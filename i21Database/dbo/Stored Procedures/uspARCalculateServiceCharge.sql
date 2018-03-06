@@ -206,44 +206,34 @@ AS
 																			--MIN. FINANCE CHARGE BAL > INVOICE AMOUNT DUE = 0
 																			CASE WHEN ISNULL(SC.dblMinimumFinanceCharge, 0) > I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)
 																				 THEN 0
-																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * CASE WHEN (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)) > 0  
-																																			THEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate)
-																																			ELSE
-																																			DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
-																																				 THEN I.dtmDueDate 
-																																				 ELSE I.dtmCalculated 
-																																			END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
-																																			 END
-																																			* (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
+																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) *  DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																																					THEN I.dtmDueDate 
+																																					ELSE I.dtmCalculated 
+																																					END, @asOfDate)
+																															* (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
 																			END
 						 		  										THEN SC.dblMinimumCharge
 						 		  										ELSE 
 																			CASE WHEN ISNULL(SC.dblMinimumFinanceCharge, 0) > I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)
 																				 THEN 0
-																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * CASE WHEN (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)) > 0  
-																																			THEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate)
-																																			ELSE
-																																			DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
-																																				 THEN I.dtmDueDate 
-																																				 ELSE I.dtmCalculated 
-																																			END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
-																																			 END
-																																			* (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
+																				 ELSE  ((SC.dblServiceChargeAPR/365) / 100) * DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+																																					 THEN I.dtmDueDate 
+																																					 ELSE I.dtmCalculated 
+																																					 END, @asOfDate)
+																															* (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal))
 																			END
 						 											END
 						 										ELSE 0
 						 									END
-						 								ELSE 
-						 									SC.dblPercentage
+						 								ELSE CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmCalculated, @asOfDate) <= 0
+																		THEN 0
+																		ELSE SC.dblPercentage
+																		END
 						 							END, dbo.fnARGetDefaultDecimal())
-									, CASE WHEN (I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal)) > 0  
-											THEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @asOfDate)
-											ELSE
-											DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
+									, DATEDIFF(DAYOFYEAR, CASE WHEN ISNULL(I.ysnForgiven, 0) = 0 AND ISNULL(I.ysnCalculated, 0) = 0
 													THEN I.dtmDueDate 
 													ELSE I.dtmCalculated 
-											END, ISNULL(ISNULL(PAYMENT.dtmDatePaid, PAYMENT2.dtmDatePaid), @asOfDate))
-												END
+													END, @asOfDate)
 							FROM tblARInvoice I
 								INNER JOIN #tmpCustomers C ON I.intEntityCustomerId = C.[intEntityId]
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
