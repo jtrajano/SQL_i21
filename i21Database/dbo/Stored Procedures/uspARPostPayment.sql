@@ -2459,7 +2459,6 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-						AND ISNULL(B.ysnInvoicePrepayment,0) = 0
 					GROUP BY
 						A.intInvoiceId
 				) P
@@ -2480,13 +2479,11 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-				AND ISNULL(A.ysnInvoicePrepayment,0) = 0
-				
+			
 			UPDATE 
 				tblARInvoice
 			SET 
 				tblARInvoice.ysnPaid = 0
-				--,tblARInvoice.dtmPostDate = ISNULL((SELECT TOP 1 dtmDate FROM tblGLDetail WHERE strTransactionId = C.strInvoiceNumber AND intTransactionId = C.intInvoiceId AND ysnIsUnposted = 0), C.dtmPostDate)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -2495,26 +2492,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId				
 			WHERE
 				A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-				AND ISNULL(A.ysnInvoicePrepayment,0) = 0
-				
-				
-			--UPDATE 
-			--	tblARPaymentDetail
-			--SET 
-			--	dblPayment = CASE WHEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblPayment THEN (((ISNULL(C.dblAmountDue,0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblPayment END
-			--	,dblBasePayment = CASE WHEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) < A.dblBasePayment THEN (((ISNULL(C.dblBaseAmountDue,0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00))* (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)) ELSE A.dblBasePayment END
-			--FROM
-			--	tblARPaymentDetail A
-			--INNER JOIN
-			--	tblARPayment B
-			--		ON A.intPaymentId = B.intPaymentId
-			--		AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			--INNER JOIN 
-			--	tblARInvoice C
-			--		ON A.intInvoiceId = C.intInvoiceId
-			--WHERE
-			--	ISNULL(B.[ysnInvoicePrepayment],0) = 0
-					
+								
 			UPDATE 
 				tblARPaymentDetail
 			SET 
