@@ -71,11 +71,13 @@ SELECT TOP 100 PERCENT * FROM (
     OUTER APPLY (
         SELECT
             SUM(charge.dblAmount) AS dblAmount
-        FROM tblICInventoryReceiptCharge charge
-        LEFT JOIN tblQMTicketDiscount tktDiscount ON tktDiscount.intTicketId = ticket.intTicketId
+        FROM tblQMTicketDiscount tktDiscount
         LEFT JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
-        LEFT JOIN tblICItem dscnItem ON dscntCode.intItemId = dscnItem.intItemId 
-        WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId    
+        LEFT JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
+        WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
+        AND tktDiscount.dblGradeReading != 0
+        AND tktDiscount.intTicketId = ticket.intTicketId
+        AND tktDiscount.strSourceType = 'Scale'
         GROUP BY charge.intInventoryReceiptId
     ) discounts
     OUTER APPLY (
