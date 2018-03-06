@@ -88,6 +88,8 @@ BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
 
+	DECLARE @intCashPriceUOMId INT
+
 	SET @dtmDate = GETDATE()
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
@@ -187,6 +189,7 @@ BEGIN TRY
 			,@dblSpotCashPrice = dblCashPrice
 			,@IntCommodityId = intCommodityId
 			,@CommodityStockUomId = intCommodityStockUomId
+			,@intCashPriceUOMId = intItemUOMId
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 	
@@ -1000,13 +1003,15 @@ BEGIN TRY
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
 					,[intAccountId]				= NULL
-					,[dblQtyReceived]			= a.dblUnits
+					--,[dblQtyReceived]			= a.dblUnits
+					,[dblQtyReceived]			= ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2)
 					,[strMiscDescription]		= c.[strItemNo]
 					,[dblCost]					= a.[dblCashPrice]
 					,[intContractHeaderId]		= a.[intContractHeaderId]
 					,[intContractDetailId]		= a.[intContractDetailId]
-					,[intUnitOfMeasureId]		= b.intItemUOMId
-					,[intCostUOMId]				= b.intItemUOMId
+					--,[intUnitOfMeasureId]		= b.intItemUOMId
+					,[intUnitOfMeasureId]		= @intCashPriceUOMId
+					,[intCostUOMId]				= @intCashPriceUOMId --b.intItemUOMId
 					,[dblWeightUnitQty]			= 1 
 					,[dblCostUnitQty]			= 1 
 					,[dblUnitQty]				= 1
@@ -1040,7 +1045,8 @@ BEGIN TRY
 				 intCustomerStorageId = SST.intCustomerStorageId
 				,intItemId = ReceiptCharge.[intChargeId]
 				,[intAccountId] = NULL
-				,[dblQtyReceived] = SST.dblUnits
+				--,[dblQtyReceived] = SST.dblUnits
+				,[dblQtyReceived] = ROUND(dbo.fnCalculateQtyBetweenUOM(ReceiptCharge.intCostUOMId,@intCashPriceUOMId,SST.dblUnits),2)
 				,[strMiscDescription] = Item.[strItemNo]
 				,[dblCost] = CASE 
 								WHEN ReceiptCharge.strCostMethod='Per Unit'		THEN
@@ -1059,8 +1065,9 @@ BEGIN TRY
 							 END
 				,[intContractHeaderId] = NULL
 				,[intContractDetailId] = NULL
-				,[intUnitOfMeasureId] = ReceiptCharge.intCostUOMId
-				,[intCostUOMId]	= ReceiptCharge.intCostUOMId
+				--,[intUnitOfMeasureId] = ReceiptCharge.intCostUOMId
+				,[intUnitOfMeasureId] = @intCashPriceUOMId
+				,[intCostUOMId]	= @intCashPriceUOMId --ReceiptCharge.intCostUOMId
 				,[dblWeightUnitQty] = 1
 				,[dblCostUnitQty] = 1
 				,[dblUnitQty] =1
@@ -1129,8 +1136,9 @@ BEGIN TRY
 											 END)
 				 ,[intContractHeaderId]	  = CD.[intContractHeaderId]
 				 ,[intContractDetailId]	  = CD.[intContractDetailId]
-				 ,[intUnitOfMeasureId]	  = CC.intItemUOMId
-				 ,[intCostUOMId]		  = CC.intItemUOMId
+				 --,[intUnitOfMeasureId]	  = CC.intItemUOMId
+				 ,[intUnitOfMeasureId]	  = @intCashPriceUOMId
+				 ,[intCostUOMId]		  = @intCashPriceUOMId --CC.intItemUOMId
 				 ,[dblWeightUnitQty]	  = 1 
 				 ,[dblCostUnitQty]		  = 1 
 				 ,[dblUnitQty]			  = 1

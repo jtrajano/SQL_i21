@@ -43,6 +43,7 @@ BEGIN TRY
 	DECLARE @dblContractAmount DECIMAL(24, 10)
 	DECLARE @NewSettleStorageId INT
 	DECLARE @Counter INT
+	DECLARE @intItemUOMId INT
 
 	SET @Counter = 1 
 
@@ -56,6 +57,7 @@ BEGIN TRY
 		,@dblAdjustPerUnit			 = dblAdjustPerUnit
 		,@dblSpotUnits				 = dblSpotUnits
 		,@dblSpotCashPrice			 = dblCashPrice
+		,@intItemUOMId				 = intItemUOMId
 	FROM tblGRSettleStorage
 	WHERE intSettleStorageId = @intSettleStorageId
 
@@ -417,6 +419,7 @@ BEGIN TRY
 				,intBillId
 				,dtmCreated
 				,intParentSettleStorageId
+				,intItemUOMId
 			)
 			SELECT 
 				 intConcurrencyId			= 1
@@ -444,6 +447,7 @@ BEGIN TRY
 				,intBillId					= NULL
 				,dtmCreated					= dtmCreated
 				,intParentSettleStorageId	= @intSettleStorageId
+				,intItemUOMId				= @intItemUOMId
 			FROM tblGRSettleStorage
 			WHERE intSettleStorageId = @intSettleStorageId
 
@@ -538,6 +542,7 @@ BEGIN TRY
 				,intBillId
 				,dtmCreated
 				,intParentSettleStorageId
+				,intItemUOMId
 				)
 			SELECT 
 				 intConcurrencyId				= 1
@@ -565,6 +570,7 @@ BEGIN TRY
 				,intBillId						= NULL
 				,dtmCreated						= dtmCreated
 				,intParentSettleStorageId		= @intSettleStorageId
+				,intItemUOMId					= @intItemUOMId
 			FROM tblGRSettleStorage
 			WHERE intSettleStorageId = @intSettleStorageId
 
