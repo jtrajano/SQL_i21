@@ -233,6 +233,7 @@ BEGIN
 				,[dblCost] = 
 					CASE 
 						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
+						WHEN rc.strCostMethod = 'Gross Unit' THEN rc.dblRate
 						ELSE rc.dblAmount
 					END 
 				,[intTaxGroupId] = rc.intTaxGroupId
