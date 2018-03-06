@@ -35,9 +35,9 @@ SELECT
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	
 													CASE 
-														WHEN ReceiptCharge.ysnSubCurrency = 1 AND ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+														WHEN ReceiptCharge.ysnSubCurrency = 1 AND ReceiptCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
 															ABS(ISNULL(ReceiptCharge.dblRate, 0)) * 100
-														WHEN ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+														WHEN ReceiptCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
 															ABS(ISNULL(ReceiptCharge.dblRate, 0))
 														WHEN ReceiptCharge.ysnSubCurrency = 1 THEN 
 															ABS(ISNULL(ReceiptCharge.dblAmount, 0)) * 100
@@ -194,9 +194,9 @@ SELECT
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	
 													CASE 
-														WHEN ReceiptCharge.ysnSubCurrency = 1 AND ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+														WHEN ReceiptCharge.ysnSubCurrency = 1 AND ReceiptCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
 															ABS(ISNULL(ReceiptCharge.dblRate, 0)) * 100
-														WHEN ReceiptCharge.strCostMethod = 'Per Unit' THEN 
+														WHEN ReceiptCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
 															ABS(ISNULL(ReceiptCharge.dblRate, 0))
 														WHEN ReceiptCharge.ysnSubCurrency = 1 THEN 
 															ABS(ISNULL(ReceiptCharge.dblAmount, 0)) * 100
