@@ -6237,6 +6237,7 @@
     <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuICGetItemsWithNoLocation.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebatePrograms.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicNM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
