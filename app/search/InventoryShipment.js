@@ -211,7 +211,7 @@ Ext.define('Inventory.search.InventoryShipment', {
     /*Support functions*/
     processShipmentToInvoice : function (shipmentId, callback) {
         ic.utils.ajax({
-            url: '../Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
+            url: './inventory/api/inventoryshipment/processshipmenttoinvoice',
             params:{
                 id: shipmentId
             },
