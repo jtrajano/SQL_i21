@@ -36,7 +36,7 @@ AS
 					, intCurrencyExchangeRateId			=	CD.intCurrencyExchangeRateId
 					, dblCurrencyExchangeRate			=	CD.dblRate
 					, intSubCurrencyId					=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.intSeqCurrencyId ELSE NULL END
-					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE NULL END
+					, dblSubCurrencyRate				=   CAST(ISNULL(CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE NULL END, 0) AS NUMERIC(18, 6))
 					, strSubCurrency					=	CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.strSeqCurrency ELSE NULL END
 					, dblOrderPrice						=	AD.dblSeqPrice
 					, intPriceItemUOMId					=	AD.intSeqPriceUOMId
