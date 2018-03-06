@@ -45,7 +45,7 @@ BEGIN
 				,strCustomerNumber = C.vwcus_key
 				,A.intNextDeliveryDegreeDay
 				,K.strRouteId
-				,strItemNo = I.vwitm_no COLLATE Latin1_General_CI_AS
+				,strItemNo = ISNULL(O.vwitm_no, I.vwitm_no) COLLATE Latin1_General_CI_AS
 				,J.dtmRequestedDate
 				,strTerm = CAST(L.vwtrm_desc AS NVARCHAR(20))
 				,dblARBalance = C.vwcus_balance 
@@ -84,6 +84,8 @@ BEGIN
 				ON A.intSiteID = J.intSiteID
 			LEFT JOIN vwitmmst I
 				ON A.intProduct = I.A4GLIdentity
+			LEFT JOIN vwitmmst O
+				ON J.intSubstituteProductID = O.A4GLIdentity
 			LEFT JOIN tblTMFillMethod H
 				ON A.intFillMethodId = H.intFillMethodId
 			LEFT JOIN tblTMRoute K
@@ -212,9 +214,9 @@ BEGIN
 			INNER JOIN tblTMDispatch J
 				ON A.intSiteID = J.intSiteID
 			INNER JOIN tblICItem I
-				ON J.intProductID = I.intItemId
+				ON A.intProduct = I.intItemId
 			LEFT JOIN tblICItem O
-				ON J.intProductID = O.intItemId
+				ON J.intSubstituteProductID = O.intItemId
 			LEFT JOIN [vyuARCustomerInquiryReport] CI
 				ON Ent.intEntityId = CI.intEntityCustomerId
 			LEFT JOIN tblTMFillMethod H

@@ -165,6 +165,11 @@ BEGIN
 END 
 
 -- Create the G/L Entries
+IF EXISTS (
+	SELECT	TOP 1 1
+	FROM	tblICInventoryShipmentItemAllocatedCharge
+	WHERE	intInventoryShipmentId = @intInventoryShipmentId
+)
 BEGIN 
 	-- Create the variables used by fnGetItemGLAccount
 	DECLARE @ACCOUNT_CATEGORY_Inventory AS NVARCHAR(30) = 'Inventory'
@@ -177,35 +182,6 @@ BEGIN
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'
 			,@strTransactionForm  AS NVARCHAR(50) = 'Inventory Shipment'
 			,@strCode AS NVARCHAR(10) = 'IC'
-
-
-	DECLARE @ItemGLAccounts AS dbo.ItemGLAccount
-
-	-- Get the GL Account ids to use for AP Clearing. 
-	INSERT INTO @ItemGLAccounts (
-		intItemId
-		,intItemLocationId 
-		,intInventoryId
-		,intContraInventoryId
-		,intTransactionTypeId
-	)
-	SELECT	Query.intItemId
-			,Query.intItemLocationId
-			,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_Inventory) 
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing) 
-			,intTransactionTypeId = @intTransactionTypeId
-	FROM (
-		SELECT	DISTINCT 
-				ShipmentItem.intItemId
-				,ItemLocation.intItemLocationId
-		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
-				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-				LEFT JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemLocation.intItemId = ShipmentItem.intItemId
-					AND ItemLocation.intLocationId = Shipment.intShipFromLocationId
-		WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
-	) Query
-		
 
 	-- Get the GL Account ids to use for the other charges. 
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount; 
@@ -235,58 +211,20 @@ BEGIN
 				WHERE	OtherCharges.intInventoryShipmentId = @intInventoryShipmentId
 			) Query
 
-	-- Check for missing Inventory Account Id
-	BEGIN 
-		SET @strItemNo = NULL
-		SET @intItemId = NULL
-
-		SELECT	TOP 1 
-				@intItemId = Item.intItemId 
-				,@strItemNo = Item.strItemNo
-		FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intItemId
-		WHERE	ItemGLAccount.intInventoryId IS NULL 
-
-		SELECT	TOP 1 
-				@strLocationName = c.strLocationName
-		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON ItemGLAccount.intItemId = il.intItemId
-					AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId
-				AND ItemGLAccount.intInventoryId IS NULL 
-
-		IF @intItemId IS NOT NULL 
-		BEGIN 
-			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-			EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @ACCOUNT_CATEGORY_Inventory;			
-			RETURN;
-		END 
-	END 
-	;
-
 	-- Check for missing AP Clearing Account Id
 	BEGIN 
 		SET @strItemNo = NULL
 		SET @intItemId = NULL
 
 		SELECT	TOP 1 
-				@intItemId = Item.intItemId 
-				,@strItemNo = Item.strItemNo
-		FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intItemId
-		WHERE	ItemGLAccount.intContraInventoryId IS NULL 
-
-		SELECT	TOP 1 
 				@strLocationName = c.strLocationName
 		FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
 					ON il.intLocationId = c.intCompanyLocationId
-				INNER JOIN @ItemGLAccounts ItemGLAccount
-					ON ItemGLAccount.intItemId = il.intItemId
+				INNER JOIN @OtherChargesGLAccounts ItemGLAccount
+					ON ItemGLAccount.intChargeId = il.intItemId
 					AND ItemGLAccount.intItemLocationId = il.intItemLocationId
 		WHERE	il.intItemId = @intItemId
-				AND ItemGLAccount.intContraInventoryId IS NULL 
+				AND ItemGLAccount.intAPClearing IS NULL 
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 

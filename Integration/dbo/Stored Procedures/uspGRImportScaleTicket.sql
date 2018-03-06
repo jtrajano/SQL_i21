@@ -214,13 +214,13 @@ BEGIN
 			JOIN    tblSCTicketPool         TP  ON TP.intTicketPoolId=SS.intTicketPoolId --AND TP.strTicketPool  collate Latin1_General_CI_AS =LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))---Added
 			JOIN	tblSMCompanyLocation	CL	ON	LTRIM(RTRIM(CL.strLocationNumber)) collate Latin1_General_CI_AS  = LTRIM(RTRIM(GT.gasct_loc_no))
 	--LEFT	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strName)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no))
-	LEFT	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no)) AND EY.ysnActive =1
-	LEFT	JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId 
-	LEFT	JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_com_cd))
+	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no)) AND EY.ysnActive =1
+	JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId 
+	JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_com_cd))
 	--LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strDescription))
-	LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strCommodityCode))
-	LEFT	JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId AND IU.ysnStockUnit =1 ---- IU.intUnitMeasureId = SS.intUnitMeasureId
-	LEFT	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId	= SS.intUnitMeasureId
+	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strCommodityCode))
+	JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId AND IU.ysnStockUnit =1 ---- IU.intUnitMeasureId = SS.intUnitMeasureId
+	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId	= SS.intUnitMeasureId
 		
 	LEFT	JOIN	tblGRDiscountSchedule	DS	ON	DS.strDiscountDescription collate Latin1_General_CI_AS = GT.gasct_disc_schd_no AND DS.intCommodityId = CO.intCommodityId
 	LEFT	JOIN	tblSMCurrency			CY	ON	LTRIM(RTRIM(CY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_currency))
@@ -243,7 +243,7 @@ BEGIN
 					 END
 	  ) 
 	AND A4GLIdentity NOT IN (SELECT A4GLIdentity FROM gasctmst WHERE gasct_tic_no = 'o         ' AND  ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '')
-	AND GT.gasct_tic_no NOT IN('0000120797','0000120802')
+	AND ISNULL(GT.gasct_open_close_ind,'') <> 'C'
 	AND EY.intEntityId IS NOT NULL
 
 	SET IDENTITY_INSERT tblSCTicket OFF

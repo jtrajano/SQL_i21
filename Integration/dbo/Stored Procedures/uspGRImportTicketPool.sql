@@ -140,14 +140,16 @@ BEGIN
 	 	,ysnDistributionAllowed
 	 	,ysnDefaultDistribution
 	 	,intConcurrencyId
+		,intStorageScheduleTypeId
 	 )
 	 SELECT DISTINCT
-	 	  strDistributionOption	 = ST.strStorageTypeCode
-	 	 ,intTicketPoolId		 = TT.intTicketPoolId
-	 	 ,intTicketTypeId		 = TT.intTicketTypeId
-	 	 ,ysnDistributionAllowed = 1
-	 	 ,ysnDefaultDistribution = 0
-	 	 ,intConcurrencyId		 = 1
+	 	  strDistributionOption		= ST.strStorageTypeCode
+	 	 ,intTicketPoolId			= TT.intTicketPoolId
+	 	 ,intTicketTypeId			= TT.intTicketTypeId
+	 	 ,ysnDistributionAllowed	= 1
+	 	 ,ysnDefaultDistribution	= 0
+	 	 ,intConcurrencyId			= 1
+		 ,intStorageScheduleTypeId  = ST.intStorageScheduleTypeId
 	 FROM tblGRStorageType ST
 	 CROSS JOIN tblSCTicketType TT
 	

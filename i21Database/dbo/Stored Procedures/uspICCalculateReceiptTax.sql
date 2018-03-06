@@ -229,7 +229,19 @@ BEGIN
 																vendorTax.[dblTax] 
 														END 
 												END 
-			,[dblAdjustedTax]				= vendorTax.[dblAdjustedTax]
+			,[dblAdjustedTax]				= 
+											CASE 
+												WHEN ri.dblForexRate <> 0 THEN 
+													ROUND(
+														dbo.fnDivide(
+															-- Convert the tax to the transaction currency. 
+																vendorTax.[dblAdjustedTax]
+															, ri.dblForexRate
+														)
+													, 2) 
+												ELSE 
+													vendorTax.[dblAdjustedTax]
+											END
 			,[intTaxAccountId]				= vendorTax.[intTaxAccountId]
 			,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]			= vendorTax.[ysnSeparateOnInvoice]

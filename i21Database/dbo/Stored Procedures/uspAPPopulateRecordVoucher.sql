@@ -165,11 +165,11 @@ BEGIN
 			, dblVoucherQty
 			, dblRecordLineTotal
 			, dblVoucherLineTotal
-			, dblRecordTax
-			, dblVoucherTax
+			, (CASE WHEN CT.ysnCheckoffTax = 0 THEN ABS(dblRecordTax) ELSE dblRecordTax END) AS dblRecordTax
+			, (CASE WHEN CT.ysnCheckoffTax = 0 THEN ABS(dblVoucherTax) ELSE dblVoucherTax END) AS dblVoucherTax  
 			, dblOpenQty
 			, dblItemsPayable
-			, dblTaxesPayable
+			, (CASE WHEN CT.ysnCheckoffTax = 0 THEN ABS(dblTaxesPayable) ELSE dblTaxesPayable END) AS dblTaxesPayable
 			, dtmLastVoucherDate
 			, strAllVouchers
 			, dtmCreated = @dtmCreated
@@ -189,6 +189,10 @@ BEGIN
 				FROM	vyuAPGetInventoryReceiptVoucherCharges charges
 				WHERE	charges.intEntityVendorId = vendor.intEntityId
 			) receiptCharges
+			OUTER APPLY(
+						SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax CT
+						WHERE CT.intInventoryReceiptChargeId = receiptCharges.intInventoryRecordChargeId
+			) CT 
 	
 	--Shipment with other charges
 	UNION ALL 

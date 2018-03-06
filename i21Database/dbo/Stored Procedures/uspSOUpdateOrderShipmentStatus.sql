@@ -112,7 +112,8 @@ ELSE
 		SET dblQtyShipped  = CASE WHEN @ysnForDelete = 0 
 								  THEN CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), (ISNULL(INVOICEITEMS.dblQtyShipped, 0) + ISNULL(SHIPPEDITEMS.dblQuantity, 0))))
 								  ELSE SOD.dblQtyShipped - CONVERT(NUMERIC(18, 6), dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, ISNULL(UOM.intItemUOMId, SOD.intItemUOMId), (ISNULL(INVOICEITEMS.dblQtyShipped, 0) + ISNULL(SHIPPEDITEMS.dblQuantity, 0))))
-							 END		  
+							 END,
+			@intSalesOrderId = SOD.intSalesOrderId		  
 		FROM tblSOSalesOrderDetail SOD
 		LEFT JOIN tblICItemUOM UOM ON SOD.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
 		OUTER APPLY (
@@ -162,22 +163,31 @@ ELSE
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 	BEGIN
-		DECLARE @intSOToUpdate INT = NULL
-		
+		DECLARE @intSOToUpdate INT = NULL		
+		DECLARE @ysnShipmentPosted BIT = 0
+
 		SELECT TOP 1 @intSOToUpdate = intId FROM @tblSOToUpdate
 		SET @dblTotalQtyOrdered = 0
 		SET @dblTotalQtyShipped = 0
 
 		SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
-			 , @dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END) 
-		FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @intSOToUpdate 
-		GROUP BY intSalesOrderId
+			  ,@dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END)
+			  ,@ysnShipmentPosted = [IS].ysnPosted
+		FROM tblSOSalesOrderDetail [SOD]
+		INNER JOIN tblSOSalesOrder [SO]
+			ON [SO].intSalesOrderId = [SOD].intSalesOrderId
+		LEFT JOIN tblICInventoryShipment [IS]
+			ON [IS].strReferenceNumber = SO.strSalesOrderNumber
+		WHERE [SO].intSalesOrderId = @intSOToUpdate
+		GROUP BY [SO].intSalesOrderId, [IS].ysnPosted
 
 		IF (@dblTotalQtyShipped = 0)
 			SET @strOrderStatus = 'Open'
 		ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
 			SET @strOrderStatus = 'Partial'
-		ELSE IF @dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered
+		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 0
+			SET @strOrderStatus = 'Pending'
+		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 1
 			SET @strOrderStatus = 'Closed'
 
 		UPDATE tblSOSalesOrder

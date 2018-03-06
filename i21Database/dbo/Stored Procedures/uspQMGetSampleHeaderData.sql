@@ -78,6 +78,7 @@ BEGIN
 		,ISNULL(C.intItemContractOriginId, C.intOriginId) AS intCountryId
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 		,C.intContractTypeId
+		,C.strItemSpecification
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
 	WHERE C.intContractDetailId = @intProductValueId
@@ -117,6 +118,7 @@ BEGIN
 		,S.intPSubLocationId AS intCompanyLocationSubLocationId
 		,S.strSubLocationName
 		,C.intContractTypeId
+		,C.strItemSpecification
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
@@ -153,6 +155,7 @@ BEGIN
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 		,S.strMarks
 		,C.intContractTypeId
+		,C.strItemSpecification
 	--FROM vyuLGShipmentContainerReceiptContracts S
 	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	--WHERE S.intShipmentContractQtyId = @intProductValueId
@@ -215,6 +218,8 @@ BEGIN
 		,@strContainerNumber AS strContainerNumber
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
+		,CL.intCompanyLocationSubLocationId
+		,CL.strSubLocationName
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -222,6 +227,7 @@ BEGIN
 		AND IU.ysnStockUnit = 1
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	WHERE L.intLotId = @intProductValueId
 END

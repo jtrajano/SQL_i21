@@ -170,6 +170,55 @@ join tblICItem I on IL.intItemId = I.intItemId
 where I.intCommodityId is not null) CL
 on CL.intCommodityId = I.intCommodityId
 
+----====================================STEP 13======================================
+--Setup a grain Freight category for each commodity 
+insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
+select rtrim(gacom_com_cd)+'Freight', rtrim(gacom_desc)+' Freight', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
+from gacommst oc
+left join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd)+'Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
+where icat.intCategoryId IS NULL
+
+----====================================STEP 14======================================
+--convert Freight as other charge items from each Commodity. 
+
+insert into tblICItem 
+(strItemNo, strDescription, strShortName,strType, strInventoryTracking, strLotTracking, intCommodityId, intCategoryId, strStatus,
+intLifeTime, strCostType, strCostMethod,ysnAccrue)
+select LTRIM(RTRIM(gacom_com_cd))+' Freight', LTRIM(RTRIM(ISNULL(oc.gacom_desc,gacom_com_cd)))+' Freight', 'Freight' strShortName,'Other Charge' strInventoryType, 'Item Level' InventoryTracking, 'No' LotTracking,
+ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Freight' strCostType
+,'Per Unit' strCostMethod, 1 ysnAccrue
+from gacommst oc 
+join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
+join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd)+'Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
+LEFT JOIN tblICItem Item ON Item.strItemNo=LTRIM(RTRIM(gacom_com_cd))+' Freight' COLLATE  SQL_Latin1_General_CP1_CS_AS 
+		WHERE Item.strItemNo IS NULL
+		
+----====================================STEP 15===========================================
+----insert uom for Freight items from the commodity table
+INSERT INTO tblICItemUOM 
+(intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+select I.intItemId, CM.intUnitMeasureId, 1 dblUnitQty, 0 ysnStockUnit,1 AllowPurchase, 1 AllowSale, 1 ConcurrencyId 
+from tblICCommodityUnitMeasure CM
+join tblICCommodity C on C.intCommodityId = CM.intCommodityId
+join tblICItem I on C.intCommodityId = I.intCommodityId
+where I.strCostType = 'Freight'	
+
+---=====================================STEP 16=============================================
+--Add locations for discount items
+
+insert into tblICItemLocation 
+(intItemId, intLocationId, intCostingMethod, intAllowNegativeInventory, intConcurrencyId)
+select I.intItemId, CL.intLocationId, 1 CostingMethod, 0 AllowNegative, 1 ConcurrencyId
+--,I.strItemNo, I.intCommodityId
+from  
+(select I.intItemId, I.strItemNo, I.intCommodityId from tblICItem I
+where I.strCostType = 'Freight') I
+join 
+(select distinct IL.intLocationId, I.intCommodityId
+from tblICItemLocation IL
+join tblICItem I on IL.intItemId = I.intItemId
+where I.intCommodityId is not null) CL
+on CL.intCommodityId = I.intCommodityId	
 
 
 ----============================STEP xx==============================================

@@ -469,7 +469,7 @@ FROM (
 	     , intItemId						= ICISI.intItemId
 	     , strItemDescription				= NULL
 	     , intItemUOMId						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
-	     , intOrderUOMId					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intOrderUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
+	     , intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
@@ -675,10 +675,10 @@ FROM (
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0
 		 , dblTotal							= 1 * ICISC.dblAmount
-		 , intStorageLocationId				= ICISI.intStorageLocationId
+		 , intStorageLocationId				= NULL
 		 , intTermId						= NULL
 		 , intEntityShipViaId				= NULL
-		 , intTicketId						= ICISI.intSourceId
+		 , intTicketId						= NULL
 		 , intTaxGroupId					= NULL
 		 , dblGrossWt						= 0
 		 , dblTareWt						= 0
@@ -689,7 +689,7 @@ FROM (
 		 , intEntitySalespersonId			= NULL
 		 , ysnBlended						= NULL
 		 , intRecipeId						= NULL
-		 , intSubLocationId					= ICISI.intSubLocationId
+		 , intSubLocationId					= NULL
 		 , intCostTypeId					= NULL
 		 , intMarginById					= NULL
 		 , intCommentTypeId					= NULL
@@ -716,16 +716,8 @@ FROM (
 		FROM dbo.tblICInventoryShipment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 	) ICIS ON ICISC.intInventoryShipmentId = ICIS.intInventoryShipmentId
-	LEFT OUTER JOIN	(
-		SELECT intInventoryShipmentId
-			 , intSourceId
-			 , intSubLocationId
-			 , intStorageLocationId
-		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
-	) ICISI ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 	LEFT OUTER JOIN (
-		SELECT intInventoryShipmentItemId
-			 , intInventoryShipmentChargeId
+		SELECT intInventoryShipmentChargeId
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 		WHERE ISNULL(intInventoryShipmentChargeId, 0) = 0
 	) ARID ON ICISC.intInventoryShipmentChargeId = ARID.intInventoryShipmentChargeId

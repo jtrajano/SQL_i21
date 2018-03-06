@@ -9,6 +9,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @tblMFLot TABLE (strLotNumber NVARCHAR(50) Collate Latin1_General_CI_AS)
+DECLARE @tblMFFinalLot TABLE (
+	strLotNumber NVARCHAR(50) Collate Latin1_General_CI_AS
+	,intSampleTypeId INT
+	)
 DECLARE @strSampleId NVARCHAR(MAX)
 	,@ysnEnableSampleTypeByUserRole BIT
 	,@intParentLotId INT
@@ -28,6 +32,14 @@ BEGIN
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
 
+	INSERT INTO @tblMFFinalLot (
+		strLotNumber
+		,intSampleTypeId
+		)
+	SELECT L.strLotNumber
+		,-1
+	FROM @tblMFLot L
+
 	IF EXISTS (
 			SELECT *
 			FROM tblQMSampleType
@@ -42,6 +54,16 @@ BEGIN
 		SELECT strLotNumber
 		FROM tblICLot
 		WHERE intParentLotId = @intParentLotId
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Parent Lot'
 	END
 
 	IF EXISTS (
@@ -59,6 +81,16 @@ BEGIN
 		FROM tblICLot L
 		JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Warehouse Ref No'
 	END
 
 	IF EXISTS (
@@ -81,6 +113,16 @@ BEGIN
 		JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			AND L.intParentLotId = @intParentLotId
 		WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	END
 
 	IF EXISTS (
@@ -97,6 +139,16 @@ BEGIN
 		SELECT L.strLotNumber
 		FROM tblICLot L
 		WHERE L.strContainerNo = @strContainerNo
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Container'
 	END
 
 	IF EXISTS (
@@ -113,6 +165,16 @@ BEGIN
 		SELECT L.strLotNumber
 		FROM tblICLot L
 		WHERE L.strLotAlias = @strLotAlias
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Work Order'
 	END
 
 	IF EXISTS (
@@ -131,6 +193,16 @@ BEGIN
 		FROM tblICLot L
 		WHERE intItemId = @intItemId
 			AND intParentLotId = @intParentLotId
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Item & Parent Lot'
 	END
 
 	IF @ysnEnableSampleTypeByUserRole = 1
@@ -140,9 +212,11 @@ BEGIN
 		JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId
 			AND SU.intUserRoleID = @intUserRoleID
 		WHERE S.intProductTypeId = @intProductTypeId
-			AND S.strLotNumber IN (
-				SELECT strLotNumber
-				FROM @tblMFLot
+			AND EXISTS (
+				SELECT *
+				FROM @tblMFFinalLot L
+				WHERE L.strLotNumber = S.strLotNumber
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId 
 				)
 		ORDER BY S.intSampleId DESC
 	END
@@ -151,9 +225,11 @@ BEGIN
 		SELECT @strSampleId = COALESCE(@strSampleId + '|^|', '') + CONVERT(NVARCHAR, S.intSampleId)
 		FROM tblQMSample S
 		WHERE S.intProductTypeId = @intProductTypeId
-			AND S.strLotNumber IN (
-				SELECT strLotNumber
-				FROM @tblMFLot
+			AND EXISTS (
+				SELECT *
+				FROM @tblMFFinalLot L
+				WHERE L.strLotNumber = S.strLotNumber
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId
 				)
 		ORDER BY S.intSampleId DESC
 	END
@@ -164,6 +240,14 @@ BEGIN
 	SELECT strLotNumber
 	FROM tblICLot
 	WHERE intParentLotId = @intProductValueId
+
+	INSERT INTO @tblMFFinalLot (
+		strLotNumber
+		,intSampleTypeId
+		)
+	SELECT L.strLotNumber
+		,-1
+	FROM @tblMFLot L
 
 	IF EXISTS (
 			SELECT *
@@ -184,6 +268,16 @@ BEGIN
 		FROM tblICLot L
 		JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 		WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Warehouse Ref No'
 	END
 
 	IF EXISTS (
@@ -206,6 +300,16 @@ BEGIN
 		JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			AND L.intParentLotId = @intProductValueId
 		WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	END
 
 	IF EXISTS (
@@ -222,6 +326,16 @@ BEGIN
 		SELECT L.strLotNumber
 		FROM tblICLot L
 		WHERE L.strContainerNo = @strContainerNo
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Container'
 	END
 
 	IF EXISTS (
@@ -238,6 +352,16 @@ BEGIN
 		SELECT L.strLotNumber
 		FROM tblICLot L
 		WHERE L.strLotAlias = @strLotAlias
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Work Order'
 	END
 
 	IF EXISTS (
@@ -255,6 +379,16 @@ BEGIN
 		FROM tblICLot L
 		WHERE intItemId = @intItemId
 			AND intParentLotId = @intProductValueId
+
+		INSERT INTO @tblMFFinalLot (
+			strLotNumber
+			,intSampleTypeId
+			)
+		SELECT L.strLotNumber
+			,ST.intSampleTypeId
+		FROM @tblMFLot L
+			,tblQMSampleType ST
+		WHERE ST.strApprovalBase = 'Item & Parent Lot'
 	END
 
 	IF @ysnEnableSampleTypeByUserRole = 1
@@ -264,9 +398,11 @@ BEGIN
 		JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId
 			AND SU.intUserRoleID = @intUserRoleID
 		WHERE S.intProductTypeId = @intProductTypeId
-			AND S.strLotNumber IN (
-				SELECT strLotNumber
-				FROM @tblMFLot
+			AND EXISTS (
+				SELECT *
+				FROM @tblMFFinalLot L
+				WHERE L.strLotNumber = S.strLotNumber
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId
 				)
 		ORDER BY S.intSampleId DESC
 	END
@@ -275,9 +411,11 @@ BEGIN
 		SELECT @strSampleId = COALESCE(@strSampleId + '|^|', '') + CONVERT(NVARCHAR, S.intSampleId)
 		FROM tblQMSample S
 		WHERE S.intProductTypeId = @intProductTypeId
-			AND S.strLotNumber IN (
-				SELECT strLotNumber
-				FROM @tblMFLot
+			AND EXISTS (
+				SELECT *
+				FROM @tblMFFinalLot L
+				WHERE L.strLotNumber = S.strLotNumber
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId
 				)
 		ORDER BY S.intSampleId DESC
 	END

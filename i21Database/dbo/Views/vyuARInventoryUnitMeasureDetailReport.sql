@@ -9,8 +9,8 @@ SELECT INVOICE.intInvoiceId
 	 , CUSTOMER.strCustomerNumber 
 	 , DETAIL.intItemId
 	 , DETAIL.intItemUOMId	 
-	 , DETAIL.dblQtyShipped
-	 , DETAIL.dblTotal
+	 , dblQtyShipped = [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType) * DETAIL.dblQtyShipped
+	 , dblTotal = [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType) * DETAIL.dblTotal
 	 , ITEM.strItemNo
 	 , ITEM.strItemDescription
 	 , UOM.strUnitMeasure

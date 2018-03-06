@@ -166,7 +166,7 @@ BEGIN
 				END 				
 			)
 			AND ChargeItem.intOnCostTypeId IS NULL 
-			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 			-- Do not include Bundle types when calculating the other charges. 
 			AND Item.strType <> 'Bundle' 
 
@@ -318,7 +318,7 @@ BEGIN
 				END 				
 			)
 			AND ChargeItem.intOnCostTypeId IS NULL 
-			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 			-- Do not include Bundle types when calculating the other charges. 
 			AND Item.strType <> 'Bundle' 
 
@@ -477,7 +477,7 @@ BEGIN
 				END 				
 			)
 			AND ChargeItem.intOnCostTypeId IS NULL 
-			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 			-- Do not include Bundle types when calculating the other charges. 
 			AND Item.strType <> 'Bundle' 
 

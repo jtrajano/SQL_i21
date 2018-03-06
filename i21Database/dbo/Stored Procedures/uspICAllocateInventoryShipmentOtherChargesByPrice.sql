@@ -25,6 +25,8 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
+		,@SHIPMENT_ITEM_TYPE AS NVARCHAR(50) = 'Kit Item'
+
 DECLARE	-- Shipment Types
 			@SHIPMENT_TYPE_Sales_Contract AS INT = 1 -- Sales Contract
 			,@SHIPMENT_TYPE_Sales_Order AS INT = 2 -- Sales Order
@@ -63,6 +65,14 @@ BEGIN
 								 ELSE 0
 							END 					
 					AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+				INNER JOIN dbo.tblICItem Item 
+					ON Item.intItemId = ShipmentItem.intItemId
+					-- Do not include Kit Components when calculating the other charges. 
+					AND 1 = 
+						CASE	
+							WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
+							ELSE 1
+						END
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = 
 								-- Convert the other charge amount to functional currency. 
@@ -96,6 +106,14 @@ BEGIN
 							,ShipmentItem.strChargesLink
 					FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 								ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+							INNER JOIN dbo.tblICItem Item 
+								ON Item.intItemId = ShipmentItem.intItemId
+								-- Do not include Kit Components when calculating the other charges. 
+								AND 1 = 
+									CASE	
+										WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
+										ELSE 1
+									END
 					WHERE	Shipment.intInventoryShipmentId = @intInventoryShipmentId
 					GROUP BY ShipmentItem.intInventoryShipmentId, ShipmentItem.strChargesLink
 				) TotalCostOfItemsPerContract 

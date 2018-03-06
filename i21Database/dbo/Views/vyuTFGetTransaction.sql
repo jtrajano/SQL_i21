@@ -100,8 +100,8 @@ WHERE ISNULL(Exception.ysnDeleted, 0) != 1
 
 UNION ALL
 
-SELECT intTransactionId = NULL
-	, uniqTransactionGuid = NULL
+SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + CAST((SELECT TOP 1 ISNULL(intTransactionId, '') FROM tblTFTransaction WHERE intReportingComponentId = Exception.intReportingComponentId) AS NVARCHAR(10)) AS INT)
+	, uniqTransactionGuid = (SELECT TOP 1 uniqTransactionGuid FROM tblTFTransaction WHERE intReportingComponentId = Exception.intReportingComponentId)
 	, Exception.intReportingComponentId
 	, RC.intTaxAuthorityId
 	, RC.strTaxAuthorityCode

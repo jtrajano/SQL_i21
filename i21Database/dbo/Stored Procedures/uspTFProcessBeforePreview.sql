@@ -113,8 +113,28 @@ BEGIN TRY
 			LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND TaxException.intItemId = InvoiceDetail.intItemId
 			WHERE Trans.strTransactionType = 'Invoice'
 			
-			
-			
+		END
+		ELSE IF (@TaxAuthorityCode = 'NM' AND @ScheduleCode = 'A')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicNM
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicNM(
+				intTransactionId
+				, strCounty
+				, strLocation
+			)
+			SELECT Trans.intTransactionId
+				, strCounty = ISNULL(TACL.strCounty, '')
+				, strLocation = ISNULL(TACL.strLocation, '')
+			FROM #tmpTransaction Trans
+			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
+			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+			LEFT JOIN vyuTFGetTaxAuthorityCountyLocation TACL ON TACL.intEntityId = Invoice.intEntityCustomerId AND TACL.intEntityLocationId = Invoice.intShipToLocationId
+			WHERE Trans.strTransactionType = 'Invoice'
+				AND Trans.intProductCodeId != NULL
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId

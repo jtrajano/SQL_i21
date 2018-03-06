@@ -9,6 +9,8 @@ SELECT
 	,intLFutOptTransactionId
 	,intSFutOptTransactionId
 	,isnull(dblMatchQty,0.0) dblMatchQty
+	,intLFutOptTransactionHeaderId
+	,intSFutOptTransactionHeaderId
 	,dtmLTransDate
 	,dtmSTransDate
 	,isnull(dblLPrice,0.0) as dblLPrice
@@ -21,7 +23,7 @@ SELECT
 	,intCurrencyId
 	,intCent
 	,ysnSubCurrency
-	,isnull((dblGrossPL-dblFutCommission),0.0)  AS dblNetPL 
+	,isnull((dblGrossPL + dblFutCommission),0.0)  AS dblNetPL 
 FROM
 	(SELECT 
 		((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL
@@ -33,6 +35,8 @@ FROM
 		,psd.intLFutOptTransactionId
 		,psd.intSFutOptTransactionId
 		,isnull(psd.dblMatchQty,0) as dblMatchQty
+		,ot.intFutOptTransactionHeaderId as intLFutOptTransactionHeaderId
+		,ot1.intFutOptTransactionHeaderId as intSFutOptTransactionHeaderId
 		,ot.dtmTransactionDate dtmLTransDate
 		,ot1.dtmTransactionDate dtmSTransDate
 		,isnull(ot.dblPrice,0) dblLPrice
@@ -51,7 +55,7 @@ FROM
 	LEFT JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId
 	LEFT JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
 	LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId in(1) 
-	LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId and ot.intBrokerageAccountId=bc.intBrokerageAccountId
+	--LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId and ot.intBrokerageAccountId=bc.intBrokerageAccountId
 	JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId
   )t
 )t1

@@ -130,190 +130,85 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			END
 			/****************** AUDIT LOG ******************/
 
-			IF(@ysnForgive = 1)
-				BEGIN
-					DELETE FROM tblGLDetail 
-					WHERE intGLDetailId IN(
-						SELECT intGLDetailId FROM dbo.tblGLDetail GL WITH (NOLOCK)
-						INNER JOIN @ServiceChargeToForgive SCI
-							ON GL.intTransactionId = SCI.intInvoiceId
-							AND GL.strTransactionId = SCI.strInvoiceNumber
-							AND strJournalLineDescription = 'Unforgive Service Charge'
-					WHERE GL.ysnIsUnposted = 0 AND strJournalLineDescription = 'Unforgive Service Charge')
-
-
-					INSERT INTO tblGLDetail (
-						  intCompanyId
-						, dtmDate
-						, strBatchId
-						, intAccountId
-						, dblDebit
-						, dblCredit
-						, dblDebitUnit
-						, dblCreditUnit
-						, strDescription
-						, strCode
-						, strReference
-						, intCurrencyId
-						, dblExchangeRate
-						, dtmDateEntered
-						, dtmTransactionDate
-						, strJournalLineDescription
-						, intJournalLineNo
-						, ysnIsUnposted
-						, intUserId
-						, intEntityId
-						, strTransactionId
-						, intTransactionId
-						, strTransactionType
-						, strTransactionForm
-						, strModuleName
-						, intConcurrencyId
-						, dblDebitForeign
-						, dblDebitReport
-						, dblCreditForeign
-						, dblCreditReport
-						, dblReportingRate
-						, dblForeignRate
-						, intReconciledId
-						, dtmReconciled
-						, ysnReconciled
-						, ysnRevalued
-					)
-					SELECT intCompanyId					= GL.intCompanyId
-						, dtmDate						= GL.dtmDate
-						, strBatchId					= GL.strBatchId
-						, intAccountId					= GL.intAccountId
-						, dblDebit						= GL.dblCredit
-						, dblCredit						= GL.dblDebit
-						, dblDebitUnit					= GL.dblCreditUnit
-						, dblCreditUnit					= GL.dblDebitUnit
-						, strDescription				= 'Forgiven Service Charge: ' + GL.strDescription
-						, strCode						= GL.strCode
-						, strReference					= GL.strReference
-						, intCurrencyId					= GL.intCurrencyId
-						, dblExchangeRate				= GL.dblExchangeRate
-						, dtmDateEntered				= GETDATE()
-						, dtmTransactionDate			= GL.dtmTransactionDate
-						, strJournalLineDescription		= 'Forgiven Service Charge'
-						, intJournalLineNo				= GL.intJournalLineNo
-						, ysnIsUnposted					= 0
-						, intUserId						= GL.intUserId
-						, intEntityId					= GL.intEntityId
-						, strTransactionId				= GL.strTransactionId
-						, intTransactionId				= GL.intTransactionId
-						, strTransactionType			= 'Invoice'
-						, strTransactionForm			= 'Invoice'
-						, strModuleName					= 'Accounts Receivable'
-						, intConcurrencyId				= 1
-						, dblDebitForeign				= GL.dblCreditForeign
-						, dblDebitReport				= GL.dblCreditReport
-						, dblCreditForeign				= GL.dblDebitForeign
-						, dblCreditReport				= GL.dblDebitReport
-						, dblReportingRate				= GL.dblReportingRate
-						, dblForeignRate				= GL.dblForeignRate
-						, intReconciledId				= GL.intReconciledId
-						, dtmReconciled					= GL.dtmReconciled
-						, ysnReconciled					= GL.ysnReconciled
-						, ysnRevalued					= GL.ysnRevalued
-					FROM dbo.tblGLDetail GL WITH (NOLOCK)
-					INNER JOIN @ServiceChargeToForgive SCI
-						ON GL.intTransactionId = SCI.intInvoiceId
-						AND GL.strTransactionId = SCI.strInvoiceNumber
-					WHERE GL.ysnIsUnposted = 0
-				END
-			ELSE
-				BEGIN
-					DELETE FROM tblGLDetail 
-					WHERE intGLDetailId IN(
-						SELECT intGLDetailId FROM dbo.tblGLDetail GL WITH (NOLOCK)
-						INNER JOIN @ServiceChargeToForgive SCI
-							ON GL.intTransactionId = SCI.intInvoiceId
-							AND GL.strTransactionId = SCI.strInvoiceNumber
-							AND strJournalLineDescription = 'Forgiven Service Charge'
-					WHERE GL.ysnIsUnposted = 0 AND strJournalLineDescription = 'Forgiven Service Charge')
-
-					INSERT INTO tblGLDetail (
-						  intCompanyId
-						, dtmDate
-						, strBatchId
-						, intAccountId
-						, dblDebit
-						, dblCredit
-						, dblDebitUnit
-						, dblCreditUnit
-						, strDescription
-						, strCode
-						, strReference
-						, intCurrencyId
-						, dblExchangeRate
-						, dtmDateEntered
-						, dtmTransactionDate
-						, strJournalLineDescription
-						, intJournalLineNo
-						, ysnIsUnposted
-						, intUserId
-						, intEntityId
-						, strTransactionId
-						, intTransactionId
-						, strTransactionType
-						, strTransactionForm
-						, strModuleName
-						, intConcurrencyId
-						, dblDebitForeign
-						, dblDebitReport
-						, dblCreditForeign
-						, dblCreditReport
-						, dblReportingRate
-						, dblForeignRate
-						, intReconciledId
-						, dtmReconciled
-						, ysnReconciled
-						, ysnRevalued
-					)
-					SELECT intCompanyId					= GL.intCompanyId
-						, dtmDate						= GL.dtmDate
-						, strBatchId					= GL.strBatchId
-						, intAccountId					= GL.intAccountId
-						, dblDebit						= GL.dblDebit
-						, dblCredit						= GL.dblCredit
-						, dblDebitUnit					= GL.dblDebitUnit
-						, dblCreditUnit					= GL.dblCreditUnit
-						, strDescription				= 'Unforgive Service Charge: ' + GL.strDescription
-						, strCode						= GL.strCode
-						, strReference					= GL.strReference
-						, intCurrencyId					= GL.intCurrencyId
-						, dblExchangeRate				= GL.dblExchangeRate
-						, dtmDateEntered				= GETDATE()
-						, dtmTransactionDate			= GL.dtmTransactionDate
-						, strJournalLineDescription		= 'Unforgive Service Charge'
-						, intJournalLineNo				= GL.intJournalLineNo
-						, ysnIsUnposted					= 0
-						, intUserId						= GL.intUserId
-						, intEntityId					= GL.intEntityId
-						, strTransactionId				= GL.strTransactionId
-						, intTransactionId				= GL.intTransactionId
-						, strTransactionType			= 'Invoice'
-						, strTransactionForm			= 'Invoice'
-						, strModuleName					= 'Accounts Receivable'
-						, intConcurrencyId				= 1
-						, dblDebitForeign				= GL.dblDebitForeign
-						, dblDebitReport				= GL.dblDebitReport
-						, dblCreditForeign				= GL.dblCreditForeign
-						, dblCreditReport				= GL.dblCreditReport
-						, dblReportingRate				= GL.dblReportingRate
-						, dblForeignRate				= GL.dblForeignRate
-						, intReconciledId				= GL.intReconciledId
-						, dtmReconciled					= GL.dtmReconciled
-						, ysnReconciled					= GL.ysnReconciled
-						, ysnRevalued					= GL.ysnRevalued
-					FROM dbo.tblGLDetail GL WITH (NOLOCK)
-					INNER JOIN @ServiceChargeToForgive SCI
-						ON GL.intTransactionId = SCI.intInvoiceId
-						AND GL.strTransactionId = SCI.strInvoiceNumber
-					WHERE GL.ysnIsUnposted = 0
-					  AND ISNULL(GL.strJournalLineDescription, '') <> 'Forgiven Service Charge'
-				END
-
+			INSERT INTO tblGLDetail (
+					intCompanyId
+				, dtmDate
+				, strBatchId
+				, intAccountId
+				, dblDebit
+				, dblCredit
+				, dblDebitUnit
+				, dblCreditUnit
+				, strDescription
+				, strCode
+				, strReference
+				, intCurrencyId
+				, dblExchangeRate
+				, dtmDateEntered
+				, dtmTransactionDate
+				, strJournalLineDescription
+				, intJournalLineNo
+				, ysnIsUnposted
+				, intUserId
+				, intEntityId
+				, strTransactionId
+				, intTransactionId
+				, strTransactionType
+				, strTransactionForm
+				, strModuleName
+				, intConcurrencyId
+				, dblDebitForeign
+				, dblDebitReport
+				, dblCreditForeign
+				, dblCreditReport
+				, dblReportingRate
+				, dblForeignRate
+				, intReconciledId
+				, dtmReconciled
+				, ysnReconciled
+				, ysnRevalued
+			)
+			SELECT intCompanyId					= GL.intCompanyId
+				, dtmDate						= GL.dtmDate
+				, strBatchId					= GL.strBatchId
+				, intAccountId					= GL.intAccountId
+				, dblDebit						= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END
+				, dblCredit						= CASE WHEN @ysnForgive = 0 THEN GL.dblCredit ELSE GL.dblDebit END
+				, dblDebitUnit					= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitUnit ELSE GL.dblCreditUnit END
+				, dblCreditUnit					= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END
+				, strDescription				= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge: ' ELSE 'Forgiven Service Charge: ' END + ISNULL(GL.strDescription, '')
+				, strCode						= GL.strCode
+				, strReference					= GL.strReference
+				, intCurrencyId					= GL.intCurrencyId
+				, dblExchangeRate				= GL.dblExchangeRate
+				, dtmDateEntered				= GETDATE()
+				, dtmTransactionDate			= GL.dtmTransactionDate
+				, strJournalLineDescription		= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge' ELSE 'Forgiven Service Charge' END
+				, intJournalLineNo				= GL.intJournalLineNo
+				, ysnIsUnposted					= 0
+				, intUserId						= GL.intUserId
+				, intEntityId					= GL.intEntityId
+				, strTransactionId				= GL.strTransactionId
+				, intTransactionId				= GL.intTransactionId
+				, strTransactionType			= 'Invoice'
+				, strTransactionForm			= 'Invoice'
+				, strModuleName					= 'Accounts Receivable'
+				, intConcurrencyId				= 1
+				, dblDebitForeign				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitForeign ELSE GL.dblCreditForeign END
+				, dblDebitReport				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitReport ELSE GL.dblCreditReport END
+				, dblCreditForeign				= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditForeign ELSE GL.dblDebitForeign END
+				, dblCreditReport				= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditReport ELSE GL.dblDebitReport END
+				, dblReportingRate				= GL.dblReportingRate
+				, dblForeignRate				= GL.dblForeignRate
+				, intReconciledId				= GL.intReconciledId
+				, dtmReconciled					= GL.dtmReconciled
+				, ysnReconciled					= GL.ysnReconciled
+				, ysnRevalued					= GL.ysnRevalued
+			FROM dbo.tblGLDetail GL WITH (NOLOCK)
+			INNER JOIN @ServiceChargeToForgive SCI
+				ON GL.intTransactionId = SCI.intInvoiceId
+				AND GL.strTransactionId = SCI.strInvoiceNumber
+			WHERE GL.ysnIsUnposted = 0
+				AND ISNULL(GL.strJournalLineDescription, '') NOT IN ('Forgiven Service Charge', 'Unforgive Service Charge')
 		END
 	END

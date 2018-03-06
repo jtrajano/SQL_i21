@@ -1262,11 +1262,18 @@ BEGIN TRY
 				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 				INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
 				INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
+				LEFT OUTER JOIN tblICItemStock ICIS ON ICI.intItemId = ICIS.intItemId AND ICL.intItemLocationId = ICIS.intItemLocationId 
 			WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 			AND ID.ysnBlended <> @post
 			AND ICI.ysnAutoBlend = 1
 			AND I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
-			--AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677			
+			--AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677	
+			AND 
+				(
+				@post = 0
+				OR
+				[dbo].[fnICConvertUOMtoStockUnit](ICI.intItemId, ID.intItemUOMId, ID.dblQtyShipped) > ISNULL(ICIS.dblUnitOnHand,0.000000)
+				)		
 
 			WHILE EXISTS (SELECT NULL FROM @FinishedGoodItems)
 				BEGIN
@@ -3317,17 +3324,101 @@ IF @post = 1
 		IF @recap = 0
 		BEGIN
 			BEGIN TRY
-				UPDATE GLEntries
-				SET [dtmDateEntered] = @PostDate
-				   ,[dblDebitUnit] = DebitUnit.Value
-				   ,[dblCreditUnit] = CreditUnit.Value					
+				DECLARE @FinalGLEntries AS RecapTableType
+				DELETE FROM @FinalGLEntries
+				INSERT INTO @FinalGLEntries
+					([dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+					,[strDocument]
+					,[strComments]
+					,[strSourceDocumentId]
+					,[intSourceLocationId]
+					,[intSourceUOMId]
+					,[dblSourceUnitDebit]
+					,[dblSourceUnitCredit]
+					,[intCommodityId]
+					,[intSourceEntityId])
+				SELECT
+					 [dtmDate]						= GLEntries.[dtmDate]
+					,[strBatchId]					= GLEntries.[strBatchId]
+					,[intAccountId]					= GLEntries.[intAccountId]
+					,[dblDebit]						= GLEntries.[dblDebit]
+					,[dblCredit]					= GLEntries.[dblCredit]
+					,[dblDebitUnit]					= DebitUnit.Value
+					,[dblCreditUnit]				= CreditUnit.Value
+					,[strDescription]				= GLEntries.[strDescription]
+					,[strCode]						= GLEntries.[strCode]
+					,[strReference]					= GLEntries.[strReference]
+					,[intCurrencyId]				= GLEntries.[intCurrencyId]
+					,[dblExchangeRate]				= GLEntries.[dblExchangeRate]
+					,[dtmDateEntered]				= @PostDate
+					,[dtmTransactionDate]			= GLEntries.[dtmTransactionDate]
+					,[strJournalLineDescription]	= GLEntries.[strJournalLineDescription]
+					,[intJournalLineNo]				= GLEntries.[intJournalLineNo]
+					,[ysnIsUnposted]				= GLEntries.[ysnIsUnposted]
+					,[intUserId]					= GLEntries.[intUserId]
+					,[intEntityId]					= GLEntries.[intEntityId]
+					,[strTransactionId]				= GLEntries.[strTransactionId]
+					,[intTransactionId]				= GLEntries.[intTransactionId]
+					,[strTransactionType]			= GLEntries.[strTransactionType]
+					,[strTransactionForm]			= GLEntries.[strTransactionForm]
+					,[strModuleName]				= GLEntries.[strModuleName]
+					,[intConcurrencyId]				= GLEntries.[intConcurrencyId]
+					,[dblDebitForeign]				= GLEntries.[dblDebitForeign]
+					,[dblDebitReport]				= GLEntries.[dblDebitReport]
+					,[dblCreditForeign]				= GLEntries.[dblCreditForeign]
+					,[dblCreditReport]				= GLEntries.[dblCreditReport]
+					,[dblReportingRate]				= GLEntries.[dblReportingRate]
+					,[dblForeignRate]				= GLEntries.[dblForeignRate]
+					,[strRateType]					= GLEntries.[strRateType]
+					,[strDocument]					= GLEntries.[strDocument]
+					,[strComments]					= GLEntries.[strComments]
+					,[strSourceDocumentId]			= GLEntries.[strSourceDocumentId]
+					,[intSourceLocationId]			= GLEntries.[intSourceLocationId]
+					,[intSourceUOMId]				= GLEntries.[intSourceUOMId]
+					,[dblSourceUnitDebit]			= GLEntries.[dblSourceUnitDebit]
+					,[dblSourceUnitCredit]			= GLEntries.[dblSourceUnitCredit]
+					,[intCommodityId]				= GLEntries.[intCommodityId]
+					,[intSourceEntityId]			= GLEntries.[intSourceEntityId]
 				FROM @GLEntries GLEntries
 				CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
-				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
+				CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) CreditUnit
+				ORDER BY
+					GLEntries.[strTransactionId]
 
-				IF EXISTS ( SELECT TOP 1 1 FROM @GLEntries)
+				IF EXISTS ( SELECT TOP 1 1 FROM @FinalGLEntries)
 					EXEC	dbo.uspGLBookEntries
-								 @GLEntries		= @GLEntries
+								 @GLEntries		= @FinalGLEntries
 								,@ysnPost		= @post
 								,@XACT_ABORT_ON = @raiseError
 			END TRY

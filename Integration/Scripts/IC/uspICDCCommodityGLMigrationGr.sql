@@ -142,6 +142,50 @@ Cross Apply
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
 
+---================================Grain Freight=============================================
+--add gl accounts for freight items
+-- update accounts for type 'Other Charge' 
+--Sales account to Other Charge Income account
+INSERT INTO tblICItemAccount (
+	intItemId
+	,intAccountCategoryId
+	,intAccountId
+	,intConcurrencyId
+	) 
+select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
+Cross Apply
+	(SELECT top 1 inv.intItemId
+	--,seg.intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Income') intAccountCategoryId
+	,act.intAccountId
+	FROM gacommst AS itm 
+	INNER JOIN tblICItem AS inv ON inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(itm.gacom_com_cd))+' Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacom_gl_frt_inc as nvarchar)
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
+	and inv.strType = 'Other Charge' 
+	and I.intItemId = inv.intItemId) as ac
+
+--Purchase account to Other Charge Expense account
+INSERT INTO tblICItemAccount (
+	intItemId
+	,intAccountCategoryId
+	,intAccountId
+	,intConcurrencyId
+	) 
+select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
+Cross Apply
+	(SELECT top 1 inv.intItemId
+	--,seg.intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Other Charge Expense') intAccountCategoryId
+	,act.intAccountId
+	FROM gacommst AS itm 
+	INNER JOIN tblICItem AS inv ON inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(itm.gacom_com_cd))+' Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
+	INNER JOIN tblGLCOACrossReference AS coa ON substring(strOldId, 0, CHARINDEX('-', strOldId)) = cast(itm.gacom_gl_frt_exp as nvarchar)
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
+	and inv.strType = 'Other Charge' 
+	and I.intItemId = inv.intItemId) as ac	
 
 --==================================================================
 --update the account table with correct account category required for inventory to function

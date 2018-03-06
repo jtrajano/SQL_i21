@@ -57,7 +57,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 
 			UPDATE tblPRPayGroupDetail
 				SET dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest,
-					dblAmount = CASE WHEN (EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0) THEN
+					dblAmount = CASE WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary') AND EL.dblDefaultHours > 0) THEN
 												CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest) < 0 THEN 0 
 													ELSE tblPRPayGroupDetail.dblAmount + ROUND(((EL.dblRateAmount / EL.dblDefaultHours) * TOR.dblRequest), 2) END
 											ELSE 
@@ -70,14 +70,14 @@ SELECT @intTimeOffRequestId = @intTransactionId
 											 WHEN (EL.strCalculationType IN ('Rate Factor')) THEN 
 												CASE WHEN (EL2.strCalculationType = 'Hourly Rate') THEN
 													(tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest) * tblPRPayGroupDetail.dblAmount
-												WHEN (EL2.strCalculationType = 'Fixed Amount') THEN
+												WHEN (EL2.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 													CASE WHEN (EL2.dblDefaultHours > 0) THEN 
 														(tblPRPayGroupDetail.dblHoursToProcess + TOR.dblRequest) * tblPRPayGroupDetail.dblAmount
 													ELSE tblPRPayGroupDetail.dblTotal END
 												ELSE
 													tblPRPayGroupDetail.dblTotal
 												END
-											 WHEN (EL.strCalculationType = 'Fixed Amount') THEN
+											 WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 												CASE WHEN (EL.dblDefaultHours > 0) THEN 
 													tblPRPayGroupDetail.dblTotal + ROUND(((EL.dblRateAmount / EL.dblDefaultHours) * TOR.dblRequest), 2)
 												ELSE tblPRPayGroupDetail.dblTotal END
@@ -111,7 +111,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 	END
 	ELSE
 	BEGIN
-		/* Post to Calendar */
+		/* Post to Global Calendar */
 		DECLARE @udtSMEventsIn TABLE(intEventId INT)
 
 		INSERT INTO tblSMEvents
@@ -139,7 +139,6 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			,'<table style="font-size: 14px;"><tbody>'
 				+ '<tr><td><strong>Time Off Type</strong></td><td>' + REPLACE(TTO.strTimeOff, '''', '''''') +'</td></tr>'
 				+ '<tr><td><strong>Time Off Hours</strong></td><td>' + CAST(CAST(TOR.dblRequest AS FLOAT) AS NVARCHAR(50)) + '</td></tr>'
-				+ '<tr><td><strong>Reason</strong></td><td>' + REPLACE(TOR.strReason, '''', '''''') + '</td></tr>'
 				+ '<tr><td><strong>Address while on Time Off</strong></td><td>' + REPLACE(TOR.strAddress, '''', '''''') + '</td></tr>'
 				+ '</tbody></table>'
 			,'{"allDay":"true","drillDown":{"enabled":true,"url":"#/PR/TimeOffRequest?routeId=' + CAST(intTimeOffRequestId AS NVARCHAR(20))+'%7C%5E%7C&activeTab=Details","text":"View Time Off Request "},"title":"Time Off - ' + REPLACE(ENT.strName, '', '''') + '"}'
@@ -201,9 +200,9 @@ SELECT @intTimeOffRequestId = @intTransactionId
 					,EE.strCalculationType
 					,EE.dblDefaultHours
 					,TOR.dblRequest
-					,CASE WHEN (EE.strCalculationType = 'Rate Factor' AND EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0) 
+					,CASE WHEN (EE.strCalculationType = 'Rate Factor' AND EL.strCalculationType IN ('Fixed Amount', 'Salary') AND EL.dblDefaultHours > 0) 
 							THEN TOR.dblRequest * EE.dblRateAmount
-						WHEN (EE.strCalculationType = 'Fixed Amount' AND EE.dblDefaultHours > 0) 
+						WHEN (EE.strCalculationType IN ('Fixed Amount', 'Salary') AND EE.dblDefaultHours > 0) 
 							THEN ROUND(((EE.dblRateAmount / EE.dblDefaultHours) * TOR.dblRequest), 2) 
 						ELSE EE.dblRateAmount END
 					,dblTotal = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime')) THEN
@@ -211,14 +210,14 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									 WHEN (EE.strCalculationType IN ('Rate Factor')) THEN 
 										CASE WHEN (EL.strCalculationType = 'Hourly Rate') THEN
 											TOR.dblRequest * EE.dblRateAmount
-										WHEN (EL.strCalculationType = 'Fixed Amount') THEN
+										WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 											CASE WHEN (EL.dblDefaultHours > 0) THEN 
 												TOR.dblRequest * EE.dblRateAmount
 											ELSE EE.dblRateAmount END
 										ELSE
 											0
 										END
-									 WHEN (EE.strCalculationType = 'Fixed Amount') THEN
+									 WHEN (EE.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 										CASE WHEN (EE.dblDefaultHours > 0) THEN 
 											ROUND(((EE.dblRateAmount / EE.dblDefaultHours) * TOR.dblRequest), 2)
 										ELSE EE.dblRateAmount END
@@ -284,7 +283,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,EL.strCalculationType
 						,EL.dblDefaultHours
 						,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
-						,CASE WHEN (EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0) THEN 
+						,CASE WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary') AND EL.dblDefaultHours > 0) THEN 
 								CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 
 									ELSE EL.dblRateAmount - ROUND(((EL.dblRateAmount / EL.dblDefaultHours) * TOR.dblRequest), 2) END
 							ELSE EL.dblRateAmount END
@@ -293,14 +292,14 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									 WHEN (EL.strCalculationType IN ('Rate Factor')) THEN 
 										CASE WHEN (EL2.strCalculationType = 'Hourly Rate') THEN
 											(EL.dblDefaultHours - TOR.dblRequest) * EL.dblRateAmount
-										WHEN (EL2.strCalculationType = 'Fixed Amount') THEN
+										WHEN (EL2.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 											CASE WHEN (EL2.dblDefaultHours > 0) THEN 
 												(EL.dblDefaultHours - TOR.dblRequest) * EL.dblRateAmount
 											ELSE EL.dblRateAmount END
 										ELSE
 											0
 										END
-									 WHEN (EL.strCalculationType = 'Fixed Amount') THEN
+									 WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 										CASE WHEN (EL.dblDefaultHours > 0) THEN 
 											EL.dblRateAmount - ROUND(((EL.dblRateAmount / EL.dblDefaultHours) * TOR.dblRequest), 2)
 										ELSE EL.dblRateAmount END
@@ -325,7 +324,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 				ELSE
 					UPDATE tblPRPayGroupDetail
 						SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest,
-							dblAmount = CASE WHEN (EL.strCalculationType = 'Fixed Amount' AND EL.dblDefaultHours > 0) THEN
+							dblAmount = CASE WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary') AND EL.dblDefaultHours > 0) THEN
 												CASE WHEN (tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest) < 0 THEN 0 
 													ELSE tblPRPayGroupDetail.dblAmount - ROUND(((EL.dblRateAmount / EL.dblDefaultHours) * TOR.dblRequest), 2) END
 											ELSE 
@@ -338,14 +337,14 @@ SELECT @intTimeOffRequestId = @intTransactionId
 											 WHEN (EL.strCalculationType IN ('Rate Factor')) THEN 
 												CASE WHEN (EL2.strCalculationType = 'Hourly Rate') THEN
 													(tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest) * tblPRPayGroupDetail.dblAmount
-												WHEN (EL2.strCalculationType = 'Fixed Amount') THEN
+												WHEN (EL2.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 													CASE WHEN (EL2.dblDefaultHours > 0) THEN 
 														(tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest) * tblPRPayGroupDetail.dblAmount
 													ELSE tblPRPayGroupDetail.dblTotal END
 												ELSE
 													tblPRPayGroupDetail.dblTotal
 												END
-											 WHEN (EL.strCalculationType = 'Fixed Amount') THEN
+											 WHEN (EL.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 												CASE WHEN (EL.dblDefaultHours > 0) THEN 
 													tblPRPayGroupDetail.dblTotal - ROUND(((EL.dblRateAmount / EL.dblDefaultHours) * TOR.dblRequest), 2)
 												ELSE tblPRPayGroupDetail.dblTotal END

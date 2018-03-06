@@ -63,6 +63,7 @@ BEGIN TRY
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strBundleItemNo]', 'I1.strItemNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemSpecification]', 'CD.strItemSpecification')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strStatus]', 'SS.strStatus')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strMarks]', 'S.strMarks')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperCode]', 'E1.strEntityNo')
@@ -99,6 +100,7 @@ BEGIN TRY
 			,I1.strItemNo AS strBundleItemNo
 			,I.strItemNo
 			,I.strDescription
+			,CD.strItemSpecification
 			,S.strContainerNumber
 			,S.strSampleNumber
 			,S.strSampleRefNo
@@ -147,6 +149,7 @@ BEGIN TRY
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strBundleItemNo]', 'I1.strItemNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemNo]', 'I.strItemNo')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strDescription]', 'I.strDescription')
+		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strItemSpecification]', 'CD.strItemSpecification')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strStatus]', 'SS.strStatus')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strMarks]', 'S.strMarks')
 		SET @strFilterCriteria = REPLACE(@strFilterCriteria, '[strShipperCode]', 'E1.strEntityNo')
@@ -158,7 +161,7 @@ BEGIN TRY
 	SET @SQL = @SQL + ') t '
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
-	SET @strColumnsList = 'intTotalCount,strContractNumber,strName,strContractItemName,strBundleItemNo,strItemNo,strDescription'
+	SET @strColumnsList = 'intTotalCount,strContractNumber,strName,strContractItemName,strBundleItemNo,strItemNo,strDescription,strItemSpecification'
 	SET @strColumnsList = @strColumnsList + ',strLoadNumber,strContainerNumber,strMarks,strShipperCode,strShipperName,strSubLocationName,strSampleNumber,strSampleRefNo,strSampleTypeName'
 	SET @strColumnsList = @strColumnsList + ',strStatus,intSampleId,dtmSampleReceivedDate,dtmSamplingEndDate,strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
@@ -169,6 +172,7 @@ BEGIN TRY
   ,strBundleItemNo
   ,strItemNo  
   ,strDescription  
+  ,strItemSpecification
   ,strLoadNumber
   ,strContainerNumber  
   ,strMarks
@@ -192,6 +196,7 @@ BEGIN TRY
 		,strBundleItemNo
 		,strItemNo
 		,CQ.strDescription
+		,CQ.strItemSpecification
 		,strLoadNumber
 		,strContainerNumber
 		,strMarks

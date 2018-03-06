@@ -148,7 +148,15 @@ SELECT
 		,intGrossNetUOMId			= LI.intItemUOMId
 		,intCostUOMId				= CASE
 										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
-										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
+										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN 
+										CASE 
+											WHEN CNT.ysnUseFXPrice = 1 
+												AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+												AND CNT.dblRate IS NOT NULL 
+												AND CNT.intFXPriceUOMId IS NOT NULL 
+											THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, LI.intItemUOMId)
+											ELSE dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
+										END
 									END
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
@@ -185,7 +193,7 @@ SELECT
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
 												THEN 
 													dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-												ELSE 1
+												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
@@ -198,8 +206,8 @@ SELECT
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
-		,dblGross					= SC.dblGrossUnits
-		,dblNet						= SC.dblNetUnits
+		,dblGross					= (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+		,dblNet						= LI.dblQty
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
 		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId

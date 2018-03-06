@@ -20,6 +20,7 @@ SELECT S.intSampleId
 	,CS.strSubLocationName
 	,S1.strSampleNumber AS strParentSampleNo
 	,SL.strName AS strStorageLocationName
+	,CD.strItemSpecification
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId

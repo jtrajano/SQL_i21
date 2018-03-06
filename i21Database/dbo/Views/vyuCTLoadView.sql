@@ -44,6 +44,7 @@ AS
 		JOIN	tblLGLoadDetail		LD ON LD.intLoadId		=	LO.intLoadId LEFT
 		JOIN	tblEMEntity			SL ON SL.intEntityId	=	LO.intShippingLineEntityId
 		WHERE	LO.intShipmentType = 1
+		AND		LO.intShipmentStatus <> 10
 	
 	
 	)
@@ -108,6 +109,7 @@ AS
 		JOIN	tblEMEntity			SL ON SL.intEntityId	=	LO.intShippingLineEntityId
 		WHERE	LD.intPContractDetailId NOT IN (SELECT intContractDetailId FROM Shipment)
 		AND		LO.intShipmentType = 2
+		AND		LO.intShipmentStatus <> 10
 	)t
 	GROUP BY strLoadNumber
 			,strLoadShippingLine

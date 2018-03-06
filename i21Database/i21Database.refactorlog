@@ -6734,4 +6734,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[IX_tblTFReportingComponentConfiguration_strTemplateItemId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="12ebff52-abfd-4f16-86b0-c5a66ea9f1d3" ChangeDateTime="02/28/2018 11:00:31">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityCountyLocation].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityCountyLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxAuthorityCountyLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2561df6a-0340-42b2-bc2c-04bd952a4b21" ChangeDateTime="03/02/2018 04:40:00">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicNM].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicNM]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
 </Operations>

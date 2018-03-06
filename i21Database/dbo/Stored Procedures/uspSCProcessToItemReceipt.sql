@@ -528,6 +528,7 @@ BEGIN TRY
 		,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 		,[dblQtyReceived] NUMERIC(38,20)
 		,[dblCost] NUMERIC(38,20)
+		,[intOwnershipType] INT
 		UNIQUE ([intInventoryReceiptItemId])
 	);
 	INSERT INTO #tmpReceiptItem(
@@ -540,6 +541,7 @@ BEGIN TRY
 		,[strChargesLink]
 		,[dblQtyReceived]
 		,[dblCost]
+		,[intOwnershipType]
 	)
 	SELECT 
 		ri.intInventoryReceiptItemId
@@ -551,9 +553,11 @@ BEGIN TRY
 		,ri.strChargesLink
 		,ri.dblOpenReceive - ri.dblBillQty
 		,ri.dblUnitCost
+		,ri.intOwnershipType
 	FROM tblICInventoryReceipt r 
 	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo AND ri.intInventoryReceiptId = @InventoryReceiptId 
+	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
+	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1
 	-- Assemble the voucher items 
 	BEGIN 
 		INSERT INTO @voucherItems (
@@ -576,7 +580,7 @@ BEGIN TRY
 		FROM	tblICInventoryReceiptItem ri
 				INNER JOIN #tmpReceiptItem tmp ON tmp.intInventoryReceiptItemId = ri.intInventoryReceiptItemId AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
-				AND ri.intOwnershipType = 1		
+				AND tmp.intOwnershipType = 1		
 	END 
 
 	-- Assemble the Other Charges
@@ -600,6 +604,7 @@ BEGIN TRY
 				INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
 		WHERE	tmp.ysnPosted = 1
 				AND tmp.intInventoryReceiptId = @InventoryReceiptId
+				AND tmp.intOwnershipType = 1
 				AND 
                 (
                     (
@@ -633,17 +638,29 @@ BEGIN TRY
 
 	IF ISNULL(@intBillId , 0) != 0
 	BEGIN
-		INSERT INTO @prePayId(
-			[intId]
-		)
-		SELECT [intId] = ISNULL(dbo.fnCTGetPrepaidIds(CT.intContractHeaderId),0)
+		IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
+			DROP TABLE #tmpContractPrepay
+
+		CREATE TABLE #tmpContractPrepay (
+			[intPrepayId] INT
+		);
+		INSERT INTO #tmpContractPrepay(
+			[intPrepayId]
+		) 
+		SELECT ISNULL(dbo.fnCTGetPrepaidIds(CT.intContractHeaderId),0)
 		FROM #tmpReceiptItem tmp 
 		INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
 		GROUP BY CT.intContractHeaderId
 		
-		SELECT @total = COUNT(intId) FROM @prePayId WHERE intId > 0;
+		SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
 		IF (@total > 0)
 		BEGIN
+			INSERT INTO @prePayId(
+				[intId]
+			)
+			SELECT [intId] = intPrepayId
+			FROM #tmpContractPrePay where intPrepayId > 0
+			
 			EXEC uspAPApplyPrepaid @intBillId, @prePayId
 			update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 		END
@@ -670,7 +687,7 @@ BEGIN TRY
 		END
 	END
 
-
+	/*
 	IF OBJECT_ID (N'tempdb.dbo.#tmpItemReceiptIds') IS NOT NULL
         DROP TABLE #tmpItemReceiptIds
 
@@ -700,6 +717,7 @@ BEGIN TRY
 			AND tmp.intInventoryReceiptId = @InventoryReceiptId
 			AND rc.ysnAccrue = 1 
 			AND rc.intEntityVendorId != tmp.intEntityVendorId
+			AND tmp.intOwnershipType = 1
 
 	DECLARE ListThirdPartyVendor CURSOR LOCAL FAST_FORWARD
 	FOR
@@ -766,6 +784,7 @@ BEGIN TRY
 
 	CLOSE ListThirdPartyVendor;
 	DEALLOCATE ListThirdPartyVendor;
+	*/
 _Exit:
 
 END TRY

@@ -43,7 +43,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN 
-				UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty WHERE intTicketId = @intTicketId
+				UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty WHERE intTicketId = @intTicketId AND intContractId = @intContractDetailId
 			END
 		END
 	ELSE

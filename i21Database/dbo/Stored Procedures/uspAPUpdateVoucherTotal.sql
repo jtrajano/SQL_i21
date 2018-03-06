@@ -43,7 +43,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
-	INNER JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	LEFT JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 
 	--UPDATE PAYMENT
 	UPDATE A
