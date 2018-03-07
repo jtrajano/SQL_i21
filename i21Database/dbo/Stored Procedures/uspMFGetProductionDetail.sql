@@ -49,6 +49,7 @@ BEGIN
 		,LS.strSecondaryStatus AS strLotStatus
 		,PL.strParentLotNumber
 		,L1.strLotNumber AS strSpecialPalletId
+		,LS.strBackColor
 	FROM dbo.tblMFWorkOrderProducedLot W
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId

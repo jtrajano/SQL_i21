@@ -3362,3 +3362,9 @@ UPDATE tblMFCompanyPreference
 SET intDefaultMaterialRequirementDuration = 7
 Where intDefaultMaterialRequirementDuration IS NULL
 GO
+
+UPDATE tblICLotStatus
+SET strBackColor = '#FFD700' -- gold
+WHERE strSecondaryStatus = 'Quarantine'
+	AND strBackColor IS NULL
+GO

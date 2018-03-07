@@ -110,8 +110,9 @@ SELECT l.intLotId
 	,mp.intAttributeTypeId
 	,DATEDIFF(dd,  l.dtmDateCreated,GETDATE()) AS intAge
 	,DATEDIFF(dd, GETDATE(), l.dtmExpiryDate) AS intRemainingLife
-	,LI.dtmLastMoveDate 
-	,LI.dtmDueDate 
+	,LI.dtmLastMoveDate
+	,LI.dtmDueDate
+	,ls.strBackColor
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId

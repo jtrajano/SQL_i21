@@ -108,6 +108,7 @@ SELECT l.intLotId
 	,SH.dtmDate dtmSnapshotDate
 	,SD.intLotSnapshotDetail
 	,l.intUnitPallet
+	,ls.strBackColor
 FROM tblICLot l
 JOIN tblMFLotSnapshotDetail SD ON SD.intLotId = l.intLotId
 JOIN tblMFLotSnapshot SH ON SD.intLotSnapshotId = SH.intLotSnapshotId
