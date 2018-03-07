@@ -36,9 +36,18 @@ IF @Unship = 1
 		DECLARE @shipmentNos NVARCHAR(MAX) = NULL
 
 		SELECT @shipmentNos = COALESCE(@shipmentNos + ', ' ,'') + ISH.strShipmentNumber 
-		FROM tblICInventoryShipmentItem ISHI INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
-			WHERE ISHI.intOrderId = @SalesOrderId 
-			  AND ISH.ysnPosted = 1
+		FROM (
+			SELECT intInventoryShipmentId
+			FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
+			WHERE intOrderId = @SalesOrderId
+			GROUP BY intInventoryShipmentId
+		) ISHI 
+		INNER JOIN (
+			SELECT intInventoryShipmentId
+				 , strShipmentNumber
+			FROM dbo.tblICInventoryShipment WITH (NOLOCK)
+			WHERE ysnPosted = 1
+		) ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 
 		IF ISNULL(@shipmentNos, '') <> ''
 			BEGIN				

@@ -199,9 +199,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 			SET @strOrderStatus = 'Open'
 		ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
 			SET @strOrderStatus = 'Partial'
-		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 0
-			SET @strOrderStatus = 'Pending'
-		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 1
+		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered)
 			SET @strOrderStatus = 'Closed'
 
 		UPDATE tblSOSalesOrder
