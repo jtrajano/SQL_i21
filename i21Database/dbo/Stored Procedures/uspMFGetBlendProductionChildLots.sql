@@ -78,6 +78,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,wcl.intWorkOrderId
 	,0 AS intLotId
 	,'' strLotNumber
+	,'' strLotAlias
 	,i.intItemId
 	,i.strItemNo
 	,i.strDescription
@@ -127,6 +128,7 @@ SELECT wcl.intWorkOrderConsumedLotId
 	,wcl.intWorkOrderId
 	,l.intLotId
 	,l.strLotNumber
+	,ISNULL(l.strLotAlias,'') AS strLotAlias
 	,i.intItemId
 	,i.strItemNo
 	,i.strDescription
@@ -263,6 +265,7 @@ Begin
 	0 AS intWorkOrderId,
 	tpl.intLotId,
 	tpl.strLotNumber,
+	ISNULL(tpl.strLotAlias,'') AS strLotAlias,
 	tpl.intItemId,
 	tpl.strItemNo,
 	tpl.strDescription,

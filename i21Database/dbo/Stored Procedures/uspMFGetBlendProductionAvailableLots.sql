@@ -52,7 +52,8 @@ i.dblRiskScore,
 ISNULL(l.intParentLotId,0) AS intParentLotId,
 sl.intStorageLocationId,
 ISNULL(pl.strParentLotNumber,'') AS strParentLotNumber,
-i.strLotTracking
+i.strLotTracking,
+i.intCategoryId
 into #tempLot
 from tblICLot l
 Left Join @tblReservedQty c on l.intLotId=c.intLotId
