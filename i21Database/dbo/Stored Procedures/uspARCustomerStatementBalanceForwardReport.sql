@@ -643,11 +643,16 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
-				  , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+				  , ysnStatementCreditLimit		= CUST.ysnStatementCreditLimit
 				  , strType						= NULL
 				  , strComment					= NULL
             FROM tblARCustomerBudget CB
 				INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
+				INNER JOIN (
+					SELECT intEntityId
+						 , ysnStatementCreditLimit
+					FROM dbo.tblARCustomer WITH (NOLOCK)
+				) CUST ON CB.intEntityCustomerId = CUST.intEntityId
 				OUTER APPLY (
 					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
 					FROM (

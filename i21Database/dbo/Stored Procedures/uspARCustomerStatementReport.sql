@@ -361,7 +361,7 @@ IF @ysnIncludeBudgetLocal = 1
 		SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
 			'SELECT strReferenceNumber			= ''Budget for: '' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) 
 				  , strTransactionType			= ''Customer Budget''
-				  , intEntityCustomerId			= C.intEntityId
+				  , intEntityCustomerId			= C.intEntityCustomerId
 				  , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate))
 				  , dtmDate						= dtmBudgetDate
 				  , intDaysDue					= DATEDIFF(DAY, DATEADD(DAY, -1, DATEADD(MONTH, 1, dtmBudgetDate)), '+ @strDateTo +')
@@ -370,9 +370,9 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblAmountDue				= dblBudgetAmount - dblAmountPaid
 				  , dblPastDue					= dblBudgetAmount - dblAmountPaid
 				  , dblMonthlyBudget			= dblBudgetAmount
-				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityId'+ @queryRunningBalanceBudget +')
+				  , dblRunningBalance			= SUM(dblBudgetAmount - dblAmountPaid) OVER (PARTITION BY C.intEntityCustomerId'+ @queryRunningBalanceBudget +')
 				  , strCustomerNumber			= C.strCustomerNumber
-				  , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strCustomerName ELSE ISNULL(CC.strCheckPayeeName, C.strCustomerName) END
+				  , strDisplayName				= CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strCustomerName ELSE ISNULL(CUST.strCheckPayeeName, C.strCustomerName) END
 				  , strName						= C.strCustomerName
 				  , strBOLNumber				= NULL
 				  , dblCreditLimit				= C.dblCreditLimit
@@ -383,10 +383,17 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
-				  , ysnStatementCreditLimit
+				  , ysnStatementCreditLimit		= CUST.ysnStatementCreditLimit
+				  , intPaymentId				= NULL
 			FROM tblARCustomerBudget CB
 				INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
-				LEFT JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1
+				INNER JOIN (
+					SELECT intEntityCustomerId
+						 , strCheckPayeeName
+						 , strName
+						 , ysnStatementCreditLimit
+					FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
+				) CUST ON CB.intEntityCustomerId = CUST.intEntityCustomerId
 				OUTER APPLY (
 					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
 					FROM (
