@@ -5207,7 +5207,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strUOM",
                                                                 "itemId": "colLotStorageLocation",
-                                                                "text": "Storage Location",
+                                                                "text": "Storage Unit",
                                                                 "width": 100
                                                             },
                                                             "configAlternates": {

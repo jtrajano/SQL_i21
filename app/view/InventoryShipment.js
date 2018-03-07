@@ -1953,7 +1953,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colLotStorageLocation',
                                                                         width: 100,
                                                                         dataIndex: 'strUOM',
-                                                                        text: 'Storage Location'
+                                                                        text: 'Storage Unit'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
