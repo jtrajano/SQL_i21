@@ -8798,6 +8798,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351375
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351381
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351380
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 351411
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = 'MF2', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 351179
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351034
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '1', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351038
@@ -8896,6 +8897,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351107
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '8', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351113
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '8', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351112
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 351412
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = 'TR2', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 351410
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351384
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351388
@@ -8924,6 +8926,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351403
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351409
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351408
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '', strType = 'Text File', ysnStatus = 1, intFrequency = 1, intMasterId = 351413
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
