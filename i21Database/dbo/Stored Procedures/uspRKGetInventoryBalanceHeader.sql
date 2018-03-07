@@ -1,14 +1,13 @@
-﻿CREATE PROC uspRKGetInventoryBalanceHeader
-
-		  @dtmFromTransactionDate DATETIME = null,
+﻿CREATE PROC [dbo].[uspRKGetInventoryBalanceHeader]
+          @dtmFromTransactionDate DATETIME = null,
           @dtmToTransactionDate DATETIME = NULL,
           @intCommodityId int =  NULL,
-	      @intItemId int= null
+          @intItemId int= null
 AS 
 
 DECLARE @tblDateList TABLE
 (Id INT identity(1,1),
- DateData datetime
+DateData datetime
 )
 
 DECLARE @StartDateTime DATETIME
@@ -38,8 +37,8 @@ DECLARE @tblResult TABLE
        [Unpaid Out] NUMERIC(24,10),
        [Unpaid Balance] NUMERIC(24,10),
        [InventoryBalanceCarryForward] NUMERIC(24,10),
-	   strReceiptNumber nvarchar(50),
-	   intReceiptId int
+                   strReceiptNumber nvarchar(50),
+                   intReceiptId int
 )
 
 DECLARE @tblFirstResult TABLE
@@ -49,8 +48,8 @@ DECLARE @tblFirstResult TABLE
        tranShipQty NUMERIC(24,10),
        tranRecQty NUMERIC(24,10),
        dblAdjustmentQty NUMERIC(24,10),
-	   dblCountQty NUMERIC(24,10),
-	   dblInvoiceQty NUMERIC(24,10),
+                   dblCountQty NUMERIC(24,10),
+                   dblInvoiceQty NUMERIC(24,10),
        BalanceForward NUMERIC(24,10)
 )
 
@@ -88,8 +87,8 @@ DECLARE @tblConsolidatedResult TABLE
        [Receive In] NUMERIC(24,10),
        [Ship Out] NUMERIC(24,10),
        [Adjustments] NUMERIC(24,10),
-	   [dblCount] NUMERIC(24,10),
-	   [dblInvoiceQty] NUMERIC(24,10),
+                   [dblCount] NUMERIC(24,10),
+                   [dblInvoiceQty] NUMERIC(24,10),
        BalanceForward NUMERIC(24,10),
        InventoryBalanceCarryForward NUMERIC(24,10),
        [Unpaid In] NUMERIC(24,10),
@@ -102,7 +101,7 @@ INSERT INTO @tblConsolidatedResult(dtmDate ,[Receive In],[Ship Out],[Adjustments
               [Unpaid In],[Unpaid Out],[Balance], [Unpaid Balance])
 
 SELECT isnull(a.dtmDate,b.dtmDate) [Date],isnull(a.tranRecQty,0) [Receive In], isnull(a.tranShipQty,0) [Ship Out], isnull(dblAdjustmentQty,0) [Adjustments], isnull(dblCountQty,0) as dblCount,
-					isnull(dblInvoiceQty,0) dblInvoiceQty,
+                                                                                isnull(dblInvoiceQty,0) dblInvoiceQty,
                      isnull(a.BalanceForward,0) BalanceForward,isnull(a.BalanceForward,0)+ isnull(b.InventoryBalanceCarryForward,0),
               isnull(b.dblUnpaidIn,0) [Unpaid In],isnull(b.dblUnpaidOut,0) [Unpaid Out],
                      isnull(b.dblUnpaidBalance,0) as [Balance1],null [Unpaid Balance] 
@@ -132,7 +131,7 @@ FROM @tblConsolidatedResult T1
 FULL JOIN @tblDateList list on T1.dtmDate=list.DateData
   )t )t1)t2 order by dtmDate
 
-  SELECT intRowNum,dtmDate,dblReceiveIn,dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,
+SELECT intRowNum,dtmDate,dblReceiveIn,dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,
 strDistributionA,[dblAIn],[dblAOut], [dblANet],strDistributionB,[dblBIn],[dblBOut], [dblBNet],strDistributionC,[dblCIn],[dblCOut], [dblCNet],
 strDistributionD,[dblDIn],[dblDOut], [dblDNet],strDistributionE,[dblEIn],[dblEOut], [dblENet],strDistributionF,[dblFIn],[dblFOut], [dblFNet],
 strDistributionG,[dblGIn],[dblGOut], [dblGNet],strDistributionH,[dblHIn],[dblHOut], [dblHNet],strDistributionI,[dblIIn],[dblIOut], [dblINet],
@@ -144,26 +143,26 @@ isnull(dblGNet,0)+isnull(dblHNet,0)+isnull(dblINet,0)+isnull(dblJNet,0)) + dblTo
 ,dblUnpaidBalance from
   (
   SELECT intRowNum,list.dtmDate dtmDate,dblReceiveIn,abs(dblShipOut) dblShipOut,dblAdjustments,dblCount,dblInvoiceQty,dblInventoryBalance,  
-    (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionA,'') <>'') else strDistributionA end) strDistributionA, 	
-	[dblAIn],[dblAOut],(SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblANet],
-	(CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionB,'') <>'') else strDistributionB end) strDistributionB,
-	[dblBIn],[dblBOut],(SELECT SUM(dblBNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblBNet],
-	(CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionC,'') <>'') else strDistributionC end) strDistributionC,
-	[dblCIn],[dblCOut],(SELECT SUM(dblCNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblCNet],
-	(CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionD,'') <>'') else strDistributionD end) strDistributionD,
-	[dblDIn],[dblDOut],(SELECT SUM(dblDNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblDNet],
-	(CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionE,'') <>'') else strDistributionE end) strDistributionE,
-	[dblEIn],[dblEOut],(SELECT SUM(dblENet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblENet],
-	(CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionF,'') <>'') else strDistributionF end) strDistributionF,
-	[dblFIn],[dblFOut],(SELECT SUM(dblFNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblFNet],
-	(CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionG,'') <>'') else strDistributionG end) strDistributionG,
-	[dblGIn],[dblGOut],(SELECT SUM(dblGNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblGNet],
-	(CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionH,'') <>'') else strDistributionH end) strDistributionH,
-	[dblHIn],[dblHOut],(SELECT SUM(dblHNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblHNet],
-	(CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionI,'') <>'') else strDistributionI end) strDistributionI,
-	[dblIIn],[dblIOut],(SELECT SUM(dblINet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblINet],
-	(CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionJ,'') <>'') else strDistributionJ end) strDistributionJ,
-	[dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblJNet]
+    (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionA,'') <>'') else strDistributionA end) strDistributionA,                 
+                [dblAIn],[dblAOut],(SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblANet],
+                (CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionB,'') <>'') else strDistributionB end) strDistributionB,
+                [dblBIn],[dblBOut],(SELECT SUM(dblBNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblBNet],
+                (CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionC,'') <>'') else strDistributionC end) strDistributionC,
+                [dblCIn],[dblCOut],(SELECT SUM(dblCNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblCNet],
+                (CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionD,'') <>'') else strDistributionD end) strDistributionD,
+                [dblDIn],[dblDOut],(SELECT SUM(dblDNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblDNet],
+                (CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionE,'') <>'') else strDistributionE end) strDistributionE,
+                [dblEIn],[dblEOut],(SELECT SUM(dblENet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblENet],
+                (CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionF,'') <>'') else strDistributionF end) strDistributionF,
+                [dblFIn],[dblFOut],(SELECT SUM(dblFNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblFNet],
+                (CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionG,'') <>'') else strDistributionG end) strDistributionG,
+                [dblGIn],[dblGOut],(SELECT SUM(dblGNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblGNet],
+                (CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionH,'') <>'') else strDistributionH end) strDistributionH,
+                [dblHIn],[dblHOut],(SELECT SUM(dblHNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblHNet],
+                (CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionI,'') <>'') else strDistributionI end) strDistributionI,
+                [dblIIn],[dblIOut],(SELECT SUM(dblINet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblINet],
+                (CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE isnull(strDistributionJ,'') <>'') else strDistributionJ end) strDistributionJ,
+                [dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE isnull(T2.dtmDate,'01/01/1900') <= isnull(list.dtmDate,'01/01/1900')) [dblJNet]
    ,dblUnpaidIn,dblUnpaidOut,dblBalance,dblPaidBalance,dblTotalCompanyOwned,dblUnpaidBalance
   FROM #final list
   FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=isnull(list.dtmDate,'1900-01-01'))t order by dtmDate
