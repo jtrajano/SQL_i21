@@ -44,7 +44,8 @@ WHERE intAttributeId = 90
 	AND strAttributeValue <> ''
 
 DECLARE @tblMFMultipleLotCode TABLE (
-	strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	intLotId int
+	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblLotQty NUMERIC(24, 10)
 	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dblWOQty NUMERIC(24, 10)
@@ -52,7 +53,8 @@ DECLARE @tblMFMultipleLotCode TABLE (
 	)
 
 INSERT INTO @tblMFMultipleLotCode (
-	strLotNumber
+	intLotId
+	,strLotNumber
 	,dblLotQty
 	,strParentLotNumber
 	,dblWOQty
@@ -103,17 +105,12 @@ BEGIN
 					THEN LS1.strSecondaryStatus
 				WHEN LS.strSecondaryStatus = 'On Hold'
 					THEN 'PR Hold'
+
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
-				WHEN LS.strSecondaryStatus IN (
-						'Inactive'
-						,'Mislabeled'
-						,'Serial Number'
-						,'Used'
-						,'Quality Inspection'
-						)
-					THEN 'Other Status'
-				ELSE LS.strSecondaryStatus
+				WHEN LS.strSecondaryStatus = 'Active'
+					THEN 'Active'
+				ELSE 'Other Status'
 				END AS [Lot Status]
 			,(
 				CASE 
@@ -132,7 +129,7 @@ BEGIN
 			AND UM.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = SD.intLotStatusId
 		LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = SD.intBondStatusId
-		LEFT JOIN @tblMFMultipleLotCode MLC ON MLC.strLotNumber = L.strLotNumber
+		LEFT JOIN @tblMFMultipleLotCode MLC ON MLC.intLotId = L.intLotId
 		JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
 		WHERE L.intStorageLocationId NOT IN (
@@ -196,15 +193,9 @@ BEGIN
 					THEN 'PR Hold'
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
-				WHEN LS.strSecondaryStatus IN (
-						'Inactive'
-						,'Mislabeled'
-						,'Serial Number'
-						,'Used'
-						,'Quality Inspection'
-						)
-					THEN 'Other Status'
-				ELSE LS.strSecondaryStatus
+				WHEN LS.strSecondaryStatus = 'Active'
+					THEN 'Active'
+				ELSE 'Other Status'
 				END AS [Lot Status]
 			,(
 				CASE 
@@ -223,7 +214,7 @@ BEGIN
 			AND UM.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = SD.intLotStatusId
 		LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = SD.intBondStatusId
-		LEFT JOIN @tblMFMultipleLotCode MLC ON MLC.strLotNumber = L.strLotNumber
+		LEFT JOIN @tblMFMultipleLotCode MLC ON MLC.intLotId = L.intLotId
 		JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
 		) AS SourceTable
