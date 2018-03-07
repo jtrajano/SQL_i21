@@ -78,7 +78,7 @@ ROUND((SELECT top 1 ia.intInvoiceId FROM tblARInvoice ia
 
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(33,4,5,10,23)
-JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
+JOIN tblICItemLocation il on it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
 										AND  il.intLocationId  IN (
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
