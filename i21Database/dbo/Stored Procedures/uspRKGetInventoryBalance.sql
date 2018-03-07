@@ -28,7 +28,7 @@ SELECT  sum(dblQty*dblUOMQty) BalanceForward
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4,5,10,23,33)
 join tblICInventoryTransactionType tr on it.intTransactionTypeId=tr.intTransactionTypeId
-JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
+JOIN tblICItemLocation il on it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
 										AND  il.intLocationId  IN (
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -78,7 +78,7 @@ ROUND((SELECT TOP 1 dblQty FROM tblARInvoice ia
 
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4,5,10,23,33)
-JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId
+JOIN tblICItemLocation il on it.intItemId=il.intItemId
 										AND  il.intLocationId  IN (
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
