@@ -45,7 +45,8 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			,ft.dblSpotRate
 			,ft.ysnLiquidation
 			,ft.ysnSwap	
-			,rm.strFutureMonth strRollingMonth				
+			,rm.strFutureMonth strRollingMonth
+			,ft.strBrokerTradeNo				
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
