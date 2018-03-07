@@ -36,6 +36,7 @@ describe("Import Origins", function() {
 
             it("should disable UOM when task is UOM & LOB should be disabled", function() {
                 var lob = vm.get(LOB);
+                vm.set(TASK, 'UOM');
                 var task = vm.get(TASK);
                 var enabled = task === 'UOM';
 
