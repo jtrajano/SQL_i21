@@ -7323,7 +7323,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     calculateLinkedItems: function(current, activeRecord){
-        var parentLinkId = activeRecord.get('intParentItemLinkId'),
+        var me = this,
+            parentLinkId = activeRecord.get('intParentItemLinkId'),
             itemDetailStore = current.tblICInventoryReceiptItems(),
             linkType = activeRecord.get('strItemType'),
             searchURL;
@@ -7359,7 +7360,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var result = Ext.decode(successResponse.responseText);
                 Ext.Array.forEach(result.data, function(rec) {
                     var childRecord = _.find(itemDetailStore.data.items, function(x){
-                        return x.get('intItemId') == rec.intComponentItemId &&  x.get('intUnitMeasureId') == rec.intComponentUOMId && x.get('intChildItemLinkId') == parentLinkId && !x.dummy;
+                        return x.get('intItemId') == rec.intComponentItemId 
+                            && x.get('intUnitMeasureId') == rec.intComponentUOMId 
+                            && x.get('intChildItemLinkId') == parentLinkId 
+                            && !x.dummy;
                     });
 
                     if(childRecord){
@@ -7373,6 +7377,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                         childRecord.set('dblOpenReceive', dblQty);
                         childRecord.set('dblLineTotal', dblQty * childRecord.get('dblUnitCost'));
+
+                        me.calculateGrossNet(childRecord, 1);
                     }
 
                 });
