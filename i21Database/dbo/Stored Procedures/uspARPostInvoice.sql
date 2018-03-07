@@ -1255,7 +1255,7 @@ BEGIN TRY
 				 , ID.dblQtyShipped
 				 , ID.intItemUOMId
 				 , I.intCompanyLocationId
-				 , ICL.intSubLocationId
+				 , ISNULL(ID.intCompanyLocationSubLocationId, ICL.intSubLocationId)
 				 , ID.intStorageLocationId
 				 ,I.dtmDate
 			FROM tblARInvoice I
