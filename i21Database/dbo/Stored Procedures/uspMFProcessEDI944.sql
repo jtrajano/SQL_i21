@@ -40,21 +40,56 @@ BEGIN
 		RETURN
 	END
 
-	SELECT 944 AS strTransactionId
+	DECLARE @tblMFEDI944 TABLE (
+		intRecordId INT
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strCustomerId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strType CHAR(1) COLLATE Latin1_General_CI_AS
+		,dtmDate DATETIME
+		,strWarehouseReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strDepositorOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strShipmentId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dtmShippedDate DATETIME
+		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+		,dblReceived NUMERIC(38, 20)
+		,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		)
+
+	INSERT INTO @tblMFEDI944 (
+		intRecordId
+		,strTransactionId
+		,strCustomerId
+		,strType
+		,dtmDate
+		,strWarehouseReceiptNumber
+		,strDepositorOrderNumber
+		,strShipmentId
+		,dtmShippedDate
+		,strItemNo
+		,strDescription
+		,dblReceived
+		,strUOM
+		,strParentLotNumber
+		)
+	SELECT IRI.intInventoryReceiptItemId
+		,944 AS strTransactionId
 		,'Wholesome Sweetners' AS strCustomerId
 		,'J' AS strType
-		,IR.dtmReceiptDate dtmDate
+		,IR.dtmReceiptDate AS dtmDate
 		,IR.strReceiptNumber strWarehouseReceiptNumber
 		,IR.strWarehouseRefNo strDepositorOrderNumber
 		,EDI.strShipmentId AS strShipmentId
 		,EDI.dtmDate AS dtmShippedDate
-		,[dbo].[fnRemoveTrailingZeroes](SUM(IRI.dblOpenReceive) OVER (PARTITION BY IR.intInventoryReceiptId)) dblTotalReceivedQty
 		,I.strItemNo
 		,I.strDescription
-		,[dbo].[fnRemoveTrailingZeroes](IRI.dblOpenReceive) dblReceived
+		,SUM(IRL.dblQuantity) dblReceived
 		,EDI.strUOM
+		,IRL.strParentLotNumber
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+	JOIN dbo.tblICInventoryReceiptItemLot IRL ON IRL.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 		AND IR.ysnPosted = 1
 	JOIN tblICItem I ON I.intItemId = IRI.intItemId
 	LEFT JOIN tblMFEDI943Archive EDI ON EDI.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
@@ -68,6 +103,34 @@ BEGIN
 			FROM @tblMFOrderNo O
 			WHERE O.strOrderNo = IR.strWarehouseRefNo
 			)
+	GROUP BY IR.dtmReceiptDate
+		,IR.strReceiptNumber
+		,IR.strWarehouseRefNo
+		,EDI.strShipmentId
+		,EDI.dtmDate
+		,I.strItemNo
+		,I.strDescription
+		,EDI.strUOM
+		,IRL.strParentLotNumber
+		,IRI.intInventoryReceiptItemId
+	ORDER BY IRI.intInventoryReceiptItemId
+
+	SELECT strTransactionId
+		,strCustomerId
+		,strType
+		,rtrim(Convert(CHAR, dtmDate, 101)) AS dtmDate
+		,strWarehouseReceiptNumber
+		,strDepositorOrderNumber
+		,strShipmentId
+		,rtrim(Convert(CHAR, dtmShippedDate, 101)) AS dtmShippedDate
+		,[dbo].[fnRemoveTrailingZeroes](SUM(dblReceived) OVER (PARTITION BY strWarehouseReceiptNumber)) dblTotalReceivedQty
+		,strItemNo
+		,strDescription
+		,[dbo].[fnRemoveTrailingZeroes](dblReceived) AS dblReceived
+		,strUOM
+		,strParentLotNumber
+	FROM @tblMFEDI944
+	ORDER BY intRecordId
 
 	INSERT INTO tblMFEDI944 (
 		intInventoryReceiptId

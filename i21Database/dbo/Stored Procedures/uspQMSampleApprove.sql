@@ -99,7 +99,9 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblMFLotInventory
 		SET intBondStatusId = @intLotStatusId
-		WHERE intLotId = @intProductValueId
+		from tblMFLotInventory LI 
+		JOIN tblICLot L on L.intLotId=LI.intLotId
+		WHERE L.strLotNumber=@strLotNumber
 	END
 	ELSE IF @intProductTypeId = 11
 		AND @intSampleControlPointId = 14
