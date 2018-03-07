@@ -35,9 +35,9 @@ AS
 					, strCurrencyExchangeRateType		=	ER.strCurrencyExchangeRateType
 					, intCurrencyExchangeRateId			=	CD.intCurrencyExchangeRateId
 					, dblCurrencyExchangeRate			=	CD.dblRate
-					, intSubCurrencyId					=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.intSeqCurrencyId ELSE NULL END
-					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE NULL END
-					, strSubCurrency					=	CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.strSeqCurrency ELSE NULL END
+					, intSubCurrencyId					=   AD.intSeqCurrencyId
+					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE 1.000000 END
+					, strSubCurrency					=	AD.strSeqCurrency
 					, dblOrderPrice						=	AD.dblSeqPrice
 					, intPriceItemUOMId					=	AD.intSeqPriceUOMId
 					, strPriceUnitMeasure				=	AD.strSeqPriceUOM
