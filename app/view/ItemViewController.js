@@ -2459,29 +2459,33 @@ Ext.define('Inventory.view.ItemViewController', {
                                 callback: function(result) {
                                     if (result) {
                                         var me = this;
-                                        Ext.Array.each(result, function (location) {
-                                            var prices = me.getViewModel().data.current.tblICItemPricings().data.items;
-                                            var exists = Ext.Array.findBy(prices, function (row) {
-                                                if (location.get('intItemLocationId') === row.get('intItemLocationId')) {
-                                                    return true;
-                                                }
-                                            });
-                                            if (!exists) {
-                                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
-                                                    intItemId : location.get('intItemId'),
-                                                    intItemLocationId : location.get('intItemLocationId'),
-                                                    strLocationName : location.get('strLocationName'),
-                                                    dblAmountPercent : 0.00,
-                                                    dblSalePrice : 0.00,
-                                                    dblMSRPPrice : 0.00,
-                                                    strPricingMethod : 'None',
-                                                    dblLastCost : 0.00,
-                                                    dblStandardCost : 0.00,
-                                                    dblAverageCost : 0.00,
-                                                    dblEndMonthCost : 0.00,
-                                                    intSort : location.get('intSort')
+                                        me.getViewModel().data.current.tblICItemPricings().load({
+                                            callback: function() {
+                                                Ext.Array.each(result, function (location) {
+                                                    var prices = me.getViewModel().data.current.tblICItemPricings().data.items;
+                                                    var exists = Ext.Array.findBy(prices, function (row) {
+                                                        if (location.get('intItemLocationId') === row.get('intItemLocationId')) {
+                                                            return true;
+                                                        }
+                                                    });
+                                                    if (!exists) {
+                                                        var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                                                            intItemId : location.get('intItemId'),
+                                                            intItemLocationId : location.get('intItemLocationId'),
+                                                            strLocationName : location.get('strLocationName'),
+                                                            dblAmountPercent : 0.00,
+                                                            dblSalePrice : 0.00,
+                                                            dblMSRPPrice : 0.00,
+                                                            strPricingMethod : 'None',
+                                                            dblLastCost : 0.00,
+                                                            dblStandardCost : 0.00,
+                                                            dblAverageCost : 0.00,
+                                                            dblEndMonthCost : 0.00,
+                                                            intSort : location.get('intSort')
+                                                        });
+                                                        me.getViewModel().data.current.tblICItemPricings().add(newPrice);
+                                                    }
                                                 });
-                                                me.getViewModel().data.current.tblICItemPricings().add(newPrice);
                                             }
                                         });
                                     }
