@@ -26,7 +26,7 @@ SELECT sum(dblUnpaidIn)-sum(dblUnpaidIn-dblUnpaidOut) dblUnpaidBalance,
 (SELECT sum(dblQty) BalanceForward
                            FROM tblICInventoryTransaction it 
                            join tblICItem i on i.intItemId=it.intItemId and it.intTransactionTypeId in(4,5,10,23)
-                           JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and isnull(il.strDescription,'') <> 'In-Transit' 
+                           JOIN tblICItemLocation il on it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
                            WHERE intCommodityId=@intCommodityId and 
                            convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110)
                            < convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) and i.intCommodityId=@intCommodityId
