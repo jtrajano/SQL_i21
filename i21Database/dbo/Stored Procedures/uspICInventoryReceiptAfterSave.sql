@@ -649,126 +649,127 @@ BEGIN
 			currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpBeforeSaveReceiptItems)
 
-		DECLARE @ItemsFromIRForPO AS dbo.ReceiptItemTableType
-		INSERT INTO @ItemsFromIRForPO (
-				-- Header
-				[intInventoryReceiptId] 
-				,[strInventoryReceiptId] 
-				,[strReceiptType] 
-				,[intSourceType] 
-				,[dtmDate] 
-				,[intCurrencyId] 
-				,[dblExchangeRate] 
-				-- Detail 
-				,[intInventoryReceiptDetailId] 
-				,[intItemId] 
-				,[intLotId] 
-				,[strLotNumber] 
-				,[intLocationId] 
-				,[intItemLocationId] 
-				,[intSubLocationId] 
-				,[intStorageLocationId] 
-				,[intItemUOMId] 
-				,[intWeightUOMId] 
-				,[dblQty] 
-				,[dblUOMQty] 
-				,[dblNetWeight] 
-				,[dblCost] 
-				,[intContainerId] 
-				,[intOwnershipType] 
-				,[intOrderId] 
-				,[intSourceId] 
-				,[intLineNo] 
-				,[intLoadReceive]
-		)
-		SELECT 
-				-- Header
-				[intInventoryReceiptId]		= r.intInventoryReceiptId
-				,[strInventoryReceiptId]	= r.strReceiptNumber 
-				,[strReceiptType]			= r.strReceiptType 
-				,[intSourceType]			= r.intSourceType
-				,[dtmDate]					= r.dtmReceiptDate
-				,[intCurrencyId]			= r.intCurrencyId
-				,[dblExchangeRate]			= ISNULL(ri.dblForexRate, 1) 
-				-- Detail 
-				,[intInventoryReceiptDetailId]	= ri.intInventoryReceiptItemId
-				,[intItemId]					= ri.intItemId
-				,[intLotId]						= NULL 
-				,[strLotNumber]					= NULL 
-				,[intLocationId]				= r.intLocationId
-				,[intItemLocationId]			= il.intItemLocationId 
-				,[intSubLocationId]				= ri.intSubLocationId
-				,[intStorageLocationId]			= ri.intStorageLocationId
-				,[intItemUOMId]					= ri.intUnitMeasureId
-				,[intWeightUOMId]				= ri.intWeightUOMId
-				,[dblQty]						= po.dblQty 
-				,[dblUOMQty]					= iu.dblUnitQty
-				,[dblNetWeight]					= ri.dblNet
-				,[dblCost]						= ri.dblUnitCost
-				,[intContainerId]				= ri.intContainerId
-				,[intOwnershipType]				= ri.intOwnershipType 
-				,[intOrderId]					= ri.intOrderId
-				,[intSourceId]					= ri.intSourceId
-				,[intLineNo]					= ri.intLineNo
-				,[intLoadReceive]				= ri.intLoadReceive
-		FROM	@tblPurchaseOrderToProcess po INNER JOIN tblICInventoryReceiptItem ri
-					ON po.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-				INNER JOIN tblICInventoryReceipt r
-					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-				LEFT JOIN tblICItemLocation il
-					ON il.intItemId = ri.intItemId
-					AND il.intLocationId = r.intLocationId
-				LEFT JOIN tblICItemUOM iu
-					ON iu.intItemId = ri.intItemId
-					AND iu.intItemUOMId = ri.intUnitMeasureId
-	END
-	IF EXISTS (SELECT TOP 1 1 FROM @ItemsFromIRForPO) 
-	BEGIN 
-		EXEC dbo.uspPOReceived 
-			@ItemsFromIRForPO
-			, @UserId			
-	END 
-
-	--BEGIN 
-	--	DECLARE loopItemsForPurchaseOrderReceivedQty CURSOR LOCAL FAST_FORWARD
-	--	FOR 
-	--	SELECT	intPurchaseDetailId
-	--			,dblQty
-	--			,intInventoryReceiptItemId
-	--	FROM	@tblPurchaseOrderToProcess
-
-	--	OPEN loopItemsForPurchaseOrderReceivedQty;
-	
-	--	-- Initial fetch attempt
-	--	FETCH NEXT FROM loopItemsForPurchaseOrderReceivedQty INTO 
-	--		@intPurchaseDetailId
-	--		,@dblQty
-	--		,@intInventoryReceiptItemId;
-
-	--	-----------------------------------------------------------------------------------------------------------------------------
-	--	-- Start of the loop for the integration sp. 
-	--	-----------------------------------------------------------------------------------------------------------------------------
-	--	WHILE @@FETCH_STATUS = 0
-	--	BEGIN 		
-	--		EXEC dbo.uspPOReceived 
-	--			@ItemsFromIRForPO
-	--			, @UserId			
-			
-	--		IF @@ERROR <> 0 GOTO _Exit
-
-	--		-- Attempt to fetch the next row from cursor. 
-	--		FETCH NEXT FROM loopItemsForPurchaseOrderReceivedQty INTO 
-	--			@intPurchaseDetailId
-	--			,@dblQty
-	--			,@intInventoryReceiptItemId	
-	--	END;
-	--	-----------------------------------------------------------------------------------------------------------------------------
-	--	-- End of the loop
-	--	-----------------------------------------------------------------------------------------------------------------------------
-
-	--	CLOSE loopItemsForPurchaseOrderReceivedQty;
-	--	DEALLOCATE loopItemsForPurchaseOrderReceivedQty;
+	--	DECLARE @ItemsFromIRForPO AS dbo.ReceiptItemTableType
+	--	INSERT INTO @ItemsFromIRForPO (
+	--			-- Header
+	--			[intInventoryReceiptId] 
+	--			,[strInventoryReceiptId] 
+	--			,[strReceiptType] 
+	--			,[intSourceType] 
+	--			,[dtmDate] 
+	--			,[intCurrencyId] 
+	--			,[dblExchangeRate] 
+	--			-- Detail 
+	--			,[intInventoryReceiptDetailId] 
+	--			,[intItemId] 
+	--			,[intLotId] 
+	--			,[strLotNumber] 
+	--			,[intLocationId] 
+	--			,[intItemLocationId] 
+	--			,[intSubLocationId] 
+	--			,[intStorageLocationId] 
+	--			,[intItemUOMId] 
+	--			,[intWeightUOMId] 
+	--			,[dblQty] 
+	--			,[dblUOMQty] 
+	--			,[dblNetWeight] 
+	--			,[dblCost] 
+	--			,[intContainerId] 
+	--			,[intOwnershipType] 
+	--			,[intOrderId] 
+	--			,[intSourceId] 
+	--			,[intLineNo] 
+	--			,[intLoadReceive]
+	--	)
+	--	SELECT 
+	--			-- Header
+	--			[intInventoryReceiptId]		= r.intInventoryReceiptId
+	--			,[strInventoryReceiptId]	= r.strReceiptNumber 
+	--			,[strReceiptType]			= r.strReceiptType 
+	--			,[intSourceType]			= r.intSourceType
+	--			,[dtmDate]					= r.dtmReceiptDate
+	--			,[intCurrencyId]			= r.intCurrencyId
+	--			,[dblExchangeRate]			= ISNULL(ri.dblForexRate, 1) 
+	--			-- Detail 
+	--			,[intInventoryReceiptDetailId]	= ri.intInventoryReceiptItemId
+	--			,[intItemId]					= ri.intItemId
+	--			,[intLotId]						= NULL 
+	--			,[strLotNumber]					= NULL 
+	--			,[intLocationId]				= r.intLocationId
+	--			,[intItemLocationId]			= il.intItemLocationId 
+	--			,[intSubLocationId]				= ri.intSubLocationId
+	--			,[intStorageLocationId]			= ri.intStorageLocationId
+	--			,[intItemUOMId]					= ri.intUnitMeasureId
+	--			,[intWeightUOMId]				= ri.intWeightUOMId
+	--			,[dblQty]						= po.dblQty 
+	--			,[dblUOMQty]					= iu.dblUnitQty
+	--			,[dblNetWeight]					= ri.dblNet
+	--			,[dblCost]						= ri.dblUnitCost
+	--			,[intContainerId]				= ri.intContainerId
+	--			,[intOwnershipType]				= ri.intOwnershipType 
+	--			,[intOrderId]					= ri.intOrderId
+	--			,[intSourceId]					= ri.intSourceId
+	--			,[intLineNo]					= ri.intLineNo
+	--			,[intLoadReceive]				= ri.intLoadReceive
+	--	FROM	@tblPurchaseOrderToProcess po INNER JOIN tblICInventoryReceiptItem ri
+	--				ON po.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+	--			INNER JOIN tblICInventoryReceipt r
+	--				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	--			LEFT JOIN tblICItemLocation il
+	--				ON il.intItemId = ri.intItemId
+	--				AND il.intLocationId = r.intLocationId
+	--			LEFT JOIN tblICItemUOM iu
+	--				ON iu.intItemId = ri.intItemId
+	--				AND iu.intItemUOMId = ri.intUnitMeasureId
 	--END
+	--IF EXISTS (SELECT TOP 1 1 FROM @ItemsFromIRForPO) 
+	--BEGIN 
+	--	EXEC dbo.uspPOReceived 
+	--		@ItemsFromIRForPO
+	--		, @UserId			
+	--END 
+
+		DECLARE loopItemsForPurchaseOrderReceivedQty CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT	intPurchaseDetailId
+				,dblQty
+				,intInventoryReceiptItemId
+		FROM	@tblPurchaseOrderToProcess
+
+		OPEN loopItemsForPurchaseOrderReceivedQty;
+	
+		-- Initial fetch attempt
+		FETCH NEXT FROM loopItemsForPurchaseOrderReceivedQty INTO 
+			@intPurchaseDetailId
+			,@dblQty
+			,@intInventoryReceiptItemId;
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Start of the loop for the integration sp. 
+		-----------------------------------------------------------------------------------------------------------------------------
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 		
+			EXEC dbo.uspPOReceived 
+				@intPurchaseDetailId
+				,@intInventoryReceiptItemId
+				,@dblQty
+				,@UserId			
+			
+			IF @@ERROR <> 0 GOTO _Exit
+
+			-- Attempt to fetch the next row from cursor. 
+			FETCH NEXT FROM loopItemsForPurchaseOrderReceivedQty INTO 
+				@intPurchaseDetailId
+				,@dblQty
+				,@intInventoryReceiptItemId	
+		END;
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- End of the loop
+		-----------------------------------------------------------------------------------------------------------------------------
+
+		CLOSE loopItemsForPurchaseOrderReceivedQty;
+		DEALLOCATE loopItemsForPurchaseOrderReceivedQty;
+	END
 END 
 
 -- Delete the data snapshot. 
