@@ -146,6 +146,14 @@ FROM
 WHERE
 	[intInvoiceId] = @InvoiceId
 	
+	DECLARE @NewDocumentId INT
+	EXEC uspSMDuplicateDocumentMaintenance @intDocumentMaintenanceId, @NewDocumentId OUTPUT
+	IF(@NewDocumentId > 0)
+	BEGIN
+		SET @intDocumentMaintenanceId = @NewDocumentId
+	END
+
+
 --VALIDATE INVOICE TYPES
 IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
 	BEGIN			
