@@ -156,6 +156,7 @@ BEGIN
 			,DT.strUOM
 			,DT.strParentLotNumber AS strLotNumber
 			,DT.strBestBy
+			,Row_Number()Over(Partition by DT.strDepositorOrderNumber Order By DT.intLineNo,DT.strParentLotNumber) As intRowNumber
 		FROM (
 			SELECT EDI.strTransactionId
 				,EDI.strCustomerId
@@ -204,7 +205,7 @@ BEGIN
 			LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
 			) AS DT
 		ORDER BY DT.strDepositorOrderNumber
-			,DT.intLineNo
+			,DT.intLineNo,DT.strParentLotNumber
 	END
 	ELSE
 	BEGIN
@@ -244,6 +245,7 @@ BEGIN
 			,DT.strUOM
 			,DT.strParentLotNumber AS strLotNumber
 			,DT.strBestBy
+			,Row_Number()Over(Partition by DT.strDepositorOrderNumber Order By DT.intLineNo,DT.strParentLotNumber) intRowNumber
 		FROM (
 			SELECT EDI.strTransactionId
 				,EDI.strCustomerId
@@ -290,7 +292,7 @@ BEGIN
 			FROM #tblMFEDI945 EDI
 			) AS DT
 		ORDER BY DT.strDepositorOrderNumber
-			,DT.intLineNo
+			,DT.intLineNo,DT.strParentLotNumber
 	END
 
 	INSERT INTO tblMFEDI945 (
