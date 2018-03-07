@@ -275,7 +275,7 @@ BEGIN
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 			) ForexRate
-	WHERE B.dblAmountApplied <> 0
+	WHERE B.ysnApplied = 1
 	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	--DEBIT
 	UNION ALL 
