@@ -270,10 +270,12 @@ SELECT
 													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 													--[Voucher Cost]
 													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
 														ELSE 
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
 													END 													
 												)
