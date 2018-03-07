@@ -232,6 +232,13 @@ BEGIN
 	FROM	tblICInventoryReceipt r INNER JOIN #tmpAddItemReceiptResult tempR
 				ON r.intInventoryReceiptId = tempR.intInventoryReceiptId
 
+	-- Update the PO Received Qty
+	UPDATE	pod
+	SET		pod.dblQtyReceived = pod.dblQtyOrdered
+	FROM	tblPOPurchase po INNER JOIN tblPOPurchaseDetail pod
+				ON po.intPurchaseId = pod.intPurchaseId
+	WHERE	po.intPurchaseId = @poId
+
 	-- Update the PO Status 
 	EXEC dbo.uspPOUpdateStatus @poId
 END

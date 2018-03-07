@@ -224,12 +224,6 @@ WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 IF EXISTS(SELECT 1 FROM @contractItems)
 BEGIN
-	--DECLARE @userId INT = (
-	--	SELECT	TOP 1 
-	--			A.intEntityId 
-	--	FROM	tblICInventoryReceipt A INNER JOIN @ItemsFromInventoryReceipt B 
-	--				ON A.intInventoryReceiptId = B.intInventoryReceiptId)
-
 	EXEC uspCTReceived @contractItems, @intUserId
 	IF @@ERROR != 0
 	BEGIN
