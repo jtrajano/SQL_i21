@@ -1,9 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMGetBankAccountRegister] 
-@intBankAccountId  INT,
-@skip INT,
-@take INT,
-@totalCount AS INT = 0 OUTPUT 
-
+@intBankAccountId  INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -213,25 +209,6 @@ END
 CLOSE rt_cursor
 DEALLOCATE rt_cursor
 		
-		SELECT @totalCount = COUNT(intTransactionId) FROM @BankAccountRegister
-
-		IF @skip IS NOT NULL AND @take IS NOT NULL 
-			BEGIN
-				WITH Results_CTE AS
-				(
-					SELECT
-						*,
-						ROW_NUMBER() OVER (ORDER BY intTransactionId) AS RowNum
-					FROM @BankAccountRegister 
-				)
-				SELECT *
-				FROM Results_CTE
-				WHERE RowNum > @skip
-				AND RowNum <  CASE WHEN @skip = 0 THEN 1 ELSE @skip END + @take
-				--SELECT * FROM @BankAccountRegister  ORDER BY intTransactionId OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY
-				
-			END
-		ELSE
-			BEGIN
-				SELECT * FROM @BankAccountRegister
-			END
+	
+SELECT * FROM @BankAccountRegister
+	
