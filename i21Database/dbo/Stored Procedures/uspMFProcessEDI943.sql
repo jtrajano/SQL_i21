@@ -1223,7 +1223,7 @@ BEGIN TRY
 			FROM tblMFEDI943 EDI943
 			JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
 			JOIN tblICInventoryReceiptItem RI ON RI.intItemId = I.intItemId
-				AND RI.intInventoryReceiptId = @intInventoryReceiptId
+				AND RI.intInventoryReceiptId = @intInventoryReceiptId and EDI943.intLineNumber =RI.intSourceId 
 			WHERE strDepositorOrderNumber = @strOrderNo
 
 			DELETE
