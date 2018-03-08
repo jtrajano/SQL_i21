@@ -61,7 +61,7 @@ CREATE TABLE #tempBillDetail (
 	[intWeightUOMId]    			INT             NULL ,
 	[intLineNo] 					INT NOT NULL DEFAULT 1,
 	[dblWeightUnitQty] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblCostUnitQty] 				DECIMAL(18, 6) NOT NULL DEFAULT 0,
+	[dblCostUnitQty] 				DECIMAL(38, 20) NOT NULL DEFAULT 0,
 	[dblUnitQty] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[intCurrencyId] 				INT NULL,
 	[intStorageLocationId] 			INT             NULL,
