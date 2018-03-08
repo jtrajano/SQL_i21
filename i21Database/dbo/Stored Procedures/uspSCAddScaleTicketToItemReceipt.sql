@@ -171,7 +171,7 @@ SELECT
 		,dblCost					= CASE
 			                            WHEN CNT.intPricingTypeId = 2 THEN 
 										(
-											SELECT dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,intSettlementUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(intSettlementUOMId,CNT.intBasisUOMId,LI.dblCost)
+											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,intSettlementUOMId,dblSettlementPrice),0) + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(intSettlementUOMId,CNT.intBasisUOMId,LI.dblCost),0)
 											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId)
 										)
 										ELSE
