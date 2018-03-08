@@ -446,9 +446,8 @@ END
 		IF NOT EXISTS(SELECT 1
 							FROM tblRKFutOptTransactionImport ti
 							JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
-							join tblRKBrokerageCommission am on  am.intFutureMarketId=fm.intFutureMarketId
+							JOIN tblRKBrokersAccountMarketMapping am on fm.intFutureMarketId =am.intFutureMarketId
 							JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=am.intBrokerageAccountId  
-							
 							JOIN tblEMEntity em on ba.intEntityId=em.intEntityId and em.strName=ti.strName
 							WHERE intFutOptTransactionId =@mRowNumber)
 		BEGIN
@@ -473,7 +472,7 @@ END
 	IF NOT EXISTS(SELECT 1
 						FROM tblRKFutOptTransactionImport ti
 						JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
-						join tblRKBrokerageCommission am on  am.intFutureMarketId=fm.intFutureMarketId
+						JOIN tblRKBrokersAccountMarketMapping am on fm.intFutureMarketId =am.intFutureMarketId
 						JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=am.intBrokerageAccountId  
 						AND ba.intInstrumentTypeId= case when ba.intInstrumentTypeId= 3 then 3 else
 								case when ti.strInstrumentType='Futures' then 1
