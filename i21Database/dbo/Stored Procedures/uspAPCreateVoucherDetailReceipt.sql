@@ -792,12 +792,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblICInventoryReceiptItem D ON B.intInventoryReceiptItemId = D.intInventoryReceiptItemId
 
 	UPDATE voucherDetails
-		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
+		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0) / (CASE WHEN voucherDetails.ysnSubCurrency = 1 THEN ISNULL(currency.intSubCurrencyCents,1) ELSE 1 END)
 		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
 		SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
 	) taxes
+	OUTER APPLY (
+		SELECT TOP 1 intSubCurrencyCents FROM tblAPBill WHERE intBillId = voucherDetails.intBillId
+	) currency 
 	WHERE voucherDetails.intBillDetailId IN (SELECT intBillDetailId FROM @detailCreated)
 	
 	INSERT INTO @voucherIds
