@@ -57,6 +57,7 @@ SELECT S.intSampleId
 	,ISNULL(ito1.intOwnerId, ito2.intOwnerId) AS intEntityId
 	,S1.strSampleNumber AS strParentSampleNo
 	,CD.strItemSpecification
+	,SL.strName AS strStorageLocationName
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -82,6 +83,7 @@ LEFT JOIN dbo.tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLoca
 LEFT JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUOMId
 LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = S.intLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId

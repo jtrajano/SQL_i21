@@ -169,7 +169,7 @@ BEGIN
 			, (CASE WHEN CT.ysnCheckoffTax = 0 THEN ABS(dblVoucherTax) ELSE dblVoucherTax END) AS dblVoucherTax  
 			, dblOpenQty
 			, dblItemsPayable
-			, dblTaxesPayable
+			, (CASE WHEN CT.ysnCheckoffTax = 0 THEN ABS(dblTaxesPayable) ELSE dblTaxesPayable END) AS dblTaxesPayable
 			, dtmLastVoucherDate
 			, strAllVouchers
 			, dtmCreated = @dtmCreated

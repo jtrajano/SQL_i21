@@ -392,7 +392,7 @@ EXEC sp_executesql @query
 IF @ysnIncludeBudgetLocal = 1
     BEGIN
         SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
-            'SELECT intEntityCustomerId         = C.intEntityId 
+            'SELECT intEntityCustomerId         = C.intEntityCustomerId 
 			      , strCustomerNumber           = C.strCustomerNumber
 				  , strCustomerName             = C.strCustomerName
 				  , dblCreditLimit              = C.dblCreditLimit
@@ -418,9 +418,14 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
-				  , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+				  , ysnStatementCreditLimit		= CUST.ysnStatementCreditLimit
             FROM tblARCustomerBudget CB
             INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
+			INNER JOIN (
+				SELECT intEntityId
+						, ysnStatementCreditLimit
+				FROM dbo.tblARCustomer WITH (NOLOCK)
+			) CUST ON CB.intEntityCustomerId = CUST.intEntityId
             OUTER APPLY (
 					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
 					FROM (

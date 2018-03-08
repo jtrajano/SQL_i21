@@ -37,10 +37,8 @@ BEGIN
 		,intSampleTypeId
 		)
 	SELECT L.strLotNumber
-		,ST.intSampleTypeId
+		,-1
 	FROM @tblMFLot L
-		,tblQMSampleType ST
-	WHERE ST.strApprovalBase = 'Lot'
 
 	IF EXISTS (
 			SELECT *
@@ -218,7 +216,7 @@ BEGIN
 				SELECT *
 				FROM @tblMFFinalLot L
 				WHERE L.strLotNumber = S.strLotNumber
-					AND L.intSampleTypeId = S.intSampleTypeId
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId 
 				)
 		ORDER BY S.intSampleId DESC
 	END
@@ -231,7 +229,7 @@ BEGIN
 				SELECT *
 				FROM @tblMFFinalLot L
 				WHERE L.strLotNumber = S.strLotNumber
-					AND L.intSampleTypeId = S.intSampleTypeId
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId
 				)
 		ORDER BY S.intSampleId DESC
 	END
@@ -248,10 +246,8 @@ BEGIN
 		,intSampleTypeId
 		)
 	SELECT L.strLotNumber
-		,ST.intSampleTypeId
+		,-1
 	FROM @tblMFLot L
-		,tblQMSampleType ST
-	WHERE ST.strApprovalBase = 'Parent Lot'
 
 	IF EXISTS (
 			SELECT *
@@ -406,7 +402,7 @@ BEGIN
 				SELECT *
 				FROM @tblMFFinalLot L
 				WHERE L.strLotNumber = S.strLotNumber
-					AND L.intSampleTypeId = S.intSampleTypeId
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId
 				)
 		ORDER BY S.intSampleId DESC
 	END
@@ -419,7 +415,7 @@ BEGIN
 				SELECT *
 				FROM @tblMFFinalLot L
 				WHERE L.strLotNumber = S.strLotNumber
-					AND L.intSampleTypeId = S.intSampleTypeId
+					AND (Case When L.intSampleTypeId = -1 Then S.intSampleTypeId  Else L.intSampleTypeId End)=S.intSampleTypeId
 				)
 		ORDER BY S.intSampleId DESC
 	END
