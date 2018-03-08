@@ -85,6 +85,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strBundledItemDescription).HasColumnName("strBundledItemDescription");
             this.Property(t => t.ysnIsBasket).HasColumnName("ysnIsBasket");
             this.Property(t => t.strBundleType).HasColumnName("strBundleType");
+            this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
+            this.Property(t => t.strLotCondition).HasColumnName("strLotCondition");
         }
     }
 }
