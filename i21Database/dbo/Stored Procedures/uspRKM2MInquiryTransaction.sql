@@ -377,7 +377,12 @@ intPricingTypeId,strPricingType,dblContractBasis,dblDummyContractBasis,dblCash,d
 intContractTypeId ,dblRate,intCommodityUnitMeasureId,intQuantityUOMId,intPriceUOMId,intCurrencyId,PriceSourceUOMId,dblCosts,dblContractOriginalQty,
 ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate,intCompanyLocationId,intMarketZoneId,intContractStatusId,dtmContractDate,ysnExpired,dblInvoicedQuantity
 ,dblPricedQty,dblUnPricedQty,dblPricedAmount,strMarketZoneCode,strLocationName)		
-
+select intContractHeaderId, intContractDetailId,strContractOrInventoryType,strContractSeq,strEntityName,intEntityId,strFutMarketName,
+intFutureMarketId,strFutureMonth,intFutureMonthId,strCommodityCode,intCommodityId,strItemNo,intItemId,strOrgin,intOriginId,strPosition, strPeriod, strPeriodTo, strPriOrNotPriOrParPriced,
+intPricingTypeId,strPricingType,case when isnull(intPricingTypeId,0)=3 then dblMarketBasis1 else dblContractBasis end dblContractBasis,dblDummyContractBasis,dblCash,dblFuturesClosingPrice1,dblFutures ,dblMarketBasis1, dblMarketBasisUOM, dblFuturePrice1,                         
+intContractTypeId ,dblRate,intCommodityUnitMeasureId,intQuantityUOMId,intPriceUOMId,intCurrencyId,PriceSourceUOMId,dblCosts,dblContractOriginalQty,
+ysnSubCurrency,intMainCurrencyId,intCent,dtmPlannedAvailabilityDate,intCompanyLocationId,intMarketZoneId,intContractStatusId,dtmContractDate,ysnExpired,dblInvoicedQuantity
+,dblPricedQty,dblUnPricedQty,dblPricedAmount,strMarketZoneCode,strLocationName from(
 SELECT distinct cd.intContractHeaderId, cd.intContractDetailId,
                   'Contract'+'('+LEFT(cd.strContractType,1)+')' as strContractOrInventoryType,
                   cd.strContractNumber +'-'+CONVERT(nvarchar,cd.intContractSeq) as strContractSeq,
@@ -406,9 +411,9 @@ SELECT distinct cd.intContractHeaderId, cd.intContractDetailId,
                   CASE WHEN cd.intPricingTypeId=6 then dblCashPrice else null end dblCash,
 				 dblFuturePrice as dblFuturesClosingPrice1,	
 
-	  CASE WHEN isnull(strPricingStatus,'')='Unpriced' then 
-          dblFuturePrice   else                                                        
-          CASE WHEN cd.intPricingTypeId=1 THEN isnull(p.dblFutures,0) ELSE dblFuture end end as dblFutures,        
+
+	  CASE WHEN cd.intPricingTypeId=2 then dblFuturePrice   else                                                        
+          CASE WHEN cd.intPricingTypeId in(1,3) THEN isnull(p.dblFutures,0) ELSE dblFuture end end as dblFutures,        
                                               
 			isnull((SELECT top 1 (isnull(dblBasisOrDiscount,0)+isnull(dblCashOrFuture,0))
 									/ case when c.ysnSubCurrency= 1 then 100 else 1 end FROM tblRKM2MBasisDetail temp 
@@ -454,7 +459,7 @@ LEFT JOIN @tblContractCost cc on cd.intContractDetailId=cc.intContractDetailId
 LEFT JOIN @tblContractFuture cf on cf.intContractDetailId=cd.intContractDetailId
 LEFT JOIN tblICCommodityUnitMeasure cuc3 on cd.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId=cd.intPriceUnitMeasureId
 LEFT JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId 
-WHERE   cd.intCommodityId= @intCommodityId 
+WHERE   cd.intCommodityId= @intCommodityId )t
 
 -- intransit
 INSERT INTO @tblFinalDetail (intContractHeaderId,
@@ -950,4 +955,4 @@ isnull(dblNotLotTrackedPrice,0) dblContractPrice
 ,intQuantityUOMId,intCommodityUnitMeasureId,intPriceUOMId,intCent,dtmPlannedAvailabilityDate,dblPricedQty,dblUnPricedQty,dblPricedAmount,intCompanyLocationId,
 intMarketZoneId,strMarketZoneCode,strLocationName FROM #Temp 
 WHERE  dblOpenQty <> 0 and intContractHeaderId IS NULL)t 
- ORDER BY intContractHeaderId DESC 
+ ORDER BY intContractHeaderId DESC
