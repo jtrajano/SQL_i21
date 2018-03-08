@@ -5,7 +5,9 @@ IF (EXISTS(SELECT NULL FROM sys.tables WHERE [name] = N'tblARQuotePage') AND EXI
 		IF EXISTS(SELECT TOP 1 NULL FROM tblARQuotePage)	
 		BEGIN
 			IF EXISTS (SELECT NULL FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_NAME ='FK_tblARQuoteTemplateDetail_tblARQuotePage')
-				ALTER TABLE tblARQuoteTemplateDetail DROP CONSTRAINT FK_tblARQuoteTemplateDetail_tblARQuotePage
+			
+			DECLARE @strQuery NVARCHAR(MAX) = CAST('' AS NVARCHAR(MAX)) + '
+			ALTER TABLE tblARQuoteTemplateDetail DROP CONSTRAINT FK_tblARQuoteTemplateDetail_tblARQuotePage
 
 			WHILE EXISTS (SELECT TOP 1 NULL FROM tblARQuotePage)
 				BEGIN
@@ -23,7 +25,7 @@ IF (EXISTS(SELECT NULL FROM sys.tables WHERE [name] = N'tblARQuotePage') AND EXI
 					ORDER BY intQuotePageId
 
 					IF EXISTS (SELECT TOP 1 NULL FROM tblSMLetter WHERE strName = @strPageTitle)
-						SET @strPageTitle = 'DUP: '+ @strPageTitle
+						SET @strPageTitle = ''DUP: ''+ @strPageTitle
 
 					INSERT INTO tblSMLetter (
 						  strName
@@ -37,14 +39,14 @@ IF (EXISTS(SELECT NULL FROM sys.tables WHERE [name] = N'tblARQuotePage') AND EXI
 					SELECT @strPageTitle
 						, @strPageDescription
 						, @blbMessage
-						, 'Sales'
+						, ''Sales''
 						, 0
 						, NULL
 						, 1
 
 					SET @intNewLetterId = SCOPE_IDENTITY()
 
-					IF COL_LENGTH('tblARQuoteTemplateDetail', 'intQuotePageId') IS NOT NULL 
+					IF COL_LENGTH(''tblARQuoteTemplateDetail'', ''intQuotePageId'') IS NOT NULL 
 					BEGIN
 						UPDATE tblARQuoteTemplateDetail 
 						SET intQuotePageId = @intNewLetterId 
@@ -56,7 +58,9 @@ IF (EXISTS(SELECT NULL FROM sys.tables WHERE [name] = N'tblARQuotePage') AND EXI
 
 			UPDATE tblARQuoteTemplateDetail
 			SET intQuotePageId = NULL
-			WHERE intQuotePageId NOT IN (SELECT intLetterId FROM tblSMLetter)
+			WHERE intQuotePageId NOT IN (SELECT intLetterId FROM tblSMLetter)'
+
+			EXEC sp_executesql @strQuery
 		END
 	END
 GO
