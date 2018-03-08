@@ -34,7 +34,9 @@ AS
 			CH.intEntityId,
 			EY.strName AS strEntityName,
 			CH.strContractNumber,
-			CH.ysnUnlimitedQuantity
+			CH.ysnUnlimitedQuantity,
+			CD.intContractSeq,
+			CD.intPricingTypeId
 																												
 	FROM	tblCTContractDetail				CD	CROSS																						
 	JOIN	tblCTCompanyPreference			CP																									
