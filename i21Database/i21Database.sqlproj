@@ -6239,6 +6239,7 @@
     <Build Include="dbo\Views\vyuSTCigaretteRebatePrograms.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicNM.sql" />
     <Build Include="dbo\Functions\fnICFormatNumber.sql" />
+    <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
