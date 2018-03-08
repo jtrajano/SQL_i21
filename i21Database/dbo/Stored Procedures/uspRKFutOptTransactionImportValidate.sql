@@ -108,8 +108,11 @@ WHILE @mRowNumber > 0
 				END
 			END
 			--- Broker Trader Number Exists -- in current Batch
-			IF EXISTS(SELECT COUNT(strBrokerTradeNo) FROM tblRKFutOptTransactionImport WHERE strBrokerTradeNo=@strBrokerTradeNo 
-						AND strName=@strName and isnull(strBrokerTradeNo,'')<>'' HAVING COUNT(strBrokerTradeNo) > 1)
+			
+
+			IF EXISTS(SELECT COUNT(strBrokerTradeNo) from (
+					SELECT distinct strBrokerTradeNo FROM tblRKFutOptTransactionImport WHERE strBrokerTradeNo=@strBrokerTradeNo 
+						AND strName=@strName and isnull(strBrokerTradeNo,'')<>'')t HAVING COUNT(strBrokerTradeNo) > 1)
 		BEGIN
 			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber )
 				BEGIN
