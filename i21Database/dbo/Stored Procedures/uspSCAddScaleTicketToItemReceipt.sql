@@ -1236,14 +1236,8 @@ BEGIN
 									ELSE RE.intItemUOMId
 								END
 		,[dblQuantity]			= RE.dblQty
-		,[dblGrossWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.dblGrossWeight
-									ELSE NULL
-								END
-		,[dblTareWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.dblTareWeight
-									ELSE NULL
-								END
+		,[dblGrossWeight]		= RE.dblQty
+		,[dblTareWeight]		= 0
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
 		,[dtmManufacturedDate]	= RE.dtmDate
