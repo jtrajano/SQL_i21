@@ -6228,6 +6228,7 @@
     <Build Include="dbo\Functions\fnLGGetShipmentStatus.sql" />
     <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuICGetItemsWithNoLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
