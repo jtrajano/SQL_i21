@@ -103,7 +103,7 @@ AS
 	detailTransaction.dblTax,
 	CNTRCT.strContractNumber,
 	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) AS TotalDiscount,
-	(detailTransaction.dblTotal + detailTransaction.dblTax ) as NetDue,
+	(BillDtl.dblTotal + BillDtl.dblTax ) as NetDue,
 	Bill.strBillId as strId,
 	PYMT.intPaymentId,
 	PYMT.dblAmountPaid as CheckAmount,
