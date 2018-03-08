@@ -3973,6 +3973,70 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 150,
                                                                         displayField: 'strUnitMeasure',
                                                                         valueField: 'strUnitMeasure'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'uomfield',
+                                                                        quantityValueField: 'dblAmount',
+                                                                        lookupDisplayField: "strUnitMeasure",
+                                                                        uomValueField: 'strCostUOM',
+                                                                        objectKey: 'costUnitQty',
+                                                                        valueField: 'intCostUOMId',
+                                                                        updateField: 'intCostUOMId',
+                                                                        lookupValueField: 'intItemUOMId',
+                                                                        displayField: 'strCostUOM',
+                                                                        decimalsField: 'intDecimalPlaces',
+                                                                        fieldLabel: 'UOM',
+                                                                        labelWidth: 150,
+                                                                        itemId: 'gumCostUnitQty',
+                                                   
+                                                                        storeConfig: {
+                                                                            type: 'Inventory.store.BufferedItemUnitMeasure',
+                                                                            defaultFilters: [
+                                                                                {
+                                                                                    column: 'intItemId',
+                                                                                    valueField: 'intItemId',
+                                                                                    conjunction: 'and',
+                                                                                    condition: 'eq'
+                                                                                }
+                                                                            ],
+                                                                            comboBoxConfig: {
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intItemUOMId',
+                                                                                        dataType: 'numeric',
+                                                                                        text: 'Unit Of Measure Id',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strUnitMeasure',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Unit Measure',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strUnitType',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Unit Type',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkcolumn',
+                                                                                        dataIndex: 'ysnStockUnit',
+                                                                                        dataType: 'boolean',
+                                                                                        text: 'Stock Unit',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'intDecimalPlaces',
+                                                                                        text: 'Decimal Places',
+                                                                                        flex: 1,
+                                                                                        hidden: false
+                                                                                    }
+                                                                                ],
+                                                                                displayField: 'strUnitMeasure',
+                                                                                valueField: 'strUnitMeasure'
+                                                                            }
+                                                                        }
                                                                     }
                                                                 ]
                                                             },

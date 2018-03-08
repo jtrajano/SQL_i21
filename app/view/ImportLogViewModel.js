@@ -10,7 +10,7 @@ Ext.define('Inventory.view.ImportLogViewModel', {
             return 'Allow Duplicates';
         },
         duration: function(get) {
-            return ic.utils.Date.getDuration(get('current.dblTimeSpentInSeconds'));
+            return Inventory.Utils.Date.getDuration(get('current.dblTimeSpentInSeconds'));
         },
         messagestyle: function(get) {
             if(get('current.intTotalErrors') > 0) {

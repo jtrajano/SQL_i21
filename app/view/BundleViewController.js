@@ -855,7 +855,7 @@ Ext.define('Inventory.view.BundleViewController', {
 
         if (current) {
             iRely.Msg.showWait('Duplicating item...');
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/Item/DuplicateItem',
                 params: {
@@ -1451,7 +1451,7 @@ Ext.define('Inventory.view.BundleViewController', {
                 break;
             }
         //return salePrice;
-        return ic.utils.Math.round(salePrice, 6);
+        return Inventory.Utils.Math.round(salePrice, 6);
     },
 
     getPricingLevelUnitPrice: function (price) {
@@ -1507,7 +1507,7 @@ Ext.define('Inventory.view.BundleViewController', {
                 break;
         }
         //return retailPrice;
-        return ic.utils.Math.round(retailPrice, 6);
+        return Inventory.Utils.Math.round(retailPrice, 6);
     },
 
     updatePricing: function (pricing, data, validationCallback) {
@@ -1832,7 +1832,7 @@ Ext.define('Inventory.view.BundleViewController', {
             return;
 
         iRely.Msg.showWait('Converting units...');
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/Item/GetUnitConversion',
             method: 'Post',
             params: {
@@ -1890,7 +1890,7 @@ Ext.define('Inventory.view.BundleViewController', {
         uoms = uoms ? uoms : null; 
 
         if (obj.dataIndex === 'ysnStockUnit'){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/Item/CheckStockUnit',
                 method: 'POST',
                 params: {
@@ -1928,7 +1928,7 @@ Ext.define('Inventory.view.BundleViewController', {
                                         current.set('dblUnitQty', 1);
                                     }
                                 }
-                                ic.utils.ajax({
+                                Inventory.Utils.ajax({
                                     url: './Inventory/api/Item/ConvertItemToNewStockUnit',
                                     method: 'POST',
                                     params: {

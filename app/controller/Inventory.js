@@ -4,10 +4,12 @@
 Ext.define('Inventory.controller.Inventory', {
     extend: 'i21.controller.Module',
     alias: 'controller.inventory',
+    alternateClassName: 'ic',
     requires: [
         'Inventory.Utils',
         'Inventory.ux.GridUOMColumn',
         'Inventory.ux.GridUOMField',
+        'Inventory.ux.UOMField',
         'iRely.form.field.NumericField',
         'iRely.form.field.DateTimeField',
         'iRely.grid.CustomSummary',
@@ -117,6 +119,31 @@ Ext.define('Inventory.controller.Inventory', {
         app.getController('GeneralLedger.controller.Global');
         this.companyPreferenceStore = Ext.create('Inventory.store.CompanyPreference');
         this.companyPreferenceStore.load();
+
+        // Load lookup UOMS
+        if(localStorage) {
+            var ls = localStorage.getItem(ic.CACHE_UOM);
+            if(ls) {
+                localStorage.removeItem(ic.CACHE_UOM);
+            }
+
+            
+        }
+    },
+
+    CACHE_UOM: "inventory.data.cache.uoms",
+
+    getCachedUoms: function() {
+        if(localStorage) {
+            return localStorage.getItem(ic.CACHE_UOM);
+        }
+        return null;
+    },
+
+    hasExpired: function(date, minutes) {
+        let start = moment(date);
+        let remaining = start.diff(moment(), 'minutes', true);
+        return (remaining >= minutes);
     },
 
     getCompanyPreference: function(field) {
@@ -346,7 +373,7 @@ Ext.define('Inventory.controller.Inventory', {
         var action = 'view',
         columnName = 'strWorkOrderNo';
         
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './manufacturing/api/workordermanagement/getviewnamebyworkorderno',
             params:{
                 strWorkOrderNo: recordId

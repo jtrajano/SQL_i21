@@ -41,19 +41,19 @@ Ext.define("Inventory.domain.receipt.LotReplicationAnalyzer", {
         if(!this.getTotalConvertedLotQty()) {
             var lots = _.filter(this.getReceiptItem().tblICInventoryReceiptItemLots().data.items, function(x) { return !x.dummy; });
             var qty = Inventory.domain.receipt.LotReplicationAnalyzer.getTotalLotQty(lots, this.getReceiptItem());
-            this.setTotalConvertedLotQty(ic.utils.nullOrDefault(qty, 0));
+            this.setTotalConvertedLotQty(Inventory.Utils.nullOrDefault(qty, 0));
         }
 
         // 1. Get the total item qty and convert to lot unit
-        this.setTotalQty(ic.utils.Uom.convertQtyBetweenUOM(receiptItemConversionFactor, lotConversionFactor, receiptItemQuantity));
+        this.setTotalQty(Inventory.Utils.Uom.convertQtyBetweenUOM(receiptItemConversionFactor, lotConversionFactor, receiptItemQuantity));
         // 2. Get the total lot qty in item unit
-        this.setTotalConvertedQty(ic.utils.Uom.convertQtyBetweenUOM(lotConversionFactor, receiptItemConversionFactor, this.getTotalQty()));
+        this.setTotalConvertedQty(Inventory.Utils.Uom.convertQtyBetweenUOM(lotConversionFactor, receiptItemConversionFactor, this.getTotalQty()));
         // 3. Get the limit that the replication can fill in
         this.setQtyReplicationLimit(this.getTotalConvertedQty() - this.getTotalConvertedLotQty());
         // 4. Calculate the no. of replications by converting the total qty from item unit to lot unit
         this.setLotQtyToReplicate(lotQuantity);
-        this.setReplications(ic.utils.Uom.convertQtyBetweenUOM(receiptItemConversionFactor, lotConversionFactor, this.getQtyReplicationLimit()) / lotQuantity);
-        this.setBaseReplications(ic.utils.Math.truncate(this.getReplications()));
+        this.setReplications(Inventory.Utils.Uom.convertQtyBetweenUOM(receiptItemConversionFactor, lotConversionFactor, this.getQtyReplicationLimit()) / lotQuantity);
+        this.setBaseReplications(Inventory.Utils.Math.truncate(this.getReplications()));
         // 5. Calculate the excess qty to replicate
         this.setExcessReplications(this.getReplications() - this.getBaseReplications());
         this.setExcessLotQtyToReplicate(this.getExcessReplications() * lotQuantity);
@@ -63,11 +63,11 @@ Ext.define("Inventory.domain.receipt.LotReplicationAnalyzer", {
         var receiptItemGrossQty = this.getReceiptItem().get('dblGross');
         if(receiptItemGrossQty) {
             // 6. Calculate lot gross qty
-            var lotGrossQtyToReplicate = ic.utils.Uom.convertQtyBetweenUOM(lotConversionFactor, receiptItemGrossConversionFactor, lotQuantity);
+            var lotGrossQtyToReplicate = Inventory.Utils.Uom.convertQtyBetweenUOM(lotConversionFactor, receiptItemGrossConversionFactor, lotQuantity);
             this.setLotGrossQtyToReplicate(lotGrossQtyToReplicate);
 
             // 7. Calculate excess lot gross qty
-            var excessLotGrossQtyToReplicate = ic.utils.Uom.convertQtyBetweenUOM(lotConversionFactor, receiptItemGrossConversionFactor, this.getExcessLotQtyToReplicate());
+            var excessLotGrossQtyToReplicate = Inventory.Utils.Uom.convertQtyBetweenUOM(lotConversionFactor, receiptItemGrossConversionFactor, this.getExcessLotQtyToReplicate());
             this.setExcessLotGrossQtyToReplicate(excessLotGrossQtyToReplicate);
 
             // 8. Calculate tare qty
@@ -77,7 +77,7 @@ Ext.define("Inventory.domain.receipt.LotReplicationAnalyzer", {
     },
 
     getSuggestedLotQtyToReplicate: function() {
-        return ic.utils.Math.roundWithPrecision(this.getReplications() / this.getReplicationLimit() * this.getLotQtyToReplicate(), 0);
+        return Inventory.Utils.Math.roundWithPrecision(this.getReplications() / this.getReplicationLimit() * this.getLotQtyToReplicate(), 0);
     },
 
     /*  
@@ -122,7 +122,7 @@ Ext.define("Inventory.domain.receipt.LotReplicationAnalyzer", {
             var qty = 0;
             _.each(lots, function(rec) {
                 var factor = receiptItem.get('dblItemUOMConvFactor');
-                qty += ic.utils.Uom.convertQtyBetweenUOM(rec.get('dblLotUOMConvFactor'), factor, rec.get('dblQuantity'));
+                qty += Inventory.Utils.Uom.convertQtyBetweenUOM(rec.get('dblLotUOMConvFactor'), factor, rec.get('dblQuantity'));
             });
 
             return qty;

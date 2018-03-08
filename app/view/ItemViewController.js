@@ -743,6 +743,12 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
 
+            gumCostUnitQty: {
+                value: '{current.costUnitQty}',
+                activeRecord: '{current}',
+                mutateByProperties: true
+            },
+
             //--------------//
             //Motor Fuel Tax//
             //--------------//
@@ -1921,7 +1927,7 @@ Ext.define('Inventory.view.ItemViewController', {
             return;
 
         iRely.Msg.showWait('Converting units...');
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/Item/GetUnitConversion',
             method: 'Post',
             params: {
@@ -1984,7 +1990,7 @@ Ext.define('Inventory.view.ItemViewController', {
         uoms = uoms ? uoms : null; 
 
         if (checkbox.dataIndex === 'ysnStockUnit'){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/Item/CheckStockUnit',
                 method: 'POST',
                 params: {
@@ -2000,7 +2006,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     {
                          var result = function (button) {
                             if (button === 'yes') {                                
-                                ic.utils.ajax({
+                                Inventory.Utils.ajax({
                                     url: './Inventory/api/Item/ConvertItemToNewStockUnit',
                                     method: 'POST',
                                     params: {
@@ -2571,7 +2577,7 @@ Ext.define('Inventory.view.ItemViewController', {
             conjunction: 'And'
         }];
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/ItemLocation/Search',
                 params: {
@@ -3072,7 +3078,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
         }
         //return retailPrice;
-        return ic.utils.Math.round(retailPrice, 6);
+        return Inventory.Utils.Math.round(retailPrice, 6);
     },
 
     /* TODO:Create unit test for getSalePrice */
@@ -3099,7 +3105,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
             }
         //return salePrice;
-        return ic.utils.Math.round(salePrice, 6);
+        return Inventory.Utils.Math.round(salePrice, 6);
     },
 
     updatePricing: function (pricing, data, validationCallback) {
@@ -3595,7 +3601,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (current) {
             iRely.Msg.showWait('Duplicating item...');
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/Item/DuplicateItem',
                 params: {
@@ -4191,8 +4197,17 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },    
 
+    onCostUnitQtyValueChange: function(newValue, oldValue, activeRecord, control, uomRecord) {
+        var me = this;
+        me.setData('costUnitQty', newValue);  
+        console.log(me.getCurrent());
+    },
+
     init: function(application) {
         this.control({
+            "#gumCostUnitQty": {
+                valuechange: this.onCostUnitQtyValueChange
+            },
             "#cboType": {
                 select: this.onInventoryTypeSelect
             },

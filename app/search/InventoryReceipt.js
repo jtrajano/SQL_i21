@@ -236,7 +236,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
     ],
 
     processReceiptToVoucher: function (receiptId, callback) {
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/InventoryReceipt/ProcessBill',
             params:{
                 id: receiptId
@@ -257,7 +257,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
     },    
 
     // onRefreshVoucherClick: function (control) {
-    //     ic.utils.ajax({
+    //     Inventory.Utils.ajax({
     //         url: './Inventory/api/InventoryReceipt/UpdateReceiptVoucher',
     //         method: 'post'
     //     })

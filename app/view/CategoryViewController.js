@@ -703,7 +703,7 @@ Ext.define('Inventory.view.CategoryViewController', {
 
         if (current) {
             iRely.Msg.showWait('Duplicating category...');
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './inventory/api/category/duplicatecategory',
                 params: {

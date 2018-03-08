@@ -23,6 +23,6 @@ Ext.define('Inventory.domain.receipt.LotReplicationProgress', {
     },
 
     getPercentage: function() {
-        return ic.utils.Math.roundWithPrecision(this.getValue() / this.getMax() * 100.00, 0);
+        return Inventory.Utils.Math.roundWithPrecision(this.getValue() / this.getMax() * 100.00, 0);
     }
 });

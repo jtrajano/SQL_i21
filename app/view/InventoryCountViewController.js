@@ -629,7 +629,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
     },
 
     getTotalLocationStockOnHand: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId, callback) {
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             timeout: 120000,
             url: './inventory/api/itemstock/getlocationstockonhand',
             params: {
@@ -892,7 +892,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             grossQty = lotQty;
         }
         else if (weightUOMConversionFactor !== 0) {
-            grossQty = ic.utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+            grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
         }
 
         return {
@@ -949,7 +949,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                 var current = vm.get('current');
                 var id = current.get('intInventoryCountId');
                 win.down("#grdPhysicalCount").setLoading("Deleting records...");
-                ic.utils.ajax({
+                Inventory.Utils.ajax({
                     url: './inventory/api/inventorycount/deletealldetails',
                     method: 'DELETE',
                     params: {
@@ -1115,7 +1115,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     };
                 }
 
-                var rx = ic.utils.ajax({
+                var rx = Inventory.Utils.ajax({
                     url: "./inventory/api/inventorycount/" + resource,
                     method: "PUT",
                     params: requestParams
@@ -1296,7 +1296,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         
         var doPost = function (){
             var current = currentRecord; 
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventorycount/posttransaction',
                 params:{
                     strTransactionId: current.get('strCountNo'),
@@ -1361,7 +1361,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         var context = win.context;
 
         var doRecap = function (currentRecord){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventorycount/posttransaction',
                 params:{
                     strTransactionId: currentRecord.get('strCountNo'),
@@ -1848,7 +1848,7 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             storageLocationId = record.get('intStorageLocationId');
         var qty = 0;
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             timeout: 120000,   
             url: './inventory/api/item/getitemstockuomsummary',
             params: {

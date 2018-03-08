@@ -573,7 +573,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
         
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/ItemLocation/CheckCostingMethod',
             method: 'POST',
             params: {

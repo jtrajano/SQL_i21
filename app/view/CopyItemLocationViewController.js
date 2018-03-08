@@ -63,7 +63,7 @@ Ext.define('Inventory.view.CopyItemLocationViewController', {
             i21.functions.showCustomDialog('info', 'ok', 'Cannot copy locations when the source and destination items are the same.');    
             return;
         }
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/item/copyitemlocation',
             params: {
                 intSourceItemId: sourceItem.get('intItemId'),

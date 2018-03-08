@@ -1433,7 +1433,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
                 else if (weightCF !== 0) {
                     //grossQty = (lotCF * qty) / weightCF;
-                    grossQty = ic.utils.Uom.convertQtyBetweenUOM(lotCF, weightCF, qty);
+                    grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(lotCF, weightCF, qty);
                 }
 
             }
@@ -1596,7 +1596,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     fetchSetDefaultLocation: function(current, intDefaultLocation) {
         if(intDefaultLocation && current) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './entitymanagement/api/location/search',
                 params: {
                     filter: iRely.Functions.encodeFilters([{ column: 'intEntityId', value: current.get('intEntityVendorId') }])
@@ -1756,7 +1756,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Save first before calculating the taxes
         win.context.data.saveRecord({
             successFn: function () {
-                ic.utils.ajax({
+                Inventory.Utils.ajax({
                     url: './inventory/api/inventoryreceipt/gettaxgroupid',
                     params: {
                         id: current.get('intInventoryReceiptId')
@@ -1794,7 +1794,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     getDefaultReceiptTaxGroupId: function (current, cfg) {
         cfg = cfg ? cfg : {};
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventoryreceipt/getdefaultreceipttaxgroupid',
             params: {
                 freightTermId: cfg.freightTermId,
@@ -1832,7 +1832,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         successFn = successFn && (successFn instanceof Function) ? successFn : function () { /*empty function*/ };
         failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function () { /*empty function*/ };
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './entitymanagement/api/vendorpricing/searchvendorlocationitemcurrency',
             params: {
                 VendorId: cfg.vendorId,
@@ -2160,7 +2160,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     resolveItemCost: function(vm, receipt, receiptItem) {
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
             filters: [
                 {
@@ -2778,7 +2778,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                                 else if (weightCF !== 0) {
                                     //grossQty = (lotCF * lotQty) / weightCF;
-                                    grossQty = ic.utils.Uom.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
+                                    grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
                                 }
                                 
                                 lot.set('dblGrossWeight', grossQty);
@@ -2856,7 +2856,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 totalGross = 0;
             }
             else {
-                totalGross = ic.utils.Uom.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
+                totalGross = Inventory.Utils.Uom.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
             }
             totalGross = Ext.isNumeric(totalGross) ? totalGross : 0.00;
             totalNet = totalGross;
@@ -3146,7 +3146,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             countItemsWithZeroCost = 0;        
 
         var processReceiptToVoucher = function (receiptId, callback) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventoryreceipt/processbill',
                 params: {
                     id: receiptId
@@ -3242,7 +3242,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             countItemsWithZeroCost = 0;
 
         var processReceiptToDebitMemo = function (receiptId) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventoryreceipt/processbill',
                 params: {
                     id: receiptId
@@ -3640,7 +3640,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 currentReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalGross / dblQty), 6));
                 currentReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalNet / dblQty), 6));
-                // ic.utils.ajax({
+                // Inventory.Utils.ajax({
                 //     url: './Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
                 //     params: {
                 //         intItemUOMId: intItemUOMId,
@@ -3673,7 +3673,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dblProposedQty = currentReceiptItem.get('dblOpenReceive'),
                     dblProposedGrossQty = context.value;
             
-            //     ic.utils.ajax({
+            //     Inventory.Utils.ajax({
             //         url: './Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
             //         params: {
             //             intItemUOMId: intItemUOMId,
@@ -3836,7 +3836,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './entitymanagement/api/shipvia/searchshipviaview'
             })
                 .flatMap(function (res) {
@@ -5503,7 +5503,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         conjunction: 'and'
                     }
                 ]);
-                var arx = ic.utils.ajax({
+                var arx = Inventory.Utils.ajax({
                     url: ContractStore.proxy.api.read,
                     params: {
                         filter: filter
@@ -6165,12 +6165,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }, function(err) {
                             var a = replicator.getAnalyzer();
                             if(a.excessive()) {
-                                var suggestion = ic.utils.Number.format(a.getSuggestedLotQtyToReplicate(), '0,0.[00]');
+                                var suggestion = Inventory.Utils.Number.format(a.getSuggestedLotQtyToReplicate(), '0,0.[00]');
                                 iRely.Functions.showErrorDialog("Stop! A quantity of " 
-                                    + ic.utils.Math.roundWithPrecision(a.getLotQtyToReplicate(), 2) + " "
+                                    + Inventory.Utils.Math.roundWithPrecision(a.getLotQtyToReplicate(), 2) + " "
                                     + a.getLot().get('strUnitMeasure')
                                     + " is too small to replicate. This produces a huge number of lot replications. "
-                                    + ic.utils.Number.format(a.getReplications(), '0,0')
+                                    + Inventory.Utils.Number.format(a.getReplications(), '0,0')
                                     + " times to be exact. Try something like "
                                     + suggestion + " " + a.getLot().get('strUnitMeasure') + ".");
                             } else {
@@ -6182,7 +6182,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             Ext.MessageBox.hide();
                             grdLotTracking.resumeEvents();
                             if(lots.length > 0) {
-                                iRely.Functions.showInfoDialog("Replicated " + ic.utils.Number.format(lots.length, '0,0') + " lot(s).");
+                                iRely.Functions.showInfoDialog("Replicated " + Inventory.Utils.Number.format(lots.length, '0,0') + " lot(s).");
                                 //Calculate Line Total                        
                                 me.calculateGrossNet(currentReceiptItem, 1);
                                 currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
@@ -6279,7 +6279,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dblFranchise = Ext.isNumeric(dblFranchise) ? dblFranchise * 100 : 0.00;                   
                     
                     if (dblShippedWeightUOMConvFactor != dblWeightUOMConvFactor){
-                        dblOrderNetShippedWt = ic.utils.Uom.convertQtyBetweenUOM(
+                        dblOrderNetShippedWt = Inventory.Utils.Uom.convertQtyBetweenUOM(
                             dblShippedWeightUOMConvFactor, 
                             dblWeightUOMConvFactor, 
                             dblOrderNetShippedWt
@@ -6294,16 +6294,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        dblTotalWeightLoss = ic.utils.Math.round(dblTotalWeightLoss, 2);
+        dblTotalWeightLoss = Inventory.Utils.Math.round(dblTotalWeightLoss, 2);
         dblTotalWeightLoss = dblTotalWeightLoss ? dblTotalWeightLoss : 0.00; 
 
-        dblWeightLossPercentage = ic.utils.Math.round(
+        dblWeightLossPercentage = Inventory.Utils.Math.round(
             dblTotalOrderNetShippedWt != 0 ? (dblTotalReceivedWt - dblTotalOrderNetShippedWt) / dblTotalOrderNetShippedWt * 100 : 0.00
             , 2
         );
         dblWeightLossPercentage = dblWeightLossPercentage ? dblWeightLossPercentage : 0.00; 
 
-        dblTotalFranchise = ic.utils.Math.round(dblTotalFranchise, 2);
+        dblTotalFranchise = Inventory.Utils.Math.round(dblTotalFranchise, 2);
         dblTotalFranchise = dblTotalFranchise ? dblTotalFranchise : 0.00;        
 
         return {
@@ -6514,7 +6514,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (!(context && current)) return;
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventoryreceipt/calculatecharges',
             params: {
                 id: current.get('intInventoryReceiptId')
@@ -6686,7 +6686,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (grdInventoryReceipt) { grdInventoryReceipt.getSelectionModel().deselectAll(); }
 
         var doRecap = function (currentRecord) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? './inventory/api/inventoryreceipt/return' : './inventory/api/inventoryreceipt/receive',
                 params: {
                     strTransactionId: currentRecord.get('strReceiptNumber'),
@@ -6748,7 +6748,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             case 'pgeIncomingInspection':
                 var updateReceiptInspection = function () {
                     if (current) {
-                        ic.utils.ajax({
+                        Inventory.Utils.ajax({
                             url: './inventory/api/inventoryreceipt/updatereceiptinspection',
                             params: {
                                 id: current.get('intInventoryReceiptId')
@@ -6968,7 +6968,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         var processReceiptToReturn = function () {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryReceipt/ReturnReceipt',
                 params: {
                     id: current.get('intInventoryReceiptId')
@@ -7020,7 +7020,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         // Call an ajax to validate the receipt if receipt is valid for return. 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/InventoryReceipt/CheckReceiptForValidReturn',
             params: {
                 receiptId: current.get('intInventoryReceiptId')
@@ -7094,7 +7094,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var doPost = function () {
             var current = currentRecord;
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: (current.get('strReceiptType') === 'Inventory Return') ? './Inventory/api/InventoryReceipt/Return' : './Inventory/api/InventoryReceipt/Receive',
                 params: {
                     strTransactionId: current.get('strReceiptNumber'),
@@ -7249,7 +7249,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var ordered = current.get('dblOrderQty');
         var qtyToReceive = plugin.getActiveEditor().getValue();
         if (origCF > 0 && newCF > 0) {
-            qtyToReceive = ic.utils.Uom.convertQtyBetweenUOM(origCF, newCF, qtyToReceive); //Ordered - Received;
+            qtyToReceive = Inventory.Utils.Uom.convertQtyBetweenUOM(origCF, newCF, qtyToReceive); //Ordered - Received;
             current.set('dblOpenReceive', qtyToReceive);
             plugin.getActiveEditor().field.setValue(qtyToReceive);
         }
@@ -7352,7 +7352,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             //     break;
         }
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: searchURL,
             method: 'get'
         }).subscribe(
@@ -7436,7 +7436,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         };
 
         if(bundleType == 'Kit'){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: searchURL,
                 method: 'get'
             }).subscribe(
@@ -7784,7 +7784,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
         };
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/itemaddon/getitemaddons?intItemId=' + itemAddOnId + '&intItemUOMId=' + itemUOMId 
                 + '&intLocationId=' + intLocationId + '&dblQuantity=1',
             method: 'get'
@@ -7963,7 +7963,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
         };
         
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemSubstituteId + '&intItemUOMId=' + itemUOMId 
                 + '&intLocationId=' + intLocationId + '&dblQuantity=1',
             method: 'get'
@@ -8299,7 +8299,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     checkVendorCost: function(vm, receipt, dtmReceiptDate, oldValue) {
         var me = this;
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
             filters: [
                 {

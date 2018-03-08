@@ -350,7 +350,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         //     grossQty = lotQty;
         // }
         if (weightPerQty !== 0) {
-            //grossQty = ic.utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+            //grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
             computedGross = lotQty * weightPerQty; 
         }
 
@@ -758,7 +758,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var activeTab = tabInventoryTransfer ? tabInventoryTransfer.getActiveTab() : null;        
 
         var doPost = function (){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryTransfer/PostTransaction',
                 params:{
                     strTransactionId: current.get('strTransferNo'),
@@ -873,7 +873,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         if (grdInventoryTransfer) { grdInventoryTransfer.getSelectionModel().deselectAll(); }
 
         var doRecap = function () {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryTransfer/PostTransaction',
                 params: {
                     strTransactionId: current.get('strTransferNo'),

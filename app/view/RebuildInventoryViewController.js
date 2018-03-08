@@ -63,7 +63,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     },
 
     verifyValuation: function (date) {
-        return ic.utils.ajax({
+        return Inventory.Utils.ajax({
             timeout: 120000,
             url: './Inventory/api/InventoryValuation/CompareRebuiltValuationSnapshot',
             method: "GET",
@@ -77,7 +77,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
     },
 
     rebuild: function (data) {
-        return ic.utils.ajax({
+        return Inventory.Utils.ajax({
             timeout: 0, //120000,
             url: './Inventory/api/InventoryValuation/RebuildInventory',
             method: "post",
@@ -101,7 +101,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             { field: "dblCredit_ActualGLDetail", column: "Actual Credit" },
             { field: "CreditDiff", column: "Credit Diff" }
         ];
-        ic.utils.writeCSV(columns, data, alias, "disrepancies.csv");
+        Inventory.Utils.writeCSV(columns, data, alias, "disrepancies.csv");
     },
 
     repost: function (vm, data) {
@@ -123,7 +123,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                     if (res.status === 202)
                         iRely.Functions.showCustomDialog('warning', 'yesno', "Rebuild inventory completed but discrepancies were found. Do you want to download the logs to check discrepancies manually?", function (button) {
                             if (button === 'yes') {
-                                ic.utils.ajax({
+                                Inventory.Utils.ajax({
                                     url: './Inventory/api/InventoryValuation/GetDiscrepancies',
                                     params: {
                                         dtmDate: data.dtmStartDate
@@ -132,7 +132,7 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                                 .map(function (x) {
                                     var json = JSON.parse(x.responseText);
                                     return {
-                                        csv: ic.utils.jsonArrayToCSVMapping(json.data),
+                                        csv: Inventory.Utils.jsonArrayToCSVMapping(json.data),
                                         success: true,
                                         message: 'Success'
                                     };

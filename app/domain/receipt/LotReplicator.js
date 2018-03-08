@@ -62,7 +62,7 @@ Ext.define('Inventory.domain.receipt.LotReplicator', {
             }
 
             // Add the lot containing the excess replication quantity.
-            if (ic.utils.Math.roundWithPrecision(analyzer.getExcessLotQtyToReplicate(), 6) !== 0) {
+            if (Inventory.Utils.Math.roundWithPrecision(analyzer.getExcessLotQtyToReplicate(), 6) !== 0) {
                 var replicatedLot = me.createReceiptItemLot(analyzer.getLot(), analyzer.getExcessLotQtyToReplicate(), analyzer.getExcessLotGrossQtyToReplicate(), analyzer.getLotTareWgtQtyToReplicate());
                 lots.push(replicatedLot);
                 totalReplicatedQty += analyzer.getExcessLotQtyToReplicate();

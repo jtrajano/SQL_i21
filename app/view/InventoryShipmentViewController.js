@@ -1020,7 +1020,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         action = (typeof action === "function") ? action : function(){};
 
         if(customerId) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/InventoryShipment/GetCustomerCurrency',
                 method: 'GET',
@@ -1279,7 +1279,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         successFn = successFn && (successFn instanceof Function) ? successFn : function(){ /*empty function*/ };
         failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function(){ /*empty function*/ };
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './accountsreceivable/api/common/getitemprice',
             params: {
                 intItemId: cfg.ItemId,
@@ -1753,7 +1753,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 return;
             }
 
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
                 params: {
@@ -2346,7 +2346,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     getDefaultTaxGroupId: function (current, cfg) {
         cfg = cfg ? cfg : {};
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventoryreceipt/getdefaultreceipttaxgroupid',
             params: {
                 freightTermId: cfg.freightTermId,
@@ -3387,7 +3387,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var context = win.context;
 
         if (current) {
-            ic.utils.ajax(
+            Inventory.Utils.ajax(
                 {
                     timeout: 120000,
                     url: './Inventory/api/InventoryShipment/CalculateCharges',
@@ -3600,7 +3600,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var doPost = function (){
             var current = currentRecord; 
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryShipment/Ship',
                 params:{
                     strTransactionId: current.get('strShipmentNumber'),
@@ -3765,7 +3765,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     //     var win = combo.up('window');
 	// 	var txtShipFromAddress = win.down('#txtShipFromAddress');
 
-    //       ic.utils.ajax({
+    //       Inventory.Utils.ajax({
     //             url: './i21/api/companylocation/search'
     //         })
     //         .flatMap(function(res) {
@@ -3842,7 +3842,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var context = win.context;
 
         var doRecap = function (currentRecord){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryShipment/Ship',
                 params:{
                     strTransactionId: currentRecord.get('strShipmentNumber'),
@@ -4016,7 +4016,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             //     break;
         }
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: searchURL,
             method: 'get'
         }).subscribe(
@@ -4065,7 +4065,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         
         if(bundleType == 'Kit') {
 
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: searchURL,
                 method: 'get'
             }).subscribe(
@@ -4344,7 +4344,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
         };   
         
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/itemaddon/getitemaddons?intItemId=' + itemAddOnId + '&intItemUOMId=' + itemUOMId 
                 + '&intLocationId=' + locationId + '&dblQuantity=1',
             method: 'get'
@@ -4496,7 +4496,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
         };   
         
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemSubstituteId + '&intItemUOMId=' + itemUOMId 
                 + '&intLocationId=' + locationId + '&dblQuantity=1',
             method: 'get'
