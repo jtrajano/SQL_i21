@@ -239,6 +239,50 @@ BEGIN
 				ON po.intPurchaseId = pod.intPurchaseId
 	WHERE	po.intPurchaseId = @poId
 
+	-- Update the On-Order Qty
+	BEGIN 
+		DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType
+
+		-- Create the list. 
+		INSERT INTO @ItemToUpdateOnOrderQty (
+				dtmDate
+				,intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intSubLocationId
+				,dblQty
+				,dblUOMQty
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+		)
+		SELECT	dtmDate					= PO.dtmDate
+				,intItemId				= POD.intItemId
+				,intItemLocationId		= il.intItemLocationId 
+				,intItemUOMId			= POD.intUnitOfMeasureId  
+				,intSubLocationId		= NULL 
+				,dblQty					= -POD.dblQtyOrdered
+				,dblUOMQty				= iu.dblUnitQty
+				,intTransactionId		= PO.intPurchaseId
+				,intTransactionDetailId = POD.intPurchaseDetailId 
+				,strTransactionId		= PO.strPurchaseOrderNumber
+				,intTransactionTypeId	= -1 -- Any value
+		FROM	tblPOPurchase PO INNER JOIN tblPOPurchaseDetail POD
+					ON PO.intPurchaseId = POD.intPurchaseId
+				LEFT JOIN tblICItemLocation il
+					ON il.intItemId = POD.intItemId
+					AND il.intLocationId = PO.intShipToId
+				LEFT JOIN tblICItemUOM iu
+					ON iu.intItemId = POD.intItemId 
+					AND iu.intItemUOMId = POD.intUnitOfMeasureId 
+		WHERE	PO.intPurchaseId = @poId
+
+		-- Call the stored procedure that updates the on order qty. 
+		EXEC dbo.uspICIncreaseOnOrderQty 
+			@ItemToUpdateOnOrderQty
+	END 
+	
 	-- Update the PO Status 
 	EXEC dbo.uspPOUpdateStatus @poId
 END
