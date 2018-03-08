@@ -14,7 +14,11 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 
-		SELECT * FROM tblARCustomerStatementStagingTable
+		SELECT *
+			, dblBareInvoiceTotal = cast(0 as numeric(18, 6))
+			, rownum = 0
+			, dblBareInvoiceTotalPayment = cast(0 as numeric(18, 6))
+		FROM tblARCustomerStatementStagingTable
 	END
 
 -- Declare the variables.
@@ -105,12 +109,24 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
-SELECT strCustomerName		= CUSTOMER.strName
+
+IF OBJECT_ID('tempdb..#TmpPayments') IS NOT NULL DROP TABLE #TmpPayments
+
+
+SELECT 
+	rownm = ROW_NUMBER() OVER(PARTITION BY strInvoiceNumber ORDER BY strRecordNumber ASC)
+	 , strCustomerName		= CUSTOMER.strName
 	 , strCompanyName		= COMPANY.strCompanyName
      , strCompanyAddress	= COMPANY.strCompanyAddress
 	 , strContact			= CUSTOMER.strFullAddress
-	 , strPaid				= CASE WHEN PAYMENTS.dblInvoiceTotal - TOTALPAYMENTS.dblTotalPayments = 0 THEN 'Yes' ELSE 'No' END
+	 , strPaid				= CASE WHEN PAYMENTS.dblAmountDue = 0 THEN 'Yes' ELSE 'No' END
+	 --CASE WHEN PAYMENTS.dblInvoiceTotal - (dbo.fnARGetInvoiceAmountMultiplier(PAYMENTS.strTransactionType) * TOTALPAYMENTS.dblTotalPayments) = 0 THEN 'Yes' ELSE 'No' END
 	 , PAYMENTS.*
+	 , dblBareInvoiceTotal = cast(0 as numeric(18, 6))
+	 , rownum = 0
+	 , dblBareInvoiceTotalPayment = dbo.fnARGetInvoiceAmountMultiplier(PAYMENTS.strTransactionType) * TOTALPAYMENTS.dblTotalPayments
+INTO #TmpPayments
+
 FROM ( 
 	SELECT I.strInvoiceNumber
 		 , I.intEntityCustomerId
@@ -120,11 +136,12 @@ FROM (
 		 , dblAmountPaid		= ISNULL(PAYMENTS.dblAmountPaid, 0)
 		 , dblAmountApplied		= ISNULL(PAYMENTS.dblAmountApplied, 0)
 		 , dblInvoiceTotal		= I.dblInvoiceTotal
-		 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END	 
+		 , dblAmountDue			= (dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal) - ISNULL(PAYMENTS.dblAmountApplied, 0)  -- CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END	 
 		 , intPaymentId			= PAYMENTS.intPaymentId	 
 		 , strReferenceNumber	= PAYMENTS.strPaymentInfo
 		 , strPaymentMethod		= PAYMENTS.strPaymentMethod
 		 , dblUnappliedAmount	= ISNULL(PAYMENTS.dblUnappliedAmount, 0)
+		 , strTransactionType	= I.strTransactionType
 	FROM dbo.tblARInvoice I	WITH (NOLOCK)
 	INNER JOIN (
 		SELECT strRecordNumber	= P.strRecordNumber
@@ -137,6 +154,7 @@ FROM (
 			 , P.strPaymentMethod
 			 , P.dblUnappliedAmount
 			 , PD.intInvoiceId
+			 , PD.dblAmountDue
 		FROM dbo.tblARPayment P WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intPaymentId
@@ -144,6 +162,7 @@ FROM (
 				 , dblPayment
 				 , dblDiscount
 				 , dblInterest
+				 , dblAmountDue
 			FROM dbo.tblARPaymentDetail 
 		) PD ON P.intPaymentId = PD.intPaymentId
 			AND P.strPaymentMethod <> 'CF Invoice'
@@ -164,6 +183,7 @@ FROM (
 			 , strPaymentMethod		= NULL
 			 , dblUnappliedAmount	= APP.dblUnapplied
 			 , APPD.intInvoiceId
+			 , APPD.dblAmountDue
 		FROM dbo.tblAPPayment APP WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intPaymentId
@@ -171,6 +191,7 @@ FROM (
 				 , dblPayment
 				 , dblDiscount
 				 , dblInterest
+				 , dblAmountDue
 			FROM tblAPPaymentDetail WITH (NOLOCK)
 		) APPD ON APP.intPaymentId = APPD.intPaymentId 
 		WHERE APP.ysnPosted = 1
@@ -196,6 +217,7 @@ FROM (
 		 , strReferenceNumber	= PREPAYMENT.strPaymentInfo
 		 , strPaymentMethod		= PREPAYMENT.strPaymentMethod
 		 , dblUnappliedAmount	= ISNULL(PREPAYMENT.dblUnappliedAmount, 0)
+		 , strTransactionType	= I.strTransactionType
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -250,3 +272,32 @@ OUTER APPLY (
 	WHERE intInvoiceId = PAYMENTS.intInvoiceId	  
 	GROUP BY intInvoiceId
 ) TOTALPAYMENTS
+
+UPDATE #TmpPayments SET dblBareInvoiceTotal = dblInvoiceTotal, dblBareInvoiceTotalPayment = 0 WHERE rownm = 1
+
+DECLARE @Tmp TABLE
+(
+	rownm INT,
+	intInvoiceId INT,
+	dblAmount NUMERIC(18,6)
+)
+
+INSERT INTO @Tmp
+SELECT rownm, intInvoiceId, dblAmountApplied FROM #TmpPayments --WHERE rownm > 1
+
+UPDATE A 
+	SET dblAmountDue = dblAmountDue - D.dblAmount
+	,strPaid = CASE WHEN dblAmountDue - D.dblAmount = 0 THEN 'Yes' ELSE 'No' END	
+	FROM #TmpPayments A
+		OUTER APPLY(
+			select 
+				intInvoiceId, 
+				dblAmount = SUM(dblAmount) 
+				from @Tmp C 
+					where C.rownm < A.rownm and C.intInvoiceId = A.intInvoiceId
+			GROUP BY intInvoiceId
+		) D 
+	WHERE A.rownm > 1
+
+SELECT * FROM #TmpPayments
+
