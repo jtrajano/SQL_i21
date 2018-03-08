@@ -660,7 +660,9 @@ BEGIN
 												NULL 
 									END 
 								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
-									'Work in Progress'																		
+									'Work in Progress'	
+								WHEN @strTransactionForm = 'Settle Storage' THEN 
+									'AP Clearing'
 								ELSE 
 									NULL 
 						END
