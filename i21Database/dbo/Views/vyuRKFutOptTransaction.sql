@@ -1,4 +1,4 @@
-﻿CREATE View vyuRKFutOptTransaction
+﻿CREATE VIEW vyuRKFutOptTransaction
 
 AS  
 
@@ -28,7 +28,7 @@ SELECT 	ft.[intFutOptTransactionId] AS [intFutOptTransactionId],
 			ft.[strStatus] AS [strStatus], 
 			sb.[strBook] AS [strBook], 
 			ssb.[strSubBook] AS [strSubBook], 
-			ft.[dtmFilledDate] AS [dtmFilledDate],
+			CONVERT(DATETIME,CONVERT(VARCHAR(10),ft.[dtmFilledDate],110),110) AS [dtmFilledDate],
 			ft.intCommodityId
 			,strBankName
 			,strBankAccountNo
