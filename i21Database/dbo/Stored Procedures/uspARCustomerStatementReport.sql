@@ -432,6 +432,28 @@ IF @ysnIncludeBudgetLocal = 1
 
 		INSERT INTO @temp_statement_table
 		EXEC sp_executesql @queryBudget
+
+		IF EXISTS(SELECT TOP 1 NULL FROM @temp_statement_table WHERE strTransactionType = 'Customer Budget')
+			BEGIN
+				UPDATE STATEMENTS
+				SET strCompanyAddress			= COMPLETESTATEMENTS.strCompanyAddress
+				  , strCompanyName				= COMPLETESTATEMENTS.strCompanyName
+				  , strStatementFooterComment	= COMPLETESTATEMENTS.strStatementFooterComment
+				  , strLocationName				= COMPLETESTATEMENTS.strLocationName
+				  , strFullAddress				= COMPLETESTATEMENTS.strFullAddress
+				FROM @temp_statement_table STATEMENTS
+				OUTER APPLY (
+					SELECT TOP 1 strCompanyAddress
+							   , strCompanyName
+							   , strStatementFooterComment
+							   , strLocationName
+							   , strFullAddress
+					FROM @temp_statement_table
+					WHERE intEntityCustomerId = STATEMENTS.intEntityCustomerId
+					  AND strCompanyAddress IS NOT NULL AND strCompanyName IS NOT NULL
+				) COMPLETESTATEMENTS
+				WHERE strTransactionType = 'Customer Budget'
+			END
 	END
 
 IF @ysnPrintOnlyPastDueLocal = 1
