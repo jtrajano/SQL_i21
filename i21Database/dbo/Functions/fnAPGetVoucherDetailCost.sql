@@ -2,10 +2,10 @@
 (
 	@voucherDetailId INT
 )
-RETURNS DECIMAL(18,6)
+RETURNS DECIMAL(38,20)
 AS
 BEGIN
-	DECLARE @cost DECIMAL(18,6);
+	DECLARE @cost DECIMAL(38,20);
 
 	SELECT
 		@cost = CASE WHEN B.intTransactionType = 2 OR B.intTransactionType = 13
