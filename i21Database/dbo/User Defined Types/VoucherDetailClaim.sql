@@ -5,7 +5,7 @@
 	dblFranchiseWeight			DECIMAL(18,6),
 	dblQtyReceived				DECIMAL(18,6),
 	dblCost						DECIMAL(18,6),
-	dblCostUnitQty				DECIMAL(18,6),
+	dblCostUnitQty				DECIMAL(38,20),
 	dblWeightUnitQty			DECIMAL(18,6),
 	dblUnitQty					DECIMAL(18,6),
 	intWeightUOMId				INT NULL,
