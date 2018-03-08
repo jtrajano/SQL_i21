@@ -1129,7 +1129,6 @@ BEGIN
 			,intWillCallRouteId
 			,intWillCallDispatchId
 			,ysnWillCallLeakCheckRequired
-			,intInvoiceId
 			,dblWillCallPercentLeft
 			,dblWillCallOriginalPercentLeft
 		)
@@ -1185,7 +1184,6 @@ BEGIN
 			,intWillCallRouteId = G.intRouteId
 			,intWillCallDispatchId = G.intDispatchID
 			,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
-			,intInvoiceId = B.intInvoiceId
 			,dblWillCallPercentLeft = G.dblPercentLeft
 			,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
 		FROM tblTMSite A
