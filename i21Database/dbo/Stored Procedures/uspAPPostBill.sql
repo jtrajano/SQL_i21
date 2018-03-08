@@ -886,7 +886,19 @@ BEGIN
 					AND Receipt.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	ISNULL(Charge.ysnPrice, 0) = 1
 				AND BillDetail.dblTotal < 0 
-				
+
+		--UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
+		UPDATE	Charge
+		SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
+				,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryShipmentCharge Charge 
+					ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
+					AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	BillDetail.dblTotal > 0 
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -992,7 +1004,19 @@ BEGIN
 					AND Receipt.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	ISNULL(Charge.ysnPrice, 0) = 1
 				AND BillDetail.dblTotal < 0 
-				
+
+		--UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
+		UPDATE	Charge
+		SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
+				,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryShipmentCharge Charge 
+					ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
+					AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	BillDetail.dblTotal > 0 				
 		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
