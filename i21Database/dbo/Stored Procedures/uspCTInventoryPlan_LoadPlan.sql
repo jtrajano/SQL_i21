@@ -39,11 +39,13 @@ BEGIN
 
 	SELECT RM.*
 		,C.strCategoryCode
+		,UOM.strUnitMeasure
 		,CL.strLocationName
 		,@intItemIdList AS 'intItemIdList'
 		,@strItemNoList AS 'strItemNoList'
 	FROM dbo.tblCTInvPlngReportMaster RM
 	JOIN tblICCategory C ON C.intCategoryId = RM.intCategoryId
+	LEFT JOIN tblICUnitMeasure AS UOM ON UOM.intUnitMeasureId = RM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = RM.intCompanyLocationId
 	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
 
@@ -86,9 +88,9 @@ BEGIN
 	SET @SQL = @SQL + ' ) '
 	SET @SQL = @SQL + ' INSERT INTO @Table 
 						SELECT Ext.intItemId
-						, M.strItemNo + '' ('' + UOM1.strUnitMeasure + '' per '' + UOM.strUnitMeasure + '' --> '' + CAST(CONVERT(DECIMAL(24,6),ISNULL(MUOM1.dblUnitQty,UOMCON.dblConversionToStock)) as nvarchar(30)) + '')'' [strItemNo]
+						, M.strItemNo + '' ('' + ISNULL(SUOM.strUnitMeasure, UOM1.strUnitMeasure) + '' per '' + UOM.strUnitMeasure + '' --> '' + CAST(CONVERT(DECIMAL(24,6),ISNULL(MUOM1.dblUnitQty,UOMCON.dblConversionToStock)) as nvarchar(30)) + '')'' [strItemNo]
 						, UOM.strUnitMeasure [StdUOM]
-						, UOM1.strUnitMeasure [BaseUOM]
+						, ISNULL(SUOM.strUnitMeasure, UOM1.strUnitMeasure) [BaseUOM]
 						, Ext.intReportAttributeID [AttributeId]
 						, RA.strAttributeName 
 						, Ext.OpeningInv
@@ -120,7 +122,9 @@ BEGIN
 
 	SET @SQL = @SQL + ')
 						) p
-					) Ext 					
+					) Ext
+					JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = Ext.intInvPlngReportMasterID
+						AND Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + '
 					JOIN tblICItem M ON M.intItemId = Ext.intItemId
 					JOIN tblICItemUOM MUOM ON MUOM.intItemId = M.intItemId
 						  AND MUOM.ysnStockUnit = 1
@@ -129,15 +133,16 @@ BEGIN
 					JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM.intPurchaseUOMId
 					JOIN dbo.tblCTReportAttribute RA ON RA.intReportAttributeID = Ext.intReportAttributeID
 
+					LEFT JOIN tblICUnitMeasure SUOM ON SUOM.intUnitMeasureId = RM.intUnitMeasureId
 					LEFT JOIN tblICItemUOM MUOM1 ON MUOM1.intItemId = M.intItemId
-						  AND MUOM1.intUnitMeasureId = UOM1.intUnitMeasureId
-				     LEFT JOIN tblICUnitMeasureConversion UOMCON ON UOMCON.intUnitMeasureId = UOM1.intUnitMeasureId
+						  AND MUOM1.intUnitMeasureId = ISNULL(SUOM.intUnitMeasureId, UOM1.intUnitMeasureId)
+				    LEFT JOIN tblICUnitMeasureConversion UOMCON ON UOMCON.intUnitMeasureId = ISNULL(SUOM.intUnitMeasureId, UOM1.intUnitMeasureId)
 						  AND UOMCON.intStockUnitMeasureId = MUOM.intUnitMeasureId
-					WHERE Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + ' order by intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
-	--SET @SQL = CHAR(13) + @SQL + '	SELECT * FROM @Table'
+					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
 	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
 
-	SET @SQL = @SQL + ' SELECT AttributeId, strAttributeName
+	-- Plan Totals
+	/*SET @SQL = @SQL + ' SELECT AttributeId, strAttributeName
 	,SUM( CASE WHEN ISNUMERIC(OpeningInv)=1 THEN CAST(OpeningInv AS float)  
                      ELSE 0 END ) [OpeningInv]
 	,SUM( CASE WHEN ISNUMERIC(PastDue)=1 THEN CAST(PastDue AS float)  
@@ -153,7 +158,7 @@ BEGIN
 
 	SET @SQL = @SQL + ' FROM @Table WHERE AttributeId <> 1 
 						Group By AttributeId, strAttributeName 
-						Order By AttributeId'
+						Order By AttributeId'*/
 
 	--SELECT @SQL		
 	EXEC (@SQL)

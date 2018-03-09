@@ -18,7 +18,7 @@
 	[ysnDemandViewForBlend] BIT NOT NULL CONSTRAINT [DF_tblCTCompanyPreference_ysnDemandViewForBlend] DEFAULT 0,
 	[intEarlyDaysPurchase] INT NULL,
 	[intEarlyDaysSales] INT NULL,
-	[strDemandItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[strDemandItemType] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	[ysnBagMarkMandatory] BIT NULL,
 	[strESA] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnAutoCreateDP BIT,
