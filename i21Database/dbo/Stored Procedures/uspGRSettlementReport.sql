@@ -312,8 +312,8 @@ BEGIN
 		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 		,dblDockage							= ROUND(SC.dblShrink,3)		 
 		,dblCost							= BillDtl.dblCost
-		,Net								= BillDtl.dblQtyOrdered
-		,strUnitMeasure						= UOM.strSymbol
+		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
+		,strUnitMeasure						= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 		,dblTotal							= BillDtl.dblTotal
 		,dblTax								= BillDtl.dblTax
 		,dblNetTotal						= BillDtl.dblTotal+ BillDtl.dblTax
@@ -391,6 +391,8 @@ BEGIN
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1	
+	LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblSCTicket SC ON SC.intTicketId = INVRCPTITEM.intSourceId
@@ -498,8 +500,8 @@ BEGIN
 		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
-		,Net								= BillDtl.dblQtyOrdered 
-		,strUnitMeasure						= UOM.strSymbol
+		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
+		,strUnitMeasure						= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 		,dblTotal							= BillDtl.dblTotal
 		,dblTax								= BillDtl.dblTax
 		,dblNetTotal						= BillDtl.dblTotal + BillDtl.dblTax
@@ -628,6 +630,8 @@ BEGIN
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1
+	LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)
@@ -678,8 +682,8 @@ BEGIN
 		,dblNetWeight						= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 		,dblDockage							= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 		,dblCost							= BillDtl.dblCost
-		,Net								= BillDtl.dblQtyOrdered 
-		,strUnitMeasure						= UOM.strSymbol
+		,Net								= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
+		,strUnitMeasure						= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 		,dblTotal							= BillDtl.dblTotal
 		,dblTax								= BillDtl.dblTax
 		,dblNetTotal						= BillDtl.dblTotal + BillDtl.dblTax
@@ -816,6 +820,8 @@ BEGIN
 	LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 	LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 	LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1	
+	LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+	LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
 	--LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId	
@@ -951,8 +957,8 @@ BEGIN
 				,dblNetWeight				= ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 				,dblDockage					= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
 				,dblCost					= BillDtl.dblCost
-				,Net						= BillDtl.dblQtyOrdered
-				,strUnitMeasure				= UOM.strSymbol
+				,Net						= CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
+				,strUnitMeasure				= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal					= BillDtl.dblTotal
 				,dblTax						= BillDtl.dblTax
 				,dblNetTotal				= BillDtl.dblTotal+ BillDtl.dblTax
@@ -1028,6 +1034,8 @@ BEGIN
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
+			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 			LEFT JOIN tblSCTicket SC ON SC.intTicketId = INVRCPTITEM.intSourceId
@@ -1134,8 +1142,8 @@ BEGIN
 				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
-				,Net					     = BillDtl.dblQtyOrdered 
-				,strUnitMeasure				 = UOM.strSymbol
+				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
+				,strUnitMeasure				 = ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal					 = BillDtl.dblTotal
 				,dblTax						 = BillDtl.dblTax
 				,dblNetTotal				 = BillDtl.dblTotal+ BillDtl.dblTax
@@ -1260,6 +1268,8 @@ BEGIN
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
+			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 			LEFT JOIN tblEMEntityFarm EntityFarm ON EntityFarm.intEntityId=VENDOR.intEntityId AND EntityFarm.intFarmFieldId=ISNULL(SC.intFarmFieldId, 0)	
@@ -1310,8 +1320,8 @@ BEGIN
 				,dblNetWeight				 = ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
 				,dblDockage					 = [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost					 = BillDtl.dblCost
-				,Net						 = BillDtl.dblQtyOrdered 
-				,strUnitMeasure				 = UOM.strSymbol
+				,Net						 = CASE WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) >0 AND ISNULL(BillDtl.intCostUOMId,0) >0   THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) ELSE BillDtl.dblQtyOrdered END
+				,strUnitMeasure				 = ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal					 = BillDtl.dblTotal
 				,dblTax						 = BillDtl.dblTax
 				,dblNetTotal				 = BillDtl.dblTotal+ BillDtl.dblTax
@@ -1446,6 +1456,8 @@ BEGIN
 			LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
 			LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
 			LEFT JOIN tblEMEntityEFTInformation EFT ON ENTITY.intEntityId = EFT.intEntityId AND EFT.ysnActive = 1			
+			LEFT JOIN tblICItemUOM CostItemUOM ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure CostUOM ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM ItemUOM ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId		
 			--LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
