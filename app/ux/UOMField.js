@@ -17,33 +17,71 @@ Ext.define('Inventory.ux.UOMField', {
         editable: true
     },
 
+    DEFAULT_DECIMALS: 6,
     config: {
-        DEFAULT_DECIMALS: 6,
         readOnly: false,
+        readOnlyMode: 'both',
+        readOnlyQty: false,
+        readOnlyUom: false,
         activeRecord: undefined,
         selectOnFocus: true,
         mutateSource: true,
         mutateByProperties: false
     },
 
+    getReadOnly: function() {
+        return this.readOnly;
+    },
+
+    setReadOnly: function(value) {
+        this.readOnly = value;
+
+        if(this.readOnlyMode === 'uom') {
+            this.toggleReadOnlyUom(value);    
+        } else if(this.readOnlyMode === 'qty') {
+            this.toggleReadOnlyQty(value);
+        } else if(this.readOnlyMode === 'independent') { 
+            this.toggleReadOnlyQty(this.readOnlyQty);
+            this.toggleReadOnlyUom(this.readOnlyUom);    
+        } else {
+            this.toggleReadOnlyQty(value);
+            this.toggleReadOnlyUom(value);
+        }
+
+        if(this.txtQuantity) {
+            if(this.getReadOnlyUom()) {
+                this.txtQuantity.setDecimalPrecision(this.DEFAULT_DECIMALS);
+                this.txtQuantity.setDecimalToDisplay(this.DEFAULT_DECIMALS);
+                this.setupDecimalPrecision(this.txtQuantity.getValue(), this.DEFAULT_DECIMALS);
+            } else {
+                var decimals = this.getUomDecimals(this.getValue()["intUnitMeasureId"]);
+                var qty = this.setupDecimalPrecision(this.getValue()["dblQuantity"] 
+                    ? this.getValue()["dblQuantity"] : (this.activeRecord ? this.activeRecord.get(this.getUpdateField()) : null), decimals) ;
+                this.txtQuantity.setDecimalPrecision(decimals);
+                this.txtQuantity.setDecimalToDisplay(decimals);
+                this.txtQuantity.setRawValue(qty);
+                this.txtQuantity.setValue(qty);
+            }
+        }
+    },
+    
+    toggleReadOnlyQty: function(value) {
+        if(this.txtQuantity)
+            this.txtQuantity.setReadOnly(value);
+        this.readOnlyQty = value;
+    },
+
+    toggleReadOnlyUom: function(value) {
+        if(this.cboUom)
+            this.cboUom.setReadOnly(value);
+        this.readOnlyUom = value;
+    },
+
     panel: undefined,
     txtQuantity: undefined,
-    cboUOM: undefined,
+    cboUom: undefined,
 
     store: undefined,
-
-    // //region Properties
-    // getReadOnly: function() { return this.readOnly; },
-    // setReadOnly: function(value) { this.readOnly = value; },
-    // setActiveRecord: function(value) { this.activeRecord = value; },
-    // getActiveRecord: function() { return this.activeRecord; },
-    // setSelectOnFocus: function(value) { this.selectOnFocus = value; },
-    // getSelectOnFocus: function() { return this.selectOnFocus; },
-    // getMutateByProperties: function() { return this.mutateByProperties; },
-    // setMutateByProperties: function(value) { this.mutateByProperties = value; },
-    // getMutateSource: function() { return this.mutateSource; },
-    // setMutateSource: function(value) { this.mutateSource = value; },
-    // //endregion
 
     constructor: function (config) {
         this.callParent([config]);
@@ -56,7 +94,7 @@ Ext.define('Inventory.ux.UOMField', {
 
         me.panel = me.items;
         me.txtQuantity = me.items.items.items[0];
-        me.cboUOM = me.items.items.items[1];
+        me.cboUom = me.items.items.items[1];
 
         me.setupBindings();
         me.setupComboboxFilters();
@@ -88,7 +126,7 @@ Ext.define('Inventory.ux.UOMField', {
             store = this.createStore(cfg.type);
         me.store = store;
         me.setupQueryParams();
-        me.cboUOM.bindStore(me.store);
+        me.cboUom.bindStore(me.store);
     },
 
     loadStore: function() {
@@ -96,13 +134,12 @@ Ext.define('Inventory.ux.UOMField', {
         me.store.load();
         
         var ls = ic.getCachedUoms();
-        console.log(ls);
     },
 
     setupBindings: function() {
         var me = this;
-        me.cboUOM.displayField = me.getDisplayField();
-        me.cboUOM.valueField = me.getValueField();
+        me.cboUom.displayField = me.getDisplayField();
+        me.cboUom.valueField = me.getValueField();
     },
 
     setupComboboxFilters: function() {
@@ -111,17 +148,17 @@ Ext.define('Inventory.ux.UOMField', {
 
         if(cfg) {
             if(cfg.defaultFilters) {
-                me.cboUOM.defaultFilters = me.createDynamicFilters(cfg.defaultFilters, me.activeRecord);    
+                me.cboUom.defaultFilters = me.createDynamicFilters(cfg.defaultFilters, me.activeRecord);    
             }
             var cboConfig = cfg.comboBoxConfig;
             if(cboConfig) {
                 var columns = cboConfig.columns;
                 if(columns)
-                    me.cboUOM.columns = columns;
+                    me.cboUom.columns = columns;
                 if(cboConfig.displayField)
-                    me.cboUOM.displayField = cboConfig.displayField;
+                    me.cboUom.displayField = cboConfig.displayField;
                 if(cboConfig.valueField)
-                    me.cboUOM.valueField = cboConfig.valueField;
+                    me.cboUom.valueField = cboConfig.valueField;
             }
         }
     },
@@ -153,7 +190,7 @@ Ext.define('Inventory.ux.UOMField', {
 
         var dynamicFilters = cfg && cfg.defaultFilters ? me.createDynamicFilters(cfg.defaultFilters, me.activeRecord) : [],
             filterParam = cfg && cfg.defaultFilters ? iRely.Functions.encodeFilters(dynamicFilters) : "[]",
-            columnsParam = me.encodeColumnsParam(cfg && cboCfg && cboCfg.columns ? cboCfg.columns : me.cboUOM.columns);
+            columnsParam = me.encodeColumnsParam(cfg && cboCfg && cboCfg.columns ? cboCfg.columns : me.cboUom.columns);
 
         if(cboCfg) {
             me.store.proxy.extraParams = {
@@ -255,17 +292,16 @@ Ext.define('Inventory.ux.UOMField', {
         var index = me.store.findExact(me.getLookupValueField(), id);
         var record = me.store.getAt(index);
         if(record) {
-            me.cboUOM.setRawValue(record.get(me.getLookupDisplayField()));
-            me.cboUOM.setValue(record.get(me.getLookupDisplayField()));
-            me.cboUOM.setSelection(record);
+            me.cboUom.setRawValue(record.get(me.getLookupDisplayField()));
+            me.cboUom.setValue(record.get(me.getLookupDisplayField()));
+            me.cboUom.setSelection(record);
             return record;
         } else {
             if(id !== 0 && id !== -1 && id != null) {
-                me.cboUOM.setRawValue(id);
-                me.cboUOM.setValue(uom);
+                me.cboUom.setRawValue(id);
+                me.cboUom.setValue(uom);
             }
         }
-        me.cboUOM.setReadOnly(me.readOnly);    
         return false;
     },
      
@@ -277,8 +313,8 @@ Ext.define('Inventory.ux.UOMField', {
 
         if(me.activeRecord && !me.activeRecord.dirty) {
             qty = me.activeRecord.get(me.getQuantityValueField());
-            uom = me.activeRecord.get(me.getDisplayField());
             uomid = me.activeRecord.get(me.getUpdateField());    
+            uom = uomid ? me.activeRecord.get(me.getDisplayField()) : null;
         }
 
         var fieldQty = "dblQuantity",
@@ -287,29 +323,36 @@ Ext.define('Inventory.ux.UOMField', {
 
         if(value) {
             qty = value[fieldQty];
-            uom = value[fieldDisplay];
             uomid = value[fieldId];
+            uom = uomid ? value[fieldDisplay] : null;
         } else {
             if(me.activeRecord) {
                 qty = me.activeRecord.get(me.getQuantityValueField());
-                uom = me.activeRecord.get(me.getDisplayField());
                 uomid = me.activeRecord.get(me.getUpdateField());
+                uom = uomid ? me.activeRecord.get(me.getDisplayField()) : null;
             }
         }
 
         
         var selectedUOM = me.setComboboxSelection(uomid, uom);
         if(selectedUOM) {
-            uom = selectedUOM.get(me.getLookupDisplayField());
             uomid = selectedUOM.get(me.getLookupValueField());
+            uom = uomid ? selectedUOM.get(me.getLookupDisplayField()) : null;
         }
 
         var decimals = me.getUomDecimals(uomid);
+        var origQty = qty;
         qty = me.setupDecimalPrecision(qty, decimals, removeTrailingZeroes);
+
+        if(me.getReadOnlyUom()) {
+            qty = origQty;
+            me.txtQuantity.setDecimalPrecision(me.DEFAULT_DECIMALS);
+            me.txtQuantity.setDecimalToDisplay(me.DEFAULT_DECIMALS);
+            me.setupDecimalPrecision(qty, me.DEFAULT_DECIMALS, removeTrailingZeroes);   
+        }
 
         me.txtQuantity.setRawValue(qty);
         me.txtQuantity.setValue(qty);
-        me.txtQuantity.setReadOnly(me.readOnly);
 
         var newValue = me.getParsedValue(qty, uomid, uom);
         value = newValue;
@@ -321,7 +364,7 @@ Ext.define('Inventory.ux.UOMField', {
                 if(value) {
                     me.activeRecord.set(me.getQuantityValueField(), me.value[fieldQty]);
                     me.activeRecord.set(me.getUpdateField(), me.value[fieldId]);
-                    me.activeRecord.set(me.getDisplayField(), me.value[fieldDisplay]);
+                    me.activeRecord.set(me.getDisplayField(), me.value[fieldId] ? me.value[fieldDisplay] : null);
                 } else {
                     me.activeRecord.set(me.getQuantityValueField(), null);
                     me.activeRecord.set(me.getUpdateField(), null);
@@ -349,17 +392,20 @@ Ext.define('Inventory.ux.UOMField', {
         me.txtQuantity.setDecimalPrecision(!iRely.Functions.isEmpty(me.DEFAULT_DECIMALS) ? me.DEFAULT_DECIMALS : 6);
         me.txtQuantity.setDecimalToDisplay(!iRely.Functions.isEmpty(me.DEFAULT_DECIMALS) ? me.DEFAULT_DECIMALS : 6);
         me.txtQuantity.setValue(null);
-        me.cboUom.setValue(null);
         me.cboUom.setRawValue(null);
+        me.cboUom.setValue(null);
         me.cboUom.selection = null;
     },
 
     onTextFocus: function() {
         var me = this;
-        me.txtQuantity.on('focus', function() {
-            if(me.getSelectOnFocus())
-                me.txtQuantity.inputEl.dom.select();
-        });        
+        me.mon(me.txtQuantity, {
+            scope: me,
+            focus: function() {
+                if(me.getSelectOnFocus())
+                    me.txtQuantity.inputEl.dom.select();
+            }
+        });       
     },
 
     getParsedValue: function(quantity, uomid, uom) {
@@ -370,18 +416,21 @@ Ext.define('Inventory.ux.UOMField', {
 
     onTextBlur: function() {
         var me = this;
-        me.txtQuantity.on('blur', function(field, event) {
-            if(me.getValue()) {
-                var uomid = me.getValue()['intUnitMeasureId'];
-                var uom = me.getValue()['strUnitMeasure'];
+        me.mon(me.txtQuantity, {
+            scope: me,
+            blur: function(field, event) {
+                if(me.getValue()) {
+                    var uomid = me.getValue()['intUnitMeasureId'];
+                    var uom = me.getValue()['strUnitMeasure'];
+                }
+                me.setValue(me.getParsedValue(field.lastValue, uomid, uom), true);
             }
-            me.setValue(me.getParsedValue(field.lastValue, uomid, uom), true);
         });
     },
 
     onUOMSelect: function() {
         var me = this;
-        me.cboUOM.on('select', function(combo, records, options) {
+        me.cboUom.on('select', function(combo, records, options) {
             if(records.length > 0) {
                 var qty = null;
                 if(me.getValue()) {
@@ -395,7 +444,7 @@ Ext.define('Inventory.ux.UOMField', {
 
     onUOMExpand: function() {
         var me = this;
-        me.cboUOM.on('beforequery', function(combo, records, options) {
+        me.cboUom.on('beforequery', function(combo, records, options) {
             me.setupComboboxFilters();
         });
     },
@@ -444,6 +493,7 @@ Ext.define('Inventory.ux.UOMField', {
                     xtype: 'numberfield',
                     flex: 2,
                     selectOnFocus: true,
+                    readOnly: this.readOnly,
                     margin: '0 0 0 0',
                     decimalPrecision: 6,
                     decimalToDisplay: 6,
@@ -458,6 +508,7 @@ Ext.define('Inventory.ux.UOMField', {
                 },
                 {
                     xtype: 'gridcombobox',
+                    readOnly: this.readOnly,
                     grow: true,
                     flex: 1,
                     margin: '0 0 0 0',

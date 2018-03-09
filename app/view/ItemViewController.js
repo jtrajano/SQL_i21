@@ -729,21 +729,10 @@ Ext.define('Inventory.view.ItemViewController', {
                     conjunction: 'and'
                 }]
             },
-            txtAmount: '{current.dblAmount}',
-            cboCostUOM: {
-                readOnly: '{checkPerUnitCostMethod}',
-                value: '{current.strCostUOM}',
-                origValueField: 'intItemUOMId',
-                origUpdateField: 'intCostUOMId',
-                store: '{costUOM}',
-                defaultFilters: [{
-                    column: 'intItemId',
-                    value: '{current.intItemId}',
-                    conjunction: 'and'
-                }]
-            },
 
-            gumCostUnitQty: {
+            uomCostUnitQty: {
+                readOnly: '{checkPerUnitCostMethod}',
+                readOnlyMode: 'uom',
                 value: '{current.costUnitQty}',
                 activeRecord: '{current}',
                 mutateByProperties: true
@@ -4200,12 +4189,11 @@ Ext.define('Inventory.view.ItemViewController', {
     onCostUnitQtyValueChange: function(newValue, oldValue, activeRecord, control, uomRecord) {
         var me = this;
         me.setData('costUnitQty', newValue);  
-        console.log(me.getCurrent());
     },
 
     init: function(application) {
         this.control({
-            "#gumCostUnitQty": {
+            "#uomCostUnitQty": {
                 valuechange: this.onCostUnitQtyValueChange
             },
             "#cboType": {
