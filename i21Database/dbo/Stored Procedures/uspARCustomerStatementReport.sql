@@ -13,7 +13,6 @@
 	, @strCustomerName				AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
-	, @strPaymentMethod				AS NVARCHAR(100)	= NULL
 	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
 AS
 
@@ -23,11 +22,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF @strPaymentMethod IS NULL
-	SET @strPaymentMethod = ' <> '''' '
-ELSE 
-	SET @strPaymentMethod = ' = ''' + @strPaymentMethod + ''''
-
 DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @dtmDateFromLocal					AS DATETIME			= NULL
 	  , @ysnPrintZeroBalanceLocal			AS BIT				= 0
@@ -35,7 +29,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
-	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
@@ -49,6 +43,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @filter								AS NVARCHAR(MAX)	= ''
 	  , @queryRunningBalance				AS NVARCHAR(MAX)	= ''
 	  , @queryRunningBalanceBudget			AS NVARCHAR(MAX)	= ''
+	  , @intWriteOffPaymentMethodId			AS INT				= NULL
 
 DECLARE @temp_statement_table TABLE(
 	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -108,7 +103,7 @@ SET @ysnPrintCreditBalanceLocal			= ISNULL(@ysnPrintCreditBalance, 1)
 SET @ysnIncludeBudgetLocal				= ISNULL(@ysnIncludeBudget, 0)
 SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
-SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 0)
+SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
@@ -205,6 +200,13 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
+IF @ysnIncludeWriteOffPaymentLocal = 1
+	BEGIN
+		SELECT TOP 1 @intWriteOffPaymentMethodId = intPaymentMethodID 
+		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
+		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
+	END
+
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
 		  strCustomerName
@@ -233,6 +235,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 )
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
+										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 
@@ -288,39 +291,44 @@ FROM (
 		WHERE ysnPosted  = 1		
 		AND ysnCancelled = 0
 		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
-		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) <= '+ @strDateTo +' 
-		AND (ysnPaid = 0
-			OR (ysnPaid = 1 AND intInvoiceId IN (SELECT PD.intInvoiceId
-												 FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
-												 INNER JOIN (
-													SELECT intPaymentId
-													FROM dbo.tblARPayment WITH (NOLOCK)
-													WHERE ysnPosted = 1
-													  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'
-												 ) P ON PD.intPaymentId = P.intPaymentId
-												 UNION ALL												 
-												 (SELECT intPrepaymentId
-												 FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
-												 WHERE ysnApplied = 1)))))
+		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
+		AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 
+													FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
+													INNER JOIN (
+														SELECT intPaymentId
+														FROM dbo.tblARPayment WITH (NOLOCK)
+														WHERE ysnPosted = 1
+															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
+													) P ON PD.intPaymentId = P.intPaymentId))
+		OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
+													FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+													INNER JOIN (
+														SELECT intPaymentId
+														FROM dbo.tblARPayment WITH (NOLOCK)
+														WHERE ysnPosted = 1
+															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
+													) P ON PD.intPaymentId = P.intPaymentId))))
 		AND intAccountId IN (SELECT intAccountId FROM dbo.vyuGLAccountDetail WITH (NOLOCK) WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
 	) I ON I.intEntityCustomerId = C.intEntityId		
 	LEFT JOIN (
 		SELECT intPaymentId	
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1 
-			AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+		  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 	LEFT JOIN (
 		SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
 			 , intInvoiceId
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
-		INNER JOIN (SELECT intPaymentId
-					FROM dbo.tblARPayment WITH (NOLOCK) 
-					WHERE ysnPosted = 1
-					  AND ysnInvoicePrepayment = 0
-					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
-				   ) P ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN (
+			SELECT intPaymentId
+			FROM dbo.tblARPayment WITH (NOLOCK) 
+			WHERE ysnPosted = 1
+			  AND ysnInvoicePrepayment = 0
+			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+			  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
+		) P ON PD.intPaymentId = P.intPaymentId
 		GROUP BY intInvoiceId
 	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	LEFT JOIN (
@@ -475,28 +483,6 @@ IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		
 	END
-	
-IF @ysnIncludeWriteOffPaymentLocal = 0 
-BEGIN
-	DECLARE @intPaymentMethodId INT
-	
-	SELECT @intPaymentMethodId = intPaymentMethodID 
-		FROM tblSMPaymentMethod 
-			WHERE UPPER(strPaymentMethod) = UPPER('Write Off')
-
-	DECLARE @PaymentIdAvail table( id int)
-
-	insert into @PaymentIdAvail
-	select intPaymentId 
-		from @temp_statement_table where intPaymentId is not null
-
-	DELETE FROM @temp_statement_table 
-		WHERE intPaymentId in (SELECT intPaymentId 
-									FROM tblARPayment 
-										WHERE intPaymentMethodId = @intPaymentMethodId
-											and intPaymentId in (select id from @PaymentIdAvail)
-										)
-END
 
 INSERT INTO @temp_cf_table (
 	  intInvoiceId

@@ -1,30 +1,33 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
-	@dtmDateFrom			DATETIME = NULL,
-	@dtmDateTo				DATETIME = NULL,
-	@strSalesperson			NVARCHAR(100) = NULL,
-	@intEntityCustomerId	INT = NULL,
-	@strSourceTransaction	NVARCHAR(100) = NULL,
-	@strCompanyLocation		NVARCHAR(100) = NULL,
-	@ysnIncludeBudget       BIT = 0,
-	@ysnIncludeCredits      BIT = 1,
-	@strCustomerName		NVARCHAR(MAX) = NULL,
-	@strAccountStatusCode	NVARCHAR(100) = NULL,
-	@strCustomerIds			NVARCHAR(MAX) = NULL
+	@dtmDateFrom				DATETIME = NULL,
+	@dtmDateTo					DATETIME = NULL,
+	@strSalesperson				NVARCHAR(100) = NULL,
+	@intEntityCustomerId		INT = NULL,
+	@strSourceTransaction		NVARCHAR(100) = NULL,
+	@strCompanyLocation			NVARCHAR(100) = NULL,
+	@ysnIncludeBudget			BIT = 0,
+	@ysnIncludeCredits			BIT = 1,
+	@ysnIncludeWriteOffPayment	BIT = 1,
+	@strCustomerName			NVARCHAR(MAX) = NULL,
+	@strAccountStatusCode		NVARCHAR(100) = NULL,
+	@strCustomerIds				NVARCHAR(MAX) = NULL
 AS
 
-DECLARE @dtmDateFromLocal			DATETIME		= NULL,
-	    @dtmDateToLocal				DATETIME		= NULL,
-	    @strSalespersonLocal		NVARCHAR(100)	= NULL,
-	    @intEntityCustomerIdLocal	INT				= NULL,
-		@strSourceTransactionLocal	NVARCHAR(100)	= NULL,
-		@strCompanyLocationLocal    NVARCHAR(100)	= NULL,
-		@ysnIncludeBudgetLocal		BIT				= 0,
-		@ysnIncludeCreditsLocal		BIT				= 1,
-		@intSalespersonId			INT				= NULL,
-		@intCompanyLocationId		INT				= NULL,
-		@strCustomerNameLocal		NVARCHAR(MAX)	= NULL,
-		@strAccountStatusCodeLocal	NVARCHAR(100)	= NULL,
-		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL
+DECLARE @dtmDateFromLocal				DATETIME		= NULL,
+	    @dtmDateToLocal					DATETIME		= NULL,
+	    @strSalespersonLocal			NVARCHAR(100)	= NULL,
+	    @intEntityCustomerIdLocal		INT				= NULL,
+		@strSourceTransactionLocal		NVARCHAR(100)	= NULL,
+		@strCompanyLocationLocal		NVARCHAR(100)	= NULL,
+		@ysnIncludeBudgetLocal			BIT				= 0,
+		@ysnIncludeCreditsLocal			BIT				= 1,
+		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
+		@intSalespersonId				INT				= NULL,
+		@intCompanyLocationId			INT				= NULL,
+		@strCustomerNameLocal			NVARCHAR(MAX)	= NULL,
+		@strAccountStatusCodeLocal		NVARCHAR(100)	= NULL,
+		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL,
+		@intWriteOffPaymentMethodId		INT				= NULL
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -33,17 +36,25 @@ DECLARE @tblCustomers TABLE (
 	  , dblCreditLimit				NUMERIC(18, 6)
 )
 		
-SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
-SET	@dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
-SET @strSalespersonLocal		= NULLIF(@strSalesperson, '')
-SET @intEntityCustomerIdLocal   = NULLIF(@intEntityCustomerId, 0)
-SET @strSourceTransactionLocal  = NULLIF(@strSourceTransaction, '')
-SET @strCompanyLocationLocal	= NULLIF(@strCompanyLocation, '')
-SET @ysnIncludeBudgetLocal		= @ysnIncludeBudget
-SET @ysnIncludeCreditsLocal		= @ysnIncludeCredits
-SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
-SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
-SET @strCustomerIdsLocal		= NULLIF(@strCustomerIds, '')
+SET @dtmDateFromLocal				= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
+SET	@dtmDateToLocal					= ISNULL(@dtmDateTo, GETDATE())
+SET @strSalespersonLocal			= NULLIF(@strSalesperson, '')
+SET @intEntityCustomerIdLocal		= NULLIF(@intEntityCustomerId, 0)
+SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')
+SET @strCompanyLocationLocal		= NULLIF(@strCompanyLocation, '')
+SET @ysnIncludeBudgetLocal			= @ysnIncludeBudget
+SET @ysnIncludeCreditsLocal			= @ysnIncludeCredits
+SET @ysnIncludeWriteOffPaymentLocal	= ISNULL(@ysnIncludeWriteOffPayment, 1)
+SET @strCustomerNameLocal			= NULLIF(@strCustomerName, '')
+SET @strAccountStatusCodeLocal		= NULLIF(@strAccountStatusCode, '')
+SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
+
+IF @ysnIncludeWriteOffPaymentLocal = 1
+	BEGIN
+		SELECT TOP 1 @intWriteOffPaymentMethodId = intPaymentMethodID 
+		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
+		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
+	END
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -171,6 +182,7 @@ INNER JOIN (
 ) C ON P.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId <> @intWriteOffPaymentMethodId) OR (@ysnIncludeWriteOffPaymentLocal = 0))
 
 --#INVOICETOTALPREPAYMENTS
 SELECT dblPayment = SUM(dblPayment)

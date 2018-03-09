@@ -46,7 +46,6 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@begingroup					AS NVARCHAR(50)
 		,@endgroup						AS NVARCHAR(50)
 		,@datatype						AS NVARCHAR(50)
-		,@strPaymentMethod				AS NVARCHAR(100)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -143,10 +142,6 @@ SELECT @strStatementFormat = CASE WHEN ISNULL([from], '') = '' THEN 'Open Item' 
 FROM @temp_xml_table
 WHERE [fieldname] = 'strStatementFormat'
 
-SELECT @strPaymentMethod = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strPaymentMethod'
-
 SELECT @ysnIncludeWriteOffPayment = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnIncludeWriteOffPayment'
@@ -185,8 +180,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @strCustomerName				= @strCustomerName
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
-			, @strPaymentMethod			= @strPaymentMethod
-			, @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPayment
+			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
 	BEGIN
@@ -205,7 +199,6 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 			, @strCustomerName				= @strCustomerName
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
-			, @strPaymentMethod				= @strPaymentMethod
 			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
@@ -224,7 +217,6 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 			, @strCustomerName				= @strCustomerName
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
-			, @strPaymentMethod				= @strPaymentMethod
 			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
 	END
 
