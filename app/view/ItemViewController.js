@@ -550,7 +550,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     },
                     {
                         column: 'strUnitType',
-                        value: 'Packed',
+                        value: 'Quantity',
                         conjunction: 'and'
                     }                    
                 ],                
@@ -572,8 +572,24 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 ],
             },
+            cboMaterialPack: {
+                //value: '{current.intWeightUOMId}',
+                value: '{current.strMaterialPackUOM}',          
+                store: '{mfgPackUom}',
+                defaultFilters: [
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Quantity',
+                        conjunction: 'and'
+                    }
+                ],
+            },
             txtWeight: '{current.dblWeight}',
-            txtMaterialPack: '{current.intMaterialPackTypeId}',
             txtMaterialSizeCode: '{current.strMaterialSizeCode}',
             txtInnerUnits: '{current.intInnerUnits}',
             txtLayersPerPallet: '{current.intLayerPerPallet}',
@@ -4057,6 +4073,9 @@ Ext.define('Inventory.view.ItemViewController', {
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
             current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+        } else if (combo.itemId === 'cboMaterialPack') {
+            current.set('intMaterialPackTypeId', records[0].get('intUnitMeasureId'));
+            current.set('strMaterialPackUOM', records[0].get('strUnitMeasure'));    
         }
     },    
 
@@ -4422,6 +4441,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboWeightUOM": {
                 select: this.onManufacturingUOMSelect
             }, 
+            "#cboMaterialPack": {
+                select: this.onManufacturingUOMSelect
+            },
             "#cboAddOnItem": {
                 select: this.onAddOnSelect
             },

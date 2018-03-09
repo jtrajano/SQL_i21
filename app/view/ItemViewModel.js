@@ -561,6 +561,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         mfgWeightUom: {
             type: 'icbuffereditemuombytype'
+        },
+        mfgPackUom: {
+            type: 'icbuffereditemuombytype'
 		},
         packType: {
             type: 'mfbufferedpacktype'

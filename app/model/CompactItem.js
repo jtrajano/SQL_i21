@@ -43,6 +43,8 @@ Ext.define('Inventory.model.CompactItem', {
         { name: 'ysnBasisContract', type: 'boolean' },
         { name: 'ysnUseWeighScales', type: 'boolean' },
         { name: 'ysnIsBasket', type: 'boolean' },
-        { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: true }        
+        { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: true },
+        { name: 'strMaterialPackUOM', type: 'string' },
+        { name: 'intMaterialPackTypeId', type: 'int', allowNull: true }       
     ]
 });

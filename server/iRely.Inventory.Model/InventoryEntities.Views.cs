@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd06c702621bae55289ec89b630acb3c40a6beaf090b33d6e67279b061b246ab5))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets18bb987407773e4fdcd9b5c7609796b9d336d7dca76df3d40eeb4289d1e9fb4c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -22,15 +22,15 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsd06c702621bae55289ec89b630acb3c40a6beaf090b33d6e67279b061b246ab5 : DbMappingViewCache
+    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
+    internal sealed class ViewsForBaseEntitySets18bb987407773e4fdcd9b5c7609796b9d336d7dca76df3d40eeb4289d1e9fb4c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "d06c702621bae55289ec89b630acb3c40a6beaf090b33d6e67279b061b246ab5"; }
+            get { return "18bb987407773e4fdcd9b5c7609796b9d336d7dca76df3d40eeb4289d1e9fb4c"; }
         }
 
         /// <summary>
@@ -6113,7 +6113,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCompactItem
-        [CodeFirstDatabaseSchema.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_intM2MComputationId, T1.vyuICGetCompactItem_strM2MComputation, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName, T1.vyuICGetCompactItem_strCostType, T1.vyuICGetCompactItem_strShortName, T1.vyuICGetCompactItem_strRequired, T1.vyuICGetCompactItem_ysnBasisContract, T1.vyuICGetCompactItem_intTonnageTaxUOMId, T1.vyuICGetCompactItem_strTonnageTaxUOM, T1.vyuICGetCompactItem_strSecondaryStatus, T1.vyuICGetCompactItem_strFuelCategory, T1.vyuICGetCompactItem_strPhysicalItem, T1.vyuICGetCompactItem_strPatronageCategory, T1.vyuICGetCompactItem_strPatronageDirect, T1.vyuICGetCompactItem_strGrade, T1.vyuICGetCompactItem_strOrigin, T1.vyuICGetCompactItem_strProductType, T1.vyuICGetCompactItem_strRegion, T1.vyuICGetCompactItem_strSeason, T1.vyuICGetCompactItem_strClass, T1.vyuICGetCompactItem_strProductLine, T1.vyuICGetCompactItem_ysnUseWeighScales, T1.vyuICGetCompactItem_strBundleType, T1.vyuICGetCompactItem_strDimensionUOM, T1.vyuICGetCompactItem_strWeightUOM, T1.vyuICGetCompactItem_ysnLotWeightsRequired, T1.vyuICGetCompactItem_strMedicationTag, T1.vyuICGetCompactItem_strIngredientTag, T1.vyuICGetCompactItem_strHazmatTag, T1.vyuICGetCompactItem_strMedicationMessage, T1.vyuICGetCompactItem_strIngredientMessage, T1.vyuICGetCompactItem_strHazmatMessage)
+        [CodeFirstDatabaseSchema.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_intM2MComputationId, T1.vyuICGetCompactItem_strM2MComputation, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName, T1.vyuICGetCompactItem_strCostType, T1.vyuICGetCompactItem_strShortName, T1.vyuICGetCompactItem_strRequired, T1.vyuICGetCompactItem_ysnBasisContract, T1.vyuICGetCompactItem_intTonnageTaxUOMId, T1.vyuICGetCompactItem_strTonnageTaxUOM, T1.vyuICGetCompactItem_strSecondaryStatus, T1.vyuICGetCompactItem_strFuelCategory, T1.vyuICGetCompactItem_strPhysicalItem, T1.vyuICGetCompactItem_strPatronageCategory, T1.vyuICGetCompactItem_strPatronageDirect, T1.vyuICGetCompactItem_strGrade, T1.vyuICGetCompactItem_strOrigin, T1.vyuICGetCompactItem_strProductType, T1.vyuICGetCompactItem_strRegion, T1.vyuICGetCompactItem_strSeason, T1.vyuICGetCompactItem_strClass, T1.vyuICGetCompactItem_strProductLine, T1.vyuICGetCompactItem_ysnUseWeighScales, T1.vyuICGetCompactItem_strBundleType, T1.vyuICGetCompactItem_strDimensionUOM, T1.vyuICGetCompactItem_strWeightUOM, T1.vyuICGetCompactItem_ysnLotWeightsRequired, T1.vyuICGetCompactItem_strMedicationTag, T1.vyuICGetCompactItem_strIngredientTag, T1.vyuICGetCompactItem_strHazmatTag, T1.vyuICGetCompactItem_strMedicationMessage, T1.vyuICGetCompactItem_strIngredientMessage, T1.vyuICGetCompactItem_strHazmatMessage, T1.vyuICGetCompactItem_strMaterialPackUOM, T1.vyuICGetCompactItem_intMaterialPackTypeId)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetCompactItem_intItemId, 
@@ -6174,6 +6174,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strMedicationMessage AS vyuICGetCompactItem_strMedicationMessage, 
             T.strIngredientMessage AS vyuICGetCompactItem_strIngredientMessage, 
             T.strHazmatMessage AS vyuICGetCompactItem_strHazmatMessage, 
+            T.strMaterialPackUOM AS vyuICGetCompactItem_strMaterialPackUOM, 
+            T.intMaterialPackTypeId AS vyuICGetCompactItem_intMaterialPackTypeId, 
             True AS _from0
         FROM InventoryEntities.vyuICGetCompactItems AS T
     ) AS T1");
@@ -10162,7 +10164,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCompactItems
-        [iRely.Inventory.Model.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_intM2MComputationId, T1.vyuICGetCompactItem_strM2MComputation, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName, T1.vyuICGetCompactItem_strCostType, T1.vyuICGetCompactItem_strShortName, T1.vyuICGetCompactItem_strRequired, T1.vyuICGetCompactItem_ysnBasisContract, T1.vyuICGetCompactItem_intTonnageTaxUOMId, T1.vyuICGetCompactItem_strTonnageTaxUOM, T1.vyuICGetCompactItem_strSecondaryStatus, T1.vyuICGetCompactItem_strFuelCategory, T1.vyuICGetCompactItem_strPhysicalItem, T1.vyuICGetCompactItem_strPatronageCategory, T1.vyuICGetCompactItem_strPatronageDirect, T1.vyuICGetCompactItem_strGrade, T1.vyuICGetCompactItem_strOrigin, T1.vyuICGetCompactItem_strProductType, T1.vyuICGetCompactItem_strRegion, T1.vyuICGetCompactItem_strSeason, T1.vyuICGetCompactItem_strClass, T1.vyuICGetCompactItem_strProductLine, T1.vyuICGetCompactItem_ysnUseWeighScales, T1.vyuICGetCompactItem_strBundleType, T1.vyuICGetCompactItem_strDimensionUOM, T1.vyuICGetCompactItem_strWeightUOM, T1.vyuICGetCompactItem_ysnLotWeightsRequired, T1.vyuICGetCompactItem_strMedicationTag, T1.vyuICGetCompactItem_strIngredientTag, T1.vyuICGetCompactItem_strHazmatTag, T1.vyuICGetCompactItem_strMedicationMessage, T1.vyuICGetCompactItem_strIngredientMessage, T1.vyuICGetCompactItem_strHazmatMessage)
+        [iRely.Inventory.Model.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_intM2MComputationId, T1.vyuICGetCompactItem_strM2MComputation, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM, T1.vyuICGetCompactItem_intOriginId, T1.vyuICGetCompactItem_strOriginName, T1.vyuICGetCompactItem_strCostType, T1.vyuICGetCompactItem_strShortName, T1.vyuICGetCompactItem_strRequired, T1.vyuICGetCompactItem_ysnBasisContract, T1.vyuICGetCompactItem_intTonnageTaxUOMId, T1.vyuICGetCompactItem_strTonnageTaxUOM, T1.vyuICGetCompactItem_strSecondaryStatus, T1.vyuICGetCompactItem_strFuelCategory, T1.vyuICGetCompactItem_strPhysicalItem, T1.vyuICGetCompactItem_strPatronageCategory, T1.vyuICGetCompactItem_strPatronageDirect, T1.vyuICGetCompactItem_strGrade, T1.vyuICGetCompactItem_strOrigin, T1.vyuICGetCompactItem_strProductType, T1.vyuICGetCompactItem_strRegion, T1.vyuICGetCompactItem_strSeason, T1.vyuICGetCompactItem_strClass, T1.vyuICGetCompactItem_strProductLine, T1.vyuICGetCompactItem_ysnUseWeighScales, T1.vyuICGetCompactItem_strBundleType, T1.vyuICGetCompactItem_strDimensionUOM, T1.vyuICGetCompactItem_strWeightUOM, T1.vyuICGetCompactItem_ysnLotWeightsRequired, T1.vyuICGetCompactItem_strMedicationTag, T1.vyuICGetCompactItem_strIngredientTag, T1.vyuICGetCompactItem_strHazmatTag, T1.vyuICGetCompactItem_strMedicationMessage, T1.vyuICGetCompactItem_strIngredientMessage, T1.vyuICGetCompactItem_strHazmatMessage, T1.vyuICGetCompactItem_strMaterialPackUOM, T1.vyuICGetCompactItem_intMaterialPackTypeId)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetCompactItem_intItemId, 
@@ -10223,6 +10225,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strMedicationMessage AS vyuICGetCompactItem_strMedicationMessage, 
             T.strIngredientMessage AS vyuICGetCompactItem_strIngredientMessage, 
             T.strHazmatMessage AS vyuICGetCompactItem_strHazmatMessage, 
+            T.strMaterialPackUOM AS vyuICGetCompactItem_strMaterialPackUOM, 
+            T.intMaterialPackTypeId AS vyuICGetCompactItem_intMaterialPackTypeId, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetCompactItem AS T
     ) AS T1");

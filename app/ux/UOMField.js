@@ -54,13 +54,15 @@ Ext.define('Inventory.ux.UOMField', {
                 this.txtQuantity.setDecimalToDisplay(this.DEFAULT_DECIMALS);
                 this.setupDecimalPrecision(this.txtQuantity.getValue(), this.DEFAULT_DECIMALS);
             } else {
-                var decimals = this.getUomDecimals(this.getValue()["intUnitMeasureId"]);
-                var qty = this.setupDecimalPrecision(this.getValue()["dblQuantity"] 
-                    ? this.getValue()["dblQuantity"] : (this.activeRecord ? this.activeRecord.get(this.getUpdateField()) : null), decimals) ;
-                this.txtQuantity.setDecimalPrecision(decimals);
-                this.txtQuantity.setDecimalToDisplay(decimals);
-                this.txtQuantity.setRawValue(qty);
-                this.txtQuantity.setValue(qty);
+                if(this.getValue()) {
+                    var decimals = this.getUomDecimals(this.getValue()["intUnitMeasureId"]);
+                    var qty = this.setupDecimalPrecision(this.getValue()["dblQuantity"] 
+                        ? this.getValue()["dblQuantity"] : (this.activeRecord ? this.activeRecord.get(this.getUpdateField()) : null), decimals) ;
+                    this.txtQuantity.setDecimalPrecision(decimals);
+                    this.txtQuantity.setDecimalToDisplay(decimals);
+                    this.txtQuantity.setRawValue(qty);
+                    this.txtQuantity.setValue(qty);
+                }
             }
         }
     },
