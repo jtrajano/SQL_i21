@@ -4,6 +4,7 @@
 	,@intMonthsToView INT
 	,@ysnIncludeInventory BIT
 	,@intCompanyLocationId INT
+	,@intUnitMeasureId INT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
@@ -189,12 +190,22 @@ BEGIN TRY
 		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = MUOM.intUnitMeasureId
 		WHERE M.intItemId = @intItemId
 
-		SELECT @TargetUOMKey = UOM.intUnitMeasureId
-			,@TargetUOMName = UOM.strUnitMeasure
-		FROM tblICItem M
-		JOIN tblCTItemDefaultUOM IUOM ON IUOM.intItemId = M.intItemId
-		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intPurchaseUOMId
-		WHERE M.intItemId = @intItemId
+		IF @intUnitMeasureId = 0
+		BEGIN
+			SELECT @TargetUOMKey = UOM.intUnitMeasureId
+				,@TargetUOMName = UOM.strUnitMeasure
+			FROM tblICItem M
+			JOIN tblCTItemDefaultUOM IUOM ON IUOM.intItemId = M.intItemId
+			JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intPurchaseUOMId
+			WHERE M.intItemId = @intItemId
+		END
+		ELSE
+		BEGIN
+			SELECT @TargetUOMKey = intUnitMeasureId
+				,@TargetUOMName = strUnitMeasure
+			FROM tblICUnitMeasure
+			WHERE intUnitMeasureId = @intUnitMeasureId
+		END
 
 		DECLARE @Conversion_Factor DECIMAL(24, 6)
 
@@ -1984,7 +1995,7 @@ BEGIN TRY
 	--SET @SQL = @SQL + ' SELECT * FROM @Table ORDER By intItemId, AttributeId '
 	SET @SQL = @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
 	-- ******* Plan Totals start *****************
-	SET @SQL = @SQL + 'DECLARE @Table_Sum table(AttributeId int, strAttributeName nvarchar(50)
+	/*SET @SQL = @SQL + 'DECLARE @Table_Sum table(AttributeId int, strAttributeName nvarchar(50)
 						, OpeningInv decimal(24,6), PastDue nvarchar(35)'
 	SET @Cnt = 1
 
@@ -2165,7 +2176,7 @@ BEGIN TRY
 		SET @Cnt = @Cnt + 1
 	END
 
-	SET @SQL = @SQL + ' FROM @Table_Sum ORDER By AttributeId '
+	SET @SQL = @SQL + ' FROM @Table_Sum ORDER By AttributeId '*/
 
 	--SELECT @SQL
 	EXEC (@SQL)
