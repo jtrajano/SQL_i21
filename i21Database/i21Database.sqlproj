@@ -6241,6 +6241,7 @@
     <Build Include="dbo\Functions\fnICFormatNumber.sql" />
     <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
