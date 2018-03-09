@@ -206,10 +206,13 @@ BEGIN
 				,[intTaxGroupId] = ri.intTaxGroupId
 		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN tblICItem Item 
+					ON Item.intItemId = ri.intItemId
 		WHERE	r.ysnPosted = 1
 				AND r.intInventoryReceiptId = @intReceiptId
 				AND ri.dblBillQty < ri.dblOpenReceive 
 				AND ri.intOwnershipType = @Own
+				AND Item.strType <> 'Bundle'
 	END 
 
 	-- Assemble the Other Charges
