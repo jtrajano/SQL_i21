@@ -1926,6 +1926,9 @@ BEGIN
 					,@intVehicleId
 					,1 -- @DisregardExemptionSetup
 					,0
+					, NULL	--intItemUOMId
+					,@intSiteId
+					,0		--@IsDeliver			
 				)
 
 					--SELECT * FROM @tblCFCalculatedTaxExempt
