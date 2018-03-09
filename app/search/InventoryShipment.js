@@ -95,7 +95,7 @@ Ext.define('Inventory.search.InventoryShipment', {
                     if (!grid) return true; 
 
                     if (grid && grid.url == './Inventory/api/InventoryShipment/SearchShipmentInvoice') {
-                        ic.utils.ajax({
+                        Inventory.Utils.ajax({
                             url: './Inventory/api/InventoryShipment/UpdateShipmentInvoice',
                             method: 'post'  
                         })
@@ -210,8 +210,8 @@ Ext.define('Inventory.search.InventoryShipment', {
 
     /*Support functions*/
     processShipmentToInvoice : function (shipmentId, callback) {
-        ic.utils.ajax({
-            url: '../Inventory/api/InventoryShipment/ProcessShipmentToInvoice',
+        Inventory.Utils.ajax({
+            url: './inventory/api/inventoryshipment/processshipmenttoinvoice',
             params:{
                 id: shipmentId
             },

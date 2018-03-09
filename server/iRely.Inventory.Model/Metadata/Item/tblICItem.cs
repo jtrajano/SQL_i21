@@ -308,6 +308,26 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _materialPackUOM;
+        [NotMapped]
+        public string strMaterialPackUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_materialPackUOM))
+                    if (vyuICGetCompactItem != null)
+                        return vyuICGetCompactItem.strMaterialPackUOM;
+                    else
+                        return null;
+                else
+                    return _materialPackUOM;
+            }
+            set
+            {
+                _materialPackUOM = value;
+            }
+        }
+
         private string _medicationTag;
         
         [NotMapped]

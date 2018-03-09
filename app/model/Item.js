@@ -187,7 +187,10 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnUseWeighScales', type: 'boolean' },
         { name: 'ysnIsBasket', type: 'boolean' },
         { name: 'ysnLotWeightsRequired', type: 'boolean', defaultValue: true },
-        { name: 'strCategory', type: 'string' }
+        { name: 'strCategory', type: 'string' },
+        { name: 'strMaterialPackUOM', type: 'string' },
+        { name: 'intMaterialPackTypeId', type: 'int', allowNull: true },        
+        { name: 'costUnitQty', type: 'auto'}
     ],
 
     validators: [

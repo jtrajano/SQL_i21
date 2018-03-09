@@ -1154,7 +1154,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if(storageLocationId)
             filters.push([{ column: 'intStorageLocationId', value: storageLocationId, condition: 'eq', conjunction: 'and'}]);
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             timeout: 120000,   
             //url: './inventory/api/item/getitemstockuomsummary',
             url: './inventory/api/item/getitemrunningstock',
@@ -1443,7 +1443,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var activeTab = tabInventoryAdjustment.getActiveTab();       
 
         var doPost = function (){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventoryadjustment/posttransaction',
                 params:{
                     strTransactionId: current.get('strAdjustmentNo'),
@@ -1517,7 +1517,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (grdInventoryAdjustment) {grdInventoryAdjustment.getSelectionModel().deselectAll();       }
 
         var doRecap = function (){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventoryadjustment/posttransaction',
                 params:{
                     strTransactionId: current.get('strAdjustmentNo'),

@@ -299,7 +299,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         rec.set('intEntityUserSecurityId', iRely.config.Security.EntityId);
         rec.set('strUserName', 'Entered by ' + iRely.config.Security.UserName);
         rec.set('dblConversionFactor', 1);
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventorycountdetail/getlastcountdetailid',
             params: {
                 intInventoryCountId: intInventoryCountId
@@ -357,7 +357,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
     },
 
     getTotalLocationStockOnHand: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, intLotId, intItemUOMId, callback) {
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             timeout: 120000,
             url: './inventory/api/itemstock/getlocationstockonhand',
             params: {
@@ -400,7 +400,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
             grossQty = lotQty;
         }
         else if (weightUOMConversionFactor !== 0) {
-            grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+            grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
         }
 
         return {
@@ -410,22 +410,8 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         };
     },
 
-    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
-        var result = 0;
-
-        if (sourceUOMConversionFactor === targetUOMConversionFactor) {
-            result = qty;
-        }
-        else if (targetUOMConversionFactor !== 0) {
-            result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
-        }
-
-        //return Math.round(result, 12);
-        return ic.utils.Math.round(result, 12);
-    },
-
     getStockQuantity: function (intLocationId, intItemId, intSubLocationId, intStorageLocationId, callback) {
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             timeout: 120000,   
             url: './inventory/api/item/getitemstockuomsummary',
             params: {
@@ -631,7 +617,7 @@ Ext.define('Inventory.view.InventoryCountDetailsViewController', {
         var vm = me.getViewModel();
         var rec = _.first(records);
         var intCountGroupId = rec.get('intCountGroupId');
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventorycountdetail/getlastcountgroup',
             params: {
                 intCountGroupId: intCountGroupId

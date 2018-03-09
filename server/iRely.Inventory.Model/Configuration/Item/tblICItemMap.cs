@@ -330,6 +330,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMedicationMessage).HasColumnName("strMedicationMessage");
             this.Property(t => t.strIngredientMessage).HasColumnName("strIngredientMessage");
             this.Property(t => t.strHazmatMessage).HasColumnName("strHazmatMessage");
+            this.Property(t => t.strMaterialPackUOM).HasColumnName("strMaterialPackUOM");
+            this.Property(t => t.intMaterialPackTypeId).HasColumnName("intMaterialPackTypeId");
         }
     }
 

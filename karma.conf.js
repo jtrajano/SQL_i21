@@ -15,12 +15,16 @@ var appFiles = [
     { pattern: 'app/controller/Inventory.js', watched: true }
 ];
 
+var domainFiles = [
+    { pattern: 'app/domain/**/*.js', watched: true }
+];
+
 var testFiles = [
     { pattern: 'node_modules/extjs-spec-generator/src/UnitTestEngine.js', watched: true },
     { pattern: 'test/specs/**/*.spec.js', watched: true }
 ];
 
-var files = libFiles.concat(dependencies.frameworkFiles).concat(mockFiles).concat(dependencies.files).concat(appFiles).concat(testFiles);
+var files = libFiles.concat(dependencies.frameworkFiles).concat(mockFiles).concat(dependencies.files).concat(appFiles).concat(domainFiles).concat(testFiles);
 
 module.exports = function (config) {
     config.set({
@@ -32,7 +36,7 @@ module.exports = function (config) {
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         // 'jasmine',
-        frameworks: ['mocha', 'chai'],
+        frameworks: ['mocha', 'should'],
 
 
         // list of files / patterns to load in the browser

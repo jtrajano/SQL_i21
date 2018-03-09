@@ -76,5 +76,7 @@ namespace iRely.Inventory.Model
         public string strBundledItemDescription { get; set; }
         public bool? ysnIsBasket { get; set; }
         public string strBundleType { get; set; }
+        public int? intLotStatusId { get; set; }
+        public string strLotCondition { get; set; }
     }
 }

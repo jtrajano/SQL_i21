@@ -8545,23 +8545,8 @@
                                                                 "width": "auto",
                                                                 "scrollable": "boolean"
                                                             },
-                                                            "name": "MyCheck5",
-                                                            "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "configAlternates": {
-                                                                        "scrollable": "boolean"
-                                                                    },
-                                                                    "name": "MyCheckbox41",
-                                                                    "designerId": "e9588d15-d8e5-4963-ae13-302dd76eb483"
-                                                                }
-                                                            ]
+                                                            "name": "MyCheck2",
+                                                            "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514"
                                                         },
                                                         {
                                                             "type": "Ext.view.Table",

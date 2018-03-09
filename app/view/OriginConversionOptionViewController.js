@@ -425,7 +425,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     { dataIndex: 'dblTimeSpentInSeconds', text: 'Duration', flex: 1, 
                         renderer: function(val) {
                             if(!val) val = 0;
-                            return ic.utils.Date.getDuration(val);
+                            return Inventory.Utils.Date.getDuration(val);
                         }
                         , dataType: 'string', allowNull: true 
                     },

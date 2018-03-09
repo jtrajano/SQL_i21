@@ -42,7 +42,8 @@ namespace iRely.Inventory.BusinessLayer
                     ysnAllowSale = p.ysnAllowSale,
                     strUnitMeasure = p.tblICUnitMeasure.strUnitMeasure,
                     strUnitType = p.tblICUnitMeasure.strUnitType,
-                    strWeightUOM = p.WeightUOM.strUnitMeasure
+                    strWeightUOM = p.WeightUOM.strUnitMeasure,
+                    intDecimalPlaces = p.tblICUnitMeasure.intDecimalPlaces
                 })
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync(param.cancellationToken);

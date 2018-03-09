@@ -48,6 +48,10 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedItemUOMByType'
     ],
 
+    data: {
+        costUnitQty: null
+    },
+
     stores: {
         subLocations: {
             type: 'smcompanylocationsublocationbuffered'
@@ -556,6 +560,9 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbuffereditemuombytype'
         },
         mfgWeightUom: {
+            type: 'icbuffereditemuombytype'
+        },
+        mfgPackUom: {
             type: 'icbuffereditemuombytype'
 		},
         packType: {

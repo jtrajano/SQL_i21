@@ -550,7 +550,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     },
                     {
                         column: 'strUnitType',
-                        value: 'Packed',
+                        value: 'Quantity',
                         conjunction: 'and'
                     }                    
                 ],                
@@ -572,8 +572,24 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 ],
             },
+            cboMaterialPack: {
+                //value: '{current.intWeightUOMId}',
+                value: '{current.strMaterialPackUOM}',          
+                store: '{mfgPackUom}',
+                defaultFilters: [
+                    {
+                        column: 'intItemId',
+                        value: '{current.intItemId}',
+                        conjunction: 'and'
+                    },
+                    {
+                        column: 'strUnitType',
+                        value: 'Quantity',
+                        conjunction: 'and'
+                    }
+                ],
+            },
             txtWeight: '{current.dblWeight}',
-            txtMaterialPack: '{current.intMaterialPackTypeId}',
             txtMaterialSizeCode: '{current.strMaterialSizeCode}',
             txtInnerUnits: '{current.intInnerUnits}',
             txtLayersPerPallet: '{current.intLayerPerPallet}',
@@ -729,18 +745,13 @@ Ext.define('Inventory.view.ItemViewController', {
                     conjunction: 'and'
                 }]
             },
-            txtAmount: '{current.dblAmount}',
-            cboCostUOM: {
+
+            uomCostUnitQty: {
                 readOnly: '{checkPerUnitCostMethod}',
-                value: '{current.strCostUOM}',
-                origValueField: 'intItemUOMId',
-                origUpdateField: 'intCostUOMId',
-                store: '{costUOM}',
-                defaultFilters: [{
-                    column: 'intItemId',
-                    value: '{current.intItemId}',
-                    conjunction: 'and'
-                }]
+                readOnlyMode: 'uom',
+                value: '{current.costUnitQty}',
+                activeRecord: '{current}',
+                mutateByProperties: true
             },
 
             //--------------//
@@ -1921,7 +1932,7 @@ Ext.define('Inventory.view.ItemViewController', {
             return;
 
         iRely.Msg.showWait('Converting units...');
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/Item/GetUnitConversion',
             method: 'Post',
             params: {
@@ -1984,7 +1995,7 @@ Ext.define('Inventory.view.ItemViewController', {
         uoms = uoms ? uoms : null; 
 
         if (checkbox.dataIndex === 'ysnStockUnit'){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/Item/CheckStockUnit',
                 method: 'POST',
                 params: {
@@ -2000,7 +2011,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     {
                          var result = function (button) {
                             if (button === 'yes') {                                
-                                ic.utils.ajax({
+                                Inventory.Utils.ajax({
                                     url: './Inventory/api/Item/ConvertItemToNewStockUnit',
                                     method: 'POST',
                                     params: {
@@ -2459,29 +2470,33 @@ Ext.define('Inventory.view.ItemViewController', {
                                 callback: function(result) {
                                     if (result) {
                                         var me = this;
-                                        Ext.Array.each(result, function (location) {
-                                            var prices = me.getViewModel().data.current.tblICItemPricings().data.items;
-                                            var exists = Ext.Array.findBy(prices, function (row) {
-                                                if (location.get('intItemLocationId') === row.get('intItemLocationId')) {
-                                                    return true;
-                                                }
-                                            });
-                                            if (!exists) {
-                                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
-                                                    intItemId : location.get('intItemId'),
-                                                    intItemLocationId : location.get('intItemLocationId'),
-                                                    strLocationName : location.get('strLocationName'),
-                                                    dblAmountPercent : 0.00,
-                                                    dblSalePrice : 0.00,
-                                                    dblMSRPPrice : 0.00,
-                                                    strPricingMethod : 'None',
-                                                    dblLastCost : 0.00,
-                                                    dblStandardCost : 0.00,
-                                                    dblAverageCost : 0.00,
-                                                    dblEndMonthCost : 0.00,
-                                                    intSort : location.get('intSort')
+                                        me.getViewModel().data.current.tblICItemPricings().load({
+                                            callback: function() {
+                                                Ext.Array.each(result, function (location) {
+                                                    var prices = me.getViewModel().data.current.tblICItemPricings().data.items;
+                                                    var exists = Ext.Array.findBy(prices, function (row) {
+                                                        if (location.get('intItemLocationId') === row.get('intItemLocationId')) {
+                                                            return true;
+                                                        }
+                                                    });
+                                                    if (!exists) {
+                                                        var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                                                            intItemId : location.get('intItemId'),
+                                                            intItemLocationId : location.get('intItemLocationId'),
+                                                            strLocationName : location.get('strLocationName'),
+                                                            dblAmountPercent : 0.00,
+                                                            dblSalePrice : 0.00,
+                                                            dblMSRPPrice : 0.00,
+                                                            strPricingMethod : 'None',
+                                                            dblLastCost : 0.00,
+                                                            dblStandardCost : 0.00,
+                                                            dblAverageCost : 0.00,
+                                                            dblEndMonthCost : 0.00,
+                                                            intSort : location.get('intSort')
+                                                        });
+                                                        me.getViewModel().data.current.tblICItemPricings().add(newPrice);
+                                                    }
                                                 });
-                                                me.getViewModel().data.current.tblICItemPricings().add(newPrice);
                                             }
                                         });
                                     }
@@ -2567,7 +2582,7 @@ Ext.define('Inventory.view.ItemViewController', {
             conjunction: 'And'
         }];
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/ItemLocation/Search',
                 params: {
@@ -3068,7 +3083,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
         }
         //return retailPrice;
-        return ic.utils.Math.round(retailPrice, 6);
+        return Inventory.Utils.Math.round(retailPrice, 6);
     },
 
     /* TODO:Create unit test for getSalePrice */
@@ -3095,7 +3110,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
             }
         //return salePrice;
-        return ic.utils.Math.round(salePrice, 6);
+        return Inventory.Utils.Math.round(salePrice, 6);
     },
 
     updatePricing: function (pricing, data, validationCallback) {
@@ -3591,7 +3606,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (current) {
             iRely.Msg.showWait('Duplicating item...');
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/Item/DuplicateItem',
                 params: {
@@ -4058,6 +4073,9 @@ Ext.define('Inventory.view.ItemViewController', {
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
             current.set('strWeightUOM', records[0].get('strUnitMeasure'));
+        } else if (combo.itemId === 'cboMaterialPack') {
+            current.set('intMaterialPackTypeId', records[0].get('intUnitMeasureId'));
+            current.set('strMaterialPackUOM', records[0].get('strUnitMeasure'));    
         }
     },    
 
@@ -4187,8 +4205,16 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },    
 
+    onCostUnitQtyValueChange: function(newValue, oldValue, activeRecord, control, uomRecord) {
+        var me = this;
+        me.setData('costUnitQty', newValue);  
+    },
+
     init: function(application) {
         this.control({
+            "#uomCostUnitQty": {
+                valuechange: this.onCostUnitQtyValueChange
+            },
             "#cboType": {
                 select: this.onInventoryTypeSelect
             },
@@ -4415,6 +4441,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboWeightUOM": {
                 select: this.onManufacturingUOMSelect
             }, 
+            "#cboMaterialPack": {
+                select: this.onManufacturingUOMSelect
+            },
             "#cboAddOnItem": {
                 select: this.onAddOnSelect
             },

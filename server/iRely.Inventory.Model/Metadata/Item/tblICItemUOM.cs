@@ -165,6 +165,7 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
         public string strUnitType { get; set; }
         public string strWeightUOM { get; set; }
+        public int? intDecimalPlaces { get; set; }
     }
 
     public class WeightUOMVm

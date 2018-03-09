@@ -350,7 +350,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         //     grossQty = lotQty;
         // }
         if (weightPerQty !== 0) {
-            //grossQty = me.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
+            //grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(itemUOMConversionFactor, weightUOMConversionFactor, lotQty);
             computedGross = lotQty * weightPerQty; 
         }
 
@@ -359,20 +359,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             // tare: tareWeight,
             // net: grossQty - tareWeight
         };
-    },
-
-    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
-        var result = 0;
-
-        if (sourceUOMConversionFactor === targetUOMConversionFactor) {
-            result = qty;
-        }
-        else if (targetUOMConversionFactor !== 0) {
-            result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
-        }
-
-        //return Math.round(result, 12);
-        return ic.utils.Math.round(result, 12);
     },
 
     onTransferQtyChange: function (config, column) {
@@ -772,7 +758,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var activeTab = tabInventoryTransfer ? tabInventoryTransfer.getActiveTab() : null;        
 
         var doPost = function (){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryTransfer/PostTransaction',
                 params:{
                     strTransactionId: current.get('strTransferNo'),
@@ -887,7 +873,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         if (grdInventoryTransfer) { grdInventoryTransfer.getSelectionModel().deselectAll(); }
 
         var doRecap = function () {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryTransfer/PostTransaction',
                 params: {
                     strTransactionId: current.get('strTransferNo'),

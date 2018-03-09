@@ -1433,7 +1433,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
                 else if (weightCF !== 0) {
                     //grossQty = (lotCF * qty) / weightCF;
-                    grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, qty);
+                    grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(lotCF, weightCF, qty);
                 }
 
             }
@@ -1596,7 +1596,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     fetchSetDefaultLocation: function(current, intDefaultLocation) {
         if(intDefaultLocation && current) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './entitymanagement/api/location/search',
                 params: {
                     filter: iRely.Functions.encodeFilters([{ column: 'intEntityId', value: current.get('intEntityVendorId') }])
@@ -1756,7 +1756,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // Save first before calculating the taxes
         win.context.data.saveRecord({
             successFn: function () {
-                ic.utils.ajax({
+                Inventory.Utils.ajax({
                     url: './inventory/api/inventoryreceipt/gettaxgroupid',
                     params: {
                         id: current.get('intInventoryReceiptId')
@@ -1794,7 +1794,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     getDefaultReceiptTaxGroupId: function (current, cfg) {
         cfg = cfg ? cfg : {};
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventoryreceipt/getdefaultreceipttaxgroupid',
             params: {
                 freightTermId: cfg.freightTermId,
@@ -1832,7 +1832,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         successFn = successFn && (successFn instanceof Function) ? successFn : function () { /*empty function*/ };
         failureFn = failureFn && (failureFn instanceof Function) ? failureFn : function () { /*empty function*/ };
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './entitymanagement/api/vendorpricing/searchvendorlocationitemcurrency',
             params: {
                 VendorId: cfg.vendorId,
@@ -2160,7 +2160,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     resolveItemCost: function(vm, receipt, receiptItem) {
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
             filters: [
                 {
@@ -2741,20 +2741,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             return result;
         },*/
 
-    convertQtyBetweenUOM: function (sourceUOMConversionFactor, targetUOMConversionFactor, qty) {
-        var result = 0;
-
-        if (sourceUOMConversionFactor === targetUOMConversionFactor) {
-            result = qty;
-        }
-        else if (targetUOMConversionFactor !== 0) {
-            result = (sourceUOMConversionFactor * qty) / targetUOMConversionFactor;
-        }
-
-        //return Math.round(result, 12);
-        return ic.utils.Math.round(result, 12); 
-    },
-
     calculateGrossNet: function (record, calculateItemGrossNet) {
         if (!record) return;
 
@@ -2792,7 +2778,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 }
                                 else if (weightCF !== 0) {
                                     //grossQty = (lotCF * lotQty) / weightCF;
-                                    grossQty = me.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
+                                    grossQty = Inventory.Utils.Uom.convertQtyBetweenUOM(lotCF, weightCF, lotQty);
                                 }
                                 
                                 lot.set('dblGrossWeight', grossQty);
@@ -2870,7 +2856,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 totalGross = 0;
             }
             else {
-                totalGross = me.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
+                totalGross = Inventory.Utils.Uom.convertQtyBetweenUOM(receiptUOMCF, weightUOMCF, receiptItemQty);
             }
             totalGross = Ext.isNumeric(totalGross) ? totalGross : 0.00;
             totalNet = totalGross;
@@ -3160,7 +3146,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             countItemsWithZeroCost = 0;        
 
         var processReceiptToVoucher = function (receiptId, callback) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventoryreceipt/processbill',
                 params: {
                     id: receiptId
@@ -3256,7 +3242,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             countItemsWithZeroCost = 0;
 
         var processReceiptToDebitMemo = function (receiptId) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './inventory/api/inventoryreceipt/processbill',
                 params: {
                     id: receiptId
@@ -3654,7 +3640,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                 currentReceiptItem.set('dblGross', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalGross / dblQty), 6));
                 currentReceiptItem.set('dblNet', i21.ModuleMgr.Inventory.roundDecimalFormat(dblProposedQty * (dblOriginalNet / dblQty), 6));
-                // ic.utils.ajax({
+                // Inventory.Utils.ajax({
                 //     url: './Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
                 //     params: {
                 //         intItemUOMId: intItemUOMId,
@@ -3687,7 +3673,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dblProposedQty = currentReceiptItem.get('dblOpenReceive'),
                     dblProposedGrossQty = context.value;
             
-            //     ic.utils.ajax({
+            //     Inventory.Utils.ajax({
             //         url: './Inventory/api/InventoryReceipt/CalculateGrossQtyRatio',
             //         params: {
             //             intItemUOMId: intItemUOMId,
@@ -3850,7 +3836,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './entitymanagement/api/shipvia/searchshipviaview'
             })
                 .flatMap(function (res) {
@@ -5517,7 +5503,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         conjunction: 'and'
                     }
                 ]);
-                var arx = ic.utils.ajax({
+                var arx = Inventory.Utils.ajax({
                     url: ContractStore.proxy.api.read,
                     params: {
                         filter: filter
@@ -5653,6 +5639,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     { dataIndex: 'strLotAlias', text: 'Lot Alias', width: 100, dataType: 'string', hidden: true, required: true },
                     { dataIndex: 'intParentLotId', text: 'Parent Lot Id', dataType: 'numeric', width: 100, hidden: true, required: true, allowNull: true },
                     { dataIndex: 'strParentLotNumber', text: 'Parent Lot No', width: 100, dataType: 'string', hidden: true, required: true },
+                    { dataIndex: 'intLotStatusId', text: 'Lot Status', width: 100, dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                    { dataIndex: 'strLotCondition', text: 'Lot Condition', width: 100, dataType: 'string', hidden: true, required: true },
 
                     { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', required: true },
@@ -5917,10 +5905,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strSubLocationName: newReceiptItem.get('strSubLocationName'),
                                         strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
                                         dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
-                                        strMarkings: order.get('strMarkings')
+                                        strMarkings: order.get('strMarkings'),
+                                        strCondition: order.get('strLotCondition')
                                     });
                                     currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                                 }
+                                
                             }
                         
                         });
@@ -6112,7 +6102,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
     
-    onReplicateBalanceLotClick: function (button) {
+    getReplicator: function(receipt, receiptItem, lot) {   
+        var analyzer = Ext.create('Inventory.domain.receipt.LotReplicationAnalyzer', {
+            receipt: receipt,
+            receiptItem: receiptItem,
+            lot: lot,
+            replicationLimit: 1000
+        });
+        
+        var replicator = Ext.create('Inventory.domain.receipt.LotReplicator', { 
+            analyzer: analyzer,
+            notifyExcessiveReplication: true,
+        });
+        
+        return replicator;
+    },
+    
+    onReplicateBalanceLotClick: function(button) {
         var me = this;
         var win = button.up('window');
         var grdLotTracking = win.down('grdLotTracking');
@@ -6136,286 +6142,65 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 return;
             }
 
-            // Get the first lot record (if there are multiple selected)
-            var currentLot = selectedLot[0];
-
-            // Get the lot qty.
-            var lotQty = currentLot.get('dblQuantity');
-
-            // Validate the lot qty.
-            if (lotQty <= 0) {
-                iRely.Functions.showErrorDialog('Cannot replicate zero Lot Quantity.');
-                return;
-            }
-
-            // Initialize the other variables.
-            var lastGrossWgt = currentLot.get('dblGrossWeight'),
-                lotGrossWgt = currentLot.get('dblGrossWeight');
-
-            var lastTareWgt = currentLot.get('dblTareWeight'),
-                lotTareWgt = currentLot.get('dblTareWeight');
-
-            var lastNetWgt = currentLot.get('dblNetWeight'),
-                lotNetWgt = currentLot.get('dblNetWeight');
-
-            var strUnitType = currentLot.get('strUnitType');
-
-            var lotCF = currentLot.get('dblLotUOMConvFactor');
-            var grossCF = currentReceiptItem.get('dblWeightUOMConvFactor');
-
-            // Convert the item qty into lot-qty-uom
-            var convertedItemQty = me.convertQtyBetweenUOM(lineItemCF, lotCF, lineItemQty);
-
-            // Calculate the last qty.
-            var lastQty = (convertedItemQty % lotQty) > 0 ? convertedItemQty % lotQty : lotQty;
-
-            // Initialize the target tare weight.
-            var addedTareWeight = 0.00;
-            var excessTareWeight = 0.00;
-
-            // If Unit-Type is a 'Packed' type, get the ceiling value. A packaging can't have a fractional value.
-            if (strUnitType == "Packed") {
-                addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
-                lastQty = Math.ceil(lastQty);
-
-                //Process Excess Lot
-                //Add another line for excess lot if the last replicated lot is more than one
-                if (addedTareWeight > 0 && lastQty > 1) {
-                    //Compute Tare Weight for the Excess Lot
-                    excessTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
-                    //Subtract 1 from lastQty because the excess lot will be added later
-                    if (excessTareWeight > 0) {
-                        lastQty = lastQty - 1;
-                    }
-                }
-                //Just add tare if the last replicated lot is equal to 1
-                addedTareWeight = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty) - addedTareWeight;
-            }
-
-            // Calculate how many times to loop.
-            var totalLot = 0;
-
-            grdLotTracking.store.each(function (lot) {
-                totalLot += lot.get('dblQuantity');
-            });
-
-            var replicaCount = (convertedItemQty - lastQty) / totalLot;
-            replicaCount = Math.ceil(replicaCount);
-
-            // Calculate the last Gross and Tare weights.
-            if ((replicaCount * lotQty) < convertedItemQty) {
-                // Compute the last gross qty.
-                if (lastGrossWgt > 0) {
-                    lastGrossWgt = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
-                }
-
-                // Compute the last net weight.
-
-                lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
-                lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + addedTareWeight : addedTareWeight;
-                lastNetWgt = lastGrossWgt - lastTareWgt;
-
-            }
-            else {
-                replicaCount -= 1;
-            }
-
-            if (replicaCount == 0) {
-                iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') + ' are fully replicated.');
-            }
-
-            var countReplicateLot = 0;
-            if (excessTareWeight > 0) {
-                countReplicateLot = replicaCount + 1;
-            }
-            else {
-                countReplicateLot = replicaCount;
-            }
-
-            // If replicate lot count is equal or less than zero, exit immediately. There is nothing to process. 
-            if (countReplicateLot <= 0) {
-                return;
-            }
-
-            // Show a progress message box.
             Ext.MessageBox.show({
                 title: "Please wait.",
-                msg: "Replicating as " + countReplicateLot + " copies of the lot.",
-                progressText: "Initializing...",
+                msg: "Replicating lot.",
+                progressText: "Replicating...",
                 width: 300,
                 progress: true,
                 closable: false
             });
 
-            // Function generator for the setTimeout.
-            // Used to update the progress of the message box and hide it when done with the loop.
-            var f = function (ctr, replicaCount) {
-                return function () {
-                    if (ctr === replicaCount - 1) {
-                        Ext.MessageBox.hide();
-                    } else {
-                        var progress = ctr / (replicaCount - 1);
-                        Ext.MessageBox.updateProgress(progress, Math.round(100 * progress) + '% completed');
-                    }
-                };
-            };
+            setTimeout(function() {
+                grdLotTracking.suspendEvents();
 
-            // This function will do a loop to replicate the lots.
-            var doReplicateLot = function () {
-                for (var ctr = 0; ctr <= replicaCount - 1; ctr++) {
-                    var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                        strUnitMeasure: currentLot.get('strUnitMeasure'),
-                        intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
-                        dblNetWeight: ctr === replicaCount - 1 ? lastNetWgt : lotNetWgt,
-                        dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
-                        dblPhyVsStated: currentLot.get('dblPhyVsStated'),
-                        strOrigin: currentLot.get('strOrigin'),
-                        intSubLocationId: currentLot.get('intSubLocationId'),
-                        intStorageLocationId: currentLot.get('intStorageLocationId'),
-                        dblQuantity: ctr === replicaCount - 1 ? lastQty : lotQty,
-                        dblGrossWeight: ctr === replicaCount - 1 ? lastGrossWgt : lotGrossWgt,
-                        dblTareWeight: ctr === replicaCount - 1 ? lastTareWgt : lotTareWgt,
-                        dblCost: currentLot.get('dblCost'),
-                        intUnitPallet: currentLot.get('intUnitPallet'),
-                        dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
-                        dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
-                        strContainerNo: currentLot.get('strContainerNo'),
-                        intEntityVendorId: currentLot.get('intEntityVendorId'),
-                        strGarden: currentLot.get('strGarden'),
-                        strMarkings: currentLot.get('strMarkings'),
-                        strGrade: currentLot.get('strGrade'),
-                        intOriginId: currentLot.get('intOriginId'),
-                        intSeasonCropYear: currentLot.get('intSeasonCropYear'),
-                        strVendorLotId: currentLot.get('strVendorLotId'),
-                        dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
-                        strRemarks: currentLot.get('strRemarks'),
-                        strCondition: currentLot.get('strCondition'),
-                        dtmCertified: currentLot.get('dtmCertified'),
-                        dtmExpiryDate: currentLot.get('dtmExpiryDate'),
-                        intSort: currentLot.get('intSor:'),
-                        strWeightUOM: currentLot.get('strWeightUOM'),
-                        intParentLotId: currentLot.get('intParentLotId'),
-                        strParentLotNumber: currentLot.get('strParentLotNumber'),
-                        strParentLotAlias: currentLot.get('strParentLotAlias'),
-                        strStorageLocation: currentLot.get('strStorageLocation'),
-                        strSubLocationName: currentLot.get('strSubLocationName'),
-                        dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor'),
-                        strLotAlias: currentLot.get('strLotAlias')
-                    });
-
-                    grdLotTracking.suspendEvents(true);
-
-                    var totalLotQty = 0;
-                    grdLotTracking.store.each(function (lot) {
-                        totalLotQty += lot.get('dblQuantity');
-                    });
-
-                    totalLotQty += (ctr === replicaCount - 1 ? lastQty : lotQty);
-
-                    if (totalLotQty > lineItemQty) {
-                        //Show this message only if before replicating lots, total quantity is already greater than or equal to line item quantity
-                        if (ctr === 0) {
-                            var itemNo = currentReceiptItem.get('strItemNo');
-                            iRely.Functions.showErrorDialog('The lots for ' + currentReceiptItem.get('strItemNo') + ' are fully replicated.');
-                        }
-                    }
-                    else {
-
-                        newLot.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, newLot));
-                        newLot.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, currentReceiptItem, newLot));
-                        newLot.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, currentReceiptItem, newLot));
-
-                        grdLotTracking.store.add(newLot);
-
-                        //Notify user if the last lot has excess/loss
-                        if (ctr == replicaCount - 1 && addedTareWeight > 0) {
-                            iRely.Functions.showCustomDialog('information', 'ok', 'Excess tare/loss noticed for the last lot. Please verify and correct if required.');
-                        }
-                        //Add Excess Lot
-                        if (ctr == replicaCount - 1 && excessTareWeight > 0) {
-                            // Calculate the last Gross and Tare weights.
-                            if ((replicaCount * lotQty) < convertedItemQty) {
-                                // Compute the last gross qty.
-                                if (lastGrossWgt > 0) {
-                                    lastGrossWgt = me.convertQtyBetweenUOM(lotCF, grossCF, lastQty);
-                                }
-
-                                // Compute the last net weight.
-                                lastGrossWgt = Ext.isNumeric(lastGrossWgt) ? lastGrossWgt : 0;
-                                lastTareWgt = Ext.isNumeric(lastTareWgt) ? lastTareWgt + excessTareWeight : excessTareWeight;
-                                lastNetWgt = lastGrossWgt - lastTareWgt;
+                try {
+                    // Get the first lot record (if there are multiple selected)
+                    var currentLot = selectedLot[0];
+                    var lots = [];
+                    var replicator = me.getReplicator(currentReceipt, currentReceiptItem, currentLot);
+                        replicator.createReplicator()
+                        .subscribe(function(val) {
+                            var lot = val.replicatedLot;
+                            lot.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, lot));
+                            lot.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, currentReceiptItem, lot));
+                            lot.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, currentReceiptItem, lot));
+                            lots.push(lot);
+                        }, function(err) {
+                            var a = replicator.getAnalyzer();
+                            if(a.excessive()) {
+                                var suggestion = Inventory.Utils.Number.format(a.getSuggestedLotQtyToReplicate(), '0,0.[00]');
+                                iRely.Functions.showErrorDialog("Stop! A quantity of " 
+                                    + Inventory.Utils.Math.roundWithPrecision(a.getLotQtyToReplicate(), 2) + " "
+                                    + a.getLot().get('strUnitMeasure')
+                                    + " is too small to replicate. This produces a huge number of lot replications. "
+                                    + Inventory.Utils.Number.format(a.getReplications(), '0,0')
+                                    + " times to be exact. Try something like "
+                                    + suggestion + " " + a.getLot().get('strUnitMeasure') + ".");
+                            } else {
+                                iRely.Functions.showErrorDialog(err);   
                             }
-
-                            var lastNewLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                                strUnitMeasure: currentLot.get('strUnitMeasure'),
-                                intItemUnitMeasureId: currentLot.get('intItemUnitMeasureId'),
-                                dblNetWeight: ctr === replicaCount - 1 ? lastNetWgt : lotNetWgt,
-                                dblStatedNetPerUnit: currentLot.get('dblStatedNetPerUnit'),
-                                dblPhyVsStated: currentLot.get('dblPhyVsStated'),
-                                strOrigin: currentLot.get('strOrigin'),
-                                intSubLocationId: currentLot.get('intSubLocationId'),
-                                intStorageLocationId: currentLot.get('intStorageLocationId'),
-                                dblQuantity: 1,
-                                dblGrossWeight: ctr === replicaCount - 1 ? lastGrossWgt : lotGrossWgt,
-                                dblTareWeight: ctr === replicaCount - 1 ? lastTareWgt : lotTareWgt,
-                                dblCost: currentLot.get('dblCost'),
-                                intUnitPallet: currentLot.get('intUnitPallet'),
-                                dblStatedGrossPerUnit: currentLot.get('dblStatedGrossPerUnit'),
-                                dblStatedTarePerUnit: currentLot.get('dblStatedTarePerUnit'),
-                                strContainerNo: currentLot.get('strContainerNo'),
-                                intEntityVendorId: currentLot.get('intEntityVendorId'),
-                                strGarden: currentLot.get('strGarden'),
-                                strMarkings: currentLot.get('strMarkings'),
-                                strGrade: currentLot.get('strGrade'),
-                                intOriginId: currentLot.get('intOriginId'),
-                                intSeasonCropYear: currentLot.get('intSeasonCropYear'),
-                                strVendorLotId: currentLot.get('strVendorLotId'),
-                                dtmManufacturedDate: currentLot.get('dtmManufacturedDate'),
-                                strRemarks: currentLot.get('strRemarks'),
-                                strCondition: currentLot.get('strCondition'),
-                                dtmCertified: currentLot.get('dtmCertified'),
-                                dtmExpiryDate: currentLot.get('dtmExpiryDate'),
-                                intSort: currentLot.get('intSor:'),
-                                strWeightUOM: currentLot.get('strWeightUOM'),
-                                intParentLotId: currentLot.get('intParentLotId'),
-                                strParentLotNumber: currentLot.get('strParentLotNumber'),
-                                strParentLotAlias: currentLot.get('strParentLotAlias'),
-                                strStorageLocation: currentLot.get('strStorageLocation'),
-                                strSubLocationName: currentLot.get('strSubLocationName'),
-                                dblLotUOMConvFactor: currentLot.get('dblLotUOMConvFactor'),
-                                strLotAlias: currentLot.get('strLotAlias')
-                            });
-
-                            lastNewLot.set('dblStatedNetPerUnit', me.calculateStatedNetPerUnit(currentReceipt, currentReceiptItem, lastNewLot));
-                            lastNewLot.set('dblStatedTotalNet', me.calculateStatedTotalNet(currentReceipt, currentReceiptItem, lastNewLot));
-                            lastNewLot.set('dblPhysicalVsStated', me.calculatePhysicalVsStated(currentReceipt, currentReceiptItem, lastNewLot));
-
-                            grdLotTracking.store.add(lastNewLot);
-                            //Notify user that the last lot has excess/loss
-                            iRely.Functions.showCustomDialog('information', 'ok', 'Excess tare/loss noticed for the last lot. Please verify and correct if required.');
-                        }
-                    }
-
-                    // call f function from above within a setTimeout.
-                    setTimeout(f(ctr, replicaCount), (ctr + 1) * 25);
-
-                    if (ctr === replicaCount - 1) {
-                        grdLotTracking.resumeEvents(true);
-
-                        //Calculate Gross/Net
-                        me.calculateGrossNet(currentReceiptItem, 1);
-
-                        //Calculate Line Total                        
-                        currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
-                    }
+                            Ext.MessageBox.hide();  
+                        }, function() {
+                            grdLotTracking.store.add(lots);
+                            Ext.MessageBox.hide();
+                            grdLotTracking.resumeEvents();
+                            if(lots.length > 0) {
+                                iRely.Functions.showInfoDialog("Replicated " + Inventory.Utils.Number.format(lots.length, '0,0') + " lot(s).");
+                                //Calculate Line Total                        
+                                me.calculateGrossNet(currentReceiptItem, 1);
+                                currentReceiptItem.set('dblLineTotal', me.calculateLineTotal(currentReceipt, currentReceiptItem));
+                            }
+                        });
+                } catch(e) {
+                    iRely.Functions.showErrorDialog(e);   
+                    Ext.MessageBox.hide(); 
+                    grdLotTracking.resumeEvents();
                 }
-            };
-
-            // Call doReplicateLot in a setTimeout to give chance for the msg box to appear.
-            setTimeout(doReplicateLot, 200);
+            }, 5);
         }
     },
-
+    
     onVendorDrilldown: function (combo) {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
@@ -6498,7 +6283,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dblFranchise = Ext.isNumeric(dblFranchise) ? dblFranchise * 100 : 0.00;                   
                     
                     if (dblShippedWeightUOMConvFactor != dblWeightUOMConvFactor){
-                        dblOrderNetShippedWt = me.convertQtyBetweenUOM(
+                        dblOrderNetShippedWt = Inventory.Utils.Uom.convertQtyBetweenUOM(
                             dblShippedWeightUOMConvFactor, 
                             dblWeightUOMConvFactor, 
                             dblOrderNetShippedWt
@@ -6513,16 +6298,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        dblTotalWeightLoss = ic.utils.Math.round(dblTotalWeightLoss, 2);
+        dblTotalWeightLoss = Inventory.Utils.Math.round(dblTotalWeightLoss, 2);
         dblTotalWeightLoss = dblTotalWeightLoss ? dblTotalWeightLoss : 0.00; 
 
-        dblWeightLossPercentage = ic.utils.Math.round(
+        dblWeightLossPercentage = Inventory.Utils.Math.round(
             dblTotalOrderNetShippedWt != 0 ? (dblTotalReceivedWt - dblTotalOrderNetShippedWt) / dblTotalOrderNetShippedWt * 100 : 0.00
             , 2
         );
         dblWeightLossPercentage = dblWeightLossPercentage ? dblWeightLossPercentage : 0.00; 
 
-        dblTotalFranchise = ic.utils.Math.round(dblTotalFranchise, 2);
+        dblTotalFranchise = Inventory.Utils.Math.round(dblTotalFranchise, 2);
         dblTotalFranchise = dblTotalFranchise ? dblTotalFranchise : 0.00;        
 
         return {
@@ -6733,7 +6518,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (!(context && current)) return;
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/inventoryreceipt/calculatecharges',
             params: {
                 id: current.get('intInventoryReceiptId')
@@ -6905,7 +6690,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (grdInventoryReceipt) { grdInventoryReceipt.getSelectionModel().deselectAll(); }
 
         var doRecap = function (currentRecord) {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: (currentRecord.get('strReceiptType') === 'Inventory Return') ? './inventory/api/inventoryreceipt/return' : './inventory/api/inventoryreceipt/receive',
                 params: {
                     strTransactionId: currentRecord.get('strReceiptNumber'),
@@ -6967,7 +6752,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             case 'pgeIncomingInspection':
                 var updateReceiptInspection = function () {
                     if (current) {
-                        ic.utils.ajax({
+                        Inventory.Utils.ajax({
                             url: './inventory/api/inventoryreceipt/updatereceiptinspection',
                             params: {
                                 id: current.get('intInventoryReceiptId')
@@ -7187,7 +6972,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         var processReceiptToReturn = function () {
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: './Inventory/api/InventoryReceipt/ReturnReceipt',
                 params: {
                     id: current.get('intInventoryReceiptId')
@@ -7239,7 +7024,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         // Call an ajax to validate the receipt if receipt is valid for return. 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './Inventory/api/InventoryReceipt/CheckReceiptForValidReturn',
             params: {
                 receiptId: current.get('intInventoryReceiptId')
@@ -7313,7 +7098,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var doPost = function () {
             var current = currentRecord;
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: (current.get('strReceiptType') === 'Inventory Return') ? './Inventory/api/InventoryReceipt/Return' : './Inventory/api/InventoryReceipt/Receive',
                 params: {
                     strTransactionId: current.get('strReceiptNumber'),
@@ -7468,7 +7253,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var ordered = current.get('dblOrderQty');
         var qtyToReceive = plugin.getActiveEditor().getValue();
         if (origCF > 0 && newCF > 0) {
-            qtyToReceive = me.convertQtyBetweenUOM(origCF, newCF, qtyToReceive); //Ordered - Received;
+            qtyToReceive = Inventory.Utils.Uom.convertQtyBetweenUOM(origCF, newCF, qtyToReceive); //Ordered - Received;
             current.set('dblOpenReceive', qtyToReceive);
             plugin.getActiveEditor().field.setValue(qtyToReceive);
         }
@@ -7542,7 +7327,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     calculateLinkedItems: function(current, activeRecord){
-        var parentLinkId = activeRecord.get('intParentItemLinkId'),
+        var me = this,
+            parentLinkId = activeRecord.get('intParentItemLinkId'),
             itemDetailStore = current.tblICInventoryReceiptItems(),
             linkType = activeRecord.get('strItemType'),
             searchURL;
@@ -7570,7 +7356,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             //     break;
         }
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: searchURL,
             method: 'get'
         }).subscribe(
@@ -7578,7 +7364,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var result = Ext.decode(successResponse.responseText);
                 Ext.Array.forEach(result.data, function(rec) {
                     var childRecord = _.find(itemDetailStore.data.items, function(x){
-                        return x.get('intItemId') == rec.intComponentItemId &&  x.get('intUnitMeasureId') == rec.intComponentUOMId && x.get('intChildItemLinkId') == parentLinkId && !x.dummy;
+                        return x.get('intItemId') == rec.intComponentItemId 
+                            && x.get('intUnitMeasureId') == rec.intComponentUOMId 
+                            && x.get('intChildItemLinkId') == parentLinkId 
+                            && !x.dummy;
                     });
 
                     if(childRecord){
@@ -7592,6 +7381,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }
                         childRecord.set('dblOpenReceive', dblQty);
                         childRecord.set('dblLineTotal', dblQty * childRecord.get('dblUnitCost'));
+
+                        me.calculateGrossNet(childRecord, 1);
                     }
 
                 });
@@ -7649,7 +7440,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         };
 
         if(bundleType == 'Kit'){
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 url: searchURL,
                 method: 'get'
             }).subscribe(
@@ -7997,7 +7788,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
         };
 
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/itemaddon/getitemaddons?intItemId=' + itemAddOnId + '&intItemUOMId=' + itemUOMId 
                 + '&intLocationId=' + intLocationId + '&dblQuantity=1',
             method: 'get'
@@ -8176,7 +7967,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             iRely.Functions.showErrorDialog('Something went wrong while getting the item cost from the Vendor Pricing setup.');
         };
         
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/itemsubstitute/getitemsubstitutes?intItemId=' + itemSubstituteId + '&intItemUOMId=' + itemUOMId 
                 + '&intLocationId=' + intLocationId + '&dblQuantity=1',
             method: 'get'
@@ -8512,7 +8303,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     checkVendorCost: function(vm, receipt, dtmReceiptDate, oldValue) {
         var me = this;
-        ic.utils.ajax({
+        Inventory.Utils.ajax({
             url: './inventory/api/item/searchvendorpricing',
             filters: [
                 {
@@ -8880,5 +8671,4 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         })
     }
-
 });

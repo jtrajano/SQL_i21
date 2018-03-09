@@ -365,7 +365,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
 
         if (current) {
             iRely.Msg.showWait('Duplicating Storage Unit...');
-            ic.utils.ajax({
+            Inventory.Utils.ajax({
                 timeout: 120000,
                 url: './Inventory/api/StorageLocation/DuplicateStorageLocation',
                 params: {

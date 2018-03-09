@@ -34,7 +34,6 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.grid.plugin.CellEditing',
         'Ext.view.Table',
         'Ext.grid.column.Check',
-        'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
@@ -1954,7 +1953,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colLotStorageLocation',
                                                                         width: 100,
                                                                         dataIndex: 'strUOM',
-                                                                        text: 'Storage Location'
+                                                                        text: 'Storage Unit'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -2322,15 +2321,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         editor: {
                                                             xtype: 'numericfield',
                                                             currencyField: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colAccrue',
-                                                        width: 45,
-                                                        text: 'Accrue',
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
                                                         }
                                                     },
                                                     {

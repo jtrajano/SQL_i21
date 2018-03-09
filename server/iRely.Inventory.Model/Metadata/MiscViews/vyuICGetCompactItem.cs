@@ -66,6 +66,8 @@ namespace iRely.Inventory.Model
         public string strMedicationMessage { get; set; }
         public string strIngredientMessage { get; set; }
         public string strHazmatMessage { get; set; }
+        public string strMaterialPackUOM { get; set; }
+        public int? intMaterialPackTypeId { get; set; }
 
         public tblICItem tblICItem { get; set; }        
     }

@@ -58,7 +58,17 @@ Ext.define('Inventory.model.ShipmentCharge', {
         { name: 'dblForexRate', type: 'float', allowNull: true }, 
         { name: 'dblQuantity', type: 'float', allowNull: true },
         { name: 'dblTax', type: 'float', allowNull: true },
-        { name: 'ysnAccrue', type: 'boolean' },
+        {
+            name: 'ysnAccrue', 
+            type: 'boolean',
+            convert: function(value, record){
+                if(record){
+                    return record.get('intEntityVendorId') ? true : false;
+                } else {
+                    return value;
+                }
+            }
+        },
         { name: 'ysnPrice', type: 'boolean' },
         { name: 'strChargesLink', type: 'string', allowNull: true },
         { name: 'strItemNo', type: 'string', auditKey: true }
@@ -107,21 +117,21 @@ Ext.define('Inventory.model.ShipmentCharge', {
             if (data) {
                 ShipmentCustomerId = data.get('intEntityCustomerId');
             }
-            if (this.get('ysnAccrue') === true) {
-                if (iRely.Functions.isEmpty(this.get('intEntityVendorId'))) {
-                    errors.add({
-                        field: 'strVendorName',
-                        message: 'Vendor for Other Charge Item ' + this.get('strItemNo') + '  is required to accrue.'
-                    })
-                }
+            //if (this.get('ysnAccrue') === true) {
+                // if (iRely.Functions.isEmpty(this.get('intEntityVendorId'))) {
+                //     errors.add({
+                //         field: 'strVendorName',
+                //         message: 'Vendor for Other Charge Item ' + this.get('strItemNo') + '  is required to accrue.'
+                //     })
+                // }
 
-                if (this.get('intEntityVendorId') === ShipmentCustomerId) {
-                    errors.add({
-                        field: 'strVendorName',
-                        message: 'Cannot accrue to a customer. Select a third party vendor.'
-                    })
-                }
-            }
+                // if (this.get('intEntityVendorId') === ShipmentCustomerId) {
+                //     errors.add({
+                //         field: 'strVendorName',
+                //         message: 'Cannot accrue to a customer. Select a third party vendor.'
+                //     })
+                // }
+            //}
         }
 
         return errors;
