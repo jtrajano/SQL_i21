@@ -54,6 +54,7 @@ BEGIN TRY
 			,[ysnIncludeInventory]
 			,[intCategoryId]
 			,[intCompanyLocationId]
+			,[intUnitMeasureId]
 			,[intCreatedUserId]
 			,[dtmCreated]
 			,[intLastModifiedUserId]
@@ -65,6 +66,7 @@ BEGIN TRY
 			,[ysnIncludeInventory]
 			,[intCategoryId]
 			,intCompanyLocationId
+			,intUnitMeasureId
 			,[intCreatedUserId]
 			,GETDATE()
 			,[intLastModifiedUserId]
@@ -75,6 +77,7 @@ BEGIN TRY
 				,ysnIncludeInventory BIT
 				,intCategoryId INT
 				,intCompanyLocationId INT
+				,intUnitMeasureId INT
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
@@ -137,6 +140,7 @@ BEGIN TRY
 			,[ysnIncludeInventory] = x.ysnIncludeInventory
 			,[intCategoryId] = x.intCategoryId
 			,intCompanyLocationId = x.intCompanyLocationId
+			,intUnitMeasureId = x.intUnitMeasureId
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
@@ -145,6 +149,7 @@ BEGIN TRY
 				,ysnIncludeInventory BIT
 				,intCategoryId INT
 				,intCompanyLocationId INT
+				,intUnitMeasureId INT
 				,intLastModifiedUserId INT
 				) x
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
