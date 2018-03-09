@@ -81,6 +81,9 @@ BEGIN
 		
 		SELECT @maxInvoiceId = MAX(intInvoiceId) FROM tblARInvoice
 		SET @maxInvoiceId = ISNULL(@maxInvoiceId, 0)
+
+		IF EXISTS (SELECT NULL FROM sys.key_constraints WHERE name = 'UK_tblARInvoice_strInvoiceNumber')
+			ALTER TABLE tblARInvoice DROP CONSTRAINT [UK_tblARInvoice_strInvoiceNumber]
 		
 			--================================================
 			--     Insert into tblARInvoice --AG INVOICES--
@@ -405,7 +408,9 @@ BEGIN
 			
 		 End
 
-			
+		IF NOT EXISTS (SELECT NULL FROM sys.key_constraints WHERE name = 'UK_tblARInvoice_strInvoiceNumber')
+			ALTER TABLE tblARInvoice ADD CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber])
+						
 			--==========================================================
 			--     Insert into tblARInvoiceDetail - AG INVOICE DETAILS
 			--==========================================================
