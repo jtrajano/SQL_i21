@@ -3053,25 +3053,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'checkcolumn',
                                                                         itemId: 'colChargeEntity',
                                                                         width: 85,
-                                                                        text: 'Charge Entity',
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'strChargeEntity',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Charge Entity',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            pickerWidth: 70,
-                                                                            itemId: 'cboChargeEntity',
-                                                                            displayField: 'strChargeEntity',
-                                                                            valueField: 'strChargeEntity'
-                                                                        }
+                                                                        text: 'Charge Entity'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

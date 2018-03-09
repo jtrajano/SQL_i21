@@ -59,14 +59,18 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'dtmLastFreeWhseDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'dblTotalCharge', type: 'float' },
         { name: 'dblTotalChargeTax', type: 'float'},
-        { name: 'intItemCount', type: 'int'}
+        { name: 'intItemCount', type: 'int'},
+        { name: 'strVendorName', type: 'string', allowNull: true },
+        { name: 'strCurrency', type: 'string', allowNull: true },
+        { name: 'strLocationName', type: 'string', allowNull: true },
+        { name: 'strFromLocation', type: 'string', allowNull: true }
     ],
 
     validators: [
         {type: 'presence', field: 'dtmReceiptDate'},
         {type: 'presence', field: 'strReceiptType'},
-        {type: 'presence', field: 'intLocationId'},
-        {type: 'presence', field: 'intCurrencyId'}
+        {type: 'presence', field: 'strLocationName'},
+        {type: 'presence', field: 'strCurrency'}
     ],
 
     validate: function(options) {
@@ -74,22 +78,22 @@ Ext.define('Inventory.model.Receipt', {
         if (this.get('strReceiptType') === 'Transfer Order') {
             if (iRely.Functions.isEmpty(this.get('intTransferorId'))) {
                 errors.add({
-                    field: 'intTransferorId',
+                    field: 'strFromLocation', 
                     message: 'From Location must be present.'
                 })
             }
 
             if (this.get('intLocationId') === this.get('intTransferorId')) {
                 errors.add({
-                    field: 'intLocationId',
-                    message: 'Value of Location and From Location must be of different.'
+                    field: 'strFromLocation', 
+                    message: 'Value of From Location and To Location must be of different.'
                 })
             }
         }
         else {
             if (iRely.Functions.isEmpty(this.get('intEntityVendorId'))) {
                 errors.add({
-                    field: 'intEntityVendorId',
+                    field: 'strVendorName', 
                     message: 'Vendor must be present.'
                 })
             }

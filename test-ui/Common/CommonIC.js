@@ -24,8 +24,8 @@ Ext.define('Inventory.CommonIC', {
     addInventoryItem: function (t,next, item, itemdesc, category, commodity,lottrack, saleuom, receiveuom,priceLC, priceSC, priceAC) {
         new iRely.FunctionalTest().start(t, next)
 
-            //.clickMenuFolder('Inventory','Folder')
-            //.clickMenuScreen('Items','Screen')
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Items','Screen')
             .waitUntilLoaded()
             .clickButton('New')
             .waitUntilLoaded('')
@@ -91,8 +91,8 @@ Ext.define('Inventory.CommonIC', {
 
             .displayText('===== Setup Item Pricing=====')
             .clickTab('Pricing')
-            .waitUntilLoaded('').waitUntilLoaded('')
-            .verifyGridData('Pricing', 1, 'strLocationName', '0001-Fort Wayne')
+            .waitUntilLoaded('')
+            .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
             .enterGridData('Pricing', 1, 'dblLastCost', priceLC)
             .enterGridData('Pricing', 1, 'dblStandardCost', priceSC)
             .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
@@ -107,7 +107,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
             .clickButton('Close')
             .waitUntilLoaded()
-            //.clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .displayText('===== Item Created =====')
             .done();
@@ -190,7 +190,7 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Setup Item Pricing=====')
             .clickTab('Pricing')
             .waitUntilLoaded('')
-            .verifyGridData('Pricing', 1, 'strLocationName', '0001-Fort Wayne')
+            .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
             .enterGridData('Pricing', 1, 'dblLastCost', priceLC)
             .enterGridData('Pricing', 1, 'dblStandardCost', priceSC)
             .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
@@ -231,321 +231,10 @@ Ext.define('Inventory.CommonIC', {
 
             //region
             .displayText('===== Scenario 1. Add stock UOM first  =====')
-            //.clickMenuFolder('Inventory','Folder')
-            //.waitUntilLoaded()
+            .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded()
             .clickMenuScreen('Inventory UOM','Screen')
-            //.filterGridRecords('Search', 'From', commoditycode)
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_Pounds')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                     
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid')
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .waitUntilLoaded().waitUntilLoaded()
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_Pounds')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_Pounds')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            
-                            .done()    
-                    })
-                        
-
-                        .done()
-                },
-                continueOnFail: true
-            })
-            .clickButton('Close')
-            .clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-            .displayText('===== Add stock UOM first Done  =====')
-            //endregion
-
-
-            //region
-            .displayText('===== Scenario 2. Add Conversion UOMs =====')
-            .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_50 lb bag')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid').waitUntilLoaded().waitUntilLoaded()
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_50 lb bag')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_50 lb bag')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',1,'colConversionTo','Test_Pounds','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 1, 'dblConversionToStock', '50 ')
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            .waitUntilLoaded()
-                            .done()
-                        })
-                        .done();
-                },
-                continueOnFail: true
-            })
-            .clickButton('Close')
-            //.clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-
-            //add another conversion
-            .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_Bushels')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid')
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .waitUntilLoaded('')
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_Bushels')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_Bushels')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',1,'colConversionTo','Test_Pounds','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 1, 'dblConversionToStock', '56 ')
-                            .verifyStatusMessage('Edited')
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            .done()
-                        })
-                        .done();
-                },
-                continueOnFail: true
-            })
-            
-            .clickButton('Close')
-            //.clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-
-            //add another conversion
-            .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_KG')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid')
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .waitUntilLoaded('')
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_KG')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_KG')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',1,'colConversionTo','Test_Pounds','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 1, 'dblConversionToStock', '2.20462')
-                            .verifyStatusMessage('Edited')
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            .done()
-                        })
-                        .done();
-                },
-                continueOnFail: true
-            })
-           
-            .clickButton('Close')
-            //.clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-
-            //add another conversion
-            .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_60 KG bags')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid')
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .waitUntilLoaded('')
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_60 KG bags')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_60 KG bags')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',1,'colConversionTo','Test_Pounds','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 1, 'dblConversionToStock', '132.2772')
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',2,'colConversionTo','Test_KG','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 2, 'dblConversionToStock', '60')
-                            .verifyStatusMessage('Edited')
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            .done()
-                        })
-                        .done();
-                },
-                continueOnFail: true
-            })
-           
-            .clickButton('Close')
-            //.clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-
-            //add another conversion
-            .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_25 KG bags')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid')
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .waitUntilLoaded('')
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_25 KG bags')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_25 KG bags')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',1,'colConversionTo','Test_Pounds','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 1, 'dblConversionToStock', '55.1155')
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',2,'colConversionTo','Test_KG','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 2, 'dblConversionToStock', '25')
-                            .verifyStatusMessage('Edited')
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            .done()
-                        })
-                        .done();
-                },
-                continueOnFail: true
-            })
-
-            .clickButton('Close')
-            //.clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-
-            //add another conversion
-            .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('UOM', 'FilterGrid', 'Test_50 KG bags')
-            .waitUntilLoaded()
-            .continueIf({
-                expected: true,
-                actual: function (win,next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdUOM').store.getCount() == 0;
-                },
-
-                success: function(next){
-                    new iRely.FunctionalTest().start(t, next)
-                        .clearTextFilter('FilterGrid')
-                        .clickButton('InsertUOM')
-                        .addFunction(function(next){
-                            var win = Ext.WindowManager.getActive();
-                            var recCount = win.down('#grdUOM').store.getCount();
-                            new iRely.FunctionalTest().start(t, next)
-                            .waitUntilLoaded('')
-                            .enterGridData('UOM', recCount, 'strUnitMeasure', 'Test_50 KG bags')
-                            .enterGridData('UOM', recCount, 'strSymbol', 'Test_50 KG bags')
-                            .selectGridComboBoxRowNumber('UOM',recCount,'strUnitType',6)
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',1,'colConversionTo','Test_Pounds','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 1, 'dblConversionToStock', '110.231')
-                            .clickButton('InsertConversion')
-                            .selectGridComboBoxRowValue('Conversion',2,'colConversionTo','Test_KG','strUnitMeasure',1)
-                            .waitUntilLoaded()
-                            .enterGridData('Conversion', 2, 'dblConversionToStock', '50')
-                            .verifyStatusMessage('Edited')
-                            .clickButton('Save')
-                            .waitUntilLoaded()
-                            .verifyStatusMessage('Saved')
-                            .done()
-                        })
-                        .done();
-                },
-                continueOnFail: true
-            })
-            .clickButton('Close')    
-            //.clearTextFilter('FilterGrid')
-            .waitUntilLoaded()
-
-
-            .displayText('===== Add Conversion UOM Done  =====')
-            //endregion
-
-        .displayText('===== Add Commodity =====')
-        .clickMenuScreen('Commodities','Screen')
-        ////////////////////////////////////////////////////////
-         .filterGridRecords('Search', 'From', commoditycode)
+            .filterGridRecords('Search', 'FilterGrid', 'Test_Pounds')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
@@ -558,31 +247,266 @@ Ext.define('Inventory.CommonIC', {
                     new iRely.FunctionalTest().start(t, next)
                         .clickButton('New')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','CommodityCode', commoditycode)
-                        .enterData('Text Field','Description', description)
-                        .enterData('Text Field','DecimalsOnDpr','6.00')
-
-                        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
-                        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
-                        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','Test_50 lb bag','strUnitMeasure')
-                        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Test_Bushels','strUnitMeasure')
-                            .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','Test_25 KG bags','strUnitMeasure')
-                        .selectGridComboBoxRowValue('Uom',5,'strUnitMeasure','Test_60 KG bags','strUnitMeasure')
-
+                        .enterData('Text Field','UnitMeasure','Test_Pounds')
+                        .enterData('Text Field','Symbol','Test_Pounds')
+                        .selectComboBoxRowNumber('UnitType',6,0)
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
                         .clickButton('Close')
+
                         .done();
                 },
                 continueOnFail: true
             })
-        ////////////////////////////////////////////////////////
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+            .displayText('===== Add stock UOM first Done  =====')
+            //endregion
 
-        
-        
+
+            //region
+            .displayText('===== Scenario 2. Add Conversion UOMs =====')
+            .clickMenuScreen('Inventory UOM','Screen')
+            .filterGridRecords('Search', 'FilterGrid', 'Test_50 lb bag')
+            .waitUntilLoaded()
+            .continueIf({
+                expected: true,
+                actual: function (win,next) {
+                    new iRely.FunctionalTest().start(t, next)
+                    return win.down('#grdSearch').store.getCount() == 0;
+                },
+
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+
+                        .clickButton('New')
+                        .waitUntilLoaded('')
+                        .enterData('Text Field','UnitMeasure','Test_50 lb bag')
+                        .enterData('Text Field','Symbol','Test_50 lb bag')
+
+                        .selectComboBoxRowNumber('UnitType',7,0)
+                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
+//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .waitUntilLoaded()
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '50 ')
+                        .verifyStatusMessage('Edited')
+                        .clickButton('Save')
+                        .waitUntilLoaded()
+                        .verifyStatusMessage('Saved')
+                        .clickButton('Close')
+                        .waitUntilLoaded()
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+
+            //add another conversion
+            .filterGridRecords('Search', 'FilterGrid', 'Test_Bushels')
+            .waitUntilLoaded()
+            .continueIf({
+                expected: true,
+                actual: function (win,next) {
+                    new iRely.FunctionalTest().start(t, next)
+                    return win.down('#grdSearch').store.getCount() == 0;
+                },
+
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+
+                        .clickButton('New')
+                        .waitUntilLoaded('')
+                        .enterData('Text Field','UnitMeasure','Test_Bushels')
+                        .enterData('Text Field','Symbol','Test_Bushels')
+                        .selectComboBoxRowNumber('UnitType',6,0)
+                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
+//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '56 ')
+                        .verifyStatusMessage('Edited')
+                        .clickButton('Save')
+                        .waitUntilLoaded()
+                        .verifyStatusMessage('Saved')
+                        .clickButton('Close')
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+
+            //add another conversion
+            .filterGridRecords('Search', 'FilterGrid', 'Test_KG')
+            .waitUntilLoaded()
+            .continueIf({
+                expected: true,
+                actual: function (win,next) {
+                    new iRely.FunctionalTest().start(t, next)
+                    return win.down('#grdSearch').store.getCount() == 0;
+                },
+
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+
+                        .clickButton('New')
+                        .waitUntilLoaded('')
+                        .enterData('Text Field','UnitMeasure','Test_KG')
+                        .enterData('Text Field','Symbol','Test_KG')
+                        .selectComboBoxRowNumber('UnitType',6,0)
+                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
+//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '2.20462')
+                        .verifyStatusMessage('Edited')
+                        .clickButton('Save')
+                        .waitUntilLoaded()
+                        .verifyStatusMessage('Saved')
+                        .clickButton('Close')
+
+
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+
+            //add another conversion
+            .filterGridRecords('Search', 'FilterGrid', 'Test_60 KG bags')
+            .waitUntilLoaded()
+            .continueIf({
+                expected: true,
+                actual: function (win,next) {
+                    new iRely.FunctionalTest().start(t, next)
+                    return win.down('#grdSearch').store.getCount() == 0;
+                },
+
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+
+                        .clickButton('New')
+                        .waitUntilLoaded('')
+                        .enterData('Text Field','UnitMeasure','Test_60 KG bags')
+                        .enterData('Text Field','Symbol','Test_60 KG bags')
+                        .selectComboBoxRowNumber('UnitType',7,0)
+                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '132.2772')
+                        .selectGridComboBoxRowValue('Conversion',2,'colOtherUOM','Test_KG','strUnitMeasure',1)
+                        .enterGridData('Conversion', 2, 'dblConversionToStock', '60')
+                        .verifyStatusMessage('Edited')
+                        .clickButton('Save')
+                        .waitUntilLoaded()
+                        .verifyStatusMessage('Saved')
+                        .clickButton('Close')
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+
+            //add another conversion
+            .filterGridRecords('Search', 'FilterGrid', 'Test_25 KG bags')
+            .waitUntilLoaded()
+            .continueIf({
+                expected: true,
+                actual: function (win,next) {
+                    new iRely.FunctionalTest().start(t, next)
+                    return win.down('#grdSearch').store.getCount() == 0;
+                },
+
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+
+                        .clickButton('New')
+                        .waitUntilLoaded('')
+                        .enterData('Text Field','UnitMeasure','Test_25 KG bags')
+                        .enterData('Text Field','Symbol','Test_25 KG bags')
+                        .selectComboBoxRowNumber('UnitType',7,0)
+                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
+//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '55.1155')
+                        .selectGridComboBoxRowValue('Conversion',2,'colOtherUOM','Test_KG','strUnitMeasure',1)
+                        .enterGridData('Conversion', 2, 'dblConversionToStock', '25')
+                        .verifyStatusMessage('Edited')
+                        .clickButton('Save')
+                        .waitUntilLoaded()
+                        .verifyStatusMessage('Saved')
+                        .clickButton('Close')
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+
+
+            //add another conversion
+            .filterGridRecords('Search', 'FilterGrid', 'Test_50 KG bags')
+            .waitUntilLoaded()
+            .continueIf({
+                expected: true,
+                actual: function (win,next) {
+                    new iRely.FunctionalTest().start(t, next)
+                    return win.down('#grdSearch').store.getCount() == 0;
+                },
+
+                success: function(next){
+                    new iRely.FunctionalTest().start(t, next)
+
+                        .clickButton('New')
+                        .waitUntilLoaded('')
+                        .enterData('Text Field','UnitMeasure','Test_50 KG bags')
+                        .enterData('Text Field','Symbol','Test_50 KG bags')
+                        .selectComboBoxRowNumber('UnitType',7,0)
+                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
+//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '110.231')
+                        .selectGridComboBoxRowValue('Conversion',2,'colOtherUOM','Test_KG','strUnitMeasure',1)
+                        .enterGridData('Conversion', 2, 'dblConversionToStock', '50')
+                        .verifyStatusMessage('Edited')
+                        .clickButton('Save')
+                        .waitUntilLoaded()
+                        .verifyStatusMessage('Saved')
+                        .clickButton('Close')
+
+                        .done();
+                },
+                continueOnFail: true
+            })
+            .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+
+
+            .displayText('===== Add Conversion UOM Done  =====')
+            //endregion
+
+        .displayText('===== Add Commodity =====')
+        .clickMenuScreen('Commodities','Screen')
+        .clickButton('New')
         .waitUntilLoaded('')
+        .enterData('Text Field','CommodityCode', commoditycode)
+        .enterData('Text Field','Description', description)
+        .enterData('Text Field','DecimalsOnDpr','6.00')
+
+        .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
+        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
+        .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','Test_50 lb bag','strUnitMeasure')
+        .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Test_Bushels','strUnitMeasure')
+            .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','Test_25 KG bags','strUnitMeasure')
+        .selectGridComboBoxRowValue('Uom',5,'strUnitMeasure','Test_60 KG bags','strUnitMeasure')
+
+        .clickButton('Save')
+        .waitUntilLoaded()
+        .verifyStatusMessage('Saved')
         .clickButton('Close')
+        .clickMenuFolder('Inventory','Folder')
+        .waitUntilLoaded('')
         .displayText('===== Add Commodity Done =====')
 
         .done();
@@ -616,14 +540,14 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
             .displayText('===== Add New Category - Inventory Type =====')
-            //.clickMenuFolder('Inventory','Folder')
-           // .clickMenuScreen('Categories','Screen')
+            .clickMenuFolder('Inventory','Folder')
+            .clickMenuScreen('Categories','Screen')
             .clickButton('New')
             .waitUntilLoaded('')
             .enterData('Text Field','CategoryCode', categorycode)
             .enterData('Text Field','Description', description)
             .selectComboBoxRowNumber('InventoryType',inventorytype,0)
-            //.selectComboBoxRowNumber('CostingMethod',1,0)
+            .selectComboBoxRowNumber('CostingMethod',1,0)
             .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
 
             .clickTab('GL Accounts')
@@ -647,7 +571,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
             .verifyStatusMessage('Saved')
             .clickButton('Close')
-            // .clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .displayText('===== Add New Category - Inventory Type Done =====')
             .done();
@@ -668,7 +592,7 @@ Ext.define('Inventory.CommonIC', {
 
 
             .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
-            // .clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Receipts','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -676,8 +600,6 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowNumber('ReceiptType',4,0)
             .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
             .selectComboBoxRowNumber('Location', location,0)
-            .clickButton('Close')
-            .clickButton('InsertInventoryReceipt')
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
@@ -705,9 +627,8 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Close')
             .waitUntilLoaded('')
             .waitUntilLoaded('')
-            .clickButton('Close')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
-            //.clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .waitUntilLoaded('')
 
@@ -728,7 +649,7 @@ Ext.define('Inventory.CommonIC', {
 
 
             .displayText('===== Creeating Direct IR for Lotted Item  =====')
-            // .clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Receipts','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -736,8 +657,6 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowNumber('ReceiptType',4,0)
             .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
             .selectComboBoxRowNumber('Location',location,0)
-            .clickButton('Close')
-            .clickButton('InsertInventoryReceipt')
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
@@ -776,7 +695,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .displayText('===== Creating Direct IR for Non Lotted Done =====')
-            //.clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .waitUntilLoaded('')
 
@@ -797,7 +716,7 @@ Ext.define('Inventory.CommonIC', {
         var linetotal =  qtytoreceive * cost;
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Purchasing (A/P)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .clickMenuScreen('Purchase Orders','Screen')
             .clickButton('New')
             .waitUntilLoaded('')
@@ -855,7 +774,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            //.clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .waitUntilLoaded('')
 
             .done();
@@ -873,7 +792,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Purchasing (A/P)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .clickMenuScreen('Purchase Orders','Screen')
             .clickButton('New')
             .waitUntilLoaded('')
@@ -962,7 +881,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            //.clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .waitUntilLoaded('')
 
             .done();
@@ -980,7 +899,7 @@ Ext.define('Inventory.CommonIC', {
         var linetotal =  qtytoreceive * cost;
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Purchasing (A/P)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .clickMenuScreen('Purchase Orders','Screen')
             .clickButton('New')
             .waitUntilLoaded('')
@@ -1053,9 +972,9 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            //.clickMenuFolder('Purchasing (Accounts Payable)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .waitUntilLoaded('')
-            //.clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
 
             .done();
@@ -1073,7 +992,7 @@ Ext.define('Inventory.CommonIC', {
         var linetotal =  qtytoreceive * cost;
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Purchasing (A/P)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .clickMenuScreen('Purchase Orders','Screen')
             .clickButton('New')
             .waitUntilLoaded('')
@@ -1089,7 +1008,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Purchasing (A/P)','Folder')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Receipts','Screen')
@@ -2334,7 +2253,7 @@ Ext.define('Inventory.CommonIC', {
             .clickMenuScreen('Items','Screen')
             .waitUntilLoaded()
             .clickButton('New')
-            .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
+            .waitUntilLoaded('')
             .verifyScreenShown('icitem')
 
 
@@ -2374,8 +2293,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
             .clickButton('Close')
             .waitUntilLoaded()
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
             .displayText('===== Other Charge Item Created =====')
             .done();
 
@@ -2416,9 +2334,8 @@ Ext.define('Inventory.CommonIC', {
             .clickMenuScreen('Users','Screen')
             .waitUntilLoaded()
             .doubleClickSearchRowValue(user, 'strUsername', 1)
-            //.waitUntilLoaded('ementity')
-            .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-            .clickTab('User').waitUntilLoaded().waitUntilLoaded()
+            .waitUntilLoaded('ementity')
+            .clickTab('User')
             .waitUntilLoaded()
             .clickTab('User Roles')
 
@@ -2491,8 +2408,7 @@ Ext.define('Inventory.CommonIC', {
 
             .clickButton('Close')
             .waitUntilLoaded()
-            .clickButton('Close')
-           // .clickMenuFolder('System Manager','Folder')
+            .clickMenuFolder('System Manager','Folder')
             .done();
     },
 
@@ -2503,17 +2419,14 @@ Ext.define('Inventory.CommonIC', {
             .clickMenuScreen('Company Configuration','Screen')
             .waitUntilLoaded('smcompanypreference')
             .waitUntilLoaded('')
-            .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
             .selectGridRowNumber('Settings',6)
             .waitUntilLoaded('')
             .selectComboBoxRowValue('ARAccount', araccountid,'ARAccount',1)
             .waitUntilLoaded('')
             .verifyData('Combo Box','ARAccount',araccountid)
-            //.clickButton('Ok')
-            .clickButton('Save')
+            .clickButton('Ok')
             .waitUntilLoaded('')
-            .clickButton('Close')
-            //.clickMenuFolder('System Manager','Folder')
+            .clickMenuFolder('System Manager','Folder')
             .waitUntilLoaded()
 
             .done();
@@ -2536,9 +2449,7 @@ Ext.define('Inventory.CommonIC', {
             .verifyData('Combo Box','APAccount',apaccountid)
             .clickButton('Save')
             .clickButton('Close')
-            .waitUntilLoaded()
-            .clickButton('Close')
-            //.clickMenuFolder('Common Info','Folder')
+            .clickMenuFolder('Common Info','Folder')
             .done();
     },
 
@@ -2587,8 +2498,8 @@ Ext.define('Inventory.CommonIC', {
             })
             .clickButton('Close')
             .waitUntilLoaded()
-            //.clickMenuFolder('Common Info','Folder')
-            
+            .clickMenuFolder('Common Info','Folder')
+            .waitUntilLoaded()
             .done();
     },
 
@@ -2652,8 +2563,7 @@ Ext.define('Inventory.CommonIC', {
                 },
                 continueOnFail: true
             })
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Common Info','Folder')
             .waitUntilLoaded()
             .done();
     },
@@ -2704,8 +2614,7 @@ Ext.define('Inventory.CommonIC', {
             })
 
             .waitUntilLoaded()
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Common Info','Folder')
             .done();
 
     },
@@ -2723,8 +2632,7 @@ Ext.define('Inventory.CommonIC', {
             .verifyData('Combo Box','TaxGroup',taxgroup)
             .clickButton('Save')
             .clickButton('Close')
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Common Info','Folder')
             .done();
     },
 
@@ -2734,8 +2642,8 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickMenuScreen('Company Locations','Screen')
             .doubleClickSearchRowValue(location, 1)
-            .waitUntilLoaded('smcompanylocation') .waitUntilLoaded() .waitUntilLoaded() .waitUntilLoaded()
-            .clickTab('Storage Location')
+            .waitUntilLoaded('smcompanylocation')
+            .clickTab('Sub Location')
             .waitUntilLoaded('')
 
             .filterGridRecords('SubLocation', 'FilterGrid', sublocation)
@@ -2778,8 +2686,7 @@ Ext.define('Inventory.CommonIC', {
 
             .clickButton('Close')
             .waitUntilLoaded()
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Common Info','Folder')
             .done();
     },
 
@@ -2788,12 +2695,12 @@ Ext.define('Inventory.CommonIC', {
 
             .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded()
-            .clickMenuScreen('Storage Units','Screen')
+            .clickMenuScreen('Storage Locations','Screen')
             .waitUntilLoaded()
 
             .filterGridRecords('Search', 'FilterGrid', storageloc)
             .waitUntilLoaded()
-.waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
+
             .continueIf({
                 expected: true,
                 actual: function(win){
@@ -2831,8 +2738,7 @@ Ext.define('Inventory.CommonIC', {
             })
 
             .waitUntilLoaded()
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
             .done();
     },
 
@@ -2885,8 +2791,7 @@ Ext.define('Inventory.CommonIC', {
             })
 
             .waitUntilLoaded()
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
             .done();
     },
 
@@ -2943,8 +2848,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
 
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
             .done();
     },
 
@@ -3010,8 +2914,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded('')
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory', 'Folder')
             .waitUntilLoaded('')
             .done();
     },
@@ -3071,8 +2974,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded('')
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory', 'Folder')
             .waitUntilLoaded('')
             .done();
     },
@@ -3136,8 +3038,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded('')
-            .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory', 'Folder')
             .waitUntilLoaded('')
             .done();
     },
@@ -3239,9 +3140,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded()
-            //.clickMenuFolder('Inventory','Folder')
-             .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .done();
     },
@@ -3339,22 +3238,20 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded()
-            //.clickMenuFolder('Inventory','Folder')
-            .waitUntilLoaded()
-             .waitUntilLoaded()
-            .clickButton('Close')
+            .clickMenuFolder('Inventory','Folder')
+            .waitUntilLoaded('')
             .done();
     },
 
     addVendor: function (t,next, vendor, contact, phone, email, address, city, state, zip, country, timezone, vendorlocation, terms, freightterms, currency) {
         new iRely.FunctionalTest().start(t, next)
-            .clickMenuFolder('Purchasing (A/P)')
+            .clickMenuFolder('Purchasing (Accounts Payable)')
             .waitUntilLoaded('')
             .clickMenuScreen('Vendors')
             .waitUntilLoaded('')
 
             .filterGridRecords('Search', 'FilterGrid', vendor)
-            .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
+            .waitUntilLoaded()
 
             .continueIf({
                 expected: true,
@@ -3394,13 +3291,7 @@ Ext.define('Inventory.CommonIC', {
                         .waitUntilLoaded()
                         .enterData('Text Field','Location', vendorlocation)
 
-                        //.clickTab('Vendor')
-                         .addFunction(function (next) {
-                                t.chain(
-                                    { click : "#frmEntity #tabEntity #pgeMainVendor => .x-tab-inner" }
-                                )
-                                next();
-                            })
+                        .clickTab('Vendor')
                         .waitUntilLoaded()
                         .selectComboBoxRowValue('VendorCurrency', currency, 'intCurrencyId',0)
                         .selectGridComboBoxRowValue('VendorTerm',1,'colVendorTerms', terms,'strTerm')
@@ -3431,15 +3322,13 @@ Ext.define('Inventory.CommonIC', {
             })
 
             .waitUntilLoaded()
-            //.clickMenuFolder('Purchasing (Accounts Payable)','Folder')
-             .waitUntilLoaded('')
-            .clickButton('Close')
+            .clickMenuFolder('Purchasing (Accounts Payable)','Folder')
             .done();
     },
     addCustomer: function (t,next, customer, customercontact, phone, email, address, city, state, zip, country, timezone,
                            customerlocation, terms, shipvia, taxgroup, location, freighterm) {
         new iRely.FunctionalTest().start(t, next)
-            .clickMenuFolder('Sales (A/R)')
+            .clickMenuFolder('Sales (Accounts Receivable)')
             .waitUntilLoaded()
             .clickMenuScreen('Customers')
             .waitUntilLoaded()
@@ -3484,12 +3373,7 @@ Ext.define('Inventory.CommonIC', {
                         .clickButton('Add')
                         .enterData('Text Field','Location', customerlocation)
 
-                        .addFunction(function (next) {
-                            t.chain(
-                                { click : "#frmEntityCustomer #tabEntity #pgeMainCustomer => .x-tab-inner" }
-                            )
-                            next();
-                        })
+                        .clickTab('Customer')
                         .waitUntilLoaded('')
                         .selectComboBoxRowValue('CustomerTerms', terms, 'CustomerTerms',5)
                         .selectComboBoxRowNumber('CustomerSalesperson',1,0)
@@ -3509,8 +3393,6 @@ Ext.define('Inventory.CommonIC', {
                         .waitUntilLoaded('')
                         .clickButton('Close')
                         .waitUntilLoaded('')
-                        .clickButton('Save')
-                        .waitUntilLoaded('')
                         .clickButton('Close')
                         .waitUntilLoaded('')
                         .displayText('===== Customer added. =====')
@@ -3519,9 +3401,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded()
-            //.clickMenuFolder('Sales (Accounts Receivable)')
-             .waitUntilLoaded('')
-            .clickButton('Close')
+            .clickMenuFolder('Sales (Accounts Receivable)')
             .done();
     },
 
@@ -3533,7 +3413,6 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
 
             .doubleClickSearchRowValue(item, 1)
-            .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
             .clickLabel('Category')
             .waitUntilLoaded()
             .filterGridRecords('Tax', 'FilterGrid', taxclass)
@@ -3562,8 +3441,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
             .clickButton('Close')
             .waitUntilLoaded()
-            .clickButton('Close')
-            //.clickMenuFolder('Inventory','Folder')
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
             .done();
     },
@@ -3598,10 +3476,28 @@ Ext.define('Inventory.CommonIC', {
             .clickButton('Save')
             .waitUntilLoaded()
             .clickButton('Close')
-            //.clickMenuFolder('Inventory','Folder')
-            
+            .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded('')
+            .done();
+    },
+    markcheckCheckOff: function (t,next, taxcode, ischeckoff) {
+        new iRely.FunctionalTest().start(t, next)
+
+            .displayText('===== 1. Open Tax Code  =====')
+            .clickMenuFolder('Common Info','Folder')
+            .clickMenuScreen('Tax Codes','Screen')
+            .waitUntilLoaded('')
+            .doubleClickSearchRowValue (taxcode,'strTaxCode',1)
+            .waitUntilLoaded('smtaxcode')
+            .clickCheckBox('CheckoffTax',ischeckoff)
+            .clickButton('Save')
+            .waitUntilLoaded()
+            .waitUntilLoaded()
             .clickButton('Close')
+            .waitUntilLoaded()
+            .displayText('===== Tax Code closed. =====')
+            .clickMenuFolder('Common Info','Folder')
+            .waitUntilLoaded()
             .done();
     },
 
@@ -3718,7 +3614,7 @@ insertInventoryItem: function(t,next,productID){
 createPurchaseOrder: function (t,next,ProductID){
                 new iRely.FunctionalTest().start(t, next)
                 .displayText(ProductID)
-                .clickMenuFolder('Purchasing (A/P)')
+                .clickMenuFolder('Purchasing (Accounts Payable)')
                 .clickMenuScreen('Purchase Orders')
                 .waitUntilLoaded()
                 .clickButton('New')
@@ -3816,794 +3712,7 @@ checkIfClosedPOShowsInIR: function (t,next,PONumber){
                 // .clickMenuFolder('Purchasing (Accounts Payable)')
                 .done()
 }
-,
-buildAccount: function(t,next){
-   //.addScenario('0','Add GL Accounts',1000)
-   //.addFunction(function(next){
-        var ysnBuildPrimaryAccount ="false";
-        var ysn20022=false,ysn15012=false,ysn50012=false,ysn40012=false,ysn16012=false,ysn50022=false,ysn12012=false,ysn20012=false,ysn49012=false,ysn59012=false,ysn25012=false,ysn72512=false;
-        var selectPrimarySegments = function(ysnSelectID,accountID){
-            new iRely.FunctionalTest().start(t, next,ysnSelectID,accountID)
-            .continueIf({
-                expected: true,
-                actual: function (bool) {
-                    return ysnSelectID;
-                },
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                
-                    .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', accountID)
-                    .waitUntilLoaded()
-                    .waitUntilLoaded()
-                    .addFunction(function (next) {
-                        t.chain(
-                            { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                        )
-                        next();
-                    })
-                    .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                    .done()
-                },
-                    continueOnFail: true   
-            })
-            .done()   
-        };
-                     
-        new iRely.FunctionalTest().start(t, next)
-        .clickMenuFolder('General Ledger').waitUntilLoaded()
-        .clickMenuScreen('GL Account Detail').waitUntilLoaded()
-        .clickButton('Segments')
-        .waitUntilLoaded('glsegmentaccounts').waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .selectGridRowNumber('SegmentName', 1)
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '20022' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 20022 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn20022=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 20022 does not exists.')
-                    .addStep('Add Primary Account 20022' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '20022'}
-                                                        ,{column: 'strDescription', data: 'AP Clearing'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '20022' +'[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Pending Payables' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'AP Clearing' ,'strAccountCategory',1) 
-                    .done()    
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '15012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 15012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn15012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 15012 does not exists.')
-                    .addStep('Add Primary Account 15012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '15012'}
-                                                        ,{column: 'strDescription', data: 'Inventories'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '15012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Inventories' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Inventory' ,'strAccountCategory',1) 
-                    .done()    
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '50012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                }, 
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 50012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn50012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 50012 does not exists.')
-                    .addStep('Add Primary Account 50012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '50012'}
-                                                        ,{column: 'strDescription', data: 'COGS'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '50012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Cost of Goods Sold' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Cost of Goods' ,'strAccountCategory',1) 
-                    .done()    
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '40012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },   
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 40012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn40012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 40012 does not exists.')
-                    .addStep('Add Primary Account 40012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '40012'}
-                                                        ,{column: 'strDescription', data: 'Sales'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '40012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Sales' ,'strAccountGroup',2)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Sales Account' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '16012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },   
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 16012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn16012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 16012 does not exists.')
-                    .addStep('Add Primary Account 16012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '16012'}
-                                                        ,{column: 'strDescription', data: 'Inventory In Transit'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '16012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Inventories' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Inventory In-Transit' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '50022' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },  
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 50022 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn50022=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 50022 does not exists.')
-                    .addStep('Add Primary Account 50022' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '50022'}
-                                                        ,{column: 'strDescription', data: 'Inventory Adjustment'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '50022[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Cost of Goods Sold' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Inventory Adjustment' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '12012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },  
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 12012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn12012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 12012 does not exists.')
-                    .addStep('Add Primary Account 12012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '12012'}
-                                                        ,{column: 'strDescription', data: 'Accounts Receivable'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '12012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Receivables' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'AR Account' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '20012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },   
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 20012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn20012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 20012 does not exists.')
-                    .addStep('Add Primary Account 20012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '20012'}
-                                                        ,{column: 'strDescription', data: 'Accounts Payable'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '20012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Payables' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'AP Account' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '49012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },  
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 49012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn49012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 49012 does not exists.')
-                    .addStep('Add Primary Account 49012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '49012'}
-                                                        ,{column: 'strDescription', data: 'Other Charge Income'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '49012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Other Income' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Other Charge Income' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '59012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },  
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 59012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn59012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 59012 does not exists.')
-                    .addStep('Add Primary Account 59012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '59012'}
-                                                        ,{column: 'strDescription', data: 'Other Charge Expense'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '59012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Other Expense' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Other Charge Expense' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '25012' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },   
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 25012 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn25012=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 25012 does not exists.')
-                    .addStep('Add Primary Account 25012' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '25012'}
-                                                        ,{column: 'strDescription', data: 'Sales Tax Liability'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '25012[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Sales Tax Payables' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Sales Tax Account' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-         .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .filterGridRecords('SegmentAccounts', 'FilterGrid', '72512' +'[ENTER]')
-        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-        .continueIf({
-                expected: true,
-                actual: function (win) {
-                    return win.down('#grdSegmentAccounts').getStore().getCount() !== 0;
-                },    
-                success: function (next) {
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 72512 exists.')
-                    .clearTextFilter('FilterGrid')
-                    .done()
-                },
-                failure: function(next){
-                    ysnBuildPrimaryAccount=true;
-                    ysn72512=true;
-                    new iRely.FunctionalTest().start(t, next)
-                    .addResult('Primary Account 72512 does not exists.')
-                    .addStep('Add Primary Account 72512' )
-                    .clearTextFilter('FilterGrid')
-                    .enterGridNewRow('SegmentAccounts', [{column: 'strCode', data: '72512'}
-                                                        ,{column: 'strDescription', data: 'Tax Expense'}
-                                                    ])
-                    .filterGridRecords('SegmentAccounts', 'FilterGrid', '72512[ENTER]')                                   
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountGroup', 'Other Expenses' ,'strAccountGroup',1)
-                    .selectGridComboBoxRowValue('SegmentAccounts',1,'colAccountCategory', 'Purchase Tax Account' ,'strAccountCategory',1) 
-                    .done()
-                },
-                continueOnFail: true   
-        })
-        .continueIf({
-                    expected: 'true',
-                    actual: function (string) {
-                        return ysnBuildPrimaryAccount.toString();
-                    },
-                    success: function (next) {
-                        new iRely.FunctionalTest().start(t, next)
-                        .clickButton('Save')
-                        .waitUntilLoaded()
-                        .clickButton('Build')
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn20022;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '20022')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn15012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '15012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn50012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '50012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn40012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '40012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn16012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '16012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn50022;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '50022')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn12012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '12012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn20012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '20012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn49012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '49012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn59012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '59012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn25012;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '25012')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-        
-                        .continueIf({
-                            expected: true,
-                            actual: function (bool) {
-                                return ysn72512;
-                            },
-                            success: function (next) {
-                                new iRely.FunctionalTest().start(t, next)
-                            
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '72512')
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .addFunction(function (next) {
-                                    t.chain(
-                                        { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #grvPrimarySegment => .x-grid-row-checker" }
-                                    )
-                                    next();
-                                })
-                                .filterGridRecords('BuildAccountsPrimarySegment', 'FilterGrid', '')
-                                .done()
-                            },
-                                continueOnFail: true   
-                        })
-                        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-                        .waitUntilLoaded().waitUntilLoaded().waitUntilLoaded().waitUntilLoaded()
-                        .addFunction(function (next) {         
-                            t.chain(
-                                 { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsPrimarySegment #tlbGridOptions #txtFilterGrid => .x-form-trigger" }
-                                )
-                                next();
-                            }) 
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()           
-                        .filterGridRecords('BuildAccountsSegment', 'FilterGrid', 'Grains')
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .addFunction(function (next) {
-                            t.chain(
-                                { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsSegment #grvSegment => .x-grid-row-checker" }
-                            )
-                            next();
-                        })
-                        .filterGridRecords('BuildAccountsSegment', 'FilterGrid', '')
-                        .filterGridRecords('BuildAccountsSegment', 'FilterGrid', 'Fort Wayne')
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .addFunction(function (next) {
-                            t.chain(
-                                { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsSegment #grvSegment => .x-grid-row-checker" }
-                            )
-                            next();
-                        })
-                        .filterGridRecords('BuildAccountsSegment', 'FilterGrid', '')
-                        .filterGridRecords('BuildAccountsSegment', 'FilterGrid', 'Indianapolis')
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .addFunction(function (next) {
-                            t.chain(
-                                { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsSegment #grvSegment => .x-grid-row-checker" }
-                            )
-                            next();
-                        })
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .addFunction(function (next) {
-                            t.chain(
-                                { click : "#frmBuildAccounts #tabBuildAccounts #grdBuildAccountsSegment #tlbGridOptions #txtFilterGrid => .x-form-trigger" }
-                            )
-                            next();
-                        })
-                        .clickButton('Build')
-                        .waitUntilLoaded()
-                        .clickButton('Commit')
-                        .waitUntilLoaded()
-                        .addFunction(function(next){
-                            var msg = document.querySelector('.sweet-alert'),
-                                message = msg.querySelector('p').innerHTML;
-                            if (msg){
-                                if(msg.querySelector('p').innerHTML === message){
-                                new iRely.FunctionalTest().start(t, next)
-                                .verifyMessageBox('iRely i21', msg.querySelector('p').innerHTML, 'ok', 'information')
-                                .displayText(msg.querySelector('p').innerHTML)
-                                .waitUntilLoaded()
-                                .waitUntilLoaded()
-                                .clickMessageBoxButton('ok')
-                                .done()
-                                }else{
-                                    new iRely.FunctionalTest().start(t, next)
-                                    .displayText('Skip message')
-                                    .done()
-                                }
-                            
-                            }
-                        })
-                        .waitUntilLoaded()
-                        .waitUntilLoaded()
-                        .clickButton('Close')
-                        .done()
-                    },
-                    continueOnFail: true
-         })                   
-        .waitUntilLoaded()
-        .waitUntilLoaded()
-        .clickButton('Close')
-        .clickButton('Close')
-                           
-        .done()
-   
 
-}
 
 ////////////////////////////////////////////////////////////////////////    
 //End Jerome Paul Fazon Codes
