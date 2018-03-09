@@ -22,12 +22,17 @@ BEGIN
 	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), 0)
 	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
 
+	DECLARE @SplitId 				INT
+	DECLARE @SplitNumber			NVARCHAR(50)
+	DECLARE @NewDocumentId			INT
 	IF ISNULL(@SplitDetailId, 0) > 0 
 		BEGIN
 			SELECT @intSplitEntityId = intEntityId
 			      ,@dblSplitPercent = dblSplitPercent/100
-			FROM [tblEMEntitySplitDetail] 
+				  ,@SplitId = intSplitId
+			FROM [tblEMEntitySplitDetail]
 			WHERE intSplitDetailId = @SplitDetailId
+			
 		END
 
 	IF ISNULL(@InvoiceId, 0) = 0
@@ -213,6 +218,47 @@ BEGIN
 				
 	SET @NewInvoiceId = SCOPE_IDENTITY()
 	
+	IF ISNULL(@SplitId, 0) > 0
+	BEGIN
+		SELECT TOP 1 @SplitNumber =  strSplitNumber FROM tblEMEntitySplit WHERE intSplitId = @SplitId
+
+		IF ISNULL(@SplitNumber, '') <> ''
+		BEGIN
+
+			DECLARE @DocumentHeader AS NVARCHAR(MAX)
+			DECLARE @DocumentMessage AS NVARCHAR(MAX)
+			DECLARE @CustomerId		AS INT
+			DECLARE @CompanyId 		AS INT
+			DECLARE @DocumentId		AS INT
+			SELECT TOP 1 
+				@DocumentHeader = 'Split: ' + I.strInvoiceNumber + ' ' + @SplitNumber,
+				@DocumentMessage = 'Split: ' + I.strInvoiceNumber + '<br/> ' + @SplitNumber ,
+				@CustomerId = I.intEntityCustomerId,
+				@CompanyId = I.intCompanyLocationId
+			FROM tblARInvoice I where I.intInvoiceId = @InvoiceId
+
+			
+
+			
+			exec [uspSMCreateDocumentMaintenance] 
+				@title = @DocumentHeader,
+				@companyLocation = @CompanyId,
+				@customerId	= @CustomerId,
+				@source = 'Invoice',
+				@message = @DocumentMessage,
+				@newId = @DocumentId output
+
+			UPDATE tblARInvoice 
+				SET intDocumentMaintenanceId = @DocumentId,
+						strComments = @DocumentMessage
+					WHERE intInvoiceId = @NewInvoiceId
+
+		END	
+	END
+
+	
+
+
 	DECLARE @InvoiceDetails TABLE(intInvoiceDetailId INT)
 		
 	INSERT INTO @InvoiceDetails
