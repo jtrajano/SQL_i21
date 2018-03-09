@@ -60,7 +60,8 @@ SELECT
 	, strMedicationMessage 		= Medication.strDescription
 	, strIngredientMessage 		= Ingredient.strDescription
 	, strHazmatMessage			= HazMat.strDescription
-
+	, strMaterialPackUOM	= ManufacturingPackingUOM.strUnitMeasure
+	, Item.intMaterialPackTypeId
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -86,6 +87,7 @@ LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Ite
 LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
 LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
 LEFT JOIN tblICCommodityProductLine ProductLine ON ProductLine.intCommodityProductLineId = Item.intProductLineId
+LEFT JOIN tblICUnitMeasure ManufacturingPackingUOM ON ManufacturingPackingUOM.intUnitMeasureId = Item.intMaterialPackTypeId
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Item.intLotStatusId
 LEFT JOIN (
 	tblICUnitMeasure mfgDimensionUOM INNER JOIN tblICItemUOM mfgDimensionItemUOM
