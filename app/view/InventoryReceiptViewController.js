@@ -5639,6 +5639,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     { dataIndex: 'strLotAlias', text: 'Lot Alias', width: 100, dataType: 'string', hidden: true, required: true },
                     { dataIndex: 'intParentLotId', text: 'Parent Lot Id', dataType: 'numeric', width: 100, hidden: true, required: true, allowNull: true },
                     { dataIndex: 'strParentLotNumber', text: 'Parent Lot No', width: 100, dataType: 'string', hidden: true, required: true },
+                    { dataIndex: 'intLotStatusId', text: 'Lot Status', width: 100, dataType: 'numeric', hidden: true, required: true, allowNull: true },
+                    { dataIndex: 'strLotCondition', text: 'Lot Condition', width: 100, dataType: 'string', hidden: true, required: true },
 
                     { dataIndex: 'strUnitMeasure', text: 'Item UOM', width: 100, dataType: 'string', required: true },
                     { dataIndex: 'strOrderUOM', text: 'Order UOM', width: 100, dataType: 'string', required: true },
@@ -5903,7 +5905,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strSubLocationName: newReceiptItem.get('strSubLocationName'),
                                         strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
                                         dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
-                                        strMarkings: order.get('strMarkings')
+                                        strMarkings: order.get('strMarkings'),
+                                        strCondition: order.get('strLotCondition')
                                     });
                                     currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                                 }
