@@ -2,7 +2,7 @@
 	AS 
 
 	select 
---Entity
+	--Entity
 	id				= a.intEntityId
 	,ent_no			= a.strEntityNo
 	,name			= a.strName
@@ -51,7 +51,15 @@
 	--Vendor
 	,ven_vendorId		= e.strVendorId
 	,ven_expenseId		= j.strAccountId
+	,ven_type			= e.intVendorType
+	,ven_taxno			= e.strTaxNumber
 
+	--User
+	,user_name			= m.strUserName
+	,user_password		= m.strPassword
+	,user_role			= m.strUserRole
+	,user_policy		= m.strPolicyName
+	
 
 	from tblEMEntity a
 	join [tblEMEntityToContact] b
@@ -76,3 +84,11 @@
 		on k.intCompanyLocationId = d.intWarehouseId
 	left join tblEMEntityPhoneNumber l
 		on l.intEntityId = c.intEntityId
+	left join 
+	(
+		select usec.intEntityId, usec.strUserName, '' as strPassword, isnull(urole.strName, '') as strUserRole, isnull(policy.strPolicyName, '') as strPolicyName
+		from tblSMUserSecurity usec
+		left join tblSMUserRole urole on usec.intUserRoleID = urole.intUserRoleID
+		left join tblSMSecurityPolicy policy on usec.intSecurityPolicyId = policy.intSecurityPolicyId
+	) m
+		on m.intEntityId = a.intEntityId
