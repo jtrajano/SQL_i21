@@ -1,10 +1,10 @@
-var Harness = Siesta.Harness.Browser.ExtJS,
+var Harness = new Siesta.Harness.Browser.ExtJS(),
     version = Math.floor(Math.random() * 9999) + 1,
     commonIC = 'Common/CommonIC.js?v='+version,
     commonICST = 'Common/CommonICSmokeTest.js?v='+version,
     functionalTest = '../../TestFramework/FunctionalTest.js?v='+version,
+    appLocation = location.href.substring(0,location.href.indexOf("app")-1) + '/i21';
     commonGL = '../../GeneralLedger/test-ui/Common/commonGL.js?v='+version
-
 
 var _url = window.location.hash,
     _items = _url.split('/');
@@ -12,7 +12,7 @@ var _url = window.location.hash,
 if(_url.indexOf('version=TF') < 1) {
     Harness.configure({
         title: 'i21 Test Suite',
-        hostPageUrl: '../../i21/index.html',
+        hostPageUrl: appLocation,
         forceDOMVisible: false,
         waitForExtReady: false,
         suppressPassedWaitForAssertion: true,
@@ -807,7 +807,7 @@ else{
 
     Harness.configure({
         title     : 'i21 Test Suite',
-        hostPageUrl: '../../i21/index.html',
+        hostPageUrl: appLocation,
         forceDOMVisible: true,
         waitForExtReady: false,
         suppressPassedWaitForAssertion: true,
@@ -817,7 +817,7 @@ else{
         viewportHeight: 1100,
         viewportWidth: 1800,
         maintainViewportSize: true,
-        autoRun: true,
+        autoRun: true,  
         viewDOM: true,
         needUI: true,
         preload: [
