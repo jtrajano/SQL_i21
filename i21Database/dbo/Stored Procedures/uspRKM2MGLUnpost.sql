@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKM2MGLPost]  
+﻿CREATE PROC [dbo].[uspRKM2MGLUnpost]  
 		@intM2MInquiryId INT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -13,23 +13,6 @@ BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(100)
 	DECLARE @ErrMsg NVARCHAR(Max)
 
-DECLARE @intCommodityId int
-DECLARE @dtmCurrenctGLPostDate DATETIME
-DECLARE @dtmPreviousGLPostDate DATETIME
-DECLARE @dtmGLReverseDate DATETIME
-DECLARE @dtmPrviousGLReverseDate DATETIME
-SELECT @intCommodityId = intCommodityId,@dtmCurrenctGLPostDate=dtmGLPostDate,@dtmGLReverseDate=dtmGLReverseDate FROM tblRKM2MInquiry where intM2MInquiryId=@intM2MInquiryId
-SELECT TOP 1 @dtmPreviousGLPostDate=dtmGLPostDate,@dtmPrviousGLReverseDate=dtmGLReverseDate  FROM tblRKM2MInquiry where ysnPost=1 and intCommodityId=@intCommodityId order by dtmGLPostDate desc
-
-IF (@dtmGLReverseDate IS NULL)
-BEGIN
-RAISERROR('Please save the record before posting.',16,1)
-END
-
-IF (convert(datetime,@dtmCurrenctGLPostDate) <= convert(datetime,@dtmPrviousGLReverseDate))
-BEGIN
-RAISERROR('Current date cannot lessthan the previous post date',16,1)
-END
 
 IF EXISTS(SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnBasisId,0) = 0)
 RAISERROR('Unrealized Gain On Basis cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
@@ -98,10 +81,10 @@ BEGIN TRANSACTION
 	SELECT [dtmDate]
 		,@batchId
 		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
+		,[dblCredit] as [dblDebit]
+		,[dblDebit] as [dblCredit]
+		,[dblCreditUnit] as [dblDebitUnit]
+		,[dblDebitUnit] as [dblCreditUnit]
 		,[strDescription]
 		,[intCurrencyId]
 		,[dtmTransactionDate]
@@ -123,10 +106,10 @@ BEGIN TRANSACTION
 	FROM tblRKM2MPostRecap
 	WHERE intM2MInquiryId = @intM2MInquiryId
 
-	EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
+	EXEC dbo.uspGLBookEntries @GLEntries,0 --@ysnPost
 
-	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
-	UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId,dtmUnpostedDateTime=null WHERE intM2MInquiryId = @intM2MInquiryId
+	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=0,strBatchId=null WHERE intM2MInquiryId = @intM2MInquiryId
+	UPDATE tblRKM2MInquiry SET ysnPost=0,dtmPostedDateTime=null,strBatchId=null,dtmUnpostedDateTime=getdate() WHERE intM2MInquiryId = @intM2MInquiryId
 
 	COMMIT TRAN	
 END TRY
@@ -146,3 +129,4 @@ BEGIN CATCH
 				)
 	END
 END CATCH
+
