@@ -6243,6 +6243,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
