@@ -1,190 +1,115 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreateRCVForCreditMemo]
-
-	@intInvoiceId			INT,
-	@intUserId 				INT,
-	@strCPIds				NVARCHAR(MAX) = ''
+	  @intInvoiceId		INT
+	, @intUserId 		INT
 AS
-	
-	SET QUOTED_IDENTIFIER OFF  
-	SET ANSI_NULLS ON  
-	SET NOCOUNT ON  
-	SET XACT_ABORT OFF  
-	SET ANSI_WARNINGS OFF  
 
-	DECLARE @intEntityCustomerId	INT
-	DECLARE @intLocationId			INT
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT OFF  
+SET ANSI_WARNINGS OFF  
 
-	SELECT 
-		@intEntityCustomerId = intEntityCustomerId, 
-		@intLocationId = intCompanyLocationId
-	FROM tblARInvoice 
-		WHERE intInvoiceId = @intInvoiceId
+DECLARE @tblPrepaids			TABLE(intPrepaymentId INT, dblAppliedAmount NUMERIC(18, 6))
+DECLARE @InvoicesDetail			TABLE(intInvoiceId INT, dblPayment NUMERIC(18, 6))
+DECLARE @intPaymentId			INT
+	  , @intPaymentMethodId		INT
+	  , @intCurrentInvoiceId	INT 
+	  , @strPaymentMethod		NVARCHAR(100) = 'Cash'
+	  , @dblTotalAppliedAmount	NUMERIC(18,6) = 0
+	  , @dblCurrentPayment		NUMERIC(18, 6)
 
-	--set @strCPIds = '524,523'
-	-- set @intInvoiceId = 522
-	-- set @intLocationId = 2
-	-- set @intEntityCustomerId = 8 
+SELECT @intPaymentMethodId = intPaymentMethodID 
+FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+WHERE LOWER(strPaymentMethod) = LOWER(@strPaymentMethod)
 
-	declare @intPaymentId INT
+--GET PREPAID/CREDIT AMOUNTS
+INSERT @tblPrepaids(intPrepaymentId, dblAppliedAmount)
+SELECT intPrepaymentId			= intPrepaymentId
+	 , dblAppliedInvoiceAmount	= ISNULL(dblAppliedInvoiceDetailAmount, 0)
+FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
+WHERE intInvoiceId = @intInvoiceId 
+  AND ysnApplied = 1
+  AND ISNULL(dblAppliedInvoiceDetailAmount, 0) > 0
 
-	declare @intCurrencyId	INT
-	declare @intPaymentMethodId INT
-	declare @strPaymentMethod nvarchar(100)
+IF NOT EXISTS(SELECT TOP 1 1 FROM @tblPrepaids)
+BEGIN
+	RETURN 0;
+END
 
-	declare @sum NUMERIC(18,6)
-	declare @basesum NUMERIC(18,6)
+--CREATE PAYMENT HEADER
+INSERT INTO tblARPayment (
+     intEntityCustomerId
+   , intCurrencyId
+   , intPaymentMethodId
+   , intLocationId
+   , dtmDatePaid
+   , strReceivePaymentType
+   , strPaymentMethod
+   , dblAmountPaid
+   , dblBaseAmountPaid
+   , dblUnappliedAmount
+   , dblBaseUnappliedAmount
+   , dblOverpayment
+   , dblBaseOverpayment
+   , dblExchangeRate
+   , ysnApplytoBudget
+)
+SELECT TOP 1 
+     intEntityCustomerId	= I.intEntityCustomerId
+   , intCurrencyId			= I.intCurrencyId
+   , intPaymentMethodId		= @intPaymentMethodId
+   , intLocationId			= I.intCompanyLocationId
+   , dtmDatePaid			= I.dtmPostDate
+   , strReceivePaymentType	= 'Cash Receipts'
+   , strPaymentMethod		= @strPaymentMethod
+   , dblAmountPaid			= 0.00
+   , dblBaseAmountPaid		= 0.00
+   , dblUnappliedAmount		= 0.00
+   , dblBaseUnappliedAmount	= 0.00
+   , dblOverpayment			= 0.00
+   , dblBaseOverpayment		= 0.00
+   , dblExchangeRate		= 1.00
+   , ysnApplytoBudget		= 0
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+WHERE intInvoiceId = @intInvoiceId
 
-	declare @cde table(
-		id int
-	)
+SET @intPaymentId = SCOPE_IDENTITY()
 
-	insert into @cde(id)
-	SELECT intPrepaymentId 
-		FROM tblARPrepaidAndCredit 
-			where intInvoiceId = @intInvoiceId 
-				and ysnApplied = 1
+--GET TOTAL AMOUNT TO APPLY IN INVOICE
+SELECT @dblTotalAppliedAmount = SUM(dblAppliedAmount)	 
+FROM @tblPrepaids
 
-	if NOT EXISTS( SELECT TOP 1 1 FROM @cde)
-	BEGIN
-		RETURN 0;
-	END
-	-- select cast(Item as int) from dbo.fnSplitString(@strCPIds, ',')
+--INSERT CREDITS TO PAYMENT DETAIL
+INSERT INTO @InvoicesDetail(intInvoiceId, dblPayment)
+SELECT intInvoiceId = intPrepaymentId
+	 , dblPayment	= dblAppliedAmount * -1
+FROM @tblPrepaids
 
-	
-	set @strPaymentMethod = 'Cash'
-	select @intPaymentMethodId = intPaymentMethodID 
-		from tblSMPaymentMethod where LOWER(strPaymentMethod) = LOWER(@strPaymentMethod)
+--INSERT INVOICE TO PAYMENT DETAIL
+INSERT INTO @InvoicesDetail(intInvoiceId, dblPayment)
+SELECT intInvoiceId = @intInvoiceId
+	 , dblPayment	= @dblTotalAppliedAmount
 
-	select @intCurrencyId = intCurrencyId from tblARInvoice where intInvoiceId = @intInvoiceId
+--INSERT ALL TO PAYMENT DETAIL
+WHILE EXISTS (SELECT TOP 1 1 FROM @InvoicesDetail)
+BEGIN
+	SET @intCurrentInvoiceId	= NULL
+	SET @dblCurrentPayment		= 0.00
 
+	SELECT TOP 1 @intCurrentInvoiceId = intInvoiceId
+			   , @dblCurrentPayment = dblPayment
+	FROM @InvoicesDetail
 
-	insert into tblARPayment ( 
-		intEntityCustomerId, intCurrencyId, intPaymentMethodId, intLocationId, dtmDatePaid, strReceivePaymentType, strPaymentMethod,
-		dblAmountPaid, dblBaseAmountPaid, dblUnappliedAmount, dblBaseUnappliedAmount,
-		dblOverpayment, dblBaseOverpayment,
-		dblBalance, dblExchangeRate,
-		strPaymentInfo, strNotes, ysnApplytoBudget
-	)
-	select 
-		@intEntityCustomerId, @intCurrencyId, @intPaymentMethodId, @intLocationId, GETDATE(), 'Cash Receipts', @strPaymentMethod,
-		0, 0, 0, 0,
-		0, 0,
-		0, 1,
-		'', '', 0
+	EXEC uspARAddInvoiceToPayment @PaymentId		= @intPaymentId
+								, @InvoiceId		= @intCurrentInvoiceId
+								, @Payment			= @dblCurrentPayment
+								, @ApplyTermDiscount = 0
+								, @Discount			= 0
+								, @RaiseError		= 1
 
-	SET @intPaymentId = @@IDENTITY
-	
+	DELETE FROM @InvoicesDetail WHERE intInvoiceId = @intCurrentInvoiceId
+END
 
-	select 
-		@sum = sum(dblInvoiceTotal) ,
-		@basesum = sum(dblBaseInvoiceTotal) 
-		from tblARInvoice 
-			where intInvoiceId in (select id from @cde)
-
-	DECLARE @InvoicesDetail TABLE(
-		intInvoiceId		INT,
-		dblPayment			NUMERIC(18, 6)
-	)
-	INSERT INTO @InvoicesDetail( intInvoiceId, dblPayment )
-	select 
-		intInvoiceId,
-		dblInvoiceTotal * -1
-		from tblARInvoice where intInvoiceId in (select id from @cde)
-	
-	INSERT INTO @InvoicesDetail( intInvoiceId, dblPayment )
-	select 
-		intInvoiceId,
-		@sum
-		from tblARInvoice where intInvoiceId = @intInvoiceId
-
-	
-	DECLARE @CurrentInvoice INT
-	DEClARE @CurrentPayment NUMERIC(18, 6)
-
-	WHILE EXISTS (SELECT TOP 1 1 FROM @InvoicesDetail)
-	BEGIN
-		SET @CurrentPayment = 0
-
-		SELECT TOP 1 @CurrentInvoice = intInvoiceId,
-				@CurrentPayment = dblPayment
-			FROM @InvoicesDetail
-
-		exec uspARAddInvoiceToPayment
-			@PaymentId	= @intPaymentId,
-			@InvoiceId = @CurrentInvoice,
-			@Payment = @CurrentPayment,
-			@ApplyTermDiscount = 0,
-			@Discount = 0,
-			@RaiseError = 1
-		
-
-		DELETE FROM @InvoicesDetail 
-			WHERE intInvoiceId = @CurrentInvoice
-	END
-	
-
-
-	exec uspARPostPayment @post=1, @param=@intPaymentId, @userId=@intUserId, @raiseError = 1
-
-
+EXEC uspARPostPayment @post = 1, @param = @intPaymentId, @userId = @intUserId, @raiseError = 1
 
 RETURN 0
-
-	/*
-	delete from tblARPaymentDetail where intPaymentId = @intPaymentId
-	
-	select 
-		@sum = sum(dblInvoiceTotal) ,
-		@basesum = sum(dblBaseInvoiceTotal) 
-		from tblARInvoice 
-			where intInvoiceId in (select id from @cde)
-				--group by intInvoiceId
-
-
-	insert into tblARPaymentDetail( 
-		intPaymentId, intInvoiceId, intConcurrencyId, intAccountId, intTermId, strTransactionNumber,
-		dblInvoiceTotal, 
-		dblBaseInvoiceTotal, 
-		dblDiscount, dblBaseDiscount,
-		dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest,
-		dblPayment,
-		dblBasePayment,		
-		dblAmountDue, dblBaseAmountDue
-	)
-	select 
-		@intPaymentId, intInvoiceId, 1, 473, 3, strInvoiceNumber,
-		dblInvoiceTotal * (case when strTransactionType = 'Credit Memo' then -1 else 1 end), 
-		dblBaseInvoiceTotal * (case when strTransactionType = 'Credit Memo' then -1 else 1 end), 
-		0, 0,
-		0, 0, 0, 0,
-		dblInvoiceTotal * 1, --(case when strTransactionType = 'Credit Memo' then -1 else 1 end), 
-		dblBaseInvoiceTotal * 1, -- (case when strTransactionType = 'Credit Memo' then -1 else 1 end), 
-		0, 0
-		from tblARInvoice where intInvoiceId in (select id from @cde)
-
-
-	insert into tblARPaymentDetail( 
-		intPaymentId, intInvoiceId, intConcurrencyId, intAccountId, intTermId, strTransactionNumber,
-		dblInvoiceTotal, 
-		dblBaseInvoiceTotal, 
-		dblDiscount, dblBaseDiscount,
-		dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest,
-		dblAmountDue, dblBaseAmountDue,
-		dblPayment, dblBasePayment
-	)
-	select 
-		@intPaymentId, intInvoiceId, 1, 473, 3, strInvoiceNumber,
-		dblInvoiceTotal * (case when strTransactionType = 'Credit Memo' then -1 else 1 end), 
-		dblBaseInvoiceTotal * (case when strTransactionType = 'Credit Memo' then -1 else 1 end), 
-		0, 0,
-		0, 0, 0, 0,
-		1 * (dblInvoiceTotal - @sum), 1 * (dblBaseInvoiceTotal - @basesum),
-		-1 * @sum, -1 * @basesum
-		from tblARInvoice where intInvoiceId = (@intInvoiceId)
-
-	-- select * 
-	-- 	from tblARPaymentDetail 
-	-- where intPaymentId = @intPaymentId
-
-	-- select * from tblARPayment where intPaymentId = @intPaymentId
-	*/

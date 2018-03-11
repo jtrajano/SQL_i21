@@ -12,7 +12,6 @@
 	, @strCustomerName					AS NVARCHAR(MAX)	= NULL
 	, @strCustomerIds					AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly						AS BIT				= NULL
-	, @strPaymentMethod					AS NVARCHAR(100)	= NULL
 	, @ysnIncludeWriteOffPayment    	AS BIT 				= 1
 AS
 
@@ -22,11 +21,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF @strPaymentMethod IS NULL
-	SET @strPaymentMethod = ' <> '''' '
-ELSE 
-	SET @strPaymentMethod = ' = ''' + @strPaymentMethod + ''''
-
 DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @dtmDateFromLocal					AS DATETIME			= NULL
 	  , @ysnPrintZeroBalanceLocal			AS BIT				= 0
@@ -34,7 +28,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnIncludeBudgetLocal				AS BIT				= 0
 	  , @ysnPrintOnlyPastDueLocal			AS BIT				= 0
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
-	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 0
+	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
@@ -45,7 +39,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @query								AS NVARCHAR(MAX)
 	  , @queryBudget						AS NVARCHAR(MAX)
 	  , @filter								AS NVARCHAR(MAX)	= ''
-		
+	  , @intWriteOffPaymentMethodId			AS INT				= NULL
+
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
 	,[fieldname]	NVARCHAR(50)
@@ -207,6 +202,13 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
+IF @ysnIncludeWriteOffPaymentLocal = 1
+	BEGIN
+		SELECT TOP 1 @intWriteOffPaymentMethodId = intPaymentMethodID 
+		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
+		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
+	END
+
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 INSERT INTO tblARCustomerAgingStagingTable (
 		  strCustomerName
@@ -235,6 +237,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 )
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
+										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
 'SELECT * 
@@ -295,7 +298,6 @@ FROM vyuARCustomerSearch C
 																SELECT intPaymentId
 																FROM dbo.tblARPayment WITH (NOLOCK)
 																WHERE ysnPosted = 1
-																	AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
 																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 														  ) P ON PD.intPaymentId = P.intPaymentId))
 				OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
@@ -304,7 +306,6 @@ FROM vyuARCustomerSearch C
 																SELECT intPaymentId
 																FROM dbo.tblARPayment WITH (NOLOCK)
 																WHERE ysnPosted = 1
-																	AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
 																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'
 														 ) P ON PD.intPaymentId = P.intPaymentId))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))			
@@ -322,9 +323,9 @@ FROM vyuARCustomerSearch C
 						 , dtmDatePaid
 					FROM dbo.tblARPayment WITH (NOLOCK)
 					WHERE ysnPosted = 1
-						AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
 					  AND ysnInvoicePrepayment = 0
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+					  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 		) P ON PD.intPaymentId = P.intPaymentId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN (
@@ -334,7 +335,6 @@ FROM vyuARCustomerSearch C
 			 , dtmDatePaid
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
-			AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 	LEFT JOIN (
@@ -344,9 +344,9 @@ FROM vyuARCustomerSearch C
 		INNER JOIN (SELECT intPaymentId
 					FROM dbo.tblARPayment WITH (NOLOCK)
 					WHERE ysnPosted = 1
-						AND intPaymentMethodId IN (select intPaymentMethodID from tblSMPaymentMethod where strPaymentMethod ' + @strPaymentMethod + ')
 					  AND ysnInvoicePrepayment = 0 
 					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+					  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 		) P ON PD.intPaymentId = P.intPaymentId
 		GROUP BY intInvoiceId
 	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
@@ -392,7 +392,7 @@ EXEC sp_executesql @query
 IF @ysnIncludeBudgetLocal = 1
     BEGIN
         SET @queryBudget = CAST('' AS NVARCHAR(MAX)) + 
-            'SELECT intEntityCustomerId         = C.intEntityId 
+            'SELECT intEntityCustomerId         = C.intEntityCustomerId 
 			      , strCustomerNumber           = C.strCustomerNumber
 				  , strCustomerName             = C.strCustomerName
 				  , dblCreditLimit              = C.dblCreditLimit
@@ -418,9 +418,14 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strCompanyName				= NULL
 				  , strCompanyAddress			= NULL
 				  , dblARBalance				= C.dblARBalance
-				  , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+				  , ysnStatementCreditLimit		= CUST.ysnStatementCreditLimit
             FROM tblARCustomerBudget CB
             INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
+			INNER JOIN (
+				SELECT intEntityId
+						, ysnStatementCreditLimit
+				FROM dbo.tblARCustomer WITH (NOLOCK)
+			) CUST ON CB.intEntityCustomerId = CUST.intEntityId
             OUTER APPLY (
 					SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
 					FROM (
@@ -445,6 +450,28 @@ IF @ysnIncludeBudgetLocal = 1
 
         INSERT INTO @temp_statement_table
         EXEC sp_executesql @queryBudget
+
+		IF EXISTS(SELECT TOP 1 NULL FROM @temp_statement_table WHERE strTransactionType = 'Customer Budget')
+			BEGIN
+				UPDATE STATEMENTS
+				SET strCompanyAddress			= COMPLETESTATEMENTS.strCompanyAddress
+				  , strCompanyName				= COMPLETESTATEMENTS.strCompanyName
+				  , strStatementFooterComment	= COMPLETESTATEMENTS.strStatementFooterComment
+				  , strLocationName				= COMPLETESTATEMENTS.strLocationName
+				  , strFullAddress				= COMPLETESTATEMENTS.strFullAddress
+				FROM @temp_statement_table STATEMENTS
+				OUTER APPLY (
+					SELECT TOP 1 strCompanyAddress
+							   , strCompanyName
+							   , strStatementFooterComment
+							   , strLocationName
+							   , strFullAddress
+					FROM @temp_statement_table
+					WHERE intEntityCustomerId = STATEMENTS.intEntityCustomerId
+					  AND strCompanyAddress IS NOT NULL AND strCompanyName IS NOT NULL
+				) COMPLETESTATEMENTS
+				WHERE strTransactionType = 'Customer Budget'
+			END
     END
 
 IF @ysnPrintOnlyPastDueLocal = 1
@@ -462,30 +489,7 @@ IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')		 
 	END
-
-
-IF @ysnIncludeWriteOffPaymentLocal = 0 
-BEGIN
-	DECLARE @intPaymentMethodId INT
 	
-	SELECT @intPaymentMethodId = intPaymentMethodID 
-		FROM tblSMPaymentMethod 
-			WHERE UPPER(strPaymentMethod) = UPPER('Write Off')
-
-	DECLARE @PaymentIdAvail table( id int)
-
-	insert into @PaymentIdAvail
-	select intPaymentId 
-		from @temp_statement_table where intPaymentId is not null
-
-	DELETE FROM @temp_statement_table 
-		WHERE intPaymentId in (SELECT intPaymentId 
-									FROM tblARPayment 
-										WHERE intPaymentMethodId = @intPaymentMethodId
-											and intPaymentId in (select id from @PaymentIdAvail)
-										)
-END
-
 INSERT INTO @temp_cf_table (
 	  intInvoiceId
 	, strInvoiceNumber
