@@ -18,34 +18,34 @@ BEGIN
 			,@SourceTypeInboundShipment AS INT = 2
 			,@SourceTypeTransport AS INT = 3
 
-	-- Update the status of the Purchase Order
-	IF EXISTS (
-		SELECT TOP 1 1 
-		FROM	tblICInventoryReceipt 
-		WHERE	intInventoryReceiptId = @intReceiptNo 
-				AND strReceiptType = @ReceiptTypePurchaseOrder
-	)
-	BEGIN
-		SELECT	DISTINCT intOrderId 
-		INTO	#tmpPOList 
-		FROM	tblICInventoryReceiptItem
-		WHERE	intInventoryReceiptId = @intReceiptNo
-				AND intOrderId IS NOT NULL 
+	---- Update the status of the Purchase Order
+	--IF EXISTS (
+	--	SELECT TOP 1 1 
+	--	FROM	tblICInventoryReceipt 
+	--	WHERE	intInventoryReceiptId = @intReceiptNo 
+	--			AND strReceiptType = @ReceiptTypePurchaseOrder
+	--)
+	--BEGIN
+	--	SELECT	DISTINCT intOrderId 
+	--	INTO	#tmpPOList 
+	--	FROM	tblICInventoryReceiptItem
+	--	WHERE	intInventoryReceiptId = @intReceiptNo
+	--			AND intOrderId IS NOT NULL 
 
-		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPOList)
-		BEGIN
-			SELECT TOP 1 @POId = intOrderId FROM #tmpPOList
+	--	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPOList)
+	--	BEGIN
+	--		SELECT TOP 1 @POId = intOrderId FROM #tmpPOList
 
-			IF (@ysnOpenStatus = 1)
-				EXEC uspPOUpdateStatus @POId, 1
-			ELSE
-				EXEC uspPOUpdateStatus @POId, NULL
+	--		IF (@ysnOpenStatus = 1)
+	--			EXEC uspPOUpdateStatus @POId, 1
+	--		ELSE
+	--			EXEC uspPOUpdateStatus @POId, NULL
 
-			DELETE FROM #tmpPOList WHERE intOrderId = @POId
-		END
+	--		DELETE FROM #tmpPOList WHERE intOrderId = @POId
+	--	END
 		
-		DROP TABLE #tmpPOList
-	END
+	--	DROP TABLE #tmpPOList
+	--END
 
 	-- Update the Status of the Scale Ticket
 	IF EXISTS (

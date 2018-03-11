@@ -117,79 +117,79 @@ BEGIN
 		END 		
 	END
 
-	-- Update the received quantities back to the Purchasing
-	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
-	BEGIN 
-		DECLARE @ItemsFromIRForPO AS dbo.ReceiptItemTableType
+	---- Update the received quantities back to the Purchasing
+	--IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
+	--BEGIN 
+	--	DECLARE @ItemsFromIRForPO AS dbo.ReceiptItemTableType
 
-		-- Do not include the 'return' items (with negative qty)
-		INSERT INTO @ItemsFromIRForPO (
-				-- Header
-				[intInventoryReceiptId] 
-				,[strInventoryReceiptId] 
-				,[strReceiptType] 
-				,[intSourceType] 
-				,[dtmDate] 
-				,[intCurrencyId] 
-				,[dblExchangeRate] 
-				-- Detail 
-				,[intInventoryReceiptDetailId] 
-				,[intItemId] 
-				,[intLotId] 
-				,[strLotNumber] 
-				,[intLocationId] 
-				,[intItemLocationId] 
-				,[intSubLocationId] 
-				,[intStorageLocationId] 
-				,[intItemUOMId] 
-				,[intWeightUOMId] 
-				,[dblQty] 
-				,[dblUOMQty] 
-				,[dblNetWeight] 
-				,[dblCost] 
-				,[intContainerId] 
-				,[intOwnershipType] 
-				,[intOrderId] 
-				,[intSourceId] 
-				,[intLineNo] 
-				,[intLoadReceive]
-		)
-		SELECT 
-				-- Header
-				[intInventoryReceiptId] 
-				,[strInventoryReceiptId] 
-				,[strReceiptType] 
-				,[intSourceType] 
-				,[dtmDate] 
-				,[intCurrencyId] 
-				,[dblExchangeRate] 
-				-- Detail 
-				,[intInventoryReceiptDetailId] 
-				,[intItemId] 
-				,[intLotId] 
-				,[strLotNumber] 
-				,[intLocationId] 
-				,[intItemLocationId] 
-				,[intSubLocationId] 
-				,[intStorageLocationId] 
-				,[intItemUOMId] 
-				,[intWeightUOMId] 
-				,[dblQty] 
-				,[dblUOMQty] 
-				,[dblNetWeight] 
-				,[dblCost] 
-				,[intContainerId] 
-				,[intOwnershipType] 
-				,[intOrderId] 
-				,[intSourceId] 
-				,[intLineNo] 
-				,[intLoadReceive]
-		FROM	@ItemsFromInventoryReceipt
-		WHERE	(@ysnPost = 0 AND dblQty < 0)
-				OR (@ysnPost = 1 AND dblQty > 0) 
+	--	-- Do not include the 'return' items (with negative qty)
+	--	INSERT INTO @ItemsFromIRForPO (
+	--			-- Header
+	--			[intInventoryReceiptId] 
+	--			,[strInventoryReceiptId] 
+	--			,[strReceiptType] 
+	--			,[intSourceType] 
+	--			,[dtmDate] 
+	--			,[intCurrencyId] 
+	--			,[dblExchangeRate] 
+	--			-- Detail 
+	--			,[intInventoryReceiptDetailId] 
+	--			,[intItemId] 
+	--			,[intLotId] 
+	--			,[strLotNumber] 
+	--			,[intLocationId] 
+	--			,[intItemLocationId] 
+	--			,[intSubLocationId] 
+	--			,[intStorageLocationId] 
+	--			,[intItemUOMId] 
+	--			,[intWeightUOMId] 
+	--			,[dblQty] 
+	--			,[dblUOMQty] 
+	--			,[dblNetWeight] 
+	--			,[dblCost] 
+	--			,[intContainerId] 
+	--			,[intOwnershipType] 
+	--			,[intOrderId] 
+	--			,[intSourceId] 
+	--			,[intLineNo] 
+	--			,[intLoadReceive]
+	--	)
+	--	SELECT 
+	--			-- Header
+	--			[intInventoryReceiptId] 
+	--			,[strInventoryReceiptId] 
+	--			,[strReceiptType] 
+	--			,[intSourceType] 
+	--			,[dtmDate] 
+	--			,[intCurrencyId] 
+	--			,[dblExchangeRate] 
+	--			-- Detail 
+	--			,[intInventoryReceiptDetailId] 
+	--			,[intItemId] 
+	--			,[intLotId] 
+	--			,[strLotNumber] 
+	--			,[intLocationId] 
+	--			,[intItemLocationId] 
+	--			,[intSubLocationId] 
+	--			,[intStorageLocationId] 
+	--			,[intItemUOMId] 
+	--			,[intWeightUOMId] 
+	--			,[dblQty] 
+	--			,[dblUOMQty] 
+	--			,[dblNetWeight] 
+	--			,[dblCost] 
+	--			,[intContainerId] 
+	--			,[intOwnershipType] 
+	--			,[intOrderId] 
+	--			,[intSourceId] 
+	--			,[intLineNo] 
+	--			,[intLoadReceive]
+	--	FROM	@ItemsFromInventoryReceipt
+	--	WHERE	(@ysnPost = 0 AND dblQty < 0)
+	--			OR (@ysnPost = 1 AND dblQty > 0) 
 
-		EXEC dbo.uspPOReceived @ItemsFromIRForPO, @intEntityUserSecurityId
-	END
+	--	EXEC dbo.uspPOReceived @ItemsFromIRForPO, @intEntityUserSecurityId
+	--END
 END 
 
 -- Call the integration scripts based on Source type

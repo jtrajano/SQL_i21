@@ -13,7 +13,7 @@
 	[intCostUOMId] 				INT NULL,
 	[intWeightUOMId] 			INT NULL,
 	[dblWeightUnitQty] 			DECIMAL(18, 6)	NOT NULL,
-    [dblCostUnitQty] 			DECIMAL(18, 6)	NOT NULL,
+    [dblCostUnitQty] 			DECIMAL(38, 20)	NOT NULL,
     [dblUnitQty] 				DECIMAL(18, 6)	NOT NULL,
     [dblNetWeight] 				DECIMAL(18, 6)	NOT NULL
 )

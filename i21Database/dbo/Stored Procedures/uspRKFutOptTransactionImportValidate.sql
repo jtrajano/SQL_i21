@@ -108,8 +108,11 @@ WHILE @mRowNumber > 0
 				END
 			END
 			--- Broker Trader Number Exists -- in current Batch
-			IF EXISTS(SELECT COUNT(strBrokerTradeNo) FROM tblRKFutOptTransactionImport WHERE strBrokerTradeNo=@strBrokerTradeNo 
-						AND strName=@strName and isnull(strBrokerTradeNo,'')<>'' HAVING COUNT(strBrokerTradeNo) > 1)
+			
+
+			IF EXISTS(SELECT COUNT(strBrokerTradeNo) from (
+					SELECT distinct strBrokerTradeNo FROM tblRKFutOptTransactionImport WHERE strBrokerTradeNo=@strBrokerTradeNo 
+						AND strName=@strName and isnull(strBrokerTradeNo,'')<>'')t HAVING COUNT(strBrokerTradeNo) > 1)
 		BEGIN
 			IF NOT EXISTS(SELECT * FROM tblRKFutOptTransactionImport_ErrLog where intFutOptTransactionId=@mRowNumber )
 				BEGIN
@@ -446,8 +449,9 @@ END
 		IF NOT EXISTS(SELECT 1
 							FROM tblRKFutOptTransactionImport ti
 							JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
-							JOIN tblRKBrokersAccountMarketMapping am on fm.intFutureMarketId =am.intFutureMarketId
+							join tblRKBrokerageCommission am on  am.intFutureMarketId=fm.intFutureMarketId
 							JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=am.intBrokerageAccountId  
+							
 							JOIN tblEMEntity em on ba.intEntityId=em.intEntityId and em.strName=ti.strName
 							WHERE intFutOptTransactionId =@mRowNumber)
 		BEGIN
@@ -472,7 +476,7 @@ END
 	IF NOT EXISTS(SELECT 1
 						FROM tblRKFutOptTransactionImport ti
 						JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
-						JOIN tblRKBrokersAccountMarketMapping am on fm.intFutureMarketId =am.intFutureMarketId
+						join tblRKBrokerageCommission am on  am.intFutureMarketId=fm.intFutureMarketId
 						JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=am.intBrokerageAccountId  
 						AND ba.intInstrumentTypeId= case when ba.intInstrumentTypeId= 3 then 3 else
 								case when ti.strInstrumentType='Futures' then 1

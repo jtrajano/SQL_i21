@@ -26,7 +26,7 @@ BEGIN TRY
 	-- USER DEFINED TABLES
 	DECLARE @TFTransaction TFTransaction
 	DECLARE @tmpInventoryReceiptDetail TFInventoryReceiptDetailTransaction
-	DECLARE @tmpDistReceiptDetail TFInventoryReceiptDetailTransaction
+	DECLARE @tmpDistReceiptDetail TFTransaction
 	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
 	IF @Refresh = 1
@@ -444,71 +444,28 @@ BEGIN TRY
 		END
 		
 		-- TR Billed Qty
-		INSERT INTO @tmpDistReceiptDetail (intInventoryReceiptItemId) 
-		SELECT DISTINCT intInventoryReceiptItemId FROM @tmpInventoryReceiptDetail
+		INSERT INTO @tmpDistReceiptDetail (intId, intInventoryReceiptItemId, dblReceived, dblBillQty) 
+		SELECT DISTINCT intId, intInventoryReceiptItemId, dblReceived, dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId IN (SELECT DISTINCT intInventoryReceiptItemId FROM @tmpInventoryReceiptDetail)	
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tmpDistReceiptDetail)
 		BEGIN
-			DECLARE @ReceiptItemId INT = NULL
+			DECLARE @ReceiptDetailId INT = NULL, @ReceiptDetailItemId INT = NULL, @ReceiptDetailItemReceived NUMERIC(18,6) = NULL, @ReceiptDetailItemBillQty NUMERIC(18,6) = NULL, @RemainingBillQty NUMERIC(18,6) = NULL
 			DECLARE @TRDetail TFTransaction 
-			DECLARE @SumBillQty INT = NULL
 
-			SELECT TOP 1 @ReceiptItemId = intInventoryReceiptItemId FROM @tmpDistReceiptDetail
+			SELECT TOP 1 @ReceiptDetailId = intId, @ReceiptDetailItemId = intInventoryReceiptItemId, @ReceiptDetailItemReceived = dblReceived, @ReceiptDetailItemBillQty = dblBillQty FROM @tmpDistReceiptDetail
 
-			INSERT INTO @TRDetail (intId ,intInventoryReceiptItemId, dblNet, strDestinationState, dblBillQty)
-			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, strState) AS intId, *
-			FROM (SELECT tblICInventoryReceiptItem.intInventoryReceiptItemId AS intInventoryReceiptItemId, tblTRLoadDistributionDetail.dblUnits AS dblUnits,
-					CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN BulkLocation.strStateProvince WHEN tblTRLoadDistributionHeader.strDestination = 'Customer' THEN CustomerLocation.strState ELSE NULL END strState, NULL AS  dblBillQty
-					FROM tblICInventoryReceiptItem INNER JOIN tblICInventoryReceipt ON tblICInventoryReceiptItem.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
-					INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
-							INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
-							INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-								INNER JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
-									LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
-									LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
-					WHERE tblICInventoryReceiptItem.intInventoryReceiptItemId = @ReceiptItemId) trans
-
-			WHILE EXISTS(SELECT TOP 1 1 FROM @TRDetail)
+			IF(@ReceiptDetailItemBillQty >= @ReceiptDetailItemReceived)
 			BEGIN
-				DECLARE @TRReceiptItemId INT = NULL, @TRNet NUMERIC = NULL, @TRDestinationState NVARCHAR(100) = NULL, @TRBillQty NUMERIC = NULL
-				
-				SELECT TOP 1 @TRReceiptItemId = intInventoryReceiptItemId, @TRNet = dblNet, @TRDestinationState = strDestinationState, @TRBillQty = dblBillQty FROM @TRDetail
-
-				IF (@TRBillQty IS NULL)
-				BEGIN	
-					SELECT @TRBillQty = dblBillQty FROM @TFTransaction WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
-					SET @TRBillQty = ISNULL(@TRBillQty, 0)
-					IF (@TRBillQty >= @TRNet)
-					BEGIN
-						UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState		
-						UPDATE @TRDetail SET dblBillQty = @TRBillQty - @TRNet WHERE intInventoryReceiptItemId = @TRReceiptItemId
-					END
-					ELSE
-					BEGIN
-						UPDATE @TFTransaction SET dblBillQty = 0 WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
-						UPDATE @TRDetail SET dblBillQty = @TRBillQty WHERE intInventoryReceiptItemId = @TRReceiptItemId
-					END	
-				END
-				ELSE
-				BEGIN
-					SET @TRBillQty = ISNULL(@TRBillQty, 0)
-					IF (@TRBillQty >= @TRNet)
-					BEGIN
-						UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
-						UPDATE @TRDetail SET dblBillQty = @TRBillQty - @TRNet WHERE intInventoryReceiptItemId = @TRReceiptItemId
-					END
-					ELSE
-					BEGIN
-						UPDATE @TFTransaction SET dblBillQty = 0 WHERE intInventoryReceiptItemId = @TRReceiptItemId AND strDestinationState = @TRDestinationState
-						UPDATE @TRDetail SET dblBillQty = @TRBillQty WHERE intInventoryReceiptItemId = @TRReceiptItemId
-					END
-				END
-
-				DELETE @TRDetail WHERE intInventoryReceiptItemId = @TRReceiptItemId AND dblNet = @TRNet AND strDestinationState = @TRDestinationState
-
+				UPDATE @TFTransaction SET dblBillQty = dblNet WHERE intId = @ReceiptDetailId
+				SET @RemainingBillQty =  @ReceiptDetailItemBillQty - @ReceiptDetailItemReceived
+				UPDATE @tmpDistReceiptDetail SET dblBillQty = @RemainingBillQty
+			END
+			ELSE
+			BEGIN
+				UPDATE @TFTransaction SET dblBillQty = 0 WHERE intId = @ReceiptDetailId
 			END
 
-			DELETE FROM @tmpDistReceiptDetail WHERE intInventoryReceiptItemId = @ReceiptItemId
+			DELETE FROM @tmpDistReceiptDetail WHERE intId = @ReceiptDetailId
 
 		END
 

@@ -191,11 +191,13 @@ INSERT INTO [dbo].[tblRKM2MInquiryTransaction]
 	) tbl
 
 	DECLARE @strEvaluationBy NVARCHAR(50)
-		,@strEvaluationByZone NVARCHAR(50)
+			,@strEvaluationByZone NVARCHAR(50)
+			,@ysnEnterForwardCurveForMarketBasisDifferential BIT
 
 	SELECT TOP 1
 		 @strEvaluationBy =  strEvaluationBy
 		,@strEvaluationByZone = strEvaluationByZone  
+		,@ysnEnterForwardCurveForMarketBasisDifferential = ysnEnterForwardCurveForMarketBasisDifferential
 	FROM tblRKCompanyPreference
 
 	IF @strEvaluationBy = 'Commodity'
@@ -207,6 +209,18 @@ INSERT INTO [dbo].[tblRKM2MInquiryTransaction]
 	BEGIN
 		SET @strZoneIds = ''
 	END
+
+	IF @strEvaluationByZone = 'Company'
+	BEGIN
+		SET @strZoneIds = ''
+		SET @strLocationIds = ''
+	END
+
+	IF @ysnEnterForwardCurveForMarketBasisDifferential = 0
+	BEGIN
+		SET @strPeriodTos = ''
+	END
+
 
 	DECLARE @#tempInquiryBasisDetail TABLE (
 							intM2MBasisDetailId INT
@@ -285,10 +299,15 @@ LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=bd.intUnitMeasureId
 WHERE b.intM2MBasisId= @intM2MBasisId
  and  c.intCommodityId=case when isnull(@intCommodityId,0) = 0 then c.intCommodityId else @intCommodityId end 
  and b.strPricingType = @strPricingType
- and ISNULL(bd.intItemId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS  end as Item from [dbo].[fnSplitString](@strItemIds, ',')) --added this be able to filter by item (RM-739)
- and bd.strPeriodTo IN(select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](@strPeriodTos, ',')) --added this be able to filter by period to (RM-739)
- and ISNULL(bd.intCompanyLocationId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end  from [dbo].[fnSplitString](@strLocationIds, ',')) --added this be able to filter by location to (RM-739)
- and ISNULL(bd.intMarketZoneId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end  from [dbo].[fnSplitString](@strZoneIds, ',')) --added this be able to filter by zone to (RM-739)
+ and ISNULL(bd.intItemId,0) IN(select case when @strItemIds = '' then ISNULL(bd.intItemId,0) else case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS  end end as Item from [dbo].[fnSplitString](@strItemIds, ',')) --added this be able to filter by item (RM-739)
+ and ISNULL(bd.strPeriodTo,'') IN(select case when @strPeriodTos = '' then ISNULL(bd.strPeriodTo,'') else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end from [dbo].[fnSplitString](@strPeriodTos, ',')) --added this be able to filter by period to (RM-739)
+ and ISNULL(bd.intCompanyLocationId,0) IN(select case when @strLocationIds = '' then ISNULL(bd.intCompanyLocationId,0) else case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS  end end as Item from [dbo].[fnSplitString](@strLocationIds, ',')) --added this be able to filter by item (RM-739)
+ and ISNULL(bd.intMarketZoneId,0) IN(select case when @strZoneIds = '' then ISNULL(bd.intMarketZoneId,0) else case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS  end end as Item from [dbo].[fnSplitString](@strZoneIds, ',')) --added this be able to filter by item (RM-739)
+ or
+ ( bd.strContractInventory = 'Inventory' and b.intM2MBasisId= @intM2MBasisId
+	and  c.intCommodityId=case when isnull(@intCommodityId,0) = 0 then c.intCommodityId else @intCommodityId end 
+	and b.strPricingType = @strPricingType
+ ) 
 order by i.strMarketValuation,fm.strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
 
 
@@ -375,23 +394,25 @@ FROM (
 							INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
 							WHERE p.intFutureMarketId = f.intFutureMarketId
 								AND pm.intFutureMonthId = fm.intFutureMonthId
-								AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmPriceDate, 111)
+								--AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmPriceDate, 111)
 								AND p.strPricingType = @strPricingType
+								AND p.intFutureSettlementPriceId = @intFutureSettlementPriceId
 							ORDER BY dtmPriceDate DESC)
 		,intFutSettlementPriceMonthId = (SELECT TOP 1 intFutSettlementPriceMonthId
 							FROM tblRKFuturesSettlementPrice p
 							INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
 							WHERE p.intFutureMarketId = f.intFutureMarketId
 								AND pm.intFutureMonthId = fm.intFutureMonthId
-								AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmPriceDate, 111)
+								--AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmPriceDate, 111)
 								AND p.strPricingType = @strPricingType
+								AND p.intFutureSettlementPriceId = @intFutureSettlementPriceId
 							ORDER BY dtmPriceDate DESC)
 		,0 as intConcurrencyId  
 FROM tblRKFutureMarket f  
 JOIN tblRKFuturesMonth fm on f.intFutureMarketId = fm.intFutureMarketId and  fm.ysnExpired=0
 join tblRKCommodityMarketMapping mm on fm.intFutureMarketId=mm.intFutureMarketId 
 where mm.intCommodityId  = case when isnull(@intCommodityId,0) = 0 then mm.intCommodityId else @intCommodityId end 
-and intFutureMonthId IN(select Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS from [dbo].[fnSplitString](@strFutureMonthIds, ',')) --added this be able to filter by future months (RM-739)
+and ISNULL(fm.intFutureMonthId,0) IN(select case when Item = '' then 0 else Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS end  from [dbo].[fnSplitString](@strFutureMonthIds, ',')) --added this be able to filter by zone to (RM-739)
 )t where dblClosingPrice > 0
 order by strFutMarketName,convert(datetime,'01 '+strFutureMonth)
 

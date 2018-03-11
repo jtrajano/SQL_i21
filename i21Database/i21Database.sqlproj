@@ -6243,6 +6243,12 @@
     <Build Include="dbo\Tables\tblMFLotTareWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateLotTareWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByPlannedDate.sql" />
+    <Build Include="dbo\Functions\fnICFormatNumber.sql" />
+    <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
+    <Build Include="dbo\Views\vyuARBatchPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

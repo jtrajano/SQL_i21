@@ -1,14 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderShipmentStatus]
-	  @intTransactionId			INT
+	  @intTransactionId			INT = NULL
 	, @strTransactionType		NVARCHAR(100) = 'Sales Order'
 	, @ysnForDelete				BIT = 0
+	, @intSalesOrderDetailId	INT = NULL
+	, @dblQuantity				NUMERIC(18,6) = 0.000000
+	, @intItemUOMId				INT = NULL
 AS
 BEGIN
 
 DECLARE @tblSOToUpdate			Id
 DECLARE	@strOrderStatus			NVARCHAR(50) = 'Open'	  
-	  , @dblTotalQtyOrdered		NUMERIC(18,6) = 0
-	  , @dblTotalQtyShipped		NUMERIC(18,6) = 0
+	  , @dblTotalQtyOrdered		NUMERIC(18,6) = 0.000000
+	  , @dblTotalQtyShipped		NUMERIC(18,6) = 0.000000
 	  , @intSalesOrderId		INT = NULL	  
 
 IF @strTransactionType = 'Sales Order' 
@@ -101,6 +104,13 @@ ELSE IF @strTransactionType = 'Inventory'
 				GROUP BY ID.intItemUOMId, UOM.intItemUOMId
 			) ITEMS
 		) OTHERITEMS
+
+		UPDATE tblSOSalesOrderDetail
+		SET
+			dblQtyShipped = dblQtyShipped + dbo.fnCalculateQtyBetweenUOM(intItemUOMId, ISNULL(@intItemUOMId, intItemUOMId), ISNULL(@dblQuantity, 0))
+		WHERE
+			intSalesOrderDetailId = @intSalesOrderDetailId
+			
 		
 		UPDATE tblSOSalesOrder
 		SET ysnShipped = CASE WHEN @ysnForDelete = 0 THEN 1 ELSE 0 END
@@ -154,6 +164,10 @@ ELSE IF @strTransactionType = 'Inventory'
 		WHERE ISI.intLineNo IS NOT NULL
 		  AND ISI.intOrderId IS NOT NULL
 		  AND ISI.intInventoryShipmentId = @intTransactionId
+		UNION
+		SELECT intSalesOrderId
+		FROM tblSOSalesOrderDetail
+		WHERE intSalesOrderDetailId = @intSalesOrderDetailId
 	END
 ELSE
 	BEGIN
@@ -185,9 +199,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 			SET @strOrderStatus = 'Open'
 		ELSE IF @dblTotalQtyShipped < @dblTotalQtyOrdered
 			SET @strOrderStatus = 'Partial'
-		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 0
-			SET @strOrderStatus = 'Pending'
-		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered) AND @ysnShipmentPosted = 1
+		ELSE IF (@dblTotalQtyShipped = @dblTotalQtyOrdered OR @dblTotalQtyShipped > @dblTotalQtyOrdered)
 			SET @strOrderStatus = 'Closed'
 
 		UPDATE tblSOSalesOrder

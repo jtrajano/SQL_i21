@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLCOATemplateDetail] (
     [intAccountTemplateDetailId] INT           IDENTITY (1, 1) NOT NULL,
-    [intAccountTemplateId]       INT           NULL,
+    [intAccountTemplateId]       INT           NOT NULL,
     [strCode]                    NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [strDescription]             NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intAccountGroupId]          INT           NULL,

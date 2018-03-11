@@ -270,10 +270,12 @@ SELECT
 													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 													--[Voucher Cost]
 													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
 														ELSE 
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, receiptCostUOM.intItemUOMId, 
+															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
 													END 													
 												)
@@ -884,7 +886,19 @@ BEGIN
 					AND Receipt.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	ISNULL(Charge.ysnPrice, 0) = 1
 				AND BillDetail.dblTotal < 0 
-				
+
+		--UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
+		UPDATE	Charge
+		SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
+				,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryShipmentCharge Charge 
+					ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
+					AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	BillDetail.dblTotal > 0 
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -990,7 +1004,19 @@ BEGIN
 					AND Receipt.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	ISNULL(Charge.ysnPrice, 0) = 1
 				AND BillDetail.dblTotal < 0 
-				
+
+		--UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
+		UPDATE	Charge
+		SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
+				,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
+		FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+					ON Bill.intBillId = BillDetail.intBillId
+				INNER JOIN #tmpPostBillData
+					ON #tmpPostBillData.intBillId = Bill.intBillId
+				INNER JOIN tblICInventoryShipmentCharge Charge 
+					ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
+					AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		WHERE	BillDetail.dblTotal > 0 				
 		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

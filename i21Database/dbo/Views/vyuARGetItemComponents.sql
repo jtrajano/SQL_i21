@@ -3,7 +3,7 @@ AS
 SELECT intRecipeId				= RECIPE.intRecipeId
 	 , intItemId				= RECIPE.intItemId
 	 , intCompanyLocationId		= I.intLocationId
-     , intComponentItemId		= RECIPE.intItemId
+     , intComponentItemId		= RECIPE.intComponentId
 	 , strItemNo				= I.strItemNo
 	 , strDescription			= I.strDescription
 	 , intItemUnitMeasureId		= RECIPE.intItemUOMId
@@ -11,8 +11,8 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , dblQuantity				= RECIPE.dblQuantity
 	 , dblNewQuantity			= RECIPE.dblQuantity
 	 , dblAvailableQuantity		= I.dblAvailable	 
-	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(RECIPE.intItemId, RECIPE.intItemUOMId, 1) * I.dblSalePrice
-	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(RECIPE.intItemId, RECIPE.intItemUOMId, 1) * I.dblSalePrice	 
+	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(RECIPE.intComponentId, RECIPE.intItemUOMId, 1) * I.dblSalePrice
+	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(RECIPE.intComponentId, RECIPE.intItemUOMId, 1) * I.dblSalePrice	 
 	 , strItemType				= I.strType
 	 , strType					= 'Finished Good'
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	 
@@ -25,10 +25,11 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 FROM vyuICGetItemStock I WITH (NOLOCK)
 INNER JOIN (
 	SELECT RI.*
+		 , R.intItemId
 	FROM dbo.tblMFRecipe R WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intRecipeId
-			 , intItemId
+			 , intComponentId = intItemId
 			 , intItemUOMId
 			 , strDocumentNo
 			 , dblQuantity
@@ -36,7 +37,7 @@ INNER JOIN (
 		WHERE intRecipeItemTypeId = 1
 	) RI ON R.intRecipeId = RI.intRecipeId
 	WHERE R.ysnActive = 1
-) RECIPE ON I.intItemId = RECIPE.intItemId
+) RECIPE ON I.intItemId = RECIPE.intComponentId
 INNER JOIN (
 	SELECT intItemUOMId
 		 , strUnitMeasure

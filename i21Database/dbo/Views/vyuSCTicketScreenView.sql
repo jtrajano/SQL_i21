@@ -197,7 +197,7 @@
 	,CT.intContractDetailSequence
 	,CT.strContractDetailLocation
 	,CT.intContractHeaderId
-	,CTEntity.strEntityName AS strHaulerName
+	,EMShipVia.strHaulerName
 	,CTGrade.strWeightGradeDesc AS strGradeOrigDes
 	,CTWeight.strWeightGradeDesc AS strWeightOrigDes
 	,CTCost.intItemUOMId AS intContractItemUOMId
@@ -238,7 +238,7 @@
 	LEFT JOIN tblICItemUOM ICIUOMFrom on ICIUOMFrom.intItemUOMId = intItemUOMIdFrom
 	LEFT JOIN tblICUnitMeasure ICUM on ICUM.intUnitMeasureId = ICIUOM.intUnitMeasureId
 
-	LEFT JOIN tblGRStorageType GRStorage on GRStorage.strStorageTypeCode = SCT.strDistributionOption
+	LEFT JOIN tblGRStorageType GRStorage on GRStorage.intStorageScheduleTypeId = SCT.intStorageScheduleTypeId 
 	LEFT JOIN tblGRDiscountId GRDiscountId on GRDiscountId.intDiscountId = SCT.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule GRSSR on GRSSR.intStorageScheduleRuleId = SCT.intStorageScheduleId
 
@@ -253,7 +253,11 @@
 		LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation SML ON SML.intCompanyLocationId = CTD.intCompanyLocationId
 	) CT ON CT.intContractDetailId = SCT.intContractId
-	LEFT JOIN vyuCTEntity CTEntity on CTEntity.intEntityId = SCT.intHaulerId AND CTEntity.ysnActive = 1
+	LEFT JOIN (
+		SELECT	EY.intEntityId, EY.strName AS strHaulerName FROM tblEMEntity EY 
+		INNER JOIN tblEMEntityType ET ON EY.intEntityId = ET.intEntityId
+		WHERE	ET.strType = 'Ship Via'
+	) EMShipVia on EMShipVia.intEntityId = SCT.intHaulerId
 	LEFT JOIN tblCTWeightGrade CTGrade on CTGrade.intWeightGradeId = SCT.intGradeId
 	LEFT JOIN tblCTWeightGrade CTWeight on CTWeight.intWeightGradeId = SCT.intWeightId
 	LEFT JOIN tblCTContractCost CTCost on CTCost.intContractCostId = SCT.intContractCostId
