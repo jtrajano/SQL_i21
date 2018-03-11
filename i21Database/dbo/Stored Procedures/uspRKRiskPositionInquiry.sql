@@ -473,7 +473,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #ContractTransaction
-			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND dtmFutureMonthsDate < @dtmFutureMonthsDate AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId
+			WHERE  intPricingTypeId <> 1 AND dtmFutureMonthsDate < @dtmFutureMonthsDate AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId
 			
 			UNION
 			
@@ -491,7 +491,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #ContractTransaction
-			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) T1
 		
 		UNION
@@ -530,7 +530,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #ContractTransaction
-			WHERE ysnExpired = 0 AND intPricingTypeId = 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) T1
 		
 		UNION
@@ -551,7 +551,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #DeltaPrecent
-			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
+			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
 				AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate < @dtmFutureMonthsDate
 			) T1
@@ -572,7 +572,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #DeltaPrecent
-			WHERE ysnExpired = 0 AND intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
+			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
 			AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
 			AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate < @dtmFutureMonthsDate
 			) T1
@@ -595,7 +595,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #DeltaPrecent
-			WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
+			WHERE intPricingTypeId <> 1 AND intCommodityId = @intCommodityId 
 				AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
 				AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) T1
@@ -618,7 +618,7 @@ BEGIN
 				,intContractHeaderId
 				,NULL AS intFutOptTransactionHeaderId
 			FROM #DeltaPrecent
-			WHERE ysnExpired = 0 AND intPricingTypeId = 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
+			WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate
 			) T1
 		
 		UNION
