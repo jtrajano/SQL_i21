@@ -188,4 +188,3 @@ FROM (
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = ItemStock.intLotId
 	LEFT JOIN tblICParentLot ParentLot ON ParentLot.intParentLotId = Lot.intParentLotId
-	where Category.intCategoryId = 12

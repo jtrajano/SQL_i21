@@ -185,4 +185,3 @@ FROM (
 		ON SubLocation.intCompanyLocationSubLocationId = ItemStock.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation 
 		ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
-	where Category.intCategoryId = 4 and l.intCompanyLocationId = 2
