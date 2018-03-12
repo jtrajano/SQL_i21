@@ -77,14 +77,15 @@ BEGIN
 	--Check if Paycheck has Payables created, if so, create Debit Memos for those
 	DECLARE @intPaycheckId INT
 	DECLARE @intPaycheckIds NVARCHAR(MAX)
+	DECLARE @strVoidTransactionId NVARCHAR(100)
 	SELECT TOP 1 @intPaycheckId = intPaycheckId FROM tblPRPaycheck WHERE strPaycheckId = @strTransactionId
 
 	IF (EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckTax WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL)
 		OR EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckDeduction WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL))
 	BEGIN
 		SELECT @intPaycheckIds = CAST(@intPaycheckId AS NVARCHAR(MAX)) FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
-		SET @strTransactionId = @strTransactionId + 'V'
-		EXEC uspPRCreatePaycheckPayable @intPaycheckIds, @strTransactionId, @intUserId, 1
+		SET @strVoidTransactionId = @strTransactionId + 'V'
+		EXEC uspPRCreatePaycheckPayable @intPaycheckIds, @strVoidTransactionId, @intUserId, 1
 	END
 
 	UPDATE tblPRPaycheck
@@ -104,5 +105,3 @@ END
 -- Clean-up routines:
 Void_Exit:
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCMBankTransaction')) DROP TABLE #tmpCMBankTransaction
-
-GO
