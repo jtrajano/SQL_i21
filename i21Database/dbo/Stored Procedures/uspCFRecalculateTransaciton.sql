@@ -1921,14 +1921,14 @@ BEGIN
 					,NULL
 					,1
 					,NULL
-					,NULL
+					,@companyConfigFreightTermId
 					,@intCardId		
 					,@intVehicleId
 					,1 -- @DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId
+					, NULL	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver			
+					,0		--@IsDeliver										 
 				)
 
 					--SELECT * FROM @tblCFCalculatedTaxExempt
@@ -2561,10 +2561,15 @@ BEGIN
 		END
 	ELSE IF @strPriceMethod = 'Network Cost'
 	BEGIN
+
+	--Original Net Price = Round( (Round(Gross Transfer Cost * Quantity,2) - Original Taxes) / Quantity, 6)
+	--Calc Gross Price = Gross Transfer Cost
+	--Calc Net Price = Round( (Round(Gross Transfer Cost * Quantity,2) - (Calc Taxes) )/ Quantity,6)
+
  
 	DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
 	SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
-	SET @dblImportFileGrossPrice = ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
+	SET @dblImportFileGrossPrice = @dblNetworkCostGrossPrice --ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
  
 	IF(ISNULL(@ysnForceRounding,0) = 1) 
 	BEGIN
@@ -2583,9 +2588,9 @@ BEGIN
 	),
 	(
 	'Net Price'
-	,ROUND((((@dblNetworkCostGrossPrice * @dblQuantity) - (@totalOriginalTax) ) / @dblQuantity),6)
+	,ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
 	--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-	,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+	,ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 	),
 	(
 	'Total Amount'

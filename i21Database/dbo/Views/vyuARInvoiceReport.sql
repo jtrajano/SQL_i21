@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceReport]
 AS
-SELECT intInvoiceId				= INV.intInvoiceId	 
+SELECT intInvoiceId				= INV.intInvoiceId
+	 , intCompanyLocationId		= INV.intCompanyLocationId
 	 , strCompanyName			= CASE WHEN [LOCATION].strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
 	 , strCompanyAddress		= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
@@ -87,6 +88,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Invoice')
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
+	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -135,6 +137,7 @@ LEFT JOIN (
 		 , strItemType			= ITEM.strType
 		 , strItemDescription	= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
 		 , SO.strBOLNumber
+		 , ITEM.ysnListBundleSeparately
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
@@ -144,6 +147,7 @@ LEFT JOIN (
 			 , strDescription
 			 , strInvoiceComments
 			 , strType
+			 , ysnListBundleSeparately
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN (
@@ -217,11 +221,11 @@ LEFT JOIN (
 		 , strFobPoint
 	FROM dbo.tblSMFreightTerms WITH (NOLOCK)
 ) FREIGHT ON INV.intFreightTermId = FREIGHT.intFreightTermId
-LEFT JOIN (SELECT 
-			strCode,
-			strMessage
-		  FROM	
-		  vyuARDocumentMaintenanceMessage) Comments ON INV.strComments = Comments.strCode
+LEFT JOIN (
+	SELECT strCode
+		 , strMessage
+	FROM vyuARDocumentMaintenanceMessage
+) Comments ON INV.strComments = Comments.strCode
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName 
 			   , strAddress

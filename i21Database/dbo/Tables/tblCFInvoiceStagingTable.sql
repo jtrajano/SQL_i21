@@ -138,13 +138,17 @@
     [ysnShowOnCFInvoice]           BIT             NULL,
     [ysnPostForeignSales]          BIT             NULL,
     [ysnSummaryByDeptVehicleProd]  BIT             NULL,
-    [ysnDepartmentGrouping]        BIT             NULL
+    [ysnDepartmentGrouping]        BIT             NULL,
+    [strGuid]                      NVARCHAR (MAX)  NULL,
+    [strUserId]                    NVARCHAR (100)  NULL,
+    CONSTRAINT [UserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
 );
 
 
+
+
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [intTransactionId]
-    ON [dbo].[tblCFInvoiceStagingTable]([intTransactionId] ASC);
+
 
 
 

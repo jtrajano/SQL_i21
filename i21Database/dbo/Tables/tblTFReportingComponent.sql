@@ -21,3 +21,5 @@
     CONSTRAINT [UK_tblTFReportingComponent_1] UNIQUE ([intTaxAuthorityId], [strFormCode], [strScheduleCode], [strType]), 
     CONSTRAINT [FK_tblTFReportingComponent_tblTFTaxAuthority] FOREIGN KEY (intTaxAuthorityId) REFERENCES [tblTFTaxAuthority]([intTaxAuthorityId])
 )
+
+GO

@@ -10,10 +10,25 @@ SELECT
 	,[strMiscDescription]						=	Item.strDescription
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
-	,[dblOrderQty]								=	1
+	,[dblOrderQty]								=	
+													CASE 
+														WHEN ISNULL(ShipmentCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+															THEN -(ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)	
+													END 
 	,[dblPOOpenReceive]							=	0
-	,[dblOpenReceive]							=	1
-	,[dblQuantityToBill]						=	1
+	,[dblOpenReceive]							=	
+													CASE 
+														WHEN ISNULL(ShipmentCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+															THEN -(ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)	
+													END 
+	,[dblQuantityToBill]						=	
+													CASE 
+														WHEN ISNULL(ShipmentCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+															THEN -(ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) 
+														ELSE ISNULL(ShipmentCharge.dblQuantity, 1) - ISNULL(ShipmentCharge.dblQuantityBilled, 0)	
+													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
 	,[intInventoryShipmentItemId]				=	ShipmentItem.intInventoryShipmentItemId --add for strSource reference
@@ -85,4 +100,10 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 WHERE	ShipmentCharge.ysnAccrue = 1 
 		AND ShipmentCharge.intEntityVendorId IS NOT NULL
 		AND ISNULL(Shipment.ysnPosted, 0) = 1
-		AND ISNULL(ShipmentCharge.dblAmountBilled, 0) < ROUND(ShipmentCharge.dblAmount, 6) 
+		AND (
+			ISNULL(ShipmentCharge.dblAmountBilled, 0) < ROUND(ShipmentCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ShipmentCharge.dblAmountBilled, 0) = 0 
+				AND ROUND(ShipmentCharge.dblAmount, 6) = 0 
+			)
+		)

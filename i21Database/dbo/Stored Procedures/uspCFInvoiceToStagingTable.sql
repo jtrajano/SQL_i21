@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
+	,@Guid						NVARCHAR(MAX)  
+	,@UserId					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
 	,@CreatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
 	,@UpdatedIvoices			NVARCHAR(MAX)  = NULL	OUTPUT
@@ -14,12 +16,15 @@ BEGIN
 	DECLARE @CatchErrorState INT;  
 	DECLARE @index INT = 0
 
+	print @Guid	
+	print @UserId
+
 	-------------CLEAN TEMP TABLES------------
-	DELETE FROM tblCFInvoiceReportTempTable
-	DELETE FROM tblCFInvoiceSummaryTempTable
-	DELETE FROM tblCFInvoiceDiscountTempTable
-	DELETE FROM tblCFInvoiceStagingTable
-	DELETE FROM tblCFInvoiceFeeStagingTable
+	DELETE FROM tblCFInvoiceReportTempTable			WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceSummaryTempTable		WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceDiscountTempTable		WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceStagingTable			WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceFeeStagingTable			WHERE strUserId = @UserId
 	------------------------------------------
 
 BEGIN TRY
@@ -32,25 +37,27 @@ BEGIN TRY
 	-- EXECUTING THIS SP's WILL INSERT RECORDS ON TEMP TABLES--
 	-----------------------------------------------------------
 	
-	DELETE FROM tblCFInvoiceReportTempTable
-	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam
+	DELETE FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId
+	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId
 
 	--SELECT 'tblCFInvoiceReportTempTable',* FROM tblCFInvoiceReportTempTable
 	
-	DELETE FROM tblCFInvoiceSummaryTempTable
-	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam
+	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId
+	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam , @UserId = @UserId
+
 
 	--SELECT 'tblCFInvoiceSummaryTempTable',* FROM tblCFInvoiceSummaryTempTable
 	
-	DELETE FROM tblCFInvoiceDiscountTempTable
-	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam
+	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId
+	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam , @UserId = @UserId
+
 
 	--SELECT 'tblCFInvoiceDiscountTempTable',* FROM tblCFInvoiceDiscountTempTable
 	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
-	DELETE FROM tblCFInvoiceStagingTable
+	DELETE FROM tblCFInvoiceStagingTable WHERE strUserId = @UserId
 	INSERT INTO tblCFInvoiceStagingTable
 	(
 	 intCustomerGroupId
@@ -179,6 +186,8 @@ BEGIN TRY
 	,ysnSummaryByDeptVehicleProd
 	,ysnDepartmentGrouping
 	,ysnPostedCSV
+	,strGuid
+	,strUserId
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -307,11 +316,16 @@ BEGIN TRY
 	,ysnSummaryByDeptVehicleProd
 	,ysnDepartmentGrouping
 	,ysnPostedCSV
+	,@Guid
+	,@UserId
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN tblCFInvoiceSummaryTempTable AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId
 	INNER JOIN tblCFInvoiceDiscountTempTable AS cfInvRptDcnt
 	ON cfInvRpt.intTransactionId = cfInvRptDcnt.intTransactionId
+	WHERE cfInvRpt.strUserId = @UserId 
+	AND cfInvRptSum.strUserId = @UserId
+	AND cfInvRptDcnt.strUserId = @UserId
 
 	SELECT DISTINCT 
 	 intAccountId
@@ -320,7 +334,7 @@ BEGIN TRY
 	FROM tblCFInvoiceStagingTable
 
 	--INSERT FEE RECORDS--
-	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam
+	EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam , @UserId = @UserId
 
 
 	DECLARE @idoc INT
@@ -489,13 +503,13 @@ BEGIN TRY
 		,NULL --dblCreditLimit
 		,(dblAccountTotalAmount + ( 
 			ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
-			WHERE innerTable.intAccountId = cfInv.intAccountId
+			WHERE innerTable.intAccountId = cfInv.intAccountId AND strUserId = @UserId
 			GROUP BY intAccountId),0)
 		)) --dblInvoiceTotal
 		,0 --dblPayment
 		,(dblAccountTotalAmount + ( 
 			ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
-			WHERE innerTable.intAccountId = cfInv.intAccountId
+			WHERE innerTable.intAccountId = cfInv.intAccountId  AND strUserId = @UserId
 			GROUP BY intAccountId),0)
 		))  --dblBalance
 		,NULL --dblTotalAR
@@ -522,6 +536,7 @@ BEGIN TRY
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv
+		WHERE strUserId = @UserId
 		GROUP BY 
 		intCustomerId
 		,dtmInvoiceDate
@@ -600,6 +615,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfInv.strTermCode		
 		FROM tblCFInvoiceStagingTable cfInv
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
+		AND cfInv.strUserId = @UserId
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET
@@ -621,7 +637,7 @@ BEGIN TRY
 																							AND (ISNULL(strEmail, N'') <> ''))
 		FROM vyuCFAccountTerm cfAccntTerm
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
-
+		----AR SHOULD HANDLE MULTI USER TOO---
 		
 		DECLARE @strWebsite NVARCHAR(MAX)
 		SET @strWebsite = (select TOP 1 ISNULL(strWebSite,'') from [tblSMCompanySetup])
@@ -768,6 +784,7 @@ BEGIN TRY
 						
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
+			AND cfInv.strUserId = @UserId
 
 
 			DELETE FROM tblARCustomerStatementStagingTable 
@@ -818,11 +835,11 @@ BEGIN CATCH
 	--	@CatchErrorState = ERROR_STATE();  
 
 	-------------CLEAN TEMP TABLES------------
-	DELETE FROM tblCFInvoiceReportTempTable
-	DELETE FROM tblCFInvoiceSummaryTempTable
-	DELETE FROM tblCFInvoiceDiscountTempTable
-	DELETE FROM tblCFInvoiceStagingTable
-	DELETE FROM tblCFInvoiceFeeStagingTable
+	DELETE FROM tblCFInvoiceReportTempTable			 WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceSummaryTempTable		 WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceDiscountTempTable		 WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceStagingTable			 WHERE strUserId = @UserId
+	DELETE FROM tblCFInvoiceFeeStagingTable			 WHERE strUserId = @UserId
 	------------------------------------------
 
 	RAISERROR (@CatchErrorMessage,@CatchErrorSeverity,@CatchErrorState)

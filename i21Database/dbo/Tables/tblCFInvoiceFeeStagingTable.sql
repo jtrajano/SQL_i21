@@ -20,8 +20,12 @@
     [dtmTransactionDate]     DATETIME        NULL,
     [dtmInvoiceDate]         DATETIME        NULL,
     [dtmStartDate]           DATETIME        NULL,
-    [dtmEndDate]             DATETIME        NULL
+    [dtmEndDate]             DATETIME        NULL,
+    [strGuid]                NVARCHAR (MAX)  NULL,
+    [strUserId]              NVARCHAR (MAX)  NULL
 );
+
+
 
 
 

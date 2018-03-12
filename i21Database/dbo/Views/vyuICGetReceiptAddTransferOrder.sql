@@ -72,6 +72,8 @@ FROM (
 			, strLotAlias				= LotItem.strLotAlias
 			, intParentLotId			= LotItem.intParentLotId
 			, strParentLotNumber		= LotItem.strParentLotNumber
+			, intLotStatusId			= d.intNewLotStatusId
+			, strLotCondition			= d.strLotCondition			
 			-- Cost UOM --------------------------------------------------------
 			, intCostUOMId				= CostUOM.intItemUOMId -- intItemUOMId
 			, strCostUOM				= CostUnitMeasure.strUnitMeasure
@@ -171,7 +173,7 @@ FROM (
 						,LotItem.strLotAlias
 						,LotItem.intParentLotId
 						,LotItem.intItemUOMId 
-						,pl.strParentLotNumber						
+						,pl.strParentLotNumber
 				FROM	dbo.tblICLot LotItem 
 						--INNER JOIN tblICInventoryTransaction t_lot
 						--	ON LotItem.intLotId = t_lot.intLotId

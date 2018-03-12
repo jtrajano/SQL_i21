@@ -42,6 +42,10 @@ IF EXISTS (select top 1 1 from sys.procedures where name = 'uspLGImportEquipment
 	DROP PROCEDURE uspLGImportEquipmentType
 GO
 
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspLGImportLoadSchedule')
+	DROP PROCEDURE uspLGImportLoadSchedule
+GO
+
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspETRecreateDeliveryMetricsView]') AND type in (N'P', N'PC'))
 DROP PROCEDURE [dbo].uspETRecreateDeliveryMetricsView
 GO

@@ -13,9 +13,6 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
--- Card Fueling
-:r .\CF\1_ImportMapping.sql
-
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
@@ -413,6 +410,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\OR_Oregon.sql
 :r .\TF\DefaultData\WA_Washington.sql
 :r .\TF\DefaultData\OH_Ohio.sql
+:r .\TF\DefaultData\NM_NewMexico.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -450,5 +448,10 @@ print 'BEGIN POST DEPLOYMENT'
 --CRM
 :R .\CRM\SplitCRMData.sql
 :R .\CRM\RenameCRMScreen.sql
+
+-- Card Fueling
+:r .\CF\1_ImportMapping.sql
+:r .\CF\2_DataFix.sql
+
 
 print 'END POST DEPLOYMENT'

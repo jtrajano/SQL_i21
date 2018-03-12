@@ -167,6 +167,23 @@ BEGIN
 			RETURN 80163 
 		END
 
+		-- Check if item is bundle type
+		SET @InvalidItemId = NULL 
+		SELECT	TOP 1 
+				@strItemNo = i.strItemNo
+				,@strItemType = i.strType
+				,@InvalidItemId = i.intItemId  
+		FROM	@Items e INNER JOIN tblICItem i 
+					ON i.intItemId = e.intItemId
+		WHERE	i.strBundleType IS NOT NULL
+
+		IF @InvalidItemId IS NOT NULL 
+		BEGIN
+			-- 'Bundle item has to be received from "Add Orders" in the %s Screen.'
+			EXEC uspICRaiseError 80203, 'Inventory Shipment';
+			RETURN 80203 
+		END
+
 		-- Validate Item UOM Id
 		SET @InvalidItemId = NULL
 

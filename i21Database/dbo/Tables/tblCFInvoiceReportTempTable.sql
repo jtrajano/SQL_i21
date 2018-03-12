@@ -82,8 +82,12 @@
     [ysnPostedCSV]                BIT             NULL,
     [ysnPostForeignSales]         BIT             NULL,
     [ysnDepartmentGrouping]       BIT             NULL,
-    [ysnSummaryByDeptVehicleProd] BIT             NULL
+    [ysnSummaryByDeptVehicleProd] BIT             NULL,
+    [strGuid]                     NVARCHAR (MAX)  NULL,
+    [strUserId]                   NVARCHAR (MAX)  NULL
 );
+
+
 
 
 

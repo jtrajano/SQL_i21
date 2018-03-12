@@ -29,6 +29,15 @@ DECLARE @SourceType_PickLot AS INT = 3
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 
+DECLARE @Id INT = NULL,
+		@intInventoryShipmentItemId	INT = NULL,
+		@intContractDetailId		INT = NULL,
+		@intSalesOrderDetailId		INT = NULL,
+		@intFromItemUOMId			INT = NULL,
+		@intToItemUOMId				INT = NULL,
+		@dblQty						NUMERIC(18, 6) = 0
+
+
 -- Validate
 BEGIN  
 	-- 'The item {Item No} is already in {Sales Invoice Id}. Remove it from the Invoice first before you can modify it from the Shipment.'
@@ -98,7 +107,8 @@ SELECT	ShipmentItem.intInventoryShipmentId
 INTO	#tmpShipmentItems
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId AND (ShipmentItem.strItemType IS NULL OR ShipmentItem.strItemType != 'Option')
+WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId 
+		AND (ShipmentItem.strItemType IS NULL OR ShipmentItem.strItemType != 'Option')
 UNION ALL
 --FOR OPTION
 SELECT	ShipmentItem.intInventoryShipmentId
@@ -115,10 +125,12 @@ SELECT	ShipmentItem.intInventoryShipmentId
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		INNER JOIN tblICItemBundle ItemBundle 
-			ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId AND ShipmentItem.intItemId = ItemBundle.intBundleItemId
+			ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId 
+			AND ShipmentItem.intItemId = ItemBundle.intBundleItemId
 		INNER JOIN tblICItemUOM ItemBundleUOM
-			ON ItemBundleUOM.intItemId = ItemBundle.intItemId AND ItemBundleUOM.ysnStockUnit = 1
-		WHERE ShipmentItem.intInventoryShipmentId = @ShipmentId
+			ON ItemBundleUOM.intItemId = ItemBundle.intItemId 
+			AND ItemBundleUOM.ysnStockUnit = 1
+WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId
 		
 -- Call the CT sp only if Shipment type is a 'Sales Contract' and NOT Logistics (Inbound Shipment) and NOT Scale (Scale Ticket)
 -- Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
@@ -134,7 +146,7 @@ BEGIN
 		intInventoryShipmentItemId	INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(12,4)	
+		dblQty						NUMERIC(18,6)	
 	)
 
 	INSERT INTO @tblContractsToProcess(
@@ -229,14 +241,6 @@ BEGIN
 			AND currentSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpLogShipmentItems)
 			--AND currentSnapshot.strItemType != 'Kit'
 
-	-- Iterate and process records
-	DECLARE @Id INT = NULL,
-			@intInventoryShipmentItemId	INT = NULL,
-			@intContractDetailId		INT = NULL,
-			@intFromItemUOMId			INT = NULL,
-			@intToItemUOMId				INT = NULL,
-			@dblQty				NUMERIC(12,4) = 0
-
 	DECLARE loopItemsForContractScheduleQuantity CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT	intContractDetailId
@@ -268,6 +272,154 @@ BEGIN
 		-- Attempt to fetch the next row from cursor. 
 		FETCH NEXT FROM loopItemsForContractScheduleQuantity INTO 
 			@intContractDetailId
+			,@dblQty
+			,@intInventoryShipmentItemId	
+	END;
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- End of the loop
+	-----------------------------------------------------------------------------------------------------------------------------
+
+	CLOSE loopItemsForContractScheduleQuantity;
+	DEALLOCATE loopItemsForContractScheduleQuantity;
+END 
+
+-- Update the Sales Order Shippped Qty
+IF (
+	@ShipmentType = @ShipmentType_SalesOrder
+)
+BEGIN 
+	-- Create temporary table for processing records
+	DECLARE @tblSalesOrderToProcess TABLE
+	(
+		intKeyId					INT IDENTITY,
+		intInventoryShipmentItemId	INT,
+		intSalesOrderDetailId		INT,
+		intItemUOMId				INT,
+		dblQty						NUMERIC(12,4)	
+	)
+
+	INSERT INTO @tblSalesOrderToProcess(
+		intInventoryShipmentItemId
+		,intSalesOrderDetailId
+		,intItemUOMId
+		,dblQty
+	)
+
+	-- Changed Quantity/UOM
+	SELECT	currentSnapshot.intInventoryShipmentItemId
+			,currentSnapshot.intLineNo
+			,currentSnapshot.intItemUOMId
+			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblQuantity ELSE (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity) END))
+	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
+				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
+				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
+			INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
+				ON SalesOrderDetail.intSalesOrderDetailId = currentSnapshot.intLineNo
+	WHERE	currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo = previousSnapshot.intLineNo
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
+			AND (currentSnapshot.intItemUOMId <> previousSnapshot.intItemUOMId OR currentSnapshot.dblQuantity <> previousSnapshot.dblQuantity)
+
+	-- New Sales Order Detail Added (via Add-Orders)
+	UNION ALL 
+	SELECT	currentSnapshot.intInventoryShipmentItemId
+			,currentSnapshot.intLineNo
+			,currentSnapshot.intItemUOMId
+			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblQuantity)
+	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
+				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
+				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
+			INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
+				ON SalesOrderDetail.intSalesOrderDetailId = currentSnapshot.intLineNo
+	WHERE	currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo		
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
+	
+
+	-- Replaced the Sales Order 
+	UNION ALL
+	SELECT	currentSnapshot.intInventoryShipmentItemId
+			,previousSnapshot.intLineNo
+			,previousSnapshot.intItemUOMId
+			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
+				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
+				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
+			INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
+				ON SalesOrderDetail.intSalesOrderDetailId = currentSnapshot.intLineNo
+	WHERE	currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId
+		
+	-- Deleted Sales Order 
+	UNION ALL
+	SELECT	currentSnapshot.intInventoryShipmentItemId
+			,previousSnapshot.intLineNo
+			,previousSnapshot.intItemUOMId
+			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
+				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
+				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
+			INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
+				ON SalesOrderDetail.intSalesOrderDetailId = currentSnapshot.intLineNo
+	WHERE	currentSnapshot.intLineNo IS NULL
+			AND previousSnapshot.intLineNo IS NOT NULL
+			
+	-- Deleted Item
+	UNION ALL	
+	SELECT	previousSnapshot.intInventoryShipmentItemId
+			,previousSnapshot.intLineNo
+			,previousSnapshot.intItemUOMId
+			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+	FROM	#tmpLogShipmentItems previousSnapshot INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
+				ON SalesOrderDetail.intSalesOrderDetailId = previousSnapshot.intLineNo
+	WHERE	previousSnapshot.intLineNo IS NOT NULL
+			AND previousSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpShipmentItems)
+	
+	-- Added Item
+	UNION ALL
+	SELECT	currentSnapshot.intInventoryShipmentItemId
+			,currentSnapshot.intLineNo
+			,currentSnapshot.intItemUOMId
+			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, currentSnapshot.dblQuantity)
+	FROM	#tmpShipmentItems currentSnapshot INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
+				ON SalesOrderDetail.intSalesOrderDetailId = currentSnapshot.intLineNo
+	WHERE	currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intInventoryShipmentItemId NOT IN (SELECT intInventoryShipmentItemId FROM #tmpLogShipmentItems)
+
+	-- Iterate and process records
+	DECLARE loopItemsForContractScheduleQuantity CURSOR LOCAL FAST_FORWARD
+	FOR 
+	SELECT	intSalesOrderDetailId
+			,dblQty 
+			,intInventoryShipmentItemId
+	FROM	@tblSalesOrderToProcess
+	WHERE	ISNULL(dblQty, 0) <> 0 
+
+	OPEN loopItemsForContractScheduleQuantity;
+		
+	-- Initial fetch attempt
+	FETCH NEXT FROM loopItemsForContractScheduleQuantity INTO 
+		@intSalesOrderDetailId
+		,@dblQty
+		,@intInventoryShipmentItemId;
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- Start of the loop for the integration sp. 
+	-----------------------------------------------------------------------------------------------------------------------------
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 		
+		EXEC [dbo].[uspSOUpdateOrderShipmentStatus]
+			  @intTransactionId			= NULL
+			, @strTransactionType		= 'Inventory'
+			, @ysnForDelete				= 0
+			, @intSalesOrderDetailId	= @intSalesOrderDetailId
+			, @dblQuantity				= @dblQty
+			, @intItemUOMId				= NULL 
+
+		-- Attempt to fetch the next row from cursor. 
+		FETCH NEXT FROM loopItemsForContractScheduleQuantity INTO 
+			@intSalesOrderDetailId
 			,@dblQty
 			,@intInventoryShipmentItemId	
 	END;

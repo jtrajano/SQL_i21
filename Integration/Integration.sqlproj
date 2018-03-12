@@ -458,5 +458,7 @@
     <None Include="dbo\Stored Procedures\uspCTImportContractPlanPt.sql" />
     <None Include="dbo\Stored Procedures\uspCTImportContractText.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
+    <None Include="dbo\Stored Procedures\uspLGImportEquipmentType.sql" />
+    <None Include="dbo\Stored Procedures\uspLGImportLoadSchedule.sql" />
   </ItemGroup>
 </Project>

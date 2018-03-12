@@ -3439,7 +3439,6 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentAmountDue.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspARDuplicateQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionDetailTable.sql" />
@@ -3462,7 +3461,6 @@
     <Build Include="dbo\Tables\tblLGLoadNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportArrivalForm.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
-    <Build Include="dbo\Tables\tblARQuotePage.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFixRackPrices.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\CallEntryPrintOut.sql" />
@@ -6199,22 +6197,25 @@
     <Build Include="dbo\Views\vyuRKGetFutureMonth.sql" />
     <Build Include="dbo\Views\vyuICGetAddOnComponentStock.sql" />
     <Build Include="dbo\Views\vyuICGetSubstituteComponentStock.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceProcessHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateOR7351334MSub.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Set_Default_Language.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_UpdatePortalMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetVendorLotNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotAlias.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRRegeneratePaycheckPanelViews.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotDetail.sql" />
     <Build Include="dbo\Functions\fnSCFreightCalculation.sql" />
     <Build Include="dbo\Views\vyuLGAllocationDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetInventoryItemTaxes.sql" />
+    <Build Include="dbo\Functions\fnARConvertPlaceHolder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRejectContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCaseLabelCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertM2MInquiryDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemAddOns.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKInsertM2MInquiryDetails.sql" />
     <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
     <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
     <Build Include="dbo\Functions\fnTRGetLoadTransferWeightedAveCost.sql" />
@@ -6222,12 +6223,23 @@
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MInqTranExpMonthValidation.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceString.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateNM41164.sql" />
+    <Build Include="dbo\Tables\tblFRBudgetSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBudgetSummary.sql" />
+    <Build Include="dbo\Views\vyuARBundleItemsReport.sql" />
     <Build Include="dbo\Views\vyuRKBrokerageCommission.sql" />
     <Build Include="dbo\Views\vyuPATRetireStock.sql" />
     <Build Include="dbo\Views\vyuLGOverallPosition.sql" />
     <Build Include="dbo\Functions\fnLGGetShipmentStatus.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityCountyLocation.sql" />
+    <Build Include="dbo\Tables\tblTFCountyLocation.sql" />
+    <Build Include="dbo\Views\vyuTFGetTaxAuthorityCountyLocation.sql" />
     <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuICGetItemsWithNoLocation.sql" />
+    <Build Include="dbo\Views\vyuSTCigaretteRebatePrograms.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicNM.sql" />
+    <Build Include="dbo\Functions\fnICFormatNumber.sql" />
+    <Build Include="dbo\Views\vyuCRMSalesOrderSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertDefaultAccrual.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
@@ -6494,5 +6506,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1s_UpdateChartDescription.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\NM_NewMexico.sql" />
   </ItemGroup>
 </Project>

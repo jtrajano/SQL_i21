@@ -117,6 +117,11 @@ FROM 	tblICItem i
 					AND ld.intItemId = t.intItemId		
 					AND ty.intTransactionTypeId = 44
 		) loadShipmentSchedule 
+		LEFT JOIN tblGRCustomerStorage settleStorage 
+			ON settleStorage.intCustomerStorageId = t.intTransactionId
+			AND settleStorage.intCustomerStorageId = t.intTransactionDetailId
+			AND t.strTransactionForm IN ('Settle Storage', 'Storage Settlement')
+			AND ty.intTransactionTypeId = 44 
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = COALESCE(
 				receipt.intEntityVendorId
@@ -125,6 +130,7 @@ FROM 	tblICItem i
 				, bill.intEntityVendorId
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
+				, settleStorage.intEntityId
 			)  
 WHERE	i.strType NOT IN (
 			'Other Charge'

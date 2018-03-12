@@ -68,11 +68,7 @@ BEGIN TRY
 
 		DECLARE @TaxAuthorityId INT, @Guid NVARCHAR(100)
 
-		DECLARE @transaction TABLE(
-			 strFormCode NVARCHAR(100)
-			,strScheduleCode NVARCHAR(100)
-			,strType  NVARCHAR(100)
-			,dblReceived NUMERIC)
+		DECLARE @transaction TFReportTransaction
 
 		SELECT TOP 1 @Guid = [from] FROM @Params WHERE [fieldname] = 'strGuid'
 
@@ -80,20 +76,55 @@ BEGIN TRY
 
 		-- Configuration
 		SELECT TOP 1 @LicenseNumber = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-LicenseNumber'
-
+		
+		SELECT @Line_5 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line5'
+		SELECT @TaxRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line7'
+		SELECT @CreditRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line8'
+		SELECT @InterestRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line13'
+		SELECT @Line_16 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1344M-Line16'
 		
 		-- Transaction
-		INSERT INTO @transaction
+		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
 		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
 		FROM vyuTFGetTransaction Trans
 		WHERE Trans.uniqTransactionGuid = @Guid
 		GROUP BY strFormCode, strScheduleCode, strType
 
+		-- Total of Transaction in SubReport
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
-	
-		--SELECT @ReceiptGasoline_2 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '1' AND strType = 'Gasoline'
-	
+
+		DECLARE @Report TFReportOR7351334MSub
+		DECLARE @TotalLine8 NVARCHAR(100) = NULL
+		INSERT INTO @Report EXECUTE sp_executesql N'uspTFGenerateOR7351334MSub @xmlParam = @xmlParam', N'@xmlParam NVARCHAR(MAX) ', @xmlParam = @xmlParam
+
+		SELECT @Line_1 = SUM(CONVERT(NUMERIC(18, 0), dblHandled)) FROM @Report
+		SELECT @Line_3 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5CRD'
+		SELECT @Line_4 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5FLT'
+
+		SET @Line_6 = @Line_2 + @Line_3 + @Line_4 + @Line_5
+
+		SET @Line_7 = @Line_6 * @TaxRate
+
+		SET @Line_8 = @Line_7 * @CreditRate
+
+		SET @Line_9 = @Line_8 - @Line_7
+
+		SELECT @Line_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5BLK'
+
+		SET @Line_11 = @Line_10 * @TaxRate
+
+		SET @Line_12 = @Line_9 + @Line_11
+
+		SET @Line_13 = @Line_12 * @InterestRate
+
+		SET @Line_14 = @Line_12 * 0.1
+
+		SET @Line_15 = @Line_12 + @Line_13 + @Line_14
+
+		SET @Line_17 = @Line_15 + @Line_16
+
+
 	END
 
 	SELECT Line_1 = @Line_1
@@ -121,6 +152,7 @@ BEGIN TRY
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo
 		, LicenseNumber = @LicenseNumber
+		, strGuid = @Guid
 
 END TRY
 BEGIN CATCH

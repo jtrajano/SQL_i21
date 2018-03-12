@@ -310,6 +310,27 @@ BEGIN
 	-- END 
 	-- ;
 
+	-- Check if Charged item is Inventory Cost = true and Linked item is a Kit item
+	BEGIN
+		SET @strItemNo = NULL;
+		SET @intChargeItemId = NULL;
+
+		SELECT	TOP 1 
+				@intChargeItemId = Item.intItemId 
+				,@strItemNo = Item.strItemNo
+		FROM	tblICItem Item INNER JOIN @ItemGLAccounts ItemGLAccount
+					ON Item.intItemId = ItemGLAccount.intItemId
+		WHERE	ItemGLAccount.intInventoryId IS NULL 
+				AND Item.strType = 'Bundle'
+
+		IF @intChargeItemId IS NOT NULL 
+		BEGIN 
+			-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+			EXEC uspICRaiseError 80205, @strItemNo;
+			RETURN;
+		END 
+	END
+
 	-- Check for missing Inventory Account Id
 	BEGIN 
 		SET @strItemNo = NULL

@@ -56,7 +56,7 @@ BEGIN
 			,EE.intEmployeeEarningId
 			,EE.intTypeEarningId
 			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
-			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) 
+			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount', 'Salary')) 
 											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
 											ELSE NULL END
 			,EE.strCalculationType
@@ -72,7 +72,7 @@ BEGIN
 											CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
 											ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
 											END * EE.dblRateAmount
-										WHEN (ELink.strCalculationType = 'Fixed Amount') THEN
+										WHEN (ELink.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 											CASE WHEN (ELink.dblDefaultHours > 0) THEN
 													CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
 													ELSE (EE.dblHoursToProcess + @dblOverrideHours) 

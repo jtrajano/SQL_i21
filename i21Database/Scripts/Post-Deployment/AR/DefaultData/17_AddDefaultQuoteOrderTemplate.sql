@@ -5,7 +5,7 @@ DECLARE @tblARQuoteTemplate TABLE(intQuoteTemplateId INT)
 DECLARE @tblARQuoteTemplateDetail TABLE(intQuoteTemplateId INT, intQuoteTemplateDetailId INT)
 DECLARE @intQuoteTemplateId INT
 
-UPDATE tblARQuoteTemplateDetail SET intQuotePageId = NULL WHERE intQuotePageId = 0
+UPDATE tblARQuoteTemplateDetail SET intLetterId = NULL WHERE intLetterId = 0
 
 INSERT INTO @tblARQuoteTemplate
 SELECT intQuoteTemplateId 

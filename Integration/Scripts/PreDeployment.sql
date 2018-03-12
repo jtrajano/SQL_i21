@@ -281,6 +281,7 @@
 
 --LOGISTICS
 :r "..\dbo\Stored Procedures\uspLGImportEquipmentType.sql"
+:r "..\dbo\Stored Procedures\uspLGImportLoadSchedule.sql"
 
 -- EnergyTrac
 :r "..\dbo\Stored Procedures\uspETRecreateDeliveryMetricsView.sql"

@@ -206,10 +206,13 @@ BEGIN
 				,[intTaxGroupId] = ri.intTaxGroupId
 		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN tblICItem Item 
+					ON Item.intItemId = ri.intItemId
 		WHERE	r.ysnPosted = 1
 				AND r.intInventoryReceiptId = @intReceiptId
 				AND ri.dblBillQty < ri.dblOpenReceive 
 				AND ri.intOwnershipType = @Own
+				AND Item.strType <> 'Bundle'
 	END 
 
 	-- Assemble the Other Charges
@@ -233,6 +236,7 @@ BEGIN
 				,[dblCost] = 
 					CASE 
 						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
+						WHEN rc.strCostMethod = 'Gross Unit' THEN rc.dblRate
 						ELSE rc.dblAmount
 					END 
 				,[intTaxGroupId] = rc.intTaxGroupId

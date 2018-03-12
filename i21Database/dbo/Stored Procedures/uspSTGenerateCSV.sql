@@ -9,9 +9,65 @@
 @intVendorAccountNumber INT OUTPUT
 AS
 BEGIN
-	Begin Try
+	BEGIN TRY
 		SET @strStatusMsg = ''
 		DECLARE @intCountAccountNumber AS INT
+
+
+		----// START Validate selected date total to 7days
+		DECLARE @intCountDays AS INT = DATEDIFF(DAY, CAST(@dtmBeginningDate AS DATE), CAST(@dtmEndingDate AS DATE)) + 1
+		IF(@intCountDays > 7)
+		BEGIN
+			SET @strCSVHeader = ''
+			SET @intVendorAccountNumber = 0
+			SET @strStatusMsg = 'Selected date range have a total of [' + CAST(@intCountDays AS NVARCHAR(20)) + '] days. Selected dates should complete only 1 week of data transaction'
+			RETURN
+		END
+		ELSE IF(@intCountDays < 7)
+		BEGIN
+			SET @strCSVHeader = ''
+			SET @intVendorAccountNumber = 0
+			SET @strStatusMsg = 'Selected date range have a total of [' + CAST(@intCountDays AS NVARCHAR(20)) + '] days. Selected dates should complete 1 week of data transaction'
+			RETURN
+		END
+		----// END Validate selected date total to 7days
+
+
+		----// START Validate Start and Ending date
+		IF(@strTableName = 'tblSTstgRebatesPMMorris')
+		BEGIN
+			-- The date should start on Sunday to Saturday
+			IF(DATENAME(DW, CAST(@dtmBeginningDate AS DATE)) = 'Sunday' AND DATENAME(DW, CAST(@dtmEndingDate AS DATE)) = 'Saturday')
+			BEGIN
+				SET @strStatusMsg = ''
+			END
+			ELSE
+			BEGIN
+				SET @strCSVHeader = ''
+				SET @intVendorAccountNumber = 0
+				SET @strStatusMsg = 'Selected date range should start on Sunday to Saturday'
+				RETURN
+			END
+		END
+		ELSE IF(@strTableName = 'tblSTstgRebatesRJReynolds')
+		BEGIN
+			-- The date should start on Monday to Sunday
+			IF(DATENAME(DW, CAST(@dtmBeginningDate AS DATE)) = 'Monday' AND DATENAME(DW, CAST(@dtmEndingDate AS DATE)) = 'Sunday')
+			BEGIN
+				SET @strStatusMsg = ''
+			END
+			ELSE
+			BEGIN
+				SET @strCSVHeader = ''
+				SET @intVendorAccountNumber = 0
+				SET @strStatusMsg = 'Selected date range should start on Monday to Sunday'
+				RETURN
+			END
+		END
+		----// END Validate Start and Ending date
+
+
+
 
 		----// START PM Morris File format validation
 		IF(@strTableName = 'tblSTstgRebatesPMMorris')
@@ -65,7 +121,7 @@ BEGIN
 				[strMultiPackIndicator] nvarchar(1) COLLATE Latin1_General_CI_AS NULL,
 				[intMultiPackRequiredQuantity] int NULL,
 				[dblMultiPackDiscountAmount] numeric(10, 2) NULL,
-				[strRetailerFundedDIscountName] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+				[strRetailerFundedDIscountName] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
 				[dblRetailerFundedDiscountAmount] numeric(10, 2) NULL,
 				[strMFGDealNameONE] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 				[dblMFGDealDiscountAmountONE] numeric(10, 2) NULL,
@@ -77,7 +133,8 @@ BEGIN
 				
 				--Optional Fields
 				intStoreTelephone int NULL,
-				strStoreContactName nvarchar(100) COLLATE Latin1_General_CI_AS NULL,				strStoreContactEmail nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+				strStoreContactName nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+				strStoreContactEmail nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 				strProductGroupingCode nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 				strProductGroupingName nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 				strLoyaltyIDRewardsNumber nvarchar(20) COLLATE Latin1_General_CI_AS NULL
@@ -155,19 +212,19 @@ BEGIN
 
 				SET @Delimiter = '|'
 
-				-- START Validate if selected dates completes a aweek
-				DECLARE @intCountDays AS INT = DATEDIFF(DAY, @dtmBeginningDate, @dtmEndingDate) + 1
+				---- START Validate if selected dates completes a aweek
+				--DECLARE @intCountDays AS INT = DATEDIFF(DAY, @dtmBeginningDate, @dtmEndingDate) + 1
 				
-				IF(@intCountDays < 7)
-				BEGIN
-					SET @strStatusMsg = 'The selected dates should complete 1 week of data transaction, you only selected ' + CAST(@intCountDays AS NVARCHAR(10)) + ' days of transaction data'
-					RETURN
-				END
-				ELSE IF(@intCountDays > 7)
-				BEGIN
-					SET @strStatusMsg = 'The selected dates have more than a week of transaction data, you selected ' + CAST(@intCountDays AS NVARCHAR(10)) + ' days, It should only have 1 week'
-					RETURN
-				END
+				--IF(@intCountDays < 7)
+				--BEGIN
+				--	SET @strStatusMsg = 'The selected dates should complete 1 week of data transaction, you only selected ' + CAST(@intCountDays AS NVARCHAR(10)) + ' days of transaction data'
+				--	RETURN
+				--END
+				--ELSE IF(@intCountDays > 7)
+				--BEGIN
+				--	SET @strStatusMsg = 'The selected dates have more than a week of transaction data, you selected ' + CAST(@intCountDays AS NVARCHAR(10)) + ' days, It should only have 1 week'
+				--	RETURN
+				--END
 
 				-- END Validate if selected dates completes a aweek
 
@@ -181,12 +238,21 @@ BEGIN
 								, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
 								, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
 								, intTermMsgSN as strTransactionIdCode
+
 								, ST.intStoreNo as strStoreNumber
 								, ST.strDescription as strStoreName
-								, REPLACE(REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
-								, ST.strCity as strStoreCity
-								, UPPER(LEFT(ST.strState, 2)) as strStoreState
-								, ST.strZipCode as intStoreZipCode
+								--, REPLACE(REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
+								--, ST.strCity as strStoreCity
+								--, UPPER(LEFT(ST.strState, 2)) as strStoreState
+								--, ST.strZipCode as intStoreZipCode
+
+								--, STMAP.intStoreNo as strStoreNumber
+								--, STMAP.strDescription as strStoreName
+								, REPLACE(REPLACE(REPLACE(REPLACE(STMAP.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
+								, STMAP.strCity as strStoreCity
+								, UPPER(LEFT(STMAP.strState, 2)) as strStoreState
+								, STMAP.strZipCode as intStoreZipCode
+
 								, strTrlDept as strCategory
 								, EM.strName as strManufacturerName
 								, strTrlUPC as strSKUCode --14
@@ -195,32 +261,58 @@ BEGIN
 								, 'PACK' as strUnitOfMeasure
 								, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold
 								, 1 as intConsumerUnits
-								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Y' ELSE 'N' END as strMultiPackIndicator
-								, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as intMultiPackRequiredQuantity
-								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblMultiPackDiscountAmount
-								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Sale' ELSE '' END as strRetailerFundedDiscountName
-								, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblRetailerFundedDiscountAmount
+
+								--, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Y' ELSE 'N' END as strMultiPackIndicator
+								--, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as intMultiPackRequiredQuantity
+								--, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblMultiPackDiscountAmount
+								, 'N' as strMultiPackIndicator
+								, 0 as intMultiPackRequiredQuantity
+								, 0 as dblMultiPackDiscountAmount
+
+								, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
+								, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 'Coupon' ELSE '' END as strMFGDealNameONE
 								, CASE WHEN strTrpPaycode = 'COUPONS' THEN 0.50 ELSE 0 END as dblMFGDealDiscountAmountONE
 								, '' as strMFGDealNameTWO
 								, 0 as dblMFGDealDiscountAmountTWO
 								, '' as strMFGDealNameTHREE
 								, 0 as dblMFGDealDiscountAmountTHREE
-								, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot ELSE 0 END as dblFinalSalesPrice
+								, CASE WHEN CRP.strProgramName IS NOT NULL THEN 0
+										WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot 
+										ELSE 0 END as dblFinalSalesPrice
 								
 								--Optional Fields
 								, NULL AS intStoreTelephone
-								, '' AS strStoreContactName								, '' strStoreContactEmail
+								, '' AS strStoreContactName
+								, '' strStoreContactEmail
 								, '' strProductGroupingCode
 								, '' strProductGroupingName
 								, '' strLoyaltyIDRewardsNumber
-				FROM tblSTTranslogRebates TR
+				FROM 
+				(
+					SELECT * FROM
+						(   
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
+							FROM tblSTTranslogRebates
+						) TRR 
+						WHERE TRR.rn = 1
+						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
+				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblSTRetailAccount STRT ON STRT.intStoreId = ST.intStoreId AND STRT.intEntityId = @intVendorId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
+				JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
+				JOIN tblSTStore STMAP ON STMAP.intStoreId = APV.intStoreStoreId
+				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
+						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+						AND TR.strTrpPaycode IN ('Change', 'CREDIT')
+				LEFT JOIN
+				(
+					SELECT [intID] 
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+					GROUP BY [intID]
+				) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 				WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
-				AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate 
-				AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate 
 				AND ysnSubmitted = 0
 				AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
@@ -263,8 +355,9 @@ BEGIN
 								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
 									THEN dblTrlMatchLineTrlPromoAmount ELSE 0 END as dblOutletMultipackDiscountAmount
 
-								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
-								, CASE WHEN strTrlDesc like '% OFF%' THEN strTrlDesc ELSE '' END as strAccountPromotionName --21
+								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
+								--, CASE WHEN strTrlDesc like '% OFF%' THEN strTrlDesc ELSE '' END as strAccountPromotionName --21
+
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount --22
 
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
@@ -278,16 +371,31 @@ BEGIN
 								, 0 as intManufacturerMultipackQuantity
 								, 0 as dblManufacturerMultipackDiscountAmount
 								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpPaycode ELSE '' END as strManufacturerPromotionDescription
-								, '' as strManufacturerBuydownDescription
-								, 0 as dblManufacturerBuydownAmount
+								, REPLACE(CRP.strProgramName, ',','') as strManufacturerBuydownDescription
+								, CRP.dblManufacturerBuyDownAmount as dblManufacturerBuydownAmount
 								, '' as strManufacturerMultiPackDescription
 								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
 								, TR.strTrLoyaltyProgramProgramID as strCouponDescription
-					FROM tblSTTranslogRebates TR
+					FROM 
+					(   
+						SELECT * FROM
+						(   
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
+							FROM tblSTTranslogRebates
+						) TRR 
+						WHERE TRR.rn = 1
+						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
+					) TR
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-					WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
-					AND CAST(TR.dtmDate as DATE) >= @dtmBeginningDate
-					AND CAST(TR.dtmDate as DATE) <= @dtmEndingDate
+					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
+						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+					LEFT JOIN
+					(
+						SELECT [intID] 
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+						GROUP BY [intID]
+					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+					WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 					AND ysnSubmitted = 0
 					AND strTrLineType = 'plu'
 					AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
@@ -295,22 +403,21 @@ BEGIN
 
 					SET @strStatusMsg = 'Success'
 			END
+			--END tblSTstgRebatesRJReynolds
 		END
 
 
-			IF(@strStatusMsg = 'Success')
-			BEGIN
-				--START mark ysnSubmitted = 1 (mark as submitted)
-				UPDATE tblSTTranslogRebates
-					SET ysnSubmitted = 1
-					WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-					AND CAST(dtmDate as DATE) >= @dtmBeginningDate
-					AND CAST(dtmDate as DATE) <= @dtmEndingDate
-					AND ysnSubmitted = 0
-				--END mark ysnSubmitted = 1 (mark as submitted)	
-			END
-
-
+		IF(@strStatusMsg = 'Success')
+		BEGIN
+			--START mark ysnSubmitted = 1 (mark as submitted)
+			UPDATE tblSTTranslogRebates
+				SET ysnSubmitted = 1
+				WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+				AND CAST(dtmDate as DATE) >= @dtmBeginningDate
+				AND CAST(dtmDate as DATE) <= @dtmEndingDate
+				AND ysnSubmitted = 0
+			--END mark ysnSubmitted = 1 (mark as submitted)	
+		END
 		ELSE IF NOT EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 		BEGIN
 			SET @strStatusMsg = 'No transaction log found based on filter'
@@ -347,11 +454,9 @@ BEGIN
 		SET @SQL = 'DELETE FROM ' + @strTableName
 		EXEC sp_executesql @SQL
 
-		
+	END TRY
 
-	End Try
-
-	Begin Catch
+	BEGIN CATCH
 		SET @strStatusMsg = ERROR_MESSAGE()
-	End Catch
+	END CATCH
 END

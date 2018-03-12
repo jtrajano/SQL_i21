@@ -104,12 +104,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.intEmployeeEarningId
 			,EE.intTypeEarningId
 			,TC.intEmployeeDepartmentId
-			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount')) THEN EMP.intWorkersCompensationId ELSE NULL END
+			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount', 'Salary')) THEN EMP.intWorkersCompensationId ELSE NULL END
 			,EE.strCalculationType
 			,TC.dblRegularHours
 			,TC.dblRegularHours
 			,EE.dblRateAmount
-			,CASE WHEN (EE.strCalculationType IN ('Fixed Amount')) THEN EE.dblRateAmount ELSE ROUND(TC.dblRegularHours * EE.dblRateAmount, 2) END
+			,CASE WHEN (EE.strCalculationType IN ('Fixed Amount', 'Salary')) THEN EE.dblRateAmount ELSE ROUND(TC.dblRegularHours * EE.dblRateAmount, 2) END
 			,CAST(FLOOR(CAST(@dtmBegin AS FLOAT)) AS DATETIME)
 			,CAST(FLOOR(CAST(@dtmEnd AS FLOAT)) AS DATETIME)
 			,3
@@ -126,7 +126,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		WHERE TC.intEmployeeEarningId = @intEmployeeEarningId
 		  AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
 		  AND TC.intEntityEmployeeId = @intEntityEmployeeId
-		  AND EE.strCalculationType IN ('Hourly Rate', 'Fixed Amount')
+		  AND EE.strCalculationType IN ('Hourly Rate', 'Fixed Amount', 'Salary')
 
 		/* Get the Created Pay Group Detail Id*/
 		SELECT @intPayGroupDetailId = @@IDENTITY

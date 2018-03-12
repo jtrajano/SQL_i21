@@ -9,7 +9,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblTFTaxAuthorityBeginEndInventory] PRIMARY KEY ([intTaxAuthorityBeginEndInventoryId]), 
     CONSTRAINT [FK_tblTFTaxAuthorityBeginEndInventory_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [tblTFTaxAuthority]([intTaxAuthorityId]), 
-    CONSTRAINT [AK_tblTFTaxAuthorityBeginEndInventory] UNIQUE ([intTaxAuthorityId], [intProductCodeId]), 
+    CONSTRAINT [AK_tblTFTaxAuthorityBeginEndInventory] UNIQUE ([intEntityLocationId], [intProductCodeId]), 
     CONSTRAINT [FK_tblTFTaxAuthorityBeginEndInventory_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId]), 
     CONSTRAINT [FK_tblTFTaxAuthorityBeginEndInventory_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]) 
 )

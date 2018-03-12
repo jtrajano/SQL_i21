@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportDiscount](
 	@xmlParam NVARCHAR(MAX)=null
+	,@UserId NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -930,7 +931,8 @@ BEGIN
 			,intAccountId
 			,intTransactionId
 			,strDiscountSchedule
-			,ysnShowOnCFInvoice)
+			,ysnShowOnCFInvoice
+			,strUserId)
 		SELECT 
 			 intSalesPersonId
 			,intTermID
@@ -957,6 +959,7 @@ BEGIN
 			,intTransactionId
 			,strDiscountSchedule
 			,ysnShowOnCFInvoice
+			,''' +@UserId+'''
 	    FROM ##tblCFInvoiceDiscount' + @endWhereClause) 
 
 		--EXEC('SELECT * FROM ##tblCFInvoiceDiscount ' + @endWhereClause) 
