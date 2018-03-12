@@ -142,7 +142,7 @@ SELECT
 	,[ysnInventory]							= 1
 	,[strItemDescription]					= POSDetail.strItemDescription 
 	,[intItemUOMId]							= POSDetail.intItemUOMId
-	,[dblQtyOrdered]						= POSDetail.dblQuantity
+	,[dblQtyOrdered]						= 0.0
 	,[dblQtyShipped]						= POSDetail.dblQuantity 
 	,[dblDiscount]							= POSDetail.dblDiscount
 	,[dblPrice]								= POSDetail.dblPrice
