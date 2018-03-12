@@ -30,8 +30,9 @@ SELECT
 	, ItemStock.intLotId
 	, Lot.strLotNumber
 	, Lot.strLotAlias
-	, ItemStock.dblStockIn
-	, ItemStock.dblStockOut
+	, ItemStock.dtmDate
+	--, ItemStock.dblStockIn
+	--, ItemStock.dblStockOut
 	, ItemStock.dblOnHand
 	, dblSystemCount = dblOnHand
 	, dblConversionFactor = ItemUOM.dblUnitQty
@@ -47,118 +48,133 @@ FROM (
 			, intStorageLocationId
 			, intItemUOMId
 			, intLotId
-			, dblStockIn = SUM(dblStockIn)
-			, dblStockOut = SUM(dblStockOut)
-			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
-	FROM (
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, intLotId = NULL
-			, dblStockIn = SUM(dblStockIn)
-			, dblStockOut = SUM(dblStockOut)
-			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryFIFO
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
+			, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+			, dblOnHand = SUM(dblQty)
+			--, dblStockIn = SUM(dblStockIn)
+			--, dblStockOut = SUM(dblStockOut)
+			--, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
+	FROM tblICInventoryTransaction
+	--WHERE intLotId IS NOT NULL
+	--FROM (
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId = NULL
+	--		, intStorageLocationId = NULL
+	--		, intItemUOMId
+	--		, intLotId = NULL
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(dblStockIn)
+	--		, dblStockOut = SUM(dblStockOut)
+	--		, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
+	--	FROM tblICInventoryFIFO
+	--	GROUP BY intItemId, intItemLocationId, intItemUOMId, CONVERT(VARCHAR(10),dtmDate,112)
 
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, intLotId = NULL
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryLIFO
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
+	--	UNION ALL
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId = NULL
+	--		, intStorageLocationId = NULL
+	--		, intItemUOMId
+	--		, intLotId = NULL
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, SUM(dblStockIn)
+	--		, SUM(dblStockOut)
+	--		, SUM(dblStockIn) - SUM(dblStockOut)
+	--	FROM tblICInventoryLIFO
+	--	GROUP BY intItemId, intItemLocationId, intItemUOMId, CONVERT(VARCHAR(10), dtmDate,112)
 
-		UNION ALL
+	--	UNION ALL
 		
-		-- SELECT intItemId
-		-- 	, intItemLocationId
-		-- 	, intSubLocationId
-		-- 	, intStorageLocationId
-		-- 	, intItemUOMId
-		-- 	, intLotId
-		-- 	, SUM(dblStockIn)
-		-- 	, SUM(dblStockOut)
-		-- 	, SUM(dblStockIn) - SUM(dblStockOut)
-		-- FROM tblICInventoryLot
-		-- GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
-		SELECT
-			intItemId,
-			intItemLocationId,
-			intSubLocationId,
-			intStorageLocationId,
-			intItemUOMId,
-			intLotId,
-			SUM(dblQty),
-			0,
-			SUM(dblQty)
-		FROM tblICLot lot
-		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
+	--	 --SELECT intItemId
+	--	 --	, intItemLocationId
+	--	 --	, intSubLocationId
+	--	 --	, intStorageLocationId
+	--	 --	, intItemUOMId
+	--	 --	, intLotId
+	--		--, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--	 --	, SUM(dblStockIn)
+	--	 --	, SUM(dblStockOut)
+	--	 --	, SUM(dblStockIn) - SUM(dblStockOut)
+	--	 --FROM tblICInventoryLot
+	--	 --GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId, CONVERT(VARCHAR(10),dtmDate,112)
+	--	SELECT
+	--		intItemId,
+	--		intItemLocationId,
+	--		intSubLocationId,
+	--		intStorageLocationId,
+	--		intItemUOMId,
+	--		lot.intLotId,
+	--		dtmDate = CAST(CONVERT(VARCHAR(10),invLot.dtmDate,112) AS datetime),
+	--		SUM(dblQty),
+	--		0,
+	--		SUM(dblQty)
+	--	FROM tblICLot lot
+	--	LEFT JOIN (SELECT DISTINCT intLotId, dtmDate = MAX(CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)) FROM tblICInventoryLot GROUP BY intLotId) invLot ON invLot.intLotId = lot.intLotId
+	--	GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, lot.intLotId, invLot.dtmDate
 
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId, intLotId = NULL
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryActualCost
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
+	--	UNION ALL
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId = NULL
+	--		, intStorageLocationId = NULL
+	--		, intItemUOMId
+	--		, intLotId = NULL
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, SUM(dblStockIn)
+	--		, SUM(dblStockOut)
+	--		, SUM(dblStockIn) - SUM(dblStockOut)
+	--	FROM tblICInventoryActualCost
+	--	GROUP BY intItemId, intItemLocationId, intItemUOMId, CONVERT(VARCHAR(10),dtmDate,112)
 
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, intLotId = NULL
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryFIFOStorage
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
+	--	UNION ALL
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId = NULL
+	--		, intStorageLocationId = NULL
+	--		, intItemUOMId
+	--		, intLotId = NULL
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, SUM(dblStockIn)
+	--		, SUM(dblStockOut)
+	--		, SUM(dblStockIn) - SUM(dblStockOut)
+	--	FROM tblICInventoryFIFOStorage
+	--	GROUP BY intItemId, intItemLocationId, intItemUOMId, CONVERT(VARCHAR(10),dtmDate,112)
 
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId = NULL
-			, intStorageLocationId = NULL
-			, intItemUOMId
-			, intLotId = NULL
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-			FROM tblICInventoryLIFOStorage
-		GROUP BY intItemId, intItemLocationId, intItemUOMId
+	--	UNION ALL
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId = NULL
+	--		, intStorageLocationId = NULL
+	--		, intItemUOMId
+	--		, intLotId = NULL
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, SUM(dblStockIn)
+	--		, SUM(dblStockOut)
+	--		, SUM(dblStockIn) - SUM(dblStockOut)
+	--		FROM tblICInventoryLIFOStorage
+	--	GROUP BY intItemId, intItemLocationId, intItemUOMId, CONVERT(VARCHAR(10),dtmDate,112)
 
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, intLotId
-			, SUM(dblStockIn)
-			, SUM(dblStockOut)
-			, SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryLotStorage
-		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId
-		) tblCostingBuckets
+	--	UNION ALL
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId
+	--		, intStorageLocationId
+	--		, intItemUOMId
+	--		, intLotId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, SUM(dblStockIn)
+	--		, SUM(dblStockOut)
+	--		, SUM(dblStockIn) - SUM(dblStockOut)
+	--	FROM tblICInventoryLotStorage
+	--	GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, intLotId, CONVERT(VARCHAR(10),dtmDate,112)
+	--	) tblCostingBuckets
 	GROUP BY intItemId
 			, intItemLocationId
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
 			, intLotId
+			, CONVERT(VARCHAR(10), dtmDate,112)
 	) ItemStock
 	LEFT JOIN tblICItem Item ON Item.intItemId = ItemStock.intItemId
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -172,3 +188,4 @@ FROM (
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ItemStock.intStorageLocationId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = ItemStock.intLotId
 	LEFT JOIN tblICParentLot ParentLot ON ParentLot.intParentLotId = Lot.intParentLotId
+	where Category.intCategoryId = 12
