@@ -357,33 +357,29 @@ AS
 								 , @entityId
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
-								 , AVG(dblAmountDue)
+								 , dblAmountDue
 								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > AVG(dblAmountDue)
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
 												 THEN 0
-												 ELSE AVG(dblTotalAmount)
+												 ELSE dblTotalAmount
 											END
 										THEN @dblMinimumSC 
 										ELSE 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > AVG(dblAmountDue)
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
 												 THEN 0
-												 ELSE AVG(dblTotalAmount)
+												 ELSE dblTotalAmount
 											END
 								   END
 							FROM @tempTblTypeServiceCharge 
-								GROUP BY intEntityCustomerId 
-								HAVING AVG(dblAmountDue) > @zeroDecimal 
-								   AND AVG(dblTotalAmount) > @zeroDecimal
+							WHERE dblAmountDue > @zeroDecimal 
+							  AND dblTotalAmount > @zeroDecimal
 						END
+
+					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue <= @dblMinFinanceSC
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
-							SET @totalAmount = @totalAmount + CASE WHEN @calculation = 'By Invoice' 
-																THEN 
-																	(SELECT SUM(dblTotalAmount) FROM @tblTypeServiceCharge)
-																ELSE 
-																	(SELECT AVG(dblTotalAmount) FROM @tblTypeServiceCharge)
-																END
+							SET @totalAmount = @totalAmount + ISNULL((SELECT SUM(ISNULL(dblTotalAmount, 0)) FROM @tblTypeServiceCharge), 0)
 
 							DELETE FROM @tempTblTypeServiceCharge WHERE ISNULL(dblAmountDue, @zeroDecimal) = @zeroDecimal OR ISNULL(dblTotalAmount, @zeroDecimal) = @zeroDecimal
 
