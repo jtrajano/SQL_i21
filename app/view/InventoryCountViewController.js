@@ -1101,7 +1101,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     intSubLocationId: current.get('intSubLocationId'),
                     intStorageLocationId: current.get('intStorageLocationId'),
                     ysnIncludeZeroOnHand: current.get('ysnIncludeZeroOnHand'),
-                    ysnCountByLots: current.get('ysnCountByLots')
+                    ysnCountByLots: current.get('ysnCountByLots'),
+                    dtmAsOfDate: current.get('dtmCountDate')
                 };
 
                 if(current.get('strCountBy') === 'Pack') {
