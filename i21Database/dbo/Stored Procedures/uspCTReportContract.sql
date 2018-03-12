@@ -247,6 +247,7 @@ BEGIN TRY
 			,strCustomerContract					= CH.strCustomerContract
 			,strContractBasis						= CB.strContractBasis
 			,strContractBasisDesc					= CB.strContractBasis+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
+			,strCityWarehouse						= CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 			,strLocationName						= SQ.strLocationName			
 			,strCropYear							= CY.strCropYear
 			,srtLoadingPoint						= SQ.srtLoadingPoint + ' :' 
