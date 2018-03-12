@@ -139,7 +139,7 @@ BEGIN
 		,strCode					= @Code
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
-		,dblExchangeRate			= 0
+		,dblExchangeRate			= 1
 		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -232,7 +232,7 @@ BEGIN
 		,strCode					= @Code
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
-		,dblExchangeRate			= 0
+		,dblExchangeRate			= 1
 		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
