@@ -68,9 +68,11 @@ VALUES ([Source].strItemNo, [Source].strType, [Source].strDescription, [Source].
 
 
 --update items Inventory type from Category table
-update tblICItem set strType = C.strInventoryType
-from tblICCategory C
-where C.intCategoryId = tblICItem.intCategoryId
+update	tblICItem 
+set		strType = C.strInventoryType
+from	tblICCategory C
+where	C.intCategoryId = tblICItem.intCategoryId
+		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
 
 --UPDATE tblICItem
