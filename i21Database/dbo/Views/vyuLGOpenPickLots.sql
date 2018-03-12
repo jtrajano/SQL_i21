@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGOpenPickLots
 AS
-SELECT DISTINCT PL.intPickLotDetailId,
+SELECT DISTINCT (SELECT COUNT(*) FROM tblLGPickLotDetail WHERE intPickLotHeaderId = PL.intPickLotHeaderId) intCount, PL.intPickLotDetailId,
   PL.intPickLotHeaderId,
   PLH.strCustomer,
   PLH.intCustomerEntityId,
