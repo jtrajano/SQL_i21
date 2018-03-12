@@ -32,7 +32,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
         },
 
         disableUOM: function(get) {
-            return (get('currentTask') !== 'UOM' && get('currentTask') != 'LOB') || !get('hasLob');
+            return (get('currentTask') !== 'UOM' && get('currentTask') !== 'LOB') || !get('hasLob');
         },
 
         disableLocations: function(get) {
@@ -49,10 +49,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
 
         disableCategoryGLAccts: function(get) {
             return get('currentTask') !== 'CategoryGLAccts' || !get('hasLob');
-        },
-
-        disableAdditionalGLAccts: function(get) {
-            return get('currentTask') !== 'AdditionalGLAccts' || !get('hasLob');
         },
 
         disableItems: function(get) {

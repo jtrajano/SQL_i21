@@ -70,18 +70,21 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                         win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
                     else
                         win.up('window').down('#cboLOB').setValue(null);
-    
-                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance"];
-                    var grains = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
-    
+                    
+                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula", "End"];
+                    var grains = ["UOM", "Locations", "Commodity"];
                     if (currentTask && currentTask !== 'LOB') {
                         if (lob === 'Grain')
                             originTypes = grains;
                         var index = originTypes.indexOf(currentTask);
                         if (index !== -1) {
-                            me.getViewModel().set('currentTask', originTypes[index + 1]);
-                        } else
+                            if(currentTask === 'RecipeFormula')
+                                me.getViewModel().set('currentTask', "End");
+                            else
+                                me.getViewModel().set('currentTask', originTypes[index + 1]);
+                        } else {
                             me.getViewModel().set('currentTask', "LOB");
+                        }
                     }
                 }
             }
@@ -111,8 +114,8 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var template = null;
         var originType = null;
         var grainType = null;
-        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "AdditionalGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula"];
-        var grain = ["UOM", "Locations", "Commodity", "AdditionalGLAccts"];
+        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula", "End"];
+        var grain = ["UOM", "Locations", "Commodity"];
         
         switch (button.itemId) {
             case "btnImportFuelCategories":
@@ -245,21 +248,17 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             case "btnOriginCategoryGLAccts":
                 originType = 3;
                 break;
-            case "btnOriginAdditionalGLAccts":
-                originType = 4;
-                grainType = 3;
-                break;
             case "btnOriginItems":
-                originType = 5;
+                originType = 4;
                 break;
             case "btnOriginItemGLAccts":
-                originType = 6;
+                originType = 5;
                 break;
             case "btnOriginBalance":
-                originType = 7;
+                originType = 6;
                 break;
             case "btnOriginRecipeFormula":
-                originType = 8;
+                originType = 7;
                 break;
         }
 
@@ -313,21 +312,21 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 i21.functions.showCustomDialog(type, 'ok', msg, function() {
                     //win.close();
                     
-                    if (json.HasMessages) {
-                        if(json.LogId && json.LogId != 0) {
-                            iRely.Functions.openScreen('Inventory.view.ImportLog', {
-                                filters: { column: 'intImportLogId', value: json.LogId },
-                                username: json.Username,
-                                action: 'view',
-                                viewConfig: { modal: true }
-                            });
-                        } else {
-                            iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
-                                data: json,
-                                title: p.title
-                            });
-                        }
-                    }
+                    // if (json.HasMessages) {
+                    //     if(json.LogId && json.LogId != 0) {
+                    //         iRely.Functions.openScreen('Inventory.view.ImportLog', {
+                    //             filters: { column: 'intImportLogId', value: json.LogId },
+                    //             username: json.Username,
+                    //             action: 'view',
+                    //             viewConfig: { modal: true }
+                    //         });
+                    //     } else {
+                    //         iRely.Functions.openScreen('Inventory.view.ImportLogMessageBox', {
+                    //             data: json,
+                    //             title: originTypes[originType]
+                    //         });
+                    //     }
+                    // }
                     
                     if(!iRely.Functions.isEmpty(json.ExtraScreenToOpen)) {
                         iRely.Functions.openScreen(ExtraScreenToOpen, json.Description);
