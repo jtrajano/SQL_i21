@@ -24,7 +24,16 @@ BEGIN
 	ELSE IF @strType = 'CategoryClass'		EXEC dbo.uspICDCCatMigrationPt
 	ELSE IF @strType = 'CategoryGLAccts'	EXEC dbo.uspICDCCatGLAcctsMigrationPt
 	--ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
-	ELSE IF @strType = 'Items'				EXEC dbo.uspICDCItemMigrationPt
+	ELSE IF @strType = 'Items'				
+		BEGIN
+			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE
+			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE
+			
+			EXEC dbo.uspICDCItemMigrationPt
+			
+			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+		END
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationPt
 	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryPt NULL, NULL, @intEntityUserSecurityId
 	ELSE IF @strType = 'RecipeFormula'		EXEC dbo.uspICDCRecipeFormulaMigrationPt @intEntityUserSecurityId	
@@ -37,7 +46,16 @@ BEGIN
 	ELSE IF @strType = 'CategoryClass'		EXEC dbo.uspICDCCatMigrationAg
 	ELSE IF @strType = 'CategoryGLAccts'	EXEC dbo.uspICDCCatGLAcctsMigrationAg
 	--ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
-	ELSE IF @strType = 'Items'				EXEC dbo.uspICDCItemMigrationAg
+	ELSE IF @strType = 'Items'				
+		BEGIN
+			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE
+			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE
+			
+			EXEC dbo.[uspICDCItemMigrationAg]
+			
+			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+		END
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationAg
 	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryAg NULL, NULL, @intEntityUserSecurityId
 END
