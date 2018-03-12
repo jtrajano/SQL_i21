@@ -7,7 +7,7 @@
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@ysnBulkChange BIT = 0
 	,@ysnProducedItemChange BIT = 0
-	,@dblPhysicalCount NUMERIC(38, 20)=NULL
+	,@dblPhysicalCount NUMERIC(38, 20) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -236,7 +236,11 @@ BEGIN TRY
 			,@intBatchId = intBatchId
 			,@intProducedLotId = intLotId
 			,@intOldProduceItemUOMId = intItemUOMId
-			,@dblPhysicalCount = Case When @dblPhysicalCount is null then dblPhysicalCount Else @dblPhysicalCount End
+			,@dblPhysicalCount = CASE 
+				WHEN @dblPhysicalCount IS NULL
+					THEN dblPhysicalCount
+				ELSE @dblPhysicalCount
+				END
 			,@intOldPhysicalItemUOMId = intPhysicalItemUOMId
 			,@dblTareWeight = dblTareWeight
 			,@intContainerId = intContainerId
@@ -309,7 +313,7 @@ BEGIN TRY
 		IF @strInstantConsumption = 'False'
 		BEGIN
 			RAISERROR (
-					'Item change is not allowed when instant consumption is false.'
+					'Item change/Production reversal is not allowed when instant consumption is false.'
 					,16
 					,1
 					)
@@ -319,96 +323,99 @@ BEGIN TRY
 
 		EXEC dbo.uspMFUndoPallet @strXML = @strXML
 
-		SELECT @strXML = '<root>'
-
-		SELECT @strXML = @strXML + '<intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId>'
-
-		SELECT @strXML = @strXML + '<intManufacturingProcessId>' + Ltrim(@intManufacturingProcessId) + '</intManufacturingProcessId>'
-
-		SELECT @strXML = @strXML + '<dtmPlannedDate>' + Ltrim(@dtmPlannedDate) + '</dtmPlannedDate>'
-
-		SELECT @strXML = @strXML + '<intPlannedShiftId>' + Ltrim(@intPlannedShiftId) + '</intPlannedShiftId>'
-
-		SELECT @strXML = @strXML + '<intItemId>' + Ltrim(@intNewItemId) + '</intItemId>'
-
-		SELECT @strXML = @strXML + '<dblProduceQty>' + Ltrim(@dblProduceQty) + '</dblProduceQty>'
-
-		SELECT @strXML = @strXML + '<intProduceUnitMeasureId>' + Ltrim(@intProduceItemUOMId) + '</intProduceUnitMeasureId>'
-
-		SELECT @strXML = @strXML + '<dblTareWeight>' + Ltrim(@dblTareWeight) + '</dblTareWeight>'
-
-		SELECT @strXML = @strXML + '<dblUnitQty>' + Ltrim(@dblUnitQty) + '</dblUnitQty>'
-
-		SELECT @strXML = @strXML + '<dblPhysicalCount>' + Ltrim(@dblPhysicalCount) + '</dblPhysicalCount>'
-
-		SELECT @strXML = @strXML + '<intPhysicalItemUOMId>' + Ltrim(@intPhysicalItemUOMId) + '</intPhysicalItemUOMId>'
-
-		SELECT @strXML = @strXML + '<intUserId>' + Ltrim(@intUserId) + '</intUserId>'
-
-		SELECT @strXML = @strXML + '<strOutputLotNumber>' + Ltrim(@strLotNumber) + '</strOutputLotNumber>'
-
-		IF @strVendorLotNo IS NOT NULL
-			SELECT @strXML = @strXML + '<strVendorLotNo>' + Ltrim(@strVendorLotNo) + '</strVendorLotNo>'
-
-		SELECT @strXML = @strXML + '<dblReadingQuantity>' + Ltrim(@dblProduceQty) + '</dblReadingQuantity>'
-
-		SELECT @strXML = @strXML + '<intLocationId>' + Ltrim(@intLocationId) + '</intLocationId>'
-
-		SELECT @strXML = @strXML + '<intStorageLocationId>' + Ltrim(@intStorageLocationId) + '</intStorageLocationId>'
-
-		SELECT @strXML = @strXML + '<intSubLocationId>' + Ltrim(@intSubLocationId) + '</intSubLocationId>'
-
-		IF @intContainerId IS NOT NULL
-			SELECT @strXML = @strXML + '<intContainerId >' + Ltrim(@intContainerId) + '</intContainerId >'
-
-		SELECT @strXML = @strXML + '<ysnSubLotAllowed>False</ysnSubLotAllowed>'
-
-		SELECT @strXML = @strXML + '<intProductionTypeId>2</intProductionTypeId>'
-
-		SELECT @strXML = @strXML + '<intMachineId>' + Ltrim(@intMachineId) + '</intMachineId>'
-
-		SELECT @strXML = @strXML + '<ysnLotAlias>False</ysnLotAlias>'
-
-		SELECT @strXML = @strXML + '<strLotAlias>' + Ltrim(@strWorkOrderNo) + '</strLotAlias>'
-
-		SELECT @strXML = @strXML + '<strParentLotNumber>' + Ltrim(@strParentLotNumber) + '</strParentLotNumber>'
-
-		IF @strReferenceNo IS NOT NULL
-			SELECT @strXML = @strXML + '<strReferenceNo>' + Ltrim(@strReferenceNo) + '</strReferenceNo>'
-
-		SELECT @strXML = @strXML + '<intStatusId>10</intStatusId>'
-
-		SELECT @strXML = @strXML + '<ysnPostProduction>0</ysnPostProduction>'
-
-		SELECT @strXML = @strXML + '<intLotStatusId>' + Ltrim(@intLotStatusId) + '</intLotStatusId>'
-
-		SELECT @strXML = @strXML + '<ysnFillPartialPallet>False</ysnFillPartialPallet>'
-
-		SELECT @strXML = @strXML + '</root>'
-
-		IF @strXML IS NULL
+		IF @dblPhysicalCount > 0
 		BEGIN
-			RAISERROR (
-					'Unable to change the item.'
-					,16
-					,1
-					)
+			SELECT @strXML = '<root>'
 
-			RETURN
-		END
+			SELECT @strXML = @strXML + '<intWorkOrderId>' + Ltrim(@intWorkOrderId) + '</intWorkOrderId>'
 
-		EXEC [dbo].[uspMFCompleteWorkOrder] @strXML = @strXML
-			,@strOutputLotNumber = @strOutputLotNumber OUTPUT
-			,@intParentLotId = @intParentLotId OUTPUT
-			,@dtmCurrentDate = NULL
-			,@ysnRecap = 0
-			,@strRetBatchId = @strRetBatchId OUTPUT
+			SELECT @strXML = @strXML + '<intManufacturingProcessId>' + Ltrim(@intManufacturingProcessId) + '</intManufacturingProcessId>'
 
-		IF @intCurrentStatusId <> 10
-		BEGIN
-			UPDATE tblMFWorkOrder
-			SET intStatusId = @intCurrentStatusId
-			WHERE intWorkOrderId = @intWorkOrderId
+			SELECT @strXML = @strXML + '<dtmPlannedDate>' + Ltrim(@dtmPlannedDate) + '</dtmPlannedDate>'
+
+			SELECT @strXML = @strXML + '<intPlannedShiftId>' + Ltrim(@intPlannedShiftId) + '</intPlannedShiftId>'
+
+			SELECT @strXML = @strXML + '<intItemId>' + Ltrim(@intNewItemId) + '</intItemId>'
+
+			SELECT @strXML = @strXML + '<dblProduceQty>' + Ltrim(@dblProduceQty) + '</dblProduceQty>'
+
+			SELECT @strXML = @strXML + '<intProduceUnitMeasureId>' + Ltrim(@intProduceItemUOMId) + '</intProduceUnitMeasureId>'
+
+			SELECT @strXML = @strXML + '<dblTareWeight>' + Ltrim(@dblTareWeight) + '</dblTareWeight>'
+
+			SELECT @strXML = @strXML + '<dblUnitQty>' + Ltrim(@dblUnitQty) + '</dblUnitQty>'
+
+			SELECT @strXML = @strXML + '<dblPhysicalCount>' + Ltrim(@dblPhysicalCount) + '</dblPhysicalCount>'
+
+			SELECT @strXML = @strXML + '<intPhysicalItemUOMId>' + Ltrim(@intPhysicalItemUOMId) + '</intPhysicalItemUOMId>'
+
+			SELECT @strXML = @strXML + '<intUserId>' + Ltrim(@intUserId) + '</intUserId>'
+
+			SELECT @strXML = @strXML + '<strOutputLotNumber>' + Ltrim(@strLotNumber) + '</strOutputLotNumber>'
+
+			IF @strVendorLotNo IS NOT NULL
+				SELECT @strXML = @strXML + '<strVendorLotNo>' + Ltrim(@strVendorLotNo) + '</strVendorLotNo>'
+
+			SELECT @strXML = @strXML + '<dblReadingQuantity>' + Ltrim(@dblProduceQty) + '</dblReadingQuantity>'
+
+			SELECT @strXML = @strXML + '<intLocationId>' + Ltrim(@intLocationId) + '</intLocationId>'
+
+			SELECT @strXML = @strXML + '<intStorageLocationId>' + Ltrim(@intStorageLocationId) + '</intStorageLocationId>'
+
+			SELECT @strXML = @strXML + '<intSubLocationId>' + Ltrim(@intSubLocationId) + '</intSubLocationId>'
+
+			IF @intContainerId IS NOT NULL
+				SELECT @strXML = @strXML + '<intContainerId >' + Ltrim(@intContainerId) + '</intContainerId >'
+
+			SELECT @strXML = @strXML + '<ysnSubLotAllowed>False</ysnSubLotAllowed>'
+
+			SELECT @strXML = @strXML + '<intProductionTypeId>2</intProductionTypeId>'
+
+			SELECT @strXML = @strXML + '<intMachineId>' + Ltrim(@intMachineId) + '</intMachineId>'
+
+			SELECT @strXML = @strXML + '<ysnLotAlias>False</ysnLotAlias>'
+
+			SELECT @strXML = @strXML + '<strLotAlias>' + Ltrim(@strWorkOrderNo) + '</strLotAlias>'
+
+			SELECT @strXML = @strXML + '<strParentLotNumber>' + Ltrim(@strParentLotNumber) + '</strParentLotNumber>'
+
+			IF @strReferenceNo IS NOT NULL
+				SELECT @strXML = @strXML + '<strReferenceNo>' + Ltrim(@strReferenceNo) + '</strReferenceNo>'
+
+			SELECT @strXML = @strXML + '<intStatusId>10</intStatusId>'
+
+			SELECT @strXML = @strXML + '<ysnPostProduction>0</ysnPostProduction>'
+
+			SELECT @strXML = @strXML + '<intLotStatusId>' + Ltrim(@intLotStatusId) + '</intLotStatusId>'
+
+			SELECT @strXML = @strXML + '<ysnFillPartialPallet>False</ysnFillPartialPallet>'
+
+			SELECT @strXML = @strXML + '</root>'
+
+			IF @strXML IS NULL
+			BEGIN
+				RAISERROR (
+						'Unable to change the item.'
+						,16
+						,1
+						)
+
+				RETURN
+			END
+
+			EXEC [dbo].[uspMFCompleteWorkOrder] @strXML = @strXML
+				,@strOutputLotNumber = @strOutputLotNumber OUTPUT
+				,@intParentLotId = @intParentLotId OUTPUT
+				,@dtmCurrentDate = NULL
+				,@ysnRecap = 0
+				,@strRetBatchId = @strRetBatchId OUTPUT
+
+			IF @intCurrentStatusId <> 10
+			BEGIN
+				UPDATE tblMFWorkOrder
+				SET intStatusId = @intCurrentStatusId
+				WHERE intWorkOrderId = @intWorkOrderId
+			END
 		END
 	END
 
