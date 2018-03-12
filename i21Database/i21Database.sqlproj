@@ -6249,6 +6249,8 @@
     <Build Include="dbo\Stored Procedures\uspSMCreateDocumentMaintenance.sql" />
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
+    <Build Include="dbo\Tables\tblLGEntityInsurer.sql" />
+    <Build Include="dbo\Tables\tblLGEntityShippingLine.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
