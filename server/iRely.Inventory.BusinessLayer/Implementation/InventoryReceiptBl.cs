@@ -189,10 +189,6 @@ namespace iRely.Inventory.BusinessLayer
                     s.intParentItemLinkId,
                     s.intChildItemLinkId,
 
-                    s.strItemType,
-                    s.intParentItemLinkId,
-                    s.intChildItemLinkId,
-
                     // PROJECTED
                     strItemNo = s.tblICItem.strItemNo,
                     strItemDescription = s.tblICItem.strDescription,
