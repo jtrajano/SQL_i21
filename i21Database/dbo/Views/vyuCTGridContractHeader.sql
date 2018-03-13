@@ -53,7 +53,8 @@ AS
 			NM.strCommodityAttributeId,
 			NM.intEntityDefaultLocationId,
 			NM.strEntityDefaultLocation,
-			NM.intPositionNoOfDays
+			NM.intPositionNoOfDays,
+			CH.intNoOfLoad - (SELECT SUM(dblBalance) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dblLoadsDelivered
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
