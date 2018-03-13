@@ -141,8 +141,8 @@ Ext.define('Inventory.controller.Inventory', {
     },
 
     hasExpired: function(date, minutes) {
-        let start = moment(date);
-        let remaining = start.diff(moment(), 'minutes', true);
+        var start = moment(date);
+        var remaining = start.diff(moment(), 'minutes', true);
         return (remaining >= minutes);
     },
 

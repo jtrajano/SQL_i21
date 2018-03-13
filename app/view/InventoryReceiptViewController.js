@@ -6399,7 +6399,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 // Check if tax is charged to the receipt vendor. 
                                 taxableAmount = charge.get('ysnPrice') ? -taxableAmount : taxableAmount; 
 
-                                if (itemDetailTax.strCalculationMethod === 'Percentage') {``
+                                if (itemDetailTax.strCalculationMethod === 'Percentage') { 
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
