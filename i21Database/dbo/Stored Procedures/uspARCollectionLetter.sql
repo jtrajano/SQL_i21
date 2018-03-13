@@ -1047,7 +1047,7 @@ BEGIN
 		, strAccountNumber		= CUSTOMER.strAccountNumber
 		, strCompanyFax			= COMPANY.strCompanyFax
 		, strCompanyEmail		= COMPANY.strCompanyEmail		
-	FROM @SelectedCustomer SC
+	FROM #TransactionLetterDetail SC
 	INNER JOIN (
 		SELECT intEntityId
 			 , strCustomerNumber
