@@ -501,11 +501,11 @@ Ext.define('Inventory.ux.UOMField', {
                     decimalToDisplay: 6,
                     fieldLabel: 'Quantity',
                     hideLabel: true,
-                    inputWrapCls: 'x-form-uom-text-wrap-default',
+                    //inputWrapCls: 'x-form-uom-text-wrap-default',
                     // remove default styling for div wrapping the input element and trigger button(s)
-                    triggerWrapCls: '',
+                    //triggerWrapCls: '',
                     // remove the input element's background
-                    fieldStyle: 'text-align: right;padding: 2px; background:none; border-left: 1px solid #cacaca; border-top: 1px solid #cacaca; border-bottom: 1px solid #cacaca',
+                    //fieldStyle: 'text-align: right;padding: 2px; background:none; border-left: 1px solid #cacaca; border-top: 1px solid #cacaca; border-bottom: 1px solid #cacaca',
                     labelWidth: 80
                 },
                 {
@@ -513,16 +513,16 @@ Ext.define('Inventory.ux.UOMField', {
                     readOnly: this.readOnly,
                     grow: true,
                     flex: 1,
-                    margin: '0 0 0 0',
+                    margin: '0 0 0 4',
                     border: false,
                     // maxWidth: 550,
                     minWidth: 80,
                     fieldLabel: '',
-                    inputWrapCls: '',
+                    //inputWrapCls: '',
                     // remove default styling for div wrapping the input element and trigger button(s)
                     
                     // remove the input element's background
-                    fieldStyle: 'padding: 2px; padding-right: 3px; font-style: italic; background:none; border-right: 1px solid #cacaca; border-top: 1px solid #cacaca; border-bottom: 1px solid #cacaca',
+                    //fieldStyle: 'padding: 2px; padding-right: 3px; font-style: italic; background:none; border-right: 1px solid #cacaca; border-top: 1px solid #cacaca; border-bottom: 1px solid #cacaca',
                     columns: [
                         {
                             dataIndex: 'intUnitMeasureId',

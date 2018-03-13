@@ -11631,14 +11631,16 @@
                                                         "container|align": "stretch",
                                                         "designer|displayName": "container",
                                                         "layout": "vbox",
-                                                        "layout|flex": 1
+                                                        "layout|flex": 0,
+                                                        "width": 350
                                                     },
                                                     "configAlternates": {
                                                         "container|align": "string",
                                                         "designer|displayName": "string",
                                                         "layout": "string",
                                                         "layout|flex": "number",
-                                                        "scrollable": "boolean"
+                                                        "scrollable": "boolean",
+                                                        "width": "auto"
                                                     },
                                                     "name": "MyContainer27",
                                                     "designerId": "0f79a587-00a5-408e-adf7-8223def7a76f",
