@@ -22,6 +22,11 @@ BEGIN TRY
 	DECLARE @intWeightUnitMeasureId INT
 	DECLARE @intItemId INT
 	DECLARE @intWeightItemUOMId INT
+	
+	DECLARE @intSubLocationId INT
+	DECLARE @dtmPickupDate DATETIME
+	DECLARE @dtmDeliveryDate DATETIME
+	DECLARE @strDeliveryNoticeNumber NVARCHAR(100)
 
 	SELECT @intTransportationMode = intDefaultTransportationMode
 		,@intTransUsedBy = intTransUsedBy
@@ -213,6 +218,32 @@ BEGIN TRY
 
 	EXEC uspLGReserveStockForInventoryShipment @intLoadId = @intLoadId
 											  ,@ysnReserveStockForInventoryShipment = 1
+
+	--- CREATE LOAD WAREHOUSE
+
+	EXEC uspSMGetStartingNumber 86
+		,@strDeliveryNoticeNumber OUT
+
+	SELECT @intSubLocationId = intSubLocationId
+	FROM tblLGPickLotHeader
+	WHERE intPickLotHeaderId = @intPickLotHeaderId
+
+	INSERT INTO tblLGLoadWarehouse (
+		intConcurrencyId
+		,intLoadId
+		,strDeliveryNoticeNumber
+		,dtmDeliveryNoticeDate
+		,intSubLocationId
+		,dtmPickupDate
+		,dtmDeliveryDate
+		)
+	SELECT 1
+		,@intLoadId
+		,@strDeliveryNoticeNumber
+		,GETDATE()
+		,@intSubLocationId
+		,GETDATE()
+		,GETDATE()
 
 END TRY
 
