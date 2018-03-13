@@ -87,6 +87,7 @@ BEGIN TRY
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
+	DECLARE @intLotId INT
 
 	SET @dtmDate = GETDATE()
 
@@ -782,6 +783,18 @@ BEGIN TRY
 				EXEC dbo.uspSMGetStartingNumber 
 					 @STARTING_NUMBER_BATCH
 					,@strBatchId OUTPUT
+				
+				SET @intLotId = NULL
+				
+				SELECT @intLotId = ReceiptItemLot.intLotId
+				FROM tblICInventoryReceiptItemLot ReceiptItemLot
+				JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+				JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+				JOIN tblGRStorageHistory SH ON SH.intInventoryReceiptId=ReceiptItem.intInventoryReceiptId AND SH.strType='FROM Scale'
+				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId=SH.intCustomerStorageId  AND SST.dblUnits > 0
+				JOIN tblGRSettleStorage SS ON SS.intSettleStorageId=SST.intSettleStorageId 
+				JOIN tblSCTicket SC ON SC.intTicketId=SH.intTicketId
+				WHERE SST.intSettleStorageId =@intSettleStorageId
 
 				IF @@ERROR <> 0
 				GOTO SettleStorage_Exit;
@@ -811,6 +824,7 @@ BEGIN TRY
 					,intTransactionDetailId
 					,strTransactionId
 					,intTransactionTypeId
+					,intLotId
 					,intSubLocationId
 					,intStorageLocationId
 					,ysnIsStorage
@@ -839,6 +853,7 @@ BEGIN TRY
 					,intTransactionDetailId		= @intSettleStorageId
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
+					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
 					,intStorageLocationId		= CS.intStorageLocationId
 					,ysnIsStorage				= 1
@@ -864,6 +879,7 @@ BEGIN TRY
 					,intTransactionDetailId
 					,strTransactionId
 					,intTransactionTypeId
+					,intLotId
 					,intSubLocationId
 					,intStorageLocationId
 					,ysnIsStorage
@@ -886,6 +902,7 @@ BEGIN TRY
 					,intTransactionDetailId		= @intSettleStorageId
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
+					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
 					,intStorageLocationId		= CS.intStorageLocationId
 					,ysnIsStorage				= 0
