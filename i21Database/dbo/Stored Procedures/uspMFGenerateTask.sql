@@ -58,6 +58,8 @@ BEGIN TRY
 		,@intPartialPickSubLocationId INT
 		,@intUnitPerPallet2 INT
 		,@intStorageLocationId INT
+		,@intWorkOrderId INT
+		,@intManufacturingProcessId INT
 
 	SELECT @ysnPickByQty = 1
 
@@ -81,6 +83,25 @@ BEGIN TRY
 		,@intLocationId INT
 		,@strInventoryTracking NVARCHAR(50)
 
+	SELECT @strOrderType = OT.strOrderType
+		,@strOrderNo = OH.strOrderNo
+		,@strOrderDirection = OD.strOrderDirection
+		,@strReferenceNo = OH.strReferenceNo
+		,@intOrderId = intOrderHeaderId
+		,@intLocationId = intLocationId
+	FROM tblMFOrderHeader OH
+	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
+	JOIN tblMFOrderDirection OD ON OD.intOrderDirectionId = OH.intOrderDirectionId
+	WHERE OH.intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @intWorkOrderId = intWorkOrderId
+	FROM tblMFStageWorkOrder SW
+	WHERE SW.intOrderHeaderId = @intOrderHeaderId
+
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Packaging Category'
@@ -88,11 +109,19 @@ BEGIN TRY
 	SELECT @intPMCategoryId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intPackagingCategoryId
+		AND intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+
+	IF @intPMCategoryId IS NULL
+	BEGIN
+		SELECT @intPMCategoryId = 0
+	END
 
 	SELECT @strPickByFullPallet = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = 92
-		AND strAttributeValue <> ''
+		AND intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
 
 	IF @strPickByFullPallet IS NULL
 		OR @strPickByFullPallet = ''
@@ -101,7 +130,13 @@ BEGIN TRY
 	SELECT @intPartialPickSubLocationId = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = 43
-		AND strAttributeValue IS NOT NULL
+		AND intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+
+	IF @intPartialPickSubLocationId IS NULL
+	BEGIN
+		SELECT @intPartialPickSubLocationId = 0
+	END
 
 	SELECT @intReceivedLife = 0
 		,@ysnPickByItemOwner = 0
@@ -132,17 +167,6 @@ BEGIN TRY
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
-
-	SELECT @strOrderType = OT.strOrderType
-		,@strOrderNo = OH.strOrderNo
-		,@strOrderDirection = OD.strOrderDirection
-		,@strReferenceNo = OH.strReferenceNo
-		,@intOrderId = intOrderHeaderId
-		,@intLocationId = intLocationId
-	FROM tblMFOrderHeader OH
-	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
-	JOIN tblMFOrderDirection OD ON OD.intOrderDirectionId = OH.intOrderDirectionId
-	WHERE OH.intOrderHeaderId = @intOrderHeaderId
 
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
@@ -179,7 +203,7 @@ BEGIN TRY
 			,dtmProductionDate DATETIME
 			,intGroupId INT
 			,intSubLocationId INT
-			,intStorageLocationId int
+			,intStorageLocationId INT
 			)
 
 		UPDATE tblMFOrderDetail
@@ -370,11 +394,8 @@ BEGIN TRY
 			--	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			--	WHERE L.intItemId = @intItemId
 			--		AND dblQty > 0
-
 			--	SELECT @dtmDateCreated1 = DATEADD(day, CAST(RIGHT(@intLotCode1, 3) AS INT) - 1, CONVERT(DATETIME, LEFT(@intLotCode1, 2) + '0101', 112))
-
 			--	SELECT @dtmDateCreated2 = @dtmDateCreated1 + @intAllowablePickDayRange
-
 			--	SELECT @intLotCode2 = RIGHT(CAST(YEAR(@dtmDateCreated2) AS CHAR(4)), 2) + RIGHT('000' + CAST(DATEPART(dy, @dtmDateCreated2) AS VARCHAR(3)), 3)
 			--END
 			--ELSE
@@ -434,7 +455,8 @@ BEGIN TRY
 				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 					AND IU.ysnStockUnit = 1
 				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
-					AND IL.intLocationId = IsNULL(@intLocationId, IL.intLocationId) and IL.intItemId=@intItemId
+					AND IL.intLocationId = IsNULL(@intLocationId, IL.intLocationId)
+					AND IL.intItemId = @intItemId
 				LEFT JOIN tblMFTask T ON T.intItemId = S.intItemId
 					AND T.intTaskTypeId NOT IN (
 						5
@@ -1034,16 +1056,22 @@ BEGIN TRY
 						BREAK;
 					END
 				END
-				ELSE IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
-					AND @ysnPickByQty = 1
+				ELSE IF (
+						@strOrderType = 'INVENTORY SHIPMENT STAGING'
+						AND @ysnPickByQty = 1
+						)
+					OR (
+						@strPickByFullPallet = 'False'
+						AND @strOrderType = 'WO PROD STAGING'
+						)
 				BEGIN
 					SELECT @dblSplitAndPickQty = NULL
 
 					SELECT @dblSplitAndPickQty = (
 							CASE 
 								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) > @dblRequiredQty
-									THEN @dblRequiredQty
-								ELSE @dblRemainingLotQty
+									THEN dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredUOMId, @intLotItemUOMId, @dblRequiredQty)
+								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredUOMId, @intLotItemUOMId, @dblRemainingLotQty)
 								END
 							)
 
@@ -1060,7 +1088,7 @@ BEGIN TRY
 					SET @dblRequiredQty = @dblRequiredQty - (
 							CASE 
 								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) > @dblRequiredQty
-									THEN dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredUOMId, @intLotItemUOMId, @dblRequiredQty)
+									THEN @dblRequiredQty
 								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty)
 								END
 							)
