@@ -203,6 +203,7 @@ BEGIN
 		--// START CHECK if Stores has department
 
 
+
 		--// CHECK if has records based on filter
 		IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 		BEGIN
@@ -318,7 +319,16 @@ BEGIN
 				AND ysnSubmitted = 0
 				AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
-				SET @strStatusMsg = 'Success'
+
+				-- Check if has record
+				IF EXISTS(select * from @tblTempPMM)
+				BEGIN
+					SET @strStatusMsg = 'Success'
+				END
+				ELSE
+				BEGIN
+					SET @strStatusMsg = 'No record found'
+				END
 			END
 			--END tblSTstgRebatesPMMorris
 
@@ -403,7 +413,15 @@ BEGIN
 					AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 
-					SET @strStatusMsg = 'Success'
+					-- Check if has record
+					IF EXISTS(select * from @tblTempRJR)
+					BEGIN
+						SET @strStatusMsg = 'Success'
+					END
+					ELSE
+					BEGIN
+						SET @strStatusMsg = 'No record found'
+					END
 			END
 			--END tblSTstgRebatesRJReynolds
 		END
@@ -420,17 +438,23 @@ BEGIN
 				AND ysnSubmitted = 0
 			--END mark ysnSubmitted = 1 (mark as submitted)	
 		END
-		ELSE IF NOT EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
+		--ELSE IF NOT EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
+		ELSE
 		BEGIN
 			SET @strStatusMsg = 'No transaction log found based on filter'
+			SET @strCSVHeader = ''
+			SET @intVendorAccountNumber = 0
+			
+			RETURN
 		END
-		
+
+
 		IF(@strTableName = 'tblSTstgRebatesPMMorris')
 		BEGIN
 				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
-					DECLARE @intNumberOfRecords int
-					DECLARE @intSoldQuantity int
-					DECLARE @dblFinalSales decimal(10, 2)
+					DECLARE @intNumberOfRecords int = 0
+					DECLARE @intSoldQuantity int = 0
+					DECLARE @dblFinalSales decimal(10, 2) = 0
 
 					--Get total number of records
 					SELECT @intNumberOfRecords = COUNT(*) FROM @tblTempPMM
@@ -438,10 +462,12 @@ BEGIN
 					--Get total quantity sold
 					SELECT @intSoldQuantity = SUM(intQuantitySold) FROM @tblTempPMM
 
+
 					--Get sum of the final sales price field
 					SELECT @dblFinalSales = SUM(dblFinalSalesPrice) FROM @tblTempPMM
 
-					SET @strCSVHeader = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50)) + CHAR(13)
+
+					SET @strCSVHeader = CAST(ISNULL(@intNumberOfRecords, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@intSoldQuantity, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@dblFinalSales, 0) as NVARCHAR(50)) + CHAR(13)
 				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
 
 			SELECT * FROM @tblTempPMM
