@@ -6398,23 +6398,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                             charge.tblICInventoryReceiptChargeTaxes().removeAll();
                             var unitMeasureId = charge.get('intCostUOMId');
-                            Ext.Array.each(itemTaxes, function (itemDetailTax) {
-                                var taxableAmount = charge.get('dblAmount');
-                                var taxAmount = 0.00;
+
+                            Ext.Array.each(itemTaxes, function (itemDetailTax) {                                
+                                var taxAmount = 0.00,
+                                    taxableAmount = 0.00;
+                                
                                 var chargeQuantity = charge.get('dblQuantity');
                                 chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
-                                var cost = taxableAmount / chargeQuantity;
+                                
+                                var chargeAmount = charge.get('dblAmount');
+                                chargeAmount = Ext.isNumeric(chargeAmount) ? chargeAmount : 0; 
+                                var cost = chargeAmount / chargeQuantity;
 
                                 var adjustedTax = itemDetailTax.dblAdjustedTax;
                                 adjustedTax = Ext.isNumeric(adjustedTax) ? adjustedTax : 0;                                
                                 // If a line is using a foreign currency, convert the adjusted tax from functional currency to the charge currency. 
                                 adjustedTax = dblForexRate != 0 ? adjustedTax / dblForexRate : adjustedTax;
 
-                                if (charge.get('ysnPrice')) {
-                                    taxableAmount = -taxableAmount; 
-                                }                                   
+                                // Get the taxable amount. 
+                                taxableAmount = me.getTaxableAmount(chargeQuantity, cost, itemDetailTax, itemTaxes);
+                                
+                                // Check if tax is charged to the receipt vendor. 
+                                taxableAmount = charge.get('ysnPrice') ? -taxableAmount : taxableAmount; 
 
-                                if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                                if (itemDetailTax.strCalculationMethod === 'Percentage') {``
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
@@ -6422,10 +6429,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
                                     taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }
-                                if (itemDetailTax.ysnCheckoffTax) {
-                                    taxAmount = -(taxAmount);
-                                }
 
+                                taxAmount = (itemDetailTax.ysnCheckoffTax) ? -taxAmount : taxAmount; 
                                 taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                                 // Do not compute tax if it can't be converted to voucher. 
