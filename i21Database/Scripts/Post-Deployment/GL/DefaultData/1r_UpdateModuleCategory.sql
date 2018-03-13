@@ -112,25 +112,11 @@ WHERE intAccountCategoryId IN (
 
 UPDATE  dbo.tblGLRequiredPrimaryCategory
 SET strView = 'i21.view.CompanyPreference', strTab = 'System Manager', strScreen = 'Company Configuration'
-WHERE intAccountCategoryId IN (
-	SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory IN
-	(
-		'Unrealized Gain or Loss Accounts Receivable',
-		'Unrealized Gain or Loss Accounts Payable',
-		'Unrealized Gain or Loss Cash Management',
-		'Unrealized Gain or Loss Inventory',
-		'Unrealized Gain or Loss Contract Purchase',
-		'Unrealized Gain or Loss Contract Sales',
-		'Unrealized Gain or Loss Offset AR',
-		'Unrealized Gain or Loss Offset AP',
-		'Unrealized Gain or Loss Offset CM',
-		'Unrealized Gain or Loss Offset Inventory',
-		'Unrealized Gain or Loss Offset Contract Purchase',
-		'Unrealized Gain or Loss Offset Contract Sales',
-		'Realized Gain or Loss Payables',
-		'Realized Gain or Loss Receivables'
-	))
+WHERE intAccountCategoryId between 60 and 77 -- gain / loss category
 
+UPDATE  dbo.tblGLRequiredPrimaryCategory
+SET strView = 'i21.view.TaxCode', strTab = 'Details', strScreen = 'Tax Code'
+WHERE intAccountCategoryId IN (48,49) --sales / purchase tax account category
 
 
 PRINT ('Finished inserting to tblGLRequiredPrimaryCategory');
