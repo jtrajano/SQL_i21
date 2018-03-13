@@ -214,3 +214,9 @@ BEGIN
     VALUES(12,'Reset Busy Flag')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 13)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(13,'FTP Operation')
+END
+GO

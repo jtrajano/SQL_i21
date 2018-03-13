@@ -6251,6 +6251,7 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
     <Build Include="dbo\Tables\tblLGEntityInsurer.sql" />
     <Build Include="dbo\Tables\tblLGEntityShippingLine.sql" />
+    <Build Include="dbo\Tables\tblIPFTPServer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

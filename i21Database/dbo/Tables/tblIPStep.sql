@@ -44,6 +44,10 @@
 	[strSubject] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strWebApi] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[intFTPServerId] INT,
+	[strFTPOperationType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strFTPServerFile] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strFTPLocalFile] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intDelayTime] INT NULL DEFAULT 0,
 	[ysnSkip] BIT NULL DEFAULT 0,
 	[intConcurrencyId] INT NULL DEFAULT 0,
@@ -57,4 +61,5 @@
 	CONSTRAINT [FK_tblIPStep_tblIPSQLType_intSQLTypeId] FOREIGN KEY ([intSQLTypeId]) REFERENCES [tblIPSQLType]([intSQLTypeId]), 
 	CONSTRAINT [FK_tblIPStep_tblIPConnection_intSourceConnectionId] FOREIGN KEY ([intSourceConnectionId]) REFERENCES [tblIPConnection]([intConnectionId]),
 	CONSTRAINT [FK_tblIPStep_tblIPSQLType_intSourceSQLTypeId] FOREIGN KEY ([intSourceSQLTypeId]) REFERENCES [tblIPSQLType]([intSQLTypeId]), 
+	CONSTRAINT [FK_tblIPStep_tblIPFTPServer_intFTPServerId] FOREIGN KEY ([intFTPServerId]) REFERENCES [tblIPFTPServer]([intFTPServerId]),
 )
