@@ -3368,3 +3368,20 @@ SET strBackColor = '#FFD700' -- gold
 WHERE strSecondaryStatus = 'Quarantine'
 	AND strBackColor IS NULL
 GO
+
+-- Setting Dock Door Location in Order Header
+IF EXISTS (
+		SELECT 1
+		FROM tblMFCompanyPreference
+		WHERE ysnLoadProcessEnabled = 1
+		)
+BEGIN
+	UPDATE tblMFOrderHeader
+	SET intDockDoorLocationId = (
+			SELECT intDefaultShipmentDockDoorLocation
+			FROM tblMFCompanyPreference
+			)
+	WHERE intDockDoorLocationId IS NULL
+		AND intOrderTypeId = 5
+END
+GO
