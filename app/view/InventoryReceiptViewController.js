@@ -1618,9 +1618,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-
         if (!current) return; 
 
         if (current) {
@@ -1647,56 +1647,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        var isHidden = true;
-        switch (current.get('strReceiptType')) {
-            case 'Purchase Contract':
-                switch (current.get('intSourceType')) {
-                    case 0:
-                    case 2:
-                        if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
-                            isHidden = true;
-                        }
-                        else {
-                            isHidden = false;
-                        }
-                        break;
-                    default:
-                        isHidden = true;
-                        break;
-                }
-                break;
-            case 'Purchase Order':
-                if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
-                    isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            case 'Transfer Order':
-                if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
-                    isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            default:
-                isHidden = true;
-                break;
-        }
-        if (isHidden === false) {
-            var shipTo = current.get('strLocationName'); 
-            if (shipTo) {
-                this.showAddOrders(win);
-            }            
-        }
+        var shipTo = current.get('strLocationName'); 
+        if (shipTo && me.canAddOrders(current)) {
+            me.showAddOrders(win);
+        }  
     },
 
     onLocationSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
-
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
@@ -1711,36 +1671,54 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        if (grdInventoryReceiptCount == 0){
-            this.showAddOrders(win);
+        if (grdInventoryReceiptCount == 0 && me.canAddOrders(current)){
+            me.showAddOrders(win);
         }
+    },
+
+    canAddOrders: function(current) {
+        var canAddOrders = true;
+        if(!current)
+            return false;
+        if (current.get('ysnPosted')) {
+            canAddOrders = false;
+        } else {
+            switch (current.get('strReceiptType')) {
+                case 'Purchase Contract':
+                    switch (current.get('intSourceType')) {
+                        case 0:
+                        case 2:
+                            canAddOrders = !iRely.Functions.isEmpty(current.get('intEntityVendorId'));
+                            break;
+                        default:
+                            canAddOrders = false;
+                            break;
+                    }
+                    break;
+                case 'Purchase Order':
+                    canAddOrders = !iRely.Functions.isEmpty(current.get('intEntityVendorId'));
+                    break;
+                case 'Transfer Order':
+                    canAddOrders = !iRely.Functions.isEmpty(current.get('intTransferorId'));
+                    break;
+                default :
+                    canAddOrders = false;
+                    break;
+            }
+        }
+
+        return canAddOrders;
     },
 
     onTransferorSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        var isHidden = true;
-        if (current) {
-            switch (current.get('strReceiptType')) {
-                case 'Transfer Order':
-                    if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
-                        isHidden = true;
-                    }
-                    else {
-                        isHidden = false;
-                    }
-                    break;
-                default:
-                    isHidden = true;
-                    break;
-            }
-            if (isHidden === false) {
-                this.showAddOrders(win);
-            }
-        }
+        if(me.canAddOrders(current))
+            me.showAddOrders(win);
     },
 
     onFreightTermSelect: function (combo, records, eOpts) {
