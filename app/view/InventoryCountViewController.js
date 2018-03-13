@@ -12,9 +12,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
             },
-            btnEditRow: {
-                hidden: true
-            },
             cboPageSize: {
                 hidden: true,
                 value: '{pageSize}',
@@ -2093,9 +2090,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#btnAttachNewRow": {
                 click: this.onAttachNewRow
-            },
-            "#btnEditRow": {
-                click: this.onOpenRow
             },
             "#cboCountBy": {
                 select: this.onCountBySelect
