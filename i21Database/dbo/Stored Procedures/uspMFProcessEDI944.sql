@@ -10,7 +10,7 @@ BEGIN
 		intInventoryReceiptId
 		,strOrderNo
 		)
-	SELECT IR.intInventoryReceiptId
+	SELECT Top 1 IR.intInventoryReceiptId
 		,IR.strWarehouseRefNo
 	FROM tblICInventoryReceipt IR
 	WHERE ysnPosted = 1
