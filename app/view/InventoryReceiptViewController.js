@@ -7800,6 +7800,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     editingRecord.set('strItemType', 'Add-On');
                     editingRecord.set('dblOpenReceive', 1);
                     win.down('#colItemNo').focus();
+                    me.calculateGrossNet(editingRecord, 1);
 
                     var recordIdx = itemDetailStore.findBy(function(rec){
                         return rec.id == editingRecord.id;
@@ -7825,7 +7826,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 dblLastCost: rec.dblLastCost,
                                 dblUnitCost: rec.dblLastCost,
                                 dblUnitRetail: rec.dblLastCost,
-
+                                intWeightUOMId: rec.intGrossUOMId,
+                                strWeightUOM: rec.strGrossUOM,
+                                dblWeightUOMConvFactor: rec.dblGrossUOMConvFactor,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: rec.intSubLocationId,
                                 strSubLocationName: rec.strSubLocationName,
@@ -7979,6 +7982,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     editingRecord.set('strItemType', 'Substitute');
                     editingRecord.set('dblOpenReceive', 1);
                     win.down('#colItemNo').focus();
+                    me.calculateGrossNet(editingRecord, 1);
 
                     var recordIdx = itemDetailStore.findBy(function(rec){
                             return rec.id == editingRecord.id;
@@ -8011,6 +8015,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strCostUOM: rec.strComponentStockUOM,
                                 intCostUOMId: rec.intComponentStockUOMId,
                                 dblCostUOMConvFactor: 1,
+                                intWeightUOMId: rec.intGrossUOMId,
+                                strWeightUOM: rec.strGrossUOM,
+                                dblWeightUOMConvFactor: rec.dblGrossUOMConvFactor,
                                 dblLastCost: rec.dblLastCost,
                                 dblUnitCost: rec.dblLastCost,
                                 dblUnitRetail: rec.dblLastCost,
