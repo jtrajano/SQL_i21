@@ -1,6 +1,4 @@
-﻿
-
-CREATE VIEW [dbo].[vyuCFExportAccount]
+﻿CREATE VIEW [dbo].[vyuCFExportAccount]
 AS
 
 SELECT   
@@ -17,7 +15,7 @@ emEnt.strName,
 emEntLoc.strZipCode, 
 emEntLoc.strFax, 
 emEntLoc.strState, 
-emEnt.strEmail, 
+emEntDefaultContact.strEmail, 
 '' AS dtmDateLastModified, 
 '' AS dtmTimeLastModified, 
 cfNet.strNetworkType,
@@ -26,6 +24,8 @@ CONVERT(numeric(18, 6), 0) AS dblCreditLimit,
 CONVERT(bit, 0) AS ysnCreditIndicator
 FROM        
 dbo.tblEMEntity AS emEnt INNER JOIN
+dbo.tblEMEntityToContact as emContact ON emEnt.intEntityId = emContact.intEntityId AND emContact.ysnDefaultContact = 1 INNER JOIN
+dbo.tblEMEntity AS emEntDefaultContact ON  emEntDefaultContact.intEntityId = emContact.intEntityId INNER JOIN 
 dbo.tblARCustomer AS arCus ON emEnt.intEntityId = arCus.intEntityId INNER JOIN
 dbo.tblEMEntityLocation AS emEntLoc ON emEnt.intEntityId = emEntLoc.intEntityId INNER JOIN 
 dbo.tblCFAccount AS cfAcc ON arCus.intEntityId = cfAcc.intCustomerId INNER JOIN
@@ -44,5 +44,11 @@ emEnt.strName,
 emEntLoc.strZipCode, 
 emEntLoc.strFax, 
 emEntLoc.strState, 
-emEnt.strEmail,
+emEntDefaultContact.strEmail,
 cfNet.strNetworkType
+
+GO
+
+
+
+
