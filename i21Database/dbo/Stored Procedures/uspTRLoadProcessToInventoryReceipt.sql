@@ -67,6 +67,86 @@ BEGIN
 
 END
 
+	SELECT strReceiptType			= CASE WHEN min(TR.intContractDetailId) IS NULL THEN 'Direct'
+											WHEN min(TR.intContractDetailId) IS NOT NULL THEN 'Purchase Contract' END
+		,intEntityVendorId			= min(TR.intTerminalId)
+		,intShipFromId				= min(SP.intEntityLocationId)
+		,intLocationId				= min(TR.intCompanyLocationId)
+		,intItemId					= min(TR.intItemId)
+		,intItemLocationId			= min(TR.intCompanyLocationId)
+		,intItemUOMId				= CASE WHEN min(TR.intContractDetailId) is NULL THEN min(IC.intStockUOMId)
+											WHEN min(TR.intContractDetailId) is NOT NULL THEN min(CT.intItemUOMId) END -- Need to add the Gallons UOM from Company Preference
+		,strBillOfLadding			= min(TR.strBillOfLading)
+		,intContractHeaderId		= min(CT.intContractHeaderId)
+		,intContractDetailId		= min(TR.intContractDetailId)
+		,dtmDate					= min(TL.dtmLoadDateTime)
+		,intShipViaId				= min(TL.intShipViaId)
+		,dblQty						= CASE WHEN min(SP.strGrossOrNet) = 'Gross' THEN min(TR.dblGross)
+											WHEN min(SP.strGrossOrNet) = 'Net' THEN min(TR.dblNet) END
+		,dblCost					= min(TR.dblUnitCost)
+		,intCurrencyId				= @defaultCurrency
+		,dblExchangeRate			= 1 -- Need to check this
+		,intLotId					= NULL --No LOTS from transport
+		,intSubLocationId			= NULL -- No Sub Location from transport
+		,intStorageLocationId		= NULL -- No Storage Location from transport
+		,ysnIsStorage				= 0 -- No Storage from transports
+		,dblFreightRate				= min(TR.dblFreightRate)
+		,intSourceId				= min(TR.intLoadReceiptId)
+		,intSourceType		 		= 3 -- Source type for transports is 3 
+		,dblGross					= min(TR.dblGross)
+		,dblNet						= min(TR.dblNet)
+		,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
+		,dblSurcharge				= min(TR.dblPurSurcharge)
+		,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
+		,strActualCostId			= ISNULL(min(TLD.strTransaction), min(BID.strTransaction))
+		,intTaxGroupId				= min(TR.intTaxGroupId)
+		,strVendorRefNo				= min(TR.strBillOfLading)
+		,strSourceId				= min(TL.strTransaction)
+		,strSourceScreenName		= 'Transport Loads'
+		,intPaymentOn				= 1 -- Compute on Qty to Receive
+		,strChargesLink				= MIN(TR.strReceiptLine)
+		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
+		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
+	INTO #tmpReceipts
+	FROM tblTRLoadHeader TL
+	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId			
+	LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = TR.intContractDetailId
+	LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = TR.intSupplyPointId
+	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId
+	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = TL.intShipViaId
+	LEFT JOIN (
+				SELECT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId,HH.strDestination
+				FROM tblTRLoadHeader TT
+				JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
+				JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
+				JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
+				WHERE ((RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer') OR (RR.strOrigin = 'Terminal' AND HH.strDestination = 'Location' AND RR.intCompanyLocationId != HH.intCompanyLocationId))
+					AND RR.intItemId = HD.intItemId
+					AND HD.strReceiptLink = RR.strReceiptLine
+				) TLD on TLD.intLoadHeaderId = TR.intLoadHeaderId AND TLD.intLoadReceiptId = TR.intLoadReceiptId AND TLD.intItemId = TR.intItemId
+	LEFT JOIN (
+				SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId,HH.strDestination
+				FROM tblTRLoadHeader TT
+				LEFT JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
+				LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
+				LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
+				LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
+				WHERE	RR.strOrigin = 'Terminal' AND BI.intIngredientItemId = RR.intItemId
+				) BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
+	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+			AND TR.strOrigin = 'Terminal'
+			AND IC.strType != 'Non-Inventory'
+			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
+    group by TR.intLoadReceiptId
+	ORDER BY intEntityVendorId
+		,strBillOfLadding
+		,strReceiptType
+		,intLocationId
+		,intShipViaId
+		,intShipFromId
+		,intSourceType
+		,intTaxGroupId
+
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
 	INSERT into @ReceiptStagingTable(
 			strReceiptType
@@ -105,94 +185,42 @@ END
 			,intPaymentOn
 			,strChargesLink
 	)	
-	SELECT 
-			strReceiptType				=	CASE	WHEN min(TR.intContractDetailId) IS NULL THEN 'Direct'
-													WHEN min(TR.intContractDetailId) IS NOT NULL THEN 'Purchase Contract'
-											END
-			,intEntityVendorId			= min(TR.intTerminalId)
-			,intShipFromId				= min(SP.intEntityLocationId)
-			,intLocationId				= min(TR.intCompanyLocationId)
-			,intItemId					= min(TR.intItemId)
-			,intItemLocationId			= min(TR.intCompanyLocationId)
-			,intItemUOMId				=	CASE	
-												WHEN min(TR.intContractDetailId) is NULL  
-													THEN min(IC.intStockUOMId)
-												WHEN min(TR.intContractDetailId) is NOT NULL 
-													THEN min(CT.intItemUOMId)
-											END-- Need to add the Gallons UOM from Company Preference	   
-			,strBillOfLadding			= min(TR.strBillOfLading)
-			,intContractHeaderId		= min(CT.intContractHeaderId)
-			,intContractDetailId		= min(TR.intContractDetailId)
-			,dtmDate					= min(TL.dtmLoadDateTime)
-			,intShipViaId				= min(TL.intShipViaId)
-			,dblQty						=	CASE	WHEN min(SP.strGrossOrNet) = 'Gross' THEN min(TR.dblGross)
-													WHEN min(SP.strGrossOrNet) = 'Net' THEN min(TR.dblNet)
-											END
-			,dblCost					= min(TR.dblUnitCost)
-			,intCurrencyId				= @defaultCurrency
-			,dblExchangeRate			= 1 -- Need to check this
-			,intLotId					= NULL --No LOTS from transport
-			,intSubLocationId			= NULL -- No Sub Location from transport
-			,intStorageLocationId		= NULL -- No Storage Location from transport
-			,ysnIsStorage				= 0 -- No Storage from transports
-			,dblFreightRate				= min(TR.dblFreightRate)
-			,intSourceId				= min(TR.intLoadReceiptId)
-			,intSourceType		 		= 3 -- Source type for transports is 3 
-			,dblGross					= min(TR.dblGross)
-			,dblNet						= min(TR.dblNet)
-			,intInventoryReceiptId		= min(TR.intInventoryReceiptId)
-			,dblSurcharge				= min(TR.dblPurSurcharge)
-			,ysnFreightInPrice			= CAST(MIN(CAST(TR.ysnFreightInPrice AS INT)) AS BIT)
-			,strActualCostId			= ISNULL(min(TLD.strTransaction), min(BID.strTransaction))
-			,intTaxGroupId				= min(TR.intTaxGroupId)
-			,strVendorRefNo				= min(TR.strBillOfLading)
-			,strSourceId				= min(TL.strTransaction)
-			,strSourceScreenName		= 'Transport Loads'
-			,intPaymentOn				= 1 -- Compute on Qty to Receive
-			,strChargesLink				= MIN(TR.strReceiptLine)
-	FROM	tblTRLoadHeader TL
-	        JOIN tblTRLoadReceipt TR 
-				ON TR.intLoadHeaderId = TL.intLoadHeaderId			
-			LEFT JOIN vyuCTContractDetailView CT 
-				ON CT.intContractDetailId = TR.intContractDetailId
-			LEFT JOIN tblTRSupplyPoint SP 
-				ON SP.intSupplyPointId = TR.intSupplyPointId
-			LEFT JOIN vyuICGetItemStock IC
-			    ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId	
-		    LEFT JOIN (
-						SELECT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId 
-						FROM	tblTRLoadHeader TT JOIN tblTRLoadReceipt RR 
-									ON TT.intLoadHeaderId = RR.intLoadHeaderId
-								JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
-								JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-						WHERE	((RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer') OR (RR.strOrigin = 'Terminal' AND HH.strDestination = 'Location' AND RR.intCompanyLocationId != HH.intCompanyLocationId))
-							AND RR.intItemId = HD.intItemId
-							AND HD.strReceiptLink = RR.strReceiptLine
-					  ) TLD	on TLD.intLoadHeaderId = TR.intLoadHeaderId	 and TLD.intLoadReceiptId = TR.intLoadReceiptId and TLD.intItemId = TR.intItemId
-			LEFT JOIN (
-						SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId
-						FROM tblTRLoadHeader TT
-						LEFT JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
-						LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
-						LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
-						LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
-						WHERE	RR.strOrigin = 'Terminal' AND BI.intIngredientItemId = RR.intItemId
-						) BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
-	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
-			AND TR.strOrigin = 'Terminal'
-			AND IC.strType != 'Non-Inventory'
-			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
-    group by TR.intLoadReceiptId
-	ORDER BY intEntityVendorId
-		,strBillOfLadding
-		,strReceiptType
-		,intLocationId
-		,intShipViaId
-		,intShipFromId
-		,intSourceType
-		,intTaxGroupId
-		,intItemId
-		,dblQty
+	SELECT strReceiptType		= strReceiptType
+		,intEntityVendorId		= intEntityVendorId
+		,intShipFromId			= intShipFromId
+		,intLocationId			= intLocationId
+		,intItemId				= intItemId
+		,intItemLocationId		= intItemLocationId
+		,intItemUOMId			= intItemUOMId
+		,strBillOfLadding		= strBillOfLadding
+		,intContractHeaderId	= intContractHeaderId
+		,intContractDetailId	= intContractDetailId
+		,dtmDate				= dtmDate
+		,intShipViaId			= intShipViaId
+		,dblQty					= dblQty
+		,dblCost				= dblCost
+		,intCurrencyId			= intCurrencyId
+		,dblExchangeRate		= dblExchangeRate
+		,intLotId				= intLotId
+		,intSubLocationId		= intSubLocationId
+		,intStorageLocationId	= intStorageLocationId
+		,ysnIsStorage			= ysnIsStorage
+		,dblFreightRate			= dblFreightRate
+		,intSourceId			= intSourceId
+		,intSourceType		 	= intSourceType
+		,dblGross				= dblGross
+		,dblNet					= dblNet
+		,intInventoryReceiptId	= intInventoryReceiptId
+		,dblSurcharge			= dblSurcharge
+		,ysnFreightInPrice		= ysnFreightInPrice
+		,strActualCostId		= strActualCostId
+		,intTaxGroupId			= intTaxGroupId
+		,strVendorRefNo			= strVendorRefNo
+		,strSourceId			= strSourceId
+		,strSourceScreenName	= strSourceScreenName
+		,intPaymentOn			= intPaymentOn
+		,strChargesLink			= strChargesLink
+	FROM #tmpReceipts
 
 	SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
@@ -231,116 +259,74 @@ END
 			,[ysnAccrue]
 			,[strChargesLink]
 	) 
-   SELECT	[intEntityVendorId]					= min(RE.intEntityVendorId)
-			,[strBillOfLadding]					= min(RE.strBillOfLadding)
-			,[strReceiptType]					= min(RE.strReceiptType)
-			,[intLocationId]					= min(RE.intLocationId)
-			,[intShipViaId]						= min(RE.intShipViaId)
-			,[intShipFromId]					= min(RE.intShipFromId)
-			,[intCurrencyId]  					= min(RE.intCurrencyId)
-			,[intChargeId]						= @intFreightItemId
-			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
-														WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
-														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
-																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(TLR.intLoadHeaderId)
-																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
-																ELSE CAST(0 AS BIT) END)
-														END)
-			,[strCostMethod]					= 'Per Unit'
-			,[dblRate]							= min(RE.dblFreightRate)
-			,[intCostUOMId]						= @FreightUOMId
-			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
-															min(RE.intEntityVendorId)
-														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
-															NULL
-														WHEN min(SM.strFreightBilledBy) = 'Other' THEN 
-															min(RE.intShipViaId)
-												END
-			,[dblAmount]						= 0
-			,[strAllocateCostBy]				= 'Unit'
-			,[intContractHeaderId]				= min(RE.intContractHeaderId)
-			,[intContractDetailId]				= min(RE.intContractDetailId)
-			,[ysnAccrue]						= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
-															1
-														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
-															0
-														WHEN min(SM.strFreightBilledBy) = 'Other' THEN 
-															1
-												END
-			,strChargesLink						= MIN(RE.strChargesLink)
-    FROM	@ReceiptStagingTable RE 
-	        LEFT JOIN tblSMShipVia SM on SM.intEntityId = RE.intShipViaId
-			LEFT JOIN (select TT.intLoadHeaderId, TT.strTransaction, RR.intLoadReceiptId from tblTRLoadHeader TT
-					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
-					                                                 where RR.strOrigin = 'Terminal'
-                      ) TLR on TLR.intLoadReceiptId = RE.intSourceId
+   SELECT	[intEntityVendorId]				= RE.intEntityVendorId
+			,[strBillOfLadding]				= RE.strBillOfLadding
+			,[strReceiptType]				= RE.strReceiptType
+			,[intLocationId]				= RE.intLocationId
+			,[intShipViaId]					= RE.intShipViaId
+			,[intShipFromId]				= RE.intShipFromId
+			,[intCurrencyId]  				= RE.intCurrencyId
+			,[intChargeId]					= @intFreightItemId
+			,[ysnInventoryCost]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
+													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
+																ELSE CAST(0 AS BIT) END) END)
+			,[strCostMethod]				= 'Per Unit'
+			,[dblRate]						= RE.dblFreightRate
+			,[intCostUOMId]					= @FreightUOMId
+			,[intOtherChargeEntityVendorId]	= CASE	WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
+													WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
+													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId END
+			,[dblAmount]					= 0
+			,[strAllocateCostBy]			= 'Unit'
+			,[intContractHeaderId]			= RE.intContractHeaderId
+			,[intContractDetailId]			= RE.intContractDetailId
+			,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1
+													WHEN RE.strFreightBilledBy = 'Internal' THEN 0
+													WHEN RE.strFreightBilledBy = 'Other' THEN 1 END
+			,strChargesLink					= RE.strChargesLink
+    FROM	#tmpReceipts RE 
 	WHERE	RE.dblFreightRate != 0
-	group by RE.intId 
 
 	--Fuel Surcharge
 	UNION ALL 
-	SELECT	[intEntityVendorId]					= min(RE.intEntityVendorId)
-			,[strBillOfLadding]					= min(RE.strBillOfLadding)
-			,[strReceiptType]					= min(RE.strReceiptType)
-			,[intLocationId]					= min(RE.intLocationId)
-			,[intShipViaId]						= min(RE.intShipViaId)
-			,[intShipFromId]					= min(RE.intShipFromId)
-			,[intCurrencyId]  					= min(RE.intCurrencyId)
-			,[intChargeId]						= @intSurchargeItemId
-			,[ysnInventoryCost]					= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
-														WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
-														ELSE (CASE WHEN EXISTS(SELECT TOP 1 1 
-																				FROM tblTRLoadDistributionHeader TempDist
-																				WHERE TempDist.intLoadHeaderId = MIN(LTE.intLoadHeaderId)
-																					AND TempDist.strDestination = 'Location') THEN CAST(1 AS BIT)
-																ELSE CAST(0 AS BIT) END)
-														END)
-			,[strCostMethod]					= 'Percentage'
-			,[dblRate]							= min(RE.dblSurcharge)
-			,[intCostUOMId]						= @SurchargeUOMId
-			,[intOtherChargeEntityVendorId]		= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
-															min(RE.intEntityVendorId)
-														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
-															NULL
-														WHEN min(SM.strFreightBilledBy) = 'Other' THEN 
-															min(RE.intShipViaId)
-												END
-			,[dblAmount]						= 0
-			,[strAllocateCostBy]				= 'Unit'
-			,[intContractHeaderId]				= min(RE.intContractHeaderId)
-			,[intContractDetailId]				= min(RE.intContractDetailId)
-			,[ysnAccrue]						= CASE	WHEN min(SM.strFreightBilledBy) = 'Vendor' THEN 
-															1
-														WHEN min(SM.strFreightBilledBy) = 'Internal' THEN 
-															0
-														WHEN min(SM.strFreightBilledBy) = 'Other' THEN 
-															1
-												END
-			,strChargesLink						= MIN(RE.strChargesLink)
-    FROM	@ReceiptStagingTable RE 
-	LEFT JOIN tblSMShipVia SM on SM.intEntityId = RE.intShipViaId
-	LEFT JOIN (select TT.intLoadHeaderId, RR.intLoadReceiptId, TT.strTransaction from tblTRLoadHeader TT
-					                                                 join tblTRLoadReceipt RR on TT.intLoadHeaderId = RR.intLoadHeaderId
-					                                                 where RR.strOrigin = 'Terminal') LTE on LTE.intLoadReceiptId = RE.intSourceId
+	SELECT	[intEntityVendorId]				= RE.intEntityVendorId
+			,[strBillOfLadding]				= RE.strBillOfLadding
+			,[strReceiptType]				= RE.strReceiptType
+			,[intLocationId]				= RE.intLocationId
+			,[intShipViaId]					= RE.intShipViaId
+			,[intShipFromId]				= RE.intShipFromId
+			,[intCurrencyId]  				= RE.intCurrencyId
+			,[intChargeId]					= @intSurchargeItemId
+			,[ysnInventoryCost]				= (CASE WHEN @FreightCostAllocationMethod = 2 THEN CAST (1 AS BIT)
+													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
+													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
+																ELSE CAST(0 AS BIT) END) END)
+			,[strCostMethod]				= 'Percentage'
+			,[dblRate]						= RE.dblSurcharge
+			,[intCostUOMId]					= @SurchargeUOMId
+			,[intOtherChargeEntityVendorId]	= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
+													WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
+													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId END
+			,[dblAmount]					= 0
+			,[strAllocateCostBy]			= 'Unit'
+			,[intContractHeaderId]			= RE.intContractHeaderId
+			,[intContractDetailId]			= RE.intContractDetailId
+			,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1
+													WHEN RE.strFreightBilledBy = 'Internal' THEN 0
+													WHEN RE.strFreightBilledBy = 'Other' THEN 1 END
+			,strChargesLink					= RE.strChargesLink
+    FROM	#tmpReceipts RE 
 	WHERE	RE.dblSurcharge != 0 
-	group by RE.intId 
+
+	DROP TABLE #tmpReceipts
 
 	-- No Records to process so exit
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
     IF (@total = 0)
 	   RETURN;
 
-	-- Create the temp table if it does not exists. 
-	--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
-	--BEGIN 
-	--	CREATE TABLE #tmpAddItemReceiptResult (
-	--		intSourceId INT
-	--		,intInventoryReceiptId INT
-	--	)
-	--END 
-
-    EXEC dbo.uspICAddItemReceipt 
+	EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable
 			,@OtherCharges
 			,@intUserId;
