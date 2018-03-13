@@ -11,8 +11,8 @@ AS
 BEGIN
 	BEGIN TRY
 		SET @strStatusMsg = ''
-		DECLARE @intCountAccountNumber AS INT
-
+		DECLARE @intCountAccountNumber AS INT = 0
+		SET @intVendorAccountNumber = 0
 
 		----// START Validate selected date total to 7days
 		DECLARE @intCountDays AS INT = DATEDIFF(DAY, CAST(@dtmBeginningDate AS DATE), CAST(@dtmEndingDate AS DATE)) + 1
@@ -184,6 +184,7 @@ BEGIN
 		BEGIN
 			SELECT @strStatusMsg = @strStatusMsg + ',' + strDescription FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strAddress = '' OR strAddress IS NULL)
 			SET @strCSVHeader = ''
+			SET @intVendorAccountNumber = 0
 			SET @strStatusMsg = @strStatusMsg + ' does not have address'
 
 			RETURN
@@ -195,6 +196,7 @@ BEGIN
 		BEGIN
 			SELECT @strStatusMsg = COALESCE(@strStatusMsg + ',','') + strDescription FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strDepartment = '' OR strDepartment IS NULL)
 			SET @strCSVHeader = ''
+			SET @intVendorAccountNumber = 0
 			SET @strStatusMsg = @strStatusMsg + ' does not have department'
 			RETURN
 		END
