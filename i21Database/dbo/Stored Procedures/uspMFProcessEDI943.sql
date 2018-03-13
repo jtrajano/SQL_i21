@@ -298,7 +298,7 @@ BEGIN TRY
 				IF @intEntityId IS NULL
 				BEGIN
 					SELECT @strEntityNo = IsNULL(Max(strEntityNo), 0) + 1
-					FROM tblENEntity
+					FROM tblEMEntity
 
 					INSERT INTO tblEMEntity (
 						strName

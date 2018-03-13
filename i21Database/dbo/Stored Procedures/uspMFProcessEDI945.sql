@@ -12,7 +12,7 @@ BEGIN
 		,strOrderNo
 		,strShipmentNo
 		)
-	SELECT InvS.intInventoryShipmentId
+	SELECT Top 1 InvS.intInventoryShipmentId
 		,InvS.strReferenceNumber
 		,InvS.strShipmentNumber
 	FROM tblICInventoryShipment InvS
@@ -158,7 +158,7 @@ BEGIN
 			,DT.strBestBy
 			,Row_Number()Over(Partition by DT.strDepositorOrderNumber Order By DT.intLineNo,DT.strParentLotNumber) As intRowNumber
 		FROM (
-			SELECT EDI.strTransactionId
+			SELECT DISTINCT EDI.strTransactionId
 				,EDI.strCustomerId
 				,EDI.strType
 				,EDI.strDepositorOrderNumber
@@ -247,7 +247,7 @@ BEGIN
 			,DT.strBestBy
 			,Row_Number()Over(Partition by DT.strDepositorOrderNumber Order By DT.intLineNo,DT.strParentLotNumber) intRowNumber
 		FROM (
-			SELECT EDI.strTransactionId
+			SELECT DISTINCT EDI.strTransactionId
 				,EDI.strCustomerId
 				,EDI.strType
 				,EDI.strDepositorOrderNumber
