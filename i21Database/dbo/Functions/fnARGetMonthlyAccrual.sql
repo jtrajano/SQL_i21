@@ -14,7 +14,7 @@ BEGIN
 	INSERT @tblMonthlyAccrual
 	SELECT intInvoiceId ,
 		   dtmAccrualDate,
-		   CASE WHEN [ROW] = 1 THEN dblInvoiceSubtotal + dblTax ELSE dblInvoiceSubtotal END - SUM(dblAmount) OVER (ORDER BY intInvoiceAccrualId)  
+		   dblInvoiceSubtotal - SUM(dblAmount) OVER (ORDER BY intInvoiceAccrualId)  
 		   FROM (
 	SELECT ROW_NUMBER() OVER (ORDER BY I.intInvoiceId) [ROW],I.intInvoiceId, intInvoiceAccrualId, I.dblTax ,I.dblInvoiceSubtotal,AI.dblAmount,CONVERT(CHAR(4), dtmAccrualDate, 100) + CONVERT(CHAR(4), dtmAccrualDate, 120) dtmAccrualDate
 	FROM tblARInvoiceAccrual AI
