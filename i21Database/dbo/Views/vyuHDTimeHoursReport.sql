@@ -13,6 +13,8 @@
 			,intAgentEntityId = g.intEntityId
 			,strAgentName = g.strName
 			,a.intHours
+			,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end)
+			,intNonBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then a.intHours else 0 end)
 			,h.intJobCodeId
 			,h.strJobCode
 			,a.dblRate
