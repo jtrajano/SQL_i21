@@ -19,6 +19,7 @@
 	[strFileName] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL,
 	[strSheetName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnGenerateHeader] BIT DEFAULT 0,
+	[ysnGenerateMultipleFile] BIT DEFAULT 0,
 	[ysnSuccessFailureStep] BIT NULL DEFAULT 0,
 	[strDestinationFolder] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDeleteFile] BIT DEFAULT 0,
