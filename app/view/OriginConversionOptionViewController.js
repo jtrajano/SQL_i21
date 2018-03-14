@@ -40,9 +40,15 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             },
 
             success: function(response) {
-                var json = JSON.parse(response.responseText);
+                var json = null;
+                try {
+                    json = JSON.parse(response.responseText);
+                } catch(e)
+                {
+
+                }
                 var pref = {};
-                if(json.data && json.data.length > 0) {
+                if(json && json.data && json.data.length > 0) {
                     pref =  { states: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
                 }
 
@@ -55,7 +61,10 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                             me.getViewModel().set('lineOfBusiness', '');
                     }
     
-                    var states = JSON.parse(pref.states);
+                    var states = null;
+                    try {
+                        states = JSON.parse(pref.states);
+                    } catch(e) {}
                     var lob = me.getViewModel().get('lineOfBusiness');
     
                     if (lob)
