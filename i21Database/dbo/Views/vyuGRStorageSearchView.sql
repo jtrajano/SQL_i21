@@ -53,7 +53,7 @@ LEFT JOIN tblGRStorageHistory   SH				ON SH.intCustomerStorageId			= CS.intCusto
 LEFT JOIN tblCTContractHeader   CH				ON CH.intContractHeaderId			= SH.intContractHeaderId
 LEFT JOIN tblSCDeliverySheet    DeliverySheet   ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId  
 LEFT JOIN tblSCTicket		    SC				ON SC.intTicketId					= CS.intTicketId
-LEFT JOIN tblSCTicketSplit	    SCTicketSplit	ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
+LEFT JOIN tblSCTicketSplit	    SCTicketSplit	ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId --AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
 LEFT JOIN tblEMEntitySplit		EMSplit		    ON EMSplit.intSplitId				= SC.intSplitId
 Where ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0 AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')
 ORDER BY CS.intCustomerStorageId
