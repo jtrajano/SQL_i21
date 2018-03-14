@@ -6247,6 +6247,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
     <Build Include="dbo\Functions\fnICCheckItemUOMIdIsNotUsed.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
+	<Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

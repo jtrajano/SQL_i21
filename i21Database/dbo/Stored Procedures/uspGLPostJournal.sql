@@ -39,7 +39,7 @@ IF ISNULL(@ysnPost, 0) = 0
 		IF ISNULL(@ysnRecap, 0) = 0 -- ysnRecap = 0
 			BEGIN
 				-- DELETE Results 1 DAY OLDER	
-				DELETE tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
+				DELETE tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE()) or intTransactionId in (select intJournalId from @tmpPostJournals)
 				
 				INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
 					SELECT @strBatchId as strBatchId
@@ -80,7 +80,7 @@ IF ISNULL(@ysnPost, 0) = 0
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN
 		-- DELETE Results 2 DAYS OLDER	
-		DELETE FROM tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE())
+		DELETE FROM tblGLPostResult WHERE dtmDate < DATEADD(day, -1, GETDATE()) or intTransactionId in (select intJournalId from @tmpPostJournals)
 		
 		INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
 			SELECT @strBatchId as strBatchId,tmpBatchResults.intJournalId as intTransactionId,tblB.strJournalId as strTransactionId, strMessage as strDescription,GETDATE() as dtmDate,@intEntityId,@strJournalType
