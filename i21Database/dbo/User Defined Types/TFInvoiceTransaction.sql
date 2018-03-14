@@ -60,6 +60,8 @@
 	[strDiversionOriginalDestinationState] NVARCHAR(50) NULL,
 	[strTransactionType] NVARCHAR(50) NULL,
 	[intTransactionNumberId] INT NULL,
-	[ysnDiversion] BIT NULL
+	[ysnDiversion] BIT NULL,
+	[strContactName] NVARCHAR(50) NULL,
+	[strEmail] NVARCHAR(50) NULL
 )
 GO
