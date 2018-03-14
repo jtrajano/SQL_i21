@@ -393,6 +393,9 @@ BEGIN
 				,intProductAuthId
 				,strCardPinNumber
 				,intNetworkId
+				,ysnCardForOwnUse				
+				,ysnIgnoreCardTransaction		
+				,ysnCardLocked		
 			)
 			SELECT
 				 @intAccountId
@@ -406,6 +409,9 @@ BEGIN
 				,@intProductAuthCode
 				,@strPINNumber
 				,@intNetworkId
+				,0		
+				,0		
+				,0
 
 
 			SET @intAddCardIdentity = SCOPE_IDENTITY()
