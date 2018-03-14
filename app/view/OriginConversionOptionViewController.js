@@ -40,6 +40,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             },
 
             success: function(response) {
+                return;
                 var json = JSON.parse(response.responseText);
                 var pref = {};
                 if(json.data && json.data.length > 0) {
@@ -105,11 +106,74 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         // );
     },
 
+    stepsPetro: ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula"],
+    stepsAg: ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "Items", "ItemGLAccts", "Balance"],
+    stepsGrain: ["UOM", "Locations", "Commodity"],
+    stepsCStore: ["Locations"],
+
+    createImportOriginState: function(lob, step, setNextStep) {
+        var me = this;
+        var steps = [];
+        switch(lob) {
+            case "Petro": steps = me.stepsPetro; break;
+            case "Ag": steps = me.stepsAg; break;
+            case "Grain": steps = me.stepsGrain; break;
+            case "C-Store": steps = me.stepsCStore; break;
+            default: break;
+        }
+
+        if(!step) step = steps[0]; //Default to first step
+        var index = _.indexOf(steps, step);
+        if(setNextStep) {
+            index++;
+            step = steps[index];
+        }
+        var done = index === steps.length - 1;
+
+        return {
+            lob: lob,
+            step: step,
+            index: index,
+            done: done,
+            first: index === 0
+        };
+    },
+
+    getSynchronizedStates: function(states, state) {
+        if(states && state) {
+            var unchanged = _.reject(states, function(o) { return o.lob === state.lob; });
+            unchanged.push(state);
+            return unchanged;
+        }
+        return [];
+    },
+
+    getOriginState: function(states, lineOfBusiness) {
+        if(states && states.length > 0) {
+            var state = _.findWhere(states, { lob: lineOfBusiness });
+            return state;
+        }
+        return null;
+    },
+
+    onLOBSelect: function(combo, record) {
+        var me = this;
+        var lob = record.get('strName');
+        if(lob) {
+            me.view.viewModel.set('lineOfBusiness', lob);
+            var states = me.view.viewModel.get('states');
+            var state = me.getOriginState(states, lob);
+            if(!state)
+                state = me.createImportOriginState(lob, null);
+            me.view.viewModel.setData({ states: me.getSynchronizedStates(states, state) });
+        }
+    },
+
     onImportButtonClick: function(button, e, eOpts) {
         "use strict";
         var me= this;
         var win = button.up('window');
-
+        var vm = me.getViewModel();
         var type = null;
         var template = null;
         var originType = null;
@@ -229,40 +293,17 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 type = "ItemSubstitutes";
                 template = "itemsubstitutes";
                 break;
-                /* ORIGIN CONVERSIONS */
-            case "btnOriginUOM":
-                originType = 0;
-                grainType = 0;
-                break;
-            case "btnOriginLocations":
-                originType = 1;
-                grainType = 1;
-                break;
-            case "btnOriginCommodity":
-                grainType = 2;
-                originType = 1;
-                break;
-            case "btnOriginCategoryClass":
-                originType = 2;
-                break;
-            case "btnOriginCategoryGLAccts":
-                originType = 3;
-                break;
-            case "btnOriginItems":
-                originType = 4;
-                break;
-            case "btnOriginItemGLAccts":
-                originType = 5;
-                break;
-            case "btnOriginBalance":
-                originType = 6;
-                break;
-            case "btnOriginRecipeFormula":
-                originType = 7;
+            default:
                 break;
         }
 
+        /* ORIGIN CONVERSIONS */
         var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
+        var step = button.itemId.substring("btnOrigin".length, button.itemId.length);
+        var state = me.createImportOriginState(lineOfBusiness, step, true);
+        vm.setData({ states: me.getSynchronizedStates(vm.get('states'), state) });
+
+        console.log(vm.get('states'));
         if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
@@ -277,7 +318,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 originType = grainType;
             }
 
-            this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
+            //this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
         }
     },
 
@@ -450,14 +491,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 }
             }
         });
-    },
-
-    onLOBSelect: function(combo, record) {
-        var lob = record.get('strName');
-        if(lob) {
-            this.view.viewModel.set('lineOfBusiness', lob);
-            //this.view.viewModel.set('currentTask', 'UOM');
-        }
     },
 
     onExportCsvTemplate: function(button, e, eOpts) {
