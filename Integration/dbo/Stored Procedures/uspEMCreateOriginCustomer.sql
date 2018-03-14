@@ -8,7 +8,6 @@ GO
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN    
     
-
     EXEC(
             '
             CREATE PROCEDURE uspEMCreateOriginCustomer
@@ -22,10 +21,21 @@ BEGIN
                 DECLARE @CusSuffix				NVARCHAR(2)
                 DECLARE @CusZip					NVARCHAR(10)
                 DECLARE @CusPhone				NVARCHAR(10)
-                
-                --insert into ptcusmst(ptcus_cus_no, ptcus_last_name, ptcus_first_name, ptcus_mid_init, ptcus_name_suffx, ptcus_zip, ptcus_phone)
+            
+                IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntity 
+                                where intEntityId in ( select intEntityId 
+                                                            from tblEMEntityType 
+                                                                where intEntityId in (select intEntityId 
+                                                                                        from tblEMEntityLocation 
+                                                                                            where intEntityLocationId = @EntityLocationId) 
+                                                                    and strType = ''Customer'' )
+                    )
+                    
+                BEGIN
+                    RETURN 0;
+                END
 
-                IF NOT EXISTS( SELECT TOP 1 1 FROM tblEMEntityLocation WHERE strOriginLinkCustomer = '''' AND intEntityLocationId = @EntityLocationId)
+                IF EXISTS( SELECT TOP 1 1 FROM tblEMEntityLocation WHERE strOriginLinkCustomer = '''' AND intEntityLocationId = @EntityLocationId)
                 BEGIN
 
                     SELECT 
@@ -44,17 +54,17 @@ BEGIN
 
                     DECLARE @Count INT
                     SET @Count = 0
-                    WHILE EXISTS(SELECT TOP 1 1 FROM ptcusmst WHERE ptcus_cus_no = @CusNo)
+                    WHILE EXISTS(SELECT TOP 1 1 FROM agcusmst WHERE agcus_key = @CusNo)
                     BEGIN
                         SET @CusNo = Cast(@Count AS NVARCHAR) +  @CusNo
                     END
 
 
-                    INSERT INTO ptcusmst(
-                            ptcus_cus_no,		ptcus_last_name,		ptcus_first_name, 
-                            ptcus_mid_init,		ptcus_name_suffx,		ptcus_zip,				ptcus_phone)
+                    INSERT INTO agcusmst(
+                            agcus_key,			agcus_last_name,		agcus_first_name, 
+                            agcus_zip,				agcus_phone)
                     SELECT	@CusNo,				@CusLastName,			@CusFirstName,
-                            @CusMidInit,		@CusSuffix,				@CusZip,				@CusPhone
+                            @CusZip,				@CusPhone
 
 
                     UPDATE tblEMEntityLocation 
@@ -67,7 +77,7 @@ BEGIN
             '
         )
 
-
+    
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
