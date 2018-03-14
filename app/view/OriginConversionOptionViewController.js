@@ -456,7 +456,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var lob = record.get('strName');
         if(lob) {
             this.view.viewModel.set('lineOfBusiness', lob);
-            this.view.viewModel.set('currentTask', 'UOM');
+            //this.view.viewModel.set('currentTask', 'UOM');
         }
     },
 
