@@ -10,8 +10,8 @@ SELECT	L.strLoadNumber
 		,LC.strContainerNumber
 		,dblFranchise = CASE WHEN ISNULL(PWG.dblFranchise, 0) > 0 THEN PWG.dblFranchise / 100 ELSE 0 END 
 		,dblContainerWeightPerQty = CASE WHEN ISNULL(LC.dblQuantity, 0) = 0 THEN LC.dblNetWt ELSE LC.dblNetWt / LC.dblQuantity END -- (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
-		,intWeightUOMId = ItemUOM.intItemUOMId
-		,dblWeightUOMConvFactor = ItemUOM.dblUnitQty 
+		,intWeightUOMId = WeightItemUOM.intItemUOMId
+		,dblWeightUOMConvFactor = WeightItemUOM.dblUnitQty 
 FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL 
@@ -22,6 +22,8 @@ FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		LEFT JOIN tblICUnitMeasure WeightUOM 
 			ON WeightUOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM WeightItemUOM 
+			ON WeightItemUOM.intItemUOMId = LD.intWeightItemUOMId
 		LEFT JOIN tblCTContractDetail CD 
 			ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblCTContractHeader CH 
