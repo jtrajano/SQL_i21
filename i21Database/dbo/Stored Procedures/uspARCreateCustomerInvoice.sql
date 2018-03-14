@@ -264,6 +264,14 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		SET @ErrorMessage = 'The company location provided is not active!'
 		RETURN 0;
 	END	
+
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [tblEMEntityLocation] EL ON ARC.[intEntityId] = EL.[intEntityId] AND EL.[ysnDefaultLocation] = 1 WHERE ISNULL(ARC.[intTermsId], EL.[intTermsId]) IS NOT NULL AND ARC.[intEntityId] = @EntityCustomerId)
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('Customer has no Term setup!' , 16, 1);
+		SET @ErrorMessage = 'Customer has no Term setup!' 
+		RETURN 0;
+	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEMEntity WHERE intEntityId = @EntityId)
 	BEGIN		
@@ -411,7 +419,7 @@ BEGIN TRY
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intAccountId]					= @ARAccountId
 		,[intCurrencyId]				= @DefaultCurrency
-		,[intTermId]					= ISNULL(@TermId, C.[intTermsId])
+		,[intTermId]					= ISNULL(ISNULL(@TermId, C.[intTermsId]), EL.[intTermsId])
 		,[intSourceId]					= @SourceId
 		,[intPeriodsToAccrue]			= ISNULL(@PeriodsToAccrue, 1)
 		,[dtmDate]						= ISNULL(CAST(@InvoiceDate AS DATE),@DateOnly)
