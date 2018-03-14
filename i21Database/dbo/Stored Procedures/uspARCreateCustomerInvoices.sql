@@ -832,7 +832,7 @@ FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intTermId] IS NULL
-	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) WHERE ARC.[intTermsId] IS NOT NULL AND ARC.[intEntityId] = ITG.[intEntityCustomerId])
+	AND NOT EXISTS (SELECT NULL FROM tblARCustomer ARC WITH (NOLOCK) LEFT OUTER JOIN [tblEMEntityLocation] EL ON ARC.[intEntityId] = EL.[intEntityId] AND EL.[ysnDefaultLocation] = 1 WHERE ISNULL(ARC.[intTermsId], EL.[intTermsId]) IS NOT NULL AND ARC.[intEntityId] = ITG.[intEntityCustomerId])
 	
 DELETE FROM V
 FROM @InvoicesToGenerate V
@@ -938,7 +938,7 @@ USING
 		,[intCompanyLocationId]			= ITG.intCompanyLocationId
 		,[intAccountId]					= ITG.[intAccountId]
 		,[intCurrencyId]				= ITG.intCurrencyId
-		,[intTermId]					= ISNULL(ITG.intTermId, ARC.[intTermsId])
+		,[intTermId]					= ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]), EL.[intTermsId])
 		,[intOriginalSourceId]			= ITG.[intSourceId]
 		,[intSourceId]					= [dbo].[fnARValidateInvoiceSourceId](ITG.[strSourceTransaction], ITG.[intSourceId])
 		,[intPeriodsToAccrue]			= ISNULL(ITG.intPeriodsToAccrue, 1)
