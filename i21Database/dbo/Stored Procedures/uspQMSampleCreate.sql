@@ -36,6 +36,7 @@ BEGIN TRY
 	DECLARE @intCreatedUserId INT
 	DECLARE @intSampleItemUOMId INT
 	DECLARE @strReasonCode NVARCHAR(50)
+	DECLARE @ysnAdjustInventoryQtyBySampleQty BIT
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
@@ -63,6 +64,14 @@ BEGIN TRY
 			,intItemId INT
 			,intCreatedUserId INT
 			)
+
+	IF @intStorageLocationId IS NULL
+		AND @strLotNumber IS NOT NULL
+	BEGIN
+		SELECT @intStorageLocationId = intStorageLocationId
+		FROM tblICLot
+		WHERE strLotNumber = @strLotNumber
+	END
 
 	IF (
 			@strSampleNumber = ''
@@ -136,6 +145,7 @@ BEGIN TRY
 
 	SELECT @ysnEnableParentLot = ysnEnableParentLot
 	FROM dbo.tblQMCompanyPreference
+
 	-- Inventory Receipt / Work Order No
 	-- Creating sample from other screens should take value directly from xml
 	IF ISNULL(@intInventoryReceiptId, 0) = 0
@@ -215,6 +225,10 @@ BEGIN TRY
 			SELECT @intShipperEntityId = NULL
 		END
 	END
+
+	SELECT @ysnAdjustInventoryQtyBySampleQty = ysnAdjustInventoryQtyBySampleQty
+	FROM tblQMSampleType
+	WHERE intSampleTypeId = @intSampleTypeId
 
 	BEGIN TRAN
 
@@ -300,8 +314,8 @@ BEGIN TRY
 		,intCountryID
 		,ysnIsContractCompleted
 		,intLotStatusId
-		,intStorageLocationId
-		,ysnAdjustInventoryQtyBySampleQty
+		,IsNULL(intStorageLocationId, @intStorageLocationId)
+		,IsNULL(ysnAdjustInventoryQtyBySampleQty, @ysnAdjustInventoryQtyBySampleQty)
 		,intEntityId
 		,@intShipperEntityId
 		,strShipmentNumber
@@ -549,7 +563,10 @@ BEGIN TRY
 			FROM tblQMSampleType
 			WHERE intSampleTypeId = @intSampleTypeId
 				AND ysnAdjustInventoryQtyBySampleQty = 1
-			) AND ISNULL(@dblSampleQty, 0) > 0 AND @ysnEnableParentLot = 0 AND ISNULL(@strLotNumber, '') <> '' -- Lot
+			)
+		AND ISNULL(@dblSampleQty, 0) > 0
+		AND @ysnEnableParentLot = 0
+		AND ISNULL(@strLotNumber, '') <> '' -- Lot
 	BEGIN
 		IF @intStorageLocationId IS NULL
 		BEGIN
