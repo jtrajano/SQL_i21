@@ -547,7 +547,6 @@ Ext.define('Inventory.CommonIC', {
             .enterData('Text Field','CategoryCode', categorycode)
             .enterData('Text Field','Description', description)
             .selectComboBoxRowNumber('InventoryType',inventorytype,0)
-            .selectComboBoxRowNumber('CostingMethod',1,0)
             .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
 
             .clickTab('GL Accounts')
@@ -599,7 +598,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .selectComboBoxRowNumber('ReceiptType',4,0)
             .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
-            .selectComboBoxRowNumber('Location', location,0)
+            // .selectComboBoxRowNumber('Location', location,0)
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
@@ -1582,7 +1581,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .displayText('===== Creeating Direct IS for Non Lotted Item  =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
             .waitUntilLoaded()
@@ -1629,7 +1628,7 @@ Ext.define('Inventory.CommonIC', {
     addSalesOrderSNonLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity) {
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1679,7 +1678,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
 
             .done();
@@ -1693,7 +1692,7 @@ Ext.define('Inventory.CommonIC', {
     addSalesOrderSLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity, sublocation, storagelocation, lotno) {
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1755,7 +1754,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .waitUntilLoaded('')
             .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
 
@@ -1773,7 +1772,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .displayText('===== Creeating Direct IS for Lotted Item  =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
             .waitUntilLoaded()
@@ -1783,14 +1782,17 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
+            .waitUntilLoaded('')
 
-            .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
+            .selectGridComboBoxRowValue('LotTracking',1,'strLotNumber', lotno,'strLotNumber')
+            .waitUntilLoaded('')
             .enterGridData('LotTracking', 1, 'colShipQty', '100')
+            .waitUntilLoaded('')
             .verifyGridData('LotTracking', 1, 'colLotUOM', uom)
             .verifyGridData('LotTracking', 1, 'colGrossWeight', '100')
             .verifyGridData('LotTracking', 1, 'colTareWeight', '0')
@@ -1805,7 +1807,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
             .verifyGridData('RecapTransaction', 1, 'colCredit', linetotal)
-            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '50000-0001-000')
             .verifyGridData('RecapTransaction', 2, 'colDebit', linetotal)
 
             .clickButton('Post')
@@ -1831,7 +1833,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1861,7 +1863,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
@@ -1873,13 +1875,15 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
 //            .selectSearchRowNumber(1)
 //            .clickButton('OpenSelected')
+            .selectComboBoxRowNumber('Columns',7,0)
+            .waitUntilLoaded('')
             .doubleClickSearchRowValue(itemno, 'strItemNo', 1)
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
 //            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
@@ -1911,7 +1915,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1940,7 +1944,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
@@ -2243,30 +2247,25 @@ Ext.define('Inventory.CommonIC', {
         },
 
 
-    addOtherChargeItem: function (t,next, item, description, location) {
+    addOtherSChargeItem: function (t,next, item, description, location) {
         new iRely.FunctionalTest().start(t, next)
-
 
             //Add Other Charge Item
             .displayText('===== Adding Other Charge Item =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Items','Screen')
-            .waitUntilLoaded()
+            .waitUntilLoaded('')
             .clickButton('New')
             .waitUntilLoaded('')
-            .verifyScreenShown('icitem')
-
-
 
             .enterData('Text Field','ItemNo', item)
-            .selectComboBoxRowNumber('Type',6,0)
+            .selectComboBoxRowNumber('Type',4,0)
             .enterData('Text Field','Description', description)
 //            .selectComboBoxRowNumber('Category',4,0)
             .selectComboBoxRowValue('Category', 'Other Charges', 'Category',0)
             .displayText('===== Setup Item UOM=====')
             .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-            .clickGridCheckBox('UnitOfMeasure', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
             .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '1')
             .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
@@ -2282,8 +2281,8 @@ Ext.define('Inventory.CommonIC', {
 
             .clickTab('Location')
             .clickButton('AddLocation')
-            .waitUntilLoaded('icitemlocation')
-            .selectComboBoxRowValue('Location', location, 'Location',0)
+            .waitUntilLoaded('')
+            .selectComboBoxRowValue('Location', location, 'Location',1)
             .clickButton('Save')
             .waitUntilLoaded()
             .verifyStatusMessage('Saved')
@@ -3145,6 +3144,7 @@ Ext.define('Inventory.CommonIC', {
             .done();
     },
 
+   
     addOtherChargeItem: function (t,next, item, itemtype, itemdesc, category, commodity,
                        location1, costingmethod1, sublocation1, storagelocation1, saleuom1, receiveuom1, negativeinventory1,
                        location2, costingmethod2, sublocation2, storagelocation2, saleuom2, receiveuom2, negativeinventory2,
@@ -3328,7 +3328,7 @@ Ext.define('Inventory.CommonIC', {
     addCustomer: function (t,next, customer, customercontact, phone, email, address, city, state, zip, country, timezone,
                            customerlocation, terms, shipvia, taxgroup, location, freighterm) {
         new iRely.FunctionalTest().start(t, next)
-            .clickMenuFolder('Sales (Accounts Receivable)')
+            .clickMenuFolder('Sales(A/R)')
             .waitUntilLoaded()
             .clickMenuScreen('Customers')
             .waitUntilLoaded()
@@ -3401,7 +3401,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded()
-            .clickMenuFolder('Sales (Accounts Receivable)')
+            .clickMenuFolder('Sales(A/R)')
             .done();
     },
 
