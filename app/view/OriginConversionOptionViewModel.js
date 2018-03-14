@@ -25,8 +25,15 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
 
     isOnStep: function(states, lineOfBusiness, step) {
         if(states && states.length > 0) {
-            var state = _.findWhere(states, { lob: lineOfBusiness });
-            var enabled = state.step === step && state.lob === lineOfBusiness;
+            // var state = _.findWhere(states, { lob: lineOfBusiness });
+            var state = null;
+            for(var i = 0; i < states.length; i++) {
+                if(states[i].lob === lineOfBusiness) {
+                    state = states[i];
+                    break;
+                }
+            }
+            var enabled = state && state.step === step && state.lob === lineOfBusiness;
             return !enabled;
         }
         return true;
@@ -84,48 +91,5 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
         disableRecipeFormula: function(get){
             return this.isOnStep(get('states'), get('lineOfBusiness'), 'RecipeFormula');
         }
-        // hasLob: function(get) {
-        //     return !iRely.Functions.isEmpty(get('lineOfBusiness'));
-        // },
-        
-        // disableLob: function(get) {
-        //     return !(get('currentTask') === 'ItemGLAccts' || get('currentTask') === 'Balance' || get('currentTask') === 'RecipeFormula') && get('currentTask') !== 'LOB'; //get('currentTask') !== 'LOB' && get('currentTask') !== 'UOM';
-        // },
-
-        // disableUOM: function(get) {
-        //     return (get('currentTask') !== 'UOM' && get('currentTask') !== 'LOB') || !get('hasLob');
-        // },
-
-        // disableLocations: function(get) {
-        //     return get('currentTask') !== 'Locations' || !get('hasLob');
-        // },
-
-        // disableCommodity: function(get) {
-        //     return get('currentTask') !== 'Commodity' || !get('hasLob') || get('lineOfBusiness') !== 'Grain';
-        // },
-
-        // disableCategoryClass: function(get) {
-        //     return get('currentTask') !== 'CategoryClass' || !get('hasLob');
-        // },
-
-        // disableCategoryGLAccts: function(get) {
-        //     return get('currentTask') !== 'CategoryGLAccts' || !get('hasLob');
-        // },
-
-        // disableItems: function(get) {
-        //     return get('currentTask') !== 'Items' || !get('hasLob');
-        // },
-
-        // disableItemGLAccts: function(get) {
-        //     return get('currentTask') !== 'ItemGLAccts' || !get('hasLob');
-        // },
-
-        // disableBalance: function(get) {
-        //     return get('currentTask') !== 'Balance' || !get('hasLob');
-        // },
-        
-        // disableRecipeFormula: function(get){
-        //     return get('currentTask') !== 'RecipeFormula' || !get('hasLob') || get('lineOfBusiness') !== 'Petro';
-        // }
     }
 });

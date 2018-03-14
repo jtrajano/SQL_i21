@@ -29,7 +29,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
     initializePreferences: function(me) {
         var win = me.getView();
-                
+        
         Ext.Ajax.request({
             url: './Inventory/api/CompanyPreference/Get',
             method: 'get',
@@ -40,13 +40,12 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             },
 
             success: function(response) {
-                return;
                 var json = JSON.parse(response.responseText);
                 var pref = {};
                 if(json.data && json.data.length > 0) {
-                    pref =  { task: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
+                    pref =  { states: json.data[0].strOriginLastTask, lob: json.data[0].strOriginLineOfBusiness };
                 }
-                
+
                 if(pref) {
                     var lastLob = pref.lob;
                     if (lastLob && lastLob !== '')
@@ -56,36 +55,18 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                             me.getViewModel().set('lineOfBusiness', '');
                     }
     
-                    var lastTask = pref.task;
-                    if (lastTask && lastTask !== '')
-                        me.getViewModel().set('currentTask', lastTask);
-                    else {
-                        if (me.getViewModel().get('currentTask') !== '')
-                            me.getViewModel().set('currentTask', 'LOB');
-                    }
-    
+                    var states = JSON.parse(pref.states);
                     var lob = me.getViewModel().get('lineOfBusiness');
-                    var currentTask = me.getViewModel().get('currentTask');
     
                     if (lob)
                         win.up('window').down('#cboLOB').setValue(me.getViewModel().get('lineOfBusiness'));
                     else
                         win.up('window').down('#cboLOB').setValue(null);
-                    
-                    var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula", "End"];
-                    var grains = ["UOM", "Locations", "Commodity"];
-                    if (currentTask && currentTask !== 'LOB') {
-                        if (lob === 'Grain')
-                            originTypes = grains;
-                        var index = originTypes.indexOf(currentTask);
-                        if (index !== -1) {
-                            if(currentTask === 'RecipeFormula')
-                                me.getViewModel().set('currentTask', "End");
-                            else
-                                me.getViewModel().set('currentTask', originTypes[index + 1]);
-                        } else {
-                            me.getViewModel().set('currentTask', "LOB");
-                        }
+
+                    if(states) {
+                        me.getViewModel().set('states', states);
+                    } else {
+                        me.getViewModel().set('states', me.getViewModel().get('states'));
                     }
                 }
             }
@@ -111,7 +92,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
     stepsGrain: ["UOM", "Locations", "Commodity"],
     stepsCStore: ["Locations"],
 
-    createImportOriginState: function(lob, step, setNextStep) {
+    createImportOriginState: function(lob, step, stepInto) {
         var me = this;
         var steps = [];
         switch(lob) {
@@ -124,18 +105,22 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
 
         if(!step) step = steps[0]; //Default to first step
         var index = _.indexOf(steps, step);
-        if(setNextStep) {
+
+        if(stepInto === 'next') {
             index++;
             step = steps[index];
+        } else if(stepInto === 'back') {
+            index--;
+            step = steps[index-1];
         }
         var done = index === steps.length - 1;
 
         return {
             lob: lob,
-            step: step,
-            index: index,
-            done: done,
-            first: index === 0
+            step: step//,
+            // index: index,
+            // done: done,
+            // first: index === 0
         };
     },
 
@@ -176,10 +161,6 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var vm = me.getViewModel();
         var type = null;
         var template = null;
-        var originType = null;
-        var grainType = null;
-        var originTypes = ["UOM", "Locations", "CategoryClass", "CategoryGLAccts", "Items", "ItemGLAccts", "Balance", "RecipeFormula", "End"];
-        var grain = ["UOM", "Locations", "Commodity"];
         
         switch (button.itemId) {
             case "btnImportFuelCategories":
@@ -300,10 +281,9 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         /* ORIGIN CONVERSIONS */
         var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
         var step = button.itemId.substring("btnOrigin".length, button.itemId.length);
-        var state = me.createImportOriginState(lineOfBusiness, step, true);
+        var state = me.createImportOriginState(lineOfBusiness, step, 'next');
         vm.setData({ states: me.getSynchronizedStates(vm.get('states'), state) });
 
-        console.log(vm.get('states'));
         if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
@@ -312,21 +292,16 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 title: button.text
             });
         }
-        else if(originType !== null) {
-            if(lineOfBusiness === 'Grain') {
-                originTypes = grain;
-                originType = grainType;
-            }
-
-            //this.importFromOrigins(this.view.viewModel, originTypes, originType, lineOfBusiness, win);
+        else if(state !== null) {
+            this.importFromOrigins(this.view.viewModel, lineOfBusiness, step, state, win, me);
         }
     },
 
-    importFromOrigins: function(viewModel, originTypes, originType, lineOfBusiness, win) {
-        this.ajaxRequest(viewModel, originTypes, originType, lineOfBusiness, win);
+    importFromOrigins: function(viewModel, lineOfBusiness, step, state, win, me) {
+        this.ajaxRequest(viewModel, lineOfBusiness, step, state, win, me);
     },
 
-    ajaxRequest: function (viewModel, originTypes, originType, lineOfBusiness, win) {
+    ajaxRequest: function (viewModel, lineOfBusiness, step, state, win, owner) {
         var me = this;
         jQuery.ajax({
             url: './Inventory/api/ImportData/ImportOrigins',
@@ -334,7 +309,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': iRely.Configuration.Security.AuthToken,
-                'X-Import-Type': originTypes[originType],
+                'X-Import-Type': step + ":" + JSON.stringify(viewModel.get('states')),
                 'X-Import-LineOfBusiness': lineOfBusiness
             },
             beforeSend: function(jqXHR, settings) {
@@ -346,11 +321,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 var json = JSON.parse(jqXHR.responseText);
                 var type = json.Type === "Warning" ? 'warning' : (json.Type === "Error" ? 'error' : 'info');
                 var msg = json.Description ? json.Description : json.Message + " " + json.ExceptionMessage;
-                if(json.Errors === 0) {
-                    viewModel.set('lineOfBusiness', lineOfBusiness);
-                    viewModel.set('currentTask', originTypes[originType+1]);
-                }
-                i21.functions.showCustomDialog(type, 'ok', msg, function() {
+                i21.functions.showCustomDialog(type, 'ok', type === 'error' ? msg : "Import " + step + " from Origin for " + lineOfBusiness + " successful.", function() {
                     //win.close();
                     
                     // if (json.HasMessages) {
@@ -368,6 +339,11 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     //         });
                     //     }
                     // }
+
+                    if(type === 'error') {
+                        var state = owner.createImportOriginState(lineOfBusiness, step);
+                        viewModel.setData({ states: owner.getSynchronizedStates(viewModel.get('states'), state) });
+                    }
                     
                     if(!iRely.Functions.isEmpty(json.ExtraScreenToOpen)) {
                         iRely.Functions.openScreen(ExtraScreenToOpen, json.Description);
@@ -376,8 +352,12 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
             },
             error: function(jqXHR, status, error) {
                 iRely.Msg.close();
+                var me = this;
                 var json = JSON.parse(jqXHR.responseText);
                 var msg = json.Description ? json.Description : json.Message + " " + json.ExceptionMessage;
+                var state = owner.createImportOriginState(lineOfBusiness, step);
+                viewModel.setData({ states: owner.getSynchronizedStates(viewModel.get('states'), state) });
+
                 i21.functions.showCustomDialog('error', 'ok', 'Import failed! ' + msg,
                     function() {
                         //win.close();
