@@ -389,10 +389,10 @@ BEGIN
 			 ,@dtmIssueDate					
 			 ,@dtmCardExpiratioYearMonth		
 			 ,@dtmLastUsedDated				
-			 ,@ysnActive						
-			 ,@ysnCardForOwnUse				
-			 ,@ysnIgnoreCardTransaction		
-			 ,@ysnCardLocked					
+			 ,ISNULL(@ysnActive,0)						
+			 ,ISNULL(@ysnCardForOwnUse,0)				
+			 ,ISNULL(@ysnIgnoreCardTransaction,0)		
+			 ,ISNULL(@ysnCardLocked,0)					
 			 ,@intNumberOfCardsIssued		
 			 ,@intCardLimitedCode			
 			 ,@intCardFuelCode

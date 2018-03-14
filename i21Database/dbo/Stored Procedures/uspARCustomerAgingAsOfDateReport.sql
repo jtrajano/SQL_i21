@@ -7,7 +7,7 @@
 	@strCompanyLocation			NVARCHAR(100) = NULL,
 	@ysnIncludeBudget			BIT = 0,
 	@ysnIncludeCredits			BIT = 1,
-	@ysnIncludeWriteOffPayment	BIT = 1,
+	@ysnIncludeWriteOffPayment	BIT = 0,
 	@strCustomerName			NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode		NVARCHAR(100) = NULL,
 	@strCustomerIds				NVARCHAR(MAX) = NULL
@@ -26,8 +26,7 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@intCompanyLocationId			INT				= NULL,
 		@strCustomerNameLocal			NVARCHAR(MAX)	= NULL,
 		@strAccountStatusCodeLocal		NVARCHAR(100)	= NULL,
-		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL,
-		@intWriteOffPaymentMethodId		INT				= NULL
+		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -44,17 +43,10 @@ SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')
 SET @strCompanyLocationLocal		= NULLIF(@strCompanyLocation, '')
 SET @ysnIncludeBudgetLocal			= @ysnIncludeBudget
 SET @ysnIncludeCreditsLocal			= @ysnIncludeCredits
-SET @ysnIncludeWriteOffPaymentLocal	= ISNULL(@ysnIncludeWriteOffPayment, 1)
+SET @ysnIncludeWriteOffPaymentLocal	= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @strCustomerNameLocal			= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal		= NULLIF(@strAccountStatusCode, '')
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
-
-IF @ysnIncludeWriteOffPaymentLocal = 1
-	BEGIN
-		SELECT TOP 1 @intWriteOffPaymentMethodId = intPaymentMethodID 
-		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
-		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
-	END
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -174,6 +166,7 @@ SELECT intPaymentId
 	 , dtmDatePaid
 	 , dblAmountPaid
 	 , ysnInvoicePrepayment
+	 , intPaymentMethodId
 INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
@@ -182,7 +175,23 @@ INNER JOIN (
 ) C ON P.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId <> @intWriteOffPaymentMethodId) OR (@ysnIncludeWriteOffPaymentLocal = 0))
+
+IF (@ysnIncludeWriteOffPaymentLocal = 1)
+	BEGIN
+		IF(OBJECT_ID('tempdb..#WRITEOFFS') IS NOT NULL)
+		BEGIN
+			DROP TABLE #WRITEOFFS
+		END
+
+		SELECT intPaymentMethodID
+		INTO #WRITEOFFS 
+		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
+		WHERE UPPER(strPaymentMethod) LIKE '%WRITE OFF%'
+
+		DELETE FROM ARP
+		FROM #ARPOSTEDPAYMENT ARP 
+		INNER JOIN #WRITEOFFS WO ON ARP.intPaymentMethodId = WO.intPaymentMethodID		
+	END
 
 --#INVOICETOTALPREPAYMENTS
 SELECT dblPayment = SUM(dblPayment)

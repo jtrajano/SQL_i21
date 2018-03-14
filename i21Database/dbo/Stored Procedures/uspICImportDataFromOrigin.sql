@@ -63,7 +63,17 @@ ELSE IF @strLineOfBusiness = 'Grain'
 BEGIN
 	IF		@strType = 'UOM'				EXEC dbo.uspICDCUomMigrationGr
 	ELSE IF @strType = 'Locations'			BEGIN EXEC dbo.uspICDCStorageMigrationGr END
-	ELSE IF @strType = 'Commodity'			BEGIN EXEC dbo.uspICDCCommodityMigrationGr EXEC dbo.uspICDCCommodityGLMigrationGr END
+	ELSE IF @strType = 'Commodity'			
+		BEGIN
+			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE
+			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] DISABLE
+			
+			EXEC dbo.uspICDCCommodityMigrationGr 
+			EXEC dbo.uspICDCCommodityGLMigrationGr
+			
+			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
+		END
 	--ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
 END
 ELSE IF @strLineOfBusiness = 'C-Store'

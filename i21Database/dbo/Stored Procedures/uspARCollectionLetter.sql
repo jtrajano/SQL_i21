@@ -210,6 +210,24 @@ BEGIN
 
 	IF @strLetterName IN ('Recent Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
 		BEGIN
+			DECLARE @strCustomerLocalIds NVARCHAR(MAX)
+
+			IF(OBJECT_ID('tempdb..#tmpCustomers') IS NOT NULL)
+			BEGIN
+				DROP TABLE #tmpCustomers
+			END
+
+			SELECT DISTINCT intEntityCustomerId
+			INTO #tmpCustomers
+			FROM @SelectedCustomer
+
+			SELECT @strCustomerLocalIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+			FROM (
+				SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+				FROM #tmpCustomers WITH(NOLOCK)	
+				FOR XML PATH ('')
+			) C (intEntityCustomerId)
+
 			TRUNCATE TABLE tblARCustomerAgingStagingTable
 			INSERT INTO tblARCustomerAgingStagingTable (
 				  strCustomerName
@@ -246,7 +264,7 @@ BEGIN
 				, strCompanyName
 				, strCompanyAddress
 			)
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1, @strCustomerIds = @strCustomerLocalIds
 
 			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @SelectedCustomer)
 			DELETE FROM tblARCustomerAgingStagingTable WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARCustomerAgingStagingTable GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
@@ -1047,7 +1065,7 @@ BEGIN
 		, strAccountNumber		= CUSTOMER.strAccountNumber
 		, strCompanyFax			= COMPANY.strCompanyFax
 		, strCompanyEmail		= COMPANY.strCompanyEmail		
-	FROM @SelectedCustomer SC
+	FROM #TransactionLetterDetail SC
 	INNER JOIN (
 		SELECT intEntityId
 			 , strCustomerNumber
