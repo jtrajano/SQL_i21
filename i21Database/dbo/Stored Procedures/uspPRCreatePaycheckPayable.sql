@@ -111,6 +111,8 @@ BEGIN
 		[intShipViaId]			=	A.[intShipViaId],
 		[intContactId]			=	A.[intContactId],
 		[intOrderById]			=	A.[intOrderById],
+		[intStoreLocationId]	=	A.[intShipToId],
+		[intPayToAddressId]		=	A.[intShipFromId],
 		[intCurrencyId]			=	A.[intCurrencyId]
 	INTO #tmpBillData
 	FROM dbo.fnAPCreateBillData(@intVendorEntityId, @intUser, CASE WHEN (@ysnVoid = 1) THEN 3 ELSE 1 END, DEFAULT, DEFAULT, @intAPAccount, DEFAULT, NULL) A
@@ -143,7 +145,9 @@ BEGIN
 		,[intShipToId]			
 		,[intShipViaId]			
 		,[intContactId]			
-		,[intOrderById]			
+		,[intOrderById]
+		,[intStoreLocationId]
+		,[intPayToAddressId]	
 		,[intCurrencyId]			
 	)
 	SELECT * FROM #tmpBillData
