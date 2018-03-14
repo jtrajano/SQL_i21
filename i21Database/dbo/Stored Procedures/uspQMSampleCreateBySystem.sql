@@ -32,6 +32,7 @@ BEGIN TRY
 	DECLARE @ysnEnableParentLot BIT
 	DECLARE @dtmCurrentDateTime DATETIME = GETDATE()
 	DECLARE @dtmCurrentDate DATETIME = CONVERT(DATE, GETDATE())
+			,@ysnAdjustInventoryQtyBySampleQty BIT
 
 	-- If no output sample created
 	IF NOT EXISTS (
@@ -73,7 +74,7 @@ BEGIN TRY
 	IF @intProductId IS NULL
 		RETURN;
 
-	SELECT @intSampleTypeId = ST.intSampleTypeId
+	SELECT @intSampleTypeId = ST.intSampleTypeId,@ysnAdjustInventoryQtyBySampleQty=ST.ysnAdjustInventoryQtyBySampleQty
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intControlPointId = PC.intControlPointId
 		AND PC.intProductId = @intProductId
@@ -253,6 +254,7 @@ BEGIN TRY
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,ysnAdjustInventoryQtyBySampleQty
 		)
 	SELECT 1
 		,@intSampleTypeId
@@ -280,6 +282,7 @@ BEGIN TRY
 		,@dtmCurrentDateTime
 		,@intUserId
 		,@dtmCurrentDateTime
+		,@ysnAdjustInventoryQtyBySampleQty
 
 	SELECT @intSampleId = SCOPE_IDENTITY()
 
