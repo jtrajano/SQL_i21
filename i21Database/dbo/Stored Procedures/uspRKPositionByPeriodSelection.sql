@@ -28,7 +28,7 @@ declare @intCurrencyID1 int
 
 SELECT @intCent=intCent,@ysnSubCurrency=ysnSubCurrency,@intMainCurrencyId=intMainCurrencyId FROM tblSMCurrency WHERE intCurrencyID=@intCurrencyID
 
-if (@ysnSubCurrency = 1)
+if (isnull(@ysnSubCurrency,0) = 1)
 BEGIN
 SET @intCurrencyID1=@intMainCurrencyId
 END

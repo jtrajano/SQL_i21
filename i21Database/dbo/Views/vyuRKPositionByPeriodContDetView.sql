@@ -12,4 +12,5 @@ JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEF
 JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
 JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT
 JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT	
-JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				
+JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId	
+WHERE CD.dblQuantity > isnull(CD.dblInvoicedQty,0)			
