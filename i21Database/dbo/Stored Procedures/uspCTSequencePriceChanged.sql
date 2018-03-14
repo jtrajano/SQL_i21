@@ -41,7 +41,8 @@ BEGIN TRY
 			@ysnBillPosted					BIT,
 			@intCompanyLocationId			INT,
 			@dblTotal						NUMERIC(18,6),
-			@ysnRequireApproval				BIT
+			@ysnRequireApproval				BIT,
+			@prePayId						Id
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -134,6 +135,25 @@ BEGIN TRY
 				SELECT @intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
 
 				EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
+
+				IF EXISTS
+				(	SELECT	DISTINCT												
+							BL.intBillId
+					FROM	tblAPBillDetail BD
+					JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+					WHERE	BD.intContractHeaderId= @intContractHeaderId AND BL.intTransactionType IN (2, 13)
+				)
+				BEGIN
+					INSERT	INTO @prePayId([intId])
+					SELECT	DISTINCT												
+							BL.intBillId
+					FROM	tblAPBillDetail BD
+					JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+					WHERE	BD.intContractHeaderId= @intContractHeaderId AND BL.intTransactionType IN (2, 13)
+
+					EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
+				END
+				
 
 				EXEC [dbo].[uspAPPostBill] 
 					 @post = 1
