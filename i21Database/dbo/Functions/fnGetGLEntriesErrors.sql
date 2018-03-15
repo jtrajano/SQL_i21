@@ -8,28 +8,26 @@
 *	FROM	dbo.fnGetGLEntriesErrors(@GLEntries)
 * 
 */
+
 CREATE FUNCTION [dbo].[fnGetGLEntriesErrors] (
 	@GLEntriesToValidate RecapTableType READONLY
 )
-RETURNS TABLE 
+RETURNS  @tbl TABLE (strTransactionId nvarchar(100) NULL, strText nvarchar(150)  NULL,
+ intErrorCode int, strModuleName nvarchar(100)  NULL)
 AS
-RETURN (
-	
-	SELECT * FROM (
-		-- Failed. Invalid G/L account id found.
-		SELECT	TOP 1
-				strTransactionId
-				,FORMATMESSAGE(60001) strText
+BEGIN 
+	;WITH BatchError AS (
+	SELECT	strTransactionId
+				,'' strText
 				,60001 intErrorCode
 				,strModuleName
 		FROM	@GLEntriesToValidate GLEntries 
 		WHERE	NOT EXISTS (SELECT intAccountId FROM dbo.tblGLAccount Account WHERE Account.intAccountId = GLEntries.intAccountId)
-		ORDER BY GLEntries.strTransactionId
+		
 		-- Debit and credit amounts are not balanced.
 		UNION ALL 
-		SELECT	TOP 1
-				SubQuery.strTransactionId
-				,FORMATMESSAGE(60003) strText
+		SELECT	SubQuery.strTransactionId
+				,'' strText
 				,60003 intErrorCode
 				,strModuleName
 		FROM	(
@@ -43,12 +41,11 @@ RETURN (
 				) SubQuery
 				
 		WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
-		ORDER BY SubQuery.strTransactionId
+		
 		UNION ALL
-		SELECT	TOP 1
-				SubQuery.strTransactionId
-				,'Foreign Debit and credit amounts are not balanced.' strText
-				,60003 intErrorCode
+		SELECT	SubQuery.strTransactionId
+				,'' strText
+				,60016 intErrorCode
 				,strModuleName
 		FROM	(
 					SELECT	ToValidate.strTransactionId
@@ -60,46 +57,56 @@ RETURN (
 					GROUP BY ToValidate.strTransactionId,ToValidate.strModuleName
 				) SubQuery
 		WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
-		ORDER BY SubQuery.strTransactionId
 
 		-- Unable to find an open fiscal year period to match the transaction date.
 		-- Allow audit adjustment transactions to be posted to a closed fiscal year period
 		UNION ALL 
-		SELECT	TOP 1
-				strTransactionId
-				,FORMATMESSAGE(60004) strText
+		SELECT	strTransactionId
+				,'' strText
 				,60004 intErrorCode
 				,GLEntries.strModuleName
-		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
+		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate
+		WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 		WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
-		ORDER BY GLEntries.strTransactionId
+		
 		UNION ALL 
 
 		-- G/L entries are expected. Cannot continue because it is missing.
 		SELECT	NULL strTransactionId 
-				,FORMATMESSAGE(60005)
+				,'' strText
 				,60005 intErrorCode
 				,NULL strModuleName
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM @GLEntriesToValidate)
 
 		--Cannot continue if Module status in fiscal year period is closed (CM,AR,INV,AP)
 		UNION ALL 
-		SELECT	TOP 1 strTransactionId
-				,FORMATMESSAGE(60009,GLEntries.strModuleName) strText
+		SELECT	 strTransactionId
+				,GLEntries.strModuleName strText
 				,60009 intErrorCode
 				,strModuleName
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate WHERE ISNULL(strCode, '') <>'AA' AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')) GLEntries
 		WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0
-		ORDER BY GLEntries.strTransactionId
+		
 		UNION ALL 
-		SELECT	TOP 1 A.strTransactionId
-				,FORMATMESSAGE(60015 ,B.strAccountId) AS strText
+		SELECT	A.strTransactionId
+				,B.strAccountId strText
 				,60015 intErrorCode
 				,A.strModuleName
 		FROM	@GLEntriesToValidate A JOIN
 		dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
-		WHERE	B.ysnActive = 0 
-		ORDER BY A.strTransactionId
+		WHERE	B.ysnActive = 0 AND ISNULL( A.ysnRebuild,0) = 0
+		)
+		INSERT INTO @tbl 
+		SELECT TOP 1 strTransactionId
+		,CASE 
+				WHEN a.strText  = '' 
+					THEN  PostError.strMessage 
+				ELSE 
+					FORMATMESSAGE(PostError.strMessage,a.strText) END strText
+		,a.intErrorCode, strModuleName FROM BatchError a
+		CROSS APPLY (SELECT strMessage from dbo.fnGLGetGLEntriesErrorMessage() where intErrorCode = a.intErrorCode)AS  PostError
+		ORDER BY strTransactionId
 
-	) AS Query		
-)
+		RETURN
+		
+END

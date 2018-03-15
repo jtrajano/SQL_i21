@@ -367,7 +367,7 @@ BEGIN
 					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 
 					---Check Max exceed
-					IF(@ysnMaxExceed = 1)
+					IF(@ysnMaxExceed = 1 OR (SELECT TOP 1 dblCalculatedBurnRate FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId) < 0)
 					BEGIN
 						---Insert into out of range table
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMSyncOutOfRange WHERE intSiteID = @intSiteId AND DATEADD(dd, DATEDIFF(dd, 0, dtmDateSync),0) = DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0))
@@ -816,7 +816,7 @@ BEGIN
 					SET @intNewDeliveryHistoryId = @@IDENTITY
 					
 					---Check Max exceed
-					IF(@ysnMaxExceed = 1)
+					IF(@ysnMaxExceed = 1 OR (SELECT TOP 1 dblCalculatedBurnRate FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId) < 0)
 					BEGIN
 						---Insert into out of range table
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMSyncOutOfRange WHERE intSiteID = @intSiteId AND DATEADD(dd, DATEDIFF(dd, 0, dtmDateSync),0) = DATEADD(dd, DATEDIFF(dd, 0, GETDATE()),0))

@@ -37,5 +37,5 @@ LEFT JOIN tblSCDeliverySheet	  DS				ON DS.intDeliverySheetId		    = SH.intDeliv
 LEFT JOIN tblICInventoryReceipt   Receipt			ON Receipt.intInventoryReceiptId	= SH.intInventoryReceiptId
 LEFT JOIN tblICInventoryShipment  Shipment			ON Shipment.intInventoryShipmentId  = SH.intInventoryShipmentId
 LEFT JOIN tblSCTicket		      SC				ON SC.intTicketId					= SH.intTicketId AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')
-LEFT JOIN tblSCTicketSplit	      SCTicketSplit	    ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
+LEFT JOIN tblSCTicketSplit	      SCTicketSplit	    ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId --AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
 LEFT JOIN tblEMEntitySplit		  EMSplit		    ON EMSplit.intSplitId				= SC.intSplitId

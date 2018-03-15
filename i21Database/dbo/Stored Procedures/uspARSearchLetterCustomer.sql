@@ -37,6 +37,7 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
 		INSERT INTO tblARCustomerAgingStagingTable (
 			   strCustomerName
 			, strCustomerNumber
+			, strCustomerInfo
 			, strInvoiceNumber
 			, strRecordNumber
 			, intInvoiceId

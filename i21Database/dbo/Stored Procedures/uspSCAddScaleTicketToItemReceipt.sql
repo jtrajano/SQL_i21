@@ -171,8 +171,9 @@ SELECT
 		,dblCost					= CASE
 			                            WHEN CNT.intPricingTypeId = 2 THEN 
 										(
-											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,intSettlementUOMId,dblSettlementPrice),0) + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(intSettlementUOMId,CNT.intBasisUOMId,LI.dblCost),0)
+											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
 											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId)
+											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
 										)
 										ELSE
 											CASE 
@@ -387,42 +388,38 @@ WHERE SCTicket.intTicketId = @intTicketId
 		,[ysnPrice]
 		,[strChargesLink]
 	)
-		SELECT	
-		[intEntityVendorId]					= RE.intEntityVendorId
-		,[strBillOfLadding]					= RE.strBillOfLadding
-		,[strReceiptType]					= RE.strReceiptType
-		,[intLocationId]					= RE.intLocationId
-		,[intShipViaId]						= RE.intShipViaId
-		,[intShipFromId]					= RE.intShipFromId
-		,[intCurrencyId]  					= RE.intCurrencyId
-		,[intCostCurrencyId]  				= RE.intCurrencyId
-		,[intChargeId]						= IC.intItemId
-		,[intForexRateTypeId]				= RE.intForexRateTypeId
-		,[dblForexRate]						= RE.dblForexRate
-		,[ysnInventoryCost]					= IC.ysnInventoryCost
-		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE
-												WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblTicketFees
-												WHEN IC.strCostMethod = 'Amount' THEN 0
-											END
-		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, @intTicketItemUOMId)
-		,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
-		,[dblAmount]						= CASE
-												WHEN IC.strCostMethod = 'Per Unit' THEN 0
-												WHEN IC.strCostMethod = 'Amount' THEN 
-												CASE
-													WHEN RE.ysnIsStorage = 1 THEN 0
-													WHEN RE.ysnIsStorage = 0 THEN SC.dblTicketFees
-												END
-											END
-		,[intContractHeaderId]				= RE.intContractHeaderId
-		,[intContractDetailId]				= RE.intContractDetailId
-		,[ysnAccrue]						= CASE 
-												WHEN @ysnDeductFeesCusVen = 1 THEN 0
-                                                WHEN @ysnDeductFeesCusVen = 0 THEN 1
-											END
-		,[ysnPrice]							= @ysnDeductFeesCusVen
-		,[strChargesLink]					= RE.strChargesLink
+	SELECT	
+	[intEntityVendorId]					= RE.intEntityVendorId
+	,[strBillOfLadding]					= RE.strBillOfLadding
+	,[strReceiptType]					= RE.strReceiptType
+	,[intLocationId]					= RE.intLocationId
+	,[intShipViaId]						= RE.intShipViaId
+	,[intShipFromId]					= RE.intShipFromId
+	,[intCurrencyId]  					= RE.intCurrencyId
+	,[intCostCurrencyId]  				= RE.intCurrencyId
+	,[intChargeId]						= IC.intItemId
+	,[intForexRateTypeId]				= RE.intForexRateTypeId
+	,[dblForexRate]						= RE.dblForexRate
+	,[ysnInventoryCost]					= IC.ysnInventoryCost
+	,[strCostMethod]					= IC.strCostMethod
+	,[dblRate]							= CASE
+											WHEN IC.strCostMethod = 'Per Unit' THEN SC.dblTicketFees
+											WHEN IC.strCostMethod = 'Amount' THEN 0
+										END
+	,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, @intTicketItemUOMId)
+	,[intOtherChargeEntityVendorId]		= RE.intEntityVendorId
+	,[dblAmount]						= CASE
+											WHEN IC.strCostMethod = 'Per Unit' THEN 0
+											WHEN IC.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * SC.dblTicketFees), 2)
+										END
+	,[intContractHeaderId]				= RE.intContractHeaderId
+	,[intContractDetailId]				= RE.intContractDetailId
+	,[ysnAccrue]						= CASE 
+											WHEN @ysnDeductFeesCusVen = 1 THEN 0
+                                            WHEN @ysnDeductFeesCusVen = 0 THEN 1
+										END
+	,[ysnPrice]							= @ysnDeductFeesCusVen
+	,[strChargesLink]					= RE.strChargesLink
 	FROM @ReceiptStagingTable RE
 	INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId

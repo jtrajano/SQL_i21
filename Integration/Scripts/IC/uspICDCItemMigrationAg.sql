@@ -13,7 +13,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
-
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- Inventory/Item data migration from agitmmst origin table to tblICItem i21 table 
 -- Section 1
@@ -160,10 +159,11 @@ SET ANSI_WARNINGS OFF
 
 --all items are imported with type 'Inventory'
 --update items Inventory type from Category table
-update tblICItem set strType = C.strInventoryType
-from tblICCategory C
-where C.intCategoryId = tblICItem.intCategoryId
-
+update	tblICItem 
+set		strType = C.strInventoryType
+from	tblICCategory C
+where	C.intCategoryId = tblICItem.intCategoryId
+		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
 --** Items allocated for some charges are considered as non item and we classify it as 'Other Charge' Type.
  --  We validate this thru strDescription. If it contains any charges in it then that item is marked as type 'Other Charge'. **  
