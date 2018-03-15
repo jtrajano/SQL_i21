@@ -373,12 +373,13 @@ BEGIN TRY
 	  SET @strTableColumns = 'intParentLotId INT,intItemId INT,dblDeviation numeric(38,20),dblQuantity numeric(38,20),dtmCreateDate datetime,dtmExpiryDate datetime,dblUnitCost numeric(38,20)'
 	  SET @strPivotfor = ''
 
-      Declare CurProp CURSOR FOR
-      Select  intPropertyId,strPropertyName,dblMinValue,dblMaxValue,dblMedian from #tblProductProperty Order by intSequenceNo
-      OPEN CurProp 
-      FETCH NEXT FROM CurProp INTO  @intPropertyId,@strPropertyName,@dblMinValue,@dblMaxValue,@dblMedian
-      WHILE @@FETCH_STATUS = 0
+      Declare @intMinPropertyId INT
+      Select  @intMinPropertyId=MIN(intPropertyId) from #tblProductProperty
+      WHILE @intMinPropertyId is not null
       BEGIN
+		  Select @intPropertyId=intPropertyId,@strPropertyName=strPropertyName,@dblMinValue=dblMinValue,@dblMaxValue=dblMaxValue,@dblMedian=dblMedian 
+		  from #tblProductProperty Where intPropertyId=@intMinPropertyId 	
+
 		  if LEN(@strPivotSelect ) > 0 
 		  SET @strPivotSelect = @strPivotSelect  + ', '
 
@@ -394,11 +395,8 @@ BEGIN TRY
 
 		  Set @strTableColumns = @strTableColumns + '[' + @strPropertyName +'] Numeric(38,20)'
 
-		  FETCH NEXT FROM CurProp INTO  @intPropertyId,@strPropertyName,@dblMinValue,@dblMaxValue,@dblMedian
+		  Select  @intMinPropertyId=MIN(intPropertyId) from #tblProductProperty Where intPropertyId>@intMinPropertyId
       END
-
-      CLOSE CurProp
-      DEALLOCATE CurProp
 
 	--Clean Up Code for existing tblItem global temp tables
 	IF (Select COUNT(1) From tempdb.sys.objects Where name like '##tblItem%')>0
@@ -777,24 +775,26 @@ BEGIN TRY
     --DECLARE @Count decimal(38,0)
     SET @strTblName =''
 
-     Declare CurProp CURSOR FOR
-     SELECT DISTINCT strPropertyName,dblMedian,intSequenceNo from #tblProductProperty Order by intSequenceNo ASC
-     OPEN CurProp 
-     FETCH NEXT FROM CurProp
-     INTO  @strPropertyName,@dblMedian,@intSequenceNo
+	 Declare @intMinProductProperty INT
+	 Select @intMinProductProperty=MIN(intRowNo) From #tblProductProperty
      
-	 WHILE @@FETCH_STATUS = 0
+	 WHILE @intMinProductProperty is not null
       BEGIN
+		Select @strPropertyName=strPropertyName,@dblMedian=dblMedian,@intSequenceNo=intSequenceNo From #tblProductProperty Where intRowNo=@intMinProductProperty
+
 		SET @strPropertyName= '['+ @strPropertyName + ']' 
 		SET @strSQL=''
 		SET @strLot=''
 		SET @strFromTB=''
   
-        Declare CurTables CURSOR FOR select * from #tblNames
-        Open CurTables
-            FETCH NEXT FROM CurTables INTO @intCount,@strTblName,@intRawItemId,@dblRequiredQty,@dblQtyToProduce
-            WHILE @@FETCH_STATUS = 0
-            BEGIN                                     
+		Declare @intMinTableName INT
+		Select @intMinTableName=MIN(intRowNo) From #tblNames
+
+            WHILE @intMinTableName is not null
+            BEGIN                
+				Select @intCount=intRowNo,@strTblName=strtblName,@intRawItemId=intItemId,@dblRequiredQty=dblRequiredQty,@dblQtyToProduce=dblDemandQty 
+				from #tblNames Where intRowNo=@intMinTableName
+				                     
 				SET @strSQL = @strSQL + '('+ @strTblName +'.'+ @strPropertyName+'* ' + LTRIM(str(@dblRequiredQty)) + ')' + '+' 
                                                       
 				declare @aliasName nvarchar(max)
@@ -817,10 +817,8 @@ BEGIN TRY
 				if CHARINDEX(@strTblName,@strOrderByFEFO) = 0
 				SET @strOrderByFEFO=@strOrderByFEFO+ + @strTblName + 'EDate ASC, '
 								
-				FETCH NEXT FROM CurTables INTO @intCount,@strTblName,@intRawItemId,@dblRequiredQty,@dblQtyToProduce
+				Select @intMinTableName=MIN(intRowNo) From #tblNames Where intRowNo>@intMinTableName
 			END 
-        CLOSE CurTables
-        DEALLOCATE CurTables
                		
         IF RIGHT(@strSQL,1)='+'
         SET @strSQL=LEFT(@strSQL, LEN(@strSQL) - 1)
@@ -830,12 +828,8 @@ BEGIN TRY
 		if CHARINDEX(@strTblName,@strOrderBydev) = 0                
 		SET @strOrderBydev= @strOrderBydev + LEFT(@strPropertyName, LEN(@strPropertyName) - 1)   +'dblDeviation] ASC'+','
 
-      FETCH NEXT FROM CurProp INTO  @strPropertyName,@dblMedian,@intSequenceNo
+		Select @intMinProductProperty=MIN(intRowNo) From #tblProductProperty Where intRowNo>@intMinProductProperty
       END
-
-      CLOSE CurProp
-      DEALLOCATE CurProp
-
 
 	--Get the Rules
 	SELECT @intSequenceNo = MAX(intSequenceNo) + 1
@@ -1186,13 +1180,13 @@ BEGIN TRY
 					--,@intPartialQuantityStorageLocationId
 					) --Exclude Kit Staging,Blend Staging,Partial Qty Storage Locations
 
-			DECLARE cursor_NextBestPick CURSOR LOCAL FAST_FORWARD FOR                        
-			SELECT * FROM ##tblNextBestLot                        
-			OPEN cursor_NextBestPick                        
-			FETCH NEXT FROM cursor_NextBestPick INTO @intLotId,@intRawItemId,@dblAvailableQty  
+			DECLARE @intMinBestPick INT
+			SELECT @intMinBestPick=MIN(intLotId) FROM ##tblNextBestLot                        
 
-			WHILE (@@FETCH_STATUS <> -1)                        
+			WHILE EXISTS (SELECT 1 FROM ##tblNextBestLot)                        
 			BEGIN
+				Select @intLotId=intLotId,@intRawItemId=intItemId,@dblAvailableQty=dblAvailableQty From ##tblNextBestLot Where intLotId=@intMinBestPick
+
 				If @ysnEnableParentLot=0
 					Select @dblWeightPerQty=CASE WHEN ISNULL(dblWeightPerQty,0)=0 THEN 1 ELSE dblWeightPerQty END From tblICLot Where intLotId=@intLotId
 				Else
@@ -1323,7 +1317,7 @@ BEGIN TRY
 
 				END
                   
-				FETCH NEXT FROM cursor_NextBestPick INTO @intLotId,@intRawItemId,@dblAvailableQty    
+				Select @intLotId=intLotId,@intRawItemId=intItemId,@dblAvailableQty=dblAvailableQty From ##tblNextBestLot Where intLotId>@intMinBestPick  
 			END
 			LOOP_END:	
 			--End Search for next best lot
@@ -1336,12 +1330,6 @@ BEGIN TRY
 
 			IF OBJECT_ID('tempdb..##tblNextBestLot') IS NOT NULL 
 			DROP table ##tblNextBestLot
-
-			IF EXISTS(SELECT status FROM MASter.dbo.syscursors WHERE cursor_name='cursor_NextBestPick' AND status>=0)             
-			BEGIN
-				CLOSE cursor_NextBestPick                        
-				DEALLOCATE cursor_NextBestPick
-			END
 
 			SELECT @intMinRowNo = MIN(intRowNo)
 			FROM @tblInputItem
