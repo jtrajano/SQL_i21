@@ -736,8 +736,8 @@ BEGIN
 	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
 				on i2p.intItemId = i.intItemId
 				AND i2p.intItemLocationId = i.intItemLocationId			
-	WHERE	dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
-			AND i.dblUnitOnHand = 0 
+	WHERE	--dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
+			ROUND(i.dblUnitOnHand, 6) = 0 
 
 	SELECT	TOP 1 
 			@intInventoryTransactionId	= intInventoryTransactionId
@@ -815,7 +815,7 @@ BEGIN
 				,[dtmCreated]							= GETDATE()
 				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
-				,[intCostingMethod]						= @intCostingMethod
+				,[intCostingMethod]						= il.intCostingMethod -- @intCostingMethod
 				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
 															dbo.fnFormatMessage(
 																dbo.fnICGetErrorMessage(80093) 
