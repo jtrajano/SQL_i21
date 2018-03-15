@@ -32,6 +32,8 @@ USING
 		, intConcurrencyId			= 1
 		,ysnAutoCalculateFreight	= CAST(CASE WHEN (ptcls_auto_frt_yn = 'Y') THEN 1 ELSE 0 END AS BIT)
 	FROM ptclsmst
+	LEFT JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(ptcls_class) COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE CAT.intCategoryId IS NULL
 ) AS [Source] (strCategoryCode, strDescription, strMaterialFee, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId, ysnAutoCalculateFreight)
 ON [Target].strCategoryCode = [Source].strCategoryCode
 WHEN NOT MATCHED THEN
