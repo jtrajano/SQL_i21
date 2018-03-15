@@ -136,66 +136,66 @@ BEGIN TRY
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
-		SELECT @Gasoline_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Gasoline'
-		SELECT @Gasoline_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Gasoline'
-		SELECT @Gasoline_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Gasoline'
-		SELECT @Gasoline_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'Gasoline'
+		SELECT @Gasoline_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'Gasoline'
+		SELECT @Gasoline_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'Gasoline'
+		SELECT @Gasoline_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'Gasoline'
+		SELECT @Gasoline_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'Gasoline'
 		SET @Gasoline_3 = @Gasoline_1B + @Gasoline_2E
 		SET @Gasoline_6 = @Gasoline_7A + @Gasoline_7D
 
-		SELECT @ClearDiesel_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Clear Diesel'
-		SELECT @ClearDiesel_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Clear Diesel'
-		SELECT @ClearDiesel_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Clear Diesel'
-		SELECT @ClearDiesel_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'Clear Diesel'
 		SET @ClearDiesel_3 = @ClearDiesel_1B + @ClearDiesel_2E
 		SET @ClearDiesel_6 = @ClearDiesel_7A + @ClearDiesel_7D
 
-		SELECT @LowSulfur_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Low Sulfur Dyed Diesel'
-		SELECT @LowSulfur_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Low Sulfur Dyed Diesel'
-		SELECT @LowSulfur_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Low Sulfur Dyed Diesel'
-		SELECT @LowSulfur_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'Low Sulfur Dyed Diesel'
 		SET @LowSulfur_3 = @LowSulfur_1B + @LowSulfur_2E
 		SET @LowSulfur_6 = @LowSulfur_7A + @LowSulfur_7D
 
-		SELECT @HighSulfur_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'High Sulfur Dyed Diesel'
-		SELECT @HighSulfur_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'High Sulfur Dyed Diesel'
-		SELECT @HighSulfur_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'High Sulfur Dyed Diesel'
-		SELECT @HighSulfur_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'High Sulfur Dyed Diesel'
 		SET @HighSulfur_3 = @HighSulfur_1B + @HighSulfur_2E
 		SET @HighSulfur_6 = @HighSulfur_7A + @HighSulfur_7D
 
-		SELECT @Kerosene_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Kerosene'
-		SELECT @Kerosene_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Kerosene'
-		SELECT @Kerosene_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Kerosene'
-		SELECT @Kerosene_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'Kerosene'
+		SELECT @Kerosene_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'Kerosene'
+		SELECT @Kerosene_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'Kerosene'
+		SELECT @Kerosene_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'Kerosene'
+		SELECT @Kerosene_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'Kerosene'
 		SET @Kerosene_3 = @Kerosene_1B + @Kerosene_2E
 		SET @Kerosene_6 = @Kerosene_7A + @Kerosene_7D
 
-		SELECT @CNG_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'CNG'
-		SELECT @CNG_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'CNG'
-		SELECT @CNG_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'CNG'
-		SELECT @CNG_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'CNG'
+		SELECT @CNG_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'CNG'
+		SELECT @CNG_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'CNG'
+		SELECT @CNG_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'CNG'
+		SELECT @CNG_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'CNG'
 		SET @CNG_3 = @CNG_1B + @CNG_2E
 		SET @CNG_6 = @CNG_7A + @CNG_7D
 
-		SELECT @LNG_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'LNG'
-		SELECT @LNG_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'LNG'
-		SELECT @LNG_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'LNG'
-		SELECT @LNG_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'LNG'
+		SELECT @LNG_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'LNG'
+		SELECT @LNG_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'LNG'
+		SELECT @LNG_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'LNG'
+		SELECT @LNG_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'LNG'
 		SET @LNG_3 = @LNG_1B + @LNG_2E
 		SET @LNG_6 = @LNG_7A + @LNG_7D
 
-		SELECT @Propane_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Propane'
-		SELECT @Propane_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Propane'
-		SELECT @Propane_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Propane'
-		SELECT @Propane_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'Propane'
+		SELECT @Propane_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'Propane'
+		SELECT @Propane_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'Propane'
+		SELECT @Propane_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'Propane'
+		SELECT @Propane_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'Propane'
 		SET @Propane_3 = @Propane_1B + @Propane_2E
 		SET @Propane_6 = @Propane_7A + @Propane_7D
 
-		SELECT @Other_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '1B' AND strType = 'Other'
-		SELECT @Other_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '2E' AND strType = 'Other'
-		SELECT @Other_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7A' AND strType = 'Other'
-		SELECT @Other_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode = '7D' AND strType = 'Other'
+		SELECT @Other_1B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '1B%' AND strType = 'Other'
+		SELECT @Other_2E = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '2E%' AND strType = 'Other'
+		SELECT @Other_7A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7A%' AND strType = 'Other'
+		SELECT @Other_7D = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'EX2' AND strScheduleCode LIKE '7D%' AND strType = 'Other'
 		SET @Other_3 = @Other_1B + @Other_2E
 		SET @Other_6 = @Other_7A + @Other_7D
 
