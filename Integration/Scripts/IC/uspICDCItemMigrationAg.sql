@@ -202,7 +202,7 @@ Case oi.agitm_un_desc When 'BU' then 1/oi.agitm_lbs_per_un When 'TON' then 1/oi.
 from tblICItem I 
 join 
 (select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc, min(agitm_lbs_per_un) agitm_lbs_per_un from agitmmst 
-where agitm_lbs_per_un > 1
+where agitm_lbs_per_un > 1 and agitm_un_desc <> 'LB'
 group by rtrim(agitm_no)) as oi 
 on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -220,7 +220,7 @@ oi.agitm_un_per_pak dblUnitQty, 0 ysnStockUnit,1 ysnAllowPurchase, 1 ysnAllowSal
 from tblICItem I 
 join 
 (select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc, min(agitm_un_per_pak) agitm_un_per_pak from agitmmst 
-where agitm_un_per_pak > 1
+where agitm_un_per_pak > 1 and agitm_un_desc <> agitm_pak_desc
 group by rtrim(agitm_no)) as oi 
 on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -255,6 +255,7 @@ SELECT inv.intItemId
 	,intItemUOMId intReceiveUOMId
 	,3 intAllowNegativeInventory
 	,1 intConcurrencyId
+	,itm.agitm_un_min_bal dblReorderPoint
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 LEFT JOIN vyuEMEntity AS vnd ON (itm.agitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
