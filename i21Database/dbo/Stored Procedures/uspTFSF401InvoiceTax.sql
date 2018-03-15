@@ -203,7 +203,7 @@ DECLARE @tblTempTransaction TABLE (
 						 tblSMCompanySetup.strZip, 
 						 tblSMCompanySetup.strPhone, 
 						 tblSMCompanySetup.strStateTaxID, 
-						 tblSMCompanySetup.strFederalTaxID '
+						 tblSMCompanySetup.strEin '
 
 				SET @InvQueryPart2 = 'FROM tblTFTaxCategory INNER JOIN
                          tblTFReportingComponentCriteria ON tblTFTaxCategory.intTaxCategoryId = tblTFReportingComponentCriteria.intTaxCategoryId INNER JOIN
@@ -462,7 +462,7 @@ DECLARE @TRRCId NVARCHAR(50)
 								SMCOMPSETUP.strZip,
 								SMCOMPSETUP.strPhone,
 								SMCOMPSETUP.strStateTaxID,
-								SMCOMPSETUP.strFederalTaxID,
+								SMCOMPSETUP.strEin,
 								''' + @DateFrom + ''',
 								''' + @DateTo + ''',
 								TR.strItemNumber,

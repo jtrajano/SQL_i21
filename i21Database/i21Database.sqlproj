@@ -6257,6 +6257,7 @@
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
     <Build Include="dbo\Views\vyuSTItemsToRegister.sql" />
     <Build Include="dbo\Tables\tblSTUpdateRegisterNotification.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

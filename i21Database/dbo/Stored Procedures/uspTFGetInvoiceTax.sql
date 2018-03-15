@@ -195,7 +195,7 @@ BEGIN TRY
 					, tblSMCompanySetup.strZip
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
-					, tblSMCompanySetup.strFederalTaxID
+					, tblSMCompanySetup.strEin
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
@@ -370,7 +370,7 @@ BEGIN TRY
 					, tblSMCompanySetup.strZip
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
-					, tblSMCompanySetup.strFederalTaxID
+					, tblSMCompanySetup.strEin
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
@@ -635,7 +635,7 @@ BEGIN TRY
 				, tblSMCompanySetup.strZip
 				, tblSMCompanySetup.strPhone
 				, tblSMCompanySetup.strStateTaxID
-				, tblSMCompanySetup.strFederalTaxID
+				, tblSMCompanySetup.strEin
 				, strTransporterIdType = 'FEIN'
 				, strVendorIdType = 'FEIN'
 				, strCustomerIdType = 'FEIN'

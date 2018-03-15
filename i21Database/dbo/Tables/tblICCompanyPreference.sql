@@ -10,7 +10,7 @@
     [intShipmentOrderType] INT NULL, 
     [intShipmentSourceType] INT NULL, 
     [strOriginLineOfBusiness] NVARCHAR(50) NULL, 
-    [strOriginLastTask] NVARCHAR(50) NULL, 
+    [strOriginLastTask] NVARCHAR(600) NULL, 
     [strIRUnpostMode] NVARCHAR(50) NULL DEFAULT 'Default', 
     [strReturnPostMode] NVARCHAR(50) NULL DEFAULT 'Default',
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 

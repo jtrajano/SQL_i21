@@ -460,5 +460,6 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
     <None Include="dbo\Stored Procedures\uspLGImportEquipmentType.sql" />
     <None Include="dbo\Stored Procedures\uspLGImportLoadSchedule.sql" />
+    <None Include="dbo\Stored Procedures\uspEMCreateOriginCustomer.sql" />    
   </ItemGroup>
 </Project>

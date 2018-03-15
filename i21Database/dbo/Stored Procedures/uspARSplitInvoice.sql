@@ -231,7 +231,7 @@ BEGIN
 			DECLARE @CompanyId 		AS INT
 			DECLARE @DocumentId		AS INT
 			SELECT TOP 1 
-				@DocumentHeader = 'Split: ' + I.strInvoiceNumber + ' ' + @SplitNumber,
+				@DocumentHeader = 'Split: ' + I.strInvoiceNumber,
 				@DocumentMessage = 'Split: ' + I.strInvoiceNumber + '<br/> ' + @SplitNumber ,
 				@CustomerId = I.intEntityCustomerId,
 				@CompanyId = I.intCompanyLocationId

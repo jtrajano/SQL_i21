@@ -662,13 +662,27 @@ Begin
 	--Counter Data for the while loop
 	SELECT @intMaxRecordCount = Max(intRecordId),@intParentId = Max(intRecordId) FROM @tblNodeData
 
-	--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
-	Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
-	Select TOP 1 intRecordId-(Case When @intNoOfShipRecord>0 Then (@intNoOfShipRecord-1) Else 0 End),intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Where strType not in ('SO') Order By intRecordId Desc
+	--Shipment
+	If @intObjectTypeId = 7
+	Begin
+		--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
+		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
+		Select intRecordId-(Case When @intNoOfShipRecord>0 Then (@intNoOfShipRecord-1) Else 0 End),intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Where strType not in ('SO') Order By intRecordId Desc
 
-	Set @intRowCount=1
+		Select @intRowCount=COUNT(1) From @tblTemp
+	End
+	Else
+	Begin
+		--Point the Record Id to the first visible Lot Node depending on no of shipments (multiple shipments) , case statement refers to that
+		Insert Into @tblTemp(intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType)
+		Select TOP 1 intRecordId-(Case When @intNoOfShipRecord>0 Then (@intNoOfShipRecord-1) Else 0 End),intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
+		dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strType From @tblNodeData Where strType not in ('SO') Order By intRecordId Desc
+
+		Set @intRowCount=1
+	End
 
 	WHILE (@intRowCount > 0)
 	BEGIN    

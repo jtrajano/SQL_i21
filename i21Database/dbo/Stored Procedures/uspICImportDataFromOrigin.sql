@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICImportDataFromOrigin]
 	@strLineOfBusiness VARCHAR(50),
-	@strType VARCHAR(50),
+	@strType VARCHAR(600),
 	@intEntityUserSecurityId INT = 0
 
 AS
@@ -16,6 +16,13 @@ BEGIN
 	EXEC uspICRaiseError 80166; 
 	GOTO _Exit;
 END
+
+DECLARE @strRawType NVARCHAR(600)
+SET @strRawType = @strType
+
+SET @strType = SUBSTRING(@strType, 0, CHARINDEX(':', @strType))
+DECLARE @strStates NVARCHAR(600)
+SET @strStates = SUBSTRING(@strRawType, CHARINDEX(':', @strRawType)+1, LEN(@strRawType))
 
 IF @strLineOfBusiness = 'Petro' 
 BEGIN
@@ -83,7 +90,7 @@ BEGIN
 END
 
 UPDATE tblICCompanyPreference
-SET strOriginLastTask = @strType,
+SET strOriginLastTask = @strStates,
 	strOriginLineOfBusiness = @strLineOfBusiness
 
 _Exit:
