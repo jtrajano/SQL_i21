@@ -78,11 +78,28 @@ BEGIN
 				,AA.strLostCustomerReason
 				,A.ysnLostCustomer
 				,A.dtmLostCustomerDate
+				,A.intNextDeliveryDegreeDay
+				,A.intLastDeliveryDegreeDay
+				,A.dblDegreeDayBetweenDelivery
+				,A.dblBurnRate
+				,A.dblPreviousBurnRate
+				,A.dblSummerDailyUse
+				,A.dblWinterDailyUse
+				,A.ysnAdjustBurnRate
+				,strPricingLevelName = ''''
+				,A.dblPriceAdjustment
+				,T.strClockNumber
+				,A.strClassFillOption
+				,A.dblTotalReserve
+				,A.dtmRunOutDate
+				,A.dtmForecastedDelivery
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN vwcusmst C
 					ON B.intCustomerNumber = C.A4GLIdentity
+				INNER JOIN tblTMClock	T
+					ON A.intClockID = T.intClockID
 				LEFT JOIN vwitmmst I
 					ON A.intProduct = I.A4GLIdentity
 				LEFT JOIN tblTMFillMethod H
@@ -170,6 +187,21 @@ BEGIN
 				,AA.strLostCustomerReason
 				,A.ysnLostCustomer
 				,A.dtmLostCustomerDate
+				,A.intNextDeliveryDegreeDay
+				,A.intLastDeliveryDegreeDay
+				,A.dblDegreeDayBetweenDelivery
+				,A.dblBurnRate
+				,A.dblPreviousBurnRate
+				,A.dblSummerDailyUse
+				,A.dblWinterDailyUse
+				,A.ysnAdjustBurnRate
+				,S.strPricingLevelName
+				,A.dblPriceAdjustment
+				,T.strClockNumber
+				,A.strClassFillOption
+				,A.dblTotalReserve
+				,A.dtmRunOutDate
+				,A.dtmForecastedDelivery
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
@@ -184,6 +216,8 @@ BEGIN
 						and F.ysnDefaultContact = 1
 				INNER JOIN tblEMEntity G 
 					ON F.intEntityContactId = G.intEntityId
+				INNER JOIN tblTMClock	T
+					ON A.intClockID = T.intClockID
 				LEFT JOIN tblICItem I
 					ON A.intProduct = I.intItemId
 				LEFT JOIN tblTMFillMethod H
@@ -218,6 +252,8 @@ BEGIN
 					ON A.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
 				LEFT JOIN tblTMLostCustomerReason AA
 					ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
+				LEFT JOIN tblSMCompanyLocationPricingLevel S
+					ON A.intCompanyLocationPricingLevelId = S.intCompanyLocationPricingLevelId
 				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END
