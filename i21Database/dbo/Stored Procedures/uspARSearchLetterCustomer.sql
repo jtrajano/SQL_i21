@@ -277,7 +277,7 @@ IF ISNULL(@strLetterName, '') <> ''
 		) EMAILSETUP
 
 		IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
-			DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table) AND ARCO.intEntityUserId = @intEntityUserId
+			DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table) AND intEntityUserId = @intEntityUserId
 			
 		SET NOCOUNT ON;
 		SELECT * FROM @temp_return_table ORDER BY strCustomerName
