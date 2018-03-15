@@ -6252,6 +6252,8 @@
     <Build Include="dbo\Tables\tblLGEntityInsurer.sql" />
     <Build Include="dbo\Tables\tblLGEntityShippingLine.sql" />
     <Build Include="dbo\Tables\tblIPFTPServer.sql" />
+    <Build Include="dbo\Tables\tblCRMSalesRepSummaryResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCRMGenerateSalesRepSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
