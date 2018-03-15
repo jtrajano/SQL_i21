@@ -10,6 +10,7 @@
 	,@ysnPrintCreditBalance BIT = 1
 	,@ysnPrintOnlyPastDue	BIT = 0
 	,@ysnPrintZeroBalance	BIT = 0
+	,@intEntityUserId		INT = NULL
 )
 AS
 
@@ -20,13 +21,15 @@ DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
+SET @intEntityUserId			= NULLIF(@intEntityUserId, 0)
 
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
 	 , strCustomerNumber
 	 , strCustomerInfo
 	 , intEntityCustomerId
+	 , intEntityUserId
 	 , dblCreditLimit
 	 , dblTotalAR
 	 , dblFuture
@@ -46,11 +49,13 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strSourceTransaction
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strAgingType
 )
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo = @dtmAsOfDate
 										, @strCompanyLocation = @strCompanyLocation
+										, @intEntityUserId = @intEntityUserId
 
-TRUNCATE TABLE tblARSearchStatementCustomer
+DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
 			  intEntityCustomerId
 			, strCustomerNumber
@@ -59,6 +64,7 @@ INSERT INTO tblARSearchStatementCustomer (
 			, dblTotalAmount
 			, ysnHasEmailSetup
 			, intConcurrencyId
+			, intEntityUserId
 		)
 SELECT AGING.intEntityCustomerId
 	 , AGING.strCustomerNumber
@@ -67,6 +73,7 @@ SELECT AGING.intEntityCustomerId
 	 , AGING.dblTotalAR
 	 , ysnHasEmailSetup			= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , 1
+	 , @intEntityUserId
 FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -81,12 +88,14 @@ OUTER APPLY (
 		AND CC.strEmailDistributionOption LIKE '%Statements%'
 ) EMAILSETUP
 WHERE ISNULL(AGING.dblTotalAR, 0) <> 0
+AND AGING.intEntityUserId = @intEntityUserId
+AND AGING.strAgingType = 'Summary'
 
 IF ISNULL(@strAccountStatusCodeLocal, '') <> ''
 	BEGIN
 		DELETE FROM tblARSearchStatementCustomer
-		WHERE intEntityCustomerId NOT IN (SELECT intEntityId 
-										  FROM dbo.tblARCustomer WITH (NOLOCK) 
+		WHERE intEntityUserId = @intEntityUserId
+		  AND intEntityCustomerId NOT IN (SELECT intEntityId FROM dbo.tblARCustomer WITH (NOLOCK) 
 										  WHERE dbo.fnARGetCustomerAccountStatusCodes(intEntityCustomerId) LIKE '%' + @strAccountStatusCodeLocal + '%')
 	END
 
@@ -94,15 +103,18 @@ IF @ysnDetailedFormat = 0
 	BEGIN
 		SELECT SSC.*
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
-		INNER JOIN (SELECT intEntityId
-					FROM dbo.tblARCustomer WITH (NOLOCK)
-					WHERE ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormat
+		INNER JOIN (
+			SELECT intEntityId
+			FROM dbo.tblARCustomer WITH (NOLOCK)
+			WHERE ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormat
 		) C ON SSC.intEntityCustomerId = C.intEntityId
+		WHERE intEntityUserId = @intEntityUserId
 		ORDER BY SSC.strCustomerName
 	END
 ELSE
 	BEGIN
 		SELECT SSC.*
 		FROM dbo.tblARSearchStatementCustomer SSC WITH (NOLOCK)
+		WHERE intEntityUserId = @intEntityUserId
 		ORDER BY SSC.strCustomerName
 	END

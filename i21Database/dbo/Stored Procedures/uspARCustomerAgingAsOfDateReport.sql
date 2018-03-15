@@ -3,6 +3,7 @@
 	@dtmDateTo					DATETIME = NULL,
 	@strSalesperson				NVARCHAR(100) = NULL,
 	@intEntityCustomerId		INT = NULL,
+	@intEntityUserId			INT = NULL,
 	@strSourceTransaction		NVARCHAR(100) = NULL,
 	@strCompanyLocation			NVARCHAR(100) = NULL,
 	@ysnIncludeBudget			BIT = 0,
@@ -10,13 +11,14 @@
 	@ysnIncludeWriteOffPayment	BIT = 0,
 	@strCustomerName			NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode		NVARCHAR(100) = NULL,
-	@strCustomerIds				NVARCHAR(MAX) = NULL
+	@strCustomerIds				NVARCHAR(MAX) = NULL	
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 	    @dtmDateToLocal					DATETIME		= NULL,
 	    @strSalespersonLocal			NVARCHAR(100)	= NULL,
 	    @intEntityCustomerIdLocal		INT				= NULL,
+		@intEntityUserIdLocal			INT				= NULL,
 		@strSourceTransactionLocal		NVARCHAR(100)	= NULL,
 		@strCompanyLocationLocal		NVARCHAR(100)	= NULL,
 		@ysnIncludeBudgetLocal			BIT				= 0,
@@ -39,6 +41,7 @@ SET @dtmDateFromLocal				= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET	@dtmDateToLocal					= ISNULL(@dtmDateTo, GETDATE())
 SET @strSalespersonLocal			= NULLIF(@strSalesperson, '')
 SET @intEntityCustomerIdLocal		= NULLIF(@intEntityCustomerId, 0)
+SET @intEntityUserIdLocal			= NULLIF(@intEntityUserId, 0)
 SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')
 SET @strCompanyLocationLocal		= NULLIF(@strCompanyLocation, '')
 SET @ysnIncludeBudgetLocal			= @ysnIncludeBudget
@@ -151,16 +154,6 @@ BEGIN
     DROP TABLE #POSTEDINVOICES
 END
 
-IF(OBJECT_ID('tempdb..#PREPAIDS') IS NOT NULL)
-BEGIN
-    DROP TABLE #PREPAIDS
-END
-
-IF(OBJECT_ID('tempdb..#PREPAIDSINVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #PREPAIDSINVOICES
-END
-
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -264,33 +257,12 @@ WHERE ysnPosted = 1
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
-
---#PREPAIDS
-SELECT intPrepaymentId
-	 , dblAppliedInvoiceAmount = SUM(dblAppliedInvoiceAmount)
-INTO #PREPAIDS
-FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK) 
-WHERE ysnApplied = 1
-GROUP BY intPrepaymentId
-
---#PREPAIDSINVOICES
-SELECT PC.intInvoiceId
-	 , I.strInvoiceNumber
-	 , PC.intPrepaymentId
-	 , dblAppliedInvoiceAmount = SUM(dblAppliedInvoiceAmount)
-INTO #PREPAIDSINVOICES
-FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK) 
-INNER JOIN (SELECT intInvoiceId
-				 , strInvoiceNumber
-			FROM dbo.tblARInvoice WITH (NOLOCK)
-) I ON I.intInvoiceId = PC.intPrepaymentId
-WHERE ysnApplied = 1
-GROUP BY PC.intInvoiceId, PC.intPrepaymentId, I.strInvoiceNumber
-
+	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
 	 , strCustomerInfo		= CUSTOMER.strCustomerName + CHAR(13) + CUSTOMER.strCustomerNumber
 	 , intEntityCustomerId	= AGING.intEntityCustomerId
+	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
@@ -310,6 +282,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strSourceTransaction	= @strSourceTransactionLocal
 	 , strCompanyName		= COMPANY.strCompanyName
 	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strAgingType			= 'Summary'
 FROM
 (SELECT A.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
@@ -406,11 +379,11 @@ UNION ALL
 
 SELECT I.intInvoiceId
      , dblAmountPaid		= 0
-     , dblInvoiceTotal		= CASE WHEN I.strType = 'CF Tran' THEN (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)) * -1 ELSE 0 END
+     , dblInvoiceTotal		= CASE WHEN I.strType = 'CF Tran' THEN (ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)) * -1 ELSE 0 END
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0) END
+     , dblAvailableCredit	= CASE WHEN I.strType = 'CF Tran' THEN 0 ELSE ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) END
 	 , dblPrepayments		= 0
 	 , I.strType
 FROM #POSTEDINVOICES I WITH (NOLOCK)
@@ -421,7 +394,6 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId		
-	LEFT JOIN #PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
 
@@ -434,12 +406,11 @@ SELECT I.intInvoiceId
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
      , dblAvailableCredit	= 0
-	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 	 , I.strType
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
 	                                          
@@ -474,19 +445,6 @@ LEFT JOIN (
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
-
-	UNION ALL
-
-	SELECT PC.intInvoiceId
-		 , dblTotalPayment = SUM(dblAppliedInvoiceAmount)
-	FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK) 
-	INNER JOIN (SELECT intInvoiceId
-					 , strInvoiceNumber
-				FROM dbo.tblARInvoice WITH (NOLOCK)
-	) I ON I.intInvoiceId = PC.intPrepaymentId
-	WHERE ysnApplied = 1
-	GROUP BY PC.intInvoiceId
-
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo')) OR (@ysnIncludeCreditsLocal = 1))
 

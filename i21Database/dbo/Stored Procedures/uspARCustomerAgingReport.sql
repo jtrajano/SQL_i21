@@ -20,6 +20,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE @dtmDateTo						DATETIME
       , @dtmDateFrom					DATETIME
 	  , @intEntityCustomerId			INT	= NULL
+	  , @intEntityUserId				INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
 	  , @strCustomerName				NVARCHAR(MAX)
 	  , @strAccountStatusCode			NVARCHAR(5)
@@ -104,6 +105,10 @@ SELECT	@ysnPrintOnlyOverCreditLimit = CASE WHEN ISNULL([from], 'False') = 'False
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'ysnPrintOnlyOverCreditLimit'
 
+SELECT  @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'intEntityUserId'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)
@@ -115,12 +120,13 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
 	 , strCustomerNumber
 	 , strCustomerInfo
 	 , intEntityCustomerId
+	 , intEntityUserId
 	 , dblCreditLimit
 	 , dblTotalAR
 	 , dblFuture
@@ -140,6 +146,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strSourceTransaction
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strAgingType
 )
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @dtmDateTo = @dtmDateTo
@@ -148,36 +155,42 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @strCompanyLocation = @strCompanyLocation
 										, @strCustomerName	= @strCustomerName
 										, @strAccountStatusCode = @strAccountStatusCode
-EXEC dbo.uspARGLAccountReport @dtmDateTo
+										, @intEntityUserId = @intEntityUserId
+EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
+							, @intEntityUserId = @intEntityUserId
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
 											 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
 											 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
+											 AND intEntityUserId = @intEntityUserId
+											 AND strAgingType = 'Summary'
 
 IF @strAgedBalances = 'Current'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl0Days, 0) = 0
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl0Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 END
 ELSE IF @strAgedBalances = '1-10 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl10Days, 0) = 0
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl10Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 END
 ELSE IF @strAgedBalances = '11-30 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl30Days, 0) = 0
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl30Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 END
 ELSE IF @strAgedBalances = '31-60 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl60Days, 0) = 0
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl60Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 END
 ELSE IF @strAgedBalances = '61-90 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl90Days, 0) = 0
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl90Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 END
 ELSE IF @strAgedBalances = 'Over 90 Days'
-	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl91Days, 0) = 0
+	BEGIN DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dbl91Days, 0) = 0 AND intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 END
 
 IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 	BEGIN
-		DELETE FROM tblARCustomerAgingStagingTable WHERE ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
+		DELETE FROM tblARCustomerAgingStagingTable WHERE (ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
 									    OR (ISNULL(dblCreditLimit, 0) = 0 AND ISNULL(dblTotalAR, 0) = 0)
-										OR ISNULL(dblCreditLimit, 0) = 0
+										OR ISNULL(dblCreditLimit, 0) = 0)
+										AND intEntityUserId = @intEntityUserId
+										AND strAgingType = 'Summary'
 	END
 
-SELECT * FROM tblARCustomerAgingStagingTable
+SELECT * FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'

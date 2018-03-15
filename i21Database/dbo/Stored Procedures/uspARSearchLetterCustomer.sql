@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchLetterCustomer]
 (
-	@intLetterId	INT
+	  @intLetterId		INT
+	, @intEntityUserId	INT
 )
 AS
 DECLARE @strLetterName			NVARCHAR(MAX),
@@ -33,9 +34,9 @@ DECLARE @temp_return_table TABLE(
 
 IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
 	BEGIN
-		TRUNCATE TABLE tblARCustomerAgingStagingTable
+		DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 		INSERT INTO tblARCustomerAgingStagingTable (
-			   strCustomerName
+			  strCustomerName
 			, strCustomerNumber
 			, strCustomerInfo
 			, strInvoiceNumber
@@ -43,6 +44,7 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
 			, intInvoiceId
 			, strBOLNumber
 			, intEntityCustomerId
+			, intEntityUserId
 			, dblCreditLimit
 			, dblTotalAR
 			, dblFuture
@@ -68,16 +70,28 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
 			, strType
 			, strCompanyName
 			, strCompanyAddress
+			, strAgingType
 		)
 		EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
+													  , @intEntityUserId = @intEntityUserId
 
-		DELETE FROM tblARCustomerAgingStagingTable WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARCustomerAgingStagingTable GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
-		DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
+		DELETE AGING
+		FROM tblARCustomerAgingStagingTable AGING
+		INNER JOIN (
+			SELECT intInvoiceId 
+			FROM tblARCustomerAgingStagingTable 
+			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+			GROUP BY intInvoiceId 
+			HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
+		) ENTITY ON AGING.intInvoiceId = ENTITY.intInvoiceId
+		WHERE AGING.intEntityUserId = @intEntityUserId
+		  AND AGING.strAgingType = 'Detail'
 			
-		TRUNCATE TABLE tblARCollectionOverdue
+		DELETE FROM tblARCollectionOverdue WHERE intEntityUserId = @intEntityUserId
 		INSERT INTO tblARCollectionOverdue
 		(
 			intEntityCustomerId
+			,intEntityUserId
 			,dblCreditLimitSum
 			,dblTotalARSum
 			,dblFutureSum
@@ -95,7 +109,8 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
 			,dblPrepaidsSum
 		)
 		SELECT 			 
-			intEntityCustomerId 				 
+			intEntityCustomerId		= intEntityCustomerId 				 
+			,intEntityUserId		= @intEntityUserId
 			,dblCreditLimitSum		= SUM(dblCreditLimit)
 			,dblTotalARSum			= SUM(dblTotalAR)
 			,dblFutureSum			= SUM(dblFuture)
@@ -112,6 +127,7 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
 			,dblCreditsSum			= SUM(dblCredits)
 			,dblPrepaidsSum			= SUM(dblPrepaids)
 		FROM tblARCustomerAgingStagingTable
+		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 		GROUP BY intEntityCustomerId
 	END
 	
@@ -129,6 +145,7 @@ IF @strLetterName = 'Recent Overdue Collection Letter'
 					WHERE ysnActive = 1
 		) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 		WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0)
+		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
 ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 	BEGIN
@@ -144,6 +161,7 @@ ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 					WHERE ysnActive = 1
 		) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 		WHERE (ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)
+		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
 ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
 	BEGIN
@@ -159,6 +177,7 @@ ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
 					WHERE ysnActive = 1
 		) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 		WHERE (ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)
+		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
 ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
 	BEGIN
@@ -174,6 +193,7 @@ ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
 					WHERE ysnActive = 1
 		) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 		WHERE (ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)
+		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
 ELSE IF @strLetterName = 'Final Overdue Collection Letter'
 	BEGIN
@@ -189,6 +209,7 @@ ELSE IF @strLetterName = 'Final Overdue Collection Letter'
 					WHERE ysnActive = 1
 		) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId
 		WHERE (ISNULL(dbl121DaysSum,0) <> 0)
+		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
 ELSE IF @strLetterName = 'Credit Suspension'
 	BEGIN
@@ -256,7 +277,7 @@ IF ISNULL(@strLetterName, '') <> ''
 		) EMAILSETUP
 
 		IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter')
-			DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table)
+			DELETE FROM dbo.tblARCollectionOverdue WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @temp_return_table) AND ARCO.intEntityUserId = @intEntityUserId
 			
 		SET NOCOUNT ON;
 		SELECT * FROM @temp_return_table ORDER BY strCustomerName
