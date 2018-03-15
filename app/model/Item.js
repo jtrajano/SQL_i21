@@ -190,7 +190,9 @@ Ext.define('Inventory.model.Item', {
         { name: 'strCategory', type: 'string' },
         { name: 'strMaterialPackUOM', type: 'string' },
         { name: 'intMaterialPackTypeId', type: 'int', allowNull: true },        
-        { name: 'costUnitQty', type: 'auto'}
+        { name: 'costUnitQty', type: 'auto'},
+        { name: 'intModuleId', type: 'int', allowNull: true },
+        { name: 'strModule', type: 'string' },
     ],
 
     validators: [

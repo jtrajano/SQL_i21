@@ -43,6 +43,7 @@ namespace iRely.Inventory.WebApi
             public int intStorageLocationId { get; set; }
             public bool ysnIncludeZeroOnHand { get; set; }
             public bool ysnCountByLots { get; set; }
+            public DateTime dtmAsOfDate { get; set; }
         }
 
         [HttpPut]
@@ -56,7 +57,7 @@ namespace iRely.Inventory.WebApi
                 var query = (@"EXEC dbo.uspICUpdateInventoryCountDetails
 	                              @intInventoryCountId, @intEntityUserSecurityId, @strHeaderNo, @intLocationId
                                 , @intCategoryId, @intCommodityId, @intCountGroupId
-	                            , @intSubLocationId, @intStorageLocationId, @ysnIncludeZeroOnHand, @ysnCountByLots");
+	                            , @intSubLocationId, @intStorageLocationId, @ysnIncludeZeroOnHand, @ysnCountByLots, @dtmAsOfDate");
                 await db.ExecuteSqlCommandAsync(query,
                     new SqlParameter("@intInventoryCountId", param.intInventoryCountId),
                     new SqlParameter("@intEntityUserSecurityId", param.intEntityUserSecurityId),
@@ -68,7 +69,8 @@ namespace iRely.Inventory.WebApi
                     new SqlParameter("@intSubLocationId", param.intSubLocationId),
                     new SqlParameter("@intStorageLocationId", param.intStorageLocationId),
                     new SqlParameter("@ysnIncludeZeroOnHand", param.ysnIncludeZeroOnHand),
-                    new SqlParameter("@ysnCountByLots", param.ysnCountByLots));
+                    new SqlParameter("@ysnCountByLots", param.ysnCountByLots),
+                    new SqlParameter("@dtmAsOfDate", param.dtmAsOfDate));
                 updateResult.HasError = false;
             }
             catch (Exception ex)

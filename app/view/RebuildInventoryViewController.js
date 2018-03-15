@@ -29,6 +29,9 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             },
             btnPost: {
                 disabled: '{!canPost}'
+            },
+            btnRefresh: {
+                hidden: true 
             }
         }
     },
@@ -160,16 +163,20 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
                         vm.setData({ inProgress: false });
                     }
                 }
-                else
+                else {
                     iRely.Functions.showErrorDialog(json.message);
+                    me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'Rebuild Failed.', color: 'Red'});
+                }
+                    
             },
             function (error) {
+                me.view.context.screenMgr.toolbarMgr.provideFeedBack({ text: 'Rebuild Failed.', color: 'Red'});
                 if (error.timedout)
                     iRely.Functions.showErrorDialog("Looks like the server is taking too long to respond, this can be caused by either poor connectivity or an error with our servers. Please try again in a while.");
                 else
                     iRely.Functions.showErrorDialog(JSON.parse(error.responseText).message);
             }
-            );
+        );
     },
 
     onFiscalMonthBeforeQuery: function(obj) {
@@ -290,7 +297,8 @@ Ext.define('Inventory.view.RebuildInventoryViewController', {
             store: store,
             createRecord: me.createRecord,
             binding: me.config.binding,
-            checkChange: false
+            checkChange: false,
+            enableScreenOptimization: false
         });
 
         return win.context;

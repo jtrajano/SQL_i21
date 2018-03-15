@@ -1618,9 +1618,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-
         if (!current) return; 
 
         if (current) {
@@ -1647,56 +1647,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        var isHidden = true;
-        switch (current.get('strReceiptType')) {
-            case 'Purchase Contract':
-                switch (current.get('intSourceType')) {
-                    case 0:
-                    case 2:
-                        if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
-                            isHidden = true;
-                        }
-                        else {
-                            isHidden = false;
-                        }
-                        break;
-                    default:
-                        isHidden = true;
-                        break;
-                }
-                break;
-            case 'Purchase Order':
-                if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
-                    isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            case 'Transfer Order':
-                if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
-                    isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            default:
-                isHidden = true;
-                break;
-        }
-        if (isHidden === false) {
-            var shipTo = current.get('strLocationName'); 
-            if (shipTo) {
-                this.showAddOrders(win);
-            }            
-        }
+        var shipTo = current.get('strLocationName'); 
+        if (shipTo && me.canAddOrders(current)) {
+            me.showAddOrders(win);
+        }  
     },
 
     onLocationSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
-
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
@@ -1711,36 +1671,54 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        if (grdInventoryReceiptCount == 0){
-            this.showAddOrders(win);
+        if (grdInventoryReceiptCount == 0 && me.canAddOrders(current)){
+            me.showAddOrders(win);
         }
+    },
+
+    canAddOrders: function(current) {
+        var canAddOrders = true;
+        if(!current)
+            return false;
+        if (current.get('ysnPosted')) {
+            canAddOrders = false;
+        } else {
+            switch (current.get('strReceiptType')) {
+                case 'Purchase Contract':
+                    switch (current.get('intSourceType')) {
+                        case 0:
+                        case 2:
+                            canAddOrders = !iRely.Functions.isEmpty(current.get('intEntityVendorId'));
+                            break;
+                        default:
+                            canAddOrders = false;
+                            break;
+                    }
+                    break;
+                case 'Purchase Order':
+                    canAddOrders = !iRely.Functions.isEmpty(current.get('intEntityVendorId'));
+                    break;
+                case 'Transfer Order':
+                    canAddOrders = !iRely.Functions.isEmpty(current.get('intTransferorId'));
+                    break;
+                default :
+                    canAddOrders = false;
+                    break;
+            }
+        }
+
+        return canAddOrders;
     },
 
     onTransferorSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        var isHidden = true;
-        if (current) {
-            switch (current.get('strReceiptType')) {
-                case 'Transfer Order':
-                    if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
-                        isHidden = true;
-                    }
-                    else {
-                        isHidden = false;
-                    }
-                    break;
-                default:
-                    isHidden = true;
-                    break;
-            }
-            if (isHidden === false) {
-                this.showAddOrders(win);
-            }
-        }
+        if(me.canAddOrders(current))
+            me.showAddOrders(win);
     },
 
     onFreightTermSelect: function (combo, records, eOpts) {
@@ -6398,23 +6376,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                             charge.tblICInventoryReceiptChargeTaxes().removeAll();
                             var unitMeasureId = charge.get('intCostUOMId');
-                            Ext.Array.each(itemTaxes, function (itemDetailTax) {
-                                var taxableAmount = charge.get('dblAmount');
-                                var taxAmount = 0.00;
+
+                            Ext.Array.each(itemTaxes, function (itemDetailTax) {                                
+                                var taxAmount = 0.00,
+                                    taxableAmount = 0.00;
+                                
                                 var chargeQuantity = charge.get('dblQuantity');
                                 chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
-                                var cost = taxableAmount / chargeQuantity;
+                                
+                                var chargeAmount = charge.get('dblAmount');
+                                chargeAmount = Ext.isNumeric(chargeAmount) ? chargeAmount : 0; 
+                                var cost = chargeAmount / chargeQuantity;
 
                                 var adjustedTax = itemDetailTax.dblAdjustedTax;
                                 adjustedTax = Ext.isNumeric(adjustedTax) ? adjustedTax : 0;                                
                                 // If a line is using a foreign currency, convert the adjusted tax from functional currency to the charge currency. 
                                 adjustedTax = dblForexRate != 0 ? adjustedTax / dblForexRate : adjustedTax;
 
-                                if (charge.get('ysnPrice')) {
-                                    taxableAmount = -taxableAmount; 
-                                }                                   
+                                // Get the taxable amount. 
+                                taxableAmount = me.getTaxableAmount(chargeQuantity, cost, itemDetailTax, itemTaxes);
+                                
+                                // Check if tax is charged to the receipt vendor. 
+                                taxableAmount = charge.get('ysnPrice') ? -taxableAmount : taxableAmount; 
 
-                                if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                                if (itemDetailTax.strCalculationMethod === 'Percentage') { 
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
@@ -6422,10 +6407,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
                                     taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }
-                                if (itemDetailTax.ysnCheckoffTax) {
-                                    taxAmount = -(taxAmount);
-                                }
 
+                                taxAmount = (itemDetailTax.ysnCheckoffTax) ? -taxAmount : taxAmount; 
                                 taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                                 // Do not compute tax if it can't be converted to voucher. 
@@ -7799,6 +7782,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     editingRecord.set('strItemType', 'Add-On');
                     editingRecord.set('dblOpenReceive', 1);
                     win.down('#colItemNo').focus();
+                    me.calculateGrossNet(editingRecord, 1);
 
                     var recordIdx = itemDetailStore.findBy(function(rec){
                         return rec.id == editingRecord.id;
@@ -7824,7 +7808,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 dblLastCost: rec.dblLastCost,
                                 dblUnitCost: rec.dblLastCost,
                                 dblUnitRetail: rec.dblLastCost,
-
+                                intWeightUOMId: rec.intGrossUOMId,
+                                strWeightUOM: rec.strGrossUOM,
+                                dblWeightUOMConvFactor: rec.dblGrossUOMConvFactor,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: rec.intSubLocationId,
                                 strSubLocationName: rec.strSubLocationName,
@@ -7978,6 +7964,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     editingRecord.set('strItemType', 'Substitute');
                     editingRecord.set('dblOpenReceive', 1);
                     win.down('#colItemNo').focus();
+                    me.calculateGrossNet(editingRecord, 1);
 
                     var recordIdx = itemDetailStore.findBy(function(rec){
                             return rec.id == editingRecord.id;
@@ -8010,6 +7997,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 strCostUOM: rec.strComponentStockUOM,
                                 intCostUOMId: rec.intComponentStockUOMId,
                                 dblCostUOMConvFactor: 1,
+                                intWeightUOMId: rec.intGrossUOMId,
+                                strWeightUOM: rec.strGrossUOM,
+                                dblWeightUOMConvFactor: rec.dblGrossUOMConvFactor,
                                 dblLastCost: rec.dblLastCost,
                                 dblUnitCost: rec.dblLastCost,
                                 dblUnitRetail: rec.dblLastCost,
