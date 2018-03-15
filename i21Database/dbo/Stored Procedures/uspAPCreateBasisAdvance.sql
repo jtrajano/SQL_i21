@@ -183,33 +183,41 @@ FROM tblAPBasisAdvanceDummyHeader A
 IF OBJECT_ID('tempdb..#tmpBillDetailData') IS NOT NULL DROP TABLE #tmpBillDetailData
 SELECT
     [intBillId]                         = voucherCreated.intBillId,
-    [intPrepayTypeId]                   = 1,
+    [intPrepayTypeId]                   = 2,
     [intScaleTicketId]                  = basisAdvance.intTicketId,
     [intContractHeaderId]               = basisAdvance.intContractHeaderId,
     [intContractDetailId]               = basisAdvance.intContractDetailId,
     [intContractSeq]                    = basisAdvance.intContractSeq,
     [intItemId]                         = receiptItem.intItemId,
     -- [intInventoryReceiptItemId]         = receiptItem.intInventoryReceiptItemId,
-    [dblQtyOrdered]                     = 1,--receiptItem.dblOpenReceive,
-    [dblQtyReceived]                    = 1,--receiptItem.dblOpenReceive,
+    [dblQtyOrdered]                     = receiptItem.dblOpenReceive,
+    [dblQtyReceived]                    = receiptItem.dblOpenReceive,
     [dblRate]                           = @rate,
     [intCurrencyExchangeRateTypeId]     = @rateType,
-    [ysnSubCurrency]                    = 0,
-    [intTaxGroupId]                     = NULL,
+    [ysnSubCurrency]                    = receiptItem.ysnSubCurrency,
+    [intTaxGroupId]                     = receiptItem.intTaxGroupId,
     [intAccountId]                      = loc.intAPAccount,
     [dblTotal]                          = basisAdvance.dblAmountToAdvance,
+                                            -- (CASE WHEN receiptItem.dblNet > 0 THEN 
+                                            --     (basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis) 
+                                            --             * (ISNULL(ItemWeightUOM.dblUnitQty,1)  / ISNULL(ItemCostUOM.dblUnitQty,1)) 
+											-- 	  WHEN receiptItem.intCostUOMId > 0 THEN 
+                                            --     (basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis) 
+                                            --             * (ItemUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1)) 
+											--     ELSE (basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis) 
+                                            --    END) / CASE WHEN receiptItem.ysnSubCurrency > 0 THEN ISNULL(receipt.intSubCurrencyCents,1) ELSE 1 END,
     [dblContractCost]                   = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis,
-    [dblCost]                           = basisAdvance.dblAmountToAdvance,
+    [dblCost]                           = basisAdvance.dblAmountToAdvance / basisAdvance.dblQuantity,
     [dblOldCost]                        = NULL,
     [dblNetWeight]                      = 0,
     [dblWeightLoss]                     = 0,
-    [intUnitOfMeasureId]                = NULL,
-    [intCostUOMId]                      = NULL,
-    [intWeightUOMId]                    = NULL,
+    [intUnitOfMeasureId]                = receiptItem.intUnitMeasureId,
+    [intCostUOMId]                      = receiptItem.intUnitMeasureId, --receiptItem.intCostUOMId,
+    [intWeightUOMId]                    = NULL, --receiptItem.intWeightUOMId,
     [intLineNo]                         = 1,
-    [dblWeightUnitQty]                  = 0,
-    [dblCostUnitQty]                    = 0,
-    [dblUnitQty]                        = 0,
+    [dblWeightUnitQty]                  = 1,
+    [dblCostUnitQty]                    = 1,
+    [dblUnitQty]                        = ISNULL(ItemUOM.dblUnitQty,1),
     [intCurrencyId]                     = NULL,
     [intStorageLocationId]              = receiptItem.intStorageLocationId,
     [int1099Form]                       = 0,
@@ -222,6 +230,10 @@ INNER JOIN vyuAPBasisAdvance basisAdvance
 INNER JOIN tblSMCompanyLocation loc ON basisAdvance.intCompanyLocationId = loc.intCompanyLocationId
 INNER JOIN tblICInventoryReceiptItem receiptItem
     ON basisAdvance.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+INNER JOIN tblICInventoryReceipt receipt ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = receiptItem.intWeightUOMId
+LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = receiptItem.intCostUOMId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItem.intUnitMeasureId
 
 MERGE INTO tblAPBillDetail
 USING (SELECT * FROM #tmpBillDetailData) AS Source
