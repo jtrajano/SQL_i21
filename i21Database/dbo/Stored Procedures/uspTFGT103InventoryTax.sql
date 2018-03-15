@@ -136,7 +136,7 @@ BEGIN TRY
 			, tblSMCompanySetup.strZip
 			, tblSMCompanySetup.strPhone
 			, tblSMCompanySetup.strStateTaxID
-			, tblSMCompanySetup.strFederalTaxID
+			, tblSMCompanySetup.strEin
 			, tblEMEntityLocation.strState AS strOriginState
 			, tblEMEntityLocation.strCity AS strOriginCity
 			, CountyTaxCode.strCounty AS strOriginCounty

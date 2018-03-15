@@ -195,7 +195,7 @@ BEGIN TRY
 					, tblSMCompanySetup.strZip
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
-					, tblSMCompanySetup.strFederalTaxID
+					, strHeaderFederalTaxID = @CompanyEIN
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
@@ -368,7 +368,7 @@ BEGIN TRY
 					, tblSMCompanySetup.strZip
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
-					, tblSMCompanySetup.strFederalTaxID
+					, strHeaderFederalTaxID = @CompanyEIN
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
