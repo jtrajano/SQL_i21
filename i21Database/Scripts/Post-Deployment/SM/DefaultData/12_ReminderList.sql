@@ -1170,3 +1170,24 @@ BEGIN
 	WHERE [strReminder] = N'Mail Not Sent For' AND [strType] = N'Approved Contract' 
 END
 GO
+
+GO
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Update' AND [strType] = N'Register')
+	BEGIN
+		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
+		SELECT	[strReminder]		=        N'Update',
+				[strType]			=        N'Register',
+				[strMessage]		=        N'{0} Item(s) {2} needed to be sent to the register.',
+				[strQuery]			=        N'SELECT intItemId FROM vyuSTItemsToRegister WHERE intEntityId = {0}',
+				[strNamespace]		=        N'Store.view.UpdateRegister',
+				[intSort]			=        1
+	END
+ELSE
+	BEGIN
+		UPDATE [tblSMReminderList]
+		SET [strMessage]  =     N'{0} Item(s) {2} needed to be sent to the register.',
+			[strQuery]	  =     N'SELECT intItemId FROM vyuSTItemsToRegister WHERE intEntityId = {0}',
+		    [strNamespace]	=   N'Store.view.UpdateRegister'
+		WHERE [strReminder] = N'Update' AND [strType] = N'Register'
+	END
+GO
