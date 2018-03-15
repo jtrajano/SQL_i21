@@ -123,8 +123,8 @@ BEGIN TRY
 
 			INSERT INTO tblTFTransactionDynamicNM(
 				intTransactionId
-				, strCounty
-				, strLocation
+				, strNMCounty
+				, strNMLocation
 			)
 			SELECT Trans.intTransactionId
 				, strCounty = ISNULL(TACL.strCounty, '')
@@ -134,7 +134,7 @@ BEGIN TRY
 			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 			LEFT JOIN vyuTFGetTaxAuthorityCountyLocation TACL ON TACL.intEntityId = Invoice.intEntityCustomerId AND TACL.intEntityLocationId = Invoice.intShipToLocationId
 			WHERE Trans.strTransactionType = 'Invoice'
-				AND Trans.intProductCodeId != NULL
+				AND ISNULL(Trans.intProductCodeId, '') != ''
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
