@@ -29,6 +29,34 @@ BEGIN
 	 DECLARE @intCurrencyId INT
 	SELECT @intCurrencyId =intDefaultCurrencyId FROM tblSMCompanyPreference
 
+	DECLARE @CustomerId AS Id
+
+	INSERT INTO @CustomerId
+	SELECT DISTINCT CUS.intEntityId
+	FROM gasctmst
+	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gasct_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE gasct_in_out_ind = 'I'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblAPVendor
+			WHERE strVendorId = CUS.strCustomerNumber
+			)
+
+	UNION ALL
+
+	SELECT DISTINCT CUS.intEntityId
+	FROM gastlmst
+	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastl_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE gastl_pur_sls_ind = 'P'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblAPVendor
+			WHERE strVendorId = CUS.strCustomerNumber
+			)
+
+	EXEC uspEMConvertCustomerToVendor @CustomerId
+		,@UserId
+
 	
 	SET IDENTITY_INSERT tblSCTicket ON
 
@@ -175,7 +203,7 @@ BEGIN
 	,intContractSequence	   = gasct_cnt_seq
 	,strContractLocation	   = LTRIM(RTRIM(gasct_cnt_loc))
 	,dblUnitPrice			   = gasct_un_prc
-	,dblUnitBasis			   = NULL
+	,dblUnitBasis			   = 0
 	,dblTicketFees			   = gasct_fees
 	,intCurrencyId			   = ISNULL(CY.intCurrencyID,@intCurrencyId)
 	,dblCurrencyRate		   = gasct_currency_rt
