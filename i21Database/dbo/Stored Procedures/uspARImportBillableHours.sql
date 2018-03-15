@@ -118,7 +118,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		SELECT
 			@NewInvoiceId												--[intInvoiceId]
 			,V.[intItemId]												--[intItemId]
-			,IC.[strDescription] + ' - ' + V.strTicketNumber			--strItemDescription] 
+			--,IC.[strDescription] + ' - ' + V.strTicketNumber			--strItemDescription] 
+			,V.strTicketNumber + ' - ' + V.strSubject					--strItemDescription] 
 			,V.intItemUOMId												--[intItemUOMId]
 			,ISNULL(IL.intIssueUOMId, V.intItemUOMId)					--[intOrderUOMId]
 			,V.[intHours]												--[dblQtyOrdered]
