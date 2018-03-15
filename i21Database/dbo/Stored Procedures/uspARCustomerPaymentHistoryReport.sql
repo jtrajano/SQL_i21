@@ -135,7 +135,7 @@ FROM (
 		 , dtmDatePaid			= PAYMENTS.dtmDatePaid
 		 , dblAmountPaid		= ISNULL(PAYMENTS.dblAmountPaid, 0)
 		 , dblAmountApplied		= ISNULL(PAYMENTS.dblAmountApplied, 0)
-		 , dblInvoiceTotal		= I.dblInvoiceTotal
+		 , dblInvoiceTotal		= dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal
 		 , dblAmountDue			= (dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal) - ISNULL(PAYMENTS.dblAmountApplied, 0)  -- CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END	 
 		 , intPaymentId			= PAYMENTS.intPaymentId	 
 		 , strReferenceNumber	= PAYMENTS.strPaymentInfo
@@ -273,7 +273,7 @@ OUTER APPLY (
 	GROUP BY intInvoiceId
 ) TOTALPAYMENTS
 
-UPDATE #TmpPayments SET dblBareInvoiceTotal = dblInvoiceTotal, dblBareInvoiceTotalPayment = 0 WHERE rownm = 1
+UPDATE #TmpPayments SET dblBareInvoiceTotal = dblInvoiceTotal, dblBareInvoiceTotalPayment = CASE WHEN strPaid = 'Yes' THEN dblInvoiceTotal ELSE 0 END WHERE rownm = 1
 
 DECLARE @Tmp TABLE
 (
