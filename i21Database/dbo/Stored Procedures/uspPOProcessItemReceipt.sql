@@ -276,7 +276,7 @@ BEGIN
 				LEFT JOIN tblICItemUOM iu
 					ON iu.intItemId = POD.intItemId 
 					AND iu.intItemUOMId = POD.intUnitOfMeasureId 
-		WHERE	PO.intPurchaseId = @poId
+		WHERE	PO.intPurchaseId = @poId  AND POD.intItemId IS NOT NULL
 
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty 
