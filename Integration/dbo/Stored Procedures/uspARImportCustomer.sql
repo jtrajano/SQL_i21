@@ -894,7 +894,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = (SELECT TOP 1 intAccountStatusId FROM tblARCustomerAccountStatus WHERE intEntityCustomerId = Cus.intEntityId)),
 				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
-				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 )
+				ptcus_terms_code = (SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255 ),
+				ptcus_bill_to = CASE WHEN ISNULL(BillToLocation.strOriginLinkCustomer, '''') <> '''' THEN BillToLocation.strOriginLinkCustomer ELSE '''' END
 				--ptcus_dpa_cnt = Cus.strDPAContract,
 				--ptcus_dpa_rev_dt = CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 				--ptcus_gb_rcpt_no = Cus.strGBReceiptNumber,
@@ -915,6 +916,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				INNER JOIN tblEMEntityLocation Loc 
 					ON Ent.intEntityId = Loc.intEntityId 
 						and Loc.ysnDefaultLocation = 1
+				LEFT JOIN tblEMEntityLocation BillToLocation
+					ON Cus.intBillToId = BillToLocation.intEntityLocationId
+						AND BillToLocation.intEntityId = Cus.intEntityId
 				LEFT JOIN tblEMEntityPhoneNumber P
 					ON P.intEntityId = Con.intEntityId
 				LEFT JOIN tblEMEntityMobileNumber M
@@ -963,7 +967,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_acct_stat_x_1,
 				ptcus_slsmn_id,
 				ptcus_srv_cd,
-				ptcus_terms_code
+				ptcus_terms_code,
+				ptcus_bill_to				
 				--agcus_dpa_cnt
 				--agcus_dpa_rev_dt,
 				--agcus_gb_rcpt_no,
@@ -1017,7 +1022,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
 				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
-				(SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255)
+				(SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255),
+				Ent.strEntityNo
 				--Cus.strDPAContract,
 				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 				--Cus.strGBReceiptNumber,
@@ -1039,12 +1045,22 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				INNER JOIN tblEMEntityLocation Loc 
 					ON Ent.intEntityId = Loc.intEntityId 
 						and Loc.ysnDefaultLocation = 1
+				LEFT JOIN tblEMEntityLocation BillToLocation
+					ON Cus.intBillToId = BillToLocation.intEntityLocationId
+						AND BillToLocation.intEntityId = Cus.intEntityId
 				LEFT JOIN tblEMEntityPhoneNumber P
 					ON P.intEntityId = Con.intEntityId
 				LEFT JOIN tblEMEntityMobileNumber M
 					ON M.intEntityId = Con.intEntityId	
 				WHERE Ent.strEntityNo =  @CustomerId
 
+				UPDATE Loc 
+					SET strOriginLinkCustomer = Ent.strEntityNo
+					FROM tblEMEntity Ent
+						INNER JOIN tblEMEntityLocation Loc 
+							ON Ent.intEntityId = Loc.intEntityId 
+								and Loc.ysnDefaultLocation = 1
+				WHERE Ent.strEntityNo =  @CustomerId
 
 		RETURN;
 		END
@@ -1469,8 +1485,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					END
 
 					--INSERT into Location
-					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
+					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation], [strOriginLinkCustomer])
+					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault, @originCustomer)
 
 					DECLARE @EntityLocationId INT
 					SET @EntityLocationId = SCOPE_IDENTITY()
@@ -1545,6 +1561,30 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						INNER JOIN tblEMEntity EM ON EM.intEntityId = CUS.intEntityId
 						LEFT JOIN tblEMEntityLocation LOC ON LOC.intEntityId = EM.intEntityId AND LOC.strLocationName =ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO''
 						WHERE ADR.ptadr_key = @originCustomer AND LOC.intEntityLocationId IS NULL
+
+
+						DECLARE @EntityLocationIdTable TABLE(
+							id 		INT
+						)
+						INSERT INTO @EntityLocationIdTable(id)
+						SELECT intEntityLocationId 
+							FROM tblEMEntityLocation 
+								WHERE intEntityId = @EntityId AND ISNULL(strOriginLinkCustomer, '''') = ''''
+
+						DECLARE @CurrentLocationId INT
+						WHILE EXISTS (SELECT TOP 1 1 FROM @EntityLocationIdTable)
+						BEGIN
+							SELECT @CurrentLocationId = id FROM @EntityLocationIdTable
+
+								EXEC uspEMCreateOriginCustomer @EntityLocationId = @CurrentLocationId
+
+							DELETE FROM @EntityLocationIdTable WHERE id = @CurrentLocationId	
+						END
+						
+
+
+
+
 
 					--INSERT into tblARCustomerToContact
 					DECLARE @CustomerToContactId INT
