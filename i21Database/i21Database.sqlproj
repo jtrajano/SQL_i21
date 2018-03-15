@@ -6245,6 +6245,7 @@
     <Build Include="dbo\Views\vyuARBatchPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

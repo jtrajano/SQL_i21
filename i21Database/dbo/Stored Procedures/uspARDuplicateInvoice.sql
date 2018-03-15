@@ -151,6 +151,35 @@ WHERE
 	IF(@NewDocumentId > 0)
 	BEGIN
 		SET @intDocumentMaintenanceId = @NewDocumentId
+		--should we move this to its own procedure
+		DECLARE @DocumentMaintenanceTable TABLE(
+			intDocumentMaintenanceMessageId		INT,
+			strCurrentMessage					NVARCHAR(MAX)
+		)
+
+		
+		INSERT INTO @DocumentMaintenanceTable(intDocumentMaintenanceMessageId, strCurrentMessage)
+		SELECT 
+				intDocumentMaintenanceMessageId,
+				CAST(CAST(blbMessage AS VARCHAR(MAX)) AS NVARCHAR(MAX)) + CASE WHEN strHeaderFooter = 'Header' THEN ' DUP: ' + @InvoiceNumber ELSE '' END
+			FROM tblSMDocumentMaintenanceMessage
+				WHERE intDocumentMaintenanceId = @NewDocumentId AND strHeaderFooter = 'Header'
+
+		DECLARE @CurrentDocumentMaintenanceMessageId INT
+		DECLARE @CurrentMessage NVARCHAR(MAX)
+		WHILE EXISTS(SELECT TOP 1 1 FROM @DocumentMaintenanceTable)
+		BEGIN
+			SELECT TOP 1  
+				@CurrentDocumentMaintenanceMessageId = intDocumentMaintenanceMessageId
+				,@CurrentMessage = strCurrentMessage
+			FROM @DocumentMaintenanceTable
+
+			EXEC uspSMEditDocumentMessage @CurrentDocumentMaintenanceMessageId,  @CurrentMessage
+
+			DELETE FROM @DocumentMaintenanceTable WHERE intDocumentMaintenanceMessageId = @CurrentDocumentMaintenanceMessageId
+			
+		END
+
 	END
 
 
