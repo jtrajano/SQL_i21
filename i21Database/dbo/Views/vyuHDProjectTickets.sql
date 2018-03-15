@@ -11,6 +11,7 @@
 			,strCustomerName = ''--cusEnt.strName
 			,strContactName = conEnt.strName
 			,strModule = m.strModule
+			,strPriority = prio.strPriority
 			,strAssignedTo = assEnt.strName
 			,t.dtmDueDate
 			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101)
@@ -27,6 +28,9 @@
 			,strTicketType = tt.strType
 			,t.intSequenceInProject
 			,task.intProjectId
+			,strPriorityBackColor = prio.strBackColor
+			,strPriorityFontColor = prio.strFontColor
+			,strPriorityIcon = prio.strIcon
 		from
 			tblHDTicket t
 			/*
@@ -40,4 +44,5 @@
 			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 			left outer join tblHDTicketType tt on tt.intTicketTypeId = t.intTicketTypeId
 			left outer join tblHDProjectTask task on task.intTicketId = t.intTicketId
+			left outer join tblHDTicketPriority prio on prio.intTicketPriorityId = t.intTicketPriorityId
 		where t.intTicketTypeId not in (select top 1 intTicketTypeId from tblHDTicketType where strType = 'Template')
