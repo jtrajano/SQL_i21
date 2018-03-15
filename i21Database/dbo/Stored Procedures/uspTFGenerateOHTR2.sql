@@ -117,49 +117,49 @@ BEGIN TRY
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
-		SELECT @Gasoline_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Gasoline'
-		SELECT @Gasoline_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Gasoline'
-		SELECT @Gasoline_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Gasoline'
+		SELECT @Gasoline_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'Gasoline'
+		SELECT @Gasoline_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'Gasoline'
+		SELECT @Gasoline_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'Gasoline'
 		SET @Gasoline_4 = @Gasoline_14A + @Gasoline_14B + @Gasoline_14C
 
-		SELECT @ClearDiesel_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Clear Diesel'
-		SELECT @ClearDiesel_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Clear Diesel'
-		SELECT @ClearDiesel_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'Clear Diesel'
+		SELECT @ClearDiesel_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'Clear Diesel'
 		SET @ClearDiesel_4 = @ClearDiesel_14A + @ClearDiesel_14B + @ClearDiesel_14C
 		
-		SELECT @LowSulfur_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Low Sulfur Dyed Diesel'
-		SELECT @LowSulfur_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Low Sulfur Dyed Diesel'
-		SELECT @LowSulfur_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'Low Sulfur Dyed Diesel'
+		SELECT @LowSulfur_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'Low Sulfur Dyed Diesel'
 		SET @LowSulfur_4 = @LowSulfur_14A + @LowSulfur_14B + @LowSulfur_14C
 
-		SELECT @HighSulfur_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'High Sulfur Dyed Diesel'
-		SELECT @HighSulfur_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'High Sulfur Dyed Diesel'
-		SELECT @HighSulfur_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'High Sulfur Dyed Diesel'
+		SELECT @HighSulfur_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'High Sulfur Dyed Diesel'
 		SET @HighSulfur_4 = @HighSulfur_14A + @HighSulfur_14B + @HighSulfur_14C
 
-		SELECT @Kerosene_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Kerosene'
-		SELECT @Kerosene_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Kerosene'
-		SELECT @Kerosene_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Kerosene'
+		SELECT @Kerosene_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'Kerosene'
+		SELECT @Kerosene_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'Kerosene'
+		SELECT @Kerosene_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'Kerosene'
 		SET @Kerosene_4 = @Kerosene_14A + @Kerosene_14B + @Kerosene_14C
 
-		SELECT @CNG_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'CNG'
-		SELECT @CNG_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'CNG'
-		SELECT @CNG_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'CNG'
+		SELECT @CNG_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'CNG'
+		SELECT @CNG_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'CNG'
+		SELECT @CNG_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'CNG'
 		SET @CNG_4 = @CNG_14A + @CNG_14B + @CNG_14C
 
-		SELECT @LNG_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'LNG'
-		SELECT @LNG_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'LNG'
-		SELECT @LNG_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'LNG'
+		SELECT @LNG_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'LNG'
+		SELECT @LNG_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'LNG'
+		SELECT @LNG_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'LNG'
 		SET @LNG_4 = @LNG_14A + @LNG_14B + @LNG_14C
 
-		SELECT @Propane_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Propane'
-		SELECT @Propane_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Propane'
-		SELECT @Propane_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Propane'
+		SELECT @Propane_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'Propane'
+		SELECT @Propane_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'Propane'
+		SELECT @Propane_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'Propane'
 		SET @Propane_4 = @Propane_14A + @Propane_14B + @Propane_14C
 
-		SELECT @Other_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14A' AND strType = 'Other'
-		SELECT @Other_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14B' AND strType = 'Other'
-		SELECT @Other_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR' AND strScheduleCode = '14C' AND strType = 'Other'
+		SELECT @Other_14A = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14A' AND strType = 'Other'
+		SELECT @Other_14B = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14B' AND strType = 'Other'
+		SELECT @Other_14C = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strFormCode = 'TR2' AND strScheduleCode = '14C' AND strType = 'Other'
 		SET @Other_4 = @Other_14A + @Other_14B + @Other_14C
 
 		SET @Total_5 = @Gasoline_4 + @ClearDiesel_4 + @LowSulfur_4 + @HighSulfur_4 + @Kerosene_4 + @CNG_4 + @LNG_4 + @Propane_4 + @Other_4
