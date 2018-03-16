@@ -62,7 +62,7 @@ AS
 	,A.dblSummerDailyUse
 	,A.dblWinterDailyUse
 	,A.ysnAdjustBurnRate
-	,A.strPricingLevelName
+	,S.strPricingLevelName
 	,A.dblPriceAdjustment
 	,T.strClockNumber
 	,A.strClassFillOption
