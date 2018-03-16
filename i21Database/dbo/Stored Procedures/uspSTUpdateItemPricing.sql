@@ -667,6 +667,9 @@ FROM @tblTempOne
 --OLD
 --SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
 
+-- Update Register Notification
+EXEC uspSTUpdateRegisterNotification
+
 END TRY
 
 BEGIN CATCH       

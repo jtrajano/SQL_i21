@@ -647,7 +647,9 @@ FROM @tblTempOne
 
 --OLD
 --SELECT  @RecCount as RecCount,  @UpdateCount as UpdateRebateOrDiscountCount	
-	  
+
+-- Update Register Notification
+EXEC uspSTUpdateRegisterNotification	  
 
 END TRY
 
