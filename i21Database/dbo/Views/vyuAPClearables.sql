@@ -32,15 +32,32 @@ SELECT	DISTINCT
 			,dblQtyVouchered = CASE WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
 			,dblQtyToVoucher = dblOpenQty
 			,dblAmountToVoucher = CASE 
-									WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - (totalVouchered.dblTotal),0)
-									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - ISNULL(dblItemsPayable + dblTaxesPayable,0),0)
+									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - (totalVouchered.dblTotal),0)
+									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL(dblItemsPayable + dblTaxesPayable,0)
 									ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
 			,dblChargeAmount = 0
 			,strContainer = strContainerNumber
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityId
 			CROSS APPLY (
-				SELECT	* 
+				SELECT	intInventoryReceiptId
+						,intInventoryReceiptItemId
+						,dblReceiptQty
+						,dblVoucherQty
+						,dtmReceiptDate
+						,strReceiptNumber
+						,strBillOfLading
+						,strOrderNumber
+						,dtmLastVoucherDate
+						,strAllVouchers
+						,dblReceiptLineTotal
+						,dblReceiptTax
+						,dblItemsPayable
+						,dblTaxesPayable
+						,dblVoucherLineTotal
+						,dblVoucherTax
+						,dblOpenQty
+						,strContainerNumber
 				FROM	vyuICGetInventoryReceiptVoucherItems items
 				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
@@ -49,7 +66,8 @@ SELECT	DISTINCT
 				INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
 				WHERE 
-				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
+				AND  A.ysnPosted = 0
 			) bill
 			OUTER APPLY (
 				SELECT 
@@ -230,7 +248,7 @@ SELECT DISTINCT
 		THEN Bill.dblDetailTotal + ISNULL(CASE WHEN ysnCheckoffTax > 0 THEN ReceiptCharge.dblTax ELSE ABS(ReceiptCharge.dblTax) END,0) * -1 
 		ELSE Bill.dblDetailTotal + ISNULL(CASE WHEN ysnCheckoffTax > 0 THEN ReceiptCharge.dblTax ELSE ABS(ReceiptCharge.dblTax) END,0) 
 	  END,0) AS dblAmountDue 
-	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) ELSE 0 END  
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
