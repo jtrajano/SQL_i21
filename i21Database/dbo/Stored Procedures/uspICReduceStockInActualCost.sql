@@ -67,7 +67,7 @@ BEGIN
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
-						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+						-- AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1 -- We can skip the date filter since it has an actual cost id. 
 			) cb 
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
