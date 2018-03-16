@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets18bb987407773e4fdcd9b5c7609796b9d336d7dca76df3d40eeb4289d1e9fb4c))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets9e7f42073218c5dcc2471600dc1d8dfef6b02089ea2aa0ce5365d2ca9d2e56f6))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -22,15 +22,15 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
-    internal sealed class ViewsForBaseEntitySets18bb987407773e4fdcd9b5c7609796b9d336d7dca76df3d40eeb4289d1e9fb4c : DbMappingViewCache
+    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
+    internal sealed class ViewsForBaseEntitySets9e7f42073218c5dcc2471600dc1d8dfef6b02089ea2aa0ce5365d2ca9d2e56f6 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "18bb987407773e4fdcd9b5c7609796b9d336d7dca76df3d40eeb4289d1e9fb4c"; }
+            get { return "9e7f42073218c5dcc2471600dc1d8dfef6b02089ea2aa0ce5365d2ca9d2e56f6"; }
         }
 
         /// <summary>
@@ -14478,12 +14478,17 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemRunningStock
-        [CodeFirstDatabaseSchema.vyuICGetItemRunningStock](T1.vyuICGetItemRunningStock_intKey, T1.vyuICGetItemRunningStock_intItemId, T1.vyuICGetItemRunningStock_strItemNo, T1.vyuICGetItemRunningStock_intLocationId, T1.vyuICGetItemRunningStock_strLocationName, T1.vyuICGetItemRunningStock_intSubLocationId, T1.vyuICGetItemRunningStock_strSubLocationName, T1.vyuICGetItemRunningStock_intStorageLocationId, T1.vyuICGetItemRunningStock_strStorageLocationName, T1.vyuICGetItemRunningStock_intLotId, T1.vyuICGetItemRunningStock_strLotNumber, T1.vyuICGetItemRunningStock_intOwnershipType, T1.vyuICGetItemRunningStock_dtmAsOfDate, T1.vyuICGetItemRunningStock_dblQty)
+        [CodeFirstDatabaseSchema.vyuICGetItemRunningStock](T1.vyuICGetItemRunningStock_intKey, T1.vyuICGetItemRunningStock_intItemId, T1.vyuICGetItemRunningStock_strItemNo, T1.vyuICGetItemRunningStock_intItemUOMId, T1.vyuICGetItemRunningStock_strItemUOM, T1.vyuICGetItemRunningStock_strItemUOMType, T1.vyuICGetItemRunningStock_ysnStockUnit, T1.vyuICGetItemRunningStock_dblUnitQty, T1.vyuICGetItemRunningStock_intLocationId, T1.vyuICGetItemRunningStock_strLocationName, T1.vyuICGetItemRunningStock_intSubLocationId, T1.vyuICGetItemRunningStock_strSubLocationName, T1.vyuICGetItemRunningStock_intStorageLocationId, T1.vyuICGetItemRunningStock_strStorageLocationName, T1.vyuICGetItemRunningStock_intLotId, T1.vyuICGetItemRunningStock_strLotNumber, T1.vyuICGetItemRunningStock_intOwnershipType, T1.vyuICGetItemRunningStock_intItemOwnerId, T1.vyuICGetItemRunningStock_dtmExpiryDate, T1.vyuICGetItemRunningStock_intWeightUOMId, T1.vyuICGetItemRunningStock_strWeightUOM, T1.vyuICGetItemRunningStock_dblWeight, T1.vyuICGetItemRunningStock_dblWeightPerQty, T1.vyuICGetItemRunningStock_intLotStatusId, T1.vyuICGetItemRunningStock_strLotStatus, T1.vyuICGetItemRunningStock_strLotPrimaryStatus, T1.vyuICGetItemRunningStock_intOwnerId, T1.vyuICGetItemRunningStock_strOwner, T1.vyuICGetItemRunningStock_dtmAsOfDate, T1.vyuICGetItemRunningStock_dblQty, T1.vyuICGetItemRunningStock_dblCost)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemRunningStock_intKey, 
             T.intItemId AS vyuICGetItemRunningStock_intItemId, 
             T.strItemNo AS vyuICGetItemRunningStock_strItemNo, 
+            T.intItemUOMId AS vyuICGetItemRunningStock_intItemUOMId, 
+            T.strItemUOM AS vyuICGetItemRunningStock_strItemUOM, 
+            T.strItemUOMType AS vyuICGetItemRunningStock_strItemUOMType, 
+            T.ysnStockUnit AS vyuICGetItemRunningStock_ysnStockUnit, 
+            T.dblUnitQty AS vyuICGetItemRunningStock_dblUnitQty, 
             T.intLocationId AS vyuICGetItemRunningStock_intLocationId, 
             T.strLocationName AS vyuICGetItemRunningStock_strLocationName, 
             T.intSubLocationId AS vyuICGetItemRunningStock_intSubLocationId, 
@@ -14493,8 +14498,20 @@ namespace Edm_EntityMappingGeneratedViews
             T.intLotId AS vyuICGetItemRunningStock_intLotId, 
             T.strLotNumber AS vyuICGetItemRunningStock_strLotNumber, 
             T.intOwnershipType AS vyuICGetItemRunningStock_intOwnershipType, 
+            T.intItemOwnerId AS vyuICGetItemRunningStock_intItemOwnerId, 
+            T.dtmExpiryDate AS vyuICGetItemRunningStock_dtmExpiryDate, 
+            T.intWeightUOMId AS vyuICGetItemRunningStock_intWeightUOMId, 
+            T.strWeightUOM AS vyuICGetItemRunningStock_strWeightUOM, 
+            T.dblWeight AS vyuICGetItemRunningStock_dblWeight, 
+            T.dblWeightPerQty AS vyuICGetItemRunningStock_dblWeightPerQty, 
+            T.intLotStatusId AS vyuICGetItemRunningStock_intLotStatusId, 
+            T.strLotStatus AS vyuICGetItemRunningStock_strLotStatus, 
+            T.strLotPrimaryStatus AS vyuICGetItemRunningStock_strLotPrimaryStatus, 
+            T.intOwnerId AS vyuICGetItemRunningStock_intOwnerId, 
+            T.strOwner AS vyuICGetItemRunningStock_strOwner, 
             T.dtmAsOfDate AS vyuICGetItemRunningStock_dtmAsOfDate, 
             T.dblQty AS vyuICGetItemRunningStock_dblQty, 
+            T.dblCost AS vyuICGetItemRunningStock_dblCost, 
             True AS _from0
         FROM InventoryEntities.vyuICGetItemRunningStocks AS T
     ) AS T1");
@@ -14508,12 +14525,17 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemRunningStocks
-        [iRely.Inventory.Model.vyuICGetItemRunningStock](T1.vyuICGetItemRunningStock_intKey, T1.vyuICGetItemRunningStock_intItemId, T1.vyuICGetItemRunningStock_strItemNo, T1.vyuICGetItemRunningStock_intLocationId, T1.vyuICGetItemRunningStock_strLocationName, T1.vyuICGetItemRunningStock_intSubLocationId, T1.vyuICGetItemRunningStock_strSubLocationName, T1.vyuICGetItemRunningStock_intStorageLocationId, T1.vyuICGetItemRunningStock_strStorageLocationName, T1.vyuICGetItemRunningStock_intLotId, T1.vyuICGetItemRunningStock_strLotNumber, T1.vyuICGetItemRunningStock_intOwnershipType, T1.vyuICGetItemRunningStock_dtmAsOfDate, T1.vyuICGetItemRunningStock_dblQty)
+        [iRely.Inventory.Model.vyuICGetItemRunningStock](T1.vyuICGetItemRunningStock_intKey, T1.vyuICGetItemRunningStock_intItemId, T1.vyuICGetItemRunningStock_strItemNo, T1.vyuICGetItemRunningStock_intItemUOMId, T1.vyuICGetItemRunningStock_strItemUOM, T1.vyuICGetItemRunningStock_strItemUOMType, T1.vyuICGetItemRunningStock_ysnStockUnit, T1.vyuICGetItemRunningStock_dblUnitQty, T1.vyuICGetItemRunningStock_intLocationId, T1.vyuICGetItemRunningStock_strLocationName, T1.vyuICGetItemRunningStock_intSubLocationId, T1.vyuICGetItemRunningStock_strSubLocationName, T1.vyuICGetItemRunningStock_intStorageLocationId, T1.vyuICGetItemRunningStock_strStorageLocationName, T1.vyuICGetItemRunningStock_intLotId, T1.vyuICGetItemRunningStock_strLotNumber, T1.vyuICGetItemRunningStock_intOwnershipType, T1.vyuICGetItemRunningStock_intItemOwnerId, T1.vyuICGetItemRunningStock_dtmExpiryDate, T1.vyuICGetItemRunningStock_intWeightUOMId, T1.vyuICGetItemRunningStock_strWeightUOM, T1.vyuICGetItemRunningStock_dblWeight, T1.vyuICGetItemRunningStock_dblWeightPerQty, T1.vyuICGetItemRunningStock_intLotStatusId, T1.vyuICGetItemRunningStock_strLotStatus, T1.vyuICGetItemRunningStock_strLotPrimaryStatus, T1.vyuICGetItemRunningStock_intOwnerId, T1.vyuICGetItemRunningStock_strOwner, T1.vyuICGetItemRunningStock_dtmAsOfDate, T1.vyuICGetItemRunningStock_dblQty, T1.vyuICGetItemRunningStock_dblCost)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemRunningStock_intKey, 
             T.intItemId AS vyuICGetItemRunningStock_intItemId, 
             T.strItemNo AS vyuICGetItemRunningStock_strItemNo, 
+            T.intItemUOMId AS vyuICGetItemRunningStock_intItemUOMId, 
+            T.strItemUOM AS vyuICGetItemRunningStock_strItemUOM, 
+            T.strItemUOMType AS vyuICGetItemRunningStock_strItemUOMType, 
+            T.ysnStockUnit AS vyuICGetItemRunningStock_ysnStockUnit, 
+            T.dblUnitQty AS vyuICGetItemRunningStock_dblUnitQty, 
             T.intLocationId AS vyuICGetItemRunningStock_intLocationId, 
             T.strLocationName AS vyuICGetItemRunningStock_strLocationName, 
             T.intSubLocationId AS vyuICGetItemRunningStock_intSubLocationId, 
@@ -14523,8 +14545,20 @@ namespace Edm_EntityMappingGeneratedViews
             T.intLotId AS vyuICGetItemRunningStock_intLotId, 
             T.strLotNumber AS vyuICGetItemRunningStock_strLotNumber, 
             T.intOwnershipType AS vyuICGetItemRunningStock_intOwnershipType, 
+            T.intItemOwnerId AS vyuICGetItemRunningStock_intItemOwnerId, 
+            T.dtmExpiryDate AS vyuICGetItemRunningStock_dtmExpiryDate, 
+            T.intWeightUOMId AS vyuICGetItemRunningStock_intWeightUOMId, 
+            T.strWeightUOM AS vyuICGetItemRunningStock_strWeightUOM, 
+            T.dblWeight AS vyuICGetItemRunningStock_dblWeight, 
+            T.dblWeightPerQty AS vyuICGetItemRunningStock_dblWeightPerQty, 
+            T.intLotStatusId AS vyuICGetItemRunningStock_intLotStatusId, 
+            T.strLotStatus AS vyuICGetItemRunningStock_strLotStatus, 
+            T.strLotPrimaryStatus AS vyuICGetItemRunningStock_strLotPrimaryStatus, 
+            T.intOwnerId AS vyuICGetItemRunningStock_intOwnerId, 
+            T.strOwner AS vyuICGetItemRunningStock_strOwner, 
             T.dtmAsOfDate AS vyuICGetItemRunningStock_dtmAsOfDate, 
             T.dblQty AS vyuICGetItemRunningStock_dblQty, 
+            T.dblCost AS vyuICGetItemRunningStock_dblCost, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetItemRunningStock AS T
     ) AS T1");

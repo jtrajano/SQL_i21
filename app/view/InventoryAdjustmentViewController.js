@@ -33,7 +33,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 disabled: '{current.ysnPosted}'
             },
             cboLocation: {
-                value: '{current.strLocation}',
+                value: '{current.strLocationName}',
                 origValueField: 'intCompanyLocationId',
                 origUpdateField: 'intLocationId',
                 store: '{location}',
@@ -148,31 +148,33 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strLotNumber',
                     text: '{setLotNumberLabel}',
                     editor: {
-                        store: '{lot}',
-                        defaultFilters: [
-                            {
-                                column: 'intItemId',
-                                value: '{grdInventoryAdjustment.selection.intItemId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intLocationId',
-                                value: '{current.intLocationId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intSubLocationId',
-                                value: '{grdInventoryAdjustment.selection.intSubLocationId}',
-                                conjunction: 'and',
-                                condition: 'blk'
-                            },
-                            {
-                                column: 'intStorageLocationId',
-                                value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
-                                conjunction: 'and',
-                                condition: 'blk'
-                            }
-                        ],
+                        //store: '{lot}',
+                        store: '{itemRunningQty}',
+                        defaultFilters: '{runningQtyFilter}',
+                        // defaultFilters: [
+                        //     {
+                        //         column: 'intItemId',
+                        //         value: '{grdInventoryAdjustment.selection.intItemId}',
+                        //         conjunction: 'and'
+                        //     },
+                        //     {
+                        //         column: 'intLocationId',
+                        //         value: '{current.intLocationId}',
+                        //         conjunction: 'and'
+                        //     },
+                        //     {
+                        //         column: 'intSubLocationId',
+                        //         value: '{grdInventoryAdjustment.selection.intSubLocationId}',
+                        //         conjunction: 'and',
+                        //         condition: 'blk'
+                        //     },
+                        //     {
+                        //         column: 'intStorageLocationId',
+                        //         value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
+                        //         conjunction: 'and',
+                        //         condition: 'blk'
+                        //     }
+                        // ],
                         readOnly: '{formulaShowLotNumberEditor}'
                     }
                 },
@@ -210,33 +212,36 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strItemUOM',
                     hidden: '{formulaHideColumn_colUOM}',
                     editor: {
-                        store: '{itemUOM}',
-                        defaultFilters: [
-
-                            {
-                                column: 'intLocationId',
-                                value: '{current.intLocationId}',
-                                conjunction: 'and'
-                            },
-                           /* {
-                                column: 'intLocationId',
-                                value: '',
-                                conjunction: 'or',
-                                condition: 'blk'
-                            },*/
-                            {
-                                column: 'intItemId',
-                                value: '{grdInventoryAdjustment.selection.intItemId}',
-                                conjunction: 'and'
-                            }//,
-                            // {
-                            //     column: 'dblOnHand',
-                            //     value: '{getOnHandFilterValue}',
-                            //     conjunction: 'and',
-                            //     condition: 'gt'
-                            // }
-                        ],
+                        //store: '{itemUOM}',
+                        store: '{itemRunningQty}',
+                        defaultFilters: '{runningQtyFilter}',
+                        origValueField: 'intItemUOMId',
                         readOnly: '{formulaShowItemUOMEditor}'
+                        // defaultFilters: [
+
+                        //     {
+                        //         column: 'intLocationId',
+                        //         value: '{current.intLocationId}',
+                        //         conjunction: 'and'
+                        //     },
+                        //    /* {
+                        //         column: 'intLocationId',
+                        //         value: '',
+                        //         conjunction: 'or',
+                        //         condition: 'blk'
+                        //     },*/
+                        //     {
+                        //         column: 'intItemId',
+                        //         value: '{grdInventoryAdjustment.selection.intItemId}',
+                        //         conjunction: 'and'
+                        //     }//,
+                        //     // {
+                        //     //     column: 'dblOnHand',
+                        //     //     value: '{getOnHandFilterValue}',
+                        //     //     conjunction: 'and',
+                        //     //     condition: 'gt'
+                        //     // }
+                        // ],
                     }
                 },
 
@@ -474,7 +479,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             enableActivity: true,
             createTransaction: Ext.bind(me.createTransaction, me),
             enableAudit: true,
-            include: 'vyuICGetInventoryAdjustment, tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
+            //include: 'vyuICGetInventoryAdjustment, tblICInventoryAdjustmentDetails.vyuICGetInventoryAdjustmentDetail',
             onSaveClick: me.saveAndPokeGrid(win, grdInventoryAdjustment),
             createRecord: me.createRecord,
             validateRecord: me.validateRecord,
@@ -486,6 +491,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             details: [
                 {
                     key: 'tblICInventoryAdjustmentDetails',
+                    lazy: true,
                     component: Ext.create('iRely.grid.Manager', {
                         grid: grdInventoryAdjustment,
                         deleteButton: win.down('#btnRemoveItem')
@@ -672,43 +678,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     },
 
     createRecord: function (config, action) {
-        var today = new Date();
-        var newRecord = Ext.create('Inventory.model.Adjustment');
-        var defaultLocation = iRely.config.Security.CurrentDefaultLocation; 
-
-        newRecord.set('intAdjustmentType', '1');
-        newRecord.set('dtmAdjustmentDate', today);
-        newRecord.set('ysnPosted', false);
-
-        if (defaultLocation){
-            newRecord.set('intLocationId', defaultLocation);
-            Ext.create('i21.store.CompanyLocationBuffered', {
-                storeId: 'icReceiptCompanyLocation',
-                autoLoad: {
-                    filters: [
-                        {
-                            dataIndex: 'intCompanyLocationId',
-                            value: defaultLocation,
-                            condition: 'eq'
-                        }
-                    ],
-                    params: {
-                        columns: 'strLocationName:intCompanyLocationId:'
-                    },
-                    callback: function(records, operation, success){
-                        var record; 
-                        if (records && records.length > 0) {
-                            record = records[0];
-                        }
-
-                        if(success && record){
-                            newRecord.set('strLocation', record.get('strLocationName'));
-                            newRecord.set('intLocationId', record.get('intCompanyLocationId'));
-                        }
-                    }
-                }
-            });            
-        } 
+        
+        var newRecord = Ext.create('Inventory.model.Adjustment', {
+            intAdjustmentType: 1,
+            intLocationId: iRely.Configuration.Security.CurrentDefaultLocation,
+            strLocationName: iRely.Configuration.Security.CurrentDefaultLocationName
+        });
 
         action(newRecord);
     },
@@ -827,24 +802,28 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             // Populate the default data.
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
-            current.set('dblCost', record.get('dblLastCost'));
-            current.set('dblNewCost', record.get('dblLastCost'));
-            me.getStockQuantity(current, win);
+            //current.set('dblCost', record.get('dblLastCost'));
+            //current.set('dblNewCost', record.get('dblLastCost'));
+            
+            var strLotTracking = record.get('strLotTracking');
+            current.set('strLotTracking', strLotTracking);
 
             // Check if selected item lot-tracking = NO.
             // Non Lot items will need to use stock UOM.
-            var strLotTracking = record.get('strLotTracking');
 
-            if (strLotTracking == 'No') {
-                current.set('intItemUOMId', record.get('intStockUOMId'));
-                current.set('strItemUOM', record.get('strStockUOM'));
-                current.set('dblItemUOMUnitQty', record.get('dblStockUnitQty'));
-            }
-            else {
+            // if (strLotTracking == 'No') {
+            //     current.set('intItemUOMId', record.get('intStockUOMId'));
+            //     current.set('strItemUOM', record.get('strStockUOM'));
+            //     current.set('dblItemUOMUnitQty', record.get('dblStockUnitQty'));
+            //     current.set('dblQuantity', record.get('dblStockUnitQty'));
+
+            //     me.getStockQuantity(current, win);
+            // }
+            // else {
                 current.set('intItemUOMId', null);
                 current.set('strItemUOM', null);
                 current.set('dblItemUOMUnitQty', null);
-            }
+            //}
 
             // Clear the values for the following fields:
             current.set('strOwnershipType', 'Own');
@@ -869,7 +848,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblWeightPerQty', null);
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
-            current.set('strLotTracking', strLotTracking);
 
             // Set the editor for Lot and UOM
             var cboLotNumber = win.down('#cboLotNumber');
@@ -953,10 +931,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strNewItemDescription', record.get('strDescription'));
         }
         else if (combo.itemId === 'cboLotNumber') {
+            var iowt = record.get('intOwnershipType');
+
             current.set('intLotId', record.get('intLotId'));
-            current.set('dblQuantity', record.get('dblQty'));
+            current.set('dblQuantity', iowt == 1 ? record.get('dblRunningAvailableQty') : record.get('dblStorageAvailableQty'));
             current.set('dblWeight', record.get('dblWeight'));
-            current.set('dblCost', record.get('dblCost') * record.get('dblItemUOMUnitQty'));
+            current.set('dblCost', record.get('dblCost') * record.get('dblUnitQty'));
             current.set('dblWeightPerQty', record.get('dblWeightPerQty'));
             current.set('intItemUOMId', record.get('intItemUOMId'));
             current.set('dblItemUOMUnitQty', record.get('dblItemUOMUnitQty'));
@@ -994,10 +974,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strNewSubLocation', null);
             current.set('intNewStorageLocationId', null);
             current.set('strNewStorageLocation', null);
-            var iowt = record.get('intOwnershipType');
-            var sowt = iowt === 1 ? 'Own' : 'Storage';
+
             current.set('intOwnershipType', iowt);
-            current.set('strOwnershipType', sowt);
+            current.set('strOwnershipType', iowt === 1 ? 'Own' : 'Storage');
             
         }
         else if (combo.itemId === 'cboNewUOM') {
@@ -1017,11 +996,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
         else if (combo.itemId === 'cboUOM') {
             // Recalculate the unit cost
-            var currentUnitCost = current.get('dblCost')
+            var currentUnitCost = current.get('dblCost') ? current.get('dblCost') : record.get('dblCost')
                 , currentItemUOMUnitQty = current.get('dblItemUOMUnitQty')
+                //, selectedUnitCost = record.get('dblCost')
                 , selectedItemUOMUnitQty = record.get('dblUnitQty')
-                , selectedOnHandQty = record.get('dblOnHand')
-                , selectedOnStorageQty = record.get('dblUnitStorage')
+                , selectedOnHandQty = record.get('dblRunningAvailableQty')
+                , selectedOnStorageQty = record.get('dblStorageAvailableQty')
                 , newUnitCost;
 
             if (Ext.isNumeric(currentUnitCost)
@@ -1055,12 +1035,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewQuantity', newQty);
 
             //Set Sub and Storage Locations
-            if(iRely.Functions.isEmpty(record.get('intItemStockUOMId'))) {
-                current.set('intStorageLocationId', record.get('intStorageLocationId'));
-                current.set('strStorageLocation', record.get('strStorageLocationName'));
-                current.set('intSubLocationId', record.get('intStorageLocationId'));
-                current.set('strSubLocation', record.get('strSubLocationName'));
-            }
+            //if(iRely.Functions.isEmpty(record.get('intItemStockUOMId'))) {
+            current.set('intSubLocationId', record.get('intSubLocationId'));
+            current.set('strSubLocation', record.get('strSubLocationName'));
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+            current.set('strStorageLocation', record.get('strStorageLocationName'));
+            //}
 
             //Set Available Quantity Per UOm
             current.set('dblQuantity', qty);
@@ -1114,9 +1094,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             itemId = record.get('intItemId'),
             subLocationId = record.get('intSubLocationId'),
             storageLocationId = record.get('intStorageLocationId'),
-            asOfDate = current.get('dtmAdjustmentDate');
+            asOfDate = Ext.Date.format(current.get('dtmAdjustmentDate'),'Y-m-d'),
+            ysnLotTracked = record.get('strLotTracking') !== 'No' ? true : false;
         
-        var qty = 0;
+        var qty = 0,
+            cost = 0;
 
         var filters = [
             {
@@ -1126,20 +1108,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 conjunction: 'and'
             },
             {
-                inner: [
-                    {
-                        column: 'dtmAsOfDate',
-                        value: asOfDate,
-                        condition: 'lt',
-                        conjunction: 'or'
-                    },
-                    {
-                        column: 'dtmAsOfDate',
-                        value: asOfDate,
-                        condition: 'eq',
-                        conjunction: 'or'
-                    }
-                ],
+                column: 'dtmAsOfDate',
+                value: asOfDate,
+                condition: 'lte',
                 conjunction: 'and'
             },{
                 column: 'intLocationId',
@@ -1149,62 +1120,55 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             }
         ];
 
-        if(subLocationId)
-            filters.push([{ column: 'intSubLocationId', value: subLocationId, condition: 'eq', conjunction: 'and'}]);
-        if(storageLocationId)
-            filters.push([{ column: 'intStorageLocationId', value: storageLocationId, condition: 'eq', conjunction: 'and'}]);
+        if(subLocationId && storageLocationId){
+            filters.push({ column: 'intSubLocationId', value: subLocationId, condition: 'eq', conjunction: 'and' },
+                { column: 'intStorageLocationId', value: storageLocationId, condition: 'eq', conjunction: 'and' });
 
-        Inventory.Utils.ajax({
-            timeout: 120000,   
-            //url: './inventory/api/item/getitemstockuomsummary',
-            url: './inventory/api/item/getitemrunningstock',
-            params: {
-                // ItemId: itemId,
-                // LocationId: locationId,
-                // SubLocationId: subLocationId,
-                // StorageLocationId: storageLocationId
-                filter: iRely.Functions.encodeFilters(filters)
-            } 
-        })
-        .map(function(x) { return Ext.decode(x.responseText); })
-        .subscribe(
-            function(data) {
-                if (data.success) {
-                    if (data.data.length > 0) {
-                        var stockRecord = data.data[0];
-                        qty = stockRecord.dblRunningAvailableQty;
-
-                        // if(record.get('intOwnershipType') === 2)
-                        //     qty = stockRecord.dblUnitStorage;
+            Inventory.Utils.ajax({
+                timeout: 120000,   
+                url: './inventory/api/item/getitemrunningstock',
+                params: {
+                    filter: iRely.Functions.encodeFilters(filters)
+                } 
+            })
+            .map(function(x) { return Ext.decode(x.responseText); })
+            .subscribe(
+                function(data) {
+                    if (data.success) {
+                        if (data.data.length > 0) {
+                            var stockRecord = data.data[0];
+                            qty = record.get('intOwnershipType') === 1 ? stockRecord.dblRunningAvailableQty : stockRecord.dblStorageAvailableQty;
+                            cost = stockRecord.dblCost;
+                        }
                     }
-                }
-                else {
-                    iRely.Functions.showErrorDialog(data.message.statusText);
-                }
+                    else {
+                        iRely.Functions.showErrorDialog(data.message.statusText);
+                    }
 
-                record.set('dblQuantity', qty);
-                var adjustByQuantity = record.get('dblAdjustByQuantity')
-                var newQty = null;
+                    record.set('dblQuantity', qty);
+                    var adjustByQuantity = record.get('dblAdjustByQuantity')
+                    var newQty = null;
 
-                if (Ext.isNumeric(qty) && Ext.isNumeric(adjustByQuantity)) {
-                    newQty = qty + adjustByQuantity;
-                }
-                record.set('dblNewQuantity', newQty); 
+                    if (Ext.isNumeric(qty) && Ext.isNumeric(adjustByQuantity)) {
+                        newQty = qty + adjustByQuantity;
+                    }
+                    record.set('dblNewQuantity', newQty); 
 
-                if(iRely.Functions.isEmpty(record.get('intLotId'))) {
-                    record.set('intLotId', stockRecord.intLotId);
-                    record.set('strLotNumber', stockRecord.strLotNumber);
-                    record.set('intSubLocationId', stockRecord.intSubLocationId);
-                    record.set('strSubLocation', stockRecord.strSubLocationName);
-                    record.set('intStorageLocationId', stockRecord.intStorageLocationId);
-                    record.set('strStorageLocation', stockRecord.strStorageLocationName);
+                    if(ysnLotTracked) {
+                        record.set('intLotId', stockRecord.intLotId);
+                        record.set('strLotNumber', stockRecord.strLotNumber);
+                        record.set('intSubLocationId', stockRecord.intSubLocationId);
+                        record.set('strSubLocation', stockRecord.strSubLocationName);
+                        record.set('intStorageLocationId', stockRecord.intStorageLocationId);
+                        record.set('strStorageLocation', stockRecord.strStorageLocationName);
+                    }
+                },
+                function(error) {
+                    var json = Ext.decode(error.responseText);
+                    iRely.Functions.showErrorDialog(json.ExceptionMessage);
                 }
-            },
-            function(error) {
-                var json = Ext.decode(error.responseText);
-                iRely.Functions.showErrorDialog(json.ExceptionMessage);
-            }
-        );
+            );
+        }
     },
 
     /**
@@ -1628,11 +1592,17 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         var win = obj.up('window');
+        var strLotTracking = current.get('strLotTracking');
 
-         if (current && (newValue === null || newValue === '')) {
+        if (current && (newValue === null || newValue === '')) {
             current.set('intStorageLocationId', null);
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', '');
+            current.set('dblQuantity', 0);
+        } else if(current && newValue && strLotTracking == 'No'){
             me.getStockQuantity(current, win);
         }
+
     },
 
     // onItemNoBeforeQuery: function (obj) {
@@ -1683,6 +1653,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (current && (newValue === null || newValue === '')) {
             current.set('dblQuantity', 0);
             current.set('intSubLocationId', null);
+            current.set('intStorageLocationId', null);
+            current.set('strSubLocation', '');
+            current.set('strStorageLocation', '');
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', '');
         }
     },
 
