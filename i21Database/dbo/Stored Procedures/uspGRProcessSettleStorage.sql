@@ -1209,6 +1209,9 @@ BEGIN TRY
 			END
 		END
 
+		UPDATE @voucherDetailStorage SET dblQtyReceived   = dblQtyReceived* -1   WHERE ISNULL(dblCost,0) < 0
+		UPDATE @voucherDetailStorage SET dblCost		  =	dblCost* -1		     WHERE ISNULL(dblCost,0) < 0
+
 		EXEC [dbo].[uspAPCreateBillData] 
 			 @userId = @UserKey
 			,@vendorId = @EntityId
