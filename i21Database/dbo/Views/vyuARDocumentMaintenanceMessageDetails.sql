@@ -3,6 +3,7 @@
 	SELECT 
 		intDocumentMaintenanceId, 
 		strCode, 
+		strTitle,
 		ISNULL(Header,'') AS strHeader, 
 		ISNULL(Footer,'') AS strFooter FROM
 (
