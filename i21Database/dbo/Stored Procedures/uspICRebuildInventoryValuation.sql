@@ -397,12 +397,18 @@ BEGIN
 		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
 			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
 
-		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [intSortByQty] ASC, [id] ASC);') 
+		--EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [intSortByQty] ASC, [id] ASC);') 
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				,id2 = intInventoryTransactionId
-				,intSortByQty = CASE WHEN dblQty > 0 THEN 1 ELSE 2 END 
+				,intSortByQty = 
+					CASE 
+						WHEN dblQty > 0 AND strTransactionForm <> 'Invoice' THEN 1 
+						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
+						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 3
+						ELSE 4
+					END  
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -438,7 +444,19 @@ BEGIN
 				,dblForexRate 
 				,strActualCostId
 		FROM	#tmpUnOrderedICTransaction
-		ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC , intInventoryTransactionId ASC
+		ORDER BY 
+			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC
+			,CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
+			,
+			CASE 
+				WHEN dblQty > 0 AND strTransactionForm <> 'Invoice' THEN 1 
+				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
+				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 3
+				ELSE 4
+			END 
+			ASC 
+
+		--ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC , intInventoryTransactionId ASC
 	END
 	ELSE 
 	BEGIN 
@@ -446,7 +464,7 @@ BEGIN
 		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
 			ON dbo.#tmpICInventoryTransaction(strBatchId ASC);
 
-		EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
+		--EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
@@ -487,7 +505,10 @@ BEGIN
 				,dblForexRate 
 				,strActualCostId
 		FROM	#tmpUnOrderedICTransaction
-		ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+		ORDER BY 
+			--CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
+			intInventoryTransactionId ASC 
+		--ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
 	END
 
 END
