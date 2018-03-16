@@ -76,7 +76,7 @@ SELECT	DISTINCT
 				WHERE A.intInventoryReceiptChargeId IS NULL AND A.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
-WHERE ((dblReceiptQty - dblVoucherQty)) != 0 AND bill.ysnPosted = 0
+WHERE ((dblReceiptQty - dblVoucherQty)) != 0 --AND bill.ysnPosted = 0
 UNION ALL 
 
 --QUERY FOR RECEIPT VENDOR ACCRUE CHARGES
