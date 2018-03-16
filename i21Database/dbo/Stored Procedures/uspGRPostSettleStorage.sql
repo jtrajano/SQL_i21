@@ -995,6 +995,9 @@ BEGIN TRY
 					GROUP BY intCustomerStorageId
 				)b ON b.intCustomerStorageId=a.intCustomerStorageId
 				WHERE a.intItemType=3
+		     
+			 IF EXISTS(SELECT 1 FROM @SettleVoucherCreate WHERE ISNULL(dblCashPrice,0) <> 0 AND ISNULL(dblUnits,0) <> 0 )
+			 BEGIN
 
 				INSERT INTO @voucherDetailStorage 
 				(
@@ -1032,7 +1035,7 @@ BEGIN TRY
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId			
-				WHERE a.dblCashPrice <> 0 AND SST.intSettleStorageId=@intSettleStorageId
+				WHERE a.dblCashPrice <> 0 AND a.dblUnits <> 0 AND SST.intSettleStorageId=@intSettleStorageId 
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 	 
 				---Adding Freight Charges.
@@ -1210,6 +1213,9 @@ BEGIN TRY
 					IF @@ERROR <> 0
 						GOTO SettleStorage_Exit;
 				END
+			
+			END
+
 			END
 
 			-------------------------xxxxxxxxxxxxxxxxxx------------------------------
@@ -1309,7 +1315,7 @@ BEGIN TRY
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
 					,[dblPaidAmount]		= SV.dblCashPrice
-					,[intBillId]			= @intCreatedBillId
+					,[intBillId]			= CASE WHEN @intCreatedBillId=0 THEN NULL ELSE @intCreatedBillId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
 				FROM @SettleVoucherCreate SV
@@ -1319,7 +1325,7 @@ BEGIN TRY
 			END
 
 			UPDATE tblGRSettleStorage
-			SET ysnPosted = 1,intBillId = @intCreatedBillId
+			SET ysnPosted = 1,intBillId = CASE WHEN @intCreatedBillId=0 THEN NULL ELSE @intCreatedBillId END
 			WHERE intSettleStorageId = @intSettleStorageId
 		END
 
