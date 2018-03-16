@@ -9,6 +9,7 @@
 	SELECT 
 			intDocumentMaintenanceId,
 			strCode,
+			strTitle,
 			strHeaderFooter,
 			strMessage
 	FROM vyuARDocumentMaintenanceMessage
