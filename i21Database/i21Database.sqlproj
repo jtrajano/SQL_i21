@@ -6250,6 +6250,7 @@
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateRegisterNotification.sql" />
     <Build Include="dbo\Views\vyuPRReportEmployeeEarningsRegister.sql" />
+    <Build Include="dbo\Views\vyuTRGetCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
