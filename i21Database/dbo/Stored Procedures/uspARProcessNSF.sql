@@ -1,8 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessNSF]
 	  @intNSFTransactionId	INT
 	, @intUserId			INT
-	, @strCreatedIvoices	NVARCHAR(MAX)	= NULL OUTPUT
+	, @strCreatedIvoices VARCHAR(500) = NULL OUTPUT
+	, @strMessage	VARCHAR(500)	= NULL OUTPUT
+
 AS
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
 DECLARE @intNSFPaymentMethodId INT = NULL
 
@@ -265,4 +272,18 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 
 UPDATE tblARNSFStagingTableDetail 
 SET ysnProcessed = 1 
+WHERE intNSFTransactionId = @intNSFTransactionId
+
+
+
+SELECT @strMessage = 
+ CASE WHEN ysnInvoiceToCustomer = 1 THEN
+			'Invoice created for NSF Charge : ' + @strCreatedIvoices
+ ELSE
+	'Bank Deposit: '+ vyu.strTransactionId + ' and Receive Payment: '+  vyu.strRecordNumber+' are reversed'
+ END
+ FROM 
+vyuARPaymentBankTransaction vyu
+INNER JOIN tblARNSFStagingTableDetail NSFDetail
+	ON vyu.intPaymentId = NSFDetail.intPaymentId
 WHERE intNSFTransactionId = @intNSFTransactionId
