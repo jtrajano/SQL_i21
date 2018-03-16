@@ -6260,6 +6260,9 @@
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
     <Build Include="dbo\Tables\tblHDCallDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateCallDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateRegisterNotification.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployeeEarningsRegister.sql" />
+    <Build Include="dbo\Views\vyuTRGetCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

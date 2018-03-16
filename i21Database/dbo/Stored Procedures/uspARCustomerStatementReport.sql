@@ -14,6 +14,7 @@
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
 	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
+	, @intEntityUserId				AS INT				= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -44,6 +45,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @queryRunningBalance				AS NVARCHAR(MAX)	= ''
 	  , @queryRunningBalanceBudget			AS NVARCHAR(MAX)	= ''
 	  , @intWriteOffPaymentMethodId			AS INT				= NULL
+	  , @intEntityUserIdLocal				AS INT				= NULL
 
 DECLARE @temp_statement_table TABLE(
 	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -112,6 +114,7 @@ SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
 SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
+SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
@@ -207,12 +210,13 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
 
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 		  strCustomerName
 		, strCustomerNumber
 		, strCustomerInfo
 		, intEntityCustomerId
+		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
 		, dblFuture
@@ -232,10 +236,12 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strSourceTransaction
 		, strCompanyName
 		, strCompanyAddress
+		, strAgingType
 )
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
+										  , @intEntityUserId = @intEntityUserIdLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 
@@ -470,13 +476,15 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 		UPDATE tblARCustomerAgingStagingTable
 		SET dbl0Days = 0
+		WHERE intEntityUserId = @intEntityUserIdLocal
+		  AND strAgingType = 'Summary'
 	END
 
 
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
 		DELETE FROM @temp_statement_table WHERE (((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) = 0
-		DELETE FROM tblARCustomerAgingStagingTable WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
+		DELETE FROM tblARCustomerAgingStagingTable WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0) AND intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 	END
 
 IF @ysnPrintCreditBalanceLocal = 0
@@ -532,7 +540,7 @@ WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
-TRUNCATE TABLE tblARCustomerStatementStagingTable
+DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = @strStatementFormatLocal
 INSERT INTO tblARCustomerStatementStagingTable (
 	  strReferenceNumber
 	, intEntityCustomerId
@@ -567,7 +575,10 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dblCredits
 	, dblPrepayments
 	, dtmAsOfDate
-	, blbLogo)
+	, blbLogo
+	, intEntityUserId
+	, strStatementFormat
+)
 SELECT MAINREPORT.* 
 	 , dblCreditAvailable	= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
 	 , dblFuture			= ISNULL(AGINGREPORT.dblFuture, 0)
@@ -581,6 +592,8 @@ SELECT MAINREPORT.*
 	 , dblPrepayments		= ISNULL(AGINGREPORT.dblPrepayments, 0)
 	 , dtmAsOfDate			= @dtmDateToLocal
 	 , blbLogo				= dbo.fnSMGetCompanyLogo('Header')
+	 , intEntityUserId		= @intEntityUserIdLocal
+	 , strStatementFormat	= @strStatementFormatLocal
 FROM (
 	SELECT STATEMENTREPORT.strReferenceNumber
 		 , STATEMENTREPORT.intEntityCustomerId
@@ -657,8 +670,11 @@ FROM (
 ) MAINREPORT
 LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+	AND AGINGREPORT.intEntityUserId = @intEntityUserIdLocal
+	AND AGINGREPORT.strAgingType = 'Summary'
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 
-
 UPDATE tblARCustomerStatementStagingTable
-	SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
+SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
+WHERE intEntityUserId = @intEntityUserIdLocal
+  AND strStatementFormat = @strStatementFormatLocal

@@ -10,6 +10,7 @@
 	[intMasterId] INT NULL,
     [intConcurrencyId]           INT            CONSTRAINT [DF_tblTFTerminalControlNumber_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblTFTerminalControlNumber] PRIMARY KEY CLUSTERED ([intTerminalControlNumberId] ASC),
-    CONSTRAINT [FK_tblTFTerminalControlNumber_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId])
+    CONSTRAINT [FK_tblTFTerminalControlNumber_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId]), 
+    CONSTRAINT [AK_tblTFTerminalControlNumber_strTerminalControlNumber] UNIQUE ([strTerminalControlNumber]) 
 );
 

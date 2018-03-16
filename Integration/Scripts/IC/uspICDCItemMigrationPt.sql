@@ -14,7 +14,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- Inventory/Item data migration from ptitmmst origin table to tblICItem i21 table 
 -- Section 1

@@ -8,7 +8,8 @@
 	@strCustomerName		NVARCHAR(MAX) = NULL,
 	@strAccountStatusCode	NVARCHAR(100) = NULL,
 	@ysnInclude120Days		BIT = 0,
-	@strCustomerIds			NVARCHAR(MAX) = NULL
+	@strCustomerIds			NVARCHAR(MAX) = NULL,
+	@intEntityUserId		INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -27,7 +28,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strCustomerNameLocal		NVARCHAR(MAX) = NULL,
 		@strAccountStatusCodeLocal	NVARCHAR(100) = NULL,
 		@intSalespersonId			INT = NULL,
-		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL
+		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL,
+		@intEntityUserIdLocal		INT = NULL
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -45,6 +47,7 @@ SET @intEntityCustomerIdLocal	= NULLIF(@intEntityCustomerId, 0)
 SET @strCustomerNameLocal		= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountStatusCode, '')
 SET @strCustomerIdsLocal		= NULLIF(@strCustomerIds, '')
+SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
@@ -144,11 +147,6 @@ BEGIN
     DROP TABLE #POSTEDINVOICES
 END
 
-IF(OBJECT_ID('tempdb..#PREPAIDS') IS NOT NULL)
-BEGIN
-    DROP TABLE #PREPAIDS
-END
-
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -223,14 +221,6 @@ WHERE ysnPosted = 1
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
 	
---#PREPAIDS
-SELECT intPrepaymentId
-	 , dblAppliedInvoiceAmount = SUM(dblAppliedInvoiceAmount)
-INTO #PREPAIDS
-FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK) 
-WHERE ysnApplied = 1
-GROUP BY intPrepaymentId
-
 SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
 	 , strCustomerInfo		= CUSTOMER.strCustomerName + CHAR(13) + CUSTOMER.strCustomerNumber
@@ -239,6 +229,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intInvoiceId			= AGING.intInvoiceId
 	 , strBOLNumber			= AGING.strBOLNumber
 	 , intEntityCustomerId  = AGING.intEntityCustomerId
+	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
@@ -264,6 +255,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strType				= AGING.strType
 	 , strCompanyName		= COMPANY.strCompanyName
 	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strAgingType			= 'Detail'
 FROM
 (SELECT A.strInvoiceNumber
      , B.strRecordNumber
@@ -358,7 +350,7 @@ SELECT I.intInvoiceId
 	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	 , dtmDatePaid			= NULL
 	 , I.intEntityCustomerId
-	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 	 , dblPrepayments		= 0
 	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
@@ -370,7 +362,6 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId		
-	LEFT JOIN #PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 
 UNION ALL
@@ -382,13 +373,12 @@ SELECT I.intInvoiceId
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , I.intEntityCustomerId
 	 , dblAvailableCredit	= 0
-	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
 	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #PREPAIDS PC ON I.intInvoiceId = PC.intPrepaymentId 
 WHERE I.strTransactionType = 'Customer Prepayment'
 						      
 UNION ALL      
@@ -427,20 +417,7 @@ LEFT JOIN (
 		FROM dbo.tblAPPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	) P ON PD.intPaymentId = P.intPaymentId
-
-	UNION ALL
-
-	SELECT PC.intInvoiceId
-		 , strRecordNumber			= I.strInvoiceNumber
-		 , PC.intPrepaymentId
-		 , dblAppliedInvoiceAmount	= dblAppliedInvoiceAmount
-	FROM dbo.tblARPrepaidAndCredit PC WITH (NOLOCK) 
-	INNER JOIN (SELECT intInvoiceId
-					 , strInvoiceNumber
-				FROM dbo.tblARInvoice WITH (NOLOCK)
-	) I ON I.intInvoiceId = PC.intPrepaymentId
-	WHERE ysnApplied = 1	
+	) P ON PD.intPaymentId = P.intPaymentId	
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
  

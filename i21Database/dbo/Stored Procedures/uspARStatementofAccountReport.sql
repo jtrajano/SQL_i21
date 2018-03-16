@@ -35,6 +35,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@ysnActiveCustomers			AS BIT
 		,@ysnIncludeWriteOffPayment		AS BIT
 		,@xmlDocumentId					AS INT
+		,@intEntityUserId				AS INT
 		,@query							AS NVARCHAR(MAX)
 		,@filter						AS NVARCHAR(MAX) = ''
 		,@fieldname						AS NVARCHAR(50)
@@ -71,6 +72,7 @@ DECLARE @temp_SOA_table TABLE(
 	,[strStatementFormat]		NVARCHAR(100)	
 	,[dtmDateFrom]				DATETIME
 	,[dtmDateTo]				DATETIME
+	,[intEntityUserId]			INT
 )
 
 -- Prepare the XML 
@@ -146,6 +148,10 @@ SELECT @ysnIncludeWriteOffPayment = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'ysnIncludeWriteOffPayment'
 
+SELECT @intEntityUserId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'intEntityUserId'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -159,6 +165,7 @@ ELSE
 	
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
+SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
@@ -181,6 +188,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
+			, @intEntityUserId				= @intEntityUserId
 	END
 ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
 	BEGIN
@@ -200,6 +208,7 @@ ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balan
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
+			, @intEntityUserId				= @intEntityUserId
 	END
 ELSE IF @strStatementFormat = 'Payment Activity'
 	BEGIN
@@ -218,6 +227,7 @@ ELSE IF @strStatementFormat = 'Payment Activity'
 			, @strCustomerIds				= @strCustomerIds
 			, @ysnEmailOnly					= @ysnEmailOnly
 			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
+			, @intEntityUserId				= @intEntityUserId
 	END
 
 INSERT INTO @temp_SOA_table
@@ -231,5 +241,6 @@ SELECT @strCustomerName
 	 , ISNULL(@strStatementFormat, 'Open Item')
 	 , @dtmDateFrom
 	 , @dtmDateTo
+	 , @intEntityUserId
 
 SELECT * FROM @temp_SOA_table

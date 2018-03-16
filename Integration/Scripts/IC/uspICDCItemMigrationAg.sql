@@ -246,8 +246,10 @@ INSERT INTO [dbo].[tblICItemLocation] (
 	,intReceiveUOMId
 	,intAllowNegativeInventory
 	,intConcurrencyId
+	,dblReorderPoint
 	) (
-SELECT inv.intItemId
+SELECT 
+	inv.intItemId
 	,loc.intCompanyLocationId
 	,vnd.intEntityId
 	,1 intCostingMethod

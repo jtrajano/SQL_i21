@@ -7,7 +7,8 @@
 	[strTransactionDate]	VARCHAR(MAX)	COLLATE Latin1_General_CI_AS,
 	[dblTotalAmount]		NUMERIC(18,6),
 	[ysnHasEmailSetup]		BIT				NOT NULL	CONSTRAINT [DF_tblARSearchStatementCustomer_ysnHasEmailSetup] DEFAULT ((0)), 
-	[intConcurrencyId]		[int] NOT NULL	 DEFAULT 0
+	[intConcurrencyId]		[int] NOT NULL	 DEFAULT 0,
+	[intEntityUserId]		INT
 );
 
 

@@ -257,9 +257,10 @@
 :r "..\dbo\Stored Procedures\uspGRImportStorageTicket.sql"
 :r "..\dbo\Stored Procedures\uspGRImportTicketPool.sql"
 :r "..\dbo\Stored Procedures\uspGRImportScaleStation.sql"
+:r "..\dbo\Stored Procedures\uspGRImportSettleScaleTicket.sql"
 :r "..\dbo\Stored Procedures\uspGRImportScaleTicket.sql"
 :r "..\dbo\Stored Procedures\uspGRImportCustomerSplit.sql"
-
+:r "..\dbo\Stored Procedures\uspGRImportFreightSettlement.sql"
 
 --CONTRACT
 :r "..\dbo\Stored Procedures\uspCTImportContract.sql"

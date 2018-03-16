@@ -25,6 +25,7 @@ EXEC uspAPPrepaidAndDebit @billId = @voucherId;
 UPDATE A
 	SET A.ysnApplied = 1
 	,A.dblAmountApplied = A.dblBalance
+    ,A.dblBalance = 0
 FROM tblAPAppliedPrepaidAndDebit A
 INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
 WHERE A.intTransactionId IN (SELECT intId FROM @prepaidIds) AND A.intBillId = @voucherId

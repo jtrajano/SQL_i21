@@ -19,6 +19,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@ysnPrintRecap					AS BIT = 1
 		,@ysnPrintDetail				AS BIT = 1
 		,@intEntityCustomerId			AS INT
+		,@intEntityUserId				AS INT
 
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -85,11 +86,16 @@ SELECT @ysnPrintDetail = CASE WHEN ISNULL([from], 'True') = 'True' THEN 1 ELSE 0
 FROM @temp_xml_table
 WHERE [fieldname] IN ('ysnPrintDetail')
 
+SELECT @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
+FROM @temp_xml_table
+WHERE [fieldname] = 'intEntityUserId'
+
 SET @strCustomerName = NULLIF(@strCustomerName, '')
 SET @strInvoiceNumber = NULLIF(@strInvoiceNumber, '')
 SET @strRecordNumber = NULLIF(@strRecordNumber, '')
 SET @strPaymentMethod = NULLIF(@strPaymentMethod, '')
 SET @strAccountStatusCode = NULLIF(@strAccountStatusCode, '')
+SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
 IF @dtmDateFrom IS NULL
     SET @dtmDateFrom = CAST(-53690 AS DATETIME)
@@ -97,12 +103,13 @@ IF @dtmDateFrom IS NULL
 IF @dtmDateTo IS NULL
     SET @dtmDateTo = GETDATE()
 	
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 		  strCustomerName
 		, strCustomerNumber
 		, strCustomerInfo
 		, intEntityCustomerId
+		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
 		, dblFuture
@@ -122,18 +129,21 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strSourceTransaction
 		, strCompanyName
 		, strCompanyAddress
+		, strAgingType
 )
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 									    , @dtmDateTo = @dtmDateTo
 									    , @strCustomerName	= @strCustomerName
+										, @intEntityUserId = @intEntityUserId
 
-TRUNCATE TABLE tblARCustomerActivityStagingTable
+DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARCustomerActivityStagingTable (
 	  strReportDateRange
 	, dtmLastPaymentDate
 	, dblLastPayment
 	, intEntityCustomerId
 	, intInvoiceDetailId
+	, intEntityUserId
 	, strCustomerNumber
 	, strCustomerName
 	, strCustomerAddress
@@ -184,6 +194,7 @@ SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) +
 	, dblLastPayment		= ISNULL(PAYMENT.dblAmountPaid, 0)
 	, intEntityCustomerId	= AGING.intEntityCustomerId
 	, intInvoiceDetailId	= TRANSACTIONS.intInvoiceDetailId
+	, intEntityUserId		= @intEntityUserId
 	, strCustomerNumber		= AGING.strCustomerNumber
 	, strCustomerName		= AGING.strCustomerName	 
 	, strCustomerAddress	= CUSTOMER.strFullAddress
@@ -374,9 +385,13 @@ OUTER APPLY (
 	) SC (strAccountStatusCode)
 	WHERE (@strAccountStatusCode IS NULL OR LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) LIKE '%'+@strAccountStatusCode+'%')
 ) STATUSCODES
+WHERE AGING.intEntityUserId = @intEntityUserId
+  AND AGING.strAgingType = 'Summary'
 ORDER BY TRANSACTIONS.dtmTransactionDate
 
 IF @ysnPrintRecap = 1
 	EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom, @dtmDateTo = @dtmDateTo
 
-SELECT * FROM tblARCustomerActivityStagingTable ORDER BY dtmTransactionDate
+SELECT * FROM tblARCustomerActivityStagingTable 
+WHERE intEntityUserId = @intEntityUserId 
+ORDER BY dtmTransactionDate

@@ -112,3 +112,9 @@ GO
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspCTImportContractText')
 	DROP PROCEDURE uspCTImportContractText
 GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportFreightSettlement')
+	DROP PROCEDURE uspGRImportFreightSettlement
+GO
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGRImportSettleScaleTicket')
+	DROP PROCEDURE uspGRImportSettleScaleTicket
+GO

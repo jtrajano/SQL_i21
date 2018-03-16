@@ -15,6 +15,7 @@
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
 	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
+	, @intEntityUserId				AS INT				= NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,6 +48,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @queryBalanceForward				AS NVARCHAR(MAX)
 	  , @filter								AS NVARCHAR(MAX)	= ''
 	  , @intWriteOffPaymentMethodId			AS INT				= NULL
+	  , @intEntityUserIdLocal				AS INT				= NULL
 
 DECLARE @temp_aging_table TABLE(
      [strCustomerName]          NVARCHAR(100)
@@ -167,6 +169,7 @@ SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @dtmDateFromLocal					= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
+SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
@@ -256,12 +259,13 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
 
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 		  strCustomerName
 		, strCustomerNumber
 		, strCustomerInfo
 		, intEntityCustomerId
+		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
 		, dblFuture
@@ -281,11 +285,13 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strSourceTransaction
 		, strCompanyName
 		, strCompanyAddress
+		, strAgingType
 )		
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
 										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
+										  , @intEntityUserId = @intEntityUserIdLocal
 
 INSERT INTO @temp_aging_table
 SELECT strCustomerName
@@ -310,13 +316,16 @@ SELECT strCustomerName
         , strSalespersonName
 	    , strSourceTransaction
 FROM tblARCustomerAgingStagingTable
+WHERE intEntityUserId = @intEntityUserIdLocal
+  AND strAgingType = 'Summary'
 
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 		  strCustomerName
 		, strCustomerNumber
 		, strCustomerInfo
 		, intEntityCustomerId
+		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
 		, dblFuture
@@ -336,11 +345,13 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strSourceTransaction
 		, strCompanyName
 		, strCompanyAddress
+		, strAgingType
 )
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
 										  , @strCompanyLocation = @strLocationNameLocal											
 										  , @strCustomerName = @strCustomerNameLocal
 										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
+										  , @intEntityUserId = @intEntityUserIdLocal
 
 INSERT INTO @temp_balanceforward_table
 SELECT strCustomerName
@@ -364,6 +375,8 @@ SELECT strCustomerName
         , strSalespersonName
 	    , strSourceTransaction
 FROM tblARCustomerAgingStagingTable
+WHERE intEntityUserId = @intEntityUserIdLocal
+  AND strAgingType = 'Summary'
 
 SET @queryForCF = CAST('' AS NVARCHAR(MAX)) + '
 SELECT intInvoiceId			= NULL
@@ -883,11 +896,12 @@ IF @ysnPrintFromCFLocal = 1
 		UPDATE @temp_statement_table SET strTransactionType = 'Service Charge' WHERE strType = 'Service Charge'
 	END
 	
-TRUNCATE TABLE tblARCustomerStatementStagingTable
+DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Balance Forward'
 INSERT INTO tblARCustomerStatementStagingTable (
 	  intEntityCustomerId
 	, intInvoiceId
 	, intPaymentId
+	, intEntityUserId
 	, dtmDate
 	, dtmDueDate
 	, dtmShipDate
@@ -908,6 +922,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strStatementFooterComment
 	, strCompanyName
 	, strCompanyAddress
+	, strStatementFormat
 	, dblCreditLimit
 	, dblInvoiceTotal
 	, dblPayment
@@ -924,10 +939,12 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dblCredits
 	, dblPrepayments
 	, ysnStatementCreditLimit
-	, blbLogo)
+	, blbLogo
+)
 SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, intInvoiceId				= MAINREPORT.intInvoiceId
 	, intPaymentId				= MAINREPORT.intPaymentId
+	, intEntityUserId			= @intEntityUserId
 	, dtmDate					= MAINREPORT.dtmDate
 	, dtmDueDate				= MAINREPORT.dtmDueDate
 	, dtmShipDate				= MAINREPORT.dtmShipDate
@@ -948,6 +965,7 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, strStatementFooterComment	= MAINREPORT.strStatementFooterComment
 	, strCompanyName			= MAINREPORT.strCompanyName
 	, strCompanyAddress			= MAINREPORT.strCompanyAddress
+	, strStatementFormat		= 'Balance Forward'
 	, dblCreditLimit			= MAINREPORT.dblCreditLimit
 	, dblInvoiceTotal			= MAINREPORT.dblInvoiceTotal
 	, dblPayment				= MAINREPORT.dblPayment
@@ -1041,10 +1059,21 @@ INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intE
 ORDER BY MAINREPORT.dtmDate
 
 UPDATE tblARCustomerStatementStagingTable
-	SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
+SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
+WHERE intEntityUserId = @intEntityUserIdLocal
+  AND strStatementFormat = 'Balance Forward'
 
 IF @ysnPrintZeroBalanceLocal = 0 AND @ysnPrintFromCFLocal = 0
 	BEGIN
-		DELETE FROM tblARCustomerStatementStagingTable 
-		WHERE intEntityCustomerId IN (SELECT DISTINCT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE dblTotalAR = 0)
+		DELETE ORIG
+		FROM tblARCustomerStatementStagingTable ORIG
+		INNER JOIN (
+			SELECT DISTINCT intEntityCustomerId 
+			FROM tblARCustomerStatementStagingTable 
+			WHERE dblTotalAR = 0
+			 AND intEntityUserId = @intEntityUserIdLocal
+		     AND strStatementFormat = 'Balance Forward'
+		) ZERO ON ORIG.intEntityCustomerId = ZERO.intEntityCustomerId
+		AND intEntityUserId = @intEntityUserIdLocal
+		AND strStatementFormat = 'Balance Forward'
 	END

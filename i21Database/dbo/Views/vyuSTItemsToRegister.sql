@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTItemsToRegister]
 AS
-SELECT DISTINCT I.intItemId, URN.intEntityId
+SELECT DISTINCT I.intItemId, EM.intEntityId
 FROM tblICItem I
 JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 JOIN(
@@ -22,7 +22,18 @@ JOIN(
 		OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
 		OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
 		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  )
-	AND dtmDate BETWEEN (SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC) AND GETDATE()
+
+	    AND dtmDate BETWEEN 
+				ISNULL(
+						(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC)
+						, (
+							SELECT TOP 1 dtmDate
+							FROM tblSMAuditLog
+							WHERE strTransactionType = 'Inventory.view.Item'
+							ORDER BY dtmDate ASC
+						)) 
+				AND GETDATE()
+
 ) AS x ON x.intItemId = I.intItemId 
 JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
@@ -35,5 +46,5 @@ JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
 JOIN tblSMUserSecurity SMUS ON SMUS.intCompanyLocationId = IL.intLocationId
 JOIN tblEMEntity EM ON EM.intEntityId = SMUS.intEntityId
-JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = EM.intEntityId
 WHERE I.ysnFuelItem = 0 
+

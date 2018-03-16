@@ -93,8 +93,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	)
 	SELECT intTaxCategoryId = 0, strState = 'NM', strTaxCategory = 'NM Excise Tax Alternative Fuels', intMasterId = 31126
 	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NM', strTaxCategory = 'NM Excise Tax Gasoline', intMasterId = 31127
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NM', strTaxCategory = 'NM Excise Tax Diesel Clear', intMasterId = 31128
-	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NM', strTaxCategory = 'NM Excise Tax Ethanol', intMasterId = 31132
+	UNION ALL SELECT intTaxCategoryId = 0, strState = 'NM', strTaxCategory = 'NM Excise Tax Diesel Clear', intMasterId = 31128	
 	
 	EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = @TaxAuthorityCode, @TaxCategories = @TaxCategories
 
@@ -195,7 +194,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41164', strFormName = 'Alternative Fuels Excise Tax Return (Quarterly)', strScheduleCode = 'Deductions', strScheduleName = 'Gallons for Deductions', strType = 'A-55', strNote = '', strTransactionType = 'Invoice', intSort = 610, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMAlternative', intMasterId = 311202, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41164', strFormName = 'Alternative Fuels Excise Tax Return (Quarterly)', strScheduleCode = 'Form41164', strScheduleName = 'Main Form', strType = '', strNote = 'Alternative Fuels Excise Tax Return Main Form', strTransactionType = 'Inventory', intSort = 620, strSPInventory = '', strSPInvoice = '', strSPRunReport = 'uspTFGenerateNMAlternative', intMasterId = 311203, intComponentTypeId = 2
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41306', strFormName = 'Combined Fuel Tax Report', strScheduleCode = 'A', strScheduleName = 'Gasoline and Ethanol Blended Fuel Sales Delivered into Counties/Locations', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 450, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMCombined', intMasterId = 311204, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41306', strFormName = 'Combined Fuel Tax Report', strScheduleCode = 'Form-41306', strScheduleName = 'Excel Export', strType = '', strNote = '', strTransactionType = '', intSort = 460, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMCombined', intMasterId = 311205, intComponentTypeId = 4	
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'Form 41306', strFormName = 'Combined Fuel Tax Report', strScheduleCode = 'Form-41306', strScheduleName = 'Excel Export', strType = '', strNote = '', strTransactionType = '', intSort = 460, strSPInventory = 'uspTFGetInventoryTax', strSPInvoice = 'uspTFGetInvoiceTax', strSPRunReport = 'uspTFGenerateNMCombined', intMasterId = 311205, intComponentTypeId = 4
 	
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -229,19 +228,19 @@ where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @Tax
 		, intMasterId
 	)
 	SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 31516
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Ethanol', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31517
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31517
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Diesel Clear', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', strCriteria = '<> 0', intMasterId = 31518
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 31519
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Ethanol', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31520
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31520
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Diesel Clear', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', strCriteria = '<> 0', intMasterId = 31521
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 31522
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Ethanol', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strCriteria = '= 0', intMasterId = 31523
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strCriteria = '= 0', intMasterId = 31523
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Diesel Clear', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Special Fuel', strCriteria = '= 0', intMasterId = 31524
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 31525
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Ethanol', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31526
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31526
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Diesel Clear', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Special Fuel', strCriteria = '<> 0', intMasterId = 31527
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 31528
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Ethanol', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31529
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Gasoline', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Ethanol', strCriteria = '<> 0', intMasterId = 31529
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'NM Excise Tax Diesel Clear', strState = 'NM', strFormCode = 'Form 41306', strScheduleCode = '5B', strType = 'Special Fuel', strCriteria = '<> 0', intMasterId = 31530
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
@@ -301,7 +300,120 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, strType
 		, intMasterId
 	)
-	SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317046
+	SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'A-55', intMasterId = 317163
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'CNG', intMasterId = 317157
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LNG', intMasterId = 317160
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LPG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LPG', intMasterId = 317154
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'A-55', intMasterId = 317164
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'CNG', intMasterId = 317158
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'LNG', intMasterId = 317161
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LPG', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'LPG', intMasterId = 317155
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'A-55', intMasterId = 317165
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'CNG', intMasterId = 317159
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'LNG', intMasterId = 317162
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LPG', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'LPG', intMasterId = 317156
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', intMasterId = 316856
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', intMasterId = 316870
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', intMasterId = 316884
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 316814
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 316828
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 316842
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316898
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316914
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316930
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316946
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316962
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316978
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316994
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317010
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317026
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317042
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317058
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317074
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317090
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317106
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317122
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317138
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316857
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316871
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316885
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316827
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316841
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317178
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317179
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317180
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317181
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317182
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317183
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317184
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317185
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317186
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317187
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317188
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316900
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316916
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316932
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316948
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316964
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316980
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316996
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317012
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317028
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317044
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317060
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317076
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317092
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317108
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317124
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317140
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317192
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317193
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317194
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317195
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317197
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317198
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317199
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317200
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317201
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317207
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317208
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317077
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317093
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317109
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317125
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317141
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317189
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317190
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317191
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317196
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317202
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317203
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317204
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317205
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317206
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317209
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316858
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316872
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316886
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316825
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316839
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316853
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316859
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316873
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316887
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316815
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316829
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316843
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316902
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316918
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316934
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316950
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316966
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316982
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316998
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317014
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317030
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317046
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317062
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317078
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317094
@@ -334,27 +446,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 316861
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 316875
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 316889
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317030
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 317014
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316998
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316982
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316966
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316950
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316934
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316918
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', intMasterId = 316902
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316843
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316829
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', intMasterId = 316815
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316887
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316873
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', intMasterId = 316859
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316853
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316839
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Gasoline', intMasterId = 316825
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316886
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316872
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10T', strType = 'Ethanol', intMasterId = 316858
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Ethanol', intMasterId = 317173
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Gasoline', intMasterId = 316817
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '2B', strType = 'Gasoline', intMasterId = 316831
@@ -521,98 +612,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316869
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316883
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Ethanol', intMasterId = 316897
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317192
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317193
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317194
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317195
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317197
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317198
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317199
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317200
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317201
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317207
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317208
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317077
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317093
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317109
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317125
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317141
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317189
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317190
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317191
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317196
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317202
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317203
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317204
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317205
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317206
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'Form 41306', strScheduleCode = '10G', strType = 'Special Fuel', intMasterId = 317209
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316900
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316916
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316932
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316948
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316964
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316980
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 316996
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317012
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317028
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317044
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317060
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317076
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317092
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317108
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317124
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '10F', strType = 'Special Fuel', intMasterId = 317140
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317178
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317179
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317180
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317181
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317182
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317183
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317184
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317185
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317186
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317187
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Special Fuel', intMasterId = 317188
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316827
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Gasoline', intMasterId = 316841
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316857
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316871
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '10A', strType = 'Ethanol', intMasterId = 316885
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316898
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316914
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316930
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316946
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316962
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316978
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 316994
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317010
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317026
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317042
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317058
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317074
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317090
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317106
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317122
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', intMasterId = 317138
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 316814
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 316828
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 316842
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', intMasterId = 316856
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', intMasterId = 316870
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', intMasterId = 316884
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LPG', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'LPG', intMasterId = 317156
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'LNG', intMasterId = 317162
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'CNG', intMasterId = 317159
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'A-55', intMasterId = 317165
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LPG', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'LPG', intMasterId = 317155
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'LNG', intMasterId = 317161
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'CNG', intMasterId = 317158
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Disbursed', strType = 'A-55', intMasterId = 317164
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LPG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LPG', intMasterId = 317154
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'LNG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LNG', intMasterId = 317160
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'CNG', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'CNG', intMasterId = 317157
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'A-55', strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'A-55', intMasterId = 317163
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 316824
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 316838
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Form 41306', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 316852
@@ -664,29 +663,29 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, strStatus
 		, intMasterId
 	)
-	SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31575
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31574
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31576
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31578
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31577
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31579
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31581
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31580
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31582
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31584
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31583
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31585
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31587
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31586
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31588
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31590
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31589
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31591
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31592
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31602
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31601
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31595
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '9', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31598
+	SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31575
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31574
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31576
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Ethanol', strState = 'TX', strStatus = 'Include', intMasterId = 31578
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Gasoline', strState = 'TX', strStatus = 'Include', intMasterId = 31577
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '1A', strType = 'Special Fuel', strState = 'TX', strStatus = 'Include', intMasterId = 31579
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31581
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31580
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31582
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31584
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31583
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31585
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31587
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31586
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31588
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31590
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31589
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31591
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31592
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31602
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31601
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31595
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '9', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31598
 	
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId
@@ -1554,8 +1553,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Form41164', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 311808
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'A-55', ysnStatus = 1, intFrequency = 1, intMasterId = 311807
+	SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'A-55', ysnStatus = 1, intFrequency = 1, intMasterId = 311807
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 311805
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 311806
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Deductions', strType = 'LPG', ysnStatus = 1, intFrequency = 1, intMasterId = 311804
@@ -1567,6 +1565,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 311801
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 311802
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Exemptions', strType = 'LPG', ysnStatus = 1, intFrequency = 1, intMasterId = 311800
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41164', strScheduleCode = 'Form41164', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 311808
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Ethanol', ysnStatus = 1, intFrequency = 1, intMasterId = 311753
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 311752
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'Form 41306', strScheduleCode = '1', strType = 'Special Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 311754
