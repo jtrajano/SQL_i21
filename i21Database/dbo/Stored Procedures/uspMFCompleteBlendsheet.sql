@@ -52,6 +52,7 @@ BEGIN TRY
 		,@dtmProductionDate DateTime
 		,@intShiftId int
 		,@strParentLotNumber NVARCHAR(50)
+		,@strReferenceNo NVARCHAR(50)
 
 	DECLARE @tblQuantityBreakup AS Table
 	(
@@ -83,6 +84,7 @@ BEGIN TRY
 		,@strLotAlias  = strLotAlias
 		,@dtmProductionDate = dtmProductionDate
 		,@intShiftId = intShiftId
+		,@strReferenceNo = strReferenceNo
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -101,6 +103,7 @@ BEGIN TRY
 			,strLotAlias NVARCHAR(50)
 			,dtmProductionDate DateTime
 			,intShiftId int
+			,strReferenceNo NVARCHAR(50)
 			)
 
 	SELECT @dtmCurrentDate = ISNULL(dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId), GETDATE()) 
@@ -336,9 +339,9 @@ BEGIN TRY
 			Set @intStorageLocationId=NULL
 
 		Insert Into tblMFWorkOrderProducedLot(intWorkOrderId,intItemId,dblQuantity,intItemUOMId,dblPhysicalCount,intPhysicalItemUOMId,dblWeightPerUnit,
-		intStorageLocationId,intBatchId,strBatchId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmProductionDate,intConcurrencyId)
+		intStorageLocationId,intBatchId,strBatchId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmProductionDate,strReferenceNo,intConcurrencyId)
 		Values(@intWorkOrderId,@intItemId,@dblQtyToProduce,@intItemUOMId,@dblIssuedQuantity,@intItemIssuedUOMId,@dblWeightPerUnit,
-		@intStorageLocationId,@intBatchId,@strRetBatchId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,ISNULL(@dtmProductionDate,@dtmCurrentDate),1)
+		@intStorageLocationId,@intBatchId,@strRetBatchId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,ISNULL(@dtmProductionDate,@dtmCurrentDate),@strReferenceNo,1)
 
 		EXEC uspMFPostProduction 1
 			,0
@@ -420,6 +423,7 @@ BEGIN TRY
 			SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 			SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, ISNULL(@dtmProductionDate,@dtmCurrentDate)) + '</dtmPlannedDate>'
 			SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, @intShiftId) + '</intPlannedShiftId>'
+			SET @strProduceXml = @strProduceXml + '<strReferenceNo>' + ISNULL(@strReferenceNo,'') + '</strReferenceNo>'
 			SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
 			SET @strProduceXml = @strProduceXml + '</root>'
 
@@ -463,6 +467,7 @@ BEGIN TRY
 				SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 				SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, ISNULL(@dtmProductionDate,@dtmCurrentDate)) + '</dtmPlannedDate>'
 				SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, @intShiftId) + '</intPlannedShiftId>'
+				SET @strProduceXml = @strProduceXml + '<strReferenceNo>' + ISNULL(@strReferenceNo,'') + '</strReferenceNo>'
 				SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>1</ysnIgnoreTolerance>'
 				SET @strProduceXml = @strProduceXml + '</root>'
 
