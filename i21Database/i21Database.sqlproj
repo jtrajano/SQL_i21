@@ -6246,6 +6246,7 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MGLUnpost.sql" />
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
+    <Build Include="dbo\Views\vyuTRGetCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
