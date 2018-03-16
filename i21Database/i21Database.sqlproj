@@ -6249,6 +6249,7 @@
     <Build Include="dbo\Tables\tblSTUpdateRegisterNotification.sql" />
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateRegisterNotification.sql" />
+    <Build Include="dbo\Views\vyuPRReportEmployeeEarningsRegister.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
