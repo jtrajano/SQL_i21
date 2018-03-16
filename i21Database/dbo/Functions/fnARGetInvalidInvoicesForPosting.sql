@@ -1292,6 +1292,7 @@ ELSE
 		INNER JOIN 
 			@Invoices I
 				ON ARPD.[intInvoiceId] = I.[intInvoiceId]
+		WHERE @Recap = 0
 
 		UNION
 		--Invoice with created Bank Deposit
