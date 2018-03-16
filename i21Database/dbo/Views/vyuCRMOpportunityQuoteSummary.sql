@@ -4,8 +4,8 @@
 			a.intSalesOrderId
 			,a.strSalesOrderNumber
 			,a.dblSalesOrderTotal
-			,dblSoftwareAmount = sum(isnull(b.dblLicenseAmount,0))
-			,dblMaintenanceAmount = sum(isnull(b.dblMaintenanceAmount,0))
+			,dblSoftwareAmount = sum(isnull(b.dblLicenseAmount,0) * isnull(b.dblQtyOrdered,0))
+			,dblMaintenanceAmount = sum(isnull(b.dblMaintenanceAmount,0) * isnull(b.dblQtyOrdered,0))
 			,dblOtherAmount = sum(distinct isnull(c.dblTotal,0))
 		from
 			tblSOSalesOrder a
