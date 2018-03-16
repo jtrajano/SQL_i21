@@ -1178,7 +1178,7 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'U
 		SELECT	[strReminder]		=        N'Update',
 				[strType]			=        N'Register',
 				[strMessage]		=        N'{0} Item(s) {2} needed to be sent to the register.',
-				[strQuery]			=        N'SELECT intItemId FROM vyuSTItemsToRegister WHERE intEntityId = {0}',
+				[strQuery]			=        N'SELECT DISTINCT intItemId FROM vyuSTItemsToRegister WHERE intEntityId = {0}',
 				[strNamespace]		=        N'Store.view.UpdateRegister',
 				[intSort]			=        1
 	END
@@ -1186,7 +1186,7 @@ ELSE
 	BEGIN
 		UPDATE [tblSMReminderList]
 		SET [strMessage]  =     N'{0} Item(s) {2} needed to be sent to the register.',
-			[strQuery]	  =     N'SELECT intItemId FROM vyuSTItemsToRegister WHERE intEntityId = {0}',
+			[strQuery]	  =     N'SELECT DISTINCT intItemId FROM vyuSTItemsToRegister WHERE intEntityId = {0}',
 		    [strNamespace]	=   N'Store.view.UpdateRegister'
 		WHERE [strReminder] = N'Update' AND [strType] = N'Register'
 	END
