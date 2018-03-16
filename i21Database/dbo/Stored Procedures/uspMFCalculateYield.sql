@@ -67,6 +67,7 @@ BEGIN TRY
 		,ysnScaled BIT
 		,intStorageLocationId INT
 		,ysnSubstituteItem BIT
+		,intItemUOMId int
 		)
 	DECLARE @tblOutputItem TABLE (
 		intItemRecordKey INT Identity(1, 1)
@@ -165,6 +166,7 @@ BEGIN TRY
 		,ysnScaled
 		,intStorageLocationId
 		,ysnSubstituteItem
+		,intItemUOMId 
 		)
 	SELECT ri.intItemId
 		,ri.dblCalculatedQuantity
@@ -181,6 +183,7 @@ BEGIN TRY
 			ELSE ri.intStorageLocationId
 			END
 		,0
+		,ri.intItemUOMId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
@@ -205,6 +208,7 @@ BEGIN TRY
 		,ysnScaled
 		,intStorageLocationId
 		,ysnSubstituteItem
+		,intItemUOMId 
 		)
 	SELECT rs.intSubstituteItemId
 		,ri.dblCalculatedQuantity
@@ -221,6 +225,7 @@ BEGIN TRY
 			ELSE ri.intStorageLocationId
 			END
 		,1
+		,rs.intItemUOMId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
 		AND rs.intWorkOrderId = ri.intWorkOrderId
@@ -252,7 +257,7 @@ BEGIN TRY
 		AND r.intWorkOrderId = ri.intWorkOrderId
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
-		AND ri.ysnConsumptionRequired = 1
+		--AND ri.ysnConsumptionRequired = 1
 
 	UPDATE tblMFProductionSummary
 	SET dblCalculatedQuantity = I.dblCalculatedQuantity
@@ -348,6 +353,7 @@ BEGIN TRY
 		,@dblWeightPerQty NUMERIC(18, 6)
 		,@intSubLocationId INT
 		,@strInventoryTracking NVARCHAR(50)
+		,@intYieldItemUOMId int
 
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
@@ -361,11 +367,13 @@ BEGIN TRY
 			,@dblYieldQuantity = NULL
 			,@intStorageLocationId = NULL
 			,@intMachineId = NULL
+			,@intYieldItemUOMId=NULL
 
 		SELECT @intItemId = F.intItemId
 			,@dblYieldQuantity = ABS(F.dblYieldQuantity)
 			,@intStorageLocationId = IsNULL(F.intStageLocationId, I.intStorageLocationId)
 			,@intMachineId = F.intMachineId
+			,@intYieldItemUOMId=I.intItemUOMId
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
 		WHERE F.intProductionSummaryId = @intProductionSummaryId
@@ -989,7 +997,7 @@ BEGIN TRY
 							)
 						SELECT @intWorkOrderId
 							,@intLotId
-							,@dblNewQty
+							,dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId,@intWeightUOMId,@dblNewQty)
 							,@intWeightUOMId
 							,@intItemId
 							,@intInventoryAdjustmentId
