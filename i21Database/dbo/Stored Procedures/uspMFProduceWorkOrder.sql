@@ -31,13 +31,13 @@
 	,@ysnFillPartialPallet BIT = 0
 	,@intSpecialPalletLotId INT = NULL
 	,@ysnRecap BIT = 0
+	,@intWorkOrderProducedLotId int=NULL OUTPUT
 	)
 AS
 BEGIN
 	DECLARE @dtmCreated DATETIME
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
-		,@intWorkOrderProducedLotId INT
 		,@intItemOwnerId INT
 		,@intOwnerId INT
 		,@intCategoryId INT

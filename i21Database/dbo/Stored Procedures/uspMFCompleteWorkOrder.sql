@@ -5,6 +5,7 @@
 	,@dtmCurrentDate DATETIME = NULL
 	,@ysnRecap BIT = 0
 	,@strRetBatchId NVARCHAR(40) = '' OUTPUT
+	,@intWorkOrderProducedLotId int=NULL OUTPUT
 	)
 AS
 BEGIN TRY
@@ -891,6 +892,7 @@ BEGIN TRY
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@intSpecialPalletLotId = @intSpecialPalletLotId
 					,@ysnRecap = @ysnRecap
+					,@intWorkOrderProducedLotId=@intWorkOrderProducedLotId OUTPUT
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -968,6 +970,7 @@ BEGIN TRY
 				,@ysnFillPartialPallet = @ysnFillPartialPallet
 				,@intSpecialPalletLotId = @intSpecialPalletLotId
 				,@ysnRecap = @ysnRecap
+				,@intWorkOrderProducedLotId=@intWorkOrderProducedLotId OUTPUT
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (
