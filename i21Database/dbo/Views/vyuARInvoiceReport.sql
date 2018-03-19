@@ -50,7 +50,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 									CASE WHEN INVOICEDETAIL.dblContractBalance = 0 THEN INVOICEDETAIL.dblBalance ELSE INVOICEDETAIL.dblContractBalance END
 								  ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END				
-	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + CHAR(13) + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
