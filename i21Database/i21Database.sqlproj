@@ -6248,6 +6248,7 @@
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
     <Build Include="dbo\Views\vyuTRGetCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricingInsertAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
