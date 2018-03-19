@@ -489,11 +489,11 @@ BEGIN TRY
 	--Create Work Orders
 	insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
 	intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,
-	intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intLoadDistributionDetailId,dtmPlannedDate,intConcurrencyId,dtmCompletedDate)
+	intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intLoadDistributionDetailId,dtmPlannedDate,intConcurrencyId,dtmCompletedDate,intTransactionFrom)
 	OUTPUT inserted.intWorkOrderId,inserted.intInvoiceDetailId INTO @tblWorkOrderOutput
 	Select t.strWorkOrderNo,t.intItemId,t.dblWOQuantity,t.intBlendItemUOMId,13,t.intCellId,t.intMachineId,t.intCompanyLocationId,t.dblBlendBinSize,@dtmDate,1,
 	1,t.dblWOQuantity,o.intBlendRequirementId,GETDATE(),t.intUserId,GETDATE(),t.intUserId,@dtmDate,
-	@intManufacturingProcessId,null,t.intInvoiceDetailId,null,@dtmDate,1,GETDATE()
+	@intManufacturingProcessId,null,t.intInvoiceDetailId,null,@dtmDate,1,GETDATE(),5
 	From @tblInput t 
 	join @tblBlendRequirementOutput o on o.intInvoiceDetailId=t.intInvoiceDetailId
 

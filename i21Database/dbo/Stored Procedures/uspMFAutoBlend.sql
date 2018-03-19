@@ -725,6 +725,7 @@ BEGIN TRY
 	SET @strXml += '<intItemId>' + CONVERT(VARCHAR,@intBlendItemId) + '</intItemId>'
 	SET @strXml += '<intItemUOMId>' + CONVERT(VARCHAR,@intBlendItemUOMId) + '</intItemUOMId>'
 	SET @strXml += '<intUserId>' + ISNULL(CONVERT(VARCHAR,@intUserId),'') + '</intUserId>'
+	SET @strXml += '<intTransactionFrom>' + ISNULL(CONVERT(VARCHAR,5),'') + '</intTransactionFrom>'
 
 	WHILE (@dblQtyToProduce>0)
 	BEGIN
