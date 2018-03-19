@@ -446,12 +446,9 @@ BEGIN TRY
 						) AS dblRemainingLotWeight
 					,NULL
 					,1
-					,SL.intSubLocationId
-					,SL.intStorageLocationId
+					,S.intSubLocationId
+					,S.intStorageLocationId
 				FROM tblICItemStockUOM S
-				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
-				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
-					AND UT.ysnAllowPick = 1
 				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 					AND IU.ysnStockUnit = 1
 				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
@@ -469,18 +466,14 @@ BEGIN TRY
 				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 				WHERE S.intItemId = @intItemId
 					AND S.dblOnHand > 0
-					AND SL.intRestrictionId NOT IN (
-						SELECT RT.intRestrictionId
-						FROM tblMFInventoryShipmentRestrictionType RT
-						)
 				GROUP BY S.intItemId
 					,S.dblOnHand
 					,S.intItemUOMId
 					,S.dblOnHand
 					,S.intItemUOMId
 					,S.dblOnHand
-					,SL.intSubLocationId
-					,SL.intStorageLocationId
+					,S.intSubLocationId
+					,S.intStorageLocationId
 					,I.ysnStrictFIFO
 					,I.intUnitPerLayer
 					,I.intLayerPerPallet

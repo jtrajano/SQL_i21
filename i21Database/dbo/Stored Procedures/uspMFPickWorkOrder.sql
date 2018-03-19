@@ -814,13 +814,11 @@ BEGIN TRY
 				,S.intItemUOMId
 				,0 AS ysnSubstituteItem
 				,S.intStorageLocationId
-				,SL.intSubLocationId
+				,S.intSubLocationId
 			FROM dbo.tblICItemStockUOM S
-			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
-				AND SL.ysnAllowConsume = 1
-				AND S.intItemId = @intItemId
-				AND S.dblOnHand - S.dblUnitReserved > 0
 			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+			AND S.intItemId = @intItemId
+				AND S.dblOnHand - S.dblUnitReserved > 0
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 				AND IU.ysnStockUnit = 1
 			JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
