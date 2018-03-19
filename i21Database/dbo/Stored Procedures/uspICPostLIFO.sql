@@ -62,6 +62,9 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
+DECLARE @TransactionType_InventoryReceipt AS INT = 4
+		,@TransactionType_InventoryReturn AS INT = 42
+
 -------------------------------------------------
 -- 1. Process the LIFO Cost buckets
 -------------------------------------------------
@@ -70,6 +73,23 @@ BEGIN
 	IF (ISNULL(@dblQty, 0) < 0)
 	BEGIN 
 		SET @dblReduceQty = ISNULL(@dblQty, 0) 
+
+		-- Get the item's last cost when reducing stock. 
+		-- Except if doing vendor stock returns using Inventory Receipt/Return 
+		SELECT	@dblCost = ItemPricing.dblLastCost
+		FROM	tblICItemPricing ItemPricing 
+		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
+				AND ItemPricing.intItemId = @intItemId
+				AND ItemPricing.intItemLocationId = @intItemLocationId
+		
+		-- Convert the Cost from Stock UOM to @intItemUOMId 
+		SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+		FROM	tblICItemUOM StockUOM
+		WHERE	StockUOM.intItemId = @intItemId
+				AND StockUOM.ysnStockUnit = 1
+
+		-- Make sure the cost is not null. 
+		SET @dblCost = ISNULL(@dblCost, 0) 
 
 		-- Repeat call on uspICReduceStockInLIFO until @dblReduceQty is completely distributed to all available LIFO buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)

@@ -63,6 +63,9 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
+DECLARE @TransactionType_InventoryReceipt AS INT = 4
+		,@TransactionType_InventoryReturn AS INT = 42
+
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
 -------------------------------------------------
@@ -93,24 +96,30 @@ BEGIN
 			)			 
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
-				-- and also compute the Qty if it has weights. 
+				-- Compute the Qty if it has weights. 
+				-- and Get the Lot's Last cost. 
 				SELECT	@dblReduceQty =	dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
 						,@intItemUOMId = Lot.intWeightUOMId 
+						,@dblCost = Lot.dblLastCost 
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
 				
+				-- Make sure the reduce qty is not null. 
 				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
-
-				-- Get the unit cost. 
-				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
 
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
 
-				-- Adjust the cost to the new UOM
-				SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty) 
+				-- Adjust the cost to the Lot UOM. 
+				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+				FROM	tblICItemUOM StockUOM
+				WHERE	StockUOM.intItemId = @intItemId
+						AND StockUOM.ysnStockUnit = 1
+
+				-- Make sure the cost is not null. 
+				SET @dblCost = ISNULL(@dblCost, 0) 
 			END 
 		END 
 
