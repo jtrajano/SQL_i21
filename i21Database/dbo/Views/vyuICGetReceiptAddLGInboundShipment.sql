@@ -59,13 +59,13 @@ FROM (
 		, dblContainerWeightPerQty	= LogisticsView.dblContainerWeightPerQty
 		, ysnSubCurrency			= CAST(LogisticsView.ysnSubCurrency AS BIT)
 		, intCurrencyId				= dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
-		, strSubCurrency			= (SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
+		, strSubCurrency			= SubCurrency.strCurrency --(SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
 		, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
 		, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
 		, LC.ysnRejected
-		, intForexRateTypeId		= ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForex.intForexRateTypeId) 
-		, strForexRateType			= ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForex.strCurrencyExchangeRateType)
-		, dblForexRate				= ISNULL(LogisticsView.dblForexRate, CompanyPreferenceForex.dblForexRate) 
+		, intForexRateTypeId		= ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId) 
+		, strForexRateType			= ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType)
+		, dblForexRate				= ISNULL(LogisticsView.dblForexRate, defaultForexRate.dblRate) 
 		, ysnBundleItem				= CAST(0 AS BIT)
 		, intBundledItemId			= CAST(NULL AS INT)
 		, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
@@ -79,6 +79,8 @@ FROM (
 	FROM	vyuLGLoadContainerReceiptContracts LogisticsView 
 			LEFT JOIN dbo.tblSMCurrency Currency 
 				ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency) 
+			LEFT JOIN dbo.tblSMCurrency SubCurrency 
+				ON SubCurrency.intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)
 			LEFT JOIN tblICItem Item
 				ON Item.intItemId = LogisticsView.intItemId			
 			LEFT JOIN dbo.tblICItemUOM ItemUOM 
@@ -99,30 +101,22 @@ FROM (
 				ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
 			LEFT JOIN tblSMCompanyLocationSubLocation OrdersSubLocation ON OrdersSubLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = LogisticsView.intForexRateTypeId
-
 			OUTER APPLY (
-				SELECT	dblForexRate = DefaultForexRateDetail.dblRate		
-						,intForexRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+				SELECT	intForexRateTypeId = MultiCurrencyDefault.intContractRateTypeId
 						,ForexRateType.strCurrencyExchangeRateType
 				FROM	tblSMCompanyPreference Company
-						INNER JOIN tblSMMultiCurrency MultiCurrencyDefault ON MultiCurrencyDefault.intMultiCurrencyId = Company.intMultiCurrencyId 												
-						INNER JOIN [dbo].[tblSMCurrency] AS FromCurrency ON FromCurrency.[intCurrencyID] = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0)
-						INNER JOIN [dbo].[tblSMCurrency] AS ToCurrency ON ToCurrency.[intCurrencyID] = Company.intDefaultCurrencyId 
-
-						INNER JOIN [dbo].[tblSMCurrencyExchangeRate] AS ForexPair
-							ON ForexPair.intFromCurrencyId = FromCurrency.intCurrencyID
-							AND ForexPair.intToCurrencyId = ToCurrency.intCurrencyID
-						INNER JOIN [dbo].[tblSMCurrencyExchangeRateDetail] AS DefaultForexRateDetail 
-							ON DefaultForexRateDetail.intCurrencyExchangeRateId = ForexPair.intCurrencyExchangeRateId
-							AND DefaultForexRateDetail.intRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+						INNER JOIN tblSMMultiCurrency MultiCurrencyDefault 
+							ON MultiCurrencyDefault.intMultiCurrencyId = Company.intMultiCurrencyId
 						INNER JOIN tblSMCurrencyExchangeRateType ForexRateType
-							ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId
-						
-				WHERE	dbo.fnDateLessThanEquals(DefaultForexRateDetail.[dtmValidFromDate], LogisticsView.dtmScheduledDate) = 1						
-						AND ToCurrency.intCurrencyID <> FromCurrency.intCurrencyID -- Transaction Currency is not the functiona currency. 
-						AND LogisticsView.intForexRateTypeId IS NULL
-
-			) CompanyPreferenceForex 
+							ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId -- Get the contract default forex rate type
+				WHERE	LogisticsView.intForexRateTypeId IS NULL 
+						AND Company.intDefaultCurrencyId <> dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- Logistic currency is not the functional currnecy. 
+			) CompanyPreferenceForexRateType
+			OUTER APPLY dbo.fnSMGetForexRate(
+				dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0)
+				,ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
+				,LogisticsView.dtmScheduledDate
+			) defaultForexRate 
 
 	WHERE LogisticsView.dblBalanceToReceive > 0 
 		  AND LogisticsView.intSourceType = 2 
