@@ -150,7 +150,7 @@ WHERE [fieldname] = 'ysnIncludeWriteOffPayment'
 
 SELECT @intEntityUserId = [from]
 FROM @temp_xml_table
-WHERE [fieldname] = 'intEntityUserId'
+WHERE [fieldname] = 'intSrCurrentUserId'
 
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL

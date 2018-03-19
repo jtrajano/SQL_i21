@@ -107,7 +107,7 @@ WHERE	[fieldname] = 'ysnPrintOnlyOverCreditLimit'
 
 SELECT  @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'intEntityUserId'
+WHERE	[fieldname] = 'intSrCurrentUserId'
 
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL

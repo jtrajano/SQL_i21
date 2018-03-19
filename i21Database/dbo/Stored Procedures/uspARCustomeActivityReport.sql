@@ -88,7 +88,7 @@ WHERE [fieldname] IN ('ysnPrintDetail')
 
 SELECT @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
 FROM @temp_xml_table
-WHERE [fieldname] = 'intEntityUserId'
+WHERE [fieldname] = 'intSrCurrentUserId'
 
 SET @strCustomerName = NULLIF(@strCustomerName, '')
 SET @strInvoiceNumber = NULLIF(@strInvoiceNumber, '')

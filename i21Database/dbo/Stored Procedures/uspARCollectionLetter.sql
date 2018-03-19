@@ -61,7 +61,7 @@ BEGIN
 
 	SELECT @intEntityUserId = [from]
 	FROM @temp_params 
-	WHERE [fieldname] = 'intEntityUserId'
+	WHERE [fieldname] = 'intSrCurrentUserId'
 
 	SELECT @ysnEmailOnly = [from]
 	FROM @temp_params 
