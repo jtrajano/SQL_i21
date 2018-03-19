@@ -6247,6 +6247,7 @@
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
     <Build Include="dbo\Views\vyuTRGetCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
