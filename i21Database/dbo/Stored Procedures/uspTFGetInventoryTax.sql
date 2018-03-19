@@ -172,9 +172,9 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
 					--(CASE WHEN tblICInventoryReceiptItem.dblBillQty >= tblTRLoadDistributionDetail.dblUnits THEN tblTRLoadDistributionDetail.dblUnits ELSE 0 END) 
 					--ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
@@ -343,9 +343,9 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
