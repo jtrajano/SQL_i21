@@ -47,6 +47,7 @@ BEGIN TRY
 		,@strPickByFullPallet NVARCHAR(50)
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
+		,@strRestrictPickQtyByRequiredQty NVARCHAR(50)
 	DECLARE @tblMFTask TABLE (
 		intAlternateTaskId INT
 		,dblAlternateTaskQty NUMERIC(18, 6)
@@ -361,7 +362,18 @@ BEGIN TRY
 			SELECT @strPickByFullPallet = 'False'
 		END
 
-		IF @strPickByFullPallet = 'False'
+		SELECT @strRestrictPickQtyByRequiredQty = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 106 --Restrict Pick Qty By RequiredQty
+
+		IF @strRestrictPickQtyByRequiredQty IS NULL or @strRestrictPickQtyByRequiredQty=''
+		BEGIN
+			SELECT @strRestrictPickQtyByRequiredQty = 'True'
+		END
+
+		IF @strPickByFullPallet = 'False' and @strRestrictPickQtyByRequiredQty='True'
 		BEGIN
 			IF EXISTS (
 					SELECT 1
