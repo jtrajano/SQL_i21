@@ -454,23 +454,7 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 
-				,dblCost					=  ISNULL(
-												CASE	WHEN Lot.dblLastCost IS NULL THEN 
-															(
-																SELECT	TOP 1 dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
-																FROM	tblICItemPricing 
-																WHERE	intItemId = DetailItem.intItemId 
-																		AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
-															)
-														ELSE 
-															Lot.dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
-												END, 0 + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId))
-												* CASE	WHEN  Lot.intLotId IS NULL THEN 
-														ItemUOM.dblUnitQty + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
-													ELSE
-														LotItemUOM.dblUnitQty + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
-												END
-
+				,dblCost					= 0.00
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
@@ -737,12 +721,7 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 
-				,dblCost					=  ISNULL(
-												CASE	WHEN Lot.dblLastCost IS NULL THEN 
-														(SELECT TOP 1 dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId) FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
-													ELSE 
-														Lot.dblLastCost + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId)
-												END, 0 + dbo.fnGetOtherChargesFromInventoryShipment(DetailItem.intInventoryShipmentItemId))
+				,dblCost					=  0.00 
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
