@@ -101,6 +101,7 @@ SELECT l.intLotId
 			WHEN (
 					(i.intUnitPerLayer * i.intLayerPerPallet > 0)
 					AND (l.dblQty % (i.intUnitPerLayer * i.intLayerPerPallet) > 0)
+					AND (l.dblQty <= (i.intUnitPerLayer * i.intLayerPerPallet))
 					)
 				THEN 1
 			ELSE 0
