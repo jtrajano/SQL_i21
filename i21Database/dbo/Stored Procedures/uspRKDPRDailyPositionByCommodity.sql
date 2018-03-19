@@ -2,6 +2,7 @@ CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodity]
 	 @intVendorId INT = NULL
 	,@strPositionIncludes NVARCHAR(100) = NULL
 AS
+
 DECLARE @Commodity AS TABLE (
 	intCommodityIdentity INT IDENTITY(1, 1) PRIMARY KEY
 	,intCommodity INT
@@ -80,7 +81,7 @@ SELECT DISTINCT c.intCommodityId
 		FROM (
 			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull((cd.dblBalance), 0)) AS Qty
 			FROM @tblGetOpenContractDetail cd
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intContractStatusId <> 3 AND cd.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 1 AND cd.intPricingTypeId IN (1, 2)
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intContractStatusId <> 3 AND cd.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 1 AND cd.intPricingTypeId IN (1, 3)
 			WHERE cd.intCommodityId = c.intCommodityId AND cl.intCompanyLocationId = cd.intCompanyLocationId
 			) t
 		) AS OpenPurQty
@@ -89,7 +90,7 @@ SELECT DISTINCT c.intCommodityId
 		FROM (
 			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) AS Qty
 			FROM @tblGetOpenContractDetail CD
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intContractStatusId <> 3 AND CD.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 2 AND CD.intPricingTypeId IN (1, 2)
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intContractStatusId <> 3 AND CD.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 2 AND CD.intPricingTypeId IN (1, 3)
 			WHERE CD.intCommodityId = c.intCommodityId AND cl.intCompanyLocationId = CD.intCompanyLocationId
 			) t
 		) AS OpenSalQty
@@ -107,7 +108,8 @@ SELECT DISTINCT c.intCommodityId
 		FROM (
 			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) AS Qty
 			FROM @tblGetOpenContractDetail CD
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intContractStatusId <> 3 AND CD.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 1 AND CD.intPricingTypeId IN (1, 2)
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intContractStatusId <> 3 AND CD.intUnitMeasureId = ium.intUnitMeasureId 
+			AND intContractTypeId = 1 AND CD.intPricingTypeId IN (1, 2)
 			WHERE CD.intCommodityId = c.intCommodityId AND cl.intCompanyLocationId = CD.intCompanyLocationId
 			) t
 		) AS OpenPurchasesQty
@@ -123,7 +125,7 @@ SELECT DISTINCT c.intCommodityId
 	,(
 		SELECT sum(s.dblOnHand) AS Qty
 		FROM vyuICGetItemStockUOM s
-		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND ysnStockUnit = 1
+		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0	
 		) AS invQty
 	,isnull((
 			SELECT isnull(SUM(dblRemainingQuantity), 0) CollateralSale
@@ -464,10 +466,14 @@ FROM (
 					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
 					FROM tblRKCompanyPreference
 					) = 1 THEN 0 ELSE - isnull(DP, 0) END + (isnull(dblCollatralPurchase, 0) - isnull(dblCollatralSales, 0)) + isnull(SlsBasisDeliveries, 0) + (isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0)) AS CompanyTitled
+		
 		,isnull(invQty, 0) - isnull(PurBasisDelivary, 0) + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0)) + isnull(dblCollatralSales, 0) + isnull(SlsBasisDeliveries, 0) + CASE WHEN (
 					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
 					FROM tblRKCompanyPreference
-					) = 1 THEN 0 ELSE - isnull(DP, 0) END + isnull(dblOptionNetHedge, 0) + isnull(dblFutNetHedge, 0) AS CashExposure
+					) = 1 THEN 0 ELSE - isnull(DP, 0) END + isnull(dblOptionNetHedge, 0) + isnull(dblFutNetHedge, 0) 
+		 AS CashExposure
+
+
 		,isnull(ReceiptProductQty, 0) ReceiptProductQty
 		,isnull(OpenPurchasesQty, 0) OpenPurchasesQty
 		,isnull(OpenSalesQty, 0) OpenSalesQty
