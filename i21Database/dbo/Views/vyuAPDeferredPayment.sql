@@ -36,8 +36,8 @@ FROM (
 		0.00 AS dblDeferred,
 		A.dtmInterestAccruedThru AS dtmLastDeferred, --date of last interest date calculation, if there's no voucher interest yet, this should be blank
 		A.dblAmountDue,
-		ISNULL(DATEDIFF(DAY, deferredInterest.dtmCalculationDate, A.dtmInterestAccruedThru),0) AS intDays,
-		dblInterest = CAST(A.dblTotal * ((deferredTerm.dblAPR / 365) / 12) * ISNULL(DATEDIFF(DAY, deferredInterest.dtmCalculationDate, A.dtmInterestAccruedThru),0) AS DECIMAL(18,2)),
+		ISNULL(DATEDIFF(DAY, deferredInterest.dtmCalculationDate, ISNULL(A.dtmInterestAccruedThru, ISNULL(A.dtmDeferredInterestDate, A.dtmBillDate))),0) AS intDays,
+		dblInterest = CAST(A.dblTotal * ((deferredTerm.dblAPR / 365) / 12) * ISNULL(DATEDIFF(DAY, deferredInterest.dtmCalculationDate, ISNULL(A.dtmInterestAccruedThru, ISNULL(A.dtmDeferredInterestDate, A.dtmBillDate))),0) AS DECIMAL(18,2)),
 		-- dblInterest = CAST(A.dblTotal * ((deferredTerm.dblAPR / 100) / 12) * 
 		-- 		(CASE WHEN DATEDIFF(MONTH, deferredInterest.dtmCalculationDate, GETDATE()) = 0 
 		-- 			THEN 1 ELSE DATEDIFF(MONTH, deferredInterest.dtmCalculationDate, GETDATE()) END) 
