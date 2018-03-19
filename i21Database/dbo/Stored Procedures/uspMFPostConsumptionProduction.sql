@@ -254,21 +254,6 @@ BEGIN
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
-		,@dblPercentage NUMERIC(18, 6)
-
-	SELECT @dblPercentage = CASE 
-			WHEN ysnConsumptionRequired = 1
-				AND dblPercentage IS NULL
-				THEN 100
-			WHEN ysnConsumptionRequired = 0
-				AND dblPercentage IS NULL
-				THEN 0
-			ELSE dblPercentage
-			END
-	FROM tblMFWorkOrderRecipeItem RI
-	WHERE intWorkOrderId = @intWorkOrderId
-		AND RI.intRecipeItemTypeId = 2
-		AND RI.intItemId = @intItemId
 
 	DECLARE @tblMFOtherChargeItem TABLE (
 		intRecipeItemId INT
@@ -307,9 +292,6 @@ BEGIN
 
 	SELECT @dblOtherCharges = SUM(dblOtherCharge)
 	FROM @tblMFOtherChargeItem
-
-	IF @dblPercentage IS NOT NULL
-		SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
 
 	DECLARE @dblCostPerStockUOM NUMERIC(38, 20)
 
@@ -462,7 +444,7 @@ BEGIN
 			,@intOtherChargeItemLocationId = NULL
 
 		SELECT @intOtherChargeItemId = intItemId
-			,@dblOtherCharges = dblOtherCharge * @dblPercentage / 100
+			,@dblOtherCharges = dblOtherCharge 
 		FROM @tblMFOtherChargeItem
 		WHERE intRecipeItemId = @intRecipeItemId
 
@@ -668,11 +650,7 @@ BEGIN
 				END
 			)
 		,dblUOMQty = 1
-		,dblCost = CASE 
-			WHEN IsNULL(@dblPercentage, 0) = 0
-				THEN @dblCostPerStockUOM
-			ELSE @dblCostPerStockUOM * @dblPercentage / 100
-			END
+		,dblCost = @dblCostPerStockUOM
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
