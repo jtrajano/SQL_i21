@@ -35,7 +35,7 @@ SET ANSI_WARNINGS OFF
 	BEGIN
 		IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'gacntmst')
 		 BEGIN
-			SELECT-- @Total =
+			SELECT @Total =
 				 COUNT(gacnt_cnt_no) 	
 			FROM	gacntmst							CT
 			JOIN	tblCTContractType			TY	ON	TY.strContractType	=	CASE	WHEN gacnt_pur_sls_ind IN ('1','P') THEN 'Purchase'  ELSE 'Sale' END
@@ -233,8 +233,9 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 																						WHEN LTRIM(RTRIM(ISNULL(gacnt_trk_rail_ind,''))) = 'F'  THEN 'FOB'
 																					END
 		JOIN tblRKFutureMarket		MA	ON	LTRIM(RTRIM(MA.strFutSymbol)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(CT.gacnt_bot))
-		LEFT JOIN tblRKFuturesMonth		MO	ON	UPPER(REPLACE(LTRIM(RTRIM(MO.strFutureMonth)),' ','')) collate Latin1_General_CI_AS = CT.gacnt_bot_option
-		LEFT JOIN tblCTDiscountType		DT	ON	LTRIM(RTRIM(DT.strDiscountType)) = CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'D'	 THEN 'Deliver' 
+		LEFT JOIN tblRKFuturesMonth	MO	ON	UPPER(REPLACE(LTRIM(RTRIM(MO.strFutureMonth)),' ','')) collate Latin1_General_CI_AS = CT.gacnt_bot_option
+											AND MO.intFutureMarketId = MA.intFutureMarketId
+		LEFT JOIN tblCTDiscountType	DT	ON	LTRIM(RTRIM(DT.strDiscountType)) = CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'D'	 THEN 'Deliver' 
 			 																		WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'A'  THEN 'As-Is' 
 			 																		WHEN LTRIM(RTRIM(ISNULL(gacnt_disc_dca_ind,''))) = 'C'  THEN 'Contract' 
 			 																	END
