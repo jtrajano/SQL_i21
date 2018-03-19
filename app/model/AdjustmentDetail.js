@@ -19,10 +19,16 @@ Ext.define('Inventory.model.AdjustmentDetail', {
                     role: 'tblICInventoryAdjustmentDetails',
                     storeConfig: {
                         complete: true,
-                        sortOnLoad: true,
-                        sorters: {
-                            direction: 'DESC',
-                            property: 'intSort'
+                        remoteFilter: true,
+                        proxy: {
+                            type: 'rest',
+                            api: {
+                                read: './inventory/api/inventoryadjustment/getadjustmentdetails'
+                            },
+                            reader: {
+                                type: 'json',
+                                rootProperty: 'data'
+                            }
                         }
                     }
                 }

@@ -977,14 +977,14 @@ namespace iRely.Inventory.BusinessLayer
 
         public async Task<GetObjectResult> GetItemRunningStock(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetItemRunningStock>().Filter(param, true);
-            var key = Methods.GetPrimaryKey<vyuICGetItemRunningStock>(_db.ContextManager);
-
-            var data = await query.Execute(param, key).ToListAsync(param.cancellationToken);
-
-            var finalData = data.GroupBy(g => new {
+            var query = _db.GetQuery<vyuICGetItemRunningStock>().Filter(param, true).GroupBy(g => new {
                 g.intItemId,
                 g.strItemNo,
+                g.intItemUOMId,
+                g.strItemUOM,
+                g.strItemUOMType,
+                g.ysnStockUnit,
+                g.dblUnitQty,
                 g.intLocationId,
                 g.strLocationName,
                 g.intSubLocationId,
@@ -993,10 +993,26 @@ namespace iRely.Inventory.BusinessLayer
                 g.strStorageLocationName,
                 g.intLotId,
                 g.strLotNumber,
-                g.intOwnershipType
+                g.intOwnershipType,
+                g.intItemOwnerId,
+                g.dtmExpiryDate,
+                g.intWeightUOMId,
+                g.strWeightUOM,
+                g.dblWeight,
+                g.dblWeightPerQty,
+                g.intLotStatusId,
+                g.strLotStatus,
+                g.strLotPrimaryStatus,
+                g.intOwnerId,
+                g.strOwner
             }).Select(s => new {
                 intItemId = s.Key.intItemId,
                 strItemNo = s.Key.strItemNo,
+                intItemUOMId = s.Key.intItemUOMId,
+                strItemUOM = s.Key.strItemUOM,
+                strItemUOMType = s.Key.strItemUOMType,
+                ysnStockUnit = s.Key.ysnStockUnit,
+                dblUnitQty = s.Key.dblUnitQty,
                 intLocationId = s.Key.intLocationId,
                 strLocationName = s.Key.strLocationName,
                 intSubLocationId = s.Key.intSubLocationId,
@@ -1006,14 +1022,27 @@ namespace iRely.Inventory.BusinessLayer
                 intLotId = s.Key.intLotId,
                 strLotNumber = s.Key.strLotNumber,
                 intOwnershipType = s.Key.intOwnershipType,
+                intItemOwnerId = s.Key.intItemOwnerId,
+                dtmExpiryDate = s.Key.dtmExpiryDate,
+                intWeightUOMId = s.Key.intWeightUOMId,
+                strWeightUOM = s.Key.strWeightUOM,
+                dblWeight = s.Key.dblWeight,
+                dblWeightPerQty = s.Key.dblWeightPerQty,
+                intLotStatusId = s.Key.intLotStatusId,
+                strLotStatus = s.Key.strLotStatus,
+                strLotPrimaryStatus = s.Key.strLotPrimaryStatus,
+                intOwnerId = s.Key.intOwnerId,
+                strOwner = s.Key.strOwner,
                 dtmAsOfDate = s.Max(m => m.dtmAsOfDate),
-                dblRunningAvailableQty = s.Sum(d => d.dblQty)
-            }).ToList();
-
+                dblRunningAvailableQty = s.Sum(d => d.intOwnershipType != 2 ? d.dblQty : 0),
+                dblStorageAvailableQty = s.Sum(d => d.intOwnershipType == 2 ? d.dblQty : 0),
+                dblCost = s.Max(m => m.dblCost)
+            });
+            
             return new GetObjectResult()
             {
-                data = finalData,
-                total = finalData.Count(),
+                data = await query.Execute(param, "intItemUOMId").ToListAsync(param.cancellationToken),
+                total = await query.CountAsync(param.cancellationToken)
             };
         }
 

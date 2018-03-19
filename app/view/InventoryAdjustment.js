@@ -435,6 +435,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 }
                                                             ],
+                                                            lookUpField: false,
                                                             itemId: 'cboSubLocation',
                                                             displayField: 'strSubLocationName',
                                                             valueField: 'strSubLocationName'
@@ -476,6 +477,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
+                                                            lookUpField: true,
                                                             itemId: 'cboStorageLocation',
                                                             displayField: 'strStorageLocationName',
                                                             valueField: 'strStorageLocationName'
@@ -531,12 +533,21 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'dblQty',
+                                                                    xtype: 'numbercolumn',
+                                                                    dataIndex: 'dblRunningAvailableQty',
                                                                     dataType: 'numeric',
                                                                     text: 'On Hand',
                                                                     flex: 1
                                                                 },
                                                                 {
+                                                                    xtype: 'numbercolumn',
+                                                                    dataIndex: 'dblStorageAvailableQty',
+                                                                    dataType: 'numeric',
+                                                                    text: 'On Storage',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'numbercolumn',
                                                                     dataIndex: 'dblCost',
                                                                     dataType: 'numeric',
                                                                     text: 'Last Cost',
@@ -569,6 +580,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataIndex: 'intOwnershipType',
                                                                     text: 'Ownership Type',
                                                                     flex: 1,
+                                                                    hidden: true,
                                                                     dataType: 'numeric'
                                                                 },
                                                                 {
@@ -614,12 +626,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'intItemLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
                                                                     dataIndex: 'intSubLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Storage Location Id',
@@ -662,7 +668,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 }
                                                             ],
-                                                            lookUpField: true,
+                                                            lookUpField: false,
                                                             itemId: 'cboLotNumber',
                                                             displayField: 'strLotNumber',
                                                             valueField: 'strLotNumber'
@@ -684,13 +690,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataIndex: 'strItemUOM',
                                                                     dataType: 'string',
                                                                     text: 'Unit Measure',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strUnitType',
+                                                                    dataIndex: 'strItemUOMType',
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
                                                                     flex: 1
@@ -703,21 +709,31 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'dblOnHand',
+                                                                    xtype: 'numbercolumn',
+                                                                    dataIndex: 'dblRunningAvailableQty',
                                                                     dataType: 'float',
                                                                     text: 'On Hand',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'dblUnitStorage',
+                                                                    xtype: 'numbercolumn',
+                                                                    dataIndex: 'dblStorageAvailableQty',
                                                                     dataType: 'float',
-                                                                    text: 'On Hand',
+                                                                    text: 'On Storage',
                                                                     flex: 1
                                                                 },
                                                                 {
+                                                                    xtype: 'numbercolumn',
                                                                     dataIndex: 'dblUnitQty',
                                                                     dataType: 'float',
                                                                     text: 'Unit Qty',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'numbercolumn',
+                                                                    dataIndex: 'dblCost',
+                                                                    dataType: 'float',
+                                                                    text: 'Cost',
                                                                     flex: 1,
                                                                     hidden: true
                                                                 },
@@ -749,9 +765,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 },
                                                                 
                                                             ],
+                                                            lookUpField: false,
                                                             itemId: 'cboUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
+                                                            displayField: 'strItemUOM',
+                                                            valueField: 'strItemUOM'
                                                         }
                                                     },
                                                     {
