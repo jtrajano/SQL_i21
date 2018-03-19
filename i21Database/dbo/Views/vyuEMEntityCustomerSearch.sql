@@ -2,7 +2,7 @@
 AS 
 SELECT DISTINCT
 	  intEntityId			= CUSTOMER.intEntityId
-	, strCustomerNumber		= CUSTOMER.strCustomerNumber
+	, strCustomerNumber		= entityToCustomer.strEntityNo --CUSTOMER.strCustomerNumber
 	, strName				= entityToCustomer.strName
 	, strPhone				= entityPhone.strPhone
 	, strSalesPersonName	= entityToSalesperson.strName
