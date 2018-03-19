@@ -241,6 +241,22 @@ GO
 			WHERE strNamespace = 'Manufacturing.view.ProcessProductionConsume'
 		END
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ProcessProductionProduce') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [ysnActivity], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'ProcessProductionProduce', N'Process Production Produce', N'Manufacturing.view.ProcessProductionProduce', N'Manufacturing', N'tblMFWorkOrderProducedLot', 1, 1, 1, 0, N'Manufacturing')
+	END
+	ELSE
+	BEGIN
+		UPDATE tblSMScreen
+		SET strTableName = N'tblMFWorkOrderProducedLot',
+			ysnApproval = 1, 
+			ysnCustomTab = 1,
+			ysnActivity = 1,
+			strGroupName = N'Manufacturing'
+		WHERE strNamespace = 'Manufacturing.view.ProcessProductionProduce'
+	END
+
 	UPDATE tblSMScreen SET strNamespace = 'ContractManagement.view.Amendments' WHERE strNamespace IN ('ContractManagement.view.ContractAmendments', 'ContractManagement.view.ContractAmendment')
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Amendments') 

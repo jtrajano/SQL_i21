@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspMFSaveConsumeCustomFields @strXML NVARCHAR(MAX)
 	,@intWorkOrderInputLotId INT
+	,@ysnProducedLot BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -13,19 +14,43 @@ DECLARE @idoc INT
 EXEC sp_xml_preparedocument @idoc OUTPUT
 	,@strXML
 
-INSERT INTO tblMFCustomFieldValue (
-	intConcurrencyId
-	,intCustomTabDetailId
-	,intWorkOrderInputLotId
-	,strValue
-	)
-SELECT 1
-	,x.intCustomTabDetailId
-	,@intWorkOrderInputLotId
-	,x.strValue
-FROM OPENXML(@idoc, 'root/fields', 2) WITH (
-		intCustomTabDetailId INT
-		,strValue NVARCHAR(MAX)
-		) x
+IF @ysnProducedLot = 1
+BEGIN
+	INSERT INTO tblMFCustomFieldValue (
+		intConcurrencyId
+		,intCustomTabDetailId
+		,intWorkOrderInputLotId
+		,intWorkOrderProducedLotId
+		,strValue
+		)
+	SELECT 1
+		,x.intCustomTabDetailId
+		,NULL
+		,@intWorkOrderInputLotId
+		,x.strValue
+	FROM OPENXML(@idoc, 'root/fields', 2) WITH (
+			intCustomTabDetailId INT
+			,strValue NVARCHAR(MAX)
+			) x
+END
+ELSE
+BEGIN
+	INSERT INTO tblMFCustomFieldValue (
+		intConcurrencyId
+		,intCustomTabDetailId
+		,intWorkOrderInputLotId
+		,intWorkOrderProducedLotId
+		,strValue
+		)
+	SELECT 1
+		,x.intCustomTabDetailId
+		,@intWorkOrderInputLotId
+		,NULL
+		,x.strValue
+	FROM OPENXML(@idoc, 'root/fields', 2) WITH (
+			intCustomTabDetailId INT
+			,strValue NVARCHAR(MAX)
+			) x
+END
 
 EXEC sp_xml_removedocument @idoc
