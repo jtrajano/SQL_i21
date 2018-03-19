@@ -2610,7 +2610,14 @@ BEGIN
 		) AND EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 		BEGIN 
 			DECLARE @intReturnCode AS INT = 0;
-			EXEC @intReturnCode = dbo.uspGLBookEntries @GLEntries, 1 
+
+			-- Set ysnRebuild = 1 to tell GL that the GL entries are from stock rebuild. 
+			UPDATE @GLEntries
+			SET ysnRebuild = 1
+
+			EXEC @intReturnCode = dbo.uspGLBookEntries 
+				@GLEntries
+				, 1 
 			
 			IF ISNULL(@intReturnCode, 0) <> 0 
 			BEGIN 
