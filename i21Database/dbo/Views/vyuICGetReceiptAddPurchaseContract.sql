@@ -1,4 +1,4 @@
-﻿CREATE  VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
+﻿CREATE VIEW [dbo].[vyuICGetReceiptAddPurchaseContract]
 AS
 
 SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, intEntityVendorId, intItemId, intLineNo) AS INT)
@@ -89,9 +89,9 @@ FROM (
 										CAST(0 AS NUMERIC(38, 20))									
 									--END
 
-		, intForexRateTypeId		= ContractView.intRateTypeId
-		, strForexRateType			= ContractView.strCurrencyExchangeRateType
-		, dblForexRate				= ContractView.dblRate
+		, intForexRateTypeId		= ISNULL(ContractView.intRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
+		, strForexRateType			= ISNULL(ContractView.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType)
+		, dblForexRate				= ISNULL(ContractView.dblRate, defaultForexRate.dblRate) 
 		, strBundleType				= ContractView.strBundleType
 		--, ysnBundleItem				= ContractView.ysnBundleItem
 		--, intBundledItemId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN ContractView.intItemId ELSE CAST(NULL AS INT) END 
@@ -109,6 +109,23 @@ FROM (
 		LEFT JOIN dbo.tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, ContractView.intSeqPriceUOMId)
 		LEFT JOIN dbo.tblICUnitMeasure ItemCostUnitMeasure ON ItemCostUnitMeasure.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = dbo.fnICGetCurrency(ContractView.intContractDetailId, 1) -- 1 indicates that value is for Sub Currency
+		OUTER APPLY (
+			SELECT	intForexRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+					,ForexRateType.strCurrencyExchangeRateType
+			FROM	tblSMCompanyPreference Company
+					INNER JOIN tblSMMultiCurrency MultiCurrencyDefault 
+						ON MultiCurrencyDefault.intMultiCurrencyId = Company.intMultiCurrencyId
+					INNER JOIN tblSMCurrencyExchangeRateType ForexRateType
+						ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId -- Get the contract default forex rate type
+			WHERE	ContractView.intRateTypeId IS NULL 
+					AND Company.intDefaultCurrencyId <> dbo.fnICGetCurrency(ContractView.intContractDetailId, 0) -- Contract currency is not the functional currnecy. 
+		) CompanyPreferenceForexRateType
+
+		OUTER APPLY dbo.fnSMGetForexRate(
+			dbo.fnICGetCurrency(ContractView.intContractDetailId, 0)
+			,ISNULL(ContractView.intRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
+			,ContractView.dtmContractDate
+		) defaultForexRate 
 
 		-- The following are bundle/basket related queries:
 		--LEFT JOIN tblICItemBundle BundleItem ON BundleItem.intItemId = ContractView.intItemId
