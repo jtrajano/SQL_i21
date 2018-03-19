@@ -26,7 +26,7 @@ WITH Pricing AS
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
 	FROM    tblCTPriceFixationDetail  PFD
     JOIN    tblCTPriceFixation   PFX ON PFX.intPriceFixationId   = PFD.intPriceFixationId
-    JOIN    tblCTContractDetail   CDT ON CDT.intContractDetailId  = PFX.intContractDetailId and CDT.intPricingTypeId IN (1,2,3)
+    JOIN    tblCTContractDetail   CDT ON CDT.intContractDetailId  = PFX.intContractDetailId and CDT.intPricingTypeId IN (1,2)
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId <> 3
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
@@ -110,7 +110,7 @@ WITH Pricing AS
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,EY.strEntityName,ch.strCustomerContract
     FROM    tblCTContractDetail CDT
-    JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (1,2,3)
+    JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (1,2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId <> 3
 	JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
 														1 = (
@@ -163,7 +163,7 @@ WITH Pricing AS
 															END
 														) 
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
-	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId IN (1,2,3)
+	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId and CDT.intPricingTypeId IN (1,2)
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
 	JOIN tblCTContractType ct on ct.intContractTypeId=ch.intContractTypeId
 	JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId		=	CDT.intCompanyLocationId
