@@ -406,6 +406,30 @@ BEGIN TRY
 				)
 	END
 
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrderRecipeItem ri
+			WHERE ri.intWorkOrderId = @intWorkOrderId
+				AND ri.intRecipeItemTypeId = 2
+				AND ri.ysnOutputItemMandatory = 1
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderProducedLot WP
+					WHERE WP.intWorkOrderId = ri.intWorkOrderId
+						AND WP.intItemId = ri.intItemId
+						AND WP.ysnProductionReversed =0
+					)
+			)
+	BEGIN
+		RAISERROR (
+				'Cannot start the cycle count. One or more mandatory items are not produced.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
 	DECLARE @tblICItem TABLE (
 		intItemId INT
 		,intConsumptionMethodId INT
@@ -926,12 +950,13 @@ BEGIN TRY
 		,I.intItemUOMId
 		,I.intStorageLocationId
 	FROM @tblICFinalItem I
-	JOIN tblICItemStockUOM S ON S.intItemId = I.intItemId and I.strLotTracking ='No'
+	JOIN tblICItemStockUOM S ON S.intItemId = I.intItemId
+		AND I.strLotTracking = 'No'
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
-				AND IU.ysnStockUnit = 1
-				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+		AND IU.ysnStockUnit = 1
+	JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
 		AND S.intStorageLocationId = I.intStorageLocationId
-		and S.dblOnHand>0
+		AND S.dblOnHand > 0
 		AND IL.intLocationId = @intLocationId
 	GROUP BY I.intItemId
 		,I.intItemUOMId
@@ -949,7 +974,8 @@ BEGIN TRY
 		,I.intItemUOMId
 		,I.intStorageLocationId
 	FROM @tblICFinalItem I
-	JOIN tblICLot L ON L.intItemId = I.intItemId and I.strLotTracking <>'No'
+	JOIN tblICLot L ON L.intItemId = I.intItemId
+		AND I.strLotTracking <> 'No'
 		AND L.intLotStatusId = 1
 		AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 		AND L.dblQty > 0

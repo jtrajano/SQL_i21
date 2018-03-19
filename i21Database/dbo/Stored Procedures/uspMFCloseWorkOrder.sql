@@ -194,7 +194,7 @@ BEGIN TRY
 				) --Line / WIP Sample
 			AND S.intSampleStatusId = 1
 
-		IF @strSampleNumber IS Not NULL
+		IF @strSampleNumber IS NOT NULL
 		BEGIN
 			SELECT @strCellName = strCellName
 			FROM tblMFManufacturingCell
@@ -208,6 +208,30 @@ BEGIN TRY
 					,@strCellName
 					)
 		END
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblMFWorkOrderRecipeItem ri
+			WHERE ri.intWorkOrderId = @intWorkOrderId
+				AND ri.intRecipeItemTypeId = 2
+				AND ri.ysnOutputItemMandatory = 1
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderProducedLot WP
+					WHERE WP.intWorkOrderId = ri.intWorkOrderId
+						AND WP.intItemId = ri.intItemId
+						AND WP.ysnProductionReversed =0
+					)
+			)
+	BEGIN
+		RAISERROR (
+				'Cannot close the work order. One or more mandatory items are not produced.'
+				,16
+				,1
+				)
+
+		RETURN
 	END
 
 	SELECT @intTransactionCount = @@TRANCOUNT
