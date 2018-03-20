@@ -82,7 +82,8 @@ SELECT DISTINCT c.intCommodityId
 		FROM (
 			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull((cd.dblBalance), 0)) AS Qty
 			FROM @tblGetOpenContractDetail cd
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intContractStatusId <> 3 AND cd.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 1 AND cd.intPricingTypeId IN (1, 2)
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intContractStatusId <> 3 
+			AND cd.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 1 AND cd.intPricingTypeId IN (1, 3)
 			WHERE cd.intCommodityId = c.intCommodityId AND cl.intCompanyLocationId = cd.intCompanyLocationId
 			) t
 		) AS OpenPurQty
@@ -91,7 +92,8 @@ SELECT DISTINCT c.intCommodityId
 		FROM (
 			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) AS Qty
 			FROM @tblGetOpenContractDetail CD
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intContractStatusId <> 3 AND CD.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 2 AND CD.intPricingTypeId IN (1, 2)
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intContractStatusId <> 3 
+			AND CD.intUnitMeasureId = ium.intUnitMeasureId AND intContractTypeId = 2 AND CD.intPricingTypeId IN (1, 3)
 			WHERE CD.intCommodityId = c.intCommodityId AND cl.intCompanyLocationId = CD.intCompanyLocationId
 			) t
 		) AS OpenSalQty
@@ -125,7 +127,7 @@ SELECT DISTINCT c.intCommodityId
 	,(
 		SELECT sum(s.dblOnHand) AS Qty
 		FROM vyuICGetItemStockUOM s
-		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND ysnStockUnit = 1
+		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
 		) AS invQty
 	,isnull((
 			SELECT isnull(SUM(dblRemainingQuantity), 0) CollateralSale

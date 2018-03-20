@@ -52,6 +52,8 @@ BEGIN
 	WHERE
 		intInvoiceId = @InvoiceId 
 
+	EXEC dbo.uspARUpdateInvoiceAccruals @intInvoiceId = @InvoiceId
+
 	--DEBIT AR
 	INSERT INTO @GLEntries (
 		 [dtmDate]
@@ -295,7 +297,7 @@ BEGIN
 	WHERE
 		A.intInvoiceId = @InvoiceId
 		
-		
+	
 		 
  DECLARE @InvoiceDetail AS TABLE(intInvoiceId INT, intInvoiceDetailId INT, dblTotal DECIMAL(18,6), dblDiscount DECIMAL(18,6), dblQtyShipped DECIMAL(18,6), dblPrice DECIMAL(18,6), dblUnits DECIMAL(18,6), dblMaintenanceAmount DECIMAL(18,6), dblLicenseAmount DECIMAL(18,6), strMaintenanceType NVARCHAR(25))
  DELETE FROM @InvoiceDetail
@@ -1287,22 +1289,4 @@ END
 		AND DT.dblAdjustedTax <> @ZeroDecimal
 END
 
-
-INSERT INTO [tblARInvoiceAccrual]
-	([intInvoiceId]
-	,[intInvoiceDetailId]
-	,[dtmAccrualDate]
-	,[dblAmount]
-	,[intConcurrencyId])
-SELECT
-	 [intInvoiceId]			= [intTransactionId]
-	,[intInvoiceDetailId]	= [intJournalLineNo]
-	,[dtmAccrualDate]		= [dtmDate]
-	,[dblAmount]			= CASE WHEN [dblDebit] = @ZeroDecimal THEN [dblCredit] ELSE [dblDebit] END
-	,[intConcurrencyId]		= 0
-				 
-FROM
-	@GLEntries
 GO
-
-

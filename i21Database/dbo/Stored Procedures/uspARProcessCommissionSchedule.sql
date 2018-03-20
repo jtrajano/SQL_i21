@@ -99,7 +99,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 				intCommissionScheduleDetailId	INT
 			  , intEntityId						INT
 			  , intCommissionPlanId				INT
-			  , dblPercentage NUMERIC(18,6)
+			  , dblPercentage					NUMERIC(18,6)
 			)
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblARCommissionSchedules)
@@ -131,15 +131,28 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 					SET @dtmStartDate = CASE WHEN @dtmStartDate < @dtmSchedStartDate THEN @dtmSchedStartDate ELSE @dtmStartDate END
 					SET @dtmEndDate = CASE WHEN @dtmEndDate > @dtmSchedEndDate THEN @dtmSchedEndDate ELSE @dtmEndDate END
 					
-					INSERT INTO @tblARCommissionScheduleDetails
-					SELECT CSD.intCommissionScheduleDetailId
-						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN NULL ELSE CSD.intEntityId END
-						 , CASE WHEN @strScheduleType = @SCHEDTYPE_GROUP THEN @intSchedCommPlanId ELSE CSD.intCommissionPlanId END
-						 , CASE WHEN @strScheduleType = @SCHEDTYPE_INDIVIDUAL THEN 0 ELSE CSD.dblPercentage END
-					FROM tblARCommissionScheduleDetail CSD						
-						INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
-					WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
-						AND CP.ysnActive = 1
+					IF @strScheduleType = @SCHEDTYPE_INDIVIDUAL 
+						BEGIN
+							INSERT INTO @tblARCommissionScheduleDetails
+							SELECT intCommissionScheduleDetailId	= CSD.intCommissionScheduleDetailId
+								 , intEntityId						= CAST(@strEntityIds AS INT)
+								 , intCommissionPlanId				= CSD.intCommissionPlanId
+								 , dblPercentage					= 0.00
+							FROM tblARCommissionScheduleDetail CSD						
+								INNER JOIN tblARCommissionPlan CP ON CSD.intCommissionPlanId = CP.intCommissionPlanId
+							WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
+								AND CP.ysnActive = 1
+						END
+					ELSE
+						BEGIN
+							INSERT INTO @tblARCommissionScheduleDetails
+							SELECT intCommissionScheduleDetailId	= CSD.intCommissionScheduleDetailId
+								 , intEntityId						= CSD.intEntityId
+								 , intCommissionPlanId				= @intSchedCommPlanId
+								 , dblPercentage					= CSD.dblPercentage
+							FROM tblARCommissionScheduleDetail CSD
+							WHERE CSD.intCommissionScheduleId = @intActiveCommSchedId
+						END
 					
 					--CALCULATE COMMISSION PLANS
 					IF EXISTS(SELECT NULL FROM @tblARCommissionScheduleDetails)

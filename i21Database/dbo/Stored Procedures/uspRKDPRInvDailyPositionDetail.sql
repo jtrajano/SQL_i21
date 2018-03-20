@@ -2,11 +2,9 @@
 	 @intCommodityId nvarchar(max)  
 	,@intLocationId int = NULL	
 	,@intVendorId int = null
-	,@strPurchaseSales nvarchar(50) = NULL
+	,@strPurchaseSales nvarchar(250) = NULL
 	,@strPositionIncludes nvarchar(100) = NULL
 AS
-
-
 BEGIN
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -36,9 +34,9 @@ DECLARE @Final AS TABLE (
 					strType nvarchar(100),
 					dblTotal DECIMAL(24,10),
 					intCollateralId int,
-					strLocationName nvarchar(50),
-					strCustomer nvarchar(50),
-					intReceiptNo nvarchar(50),
+					strLocationName nvarchar(250),
+					strCustomer nvarchar(250),
+					intReceiptNo nvarchar(250),
 					intContractHeaderId int,
 					strContractNumber nvarchar(100),
 					strCustomerReference nvarchar(100),
@@ -72,9 +70,9 @@ DECLARE @FinalTable AS TABLE (
 					strType nvarchar(100),
 					dblTotal DECIMAL(24,10),
 					intCollateralId int,
-					strLocationName nvarchar(50),
-					strCustomer nvarchar(50),
-					intReceiptNo nvarchar(50),
+					strLocationName nvarchar(250),
+					strCustomer nvarchar(250),
+					intReceiptNo nvarchar(250),
 					intContractHeaderId int,
 					strContractNumber nvarchar(100),
 					strCustomerReference nvarchar(100),
@@ -102,7 +100,7 @@ DECLARE @FinalTable AS TABLE (
 
 DECLARE @mRowNumber INT
 DECLARE @intCommodityId1 INT
-DECLARE @strDescription NVARCHAR(50)
+DECLARE @strDescription nvarchar(250)
 declare @intCommodityUnitMeasureId int
 
 SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
@@ -964,7 +962,7 @@ BEGIN
 END
 		
 DECLARE @intUnitMeasureId int
-DECLARE @strUnitMeasure nvarchar(50)
+DECLARE @strUnitMeasure nvarchar(250)
 SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 select @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
 INSERT INTO @FinalTable (intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUnitMeasure, intCollateralId,strLocationName,strCustomer,

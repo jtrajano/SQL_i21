@@ -2,7 +2,7 @@
 AS 
 SELECT DISTINCT
 	  intEntityId			= CUSTOMER.intEntityId
-	, strCustomerNumber		= CUSTOMER.strCustomerNumber
+	, strCustomerNumber		= entityToCustomer.strEntityNo --CUSTOMER.strCustomerNumber
 	, strName				= entityToCustomer.strName
 	, strPhone				= entityPhone.strPhone
 	, strSalesPersonName	= entityToSalesperson.strName
@@ -77,7 +77,7 @@ LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = en
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
 LEFT JOIN tblSMFreightTerms fTerms ON ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId) = fTerms.intFreightTermId
-LEFT JOIN tblSMShipVia shipVia on custLocation.intShipViaId = shipVia.intEntityId
+LEFT JOIN tblSMShipVia shipVia on shipLocation.intShipViaId = shipVia.intEntityId
 OUTER APPLY (
 	SELECT dtmDate = MAX(INV.dtmDate) 
 	FROM dbo.tblARInvoice INV WITH (NOLOCK) 

@@ -166,7 +166,8 @@ BEGIN TRY
 	--Declare temp01 table holder
     DECLARE @tblTempOne TABLE 
     (
-		strLocation NVARCHAR(250)
+	    intCompanyLocationId INT
+		, strLocation NVARCHAR(250)
 		, strUpc NVARCHAR(50)
 		, strItemDescription NVARCHAR(250)
 		, strChangeDescription NVARCHAR(100)

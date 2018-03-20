@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTItemsToRegister]
 AS
-SELECT DISTINCT I.intItemId, EM.intEntityId
+SELECT DISTINCT I.intItemId, EM.intEntityId, URN.ysnClick
 FROM tblICItem I
 JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 JOIN(
@@ -21,18 +21,21 @@ JOIN(
 		OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0   
 		OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
 		OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
-		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  )
+		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  
+		
+		OR CHARINDEX('dblStandardCost',strJsonData) > 0
+		OR CHARINDEX('intCategoryId',strJsonData) > 0 )
 
 	    AND dtmDate BETWEEN 
 				ISNULL(
-						(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC)
+						(DATEADD(HOUR,-8,(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC)))
 						, (
 							SELECT TOP 1 dtmDate
 							FROM tblSMAuditLog
 							WHERE strTransactionType = 'Inventory.view.Item'
 							ORDER BY dtmDate ASC
 						)) 
-				AND GETDATE()
+				AND GETUTCDATE()
 
 ) AS x ON x.intItemId = I.intItemId 
 JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
@@ -46,5 +49,6 @@ JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
 JOIN tblSMUserSecurity SMUS ON SMUS.intCompanyLocationId = IL.intLocationId
 JOIN tblEMEntity EM ON EM.intEntityId = SMUS.intEntityId
-WHERE I.ysnFuelItem = 0 
+JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = EM.intEntityId
+WHERE I.ysnFuelItem = 0
 

@@ -2300,6 +2300,9 @@ FROM @tblTempOne
 --OLD
 --SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount	
 
+	-- Update Register Notification
+	EXEC uspSTUpdateRegisterNotification
+
 	SET @strResultMsg = 'success' 
 END TRY
 

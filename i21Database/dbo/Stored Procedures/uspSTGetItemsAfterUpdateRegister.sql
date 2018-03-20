@@ -58,8 +58,13 @@ BEGIN TRY
 				  OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0
 				  OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0  
 				  OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0 
-				  OR CHARINDEX('Created', strJsonData) > 0)
-	AND dtmDate BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
+				  OR CHARINDEX('Created', strJsonData) > 0
+
+				  OR CHARINDEX('dblStandardCost',strJsonData) > 0
+				  OR CHARINDEX('intCategoryId',strJsonData) > 0 )
+	
+	AND dtmDate BETWEEN DATEADD(HOUR,-8,(@dtmBeginningChangeDate)) AND DATEADD(HOUR,-8,(@dtmEndingChangeDate))
+	--AND dtmDate BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
 
 	----Insert to table2
 	--INSERT INTO @tablePricebookFileTwo
@@ -347,6 +352,25 @@ BEGIN TRY
 					WHERE rn = 1
 				END
 		END
+
+
+	-- =============================================================================================
+	-- Update tblSTUpdateRegisterNotification
+	-- After Update Register remove notification from all users
+	-- Should only update based on location
+
+	UPDATE URN
+	SET URN.ysnClick = 1
+	FROM dbo.tblSTUpdateRegisterNotification AS URN
+	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = URN.intEntityId
+	WHERE SMUS.intCompanyLocationId = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
+	AND URN.ysnClick = 0
+
+	--UPDATE tblSTUpdateRegisterNotification
+	--SET ysnClick = 1
+	--WHERE ysnClick = 0
+	-- =============================================================================================
+
 
 	-- Insert to tblSTUpdateRegisterHistory
 	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate)

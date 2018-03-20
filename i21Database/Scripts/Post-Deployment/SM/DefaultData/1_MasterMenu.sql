@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Orders (Portal)' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Transactions (Portal)' AND strModuleName = 'System Manager' AND intParentMenuID = 0))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transaction Summary By Customer/Period' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Card Fueling'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4201,6 +4201,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Site Group Price Adjustments', strDesc
 UPDATE tblSMMasterMenu SET strMenuName = 'Card Accounts', strDescription = 'Card Accounts' WHERE strMenuName = 'Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Remote Price Adjustments', strDescription = 'Remote Price Adjustments' WHERE strMenuName = 'Site Group Price Adjustments' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = N'Group Adjustment Rates', strDescription = 'Group Adjustment Rates' WHERE strMenuName = 'Remote Price Adjustments' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = N'Transaction Summary By Customer/Period', strDescription = N'Transaction Summary By Customer/Period' WHERE strMenuName = 'Transaction Summary By Product Category' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 /* END OF RENAMING  */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingActivitiesParentMenuId)
@@ -4257,11 +4258,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transacti
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryBySite&direct=true&showCriteria=true', intSort = 2 WHERE strMenuName = 'Transaction Summary By Site' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transaction Summary By Product Category' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transaction Summary By Customer/Period' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Transaction Summary By Product Category', N'Card Fueling', @CardFuelingReportParentMenuId, N'Transaction Summary By Product Category', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Transaction Summary By Customer/Period', N'Card Fueling', @CardFuelingReportParentMenuId, N'Transaction Summary By Customer/Period', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', intSort = 3 WHERE strMenuName = 'Transaction Summary By Product Category' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', intSort = 3 WHERE strMenuName = 'Transaction Summary By Customer/Period' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
