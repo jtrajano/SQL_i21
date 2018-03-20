@@ -32,9 +32,15 @@ BEGIN
 		OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0   
 		OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
 		OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
-		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  )
-	AND dtmDate BETWEEN @BeginingChangeDate AND @EndingChangeDate
+		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  
+		
+		OR CHARINDEX('dblStandardCost',strJsonData) > 0
+		OR CHARINDEX('intCategoryId',strJsonData) > 0 )
+
+	AND dtmDate BETWEEN DATEADD(HOUR,-8,(@BeginingChangeDate)) AND DATEADD(HOUR,-8,(@EndingChangeDate)) -- Should adjust to audit log format UTCDATE 8hours late
 	
+
+
     --Insert data into Procebook staging table	
 	IF(@ExportEntirePricebookFile = 1)
 	BEGIN

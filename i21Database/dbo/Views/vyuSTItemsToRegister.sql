@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTItemsToRegister]
 AS
-SELECT DISTINCT I.intItemId, EM.intEntityId
+SELECT DISTINCT I.intItemId, EM.intEntityId, URN.ysnClick
 FROM tblICItem I
 JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 JOIN(
@@ -28,7 +28,7 @@ JOIN(
 
 	    AND dtmDate BETWEEN 
 				ISNULL(
-						(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC)
+						(DATEADD(HOUR,-8,(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC)))
 						, (
 							SELECT TOP 1 dtmDate
 							FROM tblSMAuditLog
@@ -49,5 +49,6 @@ JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
 JOIN tblSMUserSecurity SMUS ON SMUS.intCompanyLocationId = IL.intLocationId
 JOIN tblEMEntity EM ON EM.intEntityId = SMUS.intEntityId
+JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = EM.intEntityId
 WHERE I.ysnFuelItem = 0
 
