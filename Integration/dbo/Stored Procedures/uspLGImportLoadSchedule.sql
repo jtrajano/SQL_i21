@@ -22,36 +22,39 @@ BEGIN
 	IF (@Checking = 1)
 	BEGIN
 			 SELECT @Total = COUNT (*) 	FROM galdsmst LL 
-	JOIN	tblSMCompanyLocation	CL	ON	LTRIM(RTRIM(CL.strLocationNumber)) collate SQL_Latin1_General_CP1_CS_AS  = LTRIM(RTRIM(LL.galds_loc_no)) collate SQL_Latin1_General_CP1_CS_AS
-	JOIN	gacntmst				CT	ON	gacnt_cnt_no = galds_cnt_no AND gacnt_cus_no = galds_cus_no AND
-	 gacnt_seq_no = galds_cnt_seq_no AND gacnt_sub_seq_no = galds_cnt_sub_no AND gacnt_loc_no = galds_loc_no AND gacnt_pur_sls_ind = galds_pur_sls_ind
-	JOIN    tblCTContractHeader		CH  ON  LTRIM(RTRIM(CH.strContractNumber)) collate SQL_Latin1_General_CP1_CS_AS  = LTRIM(RtRIM(CT.gacnt_cnt_no))+'_'+LTRIM(RtRIM(CT.gacnt_cus_no))
-											+'_'+LTRIM(RtRIM(CAST(CT.gacnt_seq_no AS CHAR(3))))+'_'+LTRIM(RtRIM(CAST(CT.gacnt_sub_seq_no AS CHAR(3))))+'_'+CAST(CT.A4GLIdentity AS CHAR(6)) collate SQL_Latin1_General_CP1_CS_AS
-	JOIN    tblCTContractDetail		CD  ON  CD.intContractSeq												 = LL.galds_cnt_seq_no 
-										AND CD.intContractHeaderId = CH.intContractHeaderId
-	LEFT	JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(LL.galds_com_cd)) collate SQL_Latin1_General_CP1_CS_AS
-	LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo))										= LTRIM(RTRIM(LL.galds_com_cd)) collate SQL_Latin1_General_CP1_CS_AS
-	LEFT	JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId  AND IU.ysnStockUnit =1	
-	JOIN			[tblLGEquipmentType]    EquipmentType ON						EquipmentType.intEquipmentTypeId = LL.galds_equip_type
-	LEFT	JOIN	tblARCustomer			CS	ON	LTRIM(RTRIM(CS.strCustomerNumber)) collate SQL_Latin1_General_CP1_CS_AS	= LTRIM(RTRIM(LL.galds_cus_no)) collate SQL_Latin1_General_CP1_CS_AS
-	JOIN			tblEMEntity				EM  ON	EM.intEntityId = CS.intEntityId
-	LEFT	JOIN	tblEMEntityLocation		EL	ON	EL.intEntityId	=	CS.intEntityId and EL.strLocationName = EM.strName
-	LEFT	JOIN	tblSCTicket			    SC	ON	LTRIM(RTRIM(SC.strTicketNumber)) collate SQL_Latin1_General_CP1_CS_AS	= LTRIM(RTRIM(LL.galds_tic_no))+'_'+ LTRIM(RTRIM(LL.galds_cus_no))
-										--AND SC.intContractId 
-	LEFT	JOIN	tblARCustomer			Hauler	ON	LTRIM(RTRIM(Hauler.strCustomerNumber)) collate SQL_Latin1_General_CP1_CS_AS	= LTRIM(RTRIM(LL.galds_frt_cus_no))	
-	LEFT    JOIN	tblLGLoad				LG	ON LG.[strLoadNumber] collate SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(LL.galds_load_no))+'_'+LTRIM(RTRIM(LL.galds_cus_no))+'_'+LTRIM(RTRIM(LL.galds_loc_no)) collate SQL_Latin1_General_CP1_CS_AS 
-	WHERE LG.intLoadId IS NULL
-
-			 
+					JOIN	tblSMCompanyLocation	CL	ON	LTRIM(RTRIM(CL.strLocationNumber)) collate SQL_Latin1_General_CP1_CS_AS  = LTRIM(RTRIM(LL.galds_loc_no)) collate SQL_Latin1_General_CP1_CS_AS
+					JOIN	gacntmst				CT	ON	gacnt_cnt_no = galds_cnt_no AND gacnt_cus_no = galds_cus_no AND
+					 gacnt_seq_no = galds_cnt_seq_no AND gacnt_sub_seq_no = galds_cnt_sub_no AND gacnt_loc_no = galds_loc_no AND gacnt_pur_sls_ind = galds_pur_sls_ind
+					JOIN    tblCTContractHeader		CH  ON  LTRIM(RTRIM(CH.strContractNumber)) collate SQL_Latin1_General_CP1_CS_AS  = LTRIM(RtRIM(CT.gacnt_cnt_no))+'_'+LTRIM(RtRIM(CT.gacnt_cus_no))
+															+'_'+LTRIM(RtRIM(CAST(CT.gacnt_seq_no AS CHAR(3))))+'_'+LTRIM(RtRIM(CAST(CT.gacnt_sub_seq_no AS CHAR(3))))+'_'+CAST(CT.A4GLIdentity AS CHAR(6)) collate SQL_Latin1_General_CP1_CS_AS
+					JOIN    tblCTContractDetail		CD  ON  CD.intContractSeq												 = LL.galds_cnt_seq_no 
+														AND CD.intContractHeaderId = CH.intContractHeaderId
+					LEFT	JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(LL.galds_com_cd)) collate SQL_Latin1_General_CP1_CS_AS
+					LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo))										= LTRIM(RTRIM(LL.galds_com_cd)) collate SQL_Latin1_General_CP1_CS_AS
+					LEFT	JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId  AND IU.ysnStockUnit =1	
+					JOIN			[tblLGEquipmentType]    EquipmentType ON						EquipmentType.intEquipmentTypeId = LL.galds_equip_type
+					LEFT	JOIN	tblARCustomer			CS	ON	LTRIM(RTRIM(CS.strCustomerNumber)) collate SQL_Latin1_General_CP1_CS_AS	= LTRIM(RTRIM(LL.galds_cus_no)) collate SQL_Latin1_General_CP1_CS_AS
+					JOIN			tblEMEntity				EM  ON	EM.intEntityId = CS.intEntityId
+					LEFT	JOIN	tblEMEntityLocation		EL	ON	EL.intEntityId	=	CS.intEntityId and EL.strLocationName = EM.strName
+					LEFT	JOIN	tblSCTicket			    SC	ON	LTRIM(RTRIM(SC.strTicketNumber)) collate SQL_Latin1_General_CP1_CS_AS	= LTRIM(RTRIM(LL.galds_tic_no))+'_'+ LTRIM(RTRIM(LL.galds_cus_no))
+														--AND SC.intContractId 
+					LEFT	JOIN	tblARCustomer			Hauler	ON	LTRIM(RTRIM(Hauler.strCustomerNumber)) collate SQL_Latin1_General_CP1_CS_AS	= LTRIM(RTRIM(LL.galds_frt_cus_no))	
+					LEFT    JOIN	tblLGLoad				LG	ON LG.[strLoadNumber] collate SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(LL.galds_load_no))+'_'+LTRIM(RTRIM(LL.galds_cus_no))+'_'+LTRIM(RTRIM(LL.galds_loc_no)) collate SQL_Latin1_General_CP1_CS_AS 
+					WHERE LG.intLoadId IS NULL
 			 
 			 RETURN @Total
 	END
-	--For Purchase Loads,adding the GA customers as Vendor type
-	INSERT INTO [dbo].[tblEMEntityType]([intEntityId],[strType],[intConcurrencyId])
-	SELECT DISTINCT CUS.intEntityId,'Vendor',0 FROM galdsmst 
+
+	--For Purchase Loads,adding the GA customers as Vendor type	
+	DECLARE @CustomerId AS Id
+	INSERT INTO @CustomerId SELECT DISTINCT CUS.intEntityId FROM galdsmst 
 	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = galds_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
-	WHERE galds_pur_sls_ind = 'P' AND NOT EXISTS (SELECT * FROM tblEMEntityType WHERE intEntityId = CUS .intEntityId AND strType = 'Vendor')
-	
+	WHERE galds_pur_sls_ind = 'P' AND NOT EXISTS (SELECT * FROM tblAPVendor WHERE strVendorId = CUS .strCustomerNumber)
+
+	EXEC uspEMConvertCustomerToVendor @CustomerId, @UserId	
+
+	--IMPORT LOAD HEADER
+
 	INSERT INTO [dbo].[tblLGLoad]
 	(
 		 [intConcurrencyId]
