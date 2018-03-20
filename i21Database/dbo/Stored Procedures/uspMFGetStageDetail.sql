@@ -29,13 +29,13 @@ BEGIN
 		)
 
 	INSERT INTO @tblMFCustomTable (strFieldName)
-	SELECT strFieldName
-	FROM tblMFCustomFieldValue a
-	JOIN tblSMCustomTabDetail b ON a.intCustomTabDetailId = b.intCustomTabDetailId
-	JOIN tblMFWorkOrderInputLot WI ON WI.intWorkOrderInputLotId = a.intWorkOrderInputLotId
-		AND WI.intWorkOrderId = @intWorkOrderId
-	WHERE a.intWorkOrderInputLotId IS NOT NULL
-	ORDER BY a.intCustomTabDetailId
+	SELECT TD.strFieldName
+	FROM tblSMScreen S
+	JOIN tblSMCustomTab T ON T.intScreenId = S.intScreenId
+		AND S.strNamespace = 'Manufacturing.view.ProcessProductionConsume'
+	JOIN tblSMCustomTabDetail TD ON TD.intCustomTabId = T.intCustomTabId
+		AND TD.strFieldName <> 'Id'
+	ORDER BY TD.intCustomTabDetailId
 
 	SELECT @strColumn1 = strFieldName
 	FROM @tblMFCustomTable
@@ -77,7 +77,7 @@ BEGIN
 	FROM @tblMFCustomTable
 	WHERE intRecordId = 10
 
-	DECLARE @tblMFCustomValue table(
+	DECLARE @tblMFCustomValue TABLE (
 		intWorkOrderInputLotId INT
 		,strColumn1 NVARCHAR(100)
 		,strColumn2 NVARCHAR(100)
@@ -187,7 +187,7 @@ BEGIN
 	LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = W.intMachineId
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
-	Left JOIN @tblMFCustomValue CV on CV.intWorkOrderInputLotId=W.intWorkOrderInputLotId
+	LEFT JOIN @tblMFCustomValue CV ON CV.intWorkOrderInputLotId = W.intWorkOrderInputLotId
 	WHERE intWorkOrderId = @intWorkOrderId
 	
 	UNION
@@ -224,16 +224,16 @@ BEGIN
 			END AS strTransactionName
 		,PL.strParentLotNumber
 		,2 AS intDisplayOrder
-		,NULL As strColumn1
-		,NULL As strColumn2
-		,NULL As strColumn3
-		,NULL As strColumn4
-		,NULL As strColumn5
-		,NULL As strColumn6
-		,NULL As strColumn7
-		,NULL As strColumn8
-		,NULL As strColumn9
-		,NULL As strColumn10
+		,NULL AS strColumn1
+		,NULL AS strColumn2
+		,NULL AS strColumn3
+		,NULL AS strColumn4
+		,NULL AS strColumn5
+		,NULL AS strColumn6
+		,NULL AS strColumn7
+		,NULL AS strColumn8
+		,NULL AS strColumn9
+		,NULL AS strColumn10
 	FROM dbo.tblMFWorkOrderConsumedLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
