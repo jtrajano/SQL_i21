@@ -58,7 +58,7 @@
 	[strWinLossActionItem] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intLostToCompetitorId] [int] null,
 	[ysnEmailAlert] bit null,
-	[intTargetVersion] [int] null,
+	[intTargetVersionId] [int] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),

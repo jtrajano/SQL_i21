@@ -10,6 +10,7 @@
 			,strInternalSalesPerson = k.strName
 			,strCustomerProjectManager = l.strName
 			,strCustomerLeadershipSponsor = m.strName
+			,strTargetVersion = n.strVersionNo
 		from
 			tblHDProject a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -20,3 +21,4 @@
 			left join tblEMEntity k on k.intEntityId = a.intInternalSalesPerson
 			left join tblEMEntity l on l.intEntityId = a.intCustomerProjectManager
 			left join tblEMEntity m on m.intEntityId = a.intCustomerLeadershipSponsor
+			left join tblHDVersion n on n.intVersionId = a.intTargetVersionId
