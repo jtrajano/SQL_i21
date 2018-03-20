@@ -199,18 +199,25 @@ BEGIN
 
 		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
 		BEGIN
-			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
+			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strUpdateInvoiceReportNumber IS NOT NULL AND strUpdateInvoiceReportNumber != '''' )'
 			IF (ISNULL(@CustomerName,'') != '')
 			BEGIN
 				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' + 
 				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
 			END
 		END
+		ELSE
+		BEGIN
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' ( ISNULL(strUpdateInvoiceReportNumber,'''') = '''')'
+		END
 
 		IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL
 			BEGIN
 				DROP TABLE #tblCFTempInvoiceReportSummary
 			END
+
+		select @whereClause
 
 		SELECT * INTO #tblCFTempInvoiceReportSummary FROM vyuCFInvoiceReportSummary
 

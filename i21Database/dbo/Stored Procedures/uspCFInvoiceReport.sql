@@ -334,7 +334,7 @@ BEGIN
 		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'FALSE' OR @From = 0))
 		BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' ( strInvoiceReportNumber  IS NULL OR ysnPostedCSV = 1)'
+				' ( ISNULL(strInvoiceReportNumber,'''') = '''')'
 
 			---------GET DISTINCT TRANSACTION ID---------
 			SET @tblCFTempTableQuery = 'SELECT DISTINCT intTransactionId FROM #tblCFTempInvoiceReport ' + @whereClause
@@ -563,6 +563,8 @@ BEGIN
 
 
 		--SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary 
+		--SELECT * FROM tblCFInvoiceReportTempTable
+
 
 		INSERT INTO tblCFInvoiceReportTempTable (
 		intCustomerGroupId			
