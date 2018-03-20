@@ -291,7 +291,7 @@ BEGIN TRY
 END 
 
 --NEW
-SELECT @RecCount  = count(*) from @tblTempOne 
+SELECT @RecCount  = count(*) from @tblTempOne
 DELETE FROM @tblTempOne WHERE strOldData = strNewData
 SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
@@ -300,10 +300,6 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 --DELETE FROM tblSTMassUpdateReportMaster WHERE OldData =  NewData
 --SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=  NewData
 	  
-
-
-
-
 
 
 
@@ -644,77 +640,91 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 	--END
 	----==========================================================================================================================================
 
-	----TEST
-	If(OBJECT_ID('tempdb..#tempAudit') Is Not Null)
-	Begin
-		Drop Table #tempAudit
-	End
 
-	CREATE TABLE #tempAudit (intRowCount INT NOT NULL IDENTITY
-								, strUpc NVARCHAR(50)
-								, strLocation NVARCHAR(250)
-								, strItemDescription NVARCHAR(250)
-								, strChangeDescription NVARCHAR(100)
-								, strOldData NVARCHAR(MAX)
-								, strNewData NVARCHAR(MAX)
-								, intParentId INT
-								, intChildId INT)
 
-	INSERT INTO #tempAudit(strUpc
-						, strLocation
-						, strItemDescription
-						, strChangeDescription
-						, strOldData
-						, strNewData
-						, intParentId
-						, intChildId)
-	SELECT DISTINCT strUpc
-						,strLocation
-						, strItemDescription
-						, strChangeDescription
-						, strOldData
-						, strNewData
-						, intParentId
-						, intChildId
-	FROM @tblTempOne
-	WHERE strOldData != strNewData
 
-	SELECT * FROM #tempAudit
+	-- ==========================================================================
+	-- Return Count result to Server side
+	SELECT @UpdateCount = COUNT(*)
+	FROM 
+	(
+	  SELECT DISTINCT intChildId FROM @tblTempOne WHERE strOldData != strNewData
+	) T1
+	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
+	-- ==========================================================================
 
-	EXEC uspSTUpdateItemPricingInsertAuditLog @currentUserId
-	DROP TABLE #tempAudit
+
+	-- ==========================================================================
+	-- Create Audit Log
+	IF (@UpdateCount > 0)
+	 BEGIN
+		If(OBJECT_ID('tempdb..#tempAudit') Is Not Null)
+		Begin
+			Drop Table #tempAudit
+		End
+
+		CREATE TABLE #tempAudit (intRowCount INT NOT NULL IDENTITY
+									, strUpc NVARCHAR(50)
+									, strLocation NVARCHAR(250)
+									, strItemDescription NVARCHAR(250)
+									, strChangeDescription NVARCHAR(100)
+									, strOldData NVARCHAR(MAX)
+									, strNewData NVARCHAR(MAX)
+									, intParentId INT
+									, intChildId INT)
+
+		INSERT INTO #tempAudit(strUpc
+							, strLocation
+							, strItemDescription
+							, strChangeDescription
+							, strOldData
+							, strNewData
+							, intParentId
+							, intChildId)
+		SELECT DISTINCT strUpc
+							,strLocation
+							, strItemDescription
+							, strChangeDescription
+							, strOldData
+							, strNewData
+							, intParentId
+							, intChildId
+		FROM @tblTempOne
+		WHERE strOldData != strNewData
+
+		SELECT * FROM #tempAudit
+
+		EXEC uspSTUpdateItemPricingInsertAuditLog @currentUserId
+		DROP TABLE #tempAudit
+
+
+		DELETE FROM tblSTMassUpdateReportMaster
+
+		INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
+		SELECT strLocation
+			  , strUpc
+			  , strItemDescription
+			  , strChangeDescription
+			  , strOldData
+			  , strNewData 
+		FROM @tblTempOne
+		WHERE strOldData != strNewData
+
+		--OLD
+		--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
+
+		-- Update Register Notification
+		EXEC uspSTUpdateRegisterNotification
+	END
+	-- ==========================================================================
 
 	
---NEW
-SELECT @UpdateCount = COUNT(*)
-FROM 
-(
-  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
-) T1
-SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
-
-DELETE FROM tblSTMassUpdateReportMaster
-
-INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
-SELECT strLocation
-	  , strUpc
-	  , strItemDescription
-	  , strChangeDescription
-	  , strOldData
-	  , strNewData 
-FROM @tblTempOne
-
-
---OLD
---SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
-
--- Update Register Notification
-EXEC uspSTUpdateRegisterNotification
-
 END TRY
 
-BEGIN CATCH       
-	SET @ErrMsg = ERROR_MESSAGE()      
-	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
-	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+BEGIN CATCH  
+	SET @ErrMsg = ERROR_MESSAGE()  
+	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')     
+	--SET @ErrMsg = ERROR_MESSAGE()      
+	--IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
+	--RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH

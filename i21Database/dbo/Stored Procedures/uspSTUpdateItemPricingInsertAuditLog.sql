@@ -320,9 +320,6 @@ BEGIN
 
 	DELETE @tblTemp WHERE intParentId = @intParentId
 END
-
-
-	
 -- ##################################################################################
 
 
