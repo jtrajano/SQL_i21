@@ -41,7 +41,8 @@ AS BEGIN
 
 
     SET @strGeneratedSql =  ' SELECT' + CHAR(13)
-								   + ' CL.strLocationName' + CHAR(13)
+								   + ' CL.intCompanyLocationId' + CHAR(13)
+								   + '  , CL.strLocationName' + CHAR(13)
 								   + '	, UOM.strUpcCode' + CHAR(13)
 								   + '	, I.strDescription' + CHAR(13)
 								   + '	,''' + @strChangeDescription + '''' + CHAR(13)
