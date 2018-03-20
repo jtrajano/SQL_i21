@@ -651,7 +651,22 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 	(
 	  SELECT DISTINCT intChildId FROM @tblTempOne WHERE strOldData != strNewData
 	) T1
-	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
+
+	DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
+	DECLARE @strEntityIds AS NVARCHAR(MAX)= ''
+
+	SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
+	SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)
+	
+	SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(URN.intEntityId AS NVARCHAR(20)) + ',','')
+	FROM tblSTUpdateRegisterNotification URN
+	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = URN.intEntityId
+	WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+
+	SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
+
+	--PRINT @strEntityIds
+	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount, @strEntityIds as strEntityIds
 	-- ==========================================================================
 
 
@@ -717,9 +732,6 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
 
 		-- Update Register Notification
-		DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
-		SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
-		SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)
 		EXEC uspSTUpdateRegisterNotification @strLocationIds
 	END
 	-- ==========================================================================
