@@ -345,7 +345,8 @@ cfTrans.strPrintTimeStamp,
 FROM   dbo.vyuCFInvoice AS arInv 
        RIGHT OUTER JOIN dbo.tblCFTransaction AS cfTrans 
                      ON arInv.intTransactionId = cfTrans.intTransactionId 
-						AND cfTrans.ysnPosted = 1
+						AND ISNULL(cfTrans.ysnPosted,0) = 1
+						AND ISNULL(cfTrans.ysnInvalid,0) = 0
                         AND arInv.intInvoiceId = cfTrans.intInvoiceId 
        LEFT OUTER JOIN (SELECT icfVehicle.intVehicleId, 
                                icfVehicle.intAccountId, 
@@ -584,6 +585,7 @@ FROM   dbo.vyuCFInvoice AS arInv
        LEFT OUTER JOIN dbo.tblCFDepartment AS cfAccntDep 
                     ON cfAccntDep.intDepartmentId = 
                        cfCardAccount.intDepartmentId
+	WHERE ISNULL(cfTrans.ysnPosted,0) = 1 AND ISNULL(cfTrans.ysnInvalid,0) = 0
 
 
 GO
