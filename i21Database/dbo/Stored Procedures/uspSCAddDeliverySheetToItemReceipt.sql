@@ -35,14 +35,6 @@ DECLARE @intHaulerId AS INT,
 		@splitDistribution AS NVARCHAR(40);
 		
 BEGIN 
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intFutureMarketId = IC.intFutureMarketId, @splitDistribution = SC.strDistributionOption
-	FROM	dbo.tblSCTicket SC 
-	LEFT JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-	LEFT JOIN dbo.tblICCommodity IC On SC.intCommodityId = IC.intCommodityId
-	WHERE	SC.intTicketId = @intDeliverySheetId AND UOM.ysnStockUnit = 1		
-END
-
-BEGIN 
 	SELECT	@intTicketItemUOMId = UM.intItemUOMId
 	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intDeliverySheetId
@@ -219,27 +211,19 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= RE.intForexRateTypeId
 		,[dblForexRate]						= RE.dblForexRate
-		,[ysnInventoryCost]					= CASE
-												WHEN IC.ysnInventoryCost = 1
-												THEN 
-													CASE
-														WHEN QM.dblDiscountAmount < 0 THEN 1
-														WHEN QM.dblDiscountAmount > 0 THEN 0
-													END
-												ELSE IC.ysnInventoryCost
-											END
+		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 
 												CASE 
 													WHEN QM.dblDiscountAmount < 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 1) * -1)
 														ELSE (QM.dblDiscountAmount * -1)
 													END 
 													WHEN QM.dblDiscountAmount > 0 THEN 
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
+														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 1)
 														ELSE QM.dblDiscountAmount
 													END
 												END
@@ -259,18 +243,18 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 													CASE
 														WHEN QM.dblDiscountAmount < 0 THEN 
 														CASE
-															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
+															WHEN SCD.intSplitId > 0 THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 1) * -1)
 															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId) * -1)
 														END 
 														WHEN QM.dblDiscountAmount > 0 THEN 
 														CASE
-															WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
+															WHEN SCD.intSplitId > 0 THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, 1)
 															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId)
 														END 
 													END
 												END
 											END
-		,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+		,[intContractHeaderId]				= RE.intContractHeaderId
 		,[intContractDetailId]				= RE.intContractDetailId
 		,[ysnAccrue]						= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 1
@@ -285,6 +269,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 		LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
+		LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = RE.intSourceId
 		WHERE RE.intSourceId = @intDeliverySheetId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0
 
 		--FOR FEE CHARGES

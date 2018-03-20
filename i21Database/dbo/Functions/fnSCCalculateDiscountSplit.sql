@@ -4,7 +4,8 @@
 	@intEntityId INT,
 	@intTicketDiscountId INT,
 	@dblUnitQty AS NUMERIC(38, 20),
-	@intUnitMeasureId INT = NULL
+	@intUnitMeasureId INT = NULL,
+	@ysnDeliverySheet BIT = 0
 )
 RETURNS NUMERIC(18, 6) 
 AS
@@ -34,7 +35,15 @@ BEGIN
 	, @intItemId = intItemId
 	FROM tblSCTicket WHERE intTicketId = @intTicketId
 	SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId;
-	SELECT @dblSplitPercent = dblSplitPercent FROM tblSCTicketSplit WHERE intCustomerId = @intEntityId AND intTicketId = @intTicketId;
+
+	IF @ysnDeliverySheet = 0
+	BEGIN
+		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCTicketSplit WHERE intCustomerId = @intEntityId AND intTicketId = @intTicketId;
+	END
+	ELSE
+	BEGIN
+		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCDeliverySheetSplit WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intTicketId;
+	END
 	SET @dblSplitPercent = @dblSplitPercent / 100;
 
 	IF ISNULL(@intUnitMeasureId,0 ) > 0
