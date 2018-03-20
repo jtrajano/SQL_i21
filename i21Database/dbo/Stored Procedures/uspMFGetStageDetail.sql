@@ -29,7 +29,7 @@ BEGIN
 		)
 
 	INSERT INTO @tblMFCustomTable (strFieldName)
-	SELECT TD.strFieldName
+	SELECT TD.intCustomTabDetailId
 	FROM tblSMScreen S
 	JOIN tblSMCustomTab T ON T.intScreenId = S.intScreenId
 		AND S.strNamespace = 'Manufacturing.view.ProcessProductionConsume'
@@ -117,10 +117,9 @@ BEGIN
 		,strColumn10
 	FROM (
 		SELECT a.intWorkOrderInputLotId
-			,Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(b.strFieldName, @strColumn1, 'strColumn1'), @strColumn2, 'strColumn2'), @strColumn3, 'strColumn3'), @strColumn4, 'strColumn4'), @strColumn5, 'strColumn5'), @strColumn6, 'strColumn6'), @strColumn7, 'strColumn7'), @strColumn8, 'strColumn8'), @strColumn9, 'strColumn9'), @strColumn10, 'strColumn10') AS strFieldName
+			,Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(Replace(a.intCustomTabDetailId, @strColumn1, 'strColumn1'), @strColumn2, 'strColumn2'), @strColumn3, 'strColumn3'), @strColumn4, 'strColumn4'), @strColumn5, 'strColumn5'), @strColumn6, 'strColumn6'), @strColumn7, 'strColumn7'), @strColumn8, 'strColumn8'), @strColumn9, 'strColumn9'), @strColumn10, 'strColumn10') AS strFieldName
 			,a.strValue
 		FROM tblMFCustomFieldValue a
-		JOIN tblSMCustomTabDetail b ON a.intCustomTabDetailId = b.intCustomTabDetailId
 		JOIN tblMFWorkOrderInputLot WI ON WI.intWorkOrderInputLotId = a.intWorkOrderInputLotId
 			AND WI.intWorkOrderId = @intWorkOrderId
 		WHERE a.intWorkOrderInputLotId IS NOT NULL
