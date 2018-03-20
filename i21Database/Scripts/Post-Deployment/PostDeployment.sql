@@ -283,6 +283,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\25_MigratePackedTypeToQuantityType.sql
 :r .\IC\26_AddStockUOM.sql
 :r .\IC\27_RemoveAfter18.1_DataFix.sql 
+:r .\IC\29_Inventory_Constraints.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
