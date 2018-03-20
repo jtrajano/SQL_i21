@@ -1487,7 +1487,9 @@ SET @batchIdUsed = @batchId
 					UPDATE tblARPaymentDetail
 					SET
 						 dblDiscount = 0.00
+						,dblBaseDiscount = 0.00
 						,dblInterest = 0.00
+						,dblBaseInterest = 0.00
 					WHERE
 						intPaymentDetailId = @DiscountepPaymetDetailID
 						
@@ -1690,7 +1692,8 @@ IF @post = 1
 			@AROverpayment P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			A.dblUnappliedAmount <> 0
+			A.dblBaseUnappliedAmount <> @ZeroDecimal
+			OR A.dblUnappliedAmount <> @ZeroDecimal
 				
 		UNION ALL
 		--CREDIT Prepayment
@@ -1739,7 +1742,8 @@ IF @post = 1
 			@ARPrepayment P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			A.dblAmountPaid <> 0
+			A.dblAmountPaid <> @ZeroDecimal
+			OR A.dblBaseAmountPaid <> @ZeroDecimal
 				
 				
 		UNION ALL
@@ -1798,8 +1802,11 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblDiscount <> 0
-			AND B.dblAmountDue = 0
+			(B.dblDiscount <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseDiscount <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1863,9 +1870,13 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblInterest <> 0
-			AND B.dblPayment <> 0
-			AND B.dblAmountDue = 0
+			(B.dblInterest <> @ZeroDecimal
+			AND B.dblPayment <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseInterest <> @ZeroDecimal
+			AND B.dblBasePayment <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1939,7 +1950,8 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblPayment <> 0
+			B.dblPayment <> @ZeroDecimal
+			OR B.dblBasePayment <> @ZeroDecimal
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -2076,8 +2088,11 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblDiscount <> 0
-			AND B.dblAmountDue = 0
+			(B.dblDiscount <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseDiscount <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -2141,9 +2156,13 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblInterest <> 0
-			AND B.dblPayment <> 0
-			AND B.dblAmountDue = 0
+			(B.dblInterest <> @ZeroDecimal
+			AND B.dblPayment <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseInterest <> @ZeroDecimal
+			AND B.dblBasePayment <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
