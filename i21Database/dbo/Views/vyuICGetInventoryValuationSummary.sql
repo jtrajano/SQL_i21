@@ -19,11 +19,18 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intIte
 			--	, 'yyyy-MM'
 			--)  
 			CONVERT(NVARCHAR(7), CAST(RTRIM(t.intYear * 10000 + t.intMonth * 100 + 1) AS DATETIME), 120)
+		,intMonth
+		,intYear
 		,dblQuantity = ISNULL(dblQuantity, 0)
+		,dblRunningQuantity = CAST(0 AS NUMERIC(38, 20)) 
 		,dblValue = ISNULL(dblValue, 0)
+		,dblRunningValue = CAST(0 AS NUMERIC(38, 20)) 
 		,dblLastCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblLastCost, 2), 0)
+		,dblRunningLastCost = CAST(0 AS NUMERIC(38, 20)) 
 		,dblStandardCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblStandardCost, 2),0)
+		,dblRunningStandardCost = CAST(0 AS NUMERIC(38, 20)) 
 		,dblAverageCost = ISNULL( ROUND(dblQuantity * ItemPricing.dblAverageCost, 2),0)
+		,dblRunningAverageCost = CAST(0 AS NUMERIC(38, 20)) 
 		,strStockUOM = umStock.strUnitMeasure
 		,t.dblQuantityInStockUOM
 		,Category.strCategoryCode
