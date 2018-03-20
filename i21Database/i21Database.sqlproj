@@ -6249,6 +6249,8 @@
     <Build Include="dbo\Views\vyuTRGetCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricingInsertAuditLog.sql" />
+    <Build Include="dbo\Functions\fnICCheckItemUOMIdIsNotUsed.sql" />
+    <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
