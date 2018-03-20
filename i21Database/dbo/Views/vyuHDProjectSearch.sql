@@ -1,5 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuHDProjectSearch]
     AS
+		with projecthours as (
+			select aa.intProjectId, dblQuotedHours = isnull(sum(ad.dblQuotedHours),0), dblActualHours = isnull(sum(ad.dblActualHours),0)
+			from tblHDProject aa, tblHDProjectTask ab, tblHDTicket ad
+			where ab.intProjectId = aa.intProjectId
+			and ad.intTicketId = ab.intTicketId
+			group by aa.intProjectId,aa.strProjectName
+		)
 		Select
 					 intProjectId
 					,strProjectName
@@ -37,6 +44,9 @@
 					,strCampaignName
 					,strCompanyLocation
 					,strEntityLocation
+					,dblActualHours
+					,dblQuotedHours
+					,dblOverShort
 		from 
 				(
 				select
@@ -76,6 +86,9 @@
 					,cam.strCampaignName
 					,strCompanyLocation = camloc.strLocationName
 					,strEntityLocation = enloc.strLocationName
+					,ph.dblActualHours
+					,ph.dblQuotedHours
+					,dblOverShort = (ph.dblQuotedHours-ph.dblActualHours)
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
@@ -86,4 +99,5 @@
 					left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = proj.intOpportunityCampaignId
 					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
+					left join projecthours ph on ph.intProjectId = proj.intProjectId
 				) as query1
