@@ -186,6 +186,11 @@ namespace iRely.Inventory.BusinessLayer
                 {
                     msg = "Duplicate item owners are not allowed.";
                 }
+                else if (result.BaseException.Message.Contains("CK_ItemUOMId_IS_NOT_USED"))
+                {
+                    msg = "When UOM has a transaction, Unit or Unit Qty is not allowed to change.";
+                }
+
             }
 
             return new BusinessResult<tblICItem>()
