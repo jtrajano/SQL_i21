@@ -4,7 +4,8 @@ CREATE PROCEDURE [dbo].[uspMFGetBlendProductionAvailableLots]
 	@intItemId int,
 	@intLocationId int,
 	@ysnShowAllPallets bit,
-	@intItemUOMId int=0
+	@intItemUOMId int=0,
+	@intManufacturingProcessId int=0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,11 +16,35 @@ SET ANSI_WARNINGS OFF
 
 Declare @ysnEnableParentLot bit=0
 Declare @strRecipeItemUOM nvarchar(50)
+Declare @strSourceLocationIds NVARCHAR(MAX)
 
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 Select @strRecipeItemUOM=um.strUnitMeasure 
 From tblICItemUOM iu join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Where iu.intItemUOMId=@intItemUOMId
+
+SELECT @strSourceLocationIds = ISNULL(pa.strAttributeValue, '')
+FROM tblMFManufacturingProcessAttribute pa
+JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+WHERE intManufacturingProcessId = @intManufacturingProcessId
+	AND intLocationId = @intLocationId
+	AND at.strAttributeName = 'Source Location'
+
+Declare @tblSourceStorageLocation AS Table
+(
+	intStorageLocationId int
+)
+
+If ISNULL(@strSourceLocationIds,'')<>''
+Begin
+	Insert Into @tblSourceStorageLocation
+	Select * from dbo.fnCommaSeparatedValueToTable(@strSourceLocationIds)
+End
+Else
+Begin
+	Insert Into @tblSourceStorageLocation
+	Select intStorageLocationId from tblICStorageLocation Where intLocationId=@intLocationId AND ISNULL(ysnAllowConsume,0)=1
+End
 
 Declare @tblReservedQty table
 (
@@ -64,12 +89,13 @@ Join tblSMCompanyLocation cl on cl.intCompanyLocationId=l.intLocationId
 Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocationId=l.intSubLocationId
 Left Join tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
 Left Join tblICStorageUnitType ut on sl.intStorageUnitTypeId=ut.intStorageUnitTypeId AND ut.strInternalCode <> 'PROD_STAGING'
+Join @tblSourceStorageLocation tsl on sl.intStorageLocationId=tsl.intStorageLocationId
 Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
 --Left Join vyuAPVendor v on l.intVendorId=v.intVendorId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
 Where l.intItemId=@intItemId and l.dblQty>0 and ls.strPrimaryStatus='Active' 
-And l.intLocationId = @intLocationId
+And l.intLocationId = @intLocationId AND ISNULL(sl.ysnAllowConsume,0)=1
 Order by l.dtmExpiryDate, l.dtmDateCreated
 
 If @ysnEnableParentLot=0

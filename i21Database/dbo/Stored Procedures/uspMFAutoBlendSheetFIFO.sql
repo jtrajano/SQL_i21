@@ -67,6 +67,7 @@ BEGIN TRY
 	Declare @ysnWOStagePick bit=0
 	Declare @ysnIncludeKitStagingLocation bit=0
 	Declare @dblDefaultResidueQty NUMERIC(38,20)
+	Declare @strSourceLocationIds NVARCHAR(MAX)
 
 	DECLARE @intSequenceNo INT
 		,@intSequenceCount INT = 1
@@ -169,6 +170,13 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Include Kit Staging Location In Pick List'
+
+	SELECT @strSourceLocationIds = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND at.strAttributeName = 'Source Location'
 
 	If ISNULL(@ysnIncludeKitStagingLocation,0)=1 
 		Set @intKitStagingLocationId=0
@@ -290,6 +298,22 @@ BEGIN TRY
 
 	If @ysnFromPickList=0
 		Insert Into @tblLotStatus(strStatusName) Values('Quarantine')
+
+	Declare @tblSourceStorageLocation AS Table
+	(
+		intStorageLocationId int
+	)
+
+	If ISNULL(@strSourceLocationIds,'')<>''
+	Begin
+		Insert Into @tblSourceStorageLocation
+		Select * from dbo.fnCommaSeparatedValueToTable(@strSourceLocationIds)
+	End
+	Else
+	Begin
+		Insert Into @tblSourceStorageLocation
+		Select intStorageLocationId from tblICStorageLocation Where intLocationId=@intLocationId AND ISNULL(ysnAllowConsume,0)=1
+	End
 
 	DECLARE @tblExcludedLot TABLE (
 		 intItemId INT 
@@ -849,6 +873,7 @@ BEGIN TRY
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			JOIN tblICStorageLocation SL ON L.intStorageLocationId=SL.intStorageLocationId
+			JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId=SL.intStorageLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
