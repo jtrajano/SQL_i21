@@ -282,6 +282,7 @@ BEGIN TRY
 			,intLastModifiedUserId
 			,dtmReleasedDate
 			,intManufacturingProcessId
+			,intTransactionFrom
 			,intConcurrencyId
 			)
 		SELECT @strWorkOrderNo
@@ -308,6 +309,7 @@ BEGIN TRY
 			,@intUserId
 			,@dtmCurrentDate
 			,@intManufacturingProcessId
+			,4
 			,1
 
 		SELECT @intWorkOrderId = SCOPE_IDENTITY()
@@ -419,7 +421,7 @@ BEGIN TRY
 			SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
 			SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 			SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, ISNULL(@dtmProductionDate,@dtmCurrentDate)) + '</dtmPlannedDate>'
-			SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, @intShiftId) + '</intPlannedShiftId>'
+			SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, ISNULL(@intShiftId,'')) + '</intPlannedShiftId>'
 			SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>0</ysnIgnoreTolerance>'
 			SET @strProduceXml = @strProduceXml + '</root>'
 
@@ -462,7 +464,7 @@ BEGIN TRY
 				SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
 				SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 				SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, ISNULL(@dtmProductionDate,@dtmCurrentDate)) + '</dtmPlannedDate>'
-				SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, @intShiftId) + '</intPlannedShiftId>'
+				SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, ISNULL(@intShiftId,'')) + '</intPlannedShiftId>'
 				SET @strProduceXml = @strProduceXml + '<ysnIgnoreTolerance>1</ysnIgnoreTolerance>'
 				SET @strProduceXml = @strProduceXml + '</root>'
 

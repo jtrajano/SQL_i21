@@ -145,33 +145,42 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 1 THEN 2
 									  END
 		,dblQuantity				= LI.dblQty
-		,dblUnitPrice				= CASE 
-											WHEN CNT.ysnUseFXPrice = 1 
-												 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-												 AND CNT.dblRate IS NOT NULL 
-												 AND CNT.intFXPriceUOMId IS NOT NULL 
-											THEN 
-												dbo.fnCTConvertQtyToTargetItemUOM(
-													CNT.intFXPriceUOMId
-													,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId)
-													,(
-														LI.dblCost / CASE WHEN CNT.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CNT.intCent,0) = 0 THEN 1 ELSE CNT.intCent END ELSE 1 END			
-													)
-												) * CNT.dblRate
+		,dblUnitPrice				= CASE
+			                            WHEN CNT.intPricingTypeId = 2 THEN 
+										(
+											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
+											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId)
+											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
+										)
+										ELSE
+											CASE 
+												WHEN CNT.ysnUseFXPrice = 1 
+														AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+														AND CNT.dblRate IS NOT NULL 
+														AND CNT.intFXPriceUOMId IS NOT NULL 
+												THEN 
+													dbo.fnCTConvertQtyToTargetItemUOM(
+														CNT.intFXPriceUOMId
+														,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId)
+														,(
+															LI.dblCost / CASE WHEN CNT.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CNT.intCent,0) = 0 THEN 1 ELSE CNT.intCent END ELSE 1 END			
+														)
+													) * CNT.dblRate
 
-											ELSE
-												LI.dblCost
-										END 
-										* -- AD.dblQtyToPriceUOMConvFactor
-										CASE 
-											WHEN CNT.ysnUseFXPrice = 1 
-												 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-												 AND CNT.dblRate IS NOT NULL 
-												 AND CNT.intFXPriceUOMId IS NOT NULL 
-											THEN 
-												dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-											ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
-                                        END 
+												ELSE
+													LI.dblCost
+												END 
+												* -- AD.dblQtyToPriceUOMConvFactor
+												CASE 
+												WHEN CNT.ysnUseFXPrice = 1 
+														AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+														AND CNT.dblRate IS NOT NULL 
+														AND CNT.intFXPriceUOMId IS NOT NULL 
+												THEN 
+													dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
+												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
+											END
+										END
 		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
@@ -225,6 +234,8 @@ BEGIN
 			,CTD.intCurrencyId
 			,CTD.intAdjItemUOMId
 			,CTD.intPricingTypeId
+			,CTD.intBasisUOMId
+			,CTD.dtmEndDate
 			,CU.intCent
 			,CU.ysnSubCurrency
 			FROM tblCTContractDetail CTD 
@@ -307,8 +318,12 @@ BEGIN
 										END
 
 	,[intCostUOMId]						= CASE
-											WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
-											WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
+												WHEN IC.strCostMethod = 'Amount' THEN NULL
+												ELSE
+													CASE
+														WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
+														WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
+													END
 										END
 	,[intOtherChargeEntityVendorId]		= NULL
 	,[dblAmount]						= CASE
@@ -939,14 +954,17 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intContractId]			= SE.intOrderId
 							,[intContractDetailId]		= SE.intLineNo
 							,[intCurrencyId]  			= SE.intCurrencyId
-							,[intChargeId]				= ContractCost.intItemId
+							,[intChargeId]				= SCS.intFreightItemId
 							,[strCostMethod]			= SC.strCostMethod
 							,[dblRate]					= CASE
 															WHEN SC.strCostMethod = 'Amount' THEN 0
-															ELSE ContractCost.dblRate
+															ELSE SC.dblFreightRate
 														END
-							,[intCostUOMId]				= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
-							,[intEntityVendorId]		= ContractCost.intVendorId
+							,[intCostUOMId]				= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SE.intItemUOMId)
+							,[intEntityVendorId]		= CASE
+															WHEN @intHaulerId = 0 THEN NULL
+															WHEN @intHaulerId != 0 THEN @intHaulerId
+														END
 							,[dblAmount]				=  CASE
 															WHEN SC.strCostMethod = 'Amount' THEN 
 															CASE
@@ -958,8 +976,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAccrue]				= @ysnAccrue
 							,[ysnPrice]					= @ysnPrice
 							,[strChargesLink]			= SE.strChargesLink
-							FROM tblCTContractCost ContractCost
-							LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
+							FROM @ShipmentStagingTable SE
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId

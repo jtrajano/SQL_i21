@@ -405,4 +405,6 @@ Select *
 		,@strCompanyAddress AS strCompanyAddress
 		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 		,@strCountry AS strCompanyCountry
-from @tblNodeData
+		,pl.strParentLotNumber
+from @tblNodeData n
+Left Join tblICParentLot pl on n.intParentLotId=pl.intParentLotId AND n.strType='L'

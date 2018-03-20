@@ -89,15 +89,23 @@ SELECT l.intLotId
 				END
 			)) dblAvailableNoOfPacks
 	,um1.strUnitMeasure AS strReservedQtyUOM
-	,CA.strDescription as strGrade
+	,CA.strDescription AS strGrade
 	,l.intItemOwnerId
-	,R.strDisplayMember As strRestrictionType
-	,LS1.strSecondaryStatus As strBondStatus
+	,R.strDisplayMember AS strRestrictionType
+	,LS1.strSecondaryStatus AS strBondStatus
 	,LI.strVendorRefNo
-	,LI.strWarehouseRefNo 
-	,LI.strReceiptNumber As strReceiptNo
+	,LI.strWarehouseRefNo
+	,LI.strReceiptNumber AS strReceiptNo
 	,LI.dtmReceiptDate
-	,CAST(Case When ((i.intUnitPerLayer *i.intLayerPerPallet>0) and (l.dblQty%(i.intUnitPerLayer *i.intLayerPerPallet)>0)) then 1 else 0 end AS BIT) AS ysnPartialPallet
+	,CAST(CASE 
+			WHEN (
+					(i.intUnitPerLayer * i.intLayerPerPallet > 0)
+					AND (l.dblQty % (i.intUnitPerLayer * i.intLayerPerPallet) > 0)
+					AND (l.dblQty <= (i.intUnitPerLayer * i.intLayerPerPallet))
+					)
+				THEN 1
+			ELSE 0
+			END AS BIT) AS ysnPartialPallet
 	,l.intUnitPallet
 	,w.intWorkOrderId
 	,mp.intAttributeTypeId
@@ -110,17 +118,17 @@ JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
 JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
-Left JOIN dbo.tblICRestriction R on R.intRestrictionId =sl.intRestrictionId 
+LEFT JOIN dbo.tblICRestriction R ON R.intRestrictionId = sl.intRestrictionId
 LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
 LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
 LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN vyuMFStockReservation S ON S.intLotId = l.intLotId
-Left JOIN dbo.tblICCommodityAttribute CA on CA.intCommodityAttributeId =l.intGradeId 
+LEFT JOIN dbo.tblICCommodityAttribute CA ON CA.intCommodityAttributeId = l.intGradeId
 LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId
-LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId 
+LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId
 LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
-Left JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId =LI.intBondStatusId
-Left JOIN tblMFWorkOrder w on l.strTransactionId=w.strWorkOrderNo
-Left JOIN tblMFManufacturingProcess mp on w.intManufacturingProcessId=mp.intManufacturingProcessId
+LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
+LEFT JOIN tblMFWorkOrder w ON l.strTransactionId = w.strWorkOrderNo
+LEFT JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId

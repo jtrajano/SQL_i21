@@ -24,9 +24,10 @@ Join tblMFWorkOrderStatus ws on w.intStatusId=ws.intStatusId
 Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 Left Join tblSMUserSecurity us on w.intCreatedUserId=us.[intEntityId]
 Left Join tblICStorageLocation sl on w.intStorageLocationId=sl.intStorageLocationId
-Where w.intManufacturingCellId=@intManufacturingCellId AND w.intStatusId in (9,10,11,12) 
+Where w.intManufacturingCellId=@intManufacturingCellId AND w.intStatusId in (9,10,11,12) AND ISNULL(w.intTransactionFrom,0) NOT IN (4,5) --Exclude Blends Produced/Reversed from Simple Blend Production(4), AutoBlend(5) 
 Order By w.dtmExpectedDate,w.intExecutionOrder
 
+--Closed Blend Sheets
 If ISNULL(@ysnProduced,0)=1
 Begin
 If @intManufacturingCellId>0
