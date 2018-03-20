@@ -714,11 +714,12 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 		--OLD
 		--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
 
+
+
 		-- Update Register Notification
 		DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
-		SELECT DISTINCT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne
+		SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
 		SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)
-
 		EXEC uspSTUpdateRegisterNotification @strLocationIds
 	END
 	-- ==========================================================================

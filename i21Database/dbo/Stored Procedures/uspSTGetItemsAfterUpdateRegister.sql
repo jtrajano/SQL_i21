@@ -357,9 +357,18 @@ BEGIN TRY
 	-- =============================================================================================
 	-- Update tblSTUpdateRegisterNotification
 	-- After Update Register remove notification from all users
-	UPDATE tblSTUpdateRegisterNotification
-	SET ysnClick = 1
-	WHERE ysnClick = 0
+	-- Should only update based on location
+
+	UPDATE URN
+	SET URN.ysnClick = 1
+	FROM dbo.tblSTUpdateRegisterNotification AS URN
+	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = URN.intEntityId
+	WHERE SMUS.intCompanyLocationId = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
+	AND URN.ysnClick = 0
+
+	--UPDATE tblSTUpdateRegisterNotification
+	--SET ysnClick = 1
+	--WHERE ysnClick = 0
 	-- =============================================================================================
 
 
