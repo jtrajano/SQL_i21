@@ -1051,7 +1051,8 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
-        private IQueryable<vyuICGetInventoryValuation> GetOpeningBalances(List<SearchFilter> priorBalanceFilter) {
+        private IQueryable<vyuICGetInventoryValuation> GetOpeningBalances(List<SearchFilter> priorBalanceFilter)
+        {
             var priorBalanceParam = new GetParameter()
             {
                 filter = priorBalanceFilter
@@ -1063,7 +1064,23 @@ namespace iRely.Inventory.BusinessLayer
                 select v
             ).Filter(priorBalanceParam, true);
 
-            return priorBalanceQuery; 
+            return priorBalanceQuery;
+        }
+
+        private IQueryable<vyuICGetInventoryValuationSummary> GetOpeningBalancesFromSummary(List<SearchFilter> priorBalanceFilter)
+        {
+            var priorBalanceParam = new GetParameter()
+            {
+                filter = priorBalanceFilter
+            };
+
+            // Create a new query for the Prior Balance
+            var priorBalanceQuery = (
+                from v in _db.GetQuery<vyuICGetInventoryValuationSummary>()
+                select v
+            ).Filter(priorBalanceParam, true);
+
+            return priorBalanceQuery;
         }
 
         /// <summary>
@@ -1073,20 +1090,273 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> SearchInventoryValuationSummary(GetParameter param)
         {
-            var query = _db.GetQuery<vyuICGetInventoryValuationSummary>()
-                        .Filter(param, true);                              
+            // Setup the default sort. 
+            List<SearchSort> addDefaultSortList = new List<SearchSort>();
+            var defaultLocationSort = new SearchSort() { property = "strLocationName", direction = "ASC" };
+            var defaultItemSort = new SearchSort() { property = "strItemNo", direction = "ASC" };
+            var defaultYearSort = new SearchSort() { property = "intYear", direction = "ASC" };
+            var defaultMonthSort = new SearchSort() { property = "intMonth", direction = "ASC" };
+            
+            foreach (var ps in param.sort)
+            {
+                // Use the direction specified by the caller. 
+                if (ps.property.ToLower() == "strlocationname")
+                {
+                    defaultLocationSort.direction = ps.direction;
+                }
 
-            //var sorts = new List<SearchSort>();
-            //sorts.Add(new SearchSort() { property = "intItemId" });
-            //sorts.Add(new SearchSort() { property = "intItemLocationId" });
-            //sorts.AddRange(param.sort.ToList());
-            //param.sort = sorts;
+                // Use the direction specified by the caller. 
+                else if (ps.property.ToLower() == "stritemno")
+                {
+                    defaultItemSort.direction = ps.direction;
+                }
 
-            var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync(param.cancellationToken);
+                // Add any additional sorting specified by the caller. 
+                else
+                {
+                    addDefaultSortList.Add(
+                        new SearchSort()
+                        {
+                            direction = ps.direction,
+                            property = ps.property
+                        }
+                    );
+                }
+            }
+
+            // Make sure item, location, year, month are the first in the sorting order.
+            addDefaultSortList.Insert(0, defaultMonthSort);
+            addDefaultSortList.Insert(0, defaultYearSort);
+            addDefaultSortList.Insert(0, defaultLocationSort);
+            addDefaultSortList.Insert(0, defaultItemSort);
+
+            IEnumerable<SearchSort> enDefaultSort = addDefaultSortList;
+            var sort = ExpressionBuilder.GetSortSelector(enDefaultSort);
+            param.sort = addDefaultSortList;
+
+            // Create a reverse sort
+            List<SearchSort> reverseSortList = new List<SearchSort>();
+            foreach (var x in enDefaultSort)
+            {
+                reverseSortList.Add(
+                    new SearchSort()
+                    {
+                        direction = x.direction.ToLower() == "asc" ? "DESC" : "ASC",
+                        property = x.property
+                    }
+                );
+            }
+            IEnumerable<SearchSort> enReverseSort = reverseSortList;
+            var reverseSort = ExpressionBuilder.GetSortSelector(enReverseSort);
+            var selector = string.IsNullOrEmpty(param.columns) ? ExpressionBuilder.GetSelector<vyuICGetInventoryValuationSummary>() : ExpressionBuilder.GetSelector(param.columns);
+
+            var query = (
+                from v in _db.GetQuery<vyuICGetInventoryValuationSummary>()
+                select v
+            ).Filter(param, true);
+
+            // Initialize the beginning and running balances.     
+            decimal? dblBeginningQty = 0;
+            decimal? dblRunningQty = 0;
+            decimal? dblBeginningValue = 0;
+            decimal? dblRunningValue = 0;
+            decimal? dblBeginningLastCost = 0;
+            decimal? dblRunningLastCost = 0;
+            decimal? dblBeginningStandardCost = 0;
+            decimal? dblRunningStandardCost = 0;
+            decimal? dblBeginningAverageCost = 0;
+            decimal? dblRunningAverageCost = 0;
+
+            string locationFromPreviousPage = "";
+            string itemFromPreviousPage = "";
+            string intYearFromPreviousPage = null;
+            string intMonthFromPreviousPage = null;
+
+            // Create the filter for the Prior Balance Query
+            List <SearchFilter> priorBalanceFilter = new List<SearchFilter>();
+
+            // If it is not the starting page, retrieve the previous page data. 
+            if (param.start > 0)
+            {
+                // Get the last location used from the previous page. 
+                var previousPage = query.OrderBySelector(sort).Skip(0).Take(param.start.Value).OrderBySelector(reverseSort).FirstOrDefault();
+                locationFromPreviousPage = previousPage.strLocationName;
+                itemFromPreviousPage = previousPage.strItemNo;
+                intYearFromPreviousPage = previousPage.intYear.ToString();
+                intMonthFromPreviousPage = previousPage.intMonth.ToString();
+
+                priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intYear" || p.c == "intMonth");
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "strItemNo",
+                        v = itemFromPreviousPage,
+                        cj = "And"
+                    }
+                );
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "strLocationName",
+                        v = locationFromPreviousPage,
+                        cj = "And"
+                    }
+                );
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "intYear",
+                        v = intYearFromPreviousPage,
+                        co = "lte",
+                        cj = "And"
+                    }
+                );
+
+                priorBalanceFilter.Add(
+                    new SearchFilter()
+                    {
+                        c = "intMonth",
+                        v = intMonthFromPreviousPage,
+                        co = "lte",
+                        cj = "And"
+                    }
+                );
+
+                // Get the beginning qty and balances
+                var openingBalanceQuery = GetOpeningBalancesFromSummary(priorBalanceFilter);
+                dblBeginningQty = openingBalanceQuery.Sum(s => s.dblQuantityInStockUOM);
+                dblBeginningValue = openingBalanceQuery.Sum(s => s.dblValue);
+                dblBeginningLastCost = openingBalanceQuery.Sum(s => s.dblLastCost);
+                dblBeginningStandardCost = openingBalanceQuery.Sum(s => s.dblStandardCost);
+                dblBeginningAverageCost = openingBalanceQuery.Sum(s => s.dblAverageCost);
+            }
+
+
+            // Get the page. Convert it into a list for the loop below. 
+            var paged_data = await query.PagingBySelector(param).ToListAsync();
+
+            // Loop thru the List, calculate, and assign the running qty and balance for each record. 
+            string currentLocation = locationFromPreviousPage;
+            string lastLocation = locationFromPreviousPage;
+            string currentItem = itemFromPreviousPage;
+            string lastItem = itemFromPreviousPage;
+            string currentYear;
+            string currentMonth;
+
+            foreach (var row in paged_data)
+            {
+                currentLocation = row.strLocationName;
+                currentItem = row.strItemNo;
+                currentYear = row.intYear.ToString();
+                currentMonth = row.intMonth.ToString();
+
+                // Check if we need to reset the beginning qty and balance. It will reset if the item or location changes. 
+                if (lastItem == "" || lastLocation == "" || currentItem != lastItem || currentLocation != lastLocation)
+                {
+                    // Reset the qty and balances back to zero. 
+                    dblBeginningQty = 0;
+                    dblBeginningValue = 0;
+                    dblBeginningLastCost = 0;
+                    dblBeginningStandardCost = 0;
+                    dblBeginningAverageCost = 0;
+
+                    priorBalanceFilter.RemoveAll(p => p.c == "strItemNo" || p.c == "strLocationName" || p.c == "intYear" || p.c == "intMonth");
+
+                    priorBalanceFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = "strItemNo",
+                            v = currentItem,
+                            cj = "And"
+                        }
+                    );
+
+                    priorBalanceFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = "strLocationName",
+                            v = currentLocation,
+                            cj = "And"
+                        }
+                    );
+
+                    priorBalanceFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = "intYear",
+                            v = currentYear,
+                            co = "lte",
+                            cj = "And"
+                        }
+                    );
+
+                    priorBalanceFilter.Add(
+                        new SearchFilter()
+                        {
+                            c = "intMonth",
+                            v = currentMonth,
+                            co = "lt",
+                            cj = "And"
+                        }
+                    );
+
+                    var priorBalanceQuery = GetOpeningBalancesFromSummary(priorBalanceFilter);
+
+                    // Get the beginning qty and balances
+                    dblBeginningQty = priorBalanceQuery.Sum(s => s.dblQuantityInStockUOM);
+                    dblBeginningValue = priorBalanceQuery.Sum(s => s.dblValue);
+                    dblBeginningLastCost = priorBalanceQuery.Sum(s => s.dblLastCost);
+                    dblBeginningStandardCost = priorBalanceQuery.Sum(s => s.dblStandardCost);
+                    dblBeginningAverageCost = priorBalanceQuery.Sum(s => s.dblAverageCost); 
+
+                    lastLocation = currentLocation;
+                    lastItem = currentItem;
+                }
+
+                dblBeginningQty = dblBeginningQty.Equals(DBNull.Value) || dblBeginningQty == null ? 0 : dblBeginningQty;
+                dblBeginningValue = dblBeginningValue.Equals(DBNull.Value) || dblBeginningValue == null ? 0 : dblBeginningValue;
+                dblBeginningLastCost = dblBeginningLastCost.Equals(DBNull.Value) || dblBeginningLastCost == null ? 0 : dblBeginningLastCost;
+                dblBeginningStandardCost = dblBeginningStandardCost.Equals(DBNull.Value) || dblBeginningStandardCost == null ? 0 : dblBeginningStandardCost;
+                dblBeginningAverageCost = dblBeginningAverageCost.Equals(DBNull.Value) || dblBeginningAverageCost == null ? 0 : dblBeginningAverageCost;
+
+                // Calculate the running quantity
+                dblRunningQty = dblBeginningQty + row.dblQuantityInStockUOM; 
+                row.dblRunningQuantity = dblRunningQty;
+                dblBeginningQty = dblRunningQty;
+
+                // Calculate the running value
+                dblRunningValue = dblBeginningValue + row.dblValue;
+                row.dblRunningValue = dblRunningValue;
+                dblBeginningValue = dblRunningValue;
+
+                // Calculate the running last cost
+                dblRunningLastCost = dblBeginningLastCost + row.dblLastCost;
+                row.dblRunningLastCost = dblRunningLastCost;
+                dblBeginningLastCost = dblRunningLastCost;
+
+                // Calculate the running standard cost
+                dblRunningStandardCost = dblBeginningStandardCost + row.dblStandardCost;
+                row.dblRunningStandardCost = dblRunningStandardCost;
+                dblBeginningStandardCost = dblRunningStandardCost;
+
+                // Calculate the running average cost
+                dblRunningAverageCost = dblBeginningAverageCost + row.dblAverageCost;
+                row.dblRunningAverageCost = dblRunningAverageCost;
+                dblBeginningAverageCost = dblRunningAverageCost;
+                
+            }
+
+            addDefaultSortList.Remove(defaultYearSort);
+            addDefaultSortList.Remove(defaultMonthSort);
+
+            sort = ExpressionBuilder.GetSortSelector(addDefaultSortList);
 
             return new SearchResult()
             {
-                data = data.AsQueryable(),
+                data = paged_data.AsQueryable().OrderBySelector(sort).Select(selector),
                 total = await query.CountAsync(param.cancellationToken),
                 summaryData = await query.ToAggregateAsync(param.aggregates)
             };
