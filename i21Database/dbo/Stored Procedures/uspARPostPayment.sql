@@ -1692,7 +1692,7 @@ IF @post = 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -1757,7 +1757,7 @@ IF @post = 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -1827,7 +1827,7 @@ IF @post = 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -1970,7 +1970,7 @@ IF @post = 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -2035,7 +2035,7 @@ IF @post = 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
 			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -2343,6 +2343,30 @@ IF @recap = 0
 	BEGIN
 		BEGIN TRY 
 			--SELECT * FROM @GLEntries
+			IF @post = 1
+			BEGIN
+				DECLARE @DetailId INT
+				SELECT TOP 1
+					@DetailId = GE.intJournalLineNo
+				FROM
+					@GLEntries GE
+				INNER JOIN
+					tblARPaymentDetail ARPD
+						ON GE.intJournalLineNo = ARPD.intPaymentDetailId
+						AND GE.intTransactionId = ARPD.intPaymentId
+				WHERE				
+					GE.intAccountId = @DiscountAccount
+					AND ARPD.dblDiscount = @ZeroDecimal
+					AND ARPD.dblBaseDiscount = @ZeroDecimal
+
+				IF ISNULL(@DetailId,0) <> 0
+				BEGIN
+					SELECT @ErrorMerssage = 'Invalid Discount Entry(Record - ' + CAST(@DetailId AS NVARCHAR(30)) + ')!'								
+					GOTO Do_Rollback
+				END
+			END
+			
+				
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH
