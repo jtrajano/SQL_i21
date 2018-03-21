@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ItemLocation',
     alias: "store.icitemlocation",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ItemLocation"],
     config: {
         "model": "Inventory.model.ItemLocation",

@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.InventoryTag',
     alias: "store.ictag",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.InventoryTag"],
     config: {
         "model": "Inventory.model.InventoryTag",

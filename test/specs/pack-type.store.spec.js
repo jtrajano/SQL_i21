@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.PackType',
     alias: "store.icpacktype",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.PackType"],
     config: {
         "model": "Inventory.model.PackType",

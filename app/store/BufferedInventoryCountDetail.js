@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.BufferedInventoryCountDetail', {
-    extend: 'Ext.data.BufferedStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icbufferedinventorycountdetail',
 
     requires: [
