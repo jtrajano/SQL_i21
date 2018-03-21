@@ -33,7 +33,8 @@ SELECT
 	G.strLocationName AS strUserLocation,
 	A.ysnPosted,
 	EL.strCheckPayeeName AS strPayeeName,
-	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
+	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
+	A.ysnPrepayHasPayment
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 

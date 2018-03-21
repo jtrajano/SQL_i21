@@ -351,6 +351,12 @@ BEGIN
 			WHERE A.intPaymentId IN (@prepaymentId)
 			--AND C.strPaymentMethod = 'Check'
 
+		--UPDATE tblAPBill.ysnPrepayHasPayment
+		DECLARE @prepayIds Id
+		INSERT INTO @prepayIds
+		SELECT @prepaymentId
+		EXEC [uspAPUpdatePrepayStatus] @prepayIds
+
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
