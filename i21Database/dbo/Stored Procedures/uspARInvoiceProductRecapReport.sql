@@ -129,7 +129,7 @@ FROM
 			 , intCompanyLocationId		= ARI.intCompanyLocationId
 		     , strTransactionType		= 'TaxCodes'
 			 , strType					= NULL
-		     , dblInvoiceTotal			= SUM(ARIDT.dblAdjustedTax)
+		     , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARIDT.dblAdjustedTax)) --SUM(ARIDT.dblAdjustedTax)
 			 , intItemId				= NULL
 			 , dblQtyShipped			= 0.000000
 			 , intTaxCodeId				= ARIDT.intTaxCodeId
@@ -242,7 +242,7 @@ FROM
 		 , intCompanyLocationId		= ARI.intCompanyLocationId
 		 , strTransactionType		= 'Payments'
 		 , strType					= NULL
-		 , dblInvoiceTotal			= SUM(ARI.dblPayment)
+		 , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARI.dblPayment)) --SUM(ARI.dblPayment)
 		 , intItemId				= NULL
 		 , strImportFormat			= NULL
 		 , strDescription			= 'RCV' + ' - ' + 'Payments'
