@@ -6,6 +6,8 @@
 			,strName
 			,strType
 			,ysnActive
+				,strLinesOfBusinessId
+				,strLinesOfBusiness
 		from
 		(
 			select
@@ -29,6 +31,8 @@
 																								  or g.strType is not null or LTRIM(RTRIM(g.strType)) <> ''
 																								  or h.strType is not null or LTRIM(RTRIM(h.strType)) <> '' then ',' + i.strType else i.strType end)
 				,ysnActive = a.ysnActive
+				,strLinesOfBusinessId = dbo.fnCRMCoalesceLinesOfBusinessId(a.intEntityId)
+				,strLinesOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId)
 			from
 				tblEMEntity a
 				left join tblEMEntityType d on d.intEntityId = a.intEntityId and d.strType = 'Customer'

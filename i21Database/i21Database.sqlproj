@@ -6434,6 +6434,7 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
+    <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusinessId.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
