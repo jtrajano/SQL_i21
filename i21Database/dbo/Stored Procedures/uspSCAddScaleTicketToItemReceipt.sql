@@ -146,21 +146,7 @@ SELECT
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
 		,intGrossNetUOMId			= LI.intItemUOMId
-		,intCostUOMId				= CASE
-										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
-										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN 
-										CASE WHEN CNT.intPricingTypeId = 2 THEN LI.intItemUOMId
-										ELSE
-											CASE 
-												WHEN CNT.ysnUseFXPrice = 1 
-													AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-													AND CNT.dblRate IS NOT NULL 
-													AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, LI.intItemUOMId)
-												ELSE dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
-											END
-										END
-									END
+		,intCostUOMId				= LI.intItemUOMId
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
 										WHEN LI.intTransactionDetailId IS NOT NULL THEN CNT.intContractHeaderId
@@ -199,9 +185,8 @@ SELECT
 													 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 													 AND CNT.dblRate IS NOT NULL 
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN 
-													dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
+												THEN dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
+												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1)),1)
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
@@ -344,7 +329,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 												END
 											END
 										END
-	,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
+	,[intContractHeaderId]				= RE.intContractDetailId
 	,[intContractDetailId]				= RE.intContractDetailId
 	,[ysnAccrue]						= CASE
 											WHEN QM.dblDiscountAmount < 0 THEN 1
