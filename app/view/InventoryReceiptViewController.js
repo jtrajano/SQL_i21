@@ -460,6 +460,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colUnitRetail: {
                     dataIndex: 'dblUnitRetail',
+                    hidden: true,
                     editor: {
                         readOnly: '{disableFieldInReceiptGrid}'
                     }
@@ -477,7 +478,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLineTotal: 'dblLineTotal',
-                colGrossMargin: 'dblGrossMargin',
+                colGrossMargin: {
+                    dataIndex: 'dblGrossMargin',
+                    hidden: true
+                },
                 colItemTaxGroup: {
                     dataIndex: 'strTaxGroup',
                     editor: {
@@ -3526,6 +3530,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    // Calculate the Gross Margin. 
+    // Formula is: (Sales Price - Cost) / Sales Price * 100. 
+    // Ex: (100 - 40) / 100 * 100 = 60%
+    calculateGrossMargin: function(salesPrice, cost){
+        salesPrice = Ext.isNumeric(salesPrice) ? salesPrice : 0.00;
+        cost = Ext.isNumeric(cost) ? cost : 0.00;
+
+        return salesPrice != 0.00 ? (salesPrice - cost) / salesPrice * 100 : 0.00; 
+    },
+
     onItemEdit: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
@@ -3539,7 +3553,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (context.field === 'dblUnitCost') {
             if (currentReceiptItem) {
                 currentReceiptItem.set('dblUnitRetail', context.value);
-                currentReceiptItem.set('dblGrossMargin', 0);
+                currentReceiptItem.set(
+                    'dblGrossMargin', 
+                    me.calculateGrossMargin(
+                        context.value, 
+                        context.value
+                    )
+                );
             }
         }
 
@@ -3588,9 +3608,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // If editing the unit retail, update the gross margin too.
         else if (context.field === 'dblUnitRetail') {
             if (currentReceiptItem) {
-                var salesPrice = context.value;
-                var grossMargin = ((salesPrice - currentReceiptItem.get('dblUnitCost')) / (salesPrice)) * 100;
-                currentReceiptItem.set('dblGrossMargin', grossMargin);
+                currentReceiptItem.set(
+                    'dblGrossMargin', 
+                    me.calculateGrossMargin(
+                        context.value, 
+                        currentReceiptItem.get('dblUnitCost')
+                    )
+                );
             }
         }
 
