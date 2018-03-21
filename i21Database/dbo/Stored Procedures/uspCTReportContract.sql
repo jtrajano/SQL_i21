@@ -228,7 +228,10 @@ BEGIN TRY
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
 	
-	SELECT @TotalAtlasLots= CEILING(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize))
+	SELECT @TotalAtlasLots= CASE 
+								 WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize) < 1 THEN 1
+								 ELSE ROUND(SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize),0)
+							END
 							FROM tblCTContractDetail CD
 							JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
 							JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = CD.intFutureMarketId
