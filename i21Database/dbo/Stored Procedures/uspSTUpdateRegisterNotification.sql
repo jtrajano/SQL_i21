@@ -7,10 +7,13 @@ DECLARE @tblTempEntity TABLE(intId INT NOT NULL IDENTITY, intEntityId INT)
 
 INSERT @tblTempEntity
 SELECT DISTINCT
-	ITR.intEntityId
-FROM vyuSTItemsToRegister ITR
-JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = ITR.intEntityId
-WHERE SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+       EM.intEntityId
+FROM tblEMEntity EM
+JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
+JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
+WHERE ET.strType IN ('User', 'Employee')
+AND SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+
 
 --TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 --SELECT * FROM @tblTempEntity
