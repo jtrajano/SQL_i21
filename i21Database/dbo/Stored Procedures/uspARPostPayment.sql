@@ -451,7 +451,24 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) < 0
-					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND CASE WHEN A.strPaymentMethod = 'ACH' THEN 0 ELSE CASE WHEN B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 1 ELSE 1 END END = 1)
+					AND A.ysnInvoicePrepayment = 0
+					AND A.strPaymentMethod = 'ACH'
+
+
+					-- AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId 
+					
+					-- AND 
+					
+					-- CASE WHEN A.strPaymentMethod = 'ACH' THEN 
+					-- 	0 
+					-- ELSE 
+					-- 	CASE WHEN B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 
+					-- 		1 
+					-- 	ELSE 
+					-- 		1 
+					-- 	END 
+					-- END = 1
+					-- )
 
 				--Fiscal Year
 				INSERT INTO 
