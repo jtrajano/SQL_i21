@@ -6256,6 +6256,8 @@
     <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricingInsertAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayStatus.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
