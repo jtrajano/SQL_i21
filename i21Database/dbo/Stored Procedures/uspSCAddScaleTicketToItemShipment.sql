@@ -699,7 +699,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= ContractCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
@@ -765,7 +765,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * LoadCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= LoadCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= LoadCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
@@ -830,7 +830,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																		ELSE 0
 																	END	
-								,[ysnAccrue]						= ContractCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
 								FROM tblCTContractCost ContractCost
@@ -1116,7 +1116,6 @@ IF ISNULL(@intFreightItemId,0) = 0
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 							WHERE SC.dblFreightRate > 0 AND SE.intLineNo IS NULL
-
 						END
 				END
 				ELSE 
@@ -1174,7 +1173,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND (((SE.dblQuantity / SC.dblNetUnits) * ISNULL(ContractCost.dblRate,SC.dblFreightRate)), 2)
 																ELSE 0
 															END	
-						,[ysnAccrue]						= ContractCost.ysnAccrue
+						,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 						,[ysnPrice]							= ContractCost.ysnPrice
 						,[strChargesLink]					= SE.strChargesLink
 						FROM tblCTContractCost ContractCost
