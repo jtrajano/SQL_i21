@@ -139,8 +139,9 @@ BEGIN
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intId FROM @transactionIds)
 	AND strTransactionForm = @transactionType
+	AND strModuleName = 'Accounts Payable'
 	AND ysnIsUnposted = 0
-	ORDER BY intGLDetailId
+	--ORDER BY intGLDetailId
 
 	RETURN
 END
