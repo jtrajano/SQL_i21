@@ -181,7 +181,7 @@ END
 
 SELECT @intTransactionId = @intBatchId
 
-SELECT @dtmDate = ISNULL(dbo.fnGetBusinessDate(@dtmDate, @intLocationId), GETDATE())
+SELECT @dtmDate = ISNULL(@dtmDate, dbo.fnGetBusinessDate(GETDATE(), @intLocationId))
 
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH

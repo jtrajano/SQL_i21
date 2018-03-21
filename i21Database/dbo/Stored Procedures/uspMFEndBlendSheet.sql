@@ -28,6 +28,7 @@ BEGIN TRY
 		,@dtmCurrentDate datetime=GetDate()
 		,@ysnEnableParentLot bit=0
 		,@strXmlRecipeComputation nvarchar(Max)
+		,@dtmProductionDate DateTime
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -37,6 +38,7 @@ BEGIN TRY
 			,@intItemUOMId = intItemUOMId
 			,@intUserId = intUserId
 			,@intLocationId = intLocationId
+			,@dtmProductionDate = ISNULL(dtmProductionDate,GETDATE())
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			 intWorkOrderId INT
 			,intItemId int
@@ -44,6 +46,7 @@ BEGIN TRY
 			,intItemUOMId INT
 			,intUserId INT
 			,intLocationId int
+			,dtmProductionDate DateTime
 			)
 
 	Select @intStatusId=intStatusId,@strWONo=strWorkOrderNo,@intManufacturingProcessId=ISNULL(intManufacturingProcessId,0),@dblWOQty=dblQuantity 
@@ -110,6 +113,7 @@ End
 		Set @strConsumeXml=@strConsumeXml + '<intProductionTypeId>' + convert(varchar,1) + '</intProductionTypeId>'
 		Set @strConsumeXml=@strConsumeXml + '<dblProduceQty>' + convert(varchar,@dblWOQty) + '</dblProduceQty>'
 		Set @strConsumeXml=@strConsumeXml + '<intProduceUnitMeasureId>' + convert(varchar,@intItemUOMId) + '</intProduceUnitMeasureId>'
+		SET @strConsumeXml=@strConsumeXml + '<dtmPlannedDate>' + convert(VARCHAR, @dtmProductionDate) + '</dtmPlannedDate>'
 		Set @strConsumeXml=@strConsumeXml + '</root>'
 
 		Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT,@ysnRecap=@ysnRecap,@strRetBatchId=@strRetBatchId OUT
