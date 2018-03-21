@@ -228,7 +228,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            // include: 'tblSMLineOfBusiness, tblICCategoryAccounts.tblGLAccount, ' +
+            include: 'tblSMLineOfBusiness', //, tblICCategoryAccounts.tblGLAccount, ' +
             //     'tblICCategoryAccounts.tblGLAccountCategory, ' +
             //     'tblICCategoryLocations.tblSMCompanyLocation, ' +
             //     'tblICCategoryTaxes.vyuICGetCategoryTax, ' +
