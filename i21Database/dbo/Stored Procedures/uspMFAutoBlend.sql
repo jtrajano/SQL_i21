@@ -986,7 +986,8 @@ BEGIN TRY
 		SET @strXml += '<intManufacturingCellId>' + CONVERT(VARCHAR,@intCellId) + '</intManufacturingCellId>'
 		SET @strXml += '<dblPlannedQuantity>' + CONVERT(VARCHAR,@dblWOQty) + '</dblPlannedQuantity>'
 		SET @strXml += '<intUserId>' + ISNULL(CONVERT(VARCHAR,@intUserId),'') + '</intUserId>'
-	
+		SET @strXml += '<dtmProductionDate>' + ISNULL(CONVERT(VARCHAR,@dtmDate),'') + '</dtmProductionDate>'
+
 		SELECT @strWorkOrderConsumedLotsXml =
 			COALESCE(@strWorkOrderConsumedLotsXml, '') + '<lot>' +  '<intWorkOrderId>' + CONVERT(VARCHAR,@intWorkOrderId) + '</intWorkOrderId>' + 
 			'<intWorkOrderConsumedLotId>' + CONVERT(VARCHAR,wc.intWorkOrderConsumedLotId) + '</intWorkOrderConsumedLotId>' + 
@@ -1010,7 +1011,6 @@ BEGIN TRY
 		EXEC uspMFCompleteBlendSheet 
 			@strXml = @strXml
 			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
-			,@dtmCurrentDate = @dtmDate
 			,@intLotId = @intBlendLotId OUT
 			,@strLotNumber = @strLotNumber OUT
 			
