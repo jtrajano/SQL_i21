@@ -6272,6 +6272,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGetInvoiceTaxDiversion.sql" />
     <Build Include="dbo\Views\vyuTFGetLoadReceiptToDistribution.sql" />
     <Build Include="dbo\Views\vyuTFGetLoadReceiptToBlendIngredient.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotLocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
