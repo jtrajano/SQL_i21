@@ -1725,7 +1725,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colGrossMargin',
                                                                                 width: 100,
                                                                                 dataIndex: 'dblGrossMargin',
-                                                                                text: 'Gross Margin'
+                                                                                text: 'Gross Margin (%)'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',

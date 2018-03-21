@@ -4524,7 +4524,7 @@
                                                                         "dataType": null,
                                                                         "format": null,
                                                                         "itemId": "colGrossMargin",
-                                                                        "text": "Gross Margin",
+                                                                        "text": "Gross Margin (%)",
                                                                         "width": 100
                                                                     },
                                                                     "configAlternates": {
