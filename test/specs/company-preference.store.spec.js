@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.CompanyPreference',
     alias: "store.iccompanypreference",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.CompanyPreference"],
     config: {
         "model": "Inventory.model.CompanyPreference",

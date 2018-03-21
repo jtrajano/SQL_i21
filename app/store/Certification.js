@@ -2,7 +2,7 @@
  * Created by LZabala on 10/22/2014.
  */
 Ext.define('Inventory.store.Certification', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.iccertification',
 
     requires: [

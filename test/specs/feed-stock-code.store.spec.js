@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.FeedStockCode',
     alias: "store.icfeedstockcode",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.FeedStockCode"],
     config: {
         "model": "Inventory.model.FeedStockCode",

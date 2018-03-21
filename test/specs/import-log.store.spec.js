@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ImportLog',
     alias: "store.icimportlog",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ImportLog"],
     config: {
         "model": "Inventory.model.ImportLog",

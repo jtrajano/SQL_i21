@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.CommodityAttribute',
     alias: "store.iccommodityattribute",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.CommodityAttribute"],
     config: {
         "model": "Inventory.model.CommodityAttribute",

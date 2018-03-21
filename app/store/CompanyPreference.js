@@ -2,7 +2,7 @@
  * Created by LZabala on 7/3/2015.
  */
 Ext.define('Inventory.store.CompanyPreference', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.iccompanypreference',
 
     requires: [
