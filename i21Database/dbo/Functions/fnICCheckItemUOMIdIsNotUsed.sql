@@ -12,16 +12,18 @@ AS
 BEGIN
 	IF (
 		@intItemUOMId IS NOT NULL 
-		AND EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.intItemUOMId = @intItemUOMId AND t.intItemId = @intItemId) 
-		AND EXISTS (
-			SELECT	TOP 1 1 
-			FROM	tblICLot l 
-			WHERE	l.dblQty <> 0
-					AND l.intItemId = @intItemId
-					AND (
-						l.intItemUOMId = @intItemUOMId 
-						OR l.intWeightUOMId = @intItemUOMId
-					)
+		AND (
+			EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.intItemUOMId = @intItemUOMId AND t.intItemId = @intItemId) 
+			OR EXISTS (
+				SELECT	TOP 1 1 
+				FROM	tblICLot l 
+				WHERE	l.dblQty <> 0
+						AND l.intItemId = @intItemId
+						AND (
+							l.intItemUOMId = @intItemUOMId 
+							OR l.intWeightUOMId = @intItemUOMId
+						)
+			)
 		)
 	)
 	BEGIN 
