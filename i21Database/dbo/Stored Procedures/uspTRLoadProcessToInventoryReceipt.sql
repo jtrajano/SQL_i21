@@ -114,25 +114,8 @@ END
 	LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = TR.intSupplyPointId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = TR.intItemId and IC.intLocationId = TR.intCompanyLocationId
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = TL.intShipViaId
-	LEFT JOIN (
-				SELECT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId,HH.strDestination
-				FROM tblTRLoadHeader TT
-				JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
-				JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId 
-				JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId 
-				WHERE ((RR.strOrigin = 'Terminal' AND HH.strDestination = 'Customer') OR (RR.strOrigin = 'Terminal' AND HH.strDestination = 'Location' AND RR.intCompanyLocationId != HH.intCompanyLocationId))
-					AND RR.intItemId = HD.intItemId
-					AND HD.strReceiptLink = RR.strReceiptLine
-				) TLD on TLD.intLoadHeaderId = TR.intLoadHeaderId AND TLD.intLoadReceiptId = TR.intLoadReceiptId AND TLD.intItemId = TR.intItemId
-	LEFT JOIN (
-				SELECT DISTINCT TT.strTransaction,TT.intLoadHeaderId,RR.intLoadReceiptId,RR.intItemId,HH.strDestination
-				FROM tblTRLoadHeader TT
-				LEFT JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
-				LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
-				LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
-				LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
-				WHERE	RR.strOrigin = 'Terminal' AND BI.intIngredientItemId = RR.intItemId
-				) BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
+	LEFT JOIN vyuTRGetLoadReceiptToDistribution TLD on TLD.intLoadHeaderId = TR.intLoadHeaderId AND TLD.intLoadReceiptId = TR.intLoadReceiptId AND TLD.intItemId = TR.intItemId
+	LEFT JOIN vyuTFGetLoadReceiptToBlendIngredient BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
