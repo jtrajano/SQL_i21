@@ -223,10 +223,9 @@ WHERE
 	AND ISNULL(ARID.[intItemId],0) <> 0
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARI.[strTransactionType] <> 'Debit Memo'
-	AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
+	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
-	AND ((ISNULL(ARIC.[strType],'') = 'Finished Good' AND ARI.[intLoadDistributionHeaderId] IS NULL) OR ISNULL(ARIC.[strType],'') <> 'Finished Good')
 																												
 	RETURN
 END
