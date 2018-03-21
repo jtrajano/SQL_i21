@@ -498,7 +498,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
 								,[ysnInventoryCost]					= IC.ysnInventoryCost
-								,[strCostMethod]                    = IC.strCostMethod
+								,[strCostMethod]                    = CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[dblRate]							= CASE
 																		WHEN IC.strCostMethod = 'Amount' THEN 0
 																		ELSE RE.dblFreightRate
@@ -560,7 +560,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= LoadCost.intItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(LoadCost.ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]                    = LoadCost.strCostMethod
 								,[dblRate]							= CASE
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN 0
@@ -574,7 +574,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	END								
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
-								,[ysnAccrue]						= LoadCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= LoadCost.ysnPrice
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
@@ -624,7 +624,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= ContractCost.intItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]					= IC.strCostMethod
 								,[dblRate]							= CASE
 																		WHEN IC.strCostMethod = 'Amount' THEN 0
@@ -689,7 +689,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= ContractCost.intItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(ContractCost.ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= CASE
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 0
@@ -707,7 +707,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
-								,[ysnAccrue]						= ContractCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblCTContractCost ContractCost 
@@ -757,7 +757,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= LoadCost.intItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(LoadCost.ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]					= LoadCost.strCostMethod
 								,[dblRate]							= CASE
 																		WHEN LoadCost.strCostMethod = 'Amount' THEN 0
@@ -771,7 +771,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
-								,[ysnAccrue]						= LoadCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= LoadCost.ysnPrice
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
@@ -820,7 +820,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= ContractCost.intItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(ContractCost.ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]					= ContractCost.strCostMethod
 								,[dblRate]							= CASE
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 0
@@ -834,7 +834,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	END
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
-								,[ysnAccrue]						= ContractCost.ysnAccrue
+								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblCTContractCost ContractCost
@@ -886,7 +886,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intChargeId]						= @intFreightItemId
 							,[intForexRateTypeId]				= RE.intForexRateTypeId
 							,[dblForexRate]						= RE.dblForexRate
-							,[ysnInventoryCost]					= IC.ysnInventoryCost
+							,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 							,[strCostMethod]					= IC.strCostMethod
 							,[dblRate]							= CASE
 																	WHEN IC.strCostMethod = 'Amount' THEN 0
@@ -953,12 +953,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intChargeId]						= SCS.intFreightItemId
 							,[intForexRateTypeId]				= RE.intForexRateTypeId
 							,[dblForexRate]						= RE.dblForexRate
-							,[ysnInventoryCost]					= 0
+							,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 							,[strCostMethod]					= IC.strCostMethod
 							,[dblRate]							= CASE
 																	WHEN IC.strCostMethod = 'Amount' THEN 0
 																	ELSE SC.dblFreightRate
-																	
 																END
 							,[intCostUOMId]						= SC.intItemUOMIdTo
 							,[intOtherChargeEntityVendorId]		= CASE
@@ -1034,7 +1033,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intChargeId]						= ContractCost.intItemId
 							,[intForexRateTypeId]				= RE.intForexRateTypeId
 							,[dblForexRate]						= RE.dblForexRate
-							,[ysnInventoryCost]					= IC.ysnInventoryCost
+							,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 							,[strCostMethod]					= ISNULL(ContractCost.strCostMethod,IC.strCostMethod)
 							,[dblRate]							= CASE
 																	WHEN ISNULL(ContractCost.strCostMethod,IC.strCostMethod) = 'Amount' THEN 0
@@ -1095,7 +1094,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= @intFreightItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]					= SC.strCostMethod
 								,[dblRate]							= CASE
 																		WHEN SC.strCostMethod = 'Amount' THEN 0
@@ -1160,7 +1159,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 					,[intChargeId]						= ContractCost.intItemId
 					,[intForexRateTypeId]				= RE.intForexRateTypeId
 					,[dblForexRate]						= RE.dblForexRate
-					,[ysnInventoryCost]					= IC.ysnInventoryCost
+					,[ysnInventoryCost]					= CASE WHEN ISNULL(ContractCost.ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 					,[strCostMethod]					= ContractCost.strCostMethod
 					,[dblRate]							= CASE
 															WHEN ContractCost.strCostMethod = 'Amount' THEN 0
@@ -1174,7 +1173,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 														END
 					,[intContractHeaderId]				= RE.intContractHeaderId
 					,[intContractDetailId]				= RE.intContractDetailId
-					,[ysnAccrue]						= ContractCost.ysnAccrue
+					,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 					,[ysnPrice]							= ContractCost.ysnPrice
 					,[strChargesLink]					= RE.strChargesLink
 					FROM tblCTContractCost ContractCost
