@@ -21,6 +21,7 @@
 	@intItemId int = null,
 	@ysnCanadianCustomer bit = null
 AS
+
 DECLARE @intCent int
 DECLARE @ysnSubCurrency int
 DECLARE @intMainCurrencyId int
@@ -150,194 +151,124 @@ SELECT @countC1= min(intRowNumber) from @MonthList
 DECLARE @MaxMonth NVARCHAR(50) = null
 SELECT TOP 1 @MaxMonth=dtmMonth from @MonthList Order by intRowNumber desc
 
+DECLARE @ContractRateDetail AS TABLE 
+(
+intContractDetailId int, 
+dblExRate  numeric(24,10)
+)
+
+INSERT INTO @ContractRateDetail (intContractDetailId,dblExRate)
+SELECT cd.intContractDetailId, case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
+				when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd.dblRate,1) 
+				else case when isnull(cd.dblRate,0) =0 then isnull(RD.dblRate,0) else isnull(cd.dblRate,0) end  end
+FROM vyuRKPositionByPeriodContDetView cd
+JOIN tblSMCurrencyExchangeRate et on cd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId 
+LEFT JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = et.intCurrencyExchangeRateId
+JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
+JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
+where cd.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
+
+DECLARE @ContractCost AS TABLE 
+(
+intContractDetailId int, 
+dblRate  numeric(24,10)
+)
+INSERT INTO @ContractCost (intContractDetailId,dblRate)
+SELECT intContractDetailId,SUM(dblRate) from (
+	SELECT dbo.[fnRKGetCurrencyConversionRate](ccv.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,sum(dblAmountPer),
+			case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end)  dblRate,ccv.intContractDetailId
+	FROM vyuRKPositionByPeriodContDetView cd
+	join vyuCTContractCostView ccv on cd.intContractDetailId=ccv.intContractDetailId
+	join vyuCTContractCostEnquiryCost cv on cv.intContractCostId=ccv.intContractCostId
+		where ccv.strItemNo='Freight' and (isnull(ysnAccrue,0)=1 OR (isnull(ysnAccrue,0) =0 and isnull(ysnPrice,0) =0 and isnull(ysnBasis,0)=0))
+		AND cd.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
+		group by ccv.intCurrencyId,ccv.strCostMethod,ccv.intContractDetailId,cd.intCurrencyId)t group by intContractDetailId
+
+
+
 -- Priced Contract	
 IF @strGroupings= 'Contract Terms'
 BEGIN
 
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)		
 		SELECT 		
-		strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
+		strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),
+		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		
 		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
 		end end dblFuturesPrice, 
 		
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
 		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
+		end,0)
+		- isnull(cd.dblFutures,0)
 
 		 else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)
 		end end dblBasisPrice,
 
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
 		end dblCashPrice,		
 		
-		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
+		--ISNULL((SELECT SUM(dblRate) from (
+		--SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' 
+		--											then cd.intCurrencyId else ccv.intCurrencyId end,
+		--											@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer))  dblRate
+		--FROM vyuCTContractCostView ccv 
+		--join vyuCTContractCostEnquiryCost cv on cv.intContractCostId=ccv.intContractCostId
+		-- where  cd.intContractDetailId=ccv.intContractDetailId and ccv.strItemNo='Freight' and (isnull(ysnAccrue,0)=1 OR (isnull(ysnAccrue,0) =0 and isnull(ysnPrice,0) =0 and isnull(ysnBasis,0)=0))
+		-- group by ccv.intCurrencyId,ccv.strCostMethod)t),0)
+		 (select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
+		R.dblExRate AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
 		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId 
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
+		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  
 		AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		ANd cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,
-		dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
-		
+		dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate		
 
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
-		
-		------------------Sale start --------------
-
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
-		SELECT strCommodityCode as    [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,''),'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end dblFuturesPrice, 
-		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then 
-		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
-
-		 else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
-		end end dblBasisPrice,
-
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end dblCashPrice,	
-		
-		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate
-		 ,strLocationName
-		,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
-		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
-		CH.intContractHeaderId,null intFutOptTransactionHeaderId
-		FROM vyuRKPositionByPeriodContDetView cd
-		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
-		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-		AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,
-		cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,strLocationName,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
-	
+				
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,dblBalance dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Sale Quantity' 
 	
@@ -346,185 +277,82 @@ END
 IF @strGroupings= 'Market Zone'
 BEGIN
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strMarketZoneCode,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
+		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strMarketZoneCode,''),
+		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
 		end end dblFuturesPrice, 
 		
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
 		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
+		end,0)
+		- isnull(cd.dblFutures,0)
 
 		 else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)
 		end end dblBasisPrice,
 
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
 		end dblCashPrice,	
-		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
+		--ISNULL((SELECT SUM(dblRate) from (
+		--SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' 
+		--											then cd.intCurrencyId else ccv.intCurrencyId end,
+		--											@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer))  dblRate
+		--FROM vyuCTContractCostView ccv 
+		--join vyuCTContractCostEnquiryCost cv on cv.intContractCostId=ccv.intContractCostId
+		-- where  cd.intContractDetailId=ccv.intContractDetailId and ccv.strItemNo='Freight' and (isnull(ysnAccrue,0)=1 OR (isnull(ysnAccrue,0) =0 and isnull(ysnPrice,0) =0 and isnull(ysnBasis,0)=0))
+		-- group by ccv.intCurrencyId,ccv.strCostMethod)t),0) 
+		 (select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
+		R.dblExRate AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
 		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
+		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  
 		AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,
-		strMarketZoneCode,dblRate,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,
-		CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
+		strMarketZoneCode,dblRate,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,
+		CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate
 		
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
-
-		------------------Sale start --------------
-
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strMarketZoneCode,''),'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end dblFuturesPrice, 
-		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then 
-		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
-
-		 else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
-		end end dblBasisPrice,
-
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end dblCashPrice,
-			isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
-		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
-		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
-		CH.intContractHeaderId,null intFutOptTransactionHeaderId
-		FROM vyuRKPositionByPeriodContDetView cd
-		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
-		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
-		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-					AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-					AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,
-		cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
-
+				
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,
 		dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Sale Quantity' --group by strCommodity,strContractEndMonth
@@ -534,180 +362,71 @@ IF @strGroupings= 'Market Zone and Contract Terms'
 BEGIN
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,'') + ' - ' + isnull(strMarketZoneCode,''),'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
+		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,'') + ' - ' + isnull(strMarketZoneCode,''),
+		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
 		end end dblFuturesPrice, 
 		
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
 		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
+		end,0)
+		- isnull(cd.dblFutures,0)
 
 		 else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)
 		end end dblBasisPrice,
 
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
 		end dblCashPrice,
-			isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
+	(select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
+		R.dblExRate AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
 		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
+		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))			
 		AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
+		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,dblBasis,dblCashPrice,cd.dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate
 				
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Purchase Quantity'-- group by strCommodity,strContractEndMonth
 
-		------------------Sale start --------------
-
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,'') + ' - ' + isnull(strMarketZoneCode,''),'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end dblFuturesPrice, 
-		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then 
-		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
-
-		 else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
-		end end dblBasisPrice,
-
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end dblCashPrice,
-			isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
-		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
-		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,CH.intContractHeaderId,null intFutOptTransactionHeaderId
-		FROM vyuRKPositionByPeriodContDetView cd
-		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
-		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-			AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
-				
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Sale Quantity'-- group by strCommodity,strContractEndMonth
 
@@ -716,185 +435,73 @@ END
 IF @strGroupings= 'By Item' 
 BEGIN
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + strItemNo,'Purchase Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
+		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + strItemNo,
+		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
 		end end dblFuturesPrice, 
 		
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
 		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
+		end,0)
+		- isnull(cd.dblFutures,0)
 
 		 else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)
 		end end dblBasisPrice,
 
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
+				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100/100
 		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
+		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100 
 		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
+			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
 		end dblCashPrice,	
-		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
+   	(select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,strItemNo,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
+		R.dblExRate AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
 		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 1
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId 
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) --and dblBalance > 0 
+		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
+		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 			AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,
+		GROUP BY CH.intContractTypeId,strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,
 		cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strItemNo,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,
-		cd.strPricingType,intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
+		cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate
 
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
-
-		------------------Sale start --------------
-	
-		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,strItemNo,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
-	
-		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + strItemNo,'Sale Quantity',RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
-		sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end dblFuturesPrice, 
-		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then 
-		isnull(	case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end,0) -
-		isnull(case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblFutures,0),isnull(cd.dblRate,0))
-		end end ,0)
-
-		 else
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(cd.dblBasis,0),isnull(cd.dblRate,0))
-		end end dblBasisPrice,
-
-		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100
-		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
-				dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100/100
-		when c.ysnSubCurrency = 0 and isnull(@ysnSubCurrency,0)=1 THEN
-		        dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))*100 
-		else
-			    dbo.[fnRKGetCurrencyConversionRate](cd.intCurrencyId,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,isnull(dblCashPrice,0),isnull(cd.dblRate,0))
-		end dblCashPrice,	
-		isnull((SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' then cd.intCurrencyId else ccv.intCurrencyId end,@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer),isnull(cd.dblRate,0)) 
-		FROM vyuCTContractCostEnquiryCost cv
-		join vyuCTContractCostView ccv on cv.intContractCostId=ccv.intContractCostId
-		join tblICItem i on i.strItemNo=cv.strItemNo and i.strCostType='Freight'
-		 where  cd.intContractDetailId=cv.intContractDetailId
-		 group by ccv.intCurrencyId,ccv.strCostMethod
-		 ),0)  dblRate,
-		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,strItemNo,
-		(
-		SELECT case WHEN (@intCurrencyID1 <> c1.intCurrencyID and @intCurrencyID1 <> c.intCurrencyID) then null
-					 when @intCurrencyID1 = c1.intCurrencyID Then 1/isnull(cd1.dblRate,1) 
-					 else isnull(cd1.dblRate,0) end
-		FROM tblCTContractDetail cd1
-		JOIN tblSMCurrencyExchangeRate et on cd1.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId  and cd1.intContractStatusId <> 3
-		JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
-		JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
-		WHERE cd.intContractDetailId=cd1.intContractDetailId
-		) AS ExRate,
-		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,CH.intContractHeaderId,null intFutOptTransactionHeaderId
-		FROM vyuRKPositionByPeriodContDetView cd
-		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
-		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId AND CH.intContractTypeId = 2
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-			AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,strContractBasis,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,
-		cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strItemNo,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,
-		cd.intPricingTypeId,cd.strPricingType,intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
-
+				
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Sale Total','Sale Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Sale Quantity' --group by strCommodity,strContractEndMonth
 
@@ -1411,17 +1018,23 @@ DECLARE @Result AS TABLE (
 	 declare @strContractEndMonth nvarchar(100)
 
  SELECT TOP 1  @strCommodityName=strCommodity,@strHeaderValue=strHeaderValue,@strSubHeading=strSubHeading,@strSecondSubHeading=strSecondSubHeading,@strContractEndMonth=strContractEndMonth
-   FROM @FinalList where strSecondSubHeading='Purchase Quantity'
+ FROM @FinalList where strSecondSubHeading='Purchase Quantity'
+
+
+DECLARE @DistinctMonth AS TABLE (  
+     strContractEndMonth nvarchar(100))
+INSERT INTO @DistinctMonth(strContractEndMonth)
+SELECT DISTINCT strContractEndMonth FROM @FinalList WHERE strCommodity=@strCommodityName and strSecondSubHeading='Purchase Quantity'
 
  INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
 				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
 					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
- SELECT distinct @strCommodityName,@strHeaderValue,@strSubHeading,@strSecondSubHeading,	strContractEndMonth,null ,null ,  
+ SELECT DISTINCT @strCommodityName,null,@strSubHeading,null,strContractEndMonth,null ,null ,  
 				    null,null,null,null,null,null,null,null,null,null,
 					null,null,null,null,null,null,null
-FROM @FinalList  WHERE strContractEndMonth
- NOT IN (SELECT DISTINCT strContractEndMonth FROM @FinalList WHERE strCommodity=@strCommodityName and strSecondSubHeading='Purchase Quantity')
-
+FROM @FinalList  
+WHERE strContractEndMonth
+ NOT IN (SELECT strContractEndMonth from @DistinctMonth)
 
 INSERT INTO @Result (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
 				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,

@@ -3,7 +3,8 @@ AS
 SELECT
 PT.strPricingType,CH.strContractType,	CH.strContractBasis,CD.dtmEndDate,	CD.dblBalance,MZ.strMarketZoneCode,CD.intCurrencyId,					
 CH.intCommodityId,CD.intItemId,	PU.intUnitMeasureId AS	intPriceUnitMeasureId,CD.dblFutures,CD.dblCashPrice,CD.dblConvertedBasis dblBasis,CD.dblRate,				
-CD.intContractDetailId,CD.intContractSeq,CD.intCompanyLocationId,IU.intUnitMeasureId,CD.intContractStatusId,CH.intContractHeaderId,CD.intPricingTypeId,CH.strCommodityCode,CL.strLocationName,CH.strContractNumber,IM.strItemNo				
+CD.intContractDetailId,CD.intContractSeq,CD.intCompanyLocationId,IU.intUnitMeasureId,CD.intContractStatusId,CH.intContractHeaderId,CD.intPricingTypeId,CH.strCommodityCode,CL.strLocationName,CH.strContractNumber,IM.strItemNo	
+,intCurrencyExchangeRateId			
 FROM	tblCTContractDetail				CD	
 JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		
 JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId     LEFT		
