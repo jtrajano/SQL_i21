@@ -22,6 +22,7 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@intManufacturingProcessId INT
 		,@intAttributeTypeId INT
+		,@STARTING_NUMBER_BATCH AS INT = 3
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -47,7 +48,6 @@ BEGIN TRY
 
 	SELECT @intBatchId = intBatchId
 		,@intWorkOrderId = intWorkOrderId
-		,@strBatchId = strBatchId
 		,@intItemId = intItemId
 		,@intStorageLocationId = intStorageLocationId
 		,@intLotId = intLotId
@@ -93,6 +93,9 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+
+	Set @strBatchId=''
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT 
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
