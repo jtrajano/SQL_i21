@@ -1,6 +1,7 @@
-﻿CREATE FUNCTION dbo.fnCFGetLuhn
+﻿CREATE FUNCTION [dbo].[fnCFGetLuhn]
 (
-    @Luhn VARCHAR(7999)
+     @Luhn VARCHAR(7999)
+	,@appendInput BIT
 )
 RETURNS VARCHAR(8000)
 AS
@@ -23,5 +24,12 @@ BEGIN
             @Sum = @Sum + @Plus / 10 + @Plus % 10,
             @Index = @Index - 1
 
-    RETURN  @Luhn + CASE WHEN @Sum % 10 = 0 THEN '0' ELSE CAST(10 - @Sum % 10 AS CHAR) END
+	IF(ISNULL(@appendInput,0) = 0)
+	BEGIN
+		RETURN  CASE WHEN @Sum % 10 = 0 THEN '0' ELSE CAST(10 - @Sum % 10 AS CHAR) END
+	END
+	
+		RETURN  @Luhn + CASE WHEN @Sum % 10 = 0 THEN '0' ELSE CAST(10 - @Sum % 10 AS CHAR) END
+	
 END
+
