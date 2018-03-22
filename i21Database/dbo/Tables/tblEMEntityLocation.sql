@@ -5,6 +5,7 @@
     [strAddress]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCity]             NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCountry]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strCounty]		      NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strState]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strZipCode]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strPhone]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
@@ -64,8 +65,6 @@
     CONSTRAINT [FK_tblEMEntityLocation_tblEMEntity_intVendorLinkId] FOREIGN KEY ([intVendorLinkId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [UK_tblEMEntityLocation_strLocationName_strFieldNumber] UNIQUE NONCLUSTERED ([strLocationName] ASC, [strFarmFieldNumber] ASC,[intEntityId] ASC), 
     CONSTRAINT [FK_tblEMEntityLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId)
-
-
 );
 
 
