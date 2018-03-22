@@ -85,16 +85,16 @@ SELECT
 								 WHEN (ALD.dblSAllocatedQty > ISNULL((
 														SELECT SUM(LD.dblQuantity)
 														FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-														WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)
+														WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1
 														), 0)
 												)
 											THEN 0
 									ELSE 1
 								END)
 	,dblSDeliveredQty = IsNull((SELECT SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)), 0)
+							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1), 0)
 	,dblBalanceToDeliver = ALD.dblSAllocatedQty - IsNull((SELECT SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3)), 0)
+							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1), 0)
 	,PCO.strCountry AS strPOrigin
 	,SCO.strCountry AS strSOrigin
 FROM tblLGAllocationDetail ALD
