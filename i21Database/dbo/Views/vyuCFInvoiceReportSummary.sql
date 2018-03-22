@@ -97,7 +97,7 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
        ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)           AS TotalLC, 
        cfTrans.intTransactionId, 
        cfCardAccount.strNetwork, 
-       arInv.dtmPostDate                                          AS 
+       cfTrans.dtmPostedDate                                          AS 
        dtmPostedDate, 
        cfCardAccount.strInvoiceCycle, 
        cfTrans.strTempInvoiceReportNumber                         AS 

@@ -88,8 +88,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							strItemType					NVARCHAR(100),
 							strSalesOrderNumber			NVARCHAR(100),
 							strShipmentNumber			NVARCHAR(100),
-							dblContractBalance			INT,
-							dblContractAvailable		INT,
+							dblContractBalance			NUMERIC(18,6),
+							dblContractAvailable		NUMERIC(18,6),
 							intEntityContactId			INT,
 							intStorageScheduleTypeId	INT,
 							intSubCurrencyId			INT,
@@ -134,8 +134,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							strItemType					NVARCHAR(100),
 							strSalesOrderNumber			NVARCHAR(100),
 							strShipmentNumber			NVARCHAR(100),
-							dblContractBalance			INT,
-							dblContractAvailable		INT,
+							dblContractBalance			NUMERIC(18,6),
+							dblContractAvailable		NUMERIC(18,6),
 							intEntityContactId			INT,
 							intStorageScheduleTypeId	INT,
 							intSubCurrencyId			INT,
@@ -340,7 +340,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , intTaxGroupId				= NULL
 	 , intSalesOrderDetailId		= ARSI.intSalesOrderDetailId
 	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= ARSI.intRecipeId
+	 , intRecipeItemId				= ARSI.intRecipeItemId
 	 , intRecipeId					= ARSI.intRecipeId
 	 , intSubLocationId				= NULL
 	 , intCostTypeId				= NULL
@@ -585,6 +585,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intShipViaId]
 					,[strPONumber]
 					,[intTermId]
+					,[intPeriodsToAccrue]
 					,[dblInvoiceSubtotal]
 					,[dblShipping]
 					,[dblTax]
@@ -631,6 +632,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intShipViaId]
 					,[strPONumber]
 					,[intTermId]
+					,ISNULL(SOD.intPeriodsToAccrue, 1)
 					,@dblSalesOrderSubtotal --ROUND([dblSalesOrderSubtotal],2)
 					,[dblShipping]
 					,@dblTax--ROUND([dblTax],2)
@@ -663,8 +665,18 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
 					,[intSalesOrderId]
-				FROM
-				tblSOSalesOrder
+				FROM tblSOSalesOrder
+				OUTER APPLY (
+					SELECT TOP 1 CASE WHEN strFrequency = 'Monthly' THEN 12
+											 WHEN strFrequency = 'Bi-Monthly' THEN 24
+											 WHEN strFrequency = 'Quarterly' THEN 4
+											 WHEN strFrequency = 'Semi-Annually' THEN 2
+											 WHEN strFrequency = 'Annually' THEN 1
+									ELSE 1 END
+					FROM tblSOSalesOrderDetail 
+					WHERE intSalesOrderId = @SalesOrderId
+					  AND ISNULL(strFrequency, '') <> ''
+				) SOD
 				WHERE intSalesOrderId = @SalesOrderId
 
 				SET @SoftwareInvoiceId = SCOPE_IDENTITY()
@@ -720,12 +732,12 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblQtyOrdered]			--[dblQtyOrdered]
 					,[intItemUOMId]				--[intItemUOMId]					
 					,CASE WHEN [strFrequency] = 'Bi-Monthly' 
-						  THEN 2 * [dblQtyOrdered]
+						  THEN 24 * [dblQtyOrdered]
 						  WHEN [strFrequency] = 'Quarterly'
-						  THEN 3 * [dblQtyOrdered]
+						  THEN 4 * [dblQtyOrdered]
 						  WHEN [strFrequency] = 'Semi-Annually'
-						  THEN 6 * [dblQtyOrdered]
-						  WHEN [strFrequency] = 'Annually'
+						  THEN 2 * [dblQtyOrdered]
+						  WHEN [strFrequency] = 'Monthly'
 						  THEN 12 * [dblQtyOrdered]
 						  ELSE [dblQtyOrdered]
 					 END						--[dblQtyShipped]
@@ -861,8 +873,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemCommentTypeId		INT,
 						@ItemMargin				NUMERIC(18,6),
 						@ItemRecipeQty			NUMERIC(18,6),
-						@ContractBalance		INT,
-						@ContractAvailable		INT,
+						@ContractBalance		NUMERIC(18,6),
+						@ContractAvailable		NUMERIC(18,6),
 						@ItemSubCurrencyId		INT,
 						@ItemSubCurrencyRate	NUMERIC(18,6),
 						@ItemCurrencyExchangeRateTypeId		INT,
@@ -960,14 +972,17 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
 							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
 
-				UPDATE tblARInvoiceDetail 
-				SET dblContractBalance = @ContractBalance
-				  , dblContractAvailable = @ContractAvailable
-				FROM @tblItemsToInvoice 
-				WHERE intInvoiceId = @NewInvoiceId 
-				AND tblARInvoiceDetail.intItemId = @ItemId 
-				AND tblARInvoiceDetail.intContractHeaderId = @ItemContractHeaderId 
-				AND tblARInvoiceDetail.intContractDetailId = @ItemContractDetailId
+				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
+					BEGIN
+						UPDATE tblARInvoiceDetail 
+						SET dblContractBalance = ISNULL(@ContractBalance, 0.00)
+						  , dblContractAvailable = ISNULL(@ContractAvailable, 0.00)
+						FROM @tblItemsToInvoice 
+						WHERE intInvoiceId = @NewInvoiceId 
+						AND tblARInvoiceDetail.intItemId = @ItemId 
+						AND tblARInvoiceDetail.intContractHeaderId = @ItemContractHeaderId 
+						AND tblARInvoiceDetail.intContractDetailId = @ItemContractDetailId
+					END
 
 				IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
 					BEGIN
@@ -1162,11 +1177,11 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 									 intPeriodsToAccrue
 								 ELSE
 									 CASE WHEN @ysnHasMaintenanceItem = 1 THEN
-										CASE WHEN @strFrequency = 'Monthly' THEN 1
-											 WHEN @strFrequency = 'Bi-Monthly' THEN 2
-											 WHEN @strFrequency = 'Quarterly' THEN 3
-											 WHEN @strFrequency = 'Semi-Annually' THEN 6
-											 WHEN @strFrequency = 'Annually' THEN 12
+										CASE WHEN @strFrequency = 'Monthly' THEN 12
+											 WHEN @strFrequency = 'Bi-Monthly' THEN 24
+											 WHEN @strFrequency = 'Quarterly' THEN 4
+											 WHEN @strFrequency = 'Semi-Annually' THEN 2
+											 WHEN @strFrequency = 'Annually' THEN 1
 										ELSE 1 END
 									 ELSE 1 END
 								 END

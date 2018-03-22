@@ -860,6 +860,9 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
+DECLARE @ysnBatchRecap AS BIT = 0
+SELECT @ysnBatchRecap = CASE WHEN (@strBatchNo IS NOT NULL) THEN 1 ELSE 0 END
+
 IF (@ysnPost = 1 AND @strBatchNo IS NULL)
 BEGIN
 	IF (@ysnRecap = 1)
@@ -1212,7 +1215,7 @@ Post_Rollback:
 Recap_Rollback: 
 	SET @isSuccessful = 1
 	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
-	EXEC dbo.uspGLPostRecap @RecapTable
+	EXEC dbo.uspGLPostRecap @RecapTable, NULL, @ysnBatchRecap
 	GOTO Post_Exit
 	
 Audit_Log:
