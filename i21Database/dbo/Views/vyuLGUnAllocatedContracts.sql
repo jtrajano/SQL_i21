@@ -31,10 +31,10 @@ FROM (
 		,U1.strUnitMeasure AS strItemUOM
 		,CL.strLocationName
 		,CS.strContractStatus
-		,(SELECT SUM(dblReservedQuantity) FROM tblLGReservation RES WHERE RES.intContractDetailId = CD.intContractDetailId) AS dblReservedQuantity
-		,ISNULL(CD.dblQuantity, 0) - ISNULL((SELECT SUM(dblReservedQuantity) FROM tblLGReservation RES WHERE RES.intContractDetailId = CD.intContractDetailId),0) AS dblUnReservedQuantity
-		,ISNULL(CD.dblAllocatedQty, 0) AS dblAllocatedQty
-		,ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblAllocatedQty, 0)  AS dblUnAllocatedQty
+		,SUM(LR.dblReservedQuantity) AS dblReservedQuantity
+		,ISNULL(CD.dblQuantity, 0) - ISNULL(SUM(LR.dblReservedQuantity), 0) AS dblUnReservedQuantity
+		,ISNULL(SUM(PAL.dblPAllocatedQty), 0) + ISNULL(SUM(SAL.dblSAllocatedQty), 0) AS dblAllocatedQty
+		,ISNULL(CD.dblQuantity, 0) - ISNULL(SUM(PAL.dblPAllocatedQty), 0) - ISNULL(SUM(SAL.dblSAllocatedQty), 0) AS dblUnAllocatedQty
 		,CH.intContractHeaderId
 		,CH.intContractTypeId
 		,CT.strContractType
@@ -75,7 +75,6 @@ FROM (
 		,CD.strBuyerSeller
 		,CD.strFobBasis
 		,CD.dblBalance
-		,CD.dblAllocatedQty
 		,CD.dblIntransitQty
 		,CD.dblScheduleQty
 		,CD.strPackingDescription

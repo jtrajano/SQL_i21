@@ -41,7 +41,7 @@ SELECT
 	,PCT.dtmEndDate AS dtmPEndDate
 	,PCB.strContractBasis AS strPContractBasis
 	,PCS.strContractStatus AS strPContractStatus
-    ,PEY.strName AS strSeller
+	,PEY.strEntityName AS strSeller
 	,PCT.strFixationBy AS strPFixationBy
 	,PFM.strFutMarketName AS strPFutMarketName
 	,PMO.strFutureMonth AS strPFutureMonth
@@ -72,7 +72,7 @@ SELECT
 	,SCT.dtmEndDate as dtmSEndDate
 	,SCB.strContractBasis as strSContractBasis
 	,SCS.strContractStatus as strSContractStatus
-	,SEY.strName as strBuyer
+	,SEY.strEntityName as strBuyer
 	,SCT.strFixationBy as strSFixationBy
 	,SFM.strFutMarketName as strSFutMarketName
 	,SMO.strFutureMonth as strSFutureMonth
@@ -112,7 +112,7 @@ LEFT JOIN tblICCommodityAttribute PCA ON PCA.intCommodityAttributeId = IM.intOri
 LEFT JOIN tblSMCountry PCO ON PCO.intCountryID = PCA.intCountryID
 LEFT JOIN tblCTContractBasis PCB ON PCB.intContractBasisId = PCH.intContractBasisId
 LEFT JOIN tblCTContractStatus PCS ON PCS.intContractStatusId = PCT.intContractStatusId
-LEFT JOIN tblEMEntity PEY ON PEY.intEntityId = PCH.intEntityId
+LEFT JOIN vyuCTEntity PEY ON PEY.intEntityId = PCH.intEntityId AND PEY.strEntityType = 'Vendor'
 LEFT JOIN tblRKFutureMarket PFM ON PFM.intFutureMarketId = PCT.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth PMO ON PMO.intFutureMonthId = PCT.intFutureMonthId
 LEFT JOIN tblCTPosition PPO ON PPO.intPositionId = PCH.intPositionId
@@ -129,7 +129,7 @@ LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SIM.intOr
 LEFT JOIN tblSMCountry SCO ON SCO.intCountryID = SCA.intCountryID
 LEFT JOIN tblCTContractBasis SCB ON SCB.intContractBasisId = SCH.intContractBasisId
 LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCT.intContractStatusId
-LEFT JOIN tblEMEntity SEY ON SEY.intEntityId = SCH.intEntityId
+LEFT JOIN vyuCTEntity SEY ON SEY.intEntityId = SCH.intEntityId AND SEY.strEntityType = 'Customer'
 LEFT JOIN tblRKFutureMarket SFM ON SFM.intFutureMarketId = SCT.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth SMO ON SMO.intFutureMonthId = SCT.intFutureMonthId
 LEFT JOIN tblCTPosition SPO ON SPO.intPositionId = SCH.intPositionId
