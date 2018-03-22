@@ -232,7 +232,6 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, strItemNo
 				, intIntegrationError)
 			SELECT DISTINCT @Guid
 				, RC.intReportingComponentId
@@ -275,7 +274,6 @@ BEGIN TRY
 				, SMCOMPSETUP.strFederalTaxID
 				, @DateFrom
 				, @DateTo
-				, TR.strItemNumber
 				, (SELECT COUNT(*) FROM tblTFIntegrationError)
 			FROM tblTFReportingComponentCriteria
 			RIGHT OUTER JOIN vyuTFGetReportingComponentProductCode AS VPC
@@ -478,7 +476,6 @@ BEGIN TRY
 				, strTaxPayerFEIN
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, strItemNo
 				, intIntegrationError)
 			SELECT DISTINCT @Guid
 				, RC.intReportingComponentId
@@ -521,7 +518,6 @@ BEGIN TRY
 				, SMCOMPSETUP.strFederalTaxID
 				, @DateFrom
 				, @DateTo
-				, TR.strItemNumber
 				, (SELECT COUNT(*) FROM tblTFIntegrationError)
 			FROM tblTFReportingComponentCriteria
 			RIGHT OUTER JOIN vyuTFGetReportingComponentProductCode AS VPC

@@ -123,8 +123,7 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId
-			, strContactName
-			, strEmail)
+			, strContactName)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -183,7 +182,6 @@ BEGIN TRY
 			, strTransactionType = 'Invoice'
 			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
 			, strContactName = tblSMCompanySetup.strContactName
-			, strEmail = tblSMCompanySetup.strEmail
 		FROM tblTFProductCode
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
@@ -326,8 +324,7 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId
-			, strContactName
-			, strEmail)
+			, strContactName)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -390,7 +387,6 @@ BEGIN TRY
 			, strTransactionType = 'Transfer'
 			, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 			, strContactName = tblSMCompanySetup.strContactName
-			, strEmail = tblSMCompanySetup.strEmail
 		FROM tblTFProductCode
 		INNER JOIN tblICInventoryTransferDetail
 		INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
@@ -478,8 +474,7 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId
-			, strContactName
-			, strEmail)
+			, strContactName)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -529,7 +524,6 @@ BEGIN TRY
 				, strTransactionType = 'Transfer'
 				, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 				, strContactName = tblSMCompanySetup.strContactName
-				, strEmail = tblSMCompanySetup.strEmail
 			FROM tblTFProductCode
 			INNER JOIN tblICInventoryTransferDetail 
 				INNER JOIN tblICItem ON tblICItem.intItemId = tblICInventoryTransferDetail.intItemId
@@ -619,8 +613,7 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strContactName
-				, strEmail)
+				, strContactName)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCode
@@ -679,7 +672,6 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strContactName
-				, strEmail
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
 

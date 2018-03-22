@@ -53,7 +53,6 @@
 	[strTransactionType] NVARCHAR(50) NULL,
 	[intTransactionNumberId] INT NULL,
 	[strVendorLicenseNumber] NVARCHAR(50) NULL,
-	[strContactName] NVARCHAR(100) NULL,
-	[strEmail] NVARCHAR(100) NULL
+	[strContactName] NVARCHAR(100) NULL
 )
 GO

@@ -100,8 +100,7 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState
 			, strTransactionType
 			, intTransactionNumberId
-			, strContactName
-			, strEmail)
+			, strContactName)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId
 			, *
 		FROM (
@@ -158,7 +157,6 @@ BEGIN TRY
 			, strTransactionType = 'Receipt'
 			, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId
 			, strContactName = tblSMCompanySetup.strContactName
-			, strEmail = tblSMCompanySetup.strEmail
 		FROM tblTFReportingComponent 
 		INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 		INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -263,8 +261,7 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strContactName
-				, strEmail)
+				, strContactName)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, strBillOfLading
@@ -312,7 +309,6 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strContactName
-				, strEmail
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
 		END

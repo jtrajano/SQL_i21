@@ -12,11 +12,10 @@ SELECT Trans.intTransactionId
 	, RC.strScheduleName
 	, intProductCodeId = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.intProductCodeId ELSE Exception.intProductCodeId END
 	, strProductCode = CASE WHEN Exception.intExceptionId IS NULL THEN (CASE WHEN Trans.intProductCodeId = NULL THEN 'No record found.' ELSE Trans.strProductCode END) ELSE Exception.strProductCode END
-	, strProductCodeDescription = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strDescription ELSE Exception.strProductCodeDescription END
+	, strProductCodeDescription = CASE WHEN Exception.intExceptionId IS NULL THEN PC.strDescription ELSE Exception.strProductCodeDescription END
 	, strTaxCode = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxCode ELSE Exception.strTaxCode END
 	, strType = RC.strType
-	, strDescription = ISNULL(Trans.strDescription, '')
-	, strItemNo = CASE WHEN Exception.intExceptionId IS NULL THEN Item.strItemNo ELSE Exception.strItemNo END
+	, strItemNo = Item.strItemNo
 	, strBillOfLading = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strBillOfLading ELSE Exception.strBillOfLading END
 	, intItemId = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.intItemId ELSE ISNULL(Exception.intItemId, Trans.intItemId) END
 	, dblReceived = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dblReceived ELSE Exception.dblReceived END
@@ -30,15 +29,9 @@ SELECT Trans.intTransactionId
 	, strPONumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strPONumber ELSE Exception.strPONumber END
 	, strTerminalControlNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTerminalControlNumber ELSE Exception.strTerminalControlNumber END
 	, dtmDate = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dtmDate ELSE Exception.dtmDate END
-	, strShipToCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strShipToCity ELSE Exception.strShipToCity END
-	, strShipToState = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strShipToState ELSE Exception.strShipToState END
-	, strSupplierName = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strSupplierName ELSE Exception.strSupplierName END
 	, dtmLastRun = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.dtmLastRun ELSE Exception.dtmLastRun END
 	, Trans.dtmReportingPeriodBegin
 	, Trans.dtmReportingPeriodEnd
-	, strLicenseNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strLicenseNumber ELSE Exception.strLicenseNumber END
-	, strEmail = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strEmail ELSE Exception.strEmail END
-	, strFEINSSN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strFEINSSN ELSE Exception.strFEINSSN END
 	, strCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strCity ELSE Exception.strCity END
 	, strState = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strState ELSE Exception.strState END
 	, strZipCode = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strZipCode ELSE Exception.strZipCode END
@@ -64,7 +57,6 @@ SELECT Trans.intTransactionId
 	, strOriginCity = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCity ELSE Exception.strOriginCity END
 	, strOriginCounty = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginCounty ELSE Exception.strOriginCounty END
 	, strOriginTCN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strOriginTCN ELSE Exception.strOriginTCN END
-	, strFuelType = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strFuelType ELSE Exception.strFuelType END
 	, strTaxPayerName = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerName ELSE Exception.strTaxPayerName END
 	, strTaxPayerIdentificationNumber = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerIdentificationNumber ELSE Exception.strTaxPayerIdentificationNumber END
 	, strTaxPayerFEIN = CASE WHEN Exception.intExceptionId IS NULL THEN Trans.strTaxPayerFEIN ELSE Exception.strTaxPayerFEIN END
@@ -114,8 +106,7 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strProductCodeDescription
 	, Exception.strTaxCode
 	, RC.strType
-	, strDescription = ''
-	, Exception.strItemNo
+	, Item.strItemNo
 	, Exception.strBillOfLading
 	, Exception.intItemId
 	, Exception.dblReceived
@@ -129,15 +120,9 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strPONumber
 	, Exception.strTerminalControlNumber
 	, Exception.dtmDate
-	, Exception.strShipToCity
-	, Exception.strShipToState
-	, Exception.strSupplierName
 	, Exception.dtmLastRun
 	, dtmReportingPeriodBegin = NULL
 	, dtmReportingPeriodEnd = NULL
-	, Exception.strLicenseNumber
-	, Exception.strEmail
-	, Exception.strFEINSSN
 	, Exception.strCity
 	, Exception.strState
 	, Exception.strZipCode
@@ -163,7 +148,6 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strOriginCity
 	, Exception.strOriginCounty
 	, Exception.strOriginTCN
-	, Exception.strFuelType
 	, Exception.strTaxPayerName
 	, Exception.strTaxPayerIdentificationNumber
 	, Exception.strTaxPayerFEIN
@@ -190,5 +174,6 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strReason
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId
+LEFT JOIN tblICItem Item ON Item.intItemId = Exception.intItemId
 WHERE ISNULL(Exception.ysnDeleted, 0) != 1
 	AND strExceptionType = 'Add'
