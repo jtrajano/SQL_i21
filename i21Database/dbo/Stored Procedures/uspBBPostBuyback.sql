@@ -23,7 +23,7 @@ AS
 	DECLARE @strReimbursementNo NVARCHAR(100)
 	DECLARE @voucherNonInvDetails AS VoucherDetailNonInventory
 	DECLARE @intCreatedBillId INT
-	DECLARE @APbatchIdUsed NVARCHAR(100)
+	DECLARE @batchIdUsed NVARCHAR(100)
 	DECLARE @APDate DATETIME
 	DECLARE @intDetailAccount INT
 	SET @ysnSuccess = 0
@@ -87,11 +87,22 @@ AS
 		EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries = @EntriesForInvoice
 			,@UserId = @intUserId
 			,@GroupingOption = 1
-			,@RaiseError = 1
+			,@RaiseError = 0
 			,@LineItemTaxEntries = @LineItemTaxEntries
 			,@ErrorMessage = @ErrorMessage OUTPUT
 			,@CreatedIvoices = @CreatedIvoices OUTPUT
 			,@UpdatedIvoices = @UpdatedIvoices OUTPUT
+			,@BatchIdForNewPost = @batchIdUsed OUTPUT
+
+		SELECT TOP 1 @ErrorMessage = strMessage 
+		FROM tblARPostResult 
+		WHERE strBatchNumber = @batchIdUsed
+
+		IF(@ErrorMessage LIKE '%successfully posted%')
+		BEGIN
+			SET @ErrorMessage = ''
+		END
+
 
 		IF(ISNULL(@ErrorMessage,'') = '')
 		BEGIN
@@ -128,6 +139,33 @@ AS
 			@strReimbursementNo = strReimbursementNo
 		FROM tblBBBuyback
 
+
+		---Staging 
+		SELECT 
+			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](1, C.intItemLocationId, 'Other Charge Income'))
+			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
+			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
+			,[dblQtyReceived] = A.dblBuybackQuantity	
+			,[dblCost]	 = A.dblBuybackRate	
+		INTO #tmpStagingInsert
+		FROM tblBBBuybackDetail A
+		INNER JOIN tblICItem B
+			ON A.intItemId = B.intItemId
+		INNER JOIN tblICItemLocation C
+			ON B.intItemId = C.intItemId
+				AND intLocationId =  @CompanyLocation
+		WHERE intBuybackId = @intBuyBackId
+
+
+		---Check for Other Charge income account.
+		IF EXISTS(SELECT TOP 1 1 FROM #tmpStagingInsert WHERE intAccountId IS NULL)
+		BEGIN
+			SET @strPostingError = 'Invalid G/L account id found.'
+			GOTO ENDPOST
+		END
+
+
+		-- insert
 		INSERT INTO @voucherNonInvDetails(
 			[intAccountId]		
 			,[intItemId]			
@@ -136,18 +174,12 @@ AS
 			,[dblCost]			
 		)	
 		SELECT 
-			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](1, C.intItemLocationId, 'Other Charge Income'))
-			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
-			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
-			,[dblQtyReceived] = A.dblBuybackQuantity	
-			,[dblCost]	 = A.dblBuybackRate		
-		FROM tblBBBuybackDetail A
-		INNER JOIN tblICItem B
-			ON A.intItemId = B.intItemId
-		INNER JOIN tblICItemLocation C
-			ON B.intItemId = C.intItemId
-				AND intLocationId =  @CompanyLocation
-		WHERE intBuybackId = @intBuyBackId
+			[intAccountId]	
+			,[intItemId]
+			,[strMiscDescription]
+			,[dblQtyReceived]
+			,[dblCost]
+		FROM #tmpStagingInsert 
 
 		SET @APDate = GETDATE()
 		EXEC [dbo].[uspAPCreateBillData]
@@ -176,14 +208,14 @@ AS
 		,@param = @intCreatedBillId
 		,@userId = @intUserId
 		,@success = @ysnSuccess OUTPUT
-		,@batchIdUsed = @APbatchIdUsed OUTPUT
+		,@batchIdUsed = @batchIdUsed OUTPUT
 
 		IF(@ysnSuccess = 0)
 		BEGIN
 			SELECT TOP 1
 				@strPostingError = strMessage
 			FROM tblAPPostResult
-			WHERE strBatchNumber = @APbatchIdUsed
+			WHERE strBatchNumber = @batchIdUsed
 		END
 		ELSE
 		BEGIN
@@ -207,5 +239,7 @@ AS
 					) A
 			WHERE tblARInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
 		END
+		ENDPOST:
+
 	END
 GO
