@@ -15,7 +15,10 @@ SELECT
 			WHEN Adj.intAdjustmentType = 5 THEN 'Split Lot'
 			WHEN Adj.intAdjustmentType = 6 THEN 'Expiry Date Change'
 			WHEN Adj.intAdjustmentType = 7 THEN 'Lot Merge'
-			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move' END)
+			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move'
+			WHEN Adj.intAdjustmentType = 9 THEN 'Lot Owner Chang'
+			WHEN Adj.intAdjustmentType = 10 THEN 'Opening Inventory'
+		END)
 	, Adj.strAdjustmentNo
 	, Adj.strDescription
 	, Adj.intSort
