@@ -667,7 +667,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intSalesOrderId]
 				FROM tblSOSalesOrder
 				OUTER APPLY (
-					SELECT TOP 1 CASE WHEN strFrequency = 'Monthly' THEN 12
+					SELECT TOP 1 intPeriodsToAccrue = CASE WHEN strFrequency = 'Monthly' THEN 12
 											 WHEN strFrequency = 'Bi-Monthly' THEN 24
 											 WHEN strFrequency = 'Quarterly' THEN 4
 											 WHEN strFrequency = 'Semi-Annually' THEN 2
