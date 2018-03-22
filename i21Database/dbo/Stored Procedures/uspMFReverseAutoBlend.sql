@@ -106,7 +106,10 @@ Begin Transaction
 While @intWorkOrderId is not null
 Begin
 Select @strWorkOrderNo=strWorkOrderNo From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
-Select TOP 1 @intBatchId=intBatchId,@strBatchId=strBatchId From tblMFWorkOrderProducedLot Where intWorkOrderId=@intWorkOrderId
+Select TOP 1 @intBatchId=intBatchId From tblMFWorkOrderProducedLot Where intWorkOrderId=@intWorkOrderId
+
+Set @strBatchId=''
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT 
 
 Delete From @GLEntries
 
