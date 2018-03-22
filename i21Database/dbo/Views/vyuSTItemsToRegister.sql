@@ -1,10 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuSTItemsToRegister]
 AS
-SELECT DISTINCT I.intItemId, EM.intEntityId, URN.ysnClick
+SELECT DISTINCT I.intItemId, EM.intEntityId, URN.ysnClick, SMUS.intCompanyLocationId
 FROM tblICItem I
 JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 JOIN(
-	SELECT DISTINCT CAST(strRecordNo AS INT) [intItemId] 
+	SELECT DISTINCT CAST(strRecordNo AS INT) [intItemId]
+					, dtmDate
 	FROM dbo.tblSMAuditLog 
 	WHERE strTransactionType = 'Inventory.view.Item'
 		AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0  
@@ -26,16 +27,16 @@ JOIN(
 		OR CHARINDEX('dblStandardCost',strJsonData) > 0
 		OR CHARINDEX('intCategoryId',strJsonData) > 0 )
 
-	    AND dtmDate BETWEEN 
-				ISNULL(
-						(DATEADD(HOUR,-8,(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory ORDER BY intUpdateRegisterHistoryId DESC)))
-						, (
-							SELECT TOP 1 dtmDate
-							FROM tblSMAuditLog
-							WHERE strTransactionType = 'Inventory.view.Item'
-							ORDER BY dtmDate ASC
-						)) 
-				AND GETUTCDATE()
+	   -- AND dtmDate BETWEEN 
+				--ISNULL(
+				--		(DATEADD(HOUR,-8,(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory WHERE intStoreId = 3 ORDER BY intUpdateRegisterHistoryId DESC)))
+				--		, (
+				--			SELECT TOP 1 dtmDate
+				--			FROM tblSMAuditLog
+				--			WHERE strTransactionType = 'Inventory.view.Item'
+				--			ORDER BY dtmDate ASC
+				--		)) 
+				--AND GETUTCDATE()
 
 ) AS x ON x.intItemId = I.intItemId 
 JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
@@ -51,4 +52,14 @@ JOIN tblSMUserSecurity SMUS ON SMUS.intCompanyLocationId = IL.intLocationId
 JOIN tblEMEntity EM ON EM.intEntityId = SMUS.intEntityId
 JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = EM.intEntityId
 WHERE I.ysnFuelItem = 0
+AND x.dtmDate BETWEEN 
+				ISNULL(
+						(DATEADD(HOUR,-8,(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory WHERE intStoreId = ST.intStoreId ORDER BY intUpdateRegisterHistoryId DESC)))
+						, (
+							SELECT TOP 1 dtmDate
+							FROM tblSMAuditLog
+							WHERE strTransactionType = 'Inventory.view.Item'
+							ORDER BY dtmDate ASC
+						)) 
+				AND GETUTCDATE()
 

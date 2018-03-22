@@ -658,10 +658,14 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 	SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
 	SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)
 	
-	SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(URN.intEntityId AS NVARCHAR(20)) + ',','')
-	FROM tblSTUpdateRegisterNotification URN
-	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = URN.intEntityId
+	SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
+	FROM tblEMEntity EM
+	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
+	JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
 	WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+	AND ET.strType IN ('User', 'Employee')
+
+
 
 	SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
 

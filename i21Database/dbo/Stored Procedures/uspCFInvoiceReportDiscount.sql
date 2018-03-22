@@ -249,6 +249,11 @@ BEGIN
 				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
 			END
 		END
+		ELSE
+		BEGIN
+			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' ( ISNULL(strInvoiceReportNumber,'''') = '''')'
+		END
 
 
 		DECLARE @SQL NVARCHAR(MAX)

@@ -43,7 +43,7 @@ DECLARE @StorageItemsForPost AS ItemCostingTableType
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 DECLARE @intReturnValue AS INT 
-DECLARE @strBatchId NVARCHAR(50)
+DECLARE @strBatchId NVARCHAR(40)
 	,@intLocationId INT
 	,@STARTING_NUMBER_BATCH AS INT = 3  
 --------------------------------------------------------------------------------

@@ -6274,6 +6274,10 @@
     <Build Include="dbo\Views\vyuTFGetLoadReceiptToBlendIngredient.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayStatus.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherHistory.sql" />
+    <Build Include="dbo\Functions\fnCFGetLuhn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

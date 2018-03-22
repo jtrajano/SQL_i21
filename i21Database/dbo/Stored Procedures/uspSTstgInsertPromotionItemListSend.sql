@@ -5,8 +5,45 @@
 	, @EndingItemListId int
 	, @strGenerateXML nvarchar(max) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
+	, @strResult NVARCHAR(1000) OUTPUT
 AS
 BEGIN
+
+	-- =========================================================================================================
+	-- Check if register has intImportFileHeaderId
+	DECLARE @strRegister nvarchar(200)
+	SELECT @strRegister = strRegisterName FROM dbo.tblSTRegister Where intRegisterId = @Register
+	IF EXISTS(SELECT IFH.intImportFileHeaderId 
+					  FROM dbo.tblSMImportFileHeader IFH
+					  JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+					  Where IFH.strLayoutTitle = 'Promotion Item List' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register)
+		BEGIN
+			--SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSTRegisterFileConfiguration 
+			--Where intRegisterId = @Register AND strFilePrefix = 'ITT'
+
+			SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
+			FROM dbo.tblSMImportFileHeader IFH
+			JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+			Where IFH.strLayoutTitle = 'Promotion Item List' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register
+		END
+	ELSE
+		BEGIN
+			SET @intImportFileHeaderId = 0
+		END	
+	-- =========================================================================================================
+
+
+	IF(@intImportFileHeaderId = 0)
+	BEGIN
+		SET @strGenerateXML = ''
+		SET @intImportFileHeaderId = 0
+		SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Item List File'
+
+		RETURN
+	END
+
+
+
 
 	DECLARE @XMLGatewayVersion nvarchar(100)
 	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @Register
@@ -41,14 +78,12 @@ BEGIN
 	WHERE I.ysnFuelItem = 0 AND R.intRegisterId = @Register AND ST.intStoreId = @StoreLocation --AND SaleList.strPromoType = 'M'
 	AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 	
-
-	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
-	Where strLayoutTitle = 'Promotion Item List' AND strFileType = 'XML'
 	
 --Generate XML for the pricebook data availavle in staging table
 	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPromotionItemListSend~intPromotionItemListSend > 0', 0, @strGenerateXML OUTPUT
 
---Once XML is generated delete the data from pricebook  staging table.
+    --Once XML is generated delete the data from pricebook  staging table.
 	DELETE FROM [tblSTstgPromotionItemListSend]	
 	
+	SET @strResult = 'Success'
 END

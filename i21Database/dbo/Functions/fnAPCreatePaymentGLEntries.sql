@@ -303,6 +303,7 @@ BEGIN
 				ON A.intEntityVendorId = B.[intEntityId] AND B.ysnWithholding = 1
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	AND A.dblWithheld > 0
 	UNION ALL
 	--Discount
 	SELECT

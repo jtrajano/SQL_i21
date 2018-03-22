@@ -173,9 +173,9 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN (CASE WHEN vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 THEN vyuTRGetLoadBlendIngredient.dblQuantity ELSE tblTRLoadDistributionDetail.dblUnits END) ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN (CASE WHEN vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 THEN vyuTRGetLoadBlendIngredient.dblQuantity ELSE tblTRLoadDistributionDetail.dblUnits END) ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN (CASE WHEN vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 THEN vyuTRGetLoadBlendIngredient.dblQuantity ELSE tblTRLoadDistributionDetail.dblUnits END) ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
 					--(CASE WHEN tblICInventoryReceiptItem.dblBillQty >= tblTRLoadDistributionDetail.dblUnits THEN tblTRLoadDistributionDetail.dblUnits ELSE 0 END) 
 					--ELSE tblICInventoryReceiptItem.dblBillQty END dblBillQty
@@ -238,7 +238,8 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-					LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
+					LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId 
+					LEFT JOIN vyuTRGetLoadBlendIngredient ON vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId = tblTRLoadDistributionDetail.intLoadDistributionDetailId
 						LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 						LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
@@ -246,6 +247,9 @@ BEGIN TRY
 				CROSS JOIN tblSMCompanySetup
 				WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 					AND tblICInventoryReceipt.ysnPosted = 1
+					AND ((vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId IS NULL AND  tblTRLoadDistributionDetail.strReceiptLink = tblICInventoryReceiptItem.strChargesLink) -- FOR NON BLENDING TRANS
+					OR (vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 AND  vyuTRGetLoadBlendIngredient.strReceiptLink = tblICInventoryReceiptItem.strChargesLink) -- FOR BLENDING TRANS
+					OR (vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId IS NULL AND  tblTRLoadDistributionDetail.intLoadDistributionHeaderId IS NULL ) ) -- FOR DIRECT INV TRANS
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0
@@ -346,9 +350,9 @@ BEGIN TRY
 					--, tblICInventoryReceiptItem.dblGross
 					--, tblICInventoryReceiptItem.dblNet
 					--, tblICInventoryReceiptItem.dblBillQty
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblGross END dblGross
-					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' THEN tblTRLoadDistributionDetail.dblUnits ELSE tblICInventoryReceiptItem.dblNet END dblNet
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN (CASE WHEN vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 THEN vyuTRGetLoadBlendIngredient.dblQuantity ELSE tblTRLoadDistributionDetail.dblUnits END) ELSE tblICInventoryReceiptItem.dblReceived END dblReceived
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN (CASE WHEN vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 THEN vyuTRGetLoadBlendIngredient.dblQuantity ELSE tblTRLoadDistributionDetail.dblUnits END) ELSE tblICInventoryReceiptItem.dblGross END dblGross
+					, CASE WHEN tblTRLoadDistributionHeader.strDestination = 'Location' OR tblTRLoadDistributionHeader.strDestination = 'Customer' THEN (CASE WHEN vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 THEN vyuTRGetLoadBlendIngredient.dblQuantity ELSE tblTRLoadDistributionDetail.dblUnits END) ELSE tblICInventoryReceiptItem.dblNet END dblNet
 					, tblICInventoryReceiptItem.dblBillQty
 					, tblICInventoryReceipt.dtmReceiptDate
 					, tblSMShipVia.strShipVia
@@ -408,7 +412,8 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadHeaderId = tblTRLoadHeader.intLoadHeaderId
-					LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId
+					LEFT JOIN tblTRLoadDistributionDetail ON tblTRLoadDistributionDetail.intLoadDistributionHeaderId = tblTRLoadDistributionHeader.intLoadDistributionHeaderId 
+					LEFT JOIN vyuTRGetLoadBlendIngredient ON vyuTRGetLoadBlendIngredient.intLoadDistributionDetailId = tblTRLoadDistributionDetail.intLoadDistributionDetailId
 						LEFT JOIN tblSMCompanyLocation BulkLocation ON BulkLocation.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 						LEFT JOIN tblEMEntityLocation CustomerLocation ON CustomerLocation.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
@@ -416,6 +421,9 @@ BEGIN TRY
 				CROSS JOIN tblSMCompanySetup
 				WHERE  tblTFReportingComponent.intReportingComponentId = @RCId
 					AND tblICInventoryReceipt.ysnPosted = 1
+					AND ((vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId IS NULL AND  tblTRLoadDistributionDetail.strReceiptLink = tblICInventoryReceiptItem.strChargesLink) -- FOR NON BLENDING TRANS
+					OR (vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId > 0 AND  vyuTRGetLoadBlendIngredient.strReceiptLink = tblICInventoryReceiptItem.strChargesLink) -- FOR BLENDING TRANS
+					OR (vyuTRGetLoadBlendIngredient.intLoadBlendIngredientId IS NULL AND  tblTRLoadDistributionDetail.intLoadDistributionHeaderId IS NULL ) ) -- FOR DIRECT INV TRANS
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblICInventoryReceipt.dtmReceiptDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = @RCId AND strType = 'Include') = 0

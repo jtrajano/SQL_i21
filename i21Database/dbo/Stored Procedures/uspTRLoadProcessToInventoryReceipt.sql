@@ -259,14 +259,16 @@ END
 			,[intCostUOMId]					= @FreightUOMId
 			,[intOtherChargeEntityVendorId]	= CASE	WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
 													WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
-													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId END
+													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId
+													ELSE NULL END
 			,[dblAmount]					= 0
 			,[strAllocateCostBy]			= 'Unit'
 			,[intContractHeaderId]			= RE.intContractHeaderId
 			,[intContractDetailId]			= RE.intContractDetailId
 			,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1
 													WHEN RE.strFreightBilledBy = 'Internal' THEN 0
-													WHEN RE.strFreightBilledBy = 'Other' THEN 1 END
+													WHEN RE.strFreightBilledBy = 'Other' THEN 1
+													ELSE 0 END
 			,strChargesLink					= RE.strChargesLink
     FROM	#tmpReceipts RE 
 	WHERE	RE.dblFreightRate != 0
@@ -290,14 +292,17 @@ END
 			,[intCostUOMId]					= @SurchargeUOMId
 			,[intOtherChargeEntityVendorId]	= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
 													WHEN RE.strFreightBilledBy = 'Internal' THEN NULL
-													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId END
+													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId
+													ELSE NULL END
 			,[dblAmount]					= 0
 			,[strAllocateCostBy]			= 'Unit'
 			,[intContractHeaderId]			= RE.intContractHeaderId
 			,[intContractDetailId]			= RE.intContractDetailId
 			,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1
 													WHEN RE.strFreightBilledBy = 'Internal' THEN 0
-													WHEN RE.strFreightBilledBy = 'Other' THEN 1 END
+													WHEN RE.strFreightBilledBy = 'Other' THEN 1
+													ELSE 0 END
+
 			,strChargesLink					= RE.strChargesLink
     FROM	#tmpReceipts RE 
 	WHERE	RE.dblSurcharge != 0 
