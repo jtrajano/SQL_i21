@@ -229,10 +229,8 @@ BEGIN TRY
 	,strMiscellaneous
 	,strName
 	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
-					 THEN  
-						dbo.fnCFGetLuhn((select top 1 strIso from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) + strCardNumber)
-					 ELSE 
-						strCardNumber
+					 THEN  dbo.fnCFGetLuhn(strCardNumber)
+					 ELSE strCardNumber
 					 END
 	,strCardDescription
 	,strNetwork
