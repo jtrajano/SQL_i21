@@ -329,7 +329,7 @@ WHERE SCTicket.intTicketId = @intTicketId
 												END
 											END
 										END
-	,[intContractHeaderId]				= RE.intContractDetailId
+	,[intContractHeaderId]				= RE.intContractHeaderId
 	,[intContractDetailId]				= RE.intContractDetailId
 	,[ysnAccrue]						= CASE
 											WHEN QM.dblDiscountAmount < 0 THEN 1
