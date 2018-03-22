@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICPostInventoryAdjustmentItemChange  
 	@intTransactionId INT = NULL  
-	,@strBatchId NVARCHAR(50)
+	,@strBatchId NVARCHAR(40)
 	,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY NVARCHAR(50)
 	,@intEntityUserSecurityId INT 
 	,@strAdjustmentDescription AS NVARCHAR(255) 
