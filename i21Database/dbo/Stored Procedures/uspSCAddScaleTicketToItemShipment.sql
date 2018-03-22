@@ -142,15 +142,7 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 1 THEN 2
 									  END
 		,dblQuantity				= LI.dblQty
-		,dblUnitPrice				= CASE
-										WHEN CNT.intPricingTypeId = 2 THEN 
-										(
-											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
-											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId)
-											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
-										)
-										ELSE
-										CASE 
+		,dblUnitPrice				= CASE 
 											WHEN CNT.ysnUseFXPrice = 1 
 												 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 												 AND CNT.dblRate IS NOT NULL 
@@ -164,7 +156,8 @@ BEGIN
 													)
 												) * CNT.dblRate
 
-											ELSE LI.dblCost
+											ELSE
+												LI.dblCost
 										END 
 										* -- AD.dblQtyToPriceUOMConvFactor
 										CASE 
@@ -172,10 +165,10 @@ BEGIN
 												 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 												 AND CNT.dblRate IS NOT NULL 
 												 AND CNT.intFXPriceUOMId IS NOT NULL 
-											THEN dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-											ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1)),1)
+											THEN 
+												dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
+											ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
 										END 
-									END
 		,intWeightUOMId				= SC.intItemUOMIdFrom
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
@@ -228,8 +221,6 @@ BEGIN
 			,CTD.intCurrencyId
 			,CTD.intAdjItemUOMId
 			,CTD.intPricingTypeId
-			,CTD.dtmEndDate
-			,CTD.intBasisUOMId
 			,CU.intCent
 			,CU.ysnSubCurrency
 			FROM tblCTContractDetail CTD 

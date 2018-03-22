@@ -139,7 +139,18 @@ SELECT
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
 		,intGrossNetUOMId			= NULL
-		,intCostUOMId				= LI.intItemUOMId
+		,intCostUOMId				= CASE
+										WHEN ISNULL(CNT.intPriceItemUOMId,0) = 0 THEN LI.intItemUOMId 
+										WHEN ISNULL(CNT.intPriceItemUOMId,0) > 0 THEN 
+										CASE 
+											WHEN CNT.ysnUseFXPrice = 1 
+												AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+												AND CNT.dblRate IS NOT NULL 
+												AND CNT.intFXPriceUOMId IS NOT NULL 
+											THEN dbo.fnGetMatchingItemUOMId(CNT.intItemId, LI.intItemUOMId)
+											ELSE dbo.fnGetMatchingItemUOMId(CNT.intItemId, CNT.intPriceItemUOMId)
+										END
+									END
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
 										WHEN LI.intTransactionDetailId IS NOT NULL THEN CNT.intContractHeaderId
@@ -148,12 +159,7 @@ SELECT
 		,dtmDate					= SC.dtmTicketDateTime
 		,dblQty						= LI.dblQty
 		,dblCost					= CASE
-			                            WHEN CNT.intPricingTypeId = 2 THEN 
-										(
-											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
-											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId)
-											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
-										)
+			                            WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(CNT.intFutureMarketId,CNT.intFutureMonthId,GETDATE()),0) + LI.dblCost
 										ELSE 
 											CASE 
 												WHEN CNT.ysnUseFXPrice = 1 
@@ -169,7 +175,8 @@ SELECT
 														)
 													) * CNT.dblRate
 
-												ELSE LI.dblCost
+												ELSE
+													LI.dblCost
 											END 
 											* -- AD.dblQtyToPriceUOMConvFactor
 											CASE 
@@ -177,8 +184,9 @@ SELECT
 													 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 													 AND CNT.dblRate IS NOT NULL 
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
-												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1)),1)
+												THEN 
+													dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
+												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
@@ -210,8 +218,6 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			,CTD.intCurrencyId
 			,CTD.intAdjItemUOMId
 			,CTD.intPricingTypeId
-			,CTD.dtmEndDate
-			,CTD.intBasisUOMId
 			,CU.intCent
 			,CU.ysnSubCurrency
 			FROM tblCTContractDetail CTD 
