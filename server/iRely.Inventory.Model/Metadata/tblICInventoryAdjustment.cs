@@ -53,6 +53,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmUnpostedDate { get; set; }
         public int? intSourceId { get; set; }
         public int? intSourceTransactionTypeId { get; set; }
+        public int intConcurrencyId { get; set; }
         public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
     }
 
@@ -184,6 +185,7 @@ namespace iRely.Inventory.Model
         public string strNewOwnerName { get; set; }
         public int? intOwnershipType { get; set; }
         public string strOwnershipType { get; set; }
+        public int intConcurrencyId { get; set; }
 
         public tblICInventoryAdjustmentDetail tblICInventoryAdjustmentDetail { get; set; }
     }
