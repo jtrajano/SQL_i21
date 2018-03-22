@@ -6278,6 +6278,7 @@
     <Build Include="dbo\Tables\tblAPVoucherHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherHistory.sql" />
     <Build Include="dbo\Functions\fnCFGetLuhn.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

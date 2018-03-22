@@ -1,5 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCTContractCostView]
-AS 
+﻿CREATE PROCEDURE [dbo].[uspCTLoadContractCost]
+	@intContractDetailId	INT
+AS
 
 	SELECT		CC.intContractCostId, 
 				CC.intContractDetailId, 
@@ -52,17 +53,18 @@ AS
 				END   dblAmount
 
 	FROM		tblCTContractCost	CC
-	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
-	JOIN		tblCTContractHeader CH ON CH.intContractHeaderId	=	CD.intContractHeaderId
-	JOIN		tblICItem			IM ON IM.intItemId				=	CC.intItemId
-	LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
-	LEFT JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId		=	IU.intUnitMeasureId
-	LEFT JOIN	tblSMCurrency		CY ON CY.intCurrencyID			=	CC.intCurrencyId
-	LEFT JOIN	tblSMCurrency		MY ON MY.intCurrencyID			=	CY.intMainCurrencyId
-	LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
-	LEFT JOIN	tblEMEntityType		ET ON ET.intEntityId			=	EY.intEntityId
-									  AND ET.strType = 'Vendor'
-	LEFT JOIN	tblICItemUOM		PU ON PU.intItemUOMId			=	CD.intPriceItemUOMId	
-	LEFT JOIN	tblICItemUOM		QU ON QU.intItemUOMId			=	CD.intItemUOMId	
-	LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	IU.intUnitMeasureId
-									  AND CM.intItemId				=	CD.intItemId		
+	JOIN		tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+										AND CC.intContractDetailId  =	@intContractDetailId	
+	JOIN		tblCTContractHeader CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	JOIN		tblICItem			IM	ON	IM.intItemId			=	CC.intItemId
+	LEFT JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId
+	LEFT JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId
+	LEFT JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
+	LEFT JOIN	tblSMCurrency		MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId
+	LEFT JOIN	tblEMEntity			EY	ON	EY.intEntityId			=	CC.intVendorId
+	LEFT JOIN	tblEMEntityType		ET	ON	ET.intEntityId			=	EY.intEntityId
+										AND ET.strType				=	'Vendor'
+	LEFT JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
+	LEFT JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId	
+	LEFT JOIN	tblICItemUOM		CM	ON	CM.intUnitMeasureId		=	IU.intUnitMeasureId
+										AND CM.intItemId			=	CD.intItemId	
