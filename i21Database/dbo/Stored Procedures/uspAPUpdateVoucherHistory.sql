@@ -29,7 +29,7 @@ USING (
 		[strLocation]			=	loc.strLocationName,
 		[strTicketNumber]		=	ticket.strTicketNumber,
 		[strUnitMeasure]		=	unitMeasure.strUnitMeasure,
-		[strCurrency]			=	currency.strCurrency,
+		[strCurrency]			=	cur.strCurrency,
 		[dtmTransactionDate]	=	A.dtmDate,
 		[dtmTicketDateTime]		=	ticket.dtmTicketDateTime,
 		[dtmDateEntered]		=	A.dtmDateCreated
@@ -42,7 +42,7 @@ USING (
 	LEFT JOIN tblICItem item ON B.intItemId = item.intItemId
 	LEFT JOIN tblSCTicket ticket ON B.intScaleTicketId = ticket.intTicketId
 	LEFT JOIN (tblICItemUOM uom INNER JOIN tblICUnitMeasure unitMeasure ON uom.intUnitMeasureId = unitMeasure.intUnitMeasureId)
-			ON B.intUnitMeasureId = uom.intItemUOMId
+			ON B.intUnitOfMeasureId = uom.intItemUOMId
 ) AS sourceData
 ON (targetTable.intBillId = sourceData.intBillId)
 WHEN NOT MATCHED BY TARGET THEN
