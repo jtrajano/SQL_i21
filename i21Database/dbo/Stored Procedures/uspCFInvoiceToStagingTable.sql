@@ -228,10 +228,7 @@ BEGIN TRY
 	,strTempInvoiceReportNumber
 	,strMiscellaneous
 	,strName
-	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
-					 THEN  dbo.fnCFGetLuhn(strCardNumber)
-					 ELSE strCardNumber
-					 END
+	,strCardNumber
 	,strCardDescription
 	,strNetwork
 	,strInvoiceCycle
