@@ -829,7 +829,7 @@ SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Basis' as strSecondSu
 		dblBalance*dblBasisPrice / sum(isnull(dblBalance,0)) over (partition by @strCommodityCumulative,strContractEndMonth,strSecondSubHeading,strSubHeading) end,
 		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId FROM(
 SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,
-	case when isnull(@ysnCanadianCustomer,0) = 1 then dblBasisPrice end dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from  @FinalList
+	dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from  @FinalList
 WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative and dblBalance<>0 and isnull(dblBasisPrice,0) <> 0)t 
 UNION
 SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Basis' as strSecondSubHeading,'Total',
@@ -839,7 +839,7 @@ SELECT strCommodity,strHeaderValue,strSubHeading, 'Wt./Avg Basis' as strSecondSu
 		dblBalance*dblBasisPrice / sum(isnull(dblBalance,0)) over (partition by @strCommodityCumulative,strSecondSubHeading,strSubHeading) end ,
 		strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId FROM(
 SELECT strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,
-	case when isnull(@ysnCanadianCustomer,0) = 1 then dblBasisPrice end dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from  @FinalList
+	dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from  @FinalList
 WHERE (strSecondSubHeading ='Purchase Quantity' OR  strSecondSubHeading ='Sale Quantity') and strCommodity= @strCommodityCumulative and dblBalance<>0 and isnull(dblBasisPrice,0) <> 0)t 
 UNION
 
@@ -1029,7 +1029,7 @@ SELECT DISTINCT strContractEndMonth FROM @FinalList WHERE strCommodity=@strCommo
  INSERT INTO @FinalList (strCommodity,strHeaderValue,strSubHeading,strSecondSubHeading,strContractEndMonth,strContractBasis ,dblBalance ,  
 				    strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblWtAvgPriced,dblQuantity,strLocationName,strContractNumber,strItemNo,intOrderByOne,
 					intOrderByTwo,intOrderByThree,dblRate,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId) 
- SELECT DISTINCT @strCommodityName,null,@strSubHeading,null,strContractEndMonth,null ,null ,  
+ SELECT DISTINCT @strCommodityName,@strHeaderValue,@strSubHeading,@strSecondSubHeading,strContractEndMonth,null ,null ,  
 				    null,null,null,null,null,null,null,null,null,null,
 					null,null,null,null,null,null,null
 FROM @FinalList  
