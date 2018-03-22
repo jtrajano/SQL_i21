@@ -10,6 +10,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intContractHeaderId		= SODETAIL.intContractHeaderId
 	 , intContractDetailId		= SODETAIL.intContractDetailId
 	 , intRecipeId				= SODETAIL.intRecipeId
+	 , intRecipeItemId			= SODETAIL.intRecipeItemId
 	 , intSubLocationId			= SODETAIL.intSubLocationId
 	 , intCostTypeId			= SODETAIL.intCostTypeId
 	 , intMarginById			= SODETAIL.intMarginById
@@ -50,6 +51,7 @@ INNER JOIN (
 		 , intContractHeaderId
 		 , intContractDetailId
 		 , intRecipeId
+		 , intRecipeItemId
 		 , intSubLocationId
 		 , intCostTypeId
 		 , intMarginById
