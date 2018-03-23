@@ -170,7 +170,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         var vm = me.getViewModel();
         var type = null;
         var template = null;
-        
+
         switch (button.itemId) {
             case "btnImportFuelCategories":
                 type = "FuelCategories";
@@ -287,12 +287,10 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 break;
         }
 
-        /* ORIGIN CONVERSIONS */
-        var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
-        var step = button.itemId.substring("btnOrigin".length, button.itemId.length);
-        var state = me.createImportOriginState(lineOfBusiness, step, 'next');
-        vm.setData({ states: me.getSynchronizedStates(vm.get('states'), state) });
-
+        // DON'T PROCESS ANYTHING IF CLICK EVENT IS NOT COMING FROM btnOrigin and btnImport
+        if(button.itemId.indexOf('btnOrigin') === -1 && button.itemId.indexOf('btnImport') === -1)
+            return;      
+        
         if (type !== null) {
             iRely.Functions.openScreen('Inventory.view.ImportDataFromCsv', {
                 type: type,
@@ -300,9 +298,26 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                 method: "POST",
                 title: button.text
             });
-        }
-        else if(state !== null) {
-            this.importFromOrigins(this.view.viewModel, lineOfBusiness, step, state, win, me);
+        } else {
+            /* ORIGIN CONVERSIONS */
+            var lineOfBusiness = this.view.viewModel.getData().lineOfBusiness;
+            var step = button.itemId.substring("btnOrigin".length, button.itemId.length);
+            
+            var state = me.getOriginState(vm.get('states'), lineOfBusiness);
+            if(me.canAlterState(step)) {
+                var oldState = state;
+                state = me.createImportOriginState(lineOfBusiness, step, 'next');
+                if(oldState && oldState.advanced) {
+                    state.advanced = oldState.advanced;
+                }
+            } else {
+                state.advanced = [{ step: 'Receipts', done: true }];
+            }
+
+            vm.setData({ states: me.getSynchronizedStates(vm.get('states'), state) }); 
+            if(state !== null) {
+                this.importFromOrigins(this.view.viewModel, lineOfBusiness, step, state, win, me);
+            }
         }
     },
 
