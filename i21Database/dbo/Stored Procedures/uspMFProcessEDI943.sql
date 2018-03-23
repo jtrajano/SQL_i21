@@ -146,6 +146,7 @@ BEGIN TRY
 							dblQtyShipped IS NULL
 							OR dblQtyShipped = 0
 							)
+					AND strType <> 'Cancel'
 					)
 			BEGIN
 				SELECT @strItemNo = ''
@@ -919,10 +920,24 @@ BEGIN TRY
 				DELETE IRL
 				FROM dbo.tblICInventoryReceipt IR
 				JOIN dbo.tblICInventoryReceiptItem IRL ON IRL.intInventoryReceiptId = IR.intInventoryReceiptId
+					AND IR.intInventoryReceiptId = @intInventoryReceiptId
 				JOIN tblICItem I ON I.intItemId = IRL.intItemId
 				JOIN tblMFEDI943 EDI ON EDI.strVendorItemNumber = I.strItemNo
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 					AND EDI.strType = 'Cancel'
+
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblICInventoryReceiptItem
+						WHERE intInventoryReceiptId = @intInventoryReceiptId
+						)
+				BEGIN
+					DELETE
+					FROM dbo.tblICInventoryReceipt
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+					SELECT @intInventoryReceiptId = NULL
+				END
 			END
 
 			DECLARE @intMinInvRecItemId INT
