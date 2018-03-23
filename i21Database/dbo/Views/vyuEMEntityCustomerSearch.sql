@@ -57,6 +57,7 @@ SELECT DISTINCT
 	, intShipViaId			= custLocation.intShipViaId
 	, strShipViaName		= shipVia.strShipVia
 	, ysnPORequired			= ISNULL(CUSTOMER.ysnPORequired, CAST(0 AS BIT))
+	, ysnHasPastDueBalances	= CAST(0 AS BIT)
 FROM tblARCustomer CUSTOMER
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityToSalesperson.intEntityId
