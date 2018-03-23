@@ -106,7 +106,7 @@ BEGIN TRY
 				,@intInventoryShipmentId = NULL
 				,@dtmShipmentDate = NULL
 				,@dtmDeliveryRequestedDate = NULL
-				,@strPONumber=NULL
+				,@strPONumber = NULL
 
 			SELECT @strErrorMessage = ''
 
@@ -118,7 +118,7 @@ BEGIN TRY
 				,@strShipToName = strShipToName
 				,@dtmShipmentDate = strShipmentDate
 				,@dtmDeliveryRequestedDate = strDeliveryRequestedDate
-				,@strPONumber=strPONumber
+				,@strPONumber = strPONumber
 			FROM tblMFEDI940 EDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -164,7 +164,9 @@ BEGIN TRY
 							dblQtyOrdered IS NULL
 							OR dblQtyOrdered = 0
 							)
+						AND strPurpose <> 'Cancel'
 					)
+				
 			BEGIN
 				SELECT @strItemNo = ''
 
@@ -711,19 +713,19 @@ BEGIN TRY
 					,intItemId = I.intItemId
 					,intOwnershipType = 1
 					,dblQuantity = (
-					CASE 
-						WHEN I.intWeightUOMId = IU.intUnitMeasureId
-							THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, EDI.dblQtyOrdered)
-						ELSE EDI.dblQtyOrdered
-						END
-					)
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, EDI.dblQtyOrdered)
+							ELSE EDI.dblQtyOrdered
+							END
+						)
 					,intItemUOMId = (
-					CASE 
-						WHEN I.intWeightUOMId = IU.intUnitMeasureId
-							THEN IU2.intItemUOMId
-						ELSE IU.intItemUOMId
-						END
-					)
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN IU2.intItemUOMId
+							ELSE IU.intItemUOMId
+							END
+						)
 					,intOrderId = NULL
 					,intLineNo = EDI.intLineNumber
 					,intWeightUOMId = NULL
@@ -743,7 +745,7 @@ BEGIN TRY
 					AND UM.strUnitMeasure = EDI.strUOM
 				JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
 				JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
-				AND UM2.strUnitType <> 'Weight'
+					AND UM2.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 					AND strPurpose <> 'Cancel'
 
@@ -876,7 +878,8 @@ BEGIN TRY
 					FROM #tmpAddItemShipmentResult
 
 					UPDATE tblICInventoryShipment
-					SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate,strComment=@strPONumber
+					SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
+						,strComment = @strPONumber
 					WHERE intInventoryShipmentId = @intInventoryShipmentId
 
 					DELETE
@@ -948,19 +951,19 @@ BEGIN TRY
 					,intItemId = I.intItemId
 					,intOwnershipType = 1
 					,dblQuantity = (
-					CASE 
-						WHEN I.intWeightUOMId = IU.intUnitMeasureId
-							THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, EDI.dblQtyOrdered)
-						ELSE EDI.dblQtyOrdered
-						END
-					)
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, EDI.dblQtyOrdered)
+							ELSE EDI.dblQtyOrdered
+							END
+						)
 					,intItemUOMId = (
-					CASE 
-						WHEN I.intWeightUOMId = IU.intUnitMeasureId
-							THEN IU2.intItemUOMId
-						ELSE IU.intItemUOMId
-						END
-					)
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN IU2.intItemUOMId
+							ELSE IU.intItemUOMId
+							END
+						)
 					,intOrderId = NULL
 					,intLineNo = EDI.intLineNumber
 					,intWeightUOMId = NULL
@@ -980,7 +983,7 @@ BEGIN TRY
 					AND UM.strUnitMeasure = EDI.strUOM
 				JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
 				JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
-				AND UM2.strUnitType <> 'Weight'
+					AND UM2.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 					AND strPurpose <> 'Cancel'
 
@@ -1136,13 +1139,27 @@ BEGIN TRY
 						AND strPurpose = 'Cancel'
 					)
 			BEGIN
-				DELETE InvS
+				DELETE InvSI
 				FROM dbo.tblICInventoryShipment InvS
 				JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
+					AND InvS.intInventoryShipmentId = @intInventoryShipmentId
 				JOIN tblICItem I ON I.intItemId = InvSI.intItemId
 				JOIN tblMFEDI940 EDI ON EDI.strCustomerItemNumber = I.strItemNo
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 					AND EDI.strPurpose = 'Cancel'
+
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblICInventoryShipmentItem
+						WHERE intInventoryShipmentId = @intInventoryShipmentId
+						)
+				BEGIN
+					DELETE
+					FROM dbo.tblICInventoryShipment
+					WHERE intInventoryShipmentId = @intInventoryShipmentId
+
+					SELECT @intInventoryShipmentId = NULL
+				END
 			END
 
 			IF @intInventoryShipmentId > 0
