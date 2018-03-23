@@ -10,7 +10,7 @@ StartTest (function (t) {
         .displayText('===== 1. Add Indianapolis for Company Location for irelyadmin User =====')
         .clickMenuFolder('System Manager','Folder')
         .clickMenuScreen('Users','Screen')
-        .waitUntilLoaded('')
+        .waitUntilLoaded('')   
         .doubleClickSearchRowValue('irelyadmin', 'strUsername', 1)
         .waitUntilLoaded('')
         .waitUntilLoaded('')
@@ -171,66 +171,50 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         //endregion
 
-        // /*====================================== Add Inventory UOM ======================================*/
-        // //region
-        // .clickMenuScreen('Inventory UOM','Screen')
-        // // .selectSearchRowValue('Smoke','UnitMeasure',1,1)
-        // // .filterGridRecords('Search', 'FilterGrid', 'Smoke')
-        // .enterData('Text Field','FilterGrid','Smoke[RETURN]')
-        // .waitUntilLoaded('')
-        // .continueIf({
-        //     expected: true,
-        //     actual: function (win,next) {
-        //         new iRely.FunctionalTest().start(t, next)
-        //             .displayText('Inventory UOM Location already exists.')
-        //         return win.down('#grdUOM').store.getCount() == 0;
-        //     },
+        /*====================================== Add Inventory UOM ======================================*/
+        //region
+        .clickMenuScreen('Inventory UOM','Screen')
+        // .selectSearchRowValue('Smoke','UnitMeasure',1,1)
+        // .filterGridRecords('Search', 'FilterGrid', 'Smoke')
+        .enterData('Text Field','FilterGrid','Smoke_lb[RETURN]')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Inventory UOM Location already exists.')
+                return win.down('#grdUOM').store.getCount() == 0;
+            },
 
-        //     success: function(next){
-        //         new iRely.FunctionalTest().start(t, next)
-        //             //region Scenario 2. Add Inventory UOM
-        //             .displayText('===== Scenario 2. Add Inventory UOM =====')
-        //             .clearTextFilter('FilterGrid')
-        //             .waitUntilLoaded('')
-        //             .clickButton('InsertUOM')
-        //             .waitUntilLoaded('')
-        //             .enterGridData('UOM', 'Dummy', 'strUnitMeasure', 'Test')
-        //             .enterGridData('UOM', 'Dummy', 'strSymbol', 'Teest2')
-        //             .selectGridComboBoxRowValue('UOM', 'Dummy', 'strUnitType', 'Weight', 'strUnitType')
-        //             .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test'},{column: 'strSymbol',data: 'Test'},{column: 'strUnitType',data: 'Weight'}])
-        //             .enterData('Text Field','UnitMeasure','Smoke_LB')
-        //             .enterData('Text Field','Symbol','Smoke_LB')
-        //             .selectComboBoxRowNumber('UnitType',6,0)
-        //             .verifyStatusMessage('Edited')
-        //             .clickButton('Save')
-        //             .waitUntilLoaded('')
-        //             .verifyStatusMessage('Saved')
-        //             .clickButton('Close')
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //region Scenario 2. Add Inventory UOM
+                    .displayText('===== Scenario 2. Add Inventory UOM =====')
+                    .clearTextFilter('FilterGrid')
+                    .waitUntilLoaded('')
+                    .clickButton('InsertUOM')
+                    .waitUntilLoaded('')
+                    .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Smoke_lb'},{column: 'strSymbol',data: 'Smoke_lb'}])
+                    .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+                    .waitUntilLoaded('')
 
-
-        //             //Add Inventory UOM with Conversion 10 lb bag
-        //             .clickMenuScreen('Inventory UOM','Screen')
-        //             .clickButton('New')
-        //             .waitUntilLoaded('')
-        //             .enterData('Text Field','UnitMeasure','Smoke 10 LB bag')
-        //             .enterData('Text Field','Symbol','Smoke 10 LB bag')
-        //             .selectComboBoxRowNumber('UnitType',7,0)
-        //             .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
-        //             .waitUntilLoaded('')
-        //             // .selectGridComboBoxRowValue('Conversion',1,'strUnitMeasure','Smoke_LB','strUnitMeasure')
-        //             .enterGridData('Conversion', 1, 'dblConversionToStock', '10')
-        //             .verifyStatusMessage('Edited')
-        //             .clickButton('Save')
-        //             .verifyStatusMessage('Saved')
-    
-        //             .displayText('===== Inventory UOM Created =====')
-        //             .done();
-        //     },
-        //     continueOnFail: true
-        // })
-        // .clickButton('Close')
-        // .waitUntilLoaded('')
-        // //endregion
+                    // .selectGridComboBoxRowNumber('Conversion',1,'colConversionTo',11)
+                    .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','KG','strStockUOM',3)
+                    .enterGridData('Conversion', 1, 'dblConversionToStock', '0.453592')
+                    // .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','KG','strStockUOM')
+                    // .selectGridComboBoxBottomRowValue('Conversion','strStockUOM','KG','To UOM',1)
+                    // .enterGridData('Conversion', 2, 'dblConversionToStock', '0.453592')
+                    .waitUntilLoaded('')
+                    .clickButton('Save')
+                    .verifyStatusMessage('Saved')
+                    .displayText('===== Inventory UOM Created =====')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
 
 
@@ -361,38 +345,38 @@ StartTest (function (t) {
         //endregion
 
 
-        // /*====================================== Add Commodity ======================================*/
-        // //region
+        /*====================================== Add Commodity ======================================*/
+        //region
 
-        // .clickMenuScreen('Commodities','Screen')
-        // .selectSearchRowValue('SC - Commodity - 01','CommodityCode',1,1)
-        // // .filterGridRecords('Search', 'FilterGrid', 'SC - Commodity - 01')
-        // .waitUntilLoaded('')
-        // .continueIf({
-        //     expected: true,
-        //     actual: function (win,next) {
-        //         new iRely.FunctionalTest().start(t, next)
-        //             .displayText('Commodity already exists.')
-        //         return win.down('#grdSearch').store.getCount() == 0;
-        //     },
+        .clickMenuScreen('Commodities','Screen')
+        .selectSearchRowValue('SC - Commodity - 01','CommodityCode',1,1)
+        // .filterGridRecords('Search', 'FilterGrid', 'SC - Commodity - 01')
+        .waitUntilLoaded('')
+        .continueIf({
+            expected: true,
+            actual: function (win,next) {
+                new iRely.FunctionalTest().start(t, next)
+                    .displayText('Commodity already exists.')
+                return win.down('#grdSearch').store.getCount() == 0;
+            },
 
-        //     success: function(next){
-        //         new iRely.FunctionalTest().start(t, next)
-        //             //Add Commodity
-        //             .clickButton('Close')
-        //             .waitUntilLoaded('')
-        //             .displayText('===== Scenario 6: Add Commodity =====')
-        //             .addFunction(function(next){
-        //                 commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
-        //             })
-        //             .waitUntilLoaded('')
-        //             .done();
-        //     },
-        //     continueOnFail: true
-        // })
-        // .clickButton('Close')
-        // .waitUntilLoaded('')
-        // //endregion
+            success: function(next){
+                new iRely.FunctionalTest().start(t, next)
+                    //Add Commodity
+                    .clickButton('Close')
+                    .waitUntilLoaded('')
+                    .displayText('===== Scenario 6: Add Commodity =====')
+                    .addFunction(function(next){
+                        commonIC.addCommodity (t,next, 'SC - Commodity - 01', 'Test Smoke Commodity Description')
+                    })
+                    .waitUntilLoaded('')
+                    .done();
+            },
+            continueOnFail: true
+        })
+        .clickButton('Close')
+        .waitUntilLoaded('')
+        //endregion
 
 
         /*====================================== Add Lotted Item ======================================*/
@@ -527,7 +511,7 @@ StartTest (function (t) {
         // //region
         // .displayText('===== Scenario 1: Create CT to IR for  Non Lotted Item Process Button =====')
         // .addFunction(function(next){
-        //     commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking (edited)','SC - Commodity - 01','0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
+        //     commonIC.addCTtoIRProcessButtonNonLotted (t,next, 'ABC Trucking (edited)','SC - Commodity - 01','0001-Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
         // })
         // .waitUntilLoaded('')
         // //endregion
@@ -537,7 +521,7 @@ StartTest (function (t) {
         // //region
         // .displayText('===== Scenario 2:  CT to IR for Non Lotted Item Process Button =====')
         // .addFunction(function(next){
-        //     commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking (edited)', 'SC - Commodity - 01' ,'0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
+        //     commonIC.addCTtoIRProcessButtonLotted (t,next, 'ABC Trucking (edited)', 'SC - Commodity - 01' ,'0001-Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
         // })
         // .waitUntilLoaded('')
         // //endregion
@@ -737,7 +721,7 @@ StartTest (function (t) {
     //    .waitUntilLoaded('')
     //    .displayText('===== Scenario 3: Create PO to IR for Non Lotted Item Add Orders Screen =====')
     //    .addFunction(function(next){
-    //        commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking (edited)', '0001 - Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
+    //        commonIC.addPOtoIRAddOrdersButtonNonLotted (t,next, 'ABC Trucking (edited)', '0001-Fort Wayne', 'Smoke - NLTI - 01','Test_Pounds', 1000, 10)
     //    })
     //    .waitUntilLoaded('')
     //    //endregion
@@ -747,7 +731,7 @@ StartTest (function (t) {
     //    //region
     //    .displayText('===== Scenario 4: Create PO to IR for Lotted Item  Add Orders Screen =====')
     //    .addFunction(function(next){
-    //        commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking (edited)', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
+    //        commonIC.addPOtoIRAddOrdersButtonLotted (t,next, 'ABC Trucking (edited)', '0001-Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 1000, 10, 'Raw Station', 'RM Storage', 'LOT-01', 'Test_Pounds')
     //    })
     //    .waitUntilLoaded('')
     //    //endregion
@@ -1002,7 +986,7 @@ StartTest (function (t) {
 //         //region
 //         .displayText('===== Scenario 8: Create Sales Contract to Inventory Shipment Non Lotted =====')
 //         .addFunction(function(next){
-//             commonIC.addSCtoISAddORdersNonLotted (t,next, 'Adept','Smoke - NLTI - 01','SC - Commodity - 01', 100,'Test_Pounds','0001 - Fort Wayne', 'USD', 14, 'Truck')
+//             commonIC.addSCtoISAddORdersNonLotted (t,next, 'Adept','Smoke - NLTI - 01','SC - Commodity - 01', 100,'Test_Pounds','0001-Fort Wayne', 'USD', 14, 'Truck')
 //         })
 //         .waitUntilLoaded('')
 //         //endregion
@@ -1011,7 +995,7 @@ StartTest (function (t) {
 //         /*====================================== Create SC for Lotted Item ======================================*/
 //         .displayText('===== Scenario 9: Create Sales Contract to Inventory Shipment Lotted=====')
 //         .addFunction(function(next){
-//             commonIC.addSCtoISAddORdersLotted (t,next, 'Adept','Smoke - LTI - 01','SC - Commodity - 01', 100,'Test_Pounds','0001 - Fort Wayne', 'USD', 14,'Truck', 'Raw Station', 'RM Storage','LOT-01')
+//             commonIC.addSCtoISAddORdersLotted (t,next, 'Adept','Smoke - LTI - 01','SC - Commodity - 01', 100,'Test_Pounds','0001-Fort Wayne', 'USD', 14,'Truck', 'Raw Station', 'RM Storage','LOT-01')
 //         })
 //         //endregion
 
@@ -1036,7 +1020,7 @@ StartTest (function (t) {
         /*====================================== Create Direct IS for Lotted Item ======================================*/
         .displayText('===== Scenario 12: Create Direct IS for Lotted Item =====')
         .addFunction(function(next){
-            commonIC.addDirectISLotted (t,next, 'Adept', 'FOB', 'USD', '0001 - Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 100, 'LOT-01')
+            commonIC.addDirectISLotted (t,next, 'Adept', 'FOB', 'USD', '0001-Fort Wayne', 'Smoke - LTI - 01','Test_Pounds', 100, 'LOT-01')
         })
        //endregion
 
@@ -1099,7 +1083,7 @@ StartTest (function (t) {
         .selectGridComboBoxRowValue('InventoryReceipt',1,'strWeightUOM', 'Test_Pounds','strWeightUOM')
         .waitUntilLoaded('')
         .verifyData('Combo Box','ReceiptType','Transfer Order')
-        // .verifyData('Combo Box','Transferor','0001 - Fort Wayne')
+        // .verifyData('Combo Box','Transferor','0001-Fort Wayne')
         .verifyData('Combo Box','Location','0002 - Indianapolis')
         .verifyData('Combo Box','Currency','USD')
         .verifyGridData('InventoryReceipt', 1, 'colItemNo', 'Smoke - LTI - 01')
@@ -1294,7 +1278,7 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('New')
         .waitUntilLoaded('')
-        .verifyData('Combo Box','Location','0001 - Fort Wayne')
+        .verifyData('Combo Box','Location','0001-Fort Wayne')
         .selectComboBoxRowNumber('AdjustmentType',8,0)
         .enterData('Text Field','Description','Test Lot Move')
 

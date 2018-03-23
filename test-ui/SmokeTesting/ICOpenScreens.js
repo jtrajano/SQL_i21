@@ -748,146 +748,146 @@ StartTest (function (t) {
                 'InsertCriteria'
             ], true)
             .clickButton('Close')
-            .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-            .clickMessageBoxButton('no')
+            // .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+            // .clickMessageBoxButton('no')
             .waitUntilLoaded('')
             .displayText('=====  1.4 Open Inventory Adjustments and Check Screen Fields Done ====')
 
 
-            // //Inventory Count Search Screen
-            // .displayText('=====  1.5 Open Inventory Count and Check Screen Fields ====')
-            // .clickMenuScreen('Inventory Count','Screen')
-            // .waitUntilLoaded('')
-            // .verifySearchToolbarButton({openselected: false, openall: false, close: false})
-            // .verifyGridColumnNames('Search', [
-            //     {dataIndex: 'strCountNo', text: 'Count No'},
-            //     {dataIndex: 'strLocationName', text: 'Location'},
-            //     {dataIndex: 'strCategory', text: 'Category'},
-            //     {dataIndex: 'strCommodity', text: 'Commodity'},
-            //     {dataIndex: 'strCountGroup', text: 'Count Group'},
-            //     {dataIndex: 'dtmCountDate', text: 'Count Date'},
-            //     // {dataIndex: 'strSubLocationName', text: 'Sub Location'},
-            //     // {dataIndex: 'strStorageLocationName', text: 'Storage Location'},
-            //     {dataIndex: 'strStatus', text: 'Status'}
+            //Inventory Count Search Screen
+            .displayText('=====  1.5 Open Inventory Count and Check Screen Fields ====')
+            .clickMenuScreen('Inventory Count','Screen')
+            .waitUntilLoaded('')
+            .verifySearchToolbarButton({openselected: false, openall: false, close: false})
+            .verifyGridColumnNames('Search', [
+                {dataIndex: 'strCountNo', text: 'Count No'},
+                {dataIndex: 'strLocationName', text: 'Location'},
+                {dataIndex: 'strCategory', text: 'Category'},
+                {dataIndex: 'strCommodity', text: 'Commodity'},
+                {dataIndex: 'strCountGroup', text: 'Count Group'},
+                {dataIndex: 'dtmCountDate', text: 'Count Date'},
+                // {dataIndex: 'strSubLocationName', text: 'Sub Location'},
+                // {dataIndex: 'strStorageLocationName', text: 'Storage Location'},
+                {dataIndex: 'strStatus', text: 'Status'}
 
-            // ])
-            // .clickButton('New')
-            // .waitUntilLoaded('')
-            // .isControlVisible('tlb',
-            // [
-            //     'New'
-            //     ,'Save'
-            //     ,'Delete'
-            //     ,'Undo'
-            //     ,'PrintCountSheets'
-            //     ,'Close'
-            // ], true)
-            // .isControlVisible('cbo',
-            // [
-            //     'Location'
-            //     ,'Category'
-            //     ,'Commodity'
-            //     ,'CountGroup'
-            //     ,'SubLocation'
-            //     ,'StorageLocation'
-            //     ,'Status'
-            // ], true)
-            // .isControlVisible('chk',
-            // [
-            //     'IncludeZeroOnHand'
-            //     ,'IncludeOnHand'
-            //     ,'ScannedCountEntry'
-            //     ,'CountByLots'
-            //     ,'CountByPallets'
-            //     ,'RecountMismatch'
-            //     ,'External'
-            //     ,'Recount'
-            // ], true)
-            // .isControlVisible('txt',
-            // [
-            //     'CountNumber'
-            //     ,'Description'
-            //     ,'ReferenceCountNo'
-            //     ,'FilterGrid'
-            // ], true)
-            // .isControlVisible('btn',
-            // [
-            //     'Fetch'
-            //     ,'Insert'
-            //     ,'Remove'
-            //     ,'GridLayout'
-            //     ,'InsertCriteria'
-            // ], true)
-            // .isControlVisible('col',
-            // [
-            //     'Item'
-            //     ,'Description'
-            //     ,'Category'
-            //     ,'SubLocation'
-            //     ,'StorageLocation'
-            //     ,'SystemCount'
-            //     ,'LastCost'
-            //     ,'CountLineNo'
-            //     ,'PhysicalCount'
-            //     ,'UOM'
-            //     ,'PhysicalCountStockUnit'
-            //     ,'Variance'
-            //     ,'Recount'
-            //     ,'EnteredBy'
-            // ], true)
+            ])
+            .clickButton('New')
+            .waitUntilLoaded('')
+            .isControlVisible('tlb',
+            [
+                'New'
+                ,'Save'
+                ,'Delete'
+                ,'Undo'
+                ,'PrintCountSheets'
+                ,'Close'
+            ], true)
+            .isControlVisible('cbo',
+            [
+                'Location'
+                ,'Category'
+                ,'Commodity'
+                ,'CountGroup'
+                ,'SubLocation'
+                ,'StorageLocation'
+                ,'Status'
+            ], true)
+            .isControlVisible('chk',
+            [
+                'IncludeZeroOnHand'
+                ,'IncludeOnHand'
+                ,'ScannedCountEntry'
+                ,'CountByLots'
+                ,'CountByPallets'
+                ,'RecountMismatch'
+                ,'External'
+                ,'Recount'
+            ], true)
+            .isControlVisible('txt',
+            [
+                'CountNumber'
+                ,'Description'
+                ,'ReferenceCountNo'
+                ,'FilterGrid'
+            ], true)
+            .isControlVisible('btn',
+            [
+                'Fetch'
+                ,'Insert'
+                ,'Remove'
+                ,'GridLayout'
+                ,'InsertCriteria'
+            ], true)
+            .isControlVisible('col',
+            [
+                'Item'
+                ,'Description'
+                ,'Category'
+                ,'SubLocation'
+                ,'StorageLocation'
+                ,'SystemCount'
+                ,'LastCost'
+                ,'CountLineNo'
+                ,'PhysicalCount'
+                ,'UOM'
+                ,'PhysicalCountStockUnit'
+                ,'Variance'
+                ,'Recount'
+                ,'EnteredBy'
+            ], true)
 
 
-            // //IC Comments Tab
-            // //.clickTab('Comments')
-            // .waitUntilLoaded('')
-            // .isControlVisible('txt',
-            // [
-            //     'FilterGrid'
-            // ], true)
-            // .isControlVisible('col',
-            // [
-            //     ,'Created'
-            //     ,'Start'
-            //     ,'Category'
-            // ], true)
-            // .isControlVisible('btn',
-            // [
-            //     'OpenActivity'
-            //     ,'NewEvent'
-            //     ,'NewTask'
-            //     ,'NewComment'
-            //     ,'LogCall'
-            //     ,'SendEmail'
-            //     ,'GridLayout'
-            //     ,'InsertCriteria'
-            //     ,'MaximizeGrid'
-            //     ,'Help'
-            //     ,'Support'
-            //     ,'FieldName'
-            //     ,'EmailUrl'
-            // ], true)
+            //IC Comments Tab
+            //.clickTab('Comments')
+            .waitUntilLoaded('')
+            .isControlVisible('txt',
+            [
+                'FilterGrid'
+            ], true)
+            .isControlVisible('col',
+            [
+                ,'Created'
+                ,'Start'
+                ,'Category'
+            ], true)
+            .isControlVisible('btn',
+            [
+                'OpenActivity'
+                ,'NewEvent'
+                ,'NewTask'
+                ,'NewComment'
+                ,'LogCall'
+                ,'SendEmail'
+                ,'GridLayout'
+                ,'InsertCriteria'
+                ,'MaximizeGrid'
+                ,'Help'
+                ,'Support'
+                ,'FieldName'
+                ,'EmailUrl'
+            ], true)
 
-            // //IC Attachments Tab
-            // //.clickTab('Attachments')
-            // .waitUntilLoaded('')
-            // .isControlVisible('btn',
-            // [
-            //     'AddAttachment'
-            //     ,'OpenAttachment'
-            //     ,'EditAttachment'
-            //     ,'DownloadAttachment'
-            //     ,'DeleteAttachment'
-            //     ,'Help'
-            //     ,'Support'
-            //     ,'FieldName'
-            //     ,'EmailUrl'
-            // ], true)
-            // .clickButton('Close')
-            // .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-            // .clickMessageBoxButton('yes')
-            // .waitUntilLoaded('')
-            // .waitUntilLoaded('')
-            // .displayText('=====  1.5 Open Inventory Count and Check Screen Fields Done====')
+            //IC Attachments Tab
+            //.clickTab('Attachments')
+            .waitUntilLoaded('')
+            .isControlVisible('btn',
+            [
+                'AddAttachment'
+                ,'OpenAttachment'
+                ,'EditAttachment'
+                ,'DownloadAttachment'
+                ,'DeleteAttachment'
+                ,'Help'
+                ,'Support'
+                ,'FieldName'
+                ,'EmailUrl'
+            ], true)
+            .clickButton('Close')
+            .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+            .clickMessageBoxButton('yes')
+            .waitUntilLoaded('')
+            .waitUntilLoaded('')
+            .displayText('=====  1.5 Open Inventory Count and Check Screen Fields Done====')
 
 
            //Inventory Storage Measurement Reading Screen
