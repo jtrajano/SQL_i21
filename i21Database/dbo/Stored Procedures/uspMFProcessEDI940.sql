@@ -106,6 +106,7 @@ BEGIN TRY
 				,@intInventoryShipmentId = NULL
 				,@dtmShipmentDate = NULL
 				,@dtmDeliveryRequestedDate = NULL
+				,@strPONumber=NULL
 
 			SELECT @strErrorMessage = ''
 
@@ -117,6 +118,7 @@ BEGIN TRY
 				,@strShipToName = strShipToName
 				,@dtmShipmentDate = strShipmentDate
 				,@dtmDeliveryRequestedDate = strDeliveryRequestedDate
+				,@strPONumber=strPONumber
 			FROM tblMFEDI940 EDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -874,7 +876,7 @@ BEGIN TRY
 					FROM #tmpAddItemShipmentResult
 
 					UPDATE tblICInventoryShipment
-					SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
+					SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate,strComment=@strPONumber
 					WHERE intInventoryShipmentId = @intInventoryShipmentId
 
 					DELETE
