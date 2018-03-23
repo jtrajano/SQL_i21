@@ -157,6 +157,7 @@ BEGIN TRY
 						dblQtyShipped IS NULL
 						OR dblQtyShipped = 0
 						)
+					AND strType <> 'Cancel'
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -536,7 +537,7 @@ BEGIN TRY
 					,strShipFromAddress1 + CASE 
 						WHEN IsNULL(strShipFromAddress2, '') <> ''
 							THEN ' ' + strShipFromAddress2
-							Else ''
+						ELSE ''
 						END strAddress
 					,strShipFromCity strCity
 					,'United States' strCountry
@@ -611,7 +612,7 @@ BEGIN TRY
 							AND strAddress = @strShipToAddress1 + CASE 
 								WHEN IsNULL(@strShipToAddress2, '') <> ''
 									THEN ' ' + @strShipToAddress2
-									Else ''
+								ELSE ''
 								END
 							AND strCity = @strShipToCity
 							AND strState = @strShipToState
@@ -620,10 +621,10 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblEMEntityLocation
 					SET strAddress = @strShipToAddress1 + CASE 
-								WHEN IsNULL(@strShipToAddress2, '') <> ''
-									THEN ' ' + @strShipToAddress2
-									Else ''
-								END
+							WHEN IsNULL(@strShipToAddress2, '') <> ''
+								THEN ' ' + @strShipToAddress2
+							ELSE ''
+							END
 						,strCity = @strShipToCity
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip
@@ -713,12 +714,24 @@ BEGIN TRY
 				,strBillOfLadding = NULL
 				,intItemId = I.intItemId
 				,intItemLocationId = IL.intItemLocationId
-				,intItemUOMId = IU.intItemUOMId
+				,intItemUOMId = (
+					CASE 
+						WHEN I.intWeightUOMId = IU.intUnitMeasureId
+							THEN IU2.intItemUOMId
+						ELSE IU.intItemUOMId
+						END
+					)
 				,intContractHeaderId = NULL
 				,intContractDetailId = NULL
 				,dtmDate = GETDATE()
 				,intShipViaId = NULL
-				,dblQty = dblQtyShipped
+				,dblQty = (
+					CASE 
+						WHEN I.intWeightUOMId = IU.intUnitMeasureId
+							THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, dblQtyShipped)
+						ELSE dblQtyShipped
+						END
+					)
 				,intGrossNetUOMId = CASE 
 					WHEN I.ysnLotWeightsRequired = 1
 						THEN I.intWeightUOMId
@@ -764,7 +777,11 @@ BEGIN TRY
 				AND UM.strUnitMeasure = EDI.strUOM
 			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
 				AND IU1.intUnitMeasureId = I.intWeightUOMId
+			JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
+			JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
+				AND UM2.strUnitType <> 'Weight'
 			WHERE EDI.strDepositorOrderNumber = @strOrderNo
+				AND EDI.strType <> 'Cancel'
 			ORDER BY EDI.intLineNumber
 
 			INSERT INTO @ReceiptStagingTable (
@@ -864,6 +881,7 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
 				AND IU1.intUnitMeasureId = I.intWeightUOMId
 			WHERE EDI.strDepositorOrderNumber = @strOrderNo
+				AND EDI.strType <> 'Cancel'
 				AND NOT EXISTS (
 					SELECT *
 					FROM @ReceiptStagingTable RST
@@ -871,19 +889,41 @@ BEGIN TRY
 					)
 			ORDER BY EDI.intLineNumber
 
-			EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
-				,@OtherCharges = @OtherCharges
-				,@intUserId = @intUserId;
+			IF EXISTS (
+					SELECT *
+					FROM @ReceiptStagingTable
+					)
+			BEGIN
+				EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
+					,@OtherCharges = @OtherCharges
+					,@intUserId = @intUserId;
 
-			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
-			FROM #tmpAddItemReceiptResult
+				SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
+				FROM #tmpAddItemReceiptResult
 
-			DELETE
-			FROM #tmpAddItemReceiptResult
+				DELETE
+				FROM #tmpAddItemReceiptResult
 
-			UPDATE tblICInventoryReceipt
-			SET strWarehouseRefNo = @strOrderNo
-			WHERE intInventoryReceiptId = @intInventoryReceiptId
+				UPDATE tblICInventoryReceipt
+				SET strWarehouseRefNo = @strOrderNo
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+			END
+
+			IF EXISTS (
+					SELECT *
+					FROM tblMFEDI943
+					WHERE strDepositorOrderNumber = @strOrderNo
+						AND strType = 'Cancel'
+					)
+			BEGIN
+				DELETE IRL
+				FROM dbo.tblICInventoryReceipt IR
+				JOIN dbo.tblICInventoryReceiptItem IRL ON IRL.intInventoryReceiptId = IR.intInventoryReceiptId
+				JOIN tblICItem I ON I.intItemId = IRL.intItemId
+				JOIN tblMFEDI943 EDI ON EDI.strVendorItemNumber = I.strItemNo
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND EDI.strType = 'Cancel'
+			END
 
 			DECLARE @intMinInvRecItemId INT
 
@@ -1222,8 +1262,9 @@ BEGIN TRY
 				,RI.intInventoryReceiptItemId
 			FROM tblMFEDI943 EDI943
 			JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
-			JOIN tblICInventoryReceiptItem RI ON RI.intItemId = I.intItemId
-				AND RI.intInventoryReceiptId = @intInventoryReceiptId and EDI943.intLineNumber =RI.intSourceId 
+			LEFT JOIN tblICInventoryReceiptItem RI ON RI.intItemId = I.intItemId
+				AND RI.intInventoryReceiptId = @intInventoryReceiptId
+				AND EDI943.intLineNumber = RI.intSourceId
 			WHERE strDepositorOrderNumber = @strOrderNo
 
 			DELETE
