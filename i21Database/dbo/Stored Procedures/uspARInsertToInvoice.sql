@@ -618,6 +618,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
 					,[intSalesOrderId]
+					,[intDocumentMaintenanceId]
 				)
 				SELECT
 					[intEntityCustomerId]
@@ -665,6 +666,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
 					,[intSalesOrderId]
+					,[intDocumentMaintenanceId]
 				FROM tblSOSalesOrder
 				OUTER APPLY (
 					SELECT TOP 1 intPeriodsToAccrue = CASE WHEN strFrequency = 'Monthly' THEN 12
@@ -1238,7 +1240,38 @@ BEGIN
 END
 
 IF ISNULL(@NewInvoiceId, 0) > 0
+BEGIN
 	UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
+
+	DECLARE @DocumentMaintenanceId INT
+	DECLARE @HeaderComment NVARCHAR(MAX)
+	DECLARE @FooterComment NVARCHAR(MAX)
+	SELECT TOP 1 @DocumentMaintenanceId = intDocumentMaintenanceId	
+		FROM tblSOSalesOrder 
+			WHERE intSalesOrderId = @SalesOrderId 
+	IF ISNULL(@DocumentMaintenanceId, 0) <> 0
+	BEGIN
+
+		SELECT TOP 1 
+			@HeaderComment = CAST((CAST(blbMessage AS VARCHAR(MAX))) AS NVARCHAR(MAX))
+		FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Header'
+			AND intDocumentMaintenanceId = @DocumentMaintenanceId
+
+		SELECT TOP 1 
+			@FooterComment = CAST((CAST(blbMessage AS VARCHAR(MAX))) AS NVARCHAR(MAX))
+		FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Footer'
+			AND intDocumentMaintenanceId = @DocumentMaintenanceId
+
+		UPDATE tblARInvoice SET 
+				intDocumentMaintenanceId = @DocumentMaintenanceId,
+				strComments = @HeaderComment,
+				strFooterComments = @FooterComment
+			WHERE intInvoiceId = @NewInvoiceId
+
+	END
+
+	
+END
 
 --COMMIT TRANSACTION
 IF ISNULL(@RaiseError,0) = 0
