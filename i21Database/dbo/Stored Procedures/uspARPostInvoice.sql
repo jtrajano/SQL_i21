@@ -995,7 +995,7 @@ AND
 		AND 
 			ISNULL(ICIS.dblUnitOnHand,0.000000) = @ZeroDecimal
 		AND 
-			ICL.intAllowNegativeInventory = 1
+			ICL.intAllowNegativeInventory = 3
 		)
 	)
 
