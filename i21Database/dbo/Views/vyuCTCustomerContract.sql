@@ -24,11 +24,11 @@ AS
 					, intPricingTypeId					=	PT.intPricingTypeId
 					, strPricingType					=	PT.strPricingType	 
 					, dblCashPrice						=	CASE	WHEN	CD.intPricingTypeId = 2 
-																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE())
+																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
 																	ELSE	AD.dblSeqPrice
 															END
 					, dblUnitPrice						=	CASE	WHEN	CD.intPricingTypeId = 2 
-																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE())
+																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
 																	ELSE	AD.dblSeqPrice
 															END
 					, intCurrencyExchangeRateTypeId		=	CD.intRateTypeId
