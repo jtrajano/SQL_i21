@@ -33,7 +33,17 @@ SELECT
 	,[intLineNo]								=	1
 	,[intInventoryShipmentItemId]				=	ShipmentItem.intInventoryShipmentItemId --add for strSource reference
 	,[intInventoryShipmentChargeId]				=	ShipmentCharge.intInventoryShipmentChargeId
-	,[dblUnitCost]								=	CASE WHEN ShipmentCharge.ysnSubCurrency > 0 THEN (ShipmentCharge.dblAmount * 100) ELSE ShipmentCharge.dblAmount END
+	,[dblUnitCost]								=	--CASE WHEN ShipmentCharge.ysnSubCurrency > 0 THEN (ShipmentCharge.dblAmount * 100) ELSE ShipmentCharge.dblAmount END
+													CASE 
+														WHEN ShipmentCharge.ysnSubCurrency = 1 AND ShipmentCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
+															ABS(ISNULL(ShipmentCharge.dblRate, 0)) * 100
+														WHEN ShipmentCharge.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 
+															ABS(ISNULL(ShipmentCharge.dblRate, 0))
+														WHEN ShipmentCharge.ysnSubCurrency = 1 THEN 
+															ABS(ISNULL(ShipmentCharge.dblAmount, 0)) * 100
+														ELSE 
+															ABS(ISNULL(ShipmentCharge.dblAmount, 0))
+													END
 	,[dblTax]									=	0
 	,[intAccountId]								=	OtherChargeExpense.intAccountId 											 
 	,[strAccountId]								=	OtherChargeExpense.strAccountId
