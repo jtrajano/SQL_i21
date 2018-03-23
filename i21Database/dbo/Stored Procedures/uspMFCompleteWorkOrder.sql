@@ -752,6 +752,7 @@ BEGIN TRY
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
 				,@ysnRecap = @ysnRecap
+				,@dtmDate = @dtmPlannedDate
 		END
 		ELSE
 		BEGIN
@@ -789,6 +790,7 @@ BEGIN TRY
 				,@intBatchId = @intBatchId
 				,@ysnPostConsumption = @ysnPostConsumption
 				,@ysnRecap = @ysnRecap
+				,@dtmDate = @dtmPlannedDate
 		END
 
 		EXEC uspMFConsumeSKU @intWorkOrderId = @intWorkOrderId

@@ -309,12 +309,12 @@ SELECT intItemId					= ICSI.intItemId
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SO.intSalesOrderId
-FROM tblICInventoryShipmentItem ICSI 
-INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
-INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
-INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+FROM tblSOSalesOrder SO 
+INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
+INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId AND ICS.ysnPosted = 1
 LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
-WHERE ICSI.intOrderId = @SalesOrderId
+WHERE SO.intSalesOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
 
 --GET ITEMS FROM Manufacturing - Other Charges
