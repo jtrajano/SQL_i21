@@ -987,10 +987,23 @@ FROM tblARInvoice I
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
 	INNER JOIN tblICItemLocation ICL ON ID.intItemId = ICL.intItemId AND I.intCompanyLocationId = ICL.intLocationId
+	LEFT OUTER JOIN tblICItemStock ICIS ON ICI.intItemId = ICIS.intItemId AND ICL.intItemLocationId = ICIS.intItemLocationId 
 WHERE I.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 AND ID.ysnBlended <> @Post
 AND ICI.ysnAutoBlend = 1
---AND ISNULL(ICI.strType,'') = 'Finished Good' --AR-6677
+AND I.strTransactionType NOT IN ('Credit Memo', 'Customer Prepayment', 'Overpayment')
+AND 
+	(
+	@Post = 0
+	OR
+		(
+			@Post = 1
+		AND 
+			ISNULL(ICIS.dblUnitOnHand,0.000000) = @ZeroDecimal
+		AND 
+			ICL.intAllowNegativeInventory = 1
+		)
+	)
 
 DECLARE @intFGInvoiceId		INT
 DECLARE @strFGInvoiceNumber	NVARCHAR(50)

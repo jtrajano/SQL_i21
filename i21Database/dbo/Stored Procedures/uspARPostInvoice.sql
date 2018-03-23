@@ -990,7 +990,13 @@ AND
 	(
 	@post = 0
 	OR
-	[dbo].[fnICConvertUOMtoStockUnit](ICI.intItemId, ID.intItemUOMId, ID.dblQtyShipped) > ISNULL(ICIS.dblUnitOnHand,0.000000)
+		(
+			@post = 1
+		AND 
+			ISNULL(ICIS.dblUnitOnHand,0.000000) = @ZeroDecimal
+		AND 
+			ICL.intAllowNegativeInventory = 1
+		)
 	)
 
 BEGIN TRY
