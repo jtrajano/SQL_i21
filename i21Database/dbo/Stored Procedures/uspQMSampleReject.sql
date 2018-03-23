@@ -17,6 +17,7 @@ BEGIN TRY
 	DECLARE @intProductTypeId INT
 	DECLARE @intProductValueId INT
 	DECLARE @intLotStatusId INT
+	DECLARE @intOrgLotStatusId INT
 	DECLARE @intLastModifiedUserId INT
 	DECLARE @dtmLastModified DATETIME
 	DECLARE @strLotNumber NVARCHAR(50)
@@ -40,7 +41,7 @@ BEGIN TRY
 	DECLARE @strContainerNumber NVARCHAR(100)
 	DECLARE @strLotAlias NVARCHAR(50)
 		,@strWarehouseRefNo NVARCHAR(50)
-		,@intParentLotId int
+		,@intParentLotId INT
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -56,6 +57,8 @@ BEGIN TRY
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			)
+
+	SELECT @intOrgLotStatusId = @intLotStatusId
 
 	BEGIN TRAN
 
@@ -84,9 +87,10 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
 
-	SELECT @strWarehouseRefNo = LI.strWarehouseRefNo,@intParentLotId=L.intParentLotId 
-	From dbo.tblICLot L 
-	JOIN dbo.tblMFLotInventory LI on LI.intLotId=L.intLotId
+	SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
+		,@intParentLotId = L.intParentLotId
+	FROM dbo.tblICLot L
+	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 	WHERE L.strLotNumber = @strLotNumber
 
 	IF @intProductTypeId = 6
@@ -95,9 +99,9 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblMFLotInventory
 		SET intBondStatusId = @intLotStatusId
-		from tblMFLotInventory LI 
-		JOIN tblICLot L on L.intLotId=LI.intLotId
-		WHERE L.strLotNumber=@strLotNumber
+		FROM tblMFLotInventory LI
+		JOIN tblICLot L ON L.intLotId = LI.intLotId
+		WHERE L.strLotNumber = @strLotNumber
 	END
 	ELSE IF @intProductTypeId = 11
 		AND @intSampleControlPointId = 14
@@ -110,7 +114,7 @@ BEGIN TRY
 			AND PL.intParentLotId = @intProductValueId
 		JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
 	END
-	ELSE IF  @intSampleControlPointId = 14
+	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Container'
 	BEGIN
 		IF @strContainerNumber <> ''
@@ -129,7 +133,7 @@ BEGIN TRY
 			WHERE intLotId = @intProductValueId
 		END
 	END
-	ELSE IF  @intSampleControlPointId = 14
+	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Warehouse Ref No'
 	BEGIN
 		IF @strWarehouseRefNo <> ''
@@ -156,7 +160,8 @@ BEGIN TRY
 			SET intBondStatusId = @intLotStatusId
 			FROM dbo.tblICLot AS L
 			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
-			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo AND L.intParentLotId =@intParentLotId
+			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+				AND L.intParentLotId = @intParentLotId
 		END
 		ELSE
 		BEGIN
@@ -171,8 +176,9 @@ BEGIN TRY
 		UPDATE LI
 		SET intBondStatusId = @intLotStatusId
 		FROM dbo.tblICLot AS L
-		JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
-		WHERE L.intItemId=@intSampleItemId AND L.intParentLotId =@intParentLotId
+		JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+		WHERE L.intItemId = @intSampleItemId
+			AND L.intParentLotId = @intParentLotId
 	END
 
 	SELECT TOP 1 @intUserSampleApproval = ISNULL(intUserSampleApproval, 0)
@@ -302,7 +308,7 @@ BEGIN TRY
 				,intLotStatusId
 			FROM tblICLot
 			WHERE intParentLotId = @intProductValueId
-			AND intItemId=@intSampleItemId
+				AND intItemId = @intSampleItemId
 		END
 		ELSE IF @strApprovalBase = 'Warehouse Ref No'
 		BEGIN
@@ -323,7 +329,7 @@ BEGIN TRY
 				,L.intStorageLocationId
 				,L.intLotStatusId
 			FROM tblICLot L
-			JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
+			JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
 		END
 		ELSE IF @strApprovalBase = 'Warehouse Ref No & Parent Lot'
@@ -345,8 +351,9 @@ BEGIN TRY
 				,L.intStorageLocationId
 				,L.intLotStatusId
 			FROM tblICLot L
-			JOIN tblMFLotInventory LI on LI.intLotId=L.intLotId
-			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo AND L.intParentLotId =@intParentLotId
+			JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+				AND L.intParentLotId = @intParentLotId
 		END
 		ELSE IF @strApprovalBase = 'Container'
 		BEGIN
@@ -415,7 +422,7 @@ BEGIN TRY
 				,intLotStatusId
 			FROM tblICLot
 			WHERE intParentLotId = @intParentLotId
-				AND intItemId=@intSampleItemId
+				AND intItemId = @intSampleItemId
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
@@ -423,6 +430,8 @@ BEGIN TRY
 
 		WHILE (@intSeqNo > 0)
 		BEGIN
+			SELECT @intLotStatusId = @intOrgLotStatusId
+
 			SELECT @intLotId = intLotId
 				,@strLotNumber = strLotNumber
 				,@intItemId = intItemId
