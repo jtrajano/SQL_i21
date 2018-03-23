@@ -10,6 +10,8 @@
 	[dblAmount]				[numeric](18, 6)									NULL,
 	[ysnLocked]				[bit]												NULL,
 	[ysnOnceApproved]		[bit]												NULL,	
+	[intApprovalForId]		[int]												NULL,
+	[strApprovalFor]		[nvarchar](150) COLLATE Latin1_General_CI_AS		NULL,
 	[dtmLockedDate]			DATETIME											NULL,
 	[intLockedBy]			[int]												NULL,
 	[intCurrencyId]			[int]												NULL,
