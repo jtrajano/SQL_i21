@@ -10,7 +10,7 @@ BEGIN
 		intInventoryReceiptId
 		,strOrderNo
 		)
-	SELECT Top 1 IR.intInventoryReceiptId
+	SELECT TOP 1 IR.intInventoryReceiptId
 		,IR.strWarehouseRefNo
 	FROM tblICInventoryReceipt IR
 	WHERE ysnPosted = 1
@@ -84,7 +84,11 @@ BEGIN
 		,EDI.dtmDate AS dtmShippedDate
 		,I.strItemNo
 		,I.strDescription
-		,SUM(IRL.dblQuantity) dblReceived
+		,SUM(CASE 
+				WHEN IsNULL(UM.strUnitType, '') = 'Weight'
+					THEN IsNULL(IRL.dblGrossWeight, 0) - IsNULL(IRL.dblTareWeight, 0)
+				ELSE IRL.dblQuantity
+				END) dblReceived
 		,EDI.strUOM
 		,IRL.strParentLotNumber
 	FROM dbo.tblICInventoryReceipt IR
@@ -98,6 +102,9 @@ BEGIN
 			FROM tblMFEDI943Archive EDI1
 			WHERE EDI1.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 			)
+	LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
+	LEFT JOIN tblICItemUOM IU ON UM.intUnitMeasureId = IU.intUnitMeasureId
+		AND I.intItemId = IU.intItemId
 	WHERE EXISTS (
 			SELECT *
 			FROM @tblMFOrderNo O
