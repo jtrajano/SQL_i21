@@ -6251,6 +6251,7 @@
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricingInsertAuditLog.sql" />
     <Build Include="dbo\Functions\fnICCheckItemUOMIdIsNotUsed.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_UpdateTransactionsApprovalFor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
