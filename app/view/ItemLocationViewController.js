@@ -175,7 +175,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             chkCountbySerialNumber: '{current.ysnCountBySINo}',
             txtSerialNumberBegin: '{current.strSerialNoBegin}',
             txtSerialNumberEnd: '{current.strSerialNoEnd}',
-            chkIdRequiredLiqour: '{current.ysnIdRequiredLiquor}',
+            chkIdRequiredLiquor: '{current.ysnIdRequiredLiquor}',
             chkIdRequiredCigarettes: '{current.ysnIdRequiredCigarette}',
             txtMinimumAge: '{current.intMinimumAge}',
             chkApplyBlueLaw1: '{current.ysnApplyBlueLaw1}',

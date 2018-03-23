@@ -152,7 +152,7 @@ Ext.define('Inventory.search.InventoryReceipt', {
                 { dataIndex: 'strVendorName', text: 'Other Charge Vendor', flex: 1, dataType: 'string' },
                 { dataIndex: 'ysnInventoryCost', text: 'Inventory Cost', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
                 { dataIndex: 'strAllocateCostBy', text: 'Allocate Cost By', flex: 1, dataType: 'string' },
-                { dataIndex: 'ysnPrice', text: 'Price Down', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
+                { dataIndex: 'ysnPrice', text: 'Charge Entity', flex: 1, dataType: 'boolean', xtype: 'checkcolumn' },
                 { dataIndex: 'strTaxGroup', text: 'Tax Group', flex: 1, dataType: 'string' },
                 { xtype: 'numbercolumn', dataIndex: 'dblTax', text: 'Tax', flex: 1, dataType: 'float' }
             ]

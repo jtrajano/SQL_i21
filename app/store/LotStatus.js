@@ -2,7 +2,7 @@
  * Created by LZabala on 10/30/2014.
  */
 Ext.define('Inventory.store.LotStatus', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.iclotstatus',
 
     requires: [

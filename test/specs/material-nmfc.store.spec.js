@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.MaterialNMFC',
     alias: "store.icmaterialnmfc",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.MaterialNMFC"],
     config: {
         "model": "Inventory.model.MaterialNMFC",

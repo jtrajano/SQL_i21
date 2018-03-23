@@ -1612,46 +1612,6 @@ Ext.define('Inventory.view.OriginConversionOption', {
                                         },
                                         {
                                             xtype: 'container',
-                                            itemId: 'cntOriginAdditionalGLAccts',
-                                            margin: '0 0 5 0',
-                                            layout: {
-                                                type: 'hbox',
-                                                align: 'middle',
-                                                padding: ''
-                                            },
-                                            items: [
-                                                {
-                                                    xtype: 'button',
-                                                    bind: {
-                                                        disabled: '{disableAdditionalGLAccts}'
-                                                    },
-                                                    flex: 1,
-                                                    height: 40,
-                                                    itemId: 'btnOriginAdditionalGLAccts',
-                                                    text: 'Add additional GL Accounts'
-                                                },
-                                                {
-                                                    xtype: 'container',
-                                                    flex: 2,
-                                                    height: 78,
-                                                    padding: 2,
-                                                    layout: {
-                                                        type: 'hbox',
-                                                        align: 'stretch'
-                                                    },
-                                                    items: [
-                                                        {
-                                                            xtype: 'label',
-                                                            height: 59,
-                                                            padding: '0 0 0 10',
-                                                            text: '"Additional inventory accounts required by i21 like AP Clearing, Inventory In-transit, Inventory Adjustment and Auto Variance has to be created in Chart of Accounts before doing this step. User should verify the imported gl accounts before proceeding to next step."'
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'container',
                                             itemId: 'cntOriginItems',
                                             margin: '0 0 5 0',
                                             layout: {

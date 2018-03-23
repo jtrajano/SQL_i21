@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.InventoryCountDetail', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icinventorycountdetail',
 
     requires: [

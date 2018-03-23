@@ -2410,8 +2410,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strCurrency', chargeCurrency);
             current.set('dblTax', null);
 
-            current.set('intEntityVendorId', masterRecord.get('intEntityCustomerId'));
-            current.set('strVendorName', masterRecord.get('strCustomerName'));
+            //Do not assign the customer to the other charge vendor. Let the user assign the vendor. 
+            //current.set('intEntityVendorId', masterRecord.get('intEntityCustomerId'));
+            //current.set('strVendorName', masterRecord.get('strCustomerName'));
 
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');

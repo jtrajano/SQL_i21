@@ -12,9 +12,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             bind: {
                 title: 'Inventory Count - {current.strCountNo}'
             },
-            btnEditRow: {
-                hidden: true
-            },
             cboPageSize: {
                 hidden: true,
                 value: '{pageSize}',
@@ -1101,7 +1098,8 @@ Ext.define('Inventory.view.InventoryCountViewController', {
                     intSubLocationId: current.get('intSubLocationId'),
                     intStorageLocationId: current.get('intStorageLocationId'),
                     ysnIncludeZeroOnHand: current.get('ysnIncludeZeroOnHand'),
-                    ysnCountByLots: current.get('ysnCountByLots')
+                    ysnCountByLots: current.get('ysnCountByLots'),
+                    dtmAsOfDate: current.get('dtmCountDate')
                 };
 
                 if(current.get('strCountBy') === 'Pack') {
@@ -2092,9 +2090,6 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             },
             "#btnAttachNewRow": {
                 click: this.onAttachNewRow
-            },
-            "#btnEditRow": {
-                click: this.onOpenRow
             },
             "#cboCountBy": {
                 select: this.onCountBySelect

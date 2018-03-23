@@ -15,11 +15,18 @@ namespace iRely.Inventory.Model
         public int? intItemLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strMonthYear { get; set; }
+        public int? intMonth { get; set; }
+        public int? intYear { get; set; }
         public decimal? dblQuantity { get; set; }
+        public decimal? dblRunningQuantity { get; set; }
         public decimal? dblValue { get; set; }
+        public decimal? dblRunningValue { get; set; }
         public decimal? dblLastCost { get; set; }
+        public decimal? dblRunningLastCost { get; set; }
         public decimal? dblStandardCost { get; set; }
+        public decimal? dblRunningStandardCost { get; set; }
         public decimal? dblAverageCost { get; set; }
+        public decimal? dblRunningAverageCost { get; set; }
         public decimal? dblQuantityInStockUOM { get; set; }
         public string strStockUOM { get; set; }
         public string strCategoryCode { get; set; }
@@ -28,4 +35,5 @@ namespace iRely.Inventory.Model
         public int? intLocationId { get; set; }
         public int? intInTransitLocationId { get; set; }
     }
+ 
 }

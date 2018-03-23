@@ -460,6 +460,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colUnitRetail: {
                     dataIndex: 'dblUnitRetail',
+                    hidden: true,
                     editor: {
                         readOnly: '{disableFieldInReceiptGrid}'
                     }
@@ -477,7 +478,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLineTotal: 'dblLineTotal',
-                colGrossMargin: 'dblGrossMargin',
+                colGrossMargin: {
+                    dataIndex: 'dblGrossMargin',
+                    hidden: true
+                },
                 colItemTaxGroup: {
                     dataIndex: 'strTaxGroup',
                     editor: {
@@ -1618,9 +1622,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-
         if (!current) return; 
 
         if (current) {
@@ -1647,56 +1651,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        var isHidden = true;
-        switch (current.get('strReceiptType')) {
-            case 'Purchase Contract':
-                switch (current.get('intSourceType')) {
-                    case 0:
-                    case 2:
-                        if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
-                            isHidden = true;
-                        }
-                        else {
-                            isHidden = false;
-                        }
-                        break;
-                    default:
-                        isHidden = true;
-                        break;
-                }
-                break;
-            case 'Purchase Order':
-                if (iRely.Functions.isEmpty(current.get('intEntityVendorId'))) {
-                    isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            case 'Transfer Order':
-                if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
-                    isHidden = true;
-                }
-                else {
-                    isHidden = false;
-                }
-                break;
-            default:
-                isHidden = true;
-                break;
-        }
-        if (isHidden === false) {
-            var shipTo = current.get('strLocationName'); 
-            if (shipTo) {
-                this.showAddOrders(win);
-            }            
-        }
+        var shipTo = current.get('strLocationName'); 
+        if (shipTo && me.canAddOrders(current)) {
+            me.showAddOrders(win);
+        }  
     },
 
     onLocationSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
-
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
@@ -1711,36 +1675,54 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        if (grdInventoryReceiptCount == 0){
-            this.showAddOrders(win);
+        if (grdInventoryReceiptCount == 0 && me.canAddOrders(current)){
+            me.showAddOrders(win);
         }
+    },
+
+    canAddOrders: function(current) {
+        var canAddOrders = true;
+        if(!current)
+            return false;
+        if (current.get('ysnPosted')) {
+            canAddOrders = false;
+        } else {
+            switch (current.get('strReceiptType')) {
+                case 'Purchase Contract':
+                    switch (current.get('intSourceType')) {
+                        case 0:
+                        case 2:
+                            canAddOrders = !iRely.Functions.isEmpty(current.get('intEntityVendorId'));
+                            break;
+                        default:
+                            canAddOrders = false;
+                            break;
+                    }
+                    break;
+                case 'Purchase Order':
+                    canAddOrders = !iRely.Functions.isEmpty(current.get('intEntityVendorId'));
+                    break;
+                case 'Transfer Order':
+                    canAddOrders = !iRely.Functions.isEmpty(current.get('intTransferorId'));
+                    break;
+                default :
+                    canAddOrders = false;
+                    break;
+            }
+        }
+
+        return canAddOrders;
     },
 
     onTransferorSelect: function (combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
+        var me = this;
         var win = combo.up('window');
         var current = win.viewModel.data.current;
-        var isHidden = true;
-        if (current) {
-            switch (current.get('strReceiptType')) {
-                case 'Transfer Order':
-                    if (iRely.Functions.isEmpty(current.get('intTransferorId'))) {
-                        isHidden = true;
-                    }
-                    else {
-                        isHidden = false;
-                    }
-                    break;
-                default:
-                    isHidden = true;
-                    break;
-            }
-            if (isHidden === false) {
-                this.showAddOrders(win);
-            }
-        }
+        if(me.canAddOrders(current))
+            me.showAddOrders(win);
     },
 
     onFreightTermSelect: function (combo, records, eOpts) {
@@ -3548,6 +3530,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    // Calculate the Gross Margin. 
+    // Formula is: (Sales Price - Cost) / Sales Price * 100. 
+    // Ex: (100 - 40) / 100 * 100 = 60%
+    calculateGrossMargin: function(salesPrice, cost){
+        salesPrice = Ext.isNumeric(salesPrice) ? salesPrice : 0.00;
+        cost = Ext.isNumeric(cost) ? cost : 0.00;
+
+        return salesPrice != 0.00 ? (salesPrice - cost) / salesPrice * 100 : 0.00; 
+    },
+
     onItemEdit: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
@@ -3561,7 +3553,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (context.field === 'dblUnitCost') {
             if (currentReceiptItem) {
                 currentReceiptItem.set('dblUnitRetail', context.value);
-                currentReceiptItem.set('dblGrossMargin', 0);
+                currentReceiptItem.set(
+                    'dblGrossMargin', 
+                    me.calculateGrossMargin(
+                        context.value, 
+                        context.value
+                    )
+                );
             }
         }
 
@@ -3610,9 +3608,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         // If editing the unit retail, update the gross margin too.
         else if (context.field === 'dblUnitRetail') {
             if (currentReceiptItem) {
-                var salesPrice = context.value;
-                var grossMargin = ((salesPrice - currentReceiptItem.get('dblUnitCost')) / (salesPrice)) * 100;
-                currentReceiptItem.set('dblGrossMargin', grossMargin);
+                currentReceiptItem.set(
+                    'dblGrossMargin', 
+                    me.calculateGrossMargin(
+                        context.value, 
+                        currentReceiptItem.get('dblUnitCost')
+                    )
+                );
             }
         }
 
@@ -6399,23 +6401,30 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                             charge.tblICInventoryReceiptChargeTaxes().removeAll();
                             var unitMeasureId = charge.get('intCostUOMId');
-                            Ext.Array.each(itemTaxes, function (itemDetailTax) {
-                                var taxableAmount = charge.get('dblAmount');
-                                var taxAmount = 0.00;
+
+                            Ext.Array.each(itemTaxes, function (itemDetailTax) {                                
+                                var taxAmount = 0.00,
+                                    taxableAmount = 0.00;
+                                
                                 var chargeQuantity = charge.get('dblQuantity');
                                 chargeQuantity = Ext.isNumeric(chargeQuantity) ? chargeQuantity : 1; 
-                                var cost = taxableAmount / chargeQuantity;
+                                
+                                var chargeAmount = charge.get('dblAmount');
+                                chargeAmount = Ext.isNumeric(chargeAmount) ? chargeAmount : 0; 
+                                var cost = chargeAmount / chargeQuantity;
 
                                 var adjustedTax = itemDetailTax.dblAdjustedTax;
                                 adjustedTax = Ext.isNumeric(adjustedTax) ? adjustedTax : 0;                                
                                 // If a line is using a foreign currency, convert the adjusted tax from functional currency to the charge currency. 
                                 adjustedTax = dblForexRate != 0 ? adjustedTax / dblForexRate : adjustedTax;
 
-                                if (charge.get('ysnPrice')) {
-                                    taxableAmount = -taxableAmount; 
-                                }                                   
+                                // Get the taxable amount. 
+                                taxableAmount = me.getTaxableAmount(chargeQuantity, cost, itemDetailTax, itemTaxes);
+                                
+                                // Check if tax is charged to the receipt vendor. 
+                                taxableAmount = charge.get('ysnPrice') ? -taxableAmount : taxableAmount; 
 
-                                if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                                if (itemDetailTax.strCalculationMethod === 'Percentage') { 
                                     taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
                                 } else {
                                     taxAmount = chargeQuantity * itemDetailTax.dblRate;
@@ -6423,10 +6432,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     // If a line is using a foreign currency, convert the tax from functional currency to the charge currency. 
                                     taxAmount = dblForexRate != 0 ? taxAmount / dblForexRate : taxAmount;
                                 }
-                                if (itemDetailTax.ysnCheckoffTax) {
-                                    taxAmount = -(taxAmount);
-                                }
 
+                                taxAmount = (itemDetailTax.ysnCheckoffTax) ? -taxAmount : taxAmount; 
                                 taxAmount = i21.ModuleMgr.Inventory.roundDecimalValue(taxAmount, 2);
 
                                 // Do not compute tax if it can't be converted to voucher. 

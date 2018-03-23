@@ -59,6 +59,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmUnpostedDate).HasColumnName("dtmUnpostedDate");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.intSourceTransactionTypeId).HasColumnName("intSourceTransactionTypeId");
+            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 
@@ -206,6 +207,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strNewOwnerName).HasColumnName("strNewOwnerName");
             this.Property(t => t.intOwnershipType).HasColumnName("intOwnershipType");
             this.Property(t => t.strOwnershipType).HasColumnName("strOwnershipType");
+            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
         }
     }
 }

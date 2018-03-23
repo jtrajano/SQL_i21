@@ -784,8 +784,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                                                                         },
                                                                                         {
                                                                                             xtype: 'checkboxfield',
-                                                                                            itemId: 'chkIdRequiredLiqour',
-                                                                                            fieldLabel: 'ID Required (liqour)',
+                                                                                            itemId: 'chkIdRequiredLiquor',
+                                                                                            fieldLabel: 'ID Required (liquor)',
                                                                                             labelWidth: 140
                                                                                         },
                                                                                         {

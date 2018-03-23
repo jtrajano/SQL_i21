@@ -2054,6 +2054,8 @@ Ext.define('Inventory.view.BundleViewController', {
         var current = win.getViewModel().data.current;
         var accountCategoryList = win.getViewModel().storeInfo.accountCategoryList;
         me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+        me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
+        me.addAccountCategory(current, 'Other Charge Expense', accountCategoryList);
     },
 
     onEditPricingLevel: function (editor, context, eOpts) {

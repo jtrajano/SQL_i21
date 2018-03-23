@@ -3831,7 +3831,8 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'container',
-                                                                flex: 1,
+                                                                flex: 0,
+                                                                width: 350,
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
