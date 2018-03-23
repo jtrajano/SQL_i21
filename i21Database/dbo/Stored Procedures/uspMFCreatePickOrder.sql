@@ -80,6 +80,7 @@ BEGIN TRY
 		,dblPlannedQty NUMERIC(18, 6)
 		,dtmPlannedDate DATETIME
 		,intPlannedShift INT
+		,intItemUOMId INT
 		)
 
 	INSERT INTO @tblMFWorkOrder (
@@ -88,12 +89,14 @@ BEGIN TRY
 		,dblPlannedQty
 		,dtmPlannedDate
 		,intPlannedShift
+		,intItemUOMId
 		)
 	SELECT x.intWorkOrderId
 		,x.intItemId
 		,x.dblPlannedQty
 		,x.dtmPlannedDate
 		,x.intPlannedShift
+		,W.intItemUOMId
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -101,20 +104,25 @@ BEGIN TRY
 			,dtmPlannedDate DATETIME
 			,intPlannedShift INT
 			) x
+	JOIN tblMFWorkOrder W ON W.intWorkOrderId = x.intWorkOrderId
 
 	DECLARE @tblMFWorkOrderFinal TABLE (
 		intItemId INT
 		,dblPlannedQty NUMERIC(18, 6)
+		,intItemUOMId INT
 		)
 
 	INSERT INTO @tblMFWorkOrderFinal (
 		intItemId
 		,dblPlannedQty
+		,intItemUOMId
 		)
 	SELECT intItemId
 		,SUM(dblPlannedQty)
+		,intItemUOMId
 	FROM @tblMFWorkOrder
 	GROUP BY intItemId
+		,intItemUOMId
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -213,6 +221,26 @@ BEGIN TRY
 	UNION
 	
 	SELECT @intPMStageLocationId
+
+	IF (
+			(
+				@strStageLocationType = 'Production Staging Location'
+				AND @intProductionStageLocationId IS NULL
+				)
+			OR (
+				@strStageLocationType = 'Staging Location'
+				AND @intStageLocationId IS NULL
+				)
+			)
+	BEGIN
+		RAISERROR (
+				'Staging/Production Staging Location is not configured in the manufacturing process attribute.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	BEGIN TRANSACTION
 
@@ -358,7 +386,7 @@ BEGIN TRY
 													THEN ri.dblCalculatedUpperTolerance
 												ELSE ri.dblCalculatedQuantity
 												END
-											) * (W.dblPlannedQty / r.dblQuantity)
+											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
 										)) AS NUMERIC(38, 2))
 					ELSE (
 							(
@@ -367,7 +395,7 @@ BEGIN TRY
 										THEN ri.dblCalculatedUpperTolerance
 									ELSE ri.dblCalculatedQuantity
 									END
-								) * (W.dblPlannedQty / r.dblQuantity)
+								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
 							)
 					END)
 			,ri.intItemUOMId
@@ -380,7 +408,7 @@ BEGIN TRY
 													THEN ri.dblCalculatedUpperTolerance
 												ELSE ri.dblCalculatedQuantity
 												END
-											) * (W.dblPlannedQty / r.dblQuantity)
+											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
 										)) AS NUMERIC(38, 2))
 					ELSE (
 							(
@@ -389,7 +417,7 @@ BEGIN TRY
 										THEN ri.dblCalculatedUpperTolerance
 									ELSE ri.dblCalculatedQuantity
 									END
-								) * (W.dblPlannedQty / r.dblQuantity)
+								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
 							)
 					END)
 			,ri.intItemUOMId
@@ -403,7 +431,7 @@ BEGIN TRY
 													THEN ri.dblCalculatedUpperTolerance
 												ELSE ri.dblCalculatedQuantity
 												END
-											) * (W.dblPlannedQty / r.dblQuantity)
+											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
 										)) AS NUMERIC(38, 2))
 					ELSE (
 							(
@@ -412,7 +440,7 @@ BEGIN TRY
 										THEN ri.dblCalculatedUpperTolerance
 									ELSE ri.dblCalculatedQuantity
 									END
-								) * (W.dblPlannedQty / r.dblQuantity)
+								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
 							)
 					END)
 			,ISNULL(NULL, I.intUnitPerLayer)

@@ -7,15 +7,74 @@
 	, @ExportEntirePricebookFile bit
 	, @strGenerateXML nvarchar(max) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
+	, @strResult NVARCHAR(1000) OUTPUT
 AS
 BEGIN
+
+	-- =========================================================================================================
+	-- Check if register has intImportFileHeaderId
+	DECLARE @strRegister nvarchar(200)
+	SELECT @strRegister = strRegisterName FROM dbo.tblSTRegister Where intRegisterId = @Register
+	IF(UPPER(@strRegister) = UPPER('SAPPHIRE') or UPPER(@strRegister) = UPPER('COMMANDER'))
+		BEGIN
+			IF EXISTS(SELECT IFH.intImportFileHeaderId 
+					  FROM dbo.tblSMImportFileHeader IFH
+					  JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+					  Where IFH.strLayoutTitle = 'Pricebook Send Sapphire' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register)
+			BEGIN
+				SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
+				FROM dbo.tblSMImportFileHeader IFH
+				JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+				Where IFH.strLayoutTitle = 'Pricebook Send Sapphire' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register
+			END
+			ELSE
+			BEGIN
+				SET @intImportFileHeaderId = 0
+			END	
+		
+		END
+	ELSE
+		BEGIN
+			IF EXISTS(SELECT IFH.intImportFileHeaderId 
+					  FROM dbo.tblSMImportFileHeader IFH
+					  JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+					  Where IFH.strLayoutTitle = 'Pricebook File' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register)
+			BEGIN
+				--SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSTRegisterFileConfiguration 
+				--Where intRegisterId = @Register AND strFilePrefix = 'ITT'
+
+				SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
+				FROM dbo.tblSMImportFileHeader IFH
+				JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+				Where IFH.strLayoutTitle = 'Pricebook File' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register
+			END
+			ELSE
+			BEGIN
+				SET @intImportFileHeaderId = 0
+			END	
+		END
+	-- =========================================================================================================
+
+
+
+	IF(@intImportFileHeaderId = 0)
+	BEGIN
+		SET @strGenerateXML = ''
+		SET @intImportFileHeaderId = 0
+		SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Pricebook File'
+
+		RETURN
+	END
+
+
+
     DECLARE @XMLGatewayVersion nvarchar(100)
 	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @Register
 	SET @XMLGatewayVersion = ISNULL(@XMLGatewayVersion, '')
 	
 	-- Use table to get the list of items modified during change date range
 	DECLARE @Tab_UpdatedItems TABLE(intItemId int)
-	
+
 	INSERT INTO @Tab_UpdatedItems
 	Select DISTINCT CAST(strRecordNo as int) [intItemId] From dbo.tblSMAuditLog Where strTransactionType = 'Inventory.view.Item'
 	AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0  
@@ -32,9 +91,14 @@ BEGIN
 		OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0   
 		OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
 		OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
-		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  )
-	AND dtmDate BETWEEN @BeginingChangeDate AND @EndingChangeDate
-	
+		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  
+		
+		OR CHARINDEX('dblStandardCost',strJsonData) > 0
+		OR CHARINDEX('intCategoryId',strJsonData) > 0 )
+
+	AND dtmDate BETWEEN DATEADD(HOUR,-8,(@BeginingChangeDate)) AND DATEADD(HOUR,-8,(@EndingChangeDate)) -- Should adjust to audit log format UTCDATE 8hours late
+
+
     --Insert data into Procebook staging table	
 	IF(@ExportEntirePricebookFile = 1)
 	BEGIN
@@ -262,24 +326,11 @@ BEGIN
 --Select * from tblSTstgPricebookSendFile	
 	
 --Generate XML for the pricebook data availavle in staging table
-      
-	DECLARE @strRegister nvarchar(200)
-	SELECT @strRegister = strRegisterName FROM dbo.tblSTRegister Where intRegisterId = @Register
-	IF(UPPER(@strRegister) = UPPER('SAPPHIRE') or UPPER(@strRegister) = UPPER('COMMANDER'))
-	BEGIN
-		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
-		Where strLayoutTitle = 'Pricebook Send Sapphire' AND strFileType = 'XML'
-	END
-	ELSE
-	BEGIN
-		SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSTRegisterFileConfiguration 
-		Where intRegisterId = @Register AND strFilePrefix = 'ITT'
-		
-	END
-    
+
 	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgPricebookSendFile~intPricebookSendFile > 0', 0, @strGenerateXML OUTPUT
 
---Once XML is generated delete the data from pricebook  staging table.
+	--Once XML is generated delete the data from pricebook  staging table.
 	DELETE FROM dbo.tblSTstgPricebookSendFile	
 	
+	SET @strResult = 'Success'
 END

@@ -16,6 +16,9 @@ IF ISNULL(@InvoiceIds, '') <> ''
 		DECLARE @ServiceChargeToForgive TABLE (intInvoiceId INT, strInvoiceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS, dtmForgiveDate DATETIME NULL)
 		DECLARE @ServiceChargeHasPayments NVARCHAR(MAX)
 
+		DECLARE @strBatchId VARCHAR(16)
+		EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL --get starting number for Batch
+
 		INSERT INTO @ServiceChargeToForgive
 		SELECT SCI.intInvoiceId
 			 , SCI.strInvoiceNumber
@@ -170,7 +173,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			)
 			SELECT intCompanyId					= GL.intCompanyId
 				, dtmDate						= GL.dtmDate
-				, strBatchId					= GL.strBatchId
+				, strBatchId					= @strBatchId
 				, intAccountId					= GL.intAccountId
 				, dblDebit						= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END
 				, dblCredit						= CASE WHEN @ysnForgive = 0 THEN GL.dblCredit ELSE GL.dblDebit END

@@ -42,7 +42,14 @@ AS
 				IM.strCostType,
 				IM.ysnInventoryCost,
 				CH.strContractNumber,
-				MY.strCurrency	AS	strMainCurrency
+				MY.strCurrency	AS	strMainCurrency,
+				CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
+							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
+						WHEN	CC.strCostMethod = 'Amount'		THEN
+							CC.dblRate
+						WHEN	CC.strCostMethod = 'Percentage' THEN 
+							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
+				END   dblAmount
 
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
@@ -55,3 +62,7 @@ AS
 	LEFT JOIN	tblEMEntity			EY ON EY.intEntityId			=	CC.intVendorId
 	LEFT JOIN	tblEMEntityType		ET ON ET.intEntityId			=	EY.intEntityId
 									  AND ET.strType = 'Vendor'
+	LEFT JOIN	tblICItemUOM		PU ON PU.intItemUOMId			=	CD.intPriceItemUOMId	
+	LEFT JOIN	tblICItemUOM		QU ON QU.intItemUOMId			=	CD.intItemUOMId	
+	LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	IU.intUnitMeasureId
+									  AND CM.intItemId				=	CD.intItemId		

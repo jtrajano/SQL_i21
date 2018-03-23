@@ -22,6 +22,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strDateTo					AS NVARCHAR(50)
 		,@strDateFrom				AS NVARCHAR(50)
 		,@xmlDocumentId				AS INT
+		,@intEntityUserId			AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@innerQuery				AS NVARCHAR(MAX) = ''
 		,@joinQuery                 AS NVARCHAR(MAX) = ''
@@ -129,6 +130,10 @@ SELECT @strCustomerIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCustomerIds'
 
+SELECT @intEntityUserId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'intSrCurrentUserId'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
@@ -142,6 +147,7 @@ ELSE
 	
 SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
 SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
+SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
 IF UPPER(@condition) = UPPER('As Of')
 	BEGIN		
@@ -224,12 +230,13 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
-TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName
 	 , strCustomerNumber
 	 , strCustomerInfo
 	 , intEntityCustomerId
+	 , intEntityUserId
 	 , dblCreditLimit
 	 , dblTotalAR
 	 , dblFuture
@@ -249,8 +256,9 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strSourceTransaction
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strAgingType
 )
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName, @intEntityUserId = @intEntityUserId
  
 SET @query = 'SELECT * FROM
 (SELECT I.strInvoiceNumber AS strReferenceNumber
@@ -347,3 +355,5 @@ SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 FROM @temp_statement_table AS STATEMENTREPORT
 INNER JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
+ AND AGINGREPORT.intEntityUserId = @intEntityUserId
+ AND AGINGREPORT.strAgingType = 'Summary'

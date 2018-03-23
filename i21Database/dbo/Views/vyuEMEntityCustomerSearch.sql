@@ -2,7 +2,7 @@
 AS 
 SELECT DISTINCT
 	  intEntityId			= CUSTOMER.intEntityId
-	, strCustomerNumber		= CUSTOMER.strCustomerNumber
+	, strCustomerNumber		= entityToCustomer.strEntityNo --CUSTOMER.strCustomerNumber
 	, strName				= entityToCustomer.strName
 	, strPhone				= entityPhone.strPhone
 	, strSalesPersonName	= entityToSalesperson.strName
@@ -56,6 +56,7 @@ SELECT DISTINCT
 	, strFreightTerm		= fTerms.strFreightTerm
 	, intShipViaId			= custLocation.intShipViaId
 	, strShipViaName		= shipVia.strShipVia
+	, ysnPORequired			= ISNULL(CUSTOMER.ysnPORequired, CAST(0 AS BIT))
 FROM tblARCustomer CUSTOMER
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityToSalesperson.intEntityId
@@ -76,7 +77,7 @@ LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = en
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
 LEFT JOIN tblSMFreightTerms fTerms ON ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId) = fTerms.intFreightTermId
-LEFT JOIN tblSMShipVia shipVia on custLocation.intShipViaId = shipVia.intEntityId
+LEFT JOIN tblSMShipVia shipVia on shipLocation.intShipViaId = shipVia.intEntityId
 OUTER APPLY (
 	SELECT dtmDate = MAX(INV.dtmDate) 
 	FROM dbo.tblARInvoice INV WITH (NOLOCK) 

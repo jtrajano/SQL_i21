@@ -15,7 +15,7 @@
 	,@intTransactionId INT
 	,@intTransactionDetailId INT 
 	,@strTransactionId NVARCHAR(40)
-	,@strBatchId NVARCHAR(20)
+	,@strBatchId NVARCHAR(40)
 	,@intTransactionTypeId INT
 	,@intLotId INT
 	,@intRelatedInventoryTransactionId INT

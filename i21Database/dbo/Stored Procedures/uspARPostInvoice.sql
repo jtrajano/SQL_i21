@@ -82,6 +82,7 @@ DECLARE @UserEntityID				INT
 		,@CurrentTranCount			INT
 		,@Savepoint					NVARCHAR(32)
 		,@CurrentSavepoint			NVARCHAR(32)
+		,@DefaultCurrencyExchangeRateTypeId INT
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -97,6 +98,7 @@ END
 SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM dbo.tblSMUserSecurity WITH (NOLOCK) WHERE [intEntityId] = @userId),@userId)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WITH (NOLOCK) WHERE intEntityUserSecurityId = @UserEntityID)
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
+SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
 
 SELECT TOP 1 @DiscountAccountId = intDiscountAccountId 
 		   , @DeferredRevenueAccountId = intDeferredRevenueAccountId
@@ -3399,16 +3401,31 @@ IF @recap = 1
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
-			,[strRateType]						= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN NULL ELSE A.[strRateType] END
+			,[strRateType]						= RATETYPE.strCurrencyExchangeRateType
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
 		INNER JOIN dbo.tblGLAccountGroup C
-			ON B.intAccountGroupId = C.intAccountGroupId
+			ON B.intAccountGroupId = C.intAccountGroupId			
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Credit
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
+		OUTER APPLY (
+			SELECT SMCERT.strCurrencyExchangeRateType
+			FROM dbo.tblARInvoice I
+			OUTER APPLY (
+				SELECT TOP 1 intCurrencyExchangeRateTypeId
+				FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+			) ID
+			INNER JOIN (
+				SELECT intCurrencyExchangeRateTypeId
+					 , strCurrencyExchangeRateType
+				FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
+			) SMCERT ON SMCERT.intCurrencyExchangeRateTypeId = ISNULL(ID.intCurrencyExchangeRateTypeId, @DefaultCurrencyExchangeRateTypeId)
+			WHERE I.strInvoiceNumber = A.strTransactionId 
+			  AND I.intInvoiceId = A.intTransactionId
+		) RATETYPE
 				
 		--EXEC uspGLPostRecap @GLEntries, @UserEntityID 
 

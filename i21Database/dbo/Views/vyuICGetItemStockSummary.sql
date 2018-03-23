@@ -25,127 +25,145 @@ SELECT
 	, strStorageLocationName = StorageLocation.strName
 	, ItemStock.intItemUOMId
 	, UOM.strUnitMeasure
-	, ItemStock.dblStockIn
-	, ItemStock.dblStockOut
+	, ItemStock.dtmDate
+	--, ItemStock.dblStockIn
+	--, ItemStock.dblStockOut
 	, ItemStock.dblOnHand
 	, dblConversionFactor = ItemUOM.dblUnitQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
 FROM (
-	SELECT intItemId
-			, intItemLocationId
+	SELECT	intItemId
+			,intItemLocationId
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
-			, dblStockIn = SUM(dblStockIn)
-			, dblStockOut = SUM(dblStockOut)
-			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
-	FROM (
-		SELECT f.intItemId
-			, f.intItemLocationId
-			, intSubLocationId = r.intSubLocationId
-			, intStorageLocationId = r.intStorageLocationId
-			, f.intItemUOMId
-			, dblStockIn = SUM(f.dblStockIn)
-			, dblStockOut = SUM(f.dblStockOut)
-			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
-		FROM tblICInventoryFIFO f
-			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
-				AND r.intInventoryReceiptId = f.intTransactionId
-		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+			, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+			, dblOnHand = SUM(dblQty)
+	FROM tblICInventoryTransaction
+	--SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId
+	--		, intStorageLocationId
+	--		, intItemUOMId
+	--		, dtmDate
+	--		, dblStockIn = SUM(dblStockIn)
+	--		, dblStockOut = SUM(dblStockOut)
+	--		, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
+	--FROM (
+	--	SELECT f.intItemId
+	--		, f.intItemLocationId
+	--		, intSubLocationId = r.intSubLocationId
+	--		, intStorageLocationId = r.intStorageLocationId
+	--		, f.intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),f.dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(f.dblStockIn)
+	--		, dblStockOut = SUM(f.dblStockOut)
+	--		, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+	--	FROM tblICInventoryFIFO f
+	--		LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+	--			AND r.intInventoryReceiptId = f.intTransactionId
+	--	GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId, CONVERT(VARCHAR(10),f.dtmDate,112)
 
-		UNION ALL
+	--	UNION ALL
 
-		SELECT f.intItemId
-			, f.intItemLocationId
-			, intSubLocationId = r.intSubLocationId
-			, intStorageLocationId = r.intStorageLocationId
-			, f.intItemUOMId
-			, dblStockIn = SUM(f.dblStockIn)
-			, dblStockOut = SUM(f.dblStockOut)
-			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
-		FROM tblICInventoryLIFO f
-			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
-				AND r.intInventoryReceiptId = f.intTransactionId
-		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+	--	SELECT f.intItemId
+	--		, f.intItemLocationId
+	--		, intSubLocationId = r.intSubLocationId
+	--		, intStorageLocationId = r.intStorageLocationId
+	--		, f.intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),f.dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(f.dblStockIn)
+	--		, dblStockOut = SUM(f.dblStockOut)
+	--		, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+	--	FROM tblICInventoryLIFO f
+	--		LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+	--			AND r.intInventoryReceiptId = f.intTransactionId
+	--	GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId, CONVERT(VARCHAR(10),f.dtmDate,112)
 
-		UNION ALL
+	--	UNION ALL
 
-		SELECT f.intItemId
-			, f.intItemLocationId
-			, intSubLocationId = r.intSubLocationId
-			, intStorageLocationId = r.intStorageLocationId
-			, f.intItemUOMId
-			, dblStockIn = SUM(f.dblStockIn)
-			, dblStockOut = SUM(f.dblStockOut)
-			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
-		FROM tblICInventoryLot f
-			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
-				AND r.intInventoryReceiptId = f.intTransactionId
-		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+	--	SELECT f.intItemId
+	--		, f.intItemLocationId
+	--		, intSubLocationId = r.intSubLocationId
+	--		, intStorageLocationId = r.intStorageLocationId
+	--		, f.intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),f.dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(f.dblStockIn)
+	--		, dblStockOut = SUM(f.dblStockOut)
+	--		, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+	--	FROM tblICInventoryLot f
+	--		LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+	--			AND r.intInventoryReceiptId = f.intTransactionId
+	--	GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId, CONVERT(VARCHAR(10),f.dtmDate,112)
 
-		UNION ALL
+	--	UNION ALL
 
-		SELECT f.intItemId
-			, f.intItemLocationId
-			, intSubLocationId = r.intSubLocationId
-			, intStorageLocationId = r.intStorageLocationId
-			, f.intItemUOMId
-			, dblStockIn = SUM(f.dblStockIn)
-			, dblStockOut = SUM(f.dblStockOut)
-			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
-		FROM tblICInventoryActualCost f
-			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
-				AND r.intInventoryReceiptId = f.intTransactionId
-		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+	--	SELECT f.intItemId
+	--		, f.intItemLocationId
+	--		, intSubLocationId = r.intSubLocationId
+	--		, intStorageLocationId = r.intStorageLocationId
+	--		, f.intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),f.dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(f.dblStockIn)
+	--		, dblStockOut = SUM(f.dblStockOut)
+	--		, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+	--	FROM tblICInventoryActualCost f
+	--		LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+	--			AND r.intInventoryReceiptId = f.intTransactionId
+	--	GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId, CONVERT(VARCHAR(10),f.dtmDate,112)
 
-		UNION ALL
+	--	UNION ALL
 
-		SELECT f.intItemId
-			, f.intItemLocationId
-			, intSubLocationId = r.intSubLocationId
-			, intStorageLocationId = r.intStorageLocationId
-			, f.intItemUOMId
-			, dblStockIn = SUM(f.dblStockIn)
-			, dblStockOut = SUM(f.dblStockOut)
-			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
-		FROM tblICInventoryFIFOStorage f
-			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
-				AND r.intInventoryReceiptId = f.intTransactionId
-		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+	--	SELECT f.intItemId
+	--		, f.intItemLocationId
+	--		, intSubLocationId = r.intSubLocationId
+	--		, intStorageLocationId = r.intStorageLocationId
+	--		, f.intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),f.dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(f.dblStockIn)
+	--		, dblStockOut = SUM(f.dblStockOut)
+	--		, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+	--	FROM tblICInventoryFIFOStorage f
+	--		LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+	--			AND r.intInventoryReceiptId = f.intTransactionId
+	--	GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId, CONVERT(VARCHAR(10),f.dtmDate,112)
 
-		UNION ALL
+	--	UNION ALL
 
-		SELECT f.intItemId
-			, f.intItemLocationId
-			, intSubLocationId = r.intSubLocationId
-			, intStorageLocationId = r.intStorageLocationId
-			, f.intItemUOMId
-			, dblStockIn = SUM(f.dblStockIn)
-			, dblStockOut = SUM(f.dblStockOut)
-			, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
-		FROM tblICInventoryLIFOStorage f
-			LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
-				AND r.intInventoryReceiptId = f.intTransactionId
-		GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId
+	--	SELECT f.intItemId
+	--		, f.intItemLocationId
+	--		, intSubLocationId = r.intSubLocationId
+	--		, intStorageLocationId = r.intStorageLocationId
+	--		, f.intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),f.dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(f.dblStockIn)
+	--		, dblStockOut = SUM(f.dblStockOut)
+	--		, dblOnHand = SUM(f.dblStockIn) - SUM(f.dblStockOut)
+	--	FROM tblICInventoryLIFOStorage f
+	--		LEFT JOIN tblICInventoryReceiptItem r ON r.intInventoryReceiptItemId = f.intTransactionDetailId
+	--			AND r.intInventoryReceiptId = f.intTransactionId
+	--	GROUP BY f.intItemId, f.intItemLocationId, f.intItemUOMId, r.intSubLocationId, r.intStorageLocationId, CONVERT(VARCHAR(10),f.dtmDate,112)
 
-		UNION ALL
-		SELECT intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, dblStockIn = SUM(dblStockIn)
-			, dblStockOut = SUM(dblStockOut)
-			, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
-		FROM tblICInventoryLotStorage
-		GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId
-		) tblCostingBuckets
+	--	UNION ALL
+	--	SELECT intItemId
+	--		, intItemLocationId
+	--		, intSubLocationId
+	--		, intStorageLocationId
+	--		, intItemUOMId
+	--		, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
+	--		, dblStockIn = SUM(dblStockIn)
+	--		, dblStockOut = SUM(dblStockOut)
+	--		, dblOnHand = SUM(dblStockIn) - SUM(dblStockOut)
+	--	FROM tblICInventoryLotStorage
+	--	GROUP BY intItemId, intItemLocationId, intSubLocationId, intStorageLocationId, intItemUOMId, CONVERT(VARCHAR(10), dtmDate,112)
+		--) tblCostingBuckets
 	GROUP BY intItemId
 			, intItemLocationId
 			, intSubLocationId
 			, intStorageLocationId
 			, intItemUOMId
+			, CONVERT(VARCHAR(10),dtmDate,112)
 	) ItemStock
 	LEFT JOIN tblICItem Item 
 		ON Item.intItemId = ItemStock.intItemId

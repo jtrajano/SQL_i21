@@ -10,7 +10,7 @@ SELECT fm.intFutureMarketId
 	,fm.intForecastWeeklyConsumption
 	,um.strUnitMeasure strForecastUnitMeasure
 	,um.intUnitMeasureId intForecastWeeklyConsumptionUOMId
-	,intCommodityMarketId = (SELECT TOP 1  intCommodityId FROM tblRKCommodityMarketMapping WHERE intFutureMarketId = fm.intFutureMarketId ORDER BY intCommodityMarketId ASC)
+	,intCommodityMarketId = (SELECT TOP 1  intCommodityMarketId FROM tblRKCommodityMarketMapping WHERE intFutureMarketId = fm.intFutureMarketId ORDER BY intCommodityMarketId ASC)
 	,strCommodityCode = (SELECT TOP 1  strCommodityCode FROM tblRKCommodityMarketMapping mm INNER JOIN tblICCommodity co ON mm.intCommodityId = co.intCommodityId WHERE mm.intFutureMarketId = fm.intFutureMarketId ORDER BY intCommodityMarketId ASC)
 	,fm.dblContractSize
 	,fm.strOptMarketName

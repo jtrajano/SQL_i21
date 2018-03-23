@@ -200,6 +200,12 @@ BEGIN TRY
 		tblARInvoice ARI
 	WHERE 
 		ARI.[intInvoiceId] = @InvoiceId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblARCustomerBudget WHERE intEntityCustomerId = @EntityCustomerId)
+	BEGIN
+		SET @ApplytoBudget = 1
+	END
+
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

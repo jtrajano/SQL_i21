@@ -82,117 +82,71 @@ ELSE
 		WHERE
 			[intEntityId] IN (SELECT intID FROM [dbo].[fnGetRowsFromDelimitedValues](@CustomerIds))
 	END
-
-
-DECLARE @ARCustomerAgingStagingTable AS TABLE
-(
-	[intInvoiceId]				INT NULL, 
-    [intEntityCustomerId]		INT NULL, 
-    [intCompanyLocationId]		INT NULL, 
-    [dtmDate]					DATETIME NULL, 
-    [dtmDueDate]				DATETIME NULL, 
-    [dtmAsOfDate]				DATETIME NULL, 
-    [strCustomerName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strCustomerNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-	[strCustomerInfo]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strRecordNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strBOLNumber]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strSalespersonName]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-    [strSourceTransaction]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strType]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strCompanyName]            NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [strCompanyAddress]         NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    [dblCreditLimit]			NUMERIC(18, 6) NULL, 
-    [dblTotalAR]				NUMERIC(18, 6) NULL, 
-    [dblFuture]					NUMERIC(18, 6) NULL, 
-    [dbl0Days]					NUMERIC(18, 6) NULL, 
-    [dbl10Days]					NUMERIC(18, 6) NULL, 
-    [dbl30Days]					NUMERIC(18, 6) NULL, 
-    [dbl60Days]					NUMERIC(18, 6) NULL, 
-    [dbl90Days]					NUMERIC(18, 6) NULL,
-	[dbl91Days]					NUMERIC(18, 6) NULL,
-	[dbl120Days]				NUMERIC(18, 6) NULL,
-	[dbl121Days]				NUMERIC(18, 6) NULL,
-    [dblTotalDue]				NUMERIC(18, 6) NULL, 
-    [dblAmountPaid]				NUMERIC(18, 6) NULL, 
-    [dblInvoiceTotal]			NUMERIC(18, 6) NULL, 
-    [dblCredits]				NUMERIC(18, 6) NULL, 
-    [dblPrepayments]			NUMERIC(18, 6) NULL, 
-    [dblPrepaids]				NUMERIC(18, 6) NULL
+	
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @UserId AND strAgingType = 'Detail'
+INSERT INTO tblARCustomerAgingStagingTable (
+		strCustomerName
+	, strCustomerNumber
+	, strCustomerInfo
+	, strInvoiceNumber
+	, strRecordNumber
+	, intInvoiceId
+	, strBOLNumber
+	, intEntityCustomerId
+	, intEntityUserId
+	, dblCreditLimit
+	, dblTotalAR
+	, dblFuture
+	, dbl0Days
+	, dbl10Days
+	, dbl30Days
+	, dbl60Days
+	, dbl90Days
+	, dbl120Days
+	, dbl121Days
+	, dblTotalDue
+	, dblAmountPaid
+	, dblInvoiceTotal
+	, dblCredits
+	, dblPrepayments
+	, dblPrepaids
+	, dtmDate
+	, dtmDueDate
+	, dtmAsOfDate
+	, strSalespersonName
+	, intCompanyLocationId
+	, strSourceTransaction
+	, strType
+	, strCompanyName
+	, strCompanyAddress
+	, strAgingType
 )
-
-DELETE FROM @ARCustomerAgingStagingTable
-
-INSERT INTO @ARCustomerAgingStagingTable
-	(
-	 [strCustomerName]
-	,[strCustomerNumber]
-	,[strCustomerInfo]
-	,[strInvoiceNumber]
-	,[strRecordNumber]
-	,[intInvoiceId]
-	,[strBOLNumber]
-	,[intEntityCustomerId]
-	,[dblCreditLimit]
-	,[dblTotalAR]
-	,[dblFuture]
-	,[dbl0Days]
-	,[dbl10Days]
-	,[dbl30Days]
-	,[dbl60Days]
-	,[dbl90Days]
-	,[dbl120Days]
-	,[dbl121Days]
-	,[dblTotalDue]
-	,[dblAmountPaid]
-	,[dblInvoiceTotal]
-	,[dblCredits]
-	,[dblPrepayments]
-	,[dblPrepaids]
-	,[dtmDate]
-	,[dtmDueDate]
-	,[dtmAsOfDate]
-	,[strSalespersonName]
-	,[intCompanyLocationId]
-	,[strSourceTransaction]
-	,[strType]
-	,[strCompanyName]
-	,[strCompanyAddress]
-)
-EXEC [dbo].[uspARCustomerAgingDetailAsOfDateReport] @dtmDateTo = @AsOfDate, @ysnInclude120Days = 0
+EXEC [dbo].[uspARCustomerAgingDetailAsOfDateReport] @dtmDateTo = @AsOfDate
+												  , @ysnInclude120Days = 0
+												  , @intEntityUserId = @UserId
 
 
 IF (DATEPART(dd, @AsOfDate) = 31)
-	DELETE FROM @ARCustomerAgingStagingTable WHERE dtmDueDate = @AsOfDate
+	DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @AsOfDate AND intEntityUserId = @UserId AND strAgingType = 'Detail'
 
-DELETE FROM @ARCustomerAgingStagingTable
-WHERE
-	[strInvoiceNumber] IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strTransactionType NOT IN ('Invoice', 'Cash'))
+DELETE FROM tblARCustomerAgingStagingTable
+WHERE intEntityUserId = @UserId AND strAgingType = 'Detail'
+  AND strInvoiceNumber IN (SELECT strInvoiceNumber FROM tblARInvoice WHERE strTransactionType NOT IN ('Invoice', 'Cash'))
 
-DELETE FROM @ARCustomerAgingStagingTable
-WHERE
-	[intEntityCustomerId] NOT IN (SELECT [intEntityId] FROM @Customers)
+DELETE FROM tblARCustomerAgingStagingTable
+WHERE intEntityUserId = @UserId AND strAgingType = 'Detail'
+  AND intEntityCustomerId NOT IN (SELECT [intEntityId] FROM @Customers)
 
-
-
-
-
-DELETE FROM @ARCustomerAgingStagingTable
-WHERE
-	[intEntityCustomerId] IN (SELECT [intEntityCustomerId] 
-								FROM  @ARCustomerAgingStagingTable  
-									GROUP BY [intEntityCustomerId] HAVING SUM(
-														[dbl0Days] + 
-														[dbl10Days] + 
-														[dbl30Days] + 
-														[dbl60Days] + 
-														[dbl90Days] + 
-														[dbl120Days] + 
-														[dbl121Days]
-										) >= @OpenARBalance)
-
-
+DELETE STAGING
+FROM tblARCustomerAgingStagingTable STAGING
+INNER JOIN (
+	SELECT [intEntityCustomerId] 
+	FROM  tblARCustomerAgingStagingTable 
+	WHERE intEntityUserId = @UserId AND strAgingType = 'Detail'
+	GROUP BY [intEntityCustomerId] 
+	HAVING SUM([dbl0Days] + [dbl10Days] + [dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days]) >= @OpenARBalance
+) ENTITY ON STAGING.intEntityCustomerId = ENTITY.intEntityCustomerId
+WHERE STAGING.intEntityUserId = @UserId AND STAGING.strAgingType = 'Detail'
 					
 DECLARE @CustomerBalances AS TABLE
 (
@@ -222,25 +176,20 @@ SELECT
     ,[intCurrencyId]        = ARI.[intCurrencyId]
     ,[intEntityCustomerId]  = A.[intEntityCustomerId]
     ,[intCompanyLocationId] = A.[intCompanyLocationId]
-    ,[dblTotalAR]           = SUM(
-									[dbl0Days] + 
-									[dbl10Days] + 
-									[dbl30Days] + 
-									[dbl60Days] + 
-									[dbl90Days] + 
-									[dbl120Days] + 
-									[dbl121Days])
+    ,[dblTotalAR]           = SUM([dbl0Days] + [dbl10Days] + [dbl30Days] + [dbl60Days] + [dbl90Days] + [dbl120Days] + [dbl121Days])
 	,[ysnProcessed]         = 0
-FROM
-	@ARCustomerAgingStagingTable A
-INNER JOIN
-	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice WHERE ysnPosted = 1) ARI
-		ON A.[intInvoiceId] = ARI.[intInvoiceId]
-GROUP BY
-     A.[intEntityCustomerId]
-    ,A.[intInvoiceId]
-    ,ARI.[intCurrencyId]
-    ,A.[intCompanyLocationId]
+FROM tblARCustomerAgingStagingTable A
+INNER JOIN (
+	SELECT intInvoiceId
+		 , intCurrencyId 
+	FROM tblARInvoice 
+	WHERE ysnPosted = 1
+) ARI ON A.intInvoiceId = ARI.intInvoiceId
+WHERE A.intEntityUserId = @UserId AND A.strAgingType = 'Detail'
+GROUP BY A.intEntityCustomerId
+       , A.intInvoiceId
+       , ARI.intCurrencyId
+       , A.intCompanyLocationId
 
 DECLARE @VendorId AS INT
         ,@InvoiceId AS INT

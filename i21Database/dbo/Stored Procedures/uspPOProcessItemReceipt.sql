@@ -237,7 +237,7 @@ BEGIN
 	SET		pod.dblQtyReceived = pod.dblQtyOrdered
 	FROM	tblPOPurchase po INNER JOIN tblPOPurchaseDetail pod
 				ON po.intPurchaseId = pod.intPurchaseId
-	WHERE	po.intPurchaseId = @poId
+	WHERE	po.intPurchaseId = @poId AND pod.intItemId IS NOT NULL --DO NOT UPDATE MISC ENTRY
 
 	-- Update the On-Order Qty
 	BEGIN 

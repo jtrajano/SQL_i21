@@ -5,8 +5,45 @@
 	, @EndingComboId int
 	, @strGenerateXML nvarchar(max) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
+	, @strResult NVARCHAR(1000) OUTPUT
 AS
 BEGIN
+	
+	-- =========================================================================================================
+	-- Check if register has intImportFileHeaderId
+	DECLARE @strRegister nvarchar(200)
+	SELECT @strRegister = strRegisterName FROM dbo.tblSTRegister Where intRegisterId = @Register
+	IF EXISTS(SELECT IFH.intImportFileHeaderId 
+					  FROM dbo.tblSMImportFileHeader IFH
+					  JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+					  Where IFH.strLayoutTitle = 'Pricebook Combo' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register)
+		BEGIN
+			--SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
+			--Where strLayoutTitle = 'Pricebook Combo' AND strFileType = 'XML'
+
+			SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
+			FROM dbo.tblSMImportFileHeader IFH
+			JOIN dbo.tblSTRegisterFileConfiguration FC ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+			Where IFH.strLayoutTitle = 'Pricebook Combo' AND IFH.strFileType = 'XML' AND FC.intRegisterId = @Register
+		END
+	ELSE
+		BEGIN
+			SET @intImportFileHeaderId = 0
+		END	
+	-- =========================================================================================================
+
+
+
+	IF(@intImportFileHeaderId = 0)
+	BEGIN
+		SET @strGenerateXML = ''
+		SET @intImportFileHeaderId = 0
+		SET @strResult = 'Register ' + @strRegister + ' has no Outbound setup for Send Promotion Sales List File'
+
+		RETURN
+	END
+
+
 
 	Insert Into tblSTstgComboSalesFile
 	SELECT DISTINCT
@@ -72,14 +109,12 @@ BEGIN
 	WHERE R.intRegisterId = @Register  AND ST.intStoreId = @StoreLocation AND PSL.strPromoType = 'C'
 	AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
 	
-
-	SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHeader 
-	Where strLayoutTitle = 'Pricebook Combo' AND strFileType = 'XML'
 	
 --Generate XML for the pricebook data availavle in staging table
 	Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, 'tblSTstgComboSalesFile~intComboSalesFile > 0', 0, @strGenerateXML OUTPUT
 
---Once XML is generated delete the data from pricebook  staging table.
+    --Once XML is generated delete the data from pricebook  staging table.
 	DELETE FROM tblSTstgComboSalesFile	
 
+	SET @strResult = 'Success'
 END

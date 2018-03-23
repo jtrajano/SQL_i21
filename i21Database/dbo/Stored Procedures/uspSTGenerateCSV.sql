@@ -244,17 +244,15 @@ BEGIN
 
 								, ST.intStoreNo as strStoreNumber
 								, ST.strDescription as strStoreName
-								--, REPLACE(REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
-								--, ST.strCity as strStoreCity
-								--, UPPER(LEFT(ST.strState, 2)) as strStoreState
-								--, ST.strZipCode as intStoreZipCode
+								, REPLACE(REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
+								, ST.strCity as strStoreCity
+								, UPPER(LEFT(ST.strState, 2)) as strStoreState
+								, ST.strZipCode as intStoreZipCode
 
-								--, STMAP.intStoreNo as strStoreNumber
-								--, STMAP.strDescription as strStoreName
-								, REPLACE(REPLACE(REPLACE(REPLACE(STMAP.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
-								, STMAP.strCity as strStoreCity
-								, UPPER(LEFT(STMAP.strState, 2)) as strStoreState
-								, STMAP.strZipCode as intStoreZipCode
+								--, REPLACE(REPLACE(REPLACE(REPLACE(STMAP.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
+								--, STMAP.strCity as strStoreCity
+								--, UPPER(LEFT(STMAP.strState, 2)) as strStoreState
+								--, STMAP.strZipCode as intStoreZipCode
 
 								, strTrlDept as strCategory
 								, EM.strName as strManufacturerName
@@ -305,7 +303,7 @@ BEGIN
 				JOIN tblSTRetailAccount STRT ON STRT.intStoreId = ST.intStoreId AND STRT.intEntityId = @intVendorId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
 				JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
-				JOIN tblSTStore STMAP ON STMAP.intStoreId = APV.intStoreStoreId
+				--JOIN tblSTStore STMAP ON STMAP.intStoreId = APV.intStoreStoreId
 				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 						AND TR.strTrpPaycode IN ('Change', 'CREDIT')
@@ -471,10 +469,12 @@ BEGIN
 				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
 
 			SELECT * FROM @tblTempPMM
+			ORDER BY CAST(strStoreNumber AS INT) ASC
 		END
 		ELSE IF(@strTableName = 'tblSTstgRebatesRJReynolds')
 		BEGIN
 			SELECT * FROM @tblTempRJR
+			ORDER BY intOutletNumber ASC
 		END
 		
 

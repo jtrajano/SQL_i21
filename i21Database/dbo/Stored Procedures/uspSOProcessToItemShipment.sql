@@ -231,6 +231,64 @@ ELSE
 	WHERE SO.intSalesOrderId = @SalesOrderId
 	  AND (SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)) > 0
 
+	INSERT INTO @Charges(
+		[intOrderType], 
+		[intSourceType],
+		[intEntityCustomerId] ,
+		[dtmShipDate] ,
+		[intShipFromLocationId] ,
+		[intShipToLocationId] ,
+		[intFreightTermId] ,
+		[intContractId],--123
+		[intContractDetailId],
+		[intChargeId] ,
+		[strCostMethod], 
+		[dblRate] ,
+		[intCostUOMId] ,
+		[intCurrency],
+		[dblAmount],
+		[ysnAccrue] ,
+		[intEntityVendorId],
+		[ysnPrice],
+		[intForexRateTypeId],
+		[dblForexRate],
+		[strChargesLink],
+		[strAllocatePriceBy])
+
+		SELECT
+			  [intOrderType]		= @SALES_ORDER_TYPE
+			, [intSourceType]		= 0
+			, [intEntityCustomerId]	= SO.intEntityCustomerId
+			, [dtmShipDate]					= SO.dtmDate
+			, [intShipFromLocationId]	= SO.intCompanyLocationId
+			, [intShipToLocationId]	= SO.intShipToLocationId
+			, [intFreightTermId]		= SO.intFreightTermId
+			, [intContractId]			= Header.intContractHeaderId
+			, [intContractDetailId]	= Detail.intContractDetailId
+			, [intChargeId]			= Cost.intItemId
+			, [strCostMethod]			= Cost.strCostMethod
+			, [dblRate]				= Cost.dblRate
+			, [intCostUOMId]			= Cost.intItemUOMId
+			, [intCurrency]			= Cost.intCurrencyId
+			, [dblAmount]				= NULL
+			, [ysnAccrue]				= Cost.ysnAccrue
+			, [intEntityVendorId]		= NULL
+			, [ysnPrice]				= Cost.ysnPrice
+			, [intForexRateTypeId]			= SODETAIL.intCurrencyExchangeRateTypeId
+			, [dblForexRate]					= SODETAIL.dblCurrencyExchangeRate
+			, [strChargesLink]			= NULL
+			, [strAllocatePriceBy]	= NULL
+		FROM dbo.tblSOSalesOrder SO	
+		INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL 
+				ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
+		INNER JOIN tblCTContractHeader Header
+			ON Header.intContractHeaderId = SODETAIL.intContractHeaderId
+		INNER JOIN tblCTContractDetail Detail
+			ON Detail.intContractHeaderId = Header.intContractHeaderId
+		INNER JOIN tblCTContractCost Cost
+			ON Detail.intContractDetailId = Cost.intContractDetailId
+		WHERE SO.intSalesOrderId = @SalesOrderId
+
 		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemShipmentResult')) 
 		BEGIN 
 			CREATE TABLE #tmpAddItemShipmentResult (

@@ -36,9 +36,9 @@ BEGIN
 			SELECT ID.intItemId
 				 , IL.intItemLocationId
 				 , ID.intItemUOMId
-				 , NULL
-				 , NULL
-				 , NULL
+				 , ID.intLotId
+				 , ID.intCompanyLocationSubLocationId
+				 , ID.[intStorageLocationId]
 				 , ID.dblQtyShipped
 				 , I.intInvoiceId
 				 , I.strInvoiceNumber
@@ -54,6 +54,8 @@ BEGIN
 			WHERE ID.intInvoiceId = @TransactionId 
 			AND ISNULL(ID.intInventoryShipmentItemId, 0) > 0
 			AND (
+					(I.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId]))
+				OR
 					(I.[strType] <> 'Provisional' AND EXISTS(SELECT NULL FROM tblARInvoice ARI WHERE ARI.[intInvoiceId] = I.[intOriginalInvoiceId] AND ARI.[strType] = 'Provisional' AND ARI.[ysnPosted] = 0))
 				OR
 					(I.[strType] = 'Provisional' AND @HasImpactForProvisional = 1)

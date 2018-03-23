@@ -25,11 +25,40 @@ BEGIN
 	END
 
 	 BEGIN
-	
-	SET IDENTITY_INSERT tblSCTicket ON
-	
+
 	DECLARE @intCurrencyId INT
 	SELECT @intCurrencyId =intDefaultCurrencyId FROM tblSMCompanyPreference
+
+	DECLARE @CustomerId AS Id
+
+	INSERT INTO @CustomerId
+	SELECT DISTINCT CUS.intEntityId
+	FROM gasctmst
+	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gasct_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE gasct_in_out_ind = 'I'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblAPVendor
+			WHERE strVendorId = CUS.strCustomerNumber
+			)
+
+	UNION ALL
+
+	SELECT DISTINCT CUS.intEntityId
+	FROM gastlmst
+	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastl_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE gastl_pur_sls_ind = 'P'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblAPVendor
+			WHERE strVendorId = CUS.strCustomerNumber
+			)
+
+	EXEC uspEMConvertCustomerToVendor @CustomerId
+		,@UserId
+
+	
+	SET IDENTITY_INSERT tblSCTicket ON
 
 	INSERT INTO tblSCTicket
 	(
@@ -41,6 +70,7 @@ BEGIN
 	,intTicketPoolId
 	,intTicketLocationId
 	,intTicketType
+	,intTicketTypeId
 	,strInOutFlag
 	,dtmTicketDateTime
 	,dtmTicketTransferDateTime
@@ -72,6 +102,7 @@ BEGIN
 	,strItemUOM
 	,intCustomerId
 	,strDistributionOption
+	,intStorageScheduleTypeId
 	,intDiscountSchedule
 	,strDiscountLocation
 	,dtmDeferDate
@@ -123,7 +154,7 @@ BEGIN
 	 intConcurrencyId 		   = 1
 	,intTicketId       		   = A4GLIdentity
 	,strTicketStatus		   = CASE WHEN ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '' THEN 'O' ELSE LTRIM(RTRIM(gasct_open_close_ind)) END
-	,strTicketNumber		   = LTRIM(RTRIM(gasct_tic_no))+'_'+ LTRIM(RTRIM(gasct_cus_no))
+	,strTicketNumber		   = LTRIM(RTRIM(gasct_tic_no))
 	,intScaleSetupId		   = SS.intScaleSetupId
 	,intTicketPoolId		   = SS.intTicketPoolId
 	,intTicketLocationId	   = CL.intCompanyLocationId
@@ -133,7 +164,8 @@ BEGIN
 								 		WHEN gasct_tic_type = ('M')       THEN 3
 								 		WHEN gasct_tic_type = ('T')       THEN 4
 								 		ELSE 5
-								 END 
+								 END
+    ,intTicketTypeId		   = CASE WHEN gasct_tic_type ='I' THEN 1 ELSE 2 END
 	,strInOutFlag			   = LTRIM(RTRIM(gasct_in_out_ind))
 	,dtmTicketDateTime		   = dbo.fnCTConvertToDateTime(gasct_rev_dt,null)
 	,dtmTicketTransferDateTime = NULL
@@ -163,8 +195,13 @@ BEGIN
 	,dblNetUnits			   = gasct_net_un
 	,strItemNumber			   = IM.strItemNo
 	,strItemUOM				   = UM.strUnitMeasure
-	,intCustomerId			   = EY.intEntityId
-	,strDistributionOption	   = LTRIM(RTRIM(gasct_dist_option))
+	,intCustomerId			   = t.intEntityId
+	,strDistributionOption	   = CASE 
+								 	WHEN LTRIM(RTRIM(GT.gasct_dist_option))='C' THEN 'CNT' 
+								 	WHEN LTRIM(RTRIM(GT.gasct_dist_option))='M' THEN 'SPT' 
+								 	ELSE LTRIM(RTRIM(GT.gasct_dist_option))  
+								 END
+	,intStorageScheduleTypeId  = ST.intStorageScheduleTypeId
 	,intDiscountSchedule	   = DS.intDiscountScheduleId
 	,strDiscountLocation	   = ''
 	,dtmDeferDate			   = dbo.fnCTConvertToDateTime(gasct_defer_rev_dt,null)
@@ -172,7 +209,7 @@ BEGIN
 	,intContractSequence	   = gasct_cnt_seq
 	,strContractLocation	   = LTRIM(RTRIM(gasct_cnt_loc))
 	,dblUnitPrice			   = gasct_un_prc
-	,dblUnitBasis			   = NULL
+	,dblUnitBasis			   = 0
 	,dblTicketFees			   = gasct_fees
 	,intCurrencyId			   = ISNULL(CY.intCurrencyID,@intCurrencyId)
 	,dblCurrencyRate		   = gasct_currency_rt
@@ -202,10 +239,10 @@ BEGIN
 	,strCommodityCode		   = LTRIM(RTRIM(gasct_com_cd))
 	,intCommodityId			   = CO.intCommodityId
 	,intDiscountId			   = 1
-	,intContractId			   = CD.intContractDetailId
+	,intContractId			   = [Contract].intContractDetailId
 	,intDiscountLocationId	   = NULL
 	,intItemId				   = IM.intItemId
-	,intEntityId			   = EY.intEntityId
+	,intEntityId			   = t.intEntityId
 	,intItemUOMIdFrom		   = IU.intItemUOMId
 	,intItemUOMIdTo			   = IU.intItemUOMId
 	,ysnCusVenPaysFees		   = CAST(0 AS BIT)
@@ -213,42 +250,63 @@ BEGIN
 			JOIN	tblSCScaleSetup			SS	ON	LTRIM(RTRIM(SS.strStationShortDescription)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))
 			JOIN    tblSCTicketPool         TP  ON TP.intTicketPoolId=SS.intTicketPoolId --AND TP.strTicketPool  collate Latin1_General_CI_AS =LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))---Added
 			JOIN	tblSMCompanyLocation	CL	ON	LTRIM(RTRIM(CL.strLocationNumber)) collate Latin1_General_CI_AS  = LTRIM(RTRIM(GT.gasct_loc_no))
-	--LEFT	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strName)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no))
-	JOIN	tblEMEntity				EY	ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no)) AND EY.ysnActive =1
-	JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId 
-	JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_com_cd))
-	--LEFT	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strDescription))
-	JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strCommodityCode))
-	JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId AND IU.ysnStockUnit =1 ---- IU.intUnitMeasureId = SS.intUnitMeasureId
-	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId	= SS.intUnitMeasureId
-		
-	LEFT	JOIN	tblGRDiscountSchedule	DS	ON	DS.strDiscountDescription collate Latin1_General_CI_AS = GT.gasct_disc_schd_no AND DS.intCommodityId = CO.intCommodityId
+		    JOIN	tblICCommodity			CO	ON	LTRIM(RTRIM(CO.strCommodityCode))  collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_com_cd))
+		    JOIN	tblICItem				IM	ON	LTRIM(RTRIM(IM.strItemNo)) = LTRIM(RTRIM(CO.strCommodityCode))
+		    JOIN	tblICItemUOM			IU	ON	IU.intItemId	=	IM.intItemId AND IU.ysnStockUnit =1 ---- IU.intUnitMeasureId = SS.intUnitMeasureId
+		    JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId	= SS.intUnitMeasureId
+			JOIN    tblGRStorageType        ST  ON  ST.strStorageTypeCode =  CASE 
+																				WHEN LTRIM(RTRIM(GT.gasct_dist_option))='C' THEN 'CNT' 
+																				WHEN LTRIM(RTRIM(GT.gasct_dist_option))='M' THEN 'SPT' 
+																				ELSE LTRIM(RTRIM(GT.gasct_dist_option))  
+																			 END 
+																			 collate Latin1_General_CI_AS
+			JOIN (
+					SELECT * FROM 
+					(
+						SELECT	EY.intEntityId,EY.strName,EY.strEntityNo,ET.strType,ROW_NUMBER() OVER (PARTITION BY strEntityNo,ET.strType ORDER BY EY.intEntityId) intRowNum
+						FROM	tblEMEntity EY
+						JOIN	tblEMEntityType			ET	ON	ET.intEntityId	=	EY.intEntityId
+						 WHERE  ET.strType IN('Vendor','Customer') AND ISNULL(EY.strEntityNo,'')<>'' --AND EY.ysnActive =1
+					) t  WHERE intRowNum = 1
+
+				)   t ON LTRIM(RTRIM(t.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(GT.gasct_cus_no))
+				AND t.strType = CASE  WHEN GT.gasct_tic_type='I' THEN 'Vendor' ELSE 'Customer' END
+
+	LEFT	JOIN	tblGRDiscountSchedule	DS	ON	DS.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(GT.gasct_disc_schd_no))='0' THEN CO.strDescription +' Discount' ELSE LTRIM(RTRIM(GT.gasct_disc_schd_no)) END AND DS.intCommodityId = CO.intCommodityId
 	LEFT	JOIN	tblSMCurrency			CY	ON	LTRIM(RTRIM(CY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_currency))
-	LEFT	JOIN	tblSMCurrency			FY	ON	LTRIM(RTRIM(FY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_frt_currency))
-	LEFT	JOIN	tblCTContractHeader		CH	ON	LTRIM(RTRIM(CH.strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_cnt_no))
-										AND CH.intContractTypeId = 
-																	CASE 
-																		  WHEN GT.gasct_tic_type='I' THEN 1 
-																		  ELSE 2 
-																	END
-	LEFT	JOIN	tblCTContractDetail		CD	ON	CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractSeq = gasct_cnt_seq	
-	WHERE	
-	--(EY.intEntityId IS NULL OR ET.strType = 'Customer') 
-	  (
-		EY.intEntityId IS NULL 
-		OR 
-		ET.strType = CASE 
-					 	  WHEN GT.gasct_tic_type='I' THEN 'Vendor'
-					 	  ELSE 'Customer'
-					 END
-	  ) 
-	AND A4GLIdentity NOT IN (SELECT A4GLIdentity FROM gasctmst WHERE gasct_tic_no = 'o         ' AND  ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '')
-	AND ISNULL(GT.gasct_open_close_ind,'') <> 'C'
-	AND EY.intEntityId IS NOT NULL
+	LEFT	JOIN	tblSMCurrency			FY	ON	LTRIM(RTRIM(FY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_frt_currency))		
+	LEFT JOIN
+			 (
+				SELECT CH.[intContractTypeId]
+					  ,CH.[strContractNumber]
+					  ,CH.[intEntityId]
+					  ,CH.[intCommodityId] 
+					  ,CH.intContractHeaderId
+					  ,CD.intContractDetailId
+					  ,CD.intContractSeq
+				FROM tblCTContractHeader CH
+				JOIN tblCTContractDetail CD ON CD.intContractHeaderId =CH.intContractHeaderId
+			  ) [Contract] ON [Contract].strContractNumber = LTRIM(RTRIM(GT.gasct_cnt_no)) collate Latin1_General_CI_AS 
+			  			  AND [Contract].intContractSeq	 = gasct_cnt_seq 
+			  			  AND [Contract].intEntityId		 = t.intEntityId
+			  			  AND [Contract].intCommodityId	 = CO.intCommodityId
+			  			  AND [Contract].intContractTypeId = CASE WHEN GT.gasct_tic_type = 'I' THEN 1 ELSE 2 END
+
+	WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM gasctmst WHERE gasct_tic_no = 'o         ' AND  ISNULL(LTRIM(RTRIM(gasct_open_close_ind)),'') = '')
+	AND   ISNULL(GT.gasct_open_close_ind,'') <> 'C'
+	AND   GT.gasct_tic_type IN('I','O')
 
 	SET IDENTITY_INSERT tblSCTicket OFF
 
-	UPDATE tblSCTicket SET strDistributionOption='CNT' WHERE intContractId >0
+	UPDATE tblSCTicket SET strDistributionOption='CNT',intStorageScheduleTypeId = -2 WHERE intContractId >0
+	UPDATE tblSCTicket SET ysnHasGeneratedTicketNumber = 1
+	UPDATE tblCTContractHeader SET ysnUnlimitedQuantity = 0 WHERE ISNULL(ysnUnlimitedQuantity,0) = 0	
+
+	UPDATE CD
+	SET CD.intContractStatusId = 4
+	FROM tblSCTicket SC JOIN tblCTContractDetail CD ON CD.intContractDetailId = SC.intContractId
+	WHERE CD.intContractStatusId = 5 AND SC.strTicketStatus='O'
+
 
 	DECLARE @intStorageScheduleTypeId INT
 	SELECT	@intStorageScheduleTypeId = intStorageScheduleTypeId FROM tblGRStorageType WHERE strStorageTypeDescription = 'Default'
@@ -362,7 +420,10 @@ BEGIN
 	JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = @intStorageScheduleTypeId
 	JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
 	WHERE b.gasct_disc_cd IS NOT NULL	
-END
+	
+	EXEC uspGRImportSettleScaleTicket
+
+	END
 
 END
 

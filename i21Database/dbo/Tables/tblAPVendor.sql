@@ -43,6 +43,10 @@
 	[strStoreFTPUsername] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
 	[strStoreFTPPassword] NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
 	[intStoreStoreId] INT NULL,--
+	[intProtocolNumber] INT NULL,--
+	[intPortNumber] INT NULL,--
+	[intChainAccountNumber] INT NULL,--
+	[intCsvFormat] INT NULL
 
 	--store
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),

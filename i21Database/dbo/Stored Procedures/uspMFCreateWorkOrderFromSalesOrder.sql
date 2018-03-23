@@ -50,6 +50,7 @@ Declare @intInvoiceDetailId int
 Declare @intLoadDistributionDetailId int
 Declare @dtmPlannedDate DateTime
 Declare @intPlannedShiftId int
+Declare @intTransactionFrom int
 
 Declare @tblWO As table
 (
@@ -66,7 +67,7 @@ Declare @tblWO As table
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
  Select @intSalesOrderDetailId=intSalesOrderDetailId,@intInvoiceDetailId=intInvoiceDetailId,@intLoadDistributionDetailId=intLoadDistributionDetailId,@strOrderType=strOrderType,@intLocationId=intLocationId,@intRecipeId=intRecipeId,
- @intItemId=intItemId,@intItemUOMId=intItemUOMId,@intUserId=intUserId
+ @intItemId=intItemId,@intItemUOMId=intItemUOMId,@intUserId=intUserId,@intTransactionFrom=intTransactionFrom
  FROM OPENXML(@idoc, 'root', 2)  
  WITH ( 
 	intSalesOrderDetailId int, 
@@ -77,7 +78,8 @@ EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
 	intRecipeId int,
 	intItemId int,
 	intItemUOMId int,
-	intUserId int
+	intUserId int,
+	intTransactionFrom int
 	)
 
 Insert Into @tblWO(dblQuantity,dtmDueDate,intCellId,intMachineId,dblMachineCapacity,dtmPlannedDate,intPlannedShiftId)
@@ -227,7 +229,7 @@ Begin
 		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
 		intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId,intSalesOrderLineItemId,intInvoiceDetailId,intLoadDistributionDetailId,dtmPlannedDate,intPlannedShiftId,intConcurrencyId,intTransactionFrom)
 		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,@intWorkOrderStatusId,@intCellId,@intMachineId,@intLocationId,@dblBlendBinSize,@dtmDueDate,@intExecutionOrder,1,
-		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,@intInvoiceDetailId,@intLoadDistributionDetailId,@dtmPlannedDate,@intPlannedShiftId,1,2
+		@dblQuantity,@intBlendRequirementId,@ysnKittingEnabled,@intKitStatusId,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intManufacturingProcessId,@intSalesOrderDetailId,@intInvoiceDetailId,@intLoadDistributionDetailId,@dtmPlannedDate,@intPlannedShiftId,1,ISNULL(@intTransactionFrom,2) --Work Order Planning(2), AutoBlend(5)
 
 		Select @intWokrOrderId=SCOPE_IDENTITY()
 

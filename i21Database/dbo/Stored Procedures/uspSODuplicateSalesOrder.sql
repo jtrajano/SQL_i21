@@ -14,6 +14,16 @@ BEGIN
 
 	SET @SalesOrderDate = CASE WHEN @SalesOrderDate IS NULL THEN GETDATE() ELSE @SalesOrderDate END
 		
+	DECLARE @intDocumentMaintenanceId INT = 0;
+	SELECT @intDocumentMaintenanceId = intDocumentMaintenanceId FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+	DECLARE @NewDocumentId INT
+	EXEC uspSMDuplicateDocumentMaintenance @intDocumentMaintenanceId, @NewDocumentId OUTPUT
+	IF(@NewDocumentId > 0)
+	BEGIN
+		SET @intDocumentMaintenanceId = @NewDocumentId
+	END
+
+
 	INSERT INTO tblSOSalesOrder
 		(   [intEntityCustomerId]
            ,[dtmDate]
@@ -78,6 +88,7 @@ BEGIN
 		   ,[dblTotalWeight]
 		   ,[dblTotalTermDiscount]
 		   ,[intLineOfBusinessId]
+		   ,[intDocumentMaintenanceId]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -149,6 +160,7 @@ BEGIN
 		   ,[dblTotalWeight]
 		   ,[dblTotalTermDiscount]
 		   ,[intLineOfBusinessId]
+		   ,@intDocumentMaintenanceId
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId

@@ -22,7 +22,8 @@ BEGIN
 		  , @blb					VARBINARY(MAX)
 		  , @originalMsgInHTML		VARCHAR(MAX)	
 		  , @filterValue			VARCHAR(MAX)	
-		  , @intSourceLetterId		INT										
+		  , @intSourceLetterId		INT
+		  , @intEntityUserId		INT
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
@@ -57,6 +58,10 @@ BEGIN
 	SELECT @intLetterId = [from]
 	FROM @temp_params 
 	WHERE [fieldname] = 'intLetterId'
+
+	SELECT @intEntityUserId = [from]
+	FROM @temp_params 
+	WHERE [fieldname] = 'intSrCurrentUserId'
 
 	SELECT @ysnEmailOnly = [from]
 	FROM @temp_params 
@@ -210,7 +215,25 @@ BEGIN
 
 	IF @strLetterName IN ('Recent Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
 		BEGIN
-			TRUNCATE TABLE tblARCustomerAgingStagingTable
+			DECLARE @strCustomerLocalIds NVARCHAR(MAX)
+
+			IF(OBJECT_ID('tempdb..#tmpCustomers') IS NOT NULL)
+			BEGIN
+				DROP TABLE #tmpCustomers
+			END
+
+			SELECT DISTINCT intEntityCustomerId
+			INTO #tmpCustomers
+			FROM @SelectedCustomer
+
+			SELECT @strCustomerLocalIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+			FROM (
+				SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+				FROM #tmpCustomers WITH(NOLOCK)	
+				FOR XML PATH ('')
+			) C (intEntityCustomerId)
+
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 			INSERT INTO tblARCustomerAgingStagingTable (
 				  strCustomerName
 				, strCustomerNumber
@@ -220,6 +243,7 @@ BEGIN
 				, intInvoiceId
 				, strBOLNumber
 				, intEntityCustomerId
+				, intEntityUserId
 				, dblCreditLimit
 				, dblTotalAR
 				, dblFuture
@@ -245,37 +269,51 @@ BEGIN
 				, strType
 				, strCompanyName
 				, strCompanyAddress
+				, strAgingType
 			)
 			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
+														  , @strCustomerIds = @strCustomerLocalIds
+														  , @intEntityUserId = @intEntityUserId
 
-			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @SelectedCustomer)
-			DELETE FROM tblARCustomerAgingStagingTable WHERE intInvoiceId IN (SELECT intInvoiceId FROM tblARCustomerAgingStagingTable GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) = 0)
-			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND strType = 'CF Tran'
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @SelectedCustomer)
+			DELETE FROM ORIG
+			FROM tblARCustomerAgingStagingTable ORIG
+			INNER JOIN (
+				SELECT intInvoiceId 
+				FROM tblARCustomerAgingStagingTable 
+				WHERE intEntityUserId = @intEntityUserId 
+				  AND strAgingType = 'Detail'
+				GROUP BY intInvoiceId 
+				HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
+			) ZERO ON ORIG.intInvoiceId = ZERO.intInvoiceId
+			WHERE intEntityUserId = @intEntityUserId 
+			  AND strAgingType = 'Detail'
 
 			IF @strLetterName = 'Recent Overdue Collection Letter'
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
 				END
 			ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
 				END
 			ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
 				BEGIN						
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
 				END
 			ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
 				END
 			ELSE IF @strLetterName = 'Final Overdue Collection Letter'
 				BEGIN						
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl121Days, 0) = 0
 				END
 
 			INSERT INTO #TransactionLetterDetail (	
@@ -305,8 +343,9 @@ BEGIN
 				, dtmDueDate
 				, NULL
 			FROM dbo.tblARCustomerAgingStagingTable WITH (NOLOCK)
+			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 
-			TRUNCATE TABLE tblARCollectionOverdueDetail
+			DELETE FROM tblARCollectionOverdueDetail WHERE intEntityUserId = @intEntityUserId
 			INSERT INTO tblARCollectionOverdueDetail
 			(
 				intCompanyLocationId         
@@ -340,7 +379,8 @@ BEGIN
 				,dblCredits                         
 				,dblPrepaids                     
 				,dtmDate                     
-				,dtmDueDate                     
+				,dtmDueDate
+				,intEntityUserId
 			)
 			SELECT intCompanyLocationId     =    AGING.intCompanyLocationId
 				 , strCompanyName           =    AGING.strCompanyName
@@ -373,7 +413,8 @@ BEGIN
 				 , dblCredits               =    AGING.dblCredits                             
 				 , dblPrepaids              =    AGING.dblPrepaids                         
 				 , dtmDate                  =    AGING.dtmDate                         
-				 , dtmDueDate				=    AGING.dtmDueDate         
+				 , dtmDueDate				=    AGING.dtmDueDate
+				 , intEntityUserId			=	 @intEntityUserId
 			FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 			INNER JOIN (
 				SELECT intEntityId
@@ -389,22 +430,25 @@ BEGIN
 					 , strAccountNumber
 				FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
 			) CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityId
-            
-			TRUNCATE TABLE tblARCollectionOverdue                
+            WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
+
+			DELETE FROM tblARCollectionOverdue WHERE intEntityUserId = @intEntityUserId
 			INSERT INTO tblARCollectionOverdue (
 				  intEntityCustomerId
+				, intEntityUserId
 				, dbl10DaysSum
 				, dbl30DaysSum
 				, dbl60DaysSum
 				, dbl90DaysSum
 				, dbl121DaysSum
 			)
-			SELECT C.intEntityCustomerId
-				 , dbl10DaysSum = ABC.dblTotalDueSum
-                 , dbl30DaysSum = ABC.dblTotalDueSum
-                 , dbl60DaysSum = ABC.dblTotalDueSum
-                 , dbl90DaysSum = ABC.dblTotalDueSum
-                 , dbl121DaysSum = ABC.dblTotalDueSum
+			SELECT intEntityCustomerId	= C.intEntityCustomerId
+			     , intEntityUserId		= @intEntityUserId
+				 , dbl10DaysSum			= ABC.dblTotalDueSum
+                 , dbl30DaysSum			= ABC.dblTotalDueSum
+                 , dbl60DaysSum			= ABC.dblTotalDueSum
+                 , dbl90DaysSum			= ABC.dblTotalDueSum
+                 , dbl121DaysSum		= ABC.dblTotalDueSum
             FROM @SelectedCustomer C
             INNER JOIN (
                 SELECT dblTotalDueSum = SUM(dblAmount)
@@ -413,7 +457,8 @@ BEGIN
                 GROUP BY intEntityCustomerId) ABC
             ON C.intEntityCustomerId = ABC.intEntityCustomerId
 			
-			DELETE FROM @SelectedCustomer WHERE intEntityCustomerId NOT IN (SELECT DISTINCT intEntityCustomerId FROM tblARCustomerAgingStagingTable)
+			DELETE FROM @SelectedCustomer 
+			WHERE intEntityCustomerId NOT IN (SELECT DISTINCT intEntityCustomerId FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
 		END	
 	ELSE IF @strLetterName = 'Service Charge Invoices Letter'
 		BEGIN
@@ -1047,7 +1092,7 @@ BEGIN
 		, strAccountNumber		= CUSTOMER.strAccountNumber
 		, strCompanyFax			= COMPANY.strCompanyFax
 		, strCompanyEmail		= COMPANY.strCompanyEmail		
-	FROM @SelectedCustomer SC
+	FROM #TransactionLetterDetail SC
 	INNER JOIN (
 		SELECT intEntityId
 			 , strCustomerNumber

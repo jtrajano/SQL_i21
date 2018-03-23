@@ -16,5 +16,6 @@
 	,[dblInvoiceTotalSum]		NUMERIC(18,6)
 	,[dblCreditsSum]			NUMERIC(18,6)
 	,[dblPrepaidsSum]			NUMERIC(18,6)
+	,[intEntityUserId]			INT NULL
 	,[intConcurrencyId]			INT NOT NULL	DEFAULT 0
 )

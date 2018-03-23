@@ -122,7 +122,9 @@ BEGIN TRY
 			, strDiversionNumber
 			, strDiversionOriginalDestinationState
 			, strTransactionType
-			, intTransactionNumberId)
+			, intTransactionNumberId
+			, strContactName
+			, strEmail)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -166,7 +168,7 @@ BEGIN TRY
 			, tblSMCompanySetup.strZip
 			, tblSMCompanySetup.strPhone
 			, tblSMCompanySetup.strStateTaxID
-			, tblSMCompanySetup.strFederalTaxID
+			, tblSMCompanySetup.strEin
 			, strTransporterIdType = 'FEIN'
 			, strVendorIdType = 'FEIN'
 			, strCustomerIdType = 'FEIN'
@@ -180,6 +182,8 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState = NULL
 			, strTransactionType = 'Invoice'
 			, intTransactionNumberId = tblARInvoiceDetail.intInvoiceDetailId
+			, strContactName = tblSMCompanySetup.strContactName
+			, strEmail = tblSMCompanySetup.strEmail
 		FROM tblTFProductCode
 		INNER JOIN tblARInvoiceDetail
 		INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId
@@ -321,7 +325,9 @@ BEGIN TRY
 			, strDiversionNumber
 			, strDiversionOriginalDestinationState
 			, strTransactionType
-			, intTransactionNumberId)
+			, intTransactionNumberId
+			, strContactName
+			, strEmail)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -367,7 +373,7 @@ BEGIN TRY
 			, tblSMCompanySetup.strZip
 			, tblSMCompanySetup.strPhone
 			, tblSMCompanySetup.strStateTaxID
-			, tblSMCompanySetup.strFederalTaxID
+			, tblSMCompanySetup.strEin
 			, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
 			, 0.000000 AS dblTaxExempt
 			, strTransporterIdType = 'FEIN'
@@ -383,6 +389,8 @@ BEGIN TRY
 			, strDiversionOriginalDestinationState = NULL
 			, strTransactionType = 'Transfer'
 			, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
+			, strContactName = tblSMCompanySetup.strContactName
+			, strEmail = tblSMCompanySetup.strEmail
 		FROM tblTFProductCode
 		INNER JOIN tblICInventoryTransferDetail
 		INNER JOIN tblICInventoryTransfer ON tblICInventoryTransferDetail.intInventoryTransferId = tblICInventoryTransfer.intInventoryTransferId
@@ -469,7 +477,9 @@ BEGIN TRY
 			, strDiversionNumber
 			, strDiversionOriginalDestinationState
 			, strTransactionType
-			, intTransactionNumberId)
+			, intTransactionNumberId
+			, strContactName
+			, strEmail)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId, intProductCodeId DESC) AS intId
 			, *
 		FROM (
@@ -502,7 +512,7 @@ BEGIN TRY
 				, tblSMCompanySetup.strZip
 				, tblSMCompanySetup.strPhone
 				, tblSMCompanySetup.strStateTaxID
-				, tblSMCompanySetup.strFederalTaxID
+				, tblSMCompanySetup.strEin
 				, (ISNULL(tblICInventoryTransferDetail.dblQuantity, 0) * @ConfigGUTRate) AS dblTax
 				, 0.000000 AS dblTaxExempt
 				, strTransporterIdType = 'FEIN'
@@ -518,6 +528,8 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState = NULL
 				, strTransactionType = 'Transfer'
 				, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
+				, strContactName = tblSMCompanySetup.strContactName
+				, strEmail = tblSMCompanySetup.strEmail
 			FROM tblTFProductCode
 			INNER JOIN tblICInventoryTransferDetail 
 				INNER JOIN tblICItem ON tblICItem.intItemId = tblICInventoryTransferDetail.intItemId
@@ -606,7 +618,9 @@ BEGIN TRY
 				, strDiversionNumber
 				, strDiversionOriginalDestinationState
 				, strTransactionType
-				, intTransactionNumberId)
+				, intTransactionNumberId
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCode
@@ -664,6 +678,8 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
+				, strContactName
+				, strEmail
 			FROM @TFTransaction TRANS
 			LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = TRANS.intTaxAuthorityId
 

@@ -18,6 +18,10 @@ BEGIN
 
 	print @Guid	
 	print @UserId
+	DECLARE @intEntityUserId INT;
+
+	select TOP 1 @intEntityUserId = intEntityId from tblSMUserSecurity where strUserName = @UserId
+
 
 	-------------CLEAN TEMP TABLES------------
 	DELETE FROM tblCFInvoiceReportTempTable			WHERE strUserId = @UserId
@@ -25,6 +29,10 @@ BEGIN
 	DELETE FROM tblCFInvoiceDiscountTempTable		WHERE strUserId = @UserId
 	DELETE FROM tblCFInvoiceStagingTable			WHERE strUserId = @UserId
 	DELETE FROM tblCFInvoiceFeeStagingTable			WHERE strUserId = @UserId
+	
+	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
+	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null
+
 	------------------------------------------
 
 BEGIN TRY
@@ -228,7 +236,12 @@ BEGIN TRY
 	,strTempInvoiceReportNumber
 	,strMiscellaneous
 	,strName
-	,strCardNumber
+	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
+					 THEN  
+						strCardNumber + dbo.fnCFGetLuhn(((select top 1 strIso from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) + strCardNumber ) ,0)
+					 ELSE 
+						strCardNumber
+					 END
 	,strCardDescription
 	,strNetwork
 	,strInvoiceCycle
@@ -420,6 +433,7 @@ BEGIN TRY
 			, @dtmBalanceForwardDate = @dtmBalanceForwardDate
 			, @ysnPrintFromCF = 1
 			, @strCustomerNumber = @strCustomerNumber		
+			,@intEntityUserId = @intEntityUserId
 
 
 		--SELECT '1',* FROM tblARCustomerStatementStagingTable
@@ -476,6 +490,7 @@ BEGIN TRY
 		,ysnCFShowDiscountOnInvoice
 		,strCFTerm
 		,strCFTermCode
+		,intEntityUserId
 		)
 		SELECT
 		 intCustomerId
@@ -533,6 +548,7 @@ BEGIN TRY
 		,ysnShowOnCFInvoice
 		,strTerm
 		,strTermCode
+		,@intEntityUserId
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv
@@ -564,7 +580,8 @@ BEGIN TRY
 		BEGIN
 
 			DELETE FROM tblARCustomerStatementStagingTable 
-			WHERE intEntityCustomerId NOT IN (
+			WHERE intEntityUserId = @intEntityUserId
+				AND intEntityCustomerId NOT IN (
 				SELECT cfAC.intCustomerId 
 				FROM tblCFAccount as cfAC
 				INNER JOIN tblCFInvoiceCycle cfIC
@@ -576,7 +593,7 @@ BEGIN TRY
 		END
 		
 
-		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
+		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate WHERE intEntityUserId = @intEntityUserId
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET 
@@ -590,6 +607,7 @@ BEGIN TRY
 																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																						AND (ISNULL(strEmail, N'') <> ''))	
+		WHERE intEntityUserId = @intEntityUserId
 
 
 		UPDATE tblARCustomerStatementStagingTable
@@ -616,6 +634,7 @@ BEGIN TRY
 		FROM tblCFInvoiceStagingTable cfInv
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 		AND cfInv.strUserId = @UserId
+		AND intEntityUserId = @intEntityUserId
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET
@@ -637,6 +656,7 @@ BEGIN TRY
 																							AND (ISNULL(strEmail, N'') <> ''))
 		FROM vyuCFAccountTerm cfAccntTerm
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
+		AND intEntityUserId = @intEntityUserId
 		----AR SHOULD HANDLE MULTI USER TOO---
 		
 		DECLARE @strWebsite NVARCHAR(MAX)
@@ -646,13 +666,15 @@ BEGIN TRY
 		
 		DELETE FROM tblARCustomerStatementStagingTable 
 		WHERE intEntityCustomerId IN (
-			SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityCustomerId not in (
+			SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserId AND intEntityCustomerId not in (
 				SELECT intEntityCustomerId AS intCount FROM tblARCustomerStatementStagingTable
 				WHERE 
 				strTransactionType != 'Balance Forward' 
+				AND intEntityUserId = @intEntityUserId
 				GROUP BY intEntityCustomerId,strCustomerName
 				HAVING ISNULL(COUNT(*),0) > 0)
 		AND ISNULL(dblTotalAR,0) = 0)
+		AND intEntityUserId = @intEntityUserId
 
 		UPDATE STAGING
 		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR
@@ -725,6 +747,7 @@ BEGIN TRY
 		  ,dtmAsOfDate
 		) STAGING2
 		WHERE STAGING.dblTotalAR IS NULL
+		AND intEntityUserId = @intEntityUserId
 
 		END
 		ELSE
@@ -734,7 +757,9 @@ BEGIN TRY
 			BEGIN
 
 				DELETE FROM tblARCustomerStatementStagingTable 
-				WHERE intEntityCustomerId NOT IN (
+				WHERE 
+					intEntityUserId = @intEntityUserId 
+					AND intEntityCustomerId NOT IN (
 					SELECT cfAC.intCustomerId 
 					FROM tblCFAccount as cfAC
 					INNER JOIN tblCFInvoiceCycle cfIC
@@ -746,6 +771,7 @@ BEGIN TRY
 			END
 
 			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
+			WHERE intEntityUserId = @intEntityUserId
 
 			UPDATE tblARCustomerStatementStagingTable
 			SET 
@@ -759,6 +785,8 @@ BEGIN TRY
 																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																							AND (ISNULL(strEmail, N'') <> ''))	
+			WHERE intEntityUserId = @intEntityUserId
+
 
 			UPDATE tblARCustomerStatementStagingTable
 			SET 
@@ -785,14 +813,17 @@ BEGIN TRY
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 			AND cfInv.strUserId = @UserId
+			AND tblARCustomerStatementStagingTable.intEntityUserId = @intEntityUserId
 
 
 			DELETE FROM tblARCustomerStatementStagingTable 
-			WHERE intEntityCustomerId IN (
-				SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityCustomerId not in (
+				WHERE intEntityUserId = @intEntityUserId
+				AND intEntityCustomerId IN (
+				SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserId AND intEntityCustomerId not in (
 					SELECT intEntityCustomerId AS intCount FROM tblARCustomerStatementStagingTable
 					WHERE 
 					strTransactionType != 'Balance Forward' 
+					AND intEntityUserId = @intEntityUserId
 					GROUP BY intEntityCustomerId,strCustomerName
 					HAVING ISNULL(COUNT(*),0) > 0)
 			AND ISNULL(dblTotalAR,0) = 0)
@@ -803,8 +834,8 @@ BEGIN TRY
 	END
 
 
-	UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL
-	UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL
+	UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL AND intEntityUserId = @intEntityUserId
+	UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId
 	
 
 	--SELECT * FROM vyuCFAccountTerm

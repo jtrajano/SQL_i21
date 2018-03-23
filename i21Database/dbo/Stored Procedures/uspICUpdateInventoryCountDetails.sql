@@ -10,6 +10,7 @@
 	, @intStorageLocationId INT = 0
 	, @ysnIncludeZeroOnHand BIT = 0
 	, @ysnCountByLots BIT = 0
+	, @AsOfDate DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -54,12 +55,13 @@ BEGIN
 		, intParentLotId
 		, strParentLotNumber
 		, strParentLotAlias
+		--, dtmDate = MAX(dtmDate)
 		, intLotId
 		, strLotNumber
 		, strLotAlias
-		, dblSystemCount = dblOnHand
-		, dblLastCost
-		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intKey ASC) AS NVARCHAR(50))
+		, dblSystemCount = SUM(dblOnHand)
+		, dblLastCost = MAX(dblLastCost)
+		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intItemId ASC) AS NVARCHAR(50))
 		, intItemUOMId
 		, intWeightUOMId
 		, ysnRecount = 0
@@ -75,7 +77,20 @@ BEGIN
 		AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
 		AND ((dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
-		AND strLotTracking <> 'No'		
+		AND strLotTracking <> 'No'	
+		AND dtmDate	<= @AsOfDate
+	GROUP BY intItemId,
+			intItemLocationId,
+			intSubLocationId,
+			intStorageLocationId,
+			intParentLotId,
+			intLotId,
+			strLotNumber,
+			strLotAlias,
+			strParentLotNumber,
+			strParentLotAlias,
+			intItemUOMId,
+			intWeightUOMId
 END
 ELSE
 BEGIN
@@ -101,8 +116,9 @@ BEGIN
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
 		, intSubLocationId = COALESCE(stock.intSubLocationId, il.intSubLocationId)
 		, intStorageLocationId = COALESCE(stock.intStorageLocationId, il.intStorageLocationId)
+		--, dtmDate = MAX(stock.dtmDate)
 		, intLotId = NULL
-		, dblSystemCount = COALESCE(stock.dblOnHand, 0.00)
+		, dblSystemCount = dblOnHand-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost = COALESCE(stock.dblLastCost, p.dblLastCost)
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, uom.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, uom.intItemUOMId)
@@ -117,7 +133,21 @@ BEGIN
 		INNER JOIN tblICItemUOM uom ON uom.intItemId = il.intItemId
 			AND uom.ysnStockUnit = 1
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
-		LEFT JOIN vyuICGetItemStockSummary stock ON stock.intItemId = i.intItemId
+		LEFT JOIN (SELECT	intItemId,
+							intItemUOMId,
+							intItemLocationId,
+							intSubLocationId,
+							intStorageLocationId,
+							dblOnHand =  SUM(COALESCE(dblOnHand, 0.00)),
+							dblLastCost = MAX(dblLastCost)
+					FROM vyuICGetItemStockSummary
+					WHERE dtmDate <= @AsOfDate
+					GROUP BY intItemId,
+							intItemUOMId,
+							intItemLocationId,
+							intSubLocationId,
+							intStorageLocationId
+			) stock ON stock.intItemId = i.intItemId
 			AND uom.intItemUOMId = stock.intItemUOMId
 			AND stock.intItemLocationId = il.intItemLocationId
 	WHERE il.intLocationId = @intLocationId
@@ -127,4 +157,15 @@ BEGIN
 		AND ((il.intSubLocationId IS NULL) OR (il.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))
 		AND ((il.intStorageLocationId IS NULL) OR (il.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))
 		AND i.strLotTracking = 'No'
+	--GROUP BY il.intItemId, 
+	--		stock.intItemLocationId, 
+	--		il.intItemLocationId, 
+	--		stock.intSubLocationId, 
+	--		il.intSubLocationId, 
+	--		stock.intStorageLocationId, 
+	--		il.intStorageLocationId, 
+	--		uom.intItemUOMId, 
+	--		stock.intItemUOMId, 
+	--		uom.intItemUOMId, 
+	--		p.dblLastCost
 END

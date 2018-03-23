@@ -65,6 +65,10 @@ SELECT
 	B.strStoreFTPPassword,
 	B.intStoreStoreId,
 	I.intStoreNo,
+	B.intProtocolNumber,
+	B.intPortNumber,
+	B.intChainAccountNumber,
+	B.intCsvFormat,
 	storeDescription = I.strDescription,
 	ysnTransportTerminal
 FROM

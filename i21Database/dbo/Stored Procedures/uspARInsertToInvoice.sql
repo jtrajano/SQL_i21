@@ -309,12 +309,12 @@ SELECT intItemId					= ICSI.intItemId
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SO.intSalesOrderId
-FROM tblICInventoryShipmentItem ICSI 
-INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
-INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = ICSI.intLineNo
-INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+FROM tblSOSalesOrder SO 
+INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
+INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
+INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId AND ICS.ysnPosted = 1
 LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
-WHERE ICSI.intOrderId = @SalesOrderId
+WHERE SO.intSalesOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
 
 --GET ITEMS FROM Manufacturing - Other Charges
@@ -585,6 +585,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intShipViaId]
 					,[strPONumber]
 					,[intTermId]
+					,[intPeriodsToAccrue]
 					,[dblInvoiceSubtotal]
 					,[dblShipping]
 					,[dblTax]
@@ -617,6 +618,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
 					,[intSalesOrderId]
+					,[intDocumentMaintenanceId]
 				)
 				SELECT
 					[intEntityCustomerId]
@@ -631,6 +633,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intShipViaId]
 					,[strPONumber]
 					,[intTermId]
+					,ISNULL(SOD.intPeriodsToAccrue, 1)
 					,@dblSalesOrderSubtotal --ROUND([dblSalesOrderSubtotal],2)
 					,[dblShipping]
 					,@dblTax--ROUND([dblTax],2)
@@ -663,8 +666,19 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intEntityContactId]
 					,[intLineOfBusinessId]
 					,[intSalesOrderId]
-				FROM
-				tblSOSalesOrder
+					,[intDocumentMaintenanceId]
+				FROM tblSOSalesOrder
+				OUTER APPLY (
+					SELECT TOP 1 intPeriodsToAccrue = CASE WHEN strFrequency = 'Monthly' THEN 12
+											 WHEN strFrequency = 'Bi-Monthly' THEN 24
+											 WHEN strFrequency = 'Quarterly' THEN 4
+											 WHEN strFrequency = 'Semi-Annually' THEN 2
+											 WHEN strFrequency = 'Annually' THEN 1
+									ELSE 1 END
+					FROM tblSOSalesOrderDetail 
+					WHERE intSalesOrderId = @SalesOrderId
+					  AND ISNULL(strFrequency, '') <> ''
+				) SOD
 				WHERE intSalesOrderId = @SalesOrderId
 
 				SET @SoftwareInvoiceId = SCOPE_IDENTITY()
@@ -720,12 +734,12 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblQtyOrdered]			--[dblQtyOrdered]
 					,[intItemUOMId]				--[intItemUOMId]					
 					,CASE WHEN [strFrequency] = 'Bi-Monthly' 
-						  THEN 2 * [dblQtyOrdered]
+						  THEN 24 * [dblQtyOrdered]
 						  WHEN [strFrequency] = 'Quarterly'
-						  THEN 3 * [dblQtyOrdered]
+						  THEN 4 * [dblQtyOrdered]
 						  WHEN [strFrequency] = 'Semi-Annually'
-						  THEN 6 * [dblQtyOrdered]
-						  WHEN [strFrequency] = 'Annually'
+						  THEN 2 * [dblQtyOrdered]
+						  WHEN [strFrequency] = 'Monthly'
 						  THEN 12 * [dblQtyOrdered]
 						  ELSE [dblQtyOrdered]
 					 END						--[dblQtyShipped]
@@ -1165,11 +1179,11 @@ IF ISNULL(@SoftwareInvoiceId, 0) > 0
 									 intPeriodsToAccrue
 								 ELSE
 									 CASE WHEN @ysnHasMaintenanceItem = 1 THEN
-										CASE WHEN @strFrequency = 'Monthly' THEN 1
-											 WHEN @strFrequency = 'Bi-Monthly' THEN 2
-											 WHEN @strFrequency = 'Quarterly' THEN 3
-											 WHEN @strFrequency = 'Semi-Annually' THEN 6
-											 WHEN @strFrequency = 'Annually' THEN 12
+										CASE WHEN @strFrequency = 'Monthly' THEN 12
+											 WHEN @strFrequency = 'Bi-Monthly' THEN 24
+											 WHEN @strFrequency = 'Quarterly' THEN 4
+											 WHEN @strFrequency = 'Semi-Annually' THEN 2
+											 WHEN @strFrequency = 'Annually' THEN 1
 										ELSE 1 END
 									 ELSE 1 END
 								 END
@@ -1226,7 +1240,38 @@ BEGIN
 END
 
 IF ISNULL(@NewInvoiceId, 0) > 0
+BEGIN
 	UPDATE tblARInvoice SET strType = (SELECT TOP 1 strType FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId) WHERE intInvoiceId = @NewInvoiceId
+
+	DECLARE @DocumentMaintenanceId INT
+	DECLARE @HeaderComment NVARCHAR(MAX)
+	DECLARE @FooterComment NVARCHAR(MAX)
+	SELECT TOP 1 @DocumentMaintenanceId = intDocumentMaintenanceId	
+		FROM tblSOSalesOrder 
+			WHERE intSalesOrderId = @SalesOrderId 
+	IF ISNULL(@DocumentMaintenanceId, 0) <> 0
+	BEGIN
+
+		SELECT TOP 1 
+			@HeaderComment = CAST((CAST(blbMessage AS VARCHAR(MAX))) AS NVARCHAR(MAX))
+		FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Header'
+			AND intDocumentMaintenanceId = @DocumentMaintenanceId
+
+		SELECT TOP 1 
+			@FooterComment = CAST((CAST(blbMessage AS VARCHAR(MAX))) AS NVARCHAR(MAX))
+		FROM tblSMDocumentMaintenanceMessage WHERE strHeaderFooter = 'Footer'
+			AND intDocumentMaintenanceId = @DocumentMaintenanceId
+
+		UPDATE tblARInvoice SET 
+				intDocumentMaintenanceId = @DocumentMaintenanceId,
+				strComments = @HeaderComment,
+				strFooterComments = @FooterComment
+			WHERE intInvoiceId = @NewInvoiceId
+
+	END
+
+	
+END
 
 --COMMIT TRANSACTION
 IF ISNULL(@RaiseError,0) = 0

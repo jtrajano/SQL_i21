@@ -87,6 +87,7 @@ BEGIN TRY
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
+	DECLARE @intLotId INT
 
 	SET @dtmDate = GETDATE()
 
@@ -782,6 +783,18 @@ BEGIN TRY
 				EXEC dbo.uspSMGetStartingNumber 
 					 @STARTING_NUMBER_BATCH
 					,@strBatchId OUTPUT
+				
+				SET @intLotId = NULL
+				
+				SELECT @intLotId = ReceiptItemLot.intLotId
+				FROM tblICInventoryReceiptItemLot ReceiptItemLot
+				JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+				JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+				JOIN tblGRStorageHistory SH ON SH.intInventoryReceiptId=ReceiptItem.intInventoryReceiptId AND SH.strType='FROM Scale'
+				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId=SH.intCustomerStorageId  AND SST.dblUnits > 0
+				JOIN tblGRSettleStorage SS ON SS.intSettleStorageId=SST.intSettleStorageId 
+				JOIN tblSCTicket SC ON SC.intTicketId=SH.intTicketId
+				WHERE SST.intSettleStorageId =@intSettleStorageId
 
 				IF @@ERROR <> 0
 				GOTO SettleStorage_Exit;
@@ -811,6 +824,7 @@ BEGIN TRY
 					,intTransactionDetailId
 					,strTransactionId
 					,intTransactionTypeId
+					,intLotId
 					,intSubLocationId
 					,intStorageLocationId
 					,ysnIsStorage
@@ -839,6 +853,7 @@ BEGIN TRY
 					,intTransactionDetailId		= @intSettleStorageId
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
+					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
 					,intStorageLocationId		= CS.intStorageLocationId
 					,ysnIsStorage				= 1
@@ -864,6 +879,7 @@ BEGIN TRY
 					,intTransactionDetailId
 					,strTransactionId
 					,intTransactionTypeId
+					,intLotId
 					,intSubLocationId
 					,intStorageLocationId
 					,ysnIsStorage
@@ -886,6 +902,7 @@ BEGIN TRY
 					,intTransactionDetailId		= @intSettleStorageId
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
+					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
 					,intStorageLocationId		= CS.intStorageLocationId
 					,ysnIsStorage				= 0
@@ -978,6 +995,9 @@ BEGIN TRY
 					GROUP BY intCustomerStorageId
 				)b ON b.intCustomerStorageId=a.intCustomerStorageId
 				WHERE a.intItemType=3
+		     
+			 IF EXISTS(SELECT 1 FROM @SettleVoucherCreate WHERE ISNULL(dblCashPrice,0) <> 0 AND ISNULL(dblUnits,0) <> 0 )
+			 BEGIN
 
 				INSERT INTO @voucherDetailStorage 
 				(
@@ -1015,7 +1035,7 @@ BEGIN TRY
 				JOIN tblICItemUOM b ON b.intItemId = a.intItemId AND b.intUnitMeasureId = @intUnitMeasureId
 				JOIN tblICItem c ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = a.intCustomerStorageId			
-				WHERE a.dblCashPrice <> 0 AND SST.intSettleStorageId=@intSettleStorageId
+				WHERE a.dblCashPrice <> 0 AND a.dblUnits <> 0 AND SST.intSettleStorageId=@intSettleStorageId 
 				ORDER BY SST.intSettleStorageTicketId,a.intItemType
 	 
 				---Adding Freight Charges.
@@ -1196,6 +1216,9 @@ BEGIN TRY
 					IF @@ERROR <> 0
 						GOTO SettleStorage_Exit;
 				END
+			
+			END
+
 			END
 
 			-------------------------xxxxxxxxxxxxxxxxxx------------------------------
@@ -1295,7 +1318,7 @@ BEGIN TRY
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
 					,[dblPaidAmount]		= SV.dblCashPrice
-					,[intBillId]			= @intCreatedBillId
+					,[intBillId]			= CASE WHEN @intCreatedBillId=0 THEN NULL ELSE @intCreatedBillId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
 				FROM @SettleVoucherCreate SV
@@ -1305,7 +1328,7 @@ BEGIN TRY
 			END
 
 			UPDATE tblGRSettleStorage
-			SET ysnPosted = 1,intBillId = @intCreatedBillId
+			SET ysnPosted = 1,intBillId = CASE WHEN @intCreatedBillId=0 THEN NULL ELSE @intCreatedBillId END
 			WHERE intSettleStorageId = @intSettleStorageId
 		END
 

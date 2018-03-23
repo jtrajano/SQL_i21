@@ -30,6 +30,11 @@ BEGIN TRY
 		,@dblPhysicalCount1 DECIMAL(38, 24)
 		,@intItemUOMId1 INT
 		,@intPhysicalItemUOMId1 INT
+		,@intYieldCostId INT
+		,@strYieldCostValue NVARCHAR(50)
+		,@ysnPostGL BIT
+
+	SELECT @ysnPostGL = 0
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -78,6 +83,23 @@ BEGIN TRY
 			,@intSubLocationId = intSubLocationId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @intYieldCostId = intAttributeId
+		FROM tblMFAttribute
+		WHERE strAttributeName = 'Add yield cost to output item'
+
+		SELECT @strYieldCostValue = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = @intYieldCostId
+
+		IF @strYieldCostValue = 'False'
+			OR @strYieldCostValue IS NULL
+			OR @strYieldCostValue = ''
+		BEGIN
+			SELECT @ysnPostGL = 1
+		END
 
 		SELECT @intAttributeId = intAttributeId
 		FROM tblMFAttribute
@@ -257,7 +279,7 @@ BEGIN TRY
 						,@strRetBatchId = @strRetBatchId OUTPUT
 						,@ysnPostConsumption = 1
 						,@intBatchId = @intBatchId
-						,@ysnPostGL = 0
+						,@ysnPostGL = @ysnPostGL
 				END
 				ELSE
 				BEGIN
@@ -346,7 +368,7 @@ BEGIN TRY
 						,@strRetBatchId = @strRetBatchId OUTPUT
 						,@ysnPostConsumption = 1
 						,@intBatchId = @intBatchId
-						,@ysnPostGL = 0
+						,@ysnPostGL = @ysnPostGL
 				END
 
 				SELECT @intMachineId = MIN(intMachineId)
@@ -415,18 +437,7 @@ BEGIN TRY
 			,@ItemsForPost AS ItemCostingTableType
 			,@dtmBusinessDate DATETIME
 			,@intBusinessShiftId INT
-			,@intYieldCostId INT
-			,@strYieldCostValue NVARCHAR(50)
-
-		SELECT @intYieldCostId = intAttributeId
-		FROM tblMFAttribute
-		WHERE strAttributeName = 'Add yield cost to output item'
-
-		SELECT @strYieldCostValue = strAttributeValue
-		FROM tblMFManufacturingProcessAttribute
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intLocationId = @intLocationId
-			AND intAttributeId = @intYieldCostId
+			
 
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
@@ -694,8 +705,8 @@ BEGIN TRY
 			,[intCostUOMId] = PL.intItemUOMId
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost
-				ELSE @dblNewUnitCost * RI.dblPercentage / 100
+					THEN @dblNewUnitCost*PL.dblQuantity
+				ELSE (@dblNewUnitCost * RI.dblPercentage / 100)*PL.dblQuantity
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId

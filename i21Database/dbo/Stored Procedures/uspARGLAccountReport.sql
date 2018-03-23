@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGLAccountReport]
-	@dtmAsOfDate			DATETIME = NULL
+	  @dtmAsOfDate			DATETIME = NULL
+	, @intEntityUserId		INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -13,15 +14,16 @@ DECLARE @dtmAsOfDateLocal	DATETIME = @dtmAsOfDate
 IF @dtmAsOfDateLocal IS NULL
     SET @dtmAsOfDateLocal = GETDATE()
 
-TRUNCATE TABLE tblARGLSummaryStagingTable
+DELETE FROM tblARGLSummaryStagingTable WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARGLSummaryStagingTable
-SELECT intAccountId				= GL.intAccountId
+SELECT intAccountId				= GL.intAccountId	 
 	 , strAccountId				= GL.strAccountId
 	 , strAccountCategory		= GL.strAccountCategory
 	 , dblGLBalance				= ISNULL(GL.dblGLBalance, 0)
 	 , dblTotalAR				= ISNULL(AGING.dblTotalAR, 0)
 	 , dblTotalPrepayments		= ISNULL(AGING.dblTotalPrepayments, 0)
 	 , dblTotalReportBalance	= ISNULL(AGING.dblTotalReportBalance, 0)
+	 , intEntityUserId			= @intEntityUserId
 FROM (
 	SELECT GLD.intAccountId
 		 , strAccountId
@@ -54,4 +56,6 @@ OUTER APPLY (
 	     , dblTotalPrepayments		= SUM(dblPrepayments)
 		 , dblTotalReportBalance    = SUM(dblTotalAR)
 	FROM tblARCustomerAgingStagingTable
+	WHERE intEntityUserId = @intEntityUserId
+	  AND strAgingType = 'Summary'
 ) AGING

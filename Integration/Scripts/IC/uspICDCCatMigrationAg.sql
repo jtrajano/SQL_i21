@@ -45,6 +45,8 @@ SELECT RTRIM(agcls_cd)
 	,1
 	,0
 FROM agclsmst oc
+LEFT JOIN tblICCategory CAT ON CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = oc.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS
+WHERE CAT.intCategoryId IS NULL
 
 --=========================================================================
 --Tax groups in category maintenance will be setup manually by AR team

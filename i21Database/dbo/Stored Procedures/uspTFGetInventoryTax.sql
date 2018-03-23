@@ -156,7 +156,9 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strVendorLicenseNumber)
+				, strVendorLicenseNumber
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -193,7 +195,7 @@ BEGIN TRY
 					, tblSMCompanySetup.strZip
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
-					, tblSMCompanySetup.strFederalTaxID
+					, strHeaderFederalTaxID = @CompanyEIN
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
@@ -217,6 +219,8 @@ BEGIN TRY
 					, strTransactionType = 'Receipt'
 					, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId 
 					, tblTRSupplyPoint.strFuelDealerId1
+					, strContactName = tblSMCompanySetup.strContactName
+					, strEmail = tblSMCompanySetup.strEmail
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -331,7 +335,9 @@ BEGIN TRY
 				, strDiversionOriginalDestinationState
 				, strTransactionType
 				, intTransactionNumberId
-				, strVendorLicenseNumber)
+				, strVendorLicenseNumber
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -366,7 +372,7 @@ BEGIN TRY
 					, tblSMCompanySetup.strZip
 					, tblSMCompanySetup.strPhone
 					, tblSMCompanySetup.strStateTaxID
-					, tblSMCompanySetup.strFederalTaxID
+					, strHeaderFederalTaxID = @CompanyEIN
 					, tblEMEntityLocation.strState AS strOriginState
 					, tblEMEntityLocation.strCity AS strOriginCity
 					, OriginCountyTaxCode.strCounty AS strOriginCounty
@@ -390,6 +396,8 @@ BEGIN TRY
 					, strTransactionType = 'Receipt'
 					, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId 
 					, tblTRSupplyPoint.strFuelDealerId1
+					, strContactName = tblSMCompanySetup.strContactName
+					, strEmail = tblSMCompanySetup.strEmail
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -621,7 +629,9 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strVendorLicenseNumber
-				, dblQtyShipped)
+				, dblQtyShipped
+				, strContactName
+				, strEmail)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -683,6 +693,8 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, CONVERT(DECIMAL(18), dblGross)
+				, strContactName
+				, strEmail
 			FROM @TFTransaction Trans
 		END
 

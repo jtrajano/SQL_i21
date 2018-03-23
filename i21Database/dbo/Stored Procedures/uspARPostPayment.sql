@@ -99,6 +99,7 @@ DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Receive Payments'
 DECLARE @CODE NVARCHAR(25) = 'AR'
+DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
 DECLARE  @ARAccount				INT
 		,@DiscountAccount		INT
@@ -451,7 +452,24 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) < 0
-					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Customer Prepayment'))
+					AND A.ysnInvoicePrepayment = 0
+					AND A.strPaymentMethod = 'ACH'
+
+
+					-- AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId 
+					
+					-- AND 
+					
+					-- CASE WHEN A.strPaymentMethod = 'ACH' THEN 
+					-- 	0 
+					-- ELSE 
+					-- 	CASE WHEN B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 
+					-- 		1 
+					-- 	ELSE 
+					-- 		1 
+					-- 	END 
+					-- END = 1
+					-- )
 
 				--Fiscal Year
 				INSERT INTO 
@@ -1487,7 +1505,9 @@ SET @batchIdUsed = @batchId
 					UPDATE tblARPaymentDetail
 					SET
 						 dblDiscount = 0.00
+						,dblBaseDiscount = 0.00
 						,dblInterest = 0.00
+						,dblBaseInterest = 0.00
 					WHERE
 						intPaymentDetailId = @DiscountepPaymetDetailID
 						
@@ -1616,7 +1636,7 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
@@ -1663,7 +1683,7 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
@@ -1690,7 +1710,8 @@ IF @post = 1
 			@AROverpayment P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			A.dblUnappliedAmount <> 0
+			A.dblBaseUnappliedAmount <> @ZeroDecimal
+			OR A.dblUnappliedAmount <> @ZeroDecimal
 				
 		UNION ALL
 		--CREDIT Prepayment
@@ -1709,7 +1730,7 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
@@ -1739,7 +1760,8 @@ IF @post = 1
 			@ARPrepayment P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			A.dblAmountPaid <> 0
+			A.dblAmountPaid <> @ZeroDecimal
+			OR A.dblBaseAmountPaid <> @ZeroDecimal
 				
 				
 		UNION ALL
@@ -1759,8 +1781,8 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -1798,8 +1820,11 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblDiscount <> 0
-			AND B.dblAmountDue = 0
+			(B.dblDiscount <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseDiscount <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1824,8 +1849,8 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -1863,9 +1888,13 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblInterest <> 0
-			AND B.dblPayment <> 0
-			AND B.dblAmountDue = 0
+			(B.dblInterest <> @ZeroDecimal
+			AND B.dblPayment <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseInterest <> @ZeroDecimal
+			AND B.dblBasePayment <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1894,8 +1923,8 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -1939,7 +1968,8 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblPayment <> 0
+			B.dblPayment <> @ZeroDecimal
+			OR B.dblBasePayment <> @ZeroDecimal
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -1967,7 +1997,7 @@ IF @post = 1
 			,dblExchangeRate			= 0
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
 			,intJournalLineNo			= A.intPaymentId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
@@ -2037,8 +2067,8 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -2076,8 +2106,11 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblDiscount <> 0
-			AND B.dblAmountDue = 0
+			(B.dblDiscount <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseDiscount <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -2102,8 +2135,8 @@ IF @post = 1
 			,dblExchangeRate			= 1
 			,dtmDateEntered				= @PostDate
 			,dtmTransactionDate			= A.dtmDatePaid
-			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
-			,intJournalLineNo			= A.intPaymentId
+			,strJournalLineDescription	= @POSTDESC + @SCREEN_NAME 
+			,intJournalLineNo			= B.intPaymentDetailId
 			,ysnIsUnposted				= 0
 			,intUserId					= @userId
 			,intEntityId				= @UserEntityID				
@@ -2141,9 +2174,13 @@ IF @post = 1
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
 		WHERE
-			B.dblInterest <> 0
-			AND B.dblPayment <> 0
-			AND B.dblAmountDue = 0
+			(B.dblInterest <> @ZeroDecimal
+			AND B.dblPayment <> @ZeroDecimal
+			AND B.dblAmountDue = @ZeroDecimal)
+			OR
+			(B.dblBaseInterest <> @ZeroDecimal
+			AND B.dblBasePayment <> @ZeroDecimal
+			AND B.dblBaseAmountDue = @ZeroDecimal)
 		--GROUP BY
 		--	A.intPaymentId
 		--	,A.strRecordNumber
@@ -2216,7 +2253,7 @@ IF @post = 0
 				,GL.dblExchangeRate
 				,dtmDateEntered					= @PostDate
 				,GL.dtmTransactionDate
-				,GL.strJournalLineDescription
+				,strJournalLineDescription		= REPLACE(GL.strJournalLineDescription, @POSTDESC, 'Unposted ')
 				,GL.intJournalLineNo 
 				,ysnIsUnposted					= 1
 				,intUserId						= @userId
@@ -2411,6 +2448,30 @@ IF @recap = 0
 	BEGIN
 		BEGIN TRY 
 			--SELECT * FROM @GLEntries
+			IF @post = 1
+			BEGIN
+				DECLARE @DetailId INT
+				SELECT TOP 1
+					@DetailId = GE.intJournalLineNo
+				FROM
+					@GLEntries GE
+				INNER JOIN
+					tblARPaymentDetail ARPD
+						ON GE.intJournalLineNo = ARPD.intPaymentDetailId
+						AND GE.intTransactionId = ARPD.intPaymentId
+				WHERE				
+					GE.intAccountId = @DiscountAccount
+					AND ARPD.dblDiscount = @ZeroDecimal
+					AND ARPD.dblBaseDiscount = @ZeroDecimal
+
+				IF ISNULL(@DetailId,0) <> 0
+				BEGIN
+					SELECT @ErrorMerssage = 'Invalid Discount Entry(Record - ' + CAST(@DetailId AS NVARCHAR(30)) + ')!'								
+					GOTO Do_Rollback
+				END
+			END
+			
+				
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH

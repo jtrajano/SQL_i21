@@ -11,7 +11,7 @@
 			,strItemNumber = C.strItemNo
 			,strItemDescription = C.strDescription
 			,D.strCategoryCode
-			,dblQuantity = B.dblQtyShipped
+			,dblQuantity = O.dblQuantity
 			,F.strUnitMeasure
 			,E.dblUnitQty
 			,dblCost = B.dblPrice

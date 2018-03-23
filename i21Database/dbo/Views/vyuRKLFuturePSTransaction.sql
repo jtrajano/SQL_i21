@@ -32,6 +32,11 @@ SELECT intSelectedInstrumentTypeId,
 		from tblRKBrokerageCommission bc
 		LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate),0) * -1 --commision is always negative (RM-1174)
+		,intBrokerageCommissionId =(select TOP 1
+		bc.intBrokerageCommissionId
+		from tblRKBrokerageCommission bc
+		LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
+		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate)
 	  ,dtmFilledDate
 	  ,ot.intFutOptTransactionHeaderId,
 	   c.intCurrencyID as intCurrencyId
@@ -74,6 +79,7 @@ SELECT intSelectedInstrumentTypeId,
       ,intFutOptTransactionId
       ,null dblContractSize
       ,null  dblFutCommission
+	  ,null intBrokerageCommissionId
 	  ,null dtmFilledDate
 	  ,ot.intFutOptTransactionHeaderId
 	  ,null as intCurrencyId
@@ -91,7 +97,6 @@ LEFT JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ot.[intCurrencyExchange
 where intSelectedInstrumentTypeId=2 AND ot.intInstrumentTypeId = 3 and isnull(ysnLiquidation,0) = 0 
 )t)t1 WHERE dblBalanceLot > 0 
 Order by dtmCreateDateTime Asc, dblPrice desc
-
 
 
 

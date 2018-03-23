@@ -32,5 +32,6 @@
 	,[dblPrepaids]				NUMERIC(18,6)
 	,[dtmDate]					DATETIME
 	,[dtmDueDate]				DATETIME
+	,[intEntityUserId]			INT NULL
 	,[intConcurrencyId]			INT NOT NULL	DEFAULT 0
 	)

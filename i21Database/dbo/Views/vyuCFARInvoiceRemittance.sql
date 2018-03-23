@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
 AS
 
@@ -18,7 +19,8 @@ FROM
 ,strCustomerName						AS strCustomerName
 ,strCFEmail								AS strEmail								
 ,strCFEmailDistributionOption			AS strEmailDistributionOption	
-,strCustomerNumber						AS strCustomerNumber		
+,strCustomerNumber						AS strCustomerNumber	
+,intEntityUserId	
 FROM            dbo.tblARCustomerStatementStagingTable 
 GROUP BY 
 intEntityCustomerId, 
@@ -32,7 +34,8 @@ dblCFEligableGallon,
 strCustomerName,
 strCFEmail, 
 strCFEmailDistributionOption,
-strCustomerNumber) as tbl1
+strCustomerNumber
+,intEntityUserId) as tbl1
 
 INNER JOIN 
 

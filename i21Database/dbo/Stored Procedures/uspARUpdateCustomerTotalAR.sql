@@ -7,6 +7,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCustomerNumber
 	 , strCustomerInfo
 	 , intEntityCustomerId
+	 , intEntityUserId
 	 , dblCreditLimit
 	 , dblTotalAR
 	 , dblFuture
@@ -26,13 +27,17 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strSourceTransaction
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strAgingType
 )
-EXEC uspARCustomerAgingAsOfDateReport NULL, NULL, NULL, NULL
+EXEC uspARCustomerAgingAsOfDateReport
 
 UPDATE CUSTOMER
 SET dblARBalance = AGING.dblTotalAR
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-	INNER JOIN (SELECT intEntityCustomerId
-					 , dblTotalAR = ISNULL(dblTotalAR, 0)
-				FROM tblARCustomerAgingStagingTable
-	) AGING ON CUSTOMER.intEntityId = AGING.intEntityCustomerId
+INNER JOIN (
+	SELECT intEntityCustomerId
+		 , dblTotalAR = ISNULL(dblTotalAR, 0)
+	FROM tblARCustomerAgingStagingTable
+) AGING ON CUSTOMER.intEntityId = AGING.intEntityCustomerId
+
+TRUNCATE TABLE tblARCustomerAgingStagingTable

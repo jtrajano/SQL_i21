@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceProductRecapReport]
 	  @dtmDateFrom		DATETIME = NULL
 	, @dtmDateTo		DATETIME = NULL
+	, @intEntityUserId	INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,9 +16,10 @@ IF @dtmDateFrom IS NULL
 IF @dtmDateTo IS NULL
     SET @dtmDateTo = GETDATE()
 
-TRUNCATE TABLE tblARProductRecapStagingTable
+DELETE FROM tblARProductRecapStagingTable WHERE ISNULL(intEntityUserId, 0) = 0 OR intEntityUserId = @intEntityUserId
 INSERT INTO tblARProductRecapStagingTable (
 	  intEntityCustomerId
+	, intEntityUserId
 	, strCustomerName
 	, intCompanyLocationId
 	, strLocationNumber
@@ -25,7 +27,7 @@ INSERT INTO tblARProductRecapStagingTable (
 	, intItemId
 	, intTaxCodeId
 	, strProductNo
-	, intSortNo
+	, intSortNo	
 	, strDescription
 	, strTransactionType
 	, strType
@@ -33,28 +35,29 @@ INSERT INTO tblARProductRecapStagingTable (
 	, dblAmounts
 )	
 SELECT DISTINCT
-	  ABC.intEntityCustomerId
-	, ARC.strCustomerName
-	, ABC.intCompanyLocationId
-	, LOCATION.strLocationNumber
-	, LOCATION.strLocationName
-	, ABC.intItemId
-	, ABC.intTaxCodeId
+	  intEntityCustomerId			= ABC.intEntityCustomerId
+	, intEntityUserId				= @intEntityUserId
+	, strCustomerName				= ARC.strCustomerName
+	, intCompanyLocationId			= ABC.intCompanyLocationId
+	, strLocationNumber				= [LOCATION].strLocationNumber
+	, strLocationName				= [LOCATION].strLocationName
+	, intItemId						= ABC.intItemId
+	, intTaxCodeId					= ABC.intTaxCodeId
 	, strProductNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN ABC.strItemNo  
 										   WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 'RCV' 
 										   WHEN ABC.strTransactionType = 'TaxCodes' THEN ABC.strTaxCode
 										   WHEN ABC.strTransactionType = 'Service Charge' THEN 'Service Charges'
 										   WHEN ABC.strTransactionType = 'Debit Memo' THEN 'DEBIT MEMO'
 									  END
-	, intSortNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN 4
+	, intSortNo						= CASE WHEN ABC.strTransactionType = 'Items' THEN 4
 										   WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 1
 										   WHEN ABC.strTransactionType = 'TaxCodes' THEN 5
 										   WHEN ABC.strTransactionType = 'Service Charge' THEN 2
 										   WHEN ABC.strTransactionType = 'Debit Memo' THEN 3
 									  END
-	, ABC.strDescription
-	, ABC.strTransactionType
-	, ABC.strType
+	, strDescription				= ABC.strDescription
+	, strTransactionType			= ABC.strTransactionType
+	, strType						= ABC.strType
 	, dblUnits						= ABC.dblQtyShipped
 	, dblAmounts					= ABC.dblInvoiceTotal
 FROM 
@@ -126,7 +129,7 @@ FROM
 			 , intCompanyLocationId		= ARI.intCompanyLocationId
 		     , strTransactionType		= 'TaxCodes'
 			 , strType					= NULL
-		     , dblInvoiceTotal			= SUM(ARIDT.dblAdjustedTax)
+		     , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARIDT.dblAdjustedTax)) --SUM(ARIDT.dblAdjustedTax)
 			 , intItemId				= NULL
 			 , dblQtyShipped			= 0.000000
 			 , intTaxCodeId				= ARIDT.intTaxCodeId
@@ -239,7 +242,7 @@ FROM
 		 , intCompanyLocationId		= ARI.intCompanyLocationId
 		 , strTransactionType		= 'Payments'
 		 , strType					= NULL
-		 , dblInvoiceTotal			= SUM(ARI.dblPayment)
+		 , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARI.dblPayment)) --SUM(ARI.dblPayment)
 		 , intItemId				= NULL
 		 , strImportFormat			= NULL
 		 , strDescription			= 'RCV' + ' - ' + 'Payments'
@@ -281,6 +284,7 @@ INNER JOIN (
 		  intEntityCustomerId
 		, strCustomerName
 	FROM dbo.tblARCustomerActivityStagingTable WITH (NOLOCK)
+	WHERE intEntityUserId = @intEntityUserId
 ) ARC ON ABC.intEntityCustomerId = ARC.intEntityCustomerId
 LEFT JOIN (
 	SELECT intCompanyLocationId
@@ -290,3 +294,5 @@ LEFT JOIN (
 ) LOCATION ON ABC.intCompanyLocationId = LOCATION.intCompanyLocationId
 WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0
 ORDER BY ABC.intCompanyLocationId, intSortNo
+
+SELECT * FROM tblARProductRecapStagingTable WHERE intEntityUserId = @intEntityUserId

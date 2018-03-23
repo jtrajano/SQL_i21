@@ -49,6 +49,26 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE  
 			ARI.[ysnPosted] = 1
 
+
+		UNION
+
+		--Recurring Invoice
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+			,[intItemId]			= I.[intItemId] 
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Posting recurring invoice(' + I.[strInvoiceNumber] + ') is not allowed.'
+		FROM 
+			@Invoices I
+		INNER JOIN 
+			(SELECT [intInvoiceId], [ysnRecurring] FROM tblARInvoice WITH (NOLOCK)) ARI
+				ON I.[intInvoiceId] = ARI.[intInvoiceId]
+		WHERE  
+			ARI.[ysnRecurring] = 1
+
 		UNION
 		--Fiscal Year
 		SELECT
@@ -1272,6 +1292,7 @@ ELSE
 		INNER JOIN 
 			@Invoices I
 				ON ARPD.[intInvoiceId] = I.[intInvoiceId]
+		WHERE @Recap = 0
 
 		UNION
 		--Invoice with created Bank Deposit

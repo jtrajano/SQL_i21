@@ -5,6 +5,7 @@
 	[intTransactionId]			INT NULL,
 	[intItemId]					INT NULL,
 	[intInvoiceDetailTaxId]		INT NULL,
+	[intEntityUserId]			INT NULL,
 	[strReportDateRange]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

@@ -93,7 +93,8 @@ BEGIN TRY
 	--Declare temp01 table holder
     DECLARE @tblTempOne TABLE 
     (
-		strLocation NVARCHAR(250)
+		intCompanyLocationId INT
+		, strLocation NVARCHAR(250)
 		, strUpc NVARCHAR(50)
 		, strItemDescription NVARCHAR(250)
 		, strChangeDescription NVARCHAR(100)
@@ -242,7 +243,7 @@ BEGIN TRY
 				(
 					'Sales start date'
 					, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmBeginDate,111), ''/'', ''-'')'
-					, '''' + CAST(@SalesStartDate as NVARCHAR(250)) + ''''
+					, '''' + CAST(REPLACE(CONVERT(NVARCHAR(10),@SalesStartDate,111), '/', '-') as NVARCHAR(250)) + ''''
 					, @Location
 					, @Vendor
 					, @Category
@@ -269,7 +270,7 @@ BEGIN TRY
 				(
 					'Sales end date'
 					, 'REPLACE(CONVERT(NVARCHAR(10),IP.dtmEndDate,111), ''/'', ''-'')'
-					, '''' + CAST(@SalesEndDate as NVARCHAR(250)) + ''''
+					, '''' + CAST(REPLACE(CONVERT(NVARCHAR(10),@SalesEndDate,111), '/', '-') as NVARCHAR(250)) + ''''
 					, @Location
 					, @Vendor
 					, @Category
@@ -291,7 +292,7 @@ BEGIN TRY
 END 
 
 --NEW
-SELECT @RecCount  = count(*) from @tblTempOne 
+SELECT @RecCount  = count(*) from @tblTempOne
 DELETE FROM @tblTempOne WHERE strOldData = strNewData
 SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
@@ -300,10 +301,6 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 --DELETE FROM tblSTMassUpdateReportMaster WHERE OldData =  NewData
 --SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=  NewData
 	  
-
-
-
-
 
 
 
@@ -540,137 +537,216 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
  END
      
 
-	--AUDIT LOG
+	----AUDIT LOG
 
-	--use distinct to table Id's
-	INSERT INTO @tblId(intId)
-	SELECT DISTINCT intChildId 
-	--FROM tblSTMassUpdateReportMaster
-	FROM @tblTempOne
-	ORDER BY intChildId ASC
+	----use distinct to table Id's
+	--INSERT INTO @tblId(intId)
+	--SELECT DISTINCT intChildId 
+	----FROM tblSTMassUpdateReportMaster
+	--FROM @tblTempOne
+	--ORDER BY intChildId ASC
 
-	--==========================================================================================================================================
-	WHILE EXISTS (SELECT TOP (1) 1 FROM @tblId)
-	BEGIN
-		SELECT TOP 1 @intChildId = intId FROM @tblId
+	----==========================================================================================================================================
+	--WHILE EXISTS (SELECT TOP (1) 1 FROM @tblId)
+	--BEGIN
+	--	SELECT TOP 1 @intChildId = intId FROM @tblId
 
-		--use distinct to table tempOne
-		DELETE FROM @tblTempTwo
-		INSERT INTO @tblTempTwo(strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
-		SELECT DISTINCT strUpc
-						, strItemDescription
-						, strChangeDescription
-						, strOldData
-						, strNewData
-						, intParentId
-						, intChildId 
-		--FROM tblSTMassUpdateReportMaster
-		FROM @tblTempOne
-		WHERE intChildId = @intChildId
-		ORDER BY intChildId ASC
+	--	--use distinct to table tempOne
+	--	DELETE FROM @tblTempTwo
+	--	INSERT INTO @tblTempTwo(strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
+	--	SELECT DISTINCT strUpc
+	--					, strItemDescription
+	--					, strChangeDescription
+	--					, strOldData
+	--					, strNewData
+	--					, intParentId
+	--					, intChildId 
+	--	--FROM tblSTMassUpdateReportMaster
+	--	FROM @tblTempOne
+	--	WHERE intChildId = @intChildId
+	--	ORDER BY intChildId ASC
 
-		SET @RowCountMin = 1
-		SELECT @RowCountMax = Count(*) FROM @tblTempTwo
+	--	SET @RowCountMin = 1
+	--	SELECT @RowCountMax = Count(*) FROM @tblTempTwo
 
-			WHILE(@RowCountMin <= @RowCountMax)
-			BEGIN
-				SELECT TOP(1) @strChangeDescription = strChangeDescription, @strOldData = strOldData, @strNewData = strNewData, @intParentId = intParentId from @tblTempTwo
+	--		WHILE(@RowCountMin <= @RowCountMax)
+	--		BEGIN
+	--			SELECT TOP(1) @strChangeDescription = strChangeDescription, @strOldData = strOldData, @strNewData = strNewData, @intParentId = intParentId from @tblTempTwo
 			    
-				IF(@strChangeDescription = 'Standard Cost' OR @strChangeDescription = 'Retail Price')
-				BEGIN
-					SET @ItemPricingAuditLog = @ItemPricingAuditLog + '{"change":"dblStandardCost","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
-				END
+	--			IF(@strChangeDescription = 'Standard Cost' OR @strChangeDescription = 'Retail Price')
+	--			BEGIN
+	--				SET @ItemPricingAuditLog = @ItemPricingAuditLog + '{"change":"dblStandardCost","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
+	--			END
 
-				ELSE IF(@strChangeDescription = 'Sales Price' OR @strChangeDescription = 'Sales start date' OR @strChangeDescription = 'Sales end date')
-				BEGIN
-					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblStandardCost","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
-				END
+	--			ELSE IF(@strChangeDescription = 'Sales Price' OR @strChangeDescription = 'Sales start date' OR @strChangeDescription = 'Sales end date')
+	--			BEGIN
+	--				SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblStandardCost","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
+	--			END
 
-				SET @RowCountMin = @RowCountMin + 1
-				DELETE TOP (1) FROM @tblTempTwo
-			END
-
-
-		--INSERT to AUDITLOG
-		--=================================================================================================
-		--tblICItemPricing
-		IF (@ItemPricingAuditLog != '')
-		BEGIN
-			--Remove last character comma(,)
-			SET @ItemPricingAuditLog = left(@ItemPricingAuditLog, len(@ItemPricingAuditLog)-1)
-
-			SET @ItemPricingAuditLog = '{"change":"tblICItemPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ItemPricingAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Pricing"},'
-		END
-
-		--tblICItemSpecialPricing
-		IF (@ItemSpecialPricingAuditLog != '')
-		BEGIN
-			--Remove last character comma(,)
-			SET @ItemSpecialPricingAuditLog = left(@ItemSpecialPricingAuditLog, len(@ItemSpecialPricingAuditLog)-1)
-
-			SET @ItemSpecialPricingAuditLog = '{"change":"tblICItemSpecialPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ItemSpecialPricingAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Promotional Pricing"},'
-		END
-
-		SET @JsonStringAuditLog = @ItemPricingAuditLog + @ItemSpecialPricingAuditLog
+	--			SET @RowCountMin = @RowCountMin + 1
+	--			DELETE TOP (1) FROM @tblTempTwo
+	--		END
 
 
-		SELECT @checkComma = CASE WHEN RIGHT(@JsonStringAuditLog, 1) IN (',') THEN 1 ELSE 0 END
-		IF(@checkComma = 1)
-		BEGIN
-			--Remove last character comma(,)
-			SET @JsonStringAuditLog = left(@JsonStringAuditLog, len(@JsonStringAuditLog)-1)
-		END
+	--	--INSERT to AUDITLOG
+	--	--=================================================================================================
+	--	--tblICItemPricing
+	--	IF (@ItemPricingAuditLog != '')
+	--	BEGIN
+	--		--Remove last character comma(,)
+	--		SET @ItemPricingAuditLog = left(@ItemPricingAuditLog, len(@ItemPricingAuditLog)-1)
 
-		SET @JsonStringAuditLog = '{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @JsonStringAuditLog + ']}'
-		INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-		VALUES(
-				'Updated'
-				, 'Inventory.view.Item'
-				, @intParentId
-				, ''
-				, null
-				, @JsonStringAuditLog
-				, GETUTCDATE()
-				, @currentUserId
-				, 1
-		)
-		--=================================================================================================
+	--		SET @ItemPricingAuditLog = '{"change":"tblICItemPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ItemPricingAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Pricing"},'
+	--	END
 
-		--Clear
-		SET @ItemPricingAuditLog = ''
-		SET @ItemSpecialPricingAuditLog = ''
+	--	--tblICItemSpecialPricing
+	--	IF (@ItemSpecialPricingAuditLog != '')
+	--	BEGIN
+	--		--Remove last character comma(,)
+	--		SET @ItemSpecialPricingAuditLog = left(@ItemSpecialPricingAuditLog, len(@ItemSpecialPricingAuditLog)-1)
 
-		DELETE TOP (1) FROM @tblId
+	--		SET @ItemSpecialPricingAuditLog = '{"change":"tblICItemSpecialPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ItemSpecialPricingAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Promotional Pricing"},'
+	--	END
+
+	--	SET @JsonStringAuditLog = @ItemPricingAuditLog + @ItemSpecialPricingAuditLog
+
+
+	--	SELECT @checkComma = CASE WHEN RIGHT(@JsonStringAuditLog, 1) IN (',') THEN 1 ELSE 0 END
+	--	IF(@checkComma = 1)
+	--	BEGIN
+	--		--Remove last character comma(,)
+	--		SET @JsonStringAuditLog = left(@JsonStringAuditLog, len(@JsonStringAuditLog)-1)
+	--	END
+
+	--	SET @JsonStringAuditLog = '{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @JsonStringAuditLog + ']}'
+	--	INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+	--	VALUES(
+	--			'Updated'
+	--			, 'Inventory.view.Item'
+	--			, @intParentId
+	--			, ''
+	--			, null
+	--			, @JsonStringAuditLog
+	--			, GETUTCDATE()
+	--			, @currentUserId
+	--			, 1
+	--	)
+	--	--=================================================================================================
+
+	--	--Clear
+	--	SET @ItemPricingAuditLog = ''
+	--	SET @ItemSpecialPricingAuditLog = ''
+
+	--	DELETE TOP (1) FROM @tblId
+	--END
+	----==========================================================================================================================================
+
+
+
+
+	-- ==========================================================================
+	-- Return Count result to Server side
+	SELECT @UpdateCount = COUNT(*)
+	FROM 
+	(
+	  SELECT DISTINCT intChildId FROM @tblTempOne WHERE strOldData != strNewData
+	) T1
+
+	DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
+	DECLARE @strEntityIds AS NVARCHAR(MAX)= ''
+
+	SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
+	SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)
+	
+	SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
+	FROM tblEMEntity EM
+	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
+	JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
+	WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+	AND ET.strType IN ('User', 'Employee')
+
+
+
+	SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
+
+	--PRINT @strEntityIds
+	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount, @strEntityIds as strEntityIds
+	-- ==========================================================================
+
+
+	-- ==========================================================================
+	-- Create Audit Log
+	IF (@UpdateCount > 0)
+	 BEGIN
+		If(OBJECT_ID('tempdb..#tempAudit') Is Not Null)
+		Begin
+			Drop Table #tempAudit
+		End
+
+		CREATE TABLE #tempAudit (intRowCount INT NOT NULL IDENTITY
+									, strUpc NVARCHAR(50)
+									, strLocation NVARCHAR(250)
+									, strItemDescription NVARCHAR(250)
+									, strChangeDescription NVARCHAR(100)
+									, strOldData NVARCHAR(MAX)
+									, strNewData NVARCHAR(MAX)
+									, intParentId INT
+									, intChildId INT)
+
+		INSERT INTO #tempAudit(strUpc
+							, strLocation
+							, strItemDescription
+							, strChangeDescription
+							, strOldData
+							, strNewData
+							, intParentId
+							, intChildId)
+		SELECT DISTINCT strUpc
+							,strLocation
+							, strItemDescription
+							, strChangeDescription
+							, strOldData
+							, strNewData
+							, intParentId
+							, intChildId
+		FROM @tblTempOne
+		WHERE strOldData != strNewData
+
+		SELECT * FROM #tempAudit
+
+		EXEC uspSTUpdateItemPricingInsertAuditLog @currentUserId
+		DROP TABLE #tempAudit
+
+
+		DELETE FROM tblSTMassUpdateReportMaster
+
+		INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
+		SELECT strLocation
+			  , strUpc
+			  , strItemDescription
+			  , strChangeDescription
+			  , strOldData
+			  , strNewData 
+		FROM @tblTempOne
+		WHERE strOldData != strNewData
+
+		--OLD
+		--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
+
+
+
+		-- Update Register Notification
+		EXEC uspSTUpdateRegisterNotification @strLocationIds
 	END
-	--==========================================================================================================================================
+	-- ==========================================================================
 
---NEW
-SELECT @UpdateCount = COUNT(*)
-FROM 
-(
-  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
-) T1
-SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
-
-DELETE FROM tblSTMassUpdateReportMaster
-
-INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
-SELECT strLocation
-	  , strUpc
-	  , strItemDescription
-	  , strChangeDescription
-	  , strOldData
-	  , strNewData 
-FROM @tblTempOne
-
-
---OLD
---SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
-
+	
 END TRY
 
-BEGIN CATCH       
- SET @ErrMsg = ERROR_MESSAGE()      
- IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
- RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+BEGIN CATCH  
+	SET @ErrMsg = ERROR_MESSAGE()  
+	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')     
+	--SET @ErrMsg = ERROR_MESSAGE()      
+	--IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
+	--RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH

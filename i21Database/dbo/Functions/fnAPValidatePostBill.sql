@@ -202,6 +202,22 @@ BEGIN
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 			AND A.intTransactionType = 1
 
+		--VALIDATION FOR RECEIPT CHARGE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'The item "' + D.strItemNo + '" on this transaction was already vouchered.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			12
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN dbo.tblICInventoryReceiptCharge C ON B.intInventoryReceiptChargeId = C.intInventoryReceiptChargeId
+			INNER JOIN dbo.tblICItem D ON D.intItemId  = B.intItemId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) 
+			AND C.dblQuantityBilled = C.dblQuantity	  
+			AND A.intTransactionType = 1
+
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
 			'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',

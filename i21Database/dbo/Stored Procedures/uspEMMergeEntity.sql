@@ -230,6 +230,9 @@ BEGIN
 			if @hasUser = 1
 			BEGIN 
 				EXEC('alter table tblSMUserSecurity drop constraint AK_tblSMUserSecurity_strUserName')
+				EXEC('alter table tblSMLicenseAcceptance drop constraint FK_tblSMLicenseAcceptance_tblSMUserSecurity')
+				EXEC('alter table tblSMUserLogin drop constraint FK_tblSMUserLogin_tblSMUserSecurity')
+				EXEC('alter table tblSMUserSecurityMenu drop constraint FK_tblSMUserSecurityMenu_tblSMUserSecurity')
 
 				EXEC('insert into tblSMUserSecurityCompanyLocationRolePermission(intEntityUserSecurityId, intEntityId, intUserRoleId, intCompanyLocationId)
 						select ' + @PrimaryKeyString + ',' + @PrimaryKeyString + ' ,intUserRoleId, intCompanyLocationId 
@@ -300,6 +303,9 @@ BEGIN
 			if @hasUser = 1
 			BEGIN 
 				EXEC('ALTER TABLE tblSMUserSecurity ADD CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])')
+				EXEC('ALTER TABLE tblSMLicenseAcceptance ADD CONSTRAINT [FK_tblSMLicenseAcceptance_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])  ON DELETE CASCADE')
+				EXEC('ALTER TABLE tblSMUserLogin ADD CONSTRAINT [FK_tblSMUserLogin_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityId]) ON DELETE CASCADE')
+				EXEC('ALTER TABLE tblSMUserSecurityMenu ADD CONSTRAINT [FK_tblSMUserSecurityMenu_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId]) ON DELETE CASCADE')
 			END 
 			
 			EXEC('UPDATE tblEMEntity set strEntityNo = null WHERE intEntityId = ' + @CurMergeId)

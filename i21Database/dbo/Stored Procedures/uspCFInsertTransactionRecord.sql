@@ -1076,7 +1076,7 @@ BEGIN
 			,[intNetworkId]
 			,[intARItemId]
 			,[intARLocationId]				
-			,[intContractId]				
+			--,[intContractId]				
 			,[dblQuantity]				
 			,[dtmBillingDate]			
 			,[dtmPostedDate]		
@@ -1124,7 +1124,7 @@ BEGIN
 			,@intNetworkId
 			,@intARItemId
 			,@intARItemLocationId			
-			,@intContractId			
+			--,@intContractId			
 			,@dblQuantity				
 			,@dtmBillingDate		
 			,@strPostedDate	
@@ -1551,7 +1551,7 @@ BEGIN
 				------------------------------------------------------------
 				--				UPDATE CONTRACTS QUANTITY				  --
 				------------------------------------------------------------
-				IF (@strPriceMethod = 'Contract Pricing')
+				IF (@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
 				BEGIN
 					EXEC uspCTUpdateScheduleQuantity 
 					 @intContractDetailId = @intContractId

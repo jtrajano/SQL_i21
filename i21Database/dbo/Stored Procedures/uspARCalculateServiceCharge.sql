@@ -13,7 +13,8 @@
 	@serviceChargePostDate	DATE,
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
 	@totalAmount		NUMERIC(18,6) = NULL OUTPUT,
-	@upToDateCustomer 	BIT = 0
+	@upToDateCustomer 	BIT = 0,
+	@intEntityUserId	INT = NULL
 AS
 	SET NOCOUNT ON
 	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT, intTermId INT, ysnActive BIT)	
@@ -94,7 +95,7 @@ AS
 				FOR XML PATH ('')
 			) C (intEntityId)
 
-			TRUNCATE TABLE tblARCustomerAgingStagingTable
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 			INSERT INTO tblARCustomerAgingStagingTable (
 				  strCustomerName
 				, strCustomerNumber
@@ -104,6 +105,7 @@ AS
 				, intInvoiceId
 				, strBOLNumber
 				, intEntityCustomerId
+				, intEntityUserId
 				, dblCreditLimit
 				, dblTotalAR
 				, dblFuture
@@ -129,16 +131,20 @@ AS
 				, strType
 				, strCompanyName
 				, strCompanyAddress
+				, strAgingType
 			)
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate, @ysnInclude120Days = 0, @strCustomerIds = @strCustomerIds
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @asOfDate
+														  , @ysnInclude120Days = 0
+														  , @strCustomerIds = @strCustomerIds
+														  , @intEntityUserId = @intEntityUserId
 
 			IF ISNULL(@ysnChargeonCharge, 1) = 0
-				DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'Service Charge'
+				DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'Service Charge' AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 
 			IF (DATEPART(dd, @asOfDate) = 31)
-				DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @asOfDate
+				DELETE FROM tblARCustomerAgingStagingTable WHERE dtmDueDate = @asOfDate AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 
-			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran'
+			DELETE FROM tblARCustomerAgingStagingTable WHERE strType = 'CF Tran' AND intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 
 			--PROCESS BY AGING BALANCE	
 			INSERT INTO @tblComputedBalances (
@@ -153,7 +159,9 @@ AS
 				SELECT intEntityId
 				FROM dbo.tblARCustomer WITH (NOLOCK)		
 				WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
-			) C ON C.intEntityId = AGING.intEntityCustomerId		
+			) C ON C.intEntityId = AGING.intEntityCustomerId	
+			WHERE AGING.intEntityUserId = @intEntityUserId 
+			  AND AGING.strAgingType = 'Detail'	
 			GROUP BY AGING.intEntityCustomerId
 			HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @zeroDecimal
 		END
@@ -377,25 +385,26 @@ AS
 								 , @entityId
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
-								 , AVG(dblAmountDue)
+								 , dblAmountDue
 								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > AVG(dblAmountDue)
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
 												 THEN 0
-												 ELSE AVG(dblTotalAmount)
+												 ELSE dblTotalAmount
 											END
 										THEN @dblMinimumSC 
 										ELSE 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > AVG(dblAmountDue)
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
 												 THEN 0
-												 ELSE AVG(dblTotalAmount)
+												 ELSE dblTotalAmount
 											END
 								   END
 								 , intServiceChargeDays
 							FROM @tempTblTypeServiceCharge 
-								GROUP BY intEntityCustomerId, intServiceChargeDays 
-								HAVING AVG(dblAmountDue) > @zeroDecimal 
-								   AND AVG(dblTotalAmount) > @zeroDecimal
+							WHERE dblAmountDue > @zeroDecimal 
+							  AND dblTotalAmount > @zeroDecimal
 						END
+
+					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue <= @dblMinFinanceSC
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN

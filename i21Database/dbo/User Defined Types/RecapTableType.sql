@@ -40,7 +40,8 @@
 	[dblSourceUnitDebit]		NUMERIC (18, 6)  NULL,
 	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
 	[intCommodityId]			INT NULL,
-	intSourceEntityId INT NULL
+	intSourceEntityId INT NULL,
+	ysnRebuild BIT NULL
 	-- new columns GL-3550
 )
 

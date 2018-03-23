@@ -5,6 +5,7 @@
 	[intItemId]					INT NULL,
 	[intTaxCodeId]				INT NULL,
 	[intSortNo]					INT NULL,
+	[intEntityUserId]			INT NULL,
     [strCustomerName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationName]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
