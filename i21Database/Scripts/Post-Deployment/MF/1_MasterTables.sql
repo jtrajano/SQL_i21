@@ -3385,3 +3385,15 @@ BEGIN
 		AND intOrderTypeId = 5
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFCostDriver WHERE intCostDriverId = 1)
+BEGIN
+    INSERT INTO tblMFCostDriver(intCostDriverId,strName)
+    VALUES(1,'Hours/Units')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFCostDriver WHERE intCostDriverId = 2)
+BEGIN
+    INSERT INTO tblMFCostDriver(intCostDriverId,strName)
+    VALUES(2,'Flat')
+END
+GO

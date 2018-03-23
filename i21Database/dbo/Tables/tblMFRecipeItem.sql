@@ -26,6 +26,8 @@
     [dblScrap] NUMERIC(18, 6) NOT NULL CONSTRAINT [DF_tblMFRecipeItem_dblScrap] DEFAULT 0, 
     [ysnConsumptionRequired] BIT NOT NULL CONSTRAINT [DF_tblMFRecipeItem_ysnConsumptionRequired] DEFAULT 0,
 	[dblCostAllocationPercentage] NUMERIC(18,6) NULL,
+	[intCostDriverId] [int] NULL,
+	[dblCostRate] NUMERIC(18,6) NULL,
 	[intMarginById] [int] NULL,
 	[dblMargin] NUMERIC(18,6) NULL,
 	[ysnCostAppliedAtInvoice] BIT,
@@ -50,6 +52,7 @@
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFMarginBy_intMarginById] FOREIGN KEY ([intMarginById]) REFERENCES [tblMFMarginBy]([intMarginById]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFCommentType_intCommentTypeId] FOREIGN KEY ([intCommentTypeId]) REFERENCES [tblMFCommentType]([intCommentTypeId]),
 	CONSTRAINT [FK_tblMFRecipeItem_tblMFManufacturingCell_intManufacturingCellId] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblMFManufacturingCell]([intManufacturingCellId]),
+	CONSTRAINT [FK_tblMFRecipeItem_tblMFCostDriver_intCostDriverId] FOREIGN KEY ([intCostDriverId]) REFERENCES [tblMFCostDriver]([intCostDriverId]),
 )
 
 GO
