@@ -390,7 +390,7 @@ WHERE AGING.intEntityUserId = @intEntityUserId
 ORDER BY TRANSACTIONS.dtmTransactionDate
 
 IF @ysnPrintRecap = 1
-	EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom, @dtmDateTo = @dtmDateTo
+	EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom, @dtmDateTo = @dtmDateTo, @intEntityUserId = @intEntityUserId
 
 SELECT * FROM tblARCustomerActivityStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
