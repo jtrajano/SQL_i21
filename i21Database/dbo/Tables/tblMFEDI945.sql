@@ -3,4 +3,5 @@
 	,intInventoryShipmentId int
 	,strDepositorOrderNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmCreated datetime CONSTRAINT [DF_tblMFEDI945_dtmCreated] DEFAULT GETDATE() 
+	,ysnStatus BIT CONSTRAINT DF_tblMFEDI945_ysnStatus DEFAULT 1
 	)
