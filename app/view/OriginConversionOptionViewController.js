@@ -150,6 +150,10 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
         return null;
     },
 
+    canAlterState: function(step) {
+        return step !== 'Receipts';
+    },
+
     onLOBSelect: function(combo, record) {
         var me = this;
         var lob = record.get('strName');
