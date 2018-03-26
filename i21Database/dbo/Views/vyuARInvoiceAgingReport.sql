@@ -35,6 +35,7 @@ FROM
 	 , dtmDueDate			= A.dtmDueDate
 	 , intCompanyLocationId	= A.intCompanyLocationId
 	 , strTransactionType	= A.strTransactionType
+	 , intAccountId			= A.intAccountId
 FROM
 
 (SELECT dtmDate				= I.dtmPostDate
@@ -45,6 +46,7 @@ FROM
      , dblInvoiceTotal		= ISNULL(I.dblInvoiceTotal,0)
 	 , I.strTransactionType    
 	 , I.intEntityCustomerId
+	 , I.intAccountId
 	 , I.dtmDueDate    
 	 , strAge = CASE WHEN I.strType = 'CF Tran' THEN 'Future'
 				ELSE CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) <= 0 THEN 'Current'
@@ -56,31 +58,11 @@ FROM
 				END
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 WHERE ysnPosted = 1
-	AND I.ysnCancelled = 0
+	AND ysnPaid = 0
+	AND ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
-	AND I.intAccountId IN (
-		SELECT A.intAccountId
-		FROM dbo.tblGLAccount A WITH (NOLOCK)
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountId
-					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-		) ASM ON A.intAccountId = ASM.intAccountId
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountCategoryId
-							, intAccountStructureId
-					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		INNER JOIN (SELECT intAccountStructureId                 
-					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-					WHERE strType = 'Primary'
-		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-		INNER JOIN (SELECT intAccountCategoryId
-							, strAccountCategory 
-					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
-		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
-	)		
+	
 ) AS A
 
 LEFT JOIN
@@ -127,30 +109,11 @@ FROM
 	  , strType				= I.strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 WHERE ysnPosted = 1
+	AND ysnPaid = 0
+	AND ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	AND strTransactionType IN ('Invoice', 'Debit Memo')
-	AND I.intAccountId IN (
-		SELECT A.intAccountId
-		FROM dbo.tblGLAccount A WITH (NOLOCK)
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountId
-					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-		) ASM ON A.intAccountId = ASM.intAccountId
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountCategoryId
-							, intAccountStructureId
-					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		INNER JOIN (SELECT intAccountStructureId                 
-					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-					WHERE strType = 'Primary'
-		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-		INNER JOIN (SELECT intAccountCategoryId
-							, strAccountCategory 
-					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
-		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId)
 
 UNION ALL
 
@@ -200,30 +163,11 @@ LEFT JOIN (
 	GROUP BY intPrepaymentId
 ) PC ON I.intInvoiceId = PC.intPrepaymentId
 WHERE ysnPosted = 1
+    AND ysnPaid = 0
+	AND ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	AND strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-	AND I.intAccountId IN (
-		SELECT A.intAccountId
-		FROM dbo.tblGLAccount A WITH (NOLOCK)
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountId
-					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-		) ASM ON A.intAccountId = ASM.intAccountId
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountCategoryId
-							, intAccountStructureId
-					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		INNER JOIN (SELECT intAccountStructureId                 
-					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-					WHERE strType = 'Primary'
-		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-		INNER JOIN (SELECT intAccountCategoryId
-							, strAccountCategory 
-					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
-		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId)
 
 UNION ALL
 
@@ -273,30 +217,11 @@ LEFT JOIN (
 	GROUP BY intPrepaymentId
 ) PC ON I.intInvoiceId = PC.intPrepaymentId 
 WHERE ysnPosted = 1
+    AND ysnPaid = 0
+	AND ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	AND strTransactionType = 'Customer Prepayment'
-	AND I.intAccountId IN (
-		SELECT A.intAccountId
-		FROM dbo.tblGLAccount A WITH (NOLOCK)
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountId
-					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-		) ASM ON A.intAccountId = ASM.intAccountId
-		INNER JOIN (SELECT intAccountSegmentId
-							, intAccountCategoryId
-							, intAccountStructureId
-					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		INNER JOIN (SELECT intAccountStructureId                 
-					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-					WHERE strType = 'Primary'
-		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-		INNER JOIN (SELECT intAccountCategoryId
-							, strAccountCategory 
-					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
-		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId)
 
 UNION ALL
       
@@ -356,29 +281,10 @@ LEFT JOIN (
 
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE ysnPosted = 1
+    AND ysnPaid = 0
+	AND ysnCancelled = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
-	AND I.intAccountId IN (
-		SELECT A.intAccountId
-		FROM dbo.tblGLAccount A WITH (NOLOCK)
-		INNER JOIN (SELECT intAccountSegmentId
-						 , intAccountId
-					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-		) ASM ON A.intAccountId = ASM.intAccountId
-		INNER JOIN (SELECT intAccountSegmentId
-						 , intAccountCategoryId
-						 , intAccountStructureId
-					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		INNER JOIN (SELECT intAccountStructureId                 
-					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-					WHERE strType = 'Primary'
-		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-		INNER JOIN (SELECT intAccountCategoryId
-						 , strAccountCategory 
-					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
-		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId)
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()	
  ) AS TBL) AS B   
     
 ON
@@ -387,7 +293,7 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0
 
-GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId, A.strTransactionType) AS AGING
+GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId, A.strTransactionType, A.intAccountId) AS AGING
 INNER JOIN (
 	SELECT C.intEntityId
 		 , E.strName
@@ -415,6 +321,28 @@ INNER JOIN (
 	) DEFAULTBILLTO ON C.intBillToId = DEFAULTBILLTO.intEntityLocationId 
 				   AND C.intEntityId = DEFAULTBILLTO.intEntityId
 ) CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityId
+INNER JOIN (
+	SELECT A.intAccountId
+	FROM dbo.tblGLAccount A WITH (NOLOCK)
+	INNER JOIN (SELECT intAccountSegmentId
+						, intAccountId
+				FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
+	) ASM ON A.intAccountId = ASM.intAccountId
+	INNER JOIN (SELECT intAccountSegmentId
+						, intAccountCategoryId
+						, intAccountStructureId
+				FROM dbo.tblGLAccountSegment WITH (NOLOCK)
+	) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
+	INNER JOIN (SELECT intAccountStructureId                 
+				FROM dbo.tblGLAccountStructure WITH (NOLOCK)
+				WHERE strType = 'Primary'
+	) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
+	INNER JOIN (SELECT intAccountCategoryId
+						, strAccountCategory 
+				FROM dbo.tblGLAccountCategory WITH (NOLOCK)
+				WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
+	) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
+) GL ON AGING.intAccountId = GL.intAccountId
 LEFT JOIN (
 	SELECT *
 	FROM dbo.tblARInvoice WITH (NOLOCK)
