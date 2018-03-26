@@ -33,6 +33,7 @@ BEGIN TRY
 		,@intAlternateOrderHeaderId INT
 		,@intAlternateTaskId INT
 		,@intLocationId int
+		,@ysnPickAllowed BIT
 
 		SELECT @intItemId = intItemId
 		,@intParentLotId = intParentLotId
@@ -138,7 +139,7 @@ BEGIN TRY
 		END
 	END
 
-	SELECT @intBondStatusId = intBondStatusId
+	SELECT @intBondStatusId = intBondStatusId,@ysnPickAllowed=ysnPickAllowed
 	FROM tblMFLotInventory
 	WHERE intLotId = @intAlternateLotId
 
@@ -146,6 +147,15 @@ BEGIN TRY
 	BEGIN
 		RAISERROR (
 				'SCANNED LOT IS NOT BOND RELEASED. PLEASE SCAN BOND RELEASED LOT TO CONTINUE.'
+				,16
+				,1
+				)
+	END
+
+	IF @ysnPickAllowed =0
+	BEGIN
+		RAISERROR (
+				'SCANNED LOT IS NOT ALLOWED.'
 				,16
 				,1
 				)

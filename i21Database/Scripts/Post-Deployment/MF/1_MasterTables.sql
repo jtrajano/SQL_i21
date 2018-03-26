@@ -3350,5 +3350,13 @@ BEGIN
 END
 GO
 
+UPDATE tblMFCompanyPreference
+SET intDefaultMaterialRequirementDuration = 7
+Where intDefaultMaterialRequirementDuration IS NULL
+GO
+UPDATE tblMFLotInventory
+SET ysnPickAllowed = 1
+WHERE ysnPickAllowed IS NULL
+GO
 
 

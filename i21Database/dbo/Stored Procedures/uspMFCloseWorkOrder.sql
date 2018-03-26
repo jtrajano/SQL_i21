@@ -47,6 +47,7 @@ BEGIN TRY
 		,@strCostDistribution NVARCHAR(50)
 		,@intReturnValue AS INT
 		,@ErrorMessage AS NVARCHAR(4000)
+		,@strPickLot nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -567,7 +568,25 @@ BEGIN TRY
 			END
 		END
 	END
+	SELECT @strPickLot = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 108--Pick Lot/Pallet after closing work order
 
+	If @strPickLot is null or @strPickLot=''
+	Begin
+		Select @strPickLot='False'
+	End
+
+	IF @strPickLot='True'
+	Begin
+		Update LI
+		Set ysnPickAllowed=1
+		From tblMFLotInventory LI	
+		JOIN tblICLot L on L.intLotId=LI.intLotId
+		Where L.strLotNumber in (Select L.strLotNumber from tblMFWorkOrderProducedLot WP JOIN tblICLot L on L.intLotId=WP.intLotId and WP.intWorkOrderId=@intWorkOrderId)
+	End
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
