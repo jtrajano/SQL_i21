@@ -33,12 +33,13 @@ DECLARE @ErrorSeverity	INT
 
 DECLARE @AppliedInvoices TABLE(
 	intPrepaymentId INT,
-	intInvoiceId INT
+	intInvoiceId INT,
+	dblAppliedInvoiceDetailAmount NUMERIC(18, 6)
 )		
 BEGIN TRY
 
-	INSERT INTO @AppliedInvoices(intPrepaymentId, intInvoiceId)
-	SELECT intPrepaymentId, intInvoiceId FROM
+	INSERT INTO @AppliedInvoices(intPrepaymentId, intInvoiceId, dblAppliedInvoiceDetailAmount)
+	SELECT intPrepaymentId, intInvoiceId, dblAppliedInvoiceDetailAmount FROM
 		tblARPrepaidAndCredit
 	WHERE
 		tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId 
@@ -142,7 +143,7 @@ BEGIN TRY
 		  AND I.intInvoiceId <> @InvoiceId
 	) I
 
-	UPDATE A SET ysnApplied = 1
+	UPDATE A SET ysnApplied = 1, dblAppliedInvoiceDetailAmount = B.dblAppliedInvoiceDetailAmount
 		FROM tblARPrepaidAndCredit A
 			JOIN @AppliedInvoices B
 				ON A.intPrepaymentId = B.intPrepaymentId
