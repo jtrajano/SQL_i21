@@ -46,6 +46,7 @@ BEGIN
 		,@ysnBonded BIT
 		,@strLotReceiptNumber NVARCHAR(50)
 		,@dblTareWeight NUMERIC(38, 20)
+		,@ysnPickAllowed BIT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
@@ -235,6 +236,7 @@ BEGIN
 
 
 
+
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'
 	BEGIN
@@ -272,6 +274,7 @@ BEGIN
 			,@dtmReceiptDate = dtmReceiptDate
 			,@dblTareWeight = dblTareWeight
 			,@dtmDueDate = dtmDueDate
+			,@ysnPickAllowed=ysnPickAllowed
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -349,6 +352,7 @@ BEGIN
 			,dtmLastMoveDate
 			,dblTareWeight
 			,dtmDueDate
+			,ysnPickAllowed
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -359,6 +363,7 @@ BEGIN
 			,@dtmCurrentDateTime
 			,@dblTareWeight
 			,@dtmDueDate
+			,IsNULL(@ysnPickAllowed,1)
 	END
 	ELSE
 	BEGIN

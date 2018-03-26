@@ -3362,6 +3362,10 @@ UPDATE tblMFCompanyPreference
 SET intDefaultMaterialRequirementDuration = 7
 Where intDefaultMaterialRequirementDuration IS NULL
 GO
+UPDATE tblMFLotInventory
+SET ysnPickAllowed = 1
+WHERE ysnPickAllowed IS NULL
+GO
 
 UPDATE tblICLotStatus
 SET strBackColor = '#FFD700' -- gold
