@@ -3,6 +3,7 @@ AS
 SELECT intItemId			= ITEMADDON.intItemId
      , intComponentItemId	= ITEMADDON.intAddOnItemId
 	 , intItemUnitMeasureId	= ITEMADDON.intItemUOMId
+	 , intUnitMeasureId		= ITEMUOM.intUnitMeasureId
 	 , intCompanyLocationId	= ITEMLOCATION.intLocationId
 	 , strDescription		= ITEM.strDescription
 	 , strItemNo			= ITEM.strItemNo
@@ -19,6 +20,7 @@ INNER JOIN (
 INNER JOIN (
 	SELECT intItemId
 		 , intItemUOMId
+		 , UOM.intUnitMeasureId
 		 , UOM.strUnitMeasure
 	FROM dbo.tblICItemUOM IUOM WITH (NOLOCK)
 	INNER JOIN (
