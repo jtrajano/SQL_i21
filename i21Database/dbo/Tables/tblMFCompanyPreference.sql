@@ -51,5 +51,6 @@
 	ysnSplitLotOnPartialQty Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnSplitLotOnPartialQty] DEFAULT 0,
 	ysnProducedQtyByUnitCount Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnProducedQtyByUnitCount] DEFAULT 0,
 	intDamagedStatusId int,
+	ysnSendEDIOnRepost int CONSTRAINT [DF_tblMFCompanyPreference_ysnSendEDIOnRepost] DEFAULT 1
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

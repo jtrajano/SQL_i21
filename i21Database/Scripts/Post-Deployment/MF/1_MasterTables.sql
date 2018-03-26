@@ -2546,3 +2546,7 @@ JOIN tblMFOrderDetail OD ON OD.intOrderHeaderId = T.intOrderHeaderId and OD.intI
 JOIN @tblMFOrderHeader OH ON OH.intOrderHeaderId = OD.intOrderHeaderId
 Where T.intOrderDetailId is null
 Go
+UPDATE tblMFCompanyPreference
+SET ysnSendEDIOnRepost = 1
+Where ysnSendEDIOnRepost IS NULL
+Go
