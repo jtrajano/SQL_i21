@@ -25,7 +25,7 @@ BEGIN
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblMFEDI945 EDI945
-			WHERE EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
+			WHERE EDI945.ysnStatus=1 and EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
 			)
 	ORDER BY InvS.intInventoryShipmentId
 
@@ -306,8 +306,10 @@ BEGIN
 	INSERT INTO tblMFEDI945 (
 		intInventoryShipmentId
 		,strDepositorOrderNumber
+		,ysnStatus
 		)
 	SELECT intInventoryShipmentId
 		,strOrderNo
+		,1
 	FROM @tblMFOrderNo
 END

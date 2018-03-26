@@ -47,11 +47,13 @@ BEGIN
 		,@strLotReceiptNumber NVARCHAR(50)
 		,@dblTareWeight NUMERIC(38, 20)
 		,@ysnPickAllowed BIT
+		,@ysnSendEDIOnRepost BIT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
 		,@intDamagedStatusId = intDamagedStatusId
+		,@ysnSendEDIOnRepost=ysnSendEDIOnRepost
 	FROM tblMFCompanyPreference
 
 	SELECT @dtmCurrentDateTime = GETDATE()
@@ -410,8 +412,10 @@ BEGIN
 				END
 		WHERE intLotId = @intLotId
 	END
-
-	DELETE
-	FROM tblMFEDI944
-	WHERE intInventoryReceiptId = @intInventoryReceiptId
+	IF @ysnSendEDIOnRepost=1
+	BEGIN
+		Update tblMFEDI944
+		Set ysnStatus=0
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
+	END
 END
