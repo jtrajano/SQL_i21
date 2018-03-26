@@ -4,6 +4,7 @@ BEGIN
 	DECLARE @intBondStatusId INT
 		,@strLotNumber NVARCHAR(50)
 		,@strMessage NVARCHAR(max)
+		,@ysnSendEDIOnRepost BIT
 
 	IF EXISTS (
 			SELECT 1
@@ -33,6 +34,7 @@ BEGIN
 	END
 
 	SELECT @intBondStatusId = intBondStatusId
+			,@ysnSendEDIOnRepost=ysnSendEDIOnRepost
 	FROM tblMFCompanyPreference
 
 	IF @intBondStatusId IS NULL
@@ -64,8 +66,10 @@ BEGIN
 				,1
 				)
 	END
-
-	DELETE
-	FROM tblMFEDI945
-	WHERE intInventoryShipmentId = @intInventoryShipmentId
+	IF @ysnSendEDIOnRepost=1
+	BEGIN
+		Update tblMFEDI945
+		Set ysnStatus=0
+		WHERE intInventoryShipmentId = @intInventoryShipmentId
+	END
 END

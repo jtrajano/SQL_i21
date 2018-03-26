@@ -3401,3 +3401,7 @@ BEGIN
     VALUES(2,'Flat')
 END
 GO
+UPDATE tblMFCompanyPreference
+SET ysnSendEDIOnRepost = 1
+Where ysnSendEDIOnRepost IS NULL
+Go

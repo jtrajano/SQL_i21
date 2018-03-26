@@ -22,7 +22,7 @@ BEGIN
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblMFEDI944 EDI944
-			WHERE EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
+			WHERE EDI944.ysnStatus =1 and EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
 			)
 	ORDER BY IR.intInventoryReceiptId
 
@@ -142,8 +142,10 @@ BEGIN
 	INSERT INTO tblMFEDI944 (
 		intInventoryReceiptId
 		,strDepositorOrderNumber
+		,ysnStatus
 		)
 	SELECT intInventoryReceiptId
 		,strOrderNo
+		,1
 	FROM @tblMFOrderNo
 END
