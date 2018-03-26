@@ -6,6 +6,9 @@ SELECT
 	,REQ.intEntityEmployeeId
 	,ENT.strEntityNo
 	,ENT.strName
+	,EMP.strFirstName
+	,EMP.strLastName
+	,EMP.strMiddleName
 	,REQ.dtmRequestDate
 	,DEP.strDepartment
 	,REQ.dtmDateFrom
@@ -24,6 +27,7 @@ SELECT
 FROM 
 	tblPRTimeOffRequest REQ
 	LEFT JOIN tblEMEntity ENT ON REQ.intEntityEmployeeId = ENT.intEntityId
+	LEFT JOIN tblPREmployee EMP ON REQ.intEntityEmployeeId = EMP.intEntityId
 	LEFT JOIN tblPRTypeTimeOff TOFF ON REQ.intTypeTimeOffId = TOFF.intTypeTimeOffId
 	LEFT JOIN tblPRDepartment DEP ON REQ.intDepartmentId = DEP.intDepartmentId 
 	LEFT JOIN 
