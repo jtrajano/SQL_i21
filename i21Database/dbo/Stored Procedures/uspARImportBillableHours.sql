@@ -7,6 +7,7 @@
 	,@SuccessfulCount		AS INT				= 0		OUTPUT
 	,@InvalidCount			AS INT				= 0		OUTPUT
 	,@DocumentMaintenanceId AS INT				= NULL
+	,@DefaultLocationId AS INT				= NULL
 AS
 
 BEGIN
@@ -23,7 +24,7 @@ DECLARE @ZeroDecimal		NUMERIC(18,6)
 
 SET @ZeroDecimal = 0.000000	
 SET @DateOnly = CAST(GETDATE() AS DATE)
-SET @CompanyLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
+SET @CompanyLocationId = @DefaultLocationId
 
 DECLARE @TicketHoursWorked TABLE(intTicketHoursWorkedId INT, intEntityCustomerId INT, intTicketId INT)
 		
@@ -58,11 +59,11 @@ DECLARE @NewlyCreatedInvoices TABLE(intInvoiceId INT)
 
 INSERT INTO @NewInvoices
 SELECT DISTINCT V.intEntityId
-			  , ISNULL(V.intCompanyLocationId, @CompanyLocationId)
+			  , ISNULL(@CompanyLocationId, V.intCompanyLocationId)
 FROM vyuARBillableHoursForImport V
 INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
 INNER JOIN tblARCustomer C ON V.intEntityId = C.intEntityId
-GROUP BY V.intEntityId, ISNULL(V.intCompanyLocationId, @CompanyLocationId)
+GROUP BY V.intEntityId, ISNULL(@CompanyLocationId, V.intCompanyLocationId)
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 	BEGIN
