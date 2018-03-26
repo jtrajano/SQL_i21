@@ -3348,11 +3348,7 @@ BEGIN
 		,0
 		,0
 END
-GO
 
-UPDATE tblMFCompanyPreference
-SET intDefaultMaterialRequirementDuration = 7
-Where intDefaultMaterialRequirementDuration IS NULL
 GO
 UPDATE tblMFLotInventory
 SET ysnPickAllowed = 1
