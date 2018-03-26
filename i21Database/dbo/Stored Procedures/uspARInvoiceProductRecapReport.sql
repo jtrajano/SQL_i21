@@ -295,4 +295,3 @@ LEFT JOIN (
 WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0
 ORDER BY ABC.intCompanyLocationId, intSortNo
 
-SELECT * FROM tblARProductRecapStagingTable WHERE intEntityUserId = @intEntityUserId
