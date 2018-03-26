@@ -17,13 +17,13 @@ IF @dtmAsOfDateLocal IS NULL
 DELETE FROM tblARGLSummaryStagingTable WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARGLSummaryStagingTable
 SELECT intAccountId				= GL.intAccountId	 
+	 , intEntityUserId			= @intEntityUserId
 	 , strAccountId				= GL.strAccountId
 	 , strAccountCategory		= GL.strAccountCategory
 	 , dblGLBalance				= ISNULL(GL.dblGLBalance, 0)
 	 , dblTotalAR				= ISNULL(AGING.dblTotalAR, 0)
 	 , dblTotalPrepayments		= ISNULL(AGING.dblTotalPrepayments, 0)
-	 , dblTotalReportBalance	= ISNULL(AGING.dblTotalReportBalance, 0)
-	 , intEntityUserId			= @intEntityUserId
+	 , dblTotalReportBalance	= ISNULL(AGING.dblTotalReportBalance, 0)	 
 FROM (
 	SELECT GLD.intAccountId
 		 , strAccountId
