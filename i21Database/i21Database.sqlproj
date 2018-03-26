@@ -6254,13 +6254,14 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
     <Build Include="dbo\Functions\fnICCheckItemUOMIdIsNotUsed.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
-	<None Include="Scripts\Post-Deployment\SM\1810_UpdateTransactionsApprovalFor.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_UpdateTransactionsApprovalFor.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricingInsertAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayStatus.sql" />
     <Build Include="dbo\Tables\tblAPVoucherHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherHistory.sql" />
     <Build Include="dbo\Functions\fnCFGetLuhn.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
