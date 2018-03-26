@@ -3352,3 +3352,7 @@ GO
 
 
 
+UPDATE tblMFCompanyPreference
+SET ysnSendEDIOnRepost = 1
+Where ysnSendEDIOnRepost IS NULL
+Go

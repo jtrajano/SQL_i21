@@ -60,5 +60,6 @@
 	ysnGTINCaseCodeMandatory BIT,
 	intMaximumPalletsOnForklift INT,
 	ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType] DEFAULT 0,
+	ysnSendEDIOnRepost int CONSTRAINT [DF_tblMFCompanyPreference_ysnSendEDIOnRepost] DEFAULT 1
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
