@@ -6282,6 +6282,8 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
     <Build Include="dbo\Tables\tblMFCostDriver.sql" />
     <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateStateScript.sql" />
+    <Build Include="dbo\Stored Procedures\PrintSQLResults.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
