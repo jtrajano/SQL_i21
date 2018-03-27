@@ -93,6 +93,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnCountedDaily
 	, ItemLocation.ysnLockedInventory
 	, ItemLocation.intSort
+	, ItemLocation.strStorageUnitNo
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
