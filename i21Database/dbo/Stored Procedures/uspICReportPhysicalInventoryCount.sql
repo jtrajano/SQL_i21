@@ -18,6 +18,7 @@ BEGIN TRY
 			,'' AS 'strSubLocationName'
 			,'' AS 'intStorageLocationId'
 			,'' AS 'strStorageLocationName'
+			,'' AS 'strStorageUnitNo'
 			,'' AS 'intItemId'
 			,'' AS 'strItemNo'
 			,'' AS 'strItemDesc'
@@ -91,6 +92,7 @@ BEGIN TRY
 				   ,SubLocation.strSubLocationName
 				   ,InvCountDetail.intStorageLocationId
 				   ,strStorageLocationName = StorageLocation.strName
+				   ,ItemLocation.strStorageUnitNo
 				   ,InvCountDetail.intItemId
 				   ,Item.strItemNo
 				   ,strItemDesc = Item.strDescription
@@ -102,9 +104,10 @@ BEGIN TRY
 				   ,InvCount.ysnScannedCountEntry
 				   ,InvCount.ysnCountByLots
 				   ,InvCount.ysnCountByPallets
-				   ,dblPhysicalCount = ISNULL(InvCountDetail.dblPallets, 0) * ISNULL(InvCountDetail.dblQtyPerPallet, 0) 
+				   ,dblPhysicalCount = InvCountDetail.dblPhysicalCount --ISNULL(InvCountDetail.dblPallets, 0) * ISNULL(InvCountDetail.dblQtyPerPallet, 0) 
 			FROM tblICInventoryCount InvCount 
 				 LEFT JOIN tblICInventoryCountDetail InvCountDetail ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
+				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
 				 LEFT JOIN tblICItem Item ON InvCountDetail.intItemId = Item.intItemId
 				 LEFT JOIN tblSMCompanyLocation CompanyLocation ON InvCount.intLocationId = CompanyLocation.intCompanyLocationId
 				 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON InvCountDetail.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
