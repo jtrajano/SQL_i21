@@ -28,6 +28,7 @@
 [intCarrierShipmentOrderReportFormat] INT NULL,
 [intDebitNoteReportFormat] INT NULL,
 [intCreditNoteReportFormat] INT NULL,
+[intPreArrivalNotificationReportFormat] INT NULL,
 [intOrganicDeclarationReportFormat] INT NULL,
 [ysnAlertApprovedQty] [bit] NULL,
 [ysnUpdateVesselInfo] [bit] NULL,

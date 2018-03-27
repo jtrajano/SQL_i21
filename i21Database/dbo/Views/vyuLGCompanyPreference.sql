@@ -148,6 +148,11 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 2
 			THEN ''
 		END strOrganicDeclarationReportFormat
+	,CP.intPreArrivalNotificationReportFormat
+	,CASE CP.intPreArrivalNotificationReportFormat
+		WHEN 1
+			THEN 'Pre Arrival Notification Report Format - 1'
+		END strPreArrivalNotificationReportFormat
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
 	,CP.ysnHighwayOnly
