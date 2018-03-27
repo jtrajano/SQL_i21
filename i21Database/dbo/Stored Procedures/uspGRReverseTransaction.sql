@@ -143,7 +143,7 @@ BEGIN TRY
 	ELSE IF @intTransactionTypeId =4 --Settle Storage
 	BEGIN
 		---1. UnPost Voucher 
-		IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=1)
+		IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=1 AND intBillId = @intBillId)
 		BEGIN
 			EXEC uspAPPostBill 
 			 @post=0
