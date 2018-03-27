@@ -1,13 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemRunningStock]
 	AS
-SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
+SELECT intKey					= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	,i.intItemId
 	,i.strItemNo 
 	,ItemUOM.intItemUOMId
-	,strItemUOM = iUOM.strUnitMeasure
-	,strItemUOMType = iUOM.strUnitType
+	,strItemUOM					= iUOM.strUnitMeasure
+	,strItemUOMType				= iUOM.strUnitType
 	,ItemUOM.ysnStockUnit
 	,ItemUOM.dblUnitQty
+	,t.intCostingMethod
+	,CostMethod.strCostingMethod
 	,ItemLocation.intLocationId
 	,strLocationName			= CompanyLocation.strLocationName
 	,t.intSubLocationId
@@ -30,7 +32,11 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLoc
 	,strOwner = LotEntity.strName
 	,dtmAsOfDate			= CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
 	,dblQty = SUM(t.dblQty)
-	,dblCost = MAX(t.dblCost)
+	,dblCost = CASE 
+				WHEN t.intCostingMethod = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId)
+				WHEN t.intCostingMethod = 2 THEN FIFO.dblCost
+				ELSE MAX(t.dblCost) 
+			END
 FROM tblICInventoryTransaction t 
 LEFT JOIN tblICItem i 
 	ON i.intItemId = t.intItemId
@@ -38,8 +44,23 @@ INNER JOIN (
 		tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) ON ItemUOM.intItemUOMId = t.intItemUOMId
+OUTER APPLY(
+	SELECT TOP 1 *
+	FROM (SELECT intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,dtmDate
+			,dblCost
+			,dblOnHand = SUM(dblStockIn) - SUM(dblStockOut) 
+	FROM tblICInventoryFIFO
+	GROUP BY intItemId, intItemLocationId, intItemUOMId, dtmDate, dblCost) FIFO
+	WHERE FIFO.dblOnHand > 0 AND  t.intItemId = FIFO.intItemId AND t.intItemLocationId = FIFO.intItemLocationId AND t.intItemUOMId = FIFO.intItemUOMId
+	ORDER BY dtmDate ASC
+) FIFO 
 LEFT JOIN tblICItemLocation ItemLocation 
 	ON ItemLocation.intItemLocationId = t.intItemLocationId
+LEFT JOIN tblICCostingMethod CostMethod
+	ON CostMethod.intCostingMethodId = t.intCostingMethod
 LEFT JOIN tblSMCompanyLocation CompanyLocation 
 	ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
@@ -65,6 +86,7 @@ GROUP BY i.intItemId
 		,iUOM.strUnitType
 		,ItemUOM.ysnStockUnit
 		,ItemUOM.dblUnitQty
+		,ItemLocation.intItemLocationId
 		,ItemLocation.intLocationId
 		,CompanyLocation.strLocationName
 		,t.intSubLocationId
@@ -85,4 +107,7 @@ GROUP BY i.intItemId
 		,LotStatus.strPrimaryStatus
 		,ItemOwner.intOwnerId
 		,LotEntity.strName
+		,t.intCostingMethod
+		,CostMethod.strCostingMethod
+		,FIFO.dblCost
 		,CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
