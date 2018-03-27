@@ -294,7 +294,7 @@ BEGIN TRY
 			,strProducer							= PR.strName
 			,strPosition							= PO.strPosition
 			,strContractConditions				    = @strContractConditions
-			,lblAtlasLocation						= CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>''     THEN 'Location :'					ELSE NULL END
+			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN 'Location :'					ELSE NULL END
 			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
 			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Contract :'					ELSE NULL END
 			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
