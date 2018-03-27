@@ -438,7 +438,8 @@ BEGIN TRY
 			SELECT TOP 1 @InvoiceDetailId = intInvoiceDetailId, @intDetailTaxCodeId = intTaxCodeId FROM @tmpInvoiceDetail
 
 			-- Diversion
-			UPDATE @tmpInvoiceTransaction SET dblQtyShipped = (dblQtyShipped * -1) WHERE intInvoiceDetailId = @InvoiceDetailId AND ysnDiversion = 1 AND strFormCode = 'SF-900' AND strScheduleCode = '11' AND (strOriginState = 'IN' AND strDiversionOriginalDestinationState <> 'IN')
+			UPDATE @tmpInvoiceTransaction SET dblQtyShipped = (dblQtyShipped * -1), dblGross = (dblGross * -1), dblNet = (dblNet * -1), dblBillQty = (dblBillQty * -1) WHERE intInvoiceDetailId = @InvoiceDetailId AND ysnDiversion = 1 AND strFormCode = 'SF-900' AND strScheduleCode = '11' AND (strOriginState = 'IN' AND strDiversionOriginalDestinationState <> 'IN')
+
 
 			DECLARE @tblTaxCriteria TABLE (
 				intCriteriaId INT,

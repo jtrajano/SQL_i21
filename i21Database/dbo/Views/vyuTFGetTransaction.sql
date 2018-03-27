@@ -76,7 +76,7 @@ SELECT Trans.intTransactionId
 	, Trans.strTransactionType
 	, Trans.intTransactionNumberId
 	, Trans.intIntegrationError
-	, ysnHasException = CASE WHEN Exception.intExceptionId IS NULL THEN 0 ELSE 1 END
+	, ysnHasException = CASE WHEN Exception.intExceptionId IS NULL THEN CONVERT(bit, 0) ELSE CONVERT(bit, 1) END
 	, Exception.strExceptionType
 	, Exception.intExceptionId
 	, ysnDeleted = ISNULL(Exception.ysnDeleted, 0)
@@ -167,7 +167,7 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strTransactionType
 	, Exception.intTransactionNumberId
 	, intIntegrationError = NULL
-	, ysnHasException = 1
+	, ysnHasException = CONVERT(bit, 1)
 	, Exception.strExceptionType
 	, Exception.intExceptionId
 	, ysnDeleted = ISNULL(Exception.ysnDeleted, 0)
