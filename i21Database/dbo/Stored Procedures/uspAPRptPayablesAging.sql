@@ -217,7 +217,7 @@ BEGIN
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
-
+DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT @id = id, 
