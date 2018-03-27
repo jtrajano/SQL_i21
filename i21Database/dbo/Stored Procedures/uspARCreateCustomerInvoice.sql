@@ -150,7 +150,8 @@ SET @Savepoint = SUBSTRING(('ARCreateCustomerInvoice' + CONVERT(VARCHAR, @InitTr
 SET @ZeroDecimal = 0.000000
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
-	
+DECLARE @FooterComment NVARCHAR(MAX)
+
 IF ISNULL(@Comment, '') = ''
 	BEGIN
 		EXEC	[dbo].[uspARGetDefaultComment]
@@ -159,8 +160,21 @@ IF ISNULL(@Comment, '') = ''
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
 					@strHeaderComment = @Comment OUTPUT,
+					@strFooterComment = @FooterComment OUTPUT,
 					@DocumentMaintenanceId = @DocumentMaintenanceId
 	END
+
+IF(ISNULL(@DocumentMaintenanceId, 0) > 0)
+BEGIN
+	EXEC	[dbo].[uspARGetDefaultComment]
+		@intCompanyLocationId = @CompanyLocationId,
+		@intEntityCustomerId = @EntityCustomerId,
+		@strTransactionType = @TransactionType,
+		@strType = @Type,
+		@strHeaderComment = @Comment OUTPUT,
+		@strFooterComment = @FooterComment OUTPUT,
+		@DocumentMaintenanceId = @DocumentMaintenanceId
+END
 
 IF ISNULL(@EntityContactId, 0) = 0
 	BEGIN
@@ -443,7 +457,7 @@ BEGIN TRY
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
-		,[strFooterComments]			= dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0)
+		,[strFooterComments]			= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
 		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
