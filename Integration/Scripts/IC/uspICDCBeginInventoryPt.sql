@@ -154,7 +154,7 @@ BEGIN
 			WHERE	ptitm_on_hand <> 0 
 			AND ptitm_loc_no = @adjLoc
 			AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
-			AND inv.strStatus = 'Active'
+
 
 			-- Create an Audit Log
 			BEGIN 
