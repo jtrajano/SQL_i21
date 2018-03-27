@@ -23,4 +23,4 @@ BEGIN
 		WHERE intDocumentMaintenanceId = @intDocumentUsedId
 END
 
-SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, NULL, 'Footer', @DocumentMaintenanceId, 0)
+SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Footer', @DocumentMaintenanceId, 0)

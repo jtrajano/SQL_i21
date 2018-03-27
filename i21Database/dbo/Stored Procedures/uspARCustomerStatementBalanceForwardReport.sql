@@ -894,9 +894,13 @@ IF @ysnPrintFromCFLocal = 1
 		UPDATE @temp_statement_table SET strTransactionType = 'Payment' WHERE strTransactionType = 'Customer Prepayment' AND strType <> 'CF Tran'
 		UPDATE @temp_statement_table SET strTransactionType = 'Invoice' WHERE strTransactionType = 'Debit Memo' AND strType <> 'CF Tran'
 		UPDATE @temp_statement_table SET strTransactionType = 'Service Charge' WHERE strType = 'Service Charge'
+		DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND ISNULL(strStatementFormat, 'Balance Forward') = 'Balance Forward'
+	END
+ELSE
+	BEGIN
+		DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Balance Forward'
 	END
 	
-DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Balance Forward'
 INSERT INTO tblARCustomerStatementStagingTable (
 	  intEntityCustomerId
 	, intInvoiceId

@@ -1170,6 +1170,9 @@ BEGIN TRY
 				 JOIN tblICItem Item ON Item.intItemId = CC.intItemId
 				 LEFT JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CC.intItemUOMId
 				 WHERE ISNULL(CC.ysnPrice,0) =1
+				
+				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
+				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
 				 
 				EXEC [dbo].[uspAPCreateBillData] 
 					 @userId = @intCreatedUserId

@@ -163,9 +163,9 @@ SELECT cd.intContractDetailId, case WHEN (@intCurrencyID1 <> c1.intCurrencyID an
 				else case when isnull(cd.dblRate,0) =0 then isnull(RD.dblRate,0) else isnull(cd.dblRate,0) end  end
 FROM vyuRKPositionByPeriodContDetView cd
 JOIN tblSMCurrencyExchangeRate et on cd.intCurrencyExchangeRateId=et.intCurrencyExchangeRateId 
-LEFT JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = et.intCurrencyExchangeRateId
 JOIN tblSMCurrency c on et.intFromCurrencyId=c.intCurrencyID
 JOIN tblSMCurrency c1 on et.intToCurrencyId=c1.intCurrencyID
+LEFT JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = et.intCurrencyExchangeRateId
 where cd.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
 
 DECLARE @ContractCost AS TABLE 
@@ -183,8 +183,6 @@ SELECT intContractDetailId,SUM(dblRate) from (
 		where ccv.strItemNo='Freight' and (isnull(ysnAccrue,0)=1 OR (isnull(ysnAccrue,0) =0 and isnull(ysnPrice,0) =0 and isnull(ysnBasis,0)=0))
 		AND cd.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
 		group by ccv.intCurrencyId,ccv.strCostMethod,ccv.intContractDetailId,cd.intCurrencyId)t group by intContractDetailId
-
-
 
 -- Priced Contract	
 IF @strGroupings= 'Contract Terms'
@@ -239,18 +237,10 @@ BEGIN
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
 		end dblCashPrice,		
-		
-		--ISNULL((SELECT SUM(dblRate) from (
-		--SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' 
-		--											then cd.intCurrencyId else ccv.intCurrencyId end,
-		--											@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer))  dblRate
-		--FROM vyuCTContractCostView ccv 
-		--join vyuCTContractCostEnquiryCost cv on cv.intContractCostId=ccv.intContractCostId
-		-- where  cd.intContractDetailId=ccv.intContractDetailId and ccv.strItemNo='Freight' and (isnull(ysnAccrue,0)=1 OR (isnull(ysnAccrue,0) =0 and isnull(ysnPrice,0) =0 and isnull(ysnBasis,0)=0))
-		-- group by ccv.intCurrencyId,ccv.strCostMethod)t),0)
+
 		 (select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		R.dblExRate AS ExRate,
+		(SELECT TOP 1 a.dblExRate from @ContractRateDetail a where a.intContractDetailId=cd.intContractDetailId) AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
@@ -258,13 +248,12 @@ BEGIN
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId 
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
+		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)		
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  
 		AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		ANd cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,
-		dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate		
+		dblBasis,dblCashPrice,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
 
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
@@ -323,17 +312,10 @@ BEGIN
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)
 		end dblCashPrice,	
-		--ISNULL((SELECT SUM(dblRate) from (
-		--SELECT dbo.[fnRKGetCurrencyConversionRate](case when ccv.strCostMethod='Percentage' 
-		--											then cd.intCurrencyId else ccv.intCurrencyId end,
-		--											@intCurrencyID1,cd.intItemId,cd.intPriceUnitMeasureId,@intUnitMeasureId,sum(dblAmountPer))  dblRate
-		--FROM vyuCTContractCostView ccv 
-		--join vyuCTContractCostEnquiryCost cv on cv.intContractCostId=ccv.intContractCostId
-		-- where  cd.intContractDetailId=ccv.intContractDetailId and ccv.strItemNo='Freight' and (isnull(ysnAccrue,0)=1 OR (isnull(ysnAccrue,0) =0 and isnull(ysnPrice,0) =0 and isnull(ysnBasis,0)=0))
-		-- group by ccv.intCurrencyId,ccv.strCostMethod)t),0) 
+
 		 (select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		R.dblExRate AS ExRate,
+		(SELECT TOP 1 a.dblExRate from @ContractRateDetail a where a.intContractDetailId=cd.intContractDetailId) AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
@@ -341,14 +323,13 @@ BEGIN
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)
-		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
+		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId  in(1,2,3,5)		
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  
 		AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 		AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
 		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,
 		strMarketZoneCode,dblRate,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,
-		CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate
+		CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
 		
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
@@ -410,7 +391,7 @@ BEGIN
 		end dblCashPrice,
 	(select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,
-		R.dblExRate AS ExRate,
+		(SELECT TOP 1 a.dblExRate from @ContractRateDetail a where a.intContractDetailId=cd.intContractDetailId) AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,
 		CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
@@ -418,11 +399,10 @@ BEGIN
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
+		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)		
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0  AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))			
 		AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
-		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,dblBasis,dblCashPrice,cd.dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate
+		GROUP BY strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strContractBasis,cd.dblFutures,dblBasis,dblCashPrice,cd.dblRate,CH.intContractTypeId,cd.intPricingTypeId,cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
 				
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Purchase Quantity'-- group by strCommodity,strContractEndMonth
@@ -470,7 +450,8 @@ BEGIN
 		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)*100 
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblBasis,0),null)
-		end end dblBasisPrice,
+		end end 
+		dblBasisPrice,
 
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
 				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(dblCashPrice,0),null)*100
@@ -483,21 +464,20 @@ BEGIN
 		end dblCashPrice,	
    	(select cc.dblRate from @ContractCost cc where cd.intContractDetailId=cc.intContractDetailId) dblRate,
 		strLocationName,cd.strContractNumber+' - ' + convert(NVARCHAR,intContractSeq) as strContractNumber,strItemNo,
-		R.dblExRate AS ExRate,
+		(SELECT TOP 1 a.dblExRate from @ContractRateDetail a where a.intContractDetailId=cd.intContractDetailId) AS ExRate,
 		dbo.fnRKGetCurrencyExchangeRateType(cd.intContractDetailId) AS strCurrencyExchangeRateType,CH.intContractHeaderId,null intFutOptTransactionHeaderId
 		FROM vyuRKPositionByPeriodContDetView cd
 		JOIN tblSMCurrency c on c.intCurrencyID =cd.intCurrencyId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId and cd.intContractStatusId <> 3
 		JOIN tblICCommodityUnitMeasure ium1 on ium1.intCommodityId=cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId 
-		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)
-		LEFT JOIN @ContractRateDetail R on R.intContractDetailId=cd.intContractDetailId
+		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId and cd.intPricingTypeId in(1,2,3,5)		
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 			AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
 		GROUP BY CH.intContractTypeId,strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,
 		cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strItemNo,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,
-		cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate,R.dblExRate
+		cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate
 
 		INSERT INTO @List(strCommodity,strSubHeading,strSecondSubHeading,strContractEndMonth,dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId)
 		SELECT strCommodity,'Purchase Total','Purchase Total',strContractEndMonth,(dblBalance) dblBalance,strMarketZoneCode,dblFuturesPrice,dblBasisPrice,dblCashPrice,dblRate,strLocationName,strContractNumber,ExRate,strCurrencyExchangeRateType,intContractHeaderId,intFutOptTransactionHeaderId from @List where strSecondSubHeading='Purchase Quantity' --group by strCommodity,strContractEndMonth
@@ -773,7 +753,6 @@ SELECT @intCommodityIdentity= min(intCommodityIdentity) from @Commodity Where in
 END
 
 ----------------------  DONE FOR ALL..........
-
 ----------Cumulative Calculation
 
 DECLARE @strCommodityCumulative NVARCHAR(100)
@@ -1019,7 +998,6 @@ DECLARE @Result AS TABLE (
 
  SELECT TOP 1  @strCommodityName=strCommodity,@strHeaderValue=strHeaderValue,@strSubHeading=strSubHeading,@strSecondSubHeading=strSecondSubHeading,@strContractEndMonth=strContractEndMonth
  FROM @FinalList where strSecondSubHeading='Purchase Quantity'
-
 
 DECLARE @DistinctMonth AS TABLE (  
      strContractEndMonth nvarchar(100))

@@ -246,8 +246,8 @@ ELSE IF @strLetterName = 'Service Charge Invoices Letter'
 		INSERT INTO @temp_availablecustomer_table
 		SELECT DISTINCT 
 			   intEntityCustomerId
-			 , strCustomerNumber
 			 , strCustomerName
+			 , strCustomerNumber
 		FROM vyuARServiceChargeInvoiceReport	
 	END
 ELSE

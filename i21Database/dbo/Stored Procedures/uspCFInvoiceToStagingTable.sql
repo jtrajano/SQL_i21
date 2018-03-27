@@ -20,7 +20,7 @@ BEGIN
 	print @UserId
 	DECLARE @intEntityUserId INT;
 
-	select TOP 1 @intEntityUserId = intEntityId from tblEMEntity where strName = @UserId
+	select TOP 1 @intEntityUserId = intEntityId from tblSMUserSecurity where strUserName = @UserId
 
 
 	-------------CLEAN TEMP TABLES------------
@@ -29,6 +29,10 @@ BEGIN
 	DELETE FROM tblCFInvoiceDiscountTempTable		WHERE strUserId = @UserId
 	DELETE FROM tblCFInvoiceStagingTable			WHERE strUserId = @UserId
 	DELETE FROM tblCFInvoiceFeeStagingTable			WHERE strUserId = @UserId
+	
+	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
+	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null
+
 	------------------------------------------
 
 BEGIN TRY
@@ -486,6 +490,7 @@ BEGIN TRY
 		,ysnCFShowDiscountOnInvoice
 		,strCFTerm
 		,strCFTermCode
+		,intEntityUserId
 		)
 		SELECT
 		 intCustomerId
@@ -543,6 +548,7 @@ BEGIN TRY
 		,ysnShowOnCFInvoice
 		,strTerm
 		,strTermCode
+		,@intEntityUserId
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv

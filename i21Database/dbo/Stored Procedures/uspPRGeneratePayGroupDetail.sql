@@ -55,27 +55,30 @@ BEGIN
 			,EE.intEntityEmployeeId
 			,EE.intEmployeeEarningId
 			,EE.intTypeEarningId
-			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
-			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount', 'Salary')) 
+			,intDepartmentId = (SELECT TOP 1 intDepartmentId FROM tblPREmployeeDepartment
+								WHERE intEntityEmployeeId = EE.intEntityEmployeeId ORDER BY intEmployeeDepartmentId ASC)
+			,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) 
 											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
 											ELSE NULL END
 			,EE.strCalculationType
-			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (EE.dblDefaultHours + @dblOverrideHours) END					
-			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours ELSE (EE.dblHoursToProcess + @dblOverrideHours) END
+			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
+									ELSE (CASE WHEN (EE.dblDefaultHours > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblDefaultHours) END					
+			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
+									ELSE (CASE WHEN (EE.dblDefaultHours > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess) END
 			,EE.dblRateAmount
 			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime')) THEN
 									CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-										ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
+										ELSE (CASE WHEN (EE.dblHoursToProcess > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 										END * EE.dblRateAmount
 								WHEN (EE.strCalculationType IN ('Rate Factor')) THEN 
 									CASE WHEN (ELink.strCalculationType = 'Hourly Rate') THEN
 											CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-											ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
+											ELSE (CASE WHEN (EE.dblHoursToProcess > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 											END * EE.dblRateAmount
 										WHEN (ELink.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
 											CASE WHEN (ELink.dblDefaultHours > 0) THEN
 													CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-													ELSE (EE.dblHoursToProcess + @dblOverrideHours) 
+													ELSE (CASE WHEN (EE.dblHoursToProcess > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 													END * EE.dblRateAmount
 												ELSE 
 													EE.dblRateAmount

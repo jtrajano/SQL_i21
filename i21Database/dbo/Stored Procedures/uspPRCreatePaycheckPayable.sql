@@ -153,9 +153,15 @@ BEGIN
 	SELECT * FROM #tmpBillData
 	SET @intBillId = SCOPE_IDENTITY()
 
-	/* Update Voucher Invoice Number */
-	UPDATE tblAPBill SET 
-		strVendorOrderNumber = @strInvoiceNo
+	DECLARE @dtmPayDate DATETIME
+	SELECT @dtmPayDate = MAX(dtmPayDate) FROM tblPRPaycheck WHERE intPaycheckId IN (SELECT intPaycheckId FROM #tmpPaychecks)
+
+	/* Update Voucher Fields */
+	UPDATE tblAPBill
+	SET strVendorOrderNumber = @strInvoiceNo,
+		dtmDate = @dtmPayDate,
+		dtmBillDate = @dtmPayDate,
+		dtmDueDate = dbo.fnGetDueDateBasedOnTerm(@dtmPayDate, intTermsId)
 	WHERE intBillId = @intBillId 
 
 	INSERT INTO @intBillIds (intId) SELECT @intBillId
