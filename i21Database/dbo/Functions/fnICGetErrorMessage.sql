@@ -219,8 +219,7 @@ BEGIN
 		WHEN @msgId = 80202 THEN '%s is a bundle type and it is not allowed to receive nor reduce stocks.'
 		WHEN @msgId = 80203 THEN 'Bundle item has to be received from "Add Orders" in the %s Screen.'
 		WHEN @msgId = 80204 THEN 'Please check the currency used in %s. It is using %s but it is not a sub currency of %s.'
-		WHEN @msgId = 80205 THEN '%s should not be charged because it is a Kit item. Please uncheck Inventory Cost.'
-		WHEN @msgId = 80206 THEN 'Using %s as vendor for %s is invalid. Please check if %s is a Vendor type.'
+		WHEN @msgId = 80205 THEN 'Using %s as vendor for %s is invalid. Please check if %s is a Vendor type.'
 	END 
 
 	RETURN @msg
