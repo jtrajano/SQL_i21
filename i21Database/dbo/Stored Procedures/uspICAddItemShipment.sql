@@ -48,6 +48,7 @@ BEGIN
 			,@InvalidStorageLocation AS INT 
 			,@InvalidVendorId AS INT 
 			,@strCharge AS NVARCHAR(50)
+			,@strChargeVendor AS NVARCHAR(50)
 			,@InvalidChargeId AS INT 
 			,@InvalidLotId AS INT
 			,@strLotNumber AS NVARCHAR(50) 
@@ -281,23 +282,71 @@ BEGIN
 		END
 
 		-- Validate Other Charge Entity Id
-		SET @InvalidVendorId = NULL 
-		SELECT	TOP 1 
-				@InvalidVendorId = RawData.intChargeId
-				,@strCharge = charge.strItemNo 
-		FROM	@Charges RawData INNER JOIN tblICItem charge
-					ON RawData.intChargeId = charge.intItemId 
-				LEFT JOIN tblEMEntity e 
-					ON e.intEntityId = RawData.intEntityVendorId
-		WHERE	e.intEntityId IS NULL 
-				AND RawData.intEntityVendorId IS NOT NULL 
+		BEGIN 
+			SET @InvalidVendorId = NULL 
+			SELECT	TOP 1 
+					@InvalidVendorId = RawData.intChargeId
+					,@strCharge = charge.strItemNo 
+			FROM	@Charges RawData INNER JOIN tblICItem charge
+						ON RawData.intChargeId = charge.intItemId 
+					LEFT JOIN tblEMEntity e 
+						ON e.intEntityId = RawData.intEntityVendorId
+			WHERE	e.intEntityId IS NULL 
+					AND RawData.intEntityVendorId IS NOT NULL 
 
-		IF @InvalidVendorId IS NOT NULL
-		BEGIN
-			-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
-			EXEC uspICRaiseError 80140, @strCharge;
-			RETURN 80140;
-		END
+			IF @InvalidVendorId IS NOT NULL
+			BEGIN
+				-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
+				-- The vendor, {Entity name}, for {Other Charge} is invalid. Entity must be a Vendor type.
+				EXEC uspICRaiseError 80140, @strCharge;
+				RETURN 80140;
+			END
+		END 
+
+		-- Validate Other Charge Entity Id
+		BEGIN 
+			SET @InvalidVendorId = NULL 
+			SELECT	TOP 1 
+					@InvalidVendorId = RawData.intChargeId
+					,@strCharge = charge.strItemNo 
+			FROM	@Charges RawData INNER JOIN tblICItem charge
+						ON RawData.intChargeId = charge.intItemId 
+					LEFT JOIN tblEMEntity e 
+						ON e.intEntityId = RawData.intEntityVendorId
+			WHERE	e.intEntityId IS NULL 
+					AND RawData.intEntityVendorId IS NOT NULL 
+
+			IF @InvalidVendorId IS NOT NULL
+			BEGIN
+				-- Entity Id is invalid or missing for other charge item {Other Charge Item No.}.
+				EXEC uspICRaiseError 80140, @strCharge;
+				RETURN 80140;
+			END
+		END 
+
+		-- Validate Other Charge Entity Id against the Vendor table. 
+		BEGIN 
+			SET @InvalidVendorId = NULL 
+			SELECT	TOP 1 
+					@InvalidVendorId = RawData.intChargeId
+					,@strCharge = charge.strItemNo 
+					,@strChargeVendor = e.strName
+			FROM	@Charges RawData INNER JOIN tblICItem charge
+						ON RawData.intChargeId = charge.intItemId 
+					LEFT JOIN tblAPVendor v 
+						ON v.intEntityId = RawData.intEntityVendorId
+					LEFT JOIN tblEMEntity e 
+						ON e.intEntityId = RawData.intEntityVendorId
+			WHERE	v.intEntityId IS NULL 
+					AND RawData.intEntityVendorId IS NOT NULL 
+
+			IF @InvalidVendorId IS NOT NULL
+			BEGIN
+				-- The entity used for {Other Charge Item No.} must be a Vendor type.
+				EXEC uspICRaiseError 80206, @strChargeVendor, @strCharge, @strChargeVendor;
+				RETURN 80206;
+			END
+		END 
 
 		-- Validate Other Charge Location Id
 		SET @InvalidChargeId = NULL 
