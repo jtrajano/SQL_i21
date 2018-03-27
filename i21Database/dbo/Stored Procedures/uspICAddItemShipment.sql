@@ -343,8 +343,8 @@ BEGIN
 			IF @InvalidVendorId IS NOT NULL
 			BEGIN
 				-- The entity used for {Other Charge Item No.} must be a Vendor type.
-				EXEC uspICRaiseError 80206, @strChargeVendor, @strCharge, @strChargeVendor;
-				RETURN 80206;
+				EXEC uspICRaiseError 80205, @strChargeVendor, @strCharge, @strChargeVendor;
+				RETURN 80205;
 			END
 		END 
 
