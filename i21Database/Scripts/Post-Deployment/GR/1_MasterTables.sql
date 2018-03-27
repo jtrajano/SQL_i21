@@ -290,3 +290,12 @@ BEGIN
 	WHERE   CS.intItemUOMId IS NULL
 END
 GO
+IF EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intTransactionTypeId = 4 AND strVoucher IS NULL AND intBillId > 0)
+BEGIN
+	UPDATE SH
+	SET SH.strVoucher = Bill.strBillId
+	FROM tblGRStorageHistory SH
+	JOIN tblAPBill Bill ON Bill.intBillId = SH.intBillId
+	WHERE SH.intTransactionTypeId = 4 AND SH.strVoucher IS NULL
+END
+GO
