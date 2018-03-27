@@ -15,57 +15,13 @@ SET ANSI_WARNINGS OFF
 -- Get the details from the invoice 
 BEGIN TRY
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
-	INSERT INTO @ItemsFromInvoice 
-	--(
-	--	-- Header
-	--	 [intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[intEntityCustomerId]
-	--	,[dtmDate]
-	--	,[intCurrencyId]
-	--	,[intCompanyLocationId]
-	--	,[intDistributionHeaderId]
-
-	--	-- Detail 
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strItemNo]
-	--	,[strItemDescription]
-	--	,[intSCInvoiceId]
-	--	,[strSCInvoiceNumber]
-	--	,[intItemUOMId]
-	--	,[dblQtyOrdered]
-	--	,[dblQtyShipped]
-	--	,[dblDiscount]
-	--	,[dblPrice]
-	--	,[dblTotalTax]
-	--	,[dblTotal]
-	--	,[intServiceChargeAccountId]
-	--	,[intInventoryShipmentItemId]
-	--	,[intSalesOrderDetailId]
-	--	,[intShipmentPurchaseSalesContractId]
-	--	,[intSiteId]
-	--	,[strBillingBy]
-	--	,[dblPercentFull]
-	--	,[dblNewMeterReading]
-	--	,[dblPreviousMeterReading]
-	--	,[dblConversionFactor]
-	--	,[intPerformerId]
-	--	,[intContractHeaderId]
-	--	,[strContractNumber]
-	--	,[strMaintenanceType]
-	--	,[strFrequency]
-	--	,[dtmMaintenanceDate]
-	--	,[dblMaintenanceAmount]
-	--	,[dblLicenseAmount]
-	--	,[intContractDetailId]
-	--	,[intTicketId]
-	--	,[ysnLeaseBilling]
-	--)
+	INSERT INTO @ItemsFromInvoice 	
 	EXEC dbo.[uspARGetItemsFromInvoice]
 			@intInvoiceId = @TransactionId
 
 	DECLARE		@intInvoiceDetailId				INT,
+				@intTicketId					INT,
+				@intInventoryShipmentItemId		INT,
 				@intContractDetailId			INT,
 				@intFromItemUOMId				INT,
 				@intToItemUOMId					INT,
@@ -80,6 +36,8 @@ BEGIN TRY
 		intUniqueId					INT IDENTITY,
 		intInvoiceDetailId			INT,
 		intContractDetailId			INT,
+		intTicketId					INT,
+		intInventoryShipmentItemId	INT,
 		intItemUOMId				INT,
 		dblQty						NUMERIC(12,4)	
 	)
@@ -87,6 +45,8 @@ BEGIN TRY
 	INSERT INTO @tblToProcess(
 		 [intInvoiceDetailId]
 		,[intContractDetailId]
+		,[intTicketId]
+		,[intInventoryShipmentItemId]
 		,[intItemUOMId]
 		,[dblQty])
 
@@ -94,6 +54,8 @@ BEGIN TRY
 	SELECT
 		 I.[intInvoiceDetailId]
 		,D.[intContractDetailId]
+		,D.[intTicketId]
+		,D.[intInventoryShipmentItemId]
 		,D.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE (D.dblQtyShipped - TD.dblQtyShipped) END))
 	FROM
@@ -130,6 +92,8 @@ BEGIN TRY
 	SELECT
 		 I.[intInvoiceDetailId]
 		,D.[intContractDetailId]
+		,D.[intTicketId]
+		,D.[intInventoryShipmentItemId]
 		,D.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
 	FROM
@@ -165,6 +129,8 @@ BEGIN TRY
 	SELECT
 		 I.[intInvoiceDetailId]
 		,TD.[intContractDetailId]
+		,D.[intTicketId]
+		,D.[intInventoryShipmentItemId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
 	FROM
@@ -200,6 +166,8 @@ BEGIN TRY
 	SELECT
 		 I.[intInvoiceDetailId]
 		,TD.[intContractDetailId]
+		,D.[intTicketId]
+		,D.[intInventoryShipmentItemId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
 	FROM
@@ -234,6 +202,8 @@ BEGIN TRY
 	SELECT
 		 TD.intTransactionDetailId
 		,TD.[intContractDetailId]
+		,TD.[intTicketId]
+		,TD.[intInventoryShipmentItemId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
 	FROM
@@ -262,6 +232,8 @@ BEGIN TRY
 	SELECT
 		 Detail.intInvoiceDetailId
 		,Detail.[intContractDetailId]
+		,Detail.[intTicketId]
+		,Detail.[intInventoryShipmentItemId]
 		,Detail.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
 	FROM
@@ -292,12 +264,16 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
 				@dblQty							=	NULL,
-				@intInvoiceDetailId	=	NULL
+				@intInvoiceDetailId				=	NULL,
+				@intTicketId					=	NULL,
+				@intInventoryShipmentItemId		=	NULL
 
 		SELECT	@intContractDetailId			=	[intContractDetailId],
 				@intFromItemUOMId				=	[intItemUOMId],
 				@dblQty							=	[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
-				@intInvoiceDetailId				=	[intInvoiceDetailId]
+				@intInvoiceDetailId				=	[intInvoiceDetailId],
+				@intTicketId					=   [intTicketId],
+				@intInventoryShipmentItemId		=   [intInventoryShipmentItemId]
 		FROM	@tblToProcess 
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
@@ -307,18 +283,16 @@ BEGIN TRY
 		END
 
 		SET @dblQty = ISNULL(@dblQty,0)
-		-- IF ISNULL(@dblQty,0) = 0
-		-- BEGIN
-		-- 	--RAISERROR('UOM does not exist.',16,1)
-		-- 	SET @dblQty = 0
-		-- END
-					
-		EXEC	uspCTUpdateScheduleQuantity
-				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblQty,
-				@intUserId				=	@UserId,
-				@intExternalId			=	@intInvoiceDetailId,
-				@strScreenName			=	'Invoice'
+		
+		IF ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intInventoryShipmentItemId, 0) = 0
+			BEGIN
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblQty,
+						@intUserId				=	@UserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice'
+			END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
