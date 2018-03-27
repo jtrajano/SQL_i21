@@ -3348,7 +3348,15 @@ BEGIN
 		,0
 		,0
 END
+
+GO
+UPDATE tblMFLotInventory
+SET ysnPickAllowed = 1
+WHERE ysnPickAllowed IS NULL
 GO
 
 
-
+UPDATE tblMFCompanyPreference
+SET ysnSendEDIOnRepost = 1
+Where ysnSendEDIOnRepost IS NULL
+Go

@@ -106,6 +106,7 @@ BEGIN TRY
 				,@intInventoryShipmentId = NULL
 				,@dtmShipmentDate = NULL
 				,@dtmDeliveryRequestedDate = NULL
+				,@strPONumber = NULL
 
 			SELECT @strErrorMessage = ''
 
@@ -117,6 +118,7 @@ BEGIN TRY
 				,@strShipToName = strShipToName
 				,@dtmShipmentDate = strShipmentDate
 				,@dtmDeliveryRequestedDate = strDeliveryRequestedDate
+				,@strPONumber = strPONumber
 			FROM tblMFEDI940 EDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -162,7 +164,9 @@ BEGIN TRY
 							dblQtyOrdered IS NULL
 							OR dblQtyOrdered = 0
 							)
+						AND strPurpose <> 'Cancel'
 					)
+				
 			BEGIN
 				SELECT @strItemNo = ''
 
@@ -173,6 +177,7 @@ BEGIN TRY
 						dblQtyOrdered IS NULL
 						OR dblQtyOrdered = 0
 						)
+					AND strPurpose <> 'Cancel'
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -546,7 +551,7 @@ BEGIN TRY
 					,strShipToAddress1 + CASE 
 						WHEN IsNULL(strShipToAddress2, '') <> ''
 							THEN ' ' + strShipToAddress2
-							Else ''
+						ELSE ''
 						END strAddress
 					,strShipToCity strCity
 					,'United States' strCountry
@@ -621,7 +626,7 @@ BEGIN TRY
 							AND strAddress = @strShipToAddress1 + CASE 
 								WHEN IsNULL(@strShipToAddress2, '') <> ''
 									THEN ' ' + @strShipToAddress2
-									Else ''
+								ELSE ''
 								END
 							AND strCity = @strShipToCity
 							AND strState = @strShipToState
@@ -630,10 +635,10 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblEMEntityLocation
 					SET strAddress = @strShipToAddress1 + CASE 
-								WHEN IsNULL(@strShipToAddress2, '') <> ''
-									THEN ' ' + @strShipToAddress2
-									Else ''
-								END
+							WHEN IsNULL(@strShipToAddress2, '') <> ''
+								THEN ' ' + @strShipToAddress2
+							ELSE ''
+							END
 						,strCity = @strShipToCity
 						,strState = @strShipToState
 						,strZipCode = @strShipToZip
@@ -707,8 +712,20 @@ BEGIN TRY
 					,strReferenceNumber = EDI.strDepositorOrderNumber
 					,intItemId = I.intItemId
 					,intOwnershipType = 1
-					,dblQuantity = EDI.dblQtyOrdered
-					,intItemUOMId = IU.intItemUOMId
+					,dblQuantity = (
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, EDI.dblQtyOrdered)
+							ELSE EDI.dblQtyOrdered
+							END
+						)
+					,intItemUOMId = (
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN IU2.intItemUOMId
+							ELSE IU.intItemUOMId
+							END
+						)
 					,intOrderId = NULL
 					,intLineNo = EDI.intLineNumber
 					,intWeightUOMId = NULL
@@ -726,7 +743,11 @@ BEGIN TRY
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitMeasure = EDI.strUOM
+				JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
+				JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
+					AND UM2.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND strPurpose <> 'Cancel'
 
 				INSERT INTO @ShipmentStagingTable (
 					intOrderType
@@ -793,6 +814,7 @@ BEGIN TRY
 						FROM @ShipmentStagingTable SST
 						WHERE SST.intItemId = I.intItemId
 						)
+					AND strPurpose <> 'Cancel'
 
 				INSERT INTO @FinalShipmentStagingTable (
 					intOrderType
@@ -843,19 +865,26 @@ BEGIN TRY
 				FROM @ShipmentStagingTable
 				ORDER BY intLineNo
 
-				EXEC dbo.uspICAddItemShipment @Entries = @FinalShipmentStagingTable
-					,@Charges = @OtherCharges
-					,@intUserId = @intUserId;
+				IF EXISTS (
+						SELECT *
+						FROM @FinalShipmentStagingTable
+						)
+				BEGIN
+					EXEC dbo.uspICAddItemShipment @Entries = @FinalShipmentStagingTable
+						,@Charges = @OtherCharges
+						,@intUserId = @intUserId;
 
-				SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
-				FROM #tmpAddItemShipmentResult
+					SELECT TOP 1 @intInventoryShipmentId = intInventoryShipmentId
+					FROM #tmpAddItemShipmentResult
 
-				UPDATE tblICInventoryShipment
-				SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
-				WHERE intInventoryShipmentId = @intInventoryShipmentId
+					UPDATE tblICInventoryShipment
+					SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
+						,strComment = @strPONumber
+					WHERE intInventoryShipmentId = @intInventoryShipmentId
 
-				DELETE
-				FROM #tmpAddItemShipmentResult
+					DELETE
+					FROM #tmpAddItemShipmentResult
+				END
 			END
 			ELSE
 			BEGIN
@@ -921,8 +950,20 @@ BEGIN TRY
 					,strReferenceNumber = EDI.strDepositorOrderNumber
 					,intItemId = I.intItemId
 					,intOwnershipType = 1
-					,dblQuantity = EDI.dblQtyOrdered
-					,intItemUOMId = IU.intItemUOMId
+					,dblQuantity = (
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU2.intItemUOMId, EDI.dblQtyOrdered)
+							ELSE EDI.dblQtyOrdered
+							END
+						)
+					,intItemUOMId = (
+						CASE 
+							WHEN I.intWeightUOMId = IU.intUnitMeasureId
+								THEN IU2.intItemUOMId
+							ELSE IU.intItemUOMId
+							END
+						)
 					,intOrderId = NULL
 					,intLineNo = EDI.intLineNumber
 					,intWeightUOMId = NULL
@@ -940,7 +981,11 @@ BEGIN TRY
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitMeasure = EDI.strUOM
+				JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
+				JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
+					AND UM2.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND strPurpose <> 'Cancel'
 
 				INSERT INTO @ShipmentStagingTable (
 					intOrderType
@@ -1007,77 +1052,114 @@ BEGIN TRY
 						FROM @ShipmentStagingTable SST
 						WHERE SST.intItemId = I.intItemId
 						)
+					AND strPurpose <> 'Cancel'
 
-				DELETE
-				FROM tblICInventoryShipmentItem
-				WHERE intInventoryShipmentId = @intInventoryShipmentId
+				IF EXISTS (
+						SELECT *
+						FROM @ShipmentStagingTable
+						)
+				BEGIN
+					DELETE
+					FROM tblICInventoryShipmentItem
+					WHERE intInventoryShipmentId = @intInventoryShipmentId
 
-				-- Insert shipment items
-				INSERT INTO tblICInventoryShipmentItem (
-					intInventoryShipmentId
-					,intItemId
-					,intOwnershipType
-					,dblQuantity
-					,intItemUOMId
-					,intOrderId
-					,intSourceId
-					,intLineNo
-					,intSubLocationId
-					,intStorageLocationId
-					,intCurrencyId
-					,intWeightUOMId
-					,dblUnitPrice
-					,intDockDoorId
-					,strNotes
-					,intGradeId
-					,intDiscountSchedule
-					,intStorageScheduleTypeId
-					,intDestinationGradeId
-					,intDestinationWeightId
-					,intForexRateTypeId
-					,dblForexRate
-					,intConcurrencyId
-					)
-				SELECT @intInventoryShipmentId
-					,se.intItemId
-					,se.intOwnershipType
-					,se.dblQuantity
-					,se.intItemUOMId
-					,se.intOrderId
-					,se.intSourceId
-					,se.intLineNo
-					,se.intSubLocationId
-					,se.intStorageLocationId
-					,se.intItemCurrencyId
-					,se.intWeightUOMId
-					,se.dblUnitPrice
-					,se.intDockDoorId
-					,se.strNotes
-					,se.intGradeId
-					,se.intDiscountSchedule
-					,se.intStorageScheduleTypeId
-					,se.intDestinationGradeId
-					,se.intDestinationWeightId
-					,intForexRateTypeId = CASE 
-						WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
-							THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId)
-						ELSE NULL
-						END
-					,dblForexRate = CASE 
-						WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
-							THEN ISNULL(se.dblForexRate, forexRate.dblRate)
-						ELSE NULL
-						END
-					,intConcurrencyId = 1
-				FROM @ShipmentStagingTable se
-				INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = @intInventoryShipmentId
-				-- Get the SM forex rate. 
-				OUTER APPLY dbo.fnSMGetForexRate(ISNULL(s.intCurrencyId, @intFunctionalCurrencyId), CASE 
+					-- Insert shipment items
+					INSERT INTO tblICInventoryShipmentItem (
+						intInventoryShipmentId
+						,intItemId
+						,intOwnershipType
+						,dblQuantity
+						,intItemUOMId
+						,intOrderId
+						,intSourceId
+						,intLineNo
+						,intSubLocationId
+						,intStorageLocationId
+						,intCurrencyId
+						,intWeightUOMId
+						,dblUnitPrice
+						,intDockDoorId
+						,strNotes
+						,intGradeId
+						,intDiscountSchedule
+						,intStorageScheduleTypeId
+						,intDestinationGradeId
+						,intDestinationWeightId
+						,intForexRateTypeId
+						,dblForexRate
+						,intConcurrencyId
+						)
+					SELECT @intInventoryShipmentId
+						,se.intItemId
+						,se.intOwnershipType
+						,se.dblQuantity
+						,se.intItemUOMId
+						,se.intOrderId
+						,se.intSourceId
+						,se.intLineNo
+						,se.intSubLocationId
+						,se.intStorageLocationId
+						,se.intItemCurrencyId
+						,se.intWeightUOMId
+						,se.dblUnitPrice
+						,se.intDockDoorId
+						,se.strNotes
+						,se.intGradeId
+						,se.intDiscountSchedule
+						,se.intStorageScheduleTypeId
+						,se.intDestinationGradeId
+						,se.intDestinationWeightId
+						,intForexRateTypeId = CASE 
 							WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
 								THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId)
 							ELSE NULL
-							END, se.dtmShipDate) forexRate
-				ORDER BY se.intLineNo
+							END
+						,dblForexRate = CASE 
+							WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
+								THEN ISNULL(se.dblForexRate, forexRate.dblRate)
+							ELSE NULL
+							END
+						,intConcurrencyId = 1
+					FROM @ShipmentStagingTable se
+					INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = @intInventoryShipmentId
+					-- Get the SM forex rate. 
+					OUTER APPLY dbo.fnSMGetForexRate(ISNULL(s.intCurrencyId, @intFunctionalCurrencyId), CASE 
+								WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId
+									THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId)
+								ELSE NULL
+								END, se.dtmShipDate) forexRate
+					ORDER BY se.intLineNo
+				END
+			END
+
+			IF EXISTS (
+					SELECT *
+					FROM tblMFEDI940
+					WHERE strDepositorOrderNumber = @strOrderNo
+						AND strPurpose = 'Cancel'
+					)
+			BEGIN
+				DELETE InvSI
+				FROM dbo.tblICInventoryShipment InvS
+				JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
+					AND InvS.intInventoryShipmentId = @intInventoryShipmentId
+				JOIN tblICItem I ON I.intItemId = InvSI.intItemId
+				JOIN tblMFEDI940 EDI ON EDI.strCustomerItemNumber = I.strItemNo
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND EDI.strPurpose = 'Cancel'
+
+				IF NOT EXISTS (
+						SELECT *
+						FROM tblICInventoryShipmentItem
+						WHERE intInventoryShipmentId = @intInventoryShipmentId
+						)
+				BEGIN
+					DELETE
+					FROM dbo.tblICInventoryShipment
+					WHERE intInventoryShipmentId = @intInventoryShipmentId
+
+					SELECT @intInventoryShipmentId = NULL
+				END
 			END
 
 			IF @intInventoryShipmentId > 0
@@ -1274,7 +1356,7 @@ BEGIN TRY
 				,ysnNotify
 			FROM tblMFEDI940 EDI940
 			JOIN tblICItem I ON I.strItemNo = strCustomerItemNumber
-			JOIN tblICInventoryShipmentItem SI ON SI.intItemId = I.intItemId
+			LEFT JOIN tblICInventoryShipmentItem SI ON SI.intItemId = I.intItemId
 				AND SI.intInventoryShipmentId = @intInventoryShipmentId
 				AND EDI940.intLineNumber = SI.intLineNo
 			WHERE strDepositorOrderNumber = @strOrderNo

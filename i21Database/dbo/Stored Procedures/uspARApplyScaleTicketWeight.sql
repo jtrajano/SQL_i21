@@ -2,8 +2,6 @@
 	  @intSalesOrderId	INT
 	, @intScaleUOMId    INT = NULL
 	, @intUserId		INT = NULL
-	, @dblGrossWeight	NUMERIC(18, 6) = 0
-    , @dblTareWeight	NUMERIC(18, 6) = 0
 	, @dblNetWeight		NUMERIC(18, 6) = 0
 	, @intNewInvoiceId	INT = NULL OUTPUT
 AS
@@ -67,12 +65,6 @@ BEGIN
 	WHERE SOD.intSalesOrderId = @intSalesOrderId
 	GROUP BY SOD.intItemUOMId
 
-	UPDATE tblSOSalesOrderDetail
-	SET dblQtyOrdered = ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, @intItemUOMId, @dblNetWeight - @dblTotalTreatment), 0)
-	WHERE intSalesOrderDetailId = @intSalesOrderDetailId
-	  AND intSalesOrderId = @intSalesOrderId
-	  AND intItemId = @intScaleItem
-
 	EXEC dbo.uspSOProcessToInvoice @SalesOrderId = @intSalesOrderId
 								 , @UserId = @intUserId
 								 , @NewInvoiceId = @intNewInvoiceId OUT
@@ -82,4 +74,18 @@ BEGIN
 			RAISERROR('Failed to Create Invoice.', 16, 1)
 			RETURN;
 		END	
+	ELSE
+		BEGIN
+			UPDATE tblARInvoiceDetail
+			SET dblQtyShipped = @dblNetWeight - @dblTotalTreatment
+			  , intItemUOMId = @intScaleUOMId
+			WHERE intSalesOrderDetailId = @intSalesOrderDetailId
+			  AND intInvoiceId = @intNewInvoiceId
+
+			EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intNewInvoiceId, @UserId = @intUserId
+
+			UPDATE tblSOSalesOrder
+			SET strOrderStatus = 'Short Closed'
+			WHERE intSalesOrderId = @intSalesOrderId
+		END
 END

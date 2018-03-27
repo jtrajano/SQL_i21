@@ -4,7 +4,7 @@ SELECT CD.intContractDetailId
 	,CD.strSequenceNumber
 	,CD.strEntityName
 	,RI.intItemId
-	,RI.dblQuantity * CD.dblQtyInStockUOM AS dblQtyInStockUOM
+	,RI.dblQuantity * CD.dblBalanceInItemStockUOM AS dblQtyInStockUOM
 	--,CD.dblQtyInStockUOM
 	,CD.strStockItemUOM
 	,CD.intUpdatedAvailabilityMonth
@@ -17,3 +17,4 @@ JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 	AND RI.intRecipeItemTypeId = 1
 JOIN vyuCTContractDetailView CD ON CD.intItemId = R.intItemId
 	AND CD.intContractStatusId = 1
+	AND CD.dblBalanceInItemStockUOM > 0

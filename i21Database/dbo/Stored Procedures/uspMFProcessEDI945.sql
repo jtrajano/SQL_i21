@@ -25,7 +25,7 @@ BEGIN
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblMFEDI945 EDI945
-			WHERE EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
+			WHERE EDI945.ysnStatus=1 and EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
 			)
 	ORDER BY InvS.intInventoryShipmentId
 
@@ -82,7 +82,11 @@ BEGIN
 							AND ItemOwner.intOwnerId = InvS.intEntityCustomerId
 						)
 					THEN 1
+				ELSE (CASE 
+				WHEN IsNULL(UM.strUnitType, '') = 'Weight'
+					THEN dbo.fnMFConvertQuantityToTargetItemUOM(IU.intItemUOMId, IU1.intItemUOMId, InvSL.dblQuantityShipped)
 				ELSE InvSL.dblQuantityShipped
+				END)
 				END
 			) AS dblQtyShipped
 		,EDI.strUOM
@@ -95,6 +99,7 @@ BEGIN
 		AND InvS.ysnPosted = 1
 	JOIN dbo.tblICInventoryShipmentItem InvSI ON InvSI.intInventoryShipmentId = InvS.intInventoryShipmentId
 	JOIN dbo.tblICInventoryShipmentItemLot InvSL ON InvSL.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
+	JOIN tblICItemUOM IU ON InvSI.intItemUOMId  = IU.intItemUOMId 
 	JOIN dbo.tblICLot L ON L.intLotId = InvSL.intLotId
 	JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN vyuMFGetInventoryShipmentCustomField CF ON CF.intRecordId = InvS.intInventoryShipmentId
@@ -107,6 +112,9 @@ BEGIN
 			FROM tblMFEDI940Archive EDI1
 			WHERE EDI1.intInventoryShipmentItemId = InvSI.intInventoryShipmentItemId
 			)
+		LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
+		LEFT JOIN tblICItemUOM IU1 ON UM.intUnitMeasureId = IU1.intUnitMeasureId
+		AND I.intItemId = IU1.intItemId
 	SELECT *
 	INTO #tblMFSSCCNo
 	FROM dbo.vyuMFGetPalletSSCCNo
@@ -298,8 +306,10 @@ BEGIN
 	INSERT INTO tblMFEDI945 (
 		intInventoryShipmentId
 		,strDepositorOrderNumber
+		,ysnStatus
 		)
 	SELECT intInventoryShipmentId
 		,strOrderNo
+		,1
 	FROM @tblMFOrderNo
 END

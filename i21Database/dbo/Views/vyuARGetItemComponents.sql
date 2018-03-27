@@ -7,6 +7,7 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , strItemNo				= I.strItemNo
 	 , strDescription			= I.strDescription
 	 , intItemUnitMeasureId		= RECIPE.intItemUOMId
+	 , intUnitMeasureId			= UOM.intUnitMeasureId
 	 , strUnitMeasure			= UOM.strUnitMeasure
 	 , dblQuantity				= RECIPE.dblQuantity
 	 , dblNewQuantity			= RECIPE.dblQuantity
@@ -40,6 +41,7 @@ INNER JOIN (
 ) RECIPE ON I.intItemId = RECIPE.intComponentId
 INNER JOIN (
 	SELECT intItemUOMId
+		 , intUnitMeasureId
 		 , strUnitMeasure
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM
@@ -54,6 +56,7 @@ SELECT intRecipeId				= NULL
 	 , strItemNo				= I.strItemNo
 	 , strDescription			= BUNDLE.strDescription	 
 	 , intItemUnitMeasureId		= BUNDLE.intItemUnitMeasureId
+	 , intUnitMeasureId			= UOM.intUnitMeasureId
 	 , strUnitMeasure			= UOM.strUnitMeasure
 	 , dblQuantity				= BUNDLE.dblQuantity
 	 , dblNewQuantity			= BUNDLE.dblQuantity
@@ -80,6 +83,7 @@ INNER JOIN (
 ) I ON BUNDLE.intBundleItemId = I.intItemId
 INNER JOIN (
 	SELECT intItemUOMId
+		 , intUnitMeasureId
 		 , strUnitMeasure
 		 , dblUnitQty
 	FROM dbo.vyuARItemUOM WITH (NOLOCK)
