@@ -3,6 +3,7 @@
 	,@strStorageLocationName NVARCHAR(50)
 	,@intLocationId INT
 	,@intUserId INT
+	,@strSubLocationName NVARCHAR(50) = ''
 	)
 AS
 BEGIN TRY
@@ -10,15 +11,28 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intStorageLocationId INT
 		,@intSubLocationId INT
-		,@strSubLocationName NVARCHAR(50)
 
-	SELECT @intStorageLocationId = intStorageLocationId
-		,@intSubLocationId = intSubLocationId
-	FROM dbo.tblICStorageLocation
-	WHERE strName = @strStorageLocationName
-		AND intLocationId = @intLocationId
+	IF ISNULL(@strSubLocationName, '') <> ''
+	BEGIN
+		SELECT @intSubLocationId = CSL.intCompanyLocationSubLocationId
+			,@intStorageLocationId = intStorageLocationId
+		FROM tblSMCompanyLocationSubLocation CSL
+		JOIN tblICStorageLocation SL ON SL.intSubLocationId = CSL.intCompanyLocationSubLocationId
+			AND SL.strName = @strStorageLocationName
+			AND SL.intLocationId = @intLocationId
+			AND CSL.strSubLocationName = @strSubLocationName
+	END
+	ELSE
+	BEGIN
+		SELECT @intStorageLocationId = intStorageLocationId
+			,@intSubLocationId = intSubLocationId
+		FROM dbo.tblICStorageLocation
+		WHERE strName = @strStorageLocationName
+			AND intLocationId = @intLocationId
+	END
 
 	IF @intStorageLocationId IS NULL
+		OR @intSubLocationId IS NULL
 	BEGIN
 		RAISERROR (
 				'INVALID LOCATION.'
@@ -43,7 +57,7 @@ BEGIN TRY
 		JOIN dbo.tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IRI.intSubLocationId
 		WHERE IRL.intInventoryReceiptItemLotId = @intInventoryReceiptItemLotId
 
-		SET @ErrMsg = 'SCANNED LOCATION DOES NOT BELONG TO THE SUB LOCATION ''' + @strSubLocationName+''''
+		SET @ErrMsg = 'SCANNED LOCATION DOES NOT BELONG TO THE IR SUB LOCATION ''' + @strSubLocationName + ''''
 
 		RAISERROR (
 				@ErrMsg
