@@ -4,7 +4,7 @@
 	,@intEntityUserSecurityId AS INT
 	,@intTransactionTypeId AS INT 
 	,@ysnPost AS BIT = 1 	
-	,@intItemId AS INT = NULL -- Used when rebuilding the stocks. 
+	,@intRebuildItemId AS INT = NULL -- Used when rebuilding the stocks. 
 AS
 
 -- Constant Variables
@@ -67,7 +67,7 @@ BEGIN
 				AND ItemLocation.intItemId = Item.intItemId
 	WHERE	ItemLocation.intItemLocationId IS NULL 
 			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+			AND ReceiptItem.intItemId = ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
 
 	IF @intChargeItemId IS NOT NULL 
 	BEGIN 
@@ -248,7 +248,10 @@ BEGIN
 							ON ItemLocation.intItemId = ReceiptItem.intItemId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+						AND ReceiptItem.intItemId = 
+								CASE WHEN @intRebuildItemId < 0 THEN ReceiptItem.intItemId
+									 ELSE ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+								END 
 						AND ISNULL(ReceiptItem.intOwnershipType, 0) = 1 -- Only "Own" items will have GL entries. 
 						AND AllocatedCharges.ysnInventoryCost = 1 -- And allocated charge is part of the item cost. 						
 						AND ISNULL(Item.strBundleType,'') != 'Kit' -- Don't include 'Kit' items
@@ -276,7 +279,10 @@ BEGIN
 							ON ItemLocation.intItemId = ReceiptItem.intItemId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+						AND ReceiptItem.intItemId = 
+								CASE WHEN @intRebuildItemId < 0 THEN ReceiptItem.intItemId
+									 ELSE ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+								END 
 						AND ISNULL(ReceiptItem.intOwnershipType, 0) = 1 -- Only "Own" items will have GL entries. 
 						AND AllocatedCharges.ysnInventoryCost = 1 -- And allocated charge is part of the item cost. 						
 						AND Item.strBundleType = 'Kit' -- Include 'Kit' items						
@@ -409,7 +415,12 @@ BEGIN
 				INNER JOIN @ItemGLAccounts ItemGLAccount
 					ON ItemGLAccount.intItemId = il.intItemId
 					AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-		WHERE	il.intItemId = @intItemId
+		WHERE	il.intItemId = --ISNULL(@intRebuildItemId, ItemGLAccount.intItemId)
+					CASE 
+						WHEN @intRebuildItemId < 0 THEN ItemGLAccount.intItemId
+						ELSE ISNULL(@intRebuildItemId, ItemGLAccount.intItemId)
+					END 
+
 				AND ItemGLAccount.intContraInventoryId IS NULL 				 			
 
 		IF @intChargeItemId IS NOT NULL 
@@ -611,8 +622,11 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
-				
+				AND ReceiptItem.intItemId = --ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+						CASE 
+							WHEN @intRebuildItemId < 0 THEN ReceiptItem.intItemId
+							ELSE ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
+						END						
 	)
 	INSERT INTO @ChargesGLEntries (
 		[dtmDate] 
@@ -1074,7 +1088,7 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharges.intForexRateTypeId
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				
+				AND @intRebuildItemId IS NULL 				
 	)
 	INSERT INTO @ChargesGLEntries (
 		[dtmDate] 
