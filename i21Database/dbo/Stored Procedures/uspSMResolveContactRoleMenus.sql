@@ -50,7 +50,7 @@ BEGIN
 			-- Delete Contact Admin Menu
 			DELETE RoleMenu FROM tblSMUserRoleMenu RoleMenu
 			INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
-			WHERE intUserRoleId = @contactAdminRoleId AND strRoleType in ('Contact Admin') AND intMenuId IN 
+			WHERE RoleMenu.intUserRoleId = @contactAdminRoleId AND strRoleType in ('Contact Admin') AND intMenuId IN 
 			(
 				SELECT intMenuId from tblSMUserRoleMenu RoleMenu
 				INNER JOIN tblSMUserRole UserRole ON RoleMenu.intUserRoleId = UserRole.intUserRoleID
