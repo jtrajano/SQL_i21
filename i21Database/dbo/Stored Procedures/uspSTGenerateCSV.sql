@@ -3,15 +3,20 @@
 @strStoreIdList NVARCHAR(MAX),
 @dtmBeginningDate datetime,
 @dtmEndingDate datetime,
-@strTableName nvarchar(200),
+@intCsvFormat INT,
 @strStatusMsg NVARCHAR(1000) OUTPUT,
 @strCSVHeader NVARCHAR(MAX) OUTPUT,
 @intVendorAccountNumber INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
+		
+		-- @intCsvFormat
+		-- 0 = PM Morris
+        -- 1 = RJ Reynolds
+
 		SET @strStatusMsg = ''
-		DECLARE @intCountAccountNumber AS INT = 0
+		--DECLARE @intCountAccountNumber AS INT = 0
 		SET @intVendorAccountNumber = 0
 
 		----// START Validate selected date total to 7days
@@ -21,6 +26,7 @@ BEGIN
 			SET @strCSVHeader = ''
 			SET @intVendorAccountNumber = 0
 			SET @strStatusMsg = 'Selected date range have a total of [' + CAST(@intCountDays AS NVARCHAR(20)) + '] days. Selected dates should complete only 1 week of data transaction'
+			
 			RETURN
 		END
 		ELSE IF(@intCountDays < 7)
@@ -28,13 +34,14 @@ BEGIN
 			SET @strCSVHeader = ''
 			SET @intVendorAccountNumber = 0
 			SET @strStatusMsg = 'Selected date range have a total of [' + CAST(@intCountDays AS NVARCHAR(20)) + '] days. Selected dates should complete 1 week of data transaction'
+			
 			RETURN
 		END
 		----// END Validate selected date total to 7days
 
 
 		----// START Validate Start and Ending date
-		IF(@strTableName = 'tblSTstgRebatesPMMorris')
+		IF(@intCsvFormat = 0) -- 0 = PM Morris
 		BEGIN
 			-- The date should start on Sunday to Saturday
 			IF(DATENAME(DW, CAST(@dtmBeginningDate AS DATE)) = 'Sunday' AND DATENAME(DW, CAST(@dtmEndingDate AS DATE)) = 'Saturday')
@@ -46,10 +53,11 @@ BEGIN
 				SET @strCSVHeader = ''
 				SET @intVendorAccountNumber = 0
 				SET @strStatusMsg = 'Selected date range should start on Sunday to Saturday'
+				
 				RETURN
 			END
 		END
-		ELSE IF(@strTableName = 'tblSTstgRebatesRJReynolds')
+		ELSE IF(@intCsvFormat = 1) -- 1 = RJ Reynolds
 		BEGIN
 			-- The date should start on Monday to Sunday
 			IF(DATENAME(DW, CAST(@dtmBeginningDate AS DATE)) = 'Monday' AND DATENAME(DW, CAST(@dtmEndingDate AS DATE)) = 'Sunday')
@@ -61,6 +69,7 @@ BEGIN
 				SET @strCSVHeader = ''
 				SET @intVendorAccountNumber = 0
 				SET @strStatusMsg = 'Selected date range should start on Monday to Sunday'
+				
 				RETURN
 			END
 		END
@@ -70,29 +79,29 @@ BEGIN
 
 
 		----// START PM Morris File format validation
-		IF(@strTableName = 'tblSTstgRebatesPMMorris')
-		BEGIN
-			SELECT @intCountAccountNumber = COUNT(DISTINCT intRetailAccountNumber) 
-			FROM tblSTRetailAccount
-			WHERE intEntityId = @intVendorId
-			AND intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+		--IF(@intCsvFormat = 0) -- 0 = PM Morris
+		--BEGIN
+		--	SELECT @intCountAccountNumber = COUNT(DISTINCT intRetailAccountNumber) 
+		--	FROM tblSTRetailAccount
+		--	WHERE intEntityId = @intVendorId
+		--	AND intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 
-			IF(@intCountAccountNumber >= 2)
-			BEGIN
-				SET @strCSVHeader = ''
-				SET @intVendorAccountNumber = 0
-				SET @strStatusMsg = 'Selected Store does not have the same Chain Account Number'
+		--	IF(@intCountAccountNumber >= 2)
+		--	BEGIN
+		--		SET @strCSVHeader = ''
+		--		SET @intVendorAccountNumber = 0
+		--		SET @strStatusMsg = 'Selected Store does not have the same Chain Account Number'
 
-				RETURN
-			END
-			ELSE IF(@intCountAccountNumber = 1)
-			BEGIN
-				SELECT @intVendorAccountNumber = intRetailAccountNumber
-				FROM tblSTRetailAccount
-				WHERE intEntityId = @intVendorId
-				AND intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-			END
-		END
+		--		RETURN
+		--	END
+		--	ELSE IF(@intCountAccountNumber = 1)
+		--	BEGIN
+		--		SELECT @intVendorAccountNumber = intRetailAccountNumber
+		--		FROM tblSTRetailAccount
+		--		WHERE intEntityId = @intVendorId
+		--		AND intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+		--	END
+		--END
 		----// END PM Morris File format validation
 
 
@@ -198,6 +207,7 @@ BEGIN
 			SET @strCSVHeader = ''
 			SET @intVendorAccountNumber = 0
 			SET @strStatusMsg = @strStatusMsg + ' does not have department'
+			
 			RETURN
 		END
 		--// START CHECK if Stores has department
@@ -210,7 +220,7 @@ BEGIN
 			DECLARE @Delimiter CHAR(1)
 
 			--START tblSTstgRebatesPMMorris
-			IF(@strTableName = 'tblSTstgRebatesPMMorris')
+			IF(@intCsvFormat = 0) -- 0 = PM Morris
 			BEGIN
 
 				SET @Delimiter = '|'
@@ -233,6 +243,22 @@ BEGIN
 
 				-- GET week ending date (SATURDAY)
 				-- DECLARE @NextDayID INT = 5 -- 0=Mon, 1=Tue, 2=Wed, 3=Thur, 4=Fri, 5=Sat, 6=Sun
+
+				-- Check if has chain account number
+				IF EXISTS(SELECT intChainAccountNumber FROM tblAPVendor WHERE intEntityId = @intVendorId AND intChainAccountNumber IS NOT NULL)
+					BEGIN
+						SELECT @intVendorAccountNumber = intChainAccountNumber FROM tblAPVendor
+						WHERE intEntityId = @intVendorId
+					END
+				ELSE
+					BEGIN
+						SET @strCSVHeader = ''
+						SET @intVendorAccountNumber = 0
+						SET @strStatusMsg = 'Selected Vendor does not have Chain account number setup'
+
+						RETURN
+					END
+				
 
 				INSERT INTO @tblTempPMM
 				SELECT DISTINCT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
@@ -332,7 +358,7 @@ BEGIN
 
 
 			-- START tblSTstgRebatesRJReynolds
-			IF(@strTableName = 'tblSTstgRebatesRJReynolds')
+			IF(@intCsvFormat = 1) -- 1 = RJ Reynolds
 			BEGIN
 				SET @Delimiter = ','
 
@@ -447,7 +473,7 @@ BEGIN
 		END
 
 
-		IF(@strTableName = 'tblSTstgRebatesPMMorris')
+		IF(@intCsvFormat = 0) -- 0 = PM Morris
 		BEGIN
 				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
 					DECLARE @intNumberOfRecords int = 0
@@ -471,16 +497,16 @@ BEGIN
 			SELECT * FROM @tblTempPMM
 			ORDER BY CAST(strStoreNumber AS INT) ASC
 		END
-		ELSE IF(@strTableName = 'tblSTstgRebatesRJReynolds')
+		IF(@intCsvFormat = 1) -- 1 = RJ Reynolds
 		BEGIN
 			SELECT * FROM @tblTempRJR
 			ORDER BY intOutletNumber ASC
 		END
 		
 
-		DECLARE @SQL NVARCHAR(MAX)
-		SET @SQL = 'DELETE FROM ' + @strTableName
-		EXEC sp_executesql @SQL
+		--DECLARE @SQL NVARCHAR(MAX)
+		--SET @SQL = 'DELETE FROM ' + @strTableName
+		--EXEC sp_executesql @SQL
 
 	END TRY
 
