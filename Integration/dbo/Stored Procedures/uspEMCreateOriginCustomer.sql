@@ -53,10 +53,11 @@ BEGIN
                     SELECT @CusNo, @CusLastName, @CusFirstName, @CusMidInit, @CusSuffix, @CusZip, @CusPhone
 
                     DECLARE @Count INT
-                    SET @Count = 0
+                    SET @Count = 1
                     WHILE EXISTS(SELECT TOP 1 1 FROM agcusmst WHERE agcus_key = @CusNo)
                     BEGIN
                         SET @CusNo = Cast(@Count AS NVARCHAR) +  @CusNo
+                        SET @Count = @Count + 1
                     END
 
 
@@ -131,10 +132,11 @@ BEGIN
                     SELECT @CusNo, @CusLastName, @CusFirstName, @CusMidInit, @CusSuffix, @CusZip, @CusPhone
 
                     DECLARE @Count INT
-                    SET @Count = 0
+                    SET @Count = 1
                     WHILE EXISTS(SELECT TOP 1 1 FROM ptcusmst WHERE ptcus_cus_no = @CusNo)
                     BEGIN
                         SET @CusNo = Cast(@Count AS NVARCHAR) +  @CusNo
+                        SET @Count = @Count + 1
                     END
 
 
