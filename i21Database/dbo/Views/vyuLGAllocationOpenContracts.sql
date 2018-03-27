@@ -5,6 +5,7 @@ AS
 			CD.intContractSeq,
 			Item.intOriginId, 
 			Country.strCountry as strItemOrigin,
+			Country.intCountryID,
 			CD.intItemId, 					
 			Item.strItemNo,
 			Item.strDescription as strItemDescription,
