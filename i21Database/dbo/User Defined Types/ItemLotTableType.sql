@@ -214,5 +214,6 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strCondition]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 	,[intInventoryReceiptId]		INT NULL 
 	,[intInventoryReceiptItemId]	INT NULL 
-	,[intInventoryReceiptItemLotId]	INT NULL 
+	,[intInventoryReceiptItemLotId]	INT NULL
+	,[intSeasonCropYear]		INT NULL
 )

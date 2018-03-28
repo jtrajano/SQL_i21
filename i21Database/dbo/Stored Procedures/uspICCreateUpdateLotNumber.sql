@@ -102,7 +102,8 @@ DECLARE
 	,@intUnitMeasureId			AS INT
 	,@intInventoryReceiptId		AS INT 
 	,@intInventoryReceiptItemId	AS INT 
-	,@intInventoryReceiptItemLotId	AS INT 
+	,@intInventoryReceiptItemLotId	AS INT
+	,@intSeasonCropYear			AS INT
 
 
 DECLARE @strName AS NVARCHAR(200)
@@ -195,6 +196,7 @@ SELECT  intId
 		,intInventoryReceiptId
 		,intInventoryReceiptItemId
 		,intInventoryReceiptItemLotId
+		,intSeasonCropYear
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -248,6 +250,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intInventoryReceiptId
 		,@intInventoryReceiptItemId
 		,@intInventoryReceiptItemLotId
+		,@intSeasonCropYear
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -590,6 +593,7 @@ BEGIN
 						,intItemOwnerId = @intItemOwnerId
 						,strContainerNo = @strContainerNo
 						,strCondition = @strCondition 
+						,intSeasonCropYear = @intSeasonCropYear
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -622,7 +626,7 @@ BEGIN
 				,intUnitPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intUnitPallet ELSE LotMaster.intUnitPallet END 
 				,strContainerNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContainerNo ELSE LotMaster.strContainerNo END 
 				,strCondition			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCondition ELSE LotMaster.strCondition END 
-								
+				,intSeasonCropYear		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSeasonCropYear ELSE LotMaster.intSeasonCropYear END 				
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
@@ -827,7 +831,7 @@ BEGIN
 				,intItemOwnerId
 				,strContainerNo
 				,strCondition
-
+				,intSeasonCropYear
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -876,6 +880,7 @@ BEGIN
 				,@intItemOwnerId 
 				,@strContainerNo
 				,@strCondition
+				,@intSeasonCropYear
 			)
 		;
 	
@@ -1063,6 +1068,7 @@ BEGIN
 		,@intInventoryReceiptId
 		,@intInventoryReceiptItemId
 		,@intInventoryReceiptItemLotId
+		,@intSeasonCropYear
 	;
 END
 

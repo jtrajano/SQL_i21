@@ -226,6 +226,7 @@ BEGIN
 			,intInventoryReceiptId
 			,intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId
+			,intSeasonCropYear
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -270,7 +271,7 @@ BEGIN
 			,intInventoryReceiptId			= Receipt.intInventoryReceiptId
 			,intInventoryReceiptItemId		= ReceiptItem.intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId	= ItemLot.intInventoryReceiptItemLotId
-
+			,intSeasonCropYear		= ItemLot.intSeasonCropYear
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
