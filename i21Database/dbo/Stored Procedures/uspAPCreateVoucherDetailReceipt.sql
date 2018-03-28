@@ -15,23 +15,19 @@ DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @voucherIds AS Id;
 DECLARE @voucherCurrency INT;
 DECLARE @voucherVendor INT;
-DECLARE @receiptItems AS VoucherDetailReceipt;
+DECLARE @receiptItems AS TABLE (
+	[intInventoryReceiptType]		INT				NOT NULL,
+	[intInventoryReceiptItemId]		INT				NOT NULL,
+    [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
+    [dblCost]						DECIMAL(18, 6)	NULL, 
+	[dblCostUnitQty]				DECIMAL(38, 20)	NULL, 
+	[dblTotal]						DECIMAL(18, 6)	NULL, 
+	[dblNetWeight]					DECIMAL(18, 6)	NULL, 
+	[intCostUOMId]					INT NULL,
+    [intTaxGroupId]					INT NULL
+);
 DECLARE @detailCreated AS TABLE(intBillDetailId INT, intInventoryReceiptItemId INT)
 DECLARE @error NVARCHAR(200);
-
-SELECT TOP 1
-	@voucherCurrency = voucher.intCurrencyId
-	,@voucherVendor = voucher.intEntityVendorId
-FROM tblAPBill voucher
-WHERE voucher.intBillId = @voucherId
-
---Filter the records per currency
-INSERT INTO @receiptItems
-SELECT A.*
-FROM @voucherDetailReceipt A
-INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
-INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
-WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
 
 CREATE TABLE #tempBillDetail (
     [intBillId]       				INT             NOT NULL,
@@ -48,7 +44,7 @@ CREATE TABLE #tempBillDetail (
 	[intAccountId]    				INT             NULL ,
 	[dblTotal]        				DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [dblCost] 						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblOldCost] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblOldCost] 					DECIMAL(18, 6) NULL, 
 	[dblNetWeight] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblNetShippedWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightLoss] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
@@ -90,27 +86,87 @@ CREATE TABLE #tempBillDetail (
 
 EXEC uspAPValidateVoucherDetailReceiptPO @voucherId, @voucherDetailReceipt
 
---update quantity and cost to use
-UPDATE voucherDetailReceipt
-	SET voucherDetailReceipt.dblCost = (CASE WHEN voucherDetailReceipt.dblCost IS NULL 
-												THEN (
-													CASE WHEN receiptItem.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0 
+SELECT TOP 1
+	@voucherCurrency = voucher.intCurrencyId
+	,@voucherVendor = voucher.intEntityVendorId
+FROM tblAPBill voucher
+WHERE voucher.intBillId = @voucherId
+
+--Filter the records per currency
+INSERT INTO @receiptItems
+SELECT 
+	[intInventoryReceiptType]		=	A.intInventoryReceiptType,
+	[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
+	[dblQtyReceived]				=	(CASE WHEN A.dblQtyReceived IS NULL OR
+														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
+												THEN B.dblOpenReceive - B.dblBillQty
+												ELSE A.dblQtyReceived END),
+	[dblCost]						=	CASE WHEN contractDetail.dblCashPrice > 0 
 														THEN contractDetail.dblCashPrice
-														ELSE receiptItem.dblUnitCost
-													END --use cash price of contract if unit cost of receipt item is 0
-												)
-											ELSE voucherDetailReceipt.dblCost END)
-	,voucherDetailReceipt.dblQtyReceived = (CASE WHEN voucherDetailReceipt.dblQtyReceived IS NULL OR
-														voucherDetailReceipt.dblQtyReceived > (receiptItem.dblOpenReceive - receiptItem.dblBillQty) --handle over paying
-												THEN receiptItem.dblOpenReceive - receiptItem.dblBillQty
-												ELSE voucherDetailReceipt.dblQtyReceived END)
-FROM @receiptItems voucherDetailReceipt
-INNER JOIN tblICInventoryReceiptItem receiptItem 
-	ON voucherDetailReceipt.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+														ELSE 
+															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0
+																THEN contractDetail.dblCashPrice
+																ELSE B.dblUnitCost
+																END)
+													END, --use cash price of contract if unit cost of receipt item is 0,
+	[dblCostUnitQty]				=	ISNULL(CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
+											THEN ContractItemCostUOM.dblUnitQty
+											ELSE ItemCostUOM.dblUnitQty END, 1),
+	[dblTotal]						=	0,
+										-- CAST((CASE WHEN contractDetail.dblCashPrice > 0 
+										-- 				THEN contractDetail.dblCashPrice
+										-- 				ELSE 
+										-- 					(CASE WHEN receiptItem.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0
+										-- 						THEN contractDetail.dblCashPrice
+										-- 						ELSE receiptItem.dblUnitCost
+										-- 						END)
+										-- 			END) 
+										-- 		/ ISNULL(C.intSubCurrencyCents,1)  
+										-- 		* (((CASE WHEN A.dblQtyReceived IS NULL OR
+										-- 				A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
+										-- 				THEN B.dblOpenReceive - receiptItem.dblBillQty
+										-- 				ELSE A.dblQtyReceived END))
+										-- 			 * (ItemUOM.dblUnitQty/ ISNULL(NULLIF(ItemWeightUOM.dblUnitQty,0) ,1))) 
+										-- 			 * ISNULL(NULLIF(ItemWeightUOM.dblUnitQty,0),1) / ISNULL(NULLIF(voucherDetailReceipt.dblCostUnitQty,0),1) 
+										-- 	AS DECIMAL(18,2)),
+	[dblNetWeight]					=	0,
+	[intCostUOMId]					=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
+											THEN contractDetail.intPriceItemUOMId
+											ELSE B.intCostUOMId END,
+	[intTaxGroupId]					=	A.intTaxGroupId
+FROM @voucherDetailReceipt A
+INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
+LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
 				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
-				ON contractHeader.intContractHeaderId = receiptItem.intOrderId 
-				AND contractDetail.intContractDetailId = receiptItem.intLineNo
+				ON contractHeader.intContractHeaderId = B.intOrderId 
+				AND contractDetail.intContractDetailId = B.intLineNo
+LEFT JOIN tblICItemUOM ContractItemCostUOM ON ContractItemCostUOM.intItemUOMId = contractDetail.intPriceItemUOMId
+
+WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
+
+-- --update quantity and cost to use
+-- UPDATE voucherDetailReceipt
+-- 	SET voucherDetailReceipt.dblCost = CASE WHEN contractDetail.dblCashPrice > 0 
+-- 														THEN contractDetail.dblCashPrice
+-- 														ELSE 
+-- 															(CASE WHEN receiptItem.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0
+-- 																THEN contractDetail.dblCashPrice
+-- 																ELSE receiptItem.dblUnitCost
+-- 																END)
+-- 													END --use cash price of contract if unit cost of receipt item is 0
+-- 	,voucherDetailReceipt.dblQtyReceived = (CASE WHEN voucherDetailReceipt.dblQtyReceived IS NULL OR
+-- 														voucherDetailReceipt.dblQtyReceived > (receiptItem.dblOpenReceive - receiptItem.dblBillQty) --handle over paying
+-- 												THEN receiptItem.dblOpenReceive - receiptItem.dblBillQty
+-- 												ELSE voucherDetailReceipt.dblQtyReceived END)
+-- FROM @receiptItems voucherDetailReceipt
+-- INNER JOIN tblICInventoryReceiptItem receiptItem 
+-- 	ON voucherDetailReceipt.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+-- LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
+-- 				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
+-- 				ON contractHeader.intContractHeaderId = receiptItem.intOrderId 
+-- 				AND contractDetail.intContractDetailId = receiptItem.intLineNo
 
 IF @transCount = 0 BEGIN TRANSACTION
 
@@ -161,14 +217,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) 
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
 																	(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)) 
 																	*  
-																	(ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) 
+																	(ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1)) 
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
@@ -177,18 +233,18 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
-																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
+																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1))  
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* voucherDetailReceipt.dblCost
 																AS DECIMAL(18,2))  --Orig Calculation
 													END)
 												END),0),
-			[dblCost]						=	voucherDetailReceipt.dblCost,
-			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
+			[dblCost]						=	voucherDetailReceipt.dblCost, --voucherDetailReceipt.dblCost,
+			[dblOldCost]					=	NULL,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													(CASE WHEN B.dblBillQty > 0 
 															THEN voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
@@ -197,11 +253,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 											ELSE 0 END,
 			[dblWeightLoss]					=	ISNULL(B.dblGross - B.dblNet,0),
 			[intUnitOfMeasureId]			=	B.intUnitMeasureId,
-			[intCostUOMId]					=	B.intCostUOMId,
+			[intCostUOMId]					=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]				=	B.intWeightUOMId,
 			[intLineNo]						=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]				=	ISNULL(ItemWeightUOM.dblUnitQty,0),
-			[dblCostUnitQty]				=	ABS(ISNULL(ItemCostUOM.dblUnitQty,0)),
+			[dblCostUnitQty]				=	voucherDetailReceipt.dblCostUnitQty,
 			[dblUnitQty]					=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 			[intCurrencyId]					=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 												ELSE ISNULL(A.intCurrencyId,0) END,
@@ -232,6 +288,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+		LEFT JOIN (tblCTContractHeader CH INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId)  ON CH.intEntityId = A.intEntityVendorId 
+																															AND CH.intContractHeaderId = B.intOrderId 
+																															AND CD.intContractDetailId = B.intLineNo 
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityId = A.intEntityVendorId
 		WHERE A.ysnPosted = 1 AND voucherDetailReceipt.intInventoryReceiptType = 1
 	END
@@ -289,14 +348,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) 
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
 																	(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)) 
 																	*  
-																	(ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) 
+																	(ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1)) 
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
@@ -305,10 +364,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
-																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
+																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1))  
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* voucherDetailReceipt.dblCost
@@ -316,7 +375,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0),
 			[dblCost]						=	voucherDetailReceipt.dblCost,
-			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
+			[dblOldCost]					=	NULL,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													-- voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))
 													(CASE WHEN B.dblBillQty > 0 
@@ -332,12 +391,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intContractHeaderId]		=	E.intContractHeaderId,
 			[intContractSeq]			=	E1.intContractSeq,
 			[intUnitOfMeasureId]		=	B.intUnitMeasureId,
-			[intCostUOMId]				=	B.intCostUOMId,
+			[intCostUOMId]				=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
-			[dblCostUnitQty]			=	ABS(ISNULL(ItemCostUOM.dblUnitQty,0)),
-			[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
+			[dblCostUnitQty]			=	ABS(ISNULL(voucherDetailReceipt.dblCostUnitQty,0)),
+			[dblUnitQty]				=	ItemUOM.dblUnitQty,
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
@@ -434,14 +493,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) 
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
 																	(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)) 
 																	*  
-																	(ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) 
+																	(ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1)) 
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
@@ -450,10 +509,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
-																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
+																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1))  
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* voucherDetailReceipt.dblCost
@@ -461,7 +520,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0),
 			[dblCost]						=	voucherDetailReceipt.dblCost,
-			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
+			[dblOldCost]					=	NULL,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													-- voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))
 													(CASE WHEN B.dblBillQty > 0 
@@ -481,7 +540,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
-			[dblCostUnitQty]			=	ABS(ISNULL(ItemCostUOM.dblUnitQty,0)),
+			[dblCostUnitQty]			=	voucherDetailReceipt.dblCostUnitQty,
 			[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
@@ -584,14 +643,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 												THEN (CASE WHEN B.intWeightUOMId > 0 
 														THEN CAST(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)  
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))) 
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) 
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) 
 															AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0 AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
 																	(voucherDetailReceipt.dblCost / ISNULL(A.intSubCurrencyCents,1)) 
 																	*  
-																	(ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1)) 
+																	(ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1)) 
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* 
@@ -600,10 +659,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE (CASE WHEN B.intWeightUOMId > 0
 														THEN CAST(voucherDetailReceipt.dblCost 
 																	* (voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)))   
-																	* ItemWeightUOM.dblUnitQty / ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+																	* ItemWeightUOM.dblUnitQty / ISNULL(voucherDetailReceipt.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
 														WHEN (B.intUnitMeasureId > 0  AND B.intCostUOMId > 0)
 														THEN CAST(voucherDetailReceipt.dblQtyReceived
-																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(ItemCostUOM.dblUnitQty,1))  
+																	* voucherDetailReceipt.dblCost * (ItemUOM.dblUnitQty/ ISNULL(voucherDetailReceipt.dblCostUnitQty,1))  
 															AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST(voucherDetailReceipt.dblQtyReceived
 																	* voucherDetailReceipt.dblCost
@@ -611,7 +670,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0),
 			[dblCost]						=	voucherDetailReceipt.dblCost,
-			[dblOldCost]					=	CASE WHEN voucherDetailReceipt.dblCost != B.dblUnitCost THEN B.dblUnitCost ELSE 0 END,
+			[dblOldCost]					=	NULL,
 			[dblNetWeight]					=	CASE WHEN B.intWeightUOMId > 0 THEN  
 													-- voucherDetailReceipt.dblQtyReceived * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1))
 													(CASE WHEN B.dblBillQty > 0 
@@ -637,7 +696,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
 			[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,0),
-			[dblCostUnitQty]			=	ABS(ISNULL(ItemCostUOM.dblUnitQty,0)),
+			[dblCostUnitQty]			=	ABS(ISNULL(voucherDetailReceipt.dblCostUnitQty,0)),
 			[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
