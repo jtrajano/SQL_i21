@@ -738,6 +738,127 @@ BEGIN
 		,intCommodityId
 		,intSourceLocationId	
 	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
+
+	--NEGATE THE COST
+	UPDATE @adjustedEntries
+	SET dblNewValue = -dblNewValue
+
+	UPDATE @ChargesToAdjust
+	SET dblNewValue = -dblNewValue
+	-- Call the Item's Cost Adjustment
+	IF EXISTS(SELECT 1 FROM @adjustedEntries)
+	BEGIN	
+		BEGIN TRY
+			EXEC @intReturnValue = uspICPostCostAdjustment 
+					@adjustedEntries
+					, @batchId
+					, @userId
+		END TRY
+		BEGIN CATCH
+			SET @errorAdjustment = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+
+	-- Call the Item's Cost Adjustment from the Other Charges. 
+	IF EXISTS(SELECT 1 FROM @ChargesToAdjust)
+	BEGIN
+		BEGIN TRY
+			EXEC @intReturnValue = uspICPostCostAdjustmentFromOtherCharge 
+				@ChargesToAdjust = @ChargesToAdjust 
+				,@strBatchId = @batchId 
+				,@intEntityUserSecurityId = @userId 
+				,@ysnPost = @post
+				,@strTransactionType = DEFAULT 
+		END TRY
+		BEGIN CATCH
+			SET @errorAdjustment = ERROR_MESSAGE()
+			RAISERROR(@errorAdjustment, 16, 1);
+			GOTO Post_Rollback
+		END CATCH
+	END
+
+	-- Create the GL entries for the Cost Adjustment 
+	IF	EXISTS(SELECT 1 FROM @adjustedEntries)
+		OR EXISTS(SELECT 1 FROM @ChargesToAdjust)
+	BEGIN 
+		INSERT INTO @GLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId				
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate						
+		)
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+			@strBatchId = @batchId
+			,@intEntityUserSecurityId = @userId
+			,@strGLDescription = 1
+			,@ysnPost = @post
+			,@AccountCategory_Cost_Adjustment = DEFAULT
+
+		--DELETE FAILED BILLS
+		DELETE A
+		FROM #tmpPostBillData A
+		WHERE EXISTS (
+			SELECT 1
+			FROM tblAPBill B
+			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
+			INNER JOIN @adjustedEntries D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
+			WHERE A.intBillId = B.intBillId
+			AND EXISTS (
+				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
+			)
+		)
+
+		SET @failedAdjustment = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedAdjustment;
+		SET @totalRecords = @totalRecords - @failedAdjustment;
+
+		--DELETE FAILED BILLS
+		DELETE A
+		FROM #tmpPostBillData A
+		WHERE EXISTS (
+			SELECT 1
+			FROM tblAPBill B
+			INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intInventoryReceiptItemId > 0
+			INNER JOIN @ChargesToAdjust D ON B.intBillId = D.intTransactionId AND B.strBillId = D.strTransactionId
+			WHERE A.intBillId = B.intBillId
+			AND EXISTS (
+				SELECT 1 FROM tblICPostResult E WHERE E.strBatchNumber = @batchId AND E.intTransactionId = C.intInventoryReceiptItemId
+			)
+		)
+
+		SET @failedAdjustment = @@ROWCOUNT;
+		SET @invalidCount = @invalidCount + @failedAdjustment;
+		SET @totalRecords = @totalRecords - @failedAdjustment;
+	END
 END
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
