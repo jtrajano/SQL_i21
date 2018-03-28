@@ -34,6 +34,7 @@
 	[intItemOwnerId] INT NULL,
 	[intNewItemOwnerId] INT NULL, 
 	[intOwnershipType] INT NULL DEFAULT((1)),
+	[intCostingMethod] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblICInventoryAdjustmentDetail] PRIMARY KEY ([intInventoryAdjustmentDetailId]), 
@@ -186,6 +187,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryAdjustmentDetail',
     @level2type = N'COLUMN',
     @level2name = N'intNewLotStatusId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sort Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryAdjustmentDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intCostingMethod'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',

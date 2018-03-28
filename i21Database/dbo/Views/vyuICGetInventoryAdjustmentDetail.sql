@@ -72,6 +72,8 @@ SELECT
 	, strOwnerName = LotOwnerEntity.strName
 	, strNewOwnerName = NewLotOwnerEntity.strName
 	, AdjDetail.intOwnershipType
+	, AdjDetail.intCostingMethod
+	, strCostingMethod = ISNULL(CostingMethod.strCostingMethod, '')
 	, strOwnershipType = CASE AdjDetail.intOwnershipType WHEN 1 THEN 'Own' WHEN 2 THEN 'Storage' WHEN 3 THEN 'Consigned Purchase' WHEN 4 THEN 'Consigned Sale' ELSE NULL END
 	, AdjDetail.intConcurrencyId
 FROM tblICInventoryAdjustmentDetail AdjDetail
@@ -90,6 +92,7 @@ LEFT JOIN vyuICGetItemUOM WeightUOM ON WeightUOM.intItemUOMId = AdjDetail.intWei
 LEFT JOIN vyuICGetItemUOM NewWeightUOM ON NewWeightUOM.intItemUOMId = AdjDetail.intNewWeightUOMId
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = AdjDetail.intLotStatusId
 LEFT JOIN tblICLotStatus NewLotStatus ON NewLotStatus.intLotStatusId = AdjDetail.intNewLotStatusId
+LEFT JOIN tblICCostingMethod CostingMethod ON CostingMethod.intCostingMethodId = AdjDetail.intCostingMethod
 LEFT JOIN (
 	tblICItemOwner LotOwner INNER JOIN tblEMEntity LotOwnerEntity 
 		ON LotOwner.intOwnerId = LotOwnerEntity.intEntityId
