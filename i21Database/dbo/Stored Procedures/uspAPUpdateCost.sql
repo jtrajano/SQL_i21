@@ -29,10 +29,15 @@ SELECT
 	,@hasReceipt = CASE WHEN voucherDetail.intInventoryReceiptItemId > 0 THEN 1 ELSE 0 END
 	,@differentCost = CASE WHEN receiptItem.dblUnitCost != @newCost THEN 1 ELSE 0 END
 	,@contractDetailId =  voucherDetail.intContractDetailId
-	,@receiptCost = receiptItem.dblUnitCost
+	,@receiptCost = CASE WHEN CD.intContractDetailId IS NULL THEN receiptItem.dblUnitCost ELSE
+						dbo.fnMFConvertCostToTargetItemUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId),CD.intPriceItemUOMId,receiptItem.dblUnitCost)
+					END
 FROM tblAPBill voucher
 INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
 LEFT JOIN tblICInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = voucherDetail.intInventoryReceiptItemId
+LEFT JOIN (tblCTContractHeader CH INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId)  ON CH.intEntityId = voucher.intEntityVendorId 
+																															AND CH.intContractHeaderId = receiptItem.intOrderId 
+																															AND CD.intContractDetailId = receiptItem.intLineNo 
 WHERE voucherDetail.intBillDetailId = @billDetailId
 
 --DO NOT ALLOW TO UPDATE COST IF POSTED
