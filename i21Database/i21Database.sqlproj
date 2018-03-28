@@ -6284,6 +6284,11 @@
     <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateStateScript.sql" />
     <Build Include="dbo\Stored Procedures\PrintSQLResults.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanAccount.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanAgent.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanItem.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanItemCategory.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanSalesperson.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
