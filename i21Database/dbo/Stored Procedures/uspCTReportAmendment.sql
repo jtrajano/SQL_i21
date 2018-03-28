@@ -144,24 +144,25 @@ BEGIN TRY
 			        ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
 			
 
-			,strHeaderTitle   =		CASE	
+			,strHeaderTitle     =   CASE	
 										WHEN	AH.intContractTypeId  =	1	THEN	'Purchase Contract Amendment'
 										WHEN	AH.intContractTypeId  =	2   THEN	'Sale Contract Amendment'
 								    END
 			
-			,dtmContractDate   =  Convert(Nvarchar,GetDATE(),101)
-			,strContractNumber = AH.strContractNumber
-			,AccountNum		  =   EY.strVendorAccountNum
+			,dtmContractDate    =  Convert(Nvarchar,GetDATE(),101)
+			,strContractNumber  = AH.strContractNumber
+			,AccountNum		    = EY.strVendorAccountNum
 			,strAmendmentNumber = AH.strAmendmentNumber
-			,strConfirmMessage = 'We Confirm ADJUSTMENT from you as follows:'
-			,dtmHistoryCreated = AH.dtmHistoryCreated
-			,intContractSeq    = CD.intContractSeq
-			,strItemChanged	   = AH.strItemChanged
-			,strOldValue       = AH.strOldValue
-			,strNewValue	   = AH.strNewValue
-			,strE			   = @strCompanyName
-			,strF		       = AH.strEntityName	
-			,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+			,strConfirmMessage  = 'We Confirm ADJUSTMENT from you as follows:'
+			,strAmendmentText   = TX.strAmendmentText
+			,dtmHistoryCreated  = AH.dtmHistoryCreated
+			,intContractSeq     = CD.intContractSeq
+			,strItemChanged	    = AH.strItemChanged
+			,strOldValue        = AH.strOldValue
+			,strNewValue	    = AH.strNewValue
+			,strE			    = @strCompanyName
+			,strF		        = AH.strEntityName	
+			,blbHeaderLogo		= dbo.fnSMGetCompanyLogo('Header')
 
 	FROM	vyuCTAmendmentHistory AH
 	JOIN tblCTContractHeader					CH ON CH.intContractHeaderId = AH.intContractHeaderId
@@ -179,6 +180,7 @@ BEGIN TRY
 														)
 	JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = AH.intSequenceAmendmentLogId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = AH.intContractDetailId
+	LEFT JOIN tblCTContractText	  TX ON	TX.intContractTextId   = CH.intContractTextId
 
 END TRY
 
