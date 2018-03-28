@@ -66,7 +66,7 @@ cross apply
 cat.intCategoryId, cat.strCategoryCode ,
 substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) ex,
 --seg.intAccountCategoryId, 
-(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Cost of Goods') AccountCategoryId,
+(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory Adjustment') AccountCategoryId,
 act.intAccountId, act.strDescription ACDescription 
 	FROM gacommst AS cls 
 	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 

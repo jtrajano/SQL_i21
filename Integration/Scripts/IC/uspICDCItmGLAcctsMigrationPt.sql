@@ -61,7 +61,7 @@ USING
 	Cross Apply
 	(SELECT top 1 inv.intItemId
 		--,seg.intAccountCategoryId
-		,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Cost of Goods') intAccountCategoryId
+		,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory Adjustment') intAccountCategoryId
 		,act.intAccountId
 		FROM ptitmmst AS itm 
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -148,7 +148,7 @@ join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategor
 join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
 join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
 join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
-where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','Inventory Adjustment','AP Clearing')
+where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','AP Clearing')
 and c.strType in ('Inventory', 'Raw Material', 'Finished Good')
 and ast.strType = 'Primary'
 GO
