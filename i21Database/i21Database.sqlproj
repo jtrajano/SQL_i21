@@ -6262,6 +6262,11 @@
     <Build Include="dbo\Functions\fnCFGetLuhn.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
     <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanAccount.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanSalesperson.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanAgent.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanItem.sql" />
+    <Build Include="dbo\Tables\tblARCommissionPlanItemCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
