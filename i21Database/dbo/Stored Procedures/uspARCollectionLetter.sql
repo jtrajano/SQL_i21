@@ -51,6 +51,20 @@ BEGIN
 		, [datatype]	NVARCHAR(50)	COLLATE Latin1_General_CI_AS
 	)
 
+	INSERT INTO @temp_params
+	SELECT *
+	FROM OPENXML(@idoc, 'xmlparam/dummies/filter', 2)
+	WITH (
+		  [fieldname]  NVARCHAR(50)
+		, [condition]  NVARCHAR(20)
+		, [from]	   NVARCHAR(MAX)
+		, [to]		   NVARCHAR(MAX)
+		, [join]	   NVARCHAR(10)
+		, [begingroup] NVARCHAR(50)
+		, [endgroup]   NVARCHAR(50)
+		, [datatype]   NVARCHAR(50)
+	)
+
 	SELECT @strCustomerIds = [from]		
 	FROM @temp_params 
 	WHERE [fieldname] = 'intEntityCustomerId' 
