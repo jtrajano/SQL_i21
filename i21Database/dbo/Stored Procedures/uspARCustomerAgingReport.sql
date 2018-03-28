@@ -71,6 +71,20 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
+INSERT INTO @temp_xml_table
+SELECT *
+FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)
+WITH (
+	  [fieldname]  NVARCHAR(50)
+	, [condition]  NVARCHAR(20)
+	, [from]	   NVARCHAR(MAX)
+	, [to]		   NVARCHAR(MAX)
+	, [join]	   NVARCHAR(10)
+	, [begingroup] NVARCHAR(50)
+	, [endgroup]   NVARCHAR(50)
+	, [datatype]   NVARCHAR(50)
+)
+
 -- Gather the variables values from the xml table.
 SELECT  @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
