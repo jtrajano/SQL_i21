@@ -151,7 +151,8 @@ AS
 			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
 			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad,
-			CH.strCropYear,						CH.ysnExported,					CH.dtmExported
+			CH.strCropYear,						CH.ysnExported,					CH.dtmExported,
+			CH.ysnBrokerage,					CH.strCounterPartyName,			CH.strCPContract
 			
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS

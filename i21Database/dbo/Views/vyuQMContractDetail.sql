@@ -34,10 +34,14 @@ SELECT CD.intContractDetailId
 	,ISNULL(CD.strERPPONumber, '') AS strERPPONumber
 	,CH.intContractTypeId
 	,CD.strItemSpecification
+	,ISNULL(CH.ysnBrokerage, 'false') AS ysnBrokerage
+	,CH.strCPContract
+	,E1.strName AS strCounterPartyName
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+LEFT JOIN tblEMEntity E1 ON E1.intEntityId = CH.intCounterPartyId
 LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId

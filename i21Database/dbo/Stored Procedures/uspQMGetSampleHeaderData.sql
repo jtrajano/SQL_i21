@@ -32,13 +32,10 @@ ELSE IF @intProductTypeId = 8 -- Contract Line Item
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		--,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.strSequenceNumber
 		,C.intItemContractId
 		,C.strContractItemName
-		--,C.intItemId
-		--,C.strItemDescription AS strDescription
 		,CAST(CASE 
 				WHEN I.strType = 'Bundle'
 					THEN NULL
@@ -79,6 +76,20 @@ BEGIN
 		,ISNULL(C.strItemContractOrigin, C.strItemOrigin) AS strCountry
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,(
+			CASE 
+				WHEN C.ysnBrokerage = 1
+					THEN C.strCPContract
+				ELSE NULL
+				END
+			) AS strSampleNote
+		,(
+			CASE 
+				WHEN C.ysnBrokerage = 1
+					THEN C.strCounterPartyName
+				ELSE NULL
+				END
+			) AS strRefNo
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
 	WHERE C.intContractDetailId = @intProductValueId
@@ -87,10 +98,6 @@ ELSE IF @intProductTypeId = 9 -- Container Line Item
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		--,S.intShipmentId
-		--,S.intShipmentContractQtyId
-		--,S.intShipmentBLContainerId
-		--,S.intShipmentBLContainerContractId
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.intLoadContainerId
@@ -98,13 +105,10 @@ BEGIN
 		,S.strLoadNumber
 		,S.strContainerNumber
 		,S.dblQuantity AS dblRepresentingQty
-		--,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.strSequenceNumber
 		,C.intItemContractId
 		,C.strContractItemName
-		--,C.intItemId
-		--,C.strItemDescription AS strDescription
 		,S.intItemId
 		,S.strItemNo
 		,S.strItemDescription AS strDescription
@@ -119,9 +123,20 @@ BEGIN
 		,S.strSubLocationName
 		,C.intContractTypeId
 		,C.strItemSpecification
-	--FROM vyuLGShipmentContainerReceiptContracts S
-	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
-	--WHERE S.intShipmentBLContainerContractId = @intProductValueId
+		,(
+			CASE 
+				WHEN C.ysnBrokerage = 1
+					THEN C.strCPContract
+				ELSE NULL
+				END
+			) AS strSampleNote
+		,(
+			CASE 
+				WHEN C.ysnBrokerage = 1
+					THEN C.strCounterPartyName
+				ELSE NULL
+				END
+			) AS strRefNo
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -131,19 +146,14 @@ ELSE IF @intProductTypeId = 10 -- Shipment Line Item
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
-		--,S.intShipmentId
-		--,S.intShipmentContractQtyId
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.strLoadNumber
 		,S.dblQuantity AS dblRepresentingQty
-		--,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.strSequenceNumber
 		,C.intItemContractId
 		,C.strContractItemName
-		--,C.intItemId
-		--,C.strItemDescription AS strDescription
 		,S.intItemId
 		,S.strItemNo
 		,S.strItemDescription AS strDescription
@@ -156,9 +166,20 @@ BEGIN
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
-	--FROM vyuLGShipmentContainerReceiptContracts S
-	--JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
-	--WHERE S.intShipmentContractQtyId = @intProductValueId
+		,(
+			CASE 
+				WHEN C.ysnBrokerage = 1
+					THEN C.strCPContract
+				ELSE NULL
+				END
+			) AS strSampleNote
+		,(
+			CASE 
+				WHEN C.ysnBrokerage = 1
+					THEN C.strCounterPartyName
+				ELSE NULL
+				END
+			) AS strRefNo
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'

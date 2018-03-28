@@ -20,6 +20,7 @@ AS
 			CH.intLoadCategoryUnitMeasureId,CH.intContractPlanId,			CH.ysnExported,
 			CH.dtmExported,					CH.dtmSigned,					CH.intCreatedById,
 			CH.intLastModifiedById,			CH.dtmCreated,					CH.dtmLastModified,
+			CH.ysnBrokerage,				CH.strCPContract,
 
 			EY.intEntityId,					EY.strEntityName,				NM.strCommodityDescription,
 			EY.strEntityNumber,				EY.strEntityAddress,			U2.strUnitMeasure	AS strHeaderUnitMeasure,
@@ -35,6 +36,7 @@ AS
 			NM.strPricingLevelName,			NM.strPricingType,				NM.strLoadCategoryUnitMeasure,				
 			NM.strINCOLocationType,			NM.strContractPlan,				CE.strName AS strCreatedBy,
 			NM.strTermCode,					NM.strCropYear,					UE.strName AS strLastModifiedBy,					
+																			PE.strName AS strCounterPartyName,
 								
 			CASE WHEN NM.strINCOLocationType = 'City' THEN NM.strINCOLocation ELSE NM.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId)	AS	strStatuses
@@ -57,6 +59,7 @@ AS
 	JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				LEFT
 	JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
 	JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
+	JOIN	tblEMEntity							PE	ON	PE.intEntityId						=		CH.intCounterPartyId				LEFT
 	JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
 	JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId							
 	
