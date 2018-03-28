@@ -163,6 +163,7 @@ Type the overview for the table here.
 		[ysnUseWeighScales] BIT NULL,
 		[ysnLotWeightsRequired] BIT NULL DEFAULT((1)),
 		[intHazmatMessage] INT NULL,
+		[intOriginStatus] INT NULL,
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
