@@ -137,9 +137,6 @@ BEGIN TRY
 		, @DisbursementDiesel_11 NUMERIC(18, 6) = 0
 		, @DisbursementDiesel_12 NUMERIC(18, 6) = 0
 
-		, @DealerInterest NUMERIC(18, 2) = 0
-		, @DealerPenalty NUMERIC(18,2) = 0
-
 		, @dtmFrom DATE
 		, @dtmTo DATE
 		, @LicenseNumber NVARCHAR(50)
@@ -186,8 +183,6 @@ BEGIN TRY
 		-- Configuration
 		SELECT TOP 1 @LicenseNumber = strConfiguration FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-LicenseNumber'
 
-		SELECT @DealerInterest = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line12'
-		SELECT @DealerPenalty = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line13'
 		SELECT @DealerTotal_15 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,2), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-Line15'
 
 		SELECT @ReceiptGasoline_1 = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0 ELSE CONVERT(NUMERIC(18,0), strConfiguration) END FROM vyuTFGetReportingComponentConfiguration WHERE intTaxAuthorityId = @TaxAuthorityId AND strTemplateItemId = '735-1302-RefinaryGasoline'
@@ -339,16 +334,6 @@ BEGIN TRY
 		SET @DealerJet_11 = @DealerJet_9 * @DealerJet_10
 
 		SET @DealerTotal_11 = @DealerGasoline_11 + @DealerAviation_11 + @DealerJet_11
-		SET @DealerTotal_12 = @DealerTotal_11 * @DealerInterest
-
-		IF(@DealerInterest > 0)
-			BEGIN
-				SET @DealerTotal_13 = @DealerTotal_11 * @DealerPenalty
-			END
-		ELSE
-			BEGIN
-				SET @DealerTotal_13 = 25
-			END
 
 		SET @DealerTotal_14 = @DealerTotal_11 + @DealerTotal_12 + @DealerTotal_13
 		SET @DealerTotal_16 = @DealerTotal_14 + @DealerTotal_15
@@ -477,16 +462,6 @@ BEGIN TRY
 		, DisbursementDiesel_10 = @DisbursementDiesel_10
 		, DisbursementDiesel_11 = @DisbursementDiesel_11
 		, DisbursementDiesel_12 = @DisbursementDiesel_12
-
-		, DealerInterest = @DealerInterest
-		, DealerPenalty = @DealerPenalty
-
-		, DealerTotal_11 = @DealerTotal_11
-		, DealerTotal_12 = @DealerTotal_12
-		, DealerTotal_13 = @DealerTotal_13
-		, DealerTotal_14 = @DealerTotal_14
-		, DealerTotal_15 = @DealerTotal_15
-		, DealerTotal_16 = @DealerTotal_16
 
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo
