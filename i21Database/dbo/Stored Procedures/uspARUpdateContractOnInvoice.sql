@@ -64,6 +64,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblICItem ITEM
+			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN
 		tblARInvoice H
 			ON	D.[intInvoiceId] = H.[intInvoiceId]			
 	INNER JOIN
@@ -102,6 +105,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblICItem ITEM
+			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN
 		tblARInvoice H
 			ON	D.[intInvoiceId] = H.[intInvoiceId]				
 	INNER JOIN
@@ -138,6 +144,9 @@ BEGIN TRY
 	INNER JOIN
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN
+		tblICItem ITEM
+			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN
 		tblARInvoice H
 			ON	D.[intInvoiceId] = H.[intInvoiceId]				
@@ -176,6 +185,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblICItem ITEM
+			ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN
 		tblARInvoice H
 			ON	D.[intInvoiceId] = H.[intInvoiceId]				
 	INNER JOIN
@@ -209,6 +221,9 @@ BEGIN TRY
 	FROM
 		tblARTransactionDetail TD
 	INNER JOIN
+		tblICItem ITEM
+			ON TD.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN
 		tblARInvoice H
 			ON	TD.[intTransactionId] = H.[intInvoiceId]		
 	INNER JOIN
@@ -238,6 +253,9 @@ BEGIN TRY
 		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
 	FROM
 		tblARInvoiceDetail Detail
+	INNER JOIN
+		tblICItem ITEM
+			ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
 	INNER JOIN
 		tblARInvoice Header
 			ON Detail.intInvoiceId = Header.intInvoiceId 
