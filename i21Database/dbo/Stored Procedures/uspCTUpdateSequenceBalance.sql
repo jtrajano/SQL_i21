@@ -63,7 +63,14 @@ BEGIN TRY
 	
 	IF @dblNewBalance > @dblQuantity
 	BEGIN
-		RAISERROR('Balance cannot be more than quantity.',16,1)
+		IF @dblNewBalance > @dblQuantity +@dblTolerance
+		BEGIN
+			RAISERROR('Balance cannot be more than quantity.',16,1)
+		END
+		ELSE
+		BEGIN
+			SET @dblNewBalance = @dblQuantity
+		END
 	END
 	
 	IF	@ysnUnlimitedQuantity = 1 OR @intPricingTypeId IN (2,3,5)
