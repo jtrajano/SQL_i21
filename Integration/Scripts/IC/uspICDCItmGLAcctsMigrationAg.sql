@@ -51,7 +51,7 @@ INSERT INTO tblICItemAccount (
 Cross Apply
 	(SELECT top 1 inv.intItemId
 	--,seg.intAccountCategoryId
-	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Cost of Goods') intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory Adjustment') intAccountCategoryId
 	,act.intAccountId
 	FROM agitmmst AS itm 
 	INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS) 
