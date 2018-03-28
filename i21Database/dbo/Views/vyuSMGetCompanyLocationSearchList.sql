@@ -30,6 +30,7 @@ SELECT
 ,compLoc.[strTaxAuthorityId1]
 ,compLoc.[strTaxAuthorityId2]
 ,compLoc.[ysnOverridePatronage]
+,compLoc.[strOregonFacilityNumber]
 ,compLoc.[strOutOfStockWarning]
 ,compLoc.[strLotOverdrawnWarning]
 ,compLoc.[strDefaultCarrier]
