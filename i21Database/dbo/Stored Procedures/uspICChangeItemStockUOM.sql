@@ -111,6 +111,15 @@ BEGIN
 	FROM	@OriginalItemUOM
 	WHERE	intItemUOMId = @NewStockItemUOMId
 
+	-- Remove the CK_ItemUOMId_IS_NOT_USED constraint. 
+	IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemUOMId_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+	BEGIN 
+		EXEC ('
+			ALTER TABLE tblICItemUOM
+			DROP CONSTRAINT CK_ItemUOMId_IS_NOT_USED		
+		')
+	END
+
 	UPDATE	ItemUOM
 	SET		dblUnitQty = 
 					CASE	WHEN (dblUnitQty > @dblNewStockUnit_UnitQty OR dblUnitQty = 1) AND @dblNewStockUnit_UnitQty <> 0 THEN  
@@ -124,6 +133,16 @@ BEGIN
 					END 
 	FROM	dbo.tblICItemUOM ItemUOM
 	WHERE	intItemId = @intItemId
+
+	-- Re-enable the CK_ItemUOMId_IS_NOT_USED constraint. 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemUOMId_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+	BEGIN 
+		EXEC ('
+			ALTER TABLE tblICItemUOM
+			WITH NOCHECK ADD CONSTRAINT CK_ItemUOMId_IS_NOT_USED
+			CHECK (dbo.fnICCheckItemUOMIdIsNotUsed(intItemId, intItemUOMId, intUnitMeasureId, dblUnitQty) = 1)		
+		')
+	END
 END 
 
 -- Update the inventory stock
