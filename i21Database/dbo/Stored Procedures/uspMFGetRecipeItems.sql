@@ -102,7 +102,7 @@ sd.intContractHeaderId,sd.intContractDetailId,cv.strContractNumber,cv.intContrac
 ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
 ISNULL(ip.dblStandardCost,0.0)
 ),0) AS dblStandardCost, 
-ISNULL(cm.dblUnitMargin,0.0) AS dblUnitMargin,ri.intSequenceNo,ri.strDocumentNo,iu.intUnitMeasureId
+ISNULL(cm.dblUnitMargin,0.0) AS dblUnitMargin,ri.intSequenceNo,ri.strDocumentNo,iu.intUnitMeasureId,NULL AS intCostDriverId,'' AS strCostDriver,0.0 AS dblCostRate
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblICItemUOM iu on ri.intItemUOMId=iu.intItemUOMId --AND iu.ysnStockUnit=1
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
@@ -136,10 +136,14 @@ ri.dblLowerTolerance,ri.dblUpperTolerance,
 null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,
 0.0 AS dblStandardCost, 
 0.0 AS dblUnitMargin,ri.intSequenceNo,ri.strDocumentNo,
-um.intUnitMeasureId
+um.intUnitMeasureId,
+ri.intCostDriverId,
+cd.strName AS strCostDriver,
+ISNULL(ri.dblCostRate,0.0) AS dblCostRate
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Left Join tblICItemUOM iu on i.intItemId=iu.intItemId AND iu.ysnStockUnit=1
 Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+Left Join tblMFCostDriver cd on ri.intCostDriverId=cd.intCostDriverId
 Left Join tblMFMarginBy mg on ri.intMarginById=mg.intMarginById
 Join tblICItemLocation il on ri.intItemId=il.intItemId AND il.intLocationId=@intLocationId 
 Left Join tblICItemPricing ip on ip.intItemId=ri.intItemId AND ip.intItemLocationId=il.intItemLocationId
@@ -152,7 +156,7 @@ i.strType AS strItemType,0 dblQuantity,0 dblCalculatedQuantity,
 0 dblUnitQty,0 dblCalculatedLowerTolerance,0 dblCalculatedUpperTolerance,0 dblLowerTolerance,0 dblUpperTolerance,
 ri.intCommentTypeId,ct.strName strCommentType,
 null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,0.0 AS dblStandardCost,0.0 AS dblUnitMargin,ri.intSequenceNo,
-ri.strDocumentNo,null intUnitMeasureId
+ri.strDocumentNo,null intUnitMeasureId,NULL AS intCostDriverId,'' AS strCostDriver,0.0 AS dblCostRate
 From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
 Join tblMFCommentType ct on ri.intCommentTypeId=ct.intCommentTypeId
 Left Join tblSOSalesOrderDetail sd on sd.intRecipeItemId=ri.intRecipeItemId AND sd.intRecipeId=@intRecipeId AND sd.intSalesOrderId=@intSalesOrderId
