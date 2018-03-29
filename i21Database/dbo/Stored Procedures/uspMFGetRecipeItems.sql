@@ -114,6 +114,37 @@ Left Join tblSOSalesOrderDetail sd on sd.intRecipeItemId=ri.intRecipeItemId AND 
 Left Join vyuCTContractDetailView cv on sd.intContractDetailId=cv.intContractDetailId
 Where ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1 AND i.strType <> 'Other Charge'
 UNION
+Select ri.intRecipeId,ri.intRecipeItemId,ri.intItemId,i.strItemNo,i.strDescription AS strItemDescription,i.strType AS strItemType,
+@dblQuantity/@dblRecipeQty dblQuantity,
+@dblQuantity/@dblRecipeQty dblCalculatedQuantity,
+iu.intItemUOMId, 
+um.strUnitMeasure strUOM,
+ri.intMarginById,mg.strName AS strMarginBy,ISNULL(ri.dblMargin,0) AS dblMargin,
+ISNULL(dbo.fnMFConvertCostToTargetItemUOM((Select intItemUOMId From tblICItemUOM Where intItemId=ri.intItemId AND ysnStockUnit=1),ri.intItemUOMId,
+CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
+When @intCostTypeId=3 AND ISNULL(ip.dblLastCost,0) > 0 THEN ISNULL(ip.dblLastCost,0)
+Else ISNULL(ip.dblStandardCost,0) End
+),0)AS dblCost,
+1 intCostSourceId,
+'Item' strCostSource,
+0.0 AS dblRetailPrice,
+1.0 AS dblUnitQty,
+@dblQuantity/@dblRecipeQty AS dblCalculatedLowerTolerance,
+@dblQuantity/@dblRecipeQty AS dblCalculatedUpperTolerance,
+ri.dblLowerTolerance,ri.dblUpperTolerance,
+0 intCommentTypeId,'' strCommentType,
+null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,
+0.0 AS dblStandardCost, 
+0.0 AS dblUnitMargin,ri.intSequenceNo,ri.strDocumentNo,
+um.intUnitMeasureId
+From tblMFRecipeItem ri Join tblICItem i on ri.intItemId=i.intItemId 
+Left Join tblICItemUOM iu on i.intItemId=iu.intItemId AND iu.ysnStockUnit=1
+Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+Left Join tblMFMarginBy mg on ri.intMarginById=mg.intMarginById
+Join tblICItemLocation il on ri.intItemId=il.intItemId AND il.intLocationId=@intLocationId 
+Left Join tblICItemPricing ip on ip.intItemId=ri.intItemId AND ip.intItemLocationId=il.intItemLocationId
+Where ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1 AND ISNULL(ri.ysnCostAppliedAtInvoice,0)=0 AND i.strType='Other Charge'
+UNION
 Select ri.intRecipeId,ri.intRecipeItemId,ri.intItemId,i.strItemNo,CASE WHEN ISNULL(sd.strItemDescription,'')='' THEN ri.strDescription Else sd.strItemDescription End AS strItemDescription,
 i.strType AS strItemType,0 dblQuantity,0 dblCalculatedQuantity,
 0 intItemUOMId,'' strUOM,0 intMarginById,'' strMarginBy,0 AS dblMargin,
