@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspWHGetLotDetail 
 				 @intLotKey INT
+				 ,@intCompanyLocationId INT
 AS
 BEGIN
 	SELECT DISTINCT l.intLotId, 
@@ -37,4 +38,5 @@ BEGIN
 	LEFT JOIN tblMFLotInventory li ON li.intLotId = l.intLotId
 	LEFT JOIN tblICLotStatus ls1 ON ls1.intLotStatusId = li.intBondStatusId
 	WHERE l.intLotId = @intLotKey
+		AND l.intLocationId = @intCompanyLocationId
 END
