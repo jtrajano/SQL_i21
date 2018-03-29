@@ -1,13 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateRegisterNotification]
 	@strLocationIds AS NVARCHAR(MAX)
+	, @strEntityIds AS NVARCHAR(MAX) OUTPUT
 AS
 BEGIN
+
+SET @strEntityIds = ''
+
 -- Table to handle intEntityId
 DECLARE @tblTempEntity TABLE(intId INT NOT NULL IDENTITY, intEntityId INT)
 
 INSERT @tblTempEntity
 SELECT DISTINCT
-       EM.intEntityId
+	EM.intEntityId
 FROM tblEMEntity EM
 JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
 JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
@@ -15,8 +19,17 @@ WHERE ET.strType IN ('User', 'Employee')
 AND SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
 
 
---TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
---SELECT * FROM @tblTempEntity
+-- ==============================================================================================
+-- Return intEntity Id's in comma separated format
+SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
+       FROM tblEMEntity EM
+       JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
+       JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
+       WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+       AND ET.strType IN ('User', 'Employee')
+SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
+-- ==============================================================================================
+
 
 DECLARE @Id INT
 DECLARE @intEntityId INT

@@ -1,8 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateItemPricing]
 	@XML varchar(max)
-	
+	, @strEntityIds AS NVARCHAR(MAX) OUTPUT
 AS
 BEGIN TRY
+
+	SET @strEntityIds = ''
+	
 	DECLARE @ErrMsg				NVARCHAR(MAX),
 	        @idoc				INT,
 			@Location 			NVARCHAR(MAX),
@@ -643,7 +646,6 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
 
 
-
 	-- ==========================================================================
 	-- Return Count result to Server side
 	SELECT @UpdateCount = COUNT(*)
@@ -653,24 +655,23 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 	) T1
 
 	DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
-	DECLARE @strEntityIds AS NVARCHAR(MAX)= ''
 
+	--DECLARE @strEntityIds AS NVARCHAR(MAX)= ''
 	SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
-	SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)
+	SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)	
 	
-	SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
-	FROM tblEMEntity EM
-	JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
-	JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
-	WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
-	AND ET.strType IN ('User', 'Employee')
 
-
-
-	SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
+	--SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
+	--FROM tblEMEntity EM
+	--JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
+	--JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
+	--WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+	--AND ET.strType IN ('User', 'Employee')
+	--SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
 
 	--PRINT @strEntityIds
-	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount, @strEntityIds as strEntityIds
+	--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount, @strEntityIds as strEntityIds
+	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
 	-- ==========================================================================
 
 
@@ -736,7 +737,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
 
 		-- Update Register Notification
-		EXEC uspSTUpdateRegisterNotification @strLocationIds
+		EXEC uspSTUpdateRegisterNotification @strLocationIds, @strEntityIds OUTPUT
 	END
 	-- ==========================================================================
 
