@@ -19,7 +19,7 @@ SELECT L.intLoadId
 	,LD.dblTare
 	,LD.dblNet
 	,U.strUnitMeasure AS strWeightUnitMeasure
-	,U.intUnitMeasureId as intWeightUnitMeasure
+	,WeightUOM.intItemUOMId as intWeightUnitMeasure
 	,ISNULL(WeightUOM.dblUnitQty,0) AS dblWeightUnitQty
 	,E.strName AS strVendor
 	,E.intEntityId as intEntityVendorId
