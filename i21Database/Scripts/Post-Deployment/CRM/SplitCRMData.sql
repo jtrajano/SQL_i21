@@ -1719,22 +1719,29 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 
-		set @intItem = convert(int, @Item);
 		
-		--Print 'Opportunity Id = ' + convert(nvarchar(50), @intOpportunityId) + ' - LOB Id = ' + convert(nvarchar(50), @intItem)
+		begin try
+			set @intItem = convert(int, @Item);
+		end try
+		begin catch
+			set @intItem = 0;
+		end catch
 
-		IF NOT EXISTS (select * from tblCRMOpportunityLob where intOpportunityId = @intOpportunityId and intLineOfBusinessId = @intItem)
+		if (@intItem <> 0)
 		begin
-			IF EXISTS (select * from tblSMLineOfBusiness where intLineOfBusinessId = @intItem)
+			IF NOT EXISTS (select * from tblCRMOpportunityLob where intOpportunityId = @intOpportunityId and intLineOfBusinessId = @intItem)
 			begin
-				INSERT INTO [dbo].[tblCRMOpportunityLob]
-						   ([intOpportunityId]
-						   ,[intLineOfBusinessId]
-						   ,[intConcurrencyId])
-					 VALUES
-						   (@intOpportunityId
-						   ,@intItem
-						   ,1)
+				IF EXISTS (select * from tblSMLineOfBusiness where intLineOfBusinessId = @intItem)
+				begin
+					INSERT INTO [dbo].[tblCRMOpportunityLob]
+							   ([intOpportunityId]
+							   ,[intLineOfBusinessId]
+							   ,[intConcurrencyId])
+						 VALUES
+							   (@intOpportunityId
+							   ,@intItem
+							   ,1)
+				end
 			end
 		end
 
