@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherHistory]
-	@voucherIds Id READONLY
+	@voucherIds Id READONLY,
+	@paymentDetailIds Id READONLY,
+	@post BIT
 AS
 
 BEGIN
@@ -28,7 +30,8 @@ USING (
 		[strItemNo]				=	item.strItemNo,
 		[strLocation]			=	loc.strLocationName,
 		[strTicketNumber]		=	ticket.strTicketNumber,
-		[strUnitMeasure]		=	unitMeasure.strUnitMeasure,
+		[strQtyUnitMeasure]		=	unitMeasure.strUnitMeasure,
+		[strCostUnitMeasure]	=	costUnitMeasure.strUnitMeasure,
 		[strCurrency]			=	cur.strCurrency,
 		[dtmTransactionDate]	=	A.dtmDate,
 		[dtmTicketDateTime]		=	ticket.dtmTicketDateTime,
@@ -43,8 +46,12 @@ USING (
 	LEFT JOIN tblSCTicket ticket ON B.intScaleTicketId = ticket.intTicketId
 	LEFT JOIN (tblICItemUOM uom INNER JOIN tblICUnitMeasure unitMeasure ON uom.intUnitMeasureId = unitMeasure.intUnitMeasureId)
 			ON B.intUnitOfMeasureId = uom.intItemUOMId
+	LEFT JOIN (tblICItemUOM costuom INNER JOIN tblICUnitMeasure costUnitMeasure ON costuom.intUnitMeasureId = costUnitMeasure.intUnitMeasureId)
+			ON B.intCostUOMId = costuom.intItemUOMId
 ) AS sourceData
-ON (targetTable.intBillId = sourceData.intBillId)
+ON (targetTable.intBillId = sourceData.intBillId 
+	AND DATEADD(dd, DATEDIFF(dd, 0,targetTable.dtmDateEntered), 0) = DATEADD(dd, DATEDIFF(dd, 0,sourceData.dtmDateEntered), 0)
+) 
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (
 	[intBillId]				,
@@ -56,7 +63,8 @@ INSERT (
 	[strItemNo]				,
 	[strLocation]			,
 	[strTicketNumber]		,
-	[strUnitMeasure]		,
+	[strQtyUnitMeasure]		,
+	[strCostUnitMeasure]	,
 	[strCurrency]			,
 	[dtmTransactionDate]	,
 	[dtmTicketDateTime]		,
@@ -72,7 +80,8 @@ VALUES (
 	[strItemNo]				,
 	[strLocation]			,
 	[strTicketNumber]		,
-	[strUnitMeasure]		,
+	[strQtyUnitMeasure]		,
+	[strCostUnitMeasure]	,
 	[strCurrency]			,
 	[dtmTransactionDate]	,
 	[dtmTicketDateTime]		,
