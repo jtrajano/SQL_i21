@@ -151,9 +151,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmPostedDate).HasColumnName("dtmPostedDate");
             this.Property(t => t.dtmUnpostedDate).HasColumnName("dtmUnpostedDate");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
-            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.strSubLocation).HasColumnName("strSubLocation");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
-            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.strStorageLocation).HasColumnName("strStorageLocation");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
@@ -198,9 +198,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intNewLocationId).HasColumnName("intNewLocationId");
             this.Property(t => t.strNewLocationName).HasColumnName("strNewLocationName");
             this.Property(t => t.intNewSubLocationId).HasColumnName("intNewSubLocationId");
-            this.Property(t => t.strNewSubLocationName).HasColumnName("strNewSubLocationName");
+            this.Property(t => t.strNewSubLocation).HasColumnName("strNewSubLocation");
             this.Property(t => t.intNewStorageLocationId).HasColumnName("intNewStorageLocationId");
-            this.Property(t => t.strNewStorageLocationName).HasColumnName("strNewStorageLocationName");
+            this.Property(t => t.strNewStorageLocation).HasColumnName("strNewStorageLocation");
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strOwnerName).HasColumnName("strOwnerName");
