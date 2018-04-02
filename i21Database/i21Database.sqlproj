@@ -6297,6 +6297,10 @@
     <Build Include="dbo\Tables\tblARInvoiceTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuARInvoiceTransactionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI945.sql" />
+    <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
+    <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
