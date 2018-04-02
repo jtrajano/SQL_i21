@@ -47,40 +47,45 @@ ELSE
 	END
 
 
--- ==============================================================================================
--- Return intEntity Id's in comma separated format
-SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
-       FROM @tblTempEntity EM
-       JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
-       JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
-       WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
-       AND ET.strType IN ('User', 'Employee')
-SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
--- ==============================================================================================
-
-
-DECLARE @Id INT
-DECLARE @intEntityId INT
-
-WHILE EXISTS(SELECT * FROM @tblTempEntity)
+IF EXISTS(SELECT * FROM @tblTempEntity)
 	BEGIN
+		-- ==============================================================================================
+		-- Return intEntity Id's in comma separated format
+		SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
+			   FROM @tblTempEntity EM
+			   JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
+			   JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
+			   WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+			   AND ET.strType IN ('User', 'Employee')
+		SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
+		-- ==============================================================================================
 
-		SELECT TOP 1 @Id = intId, @intEntityId = intEntityId From @tblTempEntity
 
-		IF EXISTS(SELECT intEntityId FROM tblSTUpdateRegisterNotification WHERE intEntityId = @intEntityId)
+		DECLARE @Id INT
+		DECLARE @intEntityId INT
+
+		WHILE EXISTS(SELECT * FROM @tblTempEntity)
 			BEGIN
-				UPDATE tblSTUpdateRegisterNotification
-				SET ysnClick = 0
-				WHERE intEntityId = @intEntityId
-				AND ysnClick = 1
-			END
-		ELSE
-			BEGIN
-				INSERT INTO tblSTUpdateRegisterNotification(intEntityId)
-				VALUES(@intEntityId)
-			END
 
-		DELETE @tblTempEntity WHERE intId = @Id
+				SELECT TOP 1 @Id = intId, @intEntityId = intEntityId From @tblTempEntity
 
+				IF EXISTS(SELECT intEntityId FROM tblSTUpdateRegisterNotification WHERE intEntityId = @intEntityId)
+					BEGIN
+						UPDATE tblSTUpdateRegisterNotification
+						SET ysnClick = 0
+						WHERE intEntityId = @intEntityId
+						AND ysnClick = 1
+					END
+				ELSE
+					BEGIN
+						INSERT INTO tblSTUpdateRegisterNotification(intEntityId)
+						VALUES(@intEntityId)
+					END
+
+				DELETE @tblTempEntity WHERE intId = @Id
+
+			END
+		END
 	END
-END
+
+

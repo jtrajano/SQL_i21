@@ -5,7 +5,7 @@ AS
 BEGIN TRY
 
 	SET @strEntityIds = ''
-	
+
 	DECLARE @ErrMsg				NVARCHAR(MAX),
 	        @idoc				INT,
 			@Location 			NVARCHAR(MAX),
@@ -538,7 +538,6 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
                 SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
 	  END
  END
-     
 
 	----AUDIT LOG
 
@@ -657,9 +656,11 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 	DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
 
 	--DECLARE @strEntityIds AS NVARCHAR(MAX)= ''
-	SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
-	SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)	
-	
+	IF EXISTS(SELECT * FROM @tblTempOne)
+		BEGIN
+			SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
+			SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)	
+		END
 
 	--SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
 	--FROM tblEMEntity EM
@@ -734,10 +735,12 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 		--OLD
 		--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
 
-
-
 		-- Update Register Notification
-		EXEC uspSTUpdateRegisterNotification @strLocationIds, @strEntityIds OUTPUT
+		IF EXISTS(SELECT * FROM @tblTempOne)
+			BEGIN
+				EXEC uspSTUpdateRegisterNotification @strLocationIds, @strEntityIds OUTPUT
+			END
+		
 	END
 	-- ==========================================================================
 
