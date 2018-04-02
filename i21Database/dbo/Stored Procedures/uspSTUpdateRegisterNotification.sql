@@ -4,6 +4,7 @@
 AS
 BEGIN
 
+	SET @strEntityIds = ''
 -- ==================================================================================================================================================
 -- 1. Pass Location Ids in comma separated format
 -- 2. If there is no Location Ids, It will not filter Locations
@@ -49,7 +50,7 @@ ELSE
 -- ==============================================================================================
 -- Return intEntity Id's in comma separated format
 SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
-       FROM tblEMEntity EM
+       FROM @tblTempEntity EM
        JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
        JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
        WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
