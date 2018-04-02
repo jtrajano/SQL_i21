@@ -256,16 +256,21 @@ BEGIN
 
 				SET @dblAddQty = ISNULL(@dblAddQty, 0)
 
-				-- Get the unit cost. 
-				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+				---- Get the unit cost. 
+				--SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
 
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
 
-				-- Adjust the cost to the new UOM
-				SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty) 
+				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)
+				FROM	tblICItemUOM StockUOM
+				WHERE	StockUOM.intItemId = @intItemId 
+						AND StockUOM.ysnStockUnit = 1
+
+				---- Adjust the cost to the new UOM
+				--SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty) 
 			END 
 		END 
 						
@@ -429,8 +434,10 @@ BEGIN
 							, @FullQty 
 							, Lot.dblWeightPerQty
 						)
-					,Lot.dblLastCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
-			FROM	dbo.tblICLot Lot
+					,Lot.dblLastCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)  --dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
+			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
+						ON StockUOM.intItemId = Lot.intItemId
+						AND StockUOM.ysnStockUnit = 1
 			WHERE	Lot.intItemLocationId = @intItemLocationId
 					AND Lot.intLotId = @intLotId
 		END
