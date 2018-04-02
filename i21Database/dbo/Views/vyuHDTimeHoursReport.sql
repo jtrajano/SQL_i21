@@ -23,6 +23,9 @@
 			,e.intInvoiceId
 			,e.strInvoiceNumber
 			,e.dblAmountDue
+			,e.dblPayment
+			,intInternalProjectManager = i.intEntityId
+			,strInternalProjectManager = i.strName
 		from
 			tblHDTicketHoursWorked a
 			join tblHDTicket b on b.intTicketId = a.intTicketId
@@ -32,3 +35,4 @@
 			left join tblEMEntity f on f.intEntityId = b.intCustomerId
 			left join tblEMEntity g on g.intEntityId = a.intAgentEntityId
 			left join tblHDJobCode h on h.intJobCodeId = a.intJobCodeId
+			left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
