@@ -32,6 +32,8 @@ BEGIN TRY
 		,@dtmDeliveryRequestedDate DATETIME
 		,@intFunctionalCurrencyId INT
 		,@intDefaultForexRateTypeId INT
+		,@strLocationCount NVARCHAR(50)
+		,@ysnDefaultLocation BIT
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
@@ -119,6 +121,7 @@ BEGIN TRY
 				,@dtmShipmentDate = strShipmentDate
 				,@dtmDeliveryRequestedDate = strDeliveryRequestedDate
 				,@strPONumber = strPONumber
+				,@strShipToState = strShipToState
 			FROM tblMFEDI940 EDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -166,7 +169,6 @@ BEGIN TRY
 							)
 						AND strPurpose <> 'Cancel'
 					)
-				
 			BEGIN
 				SELECT @strItemNo = ''
 
@@ -520,6 +522,32 @@ BEGIN TRY
 					WHERE strDepositorOrderNumber = @strOrderNo
 				END
 
+				SELECT @strLocationCount = ''
+
+				SELECT @strLocationCount = Count(*)+1
+				FROM tblEMEntityLocation
+				WHERE intEntityId = @intEntityId
+					AND strState = @strShipToState
+
+				IF @strLocationCount = '1'
+				BEGIN
+					SELECT @strLocationCount = ''
+				END
+
+				IF EXISTS (
+						SELECT *
+						FROM tblEMEntityLocation
+						WHERE intEntityId = @intEntityId
+							AND ysnDefaultLocation = 1
+						)
+				BEGIN
+					SELECT @ysnDefaultLocation = 0
+				END
+				ELSE
+				BEGIN
+					SELECT @ysnDefaultLocation = 1
+				END
+
 				INSERT INTO tblEMEntityLocation (
 					intEntityId
 					,strLocationName
@@ -536,18 +564,7 @@ BEGIN TRY
 					,strCheckPayeeName
 					)
 				SELECT TOP 1 @intEntityId intEntityId
-					,strShipToState + ' ' + Ltrim(IsNULL((
-								SELECT Count(*)
-								FROM tblEMEntity E
-								JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-								JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
-									AND EL.strState = strShipToState
-								WHERE ET.strType = 'Customer'
-									AND E.strName = strShipToName
-								), 0) + row_number() OVER (
-							PARTITION BY @intEntityId
-							,strShipToState ORDER BY strShipToState
-							)) strLocationName
+					,Rtrim(strShipToState + ' ' + @strLocationCount) strLocationName
 					,strShipToAddress1 + CASE 
 						WHEN IsNULL(strShipToAddress2, '') <> ''
 							THEN ' ' + strShipToAddress2
@@ -558,16 +575,7 @@ BEGIN TRY
 					,strShipToState strState
 					,strShipToZip strZipCode
 					,1 intTermsId
-					,(
-						CASE 
-							WHEN row_number() OVER (
-									PARTITION BY @intEntityId
-									,strShipToState ORDER BY strShipToState
-									) = 1
-								THEN 1
-							ELSE 0
-							END
-						) ysnDefaultLocation
+					,@ysnDefaultLocation AS ysnDefaultLocation
 					,1 ysnActive
 					,'(UTC-06:00) Central Time (US & Canada)' strTimezone
 					,1 intConcurrencyId

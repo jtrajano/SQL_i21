@@ -5,6 +5,10 @@ BEGIN
 		intInventoryReceiptId INT
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @intCustomerId INT
+		,@strType NVARCHAR(1)
+		,@strOrderStatus NVARCHAR(2)
+		,@strName NVARCHAR(50)
 
 	INSERT INTO @tblMFOrderNo (
 		intInventoryReceiptId
@@ -22,7 +26,8 @@ BEGIN
 		AND NOT EXISTS (
 			SELECT *
 			FROM tblMFEDI944 EDI944
-			WHERE EDI944.ysnStatus =1 and EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
+			WHERE EDI944.ysnStatus = 1
+				AND EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
 			)
 	ORDER BY IR.intInventoryReceiptId
 
@@ -57,6 +62,25 @@ BEGIN
 		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
+	SELECT @intCustomerId = intCustomerId
+		,@strType = strType
+	FROM tblMFEDIPreference
+	WHERE strTransactionId = '944'
+
+	IF @strType IS NULL
+	BEGIN
+		SELECT @strType = ''
+	END
+
+	SELECT @strName = strName
+	FROM tblEMEntity
+	WHERE intEntityId = @intCustomerId
+
+	IF @strName IS NULL
+	BEGIN
+		SELECT @strName = ''
+	END
+
 	INSERT INTO @tblMFEDI944 (
 		intRecordId
 		,strTransactionId
@@ -75,8 +99,8 @@ BEGIN
 		)
 	SELECT IRI.intInventoryReceiptItemId
 		,944 AS strTransactionId
-		,'Wholesome Sweetners' AS strCustomerId
-		,'J' AS strType
+		,@strName AS strCustomerId
+		,@strType AS strType
 		,IR.dtmReceiptDate AS dtmDate
 		,IR.strReceiptNumber strWarehouseReceiptNumber
 		,IR.strWarehouseRefNo strDepositorOrderNumber

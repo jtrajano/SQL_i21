@@ -35,12 +35,14 @@ BEGIN TRY
 		,@intCustomTabId INT
 		,@intCustomTabDetailId INT
 		,@strReceiptNumber NVARCHAR(50)
+		,@strLocationCount NVARCHAR(50)
+		,@ysnDefaultLocation BIT
+
 	DECLARE @tblMFItemLineNumber TABLE (
 		intEDI943Id INT
 		,intLineNumber INT
 		)
-	--UPDATE tblMFEDI943
-	--SET strDepositorOrderNumber = REPLACE(LTRIM(REPLACE(strDepositorOrderNumber, '0', ' ')), ' ', '0')
+
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @tblMFOrderNo TABLE (
@@ -101,6 +103,7 @@ BEGIN TRY
 
 			SELECT @strCustomerCode = strWarehouseCode
 				,@strShipToName = strShipFromName
+				,@strShipToState=strShipFromState
 			FROM tblMFEDI943 EDI943
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -507,6 +510,32 @@ BEGIN TRY
 					WHERE strDepositorOrderNumber = @strOrderNo
 				END
 
+				SELECT @strLocationCount = ''
+
+				SELECT @strLocationCount = Count(*)+1
+				FROM tblEMEntityLocation
+				WHERE intEntityId = @intEntityId
+					AND strState = @strShipToState
+
+				IF @strLocationCount = '1'
+				BEGIN
+					SELECT @strLocationCount = ''
+				END
+
+				IF EXISTS (
+						SELECT *
+						FROM tblEMEntityLocation
+						WHERE intEntityId = @intEntityId
+							AND ysnDefaultLocation = 1
+						)
+				BEGIN
+					SELECT @ysnDefaultLocation = 0
+				END
+				ELSE
+				BEGIN
+					SELECT @ysnDefaultLocation = 1
+				END
+
 				INSERT INTO tblEMEntityLocation (
 					intEntityId
 					,strLocationName
@@ -523,18 +552,7 @@ BEGIN TRY
 					,strCheckPayeeName
 					)
 				SELECT TOP 1 @intEntityId intEntityId
-					,strShipFromState + ' ' + Ltrim(IsNULL((
-								SELECT Count(*)
-								FROM tblEMEntity E
-								JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-								JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId
-									AND EL.strState = strShipFromState
-								WHERE ET.strType = 'Vendor'
-									AND E.strName = strShipFromName
-								), 0) + row_number() OVER (
-							PARTITION BY @intEntityId
-							,strShipFromState ORDER BY strShipFromState
-							)) strLocationName
+					,Rtrim(strShipFromState + ' ' + @strLocationCount) AS  strLocationName
 					,strShipFromAddress1 + CASE 
 						WHEN IsNULL(strShipFromAddress2, '') <> ''
 							THEN ' ' + strShipFromAddress2
@@ -545,16 +563,7 @@ BEGIN TRY
 					,strShipFromState strState
 					,strShipFromZip strZipCode
 					,1 intTermsId
-					,(
-						CASE 
-							WHEN row_number() OVER (
-									PARTITION BY @intEntityId
-									,strShipFromState ORDER BY strShipFromState
-									) = 1
-								THEN 1
-							ELSE 0
-							END
-						) ysnDefaultLocation
+					,@ysnDefaultLocation ysnDefaultLocation
 					,1 ysnActive
 					,'(UTC-06:00) Central Time (US & Canada)' strTimezone
 					,1 intConcurrencyId
