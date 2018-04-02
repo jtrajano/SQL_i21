@@ -6263,6 +6263,9 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
     <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI945.sql" />
+    <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
+    <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
