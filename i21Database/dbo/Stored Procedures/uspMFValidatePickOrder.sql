@@ -9,6 +9,7 @@ BEGIN
 			SELECT *
 			FROM tblMFOrderHeader
 			WHERE strOrderNo = @strPickNo
+				AND intLocationId = @intLocationId
 			)
 	BEGIN
 		RAISERROR (
@@ -25,6 +26,7 @@ BEGIN
 			FROM tblMFOrderHeader
 			WHERE strOrderNo = @strPickNo
 				AND intOrderStatusId = 10
+				AND intLocationId = @intLocationId
 			)
 	BEGIN
 		RAISERROR (

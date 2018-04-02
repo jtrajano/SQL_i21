@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspWHConfirmPickForShipment 
 					@strShipmentNo NVARCHAR(100), 
-					@intUserId INT
+					@intUserId INT,
+					@intCompanyLocationId INT
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -46,6 +47,7 @@ BEGIN TRY
 	SELECT @intInventoryShipmentId = intInventoryShipmentId
 	FROM tblICInventoryShipment
 	WHERE strShipmentNumber = @strShipmentNo
+		AND intShipFromLocationId = @intCompanyLocationId
 
 	SELECT @ysnGenerateInvShipmentStagingOrder = ysnGenerateInvShipmentStagingOrder
 	FROM tblMFCompanyPreference
