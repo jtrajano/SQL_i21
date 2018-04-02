@@ -98,6 +98,7 @@ BEGIN TRY
 	
 	-- ======================== SUMMARY ==============================
 	-- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
+
 	SELECT intTransactionSummaryItemId = intReportingComponentConfigurationId
 		, Config.strScheduleCode
 		, strTemplateItemId
@@ -107,11 +108,25 @@ BEGIN TRY
 		, strReportSection
 		, strConfiguration
 	INTO #tmpTransactionSummaryItem
-	FROM tblTFReportingComponentConfiguration Config
-	INNER JOIN tblTFReportingComponent RC ON Config.intReportingComponentId = RC.intReportingComponentId
-	WHERE RC.strFormCode = @FormCodeParam 
-		AND Config.strSegment = 'Summary'
-	ORDER BY Config.intReportItemSequence ASC
+	FROM vyuTFGetReportingComponentConfiguration
+	WHERE strFormCode = @FormCodeParam 
+		AND strSegment = 'Summary'
+	ORDER BY intReportItemSequence ASC
+
+	--SELECT intTransactionSummaryItemId = intReportingComponentConfigurationId
+	--	, Config.strScheduleCode
+	--	, strTemplateItemId
+	--	, strDescription
+	--	, intReportItemSequence
+	--	, intTemplateItemNumber
+	--	, strReportSection
+	--	, strConfiguration
+	--INTO #tmpTransactionSummaryItem
+	--FROM tblTFReportingComponentConfiguration Config
+	--INNER JOIN tblTFReportingComponent RC ON Config.intReportingComponentId = RC.intReportingComponentId
+	--WHERE RC.strFormCode = @FormCodeParam 
+	--	AND Config.strSegment = 'Summary'
+	--ORDER BY Config.intReportItemSequence ASC
 	
 	-- LOOP ON SUMMARY ITEMS AND INSERT INTO SUMMARY TABLE
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTransactionSummaryItem)
