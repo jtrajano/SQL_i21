@@ -27,17 +27,6 @@ JOIN(
 		OR CHARINDEX('dblStandardCost',strJsonData) > 0
 		OR CHARINDEX('intCategoryId',strJsonData) > 0 )
 
-	   -- AND dtmDate BETWEEN 
-				--ISNULL(
-				--		(DATEADD(HOUR,-8,(SELECT TOP 1 dtmEndingChangeDate FROM tblSTUpdateRegisterHistory WHERE intStoreId = 3 ORDER BY intUpdateRegisterHistoryId DESC)))
-				--		, (
-				--			SELECT TOP 1 dtmDate
-				--			FROM tblSMAuditLog
-				--			WHERE strTransactionType = 'Inventory.view.Item'
-				--			ORDER BY dtmDate ASC
-				--		)) 
-				--AND GETUTCDATE()
-
 ) AS x ON x.intItemId = I.intItemId 
 JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
@@ -50,7 +39,7 @@ JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
 JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
 JOIN tblSMUserSecurity SMUS ON SMUS.intCompanyLocationId = IL.intLocationId
 JOIN tblEMEntity EM ON EM.intEntityId = SMUS.intEntityId
-JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = EM.intEntityId
+LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = EM.intEntityId
 WHERE I.ysnFuelItem = 0
 AND x.dtmDate BETWEEN 
 				ISNULL(

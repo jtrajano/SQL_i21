@@ -4,19 +4,46 @@
 AS
 BEGIN
 
-SET @strEntityIds = ''
+-- ==================================================================================================================================================
+-- 1. Pass Location Ids in comma separated format
+-- 2. If there is no Location Ids, It will not filter Locations
+-- 3. View table [vyuSTItemsToRegister] automatically detects all item's that is not being sent to the register 
+--    based on table (Date and Store Id) Flag from [tblSTUpdateRegisterHistory]
+-- 4. Requirements
+--    * Item should have [Location] setup
+--    * Item should have [UOM] setup
+--    * Item Location setup should have [Product Code]
+--    * Item should have [Item Pricing] setup
+--    * Item should have [Special Item Pricing] setup
+--    * Store should have same [Location] setup
+--    * Store should have [Register] setup
+-- ==================================================================================================================================================
+
 
 -- Table to handle intEntityId
 DECLARE @tblTempEntity TABLE(intId INT NOT NULL IDENTITY, intEntityId INT)
 
-INSERT @tblTempEntity
-SELECT DISTINCT
-	EM.intEntityId
-FROM tblEMEntity EM
-JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
-JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
-WHERE ET.strType IN ('User', 'Employee')
-AND SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+IF(@strLocationIds != '' AND @strLocationIds IS NOT NULL)
+	BEGIN
+		INSERT @tblTempEntity
+		SELECT DISTINCT
+			ITR.intEntityId
+		FROM vyuSTItemsToRegister ITR
+		JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = ITR.intEntityId
+		LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = ITR.intEntityId 
+		WHERE (URN.ysnClick IS NULL OR URN.ysnClick = 1)
+		AND SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+	END
+ELSE
+	BEGIN
+		INSERT @tblTempEntity
+		SELECT DISTINCT
+			ITR.intEntityId
+		FROM vyuSTItemsToRegister ITR
+		JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = ITR.intEntityId
+		LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = ITR.intEntityId 
+		WHERE (URN.ysnClick IS NULL OR URN.ysnClick = 1)
+	END
 
 
 -- ==============================================================================================
@@ -55,16 +82,4 @@ WHILE EXISTS(SELECT * FROM @tblTempEntity)
 		DELETE @tblTempEntity WHERE intId = @Id
 
 	END
-
--- TO TEST
---SELECT DISTINCT
---	x.intEntityId
---	, x.intItemId
---	, ICI.strDescription
---FROM vyuSTItemsToRegister x
---JOIN tblEMEntity EM ON EM.intEntityId = x.intEntityId
---JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
---JOIN tblSMCompanyLocation SMCL ON SMCL.intCompanyLocationId = SMUS.intCompanyLocationId
---JOIN tblICItem ICI ON ICI.intItemId = x.intItemId
---WHERE x.intEntityId = 1324
 END
