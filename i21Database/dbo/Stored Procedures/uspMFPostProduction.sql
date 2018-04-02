@@ -180,17 +180,9 @@ BEGIN
 END
 
 DECLARE @dblOtherCharges NUMERIC(18, 6)
-	,@dblPercentage NUMERIC(18, 6)
+	,@ysnConsumptionRequired BIT
 
-SELECT @dblPercentage = CASE 
-		WHEN ysnConsumptionRequired = 1
-			AND dblPercentage IS NULL
-			THEN 100
-		WHEN ysnConsumptionRequired = 0
-			AND dblPercentage IS NULL
-			THEN 0
-		ELSE dblPercentage
-		END
+SELECT @ysnConsumptionRequired = ysnConsumptionRequired
 FROM tblMFWorkOrderRecipeItem RI
 WHERE intWorkOrderId = @intWorkOrderId
 	AND RI.intRecipeItemTypeId = 2
@@ -202,42 +194,42 @@ DECLARE @tblMFOtherChargeItem TABLE (
 	,dblOtherCharge NUMERIC(18, 6)
 	)
 
-INSERT INTO @tblMFOtherChargeItem
-SELECT RI.intRecipeItemId
-	,RI.intItemId
-	,SUM((
-			CASE 
-				WHEN intMarginById = 2
-					THEN ISNULL(P.dblStandardCost, 0) + ISNULL(RI.dblMargin, 0)
-				ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
-				END
-			) / R.dblQuantity)
-FROM dbo.tblMFWorkOrderRecipeItem RI
-JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
-	AND R.intRecipeId = RI.intRecipeId
-JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
-	AND RI.intRecipeItemTypeId = 1
-	AND RI.ysnCostAppliedAtInvoice = 0
-	AND I.strType = 'Other Charge'
-JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
-	AND IL.intLocationId = @intLocationId
-JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
-	AND P.intItemLocationId = IL.intItemLocationId
-WHERE RI.intWorkOrderId = @intWorkOrderId
-	AND IsNULL(IsNULL(RI.intManufacturingCellId, @intManufacturingCellId), 0) = IsNULL(@intManufacturingCellId, 0)
-GROUP BY RI.intRecipeItemId
-	,RI.intItemId
-
-SELECT @dblOtherCharges = SUM(dblOtherCharge)
-FROM @tblMFOtherChargeItem
-
-IF @dblPercentage IS NOT NULL
-	SELECT @dblOtherCharges = @dblOtherCharges * @dblPercentage / 100
-
-IF @dblOtherCharges IS NOT NULL
-	AND @dblOtherCharges > 0
+IF @ysnConsumptionRequired = 1
 BEGIN
-	SELECT @dblNewUnitCost = @dblNewUnitCost + @dblOtherCharges
+	INSERT INTO @tblMFOtherChargeItem
+	SELECT RI.intRecipeItemId
+		,RI.intItemId
+		,SUM((
+				CASE 
+					WHEN intMarginById = 2
+						THEN ISNULL(P.dblStandardCost, 0) + ISNULL(RI.dblMargin, 0)
+					ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+					END
+				) / R.dblQuantity)
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
+		AND R.intRecipeId = RI.intRecipeId
+	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
+		AND RI.intRecipeItemTypeId = 1
+		AND RI.ysnCostAppliedAtInvoice = 0
+		AND I.strType = 'Other Charge'
+	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+		AND IL.intLocationId = @intLocationId
+	JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
+		AND P.intItemLocationId = IL.intItemLocationId
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND IsNULL(IsNULL(RI.intManufacturingCellId, @intManufacturingCellId), 0) = IsNULL(@intManufacturingCellId, 0)
+	GROUP BY RI.intRecipeItemId
+		,RI.intItemId
+
+	SELECT @dblOtherCharges = SUM(dblOtherCharge)
+	FROM @tblMFOtherChargeItem
+
+	IF @dblOtherCharges IS NOT NULL
+		AND @dblOtherCharges > 0
+	BEGIN
+		SELECT @dblNewUnitCost = @dblNewUnitCost + @dblOtherCharges
+	END
 END
 
 CREATE TABLE #GeneratedLotItems (
@@ -360,7 +352,7 @@ BEGIN
 		,@intOtherChargeItemLocationId = NULL
 
 	SELECT @intOtherChargeItemId = intItemId
-		,@dblOtherCharges = dblOtherCharge * @dblPercentage / 100
+		,@dblOtherCharges = dblOtherCharge
 	FROM @tblMFOtherChargeItem
 	WHERE intRecipeItemId = @intRecipeItemId
 
@@ -545,8 +537,9 @@ BEGIN
 		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
-
+		
 		UNION ALL
+		
 		SELECT dtmDate = GLEntriesForOtherCost.dtmDate
 			,strBatchId = @strBatchId
 			,intAccountId = GLAccount.intAccountId
@@ -587,6 +580,7 @@ BEGIN
 		WHERE ISNULL(GLEntriesForOtherCost.ysnAccrue, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnInventoryCost, 0) = 0
 			AND ISNULL(GLEntriesForOtherCost.ysnPrice, 0) = 0
+
 		IF EXISTS (
 				SELECT *
 				FROM @GLEntries
