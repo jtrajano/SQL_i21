@@ -145,7 +145,7 @@ EXEC sp_addmessage 80025,11,@strmessage,'us_english','False'
 
 -- was 51099
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80026) EXEC sp_dropmessage 80026, 'us_english'	
-SET @strmessage = 'Item %s is not available on location %s.'
+SET @strmessage = 'Location %s is not setup for the item %s.'
 EXEC sp_addmessage 80026,11,@strmessage,'us_english','False' 
 
 -- was 51100

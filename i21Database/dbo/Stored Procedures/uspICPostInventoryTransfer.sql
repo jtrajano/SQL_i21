@@ -183,7 +183,7 @@ BEGIN
 	DROP TABLE #tempValidateItemLocation
 	
 	-- Item %s is not available on location %s.
-	EXEC uspICRaiseError 80026, @ItemId, @LocationId;
+	EXEC uspICRaiseError 80026, @LocationId, @ItemId;
 	GOTO Post_Exit  
 END
 

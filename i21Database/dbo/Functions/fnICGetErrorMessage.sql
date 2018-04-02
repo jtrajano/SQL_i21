@@ -39,7 +39,7 @@ BEGIN
 		WHEN @msgId = 80023 THEN 'Missing costing method setup for item %s.'
 		WHEN @msgId = 80024 THEN 'Lot status for %s for item %s is going to be updated more than once. Please remove the duplicate.'
 		WHEN @msgId = 80025 THEN 'Recap is not applicable for this type of transaction.'
-		WHEN @msgId = 80026 THEN 'Item %s is not available on location %s.'
+		WHEN @msgId = 80026 THEN 'Location %s is not setup for the item %s.'
 		WHEN @msgId = 80027 THEN 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
 		WHEN @msgId = 80028 THEN 'The lot expiry dates are outdated for %s. Please review your quantity adjustments after the system reloads the latest expiry dates.'
 		WHEN @msgId = 80029 THEN 'Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.'
