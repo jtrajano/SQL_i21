@@ -648,7 +648,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     itemId: 'btnFetchDetails',
                                                     tabIndex: -1,
                                                     iconCls: 'small-refresh-small',
-                                                    text: 'Refresh'
+                                                    text: 'Load'
                                                 }
                                             ]
                                         },

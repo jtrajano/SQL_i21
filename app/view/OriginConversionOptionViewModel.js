@@ -19,7 +19,32 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
 
     data: {
         lineOfBusiness: '',
-        currentTask: 'LOB'
+        currentTask: 'LOB',
+        states: []
+    },
+
+    isOnStep: function(states, lineOfBusiness, step) {
+        if(states && states.length > 0) {
+            // var state = _.findWhere(states, { lob: lineOfBusiness });
+            var state = null;
+            for(var i = 0; i < states.length; i++) {
+                if(states[i].lob === lineOfBusiness) {
+                    state = states[i];
+                    break;
+                }
+            }
+            var enabled = state && state.step === step && state.lob === lineOfBusiness;
+            return !enabled;
+        }
+        return true;
+    },
+
+    getState: function(states, lineOfBusiness) {
+        if(states && states.length > 0) {
+            var state = _.findWhere(states, { lob: lineOfBusiness });
+            return state;
+        }
+        return null;
     },
 
     formulas: {
@@ -28,47 +53,43 @@ Ext.define('Inventory.view.OriginConversionOptionViewModel', {
         },
         
         disableLob: function(get) {
-            return get('currentTask') !== 'LOB' && get('currentTask') !== 'UOM';
+            return false;
         },
 
         disableUOM: function(get) {
-            return (get('currentTask') !== 'UOM' && get('currentTask') != 'LOB') || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'UOM');
         },
 
         disableLocations: function(get) {
-            return get('currentTask') !== 'Locations' || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'Locations');
         },
 
         disableCommodity: function(get) {
-            return get('currentTask') !== 'Commodity' || !get('hasLob') || get('lineOfBusiness') !== 'Grain';
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'Commodity');
         },
 
         disableCategoryClass: function(get) {
-            return get('currentTask') !== 'CategoryClass' || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'CategoryClass');
         },
 
         disableCategoryGLAccts: function(get) {
-            return get('currentTask') !== 'CategoryGLAccts' || !get('hasLob');
-        },
-
-        disableAdditionalGLAccts: function(get) {
-            return get('currentTask') !== 'AdditionalGLAccts' || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'CategoryGLAccts');
         },
 
         disableItems: function(get) {
-            return get('currentTask') !== 'Items' || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'Items');
         },
 
         disableItemGLAccts: function(get) {
-            return get('currentTask') !== 'ItemGLAccts' || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'ItemGLAccts');
         },
 
         disableBalance: function(get) {
-            return get('currentTask') !== 'Balance' || !get('hasLob');
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'Balance');
         },
         
         disableRecipeFormula: function(get){
-            return get('currentTask') !== 'RecipeFormula' || !get('hasLob') || get('lineOfBusiness') !== 'Petro';
+            return this.isOnStep(get('states'), get('lineOfBusiness'), 'RecipeFormula');
         }
     }
 });

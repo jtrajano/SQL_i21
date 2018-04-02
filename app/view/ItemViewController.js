@@ -2772,6 +2772,8 @@ Ext.define('Inventory.view.ItemViewController', {
             case "Bundle":
             case "Kit":
                 me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
+                me.addAccountCategory(current, 'Other Charge Expense', accountCategoryList);
                 break;
 
             case "Comment":

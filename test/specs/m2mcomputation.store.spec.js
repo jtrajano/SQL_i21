@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.M2MComputation',
     alias: "store.icm2mcomputation",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.M2MComputation"],
     config: {
         "model": "Inventory.model.M2MComputation",

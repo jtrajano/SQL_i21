@@ -21,7 +21,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         'GeneralLedger.controls.RecapTab',
         'GeneralLedger.controls.PostHistory',
         'Inventory.store.BufferedItemSubLocationsLookup',
-        'Inventory.store.BufferedItemStorageLocationsLookup'
+        'Inventory.store.BufferedItemStorageLocationsLookup',
+        'Inventory.store.BufferedItemRunningStock'
     ],
 
     stores: {
@@ -145,6 +146,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },    
         fromStorageLocation: {
             type: 'icbuffereditemstoragelocationslookup'
+        },
+        itemRunningQty: {
+            type: 'icbuffereditemrunningstock'
         }
     },
 
@@ -177,8 +181,39 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             return i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
         },
 
-        strTransactionId: function(get){
-            return get('current.strAdjustmentNo');
+        runningQtyFilter: function(get){
+            var itemId = get('grdInventoryAdjustment.selection.intItemId'),
+                storageLocationId = get('grdInventoryAdjustment.selection.intSubLocationId'),
+                storageUnitId = get('grdInventoryAdjustment.selection.intStorageLocationId'),
+                locationId = get('current.intLocationId'),
+                asOfDate = Ext.Date.format(get('current.dtmAdjustmentDate'),'Y-m-d');
+
+            var filters = [
+                {
+                    column: 'intItemId',
+                    value: itemId,
+                    condition: 'eq',
+                    conjunction: 'and'
+                },
+                {
+                    column: 'dtmAsOfDate',
+                    value: asOfDate,
+                    condition: 'lte',
+                    conjunction: 'and'
+                },{
+                    column: 'intLocationId',
+                    value: locationId,
+                    condition: 'eq',
+                    conjunction: 'and'
+                }
+            ];
+            
+            if (storageLocationId)
+                filters.push({ column: 'intSubLocationId', value: storageLocationId, condition: 'eq', conjunction: 'and' });
+            if (storageUnitId)
+                filters.push({ column: 'intStorageLocationId', value: storageUnitId, condition: 'eq', conjunction: 'and' });
+
+            return filters;
         },
         
         formulaShowLotNumberEditor: function(get){

@@ -2,7 +2,7 @@
  * Created by marahman on 18-09-2014.
  */
 Ext.define('Inventory.store.FuelCode', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icfuelcode',
 
     requires: [

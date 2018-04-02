@@ -2,7 +2,7 @@
  * Created by marahman on 19-09-2014.
  */
 Ext.define('Inventory.store.FeedStockUom', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icfeedstockuom',
 
     requires: [

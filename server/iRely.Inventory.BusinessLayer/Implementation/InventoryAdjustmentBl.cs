@@ -90,6 +90,30 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public override async Task<GetObjectResult> GetAsync(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryAdjustment>().Filter(param, true);
+            var key = Methods.GetPrimaryKey<vyuICGetInventoryAdjustment>(_db.ContextManager);
+
+            return new GetObjectResult()
+            {
+                data = await query.Execute(param, key).ToListAsync(param.cancellationToken).ConfigureAwait(false),
+                total = await query.CountAsync().ConfigureAwait(false)
+            };
+        }
+
+        public async Task<GetObjectResult> GetAdjustmentDetails(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryAdjustmentDetail>().Filter(param, true);
+            var key = Methods.GetPrimaryKey<vyuICGetInventoryAdjustmentDetail>(_db.ContextManager);
+
+            return new GetObjectResult()
+            {
+                data = await query.Execute(param, key).ToListAsync(param.cancellationToken).ConfigureAwait(false),
+                total = await query.CountAsync()
+            };
+        }
+
         public override void Add(tblICInventoryAdjustment entity)
         {
             var db = (Inventory.Model.InventoryEntities)_db.ContextManager;

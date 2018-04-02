@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.LotStatus',
     alias: "store.iclotstatus",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.LotStatus"],
     config: {
         "model": "Inventory.model.LotStatus",

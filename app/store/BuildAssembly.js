@@ -2,7 +2,7 @@
  * Created by LZabala on 10/1/2014.
  */
 Ext.define('Inventory.store.BuildAssembly', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icbuildassembly',
 
     requires: [

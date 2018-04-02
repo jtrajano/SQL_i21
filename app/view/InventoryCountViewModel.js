@@ -298,7 +298,7 @@ Ext.define('Inventory.view.InventoryCountViewModel', {
         getFetchText: function(get) {
             //return (get('hasCountGroup')) ? "Refresh" : "Fetch";
             //return "Fetch";
-            return 'Refresh';
+            return 'Load';
         },
         getFetchIconCls: function(get) {
             //return (get('hasCountGroup')) ? "small-refresh-small" : "small-transfer";

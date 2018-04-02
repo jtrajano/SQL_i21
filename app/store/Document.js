@@ -2,7 +2,7 @@
  * Created by LZabala on 10/9/2014.
  */
 Ext.define('Inventory.store.Document', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icdocument',
 
     requires: [

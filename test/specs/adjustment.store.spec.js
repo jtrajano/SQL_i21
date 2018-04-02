@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.Adjustment',
     alias: "store.icadjustment",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.Adjustment"],
     config: {
         "model": "Inventory.model.Adjustment",

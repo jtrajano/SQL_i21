@@ -1,7 +1,7 @@
 UnitTestEngine.testStore({
     name: 'Inventory.store.ReceiptItemTax',
     alias: "store.icreceiptitemtax",
-    base: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    base: 'Ext.data.Store',
     dependencies: ["Inventory.model.ReceiptItemTax"],
     config: {
         "model": "Inventory.model.ReceiptItemTax",

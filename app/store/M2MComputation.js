@@ -1,5 +1,5 @@
 Ext.define('Inventory.store.M2MComputation', {
-    extend: 'GlobalComponentEngine.store.MultiCompanyBaseStore',
+    extend: 'Ext.data.Store',
     alias: 'store.icm2mcomputation',
 
     requires: [
