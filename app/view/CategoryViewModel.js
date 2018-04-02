@@ -179,6 +179,8 @@ Ext.define('Inventory.view.CategoryViewModel', {
                     return category;
                 case 'Work In Progress':
                     return 'Inventory|^|' + category;
+                case 'Inventory Adjustment':
+                    return 'General|^|Cost of Goods|^|' + category;
                 default:
                     return 'General|^|' + category;
             }
