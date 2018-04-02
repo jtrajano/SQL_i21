@@ -79,7 +79,7 @@ FROM (
 		 , strLoadNumber
 		 , dtmScheduledDate
 	FROM dbo.tblLGLoad WITH (NOLOCK)
-	WHERE ysnPosted = 1 AND intShipmentStatus = 6
+	WHERE ysnPosted = 1 --AND intShipmentStatus = 6
 ) L
 JOIN (
 	SELECT intLoadId
