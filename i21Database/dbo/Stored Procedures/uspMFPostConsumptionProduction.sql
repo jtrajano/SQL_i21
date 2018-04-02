@@ -254,6 +254,13 @@ BEGIN
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
+		,@ysnConsumptionRequired BIT
+
+	SELECT @ysnConsumptionRequired = ysnConsumptionRequired
+	FROM tblMFWorkOrderRecipeItem RI
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND RI.intRecipeItemTypeId = 2
+		AND RI.intItemId = @intItemId
 
 	DECLARE @tblMFOtherChargeItem TABLE (
 		intRecipeItemId INT
@@ -261,37 +268,40 @@ BEGIN
 		,dblOtherCharge NUMERIC(18, 6)
 		)
 
-	INSERT INTO @tblMFOtherChargeItem
-	SELECT RI.intRecipeItemId
-		,RI.intItemId
-		,SUM((
-				CASE 
-					WHEN intMarginById = 2
-						THEN ISNULL(P.dblStandardCost, 0) + ISNULL(RI.dblMargin, 0)
-					ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
-					END
-				) / R.dblQuantity)
-	FROM dbo.tblMFWorkOrderRecipeItem RI
-	JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
-		AND R.intRecipeId = RI.intRecipeId
-	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
-		AND RI.intRecipeItemTypeId = 1
-		AND RI.ysnCostAppliedAtInvoice = 0
-		AND I.strType IN (
-			'Other Charge'
-			,'Service'
-			)
-	JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
-		AND IL.intLocationId = @intLocationId
-	JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
-		AND P.intItemLocationId = IL.intItemLocationId
-	WHERE RI.intWorkOrderId = @intWorkOrderId
-		AND IsNULL(IsNULL(RI.intManufacturingCellId, @intManufacturingCellId), 0) = IsNULL(@intManufacturingCellId, 0)
-	GROUP BY RI.intRecipeItemId
-		,RI.intItemId
+	IF @ysnConsumptionRequired = 1
+	BEGIN
+		INSERT INTO @tblMFOtherChargeItem
+		SELECT RI.intRecipeItemId
+			,RI.intItemId
+			,SUM((
+					CASE 
+						WHEN intMarginById = 2
+							THEN ISNULL(P.dblStandardCost, 0) + ISNULL(RI.dblMargin, 0)
+						ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+						END
+					) / R.dblQuantity)
+		FROM dbo.tblMFWorkOrderRecipeItem RI
+		JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
+			AND R.intRecipeId = RI.intRecipeId
+		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
+			AND RI.intRecipeItemTypeId = 1
+			AND RI.ysnCostAppliedAtInvoice = 0
+			AND I.strType IN (
+				'Other Charge'
+				,'Service'
+				)
+		JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+			AND IL.intLocationId = @intLocationId
+		JOIN dbo.tblICItemPricing P ON P.intItemId = I.intItemId
+			AND P.intItemLocationId = IL.intItemLocationId
+		WHERE RI.intWorkOrderId = @intWorkOrderId
+			AND IsNULL(IsNULL(RI.intManufacturingCellId, @intManufacturingCellId), 0) = IsNULL(@intManufacturingCellId, 0)
+		GROUP BY RI.intRecipeItemId
+			,RI.intItemId
 
-	SELECT @dblOtherCharges = SUM(dblOtherCharge)
-	FROM @tblMFOtherChargeItem
+		SELECT @dblOtherCharges = SUM(dblOtherCharge)
+		FROM @tblMFOtherChargeItem
+	END
 
 	DECLARE @dblCostPerStockUOM NUMERIC(38, 20)
 
@@ -444,7 +454,7 @@ BEGIN
 			,@intOtherChargeItemLocationId = NULL
 
 		SELECT @intOtherChargeItemId = intItemId
-			,@dblOtherCharges = dblOtherCharge 
+			,@dblOtherCharges = dblOtherCharge
 		FROM @tblMFOtherChargeItem
 		WHERE intRecipeItemId = @intRecipeItemId
 
