@@ -17,9 +17,9 @@ SELECT
 	, Adj.dtmPostedDate
 	, Adj.dtmUnpostedDate
 	, AdjDetail.intSubLocationId
-	, SubLocation.strSubLocationName
+	, strSubLocation = SubLocation.strSubLocationName
 	, AdjDetail.intStorageLocationId
-	, strStorageLocationName = StorageLocation.strName
+	, strStorageLocation = StorageLocation.strName
 	, AdjDetail.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
@@ -64,9 +64,9 @@ SELECT
 	, AdjDetail.intNewLocationId
 	, strNewLocationName = NewLocation.strLocationName
 	, AdjDetail.intNewSubLocationId
-	, strNewSubLocationName = NewSubLocation.strSubLocationName
+	, strNewSubLocation = NewSubLocation.strSubLocationName
 	, AdjDetail.intNewStorageLocationId
-	, strNewStorageLocationName = NewStorageLocation.strName
+	, strNewStorageLocation = NewStorageLocation.strName
 	, AdjDetail.dblLineTotal
 	, AdjDetail.intSort
 	, strOwnerName = LotOwnerEntity.strName
