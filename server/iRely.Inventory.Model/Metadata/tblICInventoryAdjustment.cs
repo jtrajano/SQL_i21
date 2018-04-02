@@ -129,9 +129,9 @@ namespace iRely.Inventory.Model
         public DateTime? dtmPostedDate { get; set; }
         public DateTime? dtmUnpostedDate { get; set; }
         public int? intSubLocationId { get; set; }
-        public string strSubLocationName { get; set; }
+        public string strSubLocation { get; set; }
         public int? intStorageLocationId { get; set; }
-        public string strStorageLocationName { get; set; }
+        public string strStorageLocation { get; set; }
         public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
@@ -176,9 +176,9 @@ namespace iRely.Inventory.Model
         public int? intNewLocationId { get; set; }
         public string strNewLocationName { get; set; }
         public int? intNewSubLocationId { get; set; }
-        public string strNewSubLocationName { get; set; }
+        public string strNewSubLocation { get; set; }
         public int? intNewStorageLocationId { get; set; }
-        public string strNewStorageLocationName { get; set; }
+        public string strNewStorageLocation { get; set; }
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
         public string strOwnerName { get; set; }
