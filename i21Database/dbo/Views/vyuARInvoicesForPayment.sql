@@ -200,11 +200,16 @@ FROM
 			,[strInvoiceNumber]			= ''
 			,[intBillId]				= APB.[intBillId]
 			,[strBillId]				= APB.[strBillId]
-			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 11 THEN 'Weight Claim' 
-												WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo' 
+			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 1 THEN 'Voucher'
 												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment'
-												WHEN APB.[intTransactionType] = 1 THEN 'Voucher' 
-											ELSE '' END)
+												WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo'
+												WHEN APB.[intTransactionType] = 7 THEN 'Invalid Type'
+												WHEN APB.[intTransactionType] = 9 THEN '1099 Adjustment'
+												WHEN APB.[intTransactionType] = 11 THEN 'Claim'
+												WHEN APB.[intTransactionType] = 13 THEN 'Basis Advance'
+												WHEN APB.[intTransactionType] = 14 THEN 'Deferred Interest'
+												ELSE 'Invalid Type'
+										   END)
 			,[strType]					= 'Voucher'
 			,[intEntityCustomerId]		= APB.[intEntityVendorId]
 			,[strCustomerName]			= CE.[strName]
