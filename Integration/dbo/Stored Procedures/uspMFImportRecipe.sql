@@ -94,6 +94,51 @@ BEGIN
 			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId
 			WHERE NOT EXISTS (select * from tblMFRecipe WHERE intItemId = ITM.intItemId AND intLocationId = LOC.intCompanyLocationId )			
 		 END
+
+		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agrcpmst')
+		 Begin
+			INSERT INTO [dbo].[tblMFRecipe]
+					   ([strName]
+					   ,[intCustomerId]
+					   ,[intItemId]
+					   ,[dblQuantity]
+					   ,[intItemUOMId]
+					   ,[intLocationId]
+					   ,[intVersionNo]
+					   ,[intRecipeTypeId]
+					   ,[intManufacturingProcessId]
+					   ,[ysnActive]
+					   ,[ysnImportOverride]
+					   ,[ysnAutoBlend]
+					   ,[dblMargin]
+					   ,[intCreatedUserId]
+					   ,[dtmCreated]
+					   ,[intLastModifiedUserId]
+					   ,[dtmLastModified]
+					   ,[intConcurrencyId])
+			SELECT      LTRIM(RTRIM(RCP.agrcp_rcp_no))
+					   ,CUS.intEntityId --[intCustomerId]
+					   ,NULL
+					   ,0--[dblQuantity]
+					   ,NULL--[intItemUOMId]
+					   ,LOC.intCompanyLocationId--[intLocationId]
+					   ,1--[intVersionNo]
+					   ,(select intRecipeTypeId from tblMFRecipeType where strName = 'By Quantity')--[intRecipeTypeId]
+					   ,(select intManufacturingProcessId from tblMFManufacturingProcess where strProcessName= 'Blending')--[intManufacturingProcessId]
+					   ,1--[ysnActive]
+					   ,0--[ysnImportOverride]
+					   ,0--[ysnAutoBlend]
+					   ,RCP.agrcp_mrgn--[dblMargin]					   
+					   ,1--@EntityId--[intCreatedUserId]
+					   ,(CASE WHEN ISDATE(RCP.agrcp_user_rev_dt) = 1 THEN CONVERT(DATE, CAST(RCP.agrcp_user_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)--,[dtmCreated]
+					   ,1--@EntityId--[intLastModifiedUserId]
+					   ,(CASE WHEN ISDATE(RCP.agrcp_user_rev_dt) = 1 THEN CONVERT(DATE, CAST(RCP.agrcp_user_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)--[dtmLastModified]
+					   ,1--[intConcurrencyId]			
+		    FROM agrcpmst RCP
+			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = RCP.agrcp_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = RCP.agrcp_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
+			WHERE NOT EXISTS (select * from tblMFRecipe WHERE strName COLLATE SQL_Latin1_General_CP1_CS_AS = RCP.agrcp_rcp_no COLLATE SQL_Latin1_General_CP1_CS_AS)
+		END
 		
 			--==========================================================
 			--     Insert into tblMFRecipeItem - AG Recipe Items
@@ -233,7 +278,7 @@ BEGIN
 			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = FRMI.agfml_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblMFRecipe RCP ON RCP.intItemId = ITM.intItemId AND RCP.intLocationId = LOC.intCompanyLocationId
 										AND RCP.[strName] = LTRIM(RTRIM(ITM.strDescription))+''_''+LTRIM(agfml_seq_no)
-			LEFT  JOIN tblICUnitMeasure UM ON Upper(UM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(OITM.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
+			LEFT  JOIN tblICUnitMeasure UM ON Upper(UM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = ''LB''
 			LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = ITM1.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId  
 			WHERE FRMI.agfml_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL AND NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId  AND intItemId = ITM1.intItemId ) 			
 			' 
@@ -244,6 +289,93 @@ BEGIN
 			END
 		 END
 
+			--==========================================================
+			--     Insert into tblMFRecipeItem - AG Recipe Items - agrcpmst
+			--==========================================================
+IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agrcpmst')
+		 BEGIN
+			SET @cnt = 1
+			SET @SQLCMD = ' '
+			--Insert all ingredient items 
+			WHILE @cnt < 61
+			BEGIN
+			   SET @SQLCMD = 'INSERT INTO [tblMFRecipeItem]
+					   ([intRecipeId]
+					   ,[intItemId]
+					   ,[strDescription]
+					   ,[dblQuantity]
+					   ,[dblCalculatedQuantity]
+					   ,[intItemUOMId]
+					   ,[intRecipeItemTypeId]
+					   ,[strItemGroupName]
+					   ,[dblUpperTolerance]
+					   ,[dblLowerTolerance]
+					   ,[dblCalculatedUpperTolerance]
+					   ,[dblCalculatedLowerTolerance]
+					   ,[dblShrinkage]
+					   ,[ysnScaled]
+					   ,[intConsumptionMethodId]
+					   ,[ysnYearValidationRequired]
+					   ,[ysnMinorIngredient]
+					   ,[ysnOutputItemMandatory]
+					   ,[dblScrap]
+					   ,dtmValidFrom
+					   ,dtmValidTo
+					   ,[ysnConsumptionRequired]
+					   ,[ysnCostAppliedAtInvoice]
+					   ,[intSequenceNo]
+					   ,[intCreatedUserId]
+					   ,[dtmCreated]
+					   ,[intLastModifiedUserId]
+					   ,[dtmLastModified]
+					   ,[intConcurrencyId])
+						SELECT      RCP.intRecipeId
+					   ,ITM1.intItemId
+					   ,NULL
+					   ,RCPI.agrcp_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
+					   ,0
+					   ,UOM.intItemUOMId
+					   ,(SELECT intRecipeItemTypeId FROM tblMFRecipeItemType WHERE strName = ''INPUT'')
+					   ,''''
+					   ,0
+					   ,0
+					   ,RCPI.agrcp_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
+					   ,RCPI.agrcp_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
+					   ,0  --[dblShrinkage]
+					   ,1  --[ysnScaled]
+					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+					   ,0  --[ysnYearValidationRequired]
+					   ,0  --[ysnMinorIngredient]
+					   ,0  --[ysnOutputItemMandatory]
+					   ,0  --[dblScrap]
+					   ,''1900-01-01 00:00:00.000'' --dtmValidFrom
+					   ,''9999-12-31 00:00:00.000'' --dtmValidTo,					   
+					   ,0  --[ysnConsumptionRequired]
+					   ,0  --[ysnCostAppliedAtInvoice]
+					   ,1  --[intSequenceNo]
+					   ,'+CAST(@EntityId AS NVARCHAR)+'
+					   ,(CASE WHEN ISDATE(RCPI.agrcp_user_rev_dt) = 1 THEN CONVERT(DATE, CAST(RCPI.agrcp_user_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)
+					   ,'+CAST(@EntityId AS NVARCHAR)+'
+					   ,(CASE WHEN ISDATE(RCPI.agrcp_user_rev_dt) = 1 THEN CONVERT(DATE, CAST(RCPI.agrcp_user_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END)
+					   ,1          
+			FROM agrcpmst RCPI
+			INNER JOIN agitmmst OITM ON OITM.agitm_no = RCPI.agrcp_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' AND OITM.agitm_loc_no = RCPI.agrcp_loc_no
+			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = RCPI.agrcp_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+			--INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = RCPI.agrcp_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblICItem ITM1 ON ITM1.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = RCPI.agrcp_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = RCPI.agrcp_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblMFRecipe RCP ON RCP.intCustomerId = CUS.intEntityId AND RCP.intLocationId = LOC.intCompanyLocationId
+										AND RCP.[strName] COLLATE SQL_Latin1_General_CP1_CS_AS = LTRIM(RTRIM(RCPI.agrcp_rcp_no)) COLLATE SQL_Latin1_General_CP1_CS_AS
+			LEFT  JOIN tblICUnitMeasure UM ON Upper(UM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = ''LB''
+			LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = ITM1.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId  
+			WHERE RCPI.agrcp_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL AND NOT EXISTS (SELECT * FROM tblMFRecipeItem WHERE intRecipeId = RCP.intRecipeId  AND intItemId = ITM1.intItemId )
+			' 
+			
+			   EXEC (@SQLCMD)
+
+			   SET @cnt = @cnt + 1;
+			END
+		 END
 			--================================================
 			--     Insert into tblMFRecipe--PT Recipes--
 			--================================================	
@@ -456,6 +588,11 @@ BEGIN
 			INNER JOIN tblICUnitMeasure UM ON Upper(UM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(OITM.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
 			INNER JOIN tblICItemUOM UOM ON UOM.intItemId = ITM.intItemId AND UOM.intUnitMeasureId = UM.intUnitMeasureId
 			WHERE NOT EXISTS (select * from tblMFRecipe WHERE intItemId = ITM.intItemId AND intLocationId = LOC.intCompanyLocationId )
+
+			SELECT  @Total = @Total + COUNT(*) FROM agrcpmst RCP
+			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = RCP.agrcp_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+			INNER JOIN tblSMCompanyLocation LOC ON LOC.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = RCP.agrcp_loc_no  COLLATE SQL_Latin1_General_CP1_CS_AS
+			WHERE NOT EXISTS (select * from tblMFRecipe WHERE strName COLLATE SQL_Latin1_General_CP1_CS_AS = RCP.agrcp_rcp_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 		END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptfrmmst')
