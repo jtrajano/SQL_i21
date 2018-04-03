@@ -13,10 +13,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 	UPDATE tblAPBill
-		SET	tblAPBill.dblPayment = (C.dblPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
+		SET	tblAPBill.dblPayment = (B.dblPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
 			tblAPBill.ysnPrepayHasPayment = 1
-	FROM tblARPayment A
-				INNER JOIN (
+	FROM (
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.[intTransactionType] IN (1, 14) THEN -11 ELSE 1 END)) dblPayment
 						,SUM(A.dblBasePayment * (CASE WHEN C.[intTransactionType] IN (1, 14) THEN -11 ELSE 1 END)) dblBasePayment
@@ -25,6 +24,7 @@ SET ANSI_WARNINGS OFF
 						,SUM(A.dblInterest) dblInterest
 						,SUM(A.dblBaseInterest) dblBaseInterest
 						,A.intBillId 
+						,A.intPaymentId
 					FROM
 						tblARPaymentDetail A
 					INNER JOIN tblARPayment B
@@ -34,10 +34,10 @@ SET ANSI_WARNINGS OFF
 					WHERE
 						A.intPaymentId IN (SELECT intId FROM @paymentIds)
 					GROUP BY
-						A.intBillId
+						A.intBillId 
+						,A.intPaymentId
 				) B 
-						ON A.intPaymentId = B.intPaymentId
-				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+				WHERE B.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	UPDATE tblAPBill
 		SET tblAPBill.dblAmountDue = (tblAPBill.dblTotal + tblAPBill.dblInterest) - (tblAPBill.dblPayment + tblAPBill.dblDiscount),
