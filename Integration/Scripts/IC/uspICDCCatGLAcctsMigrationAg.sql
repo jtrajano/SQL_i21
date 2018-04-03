@@ -68,6 +68,18 @@ UNION
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_inv_acct_no
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+UNION
+	SELECT cat.intCategoryId
+--	,seg.intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory In-Transit') AccountCategoryId
+	,act.intAccountId
+	,1 
+	FROM agclsmst AS cls 
+	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_inv_acct_no 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	WHERE coa.strExternalId = cls.agcls_inv_acct_no
+	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 )
 	
 
