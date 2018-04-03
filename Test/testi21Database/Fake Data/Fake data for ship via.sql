@@ -7,7 +7,7 @@ BEGIN
 			,@Ship_Via_Truck_Id AS INT = 1
 
 	INSERT INTO tblSMShipVia (
-		[intEntityShipViaId]
+		[intEntityId]
 		,strShipViaOriginKey
 		,strShipVia
 		,strShippingService
@@ -26,7 +26,7 @@ BEGIN
 		,intConcurrencyId	
 	)
 	SELECT 
-		intShipViaID			= @Ship_Via_Truck_Id
+		intEntityId				= @Ship_Via_Truck_Id
 		,strShipViaOriginKey	= NULL 
 		,strShipVia				= @Ship_Via_Truck
 		,strShippingService		= 'None'
