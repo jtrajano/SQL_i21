@@ -6289,6 +6289,7 @@
     <Build Include="dbo\Tables\tblARCommissionPlanItemCategory.sql" />
     <Build Include="dbo\Tables\tblARCommissionPlanSalesperson.sql" />
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
+    <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
