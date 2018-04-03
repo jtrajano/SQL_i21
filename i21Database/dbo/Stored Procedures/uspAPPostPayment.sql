@@ -675,13 +675,25 @@ ELSE
 
 IF(ISNULL(@recap,0) = 0)
 BEGIN
-----DELETE PAYMENT DETAIL WITHOUT PAYMENT AMOUNT
+	----DELETE PAYMENT DETAIL WITHOUT PAYMENT AMOUNT
 	IF @post = 1 AND @lenOfSuccessPay > 0
 	BEGIN		
 		DELETE FROM tblAPPaymentDetail
-		WHERE intPaymentId IN (SELECT intPaymentId FROM @payments)
+		WHERE intPaymentId IN (SELECT intId FROM @payments)
 		AND dblPayment = 0
 	END
+
+	DECLARE @voucherHistory AS Id
+	INSERT INTO @voucherHistory
+	SELECT
+		intPaymentDetailId
+	FROM (
+		SELECT intId FROM @payments
+		UNION ALL
+		SELECT intId FROM @prepayIds
+	) payments
+	INNER JOIN tblAPPaymentDetail B ON payments.intId = B.intPaymentId
+	EXEC uspAPUpdateVoucherHistory @paymentDetailIds = @voucherHistory, @post = @post
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData

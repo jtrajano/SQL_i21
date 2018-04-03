@@ -1197,6 +1197,10 @@ BEGIN
 		GOTO Post_Rollback
 	END CATCH
 
+	DECLARE @voucherHistory AS Id
+	INSERT INTO @voucherHistory
+	SELECT intBillId FROM #tmpPostBillData
+	EXEC uspAPUpdateVoucherHistory @voucherIds = @voucherHistory, @post = @post
 	--GOTO Audit_Log_Invoke
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -365,6 +365,14 @@ BEGIN
 	DECLARE @strDescription AS NVARCHAR(100),@PaymentId AS NVARCHAR(50);
 	DECLARE @paymentCounter INT = 0, @totalRecords INT = 0, @Id NVARCHAR(50);
 
+	DECLARE @voucherHistory AS Id
+	INSERT INTO @voucherHistory
+	SELECT
+		DISTINCT intPaymentDetailId
+	FROM #tmpPayables payments
+	INNER JOIN tblAPPaymentDetail B ON payments.intPaymentId = B.intPaymentId
+	EXEC uspAPUpdateVoucherHistory @paymentDetailIds = @voucherHistory, @post = 0
+
 	SET @totalRecords = (SELECT COUNT(*) FROM #tmpPayables)
 	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN

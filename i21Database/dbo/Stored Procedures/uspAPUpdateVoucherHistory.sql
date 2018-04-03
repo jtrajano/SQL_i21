@@ -16,18 +16,23 @@ BEGIN TRY
 
 DECLARE @startingRecordId INT;
 DECLARE @transCount INT = @@TRANCOUNT;
+IF OBJECT_ID(N'tempdb..#tmpVoucherHistory') IS NOT NULL DROP TABLE #tmpVoucherHistory
+IF OBJECT_ID(N'tempdb..#tmpVoucherPaymentHistory') IS NOT NULL DROP TABLE #tmpVoucherPaymentHistory
+
 IF @transCount = 0 BEGIN TRANSACTION
 
-MERGE INTO tblAPVoucherHistory AS targetTable
-USING (
+--voucher posting
+IF EXISTS(SELECT 1 FROM @voucherIds)
+BEGIN
 	SELECT 
 		[intBillId]				=	A.intBillId,
 		[strBillId]				=	A.strBillId,
-		[dblQtyReceived]		=	B.dblQtyReceived,
+		[dblQtyReceived]		=	CASE WHEN @post = 0 THEN -B.dblQtyReceived ELSE B.dblQtyReceived END,
 		[dblCost]				=	B.dblCost, 
+		[dblTotal]				=	CASE WHEN @post = 0 THEN -B.dblTotal + -B.dblTax ELSE B.dblTotal + B.dblTax END,
 		[dblAmountDue]			=	A.dblAmountDue,
 		[strCommodity]			=	ISNULL(commodity.strCommodityCode, 'None'),
-		[strItemNo]				=	item.strItemNo,
+		[strItemNo]				=	ISNULL(item.strItemNo, B.strMiscDescription),
 		[strLocation]			=	loc.strLocationName,
 		[strTicketNumber]		=	ticket.strTicketNumber,
 		[strQtyUnitMeasure]		=	unitMeasure.strUnitMeasure,
@@ -36,6 +41,7 @@ USING (
 		[dtmTransactionDate]	=	A.dtmDate,
 		[dtmTicketDateTime]		=	ticket.dtmTicketDateTime,
 		[dtmDateEntered]		=	A.dtmDateCreated
+	INTO #tmpVoucherHistory
 	FROM tblAPBill A 
 	INNER JOIN @voucherIds ids ON A.intBillId = ids.intId
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -48,106 +54,109 @@ USING (
 			ON B.intUnitOfMeasureId = uom.intItemUOMId
 	LEFT JOIN (tblICItemUOM costuom INNER JOIN tblICUnitMeasure costUnitMeasure ON costuom.intUnitMeasureId = costUnitMeasure.intUnitMeasureId)
 			ON B.intCostUOMId = costuom.intItemUOMId
-) AS sourceData
-ON (targetTable.intBillId = sourceData.intBillId 
-	AND DATEADD(dd, DATEDIFF(dd, 0,targetTable.dtmDateEntered), 0) = DATEADD(dd, DATEDIFF(dd, 0,sourceData.dtmDateEntered), 0)
-) 
-WHEN NOT MATCHED BY TARGET THEN
-INSERT (
-	[intBillId]				,
-	[strBillId]				,
-	[dblQtyReceived]		,
-	[dblCost]				, 
-	[dblAmountDue]			,
-	[strCommodity]			,
-	[strItemNo]				,
-	[strLocation]			,
-	[strTicketNumber]		,
-	[strQtyUnitMeasure]		,
-	[strCostUnitMeasure]	,
-	[strCurrency]			,
-	[dtmTransactionDate]	,
-	[dtmTicketDateTime]		,
-	[dtmDateEntered]		
-)
-VALUES (
-	[intBillId]				,
-	[strBillId]				,
-	[dblQtyReceived]		,
-	[dblCost]				, 
-	[dblAmountDue]			,
-	[strCommodity]			,
-	[strItemNo]				,
-	[strLocation]			,
-	[strTicketNumber]		,
-	[strQtyUnitMeasure]		,
-	[strCostUnitMeasure]	,
-	[strCurrency]			,
-	[dtmTransactionDate]	,
-	[dtmTicketDateTime]		,
-	[dtmDateEntered]		
-);
---ON (B.intBillId <>)
---WHEN NOT MATCHED THEN
---	INSERT(
---		[intBillId],
---		[strMiscDescription],
---		[strComment], 
---		[intAccountId],
---		[intItemId],
---		[intInventoryReceiptItemId],
---		[intInventoryReceiptChargeId],
---		[intPurchaseDetailId],
---		[intContractHeaderId],
---		[intContractDetailId],
---		[intPrepayTypeId],
---		[intTaxGroupId],
---		[dblTotal],
---		[intConcurrencyId], 
---		[dblQtyOrdered], 
---		[dblQtyReceived], 
---		[dblDiscount], 
---		[dblCost], 
---		[dblLandedCost], 
---		[dblTax], 
---		[dblPrepayPercentage], 
---		[dblWeight], 
---		[dblVolume], 
---		[dtmExpectedDate], 
---		[int1099Form], 
---		[int1099Category], 
---		[intLineNo]
---	)
---	VALUES
---	(
---		[intBillId],
---		[strMiscDescription],
---		[strComment], 
---		[intAccountId],
---		[intItemId],
---		[intInventoryReceiptItemId],
---		[intInventoryReceiptChargeId],
---		[intPurchaseDetailId],
---		[intContractHeaderId],
---		[intContractDetailId],
---		[intPrepayTypeId],
---		[intTaxGroupId],
---		[dblTotal],
---		[intConcurrencyId], 
---		[dblQtyOrdered], 
---		[dblQtyReceived], 
---		[dblDiscount], 
---		[dblCost], 
---		[dblLandedCost], 
---		[dblTax], 
---		[dblPrepayPercentage], 
---		[dblWeight], 
---		[dblVolume], 
---		[dtmExpectedDate], 
---		[int1099Form], 
---		[int1099Category], 
---		[intLineNo]
---	)
+
+	INSERT INTO tblAPVoucherHistory (
+		[intBillId]				
+		,[strBillId]				
+		,[dblQtyReceived]		
+		,[dblCost]				
+		,[dblTotal]				
+		,[dblAmountDue]			
+		,[strCommodity]			
+		,[strItemNo]				
+		,[strLocation]			
+		,[strTicketNumber]		
+		,[strQtyUnitMeasure]		
+		,[strCostUnitMeasure]	
+		,[strCurrency]			
+		,[dtmTransactionDate]	
+		,[dtmTicketDateTime]		
+		,[dtmDateEntered]		
+	)
+	SELECT
+		[intBillId]				
+		,[strBillId]				
+		,[dblQtyReceived]		
+		,[dblCost]				
+		,[dblTotal]				
+		,[dblAmountDue]			
+		,[strCommodity]			
+		,[strItemNo]				
+		,[strLocation]			
+		,[strTicketNumber]		
+		,[strQtyUnitMeasure]		
+		,[strCostUnitMeasure]	
+		,[strCurrency]			
+		,[dtmTransactionDate]	
+		,[dtmTicketDateTime]		
+		,[dtmDateEntered]		
+	FROM #tmpVoucherHistory
+END
+
+--payment posting
+IF EXISTS(SELECT 1 FROM @paymentDetailIds)
+BEGIN
+	SELECT 
+		[intBillId]				=	A.intBillId,
+		[strBillId]				=	A.strBillId,
+		[dblQtyReceived]		=	CASE WHEN @post = 0 THEN -pd.dblPayment ELSE pd.dblPayment END,
+		[dblCost]				=	pd.dblPayment, 
+		[dblTotal]				=	CASE WHEN @post = 0 THEN -pd.dblPayment ELSE pd.dblPayment END,
+		[dblAmountDue]			=	A.dblAmountDue,
+		[strCommodity]			=	NULL,
+		[strItemNo]				=	NULL,
+		[strLocation]			=	loc.strLocationName,
+		[strTicketNumber]		=	NULL,
+		[strQtyUnitMeasure]		=	NULL,
+		[strCostUnitMeasure]	=	NULL,
+		[strCurrency]			=	cur.strCurrency,
+		[dtmTransactionDate]	=	A.dtmDate,
+		[dtmTicketDateTime]		=	NULL,
+		[dtmDateEntered]		=	A.dtmDateCreated
+	INTO #tmpVoucherPaymentHistory
+	FROM tblAPBill A 
+	INNER JOIN tblAPPaymentDetail pd ON A.intBillId = ISNULL(pd.intBillId, pd.intOrigBillId)
+	INNER JOIN @paymentDetailIds ids ON pd.intPaymentDetailId = ids.intId
+	INNER JOIN tblSMCompanyLocation loc ON A.intShipToId = loc.intCompanyLocationId
+	INNER JOIN tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
+
+	INSERT INTO tblAPVoucherHistory (
+		[intBillId]				
+		,[strBillId]				
+		,[dblQtyReceived]		
+		,[dblCost]				
+		,[dblTotal]				
+		,[dblAmountDue]			
+		,[strCommodity]			
+		,[strItemNo]				
+		,[strLocation]			
+		,[strTicketNumber]		
+		,[strQtyUnitMeasure]		
+		,[strCostUnitMeasure]	
+		,[strCurrency]			
+		,[dtmTransactionDate]	
+		,[dtmTicketDateTime]		
+		,[dtmDateEntered]		
+	)
+	SELECT
+		[intBillId]				
+		,[strBillId]				
+		,[dblQtyReceived]		
+		,[dblCost]				
+		,[dblTotal]				
+		,[dblAmountDue]			
+		,[strCommodity]			
+		,[strItemNo]				
+		,[strLocation]			
+		,[strTicketNumber]		
+		,[strQtyUnitMeasure]		
+		,[strCostUnitMeasure]	
+		,[strCurrency]			
+		,[dtmTransactionDate]	
+		,[dtmTicketDateTime]		
+		,[dtmDateEntered]		
+	FROM #tmpVoucherPaymentHistory
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 END TRY
