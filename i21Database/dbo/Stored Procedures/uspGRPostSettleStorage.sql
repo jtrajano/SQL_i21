@@ -892,7 +892,7 @@ BEGIN TRY
 					,dblQty						= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
-														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice] + OtherCharge.dblCashPrice
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
@@ -909,7 +909,13 @@ BEGIN TRY
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
-				JOIN tblGRStorageType St ON St.intStorageScheduleTypeId = CS.intStorageTypeId
+				LEFT JOIN (
+							SELECT intCustomerStorageId
+							      ,SUM(dblCashPrice) dblCashPrice 
+						    FROM @SettleVoucherCreate 
+							WHERE intItemType = 2
+							GROUP BY intCustomerStorageId
+						  ) OtherCharge ON OtherCharge.intCustomerStorageId = SV.intCustomerStorageId
 				WHERE SV.intItemType = 1
 
 				--Reduce the On-Storage Quantity		
