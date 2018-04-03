@@ -13,3 +13,8 @@ UPDATE tblCFPriceProfileDetail SET strBasis = 'Pump Price Adjustment' WHERE strB
 
 UPDATE tblCFTransaction
 SET tblCFTransaction.intForDeleteTransId = CAST(REPLACE(strTransactionId,'CFDT-','') AS int)
+
+
+
+
+UPDATE tblCFCompanyPreference set strEnvelopeType = '#10 Envelope' WHERE ISNULL(strEnvelopeType,'') = ''
