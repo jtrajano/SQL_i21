@@ -89,6 +89,18 @@ USING
 			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
 			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+	UNION
+		SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory In-Transit')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
+		FROM ptclsmst AS cls 
+			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_inv_acct_no 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
+			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 ) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
 ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
 	AND [Target].intCategoryId = [Source].intCategoryId
@@ -186,7 +198,7 @@ join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategor
 join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
 join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
 join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
-where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','Inventory Adjustment','AP Clearing')
+where act.strAccountCategory in ('Inventory', 'Sales Account','Work In Progress','Inventory Adjustment','AP Clearing')
 and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Good')
 and ast.strType = 'Primary'
 
