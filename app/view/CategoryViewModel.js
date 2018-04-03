@@ -175,10 +175,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
             switch(category) {
                 case 'AP Clearing':
                 case 'Inventory':
+                case 'Work In Progress':
                 case 'Inventory In-Transit':
                     return category;
-                case 'Work In Progress':
-                    return 'Inventory|^|' + category;
                 default:
                     return 'General|^|' + category;
             }
