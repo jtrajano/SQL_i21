@@ -6291,6 +6291,7 @@
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentChangeLotWeight.sql" />
+    <Build Include="dbo\Views\vyuHDProjectTimeHoursReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
