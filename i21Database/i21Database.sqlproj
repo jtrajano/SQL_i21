@@ -6292,6 +6292,8 @@
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentChangeLotWeight.sql" />
     <Build Include="dbo\Views\vyuHDProjectTimeHoursReport.sql" />
+    <Build Include="dbo\Views\vyuCTContractsToWashout.sql" />
+    <Build Include="dbo\Tables\tblCTWashout.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
