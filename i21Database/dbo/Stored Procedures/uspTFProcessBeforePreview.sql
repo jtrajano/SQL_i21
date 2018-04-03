@@ -112,6 +112,8 @@ BEGIN TRY
 			LEFT JOIN vyuCFInvoiceReport CFTran ON CFTran.intInvoiceId = Invoice.intInvoiceId AND CFTran.ysnPosted = 1
 			LEFT JOIN tblARCustomerTaxingTaxException TaxException ON TaxException.intEntityCustomerId = Invoice.intEntityCustomerId AND ISNULL(TaxException.intItemId, InvoiceDetail.intItemId) = InvoiceDetail.intItemId AND ISNULL(TaxException.intEntityCustomerLocationId, Invoice.intShipToLocationId) = Invoice.intShipToLocationId
 			WHERE Trans.strTransactionType = 'Invoice'
+			AND Trans.uniqTransactionGuid = @Guid
+			AND Trans.intTransactionId IS NOT NULL
 			
 		END
 		ELSE IF (@TaxAuthorityCode = 'NM' AND @ScheduleCode = 'A')
