@@ -48,6 +48,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemType).HasColumnName("strItemType");
             this.Property(t => t.intParentItemLinkId).HasColumnName("intParentItemLinkId");
             this.Property(t => t.intChildItemLinkId).HasColumnName("intChildItemLinkId");
+            this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal");
 
             this.HasMany(p => p.tblICInventoryShipmentItemLots)
                 .WithRequired(p => p.tblICInventoryShipmentItem)

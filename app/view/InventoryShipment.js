@@ -1399,6 +1399,60 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         format: '0,000.00####'
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPriceUOM',
+                                                                        width: 100,
+                                                                        dataIndex: 'strPriceUOM',
+                                                                        text: 'Price UOM',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intItemUOMId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Of Measure Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Measure',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'checkcolumn',
+                                                                                    dataIndex: 'ysnStockUnit',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Stock Unit',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblSalesPrice',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Sales Price',
+                                                                                    hidden: true,
+                                                                                    required: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Qty',
+                                                                                    hidden: true,
+                                                                                    required: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboPriceUOM',
+                                                                            displayField: 'strUnitMeasure',
+                                                                            valueField: 'strUnitMeasure'
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
                                                                         itemId: 'colLineTotal',

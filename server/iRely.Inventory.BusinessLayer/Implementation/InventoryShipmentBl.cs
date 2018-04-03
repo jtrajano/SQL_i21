@@ -548,6 +548,8 @@ namespace iRely.Inventory.BusinessLayer
                         s.intParentItemLinkId,
                         s.intChildItemLinkId,
                         s.intConcurrencyId,
+                        s.intPriceUOMId,
+                        s.dblLineTotal,
 
                         // PROJECTED 
                         s.vyuICGetInventoryShipmentItem.strOrderNumber,
@@ -585,7 +587,9 @@ namespace iRely.Inventory.BusinessLayer
                         s.vyuICGetInventoryShipmentItem.strLotTracking,
                         s.vyuICGetInventoryShipmentItem.dblItemUOMConv,
                         s.vyuICGetInventoryShipmentItem.dblWeightItemUOMConv,
-                        s.vyuICGetInventoryShipmentItem.intCommodityId
+                        s.vyuICGetInventoryShipmentItem.intCommodityId,
+                        s.vyuICGetInventoryShipmentItem.strPriceUOM,
+                        s.vyuICGetInventoryShipmentItem.dblCostUOMConv
                     })
                     .AsNoTracking()
                     .ToListAsync(param.cancellationToken);

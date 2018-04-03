@@ -472,11 +472,30 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUnitCost: 'dblUnitCost',
                 colUnitPrice: {
                     dataIndex: 'dblUnitPrice',
-                    //hidden: '{hideFunctionalCurrencyColumn}',
                     editor: {
                         readOnly: '{disableFieldInShipmentGrid}'
                     }
                 },
+                colPriceUOM: {
+                    dataIndex: 'strPriceUOM',
+                    editor: {
+                        readOnly: '{disableFieldInShipmentGrid}',
+                        store: '{priceUOM}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intPriceUOMId',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryShipment.selection.intItemId}'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intShipFromLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },                
                 // colForeignUnitPrice: {
                 //     dataIndex: 'dblForeignUnitPrice',
                 //     hidden: '{hideForeignColumn}',
@@ -785,10 +804,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         var cepItem = grdInventoryShipment.getPlugin('cepItem');
         if (cepItem) {
-            cepItem.on({
-                edit: me.onItemValidateEdit,
+            // cepItem.on({
+            //     edit: me.onItemValidateEdit,
+            //     scope: me
+            // });
+
+            grdInventoryShipment.mon(cepItem, {
+                edit: me.onItemEdit,
                 scope: me
-            });
+            });               
         }        
 
         win.context.data.on({
@@ -1270,7 +1294,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 });
             }
-        }
+        }     
     },
 
     getItemSalesPrice: function(cfg, successFn, failureFn, currentItem){
@@ -1427,8 +1451,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
-            current.set('dblUnitPrice', dblUnitPrice);            
-            current.set('dblItemUOMConvFactor', records[0].get('dblIssueUOMConvFactor'));
+            current.set('dblUnitPrice', dblUnitPrice);
+            current.set('intPriceUOMId',records[0].get('intIssueUOMId'));
+            current.set('strPriceUOM',records[0].get('strIssueUOM'));
+            current.set('dblItemUOMConv', records[0].get('dblIssueUOMConvFactor'));
+            current.set('dblCostUOMConv', records[0].get('dblIssueUOMConvFactor'));
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
             current.set('strOwnershipType', 'Own');
@@ -1459,12 +1486,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             var dblForexRate = current.get('dblForexRate');
 
             // Convert the sales price from functional currency to the transaction currency. 
-            dblSalesPriceForeign = dblForexRate != 0 ? dblSalesPrice / dblForexRate : dblLastCost;
+            dblSalesPriceForeign = dblForexRate != 0 ? dblSalesPrice / dblForexRate : dblSalesPrice;
             dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
 
             current.set('dblItemUOMConv', dblUnitQty);
             current.set('dblUnitCost', dblLastCost);
-            current.set('dblUnitPrice', dblSalesPrice);
+            current.set('dblUnitPrice', dblSalesPriceForeign);
             current.set('intItemUOMId', intItemUOMId);
         }
         else if (combo.itemId === 'cboSubLocation') {
@@ -1547,8 +1574,77 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     iRely.Functions.showErrorDialog(failureResponse);                    
                 }
             );                       
+        } 
+
+        else if (combo.itemId === 'cboPriceUOM') {
+            var dblSalesPrice = records[0].get('dblSalePrice');
+            var dblSalesPriceForeign = records[0].get('dblSalePrice');
+            var intItemUOMId = records[0].get('intItemUOMId');
+            var strUnitMeasure = records[0].get('strUnitMeasure');
+            var dblForexRate = current.get('dblForexRate');
+            var dblUnitQty = records[0].get('dblUnitQty');
+            dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
+            dblSalesPrice = Ext.isNumeric(dblSalesPrice) ? dblSalesPrice : 0; 
+
+            // Convert the sales price from functional currency to the transaction currency. 
+            dblSalesPriceForeign = dblForexRate != 0 ? dblSalesPrice / dblForexRate : dblSalesPrice;
+            dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
+
+            current.set('dblUnitPrice', dblSalesPriceForeign);
+            current.set('intPriceUOMId', intItemUOMId);
+            current.set('strPriceUOM', strUnitMeasure); 
+            current.set('dblCostUOMConv', dblUnitQty);
+
+            // Get the important header data: 
+            var currentHeader = win.viewModel.data.current;
+            var transactionCurrencyId = currentHeader.get('intCurrencyId');
+            var customerId = currentHeader.get('intEntityCustomerId');            
+            var shipFromLocationId = currentHeader.get('intShipFromLocationId');
+            var shipToLocationId = currentHeader.get('intShipToLocationId');            
+            var dtmShipDate = currentHeader.get('dtmShipDate');
+            var shipQty = current.get('dblQuantity'); 
+            shipQty = Ext.isNumeric(shipQty) ? shipQty : 0; 
+
+            var processCustomerPriceOnSuccess2 = function(successResponse){
+                var jsonData = Ext.decode(successResponse.responseText);
+                var isItemRetailPrice = true;                
+
+                // If there is a customer cost, replace dblUnitPrice with the customer sales price. 
+                var itemPricing = jsonData ? jsonData.itemPricing : null;
+                if (itemPricing) {
+                    dblUnitPrice = itemPricing.dblPrice; 
+                    dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0; 
+
+                    dblSalesPriceForeign = dblForexRate != 0 ? dblUnitPrice / dblForexRate : dblUnitPrice;
+                    dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);                         
+
+                    current.set('dblUnitPrice', dblSalesPriceForeign);
+
+                    if (itemPricing.strPricing !== 'Inventory - Standard Pricing'){
+                        isItemRetailPrice = false;
+                    }                    
+                }
+            };
+
+            var processCustomerPriceOnFailure2 = function(failureResponse){
+                var jsonData = Ext.decode(failureResponse.responseText);
+                iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
+            };            
+    
+            // Get the customer cost from the hierarchy.  
+            var customerPriceCfg2 = {
+                ItemId: current.get('intItemId'),
+                CustomerId: customerId,
+                CurrencyId: transactionCurrencyId,
+                LocationId: shipFromLocationId,
+                TransactionDate: dtmShipDate,
+                Quantity: shipQty, // Default ship qty. 
+                ShipToLocationId: shipToLocationId,
+                ItemUOMId: intItemUOMId
+            }; 
+
+            me.getItemSalesPrice(customerPriceCfg2, processCustomerPriceOnSuccess2, processCustomerPriceOnFailure2);
         }        
-        
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -3659,7 +3755,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     },    
 
-    onItemValidateEdit: function (editor, context, eOpts) {
+    onItemEdit: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
         var vw = win.viewModel;
@@ -3739,6 +3835,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
                 me.calculateLinkedItems(currentHeader, currentItem);
             }
+
+            // Calculate the line total
+            currentItem.set('dblLineTotal', me.calculateLineTotal(currentHeader, currentItem));            
         }       
     },
 
@@ -4375,7 +4474,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strItemDescription: rec.strComponentDescription,
                                 intItemUOMId: rec.intComponentUOMId,
                                 strUnitMeasure: rec.strComponentUOM,
-                                dblItemUOMConvFactor: rec.dblComponentConvFactor,
+                                dblItemUOMConv: rec.dblComponentConvFactor,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: rec.intSubLocationId,
                                 strSubLocationName: rec.strSubLocationName,
@@ -4537,7 +4636,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                 strItemDescription: rec.strComponentDescription,
                                 intItemUOMId: rec.intComponentUOMId,
                                 strUnitMeasure: rec.strComponentUOM,
-                                dblItemUOMConvFactor: rec.dblComponentConvFactor,
+                                dblItemUOMConv: rec.dblComponentConvFactor,
                                 strLotTracking: rec.strLotTracking,
                                 intSubLocationId: rec.intSubLocationId,
                                 strSubLocationName: rec.strSubLocationName,
@@ -4584,6 +4683,51 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intShipViaId', record.get('intEntityId'));
         }
     },    
+
+    calculateLineTotal: function (currentShipment, currentShipmentItem) {
+        if (!currentShipment || !currentShipmentItem)
+            return;
+
+        var qty = currentShipmentItem.get('dblQuantity');
+        var qtyCF = currentShipmentItem.get('dblItemUOMConv');
+        var salesPrice = currentShipmentItem.get('dblUnitPrice');
+        var costCF = currentShipmentItem.get('dblCostUOMConv');
+        var costCentsFactor = currentShipment.get('intSubCurrencyCents');
+        var isSubCurrency = currentShipmentItem.get('ysnSubCurrency');
+        var lineTotal = 0;
+        
+        var defaultCurrency = i21.ModuleMgr.SystemManager.getCompanyPreference('intDefaultCurrencyId');
+        var intCurrencyId = currentShipment.get('intCurrencyId');
+        var dblForexRate = currentShipmentItem.get('dblForexRate');
+
+        // sanitize the value for the sub currency.
+        costCentsFactor = Ext.isNumeric(costCentsFactor) && costCentsFactor != 0 ? costCentsFactor : 1;
+
+        // check if there is a need to compute for the sub currency.
+        if (!isSubCurrency) {
+            costCentsFactor = 1;
+        }
+
+        // Compute the line total with respect to the Item UOM
+        
+        // Sanitize the cost conversion factor.
+        costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : qtyCF;
+        costCF = Ext.isNumeric(costCF) && costCF != 0 ? costCF : 1;
+
+        // Formula is:
+        // {Sub Cost} = {Unit Cost} / {Sub Currency Cents Factor}
+        // {New Cost} = {Sub Cost} x {Item UOM Conv Factor} / {Cost UOM Conv Factor}
+        // {Line Total} = ( {Qty in Item UOM} x {New Cost} )
+        lineTotal = (qty * (salesPrice / costCentsFactor) * (qtyCF / costCF));
+            
+        // Convert to the functional currency. 
+        // if (intCurrencyId && intCurrencyId != defaultCurrency){
+        //     dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;
+        //     lineTotal = lineTotal * dblForexRate; 
+        // }
+
+        return i21.ModuleMgr.Inventory.roundDecimalFormat(lineTotal, 2)
+    },
 
     init: function(application) {
         this.control({
@@ -4721,7 +4865,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboShipVia": {
                 select: this.onShipViaSelect
-            }
+            },
+            "#cboPriceUOM": {
+                select: this.onItemNoSelect
+            }            
         })
     }
 

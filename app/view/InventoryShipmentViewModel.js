@@ -159,6 +159,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         itemUOM: {
             type: 'icbuffereditempricingview'
         },
+        priceUOM: {
+            type: 'icbuffereditempricingview'
+        },        
         weightUOM: {
             type: 'icbuffereditemweightuom'
         },
