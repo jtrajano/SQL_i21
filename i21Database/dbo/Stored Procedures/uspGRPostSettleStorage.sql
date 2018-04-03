@@ -896,7 +896,7 @@ BEGIN TRY
 							SELECT intCustomerStorageId
 							      ,SUM(dblCashPrice) dblCashPrice 
 						    FROM @SettleVoucherCreate 
-							WHERE intItemType = 2
+							WHERE intItemType = 3
 							GROUP BY intCustomerStorageId
 						  ) OtherCharge ON OtherCharge.intCustomerStorageId = SV.intCustomerStorageId
 				WHERE SV.intItemType = 1
