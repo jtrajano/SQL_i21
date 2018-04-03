@@ -199,7 +199,7 @@ BEGIN
 	DECLARE @intEntityId AS INT = 19945
 
 	INSERT INTO dbo.tblSMUserSecurity (
-		intEntityUserSecurityId
+		intEntityId 
 	)
 	VALUES (@intEntityId);
 
