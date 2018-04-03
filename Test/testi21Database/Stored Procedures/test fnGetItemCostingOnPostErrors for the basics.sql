@@ -98,7 +98,7 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 	END
 
 	-- Assert
