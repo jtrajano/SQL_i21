@@ -13,6 +13,7 @@ BEGIN
 	SELECT @intStagingLocationId = intStagingLocationId
 	FROM tblMFOrderHeader
 	WHERE strOrderNo = @strPickNo
+		AND intLocationId = @intLocationId
 
 	SELECT @strName = strName
 	FROM tblICStorageLocation

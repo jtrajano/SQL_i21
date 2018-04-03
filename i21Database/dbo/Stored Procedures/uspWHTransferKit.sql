@@ -18,6 +18,7 @@ BEGIN TRY
 	SELECT @intPickListId = intPickListId
 	FROM tblMFPickList
 	WHERE strPickListNo = @strPickListNo
+		AND intLocationId = @intCompanyLocationId
 
 	IF ISNULL(@intBlendStagingLocationId,0) = 0 
 	BEGIN

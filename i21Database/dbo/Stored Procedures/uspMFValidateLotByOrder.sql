@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFValidateLotByOrder (
 	@strPickNo NVARCHAR(50)
 	,@strScannedLotNo NVARCHAR(50)
+	,@intCompanyLocationId INT
 	)
 AS
 BEGIN
@@ -12,6 +13,7 @@ BEGIN
 	SELECT @intStagingLocationId = intStagingLocationId
 	FROM tblMFOrderHeader
 	WHERE strOrderNo = @strPickNo
+		AND intLocationId = @intCompanyLocationId
 
 	SELECT @strName = strName
 	FROM tblICStorageLocation

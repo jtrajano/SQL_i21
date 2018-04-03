@@ -12,6 +12,7 @@ BEGIN
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = S.intStorageUnitTypeId
 				AND UT.strInternalCode = 'WH_DOCK_DOOR'
 			WHERE UPPER(strName) = @strDockDoorLocation
+				AND S.intLocationId = @intLocationId
 			)
 	BEGIN
 		RAISERROR (
