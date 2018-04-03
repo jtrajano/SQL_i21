@@ -25,6 +25,39 @@ SET ANSI_WARNINGS OFF
 --   into tblICCategoryAccount table removing duplicates and ignoring the invalid accounts. **
 -- Items are of different types and it requires specific GL accounts categories. For example, Inventory type requires Inventory Account
 
+
+-- Temp table to get all the Class code used in Recipes & Formulas
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#TMPCLS')
+		DROP table #TMPCLS
+
+	SELECT distinct agcls_cd INTO #TMPCLS FROM agfmlmst
+	inner join agitmmst itm on itm.agitm_no = agfml_itm_no and itm.agitm_loc_no = agfml_loc_no
+	inner join agclsmst cls on cls.agcls_cd = itm.agitm_class
+	DECLARE @cnt INT = 1,
+	@SQLCMD VARCHAR (3000)
+
+	WHILE @cnt < 61
+	BEGIN
+	   SET @SQLCMD = '	INSERT INTO #TMPCLS (agcls_cd) SELECT distinct agcls_cd FROM agfmlmst 
+				inner join agitmmst itm on itm.agitm_no = agfml_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' and itm.agitm_loc_no = agfml_loc_no
+				inner join agclsmst cls on cls.agcls_cd = itm.agitm_class'+
+				' WHERE agfml_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL  '
+
+				EXEC (@SQLCMD)
+	   SET @cnt = @cnt + 1;
+	END
+	SET @cnt = 1
+	WHILE @cnt < 61
+	BEGIN
+	   SET @SQLCMD = '	INSERT INTO #TMPCLS (agcls_cd) SELECT distinct agcls_cd FROM agrcpmst 
+				inner join agitmmst itm on itm.agitm_no = agrcp_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' and itm.agitm_loc_no = agrcp_loc_no
+				inner join agclsmst cls on cls.agcls_cd = itm.agitm_class'+
+				' WHERE agrcp_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL  '
+
+				EXEC (@SQLCMD)
+	   SET @cnt = @cnt + 1;
+	END
+
 INSERT INTO tblICCategoryAccount (
 	intCategoryId
 	,intAccountCategoryId
@@ -80,6 +113,19 @@ UNION
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cls.agcls_inv_acct_no
 	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+UNION
+	SELECT cat.intCategoryId
+--	,seg.intAccountCategoryId
+	,(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Work In Progress') AccountCategoryId
+	,act.intAccountId
+	,1 
+	FROM agclsmst AS cls 
+	INNER JOIN tblICCategory AS cat ON cls.agcls_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.agcls_inv_acct_no 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	WHERE coa.strExternalId = cls.agcls_inv_acct_no
+	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+	AND cls.agcls_cd  in (select agcls_cd from #TMPCLS where agcls_cd = cls.agcls_cd)
 )
 	
 
