@@ -19,14 +19,14 @@ BEGIN TRANSACTION;
 --=====================================================================================================================================
 -- 	INITIALIZATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF ISNULL(@ysnRecap, 0) = 0
-BEGIN
-	SELECT	@strBatchId = MAX(strBatchId)
-	FROM	tblGLDetail
-	WHERE	strTransactionId = @strTransactionId
-			AND ysnIsUnposted = 0
-			AND strCode = ISNULL(@strCode, strCode)
-END			
+--IF ISNULL(@ysnRecap, 0) = 0
+--BEGIN
+--	SELECT	@strBatchId = MAX(strBatchId)
+--	FROM	tblGLDetail
+--	WHERE	strTransactionId = @strTransactionId
+--			AND ysnIsUnposted = 0
+--			AND strCode = ISNULL(@strCode, strCode)
+--END			
 
 --=====================================================================================================================================
 -- 	REVERSE THE G/L ENTRIES
