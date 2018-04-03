@@ -104,7 +104,7 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 13) AND A.ysnOrigin = 1
 UNION ALL   
-SELECT A.dtmDatePaid AS dtmDate,   
+SELECT C.dtmDate AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
 	 CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
