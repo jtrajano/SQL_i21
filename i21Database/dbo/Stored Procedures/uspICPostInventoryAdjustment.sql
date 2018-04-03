@@ -46,6 +46,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
 		,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 		,@ADJUSTMENT_TYPE_LotOwnerChange AS INT = 9
+		,@ADJUSTMENT_TYPE_ChangeLotWeight AS INT = 11
 
 -- Read the transaction info   
 BEGIN   
@@ -374,6 +375,19 @@ BEGIN
 	END 
 	
 	-----------------------------------
+	--  Call Change Lot Weight
+	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
+	BEGIN 
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentChangeLotWeight
+				@intTransactionId
+				,@ysnPost
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END 
+	
+
+	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
 	IF @adjustmentTypeRequiresGLEntries = 1
@@ -529,6 +543,15 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 	
+	IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
+	BEGIN 
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentChangeLotWeight
+				@intTransactionId
+				,@ysnPost
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END 
+
 END   
 
 --------------------------------------------------------------------------------------------  

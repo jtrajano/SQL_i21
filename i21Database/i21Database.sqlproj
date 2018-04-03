@@ -6290,6 +6290,7 @@
     <Build Include="dbo\Tables\tblARCommissionPlanSalesperson.sql" />
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentChangeLotWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
