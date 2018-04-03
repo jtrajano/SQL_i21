@@ -102,7 +102,7 @@ BEGIN
 				WHEN a.strText  = '' 
 					THEN  PostError.strMessage 
 				ELSE 
-					FORMATMESSAGE(PostError.strMessage,a.strText) END strText
+					REPLACE(PostError.strMessage,'{0}',a.strText) END strText
 		,a.intErrorCode, strModuleName FROM BatchError a
 		CROSS APPLY (SELECT strMessage from dbo.fnGLGetGLEntriesErrorMessage() where intErrorCode = a.intErrorCode)AS  PostError
 		ORDER BY strTransactionId
