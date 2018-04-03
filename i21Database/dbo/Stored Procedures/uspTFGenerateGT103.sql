@@ -100,7 +100,7 @@ BEGIN TRY
 	-- GET SUMMARY ITEMS TABLE HELPER BY FORM AND TA THEN INSERT INTO TBLTEMPSUMMARY
 
 	SELECT intTransactionSummaryItemId = intReportingComponentConfigurationId
-		, Config.strScheduleCode
+		, strScheduleCode
 		, strTemplateItemId
 		, strDescription
 		, intReportItemSequence
