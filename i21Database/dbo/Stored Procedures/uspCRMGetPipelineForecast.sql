@@ -22,7 +22,37 @@ SET ANSI_WARNINGS OFF
 		,@strLineOfBusinessColumnField = COALESCE(@strLineOfBusinessColumnField + ', ', '') + strFieldNameColumn
 		,@strLineOfBusinessColumnFieldWithValue = COALESCE(@strLineOfBusinessColumnFieldWithValue + ', ', '') + strFieldNameColumnWithValue
 	FROM
-		(select distinct b.strLineOfBusiness, strFieldName = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' numeric(18,6) null', strFieldNameColumn = 'str' + replace(b.strLineOfBusiness, ' ', ''), strFieldNameColumnWithValue = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' = null' from tblICCategory a, tblSMLineOfBusiness b where b.intLineOfBusinessId = a.intLineOfBusinessId union all select strLineOfBusiness = 'Undefined LOB', strFieldName = 'strUndefinedLOB numeric(18,6) null', strFieldNameColumn = 'strUndefinedLOB', strFieldNameColumnWithValue = 'strUndefinedLOB = null') as result
+		(
+			select distinct
+				b.strLineOfBusiness
+				,strFieldName = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' numeric(18,6) null'
+				,strFieldNameColumn = 'str' + replace(b.strLineOfBusiness, ' ', '')
+				,strFieldNameColumnWithValue = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' = null'
+			from
+				tblICCategory a
+				,(
+					select
+						intLineOfBusinessId
+						,strLineOfBusiness = replace(REPLACE(strLineOfBusiness, '&', 'And'), '-', '')
+						,intEntityId
+						,strSICCode
+						,ysnVisibleOnWeb
+						,intSegmentCodeId
+						,strType
+						,intConcurrencyId
+					from
+						tblSMLineOfBusiness
+				) b
+			where
+				b.intLineOfBusinessId = a.intLineOfBusinessId
+			union all
+			select
+				strLineOfBusiness = 'Undefined LOB'
+				,strFieldName = 'strUndefinedLOB numeric(18,6) null'
+				,strFieldNameColumn = 'strUndefinedLOB'
+				,strFieldNameColumnWithValue = 'strUndefinedLOB = null'
+		) as result
+--		(select distinct b.strLineOfBusiness, strFieldName = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' numeric(18,6) null', strFieldNameColumn = 'str' + replace(b.strLineOfBusiness, ' ', ''), strFieldNameColumnWithValue = 'str' + replace(b.strLineOfBusiness, ' ', '') + ' = null' from tblICCategory a, tblSMLineOfBusiness b where b.intLineOfBusinessId = a.intLineOfBusinessId union all select strLineOfBusiness = 'Undefined LOB', strFieldName = 'strUndefinedLOB numeric(18,6) null', strFieldNameColumn = 'strUndefinedLOB', strFieldNameColumnWithValue = 'strUndefinedLOB = null') as result
 
 	exec('IF OBJECT_ID(''tempdb..##tmpCRMPipelineForecast'') IS NOT NULL DROP TABLE ##tmpCRMPipelineForecast create table ##tmpCRMPipelineForecast (strSalesperson nvarchar(100) COLLATE Latin1_General_CI_AS null,' + @strLineOfBusiness + ')');
 	
