@@ -80,7 +80,7 @@ BEGIN
 		,intConcurrencyId		= 1
 
 	INSERT INTO dbo.tblARCustomer (
-			intEntityCustomerId 
+			intEntityId 
 			,strCustomerNumber
 			,strType
 			,dblCreditLimit
@@ -154,7 +154,7 @@ BEGIN
 			,ysnTaxExempt
 			,intConcurrencyId	
 	)
-	SELECT	intEntityCustomerId					= @Customer_Paul_Unlimited_Id
+	SELECT	intEntityId							= @Customer_Paul_Unlimited_Id
 			,strCustomerNumber					= @Customer_Paul_Unlimited
 			,strType							= 'Company'
 			,dblCreditLimit						= 0.00

@@ -990,6 +990,8 @@
     <Build Include="testi21Database\Stored Procedures\test shipment results table.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting MT to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting LB to MT.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item uom table, kg stock unit.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostBetweenUOM for converting LB to MT and KG as stock unit.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">

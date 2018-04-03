@@ -8,5 +8,5 @@
     [dtmEffectiveDate] DATETIME NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMTaxCodeRate_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [AK_tblSMTaxCodeRate__intTaxCodeId_dtmEffectiveDate] UNIQUE ([intTaxCodeId],[dtmEffectiveDate])
+	CONSTRAINT [AK_tblSMTaxGroupCode_intTaxCodeId_dtmEffectiveDate_strCalculationMethod_intUnitMeasureId] CHECK (NOT(dbo.fnSMUniqueEffectiveMethodUOM([intTaxCodeId],[dtmEffectiveDate],[strCalculationMethod],[intUnitMeasureId]) > 1))
 )
