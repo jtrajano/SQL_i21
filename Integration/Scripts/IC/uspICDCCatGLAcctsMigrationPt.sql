@@ -49,6 +49,10 @@ SET ANSI_WARNINGS OFF
 --** From Class (ptclsmst) table below 3 accounts (Sales, Variance and Inventory accounts) are mapped 
 --   into tblICCategoryAccount table removing duplicates and ignoring the invalid accounts. **
 
+-- Temp table to get all the Class code used in Recipes & Formulas
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#TMPCLS')
+		DROP table #TMPCLS
+
 	SELECT distinct ptcls_class INTO #TMPCLS FROM ptfrmmst
 	inner join ptitmmst itm on itm.ptitm_itm_no = ptfrm_itm_no and itm.ptitm_loc_no = ptfrm_loc_no
 	inner join ptclsmst cls on cls.ptcls_class = itm.ptitm_class
