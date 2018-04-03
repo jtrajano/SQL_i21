@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Payment"
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPPayment  
+CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPPayment]  
 	@intTransactionIdFrom INT = 0   
 AS  
   
@@ -138,7 +138,7 @@ SELECT  TOP 10 * FROM(
 			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
 				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
 			INNER JOIN [dbo].[tblAPBill] BILL
-				ON PYMTDetail.intBillId = BILL.intBillId
+				ON ISNULL(PYMTDetail.intBillId,PYMTDetail.intOrigBillId) = BILL.intBillId
 			--INNER JOIN [dbo].[tblAPBillDetail] BILLDETAIL
 			--	ON BILL.intBillId = BILLDETAIL.intBillId
 			--LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
@@ -181,7 +181,7 @@ SELECT  TOP 10 * FROM(
 		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
 			ON PYMTDetail.intPaymentId = PYMT.intPaymentId
 		INNER JOIN [dbo].[tblAPBill] BILL
-			ON BILL.intBillId = PYMTDetail.intBillId
+			ON ISNULL(PYMTDetail.intBillId,PYMTDetail.intOrigBillId) = BILL.intBillId
 		INNER JOIN [dbo].[tblAPAppliedPrepaidAndDebit] PreAndDeb 
 			ON PreAndDeb.intBillId = BILL.intBillId
 		INNER JOIN [dbo].[tblAPBill] preBILL
