@@ -171,11 +171,11 @@ SELECT
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[dblAmountDue]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
 																	THEN ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
-																	ELSE ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
+																	ELSE ISNULL(APB.[dblAmountDue], @ZeroDecimal)
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[dblBaseAmountDue]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
 																	THEN ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
-																	ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
+																	ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) 
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[strInvoiceReportNumber]			= PE.[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]	= PE.[intCurrencyExchangeRateTypeId]
@@ -221,10 +221,10 @@ LEFT OUTER JOIN
 			 END AS [strTransactionType]
 			,[intTermsId] AS [intTermId]
 			,[intAccountId]
-			,[dblTotal] AS [dblInvoiceTotal]
-			,[dblTotal] AS [dblBaseInvoiceTotal]
-			,[dblAmountDue]
-			,[dblAmountDue] AS [dblBaseAmountDue]
+			,[dblTotal] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblInvoiceTotal]
+			,[dblTotal] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblBaseInvoiceTotal]
+			,[dblAmountDue] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) as [dblAmountDue]
+			,[dblAmountDue]  * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblBaseAmountDue]
 		FROM
 			tblAPBill			
 	)APB
