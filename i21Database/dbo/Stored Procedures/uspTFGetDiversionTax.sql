@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspTFGetInvoiceTaxDiversion]
+﻿CREATE PROCEDURE [dbo].[uspTFGetDiversionTax]
 	@Guid NVARCHAR(50)
 	, @ReportingComponentId NVARCHAR(MAX)
 	, @DateFrom DATETIME
@@ -93,8 +93,6 @@ BEGIN TRY
 				, intReportingComponentId
 				, strScheduleCode
 				, strType
-				--, intProductCode
-				--, strProductCode
 				, intItemId
 				, dblQtyShipped
 				, dblGross
@@ -114,7 +112,6 @@ BEGIN TRY
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
-				--, strAccountStatusCode
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
@@ -155,8 +152,6 @@ BEGIN TRY
 					, tblTFReportingComponent.intReportingComponentId
 					, tblTFReportingComponent.strScheduleCode
 					, tblTFReportingComponent.strType
-					--, tblTFProductCode.intProductCodeId
-					--, tblTFProductCode.strProductCode
 					, tblARInvoiceDetail.intItemId
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblQtyShipped
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblNet
@@ -176,7 +171,6 @@ BEGIN TRY
 					, tblSMCompanyLocation.strStateProvince AS strOriginState
 					, tblEMEntity.strName
 					, tblEMEntity.strFederalTaxId AS strCustomerFEIN
-					--, tblARAccountStatus.strAccountStatusCode
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
@@ -234,6 +228,7 @@ BEGIN TRY
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
 				WHERE tblARInvoice.ysnPosted = 1 
+					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
@@ -266,8 +261,6 @@ BEGIN TRY
 				, intReportingComponentId
 				, strScheduleCode
 				, strType
-				--, intProductCode
-				--, strProductCode
 				, intItemId
 				, dblQtyShipped
 				, dblGross
@@ -287,7 +280,6 @@ BEGIN TRY
 				, strOriginState
 				, strCustomerName
 				, strCustomerFEIN
-				--, strAccountStatusCode
 				, strShipVia
 				, strTransporterLicense
 				, strTransportationMode
@@ -328,8 +320,6 @@ BEGIN TRY
 					, tblTFReportingComponent.intReportingComponentId
 					, tblTFReportingComponent.strScheduleCode
 					, tblTFReportingComponent.strType
-					--, tblTFProductCode.intProductCodeId
-					--, tblTFProductCode.strProductCode
 					, tblARInvoiceDetail.intItemId
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblQtyShipped
 					, (CASE WHEN tblARInvoice.strTransactionType = 'Credit Memo' OR tblARInvoice.strTransactionType = 'Cash Refund' THEN tblARInvoiceDetail.dblQtyShipped * -1 ELSE tblARInvoiceDetail.dblQtyShipped END) AS dblNet
@@ -349,7 +339,6 @@ BEGIN TRY
 					, tblSMCompanyLocation.strStateProvince AS strOriginState
 					, tblEMEntity.strName
 					, tblEMEntity.strFederalTaxId AS strCustomerFEIN
-					--, tblARAccountStatus.strAccountStatusCode
 					, tblSMShipVia.strShipVia
 					, tblSMShipVia.strTransporterLicense
 					, tblSMTransportationMode.strCode
@@ -406,6 +395,7 @@ BEGIN TRY
 				LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
 				WHERE tblARInvoice.ysnPosted = 1 
+					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
@@ -530,8 +520,6 @@ BEGIN TRY
 			, intReportingComponentId
 			, strScheduleCode
 			, strType
-			--, intProductCode
-			--, strProductCode
 			, intItemId
 			, dblQtyShipped
 			, dblGross
@@ -551,7 +539,6 @@ BEGIN TRY
 			, strOriginState
 			, strCustomerName
 			, strCustomerFEIN
-			--, strAccountStatusCode
 			, strShipVia
 			, strTransporterLicense
 			, strTransportationMode
@@ -591,8 +578,6 @@ BEGIN TRY
 				, tblTFReportingComponent.intReportingComponentId
 				, tblTFReportingComponent.strScheduleCode
 				, tblTFReportingComponent.strType
-				--, tblTFProductCode.intProductCodeId
-				--, tblTFProductCode.strProductCode
 				, tblICInventoryTransferDetail.intItemId
 				, tblICInventoryTransferDetail.dblQuantity AS dblQtyShipped
 				, tblICInventoryTransferDetail.dblQuantity AS dblGross
@@ -612,7 +597,6 @@ BEGIN TRY
 				, tblEMEntityLocation.strState AS strOriginState
 				, tblSMCompanySetup.strCompanyName AS strCustomerName
 				, tblSMCompanySetup.strEin AS strCustomerFEIN
-				--, NULL AS strAccountStatusCode
 				, tblSMShipVia.strShipVia
 				, tblSMShipVia.strTransporterLicense
 				, tblSMTransportationMode.strCode

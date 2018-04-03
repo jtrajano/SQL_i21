@@ -6269,8 +6269,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_UpdateTransactionsApprovalFor.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricingInsertAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCustomTabFieldNames.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGetInventoryTaxDiversion.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGetInvoiceTaxDiversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
     <Build Include="dbo\Views\vyuTFGetLoadReceiptToDistribution.sql" />
     <Build Include="dbo\Views\vyuTFGetLoadReceiptToBlendIngredient.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
