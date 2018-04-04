@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @dblPurchasedLotQty NUMERIC(18,6)
 	DECLARE @intOutboundLoadDetailId INT
 	DECLARE @intInboundLoadDetailId INT
+	DECLARE @strInvoiceType NVARCHAR(100)
 
 	DECLARE @tblInvoiceDetail TABLE (
 		intRecordId INT IDENTITY(1, 1)
@@ -52,11 +53,16 @@ BEGIN TRY
 		SET @intLoadDetailId = NULL
 		SET @intInvoiceDetailId = NULL
 		SET @intPurchaseSale = NULL
+		SET @strInvoiceType = NULL
 
 		SELECT @intLoadDetailId = intLoadDetailId
 			,@intInvoiceDetailId = intInvoiceDetailId
 		FROM @tblInvoiceDetail
 		WHERE intRecordId = @intMinRecordId
+
+		SELECT @strInvoiceType = strType 
+		FROM tblARInvoice 
+		WHERE intInvoiceId = @InvoiceId
 
 		SELECT @intPContractDetailId = intPContractDetailId
 		      ,@intSContractDetailId = intSContractDetailId
@@ -166,7 +172,10 @@ BEGIN TRY
 
 		IF ISNULL(@Post,0) = 1
 		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId
+			IF(@strInvoiceType = 'Standard')
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 11 WHERE intLoadId = @intLoadId
+			END
 		END
 		ELSE 
 		BEGIN
