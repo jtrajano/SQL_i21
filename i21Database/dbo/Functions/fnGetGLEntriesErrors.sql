@@ -12,8 +12,12 @@
 CREATE FUNCTION [dbo].[fnGetGLEntriesErrors] (
 	@GLEntriesToValidate RecapTableType READONLY
 )
-RETURNS  @tbl TABLE (strTransactionId nvarchar(100) NULL, strText nvarchar(150)  NULL,
- intErrorCode int, strModuleName nvarchar(100)  NULL)
+RETURNS  @tbl TABLE (
+		strTransactionId nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+		strText nvarchar(150)  COLLATE Latin1_General_CI_AS NULL,
+		intErrorCode int, 
+		strModuleName nvarchar(100)  COLLATE Latin1_General_CI_AS NULL
+	)
 AS
 BEGIN 
 	;WITH BatchError AS (
