@@ -6270,6 +6270,7 @@
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
