@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCFCompanyPreference] (
     [intCompanyPreferenceId]            INT            IDENTITY (1, 1) NOT NULL,
     [strCFServiceReminderMessage]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strEnvelopeType]                   NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnCFUseSpecialPrices]             BIT            NULL,
     [strCFUsePrice]                     NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [ysnCFUseContracts]                 BIT            NULL,
@@ -16,6 +17,8 @@
     CONSTRAINT [FK_tblCFCompanyPreference_tblSMCompanyLocation] FOREIGN KEY ([intARLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
     CONSTRAINT [FK_tblCFCompanyPreference_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
+
+
 
 
 
