@@ -6271,6 +6271,7 @@
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
