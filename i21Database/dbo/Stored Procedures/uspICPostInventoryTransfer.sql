@@ -20,6 +20,12 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'InventoryTransfer' + CAST(NEWID() AS NVARCHAR(100));
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
 -- Constants  
 DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 		,@INVENTORY_TRANSFER_WITH_SHIPMENT_TYPE AS INT = 13
@@ -79,7 +85,7 @@ IF @intTransactionId IS NULL
 BEGIN   
 	-- Cannot find the transaction.  
 	EXEC uspICRaiseError 80167;  
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
   
 -- Validate the date against the FY Periods  
@@ -87,7 +93,7 @@ IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) =
 BEGIN   
 	-- Unable to find an open fiscal year period to match the transaction date.  
 	EXEC uspICRaiseError 80168; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END  
   
 -- Check if the transaction is already posted  
@@ -95,7 +101,7 @@ IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN   
 	-- The transaction is already posted.  
 	EXEC uspICRaiseError 80169; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
   
 -- Check if the transaction is already posted  
@@ -103,8 +109,16 @@ IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN   
 	-- The transaction is already unposted.  
 	EXEC uspICRaiseError 80170; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END
+
+IF @ysnRecap = 0 
+BEGIN 
+	UPDATE	dbo.tblICInventoryTransfer  
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+	WHERE	strTransferNo = @strTransactionId  
+END 
 
 -- Don't allow unpost when there's a receipt
 IF @ysnPost = 0
@@ -135,7 +149,7 @@ BEGIN
 			AND t.intInventoryTransferId = @intTransactionId
 
 		EXEC uspICRaiseError 80107, @TR, @R;
-		GOTO Post_Exit	
+		GOTO With_Rollback_Exit	
 	END
 END
 
@@ -166,7 +180,7 @@ IF EXISTS(
 		AND ISNULL(i.strLotTracking, 'No') <> 'No')
 BEGIN
 	EXEC uspICRaiseError 80085, @strTransactionId;
-	GOTO Post_Exit
+	GOTO With_Rollback_Exit
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
@@ -184,7 +198,7 @@ BEGIN
 	
 	-- Item %s is not available on location %s.
 	EXEC uspICRaiseError 80026, @ItemId, @LocationId;
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) DROP TABLE #tempValidateItemLocation
@@ -198,21 +212,15 @@ BEGIN
 	IF @ysnPost = 1   
 	BEGIN   
 		EXEC uspICRaiseError 80172, 'Post';
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
 		EXEC uspICRaiseError 80172, 'Unpost';
-		GOTO Post_Exit    
+		GOTO With_Rollback_Exit    
 	END  
 END   
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 -- Create and validate the lot numbers
 IF @ysnPost = 1
@@ -224,12 +232,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@ysnPost
 
-	IF @intCreateUpdateLotError <> 0
-	BEGIN 
-		ROLLBACK TRAN @TransactionName
-		COMMIT TRAN @TransactionName
-		GOTO Post_Exit;
-	END
+	IF @intCreateUpdateLotError <> 0 GOTO With_Rollback_Exit;
 END
 
 -- Get the next batch number
@@ -739,12 +742,6 @@ BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
 	END
 
-	UPDATE	dbo.tblICInventoryTransfer  
-	SET		ysnPosted = @ysnPost
-			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-	WHERE	strTransferNo = @strTransactionId  
-
-	
 	IF @ysnPost = 1
 	BEGIN
 		UPDATE	dbo.tblICInventoryTransfer  
@@ -863,6 +860,7 @@ IF @@TRANCOUNT > 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
 	COMMIT TRAN @TransactionName
+	RETURN -1; 
 END
 
 Post_Exit:

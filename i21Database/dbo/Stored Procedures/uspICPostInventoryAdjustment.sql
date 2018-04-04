@@ -18,6 +18,12 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'InventoryAdjustment' + CAST(NEWID() AS NVARCHAR(100));
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
@@ -79,7 +85,7 @@ IF @intTransactionId IS NULL
 BEGIN   
 	-- Cannot find the transaction.  
 	EXEC uspICRaiseError 80167; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
   
 -- Validate the date against the FY Periods  
@@ -87,7 +93,7 @@ IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) =
 BEGIN   
 	-- Unable to find an open fiscal year period to match the transaction date.  
 	EXEC uspICRaiseError 80168; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END  
   
 -- Check if the transaction is already posted  
@@ -95,7 +101,7 @@ IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN   
 	-- The transaction is already posted.  
 	EXEC uspICRaiseError 80169; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
   
 -- Check if the transaction is already unposted  
@@ -103,8 +109,18 @@ IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN   
 	-- The transaction is already unposted.  
 	EXEC uspICRaiseError 80170; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
+
+IF @ysnRecap = 0 
+BEGIN 
+	UPDATE	dbo.tblICInventoryAdjustment  
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+			,dtmPostedDate = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE dtmPostedDate	END
+			,dtmUnpostedDate = CASE WHEN @ysnPost = 0 THEN GETDATE() ELSE dtmUnpostedDate	END
+	WHERE	strAdjustmentNo = @strTransactionId  
+END 
 
 --------------------------------------------------------------------------------
 -- Check if lot numbers are unique.	
@@ -120,7 +136,7 @@ BEGIN
 	)
 	BEGIN
 		EXEC uspICRaiseError 80171; 		 
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END
 END 
  
@@ -133,13 +149,13 @@ BEGIN
 	IF @ysnPost = 1   
 	BEGIN   
 		EXEC uspICRaiseError 80172, 'Post';
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
 		EXEC uspICRaiseError 80172, 'Unpost'; 		 
-		GOTO Post_Exit    
+		GOTO With_Rollback_Exit    
 	END  
 END
 
@@ -147,7 +163,7 @@ END
 BEGIN 
 	SET @strBatchId = NULL 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId   
-	IF @@ERROR <> 0 GOTO Post_Exit    
+	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
 END 
 
 -- Determine if Adjustment requires costing and GL entries. 
@@ -159,12 +175,6 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_LotMove
 			, @ADJUSTMENT_TYPE_ItemChange
 		)
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -584,13 +594,6 @@ BEGIN
 		END
 	END
 
-	UPDATE	dbo.tblICInventoryAdjustment  
-	SET		ysnPosted = @ysnPost
-			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-			,dtmPostedDate = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE dtmPostedDate	END
-			,dtmUnpostedDate = CASE WHEN @ysnPost = 0 THEN GETDATE() ELSE dtmUnpostedDate	END
-	WHERE	strAdjustmentNo = @strTransactionId  
-
 	COMMIT TRAN @TransactionName
 END 
 
@@ -620,6 +623,7 @@ IF @@TRANCOUNT > 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
 	COMMIT TRAN @TransactionName
+	RETURN -1;
 END
 
 Post_Exit:
