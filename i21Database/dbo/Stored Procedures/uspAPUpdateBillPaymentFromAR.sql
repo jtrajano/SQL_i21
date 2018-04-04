@@ -13,7 +13,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 	UPDATE tblAPBill
-		SET	tblAPBill.dblPayment = (C.dblPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
+		SET	tblAPBill.dblPayment = (B.dblBillPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
 			tblAPBill.ysnPrepayHasPayment = 1
 	FROM tblARPayment A
 				INNER JOIN (
@@ -24,7 +24,9 @@ SET ANSI_WARNINGS OFF
 						,SUM(A.dblBaseDiscount) dblBaseDiscount
 						,SUM(A.dblInterest) dblInterest
 						,SUM(A.dblBaseInterest) dblBaseInterest
+						,SUM(C.dblPayment) as dblBillPayment
 						,A.intBillId 
+						,A.intPaymentId
 					FROM
 						tblARPaymentDetail A
 					INNER JOIN tblARPayment B
@@ -34,7 +36,8 @@ SET ANSI_WARNINGS OFF
 					WHERE
 						A.intPaymentId IN (SELECT intId FROM @paymentIds)
 					GROUP BY
-						A.intBillId
+						A.intBillId,
+						A.intPaymentId
 				) B 
 						ON A.intPaymentId = B.intPaymentId
 				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
