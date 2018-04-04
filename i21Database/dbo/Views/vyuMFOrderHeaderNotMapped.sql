@@ -13,6 +13,9 @@ SELECT SW.intOrderHeaderId
 		) AS strCustomer
 	,S1.strName AS strStagingLocationName
 	,S2.strName AS strDockDoorLocationName
+	,I.strItemNo + ' - ' + I.strDescription AS strItemDescription
+	,W.dblQuantity
+	,UOM.strUnitMeasure
 FROM tblMFOrderHeader OH
 JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
@@ -21,6 +24,9 @@ JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 LEFT JOIN tblEMEntity E ON E.intEntityId = W.intCustomerId
 LEFT JOIN tblICStorageLocation S1 ON S1.intStorageLocationId = OH.intStagingLocationId
 LEFT JOIN tblICStorageLocation S2 ON S2.intStorageLocationId = OH.intDockDoorLocationId
+JOIN tblICItem I ON I.intItemId = W.intItemId
+JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = W.intItemUOMId
+JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
 
 UNION ALL
 
@@ -37,6 +43,9 @@ SELECT OH.intOrderHeaderId
 		) AS strCustomer
 	,S1.strName AS strStagingLocationName
 	,S2.strName AS strDockDoorLocationName
+	,'' AS strItemDescription
+	,NULL AS dblQuantity
+	,'' AS strUnitMeasure
 FROM tblMFOrderHeader OH
 JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
