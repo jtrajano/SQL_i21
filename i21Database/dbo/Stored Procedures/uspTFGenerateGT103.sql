@@ -200,7 +200,7 @@ BEGIN TRY
 			BEGIN
 			--8. Interest Due. If late, multiply Line 6 by the interest rate (see Departmental Notice #3)
 				--IF(@ScheduleCodeParam <> '')
-				SET @QueryTransaction = 'SELECT ' + CONVERT(NVARCHAR(50), TemplateConfiguration)
+				SET @QueryTransaction = 'SELECT ' + CONVERT(NVARCHAR(50), @TemplateConfiguration)
 				--SET @QueryTransaction = 'SELECT strColumnValue * ' + CONVERT(NVARCHAR(50), @TemplateConfiguration) + ' FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCodeParam + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + '''' 
 				INSERT INTO @TFTransactionSummaryTotal
 				EXEC(@QueryTransaction)
