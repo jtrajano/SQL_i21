@@ -84,7 +84,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
 		[dblQtyOrdered]					=	A.dblOrderQty,
-		[dblQtyReceived]				=	ISNULL(charges.dblQtyReceived, A.dblQuantityToBill),
+		[dblQtyReceived]				=	A.dblOrderQty, --ISNULL(charges.dblQtyReceived, A.dblQuantityToBill),
 		[dblTax]						=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
