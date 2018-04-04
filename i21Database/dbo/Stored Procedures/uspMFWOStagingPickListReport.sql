@@ -19,6 +19,8 @@ BEGIN
 		,@intWorkOrderId INT
 		,@strCellName NVARCHAR(50)
 		,@strWOItem NVARCHAR(300)
+		,@dtmPlannedDate DATETIME
+		,@dtmShipDate DATETIME
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -64,6 +66,7 @@ BEGIN
 
 	SELECT @strWOItem = I.strItemNo + ' - ' + I.strDescription
 		,@strCellName = MC.strCellName
+		,@dtmPlannedDate = W.dtmPlannedDate
 	FROM tblMFWorkOrder W
 	JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 	JOIN tblICItem I ON I.intItemId = W.intItemId
@@ -71,6 +74,7 @@ BEGIN
 
 	SELECT @intInventoryShipmentId = intInventoryShipmentId
 		,@intCustomerEntityId = intEntityCustomerId
+		,@dtmShipDate = dtmShipDate
 	FROM tblICInventoryShipment
 	WHERE strShipmentNumber = @strInventoryShipmentNo
 
@@ -127,6 +131,20 @@ BEGIN
 		,OH.strComment AS strInstruction
 		,ISNULL(@strWOItem, '') AS strWOItem
 		,ISNULL(@strCellName, '') AS strCellName
+		,(
+			CASE 
+				WHEN OH.intOrderTypeId = 5
+					THEN 'Ship Date:'
+				ELSE 'Planned Date:'
+				END
+			) AS strRequiredDateName
+		,(
+			CASE 
+				WHEN OH.intOrderTypeId = 5
+					THEN @dtmShipDate
+				ELSE @dtmPlannedDate
+				END
+			) AS dtmRequiredDateValue
 	FROM tblMFOrderHeader OH
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId
