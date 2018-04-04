@@ -23,8 +23,10 @@ DECLARE @receiptItems AS TABLE (
 	[dblCostUnitQty]				DECIMAL(38, 20)	NULL, 
 	[dblTotal]						DECIMAL(18, 6)	NULL, 
 	[dblNetWeight]					DECIMAL(18, 6)	NULL, 
+	[dblRate]						DECIMAL(18, 6)	NULL, 
 	[intCostUOMId]					INT NULL,
-    [intTaxGroupId]					INT NULL
+    [intTaxGroupId]					INT NULL,
+	[intCurrencyExchangeRateTypeId]	INT NULL
 );
 DECLARE @detailCreated AS TABLE(intBillDetailId INT, intInventoryReceiptItemId INT)
 DECLARE @error NVARCHAR(200);
@@ -101,11 +103,11 @@ SELECT
 														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
 												THEN B.dblOpenReceive - B.dblBillQty
 												ELSE A.dblQtyReceived END),
-	[dblCost]						=	CASE WHEN contractDetail.dblCashPrice > 0 
-														THEN contractDetail.dblCashPrice
+	[dblCost]						=	CASE WHEN contractDetail.dblSeqPrice > 0 
+														THEN contractDetail.dblSeqPrice
 														ELSE 
-															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0
-																THEN contractDetail.dblCashPrice
+															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblSeqPrice > 0
+																THEN contractDetail.dblSeqPrice
 																ELSE B.dblUnitCost
 																END)
 													END, --use cash price of contract if unit cost of receipt item is 0,
@@ -130,18 +132,27 @@ SELECT
 										-- 			 * ISNULL(NULLIF(ItemWeightUOM.dblUnitQty,0),1) / ISNULL(NULLIF(voucherDetailReceipt.dblCostUnitQty,0),1) 
 										-- 	AS DECIMAL(18,2)),
 	[dblNetWeight]					=	0,
+	[dblRate]						=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
+											THEN contractDetail.dblRate
+											ELSE B.dblForexRate END,
 	[intCostUOMId]					=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
 											THEN contractDetail.intPriceItemUOMId
 											ELSE B.intCostUOMId END,
-	[intTaxGroupId]					=	A.intTaxGroupId
+	[intTaxGroupId]					=	A.intTaxGroupId,
+	[intCurrencyExchangeRateTypeId]	=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
+											THEN contractDetail.intRateTypeId
+											ELSE B.intForexRateTypeId END
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
 LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
-LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
-				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
-				ON contractHeader.intContractHeaderId = B.intOrderId 
+LEFT JOIN vyuCTContractDetailView contractDetail 
+			ON 	contractDetail.intContractHeaderId = B.intOrderId 
 				AND contractDetail.intContractDetailId = B.intLineNo
+-- LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
+-- 				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
+-- 				ON contractHeader.intContractHeaderId = B.intOrderId 
+-- 				AND contractDetail.intContractDetailId = B.intLineNo
 LEFT JOIN tblICItemUOM ContractItemCostUOM ON ContractItemCostUOM.intItemUOMId = contractDetail.intPriceItemUOMId
 
 WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
@@ -208,8 +219,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]					=	voucherDetailReceipt.dblQtyReceived,
 			[dblQtyReceived]				=	voucherDetailReceipt.dblQtyReceived,
-			[dblRate]						=	ISNULL(B.dblForexRate,1),
-			[intCurrencyExchangeRateTypeId]	=	B.intForexRateTypeId,
+			[dblRate]						=	ISNULL(voucherDetailReceipt.dblRate,1),
+			[intCurrencyExchangeRateTypeId]	=	voucherDetailReceipt.intCurrencyExchangeRateTypeId,
 			[ysnSubCurrency]				=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]					=	B.intTaxGroupId,
 			[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
