@@ -101,6 +101,7 @@ BEGIN TRY
 			CU.intCent						AS	intPriceCurrencyCent,
 			MY.strCurrency					AS	strMarketCurrency,
 			BC.strCurrency					AS	strBasisCurrency,
+			BN.strCurrency					AS	strBasisMainCurrency,
 			BC.ysnSubCurrency				AS	ysnBasisSubCurrency,
 			CC.strCurrency					AS	strConvertedCurrency,
 			CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
@@ -178,6 +179,7 @@ BEGIN TRY
 	LEFT    JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID					=		CD.intCurrencyId			--strCurrency
 	LEFT    JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID					=		CU.intMainCurrencyId
 	LEFT    JOIN	tblSMCurrency					BC	ON	BC.intCurrencyID					=		CD.intBasisCurrencyId		--strBasisCurrency
+	LEFT    JOIN	tblSMCurrency					BN	ON	BN.intCurrencyID					=		BC.intMainCurrencyId		--strBasisMainCurrency
 	LEFT    JOIN	tblSMCurrency					CC	ON	CC.intCurrencyID					=		CD.intConvPriceCurrencyId	--strConvertedCurrency
 
 	LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
