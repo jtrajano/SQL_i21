@@ -123,9 +123,7 @@ BEGIN TRY
 		+ CASE WHEN strType IS NULL THEN '', strType = NULL'' ELSE '', strType = '''''' + strType + '''''''' END
 		+ CASE WHEN strNote IS NULL THEN '', strNote = NULL'' ELSE '', strNote = '''''' + strNote + '''''''' END
 		+ CASE WHEN strTransactionType IS NULL THEN '', strTransactionType = NULL'' ELSE '', strTransactionType = '''''' + strTransactionType + '''''''' END
-		+ CASE WHEN strSPInventory IS NULL THEN '', strSPInventory = NULL'' ELSE '', strSPInventory = '''''' + strSPInventory + '''''''' END
-		+ CASE WHEN strSPInvoice IS NULL THEN '', strSPInvoice = NULL'' ELSE '', strSPInvoice = '''''' + strSPInvoice + '''''''' END
-		+ CASE WHEN strSPRunReport IS NULL THEN '', strSPRunReport = NULL'' ELSE '', strSPRunReport = '''''' + strSPRunReport + '''''''' END
+		+ CASE WHEN strStoredProcedure IS NULL THEN '', strStoredProcedure = NULL'' ELSE '', strStoredProcedure = '''''' + strStoredProcedure + '''''''' END
 		+ CASE WHEN intSort IS NULL THEN '', intSort = NULL'' ELSE '', intSort = '''''' + CAST(intSort AS NVARCHAR(10)) + ''''''''  END
 		+ CASE WHEN intComponentTypeId IS NULL THEN '', intComponentTypeId = NULL'' ELSE '', intComponentTypeId = '''''' + CAST(intComponentTypeId AS NVARCHAR(10)) + ''''''''  END
 		+ '', intMasterId = '' + CASE WHEN intMasterId IS NULL THEN CAST(' + CAST(@TaxAuthorityId AS NVARCHAR(10)) + ' AS NVARCHAR(20)) + CAST(intReportingComponentId AS NVARCHAR(20)) ELSE CAST(intMasterId AS NVARCHAR(20)) END
@@ -145,9 +143,7 @@ BEGIN TRY
 		, strType
 		, strNote
 		, strTransactionType
-		, strSPInventory
-		, strSPInvoice
-		, strSPRunReport
+		, strStoredProcedure
 		, intSort
 		, intComponentTypeId
 		, intMasterId

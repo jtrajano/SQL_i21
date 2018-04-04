@@ -27,10 +27,7 @@ BEGIN TRY
 		, @ScheduleName NVARCHAR(100)
 		, @Type NVARCHAR(100)
 		, @TransactionType NVARCHAR(20)
-		, @SPInventory NVARCHAR(50)
-		, @SPInvoice NVARCHAR(50)
-		, @SPRunReport NVARCHAR(50)
-		, @SPEDIReport NVARCHAR(50)
+		, @SP NVARCHAR(50)
 		, @strTaxAuthorityCode NVARCHAR(10)
 
 	DECLARE @ParamDefinition NVARCHAR(MAX)
@@ -58,13 +55,8 @@ BEGIN TRY
 			, @ScheduleName = strScheduleName
 			, @Type = strType
 			, @TransactionType = strTransactionType
-			, @SPInventory = strSPInventory
-			, @SPInvoice = strSPInvoice
-			, @SPEDIReport = strSPRunReport
 			, @strTaxAuthorityCode = strTaxAuthorityCode
-			, @SPRunReport = CASE WHEN (strTransactionType = 'Inventory') THEN strSPInventory
-								WHEN (strTransactionType = 'Invoice') THEN strSPInvoice
-								ELSE NULL END
+			, @SP = strStoredProcedure
 		FROM #tmpRC
 
 		IF (ISNULL(@TransactionType, '') = '')
@@ -72,14 +64,14 @@ BEGIN TRY
 			SET @ErrMsg = 'Form: ' + @FormCode + ' Schedule: ' + @ScheduleCode + ' Type: ' + @Type + ' does not have a valid Transaction Type.'
 			RAISERROR(@ErrMsg, 16, 1)
 		END
-		IF (ISNULL(@SPRunReport, '') = '')
+		IF (ISNULL(@SP, '') = '')
 		BEGIN
 			SET @ErrMsg = 'Form: ' + @FormCode + ' Schedule: ' + @ScheduleCode + ' Type: ' + @Type + ' does not have a valid ' + @TransactionType + ' SP.'
 			RAISERROR(@ErrMsg, 16, 1)
 		END
 
 		SET @ParamDefinition =  N'@Guid NVARCHAR(50), @ReportingComponentId NVARCHAR(MAX), @DateFrom DATETIME, @DateTo DATETIME, @IsEdi BIT, @Refresh BIT'
-		SET @SPRunString = @SPRunReport + ' @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom = @DateFrom, @DateTo = @DateTo, @IsEdi = @IsEdi, @Refresh = @Refresh'
+		SET @SPRunString = @SP + ' @Guid = @Guid, @ReportingComponentId = @ReportingComponentId, @DateFrom = @DateFrom, @DateTo = @DateTo, @IsEdi = @IsEdi, @Refresh = @Refresh'
 		
 		EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @ReportingComponentId = @RCId, @DateFrom = @DateFrom, @DateTo = @DateTo, @IsEdi = @IsEdi, @Refresh = 0;  
 
@@ -87,7 +79,7 @@ BEGIN TRY
 		IF(@strTaxAuthorityCode = 'IN' AND @IsEdi = 1)
 		BEGIN
 			SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
-			SET @SPRunString = @SPEDIReport + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
+			SET @SPRunString = @SP + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
 			EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;  
 		END
 
@@ -115,11 +107,11 @@ BEGIN TRY
 			, @ScheduleName = strScheduleName
 			, @Type = strType
 			, @TransactionType = strTransactionType
-			, @SPRunReport = strSPRunReport
+			, @SP = strStoredProcedure
 		FROM #tmpMain
 
 		SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
-		SET @SPRunString = @SPRunReport + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
+		SET @SPRunString = @SP + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
 		
 		EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;  
 

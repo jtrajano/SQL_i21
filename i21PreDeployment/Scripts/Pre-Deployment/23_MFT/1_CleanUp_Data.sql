@@ -234,6 +234,21 @@ BEGIN
 	EXEC('TRUNCATE TABLE tblTFTaxAuthorityBeginEndInventory')
 END
 
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent') 
+BEGIN
+	IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND COLUMN_NAME = 'strStoredProcedure') 
+	BEGIN
+		EXEC('ALTER TABLE tblTFReportingComponent ADD strStoredProcedure NVARCHAR(100)')
+		IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponent' AND (COLUMN_NAME = 'strSPInventory' OR COLUMN_NAME = 'strSPInvoice' OR COLUMN_NAME = 'strSPRunReport'))
+		BEGIN
+			EXEC('UPDATE tblTFReportingComponent SET strStoredProcedure = (CASE WHEN strTransactionType = ''Inventory'' THEN strSPInventory WHEN strTransactionType = ''Invoice'' THEN strSPInvoice ELSE strSPRunReport END)')
+		END
+	END
+END
+
+
+
 PRINT('MFT Cleanup - END')
 
 GO

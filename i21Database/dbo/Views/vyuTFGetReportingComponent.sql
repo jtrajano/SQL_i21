@@ -14,9 +14,7 @@ SELECT RC.intReportingComponentId
 	, CType.intComponentTypeId
 	, CType.strComponentType
 	, RC.intSort
-	, RC.strSPInventory
-	, RC.strSPInvoice
-	, RC.strSPRunReport
+	, RC.strStoredProcedure
 	, RC.ysnIncludeSalesFreightOnly
 	, dbo.fnTFCoalesceProductCode(RC.intReportingComponentId) strProductCodes
 	, dbo.fnTFCoalesceOriginState(RC.intReportingComponentId, 'Include') strIncludeOriginStates

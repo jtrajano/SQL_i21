@@ -53,9 +53,7 @@ BEGIN TRY
 			, strType				= SOURCE.strType
 			, strTransactionType	= SOURCE.strTransactionType
 			, intSort				= SOURCE.intSort
-			, strSPInventory		= SOURCE.strSPInventory
-			, strSPInvoice			= SOURCE.strSPInvoice
-			, strSPRunReport		= SOURCE.strSPRunReport
+			, strStoredProcedure	= SOURCE.strStoredProcedure
 			, intComponentTypeId	= SOURCE.intComponentTypeId
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
@@ -68,9 +66,7 @@ BEGIN TRY
 			, strNote
 			, strTransactionType
 			, intSort
-			, strSPInventory
-			, strSPInvoice
-			, strSPRunReport
+			, strStoredProcedure
 			, intMasterId
 			, intComponentTypeId
 		)
@@ -84,9 +80,7 @@ BEGIN TRY
 			, SOURCE.strNote
 			, SOURCE.strTransactionType
 			, SOURCE.intSort
-			, SOURCE.strSPInventory
-			, SOURCE.strSPInvoice
-			, SOURCE.strSPRunReport
+			, SOURCE.strStoredProcedure
 			, SOURCE.intMasterId
 			, SOURCE.intComponentTypeId
 		);
