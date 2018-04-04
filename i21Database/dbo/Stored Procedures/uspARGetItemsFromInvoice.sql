@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemsFromInvoice]
 	@intInvoiceId AS INT
+	,@forContract AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -72,3 +73,17 @@ LEFT JOIN
 		ON ID.intContractHeaderId = CH.intContractHeaderId
 WHERE
 	I.[intInvoiceId] = @intInvoiceId
+	AND (
+			ISNULL(@forContract,0) = 0
+			OR
+			(
+				ISNULL(@forContract,0) = 1
+				AND
+				ID.[intInventoryShipmentItemId] IS NULL
+				AND
+				ID.[intInventoryShipmentChargeId] IS NULL
+				--AND (ISNULL(I.intDistributionHeaderId, 0) = 0 AND ISNULL(I.intLoadDistributionHeaderId, 0) = 0)
+				--AND ISNULL(ID.intLoadDetailId, 0) = 0
+				--AND ISNULL(I.intTransactionId, 0) = 0
+			)
+		)
