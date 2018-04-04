@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspRKPnLBySalesContractSummary
-		@intContractDetailId int = null,
-		@intUnitMeasureId int = null
+  	    @intSContractDetailId	INT,
+		@intCurrencyId			INT,-- currency
+		@intUnitMeasureId		INT,--- Price uom	
+		@intWeightUOMId			INT -- weight 
 AS
 
 DECLARE @PhysicalFuturesResult TABLE (
@@ -49,7 +51,7 @@ INSERT INTO @PhysicalFuturesResult (
 	,intContractDetailId,
 	ysnPosted
 	)
-EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId, @intUnitMeasureId
+EXEC uspRKPNLPhysicalFuturesResult @intSContractDetailId,@intCurrencyId, @intUnitMeasureId	,@intWeightUOMId
 
 SELECT 1 as intRowNum,
 (select sum(dblForecast) from @PhysicalFuturesResult where strDescription='Allocated') dblForecastGross,
@@ -58,4 +60,4 @@ SELECT 1 as intRowNum,
 (select sum(dblAccounting) from @PhysicalFuturesResult where strDescription in('Invoice','Supp. Invoice')) dblAccountingGross,
 (select sum(dblAccounting) from @PhysicalFuturesResult where strDescription not in('Invoice','Supp. Invoice')) dblAccountingCost,
 (select sum(dblAccounting) from @PhysicalFuturesResult) dblAccountingTotalResult
-,@intContractDetailId as intContractDetailId
+,@intSContractDetailId as intContractDetailId

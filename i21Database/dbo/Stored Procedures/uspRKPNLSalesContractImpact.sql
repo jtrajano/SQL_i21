@@ -1,6 +1,10 @@
 ﻿CREATE PROCEDURE uspRKPNLSalesContractImpact 
-	@intSContractDetailId	INT,
-	@intUnitMeasureId		INT
+	    @intSContractDetailId	INT,
+		@intCurrencyId			INT,-- currency
+		@intUnitMeasureId		INT,--- Price uom	
+		@intWeightUOMId			INT -- weight 
+
+
 AS			--declare @intSContractDetailId INT = 2752
 			--,@intUnitMeasureId INT = 16
 	DECLARE	@intPContractDetailId INT
