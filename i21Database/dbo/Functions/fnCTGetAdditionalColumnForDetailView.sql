@@ -13,7 +13,7 @@ RETURNS	@returntable	TABLE
 	strSeqPriceUOM					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	dblQtyToPriceUOMConvFactor		NUMERIC(18,6),
 	dblNetWtToPriceUOMConvFactor	NUMERIC(18,6),
-	dblCostUnitQty					NUMERIC(18,6)
+	dblCostUnitQty					NUMERIC(38, 20)
 )
 
 AS
@@ -36,8 +36,8 @@ BEGIN
 				@intMainCurrencyId	INT,
 				@ysnUseFXPrice		BIT,
 				@intNetWeightUOMId	INT,
-				@dblCostUnitQty		NUMERIC(18,6),
-				@dblFXCostUnitQty	NUMERIC(18,6)
+				@dblCostUnitQty		NUMERIC(38, 20),
+				@dblFXCostUnitQty	NUMERIC(38, 20)
 
 	SELECT		@dblCashPrice		=	CD.dblCashPrice,
 				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END,
