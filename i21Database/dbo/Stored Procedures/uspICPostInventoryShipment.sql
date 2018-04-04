@@ -18,6 +18,12 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
 -- Constants  
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
@@ -92,7 +98,7 @@ BEGIN
 	BEGIN   
 		-- Cannot find the transaction.  
 		EXEC uspICRaiseError 80167;  
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
   
 	-- Validate the date against the FY Periods  
@@ -100,7 +106,7 @@ BEGIN
 	BEGIN   
 		-- Unable to find an open fiscal year period to match the transaction date.  
 		EXEC uspICRaiseError 80168; 
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END  
   
 	-- Check if the transaction is already posted  
@@ -108,7 +114,7 @@ BEGIN
 	BEGIN   
 		-- The transaction is already posted.  
 		EXEC uspICRaiseError 80169; 
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
   
 	-- Check if the transaction is already posted  
@@ -116,8 +122,16 @@ BEGIN
 	BEGIN   
 		-- The transaction is already unposted.  
 		EXEC uspICRaiseError 80170; 
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
+
+	IF @ysnRecap = 0
+	BEGIN 
+		UPDATE	dbo.tblICInventoryShipment
+		SET		ysnPosted = @ysnPost
+				,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+		WHERE	strShipmentNumber = @strTransactionId  
+	END 
 
 	-- Check Company preference: Allow User Self Post  
 	IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
@@ -128,13 +142,13 @@ BEGIN
 		IF @ysnPost = 1   
 		BEGIN   
 			EXEC uspICRaiseError 80172, 'Post';
-			GOTO Post_Exit  
+			GOTO With_Rollback_Exit  
 		END   
 
 		IF @ysnPost = 0  
 		BEGIN  
 			EXEC uspICRaiseError 80172, 'Unpost';
-			GOTO Post_Exit    
+			GOTO With_Rollback_Exit    
 		END  
 	END   
 
@@ -157,7 +171,7 @@ BEGIN
 		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
 			EXEC uspICRaiseError 80089, @strInvoiceNumber;
-			GOTO Post_Exit    
+			GOTO With_Rollback_Exit    
 		END 
 	END 
 
@@ -182,7 +196,7 @@ BEGIN
 		IF @strInvoiceNumber IS NOT NULL 
 		BEGIN 
 			EXEC uspICRaiseError 80089, @strInvoiceNumber;
-			GOTO Post_Exit    
+			GOTO With_Rollback_Exit    
 		END 
 	END
 		
@@ -208,7 +222,7 @@ BEGIN
 		BEGIN 
 			-- 'Unable to unpost the Inventory Shipment. The {Other Charge} was billed.'
 			EXEC uspICRaiseError 80091, @strChargeItem;
-			GOTO Post_Exit    
+			GOTO With_Rollback_Exit    
 		END 
 	END 
 	
@@ -268,7 +282,7 @@ BEGIN
 			-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 			DECLARE @difference AS NUMERIC(38, 20) = ABS(@dblQuantityShipped - @LotQtyInItemUOM)
 			EXEC uspICRaiseError 80047, @strItemNo, @dblQuantityShipped, @LotQtyInItemUOM, @difference
-			RETURN -1; 
+			GOTO With_Rollback_Exit; 
 		END 
 	END
 
@@ -302,7 +316,7 @@ BEGIN
 		BEGIN 
 			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
 			EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId;
-			RETURN -1; 
+			GOTO With_Rollback_Exit; 
 		END 
 	END 
 
@@ -310,7 +324,7 @@ BEGIN
 	IF @ysnPost = 1 AND @ysnRecap = 0 
 	BEGIN 
 		EXEC uspMFValidateInventoryShipment @intTransactionId
-		IF @@ERROR <> 0 GOTO Post_Exit    
+		IF @@ERROR <> 0 GOTO With_Rollback_Exit    
 	END 
 END
 
@@ -318,14 +332,8 @@ END
 BEGIN 
 	SET @strBatchId = NULL 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-	IF @@ERROR <> 0 GOTO Post_Exit    
+	IF @@ERROR <> 0 GOTO With_Rollback_Exit    
 END 
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 -- Call any integration sp before doing the post/unpost. 
 BEGIN 
@@ -1002,11 +1010,6 @@ BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
 
-	UPDATE	dbo.tblICInventoryShipment
-	SET		ysnPosted = @ysnPost
-			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-	WHERE	strShipmentNumber = @strTransactionId  
-
 	EXEC dbo.uspICAfterPostInventoryShipmentIntegration
 			@ysnPost
 			,@intTransactionId 
@@ -1047,6 +1050,7 @@ IF @@TRANCOUNT > 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
 	COMMIT TRAN @TransactionName
+	RETURN -1
 END
 
 Post_Exit:

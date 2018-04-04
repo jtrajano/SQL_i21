@@ -17,6 +17,12 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Count Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
@@ -70,7 +76,7 @@ IF @intTransactionId IS NULL
 BEGIN   
 	-- Cannot find the transaction.  
 	EXEC uspICRaiseError 80167; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
   
 -- Validate the date against the FY Periods  
@@ -78,7 +84,7 @@ IF @ysnRecap = 0 AND EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmDate) =
 BEGIN   
 	-- Unable to find an open fiscal year period to match the transaction date.  
 	EXEC uspICRaiseError 80168; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END  
   
 -- Check if the transaction is already posted  
@@ -86,7 +92,7 @@ IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN   
 	-- The transaction is already posted.  
 	EXEC uspICRaiseError 80169; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
   
 -- Check if the transaction is already unposted  
@@ -94,9 +100,18 @@ IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN   
 	-- The transaction is already unposted.  
 	EXEC uspICRaiseError 80170; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END   
  
+IF @ysnRecap = 0
+BEGIN 
+	UPDATE	dbo.tblICInventoryCount
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+			,dtmPosted = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE NULL END
+	WHERE	intInventoryCountId = @intTransactionId
+END 
+
 -- Check Company preference: Allow User Self Post  
 IF	dbo.fnIsAllowUserSelfPost(@intEntityUserSecurityId) = 1 
 	AND @intEntityUserSecurityId <> @intCreatedEntityId 
@@ -106,13 +121,13 @@ BEGIN
 	IF @ysnPost = 1   
 	BEGIN   
 		EXEC uspICRaiseError 80172, 'Post';
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
 		EXEC uspICRaiseError 80172, 'Unpost';
-		GOTO Post_Exit    
+		GOTO With_Rollback_Exit    
 	END  
 END   
 
@@ -132,7 +147,7 @@ IF(@iItemNo IS NOT NULL)
 BEGIN
 	-- Sub Location or Storage Location is missing for Item %s, Lot No. %s.
 	EXEC uspICRaiseError 80189, @iItemNo, @LotNo;
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END
 
 
@@ -150,7 +165,7 @@ WHERE (cd.intWeightUOMId IS NULL OR (cd.dblPhysicalCount <> 0 AND cd.dblWeightQt
 IF @iItemNo IS NOT NULL
 BEGIN
 	EXEC uspICRaiseError 80190, @iItemNo
-	GOTO Post_Exit
+	GOTO With_Rollback_Exit
 END
 
 SET @iItemNo = NULL
@@ -167,15 +182,9 @@ IF(@iItemNo IS NOT NULL)
 BEGIN
 	BEGIN
 		EXEC uspICRaiseError 80130, @iItemNo;
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END
 END
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 -- Create and validate the lot numbers
 IF @ysnPost = 1
@@ -186,12 +195,7 @@ BEGIN
 			@intTransactionId
 			,@intEntityUserSecurityId
 
-	IF @intCreateUpdateLotError <> 0
-	BEGIN 
-		ROLLBACK TRAN @TransactionName
-		COMMIT TRAN @TransactionName
-		GOTO Post_Exit;
-	END
+	IF @intCreateUpdateLotError <> 0 GOTO With_Rollback_Exit;
 END
 
 -- Validate Lot Number for Lot-tracked items
@@ -207,12 +211,12 @@ IF @ItemNo IS NOT NULL
 BEGIN
 	-- Lot Number is invalid or missing for item {Item No.}
 	EXEC uspICRaiseError 80130, @ItemNo;
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END
 
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-IF @@ERROR <> 0 GOTO Post_Exit    
+IF @@ERROR <> 0 GOTO With_Rollback_Exit    
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -429,13 +433,6 @@ BEGIN
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
 	END
-
-	UPDATE	dbo.tblICInventoryCount
-	SET		ysnPosted = @ysnPost
-			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-			,dtmPosted = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE NULL END
-	WHERE	intInventoryCountId = @intTransactionId
-
 	COMMIT TRAN @TransactionName
 END 
 
@@ -469,6 +466,7 @@ IF @@TRANCOUNT > 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
 	COMMIT TRAN @TransactionName
+	RETURN -1;
 END
 
 Post_Exit:
