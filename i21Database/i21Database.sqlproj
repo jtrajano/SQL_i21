@@ -6270,6 +6270,7 @@
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
+    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
