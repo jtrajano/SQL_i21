@@ -1,17 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKPNLPhysicalFuturesResult]
 	@intSContractDetailId	INT,
-	@intUnitMeasureId		INT,
-	@intCurrencyId			INT,
-	@intWeightUOMId			INT
+	@intCurrencyId			INT,-- currency
+	@intUnitMeasureId		INT,--- Price uom	
+	@intWeightUOMId			INT -- weight 
 AS
 
 BEGIN
 	DECLARE	@strPContractDetailId	NVARCHAR(MAX),
 			@strDetailIds			NVARCHAR(MAX),
-			@ysnSubCurrency			BIT
-	--		,@intSContractDetailId INT = 14604
-	--		,@intUnitMeasureId INT = 10
-	--      ,@intCurrencyId	INT = 9
+			@ysnSubCurrency			BIT	
 
 	SELECT @ysnSubCurrency = ysnSubCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 
