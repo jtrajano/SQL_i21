@@ -12,8 +12,12 @@
 CREATE FUNCTION [dbo].[fnGetGLEntriesErrors] (
 	@GLEntriesToValidate RecapTableType READONLY
 )
-RETURNS  @tbl TABLE (strTransactionId nvarchar(100) NULL, strText nvarchar(150)  NULL,
- intErrorCode int, strModuleName nvarchar(100)  NULL)
+RETURNS  @tbl TABLE (
+		strTransactionId nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
+		strText nvarchar(150)  COLLATE Latin1_General_CI_AS NULL,
+		intErrorCode int, 
+		strModuleName nvarchar(100)  COLLATE Latin1_General_CI_AS NULL
+	)
 AS
 BEGIN 
 	;WITH BatchError AS (
@@ -102,7 +106,7 @@ BEGIN
 				WHEN a.strText  = '' 
 					THEN  PostError.strMessage 
 				ELSE 
-					FORMATMESSAGE(PostError.strMessage,a.strText) END strText
+					REPLACE(PostError.strMessage,'{0}',a.strText) END strText
 		,a.intErrorCode, strModuleName FROM BatchError a
 		CROSS APPLY (SELECT strMessage from dbo.fnGLGetGLEntriesErrorMessage() where intErrorCode = a.intErrorCode)AS  PostError
 		ORDER BY strTransactionId

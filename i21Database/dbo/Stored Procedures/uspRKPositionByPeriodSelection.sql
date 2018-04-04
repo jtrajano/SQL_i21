@@ -21,7 +21,6 @@
 	@intItemId int = null,
 	@ysnCanadianCustomer bit = null
 AS
-
 DECLARE @intCent int
 DECLARE @ysnSubCurrency int
 DECLARE @intMainCurrencyId int
@@ -194,7 +193,7 @@ BEGIN
 		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
+		
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
 				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
@@ -203,7 +202,7 @@ BEGIN
 		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
-		end end dblFuturesPrice, 
+		end dblFuturesPrice, 
 		
 		case when isnull(cd.intPricingTypeId,0)=3 then 0 else
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
@@ -271,7 +270,7 @@ BEGIN
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strMarketZoneCode,''),
 		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
+		
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
 				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
@@ -280,7 +279,7 @@ BEGIN
 		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
-		end end dblFuturesPrice, 
+		end  dblFuturesPrice, 
 		
 		case when isnull(cd.intPricingTypeId,0)=3 then 0 else
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
@@ -350,7 +349,7 @@ BEGIN
 		SELECT strCommodityCode [StrCommodity],strContractType +'-' + cd.strPricingType + ' - ' + isnull(strContractBasis,'') + ' - ' + isnull(strMarketZoneCode,''),
 		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		strContractBasis,sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
+		
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
 				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
@@ -359,7 +358,7 @@ BEGIN
 		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
-		end end dblFuturesPrice, 
+		end dblFuturesPrice, 
 		
 		case when isnull(cd.intPricingTypeId,0)=3 then 0 else
 		case when isnull(@ysnCanadianCustomer,0) = 1 then 
@@ -425,7 +424,7 @@ BEGIN
 		case when CH.intContractTypeId=1 then 'Purchase Quantity' else 'Sale Quantity' end,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		sum(isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,ium1.intCommodityUnitMeasureId,isnull(dblBalance,0)),0)) Balance,strMarketZoneCode,
 		
-		case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
+		--case when isnull(@ysnCanadianCustomer,0) = 1 then cd.dblFutures else
 		case when c.ysnSubCurrency=1 and isnull(@ysnSubCurrency,0)=1 Then			
 				dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100
 		when c.ysnSubCurrency = 1 and isnull(@ysnSubCurrency,0)=0 THEN
@@ -434,7 +433,7 @@ BEGIN
 		        dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)*100 
 		else
 			    dbo.[fnRKGetCurrencyConversionRate](cd.intContractDetailId,@intCurrencyID1,@intUnitMeasureId,isnull(cd.dblFutures,0),null)
-		end end dblFuturesPrice, 
+		end  dblFuturesPrice, 
 
 		case when isnull(cd.intPricingTypeId,0)=3 then 0 else
 		case when (isnull(@ysnCanadianCustomer,0) = 0 and isnull(cd.dblFutures,0)<>0) then 
@@ -484,6 +483,7 @@ BEGIN
 		WHERE CH.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')) and dblBalance > 0 
 			AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 			AND cd.intItemId = case when isnull(@intItemId,0) = 0 then cd.intItemId else @intItemId end
+			--and cd.intContractDetailId=454
 		GROUP BY CH.intContractTypeId,strCommodityCode,strLocationName,cd.strContractNumber,cd.intContractSeq,RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8),strContractType,cd.intCurrencyId,
 		cd.intItemId,cd.intPriceUnitMeasureId,strMarketZoneCode,strItemNo,cd.dblFutures,dblBasis,dblCashPrice,dblRate,CH.intContractTypeId,cd.intPricingTypeId,
 		cd.strPricingType,cd.intContractDetailId,CH.intContractHeaderId,c.ysnSubCurrency,cd.dblRate

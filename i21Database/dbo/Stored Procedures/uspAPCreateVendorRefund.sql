@@ -87,7 +87,7 @@ INSERT INTO @paymentDetail(
 	,[ysnFromAP]
 )
 SELECT
-	[intId]								=	1
+	[intId]								=	A.intBillId
 	,[strSourceTransaction]				=	'Voucher'
 	,[intSourceId]						=	A.intBillId
 	,[strSourceId]						=	A.strBillId

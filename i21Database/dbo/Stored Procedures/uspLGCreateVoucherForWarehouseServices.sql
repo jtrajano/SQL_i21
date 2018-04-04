@@ -36,6 +36,7 @@ BEGIN TRY
 		,dblCost NUMERIC(18, 6)
 		,intWarehouseServicesId INT
 		,ysnInventoryCost BIT
+		,intItemUOMId INT
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -114,6 +115,7 @@ BEGIN TRY
 		,dblCost
 		,intWarehouseServicesId
 		,ysnInventoryCost
+		,intItemUOMId
 		)
 	SELECT ISNULL(SLCL.intVendorId, WRMH.intVendorEntityId)
 		,L.intLoadId
@@ -134,6 +136,7 @@ BEGIN TRY
 			)
 		,LWS.intLoadWarehouseServicesId
 		,Item.ysnInventoryCost
+		,LD.intItemUOMId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -164,6 +167,7 @@ BEGIN TRY
 		,L.strLoadNumber
 		,LD.intLoadDetailId
 		,Item.ysnInventoryCost
+		,LD.intItemUOMId
 
 	SELECT @intVendorEntityId = intVendorEntityId
 	FROM @voucherDetailData
@@ -236,6 +240,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intItemUOMId
 			)
 		SELECT intContractHeaderId
 			,intContractDetailId
@@ -244,6 +249,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intItemUOMId
 		FROM @voucherDetailData
 
 		EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
@@ -278,6 +284,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intItemUOMId
 				)
 			SELECT intContractHeaderId
 				,intContractDetailId
@@ -286,6 +293,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intItemUOMId
 			FROM @voucherDetailData
 			WHERE ysnInventoryCost = 0
 

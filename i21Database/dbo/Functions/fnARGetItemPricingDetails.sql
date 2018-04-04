@@ -44,6 +44,7 @@ RETURNS @returntable TABLE
 	,intContractDetailId	INT
 	,strContractNumber		NVARCHAR(50)
 	,intContractSeq			INT
+	,dblQuantity	        NUMERIC(18,6)
 	,dblAvailableQty        NUMERIC(18,6)
 	,ysnUnlimitedQty        BIT
 	,strPricingType			NVARCHAR(50)
@@ -59,6 +60,7 @@ DECLARE @ItemVendorId				INT
 		,@ItemCategoryId			INT
 		,@ItemCategory				NVARCHAR(100)
 		,@UOMQuantity				NUMERIC(18,6)
+		,@NewQuantity				NUMERIC(18,6)
 
 DECLARE	 @Price				NUMERIC(18,6)
 		,@Pricing			NVARCHAR(250)
@@ -110,6 +112,7 @@ DECLARE	 @Price				NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
+			,@NewQuantity		= dblQuantity
 			,@AvailableQuantity = dblAvailableQty
 			,@UnlimitedQuantity = ysnUnlimitedQty
 			,@PricingType		= strPricingType
@@ -226,8 +229,8 @@ DECLARE	 @Price				NUMERIC(18,6)
 
 			END
 
-			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort)
-			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termIdOut, 1
+			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort)
+			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @NewQuantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termIdOut, 1
 			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 		

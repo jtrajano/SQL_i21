@@ -13,13 +13,33 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 	UPDATE tblAPBill
-		SET	tblAPBill.dblPayment = (C.dblPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
+		SET	tblAPBill.dblPayment = (B.dblBillPayment + (CASE WHEN @post = 1 THEN ABS(B.dblPayment)ELSE B.dblPayment END)),
 			tblAPBill.ysnPrepayHasPayment = 1
 	FROM tblARPayment A
-				INNER JOIN tblARPaymentDetail B 
+				INNER JOIN (
+					SELECT 
+						SUM(A.dblPayment * (CASE WHEN C.[intTransactionType] IN (1, 14) THEN -11 ELSE 1 END)) dblPayment
+						,SUM(A.dblBasePayment * (CASE WHEN C.[intTransactionType] IN (1, 14) THEN -11 ELSE 1 END)) dblBasePayment
+						,SUM(A.dblDiscount) dblDiscount
+						,SUM(A.dblBaseDiscount) dblBaseDiscount
+						,SUM(A.dblInterest) dblInterest
+						,SUM(A.dblBaseInterest) dblBaseInterest
+						,SUM(C.dblPayment) as dblBillPayment
+						,A.intBillId 
+						,A.intPaymentId
+					FROM
+						tblARPaymentDetail A
+					INNER JOIN tblARPayment B
+							ON A.intPaymentId = B.intPaymentId						
+					INNER JOIN tblAPBill C
+						ON A.intBillId = C.intBillId
+					WHERE
+						A.intPaymentId IN (SELECT intId FROM @paymentIds)
+					GROUP BY
+						A.intBillId,
+						A.intPaymentId
+				) B 
 						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C
-						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	UPDATE tblAPBill
@@ -39,6 +59,19 @@ SET ANSI_WARNINGS OFF
 	FROM tblARPayment A
 				INNER JOIN tblARPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPBill C
+				INNER JOIN (SELECT
+		[intBillId]
+		,CASE WHEN [intTransactionType] = 1 THEN 'Voucher'
+			  WHEN [intTransactionType] = 2 THEN 'Vendor Prepayment'
+			  WHEN [intTransactionType] = 3 THEN 'Debit Memo'
+			  WHEN [intTransactionType] = 7 THEN 'Invalid Type'
+			  WHEN [intTransactionType] = 9 THEN '1099 Adjustment'
+			  WHEN [intTransactionType] = 11 THEN 'Claim'
+			  WHEN [intTransactionType] = 13 THEN 'Basis Advance'
+			  WHEN [intTransactionType] = 14 THEN 'Deferred Interest'
+			  ELSE 'Invalid Type' 
+		 END AS [strTransactionType]
+		,[dblTotal]
+	FROM tblAPBill) C
 						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)

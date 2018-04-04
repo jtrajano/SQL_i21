@@ -11,16 +11,33 @@ RETURNS @tblMonthlyAccrual TABLE
 )
 AS
 BEGIN
-	INSERT @tblMonthlyAccrual
-	SELECT intInvoiceId ,
-		   dtmAccrualDate,
-		   dblInvoiceSubtotal - SUM(dblAmount) OVER (ORDER BY intInvoiceAccrualId)  
-		   FROM (
-	SELECT ROW_NUMBER() OVER (ORDER BY I.intInvoiceId) [ROW],I.intInvoiceId, intInvoiceAccrualId, I.dblTax ,I.dblInvoiceSubtotal,AI.dblAmount,CONVERT(CHAR(4), dtmAccrualDate, 100) + CONVERT(CHAR(4), dtmAccrualDate, 120) dtmAccrualDate
-	FROM tblARInvoiceAccrual AI
+	DECLARE @accrual TABLE
+	(
+		id INT IDENTITY(1,1),
+		intInvoiceId INT,
+		dtmAccrualDate DATETIME,
+		dblAmount DECIMAL(18,6),
+		RunningTotal DECIMAL(18,6)
+	)
+
+	DECLARE @RunningTotal DECIMAL(18,6) = 0
+
+	INSERT @accrual(intInvoiceId, dtmAccrualDate,dblAmount, RunningTotal)
+	SELECT intInvoiceId, dtmAccrualDate, dblAmount, RunningTotal = 0
+	FROM dbo.tblARInvoiceAccrual
+	WHERE intInvoiceId = 668
+	ORDER BY dtmAccrualDate
+
+	UPDATE @accrual
+	SET @RunningTotal = RunningTotal = @RunningTotal + dblAmount
+	FROM @accrual
+	
+	INSERT INTO @tblMonthlyAccrual
+	SELECT A.intInvoiceId, CONVERT(CHAR(4), dtmAccrualDate, 100) + CONVERT(CHAR(4), dtmAccrualDate, 120) dtmAccrualDate,I.dblInvoiceSubtotal - A.RunningTotal + CASE WHEN id = 1 THEN dblTax ELSE 0 END
+	FROM @accrual A
 	INNER JOIN tblARInvoice I
-		ON AI.intInvoiceId = I.intInvoiceId
-	WHERE AI.intInvoiceId = @intInvoiceId) Accrual
+	ON A.intInvoiceId = I.intInvoiceId
+
 	--DECLARE @intPeriodsAccrue			INT
 	--	  , @intCounter					INT	= 1
 	--	  , @dtmPostDate				DATETIME

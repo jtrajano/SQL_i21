@@ -48,6 +48,28 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------------------------------------------------------
 --** From Class (ptclsmst) table below 3 accounts (Sales, Variance and Inventory accounts) are mapped 
 --   into tblICCategoryAccount table removing duplicates and ignoring the invalid accounts. **
+
+-- Temp table to get all the Class code used in Recipes & Formulas
+	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '#TMPCLS')
+		DROP table #TMPCLS
+
+	SELECT distinct ptcls_class INTO #TMPCLS FROM ptfrmmst
+	inner join ptitmmst itm on itm.ptitm_itm_no = ptfrm_itm_no and itm.ptitm_loc_no = ptfrm_loc_no
+	inner join ptclsmst cls on cls.ptcls_class = itm.ptitm_class
+	DECLARE @cnt INT = 1,
+	@SQLCMD VARCHAR (3000)
+
+	WHILE @cnt < 11
+	BEGIN
+	   SET @SQLCMD = '	INSERT INTO #TMPCLS (ptcls_class) SELECT distinct ptcls_class FROM ptfrmmst 
+				inner join ptitmmst itm on itm.ptitm_itm_no = ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' and itm.ptitm_loc_no = ptfrm_loc_no
+				inner join ptclsmst cls on cls.ptcls_class = itm.ptitm_class'+
+				' WHERE ptfrm_ingr_itm_no_'+CAST(@cnt AS NVARCHAR)+' IS NOT NULL  '
+
+				EXEC (@SQLCMD)
+	   SET @cnt = @cnt + 1;
+	END
+
 MERGE tblICCategoryAccount AS [Target]
 USING
 (
@@ -89,6 +111,31 @@ USING
 			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
 			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+	UNION
+		SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory In-Transit')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
+		FROM ptclsmst AS cls 
+			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_inv_acct_no 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
+			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+	UNION
+		SELECT
+		  intCategoryId			= cat.intCategoryId
+		, intAccountCategoryId	= (select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Work In Progress')
+		, intAccountId			= act.intAccountId
+		, intConcurrencyId		= 1
+		FROM ptclsmst AS cls 
+			INNER JOIN tblICCategory AS cat ON cls.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cls.ptcls_inv_acct_no 
+			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+		WHERE coa.strExternalId = cls.ptcls_inv_acct_no
+			and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
+			AND cls.ptcls_class  in (select ptcls_class from #TMPCLS where ptcls_class = cls.ptcls_class)
 ) AS [Source] (intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
 ON [Target].intAccountCategoryId = [Source].intAccountCategoryId
 	AND [Target].intCategoryId = [Source].intCategoryId
@@ -186,7 +233,7 @@ join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategor
 join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
 join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
 join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
-where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','Inventory Adjustment','AP Clearing')
+where act.strAccountCategory in ('Inventory', 'Sales Account','Inventory Adjustment','AP Clearing')
 and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Good')
 and ast.strType = 'Primary'
 

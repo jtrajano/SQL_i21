@@ -80,6 +80,10 @@ END
 
 --UPDATE THE TAX
 --EXEC uspAPUpdateVoucherDetailTax @billDetailIds
+DELETE A
+FROM tblAPBillDetailTax A
+WHERE A.intBillDetailId = @billDetailId
+
 INSERT INTO tblAPBillDetailTax(
 	[intBillDetailId]		, 
 	[intTaxGroupId]			, 
@@ -120,7 +124,7 @@ UPDATE voucherDetails
 	SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
 FROM tblAPBillDetail voucherDetails
 OUTER APPLY (
-	SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+	SELECT SUM(ISNULL(NULLIF(dblAdjustedTax,0), dblTax)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
 ) taxes
 WHERE voucherDetails.intBillDetailId = @billDetailId
 

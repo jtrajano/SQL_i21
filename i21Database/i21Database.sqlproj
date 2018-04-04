@@ -6269,6 +6269,8 @@
     <Build Include="dbo\Tables\tblARCommissionPlanItemCategory.sql" />
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
+    <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
+    <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
