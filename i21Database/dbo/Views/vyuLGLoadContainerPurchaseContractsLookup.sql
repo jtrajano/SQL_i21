@@ -24,7 +24,7 @@ SELECT
 	, intWeightUOMId				= L.intWeightUnitMeasureId
 	, strWeightUOM					= WTUOM.strUnitMeasure
 	, intEntityVendorId				= LD.intVendorEntityId
-	, strVendor						= EY.strEntityName
+	, strVendor						= EY.strName
 	, strItemNo						= Item.strItemNo
 	, strItemDescription			= Item.strDescription
 	, strLotTracking				= Item.strLotTracking
@@ -74,7 +74,8 @@ FROM tblLGLoad L
 	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 	INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
-	INNER JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	--INNER JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	INNER JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId 
 	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CT.intContractDetailId) AD
 	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
 	INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = LDCL.intItemUOMId
