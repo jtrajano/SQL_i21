@@ -7,8 +7,8 @@
 RETURNS NUMERIC(38,20)
 AS
 BEGIN
-	Declare @dblUnitQtyFrom NUMERIC(38,20)
-	Declare @dblUnitQtyTo NUMERIC(38,20)
+	Declare @dblUnitQtyFrom NUMERIC(38,20)=1
+	Declare @dblUnitQtyTo NUMERIC(38,20)=1
 
 	Select @dblUnitQtyFrom=ISNULL(dblUnitQty,1) From tblICItemUOM Where intItemUOMId=@intFromItemUOMId
 	Select @dblUnitQtyTo=ISNULL(dblUnitQty,1) From tblICItemUOM Where intItemUOMId=@intToItemUOMId

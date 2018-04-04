@@ -418,6 +418,8 @@ BEGIN
 						(   
 							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
+							WHERE ysnSubmitted = 0
+							AND intStoreId IN (SELECT DISTINCT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 						) TRR 
 						WHERE TRR.rn = 1
 						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
@@ -425,16 +427,13 @@ BEGIN
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-					LEFT JOIN
-					(
-						SELECT [intID] 
-						FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
-						GROUP BY [intID]
-					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
-					WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-					AND ysnSubmitted = 0
-					AND strTrLineType = 'plu'
-					AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+					--LEFT JOIN
+					--(
+					--	SELECT DISTINCT [intID] 
+					--	FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+					--	GROUP BY [intID]
+					--) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+					WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 
 					-- Check if has record

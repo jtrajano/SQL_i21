@@ -431,9 +431,9 @@ USING
 		,[ysnPosted]				= ISNULL(ITG.[ysnImportedAsPosted], 0)
 	FROM	
 		@PaymentsToGenerate ITG --WITH (NOLOCK)
-	INNER JOIN
-		(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
-			ON ITG.[intId] = ITG2.[intId]
+	-- INNER JOIN
+	-- 	(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
+	-- 		ON ITG.[intId] = ITG2.[intId]
 	INNER JOIN
 		(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
 			ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 	
@@ -695,7 +695,7 @@ BEGIN TRY
 			AND IL.[ysnSuccess] = 1
 	WHERE
 		ITG.[intInvoiceId] IS NOT NULL
-
+	
 	EXEC [dbo].[uspARAddToInvoicesToPayments]
 		 @PaymentEntries	= @LineItems
 		,@IntegrationLogId	= @IntegrationLogId

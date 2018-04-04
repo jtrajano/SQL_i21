@@ -105,7 +105,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			,[intItemId]
 			,[strItemDescription]
 			,[intItemUOMId]
-			,[intOrderUOMId]
+			--,[intOrderUOMId]
 			,[dblQtyOrdered]
 			,[dblQtyShipped]
 			,[dblPrice]
@@ -121,7 +121,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			,V.[intItemId]												--[intItemId]
 			,IC.[strDescription] + ' - ' + V.strTicketNumber			--strItemDescription] 
 			,V.intItemUOMId												--[intItemUOMId]
-			,ISNULL(IL.intIssueUOMId, V.intItemUOMId)					--[intOrderUOMId]
+			--,ISNULL(IL.intIssueUOMId, V.intItemUOMId)					--[intOrderUOMId]
 			,V.[intHours]												--[dblQtyOrdered]
 			,V.[intHours]												--[dblQtyShipped]
 			,V.[dblPrice] 												--[dblPrice]
@@ -135,12 +135,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		FROM vyuARBillableHoursForImport V
 		INNER JOIN @TicketHoursWorked HW ON V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
 		INNER JOIN tblICItem IC ON V.intItemId = IC.intItemId
-		INNER JOIN tblICItemLocation IL ON V.intItemId = IL.intItemId
-									   AND V.intCompanyLocationId = IL.intLocationId
+		--INNER JOIN tblICItemLocation IL ON V.intItemId = IL.intItemId
+		--							   AND V.intCompanyLocationId = IL.intLocationId
 		LEFT OUTER JOIN vyuARGetItemAccount Acct ON V.intItemId = Acct.intItemId
 									  AND V.intCompanyLocationId = Acct.intLocationId
 		WHERE V.intEntityId = @EntityCustomerId
-			AND ISNULL(V.intCompanyLocationId,@CompanyLocationId) = @ComLocationId
+			AND ISNULL(@CompanyLocationId, V.intCompanyLocationId) = @ComLocationId
 		
 		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId
 		
@@ -152,14 +152,18 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		
 		DELETE FROM @NewInvoices WHERE intEntityCustomerId = @EntityCustomerId AND intCompanyLocationId = @ComLocationId
 	END
-							
+
+DECLARE @intTicketHoursWorkedId AS INT
+SET @intTicketHoursWorkedId = (SELECT intTicketHoursWorkedId FROM @TicketHoursWorked)
+
 UPDATE tblHDTicketHoursWorked
 SET tblHDTicketHoursWorked.intInvoiceId = I.intInvoiceId
-FROM tblARInvoice I
-INNER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
-INNER JOIN tblHDTicketHoursWorked V ON D.intTicketHoursWorkedId = V.intTicketHoursWorkedId
-INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
-							    AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
+FROM @NewlyCreatedInvoices I
+WHERE intTicketHoursWorkedId = @intTicketHoursWorkedId
+--INNER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
+--INNER JOIN tblHDTicketHoursWorked V ON D.intTicketHoursWorkedId = V.intTicketHoursWorkedId
+--INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
+--							    AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
 		                    
 IF @Post = 1
 	BEGIN

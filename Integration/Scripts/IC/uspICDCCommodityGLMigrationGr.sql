@@ -57,6 +57,24 @@ act.intAccountId, act.strDescription ACDescription
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
 	and c.intCategoryId = cat.intCategoryId) as ac)
 
+----Inventory In-Transit Account
+INSERT INTO tblICCategoryAccount (	intCategoryId	,intAccountCategoryId	,intAccountId	,intConcurrencyId	) 
+(
+select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId, 1 from tblICCategory c
+cross apply
+(SELECT top 1
+cat.intCategoryId, cat.strCategoryCode ,
+substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) ex,
+--seg.intAccountCategoryId, 
+(select intAccountCategoryId from tblGLAccountCategory where strAccountCategory = 'Inventory In-Transit') AccountCategoryId,
+act.intAccountId, act.strDescription ACDescription 
+	FROM gacommst AS cls 
+	INNER JOIN tblICCategory AS cat ON cls.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = cat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS 
+	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
+	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
+	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
+	and c.intCategoryId = cat.intCategoryId) as ac)
+
 ----COGS Account
 INSERT INTO tblICCategoryAccount (	intCategoryId	,intAccountCategoryId	,intAccountId	,intConcurrencyId	) 
 (
