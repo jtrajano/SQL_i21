@@ -9,7 +9,7 @@ namespace iRely.Inventory.BusinessLayer
     public static class Constants
     {
         #region Constants
-        public const string ACTION_DISCARDED = "Value discarded";
+        public const string ACTION_DISCARDED = "Value is blank. No action taken.";
         public const string ACTION_DEFAULTED = "Value set to default";
         public const string ACTION_INSERTED = "Record inserted";
         public const string ACTION_UPDATED = "Record updated";
