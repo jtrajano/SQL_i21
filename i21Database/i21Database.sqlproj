@@ -6262,6 +6262,7 @@
     <Build Include="dbo\Functions\fnCFGetLuhn.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
     <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
