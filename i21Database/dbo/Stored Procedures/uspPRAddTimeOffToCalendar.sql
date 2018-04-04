@@ -111,6 +111,13 @@ SELECT @intTimeOffRequestId = @intTransactionId
 	END
 	ELSE
 	BEGIN
+		/* Check if TOR is already approved */
+		IF NOT EXISTS (SELECT TOP 1 1 FROM vyuPRTimeOffRequest WHERE intTimeOffRequestId = @intTimeOffRequestId AND strApprovalStatus IN ('Approved', 'No Need for Approval'))
+		BEGIN
+			PRINT 'Time Off Request has not been approved.'
+			GOTO Post_Exit
+		END
+
 		/* Post to Global Calendar */
 		DECLARE @udtSMEventsIn TABLE(intEventId INT)
 
@@ -367,4 +374,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 			END
 		END	
 	END
+
+Post_Exit:
+
 END
