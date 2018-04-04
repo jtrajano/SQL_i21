@@ -29,13 +29,13 @@ SELECT @ForDelete = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 BEGIN 
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 	INSERT INTO @ItemsFromInvoice 	
-	EXEC dbo.[uspARGetItemsFromInvoice] @intInvoiceId = @intTransactionId
+	EXEC dbo.[uspARGetItemsFromInvoice] @intInvoiceId = @intTransactionId, @forContract = 1
 
 	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
 	UPDATE @ItemsFromInvoice SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
 END
 
---Contracts
+--Contracts 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @intUserId
 
 --Prepaids
