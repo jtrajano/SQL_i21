@@ -55,7 +55,7 @@ SELECT	strOrderType = 'Sales Contract'
 		, ContractView.strFreightTerm
 		, ContractView.intContractSeq
 FROM	vyuCTContractAddOrdersLookup ContractView
-INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
+		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
 WHERE	ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
 		AND ContractView.dblAvailableQty > 0
