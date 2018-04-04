@@ -7,7 +7,7 @@
 CREATE FUNCTION [dbo].[fnGLGetGLEntriesErrorMessage] ()
 	RETURNS @tbl TABLE (
 		intErrorCode INT, 
-		strMessage NVARCHAR(150)
+		strMessage NVARCHAR(150) COLLATE Latin1_General_CI_AS
 	)
 AS
 BEGIN
