@@ -13,6 +13,7 @@
 	[intBookId] INT NULL, 
     [intSubBookId] INT NULL,
 	[intSelectedInstrumentTypeId] INT NULL,
+	[strType] NVARCHAR(10) DEFAULT (N'Realize'),
 	[intCurrencyExchangeRateTypeId] INT NULL,
 	[intBankId] INT NULL,
 	[intBankAccountId] INT NULL,
