@@ -38,11 +38,7 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [ysnProcessed]		= 1
-	,[dblPayment]		= ISNULL([dblAmountDue], @ZeroDecimal)
-	,[dblBasePayment]	= ISNULL([dblBaseAmountDue], @ZeroDecimal)
-	,[dblAmountDue]		= @ZeroDecimal
-	,[dblBaseAmountDue]	= @ZeroDecimal
+	 [ysnProcessed]	= 1
 WHERE
 	[intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
 	AND strType = 'Provisional'
@@ -51,11 +47,7 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [ysnProcessed]		= 0
-	,[dblAmountDue]		= ISNULL([dblPayment], @ZeroDecimal)
-	,[dblBaseAmountDue]	= ISNULL([dblBasePayment], @ZeroDecimal)
-	,[dblPayment]		= @ZeroDecimal
-	,[dblBasePayment]	= @ZeroDecimal
+	 [ysnProcessed]	= 0
 WHERE
 	[intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
 	AND 
@@ -67,6 +59,20 @@ WHERE
 	
 	AND strType = 'Provisional'
 
+
+UPDATE ARI	
+SET
+	 ARI.[dblProvisionalAmount]	= PRO.[dblPayment]
+	,ARI.[dblProvisionalAmount]	= PRO.[dblBasePayment]
+	,ARI.[strTransactionType]	= CASE WHEN PRO.[dblPayment] > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
+FROM
+	tblARInvoice ARI
+INNER JOIN
+	tblARInvoice PRO
+		ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+WHERE
+	ARI.[intInvoiceId] = @InvoiceId
+	
 
 		
 GO
