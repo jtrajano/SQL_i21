@@ -9,6 +9,10 @@ BEGIN
 	DECLARE	@strPContractDetailId	NVARCHAR(MAX),
 			@strDetailIds			NVARCHAR(MAX),
 			@ysnSubCurrency			BIT	
+		--,@intSContractDetailId	INT= 3
+		--,@intCurrencyId			INT=9
+		--,@intUnitMeasureId		INT=9
+		--,@intWeightUOMId			INT=9
 
 	SELECT @ysnSubCurrency = ysnSubCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 
@@ -99,7 +103,10 @@ BEGIN
 								dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId,CD.dblConvertedBasis)
 						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId, CD.dblCashPrice)
 				END *
-				CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
+				CASE	WHEN	CD.intCurrencyId = CY.intCurrencyID THEN	1 
+						WHEN	CY.ysnSubCurrency = 1				THEN	100 	
+						ELSE	0.01 	
+				END AS	dblPrice,
 				ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 				ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
 				NUll AS dblBooked,
@@ -143,7 +150,10 @@ BEGIN
 					NULL AS dblAllocatedQty,
 					NULL AS dblAllocatedQtyPrice,
 					dbo.[fnCTConvertQuantityToTargetItemUOM](ID.intItemId,@intUnitMeasureId,QU.intUnitMeasureId,ID.dblPrice) *
-					CASE WHEN SY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
+					CASE	WHEN	CD.intCurrencyId = SY.intCurrencyID THEN	1 
+							WHEN	SY.ysnSubCurrency = 1				THEN	100 	
+							ELSE	0.01 	
+					END AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					NULL AS dblFX,
 					dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intWeightUOMId, ID.dblQtyShipped) AS dblBooked,
@@ -222,7 +232,10 @@ BEGIN
 									dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId,CD.dblConvertedBasis)
 							ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,PU.intUnitMeasureId, CD.dblCashPrice)
 					END *
-					CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	AS	dblPrice,
+					CASE	WHEN	CD.intCurrencyId = CY.intCurrencyID THEN	1 
+							WHEN	CY.ysnSubCurrency = 1				THEN	100 	
+							ELSE	0.01 	
+					END AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0),1) AS dblFX,
 					NUll AS dblBooked,
@@ -270,7 +283,10 @@ BEGIN
 							CC.dblRate/
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intUnitMeasureId,@intUnitMeasureId,CD.dblQuantity)
 					END *
-					CASE WHEN OY.ysnSubCurrency = 1 THEN 100 ELSE 1 END	 * -1 
+					CASE	WHEN	CC.intCurrencyId = OY.intCurrencyID THEN	1 
+							WHEN	OY.ysnSubCurrency = 1				THEN	100 	
+							ELSE	0.01 	
+					END  * -1 
 					AS	dblPrice,
 					ISNULL(MY.strCurrency,CY.strCurrency) AS strCurrency,
 					ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId,1),1) AS dblFX,
