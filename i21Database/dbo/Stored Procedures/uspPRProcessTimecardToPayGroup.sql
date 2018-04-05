@@ -104,7 +104,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.intEmployeeEarningId
 			,EE.intTypeEarningId
 			,TC.intEmployeeDepartmentId
-			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Fixed Amount', 'Salary')) THEN EMP.intWorkersCompensationId ELSE NULL END
+			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) THEN EMP.intWorkersCompensationId ELSE NULL END
 			,EE.strCalculationType
 			,TC.dblRegularHours
 			,TC.dblRegularHours

@@ -104,9 +104,9 @@ FROM (
 		 , dblPrepaids			= 0.000000
 	FROM RESULT
 	GROUP BY intEntityCustomerId
-	HAVING dbo.fnRoundBanker(SUM(dblTotalDue) - SUM(dblAvailableCredit) - SUM(dblPrepayments), 2) <> 0.00 
-		OR dbo.fnRoundBanker(SUM(dblAvailableCredit) * -1, 2) <> 0.00 
-		OR dbo.fnRoundBanker(SUM(dblPrepayments) * -1, 2) <> 0.00
+	--HAVING dbo.fnRoundBanker(SUM(dblTotalDue) - SUM(dblAvailableCredit) - SUM(dblPrepayments), 2) <> 0.00 
+	--	OR dbo.fnRoundBanker(SUM(dblAvailableCredit) * -1, 2) <> 0.00 
+	--	OR dbo.fnRoundBanker(SUM(dblPrepayments) * -1, 2) <> 0.00
 ) AGING
 INNER JOIN (
 	SELECT C.intEntityId

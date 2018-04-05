@@ -34,6 +34,8 @@
 	[dblBaseAmountDue]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblPayment]					NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblBasePayment]				NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblProvisionalAmount]			NUMERIC(18, 6)									NULL DEFAULT 0,
+	[dblBaseProvisionalAmount]		NUMERIC(18, 6)									NULL DEFAULT 0,
     [intEntitySalespersonId]		INT												NULL,    
     [intFreightTermId]				INT												NULL,
     [intShipViaId]					INT												NULL,

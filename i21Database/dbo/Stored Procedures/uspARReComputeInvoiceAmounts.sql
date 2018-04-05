@@ -91,6 +91,8 @@ SET
 	,[dblTotalTermDiscount]		= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
 	,[dblInterest]				= ISNULL([dblInterest], @ZeroDecimal)
 	,[dblBaseInterest]			= ISNULL([dblBaseInterest], @ZeroDecimal)
+	,[dblProvisionalAmount]		= ISNULL([dblProvisionalAmount], @ZeroDecimal)
+	,[dblBaseProvisionalAmount]	= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
 	,[dblSplitPercent] 			= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
@@ -233,8 +235,8 @@ UPDATE
 SET
 	 [dblInvoiceTotal]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
 	,[dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblAmountDue]			= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
-	,[dblBaseAmountDue]		= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping]) - ([dblBasePayment] + [dblBaseDiscount])
+	,[dblAmountDue]			= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount] + [dblProvisionalAmount])
+	,[dblBaseAmountDue]		= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping]) - ([dblBasePayment] + [dblBaseDiscount] + [dblBaseProvisionalAmount])
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 

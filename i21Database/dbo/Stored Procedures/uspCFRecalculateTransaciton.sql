@@ -1926,7 +1926,7 @@ BEGIN
 					,@intVehicleId
 					,1 -- @DisregardExemptionSetup
 					,0
-					, NULL	--intItemUOMId		
+					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
 					,0		--@IsDeliver										 
 				)

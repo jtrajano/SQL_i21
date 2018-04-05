@@ -12,12 +12,13 @@ IF @dtmFromDate IS NULL
 IF @dtmToDate IS NULL
 	SELECT @dtmToDate = DATEADD(MONTH, DATEDIFF(MONTH, - 1, GETDATE()) - 1, - 1) --Last Day of previous month
 
---SELECT @intOwnerId = E.intEntityId
---FROM tblEMEntity E
---JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
---	AND ET.strType = 'Customer'
---WHERE strName = @strCustomerName
---	AND strEntityNo <> ''
+SELECT @intOwnerId = E.intEntityId
+FROM tblEMEntity E
+JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
+	AND ET.strType = 'Customer'
+WHERE strName = @strCustomerName
+	AND strEntityNo <> ''
+
 SELECT strItemNo
 	,strDescription
 	,strParentLotNumber
@@ -50,8 +51,11 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblEMEntity E ON E.intEntityId = IR.intEntityVendorId
+	JOIN dbo.tblICLot L on L.intLotId=IRL.intLotId
+	JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
+			AND IO1.intOwnerId = @intOwnerId
 	
 	UNION
 	
@@ -85,9 +89,11 @@ FROM (
 	JOIN dbo.tblICItem I ON I.intItemId = IA.intItemId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 	LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = L.intEntityVendorId
+	JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE IA.intTransactionTypeId = 10
 		AND IA.dtmBusinessDate BETWEEN @dtmFromDate
 			AND @dtmToDate
+			AND IO1.intOwnerId = @intOwnerId
 	
 	UNION
 	
@@ -122,8 +128,10 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblEMEntity E ON E.intEntityId = InvS.intEntityCustomerId
+	JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE InvS.dtmShipDate BETWEEN @dtmFromDate
 			AND @dtmToDate
+			AND IO1.intOwnerId = @intOwnerId
 	) AS DT
 GROUP BY strItemNo
 	,strDescription

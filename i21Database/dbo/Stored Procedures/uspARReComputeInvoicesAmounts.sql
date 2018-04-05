@@ -89,6 +89,8 @@ SET
 	,[dblTotalTermDiscount]		= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
 	,[dblInterest]				= ISNULL([dblInterest], @ZeroDecimal)
 	,[dblBaseInterest]			= ISNULL([dblBaseInterest], @ZeroDecimal)
+	,[dblProvisionalAmount]		= ISNULL([dblProvisionalAmount], @ZeroDecimal)
+	,[dblBaseProvisionalAmount]	= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
 	,[dblSplitPercent] 			= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
 WHERE
 	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = [intInvoiceId])
@@ -231,8 +233,8 @@ UPDATE ARI
 SET
 	 ARI.[dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
 	,ARI.[dblBaseInvoiceTotal]	= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping])
-	,ARI.[dblAmountDue]			= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping]) - (ARI.[dblPayment] + ARI.[dblDiscount])
-	,ARI.[dblBaseAmountDue]		= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping]) - (ARI.[dblBasePayment] + ARI.[dblBaseDiscount])
+	,ARI.[dblAmountDue]			= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping]) - (ARI.[dblPayment] + ARI.[dblDiscount] + ARI.[dblProvisionalAmount])
+	,ARI.[dblBaseAmountDue]		= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping]) - (ARI.[dblBasePayment] + ARI.[dblBaseDiscount] + ARI.[dblBaseProvisionalAmount])
 FROM
 	tblARInvoice ARI
 INNER JOIN
