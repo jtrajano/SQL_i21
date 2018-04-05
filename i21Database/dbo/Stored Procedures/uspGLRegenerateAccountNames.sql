@@ -16,7 +16,7 @@ BEGIN
 						  JOIN tblGLAccountStructure St on S.intAccountStructureId = St.intAccountStructureId
 						  RIGHT OUTER JOIN dbo.tblGLAccount A2 ON M.intAccountId = A2.intAccountId 
 						  WHERE A2.intAccountId = A1.intAccountId
-						  ORDER BY St.intAccountStructureId
+						  ORDER BY St.intSort
 			FOR XML PATH('') )  
 		, 1, 2, '' ) AS strDescription
     FROM tblGLAccount A1  
