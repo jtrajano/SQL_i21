@@ -49,6 +49,7 @@
 	[intUnrealizedLossOnInventoryCashIOSId] INT NULL,
 	[intUnrealizedGainOnInventoryIntransitIOSId] INT NULL,
 	[intUnrealizedLossOnInventoryIntransitIOSId] INT NULL,
+	[ysnDisplayAllStorage] BIT NULL,
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
     CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),

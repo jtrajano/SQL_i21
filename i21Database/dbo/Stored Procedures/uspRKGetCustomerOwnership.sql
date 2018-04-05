@@ -8,7 +8,6 @@
 
 AS
 
-
 IF OBJECT_ID('tempdb..#tempCustomer') IS NOT NULL
     DROP TABLE #tempCustomer
 IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
@@ -16,10 +15,14 @@ IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
 IF OBJECT_ID('tempdb..#final') IS NOT NULL
     DROP TABLE #final
 
-SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet into #tempCustomer FROM (
-   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(dblOutQty,2)) dblOut,round(sum(dblInQty),2)-round(sum(dblOutQty),2) dblNet FROM(		
+DECLARE @ysnDisplayAllStorage bit
+select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
+
+SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId 
+INTO #tempCustomer FROM (
+   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(dblOutQty,2)) dblOut,round(sum(dblInQty),2)-round(sum(dblOutQty),2) dblNet,intStorageScheduleTypeId FROM(		
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
-																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  				
+																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty ,gs.intStorageScheduleTypeId 				
 		FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 		
 							AND  st.intProcessingLocationId  IN (
@@ -33,8 +36,19 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer' and strTicketStatus='C'
-		  )t     GROUP BY  dtmDate,strStorageTypeDescription
+		  )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
 ) t1
+
+IF (@ysnDisplayAllStorage=1)
+	BEGIN			 
+		declare @intRowNumber int
+		SELECT TOP 1 @intRowNumber=intRowNum FROM #tempCustomer order by intRowNum desc
+		INSERT INTO #tempCustomer (intRowNum,dtmDate,strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId)
+			SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription))+@intRowNumber,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),strStorageTypeDescription,0.0,0.0,0.0,intStorageScheduleTypeId
+			FROM tblGRStorageType  
+			WHERE ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND intStorageScheduleTypeId not in(SELECT DISTINCT intStorageScheduleTypeId FROM #tempCustomer)
+	END
+	
 declare @TempTableCreate nvarchar(max)=''
 SELECT @TempTableCreate+='['+t.strDistribution +'_strDistribution] NVARCHAR(100)  COLLATE Latin1_General_CI_AS  NULL,'+
 	   '['+t.strDistribution +'_In]  NUMERIC(18, 6) NULL,'+
