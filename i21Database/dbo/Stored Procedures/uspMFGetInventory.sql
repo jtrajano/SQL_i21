@@ -28,4 +28,4 @@ JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 WHERE dblQty > 0
-	--AND IO1.intOwnerId = @intOwnerId
+	AND IO1.intOwnerId = @intOwnerId
