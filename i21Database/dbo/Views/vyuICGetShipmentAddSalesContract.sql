@@ -23,13 +23,13 @@ SELECT	strOrderType = 'Sales Contract'
 		, strSubLocationName
 		, intStorageLocationId
 		, strStorageLocationName = strStorageLocationName
-		, intOrderUOMId = intItemUOMId
+		, intOrderUOMId = ContractView.intItemUOMId
 		, strOrderUOM = strItemUOM
 		, dblOrderUOMConvFactor = dblItemUOMCF
-		, intItemUOMId
-		, strItemUOM = strItemUOM
+		, ContractView.intItemUOMId
+		, strItemUOM = ContractView.strItemUOM
 		, dblItemUOMConv = dblItemUOMCF
-		, intWeightUOMId = intItemUOMId
+		, intWeightUOMId = ContractView.intItemUOMId
 		, strWeightUOM = strItemUOM
 		, dblWeightItemUOMConv = dblItemUOMCF
 		, dblQtyOrdered = CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
@@ -54,8 +54,16 @@ SELECT	strOrderType = 'Sales Contract'
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
 		, ContractView.intContractSeq
+		, intPriceUOMId = ISNULL(ItemPriceUOM.intItemUOMId, ContractView.intItemUOMId) 
+		, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, ContractView.strItemUOM) 
 FROM	vyuCTContractAddOrdersLookup ContractView
 		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
+		LEFT JOIN (
+			tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
+				ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
+		)
+			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, ContractView.intSeqPriceUOMId)
+
 WHERE	ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
 		AND ContractView.dblAvailableQty > 0
