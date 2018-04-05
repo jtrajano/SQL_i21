@@ -2597,6 +2597,10 @@ UPDATE tblMFCompanyPreference
 SET intMaximumPalletsOnForklift = 3
 WHERE intMaximumPalletsOnForklift IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnAllowLotMoveacrossLocations = 0
+WHERE ysnAllowLotMoveacrossLocations IS NULL
+GO
 UPDATE OH
 SET intLocationId = W.intLocationId
 FROM tblMFOrderHeader OH
