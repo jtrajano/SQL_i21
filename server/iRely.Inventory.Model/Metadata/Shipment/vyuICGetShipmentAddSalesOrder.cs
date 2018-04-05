@@ -69,5 +69,7 @@ namespace iRely.Inventory.Model
         public string strShipToZipCode { get; set; }
         public string strShipToCountry { get; set; }
         public string strShipToAddress { get; set; }
+        public int? intPriceUOMId { get; set; }
+        public string strPriceUOM { get; set; }
     }
 }

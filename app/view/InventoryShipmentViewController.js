@@ -2903,7 +2903,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     { dataIndex: 'strShipToState', text: 'Ship To State', width: 100, dataType: 'string',  hidden: true },
                     { dataIndex: 'strShipToZipCode', text: 'Ship To Zip Code', width: 100, dataType: 'string', hidden: true },
                     { dataIndex: 'strShipToCountry', text: 'Ship To Country', width: 100, dataType: 'string', hidden: true },
-                    { dataIndex: 'strShipToAddress', text: 'Ship To Address', width: 100, dataType: 'string', hidden: true }
+                    { dataIndex: 'strShipToAddress', text: 'Ship To Address', width: 100, dataType: 'string', hidden: true },
+                    { dataIndex: 'intPriceUOMId', text: 'Price UOM', width: 100, dataType: 'numeric', hidden: true, allowNull: true },
+                    { dataIndex: 'strPriceUOM', text: 'Price UOM', width: 100, dataType: 'string', hidden: true, allowNull: true }
                 ],
                 title: "Add Orders",
                 showNew: false
@@ -3098,7 +3100,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                                             intCommodityId: order.get('intCommodityId'),
                                             intForexRateTypeId: order.get('intForexRateTypeId'),
                                             strForexRateType: order.get('strForexRateType'),
-                                            dblForexRate: order.get('dblForexRate')                                
+                                            dblForexRate: order.get('dblForexRate'),
+                                            intPriceUOMId: order.get('intPriceUOMId'),
+                                            strPriceUOM: order.get('strPriceUOM')
                                         };
 
                                         // Check if the shipment location matches the location of the order.
