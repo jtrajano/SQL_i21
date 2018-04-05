@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspMFGetInventoryByItem @strPeriod NVARCHAR(50) = NULL
 	,@ysnIgnoreProdStageLocation BIT = 0
+	,@strCustomerName NVARCHAR(50)=''
 AS
 DECLARE @intLotSnapshotId INT
 	,@dtmCurrentDate DATETIME
@@ -42,6 +43,15 @@ SELECT @intPMStageLocationId = strAttributeValue
 FROM tblMFManufacturingProcessAttribute
 WHERE intAttributeId = 90
 	AND strAttributeValue <> ''
+
+DECLARE @intOwnerId INT
+
+SELECT @intOwnerId = E.intEntityId
+FROM tblEMEntity E
+JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
+	AND ET.strType = 'Customer'
+WHERE strName = @strCustomerName
+	AND strEntityNo <> ''
 
 IF @ysnIgnoreProdStageLocation = 1
 BEGIN
@@ -95,10 +105,11 @@ BEGIN
 		JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
+		JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 		WHERE L.intStorageLocationId NOT IN (
 				@intProdStageLocationId
 				,@intPMStageLocationId
-				)
+				) AND IO1.intOwnerId = @intOwnerId
 		) AS DT
 	GROUP BY [Item No]
 		,[Item Desc]
@@ -158,6 +169,7 @@ BEGIN
 		JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
+		JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId AND IO1.intOwnerId = @intOwnerId
 		) AS DT
 	GROUP BY [Item No]
 		,[Item Desc]
