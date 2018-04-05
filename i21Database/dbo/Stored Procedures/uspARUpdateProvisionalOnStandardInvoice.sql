@@ -63,7 +63,7 @@ WHERE
 UPDATE ARI	
 SET
 	 ARI.[dblProvisionalAmount]	= PRO.[dblPayment]
-	,ARI.[dblProvisionalAmount]	= PRO.[dblBasePayment]
+	,ARI.[dblBaseProvisionalAmount]	= PRO.[dblBasePayment]
 	,ARI.[strTransactionType]	= CASE WHEN PRO.[dblPayment] > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
 FROM
 	tblARInvoice ARI
