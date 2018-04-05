@@ -11,6 +11,9 @@ BEGIN
 		,@strType NVARCHAR(1)
 		,@strOrderStatus NVARCHAR(2)
 		,@strName NVARCHAR(50)
+		,@intInventoryShipmentId INT
+		,@strShipmentNo NVARCHAR(50)
+		,@strError NVARCHAR(MAX)
 
 	IF @strShipmentNumber = ''
 	BEGIN
@@ -71,7 +74,7 @@ BEGIN
 					FROM tblMFEDI945 EDI945
 					WHERE EDI945.ysnStatus = 1
 						AND EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
-					) 
+					)
 			ORDER BY InvS.intInventoryShipmentId
 		END
 	END
@@ -109,6 +112,19 @@ BEGIN
 				)
 
 		RETURN
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM @tblMFOrderNo O
+			JOIN tblMFItemOwner Lbl ON O.intEntityCustomerId = Lbl.intOwnerId
+				AND intCustomerLabelTypeId IS NOT NULL
+			)
+	BEGIN
+		SELECT @intInventoryShipmentId = intInventoryShipmentId
+		FROM @tblMFOrderNo
+
+		EXEC dbo.uspMFReassignCustomerLabel @intInventoryShipmentId = @intInventoryShipmentId
 	END
 
 	SELECT @intCustomerId = intCustomerId
@@ -231,6 +247,13 @@ BEGIN
 				FROM #tblMFEDI945 EDI
 				LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
 				WHERE strSSCCNo IS NULL
+				)
+			OR NOT EXISTS (
+				SELECT 1
+				FROM #tblMFEDI945 EDI
+				LEFT JOIN #tblMFSSCCNo SSCCNo ON SSCCNo.strLotNumber = EDI.strLotNumber
+				GROUP BY dblTotalUnitsShipped
+				HAVING dblTotalUnitsShipped = SUM(dblQtyShipped)
 				)
 		BEGIN
 			INSERT INTO tblMFEDI945Error (
@@ -372,8 +395,13 @@ BEGIN
 				,DT.intLineNo
 				,DT.strParentLotNumber
 
+			SELECT @strShipmentNo = strShipmentNo
+			FROM @tblMFOrderNo
+
+			SELECT @strError = 'SSCC # is missing for the inventory shipment # ' + @strShipmentNo
+
 			RAISERROR (
-					'No data to export.'
+					@strError
 					,16
 					,1
 					)
@@ -573,4 +601,11 @@ BEGIN
 		,strOrderNo
 		,1
 	FROM @tblMFOrderNo
+
+	DELETE
+	FROM tblMFEDI945Error
+	WHERE strShipmentId IN (
+			SELECT O.strShipmentNo
+			FROM @tblMFOrderNo O
+			)
 END
