@@ -157,18 +157,10 @@ BEGIN
 										ELSE
 											CASE 
 												WHEN CNT.ysnUseFXPrice = 1 
-														AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-														AND CNT.dblRate IS NOT NULL 
-														AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN 
-													dbo.fnCTConvertQtyToTargetItemUOM(
-														CNT.intFXPriceUOMId
-														,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId)
-														,(
-															LI.dblCost / CASE WHEN CNT.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CNT.intCent,0) = 0 THEN 1 ELSE CNT.intCent END ELSE 1 END			
-														)
-													) * CNT.dblRate
-
+													AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+													AND CNT.dblRate IS NOT NULL 
+													AND CNT.intFXPriceUOMId IS NOT NULL 
+												THEN CNT.dblSeqPrice
 												ELSE LI.dblCost
 											END 
 											* -- AD.dblQtyToPriceUOMConvFactor
@@ -236,10 +228,12 @@ BEGIN
 			,CTD.intPricingTypeId
 			,CTD.intBasisUOMId
 			,CTD.dtmEndDate
+			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
 			FROM tblCTContractDetail CTD 
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
