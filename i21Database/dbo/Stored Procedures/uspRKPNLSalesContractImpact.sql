@@ -3,10 +3,7 @@
 		@intCurrencyId			INT,-- currency
 		@intUnitMeasureId		INT,--- Price uom	
 		@intWeightUOMId			INT -- weight 
-
-
-AS			--declare @intSContractDetailId INT = 2752
-			--,@intUnitMeasureId INT = 16
+AS			
 	DECLARE	@intPContractDetailId INT
 	declare @dtmToDate datetime 
 	SET @dtmToDate = convert(datetime,CONVERT(VARCHAR(10),getdate(),110),110)
@@ -31,18 +28,21 @@ DECLARE @ContractImpact TABLE (
 		dblLatestSettlementPrice numeric(24,10),
 		dblContractSize numeric(24,10),
 		intFutOptTransactionHeaderId int,
+		ysnSubCurrency int,
 		dblFutureImpact  numeric(24,10)
 		  )
+
+
 Insert into @ContractImpact
-	SELECT *,((isnull(dblLatestSettlementPrice,0)-isnull(dblPrice,0))*(isnull(intNoOfLots,0)*isnull(dblContractSize,0))) dblFutureImpact from (
+	SELECT *,((isnull(dblLatestSettlementPrice,0)-isnull(dblPrice,0))*(isnull(intNoOfLots,0)*isnull(dblContractSize,0)))/case when ysnSubCurrency=1 then 100 else 1 end dblFutureImpact from (
 		SELECT	distinct TP.strContractType,
 				CH.strContractNumber +' - ' + convert(nvarchar(100),CD.intContractSeq) AS	strContractNumber,
 				CD.intContractHeaderId,CD.dblQuantity,AD.dblSAllocatedQty,(AD.dblSAllocatedQty/CD.dblQuantity)*100	as dblContractPercentage
 				,fm.strFutureMonth + ' - ' + strBuySell strFutureMonth
 				,strInternalTradeNo,dblAssignedLots, t.dblPrice dblContractPrice,	
-				((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(AD.dblSAllocatedQty/CD.dblQuantity)*100)/100 intNoOfLots	
+				-((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(AD.dblSAllocatedQty/CD.dblQuantity)*100)/100 intNoOfLots	
 				,t.dblPrice,t.intFutureMarketId,t.intFutureMonthId,                              
-				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId	
+				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId,c.ysnSubCurrency
 		FROM	tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	AD.intPContractDetailId 
 											AND intSContractDetailId	=	@intSContractDetailId
@@ -54,6 +54,7 @@ Insert into @ContractImpact
 	   	LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
 		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
 		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId
 		WHERE	intSContractDetailId	=	@intSContractDetailId-- and t.intFutureMonthId is not null
 
@@ -69,7 +70,7 @@ Insert into @ContractImpact
 				strInternalTradeNo,dblAssignedLots,t.dblPrice dblContractPrice,
 				((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(sum(dblSAllocatedQty) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity*100))/100 intNoOfLots,
 				t.dblPrice,t.intFutureMarketId,t.intFutureMonthId,
-				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId
+				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId,c.ysnSubCurrency
 		FROM	tblLGAllocationDetail	AD 
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	@intSContractDetailId
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -80,10 +81,11 @@ Insert into @ContractImpact
 		LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
 		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
 		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId																				
 		WHERE	intSContractDetailId	=	@intSContractDetailId 
 		
-		UNION ALL
+		UNION 
 
 
 		SELECT	distinct TP.strContractType,
@@ -95,7 +97,7 @@ Insert into @ContractImpact
 				strInternalTradeNo,dblAssignedLots,t.dblPrice dblContractPrice,
 				((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity*100))/100 intNoOfLots,
 				t.dblPrice,t.intFutureMarketId,t.intFutureMonthId,
-				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId
+				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId,c.ysnSubCurrency
 		FROM	tblLGLoad AD
 		JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId 
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId and  CD.intContractDetailId= @intSContractDetailId
@@ -107,10 +109,11 @@ Insert into @ContractImpact
 		LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
 		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
 		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId																				
 		WHERE	intSContractDetailId	=	@intSContractDetailId 
 
-				UNION ALL
+				UNION 
 
 
 		SELECT	distinct TP.strContractType,
@@ -120,9 +123,9 @@ Insert into @ContractImpact
 				(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity)*100 as dblContractPercentage
 				,fm.strFutureMonth + ' - ' + strBuySell strFutureMonth,
 				strInternalTradeNo,dblAssignedLots,t.dblPrice dblContractPrice,
-				((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity*100))/100 intNoOfLots,
+				-((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity*100))/100 intNoOfLots,
 				t.dblPrice,t.intFutureMarketId,t.intFutureMonthId,
-				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId
+				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId,c.ysnSubCurrency
 		FROM	tblLGLoad AD
 		JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId 
 		join tblLGLoadDetailLot LDL on LDL.intLoadDetailId=LD.intLoadDetailId
@@ -137,6 +140,7 @@ Insert into @ContractImpact
 		LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
 		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
 		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId																					
 		WHERE	intSContractDetailId	=	@intSContractDetailId 
 
