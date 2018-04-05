@@ -17,23 +17,29 @@
 	,@intPatternCode INT
 	,@intCompanyLocationId INT
 
+SELECT @intSubPatternTypeId0 = 4
+
+SELECT @strSubPatternName0 = 'Commodity Prefix'
+
+SELECT @strSubPatternTypeDetail0 = 'tblICCommodity.strEDICode'
+
 SELECT @intSubPatternTypeId = 3
 
-SELECT @strSubPatternName = 'Part1'
+SELECT @strSubPatternName = 'Year'
 
 SELECT @strSubPatternTypeDetail = 'YY'
 
 SELECT @intSubPatternTypeId2 = 3
 
-SELECT @strSubPatternName2 = 'Part2'
+SELECT @strSubPatternName2 = 'Julian Date'
 
 SELECT @strSubPatternTypeDetail2 = 'Julian Date'
 
-SELECT @intSubPatternTypeId3 = 8
+--SELECT @intSubPatternTypeId3 = 8
 
-SELECT @strSubPatternName3 = 'Alphabetical Sequence'
+--SELECT @strSubPatternName3 = 'Alphabetical Sequence'
 
-SELECT @strSubPatternTypeDetail3 = ''
+--SELECT @strSubPatternTypeDetail3 = ''
 
 SELECT @strPatternName = N'Parent Lot Number'
 	,@strDescription = N'Parent Lot Number'
@@ -76,12 +82,35 @@ BEGIN
 		,intOrdinalPosition
 		)
 	SELECT intPatternId = @intPatternId
+		,strSubPatternName = @strSubPatternName0
+		,intSubPatternTypeId = @intSubPatternTypeId0
+		,intSubPatternSize = 1
+		,strSubPatternTypeDetail = @strSubPatternTypeDetail0
+		,strSubPatternFormat = '<?>'
+		,intOrdinalPosition = 1
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM dbo.tblMFPatternDetail
+			WHERE intPatternId = @intPatternId
+				AND strSubPatternName = @strSubPatternName0
+			)
+
+	INSERT dbo.tblMFPatternDetail (
+		intPatternId
+		,strSubPatternName
+		,intSubPatternTypeId
+		,intSubPatternSize
+		,strSubPatternTypeDetail
+		,strSubPatternFormat
+		,intOrdinalPosition
+		)
+	SELECT intPatternId = @intPatternId
 		,strSubPatternName = @strSubPatternName
 		,intSubPatternTypeId = @intSubPatternTypeId
-		,intSubPatternSize = 1
+		,intSubPatternSize = 2
 		,strSubPatternTypeDetail = @strSubPatternTypeDetail
 		,strSubPatternFormat = ''
-		,intOrdinalPosition = 1
+		,intOrdinalPosition = 2
 	WHERE NOT EXISTS (
 			SELECT *
 			FROM dbo.tblMFPatternDetail
@@ -104,7 +133,7 @@ BEGIN
 		,intSubPatternSize = 5
 		,strSubPatternTypeDetail = @strSubPatternTypeDetail2
 		,strSubPatternFormat = ''
-		,intOrdinalPosition = 2
+		,intOrdinalPosition = 3
 	WHERE NOT EXISTS (
 			SELECT *
 			FROM dbo.tblMFPatternDetail
@@ -112,30 +141,30 @@ BEGIN
 				AND strSubPatternName = @strSubPatternName2
 			)
 
-	INSERT dbo.tblMFPatternDetail (
-		intPatternId
-		,strSubPatternName
-		,intSubPatternTypeId
-		,intSubPatternSize
-		,strSubPatternTypeDetail
-		,strSubPatternFormat
-		,intOrdinalPosition
-		,ysnPaddingZero
-		)
-	SELECT intPatternId = @intPatternId
-		,strSubPatternName = @strSubPatternName3
-		,intSubPatternTypeId = @intSubPatternTypeId3
-		,intSubPatternSize = 3
-		,strSubPatternTypeDetail = @strSubPatternTypeDetail3
-		,strSubPatternFormat = ''
-		,intOrdinalPosition = 3
-		,ysnPaddingZero = 0
-	WHERE NOT EXISTS (
-			SELECT *
-			FROM dbo.tblMFPatternDetail
-			WHERE intPatternId = @intPatternId
-				AND strSubPatternName = @strSubPatternName3
-			)
+	--INSERT dbo.tblMFPatternDetail (
+	--	intPatternId
+	--	,strSubPatternName
+	--	,intSubPatternTypeId
+	--	,intSubPatternSize
+	--	,strSubPatternTypeDetail
+	--	,strSubPatternFormat
+	--	,intOrdinalPosition
+	--	,ysnPaddingZero
+	--	)
+	--SELECT intPatternId = @intPatternId
+	--	,strSubPatternName = @strSubPatternName3
+	--	,intSubPatternTypeId = @intSubPatternTypeId3
+	--	,intSubPatternSize = 3
+	--	,strSubPatternTypeDetail = @strSubPatternTypeDetail3
+	--	,strSubPatternFormat = ''
+	--	,intOrdinalPosition = 3
+	--	,ysnPaddingZero = 0
+	--WHERE NOT EXISTS (
+	--		SELECT *
+	--		FROM dbo.tblMFPatternDetail
+	--		WHERE intPatternId = @intPatternId
+	--			AND strSubPatternName = @strSubPatternName3
+	--		)
 
 	SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
 	FROM tblSMCompanyLocation
@@ -164,7 +193,7 @@ DECLARE @strPatternString NVARCHAR(50)
 
 SELECT @intSubPatternTypeId = 1
 
-SELECT @strSubPatternName = 'Part1'
+SELECT @strSubPatternName = 'ParentLotNumber'
 
 SELECT @strSubPatternTypeDetail = '@strParentLotNumber'
 
@@ -176,7 +205,7 @@ SELECT @strSubPatternTypeDetail2 = ''
 
 SELECT @intSubPatternTypeId3 = 1
 
-SELECT @strSubPatternName3 = 'Part2'
+SELECT @strSubPatternName3 = 'Hyphen'
 
 SELECT @strSubPatternTypeDetail3 = '-'
 
@@ -270,11 +299,11 @@ BEGIN
 	SELECT intPatternId = @intPatternId
 		,strSubPatternName = @strSubPatternName2
 		,intSubPatternTypeId = @intSubPatternTypeId2
-		,intSubPatternSize = 9
+		,intSubPatternSize = 2
 		,strSubPatternTypeDetail = @strSubPatternTypeDetail2
 		,strSubPatternFormat = ''
 		,intOrdinalPosition = 3
-		,ysnPaddingZero = 0
+		,ysnPaddingZero = 1
 	WHERE NOT EXISTS (
 			SELECT *
 			FROM dbo.tblMFPatternDetail
