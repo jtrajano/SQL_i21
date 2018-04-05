@@ -55,10 +55,12 @@ FROM (
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IRL.intItemUnitMeasureId
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = IRL.intLotId
+	JOIN dbo.tblICLot L on L.intLotId=LI.intLotId
+	JOIN dbo.tblICItemOwner IO1 on IO1.intItemOwnerId =L.intItemOwnerId 
 	Left JOIN vyuMFGetPutawayDate PD ON PD.intLotId=IRL.intLotId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-				--AND IO1.intOwnerId = @intOwnerId
+			AND IO1.intOwnerId = @intOwnerId
 	) AS DT
 GROUP BY DT.strReceiptNumber
 	,DT.strBillOfLading
