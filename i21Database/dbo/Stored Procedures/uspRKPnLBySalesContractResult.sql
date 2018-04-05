@@ -351,7 +351,7 @@ FROM (
 	LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
 	WHERE intSContractDetailId = @intSContractDetailId
 	
-	UNION ALL
+	UNION 
 	
 	SELECT DISTINCT TP.strContractType
 		,CH.strContractNumber + ' - ' + convert(NVARCHAR(100), CD.intContractSeq)
@@ -382,7 +382,7 @@ FROM (
 	LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
 	WHERE intSContractDetailId = @intSContractDetailId
 
-UNION ALL
+UNION 
 	SELECT DISTINCT TP.strContractType
 		,CH.strContractNumber + ' - ' + convert(NVARCHAR(100), CD.intContractSeq)
 		,CD.intContractDetailId
@@ -413,7 +413,7 @@ UNION ALL
 	LEFT JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = t.intFutureMonthId
 	WHERE intSContractDetailId = @intSContractDetailId
 
-	UNION ALL
+	UNION 
 	SELECT DISTINCT TP.strContractType
 		,CH.strContractNumber + ' - ' + convert(NVARCHAR(100), CD.intContractSeq)
 		,CD.intContractDetailId
