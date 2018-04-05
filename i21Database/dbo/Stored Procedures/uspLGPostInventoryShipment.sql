@@ -13,9 +13,9 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'Outbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 -- Constants  
-DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 46
 DECLARE @ysnRecap AS INT = 0
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
