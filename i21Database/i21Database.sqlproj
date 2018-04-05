@@ -6294,6 +6294,9 @@
     <Build Include="dbo\Views\vyuHDProjectTimeHoursReport.sql" />
     <Build Include="dbo\Views\vyuCTContractsToWashout.sql" />
     <Build Include="dbo\Tables\tblCTWashout.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceTransactionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceTransactionHistory.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

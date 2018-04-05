@@ -6,6 +6,14 @@ BEGIN
 	SELECT @TransactionType = [strTransactionType] FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = @TransactionType
 
+	DECLARE @AmountDue NUMERIC(18, 6)
+	DECLARE @CurrencyId INT
+	DECLARE @CompanyLocationId INT
+
+	SELECT TOP 1 @AmountDue = [dblAmountDue], 
+				@CurrencyId = intCurrencyId,
+				@CompanyLocationId = intCompanyLocationId
+	FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
 	INSERT INTO [tblARTransactionDetail](
 		 [intTransactionDetailId]
 		,[intTransactionId]
@@ -29,7 +37,11 @@ BEGIN
 		,[intCompanyLocationSubLocationId]
 		,[intStorageLocationId]
 		,[intOwnershipTypeId]
-		,[intStorageScheduleTypeId])
+		,[intStorageScheduleTypeId]
+		,[intCurrencyId]
+		,[intSubCurrencyId]
+		,[dblAmountDue]
+		,[intCompanyLocationId])
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
@@ -54,6 +66,10 @@ BEGIN
 		,[intStorageLocationId]					= [intStorageLocationId]
 		,[intOwnershipTypeId]					= NULL
 		,[intStorageScheduleTypeId]				= [intStorageScheduleTypeId]
+		,[intCurrencyId]						= @CurrencyId
+		,[intSubCurrencyId] 					= [intSubCurrencyId]
+		,[dblAmountDue]							= @AmountDue
+		,[intCompanyLocationId]					= @CompanyLocationId
 	FROM
 		[tblARInvoiceDetail]
 	WHERE

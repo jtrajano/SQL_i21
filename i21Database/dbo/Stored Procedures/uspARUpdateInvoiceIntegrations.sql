@@ -42,6 +42,9 @@ EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
 
+DECLARE @InvoiceIds InvoiceId
+INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
+EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 IF @ForDelete = 1
 EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
 

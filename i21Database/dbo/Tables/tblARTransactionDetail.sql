@@ -25,6 +25,10 @@
 	[intStorageLocationId]					INT				NULL,
 	[intOwnershipTypeId]					INT				NULL,
 	[intStorageScheduleTypeId]				INT				NULL,
+	[intCurrencyId]							INT				NULL,
+	[intSubCurrencyId]						INT				NULL,
+    [dblAmountDue]							NUMERIC (18, 6) NULL,
+	[intCompanyLocationId]					INT 			NULL,	
 	[intConcurrencyId]						INT				CONSTRAINT [DF_tblARTransactionDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARTransactionDetail] PRIMARY KEY CLUSTERED ([intId] ASC)
 )

@@ -3744,6 +3744,13 @@ IF @recap = 0
 			INSERT INTO @InvoiceToUpdate(intInvoiceId)
 			SELECT DISTINCT intInvoiceId FROM @PostInvoiceData
 
+			-- Log Transaction History
+			DECLARE @InvoicesId AS InvoiceId
+			INSERT INTO @InvoicesId(intHeaderId)
+			SELECT DISTINCT intInvoiceId FROM @PostInvoiceData
+						
+			EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoicesId,@post
+
 			--UPDATE tblARCustomer.dblARBalance
 			UPDATE CUSTOMER
 			SET dblARBalance = dblARBalance + (CASE WHEN @post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
@@ -3781,7 +3788,8 @@ IF @recap = 0
 				FROM @PostInvoiceData
 			) B ON A.intInvoiceId = B.intInvoiceId 
 			WHERE ysnApplied = 0
-																
+
+																			
 		END TRY
 		BEGIN CATCH	
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										

@@ -52,7 +52,8 @@ EXEC dbo.[uspARUpdateInboundShipmentOnInvoices] @IIDs
 EXEC dbo.[uspARUpdateProvisionalOnStandardInvoices] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsCommitted] @IIDs
-
+--
+EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs
 DELETE FROM ARTD
 FROM
 	tblARTransactionDetail ARTD WITH (NOLOCK)
