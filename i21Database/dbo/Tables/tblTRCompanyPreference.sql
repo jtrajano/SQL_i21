@@ -5,7 +5,7 @@
 	[intSurchargeItemId] INT NULL,
 	[intShipViaId] INT NULL,
 	[intSellerId] INT NULL,
-	[strRackPriceToUse] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strRackPriceToUse] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Vendor'),
     [ysnItemizeSurcharge] BIT NULL,		
 	[intFreightCostAllocationMethod] INT NULL DEFAULT ((3)),
 	[intRackPriceImportMappingId] INT NULL,
