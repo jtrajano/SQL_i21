@@ -112,7 +112,7 @@ SELECT
 																END)
 													END, --use cash price of contract if unit cost of receipt item is 0,
 	[dblCostUnitQty]				=	ISNULL(CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
-											THEN ContractItemCostUOM.dblUnitQty
+											THEN contractDetail.dblCostUnitQty
 											ELSE ItemCostUOM.dblUnitQty END, 1),
 	[dblTotal]						=	0,
 										-- CAST((CASE WHEN contractDetail.dblCashPrice > 0 
@@ -136,7 +136,7 @@ SELECT
 											THEN contractDetail.dblRate
 											ELSE B.dblForexRate END,
 	[intCostUOMId]					=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
-											THEN contractDetail.intPriceItemUOMId
+											THEN contractDetail.intSeqPriceUOMId
 											ELSE B.intCostUOMId END,
 	[intTaxGroupId]					=	A.intTaxGroupId,
 	[intCurrencyExchangeRateTypeId]	=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
@@ -866,7 +866,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
-		SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+		SELECT SUM(ISNULL(NULLIF(dblAdjustedTax,0), dblTax)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
 	) taxes
 	OUTER APPLY (
 		SELECT TOP 1 intSubCurrencyCents FROM tblAPBill WHERE intBillId = voucherDetails.intBillId
