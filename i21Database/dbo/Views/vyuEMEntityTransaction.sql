@@ -18,7 +18,7 @@
 	from vyuARCustomerHistory a	
 		left join tblARInvoice b on a.strTransactionNumber = b.strInvoiceNumber
 			where (b.intInvoiceId is null or  b.strType <> 'CF Tran')
-	union
+	union all
 	select 
 		intEntityId = intEntityVendorId,
 		strBillId = strBillId COLLATE Latin1_General_CI_AS,
@@ -36,7 +36,7 @@
 		dtmDatePaid = dtmDatePaid
 		--,* 
 	from vyuAPVendorHistory
-	union
+	union all
 	select 
 		intEntityId = intEntityCustomerId,
 		strBillId = '' COLLATE Latin1_General_CI_AS,
