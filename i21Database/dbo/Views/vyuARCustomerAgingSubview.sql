@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerAgingSubview]
 AS
-WITH RESULT (intInvoiceId, dblAmountPaid, dblInvoiceTotal, dblAmountDue, dtmDueDate, intEntityCustomerId, dblAvailableCredit, dblPrepayments, strType)
+WITH RESULT_CTE (intInvoiceId, dblAmountPaid, dblInvoiceTotal, dblAmountDue, dtmDueDate, intEntityCustomerId, dblAvailableCredit, dblPrepayments, strType)
 AS(SELECT I.intInvoiceId
      , dblAmountPaid		= 0
      , dblInvoiceTotal		= ISNULL(dblInvoiceTotal,0)
@@ -308,4 +308,4 @@ SELECT DISTINCT
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl90Days    
   , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 90 AND strType <> 'CF Tran'
 	     THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl91Days 
-FROM RESULT
+FROM RESULT_CTE
