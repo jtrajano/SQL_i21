@@ -1236,3 +1236,25 @@ BEGIN
 END
 GO
 
+
+ALTER TABLE tblGLCurrentFiscalYear
+ALTER COLUMN intFiscalYearId INT NULL
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblGLFiscalYear)
+BEGIN
+	IF NOT EXISTS( SELECT TOP 1 1 FROM tblGLCurrentFiscalYear cfy JOIN tblGLFiscalYear fy on fy.intFiscalYearId = cfy.intFiscalYearId)
+	BEGIN
+		DECLARE @intFiscalYearId INT
+		SELECT TOP 1 intFiscalYearId = @intFiscalYearId FROM tblGLFiscalYear
+		UPDATE tblGLCurrentFiscalYear SET  intFiscalYearId = @intFiscalYearId
+		PRINT 'Updated tblGLCurrentFiscalYear'
+	END
+END
+ELSE
+	UPDATE tblGLCurrentFiscalYear SET  intFiscalYearId = NULL
+GO
+PRINT 'Finished cleaning tblGLCurrentFiscalYear'
+GO
+
+
