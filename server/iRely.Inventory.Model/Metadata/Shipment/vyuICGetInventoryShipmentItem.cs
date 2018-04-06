@@ -69,6 +69,8 @@ namespace iRely.Inventory.Model
         public string strDockDoor { get; set; }
         public decimal? dblDestinationQuantity { get; set; }
         public int? intContractSeq { get; set; }
+        public string strPriceUOM { get; set; }
+        public decimal? dblCostUOMConv { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }
