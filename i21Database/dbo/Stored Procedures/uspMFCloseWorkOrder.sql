@@ -454,7 +454,7 @@ BEGIN TRY
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
 					THEN @dblNewCost
 				ELSE (@dblNewCost * RI.dblPercentage / 100)
-				END
+				END-ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
 				FROM tblSMCompanyPreference
