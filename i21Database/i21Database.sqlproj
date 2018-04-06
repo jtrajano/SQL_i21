@@ -6267,6 +6267,8 @@
     <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
     <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
