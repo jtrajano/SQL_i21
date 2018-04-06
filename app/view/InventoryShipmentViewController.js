@@ -1375,7 +1375,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     var dblForexRate = successResponse[0].dblRate;
                     var strRateType = successResponse[0].strRateType;             
 
-                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                       
+                    dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0;                          
 
                     // Convert the sales price to the transaction currency.
                     // and round it to six decimal places.  
@@ -1579,10 +1579,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         else if (combo.itemId === 'cboPriceUOM') {
             var dblSalesPrice = records[0].get('dblSalePrice');
             var dblSalesPriceForeign = records[0].get('dblSalePrice');
-            var intItemUOMId = records[0].get('intItemUOMId');
+            var intPriceUOMId = records[0].get('intItemUOMId');
             var strUnitMeasure = records[0].get('strUnitMeasure');
             var dblForexRate = current.get('dblForexRate');
             var dblUnitQty = records[0].get('dblUnitQty');
+            var intItemUOMId = current.get('intItemUOMId');
             dblForexRate = Ext.isNumeric(dblForexRate) ? dblForexRate : 0; 
             dblSalesPrice = Ext.isNumeric(dblSalesPrice) ? dblSalesPrice : 0; 
 
@@ -1591,7 +1592,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);            
 
             current.set('dblUnitPrice', dblSalesPriceForeign);
-            current.set('intPriceUOMId', intItemUOMId);
+            current.set('intPriceUOMId', intPriceUOMId);
             current.set('strPriceUOM', strUnitMeasure); 
             current.set('dblCostUOMConv', dblUnitQty);
 
@@ -1615,6 +1616,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dblUnitPrice = itemPricing.dblPrice; 
                     dblUnitPrice = Ext.isNumeric(dblUnitPrice) ? dblUnitPrice : 0; 
 
+                    // Convert the unit price to Price UOM
+                    var dblItemUOMConv = current.get('dblItemUOMConv');
+                    var dblCostUOMConv = current.get('dblCostUOMConv');
+
+                    dblUnitPrice = Inventory.Utils.Uom.convertCostBetweenUOM(dblItemUOMConv, dblCostUOMConv, dblUnitPrice);                    
+
+                    // Convert to the currency. 
                     dblSalesPriceForeign = dblForexRate != 0 ? dblUnitPrice / dblForexRate : dblUnitPrice;
                     dblSalesPriceForeign = i21.ModuleMgr.Inventory.roundDecimalFormat(dblSalesPriceForeign, 6);                         
 
@@ -3797,6 +3805,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             isItemRetailPrice = false;
                         }                    
                     }
+                    
+                    // Convert the unit price to Price UOM
+                    var dblItemUOMConv = currentItem.get('dblItemUOMConv');
+                    var dblCostUOMConv = currentItem.get('dblCostUOMConv');
+
+                    dblUnitPrice = Inventory.Utils.Uom.convertCostBetweenUOM(dblItemUOMConv, dblCostUOMConv, dblUnitPrice);
 
                     // Convert the sales price to the transaction currency.
                     // and round it to six decimal places.  
@@ -3812,8 +3826,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 var processCustomerPriceOnFailure = function(failureResponse){
                     var jsonData = Ext.decode(failureResponse.responseText);
                     iRely.Functions.showErrorDialog('Something went wrong while getting the item price from the customer pricing hierarchy.');
-                };            
-
+                };           
+               
                 // Get the customer cost from the hierarchy.  
                 var customerPriceCfg = {
                     ItemId: currentItem.get('intItemId'),

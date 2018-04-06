@@ -73,6 +73,53 @@ Ext.define('Inventory.Utils', {
         
                 //return Math.round(result, 12);
                 return Inventory.Utils.Math.roundWithPrecision(result, 12); 
+            }, 
+
+            convertCostBetweenUOM: function(sourceUOMConversionFactor, targetUOMConversionFactor, cost) {
+                var result = 0;
+
+                if (!Ext.isNumeric(sourceUOMConversionFactor) || sourceUOMConversionFactor === 0.00)
+                    return result; 
+
+                if (!Ext.isNumeric(targetUOMConversionFactor) || targetUOMConversionFactor === 0.00)
+                    return result;                     
+
+                if (sourceUOMConversionFactor === targetUOMConversionFactor) {
+                    result = cost;
+                }
+
+                else if (sourceUOMConversionFactor === 1){
+                    result = cost * targetUOMConversionFactor;
+                }
+
+                else if (targetUOMConversionFactor === 1){
+                    result = cost / sourceUOMConversionFactor;
+                }
+
+                else if (
+                    sourceUOMConversionFactor < 1
+                    && sourceUOMConversionFactor < targetUOMConversionFactor
+                ){
+                    result = cost / sourceUOMConversionFactor;
+                    result = result * targetUOMConversionFactor;
+                }
+
+                else if (sourceUOMConversionFactor < targetUOMConversionFactor){
+                    result = cost * sourceUOMConversionFactor;
+                    result = result / targetUOMConversionFactor;
+                }
+
+                else if (sourceUOMConversionFactor > targetUOMConversionFactor){
+                    result = cost / sourceUOMConversionFactor;
+                    result = result * targetUOMConversionFactor;
+                }
+
+                else {
+                    result = cost * sourceUOMConversionFactor;
+                    result = result / targetUOMConversionFactor;                    
+                }
+
+                return Inventory.Utils.Math.roundWithPrecision(result, 12); 
             }
         },
         
