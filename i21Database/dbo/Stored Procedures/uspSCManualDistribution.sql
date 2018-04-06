@@ -373,10 +373,11 @@ BEGIN
 END
 
 	SELECT	@strTransactionId = IR.strReceiptNumber
-	, @intLocationId = IR.intLocationId
-	, @intShipFrom = IR.intShipFromId
-	, @vendorOrderNumber = IR.strVendorRefNo 
-	, @voucherDate = IR.dtmReceiptDate
+		, @intLocationId = IR.intLocationId
+		, @intShipFrom = IR.intShipFromId
+		, @vendorOrderNumber = IR.strVendorRefNo 
+		, @voucherDate = IR.dtmReceiptDate
+		, @intCurrencyId = IR.intCurrencyId
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId
 	
