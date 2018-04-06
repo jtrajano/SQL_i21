@@ -5886,6 +5886,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 if (!iRely.Functions.isEmpty(order.get('strLotTracking')) && order.get('strLotTracking') !== 'No') {
                                     var currentReceiptItemVM = me.getViewModel().data.currentReceiptItem;
 
+                                    var dtmManufacturedDate = order.get('dtmManufacturedDate'); 
+                                    var dtmReceiptDate = currentVM ? currentVM.get('dtmReceiptDate') : null; 
+                                    var intLifeTime = order.get('intLifeTime'); 
+                                    var strLifeTimeType = order.get('strLifeTimeType'); 
+
+                                    var lotExpiryDate = me.getLotExpiryDate (
+                                        dtmManufacturedDate, 
+                                        dtmReceiptDate, 
+                                        intLifeTime, 
+                                        strLifeTimeType
+                                    ); 
+
                                     var newReceiptItemLot = Ext.create('Inventory.model.ReceiptItemLot', {
                                         intLotId: order.get('intLotId'),
                                         strLotNumber: order.get('strLotNumber'),
@@ -5908,7 +5920,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         strUnitMeasure: newReceiptItem.get('strUnitMeasure'),
                                         dblLotUOMConvFactor: newReceiptItem.get('dblItemUOMConvFactor'),
                                         strMarkings: order.get('strMarkings'),
-                                        strCondition: order.get('strLotCondition')
+                                        strCondition: order.get('strLotCondition'), 
+                                        dtmExpiryDate: lotExpiryDate
                                     });
                                     currentReceiptItemVM.tblICInventoryReceiptItemLots().add(newReceiptItemLot);
                                 }
