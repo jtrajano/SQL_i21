@@ -1237,22 +1237,29 @@ END
 GO
 
 
-ALTER TABLE tblGLCurrentFiscalYear
-ALTER COLUMN intFiscalYearId INT NULL
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCurrentFiscalYear]') AND type in (N'U')) 
+BEGIN
+    ALTER TABLE tblGLCurrentFiscalYear
+    ALTER COLUMN intFiscalYearId INT NULL
+END
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM tblGLFiscalYear)
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLCurrentFiscalYear]') AND type in (N'U')) 
 BEGIN
-	IF NOT EXISTS( SELECT TOP 1 1 FROM tblGLCurrentFiscalYear cfy JOIN tblGLFiscalYear fy on fy.intFiscalYearId = cfy.intFiscalYearId)
-	BEGIN
-		DECLARE @intFiscalYearId INT
-		SELECT TOP 1 intFiscalYearId = @intFiscalYearId FROM tblGLFiscalYear
-		UPDATE tblGLCurrentFiscalYear SET  intFiscalYearId = @intFiscalYearId
-		PRINT 'Updated tblGLCurrentFiscalYear'
-	END
+    IF EXISTS (SELECT TOP 1 1 FROM tblGLFiscalYear)
+    BEGIN
+        IF NOT EXISTS( SELECT TOP 1 1 FROM tblGLCurrentFiscalYear cfy JOIN tblGLFiscalYear fy on fy.intFiscalYearId = cfy.intFiscalYearId)
+        BEGIN
+            DECLARE @intFiscalYearId INT
+            SELECT TOP 1 intFiscalYearId = @intFiscalYearId FROM tblGLFiscalYear
+            UPDATE tblGLCurrentFiscalYear SET  intFiscalYearId = @intFiscalYearId
+            PRINT 'Updated tblGLCurrentFiscalYear'
+        END
+    END
+    ELSE
+        UPDATE tblGLCurrentFiscalYear SET  intFiscalYearId = NULL
 END
-ELSE
-	UPDATE tblGLCurrentFiscalYear SET  intFiscalYearId = NULL
+
 GO
 PRINT 'Finished cleaning tblGLCurrentFiscalYear'
 GO
