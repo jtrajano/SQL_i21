@@ -7,6 +7,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intItemId				= SODETAIL.intItemId
 	 , strItemDescription		= SODETAIL.strItemDescription
 	 , intItemUOMId				= SODETAIL.intItemUOMId
+	 , intPriceUOMId			= SODETAIL.intPriceUOMId
 	 , intContractHeaderId		= SODETAIL.intContractHeaderId
 	 , intContractDetailId		= SODETAIL.intContractDetailId
 	 , intRecipeId				= SODETAIL.intRecipeId
@@ -48,6 +49,7 @@ INNER JOIN (
 		 , intSalesOrderDetailId
 		 , intItemId
 		 , intItemUOMId
+		 , intPriceUOMId
 		 , intContractHeaderId
 		 , intContractDetailId
 		 , intRecipeId

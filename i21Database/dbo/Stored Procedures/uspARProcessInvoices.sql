@@ -217,6 +217,7 @@ DECLARE  @Id									INT
 		,@OrderUOMId							INT
 		,@ItemQtyOrdered						NUMERIC(18, 6)
 		,@ItemUOMId								INT
+		,@PriceUOMId							INT
 		,@ItemQtyShipped						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemTermDiscount						NUMERIC(18, 6)
@@ -377,6 +378,7 @@ BEGIN
 		,@OrderUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
 		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
+		,@PriceUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intPriceUOMId] ELSE NULL END)
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
 		,@ItemTermDiscount				= (CASE WHEN @GroupingOption = 0 THEN [dblItemTermDiscount] ELSE NULL END)
@@ -608,6 +610,7 @@ BEGIN
 			,@OrderUOMId					= @OrderUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemUOMId						= @ItemUOMId
+			,@PriceUOMId					= @PriceUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemTermDiscount				= @ItemTermDiscount
@@ -772,6 +775,7 @@ BEGIN
 					,@OrderUOMId					= [intOrderUOMId]					
 					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemUOMId						= [intItemUOMId]
+					,@PriceUOMId					= [intPriceUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemTermDiscount				= [dblItemTermDiscount]
@@ -862,6 +866,7 @@ BEGIN
 						,@OrderUOMId					= @OrderUOMId
 						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemUOMId						= @ItemUOMId
+						,@PriceUOMId					= @PriceUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
 						,@ItemDiscount					= @ItemDiscount
 						,@ItemTermDiscount				= @ItemTermDiscount
@@ -1462,6 +1467,7 @@ BEGIN TRY
 						,@OrderUOMId					= [intOrderUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemUOMId						= [intItemUOMId]
+						,@PriceUOMId					= [intPriceUOMId]
 						,@ItemQtyShipped				= [dblQtyShipped]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
@@ -1548,6 +1554,7 @@ BEGIN TRY
 							,@OrderUOMId					= @OrderUOMId
 							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemUOMId						= @ItemUOMId
+							,@PriceUOMId					= @PriceUOMId
 							,@ItemQtyShipped				= @ItemQtyShipped
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
@@ -1767,6 +1774,7 @@ BEGIN TRY
 					,@OrderUOMId					= [intOrderUOMId]
 					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemUOMId						= [intItemUOMId]
+					,@PriceUOMId					= [intPriceUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
@@ -1886,6 +1894,7 @@ BEGIN TRY
 						,[intOrderUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @OrderUOMId ELSE [intOrderUOMId] END
 						,[dblQtyOrdered]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemQtyOrdered ELSE [dblQtyOrdered] END
 						,[intItemUOMId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemUOMId ELSE [intItemUOMId] END
+						,[intPriceUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @PriceUOMId ELSE [intPriceUOMId] END
 						,[dblQtyShipped]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemQtyShipped ELSE [dblQtyShipped] END
 						,[dblDiscount]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDiscount ELSE [dblDiscount] END
 						,[dblItemTermDiscount]					= @ItemTermDiscount
