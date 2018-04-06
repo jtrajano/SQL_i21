@@ -61,7 +61,8 @@ AS
 				intCurrencyId,
 				intForexRateTypeId,
 				dblForexRate,
-				strChargesLink
+				strChargesLink,
+				intPriceUOMId
 		)	
 		SELECT	intOrderType			=	1,
 				intSourceType			=	0,
@@ -84,7 +85,8 @@ AS
 				intCurrencyId			=	AD.intSeqCurrencyId,
 				intForexRateTypeId		=	CD.intRateTypeId,
 				dblForexRate			=	CD.dblRate,
-				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq)
+				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq),
+				intPriceUOMId			=	CD.intPriceItemUOMId
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
