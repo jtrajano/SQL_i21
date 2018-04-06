@@ -286,6 +286,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\27_RemoveAfter18.1_DataFix.sql 
 :r .\IC\28_Company_Preferences.sql
 :r .\IC\29_Inventory_Constraints.sql
+:r .\IC\30_Populate_Shipment_LineTotal.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

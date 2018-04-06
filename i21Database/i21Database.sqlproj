@@ -6307,6 +6307,8 @@
     <Build Include="dbo\Views\vyuHDProjectDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectDetailSearch.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockTransferred.sql" />
+    <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
