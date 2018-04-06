@@ -95,8 +95,8 @@ AS
 	, TransferDetail.intGrossNetUOMId
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
 	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
-	, dblGrossNetUnitQty = GrossNetUOM.dblUnitQty  --TransferDetail.dblGrossNetUnitQty
-	, dblItemUnitQty = ItemUOM.dblUnitQty --TransferDetail.dblItemUnitQty
+	, dblGrossNetUnitQty = TransferDetail.dblGrossNetUnitQty
+	, dblItemUnitQty = TransferDetail.dblItemUnitQty
 	, [Transfer].dtmTransferDate
 	, [Transfer].ysnShipmentRequired
 	, strTransferredBy = e.strName

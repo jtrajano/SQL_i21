@@ -11,7 +11,7 @@ USING	(
 				,name = 'Open'
 		UNION ALL 
 		SELECT	id = 2
-				,name = 'Partial'
+				,name = 'In Transit'
 		UNION ALL 
 		SELECT	id = 3
 				,name = 'Closed'

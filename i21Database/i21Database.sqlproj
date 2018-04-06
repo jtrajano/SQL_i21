@@ -6306,6 +6306,7 @@
     <Build Include="dbo\Tables\tblHDProjectDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectDetailSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockTransferred.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -21,7 +21,7 @@ FROM (
 			, intItemId					= d.intItemId
 			, strItemNo					= item.strItemNo
 			, strItemDescription		= item.strDescription
-			, dblQtyToReceive			= d.dblQuantity -- -t.dblQty 
+			, dblQtyToReceive			= d.dblQuantity - st.dblReceiptQty
 			, intLoadToReceive			= CAST(0 AS INT)
 			, dblUnitCost				= --t.dblCost 
 										CASE 
@@ -88,8 +88,8 @@ FROM (
 			, ysnSubCurrency			= CAST(0 AS BIT) 
 			, intCurrencyId				= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 			, strSubCurrency			= CAST(NULL AS NVARCHAR(50)) 
-			, dblGross					= ISNULL(d.dblGross, 0) -- There is no gross from transfer
-			, dblNet					= ISNULL(d.dblNet, 0) -- There is no net from transfer
+			, dblGross					= ISNULL(d.dblGross - st.dblReceiptGross, 0) -- There is no gross from transfer
+			, dblNet					= ISNULL(d.dblNet-st.dblReceiptNet, 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
 			, intBundledItemId = CAST(NULL AS INT)
 			, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
@@ -155,7 +155,7 @@ FROM (
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
-
+			LEFT JOIN vyuICGetItemStockTransferred st ON st.intInventoryTransferId = h.intInventoryTransferId
 			--LEFT JOIN dbo.tblICLot LotItem
 			--	ON item.intItemId = LotItem.intItemId
 			--	AND ItemUOM.intItemUOMId = LotItem.intItemUOMId

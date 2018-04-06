@@ -35,6 +35,8 @@
     [dblNet] NUMERIC(38,20) NULL,
     [intNewLotStatusId] INT NULL,
     [intGrossNetUOMId] INT NULL,
+    [dblGrossNetUnitQty] NUMERIC(38,20) NULL,
+    [dblItemUnitQty] NUMERIC(38,20) NULL,
 	[dblWeightPerQty] NUMERIC(38, 20) NULL,
 	[strLotCondition] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,    
     CONSTRAINT [PK_tblICInventoryTransferDetail] PRIMARY KEY ([intInventoryTransferDetailId]), 

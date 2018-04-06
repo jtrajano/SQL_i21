@@ -1897,11 +1897,6 @@ BEGIN
 	-- Update the Inbound and Outbound In-Transit Qty for the Transfer Orders. 
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @InTransit_Outbound
 	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransit_Inbound
-
-	IF @ysnPost = 1 
-		EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 3 -- Set status of the transfer order to 'Closed'
-	ELSE 
-		EXEC dbo.[uspICUpdateTransferOrderStatus] @intTransactionId, 1 -- Set status of the transfer order to 'Open'
 END
 
 --------------------------------------------------------------------------------------------  

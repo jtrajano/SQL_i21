@@ -692,6 +692,14 @@ BEGIN
 	END
 END 
 
+IF(@ReceiptType = @ReceiptType_TransferOrder)
+BEGIN
+	IF @ForDelete = 0 
+		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 3 -- Set status of the transfer order to 'Closed'
+	ELSE 
+		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 1 -- Set status of the transfer order to 'Open'
+END
+
 -- Delete the data snapshot. 
 DELETE	FROM tblICTransactionDetailLog 
 WHERE	strTransactionType = 'Inventory Receipt' 

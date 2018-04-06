@@ -748,9 +748,8 @@ BEGIN
 	IF @ysnPost = 1
 	BEGIN
 		UPDATE	dbo.tblICInventoryTransfer  
-		SET		intStatusId = 3 -- Status: Closed
-		WHERE	strTransferNo = @strTransactionId 
-				AND ysnShipmentRequired = 0   
+		SET		intStatusId = CASE ysnShipmentRequired WHEN 1 THEN 2 ELSE 3 END -- Status: In Transit
+		WHERE	strTransferNo = @strTransactionId
 	END
 	ELSE
 	BEGIN

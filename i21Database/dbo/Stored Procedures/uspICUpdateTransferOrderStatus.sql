@@ -32,13 +32,47 @@ IF @intStatusId = 3
 	END
 END
 
--- Update the status of the transfer order
+-- IF Status is updated in Posting
+-- t.intStatusId = CASE WHEN ri.dblOrderQty = (ISNULL(tf.dblReceiptQty, 0) + ri.dblOpenReceive) THEN @intStatusId ELSE 2 END
 UPDATE t
-SET t.intStatusId = @intStatusId
+SET t.intStatusId = CASE WHEN ri.dblOrderQty = (ISNULL(tf.dblReceiptQty, 0) ) THEN @intStatusId ELSE 2 END
 FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptItem i ON i.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = i.intOrderId
+	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
+	LEFT OUTER JOIN (
+		SELECT st.intInventoryTransferId, SUM(ISNULL(st.dblReceiptQty, 0)) dblReceiptQty 
+		FROM vyuICGetItemStockTransferred st
+		GROUP BY st.intInventoryTransferId
+	) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
 WHERE r.intInventoryReceiptId = @ReceiptId
 	AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+
+DECLARE @Count INT
+SELECT @Count = COUNT(*)
+FROM tblICInventoryReceipt r
+	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
+WHERE r.intInventoryReceiptId = @ReceiptId
+	AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+	
+IF(@Count = 0)
+BEGIN
+
+	DECLARE @TransferId INT
+	SELECT TOP 1 @TransferId = ar.intOrderId
+	FROM #tmpBeforeSaveReceiptItems ar
+	WHERE ar.intInventoryReceiptId = @ReceiptId
+
+	UPDATE t
+	SET t.intStatusId = CASE WHEN ISNULL(tf.dblReceiptQty, 0) > 0 THEN 2 ELSE 1 END
+	FROM tblICInventoryTransfer t
+		LEFT OUTER JOIN (
+			SELECT st.intInventoryTransferId, SUM(ISNULL(st.dblReceiptQty, 0)) dblReceiptQty 
+			FROM vyuICGetItemStockTransferred st
+			GROUP BY st.intInventoryTransferId
+		) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
+	WHERE t.intInventoryTransferId = @TransferId
+END
+
 
 Post_Exit:
