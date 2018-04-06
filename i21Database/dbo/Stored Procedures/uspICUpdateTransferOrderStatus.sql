@@ -64,14 +64,19 @@ BEGIN
 	WHERE ar.intInventoryReceiptId = @ReceiptId
 
 	UPDATE t
-	SET t.intStatusId = CASE WHEN ISNULL(tf.dblReceiptQty, 0) > 0 THEN 2 ELSE 1 END
+	SET t.intStatusId = 2
 	FROM tblICInventoryTransfer t
-		LEFT OUTER JOIN (
-			SELECT st.intInventoryTransferId, SUM(ISNULL(st.dblReceiptQty, 0)) dblReceiptQty 
-			FROM vyuICGetItemStockTransferred st
-			GROUP BY st.intInventoryTransferId
-		) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
 	WHERE t.intInventoryTransferId = @TransferId
+
+	-- UPDATE t
+	-- SET t.intStatusId = CASE WHEN ISNULL(tf.dblReceiptQty, 0) > 0 THEN 2 ELSE 1 END
+	-- FROM tblICInventoryTransfer t
+	-- 	LEFT OUTER JOIN (
+	-- 		SELECT st.intInventoryTransferId, SUM(ISNULL(st.dblReceiptQty, 0)) dblReceiptQty 
+	-- 		FROM vyuICGetItemStockTransferred st
+	-- 		GROUP BY st.intInventoryTransferId
+	-- 	) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
+	-- WHERE t.intInventoryTransferId = @TransferId
 END
 
 
