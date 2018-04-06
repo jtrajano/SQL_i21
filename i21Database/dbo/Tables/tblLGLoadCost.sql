@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[tblLGLoadCost]
 	[intCurrencyId] INT NULL,
 	[dblRate] [numeric](10, 4) NULL,
 	[dblAmount] [numeric](10, 4) NULL,
+	[dblFX] [numeric](10, 4) NULL,
 	[intItemUOMId] [int] NULL,
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblLGLoadCost_ysnAccrue]  DEFAULT ((1)),
 	[ysnMTM] [bit] NULL,
