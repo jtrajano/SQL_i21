@@ -21,7 +21,7 @@ FROM (
 			, intItemId					= d.intItemId
 			, strItemNo					= item.strItemNo
 			, strItemDescription		= item.strDescription
-			, dblQtyToReceive			= d.dblQuantity - st.dblReceiptQty
+			, dblQtyToReceive			= d.dblQuantity - ISNULL(st.dblReceiptQty, 0)
 			, intLoadToReceive			= CAST(0 AS INT)
 			, dblUnitCost				= --t.dblCost 
 										CASE 
