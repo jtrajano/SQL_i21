@@ -47,6 +47,8 @@
 					,dblActualHours
 					,dblQuotedHours
 					,dblOverShort
+					,intParentProjectId
+					,strParentProjectName
 		from 
 				(
 				select
@@ -89,6 +91,8 @@
 					,ph.dblActualHours
 					,ph.dblQuotedHours
 					,dblOverShort = (ph.dblQuotedHours-ph.dblActualHours)
+					,intParentProjectId = pp.intProjectId
+					,strParentProjectName = pp.strProjectName
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
@@ -100,4 +104,6 @@
 					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
 					left join projecthours ph on ph.intProjectId = proj.intProjectId
+					left join tblHDProjectDetail pd on pd.intDetailProjectId = proj.intProjectId
+					left join tblHDProject pp on pp.intProjectId = pd.intProjectId
 				) as query1

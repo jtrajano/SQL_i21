@@ -6303,6 +6303,9 @@
     <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
     <Build Include="dbo\Tables\tblMBILPayment.sql" />
+    <Build Include="dbo\Tables\tblHDProjectDetail.sql" />
+    <Build Include="dbo\Views\vyuHDProjectDetail.sql" />
+    <Build Include="dbo\Views\vyuHDProjectDetailSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
