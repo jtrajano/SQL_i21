@@ -81,6 +81,7 @@ BEGIN
 	DECLARE @billRecordNumber NVARCHAR(50);
 	DECLARE @contact INT;
 	DECLARE @currency INT;
+	DECLARE @vendorCurrency INT;
 	DECLARE @shipVia INT;
 	DECLARE @subCurrencyCents INT;
 	
@@ -117,7 +118,8 @@ BEGIN
 		@shipFromCity = B.strCity,
 		@shipFromPhone = B.strPhone,
 		@shipFromState = B.strState,
-		@shipFromZipCode = B.strZipCode
+		@shipFromZipCode = B.strZipCode,
+		@vendorCurrency	= A.intCurrencyId
 	FROM tblAPVendor A
 	LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId
 	LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
@@ -138,7 +140,9 @@ BEGIN
 	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo
 
 	SELECT
-		@currency = CASE WHEN ISNULL(@currencyId,0) > 0 THEN @currencyId ELSE intDefaultCurrencyId END
+		@currency = CASE WHEN ISNULL(@currencyId,0) > 0 THEN @currencyId 
+						 WHEN @vendorCurrency > 0 THEN @vendorCurrency
+					ELSE intDefaultCurrencyId END
 	FROM tblSMCompanyPreference
 
 	SELECT
