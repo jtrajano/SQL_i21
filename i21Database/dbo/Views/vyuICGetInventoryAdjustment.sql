@@ -15,7 +15,9 @@ SELECT
 			WHEN Adj.intAdjustmentType = 5 THEN 'Split Lot'
 			WHEN Adj.intAdjustmentType = 6 THEN 'Expiry Date Change'
 			WHEN Adj.intAdjustmentType = 7 THEN 'Lot Merge'
-			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move' END)
+			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move'
+			WHEN Adj.intAdjustmentType = 9 THEN 'Lot Owner Change'
+		END)
 	, Adj.strAdjustmentNo
 	, Adj.strDescription
 	, Adj.intSort
@@ -26,6 +28,7 @@ SELECT
 	, Adj.dtmUnpostedDate
 	, Adj.intSourceId
 	, Adj.intSourceTransactionTypeId
+	, Adj.intConcurrencyId
 FROM tblICInventoryAdjustment Adj
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Adj.intLocationId
 LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = Adj.intEntityId

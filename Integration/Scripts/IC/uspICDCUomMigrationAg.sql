@@ -34,9 +34,8 @@ INSERT INTO [dbo].[tblICUnitMeasure] ([strUnitMeasure]) VALUES ('LB')
 insert into tblICUnitMeasure (strUnitMeasure)
 select distinct upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) UnitMeasure
 from agitmmst
-where upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS not in 
-(select upper(strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS from tblICUnitMeasure)
-and agitm_un_per_pak > 1
+left join tblICUnitMeasure I on I.strUnitMeasure = upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS
+where agitm_un_per_pak > 1 and I.strUnitMeasure is null
 
 --update the unit type for the imported uoms
 update tblICUnitMeasure set strUnitType = 

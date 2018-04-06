@@ -6247,7 +6247,8 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
     <Build Include="dbo\Functions\fnICCheckItemUOMIdIsNotUsed.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
-	<Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6413,6 +6414,7 @@
     <Build Include="dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
+    <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

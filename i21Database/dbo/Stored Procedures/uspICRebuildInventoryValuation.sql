@@ -632,6 +632,7 @@ BEGIN
 			,@ysnPost AS BIT 
 			,@dblQty AS NUMERIC(38, 20)
 			,@intTransactionTypeId AS INT
+			,@strTransactionType AS NVARCHAR(50) 
 
 	DECLARE @AVERAGECOST AS INT = 1
 			,@FIFO AS INT = 2
@@ -694,12 +695,16 @@ BEGIN
 									NULL 
 						END
 
+			SELECT	@strTransactionType = strName  
+			FROM	tblICInventoryTransactionType 
+			WHERE	intTransactionTypeId = @intTransactionTypeId
+
 			-- Clear the data on @ItemsToPost
 			DELETE FROM @ItemsToPost
 			DELETE FROM @ItemsForInTransitCosting
 
 			-- Repost the Bill cost adjustments
-			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment') AND ISNULL(@strTransactionForm, 'Bill') IN ('Bill'))
+			IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND ISNULL(@strTransactionForm, 'Bill') IN ('Bill'))
 			BEGIN 
 				--PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
 				
@@ -710,7 +715,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@ysnRegenerateBillGLEntries
 			END
-			IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
+			IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
 			BEGIN 
 				--PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
 				
@@ -722,7 +727,7 @@ BEGIN
 			END
 
 			-- Repost 'Consume' and 'Produce'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Consume', 'Produce'))
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Consume', 'Produce'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -898,7 +903,7 @@ BEGIN
 			END
 
 			-- Repost 'Inventory Transfer'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Transfer'))
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer'))
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -1097,9 +1102,7 @@ BEGIN
 			-- Repost the following type of Inventory Adjustment:
 			ELSE IF EXISTS (
 				SELECT	1 
-				FROM	dbo.tblICInventoryTransactionType 
-				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName IN (
+				WHERE	@strTransactionType IN (
 							'Inventory Adjustment - Item Change'
 							, 'Inventory Adjustment - Split Lot'
 							, 'Inventory Adjustment - Lot Merge'
@@ -1550,7 +1553,7 @@ BEGIN
 			END
 			
 			-- Repost 'Inventory Shipment'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Shipment')) 
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Shipment')) 
 			BEGIN 
 				SET @intFobPointId = NULL 
 
@@ -2063,7 +2066,7 @@ BEGIN
 			END	
 			
 			-- Repost 'Inventory Receipt/Return'
-			ELSE IF EXISTS (SELECT 1 FROM tblICInventoryTransactionType WHERE intTransactionTypeId = @intTransactionTypeId AND strName IN ('Inventory Receipt', 'Inventory Return')) 
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Receipt', 'Inventory Return')) 
 			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -2228,7 +2231,6 @@ BEGIN
 					,@strGLDescription
 					,@ItemsToPost
 
-
 				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strTransactionId AND strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER)
 				BEGIN 
 					-- Change the contra-account to In-Transit. 
@@ -2249,120 +2251,176 @@ BEGIN
 							AND UDT.intInTransitSourceLocationId IS NOT NULL 
 				END
 
-				SET @intReturnId = NULL 
-				INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]					
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm] 
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]
-						,[dblDebitReport]
-						,[dblCreditForeign]
-						,[dblCreditReport]
-						,[dblReportingRate]
-						,[dblForeignRate]
-						,[strRateType]
-				)			
-				EXEC @intReturnId = dbo.uspICCreateReceiptGLEntries
-					@strBatchId 
-					,@strAccountToCounterInventory
-					,@intEntityUserSecurityId
-					,@strGLDescription
-					,NULL 
-					,@intItemId-- This is only used when rebuilding the stocks. 								
-
-				IF @intReturnId <> 0 
+				IF @strTransactionType = 'Inventory Receipt'
 				BEGIN 
-					--PRINT 'Error found in uspICCreateReceiptGLEntries'
-					GOTO _EXIT_WITH_ERROR
-				END 				
-
-				-- Rebuild the Other Charges GL Entries
-				BEGIN 
-					-- Delete the GL Detail related to the other charges. 
-					DELETE  gd 
-					FROM	tblGLDetail gd INNER JOIN (
-								tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-									ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-							)
-								ON 
-								gd.strTransactionId = r.strReceiptNumber
-								AND gd.intTransactionId = r.intInventoryReceiptId
-								AND gd.intJournalLineNo = ri.intInventoryReceiptItemId
-					WHERE	gd.strBatchId = @strBatchId
-							AND gd.strTransactionId = @strTransactionId
-							AND ri.intItemId = ISNULL(@intItemId, ri.intItemId)
-
-					-- Re-create the other charge GL entries. 
+					SET @intReturnId = NULL 
 					INSERT INTO @GLEntries (
-								[dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
-								,[intCurrencyId]
-								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
-								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-							)	
-					EXEC @intReturnId = dbo.uspICPostInventoryReceiptOtherCharges 
-						@intTransactionId
-						,@strBatchId
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+					)			
+					EXEC @intReturnId = dbo.uspICCreateReceiptGLEntries
+						@strBatchId 
+						,@strAccountToCounterInventory
 						,@intEntityUserSecurityId
-						,@intTransactionTypeId
-						,1
-						,@intItemId-- This is only used when rebuilding the stocks. 	
-				
+						,@strGLDescription
+						,NULL 
+						,@intItemId-- This is only used when rebuilding the stocks. 								
+
 					IF @intReturnId <> 0 
 					BEGIN 
-						--PRINT 'Error found in uspICPostInventoryReceiptOtherCharges'
+						--PRINT 'Error found in uspICCreateReceiptGLEntries'
 						GOTO _EXIT_WITH_ERROR
-					END 	
-				END 
+					END 				
+				END
+				ELSE IF @strTransactionType = 'Inventory Return'
+				BEGIN 
+					SET @intReturnId = NULL 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]					
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm] 
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strRateType]
+					)			
+					EXEC @intReturnId = dbo.uspICCreateReturnGLEntries
+						@strBatchId 
+						,@strAccountToCounterInventory
+						,@intEntityUserSecurityId
+						,@strGLDescription
+						,NULL 
+						,@intItemId -- This is only used when rebuilding the stocks. 								
+
+					IF @intReturnId <> 0 
+					BEGIN 
+						--PRINT 'Error found in uspICCreateReturnGLEntries'
+						GOTO _EXIT_WITH_ERROR
+					END 				
+				END
+
+				---- Rebuild the GL Entries on Other Charges involved in the Inventory Cost. 
+				--BEGIN 
+				--	-- Delete the GL Detail related to the other charges. 
+				--	DELETE  gd 
+				--	FROM	tblGLDetail gd INNER JOIN (
+				--				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				--					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				--			)
+				--				ON 
+				--				gd.strTransactionId = r.strReceiptNumber
+				--				AND gd.intTransactionId = r.intInventoryReceiptId
+				--				AND gd.intJournalLineNo = ri.intInventoryReceiptItemId
+				--	WHERE	gd.strBatchId = @strBatchId
+				--			AND gd.strTransactionId = @strTransactionId
+				--			AND ri.intItemId = ISNULL(@intItemId, ri.intItemId)				
+							
+				--	DECLARE @ItemWithOtherCharge AS INT = ISNULL(@intItemId, -1)							
+
+				--	-- Re-create the other charge GL entries. 
+				--	INSERT INTO @GLEntries (
+				--				[dtmDate] 
+				--				,[strBatchId]
+				--				,[intAccountId]
+				--				,[dblDebit]
+				--				,[dblCredit]
+				--				,[dblDebitUnit]
+				--				,[dblCreditUnit]
+				--				,[strDescription]
+				--				,[strCode]
+				--				,[strReference]
+				--				,[intCurrencyId]
+				--				,[dblExchangeRate]
+				--				,[dtmDateEntered]
+				--				,[dtmTransactionDate]
+				--				,[strJournalLineDescription]
+				--				,[intJournalLineNo]
+				--				,[ysnIsUnposted]
+				--				,[intUserId]
+				--				,[intEntityId]
+				--				,[strTransactionId]
+				--				,[intTransactionId]
+				--				,[strTransactionType]
+				--				,[strTransactionForm]
+				--				,[strModuleName]
+				--				,[intConcurrencyId]
+				--				,[dblDebitForeign]	
+				--				,[dblDebitReport]	
+				--				,[dblCreditForeign]	
+				--				,[dblCreditReport]	
+				--				,[dblReportingRate]	
+				--				,[dblForeignRate]
+				--				,[strRateType]
+				--			)	
+				--	EXEC @intReturnId = dbo.uspICPostInventoryReceiptOtherCharges 
+				--		@intTransactionId
+				--		,@strBatchId
+				--		,@intEntityUserSecurityId
+				--		,@intTransactionTypeId
+				--		,1
+				--		,@ItemWithOtherCharge  -- This is only used when rebuilding the stocks. 	
+				
+				--	IF @intReturnId <> 0 
+				--	BEGIN 
+				--		--PRINT 'Error found in uspICPostInventoryReceiptOtherCharges'
+				--		GOTO _EXIT_WITH_ERROR
+				--	END 	
+				--END 
 			END 									
 								
 			ELSE 
@@ -2513,9 +2571,7 @@ BEGIN
 			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, Credit Memo, 'Inventory Transfer') AND Contra-Account is NOT NULL 
 			IF EXISTS (
 				SELECT	TOP 1 1 
-				FROM	tblICInventoryTransactionType 
-				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName NOT IN (
+				WHERE	@strTransactionType NOT IN (
 							'Cost Adjustment'
 							, 'Inventory Shipment'
 							, 'Invoice'
@@ -2604,9 +2660,7 @@ BEGIN
 		-- Book the G/L Entries (except for cost adjustment)
 		IF EXISTS (
 			SELECT	TOP 1 1 
-			FROM	tblICInventoryTransactionType 
-			WHERE	intTransactionTypeId = @intTransactionTypeId 
-					AND strName <> 'Cost Adjustment'
+			WHERE	@strTransactionType <> 'Cost Adjustment'
 		) AND EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 		BEGIN 
 			DECLARE @intReturnCode AS INT = 0;

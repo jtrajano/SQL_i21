@@ -52,6 +52,7 @@ BEGIN
 			,@InvalidChargeId AS INT 
 			,@InvalidLotId AS INT
 			,@strLotNumber AS NVARCHAR(50) 
+			,@InvalidPriceUOMId AS INT 
 
 	-- Validate Customer Id
 	BEGIN
@@ -203,6 +204,28 @@ BEGIN
 			-- 'Item UOM Id is invalid or missing for item {Item No}.'
 			EXEC uspICRaiseError 80120, @strItemNo;
 			RETURN 80120 
+		END
+
+		-- Validate Price UOM Id
+		SET @InvalidItemId = NULL
+
+		SELECT TOP 1 
+				@strItemNo = i.strItemNo
+				,@strItemType = i.strType
+				,@InvalidItemId = i.intItemId  
+				,@InvalidPriceUOMId = RawData.intPriceUOMId
+		FROM	@Items RawData INNER JOIN tblICItem i
+					ON RawData.intItemId = i.intItemId
+				LEFT JOIN tblICItemUOM iu 
+					ON iu.intItemUOMId = RawData.intPriceUOMId
+		WHERE	iu.intItemUOMId IS NULL 
+				AND RawData.intPriceUOMId IS NOT NULL 
+
+		IF @InvalidItemId IS NOT NULL 
+		BEGIN
+			-- 'Price UOM Id is invalid or missing for item {Item No}.'
+			EXEC uspICRaiseError 80120, @strItemNo;
+			RETURN 80206 
 		END
 
 		-- Validate Sub Location Id
@@ -846,6 +869,7 @@ INSERT INTO tblICInventoryShipmentItem(
 	, dblForexRate
 	, strChargesLink
 	, intConcurrencyId
+	, intPriceUOMId
 )
 SELECT 
 	se.intShipmentId
@@ -872,6 +896,7 @@ SELECT
 	, dblForexRate = CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 	, strChargesLink
 	, intConcurrencyId = 1
+	, intPriceUOMId = ISNULL(se.intPriceUOMId, se.intItemUOMId) 
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 

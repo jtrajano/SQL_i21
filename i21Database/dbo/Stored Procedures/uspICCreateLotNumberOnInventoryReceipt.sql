@@ -226,6 +226,7 @@ BEGIN
 			,intInventoryReceiptId
 			,intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId
+			,intUnitPallet
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -271,6 +272,7 @@ BEGIN
 			,intInventoryReceiptItemId		= ReceiptItem.intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId	= ItemLot.intInventoryReceiptItemLotId
 
+			,intUnitPallet			= ItemLot.intUnitPallet	
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
