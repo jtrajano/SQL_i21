@@ -2384,3 +2384,25 @@ BEGIN
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 109
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 109
+        ,'Production Type'
+        ,5
+        ,1
+        ,0
+        ,'SELECT  CONVERT(NVARCHAR,intProductionTypeId) AS ValueMember,strName AS DisplayMember FROM tblMFWorkOrderProductionType ORDER BY strName'
+END
+GO
