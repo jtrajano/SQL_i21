@@ -201,12 +201,10 @@ FROM @Result
 
 INSERT INTO @Result (strContractType,dblQty	,dblUSD	,dblBasis,dblPriceVariation)
 	
-SELECT DISTINCT 'Gross Profit - USD',@dblQty,(@dblUSDInvoice-@dblUSDPurchase)
+SELECT DISTINCT 'Gross Profit - USD',@dblQty,(@dblUSDInvoice+@dblUSDPurchase)
 	,@dblAllocatedQty*(@dblSaleBasis - @dblPurchaseBasis),
 	((@dblUSDInvoice-@dblUSDPurchase) - ((@dblSaleBasisUSD - @dblPurchaseBasisUSD) * @dblAllocatedQtyUSD))
 FROM @Result
-
-
 
 INSERT INTO @Result (
 	strContractType
@@ -495,3 +493,5 @@ WHERE strContractType = 'Physical Profit - USD'
 SELECT *
 FROM @Result
 ORDER BY intResultId
+
+GO
