@@ -75,6 +75,7 @@ BEGIN
 			,CAST(ysnPosted AS BIT) ysnPosted,
 			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
 					WHEN strType IN ('Amount')	THEN dblTranValue 
+					WHEN strType IN ('4 Supp. Invoice') AND strDescription <> 'Supp. Invoice' THEN dblPrice * -1 
 			ELSE ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END END AS	dblTransactionValue,
 			CASE	WHEN strType IN ('Amount')	THEN dblTranValue  / dblFX
 					WHEN strType IN ('Per Unit') THEN ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / dblFX / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END
@@ -176,22 +177,31 @@ BEGIN
 			JOIN	@tblLGAllocationDetail	AD	ON	AD.intSContractDetailId	=	ID.intContractDetailId
 	LEFT	JOIN	tblSMCurrency			MY	ON	MY.intCurrencyID		=	CY.intMainCurrencyId
 			WHERE	ID.intContractDetailId	=	@intSContractDetailId
+			AND NOT EXISTS(SELECT * FROM tblARInvoiceDetail WHERE strDocumentNumber = IV.strInvoiceNumber)
 		)d
 
 		UNION ALL
 
 		SELECT	DISTINCT NULL AS strContractType,
 				IV.strBillId,
-				'Supp. Invoice' AS strDescription,
+				CASE	WHEN IM.strType = 'Other Charge' THEN IM.strItemNo ELSE 'Supp. Invoice' END AS strDescription,
 				NULL AS strConfirmed,
 				NULL AS dblAllocatedQty,
 				NULL AS dblAllocatedQtyPrice,
-				ID.dblCost dblPrice,
+				CASE	WHEN	IM.strType = 'Other Charge' 
+						THEN	ID.dblCost * AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) 
+						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,@intUnitMeasureId,CD.intUnitMeasureId, ID.dblCost) END dblPrice,
 				CY.strCurrency AS strCurrency,
 				NULL AS dblFX,
-				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intWeightUOMId, ID.dblQtyReceived) * -1 AS dblBooked,
-				dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived) * -1 AS dblBookedPrice,
-				ID.dblTotal *-1 AS dblAccounting,
+				CASE	WHEN	IM.strType = 'Other Charge' 
+						THEN	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,CD.intUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) * -1 
+						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intWeightUOMId, ID.dblQtyReceived)*AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) * -1 
+				END AS dblBooked,
+				CASE	WHEN	IM.strType = 'Other Charge' 
+						THEN	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,CD.intUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty) * -1 
+						ELSE	dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyReceived)*AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) * -1
+				END AS dblBookedPrice,
+				ID.dblTotal * AD.dblPAllocatedQty/ISNULL(TA.dblTotalAllocation,1) *-1 AS dblAccounting,
 				IV.dtmDate AS dtmDate,
 				'4 Supp. Invoice'	AS strType,
 				0.0 AS dblTranValue, --Dummy
@@ -204,11 +214,17 @@ BEGIN
 		JOIN	tblCTContractDetail		CD	ON	CD.intContractDetailId	=	ID.intContractDetailId 
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblCTContractType		TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
+		JOIN	tblICItem				IM	ON	IM.intItemId			=	ID.intItemId	
 		JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intUnitOfMeasureId	
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId	
 		JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	IV.intCurrencyId
+   LEFT JOIN
+		(
+				SELECT SUM(dblPAllocatedQty) dblTotalAllocation, intPContractDetailId 
+				FROM	tblLGAllocationDetail 
+				GROUP BY intPContractDetailId
+		) TA ON TA.intPContractDetailId = AD.intPContractDetailId
 		WHERE	AD.intSContractDetailId	=	@intSContractDetailId
-		--AND		EXISTS(SELECT * FROM tblARInvoiceDetail WHERE intContractDetailId	=	@intSContractDetailId)
 		AND		ID.intContractCostId IS NULL
 
 		UNION ALL
