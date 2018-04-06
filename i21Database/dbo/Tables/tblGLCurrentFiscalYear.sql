@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLCurrentFiscalYear] (
     [cntId]             INT             IDENTITY (1, 1) NOT NULL,
-    [intFiscalYearId]   INT             NOT NULL,
+    [intFiscalYearId]   INT             NULL,
     [dtmBeginDate]      DATETIME        DEFAULT (getdate()) NOT NULL,
     [dtmEndDate]        DATETIME        DEFAULT (getdate()) NOT NULL,
     [dblPeriods]        NUMERIC (18, 6) DEFAULT ((0)) NULL,

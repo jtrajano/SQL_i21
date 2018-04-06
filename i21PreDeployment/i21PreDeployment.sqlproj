@@ -174,7 +174,7 @@
     <None Include="Scripts\Pre-Deployment\4_SM\7_CRM.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\8_TransactionManagement.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\1730_PaymentMethod.sql" />
-    <None Include="Scripts\Pre-Deployment\6_GL\CleanCrossReferenceMapping.sql" />
+    <None Include="Scripts\Pre-Deployment\6_GL\5_1710.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\11_FixSalesOrderNullysnQuote.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -292,9 +292,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\21_PR\4_1710_to_1720.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\6_GL\1730.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\3_fnARGetCustomerDefaultContact.sql" />
