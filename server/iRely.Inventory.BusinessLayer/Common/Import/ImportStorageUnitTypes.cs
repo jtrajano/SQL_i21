@@ -15,6 +15,11 @@ namespace iRely.Inventory.BusinessLayer
         {
         }
 
+        protected override Expression<Func<tblICStorageUnitType, bool>> GetUniqueKeyExpression(tblICStorageUnitType entity)
+        {
+            return (e => e.strStorageUnitType.ToLower().Equals(entity.strStorageUnitType));
+        }
+
         protected override string[] GetRequiredFields()
         {
             return new string[] { "name" };

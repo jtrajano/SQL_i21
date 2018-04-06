@@ -4,6 +4,8 @@ using LumenWorks.Framework.IO.Csv;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Data.SqlClient;
 using System.Globalization;
@@ -193,7 +195,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             OnNextRecord(recordIndex, record, out succeeded);
         }
-
+        
         protected virtual void OnNextRecord(long recordIndex, CsvRecord record, out bool succeeded)
         {
             CurrentRecordTracker.Instance.Record = record;
@@ -222,17 +224,25 @@ namespace iRely.Inventory.BusinessLayer
                             {
                                 if (foundEntity != null && foundId > 0)
                                 {
-                                    TransformeEntity(ref foundEntity, ref entity, "intConcurrencyId");
-                                    TransformeEntity(ref foundEntity, ref entity, GetPrimaryKeyName());
-                                    if (context.Entry<T>(entity).State == EntityState.Unchanged)
-                                    {
-                                        context.Entry<T>(entity).State = EntityState.Modified;
+                                    TransformEntity(ref foundEntity, ref entity, "intConcurrencyId");
+                                    TransformEntity(ref foundEntity, ref entity, GetPrimaryKeyName());
+
+                                    context.Set<T>().Attach(foundEntity);
+                                    context.Entry<T>(foundEntity).State = EntityState.Unchanged;
+                                    context.Entry<T>(foundEntity).CurrentValues.SetValues(entity);
+                                    //if (context.Entry<T>(entity).State == EntityState.Unchanged || context.Entry<T>(entity).State == EntityState.Detached)
+                                    //{
+                                    //    context.Entry<T>(entity).State = EntityState.Modified;
+                                    //    AddSuccessLog(entity, record, false);
+                                    //}
+                                    //else
+                                    //{
+                                    //    AddNoChangesWarning(entity, record);
+                                    //}
+                                    if(context.Entry<T>(foundEntity).State == EntityState.Modified)
                                         AddSuccessLog(entity, record, false);
-                                    }
                                     else
-                                    {
                                         AddNoChangesWarning(entity, record);
-                                    }
                                 }
                             }
                             else
@@ -260,17 +270,25 @@ namespace iRely.Inventory.BusinessLayer
                         {
                             if (foundEntity != null && foundId > 0)
                             {
-                                TransformeEntity(ref foundEntity, ref entity, "intConcurrencyId");
-                                TransformeEntity(ref foundEntity, ref entity, GetPrimaryKeyName());
-                                if (context.Entry<T>(entity).State == EntityState.Unchanged)
-                                {
-                                    context.Entry<T>(entity).State = EntityState.Modified;
-                                    AddSuccessLog(entity, record, false); 
-                                }
+                                TransformEntity(ref foundEntity, ref entity, "intConcurrencyId");
+                                TransformEntity(ref foundEntity, ref entity, GetPrimaryKeyName());
+
+                                context.Set<T>().Attach(foundEntity);
+                                context.Entry<T>(foundEntity).State = EntityState.Unchanged;
+                                context.Entry<T>(foundEntity).CurrentValues.SetValues(entity);
+                                //if (context.Entry<T>(entity).State == EntityState.Unchanged || context.Entry<T>(entity).State == EntityState.Detached)
+                                //{
+                                //    context.Entry<T>(entity).State = EntityState.Modified;
+                                //    AddSuccessLog(entity, record, false);
+                                //}
+                                //else
+                                //{
+                                //    AddNoChangesWarning(entity, record);
+                                //}
+                                if (context.Entry<T>(foundEntity).State == EntityState.Modified)
+                                    AddSuccessLog(entity, record, false);
                                 else
-                                {
                                     AddNoChangesWarning(entity, record);
-                                }
                             }
                         }
                         else
@@ -288,7 +306,7 @@ namespace iRely.Inventory.BusinessLayer
             }
         }
 
-        private void TransformeEntity(ref T e, ref T n, string fieldName)
+        private void TransformEntity(ref T e, ref T n, string fieldName)
         {
             PropertyInfo epi = e.GetType().GetProperty(fieldName);
             PropertyInfo npi = n.GetType().GetProperty(fieldName);
