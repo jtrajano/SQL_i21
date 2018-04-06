@@ -193,9 +193,7 @@ SELECT
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					= (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 		,dblNet						= LI.dblQty
-FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
-		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
-		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
 			,CTD.intContractDetailId
@@ -339,7 +337,13 @@ WHERE SCTicket.intTicketId = @intTicketId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 	LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 	LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
-	WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0
+	LEFT JOIN (
+		SELECT intContractHeaderId
+		,intContractDetailId
+		,intPricingTypeId
+		FROM tblCTContractDetail 
+	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
+	WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,6) 
 
 	--FOR FEE CHARGES
 	INSERT INTO @OtherCharges
@@ -1165,7 +1169,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract' AND ysnIsStorage = 0;
 IF(@checkContract > 0)
+BEGIN
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
+	UPDATE @OtherCharges SET strReceiptType = 'Purchase Contract'
+END
 
 SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)
