@@ -52,7 +52,7 @@ OUTER APPLY(
 			SELECT TOP 1 
 						 B1.dtmDatePaid,
 						 B1.dblAmountPaid,
-						 ysnPaid
+						 B1.ysnPosted
 						 FROM dbo.tblAPPayment B1
 			INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
 			LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId 
@@ -71,7 +71,7 @@ OUTER APPLY(
 			) vendor
 WHERE  
 	  APB.ysnPosted = 1 
-		  AND Payment.ysnPaid = 1 
+		  AND Payment.ysnPosted = 1 
 		  AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
 GO
 
