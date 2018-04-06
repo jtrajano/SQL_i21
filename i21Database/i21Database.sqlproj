@@ -6302,6 +6302,7 @@
     <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
     <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="dbo\Tables\tblMBILPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
