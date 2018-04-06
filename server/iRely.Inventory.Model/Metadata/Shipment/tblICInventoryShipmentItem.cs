@@ -44,6 +44,8 @@ namespace iRely.Inventory.Model
         public string strItemType { get; set; }
         public int? intParentItemLinkId { get; set; }
         public int? intChildItemLinkId { get; set; }
+        public int? intPriceUOMId { get; set; }
+        public decimal? dblLineTotal { get; set; }
         //private int? _decimalPlaces;
         //[NotMapped]
         //public int? intDecimalPlaces

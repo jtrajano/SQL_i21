@@ -90,7 +90,7 @@ StartTest (function (t) {
         .clickMenuFolder('Inventory','Folder')
         .waitUntilLoaded('')
         .clickMenuScreen('Storage Units','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        .selectSearchRowValue('Indy Storage','Name',1,1)
         .waitUntilLoaded('')
         .continueIf({
             expected: true,
@@ -129,7 +129,9 @@ StartTest (function (t) {
         //region
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Categories','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - Category')
+        .selectSearchRowValue('CRUD - Category','CategoryCode',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - Category')
         .waitUntilLoaded()
         .continueIf({
             expected: true,
@@ -159,8 +161,11 @@ StartTest (function (t) {
         /*====================================== Add Commodity ======================================*/
 
         .clickMenuScreen('Commodities','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - Commodity')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - Commodity','CommodityCode',1,1)
+        // .filterGridRecords('Search', 'FilterGrid', 'SC - Commodity - 01')
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - Commodity')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -188,8 +193,10 @@ StartTest (function (t) {
 
         /*====================================== Add Lotted Item Yes Serial ======================================*/
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 01')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - LTI - 01','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 01')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -228,8 +235,10 @@ StartTest (function (t) {
 
         /*====================================== Add Lotted Item Yes Serial ======================================*/
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 02')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - LTI - 02','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 02')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -268,8 +277,10 @@ StartTest (function (t) {
 
         /*====================================== Add Non Lotted Item ======================================*/
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - NLTI - 01')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - NLTI - 01','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - NLTI - 01')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -311,8 +322,10 @@ StartTest (function (t) {
         .displayText('===== Scenario 4: Add Non Lotted Item =====')
         .clickMenuFolder('Inventory','Folder')
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - NLTI - 02')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - NLTI - 02','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - NLTI - 02')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -358,6 +371,9 @@ StartTest (function (t) {
                     .selectComboBoxRowValue('IssueUom', 'Test_Pounds', 'IssueUom',0)
                     .selectComboBoxRowValue('ReceiveUom', 'Test_Pounds', 'ReceiveUom',0)
                     .selectComboBoxRowNumber('NegativeInventory',1,0)
+                    .waitTillLoaded('')
+                    .clickMessageBoxButton('ok')
+                    .waitUntilLoaded('')
                     .clickButton('Save')
                     .waitUntilLoaded('')
                     .clickButton('Close')
@@ -370,13 +386,16 @@ StartTest (function (t) {
                     .selectComboBoxRowValue('IssueUom', 'Test_Pounds', 'IssueUom',0)
                     .selectComboBoxRowValue('ReceiveUom', 'Test_Pounds', 'ReceiveUom',0)
                     .selectComboBoxRowNumber('NegativeInventory',1,0)
+                    .waitTillLoaded('')
+                    .clickMessageBoxButton('ok')
+                    .waitUntilLoaded('')
                     .clickButton('Save')
                     .clickButton('Close')
 
                     .displayText('===== Setup Item Pricing=====')
                     .clickTab('Pricing')
                     .waitUntilLoaded('')
-                    .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
+                    .verifyGridData('Pricing', 1, 'strLocationName', '0001-Fort Wayne')
                     .enterGridData('Pricing', 1, 'dblLastCost', '10')
                     .enterGridData('Pricing', 1, 'dblStandardCost', '10')
                     .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
@@ -426,8 +445,10 @@ StartTest (function (t) {
         //region Scenario 6: Duplicate an Item
         .displayText('===== Scenario 6: Duplicate an Item =====')
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 01-copy')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - LTI - 01-copy','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - LTI - 01-copy')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -466,7 +487,7 @@ StartTest (function (t) {
 
                     .clickTab('Location')
                     .waitTillLoaded('')
-                    .verifyGridData('LocationStore', 2, 'colLocationLocation', '0001 - Fort Wayne')
+                    .verifyGridData('LocationStore', 2, 'colLocationLocation', '0001-Fort Wayne')
                     .verifyGridData('LocationStore', 1, 'colLocationLocation', '0002 - Indianapolis')
 
                     .clickTab('Pricing')
@@ -474,7 +495,7 @@ StartTest (function (t) {
                     .verifyGridData('Pricing', 1, 'strLocationName', '0002 - Indianapolis')
                     .verifyGridData('Pricing', 1, 'strPricingMethod', 'Markup Standard Cost')
                     .verifyGridData('Pricing', 1, 'dblAmountPercent', '40')
-                    .verifyGridData('Pricing', 2, 'strLocationName', '0001 - Fort Wayne')
+                    .verifyGridData('Pricing', 2, 'strLocationName', '0001-Fort Wayne')
                     .verifyGridData('Pricing', 2, 'strPricingMethod', 'Markup Standard Cost')
                     .verifyGridData('Pricing', 2, 'dblAmountPercent', '40')
                     .displayText('===== Duplicate an Item Done=====')
@@ -485,9 +506,9 @@ StartTest (function (t) {
         })
         .clickButton('Close')
         .waitTillLoaded('')
-        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('yes')
-        .waitTillLoaded('')
+        // .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
+        // .clickMessageBoxButton('yes')
+        // .waitTillLoaded('')
 
         //region Scenario 7: Check Required Fields
         .displayText('===== Scenario 7: Check Required Fields =====')

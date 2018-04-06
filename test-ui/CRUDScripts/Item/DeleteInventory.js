@@ -91,8 +91,10 @@ StartTest (function (t) {
          .clickMenuFolder('Inventory','Folder')
          .waitUntilLoaded('')
          .clickMenuScreen('Storage Units','Screen')
-         .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+         .selectSearchRowValue('Indy Storage','Name',1,1)
          .waitUntilLoaded('')
+        //  .filterGridRecords('Search', 'FilterGrid', 'Indy Storage')
+        //  .waitUntilLoaded('')
          .continueIf({
              expected: true,
              actual: function (win,next) {
@@ -128,8 +130,10 @@ StartTest (function (t) {
          /*====================================== Add Category ======================================*/
         //region
         .clickMenuScreen('Categories','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - Category')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - Category','CategoryCode',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', 'CRUD - Category')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -158,8 +162,8 @@ StartTest (function (t) {
         /*====================================== Add Commodity ======================================*/
 
         .clickMenuScreen('Commodities','Screen')
-        .filterGridRecords('Search', 'FilterGrid', 'CRUD - Commodity')
-        .waitUntilLoaded()
+        .selectSearchRowValue('CRUD - Commodity','CommodityCode',1,1)
+        .waitUntilLoaded('')
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -188,8 +192,10 @@ StartTest (function (t) {
 
         /*====================================== Add Lotted Item Yes Serial ======================================*/
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', '001 - DLTI')
-        .waitUntilLoaded()
+        .selectSearchRowValue('001 - DLTI','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', '001 - DLTI')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -227,8 +233,10 @@ StartTest (function (t) {
         .waitUntilLoaded('')
 
         .clickMenuScreen('Items','Screen')
-        .filterGridRecords('Search', 'FilterGrid', '002 - DLTI')
-        .waitUntilLoaded()
+        .selectSearchRowValue('002 - DLTI','ItemNo',1,1)
+        .waitUntilLoaded('')
+        // .filterGridRecords('Search', 'FilterGrid', '002 - DLTI')
+        // .waitUntilLoaded()
         .continueIf({
             expected: true,
             actual: function (win,next) {
@@ -312,9 +320,6 @@ StartTest (function (t) {
         .waitUntilLoaded('')
         .clickButton('Close')
         .waitUntilLoaded('')
-        .waitTillLoaded('')
-        .verifyMessageBox('iRely i21','Do you want to save the changes you made?','yesnocancel','question')
-        .clickMessageBoxButton('no')
         .waitTillLoaded('')
         .displayText('===== Scenario 2: Delete Used Item Done=====')
         //endregion

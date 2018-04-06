@@ -22,7 +22,7 @@ namespace iRely.Inventory.BusinessLayer
 
         protected override Expression<Func<tblICStorageLocation, bool>> GetUniqueKeyExpression(tblICStorageLocation entity)
         {
-            return (e => e.strName == entity.strName);
+            return (e => e.strName.ToLower().Equals(entity.strName.ToLower()));
         }
 
         protected override string GetPrimaryKeyName()

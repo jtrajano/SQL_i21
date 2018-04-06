@@ -3,7 +3,7 @@ var Harness = new Siesta.Harness.Browser.ExtJS(),
     commonIC = 'Common/CommonIC.js?v='+version,
     commonICST = 'Common/CommonICSmokeTest.js?v='+version,
     functionalTest = '../../TestFramework/FunctionalTest.js?v='+version,
-    appLocation = location.href.substring(0,location.href.indexOf("app")-1) + '/i21';
+    appLocation = location.href.substring(0,location.href.indexOf("app")-1),
     commonGL = '../../GeneralLedger/test-ui/Common/commonGL.js?v='+version
 
 var _url = window.location.hash,

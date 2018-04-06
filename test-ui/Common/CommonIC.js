@@ -35,7 +35,11 @@ Ext.define('Inventory.CommonIC', {
             .enterData('Text Field','Description', itemdesc)
             .selectComboBoxRowValue('Category', category, 'cboCategory',1)
             .selectComboBoxRowValue('Commodity', commodity, 'strCommodityCode',1)
+            .waitUntilLoaded('')
             .selectComboBoxRowNumber('LotTracking', lottrack)
+            .waitUntilLoaded('')
+            .clickGridCheckBox('UnitOfMeasure', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
+            .waitUntilLoaded('')
 
             .clickTab('Setup')
             .clickButton('AddRequiredAccounts')
@@ -92,7 +96,7 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Setup Item Pricing=====')
             .clickTab('Pricing')
             .waitUntilLoaded('')
-            .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
+            .verifyGridData('Pricing', 1, 'strLocationName', '0001-Fort Wayne')
             .enterGridData('Pricing', 1, 'dblLastCost', priceLC)
             .enterGridData('Pricing', 1, 'dblStandardCost', priceSC)
             .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
@@ -190,7 +194,7 @@ Ext.define('Inventory.CommonIC', {
             .displayText('===== Setup Item Pricing=====')
             .clickTab('Pricing')
             .waitUntilLoaded('')
-            .verifyGridData('Pricing', 1, 'strLocationName', '0001 - Fort Wayne')
+            .verifyGridData('Pricing', 1, 'strLocationName', '0001-Fort Wayne')
             .enterGridData('Pricing', 1, 'dblLastCost', priceLC)
             .enterGridData('Pricing', 1, 'dblStandardCost', priceSC)
             .selectGridComboBoxRowNumber('Pricing', 1, 'strPricingMethod',3)
@@ -234,32 +238,37 @@ Ext.define('Inventory.CommonIC', {
             .clickMenuFolder('Inventory','Folder')
             .waitUntilLoaded()
             .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('Search', 'FilterGrid', 'Test_Pounds')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_Pounds')
+            .enterData('Text Field','FilterGrid','Test_Pounds[RETURN]')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_Pounds')
-                        .enterData('Text Field','Symbol','Test_Pounds')
-                        .selectComboBoxRowNumber('UnitType',6,0)
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_Pounds'},{column: 'strSymbol',data: 'Test_Pounds'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+                        .waitUntilLoaded('')
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
+                        // .enterData('Text Field','FilterGrid','Test_Pounds[RETURN]')
+                        // .waitUntilLoaded('')
                         .done();
                 },
                 continueOnFail: true
             })
             .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+            .clickButton('Close')
             .waitUntilLoaded()
             .displayText('===== Add stock UOM first Done  =====')
             //endregion
@@ -267,105 +276,123 @@ Ext.define('Inventory.CommonIC', {
 
             //region
             .displayText('===== Scenario 2. Add Conversion UOMs =====')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_50 lb bag')
             .clickMenuScreen('Inventory UOM','Screen')
-            .filterGridRecords('Search', 'FilterGrid', 'Test_50 lb bag')
+            .waitUntilLoaded()
+            .enterData('Text Field','FilterGrid','Test_50 lb bag[RETURN]')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
 
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_50 lb bag')
-                        .enterData('Text Field','Symbol','Test_50 lb bag')
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_50 lb bag'},{column: 'strSymbol',data: 'Test_50 lb bag'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+                        .waitUntilLoaded('')
 
-                        .selectComboBoxRowNumber('UnitType',7,0)
-                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
-//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','Test_Pounds','strStockUOM',1)
                         .waitUntilLoaded()
-                        .enterGridData('Conversion', 1, 'dblConversionToStock', '50 ')
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '50')
                         .verifyStatusMessage('Edited')
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
+                        // .enterData('Text Field','FilterGrid','Test_50 lb bag[RETURN]')
                         .waitUntilLoaded()
-
                         .done();
                 },
                 continueOnFail: true
             })
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
+            .clickButton('Close')
+            .waitUntilLoaded()
 
             //add another conversion
-            .filterGridRecords('Search', 'FilterGrid', 'Test_Bushels')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_Bushels')
+            .clickMenuScreen('Inventory UOM','Screen')
+            .waitUntilLoaded()
+            .enterData('Text Field','FilterGrid','Test_Bushels[RETURN]')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
 
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_Bushels')
-                        .enterData('Text Field','Symbol','Test_Bushels')
-                        .selectComboBoxRowNumber('UnitType',6,0)
-                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
-//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
-                        .enterGridData('Conversion', 1, 'dblConversionToStock', '56 ')
-                        .verifyStatusMessage('Edited')
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_Bushels'},{column: 'strSymbol',data: 'Test_Bushels'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+                        .waitUntilLoaded('')
+
+                        .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','Test_Pounds','strStockUOM',1)
+                        .waitUntilLoaded()
+                        // .enterGridData('Conversion', 1, 'dblConversionToStock', '56')
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '56')
+                        .waitUntilLoaded('')
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
+                        // .enterData('Text Field','FilterGrid','Test_Bushels[RETURN]')
+                        .waitUntilLoaded('')
                         .done();
                 },
                 continueOnFail: true
             })
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
+            .clickButton('Close')
+            .waitUntilLoaded()
 
             //add another conversion
-            .filterGridRecords('Search', 'FilterGrid', 'Test_KG')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_KG')
+            .clickMenuScreen('Inventory UOM','Screen')
+            .waitUntilLoaded()
+            .enterData('Text Field','FilterGrid','Test_KG[RETURN]')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
 
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_KG')
-                        .enterData('Text Field','Symbol','Test_KG')
-                        .selectComboBoxRowNumber('UnitType',6,0)
-                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
-//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_KG'},{column: 'strSymbol',data: 'Test_KG'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+                        .waitUntilLoaded('')
+
+                        .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','Test_Pounds','strStockUOM',1)
+                        .waitUntilLoaded()
                         .enterGridData('Conversion', 1, 'dblConversionToStock', '2.20462')
                         .verifyStatusMessage('Edited')
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
-
-
+                        // .enterData('Text Field','FilterGrid','Test_KG[RETURN]')
+                        .waitUntilLoaded()
 
                         .done();
                 },
@@ -373,34 +400,46 @@ Ext.define('Inventory.CommonIC', {
             })
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
+            .clickButton('Close')
+            .waitUntilLoaded()
 
             //add another conversion
-            .filterGridRecords('Search', 'FilterGrid', 'Test_60 KG bags')
+            .clickMenuScreen('Inventory UOM','Screen')
+            .waitUntilLoaded()
+            .enterData('Text Field','FilterGrid','Test_60 KG bags[RETURN]')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_60 KG bags')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
 
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_60 KG bags')
-                        .enterData('Text Field','Symbol','Test_60 KG bags')
-                        .selectComboBoxRowNumber('UnitType',7,0)
-                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
-                        .enterGridData('Conversion', 1, 'dblConversionToStock', '132.2772')
-                        .selectGridComboBoxRowValue('Conversion',2,'colOtherUOM','Test_KG','strUnitMeasure',1)
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_60 KG bags'},{column: 'strSymbol',data: 'Test_60 KG bags'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+                        .waitUntilLoaded('')
+
+
+                        .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','Test_Pounds','strStockUOM',1)
+                        .waitUntilLoaded()
+                        .enterGridData('Conversion', 1, 'dblConversionToStock', '132.277')
+                        .selectGridComboBoxRowValue('Conversion',2,'strStockUOM','Test_KG','strStockUOM',1)
+                        .waitUntilLoaded()
                         .enterGridData('Conversion', 2, 'dblConversionToStock', '60')
                         .verifyStatusMessage('Edited')
                         .clickButton('Save')
                         .waitUntilLoaded()
                         .verifyStatusMessage('Saved')
-                        .clickButton('Close')
+                        // .enterData('Text Field','FilterGrid','Test_60 KG bags[RETURN]')
+                        .waitUntilLoaded()
 
                         .done();
                 },
@@ -408,35 +447,44 @@ Ext.define('Inventory.CommonIC', {
             })
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
+            .clickButton('Close')
+            .waitUntilLoaded()
 
             //add another conversion
-            .filterGridRecords('Search', 'FilterGrid', 'Test_25 KG bags')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_25 KG bags')
+            .clickMenuScreen('Inventory UOM','Screen')
+            .waitUntilLoaded()
+            .enterData('Text Field','FilterGrid','Test_25 KG bags[RETURN]')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
 
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_25 KG bags')
-                        .enterData('Text Field','Symbol','Test_25 KG bags')
-                        .selectComboBoxRowNumber('UnitType',7,0)
-                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
-//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_25 KG bags'},{column: 'strSymbol',data: 'Test_25 KG bags'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+
+
+                        .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','Test_Pounds','strStockUOM',1)
+                        .waitUntilLoaded()
                         .enterGridData('Conversion', 1, 'dblConversionToStock', '55.1155')
-                        .selectGridComboBoxRowValue('Conversion',2,'colOtherUOM','Test_KG','strUnitMeasure',1)
+                        .selectGridComboBoxRowValue('Conversion',2,'strStockUOM','Test_KG','strStockUOM',1)
+                        .waitUntilLoaded()
                         .enterGridData('Conversion', 2, 'dblConversionToStock', '25')
                         .verifyStatusMessage('Edited')
                         .clickButton('Save')
+                        // .waitUntilLoaded()
+                        // .enterData('Text Field','FilterGrid','Test_25 KG bags[RETURN]')
                         .waitUntilLoaded()
-                        .verifyStatusMessage('Saved')
-                        .clickButton('Close')
 
                         .done();
                 },
@@ -444,42 +492,52 @@ Ext.define('Inventory.CommonIC', {
             })
             .clearTextFilter('FilterGrid')
             .waitUntilLoaded()
+            .clickButton('Close')
+            .waitUntilLoaded()
 
 
             //add another conversion
-            .filterGridRecords('Search', 'FilterGrid', 'Test_50 KG bags')
+            // .filterGridRecords('Search', 'FilterGrid', 'Test_50 KG bags')
+            .clickMenuScreen('Inventory UOM','Screen')
+            .waitUntilLoaded()
+            .enterData('Text Field','FilterGrid','Test_50 KG bags[RETURN]')
             .waitUntilLoaded()
             .continueIf({
                 expected: true,
                 actual: function (win,next) {
                     new iRely.FunctionalTest().start(t, next)
-                    return win.down('#grdSearch').store.getCount() == 0;
+                    return win.down('#grdUOM').store.getCount() == 0;
                 },
 
                 success: function(next){
                     new iRely.FunctionalTest().start(t, next)
 
-                        .clickButton('New')
+                        .clearTextFilter('FilterGrid')
                         .waitUntilLoaded('')
-                        .enterData('Text Field','UnitMeasure','Test_50 KG bags')
-                        .enterData('Text Field','Symbol','Test_50 KG bags')
-                        .selectComboBoxRowNumber('UnitType',7,0)
-                        .selectGridComboBoxRowValue('Conversion',1,'colOtherUOM','Test_Pounds','strUnitMeasure',1)
-//                    .selectGridComboBoxRowNumber('Conversion',1,'colOtherUOM',7)
+                        .clickButton('InsertUOM')
+                        .waitUntilLoaded('')
+                        .enterGridNewRow('UOM', [{column: 'strUnitMeasure',data: 'Test_50 KG bags'},{column: 'strSymbol',data: 'Test_50 KG bags'}])
+                        .selectGridComboBoxBottomRowValue('UOM','strUnitType','Weight','Unit Type',1)
+
+                        .selectGridComboBoxRowValue('Conversion',1,'strStockUOM','Test_Pounds','strStockUOM',1)
+                        .waitUntilLoaded()
                         .enterGridData('Conversion', 1, 'dblConversionToStock', '110.231')
-                        .selectGridComboBoxRowValue('Conversion',2,'colOtherUOM','Test_KG','strUnitMeasure',1)
+                        .selectGridComboBoxRowValue('Conversion',2,'strStockUOM','Test_KG','strStockUOM',1)
+                        .waitUntilLoaded()
                         .enterGridData('Conversion', 2, 'dblConversionToStock', '50')
                         .verifyStatusMessage('Edited')
                         .clickButton('Save')
                         .waitUntilLoaded()
-                        .verifyStatusMessage('Saved')
-                        .clickButton('Close')
+                        // .enterData('Text Field','FilterGrid','Test_50 KG bags[RETURN]')
+                        // .waitUntilLoaded()
 
                         .done();
                 },
                 continueOnFail: true
             })
             .clearTextFilter('FilterGrid')
+            .waitUntilLoaded()
+            .clickButton('Close')
             .waitUntilLoaded()
 
 
@@ -495,12 +553,18 @@ Ext.define('Inventory.CommonIC', {
         .enterData('Text Field','DecimalsOnDpr','6.00')
 
         .selectGridComboBoxRowValue('Uom',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
-        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
+        .waitUntilLoaded('')
         .selectGridComboBoxRowValue('Uom',2,'strUnitMeasure','Test_50 lb bag','strUnitMeasure')
+        .waitUntilLoaded('')
         .selectGridComboBoxRowValue('Uom',3,'strUnitMeasure','Test_Bushels','strUnitMeasure')
-            .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','Test_25 KG bags','strUnitMeasure')
+        .waitUntilLoaded('')
+        .selectGridComboBoxRowValue('Uom',4,'strUnitMeasure','Test_25 KG bags','strUnitMeasure')
+        .waitUntilLoaded('')
         .selectGridComboBoxRowValue('Uom',5,'strUnitMeasure','Test_60 KG bags','strUnitMeasure')
-
+        .waitUntilLoaded('')
+        .clickGridCheckBox('Uom', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
+        .waitUntilLoaded('')
+        .waitUntilLoaded('')
         .clickButton('Save')
         .waitUntilLoaded()
         .verifyStatusMessage('Saved')
@@ -547,7 +611,6 @@ Ext.define('Inventory.CommonIC', {
             .enterData('Text Field','CategoryCode', categorycode)
             .enterData('Text Field','Description', description)
             .selectComboBoxRowNumber('InventoryType',inventorytype,0)
-            .selectComboBoxRowNumber('CostingMethod',1,0)
             .selectGridComboBoxRowValue('Tax',1,'strTaxClass','State Sales Tax (SST)','strTaxClass')
 
             .clickTab('GL Accounts')
@@ -599,7 +662,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .selectComboBoxRowNumber('ReceiptType',4,0)
             .selectComboBoxRowValue('Vendor', vendor, 'Vendor',1)
-            .selectComboBoxRowNumber('Location', location,0)
+            // .selectComboBoxRowNumber('Location', location,0)
             .selectGridComboBoxRowValue('InventoryReceipt',1,'strItemNo',itemno,'strItemNo')
             .waitUntilLoaded('')
             .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure', qtytoreceive, receiptuom)
@@ -1582,7 +1645,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .displayText('===== Creeating Direct IS for Non Lotted Item  =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
             .waitUntilLoaded()
@@ -1629,7 +1692,7 @@ Ext.define('Inventory.CommonIC', {
     addSalesOrderSNonLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity) {
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1679,7 +1742,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
 
             .done();
@@ -1693,7 +1756,7 @@ Ext.define('Inventory.CommonIC', {
     addSalesOrderSLotted: function (t,next, customer, freight, currency,fromlocation,itemno,uom, quantity, sublocation, storagelocation, lotno) {
         new iRely.FunctionalTest().start(t, next)
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1755,7 +1818,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .waitUntilLoaded('')
             .displayText('===== Ship Button SO to IS for Non Lotted Done=====')
 
@@ -1773,7 +1836,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .displayText('===== Creeating Direct IR for Non Lotted Item  =====')
+            .displayText('===== Creeating Direct IS for Lotted Item  =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
             .waitUntilLoaded()
@@ -1783,14 +1846,17 @@ Ext.define('Inventory.CommonIC', {
             .selectComboBoxRowValue('Customer', customer, 'Customer',1)
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', fromlocation, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .selectGridComboBoxRowValue('InventoryShipment',1,'strItemNo',itemno,'strItemNo')
             .enterUOMGridData('InventoryShipment', 1, 'colGumQuantity', 'strUnitMeasure', quantity, uom)
+            .waitUntilLoaded('')
 
-            .selectGridComboBoxRowValue('LotTracking',1,'strLotId', lotno,'strLotId')
+            .selectGridComboBoxRowValue('LotTracking',1,'strLotNumber', lotno,'strLotNumber')
+            .waitUntilLoaded('')
             .enterGridData('LotTracking', 1, 'colShipQty', '100')
+            .waitUntilLoaded('')
             .verifyGridData('LotTracking', 1, 'colLotUOM', uom)
             .verifyGridData('LotTracking', 1, 'colGrossWeight', '100')
             .verifyGridData('LotTracking', 1, 'colTareWeight', '0')
@@ -1805,7 +1871,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .verifyGridData('RecapTransaction', 1, 'colAccountId', '16000-0001-000')
             .verifyGridData('RecapTransaction', 1, 'colCredit', linetotal)
-            .verifyGridData('RecapTransaction', 2, 'colAccountId', '16050-0001-000')
+            .verifyGridData('RecapTransaction', 2, 'colAccountId', '50000-0001-000')
             .verifyGridData('RecapTransaction', 2, 'colDebit', linetotal)
 
             .clickButton('Post')
@@ -1831,7 +1897,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1861,7 +1927,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
@@ -1873,13 +1939,15 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded()
 //            .selectSearchRowNumber(1)
 //            .clickButton('OpenSelected')
+            .selectComboBoxRowNumber('Columns',7,0)
+            .waitUntilLoaded('')
             .doubleClickSearchRowValue(itemno, 'strItemNo', 1)
             .waitUntilLoaded('')
             .waitUntilLoaded('')
             .selectComboBoxRowValue('FreightTerms', freight, 'FreightTerms',1)
             .selectComboBoxRowValue('Currency', currency, 'FreightTerms',1)
-            .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
-            .selectComboBoxRowNumber('ShipToAddress',1,0)
+            // .selectComboBoxRowValue('ShipFromAddress', location, 'ShipFromAddress',1)
+            // .selectComboBoxRowNumber('ShipToAddress',1,0)
 
             .verifyGridData('InventoryShipment', 1, 'colItemNumber', itemno)
 //            .selectGridComboBoxRowValue('InventoryShipment',1,'strSubLocationName','Raw Station','strSubLocationName')
@@ -1911,7 +1979,7 @@ Ext.define('Inventory.CommonIC', {
         new iRely.FunctionalTest().start(t, next)
 
 
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
             .clickMenuScreen('Sales Orders','Screen')
             .waitUntilLoaded()
             .clickButton('New')
@@ -1940,7 +2008,7 @@ Ext.define('Inventory.CommonIC', {
             .waitUntilLoaded('')
             .clickButton('Close')
             .waitUntilLoaded('')
-            .clickMenuFolder('Sales (Accounts Receivable)','Folder')
+            .clickMenuFolder('Sales(A/R)','Folder')
 
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Inventory Shipments','Screen')
@@ -2243,30 +2311,25 @@ Ext.define('Inventory.CommonIC', {
         },
 
 
-    addOtherChargeItem: function (t,next, item, description, location) {
+    addOtherSChargeItem: function (t,next, item, description, location) {
         new iRely.FunctionalTest().start(t, next)
-
 
             //Add Other Charge Item
             .displayText('===== Adding Other Charge Item =====')
             .clickMenuFolder('Inventory','Folder')
             .clickMenuScreen('Items','Screen')
-            .waitUntilLoaded()
+            .waitUntilLoaded('')
             .clickButton('New')
             .waitUntilLoaded('')
-            .verifyScreenShown('icitem')
-
-
 
             .enterData('Text Field','ItemNo', item)
-            .selectComboBoxRowNumber('Type',6,0)
+            .selectComboBoxRowNumber('Type',4,0)
             .enterData('Text Field','Description', description)
 //            .selectComboBoxRowNumber('Category',4,0)
             .selectComboBoxRowValue('Category', 'Other Charges', 'Category',0)
             .displayText('===== Setup Item UOM=====')
             .selectGridComboBoxRowValue('UnitOfMeasure',1,'strUnitMeasure','Test_Pounds','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 1, 'colDetailUnitQty', '1')
-            .clickGridCheckBox('UnitOfMeasure', 1,'strUnitMeasure', 'Test_Pounds', 'ysnStockUnit', true)
             .selectGridComboBoxRowValue('UnitOfMeasure',2,'strUnitMeasure','50 lb bag','strUnitMeasure')
             .enterGridData('UnitOfMeasure', 2, 'colDetailUnitQty', '1')
             .selectGridComboBoxRowValue('UnitOfMeasure',3,'strUnitMeasure','Bushels','strUnitMeasure')
@@ -2282,8 +2345,8 @@ Ext.define('Inventory.CommonIC', {
 
             .clickTab('Location')
             .clickButton('AddLocation')
-            .waitUntilLoaded('icitemlocation')
-            .selectComboBoxRowValue('Location', location, 'Location',0)
+            .waitUntilLoaded('')
+            .selectComboBoxRowValue('Location', location, 'Location',1)
             .clickButton('Save')
             .waitUntilLoaded()
             .verifyStatusMessage('Saved')
@@ -3120,7 +3183,7 @@ Ext.define('Inventory.CommonIC', {
                         .displayText('===== Setup Item Pricing=====')
                         .clickTab('Pricing')
                         .waitUntilLoaded('')
-                        .verifyGridData('Pricing', row1, 'strLocationName', '0001 - Fort Wayne')
+                        .verifyGridData('Pricing', row1, 'strLocationName', '0001-Fort Wayne')
                         .enterGridData('Pricing', row1, 'dblLastCost', priceLC1)
                         .enterGridData('Pricing', row1, 'dblStandardCost', priceSC1)
                         .selectGridComboBoxRowNumber('Pricing', row1, 'strPricingMethod', pricingmethod1)
@@ -3145,6 +3208,7 @@ Ext.define('Inventory.CommonIC', {
             .done();
     },
 
+   
     addOtherChargeItem: function (t,next, item, itemtype, itemdesc, category, commodity,
                        location1, costingmethod1, sublocation1, storagelocation1, saleuom1, receiveuom1, negativeinventory1,
                        location2, costingmethod2, sublocation2, storagelocation2, saleuom2, receiveuom2, negativeinventory2,
@@ -3328,7 +3392,7 @@ Ext.define('Inventory.CommonIC', {
     addCustomer: function (t,next, customer, customercontact, phone, email, address, city, state, zip, country, timezone,
                            customerlocation, terms, shipvia, taxgroup, location, freighterm) {
         new iRely.FunctionalTest().start(t, next)
-            .clickMenuFolder('Sales (Accounts Receivable)')
+            .clickMenuFolder('Sales(A/R)')
             .waitUntilLoaded()
             .clickMenuScreen('Customers')
             .waitUntilLoaded()
@@ -3401,7 +3465,7 @@ Ext.define('Inventory.CommonIC', {
                 continueOnFail: true
             })
             .waitUntilLoaded()
-            .clickMenuFolder('Sales (Accounts Receivable)')
+            .clickMenuFolder('Sales(A/R)')
             .done();
     },
 
@@ -3593,7 +3657,7 @@ insertInventoryItem: function(t,next,productID){
             .clickTab('Location') 
             .clickButton('AddLocation')
             .waitUntilLoaded('icitemlocation')
-            .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)    
+            .selectComboBoxRowValue('Location', '0001-Fort Wayne', 'Location',1)    
             .selectComboBoxRowValue('CostingMethod', 'AVG', 'CostingMethod',1)    
             .selectComboBoxRowValue('SubLocation', 'Raw Station', 'SubLocation',1)    
             .selectComboBoxRowValue('StorageLocation', 'RM Storage', 'StorageLocation',1)
@@ -3621,7 +3685,7 @@ createPurchaseOrder: function (t,next,ProductID){
                 .waitUntilLoaded('')
                 .waitUntilLoaded()
                 .selectComboBoxRowValue('VendorId', 'ABC Trucking', 'VendorId',1)    
-                .selectComboBoxRowValue('ShipTo', '0001 - Fort Wayne', 'ShipTo',1)
+                .selectComboBoxRowValue('ShipTo', '0001-Fort Wayne', 'ShipTo',1)
                 .selectComboBoxRowValue('ShipFrom', 'Office', 'ShipFrom',1)
                 .selectComboBoxRowValue('ShipVia1', 'Trucks', 'ShipVia1',1)
                 
@@ -3659,7 +3723,7 @@ createInventoryReceipt: function (t,next,itemQty,toPost,cost) {
                 .selectSearchRowNumber(1)
                 .clickButton('OpenSelected')
                 .waitUntilLoaded('icinventoryreceipt')
-//               .selectComboBoxRowValue('Location', '0001 - Fort Wayne', 'Location',1)
+//               .selectComboBoxRowValue('Location', '0001-Fort Wayne', 'Location',1)
                 .selectGridRowNumber('InventoryReceipt', 1)
                 .enterUOMGridData('InventoryReceipt', 1, 'colUOMQtyToReceive', 'strUnitMeasure',itemQty, 'Bushels')
                  .waitUntilLoaded()

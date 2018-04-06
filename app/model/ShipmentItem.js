@@ -46,6 +46,7 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblUnitCost', type: 'float' },
         { name: 'dblUnitPrice', type: 'float' },
+        { name: 'intPriceUOMId', type: 'int', allowNull: true },
         { name: 'intTaxCodeId', type: 'int', allowNull: true },
         { name: 'intDockDoorId', type: 'int', allowNull: true },
         { name: 'strNotes', type: 'string' },
@@ -56,19 +57,22 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'strItemNo', type: 'string', auditKey: true},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},
+        { name: 'strPriceUOM', type: 'string'},
         { name: 'strSubLocationName', type: 'string'},
         { name: 'strStorageLocationName', type: 'string'},
         { name: 'intDecimalPlaces', type: 'int', allowNull: true },
 
-        { name: 'dblLineTotal', type: 'float',
-            persist: false,
-            convert: function(value, record){
-                var qty = iRely.Functions.isEmpty(record.get('dblQuantity')) ? 0 : record.get('dblQuantity');
-                var price = iRely.Functions.isEmpty(record.get('dblUnitPrice')) ? 0 : record.get('dblUnitPrice');
-                return qty * price;
-            },
-            depends: ['dblQuantity', 'dblUnitPrice']
-        },
+        // { name: 'dblLineTotal', type: 'float',
+        //     persist: false,
+        //     convert: function(value, record){
+        //         var qty = iRely.Functions.isEmpty(record.get('dblQuantity')) ? 0 : record.get('dblQuantity');
+        //         var price = iRely.Functions.isEmpty(record.get('dblUnitPrice')) ? 0 : record.get('dblUnitPrice');
+        //         return qty * price;
+        //     },
+        //     depends: ['dblQuantity', 'dblUnitPrice']
+        // },
+
+        { name: 'dblLineTotal', type: 'float', allowNull: true},
         { name: 'intCustomerStorageId', type: 'int', allowNull: true},
         { name: 'strStorageTypeDescription', type: 'string' },
         { name: 'intForexRateTypeId', type: 'int', allowNull: true },

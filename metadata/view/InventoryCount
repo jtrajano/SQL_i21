@@ -1930,7 +1930,7 @@
                                                         "itemId": "btnFetchDetails",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Refresh"
+                                                        "text": "Load"
                                                     },
                                                     "configAlternates": {
                                                         "icon": "string",
