@@ -235,8 +235,22 @@ UPDATE
 SET
 	 [dblInvoiceTotal]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
 	,[dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblAmountDue]			= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount] + [dblProvisionalAmount])
-	,[dblBaseAmountDue]		= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping]) - ([dblBasePayment] + [dblBaseDiscount] + [dblBaseProvisionalAmount])
+	,[dblAmountDue]			= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
+									THEN 
+										CASE WHEN strTransactionType = 'Credit Memo'
+												THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) - (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
+												ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal)) - ISNULL(dblProvisionalAmount, @ZeroDecimal)
+										END
+									ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
+								  END
+	,[dblBaseAmountDue]		= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
+									THEN 
+										CASE WHEN strTransactionType = 'Credit Memo'
+												THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
+												ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal)) - ISNULL(dblBaseProvisionalAmount, @ZeroDecimal)
+										END
+									ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
+								  END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
