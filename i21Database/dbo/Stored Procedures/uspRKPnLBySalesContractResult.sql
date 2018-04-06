@@ -77,11 +77,10 @@ INSERT INTO @PhysicalFuturesResult (
 	,strType
 	,dblTranValue
 	,intSort
+	,ysnPosted
 	,dblTransactionValue
 	,dblForecast
 	,intContractDetailId
-	,ysnPosted
-
 	)
 EXEC uspRKPNLPhysicalFuturesResult @intSContractDetailId,@intCurrencyId, @intUnitMeasureId	,@intWeightUOMId 
 
