@@ -640,6 +640,7 @@ BEGIN TRY
 						SELECT RT.intRestrictionId
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
+					AND LI.ysnPickAllowed=1
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty
@@ -855,6 +856,7 @@ BEGIN TRY
 						SELECT RT.intRestrictionId
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
+					AND LI.ysnPickAllowed=1
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty

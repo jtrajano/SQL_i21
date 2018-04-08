@@ -45,5 +45,19 @@ WHERE
 	[intInvoiceId] IN (SELECT [intInvoiceId] FROM @Ids)
 	AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail WHERE intOriginalInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId <> tblARInvoice.intInvoiceId))
 	AND strType = 'Provisional'
+
+
+UPDATE ARI	
+SET
+	 ARI.[dblProvisionalAmount]	= PRO.[dblPayment]
+	,ARI.[dblBaseProvisionalAmount]	= PRO.[dblBasePayment]
+	,ARI.[strTransactionType]	= CASE WHEN PRO.[dblPayment] > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
+FROM
+	tblARInvoice ARI
+INNER JOIN
+	tblARInvoice PRO
+		ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+WHERE
+	ARI.[intInvoiceId] IN (SELECT [intHeaderId] FROM @InvoiceIds)
 		
 GO

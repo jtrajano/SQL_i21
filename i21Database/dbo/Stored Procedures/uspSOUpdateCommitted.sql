@@ -40,7 +40,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	CASE WHEN @QuantityToPost > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE @QuantityToPost END
+		,[dblQty]					=	CASE WHEN @QuantityToPost > Detail.dblQtyOrdered OR ItemUOM.ysnStockUnit = 1 THEN Detail.dblQtyOrdered ELSE @QuantityToPost END
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
@@ -88,7 +88,7 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	(CASE WHEN @QuantityToPost > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE @QuantityToPost END) * SOSODC.dblQuantity
+		,[dblQty]					=	(CASE WHEN @QuantityToPost > Detail.dblQtyOrdered  OR ItemUOM.ysnStockUnit = 1 THEN Detail.dblQtyOrdered ELSE @QuantityToPost END) * SOSODC.dblQuantity
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
@@ -115,6 +115,9 @@ BEGIN
 			ON Detail.intSalesOrderDetailId = TD.intTransactionDetailId 
 			AND Detail.intSalesOrderId = TD.intTransactionId 
 			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblICItemUOM ItemUOM 
+			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 	LEFT OUTER JOIN
 		vyuICGetItemStock IST
 			ON SOSODC.intComponentItemId = IST.intItemId 

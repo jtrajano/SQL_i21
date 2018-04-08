@@ -160,6 +160,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intOrderUOMId]
 	,[dblQtyOrdered]
 	,[intItemUOMId]
+	,[intPriceUOMId]
 	,[dblQtyShipped]
 	,[dblDiscount]
 	,[dblItemWeight]
@@ -270,6 +271,7 @@ SELECT
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
 	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
+	,[intPriceUOMId]						= ARSI.[intPriceUOMId]
 	,[dblQtyShipped]						= ARSI.[dblQtyShipped] 
 	,[dblDiscount]							= ARSI.[dblDiscount] 
 	,[dblItemWeight]						= ARSI.[dblWeight]  
@@ -388,6 +390,7 @@ SELECT
 	,[intOrderUOMId]						= NULL
 	,[dblQtyOrdered]						= @ZeroDecimal
 	,[intItemUOMId]							= NULL
+	,[intPriceUOMId]						= NULL
 	,[dblQtyShipped]						= @ZeroDecimal
 	,[dblDiscount]							= @ZeroDecimal
 	,[dblItemWeight]						= @ZeroDecimal
@@ -512,6 +515,7 @@ SELECT
 	,[intOrderUOMId]						= NULL
 	,[dblQtyOrdered]						= @ZeroDecimal
 	,[intItemUOMId]							= ICISI.intItemUOMId
+	,[intPriceUOMId]						= ICISI.intPriceUOMId
 	--,[dblQtyShipped]						= (CASE WHEN ISNULL(ICISI.dblDestinationQuantity,0) = 0 THEN ISNULL(ICISI.dblQuantity,0) ELSE ICISI.dblDestinationQuantity END)
 	,[dblQtyShipped]						= ISNULL(ICISI.dblQuantity,0)
 	,[dblDiscount]							= @ZeroDecimal

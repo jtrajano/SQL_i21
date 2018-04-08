@@ -5,7 +5,7 @@ SELECT SubRolePermimssion.intCompanyLocationId
 ,RoleMenu.intMenuId
 ,Menu.intParentMenuID as intParentMenuId
 ,[dbo].[fnSMHideOriginMenus] (strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible as INT)) as BIT)) as ysnVisible
-,MIN(RoleMenu.intSort) as intSort
+,MIN(Menu.intSort) as intSort
 ,Menu.intRow as intRow
 ,strMenuName
 ,strModuleName

@@ -51,30 +51,54 @@ BEGIN
 			END
 			-------------------------------------------END GET Department
 
-			--Get Number of rows
-			SELECT @intCountRows = COUNT(*) 
-			FROM #tempCheckoutInsert chk
-			JOIN
-			(
-				SELECT c.termMsgSN as termMsgSN
-				FROM #tempCheckoutInsert c
-				--WHERE c.trlDept = 'CIGARETTES' 
-				WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
-				AND (c.transtype = 'sale' OR c.transtype = 'network sale')
-				GROUP BY c.termMsgSN
-			) x ON x.termMsgSN = chk.termMsgSN
-			WHERE NOT EXISTS
-			(
-				SELECT * 
-					FROM dbo.tblSTTranslogRebates TR
-					WHERE TR.dtmDate = CAST(left(REPLACE(chk.date, 'T', ' '), len(chk.date) - 6) AS DATETIME)
-					AND TR.intTermMsgSNterm = chk.termMsgSNterm
-					AND TR.intTermMsgSN = chk.termMsgSN 
-					AND TR.intTrTickNumPosNum = chk.posNum 
-					AND TR.intTrTickNumTrSeq  = chk.trSeq
-					AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
-					AND TR.intStoreNumber = chk.storeNumber
-			)
+
+			-- Check if department exist in XML file
+			IF NOT EXISTS(SELECT COUNT(c.termMsgSN) FROM #tempCheckoutInsert c 
+			              WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+			              AND (c.transtype = 'sale' OR c.transtype = 'network sale') GROUP BY c.termMsgSN)
+			BEGIN
+				SET @intCountRows = 0
+				SET @strStatusMsg = 'Store department does not exists in register file'
+				RETURN
+			END
+
+
+			-- Check if has records
+			IF EXISTS(SELECT COUNT(intTranslogId) FROM tblSTTranslogRebates)
+				BEGIN
+					--Get Number of rows
+					SELECT @intCountRows = COUNT(*) 
+					FROM #tempCheckoutInsert chk
+					JOIN
+					(
+						SELECT c.termMsgSN as termMsgSN
+						FROM #tempCheckoutInsert c
+						--WHERE c.trlDept = 'CIGARETTES' 
+						WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+						AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+						GROUP BY c.termMsgSN
+					) x ON x.termMsgSN = chk.termMsgSN
+					WHERE NOT EXISTS
+					(
+						SELECT * 
+							FROM dbo.tblSTTranslogRebates TR
+							WHERE TR.dtmDate = CAST(left(REPLACE(chk.date, 'T', ' '), len(chk.date) - 6) AS DATETIME)
+							AND TR.intTermMsgSNterm = chk.termMsgSNterm
+							AND TR.intTermMsgSN = chk.termMsgSN 
+							AND TR.intTrTickNumPosNum = chk.posNum 
+							AND TR.intTrTickNumTrSeq  = chk.trSeq
+							AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
+							AND TR.intStoreNumber = chk.storeNumber
+					)
+				END
+			ELSE
+				BEGIN
+					SELECT @intCountRows = COUNT(c.termMsgSN)
+					FROM #tempCheckoutInsert c 
+					WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+					AND (c.transtype = 'sale' OR c.transtype = 'network sale')
+					GROUP BY c.termMsgSN
+				END
 
 			--PRINT 'Rows count: ' + Cast(@intCountRows as nvarchar(50))
 

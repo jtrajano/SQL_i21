@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSMUserRoleMenuSubRoleMVC]
 AS 
 SELECT        ISNULL(SubRole.intUserRoleID, RoleMenu.intUserRoleId) AS intUserRoleId, RoleMenu.intMenuId, Menu.intParentMenuID, dbo.fnSMHideOriginMenus(Menu.strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible AS INT)) AS BIT)) 
-                         AS ysnVisible, MIN(RoleMenu.intSort) AS intSort, Menu.intRow, REPLACE(Menu.strMenuName, ' (Portal)', '') AS strMenuName, Menu.strModuleName, Menu.strCategory, Menu.strType, 
+                         AS ysnVisible, MIN(Menu.intSort) AS intSort, Menu.intRow, REPLACE(Menu.strMenuName, ' (Portal)', '') AS strMenuName, Menu.strModuleName, Menu.strCategory, Menu.strType, 
                          CASE WHEN strMenuName = 'Time Off Calendar (Portal)' THEN strCommand + '?id=' + CAST
                              ((SELECT        intCalendarId
                                  FROM            tblSMCalendars

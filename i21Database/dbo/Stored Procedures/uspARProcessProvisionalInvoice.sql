@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARProcessProvisionalInvoice]
+﻿CREATE PROCEDURE [dbo].[uspARProcessProvisionalInvoice] 
 	 @InvoiceId		INT
 	,@UserId		INT	
 	,@RaiseError	BIT				= 0
@@ -478,7 +478,7 @@ BEGIN CATCH
 END CATCH
 		
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
-UPDATE tblARInvoice SET ysnProcessed = 1 WHERE intInvoiceId = @InvoiceId
+--UPDATE tblARInvoice SET ysnProcessed = 1 WHERE intInvoiceId = @InvoiceId
 
 IF ISNULL(@RaiseError,0) = 0
 BEGIN

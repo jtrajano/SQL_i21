@@ -84,6 +84,26 @@ BEGIN
 		IF EXISTS (
 				SELECT *
 				FROM tblMFParentLotNumberPattern
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+				AND intCommodityId=@intCommodityId
+				)
+		BEGIN
+			SELECT @strPatternString = strPatternString
+			FROM tblMFParentLotNumberPattern
+			WHERE intInventoryReceiptId = @intInventoryReceiptId
+			AND intCommodityId=@intCommodityId
+
+			RETURN
+		END
+	END
+
+	IF @intPatternCode = 78
+		AND @intTransactionTypeId = 4
+		AND @intIRParentLotNumberPatternId = 2
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblMFParentLotNumberPattern
 				WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 				)
 		BEGIN
@@ -476,10 +496,35 @@ BEGIN
 		IF NOT EXISTS (
 				SELECT *
 				FROM tblMFParentLotNumberPattern
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+				AND intCommodityId=@intCommodityId
+				)
+		BEGIN
+			INSERT INTO tblMFParentLotNumberPattern (
+				intInventoryReceiptId
+				,strPatternString
+				,intCommodityId
+				)
+			SELECT @intInventoryReceiptId
+				,@strPatternString
+				,@intCommodityId
+		END
+	END
+
+	IF @intPatternCode = 78
+		AND @intTransactionTypeId = 4
+		AND @intIRParentLotNumberPatternId = 2
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFParentLotNumberPattern
 				WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 				)
 		BEGIN
-			INSERT INTO tblMFParentLotNumberPattern
+			INSERT INTO tblMFParentLotNumberPattern (
+				intInventoryReceiptItemId
+				,strPatternString
+				)
 			SELECT @intInventoryReceiptItemId
 				,@strPatternString
 		END

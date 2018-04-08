@@ -28,12 +28,6 @@ DECLARE  @intCommissionAccountId	INT
 	   , @dblCalculationAmount		NUMERIC(18,6)
 	   , @strHourType				NVARCHAR(25)
 	   , @strUnitType				NVARCHAR(25)
-	   , @strAccounts				NVARCHAR(MAX)
-	   , @strSalespersons			NVARCHAR(MAX)
-	   , @strAgents					NVARCHAR(MAX)
-	   , @strDrivers				NVARCHAR(MAX)
-	   , @strItemCategories			NVARCHAR(MAX)
-	   , @strItems					NVARCHAR(MAX)
 	   , @intApprovalListId			NVARCHAR(MAX)
 	   , @ysnMarginalSales			BIT
 	   , @ysnPaymentRequired		BIT
@@ -62,12 +56,6 @@ SELECT TOP 1
   , @strHurdleType			= strHurdleType
   , @strHourType			= CASE WHEN strBasis = @BASIS_HOURS THEN strHourType ELSE NULL END
   , @strUnitType			= CASE WHEN strBasis = @BASIS_UNITS THEN strUnitType ELSE NULL END
-  , @strAccounts			= CASE WHEN strBasis = @BASIS_REVENUE THEN strAccounts ELSE NULL END
-  , @strSalespersons		= CASE WHEN strBasis = @BASIS_REVENUE THEN strSalespersons ELSE NULL END
-  , @strAgents				= CASE WHEN strBasis = @BASIS_REVENUE THEN strAgents ELSE NULL END
-  , @strDrivers				= CASE WHEN strBasis = @BASIS_REVENUE THEN strDrivers ELSE NULL END
-  , @strItemCategories		= CASE WHEN strBasis = @BASIS_REVENUE THEN strItemCategories ELSE NULL END
-  , @strItems				= CASE WHEN strBasis = @BASIS_REVENUE THEN strItems ELSE NULL END
   , @intApprovalListId		= CASE WHEN strBasis = @BASIS_CONDITIONAL THEN intApprovalListId ELSE NULL END
   , @ysnMarginalSales		= CASE WHEN strBasis = @BASIS_REVENUE THEN ysnMarginalSales ELSE 0 END
   , @dblHurdle				= ISNULL(dblHurdle, 0.000000)
@@ -174,182 +162,141 @@ ELSE IF @strBasis = @BASIS_REVENUE
 		      , @dblTotalCOGSAmount		NUMERIC(18,6) = 0
 	
 		--GET REVENUE BY GL ACCOUNTS
-		IF ISNULL(@strAccounts, '') <> ''
-			BEGIN		
-				INSERT INTO @tmpAccountsTable
-				SELECT intAccountId
-					 , intGLDetailId
-					 , dblDebit
-					 , dblCredit
-					 , dtmDate
-				FROM tblGLDetail 
-				WHERE ysnIsUnposted = 0 
-					AND intAccountId IS NOT NULL
-					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-					
-				IF ISNULL(@strAccounts, '') <> ''
-					BEGIN
-						DELETE FROM @tmpAccountsTable
-						WHERE intAccountId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strAccounts))
-					END
+		INSERT INTO @tmpAccountsTable
+		SELECT GL.intAccountId
+			 , GL.intGLDetailId
+			 , GL.dblDebit
+			 , GL.dblCredit
+			 , GL.dtmDate
+		FROM tblGLDetail GL
+		INNER JOIN tblARCommissionPlanAccount CPA ON GL.intAccountId = CPA.intAccountId
+		WHERE GL.ysnIsUnposted = 0 
+		  AND GL.intAccountId IS NOT NULL
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GL.dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+		  AND CPA.intCommissionPlanId = @intCommissionPlanId
 		
-				SELECT @dblTotalRevenue = ISNULL(SUM(dblDebit - dblCredit), 0) FROM @tmpAccountsTable 
+		SELECT @dblTotalRevenue = ISNULL(SUM(dblDebit - dblCredit), 0) FROM @tmpAccountsTable 
 
-				INSERT INTO tblARCommissionRecapDetail
-				SELECT @intCommissionRecapId
-					 , @intEntityId
-					 , intGLDetailId
-					 , 'tblGLDetail'
-					 , dtmDate
-					 , dblDebit - dblCredit
-					 , 1
-				FROM @tmpAccountsTable
+		INSERT INTO tblARCommissionRecapDetail
+		SELECT @intCommissionRecapId
+			 , @intEntityId
+			 , intGLDetailId
+			 , 'tblGLDetail'
+			 , dtmDate
+			 , dblDebit - dblCredit
+			 , 1
+		FROM @tmpAccountsTable
 
-				IF @ysnMarginalSales = 1
-					BEGIN
-						SET @dblTotalRevenue = @dblTotalRevenue - @dblTotalCOGSAmount
-					END
+		IF @ysnMarginalSales = 1
+			BEGIN
+				SET @dblTotalRevenue = @dblTotalRevenue - @dblTotalCOGSAmount
 			END
 
 		--GET INVOICE TOTAL BY SALESPERSON
-		IF ISNULL(@strSalespersons, '') <> ''
-			BEGIN
-				INSERT INTO @tmpSalespersonsTable
-				SELECT intEntitySalespersonId
-					 , intInvoiceId
-					 , dblInvoiceTotal
-					 , dtmPostDate
-				FROM tblARInvoice
-				WHERE ysnPosted = 1
-					AND intEntitySalespersonId IS NOT NULL
-					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+		INSERT INTO @tmpSalespersonsTable
+		SELECT I.intEntitySalespersonId
+			 , I.intInvoiceId
+			 , I.dblInvoiceTotal
+			 , I.dtmPostDate
+		FROM tblARInvoice I
+		INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intCommissionPlanSalespersonId
+		WHERE I.ysnPosted = 1
+		 AND I.intEntitySalespersonId IS NOT NULL
+		 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+		 AND SP.intCommissionPlanId = @intCommissionPlanId
 
-				IF ISNULL(@strSalespersons, '') <> ''
-					BEGIN
-						DELETE FROM @tmpSalespersonsTable				
-						WHERE intSalespersonId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strSalespersons))
-					END
-		
-				SELECT @dblTotalRevenue = @dblTotalRevenue + ISNULL(SUM(dblInvoiceTotal), 0) FROM @tmpSalespersonsTable
+		SELECT @dblTotalRevenue = @dblTotalRevenue + ISNULL(SUM(dblInvoiceTotal), 0) FROM @tmpSalespersonsTable
 
-				INSERT INTO tblARCommissionRecapDetail
-				SELECT @intCommissionRecapId
-					 , @intEntityId
-					 , intInvoiceId
-					 , 'tblARInvoice'
-					 , dtmPostDate
-					 , dblInvoiceTotal
-					 , 1
-				FROM @tmpSalespersonsTable
-			END
+		INSERT INTO tblARCommissionRecapDetail
+		SELECT @intCommissionRecapId
+			 , @intEntityId
+			 , intInvoiceId
+			 , 'tblARInvoice'
+			 , dtmPostDate
+			 , dblInvoiceTotal
+			 , 1
+		FROM @tmpSalespersonsTable
 
 		--GET BILLABLE RATES BY AGENT
-		IF ISNULL(@strDrivers, '') <> ''
-			BEGIN
-				INSERT INTO @tmpAgentsTable
-				SELECT intAgentEntityId
-					 , intTicketHoursWorkedId
-					 , dtmDate
-					 , ISNULL(intHours, 0) * ISNULL(dblRate, 0)
-				FROM tblHDTicketHoursWorked
-				WHERE intAgentEntityId IS NOT NULL
-					AND ysnBillable = 1
-					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+		INSERT INTO @tmpAgentsTable
+		SELECT HD.intAgentEntityId
+			 , HD.intTicketHoursWorkedId
+			 , HD.dtmDate
+			 , ISNULL(HD.intHours, 0) * ISNULL(HD.dblRate, 0)
+		FROM tblHDTicketHoursWorked HD
+		INNER JOIN tblARCommissionPlanAgent A ON HD.intAgentEntityId = A.intEntityAgentId
+		WHERE HD.intAgentEntityId IS NOT NULL
+		  AND HD.ysnBillable = 1
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), HD.dtmDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+		  AND A.intCommissionPlanId = @intCommissionPlanId
 		
-				IF ISNULL(@strAgents, '') <> ''
-					BEGIN
-						DELETE FROM @tmpAgentsTable
-						WHERE intAgentId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strAgents))
-					END
+		SELECT @dblTotalRevenue = @dblTotalRevenue + SUM(dblAmount) FROM @tmpAgentsTable
 
-				SELECT @dblTotalRevenue = @dblTotalRevenue + SUM(dblAmount) FROM @tmpAgentsTable
-
-				INSERT INTO tblARCommissionRecapDetail
-				SELECT @intCommissionRecapId
-					 , @intEntityId
-					 , intTicketHoursWorkedId
-					 , 'tblHDTicketHoursWorked'
-					 , dtmDate
-					 , dblAmount
-					 , 1
-				FROM @tmpAgentsTable
-
-				IF ISNULL(@strDrivers, '') <> ''
-					BEGIN
-						INSERT INTO @tmpDriversTable
-						SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strDrivers)
-					END
-			END
+		INSERT INTO tblARCommissionRecapDetail
+		SELECT @intCommissionRecapId
+			 , @intEntityId
+			 , intTicketHoursWorkedId
+			 , 'tblHDTicketHoursWorked'
+			 , dtmDate
+			 , dblAmount
+			 , 1
+		FROM @tmpAgentsTable
 
 		--GET INVOICE LINETOTAL BY ITEM CATEGORY
-		IF ISNULL(@strItemCategories, '') <> ''
-			BEGIN
-				INSERT INTO @tmpItemCategoriesTable
-				SELECT IC.intCategoryId
-					 , ID.intInvoiceDetailId
-					 , I.intInvoiceId
-					 , ID.dblTotal
-					 , I.dtmPostDate
-				FROM tblARInvoice I
-					INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-					INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
-					INNER JOIN tblICCategory IC ON ICI.intCategoryId = IC.intCategoryId
-				WHERE I.ysnPosted = 1
-					AND IC.intCategoryId IS NOT NULL
-					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-
-				IF ISNULL(@strItemCategories, '') <> ''
-					BEGIN
-						DELETE FROM @tmpItemCategoriesTable
-						WHERE intItemCategoryId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strItemCategories))
-					END
+		INSERT INTO @tmpItemCategoriesTable
+		SELECT IC.intCategoryId
+			 , ID.intInvoiceDetailId
+			 , I.intInvoiceId
+			 , ID.dblTotal
+			 , I.dtmPostDate
+		FROM tblARInvoice I
+			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+			INNER JOIN tblICItem ICI ON ID.intItemId = ICI.intItemId
+			INNER JOIN tblICCategory IC ON ICI.intCategoryId = IC.intCategoryId
+			INNER JOIN tblARCommissionPlanItemCategory CPIC ON IC.intCategoryId = CPIC.intItemCategoryId
+		WHERE I.ysnPosted = 1
+			AND IC.intCategoryId IS NOT NULL
+			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+			AND CPIC.intCommissionPlanId = @intCommissionPlanId
 		
-				SELECT @dblTotalRevenue = @dblTotalRevenue + ISNULL(SUM(dblTotalAmount), 0) FROM @tmpItemCategoriesTable
+		SELECT @dblTotalRevenue = @dblTotalRevenue + ISNULL(SUM(dblTotalAmount), 0) FROM @tmpItemCategoriesTable
 
-				INSERT INTO tblARCommissionRecapDetail
-				SELECT @intCommissionRecapId
-					 , @intEntityId
-					 , intInvoiceDetailId
-					 , 'tblARInvoiceDetail'
-					 , dtmPostDate
-					 , dblTotalAmount
-					 , 1
-				FROM @tmpItemCategoriesTable ICT
-			END
+		INSERT INTO tblARCommissionRecapDetail
+		SELECT @intCommissionRecapId
+			 , @intEntityId
+			 , intInvoiceDetailId
+			 , 'tblARInvoiceDetail'
+			 , dtmPostDate
+			 , dblTotalAmount
+			 , 1
+		FROM @tmpItemCategoriesTable ICT
 		
 		--GET INVOICE LINETOTAL BY ITEM
-		IF ISNULL(@strItems, '') <> ''
-			BEGIN
-				INSERT INTO @tmpItemsTable
-				SELECT ID.intItemId
-					 , ID.intInvoiceDetailId
-					 , I.intInvoiceId
-					 , ID.dblTotal
-					 , I.dtmPostDate
-				FROM tblARInvoice I
-					INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-				WHERE I.ysnPosted = 1
-					AND ID.intItemId IS NOT NULL
-					AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
-
-				IF ISNULL(@strItems, '') <> ''
-					BEGIN
-						DELETE FROM @tmpItemsTable
-						WHERE intItemId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strItems))
-					END
+		INSERT INTO @tmpItemsTable
+		SELECT ID.intItemId
+			 , ID.intInvoiceDetailId
+			 , I.intInvoiceId
+			 , ID.dblTotal
+			 , I.dtmPostDate
+		FROM tblARInvoice I
+			INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+			INNER JOIN tblARCommissionPlanItem CPI ON ID.intItemId = CPI.intItemId
+		WHERE I.ysnPosted = 1
+		  AND ID.intItemId IS NOT NULL
+		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate
+		  AND CPI.intCommissionPlanId = @intCommissionPlanId
 		
-				SELECT @dblTotalRevenue = @dblTotalRevenue + ISNULL(SUM(dblTotalAmount), 0) FROM @tmpItemsTable
+		SELECT @dblTotalRevenue = @dblTotalRevenue + ISNULL(SUM(dblTotalAmount), 0) FROM @tmpItemsTable
 
-				INSERT INTO tblARCommissionRecapDetail
-				SELECT @intCommissionRecapId
-					 , @intEntityId
-					 , intInvoiceDetailId
-					 , 'tblARInvoiceDetail'
-					 , dtmPostDate
-					 , dblTotalAmount
-					 , 1
-				FROM @tmpItemsTable
-			END
+		INSERT INTO tblARCommissionRecapDetail
+		SELECT @intCommissionRecapId
+			 , @intEntityId
+			 , intInvoiceDetailId
+			 , 'tblARInvoiceDetail'
+			 , dtmPostDate
+			 , dblTotalAmount
+			 , 1
+		FROM @tmpItemsTable
 		
 		IF @strCalculationType = @CALCTYPE_PERCENT
 			SET @dblLineTotal = (@dblCalculationAmount * @dblTotalRevenue) - @dblHurdle

@@ -49,6 +49,7 @@ BEGIN
 		,@intSpecialPalletItemId INT
 		,@intSpecialPalletCategoryId INT
 		,@ysnProducedQtyByUnitCount BIT
+		,@strPickLot nvarchar(50)
 
 	SELECT @dtmCreated = Getdate()
 
@@ -591,4 +592,21 @@ BEGIN
 					)
 		END
 	END
+
+	SELECT @strPickLot = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 108--Pick Lot/Pallet after closing work order
+
+	If @strPickLot is null or @strPickLot=''
+	Begin
+		Select @strPickLot='False'
+	End
+
+	IF @strPickLot='True'
+	Begin
+		Update tblMFLotInventory Set ysnPickAllowed=0 Where intLotId=@intLotId
+	End
+
 END

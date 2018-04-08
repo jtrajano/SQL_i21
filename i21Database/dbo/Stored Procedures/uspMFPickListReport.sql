@@ -581,7 +581,7 @@ Begin --Sales Order Pick List
 			Left Join tblEMEntitySplit es on so.intSplitId=es.intSplitId
 			Left Join vyuEMCustomerApplicator ca on so.intEntityApplicatorId=ca.intEntityId
 			Left Join tblMFMethodOfApp ma on rg.intMethodOfAppId=ma.intMethodOfAppId
-			WHERE so.intSalesOrderId=@intSalesOrderId
+			WHERE so.intSalesOrderId=@intSalesOrderId AND i.strType<>'Other Charge'
 		End
 
 	--Update total weigt for recipe guide print
@@ -617,8 +617,6 @@ Begin --Sales Order Pick List
 	End
 
 	Select @dblTotalCost=SUM(ISNULL(dblCost,0.0)) From @tblItems
-
-	Set @dblTotalCost=@dblTotalCost + (Select ISNULL(SUM(dblLineTotal),0) From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId))
 
 	Update @tblItems Set dblTotalCost=@dblTotalCost
 
@@ -660,14 +658,20 @@ Begin --Sales Order Pick List
 				NULL AS dblReqQty,
 				dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
 				NULL AS dblQuantity,
-				dblLineTotal AS dblCost,
-				@dblTotalCost AS dblTotalCost
+				sd.dblQtyOrdered * sd.dblPrice AS dblCost,
+				0.0 AS dblTotalCost
 				,@strCompanyName AS strCompanyName
 				,@strCompanyAddress AS strCompanyAddress
 				,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCompanyCityStateZip
 				,@strCountry AS strCompanyCountry 
 				,'','','','','','','','','',null,null,'','','','',@ysnShowCostInSalesOrderPickList,0,@intMaxOtherChargeId,'Other Charge',@strFooterComments,0,0.0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
-		From [dbo].[fnMFGetInvoiceChargesByShipment](0,@intSalesOrderId)
+				From tblSOSalesOrderDetail sd join tblICItem i on sd.intItemId=i.intItemId
+				Where intSalesOrderId=@intSalesOrderId AND i.strType='Other Charge'
+
+				--recalculate total cost
+				Set @dblTotalCost=@dblTotalCost + (Select SUM(ISNULL(dblCost,0.0)) From @tblItems Where strItemType='Other Charge')
+
+				Update @tblItems Set dblTotalCost=@dblTotalCost
 		End
 
 	If Exists (Select 1 From @tblItems Where ISNULL(LTRIM(RTRIM(strLotNumber)),'')<>'')

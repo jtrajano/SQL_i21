@@ -4,7 +4,7 @@ SELECT ISNULL(intUserRoleID, RoleMenu.intUserRoleId)  AS intUserRoleId
 ,RoleMenu.intMenuId
 ,Menu.intParentMenuID AS intParentMenuId
 ,[dbo].[fnSMHideOriginMenus] (strMenuName, CAST(MAX(CAST(RoleMenu.ysnVisible AS INT)) AS BIT)) AS ysnVisible
-,MIN(RoleMenu.intSort) AS intSort
+,MIN(Menu.intSort) AS intSort
 ,Menu.intRow AS intRow
 ,REPLACE(strMenuName, ' (Portal)', '') AS strMenuName
 ,strModuleName

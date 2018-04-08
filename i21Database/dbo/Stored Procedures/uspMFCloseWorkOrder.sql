@@ -47,6 +47,8 @@ BEGIN TRY
 		,@strCostDistribution NVARCHAR(50)
 		,@intReturnValue AS INT
 		,@ErrorMessage AS NVARCHAR(4000)
+		,@strPickLot NVARCHAR(50)
+		,@AccountCategory_Cost_Adjustment NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -342,11 +344,11 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 107 --Cost Distribution during close work order
 
-	If @strCostDistribution is null or @strCostDistribution=''
-	Begin
-		Select @strCostDistribution='False'
-	End
-
+	IF @strCostDistribution IS NULL
+		OR @strCostDistribution = ''
+	BEGIN
+		SELECT @strCostDistribution = 'False'
+	END
 
 	IF @strCostDistribution = 'True'
 	BEGIN
@@ -403,7 +405,7 @@ BEGIN TRY
 		END
 
 		SET @dblNewCost = ISNULL(@dblOtherCost, 0)
-		SET @dblNewCost = ABS(@dblNewCost) 
+		SET @dblNewCost = ABS(@dblNewCost)
 
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 			,@intItemId = NULL
@@ -450,9 +452,9 @@ BEGIN TRY
 			,[intCostUOMId] = PL.intItemUOMId
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewCost 
-				ELSE (@dblNewCost * RI.dblPercentage / 100) 
-				END
+					THEN @dblNewCost
+				ELSE (@dblNewCost * RI.dblPercentage / 100)
+				END-ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
 				FROM tblSMCompanyPreference
@@ -473,8 +475,9 @@ BEGIN TRY
 			,intFobPointId = 2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-		JOIN tblICItemLocation IL on IL.intItemId=PL.intItemId and IL.intLocationId =@intLocationId 
-		Left JOIN tblICLot L ON L.intLotId = PL.intLotId
+		JOIN tblICItemLocation IL ON IL.intItemId = PL.intItemId
+			AND IL.intLocationId = @intLocationId
+		LEFT JOIN tblICLot L ON L.intLotId = PL.intLotId
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
@@ -519,6 +522,15 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				IF @strInstantConsumption = 'True'
+				BEGIN
+					SELECT @AccountCategory_Cost_Adjustment = 'Inventory'
+				END
+				ELSE
+				BEGIN
+					SELECT @AccountCategory_Cost_Adjustment = 'Work In Progress'
+				END
+
 				INSERT INTO @GLEntries (
 					dtmDate
 					,strBatchId
@@ -554,7 +566,7 @@ BEGIN TRY
 					)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
 					,@intEntityUserSecurityId = @userId
-					,@AccountCategory_Cost_Adjustment = 'Work In Progress'
+					,@AccountCategory_Cost_Adjustment = @AccountCategory_Cost_Adjustment
 			END
 
 			IF EXISTS (
@@ -565,7 +577,37 @@ BEGIN TRY
 				EXEC uspGLBookEntries @GLEntries
 					,1
 			END
+
+			UPDATE tblMFWorkOrder
+			SET strCostAdjustmentBatchId = @strBatchId
+			WHERE intWorkOrderId = @intWorkOrderId
 		END
+	END
+
+	SELECT @strPickLot = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 108 --Pick Lot/Pallet after closing work order
+
+	IF @strPickLot IS NULL
+		OR @strPickLot = ''
+	BEGIN
+		SELECT @strPickLot = 'False'
+	END
+
+	IF @strPickLot = 'True'
+	BEGIN
+		UPDATE LI
+		SET ysnPickAllowed = 1
+		FROM tblMFLotInventory LI
+		JOIN tblICLot L ON L.intLotId = LI.intLotId
+		WHERE L.strLotNumber IN (
+				SELECT L.strLotNumber
+				FROM tblMFWorkOrderProducedLot WP
+				JOIN tblICLot L ON L.intLotId = WP.intLotId
+					AND WP.intWorkOrderId = @intWorkOrderId
+				)
 	END
 
 	IF @intTransactionCount = 0

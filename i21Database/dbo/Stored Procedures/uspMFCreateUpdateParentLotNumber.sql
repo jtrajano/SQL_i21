@@ -28,6 +28,25 @@ BEGIN
 		,@dtmManufacturedDate DATETIME
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
+		,@intLotDueDays INT
+		,@dtmDueDate DATETIME
+		,@ysnLifeTimeByEndOfMonth BIT
+		,@strLotNumber NVARCHAR(50)
+		,@intBondStatusId INT
+		,@strContainerNo NVARCHAR(50)
+		,@intInventoryReceiptItemId INT
+		,@intInventoryReceiptId INT
+		,@strVendorRefNo NVARCHAR(50)
+		,@strWarehouseRefNo NVARCHAR(50)
+		,@strReceiptNumber NVARCHAR(50)
+		,@strTransactionId NVARCHAR(50)
+		,@dtmReceiptDate DATETIME
+		,@strCondition NVARCHAR(50)
+		,@intSplitFromLotId INT
+		,@ysnBonded BIT
+		,@strLotReceiptNumber NVARCHAR(50)
+		,@dblTareWeight NUMERIC(38, 20)
+		,@ysnPickAllowed BIT
 		,@ysnSendEDIOnRepost BIT
 
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
@@ -190,27 +209,13 @@ BEGIN
 		WHERE intLotId = @intLotId
 	END
 
-	DECLARE @strLotNumber NVARCHAR(50)
-		,@intBondStatusId INT
-		,@strContainerNo NVARCHAR(50)
-		,@intInventoryReceiptItemId INT
-		,@intInventoryReceiptId INT
-		,@strVendorRefNo NVARCHAR(50)
-		,@strWarehouseRefNo NVARCHAR(50)
-		,@strReceiptNumber NVARCHAR(50)
-		,@strTransactionId NVARCHAR(50)
-		,@dtmReceiptDate DATETIME
-		,@strCondition NVARCHAR(50)
-		,@intSplitFromLotId INT
-		,@ysnBonded BIT
-		,@strLotReceiptNumber NVARCHAR(50)
-
 	SELECT @strLotNumber = strLotNumber
 		,@strCondition = strCondition
 		,@intSplitFromLotId = intSplitFromLotId
 		,@strLotReceiptNumber = strReceiptNumber
 	FROM tblICLot
 	WHERE intLotId = @intLotId
+
 
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'
@@ -247,6 +252,9 @@ BEGIN
 			,@strWarehouseRefNo = LI.strWarehouseRefNo
 			,@strReceiptNumber = LI.strReceiptNumber
 			,@dtmReceiptDate = dtmReceiptDate
+			,@dblTareWeight = dblTareWeight
+			,@dtmDueDate = dtmDueDate
+			,@ysnPickAllowed=ysnPickAllowed
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -316,6 +324,10 @@ BEGIN
 			,strWarehouseRefNo
 			,strReceiptNumber
 			,dtmReceiptDate
+			,dtmLastMoveDate
+			,dblTareWeight
+			,dtmDueDate
+			,ysnPickAllowed
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -323,6 +335,10 @@ BEGIN
 			,@strWarehouseRefNo
 			,@strReceiptNumber
 			,@dtmReceiptDate
+			,@dtmCurrentDateTime
+			,@dblTareWeight
+			,@dtmDueDate
+			,IsNULL(@ysnPickAllowed,1)
 	END
 	ELSE
 	BEGIN

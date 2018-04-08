@@ -93,7 +93,7 @@ WHILE @mRowNumber > 0
 
 	 INSERT INTO @PhysicalFuturesResult (
 			intRowNum,strContractType,strNumber,strDescription,strConfirmed,dblAllocatedQty,dblPrice,strCurrency,dblFX
-			,dblBooked,dblAccounting,dtmDate,strType,dblTranValue,intSort,dblTransactionValue,dblForecast,intContractDetailId,ysnPosted)
+			,dblBooked,dblAccounting,dtmDate,strType,dblTranValue,intSort,ysnPosted,dblTransactionValue,dblForecast,intContractDetailId)
 EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId,@intCurrencyId, @intUnitMeasureId	,@intWeightUOMId 
 	
 	SELECT @mRowNumber = MIN(intId)	FROM @Detail	WHERE intId > @mRowNumber

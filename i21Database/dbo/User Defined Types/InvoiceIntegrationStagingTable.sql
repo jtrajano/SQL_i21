@@ -107,6 +107,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intOrderUOMId]						INT												NULL		-- The order UOM Id
     ,[dblQtyOrdered]						NUMERIC(18, 6)									NULL		-- The quantity ordered
 	,[intItemUOMId]							INT												NULL		-- The UOM Id
+	,[intPriceUOMId]						INT												NULL		-- The UOM Id From Contract Sequence/Inventory Shipment
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
 	,[dblItemTermDiscount]					NUMERIC(18, 6)									NULL		-- The Term discount to apply to a line item upon payment

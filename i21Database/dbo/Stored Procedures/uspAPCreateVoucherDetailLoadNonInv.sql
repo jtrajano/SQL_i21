@@ -25,6 +25,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			,
 		[intContractHeaderId]			,
 		[intItemId]						,
+		[intUnitOfMeasureId]			,
+		[intContractSeq]				,
 		[intLoadDetailId]				,
 		[dblTotal]						,
 		[dblQtyOrdered]					,
@@ -41,6 +43,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			=	A.intContractDetailId,
 		[intContractHeaderId]			=	A.intContractHeaderId,
 		[intItemId]						=	A.[intItemId]					,
+		[intUnitOfMeasureId]			=	A.[intItemUOMId]					,
+		[intContractSeq]				=	G.intContractSeq,
 		[intLoadDetailId]				=	A.intLoadDetailId,
 		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived  AS DECIMAL(18,2)),
 		[dblQtyOrdered]					=	A.dblQtyReceived,
@@ -56,6 +60,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
+	INNER JOIN tblCTContractDetail G ON A.intContractDetailId = G.intContractDetailId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	WHERE B.intBillId = @voucherId
 
