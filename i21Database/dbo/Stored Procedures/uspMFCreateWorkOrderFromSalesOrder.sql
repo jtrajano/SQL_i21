@@ -246,11 +246,39 @@ Begin
 	Select TOP 1 @intCustomerId=sh.intEntityCustomerId,@strSalesOrderNo=sh.strSalesOrderNumber 
 	From tblSOSalesOrder sh Join tblSOSalesOrderDetail sd on sh.intSalesOrderId=sd.intSalesOrderId Where sd.intSalesOrderDetailId=@intSalesOrderDetailId
 
+	Declare @strWOStatusName nvarchar(50)
+	Declare @intStatusId int=null
+
+	SELECT @strWOStatusName = ISNULL(pa.strAttributeValue, 0)
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND at.strAttributeName = 'Status for Newly Created Work Order'
+
+	Select @intStatusId=intStatusId From tblMFWorkOrderStatus Where strName=@strWOStatusName
+	
+	If @intStatusId is null
+		Set @intStatusId=1
+				
 	Select @intMinWO=Min(intRowNo) From @tblWO
 
 	While(@intMinWO is not null)
 	Begin
 		Select @dblQuantity=dblQuantity,@intCellId=intCellId,@dtmDueDate=dtmDueDate,@dtmPlannedDate=dtmPlannedDate,@intPlannedShiftId=intPlannedShiftId From @tblWO Where intRowNo=@intMinWO
+
+		If @dtmPlannedDate is null Set @dtmPlannedDate=GETDATE()
+		If @intPlannedShiftId is null
+		Begin
+				Declare @dtmBusinessDate DATETIME
+				SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmPlannedDate,@intLocationId) 
+
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND @dtmCurrentDate BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
+								AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
+		End
 
 		--Get Work Order No
 		If ISNULL(@strWorkOrderNo,'') = ''
@@ -277,11 +305,13 @@ Begin
 
 		Select @intSubLocationId=intSubLocationId From tblMFManufacturingCell where intManufacturingCellId=@intCellId
 
+		Select @intItemUOMId=intItemUOMId From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId
+
 		insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dtmExpectedDate,intExecutionOrder,
 		intProductionTypeId,dblPlannedQuantity,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intManufacturingProcessId,intSalesOrderLineItemId,
 		dtmOrderDate,dtmPlannedDate,intSupervisorId,intSubLocationId,intCustomerId,strSalesOrderNo,intPlannedShiftId,intConcurrencyId,intTransactionFrom)
-		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,1,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
-		null,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
+		Select @strWorkOrderNo,@intItemId,@dblQuantity,@intItemUOMId,@intStatusId,@intCellId,null,@intLocationId,@dtmDueDate,1,1,
+		@dblQuantity,0,0,'',@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@intManufacturingProcessId,@intSalesOrderDetailId,
 		@dtmCurrentDate,@dtmPlannedDate,@intUserId,@intSubLocationId,@intCustomerId,@strSalesOrderNo,@intPlannedShiftId,1,2
 
 		Select @intWokrOrderId=SCOPE_IDENTITY()
