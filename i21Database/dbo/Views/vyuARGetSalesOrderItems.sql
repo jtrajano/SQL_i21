@@ -105,7 +105,7 @@ LEFT JOIN (
 	FROM dbo.tblICItemUOM WITH (NOLOCK)
 ) ICUOM ON SODETAIL.intItemId = ICUOM.intItemId
        AND SODETAIL.intItemUOMId = ICUOM.intItemUOMId
-INNER JOIN (
+LEFT JOIN (
 	SELECT intUnitMeasureId
 		 , strUnitMeasure
 	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
