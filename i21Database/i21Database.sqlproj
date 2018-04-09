@@ -6311,6 +6311,7 @@
     <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReopenWorkOrder.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
+    <Build Include="dbo\Tables\tblIPCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

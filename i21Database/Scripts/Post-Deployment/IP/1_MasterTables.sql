@@ -220,3 +220,9 @@ BEGIN
     VALUES(13,'FTP Operation')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 14)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(14,'Web Service Call')
+END
+GO
