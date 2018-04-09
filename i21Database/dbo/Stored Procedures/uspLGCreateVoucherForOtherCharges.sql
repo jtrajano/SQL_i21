@@ -35,6 +35,7 @@ BEGIN TRY
 		,dblCost NUMERIC(18, 6)
 		,intLoadCostId INT
 		,ysnInventoryCost BIT
+		,intItemUOMId INT
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -114,6 +115,7 @@ BEGIN TRY
 		,dblCost
 		,intLoadCostId
 		,ysnInventoryCost
+		,intItemUOMId
 		)
 	SELECT V.intEntityVendorId
 		,LD.intLoadId
@@ -134,6 +136,7 @@ BEGIN TRY
 			) * CONVERT(NUMERIC(18, 6), V.dblNet)
 		,V.intLoadCostId
 		,I.ysnInventoryCost
+		,LD.intItemUOMId
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -158,6 +161,7 @@ BEGIN TRY
 		,LD.intLoadDetailId
 		,V.intLoadCostId
 		,I.ysnInventoryCost
+		,LD.intItemUOMId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -210,6 +214,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intItemUOMId
 				)
 			SELECT intContractHeaderId
 				,intContractDetailId
@@ -218,6 +223,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intItemUOMId
 			FROM @voucherDetailData
 			WHERE intVendorEntityId = @intVendorEntityId
 
@@ -275,6 +281,7 @@ BEGIN TRY
 					,intLoadDetailId
 					,dblQtyReceived
 					,dblCost
+					,intItemUOMId
 					)
 				SELECT intContractHeaderId
 					,intContractDetailId
@@ -283,6 +290,7 @@ BEGIN TRY
 					,intLoadDetailId
 					,dblQtyReceived
 					,dblCost
+					,intItemUOMId
 				FROM @voucherDetailData
 				WHERE intVendorEntityId = @intVendorEntityId
 					AND ysnInventoryCost = 0

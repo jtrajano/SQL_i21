@@ -20,6 +20,8 @@ SELECT
 	,[strItemDescription]			= ICI.[strDescription]
 	,[intItemUOMId]					= LS.[intItemUOMId]
 	,[strUnitMeasure]				= UOM.[strUnitMeasure]
+	,[intPriceUOMId]				= ARCC.[intPriceItemUOMId]
+	,[strPriceUnitMeasure]			= UOM.[strUnitMeasure]
 	,[intShipmentItemUOMId]			= LS.[intShipmentItemUOMId]
 	,[strShipmentUnitMeasure]		= SUOM.[strUnitMeasure]
 	,[dblQtyShipped]				= LS.[dblQtyShipped]

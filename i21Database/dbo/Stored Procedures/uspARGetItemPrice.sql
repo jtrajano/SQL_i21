@@ -11,6 +11,9 @@
 	,@ContractDetailId			INT				= NULL OUTPUT
 	,@ContractNumber			NVARCHAR(50)	= NULL OUTPUT
 	,@ContractSeq				INT				= NULL OUTPUT
+	,@NewQuantity				NUMERIC(18,6)   = NULL OUTPUT
+	,@PriceUOMId				INT			    = NULL OUTPUT
+	,@PriceUOM					NVARCHAR(50)	= NULL OUTPUT
 	,@AvailableQuantity			NUMERIC(18,6)   = NULL OUTPUT
 	,@UnlimitedQuantity			BIT             = 0    OUTPUT
 	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
@@ -49,6 +52,9 @@ AS
 		,@ContractDetailId	= intContractDetailId
 		,@ContractNumber	= strContractNumber
 		,@ContractSeq		= intContractSeq
+		,@PriceUOMId		= intPriceUOMId
+		,@PriceUOM			= strPriceUOM
+		,@NewQuantity		= dblQuantity
 		,@AvailableQuantity = dblAvailableQty
 		,@UnlimitedQuantity = ysnUnlimitedQty
 		,@Deviation			= dblDeviation

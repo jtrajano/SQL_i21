@@ -228,13 +228,12 @@ BEGIN
 			,[dblCalculatedQty]			= 
 											ROUND (
 												(ISNULL(Charge.dblRate, 0) / 100)
-												*	ISNULL(ShipmentItem.dblQuantity, 0) 
 												*	CASE 
 														WHEN ISNULL(Shipment.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ShipmentItem.dblForexRate, 0) <> 0 THEN 
 															-- Convert the foreign price to transaction currency. 
-															ISNULL(ShipmentItem.dblUnitPrice, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
+															ISNULL(ShipmentItem.dblLineTotal, 0) * ISNULL(ShipmentItem.dblForexRate, 0) 
 														ELSE 
-															ISNULL(ShipmentItem.dblUnitPrice, 0)
+															ISNULL(ShipmentItem.dblLineTotal, 0)
 													END
 												* 
 													-- and then convert the transaction price to the other charge currency. 

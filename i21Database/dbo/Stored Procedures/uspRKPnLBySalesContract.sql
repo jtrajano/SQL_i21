@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspRKPnLBySalesContract
-		@intUOMId int = null,
-		@intPriceUOMId int = null
+		@intCurrencyId int ,			
+		@intUnitMeasureId		INT,--- Price uom	
+		@intWeightUOMId			INT -- weight 
 AS
 
 DECLARE @ysnPnLWithOutAllocation bit
@@ -14,7 +15,7 @@ SET @strAllocationType = 'Without Allocation'
 DECLARE @Result TABLE (intContractDetailId int,dblInvoiceQty numeric(24,10))
 INSERT INTO @Result(dblInvoiceQty,intContractDetailId)
 SELECT	DISTINCT 
-			SUM(dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intPriceUOMId, ID.dblQtyShipped)) AS dblInvoiceQty
+			SUM(dbo.fnCTConvertQuantityToTargetItemUOM(ID.intItemId,QU.intUnitMeasureId,@intUnitMeasureId, ID.dblQtyShipped)) AS dblInvoiceQty
 			,ID.intContractDetailId
 	FROM	tblARInvoiceDetail		ID 
 	JOIN	tblICItemUOM			QU	ON	QU.intItemUOMId			=	ID.intItemUOMId	
@@ -29,7 +30,7 @@ FROM(
 SELECT Distinct strSequenceNumber,strItemNo,
 		strEntityName,dblDetailQuantity,--isnull(dblAllocatedQty,0)*(isnull(dblSaleBasis,0)-isnull(dblPurchaseBasis,0)-(isnull(dblPurchaseCost,0)- isnull(dblSaleCost,0))) as dblEstimatedProfit,
 		0.0 as dblActualProfit, 
-		sum(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intUnitMeasureId,@intPriceUOMId, ISNULL(dblAllocatedQty,0))) over (Partition by intContractDetailId)  dblAllocatedQty,
+		sum(dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intUnitMeasureId,@intUnitMeasureId, ISNULL(dblAllocatedQty,0))) over (Partition by intContractDetailId)  dblAllocatedQty,
 		dblInvoiceQty  as dblInvoiceQty,		
 		intContractDetailId,strSalespersonName
 FROM(
@@ -92,8 +93,8 @@ WHILE @mRowNumber > 0
 
 	 INSERT INTO @PhysicalFuturesResult (
 			intRowNum,strContractType,strNumber,strDescription,strConfirmed,dblAllocatedQty,dblPrice,strCurrency,dblFX
-			,dblBooked,dblAccounting,dtmDate,strType,dblTranValue,intSort,dblTransactionValue,dblForecast,intContractDetailId,ysnPosted)
-EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId, @intPriceUOMId	 
+			,dblBooked,dblAccounting,dtmDate,strType,dblTranValue,intSort,ysnPosted,dblTransactionValue,dblForecast,intContractDetailId)
+EXEC uspRKPNLPhysicalFuturesResult @intContractDetailId,@intCurrencyId, @intUnitMeasureId	,@intWeightUOMId 
 	
 	SELECT @mRowNumber = MIN(intId)	FROM @Detail	WHERE intId > @mRowNumber
 END  

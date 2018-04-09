@@ -35,6 +35,8 @@ SELECT id							= NEWID()
 	 , strItemDescription			= ISNULL(SHIPPEDITEMS.strItemDescription, ITEM.strDescription)
 	 , intItemUOMId					= SHIPPEDITEMS.intItemUOMId
 	 , strUnitMeasure				= ITEMUOM.strUnitMeasure
+	 , intPriceUOMId				= SHIPPEDITEMS.intPriceUOMId	 
+	 , strPriceUnitMeasure			= ITEMPRICEUOM.strUnitMeasure
 	 , intOrderUOMId				= SHIPPEDITEMS.intOrderUOMId
 	 , strOrderUnitMeasure			= ITEMORDERUOM.strUnitMeasure
 	 , intShipmentItemUOMId			= SHIPPEDITEMS.intItemUOMId	 
@@ -94,201 +96,6 @@ SELECT id							= NEWID()
 	 , dblSubCurrencyRate			= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
 	 , strSubCurrency				= CURRENCY.strCurrency
 FROM (
-	--SELECT strTransactionType				= 'Sales Order'
-	--	 , strTransactionNumber				= SO.strSalesOrderNumber
-	--	 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
-	--	 , intEntityCustomerId				= SO.intEntityCustomerId
-	--	 , intCurrencyId					= SO.intCurrencyId
-	--	 , intSalesOrderId					= SO.intSalesOrderId
-	--	 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
-	--	 , strSalesOrderNumber				= SO.strSalesOrderNumber
-	--	 , dtmProcessDate					= SO.dtmDate
-	--	 , intInventoryShipmentId			= NULL
-	--	 , intInventoryShipmentItemId		= NULL
-	--	 , intInventoryShipmentChargeId		= NULL
-	--	 , strInventoryShipmentNumber		= ''	
-	--	 , intShipmentId					= NULL
-	--	 , strShipmentNumber				= NULL
-	--	 , intLoadId						= NULL
-	--	 , intLoadDetailId					= NULL
-	--	 , intLotId							= NULL
-	--	 , strLoadNumber					= NULL
-	--	 , intRecipeItemId 					= SOD.intRecipeItemId
-	--	 , intContractHeaderId				= SOD.intContractHeaderId
-	--	 , intContractDetailId				= SOD.intContractDetailId
-	--	 , intCompanyLocationId				= SO.intCompanyLocationId
-	--	 , intShipToLocationId				= SO.intShipToLocationId
-	--	 , intFreightTermId					= SO.intFreightTermId
-	--	 , intItemId						= SOD.intItemId
-	--	 , strItemDescription				= SOD.strItemDescription
-	--	 , intItemUOMId						= SOD.intItemUOMId
-	--	 , intOrderUOMId					= SOD.intItemUOMId
-	--	 , intShipmentItemUOMId				= SOD.intItemUOMId
-	--	 , intWeightUOMId					= NULL
-	--	 , dblWeight						= NULL
-	--	 , dblQtyShipped					= SOD.dblQtyShipped
-	--	 , dblQtyOrdered					= SOD.dblQtyOrdered
-	--	 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)	
-	--	 , dblShipmentQtyShippedTotal		= SOD.dblQtyShipped
-	--	 , dblQtyRemaining					= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
-	--	 , dblDiscount						= SOD.dblDiscount 
-	--	 , dblPrice							= SOD.dblPrice
-	--	 , dblShipmentUnitPrice				= SOD.dblPrice
-	--	 , strPricing						= SOD.strPricing
-	--	 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
-	--	 , dblTotalTax						= SOD.dblTotalTax
-	--	 , dblTotal							= SOD.dblTotal
-	--	 , intStorageLocationId				= SOD.intStorageLocationId
-	--	 , intTermId						= SO.intTermId		 
-	--	 , intEntityShipViaId				= SO.intShipViaId 		 
-	--	 , intTicketId						= NULL
-	--	 , intTaxGroupId					= SOD.intTaxGroupId		 
-	--	 , dblGrossWt						= 0.00
-	--	 , dblTareWt						= 0.00
-	--	 , dblNetWt							= 0.00
-	--	 , strPONumber						= SO.strPONumber
-	--	 , strBOLNumber						= SO.strBOLNumber
-	--	 , intSplitId						= SO.intSplitId
-	--	 , intEntitySalespersonId			= SO.intEntitySalespersonId
-	--	 , ysnBlended						= SOD.ysnBlended
-	--	 , intRecipeId						= SOD.intRecipeId
-	--	 , intSubLocationId					= SOD.intSubLocationId
-	--	 , intCostTypeId					= SOD.intCostTypeId
-	--	 , intMarginById					= SOD.intMarginById
-	--	 , intCommentTypeId					= SOD.intCommentTypeId
-	--	 , dblMargin						= SOD.dblMargin
-	--	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
-	--	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
-	--	 , intDestinationGradeId			= NULL
-	--	 , intDestinationWeightId			= NULL
-	--	 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
-	--	 , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
-	--	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
-	--	 , intSubCurrencyId					= SOD.intSubCurrencyId
-	--	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
-	--FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
-	--INNER JOIN (
-	--	SELECT *
-	--	FROM dbo.tblSOSalesOrderDetail
-	--) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-	--INNER JOIN (
-	--	SELECT intItemId
-	--		 , strLotTracking
-	--	FROM dbo.tblICItem WITH (NOLOCK)
-	--	WHERE strType <> 'Bundle'
-	--) I ON SOD.intItemId = I.intItemId 
-	--  AND (dbo.fnIsStockTrackingItem(I.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No')
-	--LEFT OUTER JOIN (
-	--	SELECT intLineNo
-	--		 , H.intInventoryShipmentId
-	--	FROM dbo.tblICInventoryShipmentItem D WITH (NOLOCK)
-	--	INNER JOIN (
-	--		SELECT intInventoryShipmentId
-	--		FROM dbo.tblICInventoryShipment WITH (NOLOCK)
-	--		WHERE intOrderType = 2
-	--	) H ON H.intInventoryShipmentId = D.intInventoryShipmentId
-	--) ISD ON SOD.intSalesOrderDetailId = ISD.intLineNo	
-	--WHERE SO.strTransactionType = 'Order' 
-	--  AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-	--  AND ((SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000) <> 0.000000) OR (ISNULL(ISD.intLineNo,0) = 0))
-	
-	--UNION ALL
-
-	--SELECT strTransactionType				= 'Sales Order'
-	--	 , strTransactionNumber				= SO.strSalesOrderNumber
-	--	 , strShippedItemId					= 'arso:' + CAST(SO.intSalesOrderId AS NVARCHAR(250))
-	--	 , intEntityCustomerId				= SO.intEntityCustomerId
-	--	 , intCurrencyId					= SO.intCurrencyId
-	--	 , intSalesOrderId					= SO.intSalesOrderId
-	--	 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
-	--	 , strSalesOrderNumber				= SO.strSalesOrderNumber
-	--	 , dtmProcessDate					= SO.dtmDate
-	--	 , intInventoryShipmentId			= NULL
-	--	 , intInventoryShipmentItemId		= NULL
-	--	 , intInventoryShipmentChargeId		= NULL
-	--	 , strInventoryShipmentNumber		= ''	
-	--	 , intShipmentId					= NULL
-	--	 , strShipmentNumber				= NULL
-	--	 , intLoadId						= NULL
-	--	 , intLoadDetailId					= NULL
-	--	 , intLotId							= NULL
-	--	 , strLoadNumber					= NULL
-	--	 , intRecipeItemId					= NULL
-	--	 , intContractHeaderId				= SOD.intContractHeaderId
-	--	 , intContractDetailId				= SOD.intContractDetailId
-	--	 , intCompanyLocationId				= SO.intCompanyLocationId
-	--	 , intShipToLocationId				= SO.intShipToLocationId
-	--	 , intFreightTermId					= SO.intFreightTermId
-	--	 , intItemId						= SOD.intItemId
-	--	 , strItemDescription				= SOD.strItemDescription
-	--	 , intItemUOMId						= SOD.intItemUOMId
-	--	 , intOrderUOMId					= SOD.intItemUOMId
-	--	 , intShipmentItemUOMId				= SOD.intItemUOMId
-	--	 , intWeightUOMId					= NULL
-	--	 , dblWeight						= NULL
-	--	 , dblQtyShipped					= SOD.dblQtyShipped
-	--	 , dblQtyOrdered					= SOD.dblQtyOrdered
-	--	 , dblShipmentQuantity				= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
-	--	 , dblShipmentQtyShippedTotal		= SOD.dblQtyShipped
-	--	 , dblQtyRemaining					= SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000)
-	--	 , dblDiscount						= SOD.dblDiscount
-	--	 , dblPrice							= SOD.dblPrice
-	--	 , dblShipmentUnitPrice				= SOD.dblPrice
-	--	 , strPricing						= SOD.strPricing
-	--	 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
-	--	 , dblTotalTax						= SOD.dblTotalTax
-	--	 , dblTotal							= SOD.dblTotal
-	--	 , intStorageLocationId				= SOD.intStorageLocationId
-	--	 , intTermId						= SO.intTermId
-	--	 , intEntityShipViaId				= SO.intEntityId
-	--	 , intTicketId						= NULL
-	--	 , intTaxGroupId					= SOD.intTaxGroupId
-	--	 , dblGrossWt						= 0.00	
-	--	 , dblTareWt						= 0.00
-	--	 , dblNetWt							= 0.00
-	--	 , strPONumber						= SO.strPONumber
-	--	 , strBOLNumber						= SO.strBOLNumber
-	--	 , intSplitId						= SO.intSplitId
-	--	 , intEntitySalespersonId			= SO.intEntitySalespersonId
-	--	 , ysnBlended						= SOD.ysnBlended
-	--	 , intRecipeId						= SOD.intRecipeId
-	--	 , intSubLocationId					= SOD.intSubLocationId
-	--	 , intCostTypeId					= SOD.intCostTypeId
-	--	 , intMarginById					= SOD.intMarginById
-	--	 , intCommentTypeId					= SOD.intCommentTypeId
-	--	 , dblMargin						= SOD.dblMargin
-	--	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
-	--	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
-	--	 , intDestinationGradeId			= NULL
-	--	 , intDestinationWeightId			= NULL
-	--	 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
-	--	 , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
-	--	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
-	--	 , intSubCurrencyId					= SOD.intSubCurrencyId
-	--	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
-	--FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
-	--INNER JOIN (
-	--	SELECT *
-	--	FROM dbo.tblSOSalesOrderDetail
-	--	WHERE intItemId IS NULL 
-	--		AND strItemDescription <> ''
-	--) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
-	--WHERE SO.strTransactionType = 'Order' 
-	--  AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-	--  AND SOD.dblQtyOrdered - ISNULL(SOD.dblQtyShipped, 0.000000) <> 0.000000
-	--  AND SOD.intSalesOrderDetailId NOT IN (SELECT intSalesOrderDetailId
-	--										FROM (SELECT intInvoiceId
-	--												   , intSalesOrderDetailId
-	--												   , dblQtyShipped 
-	--											  FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ID
-	--											  INNER JOIN (
-	--													SELECT intInvoiceId 
-	--													FROM tblARInvoice WITH (NOLOCK)
-	--											  ) I ON ID.intInvoiceId = I.intInvoiceId 
-	--											WHERE SOD.dblQtyOrdered <= ID.dblQtyShipped)
-	 
-	--UNION ALL
-
 	SELECT strTransactionType				= 'Inventory Shipment'
 		 , strTransactionNumber				= SHP.strShipmentNumber
 		 , strShippedItemId					= 'icis:' + CAST(SHP.intInventoryShipmentId AS NVARCHAR(250))
@@ -317,6 +124,7 @@ FROM (
 		 , intItemId						= SOD.intItemId	
 		 , strItemDescription				= SOD.strItemDescription
 		 , intItemUOMId						= SHP.intItemUOMId
+		 , intPriceUOMId					= SHP.intPriceUOMId
 		 , intOrderUOMId					= SOD.intItemUOMId
 		 , intShipmentItemUOMId				= SHP.intItemUOMId
 		 , intWeightUOMId					= SHP.intWeightUOMId
@@ -327,8 +135,8 @@ FROM (
 		 , dblShipmentQtyShippedTotal		= SHP.dblQuantity
 		 , dblQtyRemaining					= SHP.dblQuantity - ISNULL(INVOICEDETAIL.dblQtyShipped, 0)
 		 , dblDiscount						= SOD.dblDiscount 
-		 , dblPrice							= SOD.dblPrice
-		 , dblShipmentUnitPrice				= SHP.dblUnitPrice
+		 , dblPrice							= CAST(SOD.dblPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(SHP.dblUnitPrice AS DECIMAL(18,6))
 		 , strPricing						= SOD.strPricing
 		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
 		 , dblTotalTax						= SOD.dblTotalTax
@@ -374,6 +182,7 @@ FROM (
 			 , ISI.intItemId
 			 , ISI.dblQuantity
 			 , ISI.intItemUOMId
+			 , ISI.intPriceUOMId
 			 , ISI.dblUnitPrice
 			 , ISI.intSourceId
 			 , dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId, SOD.intItemUOMId, SUM(ISNULL(ISI.dblQuantity,0))) dblSOShipped
@@ -408,6 +217,7 @@ FROM (
 			   , ISI.intItemId
 			   , ISI.dblQuantity
 			   , ISI.intItemUOMId
+			   , ISI.intPriceUOMId
 			   , ISI.dblUnitPrice
 			   , ISI.intSourceId
 			   , ISH.intShipFromLocationId
@@ -469,6 +279,7 @@ FROM (
 	     , intItemId						= ICISI.intItemId
 	     , strItemDescription				= NULL
 	     , intItemUOMId						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
+		 , intPriceUOMId					= ICISI.intPriceUOMId
 	     , intOrderUOMId					= NULL--CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
@@ -479,8 +290,8 @@ FROM (
 	     , dblShipmentQtyShippedTotal		= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblQtyRemaining					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) - ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ICISI.dblQuantity,0) - ISNULL(ID.dblQtyShipped, 0) END
 	     , dblDiscount						= 0.000000 
-	     , dblPrice							= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END
-	     , dblShipmentUnitPrice				= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END
+	     , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0.000000
@@ -659,6 +470,7 @@ FROM (
 		 , intItemId						= ICISC.intChargeId
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= ICISC.intCostUOMId
+		 , intPriceUOMId					= NULL
 		 , intOrderUOMId					= NULL		
 		 , intShipmentItemUOMId				= ICISC.intCostUOMId
 		 , intWeightUOMId					= NULL
@@ -669,8 +481,8 @@ FROM (
 		 , dblShipmentQtyShippedTotal		= 1
 		 , dblQtyRemaining					= 1
 		 , dblDiscount						= 0 
-		 , dblPrice							= ICISC.dblAmount
-		 , dblShipmentUnitPrice				= ICISC.dblAmount
+		 , dblPrice							= CAST(ICISC.dblAmount AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(ICISC.dblAmount AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0
@@ -754,6 +566,7 @@ FROM (
 		 , intItemId						= MFG.intItemId
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= MFG.intItemUOMId
+		 , intPriceUOMId					= NULL
 		 , intOrderUOMId					= MFG.intItemUOMId
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
 		 , intWeightUOMId					= NULL
@@ -764,8 +577,8 @@ FROM (
 		 , dblShipmentQtyShippedTotal		= MFG.dblQuantity
 		 , dblQtyRemaining					= MFG.dblQuantity
 		 , dblDiscount						= 0.00
-		 , dblPrice							= MFG.dblPrice
-		 , dblShipmentUnitPrice				= MFG.dblPrice
+		 , dblPrice							= CAST(MFG.dblPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0.00
@@ -859,6 +672,7 @@ FROM (
 		 , intItemId						= MFG.intItemId	
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= MFG.intItemUOMId
+		 , intPriceUOMId					= NULL
 		 , intOrderUOMId					= NULL		
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
 		 , intWeightUOMId					= NULL
@@ -869,8 +683,8 @@ FROM (
 		 , dblShipmentQtyShippedTotal		= MFG.dblQuantity
 		 , dblQtyRemaining					= MFG.dblQuantity
 		 , dblDiscount						= 0 
-		 , dblPrice							= MFG.dblPrice
-		 , dblShipmentUnitPrice				= MFG.dblPrice
+		 , dblPrice							= CAST(MFG.dblPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0
@@ -960,6 +774,7 @@ FROM (
 	     , intItemId						= intItemId
 	     , strItemDescription				= strItemDescription
 	     , intItemUOMId						= intItemUOMId
+		 , intPriceUOMId					= NULL
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
 		 , intWeightUOMId					= intWeightUOMId
@@ -970,8 +785,8 @@ FROM (
 		 , dblShipmentQtyShippedTotal		= dblShipmentQtyShippedTotal
 		 , dblQtyRemaining					= dblQtyRemaining
 	     , dblDiscount						= dblDiscount
-	     , dblPrice							= dblPrice
-	     , dblShipmentUnitPrice				= dblShipmentUnitPrice
+	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
 	     , dblTotalTax						= dblTotalTax
@@ -1037,6 +852,7 @@ FROM (
 	     , intItemId						= LWS.intItemId
 	     , strItemDescription				= LWS.strItemDescription
 	     , intItemUOMId						= NULL
+		 , intPriceUOMId					= NULL
 	     , intOrderUOMId					= NULL
 	     , intShipmentItemUOMId				= NULL
 		 , intWeightUOMId					= NULL
@@ -1047,8 +863,8 @@ FROM (
 	     , dblShipmentQtyShippedTotal		= 1
 	     , dblQtyRemaining					= 1
 	     , dblDiscount						= 0
-	     , dblPrice							= LWS.dblPrice
-	     , dblShipmentUnitPrice				= dblShipmentUnitPrice
+	     , dblPrice							= CAST(LWS.dblPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
@@ -1150,6 +966,7 @@ FROM (
 	     , intItemId						= LC.intItemId
 	     , strItemDescription				= LC.strItemDescription
 	     , intItemUOMId						= NULL
+		 , intPriceUOMId					= NULL
 	     , intOrderUOMId					= NULL
 	     , intShipmentItemUOMId				= NULL
 		 , intWeightUOMId					= NULL
@@ -1160,8 +977,8 @@ FROM (
 	     , dblShipmentQtyShippedTotal		= 1
 	     , dblQtyRemaining					= 1
 	     , dblDiscount						= 0
-	     , dblPrice							= LC.dblPrice
-	     , dblShipmentUnitPrice				= dblShipmentUnitPrice
+	     , dblPrice							= CAST(LC.dblPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0
@@ -1271,6 +1088,7 @@ FROM (
 		 , intItemId						= LC.intItemId
 		 , strItemDescription				= LC.strItemDescription
 		 , intItemUOMId						= NULL
+		 , intPriceUOMId					= NULL
 		 , intOrderUOMId					= NULL
 		 , intShipmentItemUOMId				= NULL
 		 , intWeightUOMId					= NULL
@@ -1281,8 +1099,8 @@ FROM (
 		 , dblShipmentQtyShippedTotal		= 1
 		 , dblQtyRemaining					= 1
 		 , dblDiscount						= 0
-		 , dblPrice							= LC.dblPrice
-		 , dblShipmentUnitPrice				= dblShipmentUnitPrice
+		 , dblPrice							= CAST(LC.dblPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0
@@ -1433,6 +1251,18 @@ LEFT OUTER JOIN (
 		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
 ) ITEMORDERUOM ON SHIPPEDITEMS.intOrderUOMId = ITEMORDERUOM.intItemUOMId
+LEFT OUTER JOIN (
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) ITEMPRICEUOM ON SHIPPEDITEMS.intPriceUOMId = ITEMPRICEUOM.intItemUOMId
 LEFT OUTER JOIN (
 	SELECT intItemUOMId
 		 , intItemId

@@ -24,7 +24,8 @@ BEGIN TRY
 		,intItemId INT
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
-		,dblCost NUMERIC(18, 6))
+		,dblCost NUMERIC(18, 6)
+		,intItemUOMId INT)
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -72,6 +73,7 @@ BEGIN TRY
 		,intAccountId
 		,dblQtyReceived
 		,dblCost
+		,intItemUOMId
 		)
 	SELECT ISNULL(SLCL.intVendorId,WRMH.intVendorEntityId)
 		,L.intLoadId
@@ -90,6 +92,7 @@ BEGIN TRY
 						))
 				) * CONVERT(NUMERIC(18, 6), SUM(LD.dblNet))
 			)
+		,LD.intItemUOMId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -114,6 +117,7 @@ BEGIN TRY
 		,L.intLoadId
 		,L.strLoadNumber
 		,LD.intLoadDetailId
+		,LD.intItemUOMId
 
 	UNION ALL
 
@@ -134,6 +138,7 @@ BEGIN TRY
 						))
 				)
 			) * CONVERT(NUMERIC(18, 6), V.dblNet)
+		,LD.intItemUOMId
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -154,6 +159,7 @@ BEGIN TRY
 		,V.dblNet
 		,LD.intLoadId
 		,LD.intLoadDetailId
+		,LD.intItemUOMId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -199,6 +205,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intItemUOMId
 			)
 		SELECT intContractHeaderId
 			,intContractDetailId
@@ -207,6 +214,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intItemUOMId
 		FROM @voucherDetailData
 		WHERE intVendorEntityId = @intVendorEntityId
 

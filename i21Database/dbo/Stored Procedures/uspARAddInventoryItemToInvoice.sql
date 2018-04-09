@@ -9,6 +9,7 @@
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL		
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@OrderUOMId					INT				= NULL
+	,@PriceUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
@@ -261,6 +262,7 @@ BEGIN TRY
 				,[strDocumentNumber]
 				,[strItemDescription]
 				,[intOrderUOMId]
+				,[intPriceUOMId]
 				,[dblQtyOrdered]
 				,[intItemUOMId]
 				,[dblQtyShipped]
@@ -345,6 +347,7 @@ BEGIN TRY
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
 				,[intOrderUOMId]					= @OrderUOMId
+				,[intPriceUOMId]					= @PriceUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(ISNULL(@ItemUOMId, IL.intIssueUOMId), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = IC.[intItemId] ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)

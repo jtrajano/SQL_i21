@@ -18,6 +18,8 @@ DECLARE @intInvoiceId			INT
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
 
+EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
+
 IF @ForDelete = 1
 	BEGIN
 		SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
@@ -35,7 +37,6 @@ EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 0
 EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
 EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, 1
 EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
 EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
 EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId

@@ -167,15 +167,7 @@ SELECT
 													 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 													 AND CNT.dblRate IS NOT NULL 
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN 
-													dbo.fnCTConvertQtyToTargetItemUOM(
-														CNT.intFXPriceUOMId
-														,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId)
-														,(
-															LI.dblCost / CASE WHEN CNT.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CNT.intCent,0) = 0 THEN 1 ELSE CNT.intCent END ELSE 1 END			
-														)
-													) * CNT.dblRate
-
+												THEN CNT.dblSeqPrice
 												ELSE LI.dblCost
 											END 
 											* -- AD.dblQtyToPriceUOMConvFactor
@@ -184,7 +176,7 @@ SELECT
 													 AND CNT.intCurrencyExchangeRateId IS NOT NULL 
 													 AND CNT.dblRate IS NOT NULL 
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
-												THEN dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1)
+												THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
 												WHEN CNT.intPricingTypeId = 5 THEN 1
 												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
 											END 
@@ -201,9 +193,7 @@ SELECT
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					= (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 		,dblNet						= LI.dblQty
-FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId 
-		AND ItemUOM.intItemUOMId = @intTicketItemUOMId
-		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
 			,CTD.intContractDetailId
@@ -223,10 +213,12 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			,CTD.intPricingTypeId
 			,CTD.intBasisUOMId
 			,CTD.dtmEndDate
+			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
 			FROM tblCTContractDetail CTD 
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
@@ -345,7 +337,13 @@ WHERE SCTicket.intTicketId = @intTicketId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 	LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 	LEFT JOIN tblICItemUOM UM ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
-	WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0
+	LEFT JOIN (
+		SELECT intContractHeaderId
+		,intContractDetailId
+		,intPricingTypeId
+		FROM tblCTContractDetail 
+	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
+	WHERE RE.intSourceId = @intTicketId AND QM.dblDiscountAmount != 0 AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,6) 
 
 	--FOR FEE CHARGES
 	INSERT INTO @OtherCharges
@@ -1171,7 +1169,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 
 SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptType = 'Purchase Contract' AND ysnIsStorage = 0;
 IF(@checkContract > 0)
+BEGIN
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
+	UPDATE @OtherCharges SET strReceiptType = 'Purchase Contract'
+END
 
 SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)

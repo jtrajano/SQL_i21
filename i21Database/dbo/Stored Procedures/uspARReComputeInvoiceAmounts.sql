@@ -91,6 +91,8 @@ SET
 	,[dblTotalTermDiscount]		= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
 	,[dblInterest]				= ISNULL([dblInterest], @ZeroDecimal)
 	,[dblBaseInterest]			= ISNULL([dblBaseInterest], @ZeroDecimal)
+	,[dblProvisionalAmount]		= ISNULL([dblProvisionalAmount], @ZeroDecimal)
+	,[dblBaseProvisionalAmount]	= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
 	,[dblSplitPercent] 			= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
@@ -233,8 +235,22 @@ UPDATE
 SET
 	 [dblInvoiceTotal]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
 	,[dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblAmountDue]			= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
-	,[dblBaseAmountDue]		= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping]) - ([dblBasePayment] + [dblBaseDiscount])
+	,[dblAmountDue]			= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
+									THEN 
+										CASE WHEN strTransactionType = 'Credit Memo'
+												THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) - (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
+												ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal)) - ISNULL(dblProvisionalAmount, @ZeroDecimal)
+										END
+									ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
+								  END
+	,[dblBaseAmountDue]		= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
+									THEN 
+										CASE WHEN strTransactionType = 'Credit Memo'
+												THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
+												ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal)) - ISNULL(dblBaseProvisionalAmount, @ZeroDecimal)
+										END
+									ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
+								  END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 

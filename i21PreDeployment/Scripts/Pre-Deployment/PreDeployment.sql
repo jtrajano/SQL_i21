@@ -58,8 +58,7 @@
 :r .\6_GL\2_1430_to_1440.sql
 --:r .\6_GL\3_1440_to_1510.sql
 :r .\6_GL\4_1440_to_1530.sql
-:r .\6_GL\1730.sql
-:r .\6_GL\CleanCrossReferenceMapping.sql
+:r .\6_GL\5_1710.sql
 
 -- AR
 :r .\7_AR\1_FixInvoiceAndSalesOrderNumberUniqueConstraint.sql

@@ -10,6 +10,7 @@
 	[intOrderUOMId]							INT												NULL,    
     [dblQtyShipped]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblQtyShipped] DEFAULT ((0)) NULL,
 	[intItemUOMId]							INT												NULL,
+	[intPriceUOMId]							INT												NULL,
 	[dblItemWeight]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblItemWeight] DEFAULT ((0)) NULL,
 	[intItemWeightUOMId]					INT												NULL,    
 	[dblDiscount]							NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblDiscount] DEFAULT ((0)) NULL,

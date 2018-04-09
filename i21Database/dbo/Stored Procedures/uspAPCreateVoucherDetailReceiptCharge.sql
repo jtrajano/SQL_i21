@@ -84,7 +84,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
 		[dblQtyOrdered]					=	A.dblOrderQty,
-		[dblQtyReceived]				=	ISNULL(charges.dblQtyReceived, A.dblQuantityToBill),
+		[dblQtyReceived]				=	A.dblOrderQty, --ISNULL(charges.dblQtyReceived, A.dblQuantityToBill),
 		[dblTax]						=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
@@ -95,9 +95,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[ysnSubCurrency]				=	ISNULL(A.ysnSubCurrency,0),
 		[intTaxGroupId]					=	charges.intTaxGroupId,
 		[intAccountId]					=	[dbo].[fnGetItemGLAccount](A.intItemId,D.intItemLocationId, 'AP Clearing'),
-		[dblTotal]						=	CASE WHEN A.ysnPrice > 0 THEN  (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END) * -1 
-													ELSE (CASE WHEN A.ysnSubCurrency > 0 THEN A.dblUnitCost / A.intSubCurrencyCents ELSE A.dblUnitCost END)
-											END * A.dblQuantityToBill / (CASE WHEN A.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END)  ,
+		[dblTotal]						=	((CASE WHEN A.ysnSubCurrency > 0 
+													THEN A.dblUnitCost / A.intSubCurrencyCents 
+													ELSE A.dblUnitCost END)
+												* A.dblQuantityToBill) 
+											/ (CASE WHEN A.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END)  ,
 		[dblCost]						=	CASE WHEN charges.dblCost > 0 THEN charges.dblCost ELSE ABS((A.dblUnitCost /  ISNULL(A.intSubCurrencyCents,1))) END,
 		[dblOldCost]					=	CASE WHEN charges.dblCost != A.dblUnitCost THEN A.dblUnitCost ELSE NULL END,
 		[dblClaimAmount]				=	0,

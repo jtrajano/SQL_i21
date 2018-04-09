@@ -149,7 +149,7 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(StockUOM.dblUnitReserved, 0), 4) < 0
+					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 4) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'

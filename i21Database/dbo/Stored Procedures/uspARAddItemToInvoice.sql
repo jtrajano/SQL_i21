@@ -11,6 +11,7 @@
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@OrderUOMId					INT				= NULL
+	,@PriceUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
@@ -141,6 +142,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
 			,@OrderUOMId					= @OrderUOMId
+			,@PriceUOMId					= @PriceUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
@@ -339,6 +341,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strDocumentNumber]
 				,[intOrderUOMId]
 				,[intItemUOMId]
+				,[intPriceUOMId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
 				,[dblQtyOrdered]
@@ -391,6 +394,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDescription
 				,@ItemDocumentNumber
 				,@OrderUOMId
+				,@PriceUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemContractHeaderId
 				,@ItemContractDetailId

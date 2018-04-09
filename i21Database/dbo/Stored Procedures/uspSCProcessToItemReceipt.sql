@@ -503,6 +503,7 @@ BEGIN TRY
 			,@intShipTo = IR.intLocationId
 			,@intCurrencyId = IR.intCurrencyId
 			,@vendorOrderNumber = IR.strVendorRefNo
+			,@intCurrencyId = IR.intCurrencyId
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 
