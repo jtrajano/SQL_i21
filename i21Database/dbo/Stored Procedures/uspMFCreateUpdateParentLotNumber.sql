@@ -111,7 +111,7 @@ BEGIN
 			)
 	BEGIN
 		RAISERROR (
-				'Lot number already exists.'
+				'Lot number already exists. Note: Same lot number cannot be used by more than one item.'
 				,16
 				,1
 				)
