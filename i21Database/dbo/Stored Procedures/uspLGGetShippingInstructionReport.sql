@@ -302,6 +302,16 @@ SELECT *
 	,strFullName = @strFullName
 	,strUserPhoneNo = @strUserPhoneNo 
 	,strUserEmailId = @strUserEmailId
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strContactName AS strCompanyContactName 
+	,@strCounty AS strCompanyCounty 
+	,@strCity AS strCompanyCity 
+	,@strState AS strCompanyState 
+	,@strZip AS strCompanyZip 
+	,@strCountry AS strCompanyCountry 
+	,@strPhone AS strCompanyPhone
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
