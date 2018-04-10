@@ -55,7 +55,7 @@ BEGIN TRY
 
 		EXEC uspMFCompleteTask @intOrderHeaderId = @intOrderHeaderId
 			,@intUserId = @intUserId
-			,@intTaskId = @intTaskId
+			,@strTaskId = @intTaskId
 			,@ysnLoad=1
 
 		SELECT @intTaskId = MIN(intTaskId)
