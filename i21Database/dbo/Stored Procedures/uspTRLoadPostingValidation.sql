@@ -546,6 +546,31 @@ BEGIN TRY
 	DROP TABLE #tmpDistributionList
 	----------------------------------------------------------------------------------------
 
+
+	-- Validate no transactions at all --
+	SELECT TOP 1 LH.strTransaction, LR.strReceiptLine, LR.strOrigin, LDH.strDestination, intReceiptLocationId = LR.intCompanyLocationId, intDistributionLocationId = LDH.intCompanyLocationId
+	INTO #tmpNoTrans
+	FROM tblTRLoadReceipt LR
+	LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = LR.intLoadHeaderId
+	LEFT JOIN tblTRLoadDistributionHeader LDH ON LDH.intLoadHeaderId = LH.intLoadHeaderId
+	LEFT JOIN tblTRLoadDistributionDetail LDD ON LDD.strReceiptLink = LR.strReceiptLine AND LDD.intLoadDistributionHeaderId = LDH.intLoadDistributionHeaderId
+	WHERE LR.strOrigin = 'Location'
+		AND LDH.strDestination = 'Location'
+		AND LR.intCompanyLocationId = LDH.intCompanyLocationId
+		AND LH.intLoadHeaderId = @intLoadHeaderId
+
+	DECLARE @ReceiptLine NVARCHAR(50)
+	IF EXISTS(SELECT TOP 1 1 FROM #tmpNoTrans)
+	BEGIN
+		SELECT TOP 1 @ReceiptLine = strReceiptLine FROM #tmpNoTrans
+
+		SET @errMessage = 'Receipt Link ' + @ReceiptLine + ' has no transaction to post. There should atleast be a receipt, an invoice, or a transfer to post.'
+		RAISERROR(@errMessage, 16, 1)
+	END
+
+	DROP TABLE #tmpNoTrans
+	-------------------------------------
+
 	
 	SELECT intLoadReceiptId
 		, intInventoryReceiptId
