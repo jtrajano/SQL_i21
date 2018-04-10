@@ -6314,6 +6314,7 @@
     <Build Include="dbo\Tables\tblIPCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInfo.sql" />
     <Build Include="dbo\Views\vyuARInvoiceRecurringSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveWashout.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -208,6 +208,8 @@ BEGIN TRY
 		LEFT    JOIN	tblICCategoryUOM				GU	ON	GU.intCategoryId					=		CD.intCategoryId																	
 															AND	GU.intUnitMeasureId					=		CH.intCategoryUnitMeasureId		
 		LEFT    JOIN	tblCTPriceFixation				PF	ON	CD.intContractDetailId				=		PF.intContractDetailId		
+		LEFT	JOIN	tblCTWashout					WO	ON	WO.intSourceDetailId				=		CD.intContractDetailId
+															OR	WO.intWashoutDetailId				=		CD.intContractDetailId
 		LEFT    JOIN	(
 							SELECT	 intPriceFixationId,
 									 COUNT(intPriceFixationDetailId) intPFDCount,

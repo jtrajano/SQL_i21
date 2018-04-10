@@ -69,3 +69,5 @@ AS
 			JOIN	tblCTPriceFixation			PF	ON	FD.intPriceFixationId	=	PF.intPriceFixationId		
 			GROUP BY intContractDetailId
 	)		PD	ON	PD.intContractDetailId	=	CD.intContractDetailId
+	WHERE	CD.intContractDetailId NOT IN (SELECT intSourceDetailId FROM tblCTWashout)
+	AND		CD.intContractDetailId NOT IN (SELECT intWashoutDetailId FROM tblCTWashout)
