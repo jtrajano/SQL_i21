@@ -132,6 +132,7 @@
     ,SCT.intLotId
     ,SCT.strLotNumber
     ,SCT.intSalesOrderDetailId
+	,SCT.ysnReadyToTransfer
 
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
