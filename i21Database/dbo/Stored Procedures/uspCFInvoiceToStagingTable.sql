@@ -238,7 +238,7 @@ BEGIN TRY
 	,strName
 	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
 					 THEN  
-						strCardNumber + dbo.fnCFGetLuhn(((select top 1 strIso from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) + strCardNumber ) ,0)
+						RTRIM(LTRIM(strCardNumber + dbo.fnCFGetLuhn(((select top 1 strIso from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) + strCardNumber ) ,0)))
 					 ELSE 
 						strCardNumber
 					 END
