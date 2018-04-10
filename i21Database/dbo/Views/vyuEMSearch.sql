@@ -23,7 +23,8 @@ SELECT
 		Insurer,
 		ShipVia,
 		VendorOrCustomer =  Vendor + Customer,
-		b.strFederalTaxId
+		b.strFederalTaxId,
+		strDefaultEntityType = ET.strType
 	FROM 		
 			(SELECT	intEntityId,
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
@@ -72,3 +73,8 @@ SELECT
 			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
 		left join tblEMEntity g  
 			on f.intEntityContactId = g.intEntityId
+		CROSS APPLY (
+			SELECT  TOP 1 intEntityId, strType
+				FROM    [tblEMEntityType]
+				WHERE   intEntityId = a.intEntityId
+		) ET
