@@ -54,6 +54,7 @@
 	,@OrderUOMId					INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId						INT				= NULL
+	,@PriceUOMId					INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
@@ -603,6 +604,7 @@ BEGIN TRY
 		,@OrderUOMId					= @OrderUOMId
 		,@ItemQtyOrdered				= @ItemQtyOrdered
 		,@ItemUOMId						= @ItemUOMId
+		,@PriceUOMId					= @PriceUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
 		,@ItemTermDiscount				= @ItemTermDiscount

@@ -95,6 +95,7 @@ BEGIN
 		,intLineNo
 		,intOwnershipType
 		,dblQuantity
+		,intPriceUOMId
 		,dblUnitPrice
 		,intWeightUOMId
 		,intSubLocationId
@@ -145,6 +146,7 @@ BEGIN
 									  WHEN LI.ysnIsStorage = 1 THEN 2
 									  END
 		,dblQuantity				= LI.dblQty
+		,intPriceUOMId				= LI.intItemUOMId
 		,dblUnitPrice				= CASE
 			                            WHEN CNT.intPricingTypeId = 2 THEN 
 										(

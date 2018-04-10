@@ -229,16 +229,10 @@ BEGIN
 	EXEC('DROP TABLE tblTFTaxAuthorityBeginEndInventoryDetail')
 END
 
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthorityBeginEndInventory') 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthorityBeginEndInventory' AND COLUMN_NAME = 'intEntityLocationId') 
 BEGIN
-	IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFTaxAuthorityBeginEndInventory' AND COLUMN_NAME = 'intEntityLocationId') 
-	BEGIN
-		EXEC('TRUNCATE TABLE tblTFTaxAuthorityBeginEndInventory')
-	END
+	EXEC('TRUNCATE TABLE tblTFTaxAuthorityBeginEndInventory')
 END
-
-
-
 
 PRINT('MFT Cleanup - END')
 

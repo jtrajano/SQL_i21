@@ -4,6 +4,7 @@
     [intItemId]             INT             NULL,
     [strItemDescription]    NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intItemUOMId]          INT             NULL,
+	[intPriceUOMId]         INT             NULL,
     [dblQtyOrdered]         NUMERIC (18, 6) NULL,
     [dblQtyAllocated]       NUMERIC (18, 6) NULL,
 	[dblQtyShipped]			NUMERIC (18, 6) NULL DEFAULT ((0)),

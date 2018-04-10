@@ -58,6 +58,7 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							ysnBlended					BIT,
 							strItemDescription			NVARCHAR(100),
 							intItemUOMId				INT,
+							intPriceUOMId				INT,
 							intContractHeaderId			INT,
 							intContractDetailId			INT,
 							dblQtyOrdered				NUMERIC(18,6),
@@ -104,6 +105,7 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							ysnBlended					BIT,
 							strItemDescription			NVARCHAR(100),
 							intItemUOMId				INT,
+							intPriceUOMId				INT,
 							intContractHeaderId			INT,
 							intContractDetailId			INT,
 							dblQtyOrdered				NUMERIC(18,6),
@@ -162,6 +164,7 @@ SELECT intItemId					= SI.intItemId
 	 , ysnBlended					= SOD.ysnBlended
 	 , strItemDescription			= SI.strItemDescription
 	 , intItemUOMId					= SI.intItemUOMId
+	 , intPriceUOMId				= SOD.intPriceUOMId
 	 , intContractHeaderId			= SOD.intContractHeaderId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= SI.dblQtyOrdered
@@ -219,6 +222,7 @@ SELECT intItemId					= SOD.intItemId
 	 , ysnBlended					= SOD.ysnBlended
 	 , strItemDescription			= SOD.strItemDescription
 	 , intItemUOMId					= NULL
+	 , intPriceUOMId				= NULL
 	 , intContractHeaderId			= SOD.intContractHeaderId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= 0
@@ -270,6 +274,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , ysnBlended					= SOD.ysnBlended
 	 , strItemDescription			= SOD.strItemDescription
 	 , intItemUOMId					= ICSI.intItemUOMId
+	 , intPriceUOMId				= ICSI.intPriceUOMId
 	 , intContractHeaderId			= SOD.intContractHeaderId
 	 , intContractDetailId			= SOD.intContractDetailId
 	 , dblQtyOrdered				= SOD.dblQtyOrdered
@@ -324,6 +329,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , ysnBlended					= ARSI.ysnBlended
 	 , strItemDescription			= ARSI.strItemDescription
 	 , intItemUOMId					= ARSI.intItemUOMId
+	 , intPriceUOMId				= ARSI.intPriceUOMId
 	 , intContractHeaderId			= ARSI.intContractHeaderId
 	 , intContractDetailId			= ARSI.intContractDetailId
 	 , dblQtyOrdered				= 0
@@ -699,7 +705,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[strItemDescription]
 					,[intOrderUOMId]
 					,[dblQtyOrdered]
-					,[intItemUOMId]					
+					,[intItemUOMId]
 					,[dblQtyShipped]
 					,[dblDiscount]
 					,[dblPrice]
@@ -730,7 +736,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
 					,[strItemDescription]		--[strItemDescription]
-					,[intItemUOMId]				--[intOrderUOMId]					
+					,[intItemUOMId]				--[intOrderUOMId]
 					,[dblQtyOrdered]			--[dblQtyOrdered]
 					,[intItemUOMId]				--[intItemUOMId]					
 					,CASE WHEN [strFrequency] = 'Bi-Monthly' 
@@ -847,6 +853,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@NewDetailId			INT,
 						@ItemDescription		NVARCHAR(100),
 						@OrderUOMId				INT,
+						@PriceUOMId				INT,
 						@ItemUOMId				INT,
 						@ItemContractHeaderId	INT,
 						@ItemContractDetailId	INT,
@@ -888,7 +895,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemIsInventory		= ysnIsInventory,
 						@ItemIsBlended			= ysnBlended,
 						@ItemDescription		= strItemDescription,
-						@OrderUOMId				= intItemUOMId,	
+						@OrderUOMId				= intItemUOMId,
+						@PriceUOMId				= intPriceUOMId,
 						@ItemUOMId				= intItemUOMId,
 						@ItemContractHeaderId	= intContractHeaderId,
 						@ItemContractDetailId	= intContractDetailId,
@@ -938,6 +946,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemDescription				= @ItemDescription
 							,@ItemDocumentNumber			= @ItemSalesOrderNumber
 							,@OrderUOMId					= @OrderUOMId
+							,@PriceUOMId					= @PriceUOMId
 							,@ItemUOMId						= @ItemUOMId
 							,@ItemContractHeaderId			= @ItemContractHeaderId
 							,@ItemContractDetailId		    = @ItemContractDetailId
