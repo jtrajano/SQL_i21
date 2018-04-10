@@ -379,6 +379,23 @@ BEGIN TRY
 	FROM @tblMFShiftDetail S
 	JOIN tblMFShiftDetail SD ON SD.intShiftDetailId = S.intShiftDetailId
 
+	-- Client side, date is not saving in proper way. So updating with correct date
+	UPDATE tblMFShift
+	SET dtmShiftStartTime = '1900-01-01' + ' ' + CONVERT(VARCHAR(12), CONVERT(TIME, dtmShiftStartTime))
+	WHERE CONVERT(DATE, dtmShiftStartTime) > '01-01-1900'
+
+	UPDATE tblMFShift
+	SET dtmShiftEndTime = '1900-01-01' + ' ' + CONVERT(VARCHAR(12), CONVERT(TIME, dtmShiftEndTime))
+	WHERE CONVERT(DATE, dtmShiftEndTime) > '01-01-1900'
+
+	UPDATE tblMFShiftDetail
+	SET dtmShiftBreakTypeStartTime = '1900-01-01' + ' ' + CONVERT(VARCHAR(12), CONVERT(TIME, dtmShiftBreakTypeStartTime))
+	WHERE CONVERT(DATE, dtmShiftBreakTypeStartTime) > '01-01-1900'
+
+	UPDATE tblMFShiftDetail
+	SET dtmShiftBreakTypeEndTime = '1900-01-01' + ' ' + CONVERT(VARCHAR(12), CONVERT(TIME, dtmShiftBreakTypeEndTime))
+	WHERE CONVERT(DATE, dtmShiftBreakTypeEndTime) > '01-01-1900'
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 
