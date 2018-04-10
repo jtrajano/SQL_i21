@@ -165,8 +165,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	ISNULL(A.dblTax,0),
-		[dblAdjustedTax]		=	ISNULL(NULLIF(A.dblAdjustedTax,0), A.dblTax),
+		[dblTax]				=	CAST((ISNULL(A.dblTax,0) * D.dblTotal) / B.dblAmount AS DECIMAL(18,2)),
+		[dblAdjustedTax]		=	CAST((ISNULL(A.dblTax,0) * D.dblTotal) / B.dblAmount AS DECIMAL(18,2)),-- ISNULL(NULLIF(A.dblAdjustedTax,0), A.dblTax),
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
@@ -178,7 +178,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		D.intBillDetailId = E.intBillDetailId
 
 	UPDATE voucherDetails
-		SET voucherDetails.dblTax = ISNULL((CASE WHEN D.ysnPrice = 1 THEN -taxes.dblTax ELSE taxes.dblTax END),0)
+		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
 		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
