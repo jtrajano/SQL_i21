@@ -3,6 +3,7 @@
 	[intProspectRequirementId] [int] IDENTITY(1,1) NOT NULL,
 	[strQuestionType] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intLineOfBusinessId] [int] null,
+	[ysnActive] [bit] not null default convert(bit,0),
 	[intModuleId] [int] null,
 	[strQuestion] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
