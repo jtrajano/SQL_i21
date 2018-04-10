@@ -43,6 +43,26 @@ SELECT
 											END + ISNULL(SAR.dblRebateAmount, 0) + ISNULL(SAR.dblBuybackAmount, 0))/ ISNULL(SAR.dblLineTotal, 0)) * 100 
 									ELSE 0 
 								  END
+	 , dblMarginPerUnit = ISNULL(
+			CASE WHEN dblQtyShipped != 0 THEN 
+				((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+					CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
+						THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
+							THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+						ELSE ISNULL(SAR.dblQtyOrdered, 0)
+					END + ISNULL(SAR.dblRebateAmount, 0) + ISNULL(SAR.dblBuybackAmount, 0)) / ISNULL(SAR.dblQtyShipped, 0)
+			END
+		,0)
+	 , dblMarginPerUnitPercentage = ISNULL(
+			CASE WHEN dblQtyShipped != 0 THEN 
+				((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+					CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
+						THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
+							THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+						ELSE ISNULL(SAR.dblQtyOrdered, 0)
+					END + ISNULL(SAR.dblRebateAmount, 0) + ISNULL(SAR.dblBuybackAmount, 0)) / 100 / ISNULL(SAR.dblQtyShipped, 0)
+			END
+		,0)
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
 	 , dblTax					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblTax, 0) ELSE ISNULL(SAR.dblTax, 0) END
 	 , dblLineTotal				= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblLineTotal, 0) ELSE ISNULL(SAR.dblLineTotal, 0) END
