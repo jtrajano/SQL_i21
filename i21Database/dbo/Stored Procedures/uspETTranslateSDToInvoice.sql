@@ -75,6 +75,8 @@ BEGIN
 	DECLARE @intContractDetailId					INT
 	DECLARE @intTaxCodeId							INT
 	DECLARE @intTaxClassId							INT
+	DECLARE	@strPONumber						    NVARCHAR(50)
+	
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -188,6 +190,7 @@ BEGIN
 				,@strDetailType				  = strDetailType
 				,@strContractNumber			  = strContractNumber
 				,@intContractSequence		  = intContractSequence
+				,@strPONumber				  = strPONumber
 			FROM #tmpCustomerInvoiceDetail
 			ORDER BY intLineItem ASC
 
@@ -267,6 +270,7 @@ BEGIN
 						,@RaiseError			   = 0
 						,@UseOriginIdAsInvoiceNumber = 1
 						,@InvoiceOriginId         = @strInvoiceNumber
+						,@PONumber				   =@strPONumber
 
 					--GEt the created invoice number
 					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
