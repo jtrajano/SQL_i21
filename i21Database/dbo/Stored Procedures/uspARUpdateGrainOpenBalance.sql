@@ -204,7 +204,8 @@ BEGIN
 		strItemType NVARCHAR(100),
 		intItemId INT,
 		strItem NVARCHAR(100),
-		dblCharge NUMERIC(18,6)
+		dblCharge NUMERIC(18,6),
+		dblFlatFee NUMERIC(18,6)
 	);
 						 
 	INSERT INTO @GrainStorageCharge
@@ -217,7 +218,8 @@ BEGIN
 		strItemType,
 		intItemId,
 		strItem,
-		dblCharge 
+		dblCharge,
+		dblFlatFee 
 	)
 	EXEC uspGRUpdateGrainOpenBalanceByFIFO 
 		 @strOptionType		= 'Update'
