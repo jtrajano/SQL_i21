@@ -13,7 +13,8 @@ SELECT I.intInvoiceId
 	 , CT.strContractNumber
 	 , CT.intContractSeq
 	 , strCustomerName		= C.strName
-	 , strCustomerNumber	= C.strCustomerNumber	 
+	 , strCustomerNumber	= C.strCustomerNumber	
+	 , strItemNo = ITEM.strItemNo 
 	 , strItemDescription	= ITEM.strDescription
 	 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
 	 , dblItemWeight		= ISNULL(ID.dblItemWeight, 0)
@@ -50,6 +51,7 @@ INNER JOIN (SELECT EME.intEntityId
 							tblARCustomer WITH (NOLOCK)) ARC ON EME.intEntityId = ARC.intEntityId
 			) C ON I.intEntityCustomerId = C.intEntityId
 LEFT JOIN (SELECT intItemId
+				, strItemNo
 				, strDescription
 		   FROM 
 			dbo.tblICItem WITH (NOLOCK)
