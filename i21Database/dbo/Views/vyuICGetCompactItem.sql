@@ -62,6 +62,9 @@ SELECT
 	, strHazmatMessage			= HazMat.strDescription
 	, strMaterialPackUOM	= ManufacturingPackingUOM.strUnitMeasure
 	, Item.intMaterialPackTypeId
+	, Item.ysnBillable
+	, Item.ysnSupported
+	, Item.ysnDisplayInHelpdesk
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
