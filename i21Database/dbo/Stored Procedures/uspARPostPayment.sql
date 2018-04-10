@@ -1266,6 +1266,29 @@ SET @batchIdUsed = @batchId
 					tblARPayment ARP
 						ON ARPD.[intPaymentId] = ARP.[intPaymentId]
 
+				--Payment with associated Prepayment
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Provisional Invoice(' + I.[strInvoiceNumber] + ') was already processed!' 
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblARInvoice I
+						ON B.intInvoiceId = I.intInvoiceId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				WHERE
+					I.strType = 'Provisional'
+					AND I.ysnProcessed = 1
+
 
 				--If ysnAllowUserSelfPost is True in User Role
 				IF (@AllowOtherUserToPost IS NOT NULL AND @AllowOtherUserToPost = 1)
