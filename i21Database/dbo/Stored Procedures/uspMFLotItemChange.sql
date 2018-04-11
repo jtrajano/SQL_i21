@@ -66,7 +66,9 @@ BEGIN TRY
 		,@intOldProduceUnitMeasureId INT
 		,@intOldPhysicalUnitMeasureId INT
 		,@intProduceItemUOMId INT
+		,@ysnProductionReversal Bit
 
+	
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
@@ -232,6 +234,15 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		If @dblPhysicalCount is null 
+		Begin
+			Select @ysnProductionReversal=0
+		End
+		Else
+		Begin
+			Select @ysnProductionReversal=1
+		End
+
 		SELECT @intWorkOrderId = intWorkOrderId
 			,@intBatchId = intBatchId
 			,@intProducedLotId = intLotId
@@ -256,7 +267,7 @@ BEGIN TRY
 				WHERE strLotNumber = @strLotNumber
 				)
 
-		IF @dblPhysicalCount <> Abs(@dblAdjustByQuantity)
+		IF @dblPhysicalCount <> Abs(@dblAdjustByQuantity) and @ysnProductionReversal=0
 		BEGIN
 			RAISERROR (
 					'Item change is not allowed for this pallet. Qty is adjusted.'
