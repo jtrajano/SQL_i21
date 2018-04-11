@@ -39,6 +39,21 @@ BEGIN
 	DECLARE @FormattedLotQty AS NVARCHAR(50)
 	DECLARE @FormattedDifference AS NVARCHAR(50)
 
+	-- Check items if lot tracked
+	BEGIN
+		DECLARE @CountLottedItems AS INT = 0;
+
+			SELECT @CountLottedItems = COUNT(Item.intItemId)
+				FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = Detail.intNewItemId
+			WHERE Item.strLotTracking != 'No' AND Header.intInventoryAdjustmentId = @intTransactionId
+
+		IF(@CountLottedItems = 0)
+			RETURN 0;
+	END
+
 	-- Check if the unit quantities on the UOM table are valid. 
 	BEGIN 
 		SELECT	TOP 1 
@@ -53,7 +68,7 @@ BEGIN
 					ON ItemUOM.intItemId = Detail.intItemId
 				INNER JOIN dbo.tblICUnitMeasure UOM
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0
+		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0 AND Header.intInventoryAdjustmentId = @intTransactionId
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
@@ -65,6 +80,8 @@ BEGIN
 			RETURN -1; 			 
 		END 
 	END 
+
+
 END
 
 -- Get the list of item that needs lot numbers
@@ -199,6 +216,7 @@ END
 
 -- Assign the generated lot id's back to the inventory adjustment detail table. 
 BEGIN 
+
 	UPDATE	dbo.tblICInventoryAdjustmentDetail
 	SET		intNewLotId = LotNumbers.intLotId
 			,strNewLotNumber = LotNumbers.strLotNumber

@@ -21,8 +21,9 @@ DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
 		,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
 		,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
 
-DECLARE @ReduceLotFromSource AS ItemCostingTableType
-		,@MoveLotToNewItem AS ItemCostingTableType
+DECLARE @ReduceFromSource AS ItemCostingTableType
+		,@AddToTarget AS ItemCostingTableType
+		,@intNewItemNo AS INT
 		,@strNewItemNo AS NVARCHAR(50)
 
 --------------------------------------------------------------------------------
@@ -111,25 +112,28 @@ BEGIN
 	END 
 
 	------------------------------------------------------------
-	-- Validate the new item. It should be a lot-tracked item. 
+	-- Validate the new item. It should be the same lot type. 
 	------------------------------------------------------------
 	BEGIN 
 		SET @intItemId = NULL 
-
+		
 		SELECT	TOP 1 
-				@strNewItemNo = Item.strItemNo
+				@strItemNo = Item.strItemNo
+				,@strNewItemNo = NewItem.strItemNo
 				,@intItemId = Item.intItemId
 		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 				INNER JOIN dbo.tblICItem Item 
-					ON Item.intItemId = Detail.intNewItemId
+					ON Item.intItemId = Detail.intItemId
+				INNER JOIN dbo.tblICItem NewItem
+					ON NewItem.intItemId = Detail.intNewItemId
 		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-				AND dbo.fnGetItemLotType(Detail.intNewItemId) = 0 
+				AND dbo.fnGetItemLotType(Detail.intItemId) != dbo.fnGetItemLotType(Detail.intNewItemId) 
 
 		IF @intItemId IS NOT NULL 
 		BEGIN
-			-- 'Item %s is invalid. It must be lot tracked.'
-			EXEC uspICRaiseError 80075, @strNewItemNo;
+			-- Lot type of %s is different from %s. Items should have the same lot types.
+			EXEC uspICRaiseError 80207,@strItemNo,@strNewItemNo;
 			RETURN -1
 		END
 	END 
@@ -159,7 +163,7 @@ BEGIN
 			-- --'The new Item Location is invalid or missing for %s.'
 			EXEC uspICRaiseError 80083, @strItemNo;
 			RETURN -1
-		END		
+		END
 	END 
 END 
 
@@ -180,7 +184,8 @@ END
 -- REDUCE THE SOURCE LOT NUMBER
 --------------------------------------------------------------------------------
 BEGIN 
-	INSERT INTO @ReduceLotFromSource (
+	
+	INSERT INTO @ReduceFromSource (
 			intItemId			
 			,intItemLocationId	
 			,intItemUOMId		
@@ -203,7 +208,7 @@ BEGIN
 			,intItemLocationId		= Lot.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= Detail.dblAdjustByQuantity
+			,dblQty					= Detail.dblNewQuantity * -1
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Lot.intItemId)
@@ -235,23 +240,61 @@ BEGIN
 				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND Lot.dblQty > 0 
+			--AND Lot.dblQty > 0 
+	UNION ALL
+	SELECT 	intItemId				= Detail.intItemId
+			,intItemLocationId		= ItemLocation.intItemLocationId
+			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
+			,dtmDate				= Header.dtmAdjustmentDate
+			,dblQty					= Detail.dblNewQuantity * -1
+			,dblUOMQty				= ItemUOM.dblUnitQty
+			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+										dbo.fnGetItemStockUOM(Detail.intItemId)
+										,Detail.intItemUOMId
+										,ItemPricing.dblLastCost
+									)
+			,dblSalesPrice			= 0
+			,intCurrencyId			= NULL 
+			,dblExchangeRate		= 1
+			,intTransactionId		= Header.intInventoryAdjustmentId
+			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
+			,strTransactionId		= Header.strAdjustmentNo
+			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_ItemChange
+			,intLotId				= NULL
+			,intSubLocationId		= Detail.intSubLocationId
+			,intStorageLocationId	= Detail.intStorageLocationId
+	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = Detail.intItemId
+			INNER JOIN dbo.tblICItemLocation ItemLocation 
+				ON ItemLocation.intLocationId = Header.intLocationId 
+				AND ItemLocation.intItemId = Detail.intItemId
+			LEFT JOIN dbo.tblICItemUOM ItemUOM
+				ON ItemUOM.intItemId = Detail.intItemId
+				AND ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT JOIN tblICItemPricing ItemPricing
+				ON ItemPricing.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
+	WHERE Header.intInventoryAdjustmentId = @intTransactionId 
+		AND Item.strLotTracking = 'No'
 
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
 	EXEC	dbo.uspICPostCosting  
-			@ReduceLotFromSource  
+			@ReduceFromSource  
 			,@strBatchId  
 			,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 			,@intEntityUserSecurityId
 END
 
+
 --------------------------------------------------------------------------------
 -- INCREASE THE STOCK ON SAME LOT BUT FOR A NEW ITEM.
 --------------------------------------------------------------------------------
 BEGIN 
-	INSERT INTO @MoveLotToNewItem (
+	INSERT INTO @AddToTarget (
 			intItemId			
 			,intItemLocationId	
 			,intItemUOMId		
@@ -275,7 +318,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -SourceTransaction.dblQty
+			,dblQty					= SourceTransaction.dblQty * -1
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= SourceTransaction.dblCost
 			,dblValue				= 0
@@ -287,8 +330,8 @@ BEGIN
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_ItemChange
 			,intLotId				= Detail.intNewLotId
-			,intSubLocationId		= Detail.intNewSubLocationId
-			,intStorageLocationId	= Detail.intNewStorageLocationId
+			,intSubLocationId		= SourceLot.intSubLocationId
+			,intStorageLocationId	= SourceLot.intStorageLocationId
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
@@ -311,14 +354,56 @@ BEGIN
 				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId)
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND SourceTransaction.dblQty < 0 
+			--AND SourceTransaction.dblQty < 0 
+	UNION ALL
+	SELECT 	intItemId				= Detail.intNewItemId
+			,intItemLocationId		= NewItemLocation.intItemLocationId
+			,intItemUOMId			= NewItemUOM.intItemUOMId
+			,dtmDate				= Header.dtmAdjustmentDate
+			,dblQty					= SourceTransaction.dblQty * -1
+			,dblUOMQty				= NewItemUOM.dblUnitQty
+			,dblCost				= SourceTransaction.dblCost
+			,dblValue				= 0
+			,dblSalesPrice			= 0
+			,intCurrencyId			= NULL 
+			,dblExchangeRate		= 1
+			,intTransactionId		= Header.intInventoryAdjustmentId
+			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
+			,strTransactionId		= Header.strAdjustmentNo
+			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_ItemChange
+			,intLotId				= NULL
+			,intSubLocationId		= Detail.intNewSubLocationId
+			,intStorageLocationId	= Detail.intNewStorageLocationId
+
+	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = Detail.intNewItemId
+
+			INNER JOIN dbo.tblICItemLocation NewItemLocation 
+				ON NewItemLocation.intLocationId = Header.intLocationId 
+				AND NewItemLocation.intItemId = Detail.intNewItemId
+
+			INNER JOIN dbo.tblICInventoryTransaction SourceTransaction
+				ON SourceTransaction.intTransactionId = Header.intInventoryAdjustmentId				
+				AND SourceTransaction.strTransactionId = Header.strAdjustmentNo
+				AND SourceTransaction.strBatchId = @strBatchId
+				AND SourceTransaction.intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
+
+			LEFT JOIN dbo.tblICItemUOM NewItemUOM
+				ON NewItemUOM.intItemId = Detail.intNewItemId
+				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId)
+
+	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+			AND Item.strLotTracking = 'No'
 
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
 	EXEC	dbo.uspICPostCosting  
-			@MoveLotToNewItem  
+			@AddToTarget  
 			,@strBatchId  
 			,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 			,@intEntityUserSecurityId
+
 END
