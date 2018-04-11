@@ -401,7 +401,7 @@ namespace iRely.Inventory.BusinessLayer
 
             if (expression == null)
                 return false;
-            foundEntity = Context.Set<T>().AsNoTracking().FirstOrDefault(expression);
+            foundEntity = Context.Set<T>().FirstOrDefault(expression);
 
             if (foundEntity != null)
             {
@@ -418,7 +418,7 @@ namespace iRely.Inventory.BusinessLayer
 
             if (expression == null)
                 return false;
-            var found = Context.Set<T>().AsNoTracking().FirstOrDefault(expression);
+            var found = Context.Set<T>().FirstOrDefault(expression);
             
             if (found != null)
             {
