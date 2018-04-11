@@ -42,6 +42,7 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
 			, strInvoiceNumber
 			, strRecordNumber
 			, intInvoiceId
+			, intPaymentId
 			, strBOLNumber
 			, intEntityCustomerId
 			, intEntityUserId

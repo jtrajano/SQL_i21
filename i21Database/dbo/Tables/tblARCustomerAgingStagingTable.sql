@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerAgingStagingTable]
 (
-	[intInvoiceId]				INT NULL, 
+	[intInvoiceId]				INT NULL,
+	[intPaymentId]				INT NULL,
     [intEntityCustomerId]		INT NULL, 
     [intCompanyLocationId]		INT NULL,
 	[intEntityUserId]			INT NULL,

@@ -146,6 +146,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	, strInvoiceNumber
 	, strRecordNumber
 	, intInvoiceId
+	, intPaymentId
 	, strBOLNumber
 	, intEntityCustomerId
 	, intEntityUserId

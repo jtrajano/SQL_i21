@@ -255,6 +255,7 @@ BEGIN
 				, strInvoiceNumber
 				, strRecordNumber
 				, intInvoiceId
+				, intPaymentId
 				, strBOLNumber
 				, intEntityCustomerId
 				, intEntityUserId

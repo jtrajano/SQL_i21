@@ -103,6 +103,7 @@ AS
 				, strInvoiceNumber
 				, strRecordNumber
 				, intInvoiceId
+				, intPaymentId
 				, strBOLNumber
 				, intEntityCustomerId
 				, intEntityUserId
