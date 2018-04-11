@@ -91,7 +91,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intAccountId).HasColumnName("intAccountId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
-            this.HasRequired(p => p.tblGLAccount)
+            this.HasOptional(p => p.tblGLAccount)
                 .WithMany(p => p.tblICCategoryAccounts)
                 .HasForeignKey(p => p.intAccountId);
             this.HasOptional(p => p.tblGLAccountCategory)
