@@ -265,10 +265,13 @@ BEGIN
 		SlsBasisDeliveries		 
 	FROM (
 		SELECT (SELECT sum(qty) Qty from (
-				SELECT s.dblOnHand qty,s.intLocationId intLocationId
-				FROM vyuICGetItemStockUOM s
+				SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblOnHand ,0)))  qty,s.intLocationId intLocationId
+				from
+				vyuICGetItemStockUOM s  		
+				JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   				                           
 				WHERE s.intCommodityId  = @intCommodityId
-				AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end	AND ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0				
+				AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end	AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0				
 				)t 	WHERE intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
@@ -465,10 +468,12 @@ SELECT @strDescription,
 			,OpenSalesQty,DP
 		FROM (
 				SELECT (SELECT sum(qty) Qty from (
-				SELECT s.dblOnHand qty,s.intLocationId intLocationId
-				FROM vyuICGetItemStockUOM s
+				SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblOnHand ,0))) qty,s.intLocationId intLocationId
+				FROM vyuICGetItemStockUOM s  		
+				JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   				                           
 				WHERE s.intCommodityId  = @intCommodityId
-				AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end	AND ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0				
+				AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end	AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0				
 				)t 	WHERE intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
@@ -737,8 +742,10 @@ UNION
 		FROM (
 			SELECT (
 					(SELECT sum(qty) Qty from (
-				SELECT s.dblOnHand qty,s.intLocationId intLocationId
+				SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblOnHand ,0)))  qty,s.intLocationId intLocationId
 				FROM vyuICGetItemStockUOM s
+				JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
 				WHERE s.intCommodityId  = @intCommodityId
 				AND s.intLocationId= case when isnull(@intLocationId,0)=0 then s.intLocationId else @intLocationId end					
 				)t 	WHERE intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation

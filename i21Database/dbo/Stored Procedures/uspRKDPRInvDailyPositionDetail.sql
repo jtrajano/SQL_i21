@@ -5,6 +5,8 @@
 	,@strPurchaseSales nvarchar(250) = NULL
 	,@strPositionIncludes nvarchar(100) = NULL
 AS
+
+
 BEGIN
 
 DECLARE @ysnDisplayAllStorage bit
@@ -210,11 +212,13 @@ BEGIN
 			,[Storage Due],intLocationId 
 	FROM(	
 	SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],
-					s.dblOnHand dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate
+					dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblOnHand ,0)))  dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate
 					,s.strLocationName,s.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 					,null [Storage Due],s.intLocationId intLocationId
-					FROM vyuICGetItemStockUOM s  				  
-				    WHERE s.intCommodityId = @intCommodityId AND ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0
+					FROM vyuICGetItemStockUOM s  		
+					JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   		  
+				    WHERE s.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0
 						 AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
 			UNION all
 				SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription,[Storage Type] AS [strType],
@@ -566,9 +570,11 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 	FROM (
 		SELECT 
 		isnull((select sum(dblUnitOnHand) from (
-					SELECT s.dblOnHand dblUnitOnHand,s.intLocationId
-				FROM vyuICGetItemStockUOM s  				  
-				                           WHERE s.intCommodityId = @intCommodityId AND ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0 
+					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblOnHand ,0))) dblUnitOnHand,s.intLocationId
+				FROM vyuICGetItemStockUOM s  		
+				JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
+				                           WHERE s.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1 AND ISNULL(dblOnHand,0) <>0 
 				AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
 				 )t WHERE intLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation

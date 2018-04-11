@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKContractDetail
+﻿CREATE  VIEW vyuRKContractDetail
 
 AS
 
@@ -10,7 +10,7 @@ WITH Pricing AS
 	    strContractNumber +'-' +Convert(nvarchar,intContractSeq) strContractNumber
 		,strLocationName,
 		dtmEndDate,
-		SUM(PFD.dblQuantity) dblQuantity,
+		case when CDT.intPricingTypeId = 1 then max(CDT.dblBalance) else SUM(PFD.dblQuantity) end dblQuantity,
 		CDT.intUnitMeasureId
 		,CDT.intPricingTypeId,
 		ch.intContractTypeId
