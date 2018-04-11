@@ -27,6 +27,7 @@ DECLARE @strSubLocatioNameFrom AS NVARCHAR(50)
 DECLARE @strSubLocatioNameTo AS NVARCHAR(50)
 DECLARE @strStorageLocatioNameFrom AS NVARCHAR(50)
 DECLARE @strStorageLocatioNameTo AS NVARCHAR(50)
+DECLARE @dtmCreatedDate AS DATETIME;
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
@@ -571,7 +572,13 @@ BEGIN
 				AND Lot.intLocationId = @intLocationId
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-				
+
+		-- Get Date Created from Source Lot
+		SELECT @dtmCreatedDate = Lot.dtmDateCreated
+		FROM	dbo.tblICLot Lot
+		WHERE	Lot.intLotId = @intSplitFromLotId
+
+
 		-- Get the Lot id or insert a new record on the Lot master table. 
 		MERGE	
 		INTO	dbo.tblICLot 
@@ -866,7 +873,7 @@ BEGIN
 				,@dtmManufacturedDate
 				,@ysnReleasedToWarehouse
 				,@ysnProduced
-				,GETDATE()
+				,@dtmCreatedDate
 				,@intEntityUserSecurityId
 				,1
 				,@intOwnershipType
