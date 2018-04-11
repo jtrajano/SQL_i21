@@ -588,114 +588,7 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
-
---Get Provisional Invoices
---IF ISNULL(@HasImpactForProvisional, 0) = 1
---	BEGIN
-		--INSERT INTO @PostProvisionalData(
-		--	 [intInvoiceId]
-		--	,[strInvoiceNumber]
-		--	,[strTransactionType]
-		--	,[strType]
-		--	,[dtmDate]
-		--	,[dtmPostDate]
-		--	,[dtmShipDate]
-		--	,[intEntityCustomerId]
-		--	,[intCompanyLocationId]
-		--	,[intAccountId]
-		--	,[intDeferredRevenueAccountId]
-		--	,[intCurrencyId]
-		--	,[intTermId]
-		--	,[dblInvoiceTotal]
-		--	,[dblShipping]
-		--	,[dblTax]
-		--	,[strImportFormat]
-		--	,[intOriginalInvoiceId]
-		--	,[intDistributionHeaderId]
-		--	,[intLoadDistributionHeaderId]
-		--	,[intLoadId]
-		--	,[intFreightTermId]
-		--	,[strActualCostId]
-		--	,[intPeriodsToAccrue]
-		--	,[ysnAccrueLicense]
-		--	,[intSplitId]
-		--	,[dblSplitPercent]				
-		--	,[ysnSplitted]
-		--	,[ysnImpactInventory]
-		--	,[intEntityId]
-		--	,[ysnPost]
-		--	,[intInvoiceDetailId]
-		--	,[intItemId]
-		--	,[intItemUOMId]
-		--	,[intDiscountAccountId]
-		--	,[intCustomerStorageId]
-		--	,[intStorageScheduleTypeId]
-		--	,[intSubLocationId]
-		--	,[intStorageLocationId]
-		--	,[dblQuantity]
-		--	,[dblMaxQuantity]
-		--	,[strOptionType]
-		--	,[strSourceType]
-		--	,[strBatchId]
-		--	,[strPostingMessage]
-		--	,[intUserId]
-		--	,[ysnAllowOtherUserToPost]
-		--	,[ysnImpactForProvisional])
-		--	SELECT
-		--	 [intInvoiceId]					= ARI.[intInvoiceId]
-		--	,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
-		--	,[strTransactionType]			= ARI.[strTransactionType]
-		--	,[strType]						= ARI.[strType]
-		--	,[dtmDate]						= ARI.[dtmDate]
-		--	,[dtmPostDate]					= ARI.[dtmPostDate]
-		--	,[dtmShipDate]					= ARI.[dtmShipDate]
-		--	,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
-		--	,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
-		--	,[intAccountId]					= ARI.[intAccountId]
-		--	,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
-		--	,[intCurrencyId]				= ARI.[intCurrencyId]
-		--	,[intTermId]					= ARI.[intTermId]
-		--	,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
-		--	,[dblShipping]					= ARI.[dblShipping]
-		--	,[dblTax]						= ARI.[dblTax]
-		--	,[strImportFormat]				= ARI.[strImportFormat]
-		--	,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
-		--	,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
-		--	,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
-		--	,[intLoadId]					= ARI.[intLoadId]
-		--	,[intFreightTermId]				= ARI.[intFreightTermId]
-		--	,[strActualCostId]				= ARI.[strActualCostId]
-		--	,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
-		--	,[ysnAccrueLicense]				= @accrueLicense
-		--	,[intSplitId]					= ARI.[intSplitId]
-		--	,[dblSplitPercent]				= ARI.[dblSplitPercent]			
-		--	,[ysnSplitted]					= ARI.[ysnSplitted]
-		--	,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
-		--	,[intEntityId]					= ARI.[intEntityId]
-		--	,[ysnPost]						= @post
-		--	,[intInvoiceDetailId]			= NULL
-		--	,[intItemId]					= NULL
-		--	,[intItemUOMId]					= NULL
-		--	,[intDiscountAccountId]			= @DiscountAccountId
-		--	,[intCustomerStorageId]			= NULL
-		--	,[intStorageScheduleTypeId]		= NULL
-		--	,[intSubLocationId]				= NULL
-		--	,[intStorageLocationId]			= NULL
-		--	,[dblQuantity]					= @ZeroDecimal
-		--	,[dblMaxQuantity]				= @ZeroDecimal
-		--	,[strOptionType]				= NULL
-		--	,[strSourceType]				= NULL
-		--	,[strBatchId]					= @batchIdUsed
-		--	,[strPostingMessage]			= ''
-		--	,[intUserId]					= @UserEntityID
-		--	,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
-		--	,[ysnImpactForProvisional]		= @HasImpactForProvisional
-		--FROM dbo.tblARInvoice ARI WITH (NOLOCK) 
-		--WHERE strType = 'Provisional'
-		--  AND ysnPosted = 1
-		--  AND intInvoiceId IN (SELECT intOriginalInvoiceId FROM @PostInvoiceData WHERE ISNULL(intOriginalInvoiceId, 0) <> 0)
-	--END
-
+	
 --------------------------------------------------------------------------------------------  
 -- Validations  
 ----------------------------------------------------------------------------------------------
@@ -797,6 +690,7 @@ BEGIN TRY
 			ARI.[ysnSplitted] = 0 
 			AND ISNULL(ARI.[intSplitId], 0) > 0
 			AND EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+			AND ARI.strTransactionType IN ('Invoice', 'Cash', 'Debit Memo')
 
 		WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
 			BEGIN
