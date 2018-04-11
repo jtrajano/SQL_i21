@@ -123,7 +123,17 @@ BEGIN TRY
 				AD.ysnSeqSubCurrency,			
 				AD.intSeqPriceUOMId,
 				AD.strSeqPriceUOM,
-				AD.dblSeqPrice				
+				AD.dblSeqPrice,
+				
+				WO.intWashoutId,
+				WO.strSourceNumber,
+				WO.strWashoutNumber,
+				WO.dblCashPrice	AS	dblSourceCashPrice,
+				WO.dblWTCashPrice,
+				WO.strBillInvoice,
+				WO.intBillInvoiceId,	
+				WO.strDocType,			
+				CASE WHEN ISNULL(WO.intWashoutId,0) > 0 THEN 'Washout' ELSE '' END AS strAdjustmentType
 
 		FROM			tblCTContractDetail				CD
 				JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
