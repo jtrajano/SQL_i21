@@ -81,7 +81,10 @@ AS
 				intOrderId				=	CD.intContractHeaderId,
 				intLineNo				=	CD.intContractDetailId,
 				intWeightUOMId			=	CD.intNetWeightUOMId,
-				dblUnitPrice			=	ISNULL(AD.dblSeqPrice * AD.dblQtyToPriceUOMConvFactor,0),
+				dblUnitPrice			=	CASE	WHEN	CD.intPricingTypeId = 2 
+													THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
+													ELSE	AD.dblSeqPrice
+											END,
 				intCurrencyId			=	AD.intSeqCurrencyId,
 				intForexRateTypeId		=	CD.intRateTypeId,
 				dblForexRate			=	CD.dblRate,
