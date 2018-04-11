@@ -1300,6 +1300,10 @@ BEGIN TRY
 			SET @ErrMsg = ''
 			SET @ErrMsg = ERROR_MESSAGE()
 
+			DELETE
+			FROM tblMFEDI943Error
+			WHERE strDepositorOrderNumber = @strOrderNo
+
 			INSERT INTO tblMFEDI943Error (
 				intEDI943Id
 				,intTransactionId

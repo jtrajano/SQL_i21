@@ -6277,6 +6277,8 @@
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
