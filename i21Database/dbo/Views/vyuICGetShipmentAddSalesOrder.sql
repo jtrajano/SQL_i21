@@ -74,8 +74,8 @@ SELECT
 						,DEFAULT 
 						,DEFAULT 
 					)
-	, intPriceUOMId = intItemUOMId
-	, strPriceUOM = strUnitMeasure
+	, intPriceUOMId = ISNULL(SODetail.intPriceUOMId, SODetail.intItemUOMId) 
+	, strPriceUOM = ISNULL(SODetail.strPriceUOM, SODetail.strUnitMeasure) 
 FROM vyuSOSalesOrderDetail SODetail
 	INNER JOIN vyuSOSalesOrderSearch SO ON SODetail.intSalesOrderId = SO.intSalesOrderId
 	INNER JOIN tblSOSalesOrder OSO ON OSO.intSalesOrderId = SO.intSalesOrderId
