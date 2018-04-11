@@ -12,6 +12,7 @@ SELECT AGING.*
 	 , strCurrencyDescription	= CUR.strDescription
 	 , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
+	 , strLocationName			= COMPANYLOCATION.strLocationName
 FROM 
 (SELECT strInvoiceNumber	= A.strInvoiceNumber
      , intInvoiceId			= A.intInvoiceId
@@ -378,5 +379,10 @@ LEFT JOIN (
 		 , strDescription
 	FROM dbo.tblSMCurrency
 ) CUR ON INVOICE.intCurrencyId = CUR.intCurrencyID
+LEFT JOIN (
+	SELECT intCompanyLocationId
+		 , strLocationName
+	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+) COMPANYLOCATION ON INVOICE.intCompanyLocationId = COMPANYLOCATION.intCompanyLocationId
 WHERE INVOICE.ysnPaid = 0
 AND AGING.intInvoiceId IN (SELECT intInvoiceId FROM tblARInvoice WHERE strTransactionType NOT IN ('Cash', 'Cash Refund'))
