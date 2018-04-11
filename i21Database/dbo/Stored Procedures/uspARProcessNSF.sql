@@ -77,7 +77,7 @@ INNER JOIN (
 	INNER JOIN (
 		SELECT intPaymentMethodID
 		FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
-		WHERE strPaymentMethod IN ('Check', 'eCheck')
+		WHERE strPaymentMethod IN ('Check', 'eCheck', 'ACH')
 	) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
 	WHERE ysnPosted = 1
 	  AND ysnProcessedToNSF = 0
