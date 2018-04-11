@@ -60,6 +60,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@EntityContactId				INT				= NULL
 			,@DueDate						DATETIME		= NULL		
 			,@ShipDate						DATETIME		= NULL
+			,@CalculatedDate				DATETIME		= NULL
 			,@PostDate						DATETIME		= NULL
 			,@TransactionType				NVARCHAR(50)	= 'Invoice'
 			,@Type							NVARCHAR(200)	= 'Standard'
@@ -274,6 +275,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@EntitySalespersonId			= CASE WHEN ISNULL(D.strSalespersonNumber, '') <> '' THEN (SELECT TOP 1 SP.[intEntityId] FROM tblARSalesperson SP INNER JOIN tblEMEntity E ON SP.[intEntityId] = E.intEntityId WHERE E.strEntityNo = D.strSalespersonNumber) ELSE 0 END
 					,@DueDate						= D.dtmDueDate		
 					,@ShipDate						= D.dtmShipDate
+					,@CalculatedDate				= D.dtmCalculated
 					,@PostDate						= D.dtmPostDate 
 					,@TransactionType				= D.strTransactionType
 					,@Type							= @Type
@@ -398,6 +400,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dtmDate]
 							,[dtmDueDate]
 							,[dtmShipDate]
+							,[dtmCalculated]
 							,[dtmPostDate]
 							,[intEntitySalespersonId]
 							,[intFreightTermId]
@@ -483,6 +486,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dtmDate]					= @Date
 							,[dtmDueDate]				= @DueDate
 							,[dtmShipDate]				= @ShipDate
+							,[dtmCalculated]			= @CalculatedDate
 							,[dtmPostDate]				= @PostDate
 							,[intEntitySalespersonId]	= @EntitySalespersonId
 							,[intFreightTermId]			= @FreightTermId
@@ -496,7 +500,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intBillToLocationId]		= NULL
 							,[ysnTemplate]				= 0
 							,[ysnForgiven]				= 0
-							,[ysnCalculated]			= 0
+							,[ysnCalculated]			= CASE WHEN @CalculatedDate IS NULL THEN 0 ELSE 1 END
 							,[ysnSplitted]				= 0
 							,[intPaymentId]				= NULL
 							,[intSplitId]				= NULL

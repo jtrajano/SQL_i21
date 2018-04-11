@@ -171,6 +171,7 @@ DECLARE  @Id									INT
 		,@Date									DATETIME
 		,@DueDate								DATETIME
 		,@ShipDate								DATETIME
+		,@CalculatedDate						DATETIME
 		,@PostDate								DATETIME
 		,@EntitySalespersonId					INT
 		,@FreightTermId							INT
@@ -332,6 +333,7 @@ BEGIN
 		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
 		,@DueDate						= [dtmDueDate]
 		,@ShipDate						= CAST(ISNULL([dtmShipDate], @DateNow) AS DATE)
+		,@CalculatedDate				= [dtmCalculated]
 		,@PostDate						= [dtmPostDate]
 		,@EntitySalespersonId			= [intEntitySalespersonId]
 		,@FreightTermId					= [intFreightTermId]
@@ -564,6 +566,7 @@ BEGIN
 			,@InvoiceDate					= @Date
 			,@DueDate						= @DueDate
 			,@ShipDate						= @ShipDate
+			,@CalculatedDate				= @CalculatedDate
 			,@PostDate						= @PostDate
 			,@TransactionType				= @TransactionType
 			,@Type							= @Type
@@ -1222,6 +1225,7 @@ BEGIN TRY
 			,@Date							= CAST([dtmDate] AS DATE)
 			,@DueDate						= [dtmDueDate]
 			,@ShipDate						= [dtmShipDate]
+			,@CalculatedDate				= [dtmCalculated]
 			,@PostDate						= [dtmPostDate]
 			,@EntitySalespersonId			= [intEntitySalespersonId]
 			,@FreightTermId					= [intFreightTermId]
@@ -1346,6 +1350,7 @@ BEGIN TRY
 			,[dtmDate]					= @Date
 			,[dtmDueDate]				= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@Date, ISNULL(ISNULL(@TermId, C.[intTermsId]),0)) AS DATE)))
 			,[dtmShipDate]				= @ShipDate
+			,[dtmCalculated]			= @CalculatedDate
 			,[dtmPostDate]				= @PostDate
 			,[dblInvoiceSubtotal]		= @ZeroDecimal
 			,[dblShipping]				= @ZeroDecimal

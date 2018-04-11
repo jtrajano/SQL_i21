@@ -12,6 +12,7 @@
 	[dtmDueDate]				DATETIME	  NULL,
 	[dtmPostDate]				DATETIME	  NULL,
 	[dtmShipDate]				DATETIME	  NULL,
+	[dtmCalculated]				DATETIME	  NULL,
 	[dtmDatePaid]				DATETIME	  NULL,
 	[strFreightTerm]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strShipVia]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
