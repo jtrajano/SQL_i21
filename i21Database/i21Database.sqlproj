@@ -6249,6 +6249,7 @@
     <None Include="Scripts\Post-Deployment\IC\29_Inventory_Constraints.sql" />
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
     <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
+    <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
