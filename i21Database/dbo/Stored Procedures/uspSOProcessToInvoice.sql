@@ -36,6 +36,9 @@ ELSE
 	BEGIN
 		--INSERT TO INVOICE
 		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, NULL, 0, @NewInvoiceId OUTPUT
+		
+		IF ISNULL(@NewInvoiceId, 0) > 0
+			EXEC dbo.uspARUpdateGrainOpenBalance @NewInvoiceId, 0, @UserId
 	END
 
 END
