@@ -50,7 +50,7 @@ namespace iRely.Inventory.BusinessLayer
             SetDecimal(record, "Max", e => entity.dblMax = e);
             SetDecimal(record, "Amount/Percent", e => entity.dblAmountRate = e);
             SetDecimal(record, "Unit Price", e => entity.dblUnitPrice = e);
-            SetDecimal(record, "Comm Ammount/Percent", e => entity.dblCommissionRate = e);
+            SetDecimal(record, "Comm Amount/Percent", e => entity.dblCommissionRate = e);
             SetDate(record, "Effective Date", e => entity.dtmEffectiveDate = e);
             var lu = GetFieldValue(record, "Item No");
             valid = SetIntLookupId<tblICItem>(record, "Item No", e => e.strItemNo == lu, e => e.intItemId, e => entity.intItemId = e, required: true);
@@ -102,6 +102,12 @@ namespace iRely.Inventory.BusinessLayer
                         break;
                     case "PERCENT OF MARGIN (MSRP)":
                         input.strPricingMethod = "Percent of Margin (MSRP)";
+                        break;
+                    case "MARKUP LAST COST":
+                        input.strPricingMethod = "Markup Last Cost";
+                        break;
+                    case "MARKUP AVG COST":
+                        input.strPricingMethod = "Markup Avg Cost";
                         break;
                     default:
                         var msg = new ImportDataMessage()
@@ -195,6 +201,8 @@ namespace iRely.Inventory.BusinessLayer
                 if (itemLocation != null)
                 {
                     input.tblICItemLocation = itemLocation;
+                    input.intItemLocationId = itemLocation.intItemLocationId;
+                    input.intLocationId = itemLocation.intLocationId;
                 }
                 else
                 {

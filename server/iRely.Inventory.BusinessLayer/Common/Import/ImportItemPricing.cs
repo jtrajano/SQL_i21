@@ -97,10 +97,16 @@ namespace iRely.Inventory.BusinessLayer
                     case "PERCENT OF MARGIN":
                         input.strPricingMethod = "Percent of Margin";
                         break;
+                    case "MARKUP LAST COST":
+                        input.strPricingMethod = "Markup Last Cost";
+                        break;
+                    case "MARKUP AVG COST":
+                        input.strPricingMethod = "Markup Avg Cost";
+                        break;
                     default:
                         var msg = new ImportDataMessage()
                         {
-                            Column = "Costing Method",
+                            Column = "Pricing Method",
                             Row = Record.RecordNo,
                             Type = Constants.TYPE_WARNING,
                             Status = Constants.STAT_FAILED,
