@@ -227,7 +227,7 @@ BEGIN
 	FROM dbo.tblARLetterPlaceHolder WITH(NOLOCK)
 	WHERE CHARINDEX (dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML)) <> 0
 
-	IF @strLetterName IN ('Recent Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
+	IF @strLetterName IN ('Recent Overdue Collection Letter', '1 Day Overdue Collection Letter', '10 Day Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
 		BEGIN
 			DECLARE @strCustomerLocalIds NVARCHAR(MAX)
 
@@ -308,6 +308,16 @@ BEGIN
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
 					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
+				END
+			ELSE IF @strLetterName = '1 Day Overdue Collection Letter'		
+				BEGIN		
+					DELETE FROM tblARCustomerAgingStagingTable		
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0 AND ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0		
+				END		
+			ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
+				BEGIN		
+					DELETE FROM tblARCustomerAgingStagingTable		
+					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl30Days, 0) = 0 AND ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0		
 				END
 			ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 				BEGIN

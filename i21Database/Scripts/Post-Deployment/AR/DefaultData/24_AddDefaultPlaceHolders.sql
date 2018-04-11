@@ -379,6 +379,30 @@ BEGIN
 	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-21', N'Sales', N'[Date]', N'vyuARServiceChargeInvoiceReport', N'dtmLetterDate', N'datetime', N'dtmLetterDate', N'Letter Date', 0, 0)
 END
 
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-22'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId]  IN ('PH-22')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-22" style="border:none" placeholder="Amount Overdue 1 Day" readonly="">', N'vyuARCollectionOverdueReport', N'dbl10DaysSum', N'dbl10DaysSum', N'Amount Overdue 1 Day', 0, N'PH-22', 0, N'numeric')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-22" style="border:none" placeholder="Amount Overdue 1 Day" readonly="">', N'vyuARCollectionOverdueReport', N'dbl10DaysSum', N'dbl10DaysSum', N'Amount Overdue 1 Day', 0, N'PH-22', 0, N'numeric')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-23'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-23')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-23" style="border:none" placeholder="Amount Overdue 10 Days" readonly="">', N'vyuARCollectionOverdueReport', N'dbl30DaysSum', N'dbl30DaysSum', N'Amount Overdue 10 Days', 0, N'PH-23', 0, N'numeric')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-23" style="border:none" placeholder="Amount Overdue 10 Days" readonly="">', N'vyuARCollectionOverdueReport', N'dbl30DaysSum', N'dbl30DaysSum', N'Amount Overdue 10 Days', 0, N'PH-23', 0, N'numeric')
+END
+
 SET IDENTITY_INSERT [dbo].[tblARLetterPlaceHolder] OFF
 
  

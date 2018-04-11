@@ -147,6 +147,38 @@ IF @strLetterName = 'Recent Overdue Collection Letter'
 		WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0)
 		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
+ELSE IF @strLetterName = '1 Day Overdue Collection Letter'		
+		BEGIN		
+			INSERT INTO @temp_availablecustomer_table		
+			SELECT ARCO.intEntityCustomerId		
+				 , ENTITY.strName		
+				 , ENTITY.strCustomerNumber		
+			FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)		
+			INNER JOIN (SELECT intEntityId 		
+							 , strName		
+							 , strCustomerNumber		
+						FROM dbo.vyuARCustomer WITH (NOLOCK) 		
+						WHERE ysnActive = 1		
+			) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId		
+			WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)		
+			AND ARCO.intEntityUserId = @intEntityUserId
+		END		
+	ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
+		BEGIN		
+			INSERT INTO @temp_availablecustomer_table		
+			SELECT ARCO.intEntityCustomerId		
+				 , ENTITY.strName		
+				 , ENTITY.strCustomerNumber		
+			FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)		
+			INNER JOIN (SELECT intEntityId 		
+							 , strName		
+							 , strCustomerNumber		
+						FROM dbo.vyuARCustomer WITH (NOLOCK) 		
+						WHERE ysnActive = 1		
+			) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId		
+			WHERE (ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)		
+			AND ARCO.intEntityUserId = @intEntityUserId
+		END
 ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 	BEGIN
 		INSERT INTO @temp_availablecustomer_table
