@@ -32,7 +32,7 @@ UPDATE
 SET	 
 	[intPriceUOMId]				= CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN [intItemWeightUOMId] ELSE [intItemUOMId] END	
 WHERE
-	[intUnitUOMId] IS NULL
+	[intPriceUOMId] IS NULL
 
 			
 GO
