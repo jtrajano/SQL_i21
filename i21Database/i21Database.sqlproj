@@ -6318,6 +6318,7 @@
     <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWOSampleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
