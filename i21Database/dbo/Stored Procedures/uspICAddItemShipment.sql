@@ -470,6 +470,7 @@ INSERT INTO @ShipmentEntries(
 		, intForexRateTypeId
 		, dblForexRate
 		, strChargesLink
+		, intPriceUOMId
 )
 SELECT 
 		intOrderType
@@ -522,6 +523,7 @@ SELECT
 		, intForexRateTypeId
 		, dblForexRate
 		, strChargesLink
+		, intPriceUOMId
 FROM @Items
 
 -- 2. Charges
