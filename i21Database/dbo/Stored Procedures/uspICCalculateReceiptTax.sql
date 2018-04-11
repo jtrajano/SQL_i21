@@ -214,7 +214,8 @@ BEGIN
 			,[strCalculationMethod]			= vendorTax.[strCalculationMethod]
 			,[dblRate]						= vendorTax.[dblRate]
 			,[dblTax]						=	CASE 
-													WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN vendorTax.[dblTax] 
+													WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+														vendorTax.[dblTax] 
 													ELSE 
 														CASE 
 															WHEN ri.dblForexRate <> 0 THEN 
@@ -230,18 +231,38 @@ BEGIN
 														END 
 												END 
 			,[dblAdjustedTax]				= 
-											CASE 
-												WHEN ri.dblForexRate <> 0 THEN 
-													ROUND(
-														dbo.fnDivide(
-															-- Convert the tax to the transaction currency. 
-																vendorTax.[dblAdjustedTax]
-															, ri.dblForexRate
-														)
-													, 2) 
-												ELSE 
-													vendorTax.[dblAdjustedTax]
-											END
+												CASE 
+													WHEN vendorTax.[ysnTaxAdjusted] = 1THEN 
+														vendorTax.[dblAdjustedTax]
+													WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+														vendorTax.[dblTax] 
+													ELSE 
+														CASE 
+															WHEN ri.dblForexRate <> 0 THEN 
+																ROUND(
+																	dbo.fnDivide(
+																		-- Convert the tax to the transaction currency. 
+																		 vendorTax.[dblTax] 
+																		, ri.dblForexRate
+																	)
+																, 2) 
+															ELSE 
+																vendorTax.[dblTax] 
+														END 
+												END 
+
+											--CASE 
+											--	WHEN ri.dblForexRate <> 0 THEN 
+											--		ROUND(
+											--			dbo.fnDivide(
+											--				-- Convert the tax to the transaction currency. 
+											--					vendorTax.[dblAdjustedTax]
+											--				, ri.dblForexRate
+											--			)
+											--		, 2) 
+											--	ELSE 
+											--		vendorTax.[dblAdjustedTax]
+											--END
 			,[intTaxAccountId]				= vendorTax.[intTaxAccountId]
 			,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
 			,[ysnSeparateOnInvoice]			= vendorTax.[ysnSeparateOnInvoice]
