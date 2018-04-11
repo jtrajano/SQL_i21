@@ -194,19 +194,39 @@ BEGIN
 																	END 
 															END 
 
-						,[dblAdjustedTax]				= 
-														CASE 
-															WHEN rc.dblForexRate <> 0 THEN 
-																ROUND(
-																	dbo.fnDivide(
-																		-- Convert the tax to the transaction currency. 
-																			vendorTax.[dblAdjustedTax]
-																		, rc.dblForexRate
-																	)
-																, 2) 
-															ELSE 
-																vendorTax.[dblAdjustedTax]
-														END 
+						,[dblAdjustedTax]				=
+															CASE 
+																WHEN vendorTax.[ysnTaxAdjusted] = 1 THEN 
+																	vendorTax.[dblAdjustedTax]
+																WHEN vendorTax.[strCalculationMethod] = 'Percentage' THEN 
+																	vendorTax.[dblTax] 
+																ELSE 
+																	CASE 
+																		WHEN rc.dblForexRate <> 0 THEN 
+																			ROUND(
+																				dbo.fnDivide(
+																					-- Convert the tax to the transaction currency. 
+																					 vendorTax.[dblTax] 
+																					, rc.dblForexRate
+																				)
+																			, 2) 
+																		ELSE 
+																			vendorTax.[dblTax] 
+																	END 
+															END 						
+						 
+														--CASE 
+														--	WHEN rc.dblForexRate <> 0 THEN 
+														--		ROUND(
+														--			dbo.fnDivide(
+														--				-- Convert the tax to the transaction currency. 
+														--					vendorTax.[dblAdjustedTax]
+														--				, rc.dblForexRate
+														--			)
+														--		, 2) 
+														--	ELSE 
+														--		vendorTax.[dblAdjustedTax]
+														--END 
 
 						,[intTaxAccountId]				= vendorTax.[intTaxAccountId]
 						,[ysnTaxAdjusted]				= vendorTax.[ysnTaxAdjusted]
