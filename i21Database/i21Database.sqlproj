@@ -6278,6 +6278,7 @@
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReopenWorkOrder.sql" />
+    <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
