@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuTFGetLoadReceiptToBlendIngredient]
+﻿CREATE VIEW [dbo].[vyuTRGetLoadReceiptToBlendIngredient]
 	AS
 
 SELECT DISTINCT TT.strTransaction

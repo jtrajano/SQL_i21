@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuTFGetLoadReceiptToDistribution]
+﻿CREATE VIEW [dbo].[vyuTRGetLoadReceiptToDistribution]
 	AS
 
 SELECT TT.strTransaction
