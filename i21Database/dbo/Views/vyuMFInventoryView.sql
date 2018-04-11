@@ -2,7 +2,7 @@
 AS
 SELECT l.intLotId
 	,l.strLotNumber
-	,l.dblLastCost
+	,dbo.fnGetLotUnitCost(l.intLotId) AS dblLastCost
 	,l.dtmDateCreated
 	,l.dtmExpiryDate
 	,l.strLotAlias
