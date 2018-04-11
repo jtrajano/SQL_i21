@@ -167,10 +167,10 @@ BEGIN
 		,EL.strZipCode AS strShipToZipCode
 		,IsNULL(EDI.strShipToCode, '') AS strShipToCode
 		,dtmShipDate dtmShippedDate
-		,IsNULL(EDI.strTransportationMethod, '') AS strTransportationMethod
-		,IsNULL(EDI.strSCAC, '') AS strSCAC
-		,IsNULL(EDI.strRouting, '') AS strRouting
-		,IsNULL(EDI.strShipmentMethodOfPayment, '') AS strShipmentMethodOfPayment
+		,IsNULL(IsNULL(Case When CF.ysnCustomerPickUp=1 then 'H' Else 'M' End, EDI.strTransportationMethod), '') AS strTransportationMethod
+		,IsNULL(IsNULL(SV.strFederalId, EDI.strSCAC), '') AS strSCAC
+		,IsNULL(IsNULL(SV.strShipVia, EDI.strRouting), '') AS strRouting
+		,FT.strFreightTerm AS strShipmentMethodOfPayment
 		,strTotalPalletsLoaded
 		,SUM(dblQuantityShipped) OVER (PARTITION BY InvS.intInventoryShipmentId) dblTotalUnitsShipped
 		,0 AS dblTotalWeight
@@ -226,6 +226,8 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
 	LEFT JOIN tblICItemUOM IU1 ON UM.intUnitMeasureId = IU1.intUnitMeasureId
 		AND I.intItemId = IU1.intItemId
+	LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = InvS.intShipViaId
+	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = InvS.intFreightTermId
 
 	SELECT *
 	INTO #tblMFSSCCNo

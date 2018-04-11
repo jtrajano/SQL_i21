@@ -6316,6 +6316,8 @@
     <Build Include="dbo\Views\vyuARInvoiceRecurringSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveWashout.sql" />
     <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
