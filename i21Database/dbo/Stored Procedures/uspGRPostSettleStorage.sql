@@ -88,6 +88,20 @@ BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
 	DECLARE @intLotId INT
+	
+	DECLARE @strOwnedPhysicalStock NVARCHAR(20)
+	DECLARE @dblSettlementRatio DECIMAL(24, 10)
+	DECLARE @dblOriginalInventoryGLAmount DECIMAL(24, 10)
+	
+	DECLARE @GLAccounts AS dbo.ItemGLAccount;
+	DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
+	DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment'
+	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount
+	DECLARE @ACCOUNT_CATEGORY_APClearing AS NVARCHAR(30) = 'AP Clearing'
+	DECLARE @ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
+	DECLARE @ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
+
+	DECLARE @adjustCostOfDelayedPricingStock AS ItemCostAdjustmentTableType
 
 	SET @dtmDate = GETDATE()
 
@@ -808,6 +822,15 @@ BEGIN TRY
 				DELETE 
 				FROM @GLEntries
 
+				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
+				FROM tblGRCustomerStorage CS 
+				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				WHERE CS.intCustomerStorageId = @intCustomerStorageId
+				
+				SELECT TOP 1 @intReceiptId = intInventoryReceiptId
+				FROM tblGRStorageHistory
+				WHERE strType = 'FROM Scale' AND intCustomerStorageId = @intCustomerStorageId
+
 				INSERT INTO @ItemsToStorage 
 				(
 					 intItemId
@@ -834,13 +857,17 @@ BEGIN TRY
 					,intItemUOMId				=  @intInventoryItemStockUOMId
 					,dtmDate					=  GETDATE()
 					,dblQty						= CASE 
-														WHEN 
-															dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage >0 
-															AND dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage < 0.00001
-															THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits]),5)
-														ELSE
-																-dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
-													END
+														WHEN @strOwnedPhysicalStock ='Customer' THEN
+																										CASE 
+																											WHEN 
+																												dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage >0 
+																												AND dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])-ItemStock.dblUnitStorage < 0.00001
+																												THEN - ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits]),5)
+																											ELSE
+																													-dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+																										END
+														ELSE 0 
+												  END			
 					,dblUOMQty					=  @dblUOMQty
 					,dblCost					=  CASE 
 														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
@@ -889,7 +916,10 @@ BEGIN TRY
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
 					,dtmDate					= GETDATE()
-					,dblQty						= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+					,dblQty						= CASE 
+														WHEN @strOwnedPhysicalStock ='Customer' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+												        ELSE 0
+												  END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
 														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice] + ISNULL(OtherCharge.dblCashPrice,0)
@@ -930,12 +960,271 @@ BEGIN TRY
 				END
 
 				BEGIN
+					  SELECT @dblUnits = SUM(dblUnits) FROM @SettleVoucherCreate WHERE intItemType = 1
+					  
+					  SELECT @dblSettlementRatio = @dblUnits / dblOriginalBalance 
+					  FROM vyuGRStorageSearchView WHERE intCustomerStorageId = @intCustomerStorageId
+					  
+					  SELECT @dblOriginalInventoryGLAmount = SUM(dblOpenReceive*dblUnitCost) 
+					  FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId
+
+				END
+				
+				BEGIN
 					--EXEC uspICPostCosting 
 					--	 @ItemsToPost
 					--	,@strBatchId
 					--	,'Cost of Goods'
 					--	,@intCreatedUserId
+					
+					INSERT INTO @GLAccounts 
+					(
+						  intItemId
+						 ,intItemLocationId
+						 ,intInventoryId
+						 ,intContraInventoryId
+						 ,intAutoNegativeId
+						 ,intTransactionTypeId
+					)
+					SELECT 
+						 Query.intItemId
+						,Query.intItemLocationId
+						,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory)
+						,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, 'AP Clearing')
+						,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance)
+						,intTransactionTypeId
+					FROM (
+							SELECT DISTINCT intItemId
+								,intItemLocationId
+								,intTransactionTypeId
+							FROM dbo.tblICInventoryTransaction t
+							WHERE t.intTransactionId = @intReceiptId AND t.intItemId = @ItemId
+						) Query
+					
+					INSERT INTO @OtherChargesGLAccounts 
+					(
+						 intChargeId
+						,intItemLocationId
+						,intOtherChargeExpense
+						,intOtherChargeIncome
+						,intAPClearing
+						,intTransactionTypeId
+					)
+					SELECT 
+						 Query.intChargeId
+						,Query.intItemLocationId
+						,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense)
+						,intOtherChargeIncome = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome)
+						,intAPClearing = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_APClearing)
+						,intTransactionTypeId = 4
+					FROM (
+						SELECT DISTINCT OtherCharges.intChargeId
+							,ItemLocation.intItemLocationId
+						FROM tblICInventoryReceipt Receipt
+						INNER JOIN tblICInventoryReceiptCharge OtherCharges ON Receipt.intInventoryReceiptId = OtherCharges.intInventoryReceiptId
+						LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = OtherCharges.intChargeId
+							AND ItemLocation.intLocationId = Receipt.intLocationId
+						WHERE OtherCharges.intInventoryReceiptId = @intReceiptId
+						) Query
+					
+					---Reverse GL Entries of IR
+						INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					   )
+					   --Inventory Item Inventory GL
+					   SELECT	
+							 dtmDate					= GETDATE()
+							,strBatchId					= @strBatchId
+							,intAccountId				= GLAccounts.intInventoryId
+							,dblDebit					= 0
+							,dblCredit					= @dblOriginalInventoryGLAmount * @dblSettlementRatio
+							,dblDebitUnit				= @dblUnits
+							,dblCreditUnit				= @dblUnits
+							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](@ItemId,@dblUnits,@dblOriginalInventoryGLAmount*@dblSettlementRatio/@dblUnits) 
+							,strCode					= 'STR' 
+							,strReference				= '' 
+							,intCurrencyId				= @intCurrencyId
+							,dblExchangeRate			= 1
+							,dtmDateEntered				= GETDATE()
+							,dtmTransactionDate			= GETDATE()
+							,strJournalLineDescription  = '' 
+							,intJournalLineNo			= NULL--->
+							,ysnIsUnposted				= 0
+							,intUserId					= NULL 
+							,intEntityId				= @intCreatedUserId 
+							,strTransactionId			= @TicketNo
+							,intTransactionId			= NULL--->
+							,strTransactionType			= 'Storage Settlement'
+							,strTransactionForm			= 'Storage Settlement'
+							,strModuleName				= 'Inventory'
+							,intConcurrencyId			= 1
+							,dblDebitForeign			= 0 
+							,dblDebitReport				= NULL 
+							,dblCreditForeign			= 0
+							,dblCreditReport			= NULL 
+							,dblReportingRate			= NULL 
+							,dblForeignRate				= 1 
+							,strRateType				= NULL 
+							FROM @GLAccounts GLAccounts 
+							JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+				UNION ALL				
+				--Inventory Item AP Clearing GL
 
+							SELECT	
+							 dtmDate					= GETDATE()
+							,strBatchId					= @strBatchId
+							,intAccountId				= GLAccounts.intInventoryId
+							,dblDebit					= @dblOriginalInventoryGLAmount * @dblSettlementRatio
+							,dblCredit					= 0
+							,dblDebitUnit				= @dblUnits
+							,dblCreditUnit				= @dblUnits
+							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](@ItemId,@dblUnits,@dblOriginalInventoryGLAmount * @dblSettlementRatio/@dblUnits) 
+							,strCode					= 'STR' 
+							,strReference				= '' 
+							,intCurrencyId				= @intCurrencyId
+							,dblExchangeRate			= 1
+							,dtmDateEntered				= GETDATE()
+							,dtmTransactionDate			= GETDATE()
+							,strJournalLineDescription  = '' 
+							,intJournalLineNo			= NULL--->
+							,ysnIsUnposted				= 0
+							,intUserId					= NULL 
+							,intEntityId				= @intCreatedUserId 
+							,strTransactionId			= @TicketNo
+							,intTransactionId			= NULL--->
+							,strTransactionType			= 'Storage Settlement'
+							,strTransactionForm			= 'Storage Settlement'
+							,strModuleName				= 'Inventory'
+							,intConcurrencyId			= 1
+							,dblDebitForeign			= 0 
+							,dblDebitReport				= NULL 
+							,dblCreditForeign			= 0
+							,dblCreditReport			= NULL 
+							,dblReportingRate			= NULL 
+							,dblForeignRate				= 1 
+							,strRateType				= NULL 
+							FROM @GLAccounts GLAccounts 
+							JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+					UNION ALL	
+					--Other Charge Item Inventory GL
+					   SELECT	
+							 dtmDate					= GETDATE()
+							,strBatchId					= @strBatchId
+							,intAccountId				= GLAccounts.intInventoryId
+							,dblDebit					= (ReceiptCharge.dblAmount * @dblSettlementRatio)
+							,dblCredit					= 0
+							,dblDebitUnit				= @dblUnits
+							,dblCreditUnit				= @dblUnits
+							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ', Charges from ' + Item.strItemNo
+							,strCode					= 'STR' 
+							,strReference				= '' 
+							,intCurrencyId				= @intCurrencyId
+							,dblExchangeRate			= 1
+							,dtmDateEntered				= GETDATE()
+							,dtmTransactionDate			= GETDATE()
+							,strJournalLineDescription  = '' 
+							,intJournalLineNo			= NULL--->
+							,ysnIsUnposted				= 0
+							,intUserId					= NULL 
+							,intEntityId				= @intCreatedUserId 
+							,strTransactionId			= @TicketNo
+							,intTransactionId			= NULL--->
+							,strTransactionType			= 'Storage Settlement'
+							,strTransactionForm			= 'Storage Settlement'
+							,strModuleName				= 'Inventory'
+							,intConcurrencyId			= 1
+							,dblDebitForeign			= 0 
+							,dblDebitReport				= NULL 
+							,dblCreditForeign			= 0
+							,dblCreditReport			= NULL 
+							,dblReportingRate			= NULL 
+							,dblForeignRate				= 1 
+							,strRateType				= NULL 
+							FROM tblICInventoryReceiptCharge ReceiptCharge
+							JOIN @GLAccounts GLAccounts ON 1 = 1
+							JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+							JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
+							WHERE ReceiptCharge.intInventoryReceiptId = @intReceiptId AND ReceiptCharge.ysnInventoryCost = 1
+				UNION ALL				
+				--Other Charge Item AP Clearing GL
+
+							SELECT	
+							 dtmDate					= GETDATE()
+							,strBatchId					= @strBatchId
+							,intAccountId				= tblGLAccount.intAccountId
+							,dblDebit					= 0
+							,dblCredit					= (ReceiptCharge.dblAmount * @dblSettlementRatio)
+							,dblDebitUnit				= @dblUnits
+							,dblCreditUnit				= @dblUnits
+							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ', Charges from ' + Item.strItemNo
+							,strCode					= 'STR' 
+							,strReference				= '' 
+							,intCurrencyId				= @intCurrencyId
+							,dblExchangeRate			= 1
+							,dtmDateEntered				= GETDATE()
+							,dtmTransactionDate			= GETDATE()
+							,strJournalLineDescription  = '' 
+							,intJournalLineNo			= NULL--->
+							,ysnIsUnposted				= 0
+							,intUserId					= NULL 
+							,intEntityId				= @intCreatedUserId 
+							,strTransactionId			= @TicketNo
+							,intTransactionId			= NULL--->
+							,strTransactionType			= 'Storage Settlement'
+							,strTransactionForm			= 'Storage Settlement'
+							,strModuleName				= 'Inventory'
+							,intConcurrencyId			= 1
+							,dblDebitForeign			= 0 
+							,dblDebitReport				= NULL 
+							,dblCreditForeign			= 0
+							,dblCreditReport			= NULL 
+							,dblReportingRate			= NULL 
+							,dblForeignRate				= 1 
+							,strRateType				= NULL 
+							FROM tblICInventoryReceiptCharge ReceiptCharge
+							JOIN @OtherChargesGLAccounts OGL ON OGL.intChargeId = ReceiptCharge.intChargeId
+							JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = OGL.intAPClearing
+							JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
+							WHERE ReceiptCharge.intInventoryReceiptId = @intReceiptId AND ReceiptCharge.ysnInventoryCost = 1
+						
+						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+						BEGIN 
+								EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
+						END 
+
+						DELETE FROM @GLEntries
+						
 						INSERT INTO @GLEntries (
 							[dtmDate] 
 							,[strBatchId]
@@ -979,7 +1268,7 @@ BEGIN TRY
 					IF @intReturnValue < 0
 						GOTO SettleStorage_Exit;
 
-					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 					BEGIN 
 							EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
 					END 
@@ -1098,8 +1387,7 @@ BEGIN TRY
 				 (ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
 				  OR
 				 (ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
-				)
-								
+				)								
 				
 				---Adding Contract Other Charges.
 				INSERT INTO @voucherDetailStorage 
@@ -1161,16 +1449,16 @@ BEGIN TRY
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
-				 
+				
 				EXEC [dbo].[uspAPCreateBillData] 
-					 @userId = @intCreatedUserId
-					,@vendorId = @EntityId
-					,@type = 1
-					,@voucherDetailStorage = @voucherDetailStorage
-					,@shipTo = @LocationId
-					,@vendorOrderNumber = NULL
-					,@voucherDate = @dtmDate
-					,@billId = @intCreatedBillId OUTPUT
+							 @userId = @intCreatedUserId
+							,@vendorId = @EntityId
+							,@type = 1
+							,@voucherDetailStorage = @voucherDetailStorage
+							,@shipTo = @LocationId
+							,@vendorOrderNumber = NULL
+							,@voucherDate = @dtmDate
+							,@billId = @intCreatedBillId OUTPUT
 
 				IF @intCreatedBillId IS NOT NULL
 				BEGIN
