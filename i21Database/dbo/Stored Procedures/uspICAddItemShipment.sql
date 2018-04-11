@@ -872,6 +872,7 @@ INSERT INTO tblICInventoryShipmentItem(
 	, strChargesLink
 	, intConcurrencyId
 	, intPriceUOMId
+	, dblLineTotal
 )
 SELECT 
 	se.intShipmentId
@@ -899,6 +900,16 @@ SELECT
 	, strChargesLink
 	, intConcurrencyId = 1
 	, intPriceUOMId = ISNULL(se.intPriceUOMId, se.intItemUOMId) 
+	, dblLineTotal = 
+		ROUND(
+			se.dblQuantity
+			* dbo.fnCalculateCostBetweenUOM(
+				ISNULL(se.intPriceUOMId, se.intItemUOMId)
+				, se.intItemUOMId
+				, se.dblUnitPrice
+			) 
+			, 2
+		) 
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 
