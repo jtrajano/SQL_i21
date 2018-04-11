@@ -33,6 +33,9 @@
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
 	,@CurrencyId				INT				= NULL
+	,@CurrencyExchangeRateTypeId    INT            = NULL OUTPUT
+    ,@CurrencyExchangeRateType  NVARCHAR(20)    = NULL OUTPUT
+    ,@CurrencyExchangeRate      NUMERIC(18,6)    = NULL OUTPUT
 	,@SubCurrencyId				INT				= NULL OUTPUT
 	,@SubCurrency				NVARCHAR(250)	= NULL OUTPUT
 	,@SubCurrencyRate			NUMERIC(18,6)	= NULL OUTPUT
@@ -46,26 +49,29 @@
 AS	
 
 	SELECT
-		 @Price				= dblPrice
-		,@Pricing			= strPricing
-		,@ContractHeaderId	= intContractHeaderId
-		,@ContractDetailId	= intContractDetailId
-		,@ContractNumber	= strContractNumber
-		,@ContractSeq		= intContractSeq
-		,@PriceUOMId		= intPriceUOMId
-		,@PriceUOM			= strPriceUOM
-		,@NewQuantity		= dblQuantity
-		,@AvailableQuantity = dblAvailableQty
-		,@UnlimitedQuantity = ysnUnlimitedQty
-		,@Deviation			= dblDeviation
-		,@TermDiscount		= dblTermDiscount  
-		,@PricingType		= strPricingType
-		,@TermIdOut			= intTermId
-		,@TermDiscountBy	= strTermDiscountBy
-		,@SubCurrencyId		= intSubCurrencyId
-		,@SubCurrency		= strSubCurrency
-		,@SubCurrencyRate	= dblSubCurrencyRate
-		,@SpecialPriceId	= intSpecialPriceId
+		 @Price							= dblPrice
+		,@Pricing						= strPricing
+		,@ContractHeaderId				= intContractHeaderId
+		,@ContractDetailId				= intContractDetailId
+		,@ContractNumber				= strContractNumber
+		,@ContractSeq					= intContractSeq
+		,@PriceUOMId					= intPriceUOMId
+		,@PriceUOM						= strPriceUOM
+		,@NewQuantity					= dblQuantity
+		,@AvailableQuantity				= dblAvailableQty
+		,@UnlimitedQuantity				= ysnUnlimitedQty
+		,@Deviation						= dblDeviation
+		,@TermDiscount					= dblTermDiscount  
+		,@PricingType					= strPricingType
+		,@TermIdOut						= intTermId
+		,@TermDiscountBy				= strTermDiscountBy
+		,@CurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
+        ,@CurrencyExchangeRateType      = strCurrencyExchangeRateType
+        ,@CurrencyExchangeRate          = dblCurrencyExchangeRate
+		,@SubCurrencyId					= intSubCurrencyId
+		,@SubCurrency					= strSubCurrency
+		,@SubCurrencyRate				= dblSubCurrencyRate
+		,@SpecialPriceId				= intSpecialPriceId
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
