@@ -226,7 +226,7 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = EDI.strUOM
 	LEFT JOIN tblICItemUOM IU1 ON UM.intUnitMeasureId = IU1.intUnitMeasureId
 		AND I.intItemId = IU1.intItemId
-	LEFT JOIN tblSMShipVia SV ON SV.intEntityShipViaId = InvS.intShipViaId
+	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = InvS.intShipViaId
 	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = InvS.intFreightTermId
 
 	SELECT *
