@@ -12,6 +12,7 @@ SELECT intRecordId
 	,[heat treated pallet] AS strHeatTreatedPallet
 	,[block and brace] AS strBlockAndBrace
 	,[created by edi] AS ysnEDI
+	,[customer pick up] As ysnCustomerPickUp
 FROM (
 	SELECT T.intRecordId
 		,TD.strControlName
@@ -31,6 +32,7 @@ FROM (
 			,'heat treated pallet'
 			,'block and brace'
 			,'created by edi'
+			,'customer pick up'
 			)
 	JOIN tblSMTransaction T ON T.intTransactionId = TR.intTransactionId
 	JOIN tblSMScreen S ON S.intScreenId = T.intScreenId
@@ -48,4 +50,5 @@ PIVOT(MAX(strValue) FOR strControlName IN (
 			,[heat treated pallet]
 			,[block and brace]
 			,[created by edi]
+			,[customer pick up]
 			)) AS PivotTable
