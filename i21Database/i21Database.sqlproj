@@ -6273,9 +6273,10 @@
     <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI945.sql" />
-        <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
-        <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
-        <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
+    <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
