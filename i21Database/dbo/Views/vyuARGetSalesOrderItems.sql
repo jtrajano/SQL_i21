@@ -25,6 +25,9 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , dblQtyRemaining			= SODETAIL.dblQtyRemaining
 	 , dblPrice					= SODETAIL.dblPrice
 	 , dblBasePrice				= SODETAIL.dblBasePrice
+	 , dblUnitPrice				= SODETAIL.dblUnitPrice
+	 , dblBaseUnitPrice			= SODETAIL.dblBaseUnitPrice
+	 , dblUnitQuantity			= SODETAIL.dblUnitQuantity
 	 , dblDiscount				= SODETAIL.dblDiscount
 	 , dblCurrencyExchangeRate	= SODETAIL.dblCurrencyExchangeRate
 	 , dblSubCurrencyRate		= SODETAIL.dblSubCurrencyRate
@@ -67,6 +70,9 @@ INNER JOIN (
 		 , dblQtyRemaining = dblQtyOrdered - dblQtyShipped
 		 , dblPrice
 		 , dblBasePrice
+		 , dblUnitPrice
+		 , dblBaseUnitPrice
+		 , dblUnitQuantity
 		 , dblDiscount
 		 , dblCurrencyExchangeRate
 		 , dblSubCurrencyRate
