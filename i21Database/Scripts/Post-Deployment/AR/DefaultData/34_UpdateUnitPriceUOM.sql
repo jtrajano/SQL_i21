@@ -34,6 +34,33 @@ SET
 WHERE
 	[intPriceUOMId] IS NULL
 
+
+UPDATE
+	tblSOSalesOrderDetail
+SET	 
+	 [dblUnitPrice] 			= ISNULL([dblPrice], @ZeroDecimal)
+	,[dblBaseUnitPrice]			= ISNULL([dblBasePrice], @ZeroDecimal)
+WHERE
+	ISNULL([dblUnitPrice], @ZeroDecimal) <> ISNULL([dblPrice], @ZeroDecimal)
+	AND ISNULL([dblUnitPrice], @ZeroDecimal) = @ZeroDecimal
+	AND [intPriceUOMId] IS NULL
+
+UPDATE
+	tblSOSalesOrderDetail
+SET	 
+	[dblUnitQuantity]			= CASE WHEN (ISNULL([dblUnitQuantity],0) <> @ZeroDecimal) THEN [dblUnitQuantity] ELSE [dblQtyOrdered] END	
+WHERE
+	ISNULL([dblUnitQuantity], @ZeroDecimal) = @ZeroDecimal
+	AND ISNULL([dblQtyOrdered], @ZeroDecimal) <> @ZeroDecimal			
+	AND [intPriceUOMId] IS NULL
+
+UPDATE
+	tblSOSalesOrderDetail
+SET	 
+	[intPriceUOMId]				= [intItemUOMId]	
+WHERE
+	[intPriceUOMId] IS NULL
+
 			
 GO
 print('/*******************  END Update Unit Price and Unit UOM & QTY  *******************/')
