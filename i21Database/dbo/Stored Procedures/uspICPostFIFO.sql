@@ -24,6 +24,7 @@ CREATE PROCEDURE [dbo].[uspICPostFIFO]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
+	,@dblUnitRetail AS NUMERIC(38,20)
 
 AS
 
@@ -53,6 +54,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @UnitRetailUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -78,6 +80,7 @@ BEGIN
 		-- Get the item's last cost when reducing stock. 
 		-- Except if doing vendor stock returns using Inventory Receipt/Return 
 		SELECT	@dblCost = ItemPricing.dblLastCost
+				-- TOOD: @dblUnitRetail = ItemPricing.dblLastUnitRetail
 		FROM	tblICItemPricing ItemPricing 
 		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
 				AND ItemPricing.intItemId = @intItemId
@@ -110,6 +113,8 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
+				,@dblUnitRetail 
+				,@UnitRetailUsed OUTPUT 
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
@@ -144,6 +149,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@dblUnitRetail = @dblUnitRetail
 			
 			-- Insert the record the the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
@@ -201,6 +207,7 @@ BEGIN
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 			
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
+				,@dblUnitRetail = @dblUnitRetail
 
 
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
@@ -226,7 +233,9 @@ BEGIN
 				,@UpdatedFifoId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
-
+				,@dblUnitRetail 
+				,@UnitRetailUsed OUTPUT 
+				
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
@@ -270,6 +279,7 @@ BEGIN
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
+							,@dblUnitRetail = @dblUnitRetail
 				END 
 			END
 			

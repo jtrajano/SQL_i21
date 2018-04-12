@@ -57,6 +57,7 @@ DECLARE @intId AS INT
 		,@strActualCostId AS NVARCHAR(50)
 		,@intForexRateTypeId AS INT
 		,@dblForexRate NUMERIC(38, 20)
+		,@dblUnitRetail AS NUMERIC(38, 20)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -112,6 +113,7 @@ SELECT  intId
 		,strActualCostId
 		,intForexRateTypeId
 		,dblForexRate 
+		,dblUnitRetail
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -138,7 +140,8 @@ FETCH NEXT FROM loopItems INTO
 	,@intStorageLocationId
 	,@strActualCostId
 	,@intForexRateTypeId
-	,@dblForexRate;
+	,@dblForexRate
+	,@dblUnitRetail
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -193,6 +196,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 	END
 
 	-- FIFO 
@@ -557,7 +561,8 @@ BEGIN
 		,@intStorageLocationId
 		,@strActualCostId 
 		,@intForexRateTypeId
-		,@dblForexRate;
+		,@dblForexRate
+		,@dblUnitRetail;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
