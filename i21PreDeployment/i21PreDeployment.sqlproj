@@ -157,6 +157,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\CreateTempBasketColumn.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\10_FixInvoiceSOLineOfBusiness.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\1_FixInvoiceAndSalesOrderNumberUniqueConstraint.sql" />
+    <None Include="Scripts\Pre-Deployment\14_CT\CleanCostDataCorrection.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
