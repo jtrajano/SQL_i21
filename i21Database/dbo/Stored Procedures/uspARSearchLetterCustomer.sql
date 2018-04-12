@@ -6,6 +6,7 @@
 AS
 DECLARE @strLetterName			NVARCHAR(MAX),
 		@ysnSystemDefined		BIT
+		, @intSourceLetterId INT;
 
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -13,10 +14,16 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-SELECT @strLetterName		= strName
-	 , @ysnSystemDefined	= ysnSystemDefined 
-FROM dbo.tblSMLetter WITH (NOLOCK)
-WHERE intLetterId = CAST(@intLetterId AS NVARCHAR(10))
+SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')
+	BEGIN
+		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+	END
+	ELSE
+	BEGIN
+		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intSourceLetterId
+	END
+
 SET NOCOUNT OFF;
 
 DECLARE @temp_availablecustomer_table TABLE(

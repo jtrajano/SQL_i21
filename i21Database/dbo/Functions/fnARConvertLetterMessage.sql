@@ -13,6 +13,7 @@ DECLARE @BinMessageOut		VARBINARY(MAX)
 		, @intPlaceHolderId	INT
 		, @strPlaceHolder		VARCHAR(MAX)
 		, @strPlaceValue		NVARCHAR(MAX)
+		, @temp_newHTMLMessage NVARCHAR(MAX)
 
 DECLARE @TempPlaceHolderTable TABLE  (
 	 intPlaceHolderId	INT
@@ -36,7 +37,12 @@ BEGIN
 	FROM
 		@TempPlaceHolderTable
 
-	SET @newHTMLMessage =  (REPLACE(dbo.fnARRemoveWhiteSpace(@newHTMLMessage), dbo.fnARRemoveWhiteSpace(@strPlaceHolder), @strPlaceValue))	
+	SET @temp_newHTMLMessage =  (REPLACE(dbo.fnARRemoveWhiteSpace(@newHTMLMessage), dbo.fnARRemoveWhiteSpace(@strPlaceHolder), @strPlaceValue))
+	
+	IF	@temp_newHTMLMessage IS NOT NULL AND LEN(LTRIM(RTRIM(@temp_newHTMLMessage))) <> 0
+			BEGIN
+				SET @newHTMLMessage =  @temp_newHTMLMessage	
+			END	
  
 	DELETE FROM @TempPlaceHolderTable WHERE intPlaceHolderId = @intPlaceHolderId	
 END
