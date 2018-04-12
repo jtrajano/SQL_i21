@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @EntityId INT
 	DECLARE @LocationId INT
 	DECLARE @ItemId INT
+	DECLARE @strItemNo NVARCHAR(20)
 	DECLARE @intUnitMeasureId INT
 	DECLARE @CommodityStockUomId INT
 	DECLARE @TicketNo NVARCHAR(20)
@@ -206,7 +207,7 @@ BEGIN TRY
 		WHERE intSettleStorageId = @intSettleStorageId
 	
 		SELECT
-		@intFutureMarketId=ISNULL(Com.intFutureMarketId,0)
+		@intFutureMarketId=ISNULL(Com.intFutureMarketId,0),@strItemNo = Item.strItemNo
 		FROM tblICItem Item
 		JOIN tblICCommodity Com ON Com.intCommodityId=Item.intCommodityId
 		WHERE Item.intItemId = @ItemId
@@ -976,7 +977,94 @@ BEGIN TRY
 					--	,@strBatchId
 					--	,'Cost of Goods'
 					--	,@intCreatedUserId
+					IF @strOwnedPhysicalStock = 'Company'
+					BEGIN
+									 --,[dblVoucherCost] 					=	SV.[dblCashPrice]						
+							 		--								-- NOTE: If Settlement will have multi-currency, it has to convert the foreign amount to functional currency. See commented code below as an example:
+							 		--								--CASE WHEN [Contract Currency] <> @intFunctionalCurrencyId THEN 
+							 		--								--		-- Convert the settlement cost to the functional currency. 
+							 		--								--		SV.[dblCashPrice] * ISNULL([Exchange Rate], 0) 
+							 		--								--	 ELSE 
+							 		--								--		SV.[dblCashPrice]
+							 		--								--END 
+								INSERT INTO @adjustCostOfDelayedPricingStock 
+								(
+								   [intItemId] 
+								  ,[intItemLocationId] 
+								  ,[intItemUOMId] 
+								  ,[dtmDate] 
+								  ,[dblQty] 
+								  ,[dblUOMQty] 
+								  ,[intCostUOMId] 
+								  ,[dblVoucherCost]
+								  ,[dblNewValue] 
+								  ,[intCurrencyId] 				
+								  ,[intTransactionId] 
+								  ,[intTransactionDetailId] 
+								  ,[strTransactionId] 
+								  ,[intTransactionTypeId] 
+								  ,[intLotId] 
+								  ,[intSubLocationId] 
+								  ,[intStorageLocationId] 
+								  ,[ysnIsStorage] 
+								  ,[strActualCostId] 
+								  ,[intSourceTransactionId] 
+								  ,[intSourceTransactionDetailId] 
+								  ,[strSourceTransactionId] 
+								  ,[intFobPointId]
+								  ,[intInTransitSourceLocationId]
+							   )
+							  SELECT
+							  [intItemId]						=	@ItemId
+							 ,[intItemLocationId]				=   @ItemLocationId
+							 ,[intItemUOMId]					=   @intInventoryItemStockUOMId
+							 ,[dtmDate] 						=	GETDATE()
+							 ,[dblQty] 							=	SV.dblUnits
+							 ,[dblUOMQty] 						=	@dblUOMQty
+							 ,[intCostUOMId]					=	@intInventoryItemStockUOMId
+							 ,[dblVoucherCost] 					=	SV.[dblCashPrice]
+							 ,[dblNewValue]						=   CASE 
+																		WHEN SV.intItemType = 1 THEN (SV.[dblCashPrice]-ri.dblUnitCost)* SV.dblUnits 
+																		WHEN SV.intItemType = 3 THEN (SV.[dblCashPrice] + QM.dblDiscountDue)* 
+																									 CASE 
+																										 WHEN ISNULL(Item.strCostMethod,'') ='Per Unit' THEN SV.dblUnits 
+																										 WHEN ISNULL(Item.strCostMethod,'') ='Amount'   THEN  1 
+																									 END
+																	END
+							 ,[intCurrencyId] 					=	@intDefaultCurrencyId -- It is always in functional currency. 
+							 ,[intTransactionId]				=	@intSettleStorageId
+							 ,[intTransactionDetailId] 			=	@intSettleStorageId
+							 ,[strTransactionId] 				=	@TicketNo
+							 ,[intTransactionTypeId] 			=	44
+							 ,[intLotId] 						=	NULL 
+							 ,[intSubLocationId] 				=	NULL 
+							 ,[intStorageLocationId] 			=	NULL 
+							 ,[ysnIsStorage] 					=	0
+							 ,[strActualCostId] 				=	NULL 
+							 ,[intSourceTransactionId] 			=	r.intInventoryReceiptId
+							 ,[intSourceTransactionDetailId] 	=	ri.intInventoryReceiptItemId
+							 ,[strSourceTransactionId] 			=	r.strReceiptNumber
+							 ,[intFobPointId]					=	NULL 
+							 ,[intInTransitSourceLocationId]	=	NULL 
+							 FROM @SettleVoucherCreate SV
+							 JOIN tblICItem Item ON Item.intItemId = SV.intItemId
+							 JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+							 JOIN tblSCTicket			t ON t.intTicketId = CS.intTicketId
+							 JOIN tblICInventoryReceiptItem ri  ON  ri.intSourceId = t.intTicketId 
+																AND ri.intLineNo = t.intContractId 
+																AND ri.intItemId = t.intItemId
+							 
+							  JOIN tblICInventoryReceipt r	    ON  r.intInventoryReceiptId   = ri.intInventoryReceiptId
+																AND r.strReceiptType		  = 'Purchase Contract'
+															    AND r.intSourceType			  = 1
+							  LEFT JOIN tblQMTicketDiscount		QM  ON QM.intTicketDiscountId = SV.intTicketDiscountId
+							  LEFT JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+							  WHERE SV.intItemType IN(1,3)
+
+						   EXEC uspICPostCostAdjustment @adjustCostOfDelayedPricingStock, @strBatchId, @intCreatedUserId
 					
+					
+
 					INSERT INTO @GLAccounts 
 					(
 						  intItemId
@@ -1071,7 +1159,7 @@ BEGIN TRY
 							,dblCredit					= @dblOriginalInventoryGLAmount * @dblSettlementRatio
 							,dblDebitUnit				= @dblUnits
 							,dblCreditUnit				= @dblUnits
-							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](@ItemId,@dblUnits,@dblOriginalInventoryGLAmount*@dblSettlementRatio/@dblUnits) 
+							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](@strItemNo,@dblUnits,@dblOriginalInventoryGLAmount*@dblSettlementRatio/@dblUnits) 
 							,strCode					= 'STR' 
 							,strReference				= '' 
 							,intCurrencyId				= @intCurrencyId
@@ -1109,7 +1197,7 @@ BEGIN TRY
 							,dblCredit					= 0
 							,dblDebitUnit				= @dblUnits
 							,dblCreditUnit				= @dblUnits
-							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](@ItemId,@dblUnits,@dblOriginalInventoryGLAmount * @dblSettlementRatio/@dblUnits) 
+							,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](@strItemNo,@dblUnits,@dblOriginalInventoryGLAmount * @dblSettlementRatio/@dblUnits) 
 							,strCode					= 'STR' 
 							,strReference				= '' 
 							,intCurrencyId				= @intCurrencyId
@@ -1174,7 +1262,7 @@ BEGIN TRY
 							FROM tblICInventoryReceiptCharge ReceiptCharge
 							JOIN @GLAccounts GLAccounts ON 1 = 1
 							JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-							JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
+							JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId AND Item.strCostType = 'Discount'
 							WHERE ReceiptCharge.intInventoryReceiptId = @intReceiptId AND ReceiptCharge.ysnInventoryCost = 1
 				UNION ALL				
 				--Other Charge Item AP Clearing GL
@@ -1215,14 +1303,16 @@ BEGIN TRY
 							FROM tblICInventoryReceiptCharge ReceiptCharge
 							JOIN @OtherChargesGLAccounts OGL ON OGL.intChargeId = ReceiptCharge.intChargeId
 							JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = OGL.intAPClearing
-							JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId
+							JOIN tblICItem Item ON Item.intItemId = ReceiptCharge.intChargeId AND Item.strCostType = 'Discount'
 							WHERE ReceiptCharge.intInventoryReceiptId = @intReceiptId AND ReceiptCharge.ysnInventoryCost = 1
 						
 						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 						BEGIN 
 								EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
 						END 
-
+					
+					END
+						
 						DELETE FROM @GLEntries
 						
 						INSERT INTO @GLEntries (
