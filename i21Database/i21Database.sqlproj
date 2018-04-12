@@ -6282,6 +6282,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
+    <Build Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
