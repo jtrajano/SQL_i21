@@ -1,0 +1,1 @@
+﻿UPDATE  tblCTCleanCost SET intShipmentId = NULL WHERE intShipmentId NOT IN (SELECT intLoadDetailId from tblLGLoadDetail)
