@@ -138,6 +138,25 @@ BEGIN TRY
 			WHERE Trans.strTransactionType = 'Invoice'
 				AND ISNULL(Trans.intProductCodeId, '') != ''
 		END
+		ELSE IF (@TaxAuthorityCode = 'PA')
+		BEGIN
+			SELECT Trans.intTransactionId
+			INTO #tmpUpdateTransactions
+			FROM #tmpTransaction Trans
+			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
+			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+			WHERE Trans.strTransactionType = 'Invoice'
+				AND ISNULL(Trans.intProductCodeId, '') != ''
+				AND Trans.uniqTransactionGuid = @Guid
+				AND Invoice.strType = 'CF Tran'
+				AND Trans.intReportingComponentId IN (SELECT intReportingComponentId FROM vyuTFGetReportingComponent
+													WHERE strTaxAuthorityCode = 'PA'
+														AND strScheduleCode IN ('5', '5Q', '6', '7', '8', '9', '10'))
+			
+			UPDATE tblTFTransaction
+			SET strTransportationMode = 'GS'
+			WHERE intTransactionId IN (SELECT intTransactionId FROM #tmpUpdateTransactions)
+		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 
