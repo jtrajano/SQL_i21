@@ -70,6 +70,9 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
 							dblBasePrice				NUMERIC(18,6),
+							dblUnitPrice				NUMERIC(18,6),
+							dblBaseUnitPrice			NUMERIC(18,6),
+							dblUnitQuantity				NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
 							strVFDDocumentNumber		NVARCHAR(100),
 							intTaxGroupId				INT,
@@ -117,6 +120,9 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							strItemTermDiscountBy		NVARCHAR(50),
 							dblPrice					NUMERIC(18,6),
 							dblBasePrice				NUMERIC(18,6),
+							dblUnitPrice				NUMERIC(18,6),
+							dblBaseUnitPrice			NUMERIC(18,6),
+							dblUnitQuantity				NUMERIC(18,6),
 							strPricing					NVARCHAR(250),
 							strVFDDocumentNumber		NVARCHAR(100),
 							intTaxGroupId				INT,
@@ -176,6 +182,9 @@ SELECT intItemId					= SI.intItemId
 	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
 	 , dblBasePrice					= CASE WHEN I.strType = 'Software' THEN SOD.dblBaseLicenseAmount ELSE SI.dblPrice END
+	 , dblUnitPrice					= SOD.dblUnitPrice
+	 , dblBaseUnitPrice				= SOD.dblBaseUnitPrice
+	 , dblUnitQuantity				= SOD.dblUnitQuantity
 	 , strPricing					= SOD.strPricing 
 	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
 	 , intTaxGroupId				= SI.intTaxGroupId
@@ -234,6 +243,9 @@ SELECT intItemId					= SOD.intItemId
 	 , strItemTermDiscountBy		= 0
 	 , dblPrice						= 0
 	 , dblBasePrice					= 0
+	 , dblUnitPrice					= SOD.dblUnitPrice
+	 , dblBaseUnitPrice				= SOD.dblBaseUnitPrice
+	 , dblUnitQuantity				= SOD.dblUnitQuantity
 	 , strPricing					= SOD.strPricing 
 	 , strVFDDocumentNumber		    = NULL
 	 , intTaxGroupId				= NULL
@@ -286,6 +298,9 @@ SELECT intItemId					= ICSI.intItemId
 	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
 	 , dblPrice						= ICSI.dblUnitPrice
 	 , dblBasePrice					= ICSI.dblUnitPrice
+	 , dblUnitPrice					= SOD.dblUnitPrice
+	 , dblBaseUnitPrice				= SOD.dblBaseUnitPrice
+	 , dblUnitQuantity				= SOD.dblUnitQuantity
 	 , strPricing					= SOD.strPricing 
 	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
 	 , intTaxGroupId				= SOD.intTaxGroupId
@@ -341,6 +356,9 @@ SELECT intItemId					= ARSI.intItemId
 	 , strItemTermDiscountBy		= NULL
 	 , dblPrice						= ARSI.dblPrice 
 	 , dblBasePrice					= ARSI.dblPrice 
+	 , dblUnitPrice					= ARSI.dblUnitPrice
+	 , dblBaseUnitPrice				= ARSI.dblBaseUnitPrice
+	 , dblUnitQuantity				= ARSI.dblUnitQuantity
 	 , strPricing					= ARSI.strPricing
 	 , strVFDDocumentNumber		    = ARSI.strVFDDocumentNumber
 	 , intTaxGroupId				= NULL
