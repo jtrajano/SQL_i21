@@ -55,10 +55,10 @@
 				DECLARE @transId INT = (SELECT intTransactionId FROM tblSMTransaction where intScreenId = @intScreenId and intRecordId = @intRecordId)
 				DECLARE @intAttachmentId INT = (SELECT intAttachmentId FROM #tempdms WHERE id = @currentrow)
 					
-				IF(@resultcount = 0 OR @resultcount = NULL)
+				IF(@resultcount = 0 OR @resultcount IS NULL)
 					BEGIN
 					
-						IF(@transId = NULL)
+						IF(@transId IS NULL)
 							BEGIN
 								INSERT INTO tblSMTransaction (intScreenId, strTransactionNo, intRecordId) VALUES (@intScreenId,@intRecordId, @intRecordId)
 								SET @transId = (SELECT SCOPE_IDENTITY())
