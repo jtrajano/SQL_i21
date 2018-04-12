@@ -45,6 +45,8 @@
 	[intCurrencyId] [int] null,
 	[intCurrencyExchangeRateId] [int] null,
 	[intCurrencyExchangeRateTypeId] [int] null,
+	[dtmExchangeRateDate] datetime null,
+	[dblCurrencyRate] [numeric](18,6) null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),

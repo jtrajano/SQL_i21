@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuHDCurrencyRateType]
-	AS
+	AS select * from tblSMCurrencyExchangeRateType
+		/*
 		select
 			a.intFromCurrencyId
 			,a.intToCurrencyId
@@ -13,3 +14,4 @@
 		where
 			b.intCurrencyExchangeRateId = a.intCurrencyExchangeRateId
 			and c.intCurrencyExchangeRateTypeId = b.intRateTypeId
+		*/
