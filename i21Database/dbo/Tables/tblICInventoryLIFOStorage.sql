@@ -85,6 +85,7 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 		[intTransactionDetailId] INT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
+		[dblUnitRetail] NUMERIC(38, 20) NOT NULL DEFAULT 0,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
