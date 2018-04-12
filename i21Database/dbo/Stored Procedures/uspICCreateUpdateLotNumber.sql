@@ -589,7 +589,8 @@ BEGIN
 						,intSplitFromLotId = @intSplitFromLotId
 						,intItemOwnerId = @intItemOwnerId
 						,strContainerNo = @strContainerNo
-						,strCondition = @strCondition 
+						,strCondition = @strCondition
+						,intUnitPallet = @intUnitPallet
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
