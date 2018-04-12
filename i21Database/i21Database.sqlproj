@@ -6322,6 +6322,13 @@
     <None Include="Scripts\Post-Deployment\SM\1830_AttachmentMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
     <Build Include="dbo\Views\vyuHDTicketHoursWorked.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImport.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImportParameter.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImportLog.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImportLogDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\32_DynamicCSV.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\31_Calendar.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCSVDynamicImportProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

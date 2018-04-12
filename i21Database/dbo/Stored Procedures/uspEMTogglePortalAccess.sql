@@ -4,7 +4,8 @@
 	@ysnEnablePortalAccess	bit,
 	@message				nvarchar(200) output,
 	@intUserRoleId			int output,
-	@strPassword			nvarchar(100) = ''
+	@strPassword			nvarchar(100) = '',
+	@ysnAdmin				bit = 1
 AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
@@ -28,7 +29,7 @@ BEGIN
 			from tblEMEntityToRole a
 			 join tblSMUserRole b
 				on a.intEntityRoleId = b.intUserRoleID		 
-			 where intEntityId = @intEntityId and b.ysnAdmin = 1
+			 where intEntityId = @intEntityId and b.ysnAdmin = @ysnAdmin
 		declare @userName nvarchar(200)
 		select @userName = strEmail from tblEMEntity where intEntityId = @intEntityContactId
 				
