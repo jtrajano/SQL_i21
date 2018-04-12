@@ -5,6 +5,16 @@ DECLARE @intWeightClaimId INT
 DECLARE @xmlDocumentId INT
 DECLARE @strUserName NVARCHAR(100)
 DECLARE @intLoadId INT
+DECLARE		@strCompanyName				NVARCHAR(100),
+			@strCompanyAddress			NVARCHAR(100),
+			@strContactName				NVARCHAR(50),
+			@strCounty					NVARCHAR(25),
+			@strCity					NVARCHAR(25),
+			@strState					NVARCHAR(50),
+			@strZip						NVARCHAR(12),
+			@strCountry					NVARCHAR(25),
+			@strPhone					NVARCHAR(50),
+			@ysnPrintLogo				BIT
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL
@@ -44,9 +54,32 @@ SELECT @intLoadId = intLoadId
 FROM tblLGWeightClaim
 WHERE intWeightClaimId = @intWeightClaimId
 
+SELECT TOP 1 @ysnPrintLogo = ISNULL(ysnPrintLogo,0) FROM tblLGCompanyPreference
+
+SELECT TOP 1 @strCompanyName = strCompanyName
+		,@strCompanyAddress = strAddress
+		,@strContactName = strContactName
+		,@strCounty = strCounty
+		,@strCity = strCity
+		,@strState = strState
+		,@strZip = strZip
+		,@strCountry = strCountry
+		,@strPhone = strPhone
+FROM tblSMCompanySetup
+
 SELECT DISTINCT WC.intWeightClaimId
 	,WC.intLoadId
 	,WC.strReferenceNumber AS strWeightClaimNumber
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strContactName AS strCompanyContactName 
+	,@strCounty AS strCompanyCounty 
+	,@strCity AS strCompanyCity 
+	,@strState AS strCompanyState 
+	,@strZip AS strCompanyZip 
+	,@strCountry AS strCompanyCountry 
+	,@strPhone AS strCompanyPhone
+	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -87,6 +120,12 @@ SELECT DISTINCT WC.intWeightClaimId
 		WHEN WCD.intInvoiceId IS NOT NULL
 			THEN INV.strFooterComments
 		END AS strVoucherBankInfo
+	,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
+	,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
+	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
+	,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
+	,CASE WHEN @ysnPrintLogo = 1 THEN 'true' else 'false' END AS ysnPrintLogo
+	,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblEMEntity E ON E.intEntityId = WCD.intPartyEntityId
@@ -106,6 +145,7 @@ LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+CROSS APPLY tblLGCompanyPreference CP
 WHERE WC.intWeightClaimId = @intWeightClaimId
 GROUP BY
 WC.intWeightClaimId
@@ -133,3 +173,4 @@ WC.intWeightClaimId
 	,WCD.intBillId
 	,WCD.intInvoiceId
 	,INV.strFooterComments
+	,CP.ysnFullHeaderLogo
