@@ -56,7 +56,7 @@ BEGIN
 		SELECT	@intProductTypeId = intProductTypeId,@intCommodityId = intCommodityId FROM tblICItem WHERE intItemId = @intItemId
 		
 		IF ISNULL(@intMarketId,0) = 0 
-			SELECT	@intFutureMarketId = intFutureMarketId FROM tblRKCommodityMarketMapping WHERE strCommodityAttributeId+',' LIKE '%'+LTRIM(@intProductTypeId)+',%' AND intCommodityId = @intCommodityId
+			SELECT	@intFutureMarketId = intFutureMarketId FROM tblRKCommodityMarketMapping WHERE @intProductTypeId IN (SELECT * FROM dbo.fnSplitString(strCommodityAttributeId,',')) AND intCommodityId = @intCommodityId
 		ELSE
 			SET @intFutureMarketId = @intMarketId
 
