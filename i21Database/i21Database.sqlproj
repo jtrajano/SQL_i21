@@ -6277,6 +6277,7 @@
     <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
     <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
+    <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
