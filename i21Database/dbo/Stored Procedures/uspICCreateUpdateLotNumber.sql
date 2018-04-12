@@ -601,6 +601,7 @@ BEGIN
 						,strContainerNo = @strContainerNo
 						,strCondition = @strCondition 
 						,intSeasonCropYear = @intSeasonCropYear
+						,intUnitPallet = @intUnitPallet
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
