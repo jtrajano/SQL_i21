@@ -2,7 +2,10 @@
 ------------------------------------------------------------
 -- STARTING MIGRATION OF ATTACHMENTS TO DMS --
 ------------------------------------------------------------
-	EXEC('CREATE TABLE #tempdms
+
+	DECLARE @SQL NVARCHAR(MAX)
+	
+	SET @SQL = N'CREATE TABLE #tempdms
 	(
 		id INT IDENTITY(1,1) PRIMARY KEY,
 		strRecordNo NVARCHAR(MAX),
@@ -97,6 +100,7 @@
 			SET @currentrow = @currentrow + 1
 		END
 
-		   DROP TABLE #tempdms')
+		   DROP TABLE #tempdms'
 
-
+		
+		   EXEC sp_executesql @SQL

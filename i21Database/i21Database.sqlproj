@@ -6319,6 +6319,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOSampleDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1830_AttachmentMigration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
