@@ -94,7 +94,7 @@ FROM	(
 			AND ISNULL(ValidateItems.intStorageLocationId, 0) = ISNULL(Reserves.intStorageLocationId, 0)
 WHERE	ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
-		AND Item.strBundleType != 'Bundle' -- no lot tracking for bundle types
+		AND Item.strType <> 'Bundle' -- no lot tracking for bundle types
 
 -- If invalid, exit immediately.
 IF @intInvalidItemId IS NOT NULL 
