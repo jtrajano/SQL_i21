@@ -221,6 +221,8 @@ BEGIN
 		WHEN @msgId = 80204 THEN 'Please check the currency used in %s. It is using %s but it is not a sub currency of %s.'
 		WHEN @msgId = 80205 THEN 'Using %s as vendor for %s is invalid. Please check if %s is a Vendor type.'
 		WHEN @msgId = 80206 THEN 'Price UOM Id is invalid or missing for item %s.'
+		WHEN @msgId = 80207 THEN 'Lot type of %s is different from %s. Items should have the same lot types.'
+		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
 	END 
 
 	RETURN @msg
