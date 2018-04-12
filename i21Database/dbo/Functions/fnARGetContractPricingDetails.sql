@@ -26,8 +26,11 @@ RETURNS @returntable TABLE
 	,intContractDetailId				INT
 	,strContractNumber					NVARCHAR(50)
 	,intContractSeq						INT
+	,intContractUOMId					INT
+	,strContractUOM						NVARCHAR(50)
 	,intPriceUOMId						INT
 	,strPriceUOM						NVARCHAR(50)
+	,dblPriceUOMQuantity				NUMERIC(18,6)
 	,dblQuantity						NUMERIC(18,6)
 	,dblAvailableQty					NUMERIC(18,6)
 	,ysnUnlimitedQty					BIT
@@ -44,7 +47,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractNumber				NVARCHAR(50)
 		,@ContractSeq					INT
 		,@AvailableQuantity				NUMERIC(18,6)
-		,@NewQuantity					NUMERIC(18,6)
+		,@PriceUOMQuantity				NUMERIC(18,6)
 		,@UnlimitedQuantity				BIT
 		,@PricingType					NVARCHAR(50)
 		,@CurrencyExchangeRateTypeId	INT
@@ -52,6 +55,9 @@ DECLARE	 @Price							NUMERIC(18,6)
         ,@CurrencyExchangeRate			NUMERIC(18,6)
 		,@SubCurrencyRate				NUMERIC(18,6)
 		,@SubCurrency					NVARCHAR(40)
+		,@ContractUOMId					INT
+		,@ContractUOM					NVARCHAR(50)
+		,@PriceUOMId					INT
 		,@PriceUOM						NVARCHAR(50)
 		,@termId						INT
 		,@LimitContractLocation			BIT = 0
@@ -77,11 +83,13 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractDetailId				= ARCC.[intContractDetailId]
 		,@ContractNumber				= ARCC.[strContractNumber]
 		,@ContractSeq					= ARCC.[intContractSeq]
-		,@NewQuantity					= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), @Quantity),ISNULL(@Quantity, @ZeroDecimal))
+		,@PriceUOMQuantity				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), 1.000000),ISNULL(@Quantity, @ZeroDecimal))
 		,@AvailableQuantity				= ARCC.[dblAvailableQty]
 		,@UnlimitedQuantity				= ARCC.[ysnUnlimitedQuantity]
 		,@PricingType					= ARCC.[strPricingType]
-		,@ItemUOMId						= ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId])
+		,@ContractUOMId					= ISNULL(ARCC.[intItemUOMId], ARCC.[intPriceItemUOMId])
+		,@ContractUOM					= ISNULL(ARCC.[strUnitMeasure], ARCC.[strPriceUnitMeasure])
+		,@PriceUOMId					= ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId])
 		,@PriceUOM						= ISNULL(ARCC.[strPriceUnitMeasure], ARCC.[strUnitMeasure])
 		,@termId						= ARCC.[intTermId]
 		,@IsMaxPrice					= ARCC.[ysnMaxPrice]
@@ -126,12 +134,15 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
 			,[strSubCurrency]
+			,[intContractUOMId] 
+			,[strContractUOM]
 			,[intPriceUOMId] 
 			,[strPriceUOM]
 			,[intContractHeaderId]
 			,[intContractDetailId]
 			,[strContractNumber]
 			,[intContractSeq]
+			,[dblPriceUOMQuantity]
 			,[dblQuantity]
 			,[dblAvailableQty]
 			,[ysnUnlimitedQty]
@@ -149,13 +160,16 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,[intSubCurrencyId]					= @CurrencyId
 			,[dblSubCurrencyRate]				= @SubCurrencyRate
 			,[strSubCurrency]					= @SubCurrency
-			,[intPriceUOMId]					= @ItemUOMId
+			,[intContractUOMId]					= @ContractUOMId
+			,[strContractUOM]					= @ContractUOM
+			,[intPriceUOMId]					= @PriceUOMId
 			,[strPriceUOM]						= @PriceUOM
 			,[intContractHeaderId]				= @ContractHeaderId
 			,[intContractDetailId]				= @ContractDetailId
 			,[strContractNumber]				= @ContractNumber
 			,[intContractSeq]					= @ContractSeq
-			,[dblQuantity]						= @NewQuantity
+			,[dblPriceUOMQuantity]				= @PriceUOMQuantity
+			,[dblQuantity]						= @Quantity
 			,[dblAvailableQty]					= @AvailableQuantity
 			,[ysnUnlimitedQty]					= @UnlimitedQuantity
 			,[strPricingType]					= @PricingType
@@ -184,14 +198,16 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractDetailId				= ARCC.[intContractDetailId]
 		,@ContractNumber				= ARCC.[strContractNumber]
 		,@ContractSeq					= ARCC.[intContractSeq]
-		,@NewQuantity					= CASE WHEN ISNULL(@Quantity, @ZeroDecimal) = @ZeroDecimal
-											THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), ARCC.[dblAvailableQty]), ISNULL(ARCC.[dblAvailableQty], @ZeroDecimal))
-											ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), @Quantity), ISNULL(@Quantity, @ZeroDecimal))
+		,@PriceUOMQuantity				= CASE WHEN ISNULL(@Quantity, @ZeroDecimal) = @ZeroDecimal
+											THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), 1.000000), ISNULL(ARCC.[dblAvailableQty], @ZeroDecimal))
+											ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), 1.000000), ISNULL(@Quantity, @ZeroDecimal))
 											END		
 		,@AvailableQuantity				= ARCC.[dblAvailableQty]
 		,@UnlimitedQuantity				= ARCC.[ysnUnlimitedQuantity]
 		,@PricingType					= ARCC.[strPricingType]
-		,@ItemUOMId						= ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId])
+		,@ContractUOMId					= ISNULL(ARCC.[intItemUOMId], ARCC.[intPriceItemUOMId])
+		,@ContractUOM					= ISNULL(ARCC.[strUnitMeasure], ARCC.[strPriceUnitMeasure])
+		,@PriceUOMId					= ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId])
 		,@PriceUOM						= ISNULL(ARCC.[strPriceUnitMeasure], ARCC.[strUnitMeasure])
 		,@termId						= ARCC.[intTermId]
 		,@IsMaxPrice					= ARCC.[ysnMaxPrice]
@@ -229,12 +245,15 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
 			,[strSubCurrency]
+			,[intContractUOMId] 
+			,[strContractUOM]
 			,[intPriceUOMId] 
 			,[strPriceUOM]
 			,[intContractHeaderId]
 			,[intContractDetailId]
 			,[strContractNumber]
 			,[intContractSeq]
+			,[dblPriceUOMQuantity]
 			,[dblQuantity]
 			,[dblAvailableQty]
 			,[ysnUnlimitedQty]
@@ -252,13 +271,16 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,[intSubCurrencyId]					= @CurrencyId
 			,[dblSubCurrencyRate]				= @SubCurrencyRate
 			,[strSubCurrency]					= @SubCurrency
-			,[intPriceUOMId]					= @ItemUOMId
+			,[intContractUOMId]					= @ContractUOMId
+			,[strContractUOM]					= @ContractUOM
+			,[intPriceUOMId]					= @PriceUOMId
 			,[strPriceUOM]						= @PriceUOM
 			,[intContractHeaderId]				= @ContractHeaderId
 			,[intContractDetailId]				= @ContractDetailId
 			,[strContractNumber]				= @ContractNumber
 			,[intContractSeq]					= @ContractSeq
-			,[dblQuantity]						= @NewQuantity
+			,[dblPriceUOMQuantity]				= @PriceUOMQuantity
+			,[dblQuantity]						= @Quantity
 			,[dblAvailableQty]					= @AvailableQuantity
 			,[ysnUnlimitedQty]					= @UnlimitedQuantity
 			,[strPricingType]					= @PricingType
@@ -269,9 +291,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		RETURN
 	END
 	
-	SET @NewQuantity = 	@Quantity
-	
-	INSERT @returntable([dblPrice], [strPricing], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblQuantity], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType], [intTermId], [ysnMaxPrice], [intCompanyLocationPricingLevelId])
-	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @NewQuantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termId, @IsMaxPrice, @ContractPricingLevelId
+	INSERT @returntable([dblPrice], [strPricing], [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType], [dblCurrencyExchangeRate], [intSubCurrencyId], [dblSubCurrencyRate], [strSubCurrency], [intContractUOMId], [strContractUOM], [intPriceUOMId], [strPriceUOM], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblPriceUOMQuantity], [dblQuantity], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType], [intTermId], [ysnMaxPrice], [intCompanyLocationPricingLevelId])
+	SELECT @Price, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @CurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termId, @IsMaxPrice, @ContractPricingLevelId
 	RETURN				
 END
