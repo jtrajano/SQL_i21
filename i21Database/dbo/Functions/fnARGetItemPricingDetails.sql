@@ -40,6 +40,8 @@ RETURNS @returntable TABLE
 	,intSubCurrencyId				INT
 	,dblSubCurrencyRate				NUMERIC(18,6)
 	,strSubCurrency					NVARCHAR(40)
+	,intContractUOMId				INT
+	,strContractUOM					NVARCHAR(50)
 	,intPriceUOMId					INT
 	,strPriceUOM					NVARCHAR(50)
 	,dblDeviation					NUMERIC(18,6)
@@ -47,6 +49,7 @@ RETURNS @returntable TABLE
 	,intContractDetailId			INT
 	,strContractNumber				NVARCHAR(50)
 	,intContractSeq					INT
+	,dblPriceUOMQuantity			NUMERIC(18,6)
 	,dblQuantity					NUMERIC(18,6)
 	,dblAvailableQty				NUMERIC(18,6)
 	,ysnUnlimitedQty				BIT
@@ -63,7 +66,7 @@ DECLARE @ItemVendorId				INT
 		,@ItemCategoryId			INT
 		,@ItemCategory				NVARCHAR(100)
 		,@UOMQuantity				NUMERIC(18,6)
-		,@NewQuantity				NUMERIC(18,6)
+		,@PriceUOMQuantity			NUMERIC(18,6)
 
 DECLARE	 @Price							NUMERIC(18,6)
 		,@Pricing						NVARCHAR(250)
@@ -80,6 +83,9 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@SubCurrencyRate				NUMERIC(18,6)
 		,@SubCurrencyId					INT
 		,@SubCurrency					NVARCHAR(40)
+		,@ContractUOMId					INT
+		,@ContractUOM					NVARCHAR(50)
+		,@PriceUOMId					INT
 		,@PriceUOM						NVARCHAR(50)
 		,@OriginalItemUOMId				INT
 		,@termIdOut						INT = NULL
@@ -118,7 +124,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,@ContractDetailId				= intContractDetailId
 			,@ContractNumber				= strContractNumber
 			,@ContractSeq					= intContractSeq
-			,@NewQuantity					= dblQuantity
+			,@PriceUOMQuantity				= dblPriceUOMQuantity
 			,@AvailableQuantity				= dblAvailableQty
 			,@UnlimitedQuantity				= ysnUnlimitedQty
 			,@PricingType					= strPricingType
@@ -128,7 +134,9 @@ DECLARE	 @Price							NUMERIC(18,6)
 			,@SubCurrencyId					= intSubCurrencyId
 			,@SubCurrencyRate				= dblSubCurrencyRate
 			,@SubCurrency					= strSubCurrency
-			,@ItemUOMId						= intPriceUOMId 
+			,@ContractUOMId					= intContractUOMId 
+			,@ContractUOM					= strContractUOM
+			,@PriceUOMId					= intPriceUOMId 
 			,@PriceUOM						= strPriceUOM
 			,@termIdOut						= intTermId
 			,@IsMaxPrice					= ysnMaxPrice
@@ -238,8 +246,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 
 			END
 
-			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate)
-			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ItemUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @NewQuantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termIdOut, 1, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate
+			INSERT @returntable(dblPrice, dblTermDiscount, strTermDiscountBy, strPricing, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity,dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate)
+			SELECT @Price, @TermDiscount, @TermDiscountBy, @Pricing, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termIdOut, 1, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate
 			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 		
