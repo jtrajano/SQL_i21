@@ -224,6 +224,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 	END
 
 	-- LIFO 
@@ -251,6 +252,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 	END
 
 	-- LOT 
@@ -279,6 +281,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 	END
 
 	-- ACTUAL COST 

@@ -119,6 +119,7 @@ BEGIN
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = ISNULL(@UnitRetailUsed, @dblUnitRetail)
 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
@@ -149,7 +150,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
-					,@dblUnitRetail = @dblUnitRetail
+					,@dblUnitRetail = @dblUnitRetailToUse
 			
 			-- Insert the record the the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (

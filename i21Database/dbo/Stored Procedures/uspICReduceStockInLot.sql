@@ -22,6 +22,8 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLot]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@InventoryLotId AS INT OUTPUT 
+	,@dblUnitRetail AS NUMERIC(38,20)
+	,@UnitRetailUsed AS NUMERIC(38,20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -38,6 +40,7 @@ SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @InventoryLotId = NULL;
+SET @UnitRetailUsed = NULL; 
 
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 BEGIN 
@@ -162,6 +165,8 @@ WHEN MATCHED THEN
 		-- retrieve the id of the matching Lot bucket 
 		,@InventoryLotId = cb.intInventoryLotId
 
+		,@UnitRetailUsed = cb.dblUnitRetail 
+
 -- Insert a new Lot bucket
 WHEN NOT MATCHED THEN 
 	INSERT (
@@ -181,6 +186,7 @@ WHEN NOT MATCHED THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -198,6 +204,7 @@ WHEN NOT MATCHED THEN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
-		,1	
+		,1
+		,@dblUnitRetail	
 	)
 ;

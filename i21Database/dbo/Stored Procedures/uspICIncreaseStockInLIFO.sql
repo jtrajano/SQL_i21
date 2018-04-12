@@ -26,6 +26,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLIFO
 	,@UpdatedLIFOId AS INT OUTPUT 
 	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
 	,@intRelatedTransactionId AS INT OUTPUT
+	,@dblUnitRetail AS NUMERIC(38,20)
+	,@UnitRetailUsed AS NUMERIC(38,20) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -88,6 +90,7 @@ WHEN MATCHED THEN
 		,@UpdatedLIFOId = LIFO_bucket.intInventoryLIFOId
 		,@strRelatedTransactionId = LIFO_bucket.strTransactionId
 		,@intRelatedTransactionId = LIFO_bucket.intTransactionId
+		,@UnitRetailUsed = LIFO_bucket.dblUnitRetail 
 
 -- Insert a new LIFO bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 
@@ -105,6 +108,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -119,7 +123,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
-		,1	
+		,1
+		,@dblUnitRetail
 	)
 ;
 
@@ -145,6 +150,7 @@ BEGIN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -159,7 +165,8 @@ BEGIN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
-		,1	
+		,1
+		,@dblUnitRetail
 	)
 
 	-- Do a follow-up retrieval of the new LIFO id.

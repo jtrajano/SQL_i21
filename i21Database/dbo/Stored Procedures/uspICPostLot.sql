@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostLot]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
+	,@dblUnitRetail AS NUMERIC(38,20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -53,6 +54,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @UnitRetailUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -144,11 +146,14 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
+				,@dblUnitRetail
+				,@UnitRetailUsed OUTPUT 
 
 			-- Calculate the stock reduced
 			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
 			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = ISNULL(@UnitRetailUsed, @dblUnitRetail)
 
 			-- Insert the inventory transaction record
 			EXEC [dbo].[uspICPostInventoryTransaction]
@@ -179,7 +184,8 @@ BEGIN
 					,@intCostingMethod = @LOTCOST
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT	
 					,@intForexRateTypeId = @intForexRateTypeId
-					,@dblForexRate = @dblForexRate						
+					,@dblForexRate = @dblForexRate
+					,@dblUnitRetail = @dblUnitRetailToUse
 
 			-- Insert the record the the Lot-out table
 			INSERT INTO dbo.tblICInventoryLotOut (
@@ -265,6 +271,7 @@ BEGIN
 				WHERE intItemUOMId = @intItemUOMId
 
 				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)
+						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblUnitRetail)
 				FROM	tblICItemUOM StockUOM
 				WHERE	StockUOM.intItemId = @intItemId 
 						AND StockUOM.ysnStockUnit = 1
@@ -306,7 +313,8 @@ BEGIN
 				,@intCostingMethod = @LOTCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 	
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate						
+				,@dblForexRate = @dblForexRate		
+				,@dblUnitRetail = @dblUnitRetail				
 
 		-- Repeat call on uspICIncreaseStockInLot until @dblAddQty is completely distributed to the negative cost Lot buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -334,6 +342,8 @@ BEGIN
 				,@UpdatedInventoryLotId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@dblUnitRetail
+				,@UnitRetailUsed OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -379,6 +389,7 @@ BEGIN
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
+							,@dblUnitRetail = @dblUnitRetail
 				END 
 			END
 			
