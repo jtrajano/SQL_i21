@@ -28,6 +28,7 @@
 			,strJobCode = e.strJobCode
 			,strCurrency = f.strCurrency
 			,strCurrencyExchangeRateType = g.strCurrencyExchangeRateType
+			,strDate = convert(nvarchar(20), a.dtmDate, 101)
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
