@@ -222,7 +222,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		AND (@LimitContractLocation = 0 OR ARCC.[intCompanyLocationId] = @LocationId)
 		AND (ARCC.[intItemUOMId] = @ItemUOMId OR ARCC.[intPriceItemUOMId] = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND ARCC.[intItemId] = @ItemId
-		AND (((ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), @Quantity),ISNULL(@Quantity, @ZeroDecimal))) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
+		AND (((ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), ARCC.[intItemUOMId], @Quantity),ISNULL(@Quantity, @ZeroDecimal))) OR ARCC.[ysnUnlimitedQuantity] = 1 OR ISNULL(@AllowQtyToExceed,0) = 1)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND CAST(ISNULL(ARCC.[dtmEndDate], @TransactionDate) AS DATE)
 		AND (((ARCC.[dblAvailableQty]) > 0) OR ARCC.[ysnUnlimitedQuantity] = 1)
 		AND (ARCC.[dblBalance] > 0 OR ARCC.[ysnUnlimitedQuantity] = 1)
