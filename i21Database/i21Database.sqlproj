@@ -6488,6 +6488,8 @@
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusinessId.sql" />
     <None Include="Scripts\Post-Deployment\TR\CleanUp_TR_Data.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\SC_SouthCarolina.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\PA_Pennsylvania.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
