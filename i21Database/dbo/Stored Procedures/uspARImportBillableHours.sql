@@ -157,7 +157,7 @@ DECLARE @intTicketHoursWorkedId AS INT
 SET @intTicketHoursWorkedId = (SELECT intTicketHoursWorkedId FROM @TicketHoursWorked)
 
 UPDATE tblHDTicketHoursWorked
-SET tblHDTicketHoursWorked.intInvoiceId = I.intInvoiceId
+SET tblHDTicketHoursWorked.intInvoiceId = I.intInvoiceId, tblHDTicketHoursWorked.ysnBilled = convert(bit,1), tblHDTicketHoursWorked.dtmBilled = GETDATE()
 FROM @NewlyCreatedInvoices I
 WHERE intTicketHoursWorkedId = @intTicketHoursWorkedId
 --INNER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId

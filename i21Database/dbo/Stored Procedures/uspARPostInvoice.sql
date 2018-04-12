@@ -3814,7 +3814,7 @@ IF @recap = 0
 					UPDATE HDTHW						
 					SET
 						 HDTHW.ysnBilled = 1
-						,HDTHW.dtmBilled = GETDATE()
+						,HDTHW.dtmBilled = (case when HDTHW.dtmBilled is null then GETDATE() else HDTHW.dtmBilled end)
 					FROM
 						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
 					INNER JOIN
