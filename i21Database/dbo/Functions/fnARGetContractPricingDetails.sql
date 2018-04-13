@@ -83,7 +83,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractDetailId				= ARCC.[intContractDetailId]
 		,@ContractNumber				= ARCC.[strContractNumber]
 		,@ContractSeq					= ARCC.[intContractSeq]
-		,@PriceUOMQuantity				= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), 1.000000),ISNULL(@Quantity, @ZeroDecimal))
+		,@PriceUOMQuantity				= ARCC.[dblPriceUOMQuantity]
 		,@AvailableQuantity				= ARCC.[dblAvailableQty]
 		,@UnlimitedQuantity				= ARCC.[ysnUnlimitedQuantity]
 		,@PricingType					= ARCC.[strPricingType]
@@ -199,8 +199,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractNumber				= ARCC.[strContractNumber]
 		,@ContractSeq					= ARCC.[intContractSeq]
 		,@PriceUOMQuantity				= CASE WHEN ISNULL(@Quantity, @ZeroDecimal) = @ZeroDecimal
-											THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), 1.000000), ISNULL(ARCC.[dblAvailableQty], @ZeroDecimal))
-											ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), 1.000000), ISNULL(@Quantity, @ZeroDecimal))
+											THEN ISNULL(ARCC.[dblPriceUOMQuantity], ISNULL(ARCC.[dblAvailableQty], @ZeroDecimal))
+											ELSE ISNULL(ARCC.[dblPriceUOMQuantity], ISNULL(@Quantity, @ZeroDecimal))
 											END		
 		,@AvailableQuantity				= ARCC.[dblAvailableQty]
 		,@UnlimitedQuantity				= ARCC.[ysnUnlimitedQuantity]
