@@ -28,8 +28,6 @@ DECLARE @strSubLocatioNameTo AS NVARCHAR(50)
 DECLARE @strStorageLocatioNameFrom AS NVARCHAR(50)
 DECLARE @strStorageLocatioNameTo AS NVARCHAR(50)
 DECLARE @dtmCreatedDate AS DATETIME;
-DECLARE @strOwnershipType AS NVARCHAR(50)
-DECLARE @strOwnershipTypeNew AS NVARCHAR(50)
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
@@ -509,29 +507,6 @@ BEGIN
 		SET @intReturnCode = -80105;
 		GOTO _Exit_Loop;
 	END 
-
-	-- Validate If Lot already exist for Ownership Type 
-	IF (@intOwnershipType IS NOT NULL)
-	BEGIN 
-		SET @strItemNo = NULL;
-
-		SELECT TOP 1 @strOwnershipType = dbo.fnICGetOwnershipType(intOwnershipType)
-		FROM tblICLot
-		WHERE intItemId = @intItemId
-			AND strLotNumber = @strLotNumber
-			AND intLocationId = @intLocationId
-			AND intSubLocationId = @intSubLocationId
-			AND intStorageLocationId = @intStorageLocationId
-			AND intOwnershipType <> @intOwnershipType
-
-		IF(@strOwnershipType IS NOT NULL)
-		BEGIN
-			SET @strOwnershipTypeNew = dbo.fnICGetOwnershipType(@intOwnershipType);
-			--'Ownership of {Lot Number} is {Ownership}. Cannot add  inventory to it'
-			EXEC uspICRaiseError 80209, @strLotNumber, @strOwnershipType, @strOwnershipTypeNew;
-			SET @intReturnCode = -80209;
-		END
-	END
 
 	----------------------------------------------
 	-- Special process on the Item Qty and Weight
