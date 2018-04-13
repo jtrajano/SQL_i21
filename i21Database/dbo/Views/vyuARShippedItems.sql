@@ -46,8 +46,10 @@ SELECT id							= NEWID()
 	 , dblShipmentQuantity			= SHIPPEDITEMS.dblShipmentQuantity
 	 , dblShipmentQtyShippedTotal	= SHIPPEDITEMS.dblShipmentQtyShippedTotal
 	 , dblQtyRemaining				= SHIPPEDITEMS.dblQtyRemaining
+	 , dblPriceUOMQuantity			= SHIPPEDITEMS.dblPriceUOMQuantity
 	 , dblDiscount					= SHIPPEDITEMS.dblDiscount
 	 , dblPrice						= SHIPPEDITEMS.dblPrice
+	 , dblUnitPrice					= SHIPPEDITEMS.dblPrice
 	 , dblShipmentUnitPrice			= SHIPPEDITEMS.dblShipmentUnitPrice
 	 , strPricing					= SHIPPEDITEMS.strPricing
 	 , strVFDDocumentNumber			= SHIPPEDITEMS.strVFDDocumentNumber
@@ -134,9 +136,11 @@ FROM (
 		 , dblShipmentQuantity				= SHP.dblQuantity	
 		 , dblShipmentQtyShippedTotal		= SHP.dblQuantity
 		 , dblQtyRemaining					= SHP.dblQuantity - ISNULL(INVOICEDETAIL.dblQtyShipped, 0)
+		 , dblPriceUOMQuantity				= SOD.dblUnitQuantity
 		 , dblDiscount						= SOD.dblDiscount 
 		 , dblPrice							= CAST(SOD.dblPrice AS DECIMAL(18,6))
-		 , dblShipmentUnitPrice				= CAST(SHP.dblUnitPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
 		 , strPricing						= SOD.strPricing
 		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
 		 , dblTotalTax						= SOD.dblTotalTax
@@ -289,8 +293,10 @@ FROM (
 	     , dblShipmentQuantity				= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblShipmentQtyShippedTotal		= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblQtyRemaining					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) - ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ICISI.dblQuantity,0) - ISNULL(ID.dblQtyShipped, 0) END
+		 , dblPriceUOMQuantity				= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblPriceUOMQuantity ELSE (CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END) END
 	     , dblDiscount						= 0.000000 
 	     , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST((CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
@@ -406,9 +412,11 @@ FROM (
 			 , strUnitMeasure
 			 , intOrderUOMId
 			 , intItemUOMId
+			 , intPriceItemUOMId
 			 , strOrderUnitMeasure
 			 , intItemWeightUOMId
 			 , dblCashPrice
+			 , dblUnitPrice
 			 , dblDetailQuantity
 			 , intFreightTermId
 			 , dblShipQuantity
@@ -418,6 +426,7 @@ FROM (
 			 , strCurrencyExchangeRateType
 			 , intCurrencyExchangeRateId
 			 , dblCurrencyExchangeRate
+			 , dblPriceUOMQuantity
 		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
@@ -480,8 +489,10 @@ FROM (
 		 , dblShipmentQuantity				= 1
 		 , dblShipmentQtyShippedTotal		= 1
 		 , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST(ICISC.dblAmount AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(ICISC.dblAmount AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(ICISC.dblAmount AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -576,8 +587,10 @@ FROM (
 		 , dblShipmentQuantity				= MFG.dblQuantity
 		 , dblShipmentQtyShippedTotal		= MFG.dblQuantity
 		 , dblQtyRemaining					= MFG.dblQuantity
+		 , dblPriceUOMQuantity				= MFG.dblQuantity
 		 , dblDiscount						= 0.00
 		 , dblPrice							= CAST(MFG.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -682,8 +695,10 @@ FROM (
 		 , dblShipmentQuantity				= MFG.dblQuantity
 		 , dblShipmentQtyShippedTotal		= MFG.dblQuantity
 		 , dblQtyRemaining					= MFG.dblQuantity
+		 , dblPriceUOMQuantity				= MFG.dblQuantity
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST(MFG.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -784,8 +799,10 @@ FROM (
 		 , dblShipmentQuantity				= dblShipmentQuantity
 		 , dblShipmentQtyShippedTotal		= dblShipmentQtyShippedTotal
 		 , dblQtyRemaining					= dblQtyRemaining
+		 , dblPriceUOMQuantity				= dblNetWt
 	     , dblDiscount						= dblDiscount
 	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
@@ -862,8 +879,10 @@ FROM (
 	     , dblShipmentQuantity				= 1 
 	     , dblShipmentQtyShippedTotal		= 1
 	     , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 	     , dblDiscount						= 0
 	     , dblPrice							= CAST(LWS.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
@@ -976,8 +995,10 @@ FROM (
 	     , dblShipmentQuantity				= 1 
 	     , dblShipmentQtyShippedTotal		= 1
 	     , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 	     , dblDiscount						= 0
 	     , dblPrice							= CAST(LC.dblPrice AS DECIMAL(18,6))
+		 , dblPrice							= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
@@ -1098,8 +1119,10 @@ FROM (
 		 , dblShipmentQuantity				= 1 
 		 , dblShipmentQtyShippedTotal		= 1
 		 , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 		 , dblDiscount						= 0
 		 , dblPrice							= CAST(LC.dblPrice AS DECIMAL(18,6))
+		 , dblPrice							= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
