@@ -6329,6 +6329,8 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\32_DynamicCSV.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\31_Calendar.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCSVDynamicImportProcess.sql" />
+    <Build Include="dbo\Tables\tblRKMatchDerivativesHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesHistoryInsert.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
