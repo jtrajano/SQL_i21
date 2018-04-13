@@ -4,4 +4,5 @@
 	,intPropertyId INT
 	,strPropertyName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,strPropertyValue NVARCHAR(10) COLLATE Latin1_General_CI_AS
+	,strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )

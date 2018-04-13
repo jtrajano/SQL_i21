@@ -1,7 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspQMInspectionGetResult]
-	@intControlPointId INT -- 3 / 8 (Inspection / Shipping)
-	,@intProductTypeId INT -- 3 (Receipt)
-	,@intProductValueId INT -- 0 / intInventoryReceiptId
+﻿CREATE PROCEDURE [dbo].[uspQMInspectionGetResult] @intControlPointId INT -- 3 (Inspection)
+	,@intProductTypeId INT -- 3 / 4 (Receipt / Shipment)
+	,@intProductValueId INT -- 0 / intInventoryReceiptId / intInventoryShipmentId
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -26,6 +25,7 @@ BEGIN
 				ELSE 'false'
 				END AS strPropertyValue
 			,PP.intSequenceNo
+			,'' AS strComment
 		FROM dbo.tblQMProduct AS P
 		JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 		JOIN dbo.tblQMProductTest PT ON PT.intProductId = P.intProductId
@@ -36,6 +36,7 @@ BEGIN
 			AND PC.intControlPointId = @intControlPointId
 			AND P.ysnActive = 1
 			AND P.intProductValueId IS NULL
+			AND PR.intDataTypeId = 4 -- Bit
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 				AND DATEPART(dy, PPV.dtmValidTo)
 		ORDER BY PP.intSequenceNo
@@ -46,13 +47,14 @@ BEGIN
 			,TR.intPropertyId
 			,TR.strPropertyValue
 			,TR.intTestResultId AS intSequenceNo
+			,ISNULL(TR.strComment, '') AS strComment
 		FROM dbo.tblQMTestResult TR
 		JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		JOIN dbo.tblQMTest T ON T.intTestId = TR.intTestId
-		JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = TR.intProductValueId
 		WHERE TR.intProductTypeId = @intProductTypeId
 			AND TR.intProductValueId = @intProductValueId
 			AND TR.intControlPointId = @intControlPointId
+			AND P.intDataTypeId = 4 -- Bit
 		ORDER BY TR.intTestResultId
 	END
 END

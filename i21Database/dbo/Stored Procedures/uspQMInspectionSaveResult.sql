@@ -1,7 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspQMInspectionSaveResult]
-	@intControlPointId INT -- 3 / 8 (Inspection / Shipping)
-	,@intProductTypeId INT -- 3 (Receipt)
-	,@intProductValueId INT -- intInventoryReceiptId
+﻿CREATE PROCEDURE [dbo].[uspQMInspectionSaveResult] @intControlPointId INT -- 3 (Inspection)
+	,@intProductTypeId INT -- 3 / 4 (Receipt / Shipment)
+	,@intProductValueId INT -- intInventoryReceiptId / intInventoryShipmentId
 	,@intUserId INT
 	,@strQualityInspectionTable QualityInspectionTable READONLY
 AS
@@ -50,6 +49,7 @@ BEGIN TRY
 	IF @intTestResultId = 0
 		INSERT INTO dbo.tblQMTestResult (
 			intConcurrencyId
+			,intProductId
 			,intProductTypeId
 			,intProductValueId
 			,intTestId
@@ -57,9 +57,15 @@ BEGIN TRY
 			,strPropertyValue
 			,dtmCreateDate
 			,ysnFinal
+			,strComment
 			,intSequenceNo
 			,dtmValidFrom
 			,dtmValidTo
+			,dblMinValue
+			,dblMaxValue
+			,dblLowValue
+			,dblHighValue
+			,intProductPropertyValidityPeriodId
 			,intControlPointId
 			,intCreatedUserId
 			,dtmCreated
@@ -67,6 +73,7 @@ BEGIN TRY
 			,dtmLastModified
 			)
 		SELECT 1
+			,@intProductId
 			,@intProductTypeId
 			,@intProductValueId
 			,PP.intTestId
@@ -78,9 +85,15 @@ BEGIN TRY
 				END AS strPropertyValue
 			,GETDATE()
 			,0
+			,''
 			,PP.intSequenceNo
 			,PPV.dtmValidFrom
 			,PPV.dtmValidTo
+			,PPV.dblMinValue
+			,PPV.dblMaxValue
+			,PPV.dblLowValue
+			,PPV.dblHighValue
+			,PPV.intProductPropertyValidityPeriodId
 			,@intControlPointId
 			,@intUserId
 			,GETDATE()
@@ -106,13 +119,17 @@ BEGIN TRY
 			,intConcurrencyId = TR.intConcurrencyId + 1
 			,intLastModifiedUserId = @intUserId
 			,dtmLastModified = GETDATE()
+			,strComment = ISNULL(QIT.strComment, '')
 		FROM tblQMTestResult TR
 		JOIN @strQualityInspectionTable QIT ON QIT.intPropertyId = TR.intPropertyId
 		JOIN tblQMProperty P ON P.intPropertyId = QIT.intPropertyId
 		WHERE intProductTypeId = @intProductTypeId
 			AND intProductValueId = @intProductValueId
 			AND intControlPointId = @intControlPointId
-			AND TR.strPropertyValue <> QIT.strPropertyValue
+			AND (
+				TR.strPropertyValue <> QIT.strPropertyValue
+				OR TR.strComment <> QIT.strComment
+				)
 	END
 
 	COMMIT TRAN
