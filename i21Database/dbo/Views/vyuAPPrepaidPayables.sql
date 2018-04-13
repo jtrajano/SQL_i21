@@ -55,8 +55,8 @@ SELECT
 	, EC.strClass
 	, 1
 FROM dbo.tblAPPayment  A
- LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
- LEFT JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
+ INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+ INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblCMBankTransaction E
@@ -67,8 +67,43 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 	AND C.intTransactionType IN (2, 13)
 	AND A.ysnPrepay = 1
 	AND NOT EXISTS (
-	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
-)
+		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
+	)
+UNION ALL
+--VENDOR PREPAYMENT PAYMENT TRANSACTION (this will remove the positive part and leave the negative part)
+--HANDLE THOSE ORIGIN PREPAYMENT THAT HAS BEEN IMPORTED UNPAID AND PAID IN i21 BUT DO NOT HAVE PAYMENT TRANSACTION (ysnPrepay = 1)
+SELECT 
+	  A.dtmDate AS dtmDate 
+	, A.intBillId  
+	, A.strBillId
+	, A.dblPayment  AS dblAmountPaid     
+	, dblTotal = 0 
+	, dblAmountDue = 0 
+	, A.dblWithheld
+	, A.dblDiscount AS dblDiscount
+	, A.dblInterest AS dblInterest 
+	, dblPrepaidAmount = 0  
+	, D.strVendorId 
+	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
+	, A.dtmDueDate 
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, EC.strClass
+	, 1
+FROM dbo.tblAPBill A
+LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityVendorId] = D.[intEntityId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+ WHERE A.ysnPosted = 1
+	AND A.intTransactionType IN (2, 13)
+	AND NOT EXISTS (
+		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
+	)
+	AND NOT EXISTS (
+		SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPPayment C ON B.intPaymentId = C.intPaymentId
+		WHERE B.intBillId = A.intBillId AND C.ysnPrepay = 1
+	)
 UNION ALL
 --NEGATIVE PART
 SELECT
@@ -163,4 +198,3 @@ WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
-
