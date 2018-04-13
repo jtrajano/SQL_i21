@@ -6262,6 +6262,13 @@
     <Build Include="dbo\Functions\fnCFGetLuhn.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractCost.sql" />
     <Build Include="dbo\Views\vyuLGAllocationReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI945.sql" />
+    <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
+    <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
     <Build Include="dbo\Tables\tblARCommissionPlanAccount.sql" />
     <Build Include="dbo\Tables\tblARCommissionPlanSalesperson.sql" />
     <Build Include="dbo\Tables\tblARCommissionPlanAgent.sql" />
@@ -6270,14 +6277,15 @@
     <Build Include="dbo\Views\vyuHDTicketWatcherByEntity.sql" />
     <Build Include="dbo\Functions\fnSMUniqueEffectiveMethodUOM.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
-    <None Include="Scripts\Post-Deployment\IC\30_Populate_Shipment_LineTotal.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateInvoicePrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI945.sql" />
-    <Build Include="dbo\Tables\tblMFEDI945Error.sql" />
-    <Build Include="dbo\Tables\tblMFEDIPreference.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReopenWorkOrder.sql" />
     <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedMiscItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
+    <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6444,7 +6452,6 @@
     <None Include="Scripts\Post-Deployment\PR\Reports\DashboardPanelViews.sql" />
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
