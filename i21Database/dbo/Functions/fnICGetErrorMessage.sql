@@ -223,6 +223,7 @@ BEGIN
 		WHEN @msgId = 80206 THEN 'Price UOM Id is invalid or missing for item %s.'
 		WHEN @msgId = 80207 THEN 'Lot type of %s is different from %s. Items should have the same lot types.'
 		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
+		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
 	END 
 
 	RETURN @msg

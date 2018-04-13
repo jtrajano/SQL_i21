@@ -6331,6 +6331,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCSVDynamicImportProcess.sql" />
     <Build Include="dbo\Tables\tblRKMatchDerivativesHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesHistoryInsert.sql" />
+    <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
