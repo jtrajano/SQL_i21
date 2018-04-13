@@ -228,7 +228,7 @@ BEGIN
 	FROM dbo.tblARLetterPlaceHolder WITH(NOLOCK)
 	WHERE CHARINDEX (dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML)) <> 0
 
-	IF @strLetterName IN ('Recent Overdue Collection Letter', '1 Day Overdue Collection Letter', '10 Day Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
+	IF @strLetterName IN ('Recent Overdue Collection Letter', 'Customer Balance Collection Letter', '1 Day Overdue Collection Letter', '10 Day Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
 		BEGIN
 			SET @strTableSource = 'vyuARCollectionOverdueReport';
 
@@ -665,11 +665,11 @@ BEGIN
 					
 					IF(@strTableSource = 'vyuARCollectionOverdueReport')
 					BEGIN
-						SELECT @ARBalance = SUM(dblAmount) FROM (
-							SELECT DISTINCT intInvoiceId, dblAmount, intEntityCustomerId FROM #TransactionLetterDetail
-							WHERE intEntityCustomerId = @CustomerId
-						) STAGING
-						GROUP BY STAGING.intEntityCustomerId;
+						SELECT @ARBalance = SUM(O.dblTotalDue) 
+						FROM  vyuARCollectionOverdueReport O
+						INNER JOIN #TransactionLetterDetail D ON D.intInvoiceId = O.intInvoiceId
+						WHERE O.intEntityCustomerId = @CustomerId
+						GROUP BY O.intEntityCustomerId
 					END
 					ELSE IF(@strTableSource = 'vyuARServiceChargeInvoiceReport')
 					BEGIN
@@ -677,6 +677,13 @@ BEGIN
 						FROM vyuARServiceChargeInvoiceReport
 						WHERE intEntityCustomerId = @CustomerId
 						GROUP BY intEntityCustomerId
+					END
+
+					IF(CHARINDEX('Sum', @SourceColumn) > 0)
+					BEGIN
+						UPDATE #CustomerPlaceHolder 
+						SET strValue = CONVERT(varchar, CAST(@ARBalance AS money), 1)
+						WHERE strPlaceHolder = @PlaceHolder AND intEntityCustomerId = @CustomerId;
 					END
 
 					UPDATE #CustomerPlaceHolder 
