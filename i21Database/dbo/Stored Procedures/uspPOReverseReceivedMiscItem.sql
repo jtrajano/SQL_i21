@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspPOReceivedMiscItem]
+﻿CREATE PROCEDURE [dbo].[uspPOReverseReceivedMiscItem]
 	@billId INT
 AS
 BEGIN
@@ -76,10 +76,7 @@ BEGIN
 
 
 	UPDATE	A
-	SET		A.dblQtyReceived = (CASE	WHEN	 @posted = 1 THEN ( B.dblQtyReceived) 
-										WHEN	 @posted = 0 THEN ( B.dblQtyReceived)
-									ELSE (A.dblQtyReceived - B.dblQtyReceived) 
-								END)
+	SET		A.dblQtyReceived = A.dblQtyReceived - B.dblQtyReceived
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOMiscItems B 
 				ON (A.intItemId = B.intItemId OR A.intItemId IS NULL)
 				AND A.intPurchaseDetailId = B.[intPurchaseDetailId]
