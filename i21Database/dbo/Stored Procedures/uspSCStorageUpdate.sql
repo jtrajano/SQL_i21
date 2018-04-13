@@ -446,16 +446,24 @@ BEGIN TRY
 				,intStorageLocationId = ScaleTicket.intStorageLocationId
 				,ysnIsStorage = 
 				CASE 
-					WHEN ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Customer' THEN 1
-					ELSE 0
+					WHEN ISNULL(@intDPContractId,0) > 0 THEN 0
+					WHEN ISNULL(@intDPContractId,0) = 0 THEN 
+					CASE 
+						WHEN ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Customer' THEN 1
+						ELSE 0
+					END
 				END
 				,strSourceTransactionId  = @strDistributionOption
 		FROM	dbo.tblSCTicket ScaleTicket
 				INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
 				INNER JOIN tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-				LEFT JOIN tblCTContractDetail CNT ON CNT.intContractDetailId = ScaleTicket.intContractId
 				LEFT JOIN tblICCommodity IC ON IC.intCommodityId = ScaleTicket.intCommodityId
-				LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = ScaleTicket.intStorageScheduleTypeId
+				OUTER APPLY(
+					SELECT dtmEndDate,intContractDetailId,intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ISNULL(@intDPContractId,0)
+				) CNT
+				OUTER APPLY(
+					SELECT strOwnedPhysicalStock FROM tblGRStorageType WHERE strStorageTypeCode = @strDistributionOption
+				) GR
 		WHERE	ScaleTicket.intTicketId = @intTicketId AND ItemUOM.ysnStockUnit = 1
 	
 	CONTINUEISH:
