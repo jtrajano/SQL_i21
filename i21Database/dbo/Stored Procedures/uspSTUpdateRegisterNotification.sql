@@ -31,7 +31,22 @@ IF(@strLocationIds != '' AND @strLocationIds IS NOT NULL)
 			ITR.intEntityId
 		FROM vyuSTItemsToRegister ITR
 		JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = ITR.intEntityId
-		LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = ITR.intEntityId 
+		LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = ITR.intEntityId
+		JOIN
+		(
+			SELECT DISTINCT intEntityId
+			FROM vyuSMUserRoleMenuSubRoleMVC SR
+			INNER JOIN tblSMUserSecurity US ON SR.intUserRoleId = US.intUserRoleID
+			WHERE strMenuName = 'Update Register' 
+			AND ysnVisible = 1
+		) SRole ON ITR.intEntityId = SRole.intEntityId
+		JOIN
+		(
+			SELECT DISTINCT intEntityId
+			FROM vyuSMUserRoleMenuLocationMVC 
+			WHERE strMenuName = 'Update Register' 
+			AND ysnVisible = 1
+		) MRole ON ITR.intEntityId = MRole.intEntityId
 		WHERE (URN.ysnClick IS NULL OR URN.ysnClick = 1)
 		AND SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
 	END
@@ -42,7 +57,22 @@ ELSE
 			ITR.intEntityId
 		FROM vyuSTItemsToRegister ITR
 		JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = ITR.intEntityId
-		LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = ITR.intEntityId 
+		LEFT JOIN tblSTUpdateRegisterNotification URN ON URN.intEntityId = ITR.intEntityId
+		JOIN
+		(
+			SELECT DISTINCT intEntityId
+			FROM vyuSMUserRoleMenuSubRoleMVC SR
+			INNER JOIN tblSMUserSecurity US ON SR.intUserRoleId = US.intUserRoleID
+			WHERE strMenuName = 'Update Register' 
+			AND ysnVisible = 1
+		) SRole ON ITR.intEntityId = SRole.intEntityId
+		JOIN
+		(
+			SELECT DISTINCT intEntityId
+			FROM vyuSMUserRoleMenuLocationMVC 
+			WHERE strMenuName = 'Update Register' 
+			AND ysnVisible = 1
+		) MRole ON ITR.intEntityId = MRole.intEntityId
 		WHERE (URN.ysnClick IS NULL OR URN.ysnClick = 1)
 	END
 
@@ -54,9 +84,9 @@ IF EXISTS(SELECT * FROM @tblTempEntity)
 		SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
 			   FROM @tblTempEntity EM
 			   JOIN tblSMUserSecurity SMUS ON SMUS.intEntityId = EM.intEntityId
-			   JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
-			   WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
-			   AND ET.strType IN ('User', 'Employee')
+			   --JOIN tblEMEntityType ET ON ET.intEntityId = EM.intEntityId
+			   WHERE SMUS.intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))
+			   --AND ET.strType IN ('User', 'Employee')
 		SET @strEntityIds = left(@strEntityIds, len(@strEntityIds)-1)
 		-- ==============================================================================================
 
