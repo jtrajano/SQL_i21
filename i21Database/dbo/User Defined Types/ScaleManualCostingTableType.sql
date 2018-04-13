@@ -27,4 +27,5 @@ CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
     ,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
 	,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
 	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
+	,[intStorageScheduleTypeId] INT NULL					-- storage type Id
 )

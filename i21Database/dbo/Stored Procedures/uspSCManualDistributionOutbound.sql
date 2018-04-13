@@ -38,7 +38,8 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
-DECLARE @intInventoryShipmentItemId AS INT
+		,@intStorageScheduleTypeId INT
+		,@intInventoryShipmentItemId AS INT
 		,@intInvoiceId AS INT
 		,@intOwnershipType AS INT
 		,@intDestinationGradeId AS INT
@@ -51,26 +52,11 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@batchIdUsed AS INT
 		,@recapId AS INT;
 
-BEGIN
-	SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
-	FROM	dbo.tblSCTicket SC	        
-			JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-	WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-END
-
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-		FROM	dbo.tblICItemUOM UM	
-	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
-END
-
---BEGIN 
---	SELECT	@intTicketItemUOMId = UM.intItemUOMId
---	FROM	dbo.tblICItemUOM UM	
---			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
---	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intTicketId
---END
+SELECT @intTicketItemUOMId = UOM.intItemUOMId
+	, @intLoadId = SC.intLoadId
+	, @intItemId = SC.intItemId
+FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
+WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -79,26 +65,18 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			-- Here we do some kind of action that requires us to 
-			-- process the table variable row-by-row. This example simply
-			-- uses a PRINT statement as that action (not a very good
-			-- example).
-
-			BEGIN
-				SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
-				FROM dbo.tblGRStorageType ST WHERE 
-				ST.strStorageTypeCode = @strDistributionOption
-			END
+			IF ISNULL(@intStorageScheduleTypeId,0) > 0
+				SELECT	@ysnDPStorage = ST.ysnDPOwnedType FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
 			IF @ysnIsStorage = 0
 				BEGIN
@@ -359,7 +337,7 @@ OPEN intListCursor;
 					END
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 		END;
 
 CLOSE intListCursor;

@@ -37,9 +37,7 @@ DECLARE @strInOutFlag AS NVARCHAR(100)
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
-DECLARE @intOrderId INT
-		,@intOwnershipType INT
-		,@intPricingTypeId INT
+		,@intStorageScheduleTypeId INT
 		,@intBillId AS INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
@@ -69,9 +67,8 @@ SELECT
 	, @intItemId = SC.intItemId
 	, @dblGrossUnits = SC.dblGrossUnits
 	, @dblNetUnits = SC.dblNetUnits
-FROM	dbo.tblSCTicket SC	        
-		JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
+WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -80,28 +77,20 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38, 20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			-- Here we do some kind of action that requires us to 
-			-- process the table variable row-by-row. This example simply
-			-- uses a PRINT statement as that action (not a very good
-			-- example).
+			IF ISNULL(@intStorageScheduleTypeId,0) > 0
+				SELECT	@ysnDPStorage = ST.ysnDPOwnedType FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
-			BEGIN
-				SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
-				FROM dbo.tblGRStorageType ST WHERE 
-				ST.strStorageTypeCode = @strDistributionOption
-			END
-
-			IF @ysnIsStorage = 0
+			IF @ysnIsStorage = 0 AND ISNULL(@ysnDPStorage,0) = 0
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
@@ -359,7 +348,7 @@ OPEN intListCursor;
 					END
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 		END;
 
 CLOSE intListCursor;
