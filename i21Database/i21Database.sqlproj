@@ -6285,6 +6285,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedMiscItem.sql" />
     <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
+    <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
