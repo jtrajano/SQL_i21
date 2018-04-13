@@ -480,6 +480,7 @@ BEGIN
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,dblUnitRetail
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -639,6 +640,7 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
+				,dblUnitRetail = DetailItem.dblUnitRetail 
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -725,6 +727,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[dblUnitRetail]
 			)
 			SELECT
 					t.[intItemId] 
@@ -750,6 +753,7 @@ BEGIN
 					,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
+					,[dblUnitRetail] = t.dblUnitRetail
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
@@ -847,6 +851,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[dblUnitRetail]
 			)
 			SELECT
 					t.[intItemId] 
@@ -872,6 +877,7 @@ BEGIN
 					,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
+					,[dblUnitRetail] = t.dblUnitRetail 
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 					INNER JOIN (
@@ -963,6 +969,7 @@ BEGIN
 					,intInTransitSourceLocationId
 					,intForexRateTypeId
 					,dblForexRate
+					,dblUnitRetail
 			)
 			SELECT 
 					intItemId  
@@ -986,6 +993,7 @@ BEGIN
 					,intInTransitSourceLocationId
 					,intForexRateTypeId
 					,dblForexRate
+					,dblUnitRetail
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 			
@@ -1277,6 +1285,7 @@ BEGIN
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,dblUnitRetail
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -1434,6 +1443,7 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
+				,dblUnitRetail = DetailItem.dblUnitRetail 
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation

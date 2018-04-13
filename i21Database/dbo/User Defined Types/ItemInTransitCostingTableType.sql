@@ -27,4 +27,5 @@ CREATE TYPE [dbo].[ItemInTransitCostingTableType] AS TABLE
 	,[intInTransitSourceLocationId] INT NULL 
 	,[intForexRateTypeId] INT NULL
 	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1 
+	,[dblUnitRetail] NUMERIC(38, 20) 
 )
