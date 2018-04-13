@@ -36,6 +36,10 @@ Select @intLocationId=intCompanyLocationId From tblSOSalesOrder Where intSalesOr
 
 Select @intItemUOMId=intItemUOMId From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId
 
+--if the item does not belong to the SO, it is the recipe input item (next level recipe), use stock uom
+If Not Exists (Select 1 From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId AND intItemId=@intItemId)
+	Select @intItemUOMId=intItemUOMId From tblICItemUOM where intItemId=@intItemId AND ysnStockUnit=1
+
 Select @strCellName=strCellName From tblMFManufacturingCell Where intManufacturingCellId=@intCellId
 
 Select @intAttributeTypeId=mp.intAttributeTypeId 
@@ -78,12 +82,13 @@ End
 --Existing WOs
 If Exists(Select 1 From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId And intItemId=@intItemId And intManufacturingProcessId=@intManufacturingProcessId)
 	Begin
-		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo,um.strUnitMeasure AS strUOM,w.dtmPlannedDate,w.intPlannedShiftId,s.strShiftName AS strPlannedShiftName
+		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo,um.strUnitMeasure AS strUOM,w.dtmPlannedDate,w.intPlannedShiftId,s.strShiftName AS strPlannedShiftName,mp.intAttributeTypeId
 		From tblMFWorkOrder w Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 		Left Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId
 		Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
 		Left Join tblMFShift s on w.intPlannedShiftId=s.intShiftId
+		Join tblMFManufacturingProcess mp on w.intManufacturingProcessId=mp.intManufacturingProcessId
 		Where intSalesOrderLineItemId=@intSalesOrderDetailId And w.intItemId=@intItemId And w.intManufacturingProcessId=@intManufacturingProcessId
 	End
 Else
@@ -125,7 +130,7 @@ Begin --New WOs
 					values(0,'',@dblQuantity,@dtmOrderDate,@intCellId,@strCellName)
 			End
 
-			Select *,@intMachineId AS intMachineId,@strMachineName AS strMachineName,@dblMachineCapacity AS dblMachineCapacity,@strUOM AS strUOM From @tblWO
+			Select *,@intMachineId AS intMachineId,@strMachineName AS strMachineName,ISNULL(@dblMachineCapacity,0.0) AS dblMachineCapacity,@strUOM AS strUOM From @tblWO
 		End
 	Else
 		Select 0 AS intWorkOrderId,'' AS strWorkOrderNo,@dblQuantity AS dblQuantity,@dtmOrderDate AS dtmDueDate,@intCellId AS intCellId,@strCellName AS strCellName,@strUOM AS strUOM,0 AS intMachineId,0.0 AS dblMachineCapacity

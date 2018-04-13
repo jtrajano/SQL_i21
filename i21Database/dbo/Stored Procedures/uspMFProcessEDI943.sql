@@ -37,12 +37,10 @@ BEGIN TRY
 		,@strReceiptNumber NVARCHAR(50)
 		,@strLocationCount NVARCHAR(50)
 		,@ysnDefaultLocation BIT
-
 	DECLARE @tblMFItemLineNumber TABLE (
 		intEDI943Id INT
 		,intLineNumber INT
 		)
-
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 	DECLARE @tblMFOrderNo TABLE (
@@ -52,7 +50,8 @@ BEGIN TRY
 	DECLARE @tblMFSession TABLE (intEDI943Id INT)
 	DECLARE @tblMFItem TABLE (
 		intItemId INT
-		,strItemNo NVARCHAR(50)
+		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	INSERT INTO @tblMFSession (intEDI943Id)
@@ -103,7 +102,7 @@ BEGIN TRY
 
 			SELECT @strCustomerCode = strWarehouseCode
 				,@strShipToName = strShipFromName
-				,@strShipToState=strShipFromState
+				,@strShipToState = strShipFromState
 			FROM tblMFEDI943 EDI943
 			WHERE strDepositorOrderNumber = @strOrderNo
 
@@ -149,7 +148,7 @@ BEGIN TRY
 							dblQtyShipped IS NULL
 							OR dblQtyShipped = 0
 							)
-					AND strType <> 'Cancel'
+						AND strType <> 'Cancel'
 					)
 			BEGIN
 				SELECT @strItemNo = ''
@@ -174,6 +173,10 @@ BEGIN TRY
 					FROM tblMFEDI943 EDI943
 					JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
 					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+						AND (
+							IU.ysnAllowPurchase = 1
+							OR IU.ysnAllowSale = 1
+							)
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 						AND (
 							UM.strUnitType <> 'Weight'
@@ -188,6 +191,10 @@ BEGIN TRY
 				FROM tblMFEDI943 EDI943
 				JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					AND (
+						IU.ysnAllowPurchase = 1
+						OR IU.ysnAllowSale = 1
+						)
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND (
 						UM.strUnitType <> 'Weight'
@@ -208,9 +215,11 @@ BEGIN TRY
 			INSERT INTO @tblMFItem (
 				intItemId
 				,strItemNo
+				,strUOM
 				)
 			SELECT DISTINCT I.intItemId
 				,I.strItemNo
+				,EDI943.strUOM
 			FROM tblMFEDI943 EDI943
 			JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
 			WHERE strDepositorOrderNumber = @strOrderNo
@@ -220,19 +229,25 @@ BEGIN TRY
 						,count(*)
 					FROM @tblMFItem I
 					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+						AND (
+							IU.ysnAllowPurchase = 1
+							OR IU.ysnAllowSale = 1
+							)
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 						AND UM.strUnitType <> 'Weight'
+						AND I.intItemId NOT IN (
+							SELECT I.intItemId
+							FROM @tblMFItem I
+							JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+								AND (
+									IU.ysnAllowPurchase = 1
+									OR IU.ysnAllowSale = 1
+									)
+							JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+								AND UM.strUnitMeasure = I.strUOM
+							)
 					GROUP BY I.intItemId
 					HAVING count(*) > 1
-					)
-				AND NOT EXISTS (
-					SELECT *
-					FROM tblMFEDI943 EDI943
-					JOIN tblICItem I ON I.strItemNo = EDI943.strVendorItemNumber
-					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-						AND UM.strUnitMeasure = EDI943.strUOM
-					WHERE strDepositorOrderNumber = @strOrderNo
 					)
 			BEGIN
 				SELECT @strItemNo = ''
@@ -240,6 +255,10 @@ BEGIN TRY
 				SELECT @strItemNo = @strItemNo + strItemNo + ', '
 				FROM @tblMFItem I
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					AND (
+						IU.ysnAllowPurchase = 1
+						OR IU.ysnAllowSale = 1
+						)
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitType <> 'Weight'
 				GROUP BY strItemNo
@@ -512,7 +531,7 @@ BEGIN TRY
 
 				SELECT @strLocationCount = ''
 
-				SELECT @strLocationCount = Count(*)+1
+				SELECT @strLocationCount = Count(*) + 1
 				FROM tblEMEntityLocation
 				WHERE intEntityId = @intEntityId
 					AND strState = @strShipToState
@@ -552,7 +571,7 @@ BEGIN TRY
 					,strCheckPayeeName
 					)
 				SELECT TOP 1 @intEntityId intEntityId
-					,Rtrim(strShipFromState + ' ' + @strLocationCount) AS  strLocationName
+					,Rtrim(strShipFromState + ' ' + @strLocationCount) AS strLocationName
 					,strShipFromAddress1 + CASE 
 						WHEN IsNULL(strShipFromAddress2, '') <> ''
 							THEN ' ' + strShipFromAddress2
@@ -788,6 +807,10 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItemUOM IU1 ON IU1.intItemId = I.intItemId
 				AND IU1.intUnitMeasureId = I.intWeightUOMId
 			JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
+				AND (
+					IU2.ysnAllowPurchase = 1
+					OR IU2.ysnAllowSale = 1
+					)
 			JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
 				AND UM2.strUnitType <> 'Weight'
 			WHERE EDI.strDepositorOrderNumber = @strOrderNo
@@ -885,6 +908,10 @@ BEGIN TRY
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				AND (
+					IU.ysnAllowPurchase = 1
+					OR IU.ysnAllowSale = 1
+					)
 			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 				AND UM.strUnitType <> 'Weight'
 				AND UM.strUnitMeasure <> EDI.strUOM
@@ -1299,6 +1326,10 @@ BEGIN TRY
 		BEGIN CATCH
 			SET @ErrMsg = ''
 			SET @ErrMsg = ERROR_MESSAGE()
+
+			DELETE
+			FROM tblMFEDI943Error
+			WHERE strDepositorOrderNumber = @strOrderNo
 
 			INSERT INTO tblMFEDI943Error (
 				intEDI943Id

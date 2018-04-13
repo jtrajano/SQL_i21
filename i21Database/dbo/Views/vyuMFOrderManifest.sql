@@ -14,6 +14,7 @@ SELECT OH.intOrderHeaderId
 	,LS.strSecondaryStatus AS strLotStatus
 	,ISNULL(T.dblQty, 0) AS dblTaskQty
 	,ISNULL(T.dblPickQty, 0) AS dblPickQty
+	,I.intCategoryId
 FROM tblMFOrderHeader OH 
 JOIN tblMFOrderManifest M ON OH.intOrderHeaderId = M.intOrderHeaderId
 JOIN tblICLot L ON L.intLotId = M.intLotId

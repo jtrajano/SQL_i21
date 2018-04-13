@@ -453,7 +453,7 @@ BEGIN TRY
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
 					THEN @dblNewCost
-				ELSE (@dblNewCost * RI.dblPercentage / 100)
+				ELSE (@dblNewCost * RI.dblPercentage / 100)*(PL.dblQuantity/SUM(PL.dblQuantity)Over(PARTITION BY PL.intItemId))
 				END-ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
