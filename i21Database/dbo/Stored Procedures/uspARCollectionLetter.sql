@@ -97,7 +97,7 @@ BEGIN
 
 	SELECT 
 		@strMessage			= CONVERT(VARCHAR(MAX), blbMessage)
-		 , @blb					= blbMessage 
+		, @blb					= blbMessage 
 	FROM tblSMLetter WITH(NOLOCK) 
 	WHERE intLetterId = @intLetterId
 	
@@ -1143,7 +1143,7 @@ BEGIN
 	DECLARE 
 			@intBeginningIndex INT,
 			@intEndingIndex INT,
-			@strHTMLTableName VARCHAR(MAX),
+			@strHtmlTableName VARCHAR(MAX),
 			@strSelectedHTMLTable VARCHAR(MAX),
 			@strColumns VARCHAR(MAX);
 
@@ -1180,7 +1180,7 @@ BEGIN
 	DECLARE @intRowId INT, @strHtmlTable VARCHAR(MAX);
 	WHILE (SELECT COUNT(*) From @ExtractedHTMLTable Where ysnProcessed = 0) > 0
 	BEGIN
-		SELECT TOP 1 @intRowId = intRowId,  @strHtmlTable = strHtmlTable FROM @ExtractedHTMLTable WHERE ysnProcessed = 0
+		SELECT TOP 1 @intRowId = intRowId, @strHTMLTableName = strHTMLTableName,  @strHtmlTable = strHtmlTable FROM @ExtractedHTMLTable WHERE ysnProcessed = 0
 
 		DECLARE @intTableColumnCount int, @intColBeginningIndex INT, 
 				@intColEndingIndex INT;
@@ -1285,7 +1285,7 @@ BEGIN
 
 		WHILE (SELECT COUNT(*) From @ExtractedHTMLTable Where ysnProcessed = 0) > 0
 		BEGIN
-			SELECT TOP 1 @intRowId = intRowId,  @strHtmlTable = strHtmlTable, @strColumns = strColumns FROM @ExtractedHTMLTable WHERE ysnProcessed = 0;
+			SELECT TOP 1 @intRowId = intRowId, @strHtmlTableName = strHtmlTableName,  @strHtmlTable = strHtmlTable, @strColumns = strColumns FROM @ExtractedHTMLTable WHERE ysnProcessed = 0;
 
 			-- Parsing Table Body
 			DECLARE @strSelectedTBody VARCHAR(MAX)
