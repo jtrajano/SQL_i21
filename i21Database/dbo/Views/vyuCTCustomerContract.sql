@@ -27,14 +27,14 @@ AS
 																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
 																	ELSE	AD.dblSeqPrice
 															END
-					, dblUnitPrice						=	CASE	WHEN	CD.intPricingTypeId = 2 
+					, dblUnitPrice						=	(CASE	WHEN	CD.intPricingTypeId = 2 
 																	THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
 																	ELSE	AD.dblSeqPrice
-															END
+															END) * ISNULL([dbo].[fnCalculateQtyBetweenUOM](CD.intItemUOMId, ISNULL(AD.intSeqPriceUOMId, CD.intItemUOMId), 1.000000),ISNULL(CD.dblQuantity, 0.000000))
 					, intCurrencyExchangeRateTypeId		=	CD.intRateTypeId
 					, strCurrencyExchangeRateType		=	ER.strCurrencyExchangeRateType
 					, intCurrencyExchangeRateId			=	CD.intCurrencyExchangeRateId
-					, dblCurrencyExchangeRate			=	CD.dblRate
+					, dblCurrencyExchangeRate			=	ISNULL(CD.dblRate, 1.000000)
 					, intSubCurrencyId					=   AD.intSeqCurrencyId
 					, dblSubCurrencyRate				=   CASE WHEN AD.ysnSeqSubCurrency = 1 THEN CU.intCent ELSE 1.000000 END
 					, strSubCurrency					=	AD.strSeqCurrency
@@ -47,6 +47,7 @@ AS
 					, dblDetailQuantity					=	CD.dblQuantity 
 					, dblOrderQuantity					=	CD.dblQuantity
 					, dblShipQuantity					=	CD.dblQuantity
+					, dblPriceUOMQuantity				=	ISNULL([dbo].[fnCalculateQtyBetweenUOM](CD.intItemUOMId, ISNULL(AD.intSeqPriceUOMId, CD.intItemUOMId), 1.000000),ISNULL(CD.dblQuantity, 0.000000))
 					, ysnUnlimitedQuantity				=	CAST(ISNULL(CH.ysnUnlimitedQuantity,0) AS BIT)
 					, ysnLoad							=	CAST(ISNULL(CH.ysnLoad,0) AS BIT)
 					, ysnAllowedToShow					=	CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT)

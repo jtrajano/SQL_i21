@@ -280,12 +280,12 @@ FROM (
 	     , strItemDescription				= NULL
 	     , intItemUOMId						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
 		 , intPriceUOMId					= ICISI.intPriceUOMId
-	     , intOrderUOMId					= NULL--CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
+	     , intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
 	     , dblQtyShipped					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
-	     , dblQtyOrdered					= 0.000000 --CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
+	     , dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
 	     , dblShipmentQuantity				= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblShipmentQtyShippedTotal		= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblQtyRemaining					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) - ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ICISI.dblQuantity,0) - ISNULL(ID.dblQtyShipped, 0) END
@@ -566,7 +566,7 @@ FROM (
 		 , intItemId						= MFG.intItemId
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= MFG.intItemUOMId
-		 , intPriceUOMId					= NULL
+		 , intPriceUOMId					= MFG.intItemUOMId
 		 , intOrderUOMId					= MFG.intItemUOMId
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
 		 , intWeightUOMId					= NULL
@@ -672,7 +672,7 @@ FROM (
 		 , intItemId						= MFG.intItemId	
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= MFG.intItemUOMId
-		 , intPriceUOMId					= NULL
+		 , intPriceUOMId					= MFG.intItemUOMId
 		 , intOrderUOMId					= NULL		
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
 		 , intWeightUOMId					= NULL
