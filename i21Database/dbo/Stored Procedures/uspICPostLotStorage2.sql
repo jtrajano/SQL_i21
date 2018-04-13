@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotStorage]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20)
+	,@dblUnitRetail AS NUMERIC(38,20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -53,6 +54,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @UnitRetailUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -81,35 +83,42 @@ BEGIN
 
 			IF EXISTS (
 				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryLotStorage CostingLot INNER JOIN dbo.tblICLot Lot
-							ON CostingLot.intLotId = Lot.intLotId
-				WHERE	CostingLot.intLotId = @intLotId
-						AND CostingLot.intItemUOMId = Lot.intWeightUOMId
-						AND CostingLot.intItemUOMId <> @intItemUOMId
+				FROM	dbo.tblICInventoryLotStorage cb INNER JOIN dbo.tblICLot Lot
+							ON cb.intLotId = Lot.intLotId
+				WHERE	cb.intLotId = @intLotId
+						AND cb.intItemLocationId = @intItemLocationId
+						AND cb.intItemUOMId = Lot.intWeightUOMId
+						AND cb.intItemUOMId <> @intItemUOMId
 						AND Lot.intWeightUOMId IS NOT NULL 
-						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
-						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
+						AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+						AND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) > 0 
 			)			 
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
-				-- and also compute the Qty if it has weights. 
-				SELECT	@dblReduceQty =	Lot.dblWeightPerQty * @dblQty
+				-- Compute the Qty if it has weights. 
+				-- and Get the Lot's Last cost. 
+				SELECT	@dblReduceQty =	dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
 						,@intItemUOMId = Lot.intWeightUOMId 
+						,@dblCost = Lot.dblLastCost 
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
 				
+				-- Make sure the reduce qty is not null. 
 				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
-
-				-- Get the unit cost. 
-				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
 
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
 
-				-- Adjust the cost to the new UOM
-				SET @dblCost = @dblCost * @dblUOMQty
+				-- Adjust the cost to the Lot UOM. 
+				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+				FROM	tblICItemUOM StockUOM
+				WHERE	StockUOM.intItemId = @intItemId
+						AND StockUOM.ysnStockUnit = 1
+
+				-- Make sure the cost is not null. 
+				SET @dblCost = ISNULL(@dblCost, 0) 
 			END 
 		END 
 
@@ -134,11 +143,14 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
+				,@dblUnitRetail
+				,@UnitRetailUsed OUTPUT 
 
 			-- Calculate the stock reduced
 			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
 			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = ISNULL(@UnitRetailUsed, @dblUnitRetail)
 
 			EXEC [dbo].[uspICPostInventoryTransactionStorage]
 					@intItemId = @intItemId
@@ -169,6 +181,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@dblUnitRetail = @dblUnitRetailToUse
 
 			-- Insert the record the the Lot-out table
 			INSERT INTO dbo.tblICInventoryLotStorageOut (
@@ -238,23 +251,29 @@ BEGIN
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
 				-- and also compute the Qty if it has weights. 
-				SELECT	@dblAddQty =	Lot.dblWeightPerQty * @dblQty
+				SELECT	@dblAddQty = dbo.fnMultiply(Lot.dblWeightPerQty, @dblQty) 
 						,@intItemUOMId = Lot.intWeightUOMId 				
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
 
 				SET @dblAddQty = ISNULL(@dblAddQty, 0)
 
-				-- Get the unit cost. 
-				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+				---- Get the unit cost. 
+				--SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
 
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
 
-				-- Adjust the cost to the new UOM
-				SET @dblCost = @dblCost * @dblUOMQty
+				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)
+						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblUnitRetail)
+				FROM	tblICItemUOM StockUOM
+				WHERE	StockUOM.intItemId = @intItemId 
+						AND StockUOM.ysnStockUnit = 1
+
+				---- Adjust the cost to the new UOM
+				--SET @dblCost = dbo.fnMultiply(@dblCost, @dblUOMQty) 
 			END 
 		END 
 						
@@ -290,7 +309,8 @@ BEGIN
 				,@intCostingMethod = @LOTCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate					
+				,@dblForexRate = @dblForexRate
+				,@dblUnitRetail	= @dblUnitRetail
 
 		-- Repeat call on uspICIncreaseStockInLot until @dblAddQty is completely distributed to the negative cost Lot buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -318,6 +338,8 @@ BEGIN
 				,@UpdatedInventoryLotId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@dblUnitRetail
+				,@UnitRetailUsed OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -362,6 +384,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
+						,@dblUnitRetail = @dblUnitRetail
 				END				 
 			END
 			
@@ -417,8 +440,10 @@ BEGIN
 							, @FullQty 
 							, Lot.dblWeightPerQty
 						)
-					,Lot.dblLastCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
-			FROM	dbo.tblICLot Lot
+					,Lot.dblLastCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost)  --dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) 
+			FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
+						ON StockUOM.intItemId = Lot.intItemId
+						AND StockUOM.ysnStockUnit = 1
 			WHERE	Lot.intItemLocationId = @intItemLocationId
 					AND Lot.intLotId = @intLotId
 		END 

@@ -49,6 +49,7 @@ DECLARE @intId AS INT
 		,@strActualCostId AS NVARCHAR(50)
 		,@intForexRateTypeId AS INT
 		,@dblForexRate NUMERIC(38, 20)
+		,@dblUnitRetail AS NUMERIC(38, 20)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -106,6 +107,7 @@ SELECT  intId
 		,strActualCostId
 		,intForexRateTypeId
 		,dblForexRate
+		,dblUnitRetail
 FROM	@ItemsToStorage
 
 OPEN loopItems;
@@ -133,6 +135,7 @@ FETCH NEXT FROM loopItems INTO
 	,@strActualCostId
 	,@intForexRateTypeId
 	,@dblForexRate
+	,@dblUnitRetail
 	;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -188,6 +191,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 
 	END
 
@@ -216,6 +220,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 	END
 
 	-- LOT 
@@ -244,6 +249,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 	END
 
 	-- Attempt to fetch the next row from cursor. 
@@ -269,6 +275,7 @@ BEGIN
 		,@strActualCostId 
 		,@intForexRateTypeId
 		,@dblForexRate
+		,@dblUnitRetail
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

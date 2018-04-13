@@ -27,6 +27,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInActualCost
 	,@UpdatedActualCostId AS INT OUTPUT 
 	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
 	,@intRelatedTransactionId AS INT OUTPUT
+	,@dblUnitRetail AS NUMERIC(38,20)
+	,@UnitRetailUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -46,6 +48,7 @@ SET @NewActualCostId = NULL;
 SET @UpdatedActualCostId = NULL;
 SET @strRelatedTransactionId = NULL;
 SET @intRelatedTransactionId = NULL;
+SET @UnitRetailUsed = NULL; 
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -91,6 +94,7 @@ WHEN MATCHED THEN
 		,@UpdatedActualCostId = ActualCost_bucket.intInventoryActualCostId
 		,@strRelatedTransactionId = ActualCost_bucket.strTransactionId
 		,@intRelatedTransactionId = ActualCost_bucket.intTransactionId
+		,@UnitRetailUsed = ActualCost_bucket.dblUnitRetail 
 
 -- Insert a new ActualCost bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 
@@ -109,6 +113,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@strActualCostId
@@ -125,6 +130,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1	
+		,@dblUnitRetail
 	)
 ;
 
@@ -151,6 +157,7 @@ BEGIN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@strActualCostId
@@ -167,6 +174,7 @@ BEGIN
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1
+		,@dblUnitRetail
 	)
 
 	-- Do a follow-up retrieval of the new ActualCost id.

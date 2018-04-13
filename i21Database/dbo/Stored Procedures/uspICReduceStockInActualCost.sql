@@ -20,6 +20,8 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInActualCost]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@ActualCostId AS INT OUTPUT
+	,@dblUnitRetail AS NUMERIC(38, 20)
+	,@UnitRetailUsed AS NUMERIC(38, 20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -36,6 +38,7 @@ SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @ActualCostId = NULL;
+SET @UnitRetailUsed = NULL; 
 
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 BEGIN 
@@ -154,6 +157,8 @@ WHEN MATCHED THEN
 		-- retrieve the id of the matching ActualCost bucket 
 		,@ActualCostId = cb.intInventoryActualCostId
 
+		,@UnitRetailUsed = cb.dblUnitRetail 
+
 -- Insert a new ActualCost bucket
 WHEN NOT MATCHED THEN
 	INSERT (
@@ -171,6 +176,7 @@ WHEN NOT MATCHED THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@strActualCostId
@@ -187,5 +193,6 @@ WHEN NOT MATCHED THEN
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1
+		,@dblUnitRetail 
 	)
 ;

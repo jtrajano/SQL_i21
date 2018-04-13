@@ -26,6 +26,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFOStorage
 	,@UpdatedFIFOStorageId AS INT OUTPUT 
 	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
 	,@intRelatedTransactionId AS INT OUTPUT
+	,@dblUnitRetail AS NUMERIC(38, 20)
+	,@UnitRetailUsed AS NUMERIC(38, 20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -45,6 +47,7 @@ SET @NewFIFOStorageId = NULL;
 SET @UpdatedFIFOStorageId = NULL;
 SET @strRelatedTransactionId = NULL;
 SET @intRelatedTransactionId = NULL;
+SET @UnitRetailUsed = NULL; 
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -88,6 +91,7 @@ WHEN MATCHED AND fifo_storage_bucket.intItemUOMId = Source_Query.intItemUOMId TH
 		,@UpdatedFIFOStorageId = fifo_storage_bucket.intInventoryFIFOStorageId
 		,@strRelatedTransactionId = fifo_storage_bucket.strTransactionId
 		,@intRelatedTransactionId = fifo_storage_bucket.intTransactionId
+		,@UnitRetailUsed = fifo_storage_bucket.dblUnitRetail
 
 -- Insert a new fifo bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 
@@ -105,6 +109,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -119,7 +124,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@intTransactionDetailId 
 		,GETDATE()
 		,@intEntityUserSecurityId
-		,1	
+		,1
+		,@dblUnitRetail
 	)
 ;
 
@@ -145,6 +151,7 @@ BEGIN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -160,6 +167,7 @@ BEGIN
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1
+		,@dblUnitRetail
 	)
 
 	-- Do a follow-up retrieval of the new fifo id.

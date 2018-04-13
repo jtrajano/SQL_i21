@@ -26,6 +26,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLIFOStorage
 	,@UpdatedLIFOStorageId AS INT OUTPUT 
 	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
 	,@intRelatedTransactionId AS INT OUTPUT
+	,@dblUnitRetail AS NUMERIC(38,20)
+	,@UnitRetailUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -45,6 +47,7 @@ SET @NewLIFOStorageId = NULL;
 SET @UpdatedLIFOStorageId = NULL;
 SET @strRelatedTransactionId = NULL;
 SET @intRelatedTransactionId = NULL;
+SET @UnitRetailUsed = NULL;
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -88,6 +91,7 @@ WHEN MATCHED THEN
 		,@UpdatedLIFOStorageId = lifo_storage_bucket.intInventoryLIFOStorageId
 		,@strRelatedTransactionId = lifo_storage_bucket.strTransactionId
 		,@intRelatedTransactionId = lifo_storage_bucket.intTransactionId
+		,@UnitRetailUsed = lifo_storage_bucket.dblUnitRetail 
 
 -- Insert a new LIFO bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 
@@ -105,6 +109,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -119,7 +124,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@intTransactionDetailId
 		,GETDATE()
 		,@intEntityUserSecurityId
-		,1	
+		,1
+		,@dblUnitRetail
 	)
 ;
 

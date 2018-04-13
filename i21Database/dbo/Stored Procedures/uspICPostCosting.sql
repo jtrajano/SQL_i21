@@ -288,7 +288,7 @@ BEGIN
 	IF (@strActualCostId IS NOT NULL)
 	BEGIN 
 		-- Check if there is enough stock to reduce an actual stock.
-		-- If it is not enought then use the default costing method of the item-location. 
+		-- If it is not enough then use the default costing method of the item-location. 
 		IF (ISNULL(@dblQty, 0) < 0) AND NOT EXISTS (
 			SELECT TOP 1 1 
 			FROM dbo.tblICInventoryActualCost
@@ -327,6 +327,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate
+					,@dblUnitRetail
 			END 
 
 			ELSE IF @intCostingMethod = @FIFO
@@ -353,6 +354,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate
+					,@dblUnitRetail
 			END 
 
 			ELSE IF @intCostingMethod = @LIFO
@@ -379,6 +381,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate
+					,@dblUnitRetail
 			END 
 
 			ELSE IF @intCostingMethod = @LOTCOST
@@ -406,6 +409,7 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate
+					,@dblUnitRetail
 			END 
 		END 
 		ELSE 
@@ -433,6 +437,7 @@ BEGIN
 				,@intEntityUserSecurityId 
 				,@intForexRateTypeId
 				,@dblForexRate
+				,@dblUnitRetail
 				;
 		END 
 	END

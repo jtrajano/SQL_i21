@@ -19,6 +19,8 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFOStorage]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@FIFOStorageId AS INT OUTPUT
+	,@dblUnitRetail AS NUMERIC(38,20)
+	,@UnitRetailUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,6 +37,7 @@ SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @FIFOStorageId = NULL;
+SET @UnitRetailUsed = NULL;
 
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 BEGIN 
@@ -144,6 +147,8 @@ WHEN MATCHED THEN
 		-- retrieve the id of the matching fifo bucket 
 		,@FIFOStorageId = cb.intInventoryFIFOStorageId
 
+		,@UnitRetailUsed = cb.dblUnitRetail
+
 -- Insert a new fifo bucket
 WHEN NOT MATCHED THEN
 	INSERT (
@@ -160,6 +165,7 @@ WHEN NOT MATCHED THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -175,5 +181,6 @@ WHEN NOT MATCHED THEN
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1
+		,@dblUnitRetail
 	)
 ;

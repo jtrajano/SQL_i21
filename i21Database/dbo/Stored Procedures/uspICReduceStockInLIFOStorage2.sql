@@ -19,6 +19,8 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLIFOStorage]
 	,@CostUsed AS NUMERIC(38,20) OUTPUT 
 	,@QtyOffset AS NUMERIC(38,20) OUTPUT 
 	,@LIFOStorageId AS INT OUTPUT 
+	,@dblUnitRetail AS NUMERIC(38,20)
+	,@UnitRetailUsed AS NUMERIC(38,20) OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,7 +37,7 @@ SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @LIFOStorageId = NULL;
-
+SET @UnitRetailUsed = NULL; 
 
 -- Validate if the cost bucket is negative. If Negative stock is not allowed, then block the posting. 
 BEGIN 
@@ -143,6 +145,7 @@ WHEN MATCHED THEN
 
 		-- retrieve the id of the matching LIFO bucket 
 		,@LIFOStorageId = cb.intInventoryLIFOStorageId
+		,@UnitRetailUsed = cb.dblUnitRetail
 
 -- Insert a new LIFO bucket
 WHEN NOT MATCHED THEN 
@@ -160,6 +163,7 @@ WHEN NOT MATCHED THEN
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[dblUnitRetail]
 	)
 	VALUES (
 		@intItemId
@@ -175,5 +179,6 @@ WHEN NOT MATCHED THEN
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,1	
+		,@dblUnitRetail
 	)
 ;
