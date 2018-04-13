@@ -22,6 +22,7 @@ BEGIN TRY
 		, @ScheduleCode NVARCHAR(50)
 		, @TransactionType NVARCHAR(50)
 		, @TaxAuthorityCode NVARCHAR(50)
+		, @TaxAuthorityId INT
 		, @RCId INT
 
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
@@ -44,6 +45,7 @@ BEGIN TRY
 			, @ScheduleCode = strScheduleCode
 			, @TransactionType = strTransactionType
 			, @TaxAuthorityCode = tblTFTaxAuthority.strTaxAuthorityCode
+			, @TaxAuthorityId = tblTFTaxAuthority.intTaxAuthorityId
 		FROM tblTFReportingComponent
 		LEFT JOIN tblTFTaxAuthority ON tblTFTaxAuthority.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 		WHERE intReportingComponentId = @RCId
@@ -141,7 +143,7 @@ BEGIN TRY
 		ELSE IF (@TaxAuthorityCode = 'PA')
 		BEGIN
 			SELECT Trans.intTransactionId
-			INTO #tmpUpdateTransactions
+			INTO #tmpUpdatePA
 			FROM #tmpTransaction Trans
 			LEFT JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
 			LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
@@ -155,7 +157,34 @@ BEGIN TRY
 			
 			UPDATE tblTFTransaction
 			SET strTransportationMode = 'GS'
-			WHERE intTransactionId IN (SELECT intTransactionId FROM #tmpUpdateTransactions)
+			WHERE intTransactionId IN (SELECT intTransactionId FROM #tmpUpdatePA)
+
+			DROP TABLE #tmpUpdatePA
+		END
+		ELSE IF (@TaxAuthorityCode = 'NC')
+		BEGIN
+			DECLARE @lpgId INT,
+				@cngId INT;
+
+			SELECT TOP 1 @lpgId = intProductCodeId FROM tblTFProductCode WHERE intTaxAuthorityId = @TaxAuthorityId AND strProductCode = '054'
+			SELECT TOP 1 @cngId = intProductCodeId FROM tblTFProductCode WHERE intTaxAuthorityId = @TaxAuthorityId AND strProductCode = '224'
+
+			SELECT Trans.intTransactionId
+			INTO #tmpUpdateNC
+			FROM #tmpTransaction Trans
+			WHERE ISNULL(Trans.intProductCodeId, '') != ''
+				AND Trans.uniqTransactionGuid = @Guid
+				AND Trans.intProductCodeId IN (@lpgId, @cngId)
+				AND Trans.intReportingComponentId IN (SELECT intReportingComponentId FROM vyuTFGetReportingComponent
+													WHERE strTaxAuthorityCode = 'PA'
+														AND strFormCode = 'Gas-1252')
+			
+			UPDATE tblTFTransaction
+			SET dblBillQty = (CASE WHEN intProductCodeId = @lpgId THEN dblBillQty / 1.353
+									WHEN intProductCodeId = @cngId THEN dblBillQty / 123.57 END)
+			WHERE intTransactionId IN (SELECT intTransactionId FROM #tmpUpdateNC)
+
+			DROP TABLE #tmpUpdateNC
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
