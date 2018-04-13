@@ -116,7 +116,7 @@ END
 		SELECT	
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
 			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
-			[intAccountId]					=	SADef.intSalesAccount,
+			[intAccountId]					=	GL.intAccountId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	ROUND(A.dblFaceValue,2),
 			[dblDebitUnit]					=	0,
@@ -145,8 +145,8 @@ END
 			[dblForeignRate]				=	0,
 			[strRateType]					=	NULL
 		FROM	#tempCustomerStock A
-		CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
-		INNER JOIN tblGLAccount GL ON GL.intAccountId = SADef.intSalesAccount
+		CROSS JOIN tblPATCompanyPreference ComPref
+		INNER JOIN tblGLAccount GL ON GL.intAccountId = CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END
 		UNION ALL
 		--AR Account
 		SELECT	
@@ -408,12 +408,13 @@ BEGIN
 				,[ysnVirtualMeterReading]				= NULL
 				,[ysnClearDetailTaxes]					= 1
 				,[intTempDetailIdForTaxes]				= @intIssueStockId
-				,[intSalesAccountId]					= SADef.intSalesAccount
-
+				,[intSalesAccountId]					= CASE WHEN CS.strStockStatus = 'Voting' THEN ComPref.intVotingStockId
+																ELSE ComPref.intNonVotingStockId
+															END
 			FROM #tempCustomerStock CS
 			INNER JOIN tblARCustomer ARC
 				ON ARC.intEntityId = CS.intCustomerPatronId
-			CROSS JOIN (SELECT intSalesAccount FROM tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId) SADef
+			CROSS JOIN tblPATCompanyPreference ComPref
 
 			EXEC [dbo].[uspARProcessInvoices]
 				@InvoiceEntries = @EntriesForInvoice,
