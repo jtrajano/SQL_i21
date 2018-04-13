@@ -38,7 +38,7 @@ BEGIN TRY
 		,@strShipmentMethodOfPayment NVARCHAR(50)
 		,@intShipViaId INT
 		,@strSCAC NVARCHAR(50)
-		,@strTransportationMethod nvarchar(50)
+		,@strTransportationMethod NVARCHAR(50)
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
@@ -55,7 +55,8 @@ BEGIN TRY
 	DECLARE @tblMFSession TABLE (intEDI940Id INT)
 	DECLARE @tblMFItem TABLE (
 		intItemId INT
-		,strItemNo NVARCHAR(50)
+		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	INSERT INTO @tblMFSession (intEDI940Id)
@@ -122,7 +123,7 @@ BEGIN TRY
 				,@strShipmentMethodOfPayment = NULL
 				,@intShipViaId = NULL
 				,@strSCAC = NULL
-				,@strTransportationMethod =NULL
+				,@strTransportationMethod = NULL
 
 			SELECT @strErrorMessage = ''
 
@@ -209,6 +210,10 @@ BEGIN TRY
 					FROM tblMFEDI940 EDI940
 					JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
 					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+						AND (
+							IU.ysnAllowPurchase = 1
+							OR IU.ysnAllowSale = 1
+							)
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 						AND (
 							UM.strUnitType <> 'Weight'
@@ -223,6 +228,10 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI940
 				JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					AND (
+						IU.ysnAllowPurchase = 1
+						OR IU.ysnAllowSale = 1
+						)
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND (
 						UM.strUnitType <> 'Weight'
@@ -240,9 +249,11 @@ BEGIN TRY
 			INSERT INTO @tblMFItem (
 				intItemId
 				,strItemNo
+				,strUOM
 				)
 			SELECT DISTINCT I.intItemId
 				,I.strItemNo
+				,EDI940.strUOM
 			FROM tblMFEDI940 EDI940
 			JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
 			WHERE strDepositorOrderNumber = @strOrderNo
@@ -252,19 +263,25 @@ BEGIN TRY
 						,Count(*)
 					FROM @tblMFItem I
 					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+						AND (
+							IU.ysnAllowPurchase = 1
+							OR IU.ysnAllowSale = 1
+							)
 					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 						AND UM.strUnitType <> 'Weight'
+						AND I.intItemId NOT IN (
+							SELECT I1.intItemId
+							FROM @tblMFItem I1
+							JOIN tblICItemUOM IU1 ON I1.intItemId = IU1.intItemId
+								AND (
+									IU1.ysnAllowPurchase = 1
+									OR IU1.ysnAllowSale = 1
+									)
+							JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+								AND UM1.strUnitMeasure = I1.strUOM
+							)
 					GROUP BY I.intItemId
 					HAVING Count(*) > 1
-					)
-				AND NOT EXISTS (
-					SELECT *
-					FROM tblMFEDI940 EDI940
-					JOIN tblICItem I ON I.strItemNo = EDI940.strCustomerItemNumber
-					JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-						AND UM.strUnitMeasure = EDI940.strUOM
-					WHERE strDepositorOrderNumber = @strOrderNo
 					)
 			BEGIN
 				SELECT @strItemNo = ''
@@ -272,6 +289,10 @@ BEGIN TRY
 				SELECT @strItemNo = @strItemNo + strItemNo + ', '
 				FROM @tblMFItem I
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					AND (
+						IU.ysnAllowPurchase = 1
+						OR IU.ysnAllowSale = 1
+						)
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitType <> 'Weight'
 				GROUP BY strItemNo
@@ -794,6 +815,10 @@ BEGIN TRY
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitMeasure = EDI.strUOM
 				JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
+					AND (
+						IU2.ysnAllowPurchase = 1
+						OR IU2.ysnAllowSale = 1
+						)
 				JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
 					AND UM2.strUnitType <> 'Weight'
 				LEFT JOIN tblSMFreightTerms FT ON FT.strFreightTerm = EDI.strShipmentMethodOfPayment
@@ -861,6 +886,10 @@ BEGIN TRY
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitType <> 'Weight'
+					AND (
+						IU.ysnAllowPurchase = 1
+						OR IU.ysnAllowSale = 1
+						)
 				LEFT JOIN tblSMFreightTerms FT ON FT.strFreightTerm = EDI.strShipmentMethodOfPayment
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 					AND NOT EXISTS (
@@ -936,7 +965,7 @@ BEGIN TRY
 					UPDATE tblICInventoryShipment
 					SET dtmRequestedArrivalDate = @dtmDeliveryRequestedDate
 						,strComment = @strPONumber
-						,intShipViaId=@intShipViaId
+						,intShipViaId = @intShipViaId
 					WHERE intInventoryShipmentId = @intInventoryShipmentId
 
 					DELETE
@@ -1041,6 +1070,10 @@ BEGIN TRY
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitMeasure = EDI.strUOM
 				JOIN tblICItemUOM IU2 ON I.intItemId = IU2.intItemId
+					AND (
+						IU2.ysnAllowPurchase = 1
+						OR IU2.ysnAllowSale = 1
+						)
 				JOIN tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
 					AND UM2.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
@@ -1105,6 +1138,10 @@ BEGIN TRY
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+					AND (
+						IU.ysnAllowPurchase = 1
+						OR IU.ysnAllowSale = 1
+						)
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 					AND UM.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
@@ -1353,18 +1390,25 @@ BEGIN TRY
 						)
 					SELECT @intTabRowId
 						,@intCustomTabDetailId3
-						,Case When @strTransportationMethod='H' Then 1 Else 0 End
+						,CASE 
+							WHEN @strTransportationMethod = 'H'
+								THEN 1
+							ELSE 0
+							END
 						,1
 				END
 				ELSE
 				BEGIN
 					UPDATE tblSMFieldValue
-					SET strValue = Case When @strTransportationMethod='H' Then 1 Else 0 End
+					SET strValue = CASE 
+							WHEN @strTransportationMethod = 'H'
+								THEN 1
+							ELSE 0
+							END
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intTabRowId = @intTabRowId
 						AND intCustomTabDetailId = @intCustomTabDetailId3
 				END
-
 			END
 
 			INSERT INTO tblMFEDI940Archive (
