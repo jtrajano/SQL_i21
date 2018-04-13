@@ -27,6 +27,7 @@
 	,@InventoryTransactionIdentityId INT OUTPUT 
 	,@intForexRateTypeId INT = NULL
 	,@dblForexRate NUMERIC(38, 20) = 1
+	,@dblUnitRetail NUMERIC(38, 20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -67,6 +68,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[intConcurrencyId]
 		,[intForexRateTypeId]
 		,[dblForexRate]
+		,[dblUnitRetail]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
@@ -97,6 +99,7 @@ SELECT	[intItemId]								= @intItemId
 		,[intConcurrencyId]						= 1
 		,[intForexRateTypeId]					= @intForexRateTypeId
 		,[dblForexRate]							= @dblForexRate
+		,[dblUnitRetail]						= @dblUnitRetail
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

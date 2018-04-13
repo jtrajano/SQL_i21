@@ -301,6 +301,7 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[dblUnitRetail]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -336,6 +337,7 @@ BEGIN
 			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
+			,[dblUnitRetail]						= ActualTransaction.dblUnitRetail 
 
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
@@ -474,8 +476,17 @@ BEGIN
 												, @dblQty 
 												, Lot.dblWeightPerQty
 											)
-						,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
-				FROM	dbo.tblICLot Lot
+						,Lot.dblLastCost = 
+								CASE 
+									WHEN @dblQty > 0 THEN 
+										dbo.fnCalculateCostBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblCost) 
+									ELSE 
+										Lot.dblLastCost 
+								END 
+				FROM	dbo.tblICLot Lot LEFT JOIN tblICItemUOM StockUOM
+							ON StockUOM.intItemId = Lot.intItemId
+							AND StockUOM.intItemUOMId = @intItemUOMId
+							AND StockUOM.ysnStockUnit = 1
 				WHERE	Lot.intItemLocationId = @intItemLocationId
 						AND Lot.intLotId = @intLotId
 						AND ISNULL(@intFobPointId, @FOB_ORIGIN) <> @FOB_DESTINATION

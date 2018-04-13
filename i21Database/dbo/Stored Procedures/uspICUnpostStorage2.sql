@@ -253,6 +253,7 @@ BEGIN
 			,[intCostingMethod]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[dblUnitRetail]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -285,6 +286,7 @@ BEGIN
 			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
+			,[dblUnitRetail]						= ActualTransaction.dblUnitRetail
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId
 	
