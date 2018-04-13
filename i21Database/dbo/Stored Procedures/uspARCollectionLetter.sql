@@ -1149,7 +1149,7 @@ BEGIN
 
 	DECLARE @ExtractedHTMLTable TABLE  (
 			intRowId	INT NOT NULL IDENTITY(1,1)
-		, strHTMLTableName VARCHAR(MAX)
+		, strHtmlTableName VARCHAR(MAX)
 		, strHtmlTable		VARCHAR(MAX)
 		, strColumns VARCHAR(MAX)
 		, ysnProcessed BIT NOT NULL DEFAULT(0)
@@ -1160,14 +1160,14 @@ BEGIN
 
 	WHILE @intBeginningIndex <> 0 AND @intEndingIndex <> 0
 	BEGIN
-		SET @strHTMLTableName = CONCAT('<tbl', RTRIM(LTRIM(STR(@intBeginningIndex))) + '/>');
+		SET @strHtmlTableName = CONCAT('<tbl', RTRIM(LTRIM(STR(@intBeginningIndex))) + '/>');
 		SET @strSelectedHTMLTable = SUBSTRING(@originalMsgInHTML, @intBeginningIndex, (@intEndingIndex + 8) - @intBeginningIndex);
 		
 		INSERT INTO @ExtractedHTMLTable(
-			strHTMLTableName, strHtmlTable
-		) VALUES (@strHTMLTableName, @strSelectedHTMLTable);
+			strHtmlTableName, strHtmlTable
+		) VALUES (@strHtmlTableName, @strSelectedHTMLTable);
 		
-		SET @originalMsgInHTML = STUFF(@originalMsgInHTML, @intBeginningIndex, (@intEndingIndex + 8) - @intBeginningIndex, @strHTMLTableName);
+		SET @originalMsgInHTML = STUFF(@originalMsgInHTML, @intBeginningIndex, (@intEndingIndex + 8) - @intBeginningIndex, @strHtmlTableName);
 		
 		SET @intBeginningIndex = CHARINDEX('<table>',@originalMsgInHTML);
 		SET @intEndingIndex = CHARINDEX('</table>',@originalMsgInHTML);
@@ -1180,7 +1180,7 @@ BEGIN
 	DECLARE @intRowId INT, @strHtmlTable VARCHAR(MAX);
 	WHILE (SELECT COUNT(*) From @ExtractedHTMLTable Where ysnProcessed = 0) > 0
 	BEGIN
-		SELECT TOP 1 @intRowId = intRowId, @strHTMLTableName = strHTMLTableName,  @strHtmlTable = strHtmlTable FROM @ExtractedHTMLTable WHERE ysnProcessed = 0
+		SELECT TOP 1 @intRowId = intRowId, @strHtmlTableName = strHtmlTableName,  @strHtmlTable = strHtmlTable FROM @ExtractedHTMLTable WHERE ysnProcessed = 0
 
 		DECLARE @intTableColumnCount int, @intColBeginningIndex INT, 
 				@intColEndingIndex INT;
