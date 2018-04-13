@@ -29,3 +29,17 @@ FROM tblMFOrderHeader OH
 JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
+
+UNION ALL
+
+SELECT OH.intOrderHeaderId
+	,NULL AS dtmRequiredDate
+	,OT.strOrderType
+	,OS.strOrderStatus
+	,'' AS strItemDescription
+	,NULL AS dblQuantity
+	,'' AS strUnitMeasure
+FROM tblMFOrderHeader OH
+JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
+	AND OT.intOrderTypeId = 2
+JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
