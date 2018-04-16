@@ -41,6 +41,7 @@ BEGIN TRY
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
 		,intLocationId INT
+		,intPlannedShiftId INT
 		,intUserId INT
 		,intConcurrencyId INT
 		)
@@ -83,6 +84,7 @@ BEGIN TRY
 		,ysnUseTemplate
 		,ysnKittingEnabled
 		,intLocationId
+		,intPlannedShiftId
 		,intUserId
 		,intConcurrencyId
 		)
@@ -101,6 +103,7 @@ BEGIN TRY
 		,ysnUseTemplate
 		,ysnKittingEnabled
 		,intLocationId
+		,intPlannedShiftId
 		,intUserId
 		,intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -119,6 +122,7 @@ BEGIN TRY
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
 			,intLocationId INT
+			,intPlannedShiftId INT
 			,intUserId INT
 			,intConcurrencyId INT
 			)
@@ -285,6 +289,8 @@ BEGIN TRY
 			,intConcurrencyId
 			,intManufacturingProcessId
 			,intTransactionFrom
+			,intPlannedShiftId
+			,dtmPlannedDate
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -310,6 +316,8 @@ BEGIN TRY
 			,intConcurrencyId + 1
 			,@intManufacturingProcessId
 			,1
+			,intPlannedShiftId
+			,dtmDueDate
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -327,6 +335,8 @@ BEGIN TRY
 			,a.intLastModifiedUserId = b.intUserId
 			,a.dtmLastModified = GetDate()
 			,a.intConcurrencyId = a.intConcurrencyId + 1
+			,a.intPlannedShiftId=b.intPlannedShiftId
+			,a.dtmPlannedDate = b.dtmDueDate
 		FROM tblMFWorkOrder a
 		JOIN @tblBlendSheet b ON a.intWorkOrderId = b.intWorkOrderId
 
