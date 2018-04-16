@@ -889,6 +889,7 @@ BEGIN TRY
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@intSpecialPalletLotId = @intSpecialPalletLotId
 					,@ysnRecap = @ysnRecap
+					,@intLotStatusId=@intLotStatusId
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -966,6 +967,7 @@ BEGIN TRY
 				,@ysnFillPartialPallet = @ysnFillPartialPallet
 				,@intSpecialPalletLotId = @intSpecialPalletLotId
 				,@ysnRecap = @ysnRecap
+				,@intLotStatusId=@intLotStatusId
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (

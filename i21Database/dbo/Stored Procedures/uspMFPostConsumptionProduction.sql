@@ -15,6 +15,7 @@
 	,@intStorageLocationId INT
 	,@dtmProductionDate DATETIME = NULL
 	,@intTransactionDetailId INT = NULL
+	,@intLotStatusId INT=NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -406,6 +407,7 @@ BEGIN
 
 		EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 			,@intUserId
+			,@intLotStatusId
 
 		SELECT TOP 1 @intLotId = intLotId
 		FROM #GeneratedLotItems
