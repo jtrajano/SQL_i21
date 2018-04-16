@@ -299,3 +299,10 @@ BEGIN
 	WHERE SH.intTransactionTypeId = 4 AND SH.strVoucher IS NULL
 END
 GO
+IF EXISTS(SELECT TOP 1 1 FROM tblSCLastScaleSetup WHERE intEntityId IS NULL)
+BEGIN
+	PRINT 'Begin checking intEntityId'
+	DELETE FROM tblSCLastScaleSetup WHERE intEntityId IS NULL
+	PRINT 'End checking intEntityId'
+END
+GO
