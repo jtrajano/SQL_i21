@@ -1,43 +1,74 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemRunningStock]
 	AS
-SELECT intKey					= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
+WITH InvTransaction AS(
+	SELECT	intItemId,
+			intItemUOMId,
+			intItemLocationId,
+			intSubLocationId,
+			intStorageLocationId,
+			intLotId,
+			intCostingMethod,
+			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
+			dblQty				= dblQty,
+			dblUnitStorage		= 0,
+			dblCost,
+			intOwnershipType	= 1
+	FROM tblICInventoryTransaction
+	UNION ALL
+		SELECT	intItemId,
+			intItemUOMId,
+			intItemLocationId,
+			intSubLocationId,
+			intStorageLocationId,
+			intLotId,
+			intCostingMethod,
+			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
+			dblQty				= 0,
+			dblUnitStorage		= dblQty,
+			dblCost,
+			intOwnershipType	= 2
+	FROM tblICInventoryTransactionStorage
+)
+SELECT intKey						= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	,i.intItemId
 	,i.strItemNo 
 	,ItemUOM.intItemUOMId
-	,strItemUOM					= iUOM.strUnitMeasure
-	,strItemUOMType				= iUOM.strUnitType
+	,strItemUOM = iUOM.strUnitMeasure
+	,strItemUOMType = iUOM.strUnitType
 	,ItemUOM.ysnStockUnit
 	,ItemUOM.dblUnitQty
 	,t.intCostingMethod
 	,CostMethod.strCostingMethod
 	,ItemLocation.intLocationId
-	,strLocationName			= CompanyLocation.strLocationName
+	,strLocationName				= CompanyLocation.strLocationName
 	,t.intSubLocationId
 	,SubLocation.strSubLocationName
 	,t.intStorageLocationId
-	,strStorageLocationName		= strgLoc.strName
+	,strStorageLocationName			= strgLoc.strName
 	,Lot.intLotId
 	,Lot.strLotNumber
-	,Lot.intOwnershipType
+	,t.intOwnershipType
+	,strOwnershipType				= dbo.fnICGetOwnershipType(t.intOwnershipType)
 	,Lot.dtmExpiryDate
 	,Lot.intItemOwnerId
-	,intWeightUOMId			= Lot.intWeightUOMId
-	,strWeightUOM			= wUOM.strUnitMeasure
+	,intWeightUOMId					= Lot.intWeightUOMId
+	,strWeightUOM					= wUOM.strUnitMeasure
 	,Lot.dblWeight
 	,Lot.dblWeightPerQty
-	,intLotStatusId			= Lot.intLotStatusId
-	,strLotStatus			= LotStatus.strSecondaryStatus
-	,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
+	,intLotStatusId					= Lot.intLotStatusId
+	,strLotStatus					= LotStatus.strSecondaryStatus
+	,strLotPrimaryStatus			= LotStatus.strPrimaryStatus
 	,ItemOwner.intOwnerId
 	,strOwner = LotEntity.strName
-	,dtmAsOfDate			= CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
-	,dblQty = SUM(t.dblQty)
+	,dtmAsOfDate					= t.dtmDate
+	,dblQty							= CASE WHEN Lot.intLotId IS NOT NULL THEN SUM(t.dblUnitStorage + t.dblQty) ELSE SUM(t.dblQty) END
+	,dblUnitStorage					= CASE WHEN Lot.intLotId IS NOT NULL THEN 0 ELSE SUM(t.dblUnitStorage) END
 	,dblCost = CASE 
-				WHEN t.intCostingMethod = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId)
-				WHEN t.intCostingMethod = 2 THEN FIFO.dblCost
-				ELSE MAX(t.dblCost) 
-			END
-FROM tblICInventoryTransaction t 
+			WHEN t.intCostingMethod = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId)
+			WHEN t.intCostingMethod = 2 THEN FIFO.dblCost
+			ELSE MAX(t.dblCost) 
+		END
+FROM InvTransaction t 
 LEFT JOIN tblICItem i 
 	ON i.intItemId = t.intItemId
 INNER JOIN (
@@ -86,8 +117,8 @@ GROUP BY i.intItemId
 		,iUOM.strUnitType
 		,ItemUOM.ysnStockUnit
 		,ItemUOM.dblUnitQty
-		,ItemLocation.intItemLocationId
 		,ItemLocation.intLocationId
+		,ItemLocation.intItemLocationId
 		,CompanyLocation.strLocationName
 		,t.intSubLocationId
 		,SubLocation.strSubLocationName
@@ -95,7 +126,7 @@ GROUP BY i.intItemId
 		,strgLoc.strName
 		,Lot.intLotId
 		,Lot.strLotNumber
-		,Lot.intOwnershipType
+		,t.intOwnershipType
 		,Lot.dtmExpiryDate
 		,Lot.intItemOwnerId
 		,Lot.dblWeight
@@ -107,7 +138,7 @@ GROUP BY i.intItemId
 		,LotStatus.strPrimaryStatus
 		,ItemOwner.intOwnerId
 		,LotEntity.strName
-		,t.intCostingMethod
-		,CostMethod.strCostingMethod
-		,FIFO.dblCost
-		,CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
+		,t.intCostingMethod	
+		,CostMethod.strCostingMethod	
+		,FIFO.dblCost		
+		,t.dtmDate
