@@ -263,6 +263,18 @@ BEGIN
 	BEGIN CATCH
 		SELECT @strErrorMsg = ERROR_MESSAGE()
 		ROLLBACK TRANSACTION
+
+		BEGIN TRANSACTION
+		--for AR-7182, they have separate try catch, the one above commits its transaction so 
+		-- if there is an error on this try catch shouldn't we delete the generated bank transaction
+		-- if just leave the bank transaciton
+		-- please comment it to AR-7182 and remove below code
+		-- thanks M.D.GONZALES
+		IF ISNULL(@intNewTransactionId, 0) > 0
+			DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intNewTransactionId
+		--
+		COMMIT TRANSACTION
+
 		RAISERROR(@strErrorMsg, 11, 1)
 		RETURN;
 	END CATCH
