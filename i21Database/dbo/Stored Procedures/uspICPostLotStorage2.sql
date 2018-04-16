@@ -111,8 +111,15 @@ BEGIN
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
 
+				-- Get the item's latest unit retail. 
+				SELECT	@dblUnitRetail = ItemPricing.dblUnitRetail
+				FROM	tblICItemPricing ItemPricing 
+				WHERE	ItemPricing.intItemId = @intItemId
+						AND ItemPricing.intItemLocationId = @intItemLocationId
+
 				-- Adjust the cost to the Lot UOM. 
 				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblUnitRetail) 
 				FROM	tblICItemUOM StockUOM
 				WHERE	StockUOM.intItemId = @intItemId
 						AND StockUOM.ysnStockUnit = 1
@@ -150,7 +157,7 @@ BEGIN
 			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
 			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
-			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = ISNULL(@UnitRetailUsed, @dblUnitRetail)
+			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = @dblUnitRetail --ISNULL(@UnitRetailUsed, @dblUnitRetail)
 
 			EXEC [dbo].[uspICPostInventoryTransactionStorage]
 					@intItemId = @intItemId

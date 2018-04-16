@@ -463,7 +463,7 @@ BEGIN
 												END
 
 				,dblCost					= 0.00
-				,dblSalesPrice              = 0.00
+				,dblSalesPrice              = dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intPriceUOMId, DetailItem.intItemUOMId), DetailItem.intItemUOMId, DetailItem.dblUnitPrice) 
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
@@ -474,7 +474,7 @@ BEGIN
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
 				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
-				,dblForexRate				= 1		 
+				,dblForexRate				= 1		
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -606,6 +606,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[dblUnitRetail]
 			)
 			SELECT
 					[intItemId] 
@@ -631,6 +632,7 @@ BEGIN
 					,[intInTransitSourceLocationId] = t.intItemLocationId
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
+					,[dblUnitRetail] = t.dblUnitRetail 
 			FROM	tblICInventoryTransaction t 
 			WHERE	t.strTransactionId = @strTransactionId
 					AND t.ysnIsUnposted = 0 
@@ -729,8 +731,8 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 
-				,dblCost					=  0.00 
-				,dblSalesPrice              = 0.00
+				,dblCost					= 0.00 
+				,dblSalesPrice              = dbo.fnCalculateCostBetweenUOM(ISNULL(DetailItem.intPriceUOMId, DetailItem.intItemUOMId), DetailItem.intItemUOMId, DetailItem.dblUnitPrice) 
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId

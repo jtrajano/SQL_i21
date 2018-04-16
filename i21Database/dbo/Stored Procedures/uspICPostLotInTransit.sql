@@ -113,6 +113,7 @@ BEGIN
 
 				-- Adjust the cost to the Lot UOM. 
 				SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+						,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblUnitRetail) 
 				FROM	tblICItemUOM StockUOM
 				WHERE	StockUOM.intItemId = @intItemId
 						AND StockUOM.ysnStockUnit = 1

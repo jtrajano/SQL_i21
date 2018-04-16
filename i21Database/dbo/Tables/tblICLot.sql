@@ -72,6 +72,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[strContainerNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
 		[strCondition]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 		[intSeasonCropYear]			INT NULL,
+		[dblUnitRetail]				NUMERIC(38,20) DEFAULT ((0)) NULL,
 		[dtmDateCreated]			DATETIME NULL,
 		[intCreatedUserId]			INT NULL,
 		[intCreatedEntityId]		INT NULL,

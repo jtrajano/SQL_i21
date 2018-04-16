@@ -114,7 +114,7 @@ BEGIN
 		-- Get the item's last cost when reducing stock. 
 		-- Except if doing vendor stock returns using Inventory Receipt/Return 
 		SELECT	@dblCost = ItemPricing.dblAverageCost 
-				-- TODO: @dblUnitRetail = ItemPricing.dblAverageUnitRetail 
+				,@dblUnitRetail = ItemPricing.dblUnitRetail
 		FROM	tblICItemPricing ItemPricing 
 		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
 				AND ItemPricing.intItemId = @intItemId
@@ -122,6 +122,7 @@ BEGIN
 		
 		-- Convert the Cost from Stock UOM to @intItemUOMId 
 		SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+				,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblUnitRetail) 
 		FROM	tblICItemUOM StockUOM
 		WHERE	StockUOM.intItemId = @intItemId
 				AND StockUOM.ysnStockUnit = 1

@@ -80,7 +80,7 @@ BEGIN
 		-- Get the item's last cost when reducing stock. 
 		-- Except if doing vendor stock returns using Inventory Receipt/Return 
 		SELECT	@dblCost = ItemPricing.dblLastCost
-				-- TODO: ,@dblUnitRetail = ItemPricing.dblLastUnitRetail 
+				,@dblUnitRetail = ItemPricing.dblUnitRetail
 		FROM	tblICItemPricing ItemPricing 
 		WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
 				AND ItemPricing.intItemId = @intItemId
@@ -88,7 +88,7 @@ BEGIN
 		
 		-- Convert the Cost from Stock UOM to @intItemUOMId 
 		SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
-				-- TODO: ,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblUnitRetail) 
+				,@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblUnitRetail) 
 		FROM	tblICItemUOM StockUOM
 		WHERE	StockUOM.intItemId = @intItemId
 				AND StockUOM.ysnStockUnit = 1
@@ -121,7 +121,7 @@ BEGIN
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
-			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = ISNULL(@UnitRetailUsed, @dblUnitRetail)
+			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = @dblUnitRetail -- ISNULL(@UnitRetailUsed, @dblUnitRetail)
 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId

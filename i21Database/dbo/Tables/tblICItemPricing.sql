@@ -23,6 +23,8 @@ Type the overview for the table here.
 		[dblStandardCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblAverageCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblAverageMargin] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+		[dblUnitRetail] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[ysnIsPendingUpdate] BIT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 

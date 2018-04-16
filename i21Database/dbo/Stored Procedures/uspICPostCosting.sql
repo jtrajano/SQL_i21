@@ -472,6 +472,7 @@ BEGIN
 						,intItemLocationId = @intItemLocationId
 						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
 						,Cost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+						,UnitRetail = dbo.fnCalculateUnitCost(@dblUnitRetail, @dblUOMQty)
 		) AS StockToUpdate
 			ON ItemPricing.intItemId = StockToUpdate.intItemId
 			AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
@@ -502,7 +503,13 @@ BEGIN
 									1 										
 								ELSE 
 									0
-						END 
+						END
+					,dblUnitRetail = 
+									CASE WHEN StockToUpdate.Qty > 0 THEN 
+											CASE WHEN ISNULL(ItemPricing.dblUnitRetail, 0) = 0 THEN StockToUpdate.UnitRetail ELSE ItemPricing.dblUnitRetail END 
+										ELSE 
+											ItemPricing.dblUnitRetail
+									END 
 
 		-- If none found, insert a new item pricing record
 		WHEN NOT MATCHED THEN 
