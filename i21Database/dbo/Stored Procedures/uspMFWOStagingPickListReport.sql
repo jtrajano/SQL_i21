@@ -110,7 +110,13 @@ BEGIN
 		,L.intLotId
 		,PL.strParentLotNumber
 		,T.intFromStorageLocationId
-		,FSL.strName AS strFromStorageLocation
+		,(
+			CASE 
+				WHEN OH.intOrderDirectionId = 1
+					THEN TSL.strName
+				ELSE FSL.strName
+				END
+			) AS strFromStorageLocation
 		,T.intToStorageLocationId
 		,TSL.strName AS strToStorageLocation
 		--,CASE WHEN OH.intOrderTypeId = 5 THEN OH.strReferenceNo ELSE OH.strOrderNo END strOrderNo
@@ -145,6 +151,27 @@ BEGIN
 				ELSE @dtmPlannedDate
 				END
 			) AS dtmRequiredDateValue
+			,(
+			CASE 
+				WHEN OH.intOrderDirectionId = 1
+					THEN 'PUTAWAY LIST'
+				ELSE 'STAGING PICK LIST'
+				END
+			) AS strReportHeader1
+			,(
+			CASE 
+				WHEN OH.intOrderDirectionId = 1
+					THEN 'PUTAWAY TO'
+				ELSE 'STAGE TO'
+				END
+			) AS strReportHeader2
+			,(
+			CASE 
+				WHEN OH.intOrderDirectionId = 1
+					THEN 'STARTED PUTAWAY'
+				ELSE 'STARTED PICKING'
+				END
+			) AS strReportHeader3
 	FROM tblMFOrderHeader OH
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId
