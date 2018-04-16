@@ -124,8 +124,10 @@ BEGIN TRY
 		,[strItemDescription]
 		,[strDocumentNumber]
 		,[intItemUOMId]
+		,[intPriceUOMId]
 		,[dblQtyOrdered]
 		,[dblQtyShipped]
+		,[dblUnitQuantity]
 		,[dblDiscount]
 		,[dblPrice]
 		,[dblUnitPrice]
@@ -192,8 +194,10 @@ BEGIN TRY
 		,[strItemDescription]				= ISNULL(@ItemDescription, '')
 		,[strDocumentNumber]				= @ItemDocumentNumber
 		,[intItemUOMId]						= NULL
+		,[intPriceUOMId]					= NULL
 		,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
+		,[dblUnitQuantity]					= 1.000000
 		,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)			
 		,[dblUnitPrice]						= ISNULL(@ItemUnitPrice, @ZeroDecimal)			

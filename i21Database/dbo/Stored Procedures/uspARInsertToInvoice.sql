@@ -575,7 +575,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							
 							@ItemId					= 	@intNewSoftwareItemId,
 							@ItemDescription		=	@strNewSoftwareItemDescription,
-							@OrderUOMId				=	@intNewSoftwareUOMId,
+							@ItemOrderUOMId			=	@intNewSoftwareUOMId,
 							@ItemQtyOrdered			=	@dblNewSoftwareOrderedQty,
 							@ItemQtyShipped			=	@dblNewSoftwareOrderedQty,							
 							@ItemMaintenanceType	=	@strNewSoftwareItemMaintType,
@@ -963,8 +963,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@RaiseError					= @RaiseError
 							,@ItemDescription				= @ItemDescription
 							,@ItemDocumentNumber			= @ItemSalesOrderNumber
-							,@OrderUOMId					= @OrderUOMId
-							,@PriceUOMId					= @PriceUOMId
+							,@ItemOrderUOMId				= @OrderUOMId
+							,@ItemPriceUOMId				= @PriceUOMId
 							,@ItemUOMId						= @ItemUOMId
 							,@ItemContractHeaderId			= @ItemContractHeaderId
 							,@ItemContractDetailId		    = @ItemContractDetailId
