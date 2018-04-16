@@ -6333,6 +6333,7 @@
     <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesHistoryInsert.sql" />
     <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
     <Build Include="dbo\Tables\tblLGAllocationHeaderOrigin.sql" />
+    <Build Include="dbo\Views\vyuARForApprovalTransction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
