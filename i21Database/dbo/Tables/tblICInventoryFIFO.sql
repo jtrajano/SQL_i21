@@ -86,7 +86,7 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[intTransactionDetailId] INT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[dtmCreated] DATETIME NULL, 
-		[dblUnitRetail] NUMERIC(38, 20) NOT NULL DEFAULT 0,
+		[dblUnitRetail] NUMERIC(38, 20) NULL DEFAULT 0,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 

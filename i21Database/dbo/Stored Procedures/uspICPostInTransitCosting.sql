@@ -62,6 +62,7 @@ DECLARE @intId AS INT
 		
 		,@intInventoryTransactionId INT 
 		,@strTransactionForm AS NVARCHAR(255)
+		,@dblUnitRetail AS NUMERIC(38, 20)
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -119,6 +120,7 @@ SELECT  intId
 		,intInTransitSourceLocationId
 		,intForexRateTypeId
 		,dblForexRate
+		,dblUnitRetail
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -148,6 +150,7 @@ FETCH NEXT FROM loopItems INTO
 	,@intInTransitSourceLocationId
 	,@intForexRateTypeId
 	,@dblForexRate
+	,@dblUnitRetail
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -194,6 +197,7 @@ BEGIN
 			,@intInTransitSourceLocationId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 			;
 	END
 
@@ -223,6 +227,7 @@ BEGIN
 			,@intInTransitSourceLocationId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblUnitRetail
 			;
 	END 
 
@@ -251,7 +256,7 @@ BEGIN
 		,@intInTransitSourceLocationId
 		,@intForexRateTypeId
 		,@dblForexRate
-
+		,@dblUnitRetail
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

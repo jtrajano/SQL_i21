@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@intInTransitSourceLocationId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20)
+	,@dblUnitRetail AS NUMERIC(38,20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -53,6 +54,7 @@ DECLARE @CostUsed AS NUMERIC(38,20);
 DECLARE @FullQty AS NUMERIC(38,20);
 DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
+DECLARE @UnitRetailUsed AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
@@ -91,10 +93,13 @@ BEGIN
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
 				,@UpdatedActualCostId OUTPUT 
+				,@dblUnitRetail
+				,@UnitRetailUsed OUTPUT
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblUnitRetailToUse AS NUMERIC(38,20) = ISNULL(@UnitRetailUsed, @dblUnitRetail)
 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
@@ -128,6 +133,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@strActualCostId = @strActualCostId
+					,@dblUnitRetail = @dblUnitRetailToUse
 			
 			-- Insert the record the the Actual-out table
 			INSERT INTO dbo.tblICInventoryActualCostOut (
@@ -188,6 +194,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@strActualCostId = @strActualCostId
+				,@dblUnitRetail = @dblUnitRetail
 
 		-- Repeat call on uspICIncreaseStockInActual until @dblAddQty is completely distributed to the negative cost Actual buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -213,6 +220,8 @@ BEGIN
 				,@UpdatedActualCostId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
+				,@dblUnitRetail
+				,@UnitRetailUsed OUTPUT 
 
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
@@ -260,6 +269,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strActualCostId = @strActualCostId
+							,@dblUnitRetail = @dblUnitRetail
 				END 
 			END
 			

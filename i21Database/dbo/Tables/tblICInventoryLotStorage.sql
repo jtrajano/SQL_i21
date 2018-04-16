@@ -89,7 +89,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[intTransactionDetailId] INT NULL,
 		[dtmCreated] DATETIME NULL, 
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
-		[dblUnitRetail] NUMERIC(38, 20) NOT NULL DEFAULT 0,
+		[dblUnitRetail] NUMERIC(38, 20) NULL DEFAULT 0,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
