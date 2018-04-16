@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Options Trading Months' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Risk Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Projects (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Support (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5781,9 +5781,9 @@ INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@H
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'My Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'My Tickets (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'My Tickets (Portal)', N'Transaction', N'Screen', N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Tickets Reported by Me', N'small-menu-transaction', 1, 0, 0, 1, 0, 1)
+	VALUES (N'My Tickets (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'My Tickets (Portal)', N'Support', N'Screen', N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Tickets Reported by Me', N'small-menu-support', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Tickets Reported by Me' WHERE strMenuName = 'My Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCategory = N'Support', strIcon = N'small-menu-support', strCommand = N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Tickets Reported by Me' WHERE strMenuName = 'My Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
 
 DECLARE @HDMyTicketsMenuId INT
 SELECT  @HDMyTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'My Tickets (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
@@ -5795,9 +5795,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Open Tickets (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'Open Tickets (Portal)', N'Transaction', N'Screen', N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Open Tickets', N'small-menu-transaction', 1, 0, 0, 1, 1, 1)
+	VALUES (N'Open Tickets (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'Open Tickets (Portal)', N'Support', N'Screen', N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Open Tickets', N'small-menu-support', 1, 0, 0, 1, 1, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Open Tickets' WHERE strMenuName = 'Open Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 1, strCategory = N'Support', strIcon = N'small-menu-support', strCommand = N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=Open Tickets' WHERE strMenuName = 'Open Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
 
 DECLARE @HDOpenTicketsMenuId INT
 SELECT  @HDOpenTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Open Tickets (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
@@ -5809,9 +5809,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'All Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'All Tickets (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'All Tickets (Portal)', N'Transaction', N'Screen', N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=All Tickets', N'small-menu-transaction', 1, 0, 0, 1, 2, 1)
+	VALUES (N'All Tickets (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'All Tickets (Portal)', N'Support', N'Screen', N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=All Tickets', N'small-menu-support', 1, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=All Tickets' WHERE strMenuName = 'All Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCategory = N'Support', strIcon = N'small-menu-support', strCommand = N'HelpDesk.view.Ticket?showSearch=true&searchCommand=Ticket&isFloating=true&activeTab=All Tickets' WHERE strMenuName = 'All Tickets (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
 
 DECLARE @HDAllTicketsMenuId INT
 SELECT  @HDAllTicketsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'All Tickets (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
@@ -5819,6 +5819,20 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'All Tickets 
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @HDAllTicketsMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@HDAllTicketsMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Projects (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Projects (Portal)', N'Help Desk', @HelpDeskPortalParentMenuId, N'Projects (Portal)', N'Support', N'Screen', N'HelpDesk.view.Project?showSearch=true&searchCommand=Project', N'small-menu-support', 1, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCategory = N'Support', strIcon = N'small-menu-support', strCommand = N'HelpDesk.view.Project?showSearch=true&searchCommand=Project' WHERE strMenuName = 'Projects (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+
+DECLARE @HDProjectsMenuId INT
+SELECT  @HDProjectsMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Projects (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Projects (Portal)' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @HDProjectsMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@HDProjectsMenuId, 1)
 END
 
 /* CRM */
