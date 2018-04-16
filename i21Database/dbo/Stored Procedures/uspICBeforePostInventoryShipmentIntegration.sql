@@ -32,6 +32,8 @@ DECLARE	-- Order Types
 		,@INT_SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
 		,@INT_SOURCE_TYPE_TRANSPORT AS INT = 3
 
+DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+
 -- Get the details from the inventory receipt 
 BEGIN 
 	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
@@ -117,5 +119,13 @@ BEGIN
 				,@intUserId = @intEntityUserSecurityId
 	END 
 END 
+
+-- Mark stock reservation as posted (or unposted)
+BEGIN 
+	EXEC dbo.uspICPostStockReservation
+		@intTransactionId
+		,@INVENTORY_SHIPMENT_TYPE
+		,@ysnPost
+END
 
 _Exit:
