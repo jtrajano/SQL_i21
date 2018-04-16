@@ -44,8 +44,15 @@ BEGIN TRY
 		,@ysnProposed = 0
 		,@strPatternString = @strOrderNo OUTPUT
 
-	SELECT @intStageLocationId = intDefaultShipmentStagingLocation
-	FROM tblMFCompanyPreference
+	SELECT @intStageLocationId = intStorageLocationId
+	FROM tblICInventoryShipmentItem
+	WHERE intInventoryShipmentId = @intInventoryShipmentId and intStorageLocationId is not null
+
+	IF @intStageLocationId IS NULL
+	BEGIN
+		SELECT @intStageLocationId = intDefaultShipmentStagingLocation
+		FROM tblMFCompanyPreference
+	END
 
 	IF EXISTS (
 			SELECT 1
@@ -105,6 +112,7 @@ BEGIN TRY
 		,intLineNo
 		,intSanitizationOrderDetailsId
 		,strLineItemNote
+		,intStagingLocationId
 		)
 	SELECT @intOrderHeaderId
 		,SHI.intItemId
@@ -124,10 +132,11 @@ BEGIN TRY
 			)
 		,NULL
 		,''
+		,SHI.intStorageLocationId
 	FROM dbo.tblICInventoryShipment ISH
 	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 	JOIN dbo.tblICItem I ON I.intItemId = SHI.intItemId
-	Left JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.intUnitMeasureId = I.intWeightUOMId
 	WHERE ISH.intInventoryShipmentId = @intInventoryShipmentId
 
