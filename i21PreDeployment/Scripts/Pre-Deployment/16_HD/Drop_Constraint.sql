@@ -9,5 +9,11 @@ BEGIN
 	');
 END
 
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FK_TicketHoursWorked_JobCode]'))
+BEGIN
+	alter table tblHDTicketHoursWorked drop constraint FK_TicketHoursWorked_JobCode;
+	alter table tblHDTicketHoursWorked alter column intJobCodeId int null;
+END
+
 GO
 PRINT 'END Drop UNQ_tblHDModule'

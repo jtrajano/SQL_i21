@@ -16,14 +16,15 @@
 	[intCreatedUserId] [int] NULL,
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
-	[intJobCodeId] [int] NOT NULL,
+	[intJobCodeId] [int] NULL,
 	[intCurrencyId] [int]  NULL,
 	[intCurrencyExchangeRateTypeId] [int]  NULL,
 	[dblCurrencyRate] [numeric](18,6)  NULL,
+	[intItemId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketHoursWorked] PRIMARY KEY CLUSTERED ([intTicketHoursWorkedId] ASC),
     CONSTRAINT [FK_TicketHoursWorked_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])  on delete cascade,
-    CONSTRAINT [FK_TicketHoursWorked_JobCode] FOREIGN KEY ([intJobCodeId]) REFERENCES [dbo].[tblHDJobCode] ([intJobCodeId]),
+    CONSTRAINT [FK_TicketHoursWorked_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
 	CONSTRAINT [FK_tblHDTicketHoursWorked_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
 )
 

@@ -456,4 +456,17 @@ GO
 
 GO
 	PRINT N'End updating Help Desk Ticket comment image link.'
+	PRINT N'Start converting Help Desk Jobcode to Inventory Item.';
+GO
+
+	update
+		a set a.intItemId = c.intItemId
+	from
+		tblHDTicketHoursWorked a
+		left join tblHDJobCode b on b.intJobCodeId = a.intJobCodeId
+		left join tblICItem c on c.intItemId = b.intItemId
+		left join tblHDTicket d on d.intTicketId = a.intTicketId
+
+GO
+	PRINT N'End converting Help Desk Jobcode to Inventory Item.';
 GO
