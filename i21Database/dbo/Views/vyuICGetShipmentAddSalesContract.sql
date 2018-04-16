@@ -58,11 +58,12 @@ SELECT	strOrderType = 'Sales Contract'
 		, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, ContractView.strItemUOM) 
 FROM	vyuCTContractAddOrdersLookup ContractView
 		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
+		INNER JOIN tblICItemUOM Iuom ON Iuom.intItemId = Item.intItemId AND Iuom.ysnStockUOM = 1
 		LEFT JOIN (
 			tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
 				ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
 		)
-			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, ContractView.intSeqPriceUOMId)
+			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, Iuom.intItemUOMId)
 
 WHERE	ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
