@@ -327,10 +327,8 @@ BEGIN
 						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-				JOIN tblSTRetailAccount STRT ON STRT.intStoreId = ST.intStoreId AND STRT.intEntityId = @intVendorId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
 				JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
-				--JOIN tblSTStore STMAP ON STMAP.intStoreId = APV.intStoreStoreId
 				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 						AND TR.strTrpPaycode IN ('Change', 'CREDIT')
