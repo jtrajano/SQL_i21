@@ -291,7 +291,7 @@ namespace iRely.Inventory.BusinessLayer
                 var itemUom = ImportDataLogicHelpers.GetLookUpObject<tblICItemUOM>(Context, m => m.intUnitMeasureId == uomId && m.intItemId == input.intItemId);
                 if (itemUom != null)
                 {
-                    input.intItemUnitMeasureId = itemUom.intUnitMeasureId;
+                    input.intItemUnitMeasureId = itemUom.intItemUOMId;
                     input.dblUnit = itemUom.dblUnitQty;
                 }
                 else
