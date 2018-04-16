@@ -19,6 +19,7 @@ BEGIN TRY
 	Declare @intCellId int
 	Declare @strPackagingCategoryId NVARCHAR(Max)
 	DECLARE @dblWOQuantity NUMERIC(38,20)
+	Declare @intPlannedShiftId int
 
 	SET @intWorkOrderId = 0;
 
@@ -241,6 +242,26 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Packaging Category'
+
+	Select @intPlannedShiftId=intPlannedShiftId From @tblBlendSheet
+	IF ISNULL(@intPlannedShiftId,0)=0
+	BEGIN
+		SELECT @intPlannedShiftId = intShiftId
+		FROM dbo.tblMFShift
+		WHERE intLocationId = @intLocationId
+			AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+		IF @intPlannedShiftId IS NULL
+		BEGIN
+			SELECT @intPlannedShiftId = intShiftId
+			FROM dbo.tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND intShiftSequence = 1
+		END
+
+		Update @tblBlendSheet set intPlannedShiftId=@intPlannedShiftId
+	END
 
 	BEGIN TRAN
 

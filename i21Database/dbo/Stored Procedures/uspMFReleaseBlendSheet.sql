@@ -52,6 +52,7 @@ BEGIN TRY
 	DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
 	DECLARE @intDayOfYear INT=DATEPART(dy, @dtmDate)
 	Declare @strPackagingCategoryId NVARCHAR(Max)
+	Declare @intPlannedShiftId int
 	DECLARE @strSavedWONo NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GetDate()
@@ -385,6 +386,22 @@ End
 	From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 	and UPPER(at.strAttributeName)=UPPER('All input items mandatory for consumption')
+
+	Select @intPlannedShiftId=intPlannedShiftId From @tblBlendSheet
+	IF ISNULL(@intPlannedShiftId,0)=0
+	BEGIN
+		If ISNULL(@intBusinessShiftId,0)=0
+			BEGIN
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND intShiftSequence = 1
+			END
+		Else
+			Set @intPlannedShiftId=@intBusinessShiftId
+
+		Update @tblBlendSheet set intPlannedShiftId=@intPlannedShiftId
+	END
 
 	--Missing Item Check / Required Qty Check
 	if @ysnAllInputItemsMandatory=1
