@@ -75,6 +75,10 @@ BEGIN
 	DECLARE @intContractDetailId					INT
 	DECLARE @intTaxCodeId							INT
 	DECLARE @intTaxClassId							INT
+
+	DECLARE @ContractAvailableQuantity	NUMERIC(18, 6)
+	DECLARE @ContractOverFillQuantity	NUMERIC(18, 6)
+	DECLARE @strStatus					NVARCHAR(50)
 	
 	DECLARE @ResultTableLog TABLE(
 		strCustomerNumber			NVARCHAR(100)
@@ -160,6 +164,10 @@ BEGIN
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceDetail)
 		BEGIN
 			SET @strErrorMessage = ''
+			SET @ContractOverFillQuantity = 0
+			SET @strStatus = ''
+			SET @strContractNumber = ''
+			SET @dblQuantity = 0
 			--SET @ysnProcessNextAsHeader = 0
 			--Get the first Record and create Invoice
 			SELECT TOP 1 
@@ -221,14 +229,55 @@ BEGIN
 			SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)
 			---Get Uom ID
 			SET	@intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intUnitMeasureId = @intUnitMeasureId AND intItemId = @intItemId)
+			
+			
+			IF(LTRIM(RTRIM(@strContractNumber)) <> '')
+			BEGIN
 			--Get contract ID
-			SET @intContractDetailId = (SELECT TOP 1 B.intContractDetailId 
-											FROM tblCTContractHeader A
-											INNER JOIN tblCTContractDetail B
-												ON A.intContractHeaderId = B.intContractHeaderId
-											WHERE A.strContractNumber = @strContractNumber
-											AND A.intEntityId = @intCustomerEntityId
-											AND B.intContractSeq = @intContractSequence)
+			--SET @intContractDetailId = (SELECT TOP 1 B.intContractDetailId 
+			--								FROM tblCTContractHeader A
+			--								INNER JOIN tblCTContractDetail B
+			--									ON A.intContractHeaderId = B.intContractHeaderId
+			--								WHERE A.strContractNumber = @strContractNumber
+			--								AND A.intEntityId = @intCustomerEntityId
+			--								AND B.intContractSeq = @intContractSequence)
+			SET @intContractDetailId = NULL
+			SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+						,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
+			FROM
+				[vyuCTCustomerContract] ARCC
+			WHERE
+				ARCC.[intEntityCustomerId] = @intCustomerEntityId
+				AND ARCC.[intItemId] = @intItemId
+				AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+													CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+				AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+				AND (ARCC.[dblAvailableQty] > 0) 
+
+				AND ARCC.strContractNumber = @strContractNumber
+				--AND ARCC.intEntityId = @intCustomerEntityId
+				AND ARCC.intContractSeq = @intContractSequence
+			ORDER BY
+					dtmStartDate
+				,intContractSeq
+
+			IF(NOT @intContractDetailId IS NULL) 
+			BEGIN 
+				SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
+								
+				IF(@ContractOverFillQuantity > 0) -- Has contract number from file - but it overfills the contract.
+				BEGIN
+					SET @dblQuantity = @ContractAvailableQuantity
+					SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+				END
+			END
+			ELSE
+			BEGIN
+				SET @strStatus = @strStatus + ', Has Contract Discrepancy' -- Has contract number from file - but no available contract found upon import.
+			END
+
+			END
+
 				--TM----------------------------------------------------------------------------------------------------------------------------
 				--Get Site Id 
 				SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
@@ -287,6 +336,11 @@ BEGIN
 				END
 			ELSE
 			BEGIN
+			ADDITEM:
+				IF ISNULL(@intNewInvoiceId, 0) <> 0
+				BEGIN			
+					EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @intNewInvoiceId
+				END	
 				---- Add as line Item to Existing Invoice
 				EXEC [dbo].[uspARAddInventoryItemToInvoice]
 						@InvoiceId = @intNewInvoiceId
@@ -316,11 +370,64 @@ BEGIN
 						GOTO CONTINUELOOP
 					END
 			END
+
+			
 			
 						
 			BEGIN TRY
+
 				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
 				EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+
+				--Contract overfill
+				----------------------------------------------------------------------------------------------------------------------------------------
+				IF (@ContractOverFillQuantity > 0) 
+				BEGIN
+			
+				--EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
+				--EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+			
+				SET @intContractDetailId = NULL
+				SET @ContractAvailableQuantity = NULL
+				--Check if there is other available contract to apply.
+				SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+											,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
+											FROM
+												[vyuCTCustomerContract] ARCC
+											WHERE
+												ARCC.[intEntityCustomerId] = @intCustomerEntityId
+												AND ARCC.[intItemId] = @intItemId
+												AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+																					CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+												AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+												AND (ARCC.[dblAvailableQty] > 0) 
+											ORDER BY
+													dtmStartDate
+												,intContractSeq
+				--
+
+					IF (NOT @intContractDetailId IS NULL)
+					BEGIN
+						IF (@ContractOverFillQuantity > @ContractAvailableQuantity )
+						BEGIN
+							SET @dblQuantity = @ContractAvailableQuantity
+							SET @ContractOverFillQuantity = (@ContractOverFillQuantity - @ContractAvailableQuantity )	
+						END
+						ELSE
+						BEGIN
+							SET @dblQuantity = @ContractOverFillQuantity
+							SET @ContractOverFillQuantity = 0
+						END
+					END
+					ELSE
+					BEGIN
+						SET @dblQuantity = @ContractOverFillQuantity
+						SET @ContractOverFillQuantity = 0
+					END
+
+					GOTO ADDITEM									
+				END							
+				----------------------------------------------------------------------------------------------------------------------------------------
 
 				IF((SELECT COUNT(1) FROM #tmpCustomerInvoiceDetail) = 1)
 				BEGIN
@@ -358,7 +465,7 @@ BEGIN
 							AND ARID.intSiteId IS NULL
 							AND ICI.ysnTankRequired = 1
 							AND ICI.strType <> 'Comment'
-							AND ARI.intInvoiceId =  @intNewInvoiceId),'')
+							AND ARI.intInvoiceId =  @intNewInvoiceId),'') + ' ' + @strStatus
 
 						,ysnSuccessful = 1
 						,intInvoiceId = @intNewInvoiceId
