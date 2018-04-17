@@ -588,6 +588,27 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
+DECLARE @InvoiceIds TABLE(
+	id  	INT
+)
+INSERT INTO @InvoiceIds(id)
+SELECT distinct intInvoiceId FROM @PostInvoiceData
+
+WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds ORDER BY id)
+BEGIN				
+	DECLARE @InvoiceId1 INT
+				
+	SELECT TOP 1 @InvoiceId1 = id FROM @InvoiceIds ORDER BY id
+
+	EXEC [dbo].[uspICPostStockReservation]
+		@intTransactionId		= @InvoiceId1
+		,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+		,@ysnPosted				= @post
+		
+	DELETE FROM @InvoiceIds WHERE id = @InvoiceId1
+END		 
+
+
 	
 --------------------------------------------------------------------------------------------  
 -- Validations  
