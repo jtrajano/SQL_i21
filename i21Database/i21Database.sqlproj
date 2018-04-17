@@ -6292,6 +6292,7 @@
     <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedMiscItem.sql" />
     <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
     <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCommission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
