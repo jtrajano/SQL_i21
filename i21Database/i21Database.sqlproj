@@ -6338,6 +6338,10 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPosting.sql" />
     <Build Include="dbo\Tables\tblCTBookVsEntity.sql" />
     <Build Include="dbo\Views\vyuCTBookVsEntity.sql" />
+    <Build Include="dbo\Tables\tblLGInsurancePremiumFactor.sql" />
+    <Build Include="dbo\Tables\tblLGInsurancePremiumFactorDetail.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLineServiceContract.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLineServiceContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
