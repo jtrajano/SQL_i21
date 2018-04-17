@@ -60,6 +60,11 @@
 	[intCurrencyExchangeRateTypeId] INT		NULL,
 	[intCurrencyExchangeRateId] INT			NULL,
 	[dblCurrencyExchangeRate] NUMERIC(18, 6) CONSTRAINT [DF_tblSOSalesOrderDetail_dblCurrencyExchangeRate] DEFAULT ((1)) NULL,
+	[dblLastCost]			NUMERIC(18,6)	NULL,
+	[dblPriceMargin]		NUMERIC(18,6)	NULL,
+	[dblMarginPercentage]		NUMERIC(18,6)	NULL,
+	[intVendorId]			INT				NULL,
+	[intPurchaseOrderId]	INT				NULL
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

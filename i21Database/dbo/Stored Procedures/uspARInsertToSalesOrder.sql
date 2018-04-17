@@ -83,7 +83,7 @@ BEGIN
 		,[dblAmountDue]
 		,[dblPayment]
 		,'Order'
-		,@Type
+		, CASE WHEN strType = 'Backorder - Quote' THEN 'Backorder' ELSE @Type END
 		,'Open'
 		,[intAccountId]
 		,[dtmProcessDate]
@@ -194,7 +194,12 @@ BEGIN
 			,[dblSubCurrencyRate]
 			,[strVFDDocumentNumber]
 			,[intCurrencyExchangeRateTypeId]
-			,[dblCurrencyExchangeRate])
+			,[dblCurrencyExchangeRate]
+			,[dblLastCost]
+			,[dblPriceMargin]
+			,[dblMarginPercentage]
+			,[intVendorId]
+			,[intPurchaseOrderId])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -237,6 +242,11 @@ BEGIN
 			,[strVFDDocumentNumber]
 			,[intCurrencyExchangeRateTypeId]
 			,[dblCurrencyExchangeRate]
+			,[dblLastCost]
+			,[dblPriceMargin]
+			,[dblMarginPercentage]
+			,[intVendorId]
+			,[intPurchaseOrderId]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 
