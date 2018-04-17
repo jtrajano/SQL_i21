@@ -2,23 +2,24 @@
 AS
 
 SELECT 
-ICItem.intItemId
-,ICItem.strItemNo
-,ICItem.strDescription as strPumpItemDescription
-,ICItem.intCategoryId
-,ICCat.strCategoryCode
-,ICCat.strDescription as strCategoryDescription
-,ICUom.strUpcCode
-,ICUom.strLongUPCCode
-,ICUom.intItemUOMId
-,SMLoc.intCompanyLocationId
-,SMLoc.strLocationName 
-,ICItem.ysnFuelItem
-,ICItemPricing.dblSalePrice as dblPrice
-,ICLoc.intFamilyId
-,ICLoc.intClassId
-,STPumpItem.intStorePumpItemId
-,STPumpItem.intStoreId
+	ICItem.intItemId
+	,ICItem.strItemNo
+	,ICItem.strShortName
+	,ICItem.strDescription as strPumpItemDescription
+	,ICItem.intCategoryId
+	,ICCat.strCategoryCode
+	,ICCat.strDescription as strCategoryDescription
+	,ICUom.strUpcCode
+	,ICUom.strLongUPCCode
+	,ICUom.intItemUOMId
+	,SMLoc.intCompanyLocationId
+	,SMLoc.strLocationName 
+	,ICItem.ysnFuelItem
+	,ICItemPricing.dblSalePrice as dblPrice
+	,ICLoc.intFamilyId
+	,ICLoc.intClassId
+	,STPumpItem.intStorePumpItemId
+	,STPumpItem.intStoreId
 from tblICItem ICItem
 inner join tblICItemUOM ICUom on ICItem.intItemId = ICUom.intItemId
 inner join tblICItemLocation ICLoc on ICUom.intItemId =  ICLoc.intItemId
