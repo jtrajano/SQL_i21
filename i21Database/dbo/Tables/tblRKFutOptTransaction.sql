@@ -7,6 +7,8 @@
     [intEntityId] INT  NULL, 
     [intBrokerageAccountId] INT  NULL, 
     [intFutureMarketId] INT  NULL, 
+	[dblCommission] NUMERIC(18,6) DEFAULT (0),
+	[intBrokerageCommissionId] INT NULL,
     [intInstrumentTypeId] INT  NULL, 
     [intCommodityId] INT  NULL, 
     [intLocationId] INT  NULL, 
@@ -68,4 +70,77 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBank_intBankId] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank] ([intBankId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFuturesMonth_intRollingMonthId] FOREIGN KEY ([intRollingMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId])
-)
+);
+
+GO
+
+CREATE TRIGGER trgAfterInsertDerivativeEntry
+   ON  tblRKFutOptTransaction
+   AFTER  INSERT
+AS 
+
+DECLARE @intFutOptTransactionId AS INT,
+		@intBrokerageAccountId AS INT,
+		@intFutureMarketId AS INT,
+		@dtmTransactionDate AS DATETIME,
+		@intInstrumentTypeId AS INT,
+		@dblCommission AS NUMERIC(18,6),
+		@intBrokerageCommissionId AS INT
+BEGIN
+	
+	SET NOCOUNT ON;
+
+    SELECT 
+		 @intFutOptTransactionId = intFutOptTransactionId
+		,@intBrokerageAccountId = intBrokerageAccountId
+		,@intFutureMarketId = intFutureMarketId
+		,@dtmTransactionDate = dtmTransactionDate
+		,@intInstrumentTypeId = intInstrumentTypeId
+	 FROM inserted
+
+	 EXEC uspRKGetCommission @intBrokerageAccountId, @intFutureMarketId, @dtmTransactionDate, @intInstrumentTypeId, @dblCommission OUT, @intBrokerageCommissionId OUT
+
+	 UPDATE tblRKFutOptTransaction SET 
+		 dblCommission = @dblCommission
+		,intBrokerageCommissionId = @intBrokerageCommissionId
+	WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+
+END
+
+GO
+CREATE TRIGGER trgAfterUpdateDerivativeEntry
+   ON  tblRKFutOptTransaction
+   AFTER  UPDATE
+AS 
+
+DECLARE @intFutOptTransactionId AS INT,
+		@intBrokerageAccountId AS INT,
+		@intFutureMarketId AS INT,
+		@dtmTransactionDate AS DATETIME,
+		@intInstrumentTypeId AS INT,
+		@dblCommission AS NUMERIC(18,6),
+		@intBrokerageCommissionId AS INT
+BEGIN
+	
+	SET NOCOUNT ON;
+
+    SELECT 
+		 @intFutOptTransactionId = intFutOptTransactionId
+		,@intBrokerageAccountId = intBrokerageAccountId
+		,@intFutureMarketId = intFutureMarketId
+		,@dtmTransactionDate = dtmTransactionDate
+		,@intInstrumentTypeId = intInstrumentTypeId
+	 FROM inserted
+
+	 EXEC uspRKGetCommission @intBrokerageAccountId, @intFutureMarketId, @dtmTransactionDate, @intInstrumentTypeId, @dblCommission OUT, @intBrokerageCommissionId OUT
+
+	 UPDATE tblRKFutOptTransaction SET 
+		 dblCommission = @dblCommission
+		,intBrokerageCommissionId = @intBrokerageCommissionId
+	WHERE intFutOptTransactionId = @intFutOptTransactionId
+
+
+END
+GO
+
