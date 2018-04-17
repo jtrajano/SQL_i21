@@ -85,6 +85,7 @@ SELECT  intFutOptTransactionId,
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
 	AND convert(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) BETWEEN @dtmFromDate AND @dtmToDate
 	AND ysnExpired = @ysnExpired
+	AND ot.intInstrumentTypeId =1
   )t1)t1 
 )t1 where (dblLong<>0 or dblShort <>0) 
 ORDER BY RowNum ASC
