@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPRReportQuarterlyStateTax]
 AS
 SELECT 
-	tblPREmployee.strEmployeeId
+	tblPREmployee.intEntityId
+	,tblPREmployee.strEmployeeId
 	,tblPREmployee.strSocialSecurity
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
@@ -41,14 +42,15 @@ FROM
 								AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
 								AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
 GROUP BY 
-	tblPREmployee.strEmployeeId
-	, tblPREmployee.strSocialSecurity
-	, tblPREmployee.strFirstName
-	, tblPREmployee.strMiddleName
-	, tblPREmployee.strLastName
-	, tblPRPaycheck.intYear
-	, tblPRPaycheck.intQuarter
-	, vyuPRPaycheckTax.intTypeTaxStateId
-	, vyuPRPaycheckTax.intTypeTaxLocalId
-	, tblPRPaycheck.intEntityEmployeeId
+	tblPREmployee.intEntityId
+	,tblPREmployee.strEmployeeId
+	,tblPREmployee.strSocialSecurity
+	,tblPREmployee.strFirstName
+	,tblPREmployee.strMiddleName
+	,tblPREmployee.strLastName
+	,tblPRPaycheck.intYear
+	,tblPRPaycheck.intQuarter
+	,vyuPRPaycheckTax.intTypeTaxStateId
+	,vyuPRPaycheckTax.intTypeTaxLocalId
+	,tblPRPaycheck.intEntityEmployeeId
 HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0

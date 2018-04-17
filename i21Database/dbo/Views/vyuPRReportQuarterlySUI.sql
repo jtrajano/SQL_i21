@@ -1,7 +1,8 @@
 CREATE VIEW [dbo].[vyuPRReportQuarterlySUI]
 AS
 SELECT 
-	tblPREmployee.strEmployeeId
+	tblPREmployee.intEntityId
+	,tblPREmployee.strEmployeeId
 	,tblPREmployee.strSocialSecurity
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
@@ -42,33 +43,36 @@ SELECT
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal)
 	,vyuPRPaycheckTax.intTypeTaxId
 	,vyuPRPaycheckTax.intTypeTaxStateId
-	,dblTotalHours = MAX(tblPRPaycheck.dblTotalHoursYTD)
+	,dblTotalHours = SUM(tblPRPaycheck.dblTotalHours)
 	,intPaychecks = COUNT(tblPRPaycheck.intPaycheckId)
 FROM
 	(tblPREmployee 
 		INNER JOIN (SELECT PC.*
-					,PCYTD.dblGrossYTD
-					,PCYTD.dblAdjustedGrossYTD
-					,PCYTD.dblTotalHoursYTD
-					,CAST(YEAR(PC.dtmPayDate)AS INT) intYear
-					,DATEPART(QQ, PC.dtmPayDate) intQuarter 
+						,PCYTD.dblGrossYTD
+						,PCYTD.dblAdjustedGrossYTD
+						,PCYTD.dblTotalHoursYTD
+						,CAST(YEAR(PC.dtmPayDate)AS INT) intYear
+						,DATEPART(QQ, PC.dtmPayDate) intQuarter 
 					FROM tblPRPaycheck PC
-			INNER JOIN vyuPRPaycheckYTD PCYTD ON PC.intPaycheckId = PCYTD.intPaycheckId) tblPRPaycheck
+						INNER JOIN vyuPRPaycheckYTD PCYTD ON PC.intPaycheckId = PCYTD.intPaycheckId
+					WHERE PC.ysnPosted = 1) tblPRPaycheck
       ON tblPREmployee.intEntityId = tblPRPaycheck.intEntityEmployeeId)
-	INNER JOIN vyuPRPaycheckTax ON tblPRPaycheck.intPaycheckId = vyuPRPaycheckTax.intPaycheckId
-								AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
-								AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
+	INNER JOIN vyuPRPaycheckTax 
+		ON tblPRPaycheck.intPaycheckId = vyuPRPaycheckTax.intPaycheckId
+			AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
+			AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
 WHERE (vyuPRPaycheckTax.strCalculationType = 'USA SUTA' AND vyuPRPaycheckTax.ysnVoid = 0)
 GROUP BY 
-	tblPREmployee.strEmployeeId
-	, tblPREmployee.strSocialSecurity
-	, tblPREmployee.strFirstName
-	, tblPREmployee.strMiddleName
-	, tblPREmployee.strLastName
-	, tblPRPaycheck.intYear
-	, tblPRPaycheck.intQuarter
-	, vyuPRPaycheckTax.dblLimit
-	, vyuPRPaycheckTax.intTypeTaxId
-	, vyuPRPaycheckTax.intTypeTaxStateId
-	, tblPRPaycheck.intEntityEmployeeId
+	tblPREmployee.intEntityId
+	,tblPREmployee.strEmployeeId
+	,tblPREmployee.strSocialSecurity
+	,tblPREmployee.strFirstName
+	,tblPREmployee.strMiddleName
+	,tblPREmployee.strLastName
+	,tblPRPaycheck.intYear
+	,tblPRPaycheck.intQuarter
+	,vyuPRPaycheckTax.dblLimit
+	,vyuPRPaycheckTax.intTypeTaxId
+	,vyuPRPaycheckTax.intTypeTaxStateId
+	,tblPRPaycheck.intEntityEmployeeId
 HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0
