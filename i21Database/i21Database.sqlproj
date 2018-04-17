@@ -6336,6 +6336,8 @@
     <Build Include="dbo\Views\vyuHDInventoryItem.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPosting.sql" />
+    <Build Include="dbo\Tables\tblCTBookVsEntity.sql" />
+    <Build Include="dbo\Views\vyuCTBookVsEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
