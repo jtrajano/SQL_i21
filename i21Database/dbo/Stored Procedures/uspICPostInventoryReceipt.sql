@@ -594,8 +594,7 @@ BEGIN
 											ELSE 
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-										END 									
-
+										END
 									)										
 								ELSE 
 									(
@@ -640,13 +639,44 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
-				,dblUnitRetail = -- DetailItem.dblUnitRetail 
-						CASE	
-								WHEN DetailItem.ysnSubCurrency = 1 AND ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN 					
-									DetailItem.dblUnitRetail / Header.intSubCurrencyCents 
+				,dblUnitRetail =
+							CASE	
+								WHEN DetailItem.ysnSubCurrency = 1 AND ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN 
+									(
+										-- (A) Item Cost
+										dbo.fnCalculateReceiptUnitCost(
+											DetailItem.intItemId
+											,DetailItem.intUnitMeasureId		
+											,DetailItem.intCostUOMId
+											,DetailItem.intWeightUOMId
+											,DetailItem.dblUnitRetail
+											,DetailItem.dblNet
+											,DetailItemLot.intLotId
+											,DetailItemLot.intItemUnitMeasureId
+											,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
+											,NULL--DetailItem.ysnSubCurrency
+											,NULL--Header.intSubCurrencyCents
+										)
+										/ Header.intSubCurrencyCents 
+									)										
 								ELSE 
-									DetailItem.dblUnitRetail 
-						END 
+									(
+										-- (A) Item Cost
+										dbo.fnCalculateReceiptUnitCost(
+											DetailItem.intItemId
+											,DetailItem.intUnitMeasureId		
+											,DetailItem.intCostUOMId
+											,DetailItem.intWeightUOMId
+											,DetailItem.dblUnitRetail
+											,DetailItem.dblNet
+											,DetailItemLot.intLotId
+											,DetailItemLot.intItemUnitMeasureId
+											,AggregrateItemLots.dblTotalNet
+											,NULL--DetailItem.ysnSubCurrency
+											,NULL--Header.intSubCurrencyCents
+										)
+									)							
+							END
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
