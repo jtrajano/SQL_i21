@@ -154,7 +154,7 @@ BEGIN TRY
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
 						,intItemUOMId = ItemUOM.intItemUOMId
-						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dtmDate = dbo.fnRemoveTimeOnDate(ScaleTicket.dtmTicketDateTime)
 						,dblQty = CASE
 									WHEN @dblUnits >= @dblAvailableGrainOpenBalance THEN @dblAvailableGrainOpenBalance
 									ELSE @dblUnits
@@ -290,7 +290,7 @@ BEGIN TRY
 			,[dblTotalWeightShrink]= 0 
 			,[dblOriginalBalance]= @dblNetUnits
 			,[dblOpenBalance]= @dblNetUnits
-			,[dtmDeliveryDate]= GETDATE()
+			,[dtmDeliveryDate]= SC.dtmTicketDateTime
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
 			,[dtmLastStorageAccrueDate]= NULL 
@@ -345,7 +345,7 @@ BEGIN TRY
 		   ,NULL
 		   ,@intContractHeaderId
 		   ,@dblNetUnits
-		   ,dbo.fnRemoveTimeOnDate(GETDATE())
+		   ,dbo.fnRemoveTimeOnDate((SELECT dtmTicketDateTime FROM tblSCTicket WHERE intTicketId = @intTicketId))
 		   ,0
 		   ,'Generated From Scale'
 		   ,1
