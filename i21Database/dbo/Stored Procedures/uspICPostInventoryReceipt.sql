@@ -640,7 +640,13 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
-				,dblUnitRetail = DetailItem.dblUnitRetail 
+				,dblUnitRetail = -- DetailItem.dblUnitRetail 
+						CASE	
+								WHEN DetailItem.ysnSubCurrency = 1 AND ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN 					
+									DetailItem.dblUnitRetail / Header.intSubCurrencyCents 
+								ELSE 
+									DetailItem.dblUnitRetail 
+						END 
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -695,6 +701,14 @@ BEGIN
 					,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
 			FROM	@ItemsForPost itemCost
 			WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
+		END
+
+		-- Update the Unit Retail back to NULL if cost and unit retail are the same. 
+		BEGIN
+			UPDATE	itemCost
+			SET		dblUnitRetail = NULL 
+			FROM	@ItemsForPost itemCost
+			WHERE	itemCost.dblCost = dblUnitRetail 
 		END
 
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
