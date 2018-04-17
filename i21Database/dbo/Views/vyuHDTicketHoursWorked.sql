@@ -23,6 +23,7 @@
 			,a.intCurrencyExchangeRateTypeId
 			,a.dblCurrencyRate
 			,a.intItemId
+			,a.intItemUOMId
 			,strAgent = b.strName
 			,strInvoiceNumber = c.strInvoiceNumber
 			,strCreatedUserName = d.strName

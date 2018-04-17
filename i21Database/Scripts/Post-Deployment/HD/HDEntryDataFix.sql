@@ -460,7 +460,7 @@ GO
 GO
 
 	update
-		a set a.intItemId = c.intItemId
+		a set a.intItemId = c.intItemId, a.intItemUOMId = b.intItemUOMId
 	from
 		tblHDTicketHoursWorked a
 		left join tblHDJobCode b on b.intJobCodeId = a.intJobCodeId
