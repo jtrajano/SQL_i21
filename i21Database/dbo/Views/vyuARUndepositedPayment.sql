@@ -34,7 +34,7 @@ WHERE
 	AND (A.ysnImportedFromOrigin <> 1 AND A.ysnImportedAsPosted <> 1)
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
-	AND (ISNULL(A.dblAmountPaid, 0) > 0 OR (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod = 'ACH'))
+	AND (ISNULL(A.dblAmountPaid, 0) > 0 OR (ISNULL(A.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod = 'ACH')) OR SMPM.strPaymentMethod = 'Refund'
 	
 UNION ALL	
 	
@@ -73,3 +73,6 @@ WHERE
 	AND CM.intSourceTransactionId IS NULL
 	AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
 	AND (ISNULL(A.ysnImportedFromOrigin,0) <> 1 AND ISNULL(A.ysnImportedAsPosted,0) <> 1)
+GO
+
+

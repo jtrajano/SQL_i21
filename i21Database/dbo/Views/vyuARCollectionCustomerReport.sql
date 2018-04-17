@@ -10,7 +10,10 @@ SELECT intCompanyLocationId		=	(SELECT TOP 1 intCompanySetupID FROM tblSMCompany
 	, strCustomerAddress		=	[dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, Cus.strBillToAddress, Cus.strBillToCity, Cus.strBillToState, Cus.strBillToZipCode, Cus.strBillToCountry, Cus.strName, NULL)
 	, strCustomerPhone			=	EnPhoneNo.strPhone 
 	, strAccountNumber			=	(SELECT strAccountNumber FROM tblARCustomer WHERE [intEntityId] = Cus.[intEntityId]) 
-	, strTerm					=	Term.strTerm			
+	, strTerm					=	Term.strTerm		
+	, dtmLetterDate = GETDATE()	
+	, strCurrentUser = CURRENTUSER.strName
+	, strContactName = EC.strName		
 FROM (
 			SELECT 
 				[intEntityId]
@@ -42,3 +45,17 @@ LEFT JOIN (SELECT intTermID,
 				strTerm  
 			FROM 
 				tblSMTerm) Term ON Cus.intTermsId = Term.intTermID
+OUTER APPLY (
+	SELECT TOP 1 strName
+			   , intEntityContactId 
+	FROM dbo.vyuEMEntityContact WITH (NOLOCK) 
+	WHERE CusToCon.intEntityContactId = intEntityContactId
+) EC
+
+OUTER APPLY (
+	SELECT CU.intEntityId, EE.strName
+	FROM tblSMConnectedUser CU
+	LEFT JOIN (
+		SELECT intEntityId, strName FROM tblEMEntity
+	) EE ON EE.intEntityId = CU.intConcurrencyId
+) CURRENTUSER

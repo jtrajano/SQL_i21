@@ -22,6 +22,10 @@ SELECT ARI.intInvoiceId
 	, strCompanyFax				= SMCS.strCompanyFax
 	, strCompanyEmail			= SMCS.strCompanyEmail
 	, dtmLetterDate				= GETDATE()
+	, strCreatedByName = USERPOSTED.strName
+	, strCreatedByPhone = USERPOSTED.strPhone
+	, strCreatedByEmail = USERPOSTED.strEmail
+	, strSalesPersonName = SALESPERSON.strName
 FROM (
 	SELECT intInvoiceId
 		, intEntityCustomerId
@@ -30,7 +34,10 @@ FROM (
 		, dtmDueDate
 		, intTermId
 		, dblInvoiceTotal
-		, dblBaseInvoiceTotal		
+		, dblBaseInvoiceTotal	
+		, intEntityId
+		, intPostedById
+		, intEntitySalespersonId		
 	FROM dbo.tblARInvoice WITH (NOLOCK)
 	WHERE strType = 'Service Charge'
 	  AND ysnForgiven = 0
@@ -81,3 +88,9 @@ OUTER APPLY (
 		, strCompanyEmail		= strEmail
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) SMCS
+LEFT OUTER JOIN (
+	SELECT intEntityId, strName, strPhone, strEmail FROM dbo.tblEMEntity
+) USERPOSTED ON USERPOSTED.intEntityId = ARI.intPostedById
+LEFT OUTER JOIN(
+	SELECT intEntityId, strName FROM dbo.tblEMEntity WITH (NOLOCK)
+) SALESPERSON ON SALESPERSON.intEntityId = ARI.intEntitySalespersonId

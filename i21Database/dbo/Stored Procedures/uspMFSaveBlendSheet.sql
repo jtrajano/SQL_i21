@@ -19,6 +19,7 @@ BEGIN TRY
 	Declare @intCellId int
 	Declare @strPackagingCategoryId NVARCHAR(Max)
 	DECLARE @dblWOQuantity NUMERIC(38,20)
+	Declare @intPlannedShiftId int
 
 	SET @intWorkOrderId = 0;
 
@@ -41,6 +42,7 @@ BEGIN TRY
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
 		,intLocationId INT
+		,intPlannedShiftId INT
 		,intUserId INT
 		,intConcurrencyId INT
 		)
@@ -83,6 +85,7 @@ BEGIN TRY
 		,ysnUseTemplate
 		,ysnKittingEnabled
 		,intLocationId
+		,intPlannedShiftId
 		,intUserId
 		,intConcurrencyId
 		)
@@ -101,6 +104,7 @@ BEGIN TRY
 		,ysnUseTemplate
 		,ysnKittingEnabled
 		,intLocationId
+		,intPlannedShiftId
 		,intUserId
 		,intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -119,6 +123,7 @@ BEGIN TRY
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
 			,intLocationId INT
+			,intPlannedShiftId INT
 			,intUserId INT
 			,intConcurrencyId INT
 			)
@@ -238,6 +243,26 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Packaging Category'
 
+	Select @intPlannedShiftId=intPlannedShiftId From @tblBlendSheet
+	IF ISNULL(@intPlannedShiftId,0)=0
+	BEGIN
+		SELECT @intPlannedShiftId = intShiftId
+		FROM dbo.tblMFShift
+		WHERE intLocationId = @intLocationId
+			AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+				AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+		IF @intPlannedShiftId IS NULL
+		BEGIN
+			SELECT @intPlannedShiftId = intShiftId
+			FROM dbo.tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND intShiftSequence = 1
+		END
+
+		Update @tblBlendSheet set intPlannedShiftId=@intPlannedShiftId
+	END
+
 	BEGIN TRAN
 
 	IF @intWorkOrderId = 0
@@ -285,6 +310,8 @@ BEGIN TRY
 			,intConcurrencyId
 			,intManufacturingProcessId
 			,intTransactionFrom
+			,intPlannedShiftId
+			,dtmPlannedDate
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -310,6 +337,8 @@ BEGIN TRY
 			,intConcurrencyId + 1
 			,@intManufacturingProcessId
 			,1
+			,intPlannedShiftId
+			,dtmDueDate
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -327,6 +356,8 @@ BEGIN TRY
 			,a.intLastModifiedUserId = b.intUserId
 			,a.dtmLastModified = GetDate()
 			,a.intConcurrencyId = a.intConcurrencyId + 1
+			,a.intPlannedShiftId=b.intPlannedShiftId
+			,a.dtmPlannedDate = b.dtmDueDate
 		FROM tblMFWorkOrder a
 		JOIN @tblBlendSheet b ON a.intWorkOrderId = b.intWorkOrderId
 

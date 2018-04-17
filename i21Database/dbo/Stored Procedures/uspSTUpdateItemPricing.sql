@@ -334,7 +334,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
              set @SQL1 = @SQL1 + ' where 1=1 ' 
 	    
-		   if (@Location IS NOT NULL)
+		   if (@Location IS NOT NULL AND @Location != '')
 	          BEGIN 
 	                set @SQL1 = @SQL1 +  ' and  tblICItemPricing.intItemLocationId
 	                IN (select intItemLocationId from tblICItemLocation where intLocationId
@@ -342,7 +342,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
 	          END
 
-		   if (@Vendor IS NOT NULL)
+		   if (@Vendor IS NOT NULL AND @Vendor != '')
 	           BEGIN 
 	                 set @SQL1 = @SQL1 +  ' and  tblICItemPricing.intItemLocationId
 	                 IN (select intItemLocationId from tblICItemLocation where intVendorId
@@ -350,7 +350,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 				     IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 	           END
 
-		   if (@Category IS NOT NULL)
+		   if (@Category IS NOT NULL AND @Category != '')
 	           BEGIN
 	                 set @SQL1 = @SQL1 +  ' and tblICItemPricing.intItemId  
 	                 IN (select intItemId from tblICItem where intCategoryId IN
@@ -358,7 +358,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
 	           END
 
-		   if (@Family IS NOT NULL)
+		   if (@Family IS NOT NULL AND @Family != '')
 	           BEGIN
 		              set @SQL1 = @SQL1 +  ' and tblICItemPricing.intItemLocationId IN 
 		              (select intItemLocationId from tblICItemLocation where intFamilyId IN
@@ -366,7 +366,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					  IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
 	           END
 
-			if (@Class  IS NOT NULL)
+			if (@Class IS NOT NULL AND @Class != '')
 	            BEGIN
 	                  set @SQL1 = @SQL1 +  ' and tblICItemPricing.intItemLocationId IN 
 		              (select intItemLocationId from tblICItemLocation where intClassId IN
@@ -416,6 +416,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 				   (select intItemId from tblICItem where strDescription 
 				    like ''%' + LTRIM(@Description) + '%'' )'
 				END
+
       EXEC (@SQL1)
       SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT) 
 	  END
@@ -450,7 +451,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 
 		   set @SQL1 = @SQL1 + ' where 1=1 ' 
 
-		   if (@Location IS NOT NULL)
+		   if (@Location IS NOT NULL AND @Location != '')
 	          BEGIN 
 	                set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 	                IN (select intItemLocationId from tblICItemLocation where intLocationId
@@ -458,7 +459,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
 	          END
 
-		   if (@Vendor IS NOT NULL)
+		   if (@Vendor IS NOT NULL AND @Vendor != '')
 	           BEGIN 
 	                 set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 	                 IN (select intItemLocationId from tblICItemLocation where intVendorId
@@ -466,7 +467,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					 IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 	           END
 
-			  if (@Category IS NOT NULL)
+			if (@Category IS NOT NULL AND @Category != '')
 	             BEGIN
 	                  set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemId  
 	                  IN (select intItemId from tblICItem where intCategoryId IN
@@ -474,7 +475,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					   IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
 	             END
 
-			  if (@Family IS NOT NULL)
+			if (@Family IS NOT NULL AND @Family != '')
 	             BEGIN
 		              set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
 		              (select intItemLocationId from tblICItemLocation where intFamilyId IN
@@ -482,7 +483,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 					  IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
 	             END
 
-			  if (@Class IS NOT NULL)
+			if (@Class IS NOT NULL AND @Class != '')
 	              BEGIN
 	                  set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
 		              (select intItemLocationId from tblICItemLocation where intClassId IN
@@ -653,14 +654,14 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 	  SELECT DISTINCT intChildId FROM @tblTempOne WHERE strOldData != strNewData
 	) T1
 
-	DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
+	--DECLARE @strLocationIds AS NVARCHAR(MAX)= ''
 
 	--DECLARE @strEntityIds AS NVARCHAR(MAX)= ''
-	IF EXISTS(SELECT * FROM @tblTempOne)
-		BEGIN
-			SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
-			SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)	
-		END
+	--IF EXISTS(SELECT * FROM @tblTempOne)
+	--	BEGIN
+	--		SELECT @strLocationIds = @strLocationIds + COALESCE(CAST(intCompanyLocationId AS NVARCHAR(20)) + ',','') FROM @tblTempOne WHERE strOldData != strNewData
+	--		SET @strLocationIds = left(@strLocationIds, len(@strLocationIds)-1)	
+	--	END
 
 	--SELECT @strEntityIds = @strEntityIds + COALESCE(CAST(EM.intEntityId AS NVARCHAR(20)) + ',','')
 	--FROM tblEMEntity EM
@@ -738,7 +739,7 @@ SELECT @UpdateCount = count(*) from @tblTempOne WHERE strOldData !=  strNewData
 		-- Update Register Notification
 		IF EXISTS(SELECT * FROM @tblTempOne)
 			BEGIN
-				EXEC uspSTUpdateRegisterNotification @strLocationIds, @strEntityIds OUTPUT
+				EXEC uspSTUpdateRegisterNotification @Location, @strEntityIds OUTPUT
 			END
 		
 	END

@@ -221,7 +221,7 @@ BEGIN
 		BillDtl.dblTax
 		END as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId  AND intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
 	0 as OutboundDiscount,
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
 		0
@@ -555,7 +555,7 @@ BEGIN
 		BillDtl.dblTax
 		END as InboundTax,
 	0 as OutboundTax,
-	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = BillDtl.intBillId AND intInventoryReceiptChargeId IS NOT NULL),0) as InboundDiscount,
+	ISNULL((SELECT SUM(dblTotal) FROM tblAPBillDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId WHERE intBillId = BillDtl.intBillId AND B.strType = 'Other Charge'),0) as InboundDiscount,
 	0 as OutboundDiscount,
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN
 		0

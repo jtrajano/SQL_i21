@@ -65,8 +65,8 @@ From @tblItemFinal
 Select @dblRecipeQty=dblQuantity 
 From tblMFRecipe Where intRecipeId=(Select intRecipeId From @tblItemFinal)
 
-Select @dblAvailableQty = SUM(ISNULL(CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,0)) 
-From tblICLot Where intItemId=@intItemId And dblQty>0 And intLocationId=@intLocationId
+select @dblAvailableQty=SUM(dbo.[fnMFConvertQuantityToTargetItemUOM](v.intItemUOMId,f.intItemUOMId,v.dblAvailableNoOfPacks)) 
+from vyuMFInventoryView v join @tblItemFinal f on v.intItemId=f.intItemId where v.intItemId=@intItemId and v.dblQty>0 and v.intLocationId=@intLocationId
 
 Select TOP 1 @intWorkOrderId=ISNULL(intWorkOrderId,0),
 @dblWOQty=dblQuantity,@dtmDueDate=dtmExpectedDate,@intCellId=intManufacturingCellId 
@@ -98,9 +98,6 @@ Where r.intLocationId=@intLocationId And r.ysnActive=1 And ri.intRecipeId=@intRe
 
 Select @intItemId=intItemId From @tblItemFinal Where intRowNo=2
 
-Select @dblAvailableQty = SUM(ISNULL(CASE WHEN intWeightUOMId IS NULL THEN dblQty ELSE dblWeight END,0)) 
-From tblICLot Where intItemId=@intItemId And dblQty>0 And intLocationId=@intLocationId
-
 Set @intWorkOrderId=0
 Set @strWorkOrderNo=null
 Set @dblWOQty=null
@@ -115,8 +112,15 @@ SELECT @strWorkOrderNo= STUFF((SELECT ',' + strWorkOrderNo
             FROM tblMFWorkOrder Where intItemId=@intItemId And intSalesOrderLineItemId=@intSalesOrderDetailId
             FOR XML PATH('')) ,1,1,'')
 
-Update @tblItemFinal Set intWorkOrderId=ISNULL(@intWorkOrderId,0),strWorkOrderNo=@strWorkOrderNo,dblWOQty=@dblWOQty,dtmDueDate=@dtmDueDate,intCellId=@intCellId,
-dblAvailableQty=@dblAvailableQty Where intRowNo=2
+Update @tblItemFinal Set intWorkOrderId=ISNULL(@intWorkOrderId,0),strWorkOrderNo=@strWorkOrderNo,dblWOQty=@dblWOQty,dtmDueDate=@dtmDueDate,intCellId=@intCellId
+Where intRowNo=2
+
+Update f set f.dblAvailableQty=t.dblAvailableQty From @tblItemFinal f
+Join
+(select f.intItemId, SUM(dbo.[fnMFConvertQuantityToTargetItemUOM](v.intItemUOMId,f.intItemUOMId,v.dblAvailableNoOfPacks)) dblAvailableQty
+from vyuMFInventoryView v join @tblItemFinal f on v.intItemId=f.intItemId where v.dblQty>0 and v.intLocationId=@intLocationId
+and f.intRowNo>1 group by f.intItemId
+) t on f.intItemId=t.intItemId and f.intRowNo>1
 
 --Final Select
 Select *,@intSalesOrderId AS intSalesOrderId,@intSalesOrderDetailId AS intSalesOrderDetailId From @tblItemFinal

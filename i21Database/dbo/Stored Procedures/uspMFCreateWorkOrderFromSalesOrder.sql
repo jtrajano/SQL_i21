@@ -50,6 +50,7 @@ BEGIN TRY
 	DECLARE @dtmPlannedDate DATETIME
 	DECLARE @intPlannedShiftId INT
 	DECLARE @intTransactionFrom INT
+	DECLARE @dtmBusinessDate DATETIME
 	DECLARE @tblWO AS TABLE (
 		intRowNo INT IDENTITY
 		,dblQuantity NUMERIC(18, 6)
@@ -171,6 +172,28 @@ BEGIN TRY
 				,@intPlannedShiftId = intPlannedShiftId
 			FROM @tblWO
 			WHERE intRowNo = @intMinWO
+
+			IF @dtmPlannedDate IS NULL
+				SET @dtmPlannedDate = GETDATE()
+
+			IF @intPlannedShiftId IS NULL
+			BEGIN
+				SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmPlannedDate, @intLocationId)
+
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+						AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+				IF @intPlannedShiftId IS NULL
+				BEGIN
+					SELECT @intPlannedShiftId = intShiftId
+					FROM dbo.tblMFShift
+					WHERE intLocationId = @intLocationId
+						AND intShiftSequence = 1
+				END
+			END
 
 			IF ISNULL(@intMachineId, 0) = 0
 				SELECT TOP 1 @intMachineId = m.intMachineId
@@ -473,8 +496,6 @@ BEGIN TRY
 
 			IF @intPlannedShiftId IS NULL
 			BEGIN
-				DECLARE @dtmBusinessDate DATETIME
-
 				SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmPlannedDate, @intLocationId)
 
 				SELECT @intPlannedShiftId = intShiftId
@@ -527,6 +548,10 @@ BEGIN TRY
 			SELECT @intItemUOMId = intItemUOMId
 			FROM tblSOSalesOrderDetail
 			WHERE intSalesOrderDetailId = @intSalesOrderDetailId
+
+			--if the item does not belong to the SO, it is the recipe input item (next level recipe), use stock uom
+			If Not Exists (Select 1 From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId AND intItemId=@intItemId)
+				Select @intItemUOMId=intItemUOMId From tblICItemUOM where intItemId=@intItemId AND ysnStockUnit=1
 
 			INSERT INTO tblMFWorkOrder (
 				strWorkOrderNo

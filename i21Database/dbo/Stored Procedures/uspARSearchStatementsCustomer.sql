@@ -10,17 +10,24 @@
 	,@ysnPrintCreditBalance BIT = 1
 	,@ysnPrintOnlyPastDue	BIT = 0
 	,@ysnPrintZeroBalance	BIT = 0
-	,@intEntityUserId		INT = NULL
+	,@intEntityUserId		INT = NULL 
+	,@strAsOfDateFrom		NVARCHAR(50) = ''
 )
 AS
 
 DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDate				AS DATETIME			= NULL
+	  , @dtmAsOfDateFrom			AS DATETIME			= NULL
+
 
 SET @strAccountStatusCodeLocal	= NULLIF(@strAccountCode, '')
 SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
+
+IF @strAsOfDateFrom <> ''
+	SET @dtmAsOfDateFrom		= ISNULL(CONVERT(DATETIME, @strAsOfDateFrom), GETDATE())
+
 SET @intEntityUserId			= NULLIF(@intEntityUserId, 0)
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
@@ -54,6 +61,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo = @dtmAsOfDate
 										, @strCompanyLocation = @strCompanyLocation
 										, @intEntityUserId = @intEntityUserId
+										, @dtmDateFrom = @dtmAsOfDateFrom
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (

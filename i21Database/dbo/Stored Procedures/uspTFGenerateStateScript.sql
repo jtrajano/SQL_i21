@@ -494,6 +494,8 @@ BEGIN TRY
 	PRINT @FPResults
 
 	PRINT (CHAR(10) + 'EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets')
+
+	PRINT (CHAR(10) + 'GO')
 	
 
 END TRY

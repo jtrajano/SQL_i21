@@ -54,6 +54,7 @@
 	[strInterfaceName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strIdocName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnUseBulkCopy] BIT NULL DEFAULT 0,
+	[strReprocessSQL] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intDelayTime] INT NULL DEFAULT 0,
 	[ysnSkip] BIT NULL DEFAULT 0,
 	[intConcurrencyId] INT NULL DEFAULT 0,

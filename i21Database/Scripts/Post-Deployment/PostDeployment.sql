@@ -45,6 +45,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\29_TransportationMode.sql
 :r .\SM\DefaultData\30_ImportFileHeader.sql
 :r .\SM\DefaultData\31_Calendar.sql
+:r .\SM\DefaultData\32_DynamicCSV.sql
 :r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
@@ -163,12 +164,13 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
--- Canned Panels
+-- Canned Panels \ Dashboard Panels
 :r .\DB\1_CannedPanels_Panel.sql
 :r .\DB\2_CannedPanels_Column.sql
 :r .\DB\3_CannedPanels_Format.sql
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
+:r .\DB\7_DeleteAllFloatingPanels.sql
 
 -- General Ledger
 :r .\GL\DefaultData\1a_AccountStructure.sql
@@ -389,6 +391,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql
 :r .\EM\1740_Activate_Default_Contact.sql
 :r .\EM\1810_Set_Default_Language.sql
+:r .\EM\1810_Fix_Check_Payee_Name.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
@@ -419,6 +422,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\WA_Washington.sql
 :r .\TF\DefaultData\OH_Ohio.sql
 :r .\TF\DefaultData\NM_NewMexico.sql
+:r .\TF\DefaultData\SC_SouthCarolina.sql
+:r .\TF\DefaultData\PA_Pennsylvania.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

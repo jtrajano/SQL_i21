@@ -47,11 +47,25 @@ SELECT
 	,ARCOD.dblPrepaids				 	
 	,ARCO.dblPrepaidsSum
 	,ARCOD.dtmDate					 
-	,ARCOD.dtmDueDate	
+	,ARCOD.dtmDueDate
+	, dtmLetterDate = GETDATE()
+	, strCreatedByName = USERENTERED.strName
+	, strCreatedByPhone = USERENTERED.strPhone
+	, strCreatedByEmail = USERENTERED.strEmail
+	, strSalesPersonName = SALESPERSON.strName	
  FROM 
 	tblARCollectionOverdueDetail ARCOD
 INNER JOIN
 	tblARCollectionOverdue ARCO ON ARCOD.intEntityCustomerId = ARCO.intEntityCustomerId 
-WHERE intInvoiceId NOT IN (SELECT intInvoiceId FROm tblARInvoice WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
+INNER JOIN (
+	SELECT intInvoiceId, intPostedById, intEntityId, intEntitySalespersonId, intEntityContactId FROM tblARInvoice
+) I ON I.intInvoiceId = ARCOD.intInvoiceId
+LEFT OUTER JOIN (
+	SELECT intEntityId, strName, strPhone, strEmail FROM dbo.tblEMEntity WITH (NOLOCK)
+) USERENTERED ON USERENTERED.intEntityId = I.intEntityId
+LEFT OUTER JOIN(
+	SELECT intEntityId, strName FROM dbo.tblEMEntity WITH (NOLOCK)
+) SALESPERSON ON SALESPERSON.intEntityId = I.intEntitySalespersonId
+WHERE ARCOD.intInvoiceId NOT IN (SELECT intInvoiceId FROm tblARInvoice WHERE strTransactionType IN ('Credit Memo', 'Customer Prepayment', 'Overpayment') AND ysnPaid = 1) 
 
 

@@ -398,6 +398,7 @@ BEGIN
 			,[dblItemTermDiscount]					= 0
 			,[strDocumentNumber]					= strInvoiceReportNumber
 		FROM tblCFInvoiceFeeStagingTable
+		WHERE strUserId = @username
 
 		--GROUP BY 
 		--intCustomerId

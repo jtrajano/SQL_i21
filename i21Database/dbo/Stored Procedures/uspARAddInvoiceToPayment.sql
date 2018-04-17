@@ -77,14 +77,14 @@ IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [y
 			RAISERROR('Invoice of type Cash cannot be added!', 16, 1);
 		RETURN 0;
 	END
-	
-IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 AND [strTransactionType] = 'Cash Refund')
-	BEGIN		
-		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('Invoice of type Cash Refund cannot be added!', 16, 1);
-		RETURN 0;
-	END
-
+/* START AR-7078*/	
+--IF EXISTS(SELECT NULL FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [ysnPosted] = 1 AND [strTransactionType] = 'Cash Refund')
+--	BEGIN		
+--		IF ISNULL(@RaiseError,0) = 1
+--			RAISERROR('Invoice of type Cash Refund cannot be added!', 16, 1);
+--		RETURN 0;
+--	END
+/*END AR-7078*/
 DECLARE @InvoiceTotal		NUMERIC(18, 6)
 	,@BaseInvoiceTotal		NUMERIC(18, 6)
 	,@InvoiceAmountDue		NUMERIC(18, 6)
@@ -153,14 +153,15 @@ SET @BasePaymentTotal = [dbo].fnRoundBanker(ISNULL((SELECT SUM(ISNULL(dblBasePay
 DECLARE @ErrorMsg NVARCHAR(100)
 SET @ErrorMsg = CONVERT(NVARCHAR(100),CAST(ISNULL(@Payment,@ZeroDecimal) AS MONEY),2) 
 
-IF (@PaymentTotal + @Payment) > (@AmountPaid + @Payment) AND @TransactionType <> 'Customer Prepayment'
-	BEGIN		
+IF (CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId) THEN @PaymentTotal ELSE @AmountPaid END + @Payment) > (@AmountPaid + @Payment) AND (@TransactionType <> 'Customer Prepayment' OR @TransactionType <> 'Cash Refund' )
+	BEGIN	
 		IF ISNULL(@RaiseError,0) = 1
+		
 			RAISERROR('Payment of %s for invoice will cause an under payment.', 16, 1, @ErrorMsg);
 		RETURN 0;
 	END
 
-IF ISNULL(@AllowOverpayment,0) = 0 AND (@PaymentTotal + @Payment) > (@AmountPaid + @Payment)
+IF ISNULL(@AllowOverpayment,0) = 0 AND (CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARPaymentDetail WHERE [intPaymentId] = @PaymentId) THEN @PaymentTotal ELSE @AmountPaid END  + @Payment) > (@AmountPaid + @Payment)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('Payment of %s for invoice will cause an overpayment.', 16, 1, @ErrorMsg);
@@ -232,8 +233,8 @@ BEGIN TRY
 		,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 		,[dblInterest]				= @Interest
 		,[dblBaseInterest]			= @BaseInterest
-		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - (@Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
-		,[dblBaseAmountDue]			= (@BaseInvoiceAmountDue + @BaseInterest) - (@BasePayment + (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END))
+		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - @Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)
+		,[dblBaseAmountDue]			= (@BaseInvoiceAmountDue + @BaseInterest) - @BasePayment + (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END)
 		,[dblPayment]				= @Payment		
 		,[dblBasePayment]			= @BasePayment		
 		,[strInvoiceReportNumber]	= @InvoiceReportNumber

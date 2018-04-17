@@ -226,6 +226,23 @@ BEGIN
 			GOTO With_Rollback_Exit    
 		END 
 	END 
+
+	-- Check if non-active lots slipped through the shipment screen
+	DECLARE @strLotNo NVARCHAR(100)
+	SELECT TOP 1 @strLotNo = l.strLotNumber
+	FROM tblICInventoryShipmentItemLot sl
+		INNER JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentItemId = sl.intInventoryShipmentItemId
+		INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = si.intInventoryShipmentId
+		INNER JOIN tblICLot l ON l.intLotId = sl.intLotId
+	WHERE s.intInventoryShipmentId = @intTransactionId
+		AND l.intLotStatusId <> 1
+
+	IF @strLotNo IS NOT NULL
+	BEGIN
+		-- Unable to post lot %s. Only active lots are allowed to be shipped.
+		EXEC uspICRaiseError 80208, @strLotNo;
+		GOTO With_Rollback_Exit
+	END
 	
 	-- Check if the Shipment quantity matches the total Quantity in the Lot
 	BEGIN 
@@ -1111,12 +1128,6 @@ BEGIN
 			@ysnPost
 			,@intTransactionId 
 			,@intEntityUserSecurityId
-
-	-- Mark stock reservation as posted (or unposted)
-	EXEC dbo.uspICPostStockReservation
-		@intTransactionId
-		,@INVENTORY_SHIPMENT_TYPE
-		,@ysnPost
 
 	COMMIT TRAN @TransactionName
 END 

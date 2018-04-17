@@ -60,4 +60,5 @@ GO
 	BEGIN
 		UPDATE tblSCTicket SET intTicketTypeId = (select TOP 1 SCTicketType.intTicketTypeId from tblSCListTicketTypes SCTicketType where SCTicketType.strInOutIndicator = strInOutFlag and SCTicketType.intTicketType = intTicketType)
 	END
+	PRINT 'END Checking default value of SCListTicketType'
 GO

@@ -27,10 +27,11 @@
 		UPDATE tblSMPaymentMethod SET strPaymentMethod = 'Debit Memos and Payments' WHERE strPaymentMethod = 'Debit Memos and Payments'
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Credit')
+	UPDATE tblSMPaymentMethod SET strPaymentMethod = 'Manual Credit Card' WHERE strPaymentMethod = 'Credit'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Manual Credit Card')
 	BEGIN
 		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
-		VALUES(4, 'Credit', NULL, NULL, NULL, 1, 0)
+		VALUES(4, 'Manual Credit Card', NULL, NULL, NULL, 1, 0)
 	END
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Refund')

@@ -335,12 +335,12 @@ IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
 	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-18'
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-18', N'Sales', N'[EntityName]', N'vyuARServiceChargeInvoiceReport', N'strCustomerName', N'nvarchar', N'strCustomerName', N'Customer Name', 0, 0)
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-18', N'Sales', N'[EntityName]', N'vyuARCollectionCustomerReport', N'strCustomerName', N'nvarchar', N'strCustomerName', N'Customer Name', 0, 0)
 END
 ELSE
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-18', N'Sales', N'[EntityName]', N'vyuARServiceChargeInvoiceReport', N'strCustomerName', N'nvarchar', N'strCustomerName', N'Customer Name', 0, 0)
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-18', N'Sales', N'[EntityName]', N'vyuARCollectionCustomerReport', N'strCustomerName', N'nvarchar', N'strCustomerName', N'Customer Name', 0, 0)
 END
 
 IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-19')
@@ -371,12 +371,12 @@ IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
 	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-21'
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-21', N'Sales', N'[Date]', N'vyuARServiceChargeInvoiceReport', N'dtmLetterDate', N'datetime', N'dtmLetterDate', N'Letter Date', 0, 0)
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-21', N'Sales', N'[Date]', N'vyuARCollectionCustomerReport', N'dtmLetterDate', N'datetime', N'dtmLetterDate', N'Letter Date', 0, 0)
 END
 ELSE
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-21', N'Sales', N'[Date]', N'vyuARServiceChargeInvoiceReport', N'dtmLetterDate', N'datetime', N'dtmLetterDate', N'Letter Date', 0, 0)
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strDataType], [strPlaceHolderName], [strPlaceHolderDescription], [ysnTable], [intConcurrencyId]) VALUES (@intPlaceHolderId, N'PH-21', N'Sales', N'[Date]', N'vyuARCollectionCustomerReport', N'dtmLetterDate', N'datetime', N'dtmLetterDate', N'Letter Date', 0, 0)
 END
 
 IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-22'))
@@ -402,6 +402,248 @@ BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
 	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-23" style="border:none" placeholder="Amount Overdue 10 Days" readonly="">', N'vyuARCollectionOverdueReport', N'dbl30DaysSum', N'dbl30DaysSum', N'Amount Overdue 10 Days', 0, N'PH-23', 0, N'numeric')
 END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-24'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-24')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-24" style="border:none" placeholder="Total AR Amount Due" readonly="">', N'vyuARCollectionOverdueReport', N'dbl10DaysSum', N'dbl10DaysSum', N'Total AR Amount Due', 0, N'PH-24', 0, N'numeric')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<input type="value" name="PH-24" style="border:none" placeholder="Total AR Amount Due" readonly="">', N'vyuARCollectionOverdueReport', N'dbl10DaysSum', N'dbl10DaysSum', N'Total AR Amount Due', 0, N'PH-24', 0, N'numeric')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-25'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-25')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Entity Address]', N'vyuARCollectionCustomerReport', N'strCustomerAddress', N'strEntityAddress', N'Customer or Vendor Address', 0, N'PH-25', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Entity Address]', N'vyuARCollectionCustomerReport', N'strCustomerAddress', N'strEntityAddress', N'Customer or Vendor Address', 0, N'PH-25', 0, N'nvarchar')
+END
+
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-26'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-26')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Account Number]', N'vyuARCollectionCustomerReport', N'strAccountNumber', N'strAccountNumber', N'Customer or Vendor Account Number', 0, N'PH-26', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Account Number]', N'vyuARCollectionCustomerReport', N'strAccountNumber', N'strAccountNumber', N'Customer or Vendor Account Number', 0, N'PH-26', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-27'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-27')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[EntityPhoneNumber]', N'vyuARCollectionCustomerReport', N'strCustomerPhone', N'strCustomerPhone', N'Phone number of Customer, Vendor, Employee, etc.', 0, N'PH-27', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[EntityPhoneNumber]', N'vyuARCollectionCustomerReport', N'strCustomerPhone', N'strCustomerPhone', N'Phone number of Customer, Vendor, Employee, etc.', 0, N'PH-27', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-28'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-28')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[ARBalance]', N'vyuARCollectionOverdueReport', N'dbl10DaysSum', N'dblARBalance', N'Customer AR Balance', 0, N'PH-28', 0, N'numeric')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[ARBalance]', N'vyuARCollectionOverdueReport', N'dbl10DaysSum', N'dblARBalance', N'Customer AR Balance', 0, N'PH-28', 0, N'numeric')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-29'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-29')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CurrentUser]', N'vyuARCollectionCustomerReport', N'strCurrentUser', N'strCurrentUser', N'Currently logged user', 0, N'PH-29', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CurrentUser]', N'vyuARCollectionCustomerReport', N'strCurrentUser', N'strCurrentUser', N'Currently logged user', 0, N'PH-29', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-30'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-30')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[TransactionDate]', N'vyuARCollectionOverdueReport', N'dtmDate', N'dtmDate', N'Invoice, voucher, sales order, etc. record/transaction date', 0, N'PH-30', 0, N'datetime')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[TransactionDate]', N'vyuARCollectionOverdueReport', N'dtmDate', N'dtmDate', N'Invoice, voucher, sales order, etc. record/transaction date', 0, N'PH-30', 0, N'datetime')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-31'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-31')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[TransactionNumber]', N'vyuARCollectionOverdueReport', N'strInvoiceNumber', N'strInvoiceNumber', N'Invoice, voucher, sales order, etc. record/transaction number', 0, N'PH-31', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[TransactionNumber]', N'vyuARCollectionOverdueReport', N'strInvoiceNumber', N'strInvoiceNumber', N'Invoice, voucher, sales order, etc. record/transaction number', 0, N'PH-31', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-32'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-32')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[TransactionTotal]', N'vyuARCollectionOverdueReport', N'dblInvoiceTotal', N'dblInvoiceTotal', N'Invoice, voucher, sales order, etc. record/transaction amount total', 0, N'PH-32', 0, N'numeric')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[TransactionTotal]', N'vyuARCollectionOverdueReport', N'dblInvoiceTotal', N'dblInvoiceTotal', N'Invoice, voucher, sales order, etc. record/transaction amount total', 0, N'PH-32', 0, N'numeric')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-33'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-33')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[EffectiveDate]', N'vyuARCollectionOverdueReport', N'dtmDate', N'dtmDate', N'(reserved)', 0, N'PH-33', 0, N'datetime')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[EffectiveDate]', N'vyuARCollectionOverdueReport', N'dtmDate', N'dtmDate', N'(reserved)', 0, N'PH-33', 0, N'datetime')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-34'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-34')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Company Name]', N'vyuARCollectionCustomerReport', N'strCompanyName', N'strCompanyName', N'Name of the company', 0, N'PH-34', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Company Name]', N'vyuARCollectionCustomerReport', N'strCompanyName', N'strCompanyName', N'Name of the company', 0, N'PH-34', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-35'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-35')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Transaction Amount]', N'vyuARCollectionOverdueReport', N'dblInvoiceTotal', N'dblInvoiceTotal', N'Invoice, voucher, sales order, etc. record/transaction amount', 0, N'PH-35', 0, N'numeric')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Transaction Amount]', N'vyuARCollectionOverdueReport', N'dblInvoiceTotal', N'dblInvoiceTotal', N'Invoice, voucher, sales order, etc. record/transaction amount', 0, N'PH-35', 0, N'numeric')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-36'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-36')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Terms]', N'vyuARCollectionOverdueReport', N'strTerm', N'strTerm', N'Payment Terms used in Transaction', 0, N'PH-36', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[Terms]', N'vyuARCollectionOverdueReport', N'strTerm', N'strTerm', N'Payment Terms used in Transaction', 0, N'PH-36', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-37'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-37')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[EntityPhoneNumber]', N'vyuARCollectionCustomerReport', N'strCustomerPhone', N'strCustomerPhone', N'Phone number of Customer, Vendor, Employee, etc.', 0, N'PH-37', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[EntityPhoneNumber]', N'vyuARCollectionCustomerReport', N'strCustomerPhone', N'strCustomerPhone', N'Phone number of Customer, Vendor, Employee, etc.', 0, N'PH-37', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-38'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-38')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[ContactName]', N'vyuARCollectionCustomerReport', N'strContactName', N'strContactName', N'Name of Entity Contact', 0, N'PH-38', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[ContactName]', N'vyuARCollectionCustomerReport', N'strContactName', N'strContactName', N'Name of Entity Contact', 0, N'PH-38', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-39'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-39')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[ExpirationDate]', N'vyuARCollectionOverdueReport', N'dtmDate', N'dtmDate', N'Transaction Expiration (when applicable)', 0, N'PH-39', 0, N'datetime')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[ExpirationDate]', N'vyuARCollectionOverdueReport', N'dtmDate', N'dtmDate', N'Transaction Expiration (when applicable)', 0, N'PH-39', 0, N'datetime')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-40'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-40')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CreatedByName]', N'vyuARCollectionOverdueReport', N'strCreatedByName', N'strCreatedByName', N'Name of who created the transaction', 0, N'PH-40', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CreatedByName]', N'vyuARCollectionOverdueReport', N'strCreatedByName', N'strCreatedByName', N'Name of who created the transaction', 0, N'PH-40', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-41'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-41')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CreatedByPhone]', N'vyuARCollectionOverdueReport', N'strCreatedByPhone', N'strCreatedByPhone', N'Phone number of who created the transaction', 0, N'PH-41', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CreatedByPhone]', N'vyuARCollectionOverdueReport', N'strCreatedByPhone', N'strCreatedByPhone', N'Phone number of who created the transaction', 0, N'PH-41', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-42'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-42')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CreatedByEmail]', N'vyuARCollectionOverdueReport', N'strCreatedByEmail', N'strCreatedByEmail', N'Email of who created the transaction', 0, N'PH-42', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[CreatedByEmail]', N'vyuARCollectionOverdueReport', N'strCreatedByEmail', N'strCreatedByEmail', N'Email of who created the transaction', 0, N'PH-42', 0, N'nvarchar')
+END
+
+IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-43'))
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-43')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[SalesPersonName]', N'vyuARCollectionOverdueReport', N'strSalesPersonName', N'strSalesPersonName', N'Sales Person of the created transaction', 0, N'PH-43', 0, N'nvarchar')
+END
+ELSE
+BEGIN
+	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'[SalesPersonName]', N'vyuARCollectionOverdueReport', N'strSalesPersonName', N'strSalesPersonName', N'Sales Person of the created transaction', 0, N'PH-43', 0, N'nvarchar')
+END
+
 
 SET IDENTITY_INSERT [dbo].[tblARLetterPlaceHolder] OFF
 

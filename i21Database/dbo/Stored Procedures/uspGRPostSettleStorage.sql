@@ -88,6 +88,8 @@ BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
 	DECLARE @intLotId INT
+	DECLARE @requireApproval AS BIT
+	DECLARE @dblTotal AS DECIMAL(18,6)
 
 	DECLARE @intCashPriceUOMId INT
 
@@ -1228,14 +1230,27 @@ BEGIN TRY
 
 					IF @@ERROR <> 0
 						GOTO SettleStorage_Exit;
-
-					EXEC [dbo].[uspAPPostBill] 
-						 @post = 1
-						,@recap = 0
-						,@isBatch = 0
-						,@param = @intCreatedBillId
-						,@userId = @intCreatedUserId
-						,@success = @success OUTPUT
+                    
+					SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId
+					
+					EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+								@type = N'AccountsPayable.view.Voucher',
+								@transactionEntityId = @EntityId,
+								@currentUserEntityId = @intCreatedUserId,
+								@locationId = @LocationId,
+								@amount = @dblTotal,
+								@requireApproval = @requireApproval OUTPUT
+					
+					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+					BEGIN
+							EXEC [dbo].[uspAPPostBill] 
+								 @post = 1
+								,@recap = 0
+								,@isBatch = 0
+								,@param = @intCreatedBillId
+								,@userId = @intCreatedUserId
+								,@success = @success OUTPUT
+					END
 
 					IF @@ERROR <> 0
 						GOTO SettleStorage_Exit;

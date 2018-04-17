@@ -77,7 +77,6 @@ BEGIN
 
 
 
-
 		----// START PM Morris File format validation
 		--IF(@intCsvFormat = 0) -- 0 = PM Morris
 		--BEGIN
@@ -260,6 +259,7 @@ BEGIN
 					END
 				
 
+
 				INSERT INTO @tblTempPMM
 				SELECT DISTINCT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
 								--, replace(convert(NVARCHAR, DATEADD(DAY, (DATEDIFF(DAY, @NextDayID, @dtmBeginningDate) / 7) * 7 + 7, @NextDayID), 111), '/', '') as dtmWeekEndingDate
@@ -305,9 +305,10 @@ BEGIN
 								, '' as strMFGDealNameTHREE
 								, 0 as dblMFGDealDiscountAmountTHREE
 								, CASE WHEN CRP.strProgramName IS NOT NULL THEN 0
-										WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot 
-										ELSE 0 END as dblFinalSalesPrice
-								
+										--WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot 
+										--ELSE 0 END as dblFinalSalesPrice
+										ELSE dblTrlLineTot END as dblFinalSalesPrice
+
 								--Optional Fields
 								, NULL AS intStoreTelephone
 								, '' AS strStoreContactName
@@ -326,10 +327,8 @@ BEGIN
 						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-				JOIN tblSTRetailAccount STRT ON STRT.intStoreId = ST.intStoreId AND STRT.intEntityId = @intVendorId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
 				JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
-				--JOIN tblSTStore STMAP ON STMAP.intStoreId = APV.intStoreStoreId
 				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 						AND TR.strTrpPaycode IN ('Change', 'CREDIT')
@@ -450,16 +449,37 @@ BEGIN
 		END
 
 
+
 		IF(@strStatusMsg = 'Success')
 		BEGIN
-			--START mark ysnSubmitted = 1 (mark as submitted)
-			UPDATE tblSTTranslogRebates
-				SET ysnSubmitted = 1
-				WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-				AND CAST(dtmDate as DATE) >= @dtmBeginningDate
-				AND CAST(dtmDate as DATE) <= @dtmEndingDate
-				AND ysnSubmitted = 0
-			--END mark ysnSubmitted = 1 (mark as submitted)	
+			IF(@intCsvFormat = 0) -- 0 = PM Morris
+			BEGIN
+				IF EXISTS(SELECT COUNT(strTransactionIdCode) FROM @tblTempPMM)
+				BEGIN
+					--START mark ysnSubmitted = 1 (mark as submitted)
+					UPDATE tblSTTranslogRebates
+						SET ysnSubmitted = 1
+						WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+						AND CAST(dtmDate as DATE) >= @dtmBeginningDate
+						AND CAST(dtmDate as DATE) <= @dtmEndingDate
+						AND ysnSubmitted = 0
+					--END mark ysnSubmitted = 1 (mark as submitted)	
+				END
+			END
+			ELSE IF(@intCsvFormat = 1) -- 1 = RJ REYNOLDS
+			BEGIN
+				IF EXISTS(SELECT COUNT(strMarketBasketTransactionId) FROM @tblTempRJR)
+				BEGIN
+					--START mark ysnSubmitted = 1 (mark as submitted)
+					UPDATE tblSTTranslogRebates
+						SET ysnSubmitted = 1
+						WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+						AND CAST(dtmDate as DATE) >= @dtmBeginningDate
+						AND CAST(dtmDate as DATE) <= @dtmEndingDate
+						AND ysnSubmitted = 0
+					--END mark ysnSubmitted = 1 (mark as submitted)	
+				END
+			END
 		END
 		--ELSE IF NOT EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
 		ELSE
@@ -470,6 +490,7 @@ BEGIN
 			
 			RETURN
 		END
+
 
 
 		IF(@intCsvFormat = 0) -- 0 = PM Morris
@@ -501,7 +522,6 @@ BEGIN
 			SELECT * FROM @tblTempRJR
 			ORDER BY intOutletNumber ASC
 		END
-		
 
 		--DECLARE @SQL NVARCHAR(MAX)
 		--SET @SQL = 'DELETE FROM ' + @strTableName

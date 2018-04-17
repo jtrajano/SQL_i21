@@ -3,7 +3,7 @@ AS
 SELECT intEntityCustomerId          = C.intEntityId
      , intEntityId					= C.intEntityId
 	 , strCustomerName				= C.strName
-	 , strTerm = C.strCustomerTerm --CI.strTerm
+	 , strTerm						= C.strCustomerTerm
 	 , C.strCustomerNumber
 	 , C.strAddress
 	 , C.strZipCode
@@ -38,6 +38,7 @@ SELECT intEntityCustomerId          = C.intEntityId
 	 , dblThru						= ISNULL(CI.dblThru, CONVERT(NUMERIC(18,6), 0))
 	 , dblNextPaymentAmount			= ISNULL(CI.dblNextPaymentAmount, CONVERT(NUMERIC(18,6), 0))
 	 , dblAmountPastDue				= ISNULL(CI.dblAmountPastDue, CONVERT(NUMERIC(18,6), 0))
+	 , dbl31DaysAmountDue			= ISNULL(CI.dbl60Days, CONVERT(NUMERIC(18,6), 0)) + ISNULL(CI.dbl90Days, CONVERT(NUMERIC(18,6), 0)) + ISNULL(CI.dbl91Days, CONVERT(NUMERIC(18,6), 0))
 	 , intRemainingBudgetPeriods	= ISNULL(CI.intRemainingBudgetPeriods, CONVERT(NUMERIC(18,6), 0))
 	 , intAveragePaymentDays		= ISNULL(CI.intAveragePaymentDays, CONVERT(NUMERIC(18,6), 0))	 
 	 , dtmNextPaymentDate			= CI.dtmNextPaymentDate

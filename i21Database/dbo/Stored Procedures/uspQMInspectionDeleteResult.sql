@@ -1,13 +1,11 @@
-﻿CREATE PROCEDURE [dbo].[uspQMInspectionDeleteResult]
-	@ReceiptId INT
-
+﻿CREATE PROCEDURE [dbo].[uspQMInspectionDeleteResult] @intProductValueId INT -- intInventoryReceiptId / intInventoryShipmentId
+	,@intProductTypeId INT = 3 -- 3 / 4 (Receipt / Shipment)
 AS
-
-SET QUOTED_IDENTIFIER OFF  
-SET ANSI_NULLS ON  
-SET NOCOUNT ON  
-SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
 BEGIN
 	-- Remove values from Quality Table for Incoming Inspection Result
@@ -15,6 +13,6 @@ BEGIN
 	FROM tblQMTestResult
 	WHERE intSampleId IS NULL
 		AND intControlPointId = 3
-		AND intProductTypeId = 3
-		AND intProductValueId = @ReceiptId
+		AND intProductTypeId = @intProductTypeId
+		AND intProductValueId = @intProductValueId
 END

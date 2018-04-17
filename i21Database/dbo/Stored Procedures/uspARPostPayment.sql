@@ -1347,7 +1347,25 @@ SET @batchIdUsed = @batchId
 						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
 				WHERE
 					I.strTransactionType = 'Customer Prepayment'					
-					
+				
+				-- Cash Refund
+				INSERT INTO @ARReceivableInvalidData
+				SELECT  'Payment: ' + P.strRecordNumber +  ' was created from ' + ARI.strInvoiceNumber +'. Unpost the invoice to cerate new refund.'
+						,'Receivable'
+						,P.strRecordNumber
+						,@batchId
+						,P.intPaymentId FROM tblARPaymentDetail PD
+				INNER JOIN tblARPayment P
+					ON P.intPaymentId = PD.intPaymentId
+				INNER JOIN @ARReceivablePostData PostData
+					ON PostData.intPaymentId = P.intPaymentId
+				INNER JOIN tblARInvoice	ARI
+					ON ARI.intInvoiceId = PD.intInvoiceId
+				WHERE ARI.strTransactionType = 'Cash Refund' and ARI.ysnPosted = 1
+
+
+
+
 			END
 		
 	--Get all invalid		
@@ -1570,13 +1588,17 @@ IF @post = 1
 			UPDATE 
 				tblARPayment
 			SET 
-				 intAccountId			= C.intUndepositedFundsId
+				 intAccountId			= CASE WHEN SPM.strPaymentMethod = 'Refund' THEN ISNULL(intARAccount,C.intUndepositedFundsId) ELSE C.intUndepositedFundsId END
 				,intWriteOffAccountId	= CASE WHEN ISNULL(P.intWriteOffAccountId,0) = 0 THEN @WriteOffAccount ELSE P.intWriteOffAccountId END
 			FROM
 				tblARPayment P								
 			INNER JOIN 
 				tblSMCompanyLocation C
 					ON P.intLocationId = C.intCompanyLocationId
+			INNER JOIN 
+				tblSMPaymentMethod SPM
+					ON SPM.intPaymentMethodID = P.intPaymentMethodId
+				
 			WHERE
 				P.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 				AND ISNULL(C.intUndepositedFundsId,0) <> 0
@@ -1648,11 +1670,11 @@ IF @post = 1
 											WHEN UPPER(RTRIM(LTRIM(A.strPaymentMethod))) = UPPER('CF Invoice') THEN ISNULL(A.intWriteOffAccountId, @intCFAccount)
 											ELSE A.intAccountId
 											END
-			,dblDebit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
+			,dblDebit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 OR PM.strPaymentMethod = 'Refund' THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= A.strNotes 
+			,strDescription				= CASE WHEN(PM.strPaymentMethod = 'Refund') THEN (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) ELSE A.strNotes END
 			,strCode					= @CODE
 			,strReference				= C.strCustomerNumber
 			,intCurrencyId				= A.intCurrencyId 
@@ -1670,8 +1692,8 @@ IF @post = 1
 			,strTransactionForm			= @SCREEN_NAME
 			,strModuleName				= @MODULE_NAME
 			,intConcurrencyId			= 1
-			,[dblDebitForeign]			= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
-			,[dblDebitReport]			= A.dblBaseAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,[dblDebitForeign]			= A.dblAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1  OR PM.strPaymentMethod = 'Refund' THEN -1 ELSE 1 END)
+			,[dblDebitReport]			= A.dblBaseAmountPaid * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1  OR PM.strPaymentMethod = 'Refund' THEN -1 ELSE 1 END)
 			,[dblCreditForeign]			= 0
 			,[dblCreditReport]			= 0
 			,[dblReportingRate]			= 0
@@ -1936,7 +1958,7 @@ IF @post = 1
 			,dblCredit					= (CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
 												THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
 												ELSE B.dblBasePayment END)
-										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1  OR D.strPaymentMethod = 'Refund' THEN -1 ELSE 1 END)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
@@ -1962,11 +1984,11 @@ IF @post = 1
 			,[dblCreditForeign]			= (CASE WHEN (B.dblAmountDue = (B.dblPayment - B.dblInterest) + B.dblDiscount)
 												THEN (B.dblPayment - B.dblInterest)  + B.dblDiscount
 												ELSE B.dblPayment END)
-										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1  OR D.strPaymentMethod = 'Refund' THEN -1 ELSE 1 END)
 			,[dblCreditReport]			= (CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
 												THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
 												ELSE B.dblBasePayment END)
-										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1  OR D.strPaymentMethod = 'Refund' THEN -1 ELSE 1 END)
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
 			,[strRateType]				= SMCERT.strCurrencyExchangeRateType				 
@@ -1978,6 +2000,9 @@ IF @post = 1
 		INNER JOIN 
 			tblARCustomer C 
 				ON A.[intEntityCustomerId] = C.[intEntityId]
+		INNER JOIN 
+			tblSMPaymentMethod D
+				ON D.intPaymentMethodID = A.intPaymentMethodId
 		INNER JOIN
 			@ARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
@@ -3205,4 +3230,3 @@ Post_Exit:
 	SET @invalidCount = @totalInvalid + @totalRecords
 	SET @success = 0	
 	RETURN 0;
-	

@@ -25,8 +25,8 @@ DECLARE @tblInvoices TABLE (
   ,	dtmPostDate					DATETIME
 )
 
-SET @intPaymentMethodId = (SELECT TOP 1 intPaymentMethodID FROM dbo.tblSMPaymentMethod WHERE strPaymentMethod = 'Credit')
-SET @strPaymentMethod = (SELECT TOP 1 strPaymentMethod FROM dbo.tblSMPaymentMethod WHERE strPaymentMethod = 'Credit')
+SET @intPaymentMethodId = (SELECT TOP 1 intPaymentMethodID FROM dbo.tblSMPaymentMethod WHERE strPaymentMethod = 'Manual Credit Card')
+SET @strPaymentMethod = (SELECT TOP 1 strPaymentMethod FROM dbo.tblSMPaymentMethod WHERE strPaymentMethod = 'Manual Credit Card')
 SET @ysnAutoApplyPrepaids = ISNULL((SELECT TOP 1 ysnAutoApplyPrepaids FROM dbo.tblARCompanyPreference WITH (NOLOCK)), 0)
 SET @intDefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0)
 

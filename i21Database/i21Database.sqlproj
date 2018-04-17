@@ -6320,6 +6320,20 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOSampleDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\1830_AttachmentMigration.sql" />
+    <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
+    <Build Include="dbo\Views\vyuHDTicketHoursWorked.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImport.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImportParameter.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImportLog.sql" />
+    <Build Include="dbo\Tables\tblSMCSVDynamicImportLogDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\32_DynamicCSV.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\31_Calendar.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCSVDynamicImportProcess.sql" />
+    <Build Include="dbo\Tables\tblRKMatchDerivativesHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesHistoryInsert.sql" />
+    <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
+    <Build Include="dbo\Tables\tblLGAllocationHeaderOrigin.sql" />
+    <Build Include="dbo\Views\vyuHDInventoryItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6488,6 +6502,8 @@
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
     <Build Include="dbo\Functions\fnCRMCoalesceLinesOfBusinessId.sql" />
     <None Include="Scripts\Post-Deployment\TR\CleanUp_TR_Data.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\SC_SouthCarolina.sql" />
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\PA_Pennsylvania.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

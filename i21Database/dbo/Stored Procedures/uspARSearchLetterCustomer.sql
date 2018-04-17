@@ -6,6 +6,7 @@
 AS
 DECLARE @strLetterName			NVARCHAR(MAX),
 		@ysnSystemDefined		BIT
+		, @intSourceLetterId INT;
 
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -13,10 +14,16 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-SELECT @strLetterName		= strName
-	 , @ysnSystemDefined	= ysnSystemDefined 
-FROM dbo.tblSMLetter WITH (NOLOCK)
-WHERE intLetterId = CAST(@intLetterId AS NVARCHAR(10))
+SELECT @intSourceLetterId = intSourceLetterId FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+	IF (@intSourceLetterId IS NULL OR @intSourceLetterId = '')
+	BEGIN
+		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intLetterId
+	END
+	ELSE
+	BEGIN
+		SELECT @strLetterName = strName FROM tblSMLetter WITH(NOLOCK) WHERE intLetterId = @intSourceLetterId
+	END
+
 SET NOCOUNT OFF;
 
 DECLARE @temp_availablecustomer_table TABLE(
@@ -148,6 +155,22 @@ IF @strLetterName = 'Recent Overdue Collection Letter'
 		WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0)
 		  AND ARCO.intEntityUserId = @intEntityUserId		
 	END
+ELSE IF @strLetterName = 'Customer Balance Collection Letter'		
+BEGIN		
+	INSERT INTO @temp_availablecustomer_table		
+	SELECT ARCO.intEntityCustomerId		
+			, ENTITY.strName		
+			, ENTITY.strCustomerNumber		
+	FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)		
+	INNER JOIN (SELECT intEntityId 		
+						, strName		
+						, strCustomerNumber		
+				FROM dbo.vyuARCustomer WITH (NOLOCK) 		
+				WHERE ysnActive = 1		
+	) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId		
+	WHERE (ISNULL(dbl0DaysSum,0) <> 0 OR ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)		
+	AND ARCO.intEntityUserId = @intEntityUserId
+END	
 ELSE IF @strLetterName = '1 Day Overdue Collection Letter'		
 		BEGIN		
 			INSERT INTO @temp_availablecustomer_table		

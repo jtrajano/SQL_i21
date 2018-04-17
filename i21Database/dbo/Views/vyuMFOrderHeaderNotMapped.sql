@@ -53,3 +53,20 @@ JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
 LEFT JOIN tblEMEntity E ON E.intEntityId = S.intEntityCustomerId
 LEFT JOIN tblICStorageLocation S1 ON S1.intStorageLocationId = OH.intStagingLocationId
 LEFT JOIN tblICStorageLocation S2 ON S2.intStorageLocationId = OH.intDockDoorLocationId
+
+UNION ALL
+
+SELECT OH.intOrderHeaderId
+	,NULL AS dtmRequiredDate
+	,OT.strOrderType
+	,OS.strOrderStatus
+	,'' AS strCustomer
+	,'' AS strStagingLocationName
+	,'' AS strDockDoorLocationName
+	,'' AS strItemDescription
+	,NULL AS dblQuantity
+	,'' AS strUnitMeasure
+FROM tblMFOrderHeader OH
+JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
+	AND OT.intOrderTypeId = 2
+JOIN tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId

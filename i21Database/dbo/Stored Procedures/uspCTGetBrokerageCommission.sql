@@ -2,9 +2,16 @@
 	@intEntityId			INT			=	NULL,
     @strStatus				NVARCHAR(50)=	NULL,
     @intContractHeaderId	INT			=	NULL,
+	@strType				NVARCHAR(50)=	NULL,
     @ysnSummary				BIT			=	0,
 	@intBrkgCommnId			INT			=	0
 AS 
+
+	DECLARE @ysnReceivable BIT
+	SELECT	@ysnReceivable	=	CASE	WHEN	@strType = 'Receivables' THEN 1
+										WHEN	@strType = 'Payables' THEN 0
+										ELSE	NULL
+								END
 
 	IF @strStatus = 'All' SET @strStatus = NULL
 
@@ -57,12 +64,14 @@ AS
 				dbo.fnCTConvertQuantityToTargetItemUOM(SEQ.intItemId,SEQ.intUnitMeasureId,CST.intUnitMeasureId,SEQ.dblQuantity)*CST.dblRate AS dblEstimatedAmount,
 				dbo.fnCTConvertQuantityToTargetItemUOM(SEQ.intItemId,SEQ.intUnitMeasureId,CST.intUnitMeasureId,dblNet)*CST.dblRate AS dblAccruedAmount,
 				dblNet,
-				SEQ.strPricingType
+				SEQ.strPricingType,
+				SEQ.intContractHeaderId
 
 		FROM	vyuCTContractCostView	CST
 		JOIN	vyuCTContractSequence	SEQ	ON	SEQ.intContractDetailId =   CST.intContractDetailId
 											AND CST.intVendorId			=   ISNULL(@intEntityId,CST.intVendorId)
 											AND	SEQ.intContractHeaderId	=	ISNULL(@intContractHeaderId,SEQ.intContractHeaderId)
+											AND	CST.ysnReceivable		=	ISNULL(@ysnReceivable,CST.ysnReceivable)
 		JOIN	tblCTContractHeader		HDR ON	HDR.intContractHeaderId =   CST.intContractHeaderId
 		JOIN	tblEMEntity				SEY ON	SEY.intEntityId			=   HDR.intCounterPartyId
 		JOIN	tblICItem				CIM	ON	CIM.intItemId		    =   CST.intItemId 
