@@ -661,6 +661,26 @@ IF(@Exclude IS NOT NULL)
 	END
 	
 
+DECLARE @TempInvoiceIds TABLE(
+	id  	INT
+)
+INSERT INTO @TempInvoiceIds(id)
+SELECT distinct intInvoiceId FROM @PostInvoiceData
+
+WHILE EXISTS(SELECT TOP 1 NULL FROM @TempInvoiceIds ORDER BY id)
+BEGIN				
+	DECLARE @InvoiceId1 INT
+				
+	SELECT TOP 1 @InvoiceId1 = id FROM @TempInvoiceIds ORDER BY id
+
+	EXEC [dbo].[uspICPostStockReservation]
+		@intTransactionId		= @InvoiceId1
+		,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+		,@ysnPosted				= @Post
+		
+	DELETE FROM @TempInvoiceIds WHERE id = @InvoiceId1
+END		
+
 INSERT INTO @InvalidInvoiceData(
 	 [intInvoiceId]
 	,[strInvoiceNumber]
