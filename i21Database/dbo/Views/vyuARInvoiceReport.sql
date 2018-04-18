@@ -114,35 +114,119 @@ INNER JOIN (
 	FROM dbo.tblSMTerm WITH (NOLOCK)
 ) TERM ON INV.intTermId = TERM.intTermID
 LEFT JOIN (
-	SELECT ID.intInvoiceId
-	     , ID.intInvoiceDetailId
-		 , ID.intCommentTypeId
-		 , ID.dblTotalTax
-		 , ID.dblContractBalance
-		 , ID.dblQtyShipped
-		 , ID.dblQtyOrdered
-		 , ID.dblDiscount
-		 , ID.dblPrice
-		 , ID.dblTotal
-		 , ID.strVFDDocumentNumber
-		 , ID.strSCInvoiceNumber
-		 , UOM.strUnitMeasure
-		 , CONTRACTS.dblBalance
-		 , CONTRACTS.strContractNumber
-		 , TAX.intTaxCodeId
-		 , TAX.dblAdjustedTax
-		 , TAX.strTaxCode
-		 , ITEM.strItemNo
-		 , ITEM.strInvoiceComments
+	SELECT intInvoiceId			= ID.intInvoiceId
+	     , intInvoiceDetailId	= ID.intInvoiceDetailId
+		 , intCommentTypeId		= ID.intCommentTypeId
+		 , dblTotalTax			= ID.dblTotalTax
+		 , dblContractBalance	= ID.dblContractBalance
+		 , dblQtyShipped		= ID.dblQtyShipped
+		 , dblQtyOrdered		= ID.dblQtyOrdered
+		 , dblDiscount			= ID.dblDiscount
+		 , dblPrice				= ID.dblPrice
+		 , dblTotal				= ID.dblTotal
+		 , strVFDDocumentNumber	= ID.strVFDDocumentNumber
+		 , strSCInvoiceNumber	= ID.strSCInvoiceNumber
+		 , strUnitMeasure		= CASE WHEN ISNULL(ID.strCategoryCode, '') = '601' THEN 'Bushels' ELSE UOM.strUnitMeasure END
+		 , dblBalance			= CONTRACTS.dblBalance
+		 , strContractNumber	= CONTRACTS.strContractNumber
+		 , intTaxCodeId			= TAX.intTaxCodeId
+		 , dblAdjustedTax		= TAX.dblAdjustedTax
+		 , strTaxCode			= TAX.strTaxCode
+		 , strItemNo			= ITEM.strItemNo
+		 , strInvoiceComments	= ITEM.strInvoiceComments
 		 , strItemType			= ITEM.strType
 		 , strItemDescription	= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
-		 , SO.strBOLNumber
-		 , ITEM.ysnListBundleSeparately
-		 , RECIPE.intRecipeId
-		 , RECIPE.intOneLinePrintId
-	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		 , strBOLNumber			= SO.strBOLNumber
+		 , ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
+		 , intRecipeId			= RECIPE.intRecipeId
+		 , intOneLinePrintId	= RECIPE.intOneLinePrintId
+	FROM (
+		SELECT intInvoiceId			= ID.intInvoiceId
+			 , intInvoiceDetailId	= ID.intInvoiceDetailId
+			 , intItemId			= ID.intItemId
+			 , intItemUOMId			= ID.intItemUOMId
+			 , intSalesOrderDetailId = ID.intSalesOrderDetailId
+			 , intContractDetailId	= ID.intContractDetailId
+			 , intRecipeId			= ID.intRecipeId			 
+			 , intCommentTypeId		= ID.intCommentTypeId
+			 , dblTotalTax			= ID.dblTotalTax
+			 , dblContractBalance	= ID.dblContractBalance
+			 , dblQtyShipped		= ID.dblQtyShipped
+			 , dblQtyOrdered		= ID.dblQtyOrdered
+			 , dblDiscount			= ID.dblDiscount
+			 , dblPrice				= ID.dblPrice
+			 , dblTotal				= ID.dblTotal
+			 , strVFDDocumentNumber	= ID.strVFDDocumentNumber
+			 , strSCInvoiceNumber	= ID.strSCInvoiceNumber
+			 , strItemDescription	= ID.strItemDescription
+			 , strCategoryCode		= CAT.strCategoryCode
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		LEFT JOIN (
+			SELECT intItemId
+					, intCategoryId
+			FROM dbo.tblICItem WITH (NOLOCK)
+		) ITEM ON ID.intItemId = ITEM.intItemId
+		LEFT JOIN (
+			SELECT intCategoryId
+					, strCategoryCode
+			FROM dbo.tblICCategory WiTH (NOLOCK)
+		) CAT ON ITEM.intCategoryId = CAT.intCategoryId
+		WHERE ISNULL(CAT.strCategoryCode, '') <> '601'
+
+		UNION ALL
+
+		SELECT intInvoiceId			= ID.intInvoiceId
+			 , intInvoiceDetailId	= ID.intInvoiceDetailId
+			 , intItemId			= ID.intItemId
+			 , intItemUOMId			= ID.intItemUOMId
+			 , intSalesOrderDetailId = NULL
+			 , intContractDetailId	= NULL
+			 , intRecipeId			= NULL
+			 , intCommentTypeId		= NULL	 
+			 , dblTotalTax			= ID.dblTotalTax
+			 , dblContractBalance	= 0.00
+			 , dblQtyShipped		= SCALEITEM.dblQtyShipped
+			 , dblQtyOrdered		= SCALEITEM.dblQtyShipped
+			 , dblDiscount			= 0.00
+			 , dblPrice				= (ID.dblPrice * SCALEITEM.dblChemicalApplied) / SCALEITEM.dblQtyShipped
+			 , dblTotal				= ID.dblPrice * SCALEITEM.dblChemicalApplied
+			 , strVFDDocumentNumber	= NULL
+			 , strSCInvoiceNumber	= NULL
+			 , strItemDescription	= ID.strItemDescription
+			 , strCategoryCode		= CAT.strCategoryCode
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intItemId
+				 , intCategoryId
+			FROM dbo.tblICItem WITH (NOLOCK)
+		) ITEM ON ID.intItemId = ITEM.intItemId
+		INNER JOIN (
+			SELECT intCategoryId
+				 , strCategoryCode
+			FROM dbo.tblICCategory WITH (NOLOCK)
+			WHERE strCategoryCode = '601' 
+		) CAT ON ITEM.intCategoryId = CAT.intCategoryId
+		CROSS APPLY (
+			SELECT TOP 1 dblChemicalApplied = ((dblQtyShipped * 60.00) / 100.00) * 4
+					   , dblQtyShipped
+			FROM dbo.tblARInvoiceDetail SCALE WITH (NOLOCK)
+			INNER JOIN (
+				SELECT intItemId
+				FROM dbo.tblICItem WITH (NOLOCK)
+				WHERE ysnUseWeighScales = 1		  
+			) ITEM ON SCALE.intItemId = ITEM.intItemId
+			WHERE ID.intTicketId IS NOT NULL
+			  AND ID.intInvoiceId = SCALE.intInvoiceId
+		) SCALEITEM
+		CROSS APPLY (
+			SELECT TOP 1 ysnPrintPricePerBushel
+			FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+		) ARPREFERENCE
+		WHERE ARPREFERENCE.ysnPrintPricePerBushel = 1
+	) ID
 	LEFT JOIN (
 		SELECT intItemId
+			 , intCategoryId
 			 , strItemNo
 			 , strDescription
 			 , strInvoiceComments
@@ -151,10 +235,15 @@ LEFT JOIN (
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN (
+		SELECT intCategoryId
+			 , strCategoryCode
+		FROM dbo.tblICCategory WiTH (NOLOCK)
+	) CAT ON ITEM.intCategoryId = CAT.intCategoryId
+	LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
 			 , strUnitMeasure
-		FROM dbo. vyuARItemUOM WITH (NOLOCK)
+		FROM dbo.vyuARItemUOM WITH (NOLOCK)
 	) UOM ON ID.intItemUOMId = UOM.intItemUOMId
 	     AND ID.intItemId = UOM.intItemId
 	LEFT JOIN (
