@@ -7,6 +7,7 @@
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL, 
 	[strClearingAccountNumber]  NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyId] INT NULL,
 
     CONSTRAINT [PK_tblRKBrokerageAccount_intBrokerageAccountId] PRIMARY KEY ([intBrokerageAccountId]), 
 	CONSTRAINT [FK_tblRKBrokerageAccount_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),

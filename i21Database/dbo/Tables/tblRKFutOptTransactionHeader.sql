@@ -5,5 +5,6 @@
 	[dtmTransactionDate] datetime NULL,
 	[intSelectedInstrumentTypeId] int NULL,
 	[strSelectedInstrumentType] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intCompanyId] INT NULL,
 	CONSTRAINT [PK_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] PRIMARY KEY (intFutOptTransactionHeaderId)
 )
