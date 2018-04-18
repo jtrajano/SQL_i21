@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Projects (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Support (Portal)' AND strModuleName = 'Help Desk' AND intParentMenuID = 0))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Book Vs Entities' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Contract Management'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
