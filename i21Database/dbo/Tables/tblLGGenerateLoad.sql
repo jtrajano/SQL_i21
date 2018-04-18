@@ -31,6 +31,7 @@
 [intPCompanyLocationId] INT NULL,
 [intSCompanyLocationId] INT NULL,
 [intTransUsedBy] INT NULL, 
+[intCompanyId] INT NULL,
 
 CONSTRAINT [PK_tblLGGenerateLoad] PRIMARY KEY ([intGenerateLoadId]), 
 CONSTRAINT [UK_tblLGGenerateLoad_intReferenceNumber] UNIQUE ([intReferenceNumber]),

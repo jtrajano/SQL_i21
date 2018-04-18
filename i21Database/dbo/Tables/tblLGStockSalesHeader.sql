@@ -17,6 +17,7 @@
 	[intContractCountryId] INT NULL,
 	[intContractCityId] INT NULL,
 	[dblHedgePrice] NUMERIC(18,6),
+	[intCompanyId] INT NULL,
 
     CONSTRAINT [PK_tblLGStockSalesHeader_intStockSalesHeaderId] PRIMARY KEY ([intStockSalesHeaderId]), 
 	CONSTRAINT [UK_tblLGStockSalesHeader_intReferenceNumber] UNIQUE ([strStockSalesNumber]),

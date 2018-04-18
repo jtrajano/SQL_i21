@@ -9,6 +9,7 @@
     [intUserSecurityId] INT NOT NULL, 	
     [strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, 
 	[intWeightUnitMeasureId] INT NULL,
+	[intCompanyId] INT NULL,
 
     CONSTRAINT [PK_tblLGAllocationHeader_intAllocationHeaderId] PRIMARY KEY ([intAllocationHeaderId]), 
 	CONSTRAINT [UK_tblLGAllocationHeader_intReferenceNumber] UNIQUE ([strAllocationNumber]),

@@ -13,6 +13,7 @@
 [intPurchaseSale] INT NULL,
 [ysnPosted] BIT NULL,
 [dtmPosted] DATETIME NULL,
+[intCompanyId] INT NULL,
 
 CONSTRAINT [PK_tblLGWeightClaim_intWeightClaimId] PRIMARY KEY ([intWeightClaimId]), 
 CONSTRAINT [UK_tblLGWeightClaim_intReferenceNumber] UNIQUE ([strReferenceNumber]),

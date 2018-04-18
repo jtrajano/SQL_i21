@@ -12,6 +12,7 @@
     [intUserSecurityId] INT NOT NULL, 	
 	[intDeliveryHeaderId] INT NULL,
 	[intParentPickLotHeaderId] INT NULL,
+	[intCompanyId] INT NULL,
 
     CONSTRAINT [PK_tblLGPickLotHeader_intPickLotHeaderId] PRIMARY KEY ([intPickLotHeaderId]), 
 	CONSTRAINT [UK_tblLGPickLotHeader_intReferenceNumber] UNIQUE ([strPickLotNumber]),
