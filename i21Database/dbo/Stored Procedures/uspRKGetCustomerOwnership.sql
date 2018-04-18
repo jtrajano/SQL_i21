@@ -8,6 +8,8 @@
 
 AS
 
+DECLARE @intCommodityUnitMeasureId INT= NULL
+SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
 
 IF OBJECT_ID('tempdb..#tempCustomer') IS NOT NULL
     DROP TABLE #tempCustomer
@@ -18,8 +20,9 @@ IF OBJECT_ID('tempdb..#final') IS NOT NULL
 
 SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet into #tempCustomer FROM (
    SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(dblOutQty,2)) dblOut,round(sum(dblInQty),2)-round(sum(dblOutQty),2) dblNet FROM(		
-		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
-																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  				
+		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	
+		CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty,
+		CASE WHEN strInOutFlag='O' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblOutQty  				
 		FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 		
 							AND  st.intProcessingLocationId  IN (
@@ -27,7 +30,9 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 													ELSE isnull(ysnLicensed, 0) END)
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId
+		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId   
 		WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
