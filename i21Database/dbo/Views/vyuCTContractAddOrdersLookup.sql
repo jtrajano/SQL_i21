@@ -91,7 +91,7 @@ FROM	tblCTContractDetail CD
 	LEFT JOIN vyuCTContractHeaderView CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId					
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId =	CD.intItemUOMId
-	LEFT JOIN tblICItemUOM UM ON UM.intItemUOMId =	CD.intItemId AND UM.ysnStockUOM = 1 						
+	LEFT JOIN tblICItemUOM UM ON UM.intItemId =	CD.intItemId AND UM.ysnStockUOM = 1 						
 	LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblAPVendor VR ON VR.[intEntityId] = CD.intBillTo
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
