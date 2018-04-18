@@ -29,8 +29,8 @@ SELECT	strOrderType = 'Sales Contract'
 		, ContractView.intItemUOMId
 		, strItemUOM = ContractView.strItemUOM
 		, dblItemUOMConv = dblItemUOMCF
-		, intWeightUOMId = ContractView.intItemUOMId
-		, strWeightUOM = strItemUOM
+		, intWeightUOMId = ContractView.intNetWeightUOMId
+		, strWeightUOM = weightUOM.strUnitMeasure
 		, dblWeightItemUOMConv = dblItemUOMCF
 		, dblQtyOrdered = CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
 		, dblQtyAllocated = CAST(ISNULL(dblAllocatedQty, 0) AS NUMERIC(18, 6))
@@ -58,12 +58,17 @@ SELECT	strOrderType = 'Sales Contract'
 		, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, ContractView.strItemUOM) 
 FROM	vyuCTContractAddOrdersLookup ContractView
 		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
+		INNER JOIN tblICItemUOM Iuom ON Iuom.intItemId = Item.intItemId AND Iuom.ysnStockUOM = 1
 		LEFT JOIN (
 			tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
 				ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
 		)
-			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, ContractView.intSeqPriceUOMId)
-
+			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, Iuom.intItemUOMId)
+		LEFT JOIN (
+			tblICItemUOM ItemWeightUOM INNER JOIN tblICUnitMeasure weightUOM
+				ON ItemWeightUOM.intUnitMeasureId = weightUOM.intUnitMeasureId
+		)
+			ON ItemWeightUOM.intItemUOMId = ContractView.intNetWeightUOMId 
 WHERE	ysnAllowedToShow = 1
 		AND strContractType = 'Sale'
 		AND ContractView.dblAvailableQty > 0
