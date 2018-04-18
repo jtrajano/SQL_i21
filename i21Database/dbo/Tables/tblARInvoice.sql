@@ -100,6 +100,8 @@
 	[intPostedById]					INT												NULL,
 	[intLineOfBusinessId]			INT												NULL,
 	[intICTId]						INT												NULL,
+	[intBookId]						INT												NULL,
+	[intSubBookId]					INT												NULL,
 	[intSalesOrderId]				INT												NULL,
 	[dtmForgiveDate]				DATETIME										NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
@@ -129,6 +131,8 @@
 	CONSTRAINT [FK_tblARInvoice_tblARSalesperson_intTruckDriverId] FOREIGN KEY ([intTruckDriverId]) REFERENCES [tblARSalesperson]([intEntityId]),
 	CONSTRAINT [FK_tblARInvoice_tblSMLineOfBusiness_intLineOfBusinessId] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblSMLineOfBusiness]([intLineOfBusinessId]),
 	CONSTRAINT [FK_tblARInvoice_tblARICT_intICTId] FOREIGN KEY ([intICTId]) REFERENCES [tblARICT]([intICTId]),
+	CONSTRAINT [FK_tblARInvoice_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+	CONSTRAINT [FK_tblARInvoice_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
 	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
 );
 
