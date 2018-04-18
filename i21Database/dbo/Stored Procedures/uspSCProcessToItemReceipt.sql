@@ -660,7 +660,7 @@ BEGIN TRY
 				[intId]
 			)
 			SELECT [intId] = intPrepayId
-			FROM #tmpContractPrepay where intPrepayId > 0
+			FROM #tmpContractPrePay where intPrepayId > 0
 			
 			EXEC uspAPApplyPrepaid @intBillId, @prePayId
 			update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
