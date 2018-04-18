@@ -60,7 +60,7 @@
     [intImportFlagInternal] INT NULL,
     [intLockType] INT NULL,
     [intSort] INT NULL,
-    
+    [intInvoiceId] INT NULL,
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),
@@ -70,5 +70,6 @@
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSMUserSecurity] FOREIGN KEY ([intEntityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
+	CONSTRAINT [FK_tblSTCheckoutHeader_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId]),
     CONSTRAINT [AK_tblSTCheckoutHeader_intStoreId_dtmCheckoutDate_intShiftNo_strCheckoutType] UNIQUE ([intStoreId], [dtmCheckoutDate], [intShiftNo], [strCheckoutType]),     
 )
