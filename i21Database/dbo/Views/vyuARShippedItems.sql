@@ -126,7 +126,7 @@ FROM (
 		 , intItemId						= SOD.intItemId	
 		 , strItemDescription				= SOD.strItemDescription
 		 , intItemUOMId						= SHP.intItemUOMId
-		 , intPriceUOMId					= SHP.intPriceUOMId
+		 , intPriceUOMId					= SOD.intPriceUOMId
 		 , intOrderUOMId					= SOD.intItemUOMId
 		 , intShipmentItemUOMId				= SHP.intItemUOMId
 		 , intWeightUOMId					= SHP.intWeightUOMId
