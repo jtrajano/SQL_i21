@@ -53,6 +53,7 @@ SELECT intKey						= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.i
 	,Lot.intItemOwnerId
 	,intWeightUOMId					= Lot.intWeightUOMId
 	,strWeightUOM					= wUOM.strUnitMeasure
+	,dblWeightUOMConvF				= LotWeightUOM.dblUnitQty
 	,Lot.dblWeight
 	,Lot.dblWeightPerQty
 	,intLotStatusId					= Lot.intLotStatusId
@@ -133,6 +134,7 @@ GROUP BY i.intItemId
 		,Lot.dblWeightPerQty
 		,Lot.intWeightUOMId
 		,wUOM.strUnitMeasure
+		,LotWeightUOM.dblUnitQty
 		,Lot.intLotStatusId
 		,LotStatus.strSecondaryStatus
 		,LotStatus.strPrimaryStatus
