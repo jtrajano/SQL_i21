@@ -37,6 +37,10 @@ SELECT CD.intContractDetailId
 	,ISNULL(CH.ysnBrokerage, 'false') AS ysnBrokerage
 	,CH.strCPContract
 	,E1.strName AS strCounterPartyName
+	,CD.intBookId
+	,B.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
@@ -48,6 +52,8 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
 LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
+LEFT JOIN tblCTBook B ON B.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN (
 	SELECT *
 	FROM (

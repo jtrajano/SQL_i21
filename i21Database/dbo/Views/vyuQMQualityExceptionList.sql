@@ -45,6 +45,8 @@ SELECT TR.intTestResultId
 	,SHI.strShiftName
 	,WO.strWorkOrderNo
 	,TR.intSequenceNo
+	,B.strBook
+	,SB.strSubBook
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
@@ -56,6 +58,8 @@ LEFT JOIN dbo.tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
 JOIN dbo.tblICCategory AS C ON C.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblEMEntity AS E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUOMId
+LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN dbo.tblICLot AS L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6
 LEFT JOIN dbo.tblICParentLot AS PL ON PL.intParentLotId = S.intProductValueId

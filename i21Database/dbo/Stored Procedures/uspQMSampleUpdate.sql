@@ -117,6 +117,8 @@ BEGIN TRY
 		,intStorageLocationId = x.intStorageLocationId
 		,ysnAdjustInventoryQtyBySampleQty = x.ysnAdjustInventoryQtyBySampleQty
 		,intEntityId = x.intEntityId
+		,intBookId = x.intBookId
+		,intSubBookId = x.intSubBookId
 		,intShipperEntityId = @intShipperEntityId
 		,strShipmentNumber = x.strShipmentNumber
 		,strLotNumber = x.strLotNumber
@@ -166,6 +168,8 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,ysnAdjustInventoryQtyBySampleQty BIT
 			,intEntityId INT
+			,intBookId INT
+			,intSubBookId INT
 			,strShipmentNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)

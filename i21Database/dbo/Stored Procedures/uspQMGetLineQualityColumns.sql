@@ -60,11 +60,11 @@ BEGIN TRY
 
 	IF ISNULL(@str, '') <> ''
 	BEGIN
-		SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT,' + @str + ')'
+		SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strBook INT,strSubBook INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT,' + @str + ')'
 	END
 	ELSE
 	BEGIN
-		SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT)'
+		SELECT @SQL = 'CREATE TABLE ##LineProperty (intSampleId INT,intItemId INT,intWorkOrderId INT,strCategoryCode INT,strItemNo INT,strDescription INT,strWorkOrderNo INT,strWorkOrderStatus INT,strSampleNumber INT,strBook INT,strSubBook INT,strSampleRefNo INT,strSampleStatus INT,strSampleTypeName INT,dtmSampleReceivedDate INT,strComment INT)'
 	END
 
 	EXEC sp_executesql @SQL

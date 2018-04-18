@@ -125,6 +125,7 @@ AS
 			ISNULL(WU.dblUnitQty,1)	AS dblWeightUnitQty,
 			ISNULL(IU.dblUnitQty,1)	AS dblUnitQty,
 			RT.strCurrencyExchangeRateType,		RT.strDescription	AS strCurrencyExchangeRateTypeDesc,
+			B.strBook,							SB1.strSubBook,
 
 			--Header Detail
 
@@ -232,4 +233,6 @@ AS
 			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
-	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	
+	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	LEFT 
+	JOIN	tblCTBook						B	ON	B.intBookId					=	CD.intBookId					LEFT 
+	JOIN	tblCTSubBook					SB1	ON	SB1.intSubBookId			=	CD.intSubBookId

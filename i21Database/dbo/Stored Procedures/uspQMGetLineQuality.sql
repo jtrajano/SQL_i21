@@ -51,7 +51,9 @@ BEGIN TRY
 	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
 	   JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId  
 	   JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId  
-	   JOIN tblQMTest AS T ON TR.intTestId = T.intTestId'
+	   JOIN tblQMTest AS T ON TR.intTestId = T.intTestId
+	   LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+	   LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -93,6 +95,8 @@ BEGIN TRY
 		   ,W.strWorkOrderNo
 		   ,WS.strName AS strWorkOrderStatus
 		   ,S.strSampleNumber
+		   ,B.strBook
+		   ,SB.strSubBook
 		   ,S.strSampleRefNo
 		   ,SS.strSecondaryStatus AS strSampleStatus
 		   ,ST.strSampleTypeName  
@@ -120,7 +124,9 @@ BEGIN TRY
 		SET @SQL = @SQL + ' JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId AND SU.intUserRoleID =' + @strUserRoleID
 	END
 
-	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId'
+	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+	 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+	 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -136,7 +142,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intWorkOrderId,strWorkOrderNo'
-	SET @strColumnsList = @strColumnsList + ',strWorkOrderStatus,strSampleNumber,strSampleRefNo,strSampleStatus,strSampleTypeName,intSampleId,dtmSampleReceivedDate,strComment'
+	SET @strColumnsList = @strColumnsList + ',strWorkOrderStatus,strSampleNumber,strBook,strSubBook,strSampleRefNo,strSampleStatus,strSampleTypeName,intSampleId,dtmSampleReceivedDate,strComment'
 	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
@@ -148,6 +154,8 @@ BEGIN TRY
 	,strWorkOrderNo
 	,strWorkOrderStatus
 	,strSampleNumber
+	,strBook
+	,strSubBook
 	,strSampleRefNo
 	,strSampleStatus
 	,strSampleTypeName
@@ -165,6 +173,8 @@ BEGIN TRY
 			,strWorkOrderNo
 			,strWorkOrderStatus
 			,strSampleNumber
+			,strBook
+			,strSubBook
 			,strSampleRefNo
 			,strSampleStatus
 			,strSampleTypeName  

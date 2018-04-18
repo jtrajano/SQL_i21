@@ -55,6 +55,8 @@
 	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
 	ysnAdjustInventoryQtyBySampleQty BIT CONSTRAINT [DF_tblQMSample_ysnAdjustInventoryQtyBySampleQty] DEFAULT 0,
 	intStorageLocationId INT,
+	intBookId INT,
+	intSubBookId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
