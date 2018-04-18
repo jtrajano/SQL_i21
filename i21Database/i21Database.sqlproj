@@ -6342,6 +6342,7 @@
     <Build Include="dbo\Tables\tblLGInsurancePremiumFactorDetail.sql" />
     <Build Include="dbo\Tables\tblLGShippingLineServiceContract.sql" />
     <Build Include="dbo\Tables\tblLGShippingLineServiceContractDetail.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
