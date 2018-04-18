@@ -125,10 +125,13 @@ SELECT DISTINCT c.intCommodityId
 			) t
 		) AS OpenSalesQty
 	,(
-		SELECT sum(s.dblOnHand) AS Qty
+		 select  sum(Qty) from(
+		SELECT (dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,um.intCommodityUnitMeasureId,isnull(s.dblOnHand,0))) AS Qty
 		FROM vyuICGetItemStockUOM s
-		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
-		) AS invQty
+		JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=s.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   
+		WHERE s.intLocationId = cl.intCompanyLocationId AND s.intCommodityId = c.intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(dblOnHand,0) <>0
+		) t)AS invQty
 	,isnull((
 			SELECT isnull(SUM(dblRemainingQuantity), 0) CollateralSale
 			FROM (
