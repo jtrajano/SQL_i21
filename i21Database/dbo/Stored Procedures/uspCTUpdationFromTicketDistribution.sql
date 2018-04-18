@@ -32,7 +32,11 @@ BEGIN TRY
 			@intNewContractHeaderId	INT,
 			@ysnAutoCreateDP		BIT,
 			@strScreenName			NVARCHAR(20),
-			@XML					NVARCHAR(MAX)
+			@XML					NVARCHAR(MAX),
+			@dtmEndDate				DATETIME,
+			@intContractTypeId		INT,
+			@intCommodityId			INT,
+			@strSeqMonth			NVARCHAR(50)
 
 	DECLARE @Processed TABLE
 	(
@@ -112,8 +116,46 @@ BEGIN TRY
 			BEGIN
 				SET @strScreenName = CASE WHEN ISNULL(@ysnDeliverySheet,0) = 0 THEN 'Scale' ELSE 'Delivery Sheet' END
 				SET @XML = '<overrides><intEntityId>' + LTRIM(@intEntityId) + '</intEntityId></overrides>'
+				
 				EXEC uspCTCreateContract @intTicketId,@strScreenName,@intUserId,@XML,@intNewContractHeaderId OUTPUT
-				SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = @intNewContractHeaderId
+				
+				SELECT	@intContractDetailId	=	intContractDetailId, 
+						@intContractTypeId		=	intContractTypeId,
+						@intCommodityId			=	intCommodityId,
+						@strSeqMonth			=	RIGHT(CONVERT(varchar, dtmEndDate, 106),8),
+						@intItemId				=	intItemId
+				FROM	vyuCTContractSequence 
+				WHERE	intContractHeaderId = @intNewContractHeaderId
+
+				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
+					DROP TABLE #FutureAndBasisPrice						
+
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,null,0,@intItemId)
+
+				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
+				BEGIN
+					RAISERROR ('Settlement price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(dblSettlementPrice,0) = 0)
+				BEGIN
+					RAISERROR ('Settlement price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+				
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(dblBasis,0) = 0)
+				BEGIN
+					RAISERROR ('Basis price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(intSettlementUOMId,0) = 0)
+				BEGIN
+					RAISERROR ('Settlement UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(intBasisUOMId,0) = 0)
+				BEGIN
+					RAISERROR ('Basis UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
 			END
 			IF	ISNULL(@intContractDetailId,0) = 0
 			BEGIN
