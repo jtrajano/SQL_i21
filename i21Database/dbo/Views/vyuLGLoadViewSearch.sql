@@ -132,6 +132,10 @@ SELECT L.intLoadId
 	,FT.strFreightTerm
 	,L.intCurrencyId
 	,HeaderCurrency.strCurrency
+	,L.intBookId
+	,BO.strBook
+	,L.intSubBookId
+	,SB.strSubBook
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -159,3 +163,5 @@ LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReas
 LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId

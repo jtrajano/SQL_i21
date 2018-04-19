@@ -21,8 +21,6 @@
     CONSTRAINT [FK_tblLGAllocationDetail_tblICUnitMeasure_intPUnitMeasureId] FOREIGN KEY ([intPUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
     CONSTRAINT [FK_tblLGAllocationDetail_tblICUnitMeasure_intSUnitMeasureId] FOREIGN KEY ([intSUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
     CONSTRAINT [FK_tblLGAllocationDetail_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
-	CONSTRAINT [FK_tblLGAllocationHeader_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
-	CONSTRAINT [FK_tblLGAllocationHeader_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
 )
 GO
 CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K4_1] ON [dbo].[tblLGAllocationDetail]

@@ -299,6 +299,10 @@ FROM (
 				), AD.intSeqPriceUOMId, AD.dblSeqPrice)
 		,CD.intItemId
 		,CD.intContractDetailId
+		,CD.intBookId
+		,BO.strBook
+		,CD.intSubBookId
+		,SB.strSubBook
 		,WC.strReferenceNumber
 		,WC.dtmTransDate
 		,WC.dtmActualWeighingDate
@@ -334,6 +338,8 @@ FROM (
 	LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 	LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
 	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
+	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN (
 		SELECT SUM(ReceiptItem.dblNet) dblNet
 			,ReceiptItem.intSourceId
