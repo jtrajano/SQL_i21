@@ -8,6 +8,7 @@
 
 AS
 
+
 DECLARE @intCommodityUnitMeasureId INT= NULL
 SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
 
@@ -37,7 +38,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer' and strTicketStatus='C'
+		and gs.strOwnedPhysicalStock='Customer' and strTicketStatus='C' and  gs.intStorageScheduleTypeId > 0 
 		  )t     GROUP BY  dtmDate,strStorageTypeDescription
 ) t1
 declare @TempTableCreate nvarchar(max)=''
