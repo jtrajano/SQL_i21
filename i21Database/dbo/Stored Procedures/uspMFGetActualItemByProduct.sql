@@ -45,11 +45,14 @@ BEGIN
 			END AS strUnitMeasure
 		,I.intLayerPerPallet
 		,I.intUnitPerLayer
+		,WO.dblQuantity
+		,WO.dblProducedQuantity
 	FROM dbo.tblMFWorkOrderRecipe R
 	JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND RI.intWorkOrderId = R.intWorkOrderId
 		AND RI.intRecipeItemTypeId = @intRecipeItemTypeId
 		AND R.intWorkOrderId = @intWorkOrderId
+	JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = R.intWorkOrderId
 	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 		AND SI.intWorkOrderId = RI.intWorkOrderId
 	JOIN dbo.tblICItem I ON (
