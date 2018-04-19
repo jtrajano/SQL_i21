@@ -38,11 +38,11 @@ BEGIN
 		-------------------- Check current Invoice status --------------------
 		----------------------------------------------------------------------
 		DECLARE @ysnCurrentInvoiceStatus BIT = NULL
-		IF(@intCreatedInvoiceId IS NOT NULL)
+		IF(@intCurrentInvoiceId IS NOT NULL)
 			BEGIN
-				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCreatedInvoiceId)
+				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCurrentInvoiceId)
 					BEGIN
-						SET @ysnCurrentInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCreatedInvoiceId)
+						SET @ysnCurrentInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCurrentInvoiceId)
 					END
 				
 			END
