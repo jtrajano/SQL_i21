@@ -104,6 +104,7 @@
 	[intSubBookId]					INT												NULL,
 	[intSalesOrderId]				INT												NULL,
 	[dtmForgiveDate]				DATETIME										NULL,
+	[intCompanyId]					INT												NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),

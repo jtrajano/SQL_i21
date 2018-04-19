@@ -23,6 +23,7 @@
     [strTierCode]             NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strOdomCode]             NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strWCCode]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyId]			  INT			 NULL,
     [intConcurrencyId]        INT            NOT NULL,
     CONSTRAINT [PK_tblARCardFueling] PRIMARY KEY CLUSTERED ([intCardFuelingId] ASC)
 );

@@ -13,6 +13,7 @@
 	[intTicketId]									INT NULL,
 	[dtmTicketDate]									DATETIME NULL,
 	[dtmTransactionDate]							DATETIME NOT NULL DEFAULT(GETDATE()),
+	[intCompanyId]									INT NULL,
 	[intCurrencyId]									INT NULL,
 	[ysnPost]										BIT NULL
 	

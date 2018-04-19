@@ -20,6 +20,7 @@
 	[ysnTaxOnly]				BIT	NOT NULL DEFAULT 0,
 	[strNotes]                  NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
 	[intUnitMeasureId]			INT NULL,
+	[intCompanyId]				INT NULL,
     [intConcurrencyId]          INT CONSTRAINT [DF_tblARInvoiceDetailTax_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARInvoiceDetailTax_intInvoiceDetailTaxId] PRIMARY KEY CLUSTERED ([intInvoiceDetailTaxId] ASC),
 	CONSTRAINT [FK_tblARInvoiceDetailTax_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [dbo].[tblARInvoiceDetail] ([intInvoiceDetailId]) ON DELETE CASCADE,

@@ -5,6 +5,7 @@
     [dtmBeginDate]          DATETIME        NULL,
     [dtmExpirationDate]     DATETIME        NULL,
     [dblDeliveryCommission] NUMERIC (18, 2) NOT NULL,
+	[intCompanyId]			INT				NULL,
     [intConcurrencyId]      INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerBuyback] PRIMARY KEY CLUSTERED ([intBuybackId] ASC)
 );

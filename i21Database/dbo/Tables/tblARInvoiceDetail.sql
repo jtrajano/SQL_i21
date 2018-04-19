@@ -89,6 +89,7 @@
 	[ysnLeaseBilling]						BIT												NULL,	
 	[ysnVirtualMeterReading]				BIT												NULL,	
 	[dblOriginalItemWeight]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblOriginalItemWeight] DEFAULT ((0)) NULL,
+	[intCompanyId]							INT												NULL,
     [intConcurrencyId]						INT				CONSTRAINT [DF_tblARInvoiceDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	[intRecipeId]							INT												NULL,
 	[intSubLocationId]						INT												NULL,
