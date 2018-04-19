@@ -58,6 +58,7 @@ BEGIN
 		,PRT.intListId
 		,L.strListName
 		,TR.strIsMandatory
+		,PRT.intItemId AS intPropertyItemId
 	FROM dbo.tblQMTestResult AS TR
 	JOIN dbo.tblQMProperty AS PRT ON PRT.intPropertyId = TR.intPropertyId
 	JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId

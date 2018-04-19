@@ -300,6 +300,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,intPropertyItemId
 		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
@@ -339,6 +340,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,intPropertyItemId
 		,CASE 
 			WHEN strPropertyValue <> ''
 				THEN GETDATE()
@@ -380,6 +382,7 @@ BEGIN TRY
 			,strFormula NVARCHAR(MAX)
 			,intListItemId INT
 			,strIsMandatory NVARCHAR(20)
+			,intPropertyItemId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
