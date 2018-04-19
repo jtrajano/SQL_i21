@@ -112,7 +112,7 @@ SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL
 
   
 -- Report Query:  
-SELECT	REPLACE(CONVERT(VARCHAR(10), CHK.dtmDate, 101), '/', '-')   dtmDate
+SELECT	CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
 		,strPayee = CASE
