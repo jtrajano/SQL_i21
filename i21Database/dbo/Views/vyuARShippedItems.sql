@@ -97,6 +97,10 @@ SELECT id							= NEWID()
 	 , intSubCurrencyId				= SHIPPEDITEMS.intSubCurrencyId
 	 , dblSubCurrencyRate			= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
 	 , strSubCurrency				= CURRENCY.strCurrency
+	 , intBookId					= SHIPPEDITEMS.intBookId
+	 , intSubBookId					= SHIPPEDITEMS.intSubBookId
+	 , strBook						= BOOK.strBook
+	 , strSubBook					= SUBBOOK.strSubBook
 FROM (
 	SELECT strTransactionType				= 'Inventory Shipment'
 		 , strTransactionNumber				= SHP.strShipmentNumber
@@ -173,6 +177,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= SHP.dblForexRate
 		 , intSubCurrencyId					= SOD.intSubCurrencyId
 		 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	INNER JOIN (
 		SELECT *
@@ -330,6 +336,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= ICISI.dblForexRate
 	     , intSubCurrencyId					= NULL
 	     , dblSubCurrencyRate				= 1
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -427,6 +435,8 @@ FROM (
 			 , intCurrencyExchangeRateId
 			 , dblCurrencyExchangeRate
 			 , dblPriceUOMQuantity
+			 , intBookId
+			 , intSubBookId
 		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
@@ -526,6 +536,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ICISC.dblForexRate
 		 , intSubCurrencyId					= NULL
 		 , dblSubCurrencyRate				= 1
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -624,6 +636,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 		 , intSubCurrencyId					= NULL
 		 , dblSubCurrencyRate				= 1
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(0, SO.intSalesOrderId) MFG
 	LEFT OUTER JOIN (
@@ -732,6 +746,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ICISI.dblForexRate
 		 , intSubCurrencyId					= ICISI.intCurrencyId
 		 , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(ICISI.intInventoryShipmentItemId, 0) MFG	
 	INNER JOIN (
@@ -836,6 +852,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= dblCurrencyExchangeRate
 	     , intSubCurrencyId					= intSubCurrencyId
 	     , dblSubCurrencyRate				= dblSubCurrencyRate
+		 , intBookId						= intBookId
+		 , intSubBookId						= intSubBookId
 	FROM 
 		vyuLGLoadScheduleForInvoice
 	 
@@ -916,6 +934,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 	     , intSubCurrencyId					= LWS.intCurrencyId
 	     , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM (
 		SELECT intLoadDetailId
 			 , intCurrencyId
@@ -1032,6 +1052,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 	     , intSubCurrencyId					= LC.intCurrencyId
 	     , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM (
 		SELECT intLoadId
 		     , intLoadDetailId
@@ -1156,6 +1178,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 		 , intSubCurrencyId					= LC.intCurrencyId
 		 , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM (
 		SELECT intLoadId
 			 , intLoadDetailId
@@ -1350,6 +1374,16 @@ LEFT OUTER JOIN (
 	SELECT *
 	FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
 ) CURRENCYERT ON SHIPPEDITEMS.intCurrencyExchangeRateTypeId = CURRENCYERT.intCurrencyExchangeRateTypeId
+LEFT OUTER JOIN (
+	SELECT intBookId
+		 , strBook 
+	FROM dbo.tblCTBook WITH (NOLOCK)
+) BOOK ON BOOK.intBookId = SHIPPEDITEMS.intBookId
+LEFT OUTER JOIN (
+	SELECT intSubBookId
+		 , strSubBook
+	FROM dbo.tblCTSubBook WITH (NOLOCK)
+) SUBBOOK ON SUBBOOK.intSubBookId = SHIPPEDITEMS.intSubBookId
 OUTER APPLY (
 	SELECT TOP 1 intDefaultCurrencyId 
 	FROM dbo.tblSMCompanyPreference WITH (NOLOCK) 
