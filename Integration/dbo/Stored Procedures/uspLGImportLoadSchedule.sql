@@ -199,7 +199,10 @@ SELECT
 	,[strExternalLoadNumber]		= NULL
 	,[intTransportLoadId]			= NULL
 	,[intDriverEntityId]			= Hauler.intEntityId
-	,[ysnDispatched]				= 0
+	,[ysnDispatched]				= CASE 
+										 WHEN LL.galds_tic_no <> '' THEN 1
+										 ELSE 0
+									  END
 	,[dtmDispatchedDate]			= dbo.fnCTConvertToDateTime(LL.galds_user_rev_dt,null)
 	,[intDispatcherId]				= @UserId
 	,[ysnDispatchMailSent]			= NULL
