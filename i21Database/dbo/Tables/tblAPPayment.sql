@@ -6,6 +6,7 @@
 	[intPayToAddressId]  INT             NULL,
 	[intUnitOfMeasureId]  INT             NULL,
 	[intCompanyLocationId] INT			NULL,
+	[intCompanyId]				INT             NULL ,
     [intCurrencyId]       INT             NOT NULL,
     [strPaymentInfo]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strNotes]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

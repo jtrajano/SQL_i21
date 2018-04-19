@@ -15,6 +15,7 @@
     [intStoreId] INT NULL, 
 	[intEntityId] INT NOT NULL,
 	[intTermsId] INT NOT NULL,
+	[intCompanyId]				INT             NULL ,
 	[intContractHeaderId] INT NULL,
 	[intTransactionType] INT NOT NULL DEFAULT 5,
 	[intSubCurrencyCents] INT NOT NULL DEFAULT 0,
