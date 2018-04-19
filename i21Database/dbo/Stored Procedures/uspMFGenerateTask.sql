@@ -1261,11 +1261,12 @@ BEGIN TRY
 
 		IF @intTaskCount <= 0
 		BEGIN
-			RAISERROR (
-					'System was unable to generate task for one or more item(s).'
-					,16
-					,1
-					)
+			SET @ysnAllTasksNotGenerated = 1
+			--RAISERROR (
+			--		'System was unable to generate task for one or more item(s).'
+			--		,16
+			--		,1
+			--		)
 		END
 	END
 	ELSE

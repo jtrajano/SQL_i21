@@ -3364,3 +3364,7 @@ UPDATE tblMFCompanyPreference
 SET ysnSendEDIOnRepost = 1
 Where ysnSendEDIOnRepost IS NULL
 Go
+UPDATE tblMFCompanyPreference
+SET ysnGenerateTaskOnCreatePickOrder =0
+Where ysnGenerateTaskOnCreatePickOrder IS NULL
+Go
