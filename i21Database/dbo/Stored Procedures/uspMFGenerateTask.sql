@@ -60,6 +60,7 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
+		,@intOwnershipType int
 
 	SELECT @ysnPickByQty = 1
 
@@ -189,6 +190,7 @@ BEGIN TRY
 			,intParentLotId INT
 			,intUnitPerPallet INT
 			,strInventoryTracking NVARCHAR(50)
+			,intOwnershipType int
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -229,6 +231,7 @@ BEGIN TRY
 			,intParentLotId
 			,intUnitPerPallet
 			,strInventoryTracking
+			,intOwnershipType
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -264,6 +267,7 @@ BEGIN TRY
 			,oli.intParentLotId
 			,IsNULL(i.intUnitPerLayer * i.intLayerPerPallet, 0)
 			,i.strInventoryTracking
+			,oli.intOwnershipType
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -310,6 +314,7 @@ BEGIN TRY
 			SELECT @intUnitPerPallet2 = NULL
 
 			SELECT @strInventoryTracking = NULL
+			Select @intOwnershipType=NULL
 
 			DELETE
 			FROM @tblLot
@@ -327,6 +332,7 @@ BEGIN TRY
 				,@intUnitPerPallet = intUnitPerPallet
 				,@intUnitPerPallet2 = intUnitPerPallet
 				,@strInventoryTracking = strInventoryTracking
+				,@intOwnershipType=intOwnershipType
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -641,6 +647,7 @@ BEGIN TRY
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
 					AND LI.ysnPickAllowed = 1
+					and L.intOwnershipType=IsNULL(@intOwnershipType,L.intOwnershipType)
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty
@@ -857,6 +864,7 @@ BEGIN TRY
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
 					AND LI.ysnPickAllowed = 1
+					and L.intOwnershipType=IsNULL(@intOwnershipType,L.intOwnershipType)
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty

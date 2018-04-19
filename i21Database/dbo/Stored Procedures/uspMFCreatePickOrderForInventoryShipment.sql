@@ -115,6 +115,7 @@ BEGIN TRY
 		,intSanitizationOrderDetailsId
 		,strLineItemNote
 		,intStagingLocationId
+		,intOwnershipType
 		)
 	SELECT @intOrderHeaderId
 		,SHI.intItemId
@@ -135,6 +136,7 @@ BEGIN TRY
 		,NULL
 		,''
 		,SHI.intStorageLocationId
+		,SHI.intOwnershipType
 	FROM dbo.tblICInventoryShipment ISH
 	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 	JOIN dbo.tblICItem I ON I.intItemId = SHI.intItemId
