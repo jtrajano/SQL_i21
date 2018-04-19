@@ -3,6 +3,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractTypeId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
+	[intBookId]	INT,
+	[intSubBookId] INT,
 	[intCounterPartyId] [int] NULL,
 	[intEntityContactId] [int] NULL,
 	[intContractPlanId] [int],

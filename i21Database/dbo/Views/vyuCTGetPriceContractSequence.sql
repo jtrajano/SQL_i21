@@ -66,7 +66,9 @@ AS
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CD.strPricingType,
 				CD.dblRatio,
-				CD.dblAppliedQty
+				CD.dblAppliedQty,
+				CD.strBook,
+				CD.strSubBook
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -117,7 +119,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CD.strPricingType,
 				CD.dblRatio,
-				CD.dblAppliedQty
+				CD.dblAppliedQty,
+				BK.strBook,
+				SB.strSubBook
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
@@ -133,6 +137,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	MA.intUnitMeasureId	
 		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD	
+LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId						
+LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
 LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CH.intCommodityId 
 												AND BU.intUnitMeasureId		=	CD.intBasisUnitMeasureId
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
