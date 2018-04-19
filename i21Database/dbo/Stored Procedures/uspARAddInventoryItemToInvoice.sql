@@ -200,7 +200,7 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@SpecialPrice					NUMERIC(18,6)	= 0.000000
 		,@ContractUOMId					INT
 		,@PriceUOMId					INT
-		,@PriceUOMQuantity				NUMERIC(18,6)
+		,@PriceUOMQuantity				NUMERIC(18,6)	= 1.000000
 		,@CurrencyExchangeRateTypeId	INT
 		,@CurrencyExchangeRate			NUMERIC(18,6)
 		,@SubCurrencyId					INT

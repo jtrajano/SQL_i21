@@ -222,29 +222,37 @@ FROM
 	@InvalidRecords
 	
 CREATE TABLE #Pricing(
-	 [intId]				INT
-	,[intInvoiceId]			INT
-	,[intInvoiceDetailId]	INT
-	,[dblPrice]				NUMERIC(18,6)
-	,[dblUnitPrice]			NUMERIC(18,6)
-	,[dblTermDiscount]		NUMERIC(18,6)
-	,[strTermDiscountBy]	NVARCHAR(50)
-	,[strPricing]			NVARCHAR(250)
-	,[intSubCurrencyId]		INT
-	,[dblSubCurrencyRate]	NUMERIC(18,6)
-	,[strSubCurrency]		NVARCHAR(40)
-	,[intPriceUOMId]		INT
-	,[strPriceUOM]			NVARCHAR(50)
-	,[dblDeviation]			NUMERIC(18,6)
-	,[intContractHeaderId]	INT
-	,[intContractDetailId]	INT
-	,[strContractNumber]	NVARCHAR(50)
-	,[intContractSeq]		INT
-	,[dblAvailableQty]      NUMERIC(18,6)
-	,[ysnUnlimitedQty]      BIT
-	,[strPricingType]		NVARCHAR(50)
-	,[intTermId]			INT NULL
-	,[intSort]				INT
+	 [intId]							INT
+	,[intInvoiceId]						INT
+	,[intInvoiceDetailId]				INT
+	,[dblPrice]							NUMERIC(18,6)
+	,[dblUnitPrice]						NUMERIC(18,6)
+	,[dblTermDiscount]					NUMERIC(18,6)
+	,[strTermDiscountBy]				NVARCHAR(50)
+	,[strPricing]						NVARCHAR(250)
+	,[intCurrencyExchangeRateTypeId]	INT
+	,[intCurrencyExchangeRateId]		INT
+    ,[strCurrencyExchangeRateType]		NVARCHAR(20)
+    ,[dblCurrencyExchangeRate]			NUMERIC(18,6)
+	,[intSubCurrencyId]					INT
+	,[dblSubCurrencyRate]				NUMERIC(18,6)
+	,[strSubCurrency]					NVARCHAR(40)
+	,[intContractUOMId]					INT
+	,[strContractUOM]					NVARCHAR(50)
+	,[intPriceUOMId]					INT
+	,[strPriceUOM]						NVARCHAR(50)
+	,[dblDeviation]						NUMERIC(18,6)
+	,[intContractHeaderId]				INT
+	,[intContractDetailId]				INT
+	,[strContractNumber]				NVARCHAR(50)
+	,[intContractSeq]					INT
+	,[dblPriceUOMQuantity]				NUMERIC(18,6)
+	,[dblQuantity]						NUMERIC(18,6)
+	,[dblAvailableQty]					NUMERIC(18,6)
+	,[ysnUnlimitedQty]					BIT
+	,[strPricingType]					NVARCHAR(50)
+	,[intTermId]						INT NULL
+	,[intSort]							INT
 )
 BEGIN TRY
 	DELETE FROM #Pricing
@@ -257,9 +265,14 @@ BEGIN TRY
 		,[dblTermDiscount]
 		,[strTermDiscountBy]
 		,[strPricing]
+		,[intCurrencyExchangeRateTypeId]
+		,[strCurrencyExchangeRateType]
+		,[dblCurrencyExchangeRate]
 		,[intSubCurrencyId]
 		,[dblSubCurrencyRate]
 		,[strSubCurrency]
+		,[intContractUOMId]
+		,[strContractUOM]
 		,[intPriceUOMId]
 		,[strPriceUOM]
 		,[dblDeviation]
@@ -267,6 +280,8 @@ BEGIN TRY
 		,[intContractDetailId]
 		,[strContractNumber]
 		,[intContractSeq]
+		,[dblPriceUOMQuantity]
+		,[dblQuantity]
 		,[dblAvailableQty]
 		,[ysnUnlimitedQty]
 		,[strPricingType]
@@ -274,29 +289,36 @@ BEGIN TRY
 		,[intSort]
 	)
 	SELECT
-		 [intId]				= IE.[intId]
-		,[intInvoiceId]			= IE.[intInvoiceId] 
-		,[intInvoiceDetailId]	= IE.[intInvoiceDetailId]
-		,[dblPrice]				= IP.[dblPrice]
-		,[dblUnitPrice]			= IP.[dblPrice]
-		,[dblTermDiscount]		= IP.[dblTermDiscount]
-		,[strTermDiscountBy]	= IP.[strTermDiscountBy]
-		,[strPricing]			= IP.[strPricing]
-		,[intSubCurrencyId]		= IP.[intSubCurrencyId]
-		,[dblSubCurrencyRate]	= IP.[dblSubCurrencyRate]
-		,[strSubCurrency]		= IP.[strSubCurrency]
-		,[intPriceUOMId]		= IP.[intPriceUOMId]
-		,[strPriceUOM]			= IP.[strPriceUOM]
-		,[dblDeviation]			= IP.[dblDeviation]
-		,[intContractHeaderId]	= IP.[intContractHeaderId]
-		,[intContractDetailId]	= IP.[intContractDetailId]
-		,[strContractNumber]	= IP.[strContractNumber]
-		,[intContractSeq]		= IP.[intContractSeq]	
-		,[dblAvailableQty]		= IP.[dblAvailableQty]
-		,[ysnUnlimitedQty]		= IP.[ysnUnlimitedQty]
-		,[strPricingType]		= IP.[strPricingType]
-		,[intTermId]			= IP.[intTermId]
-		,[intSort]				= IP.[intSort]
+		 [intId]							= IE.[intId]
+		,[intInvoiceId]						= IE.[intInvoiceId] 
+		,[intInvoiceDetailId]				= IE.[intInvoiceDetailId]
+		,[dblPrice]							= IP.[dblPrice]
+		,[dblUnitPrice]						= IP.[dblUnitPrice]
+		,[dblTermDiscount]					= IP.[dblTermDiscount]
+		,[strTermDiscountBy]				= IP.[strTermDiscountBy]
+		,[strPricing]						= IP.[strPricing]
+		,[intCurrencyExchangeRateTypeId]	= IP.[intCurrencyExchangeRateTypeId]
+		,[strCurrencyExchangeRateType]		= IP.[strCurrencyExchangeRateType]
+		,[dblCurrencyExchangeRate]			= IP.[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]					= IP.[intSubCurrencyId]
+		,[dblSubCurrencyRate]				= IP.[dblSubCurrencyRate]
+		,[strSubCurrency]					= IP.[strSubCurrency]
+		,[intContractUOMId]					= IP.[intContractUOMId]
+		,[strContractUOM]					= IP.[strContractUOM]
+		,[intPriceUOMId]					= IP.[intPriceUOMId]
+		,[strPriceUOM]						= IP.[strPriceUOM]
+		,[dblDeviation]						= IP.[dblDeviation]
+		,[intContractHeaderId]				= IP.[intContractHeaderId]
+		,[intContractDetailId]				= IP.[intContractDetailId]
+		,[strContractNumber]				= IP.[strContractNumber]
+		,[intContractSeq]					= IP.[intContractSeq]
+		,[dblPriceUOMQuantity]				= IP.[dblPriceUOMQuantity]
+		,[dblQuantity]						= IP.[dblQuantity]
+		,[dblAvailableQty]					= IP.[dblAvailableQty]
+		,[ysnUnlimitedQty]					= IP.[ysnUnlimitedQty]
+		,[strPricingType]					= IP.[strPricingType]
+		,[intTermId]						= IP.[intTermId]
+		,[intSort]							= IP.[intSort]
 	FROM
 		@ItemEntries IE
 	CROSS APPLY
@@ -356,7 +378,9 @@ USING
 		,[dblQtyOrdered]						= ISNULL(IE.[dblQtyOrdered], @ZeroDecimal)
 		,[intOrderUOMId]						= IE.[intOrderUOMId]
 		,[dblQtyShipped]						= ISNULL(IE.[dblQtyShipped], @ZeroDecimal)
-		,[intItemUOMId]							= ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))
+		,[intItemUOMId]							= ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId])))
+		,[intPriceUOMId]						= ISNULL(IP.[intPriceUOMId], ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))))
+		,[dblUnitQuantity]						= ISNULL(IP.[dblPriceUOMQuantity], ISNULL(IE.[dblContractPriceUOMQty], 1.000000))
 		,[dblItemWeight]						= IE.[dblItemWeight]
 		,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
 		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
@@ -371,11 +395,11 @@ USING
 		,[dblBaseTotalTax]						= @ZeroDecimal
 		,[dblTotal]								= @ZeroDecimal
 		,[dblBaseTotal]							= @ZeroDecimal
-		,[intCurrencyExchangeRateTypeId]		= IE.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateTypeId]		= ISNULL(IP.[intCurrencyExchangeRateTypeId], IE.[intCurrencyExchangeRateTypeId])
 		,[intCurrencyExchangeRateId]			= IE.[intCurrencyExchangeRateId]
-		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END
+		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END
 		,[intSubCurrencyId]						= ISNULL(ISNULL(IP.[intSubCurrencyId], IE.[intSubCurrencyId]), IE.[intCurrencyId])
-		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(ISNULL(IP.[intSubCurrencyId], IE.[intSubCurrencyId]), 0) = 0 THEN 1 ELSE ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) END
+		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IP.[dblSubCurrencyRate], 0.000000) <> @ZeroDecimal THEN IP.[dblSubCurrencyRate] ELSE (CASE WHEN ISNULL(IE.[dblSubCurrencyRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblSubCurrencyRate], 1.000000) END) END
 		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
 		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
 		,[intAccountId]							= Acct.[intAccountId]
@@ -493,6 +517,11 @@ USING
 			,[intContractDetailId]
 			,[intContractSeq]
 			,[dblAvailableQty]
+			,[intCurrencyExchangeRateTypeId]
+			,[dblCurrencyExchangeRate]
+			,[intContractUOMId]
+			,[intPriceUOMId]
+			,[dblPriceUOMQuantity]
 		FROM
 			#Pricing WITH (NOLOCK)
 		) IP
@@ -530,6 +559,8 @@ INSERT(
 	,[intOrderUOMId]
 	,[dblQtyShipped]
 	,[intItemUOMId]
+	,[intPriceUOMId]
+	,[dblUnitQuantity]
 	,[dblItemWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
@@ -630,6 +661,8 @@ VALUES(
 	,[intOrderUOMId]
 	,[dblQtyShipped]
 	,[intItemUOMId]
+	,[intPriceUOMId]
+	,[dblUnitQuantity]
 	,[dblItemWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
