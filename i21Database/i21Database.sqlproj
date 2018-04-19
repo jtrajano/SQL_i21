@@ -6352,6 +6352,7 @@
     <Build Include="dbo\Tables\tblRKCollateralHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCollateralHistoryInsert.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyConfiguration.sql" />
+    <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
