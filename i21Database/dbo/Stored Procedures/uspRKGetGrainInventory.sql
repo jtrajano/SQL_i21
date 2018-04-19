@@ -6,6 +6,11 @@
 		  @strPositionIncludes nvarchar(100) = NULL
 
 AS
+--DECLARE		@dtmFromTransactionDate datetime = '2018-04-19 00:00:00',
+--		@dtmToTransactionDate datetime = '2018-04-19 00:00:00',
+--		@intCommodityId int =  6,
+--		@intItemId int= 0,
+--		  @strPositionIncludes nvarchar(100) = 'All Storage'
 
 DECLARE @tblResult TABLE
 (Id INT identity(1,1),
@@ -36,12 +41,14 @@ DECLARE @intCommodityUnitMeasureId INT= NULL
 SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
 
 
+
 INSERT INTO @tblResult(dtmDate,strDistributionOption,strShipDistributionOption,strAdjDistributionOption,strCountDistributionOption,tranShipmentNumber,tranShipQty,
 	tranReceiptNumber,tranRecQty,tranAdjNumber,dblAdjustmentQty,tranCountNumber,dblCountQty,tranInvoiceNumber,dblInvoiceQty
 ,intInventoryReceiptId ,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId,BalanceForward)
 
 SELECT *,round(isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0),6) BalanceForward FROM 
 (
+select distinct * from(
 SELECT dtmDate,
 	(SELECT top 1 strDistributionOption FROM tblICInventoryReceipt ir 
 	 JOIN tblICInventoryReceiptItem ir1 on ir.intInventoryReceiptId=ir1.intInventoryReceiptId
@@ -59,10 +66,10 @@ round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@int
 
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId)) ,6) tranRecQty,
 
-(SELECT top 1 strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId) tranAdjNumber,
+isnull((SELECT top 1 strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId),'') tranAdjNumber,
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId)) ,6) dblAdjustmentQty,
 
-(SELECT top 1 strCountNo FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId) tranCountNumber,
+isnull((SELECT top 1 strCountNo FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId),'') tranCountNumber,
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId )) ,6) dblCountQty,
 
 (SELECT top 1 strInvoiceNumber FROM tblARInvoice ia
@@ -85,7 +92,7 @@ FROM tblICInventoryTransaction it
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(33,4,5,10,23)
 join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
-JOIN tblICItemLocation il on it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
+JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
 										AND  il.intLocationId  IN (
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -94,8 +101,7 @@ JOIN tblICItemLocation il on it.intItemId=il.intItemId and isnull(il.strDescript
 WHERE i.intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
-and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%'
-
+and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%')t
 union
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
 		'' as strAdjDistributionOption,
@@ -136,7 +142,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
+		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 )a
 
 
 Union
@@ -179,7 +185,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
+		and  gs.strOwnedPhysicalStock='Customer' )a
 
 UNION
 
@@ -201,10 +207,11 @@ JOIN tblICItem i on i.intItemId=ir.intItemId
  		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
-and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge' and  s.intStorageScheduleTypeId > 0 
  )t
 
-SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
+ select  convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* from(
+SELECT distinct 
     dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber	
                                             when isnull(tranShipmentNumber,'') <> '' then tranShipmentNumber
                                             when isnull(tranAdjNumber,'') <> '' then tranAdjNumber
@@ -215,10 +222,10 @@ SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
                                             WHEN isnull(strShipDistributionOption,'') <> '' then strShipDistributionOption
                                             END 
                                             strDistribution,
-       tranRecQty [dblIN],tranShipmentNumber [strShipTicketNo],
+       tranRecQty [dblIN],isnull(tranShipmentNumber,'') [strShipTicketNo],
 	   isnull(tranShipQty,0) + isnull(dblInvoiceQty,0)   [dblOUT],
 	   tranAdjNumber [strAdjNo],
        dblAdjustmentQty [dblAdjQty],tranCountNumber [strCountNumber],dblCountQty [dblCountQty],BalanceForward dblDummy,
 (SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward,strShipDistributionOption,
 	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId
-FROM @tblResult T1
+FROM @tblResult T1)t order by strReceiptNumber

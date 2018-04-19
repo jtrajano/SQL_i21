@@ -40,7 +40,7 @@ FROM (
 				JOIN tblICItem i ON i.intItemId = it.intItemId AND it.intTransactionTypeId IN (4, 5, 10, 23)
 				JOIN tblICItemUOM u ON it.intItemId = u.intItemId AND u.intItemUOMId = it.intItemUOMId
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = @intCommodityId AND u.intUnitMeasureId = ium.intUnitMeasureId
-				JOIN tblICItemLocation il ON it.intItemId = il.intItemId AND isnull(il.strDescription, '') <> 'In-Transit' AND il.intLocationId IN (
+				JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId AND isnull(il.strDescription, '') <> 'In-Transit' AND il.intLocationId IN (
 						SELECT intCompanyLocationId
 						FROM tblSMCompanyLocation
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
