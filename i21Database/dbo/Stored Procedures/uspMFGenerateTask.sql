@@ -640,7 +640,7 @@ BEGIN TRY
 						SELECT RT.intRestrictionId
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
-					AND LI.ysnPickAllowed=1
+					AND LI.ysnPickAllowed = 1
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty
@@ -856,7 +856,7 @@ BEGIN TRY
 						SELECT RT.intRestrictionId
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
-					AND LI.ysnPickAllowed=1
+					AND LI.ysnPickAllowed = 1
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty
@@ -1261,15 +1261,20 @@ BEGIN TRY
 
 		IF @intTaskCount <= 0
 		BEGIN
-			RAISERROR (
-					'System was unable to generate task for one or more item(s).'
-					,16
-					,1
-					)
+			SET @ysnAllTasksNotGenerated = 1
+			--RAISERROR (
+			--		'System was unable to generate task for one or more item(s).'
+			--		,16
+			--		,1
+			--		)
 		END
 	END
 	ELSE
 	BEGIN
+		DELETE
+		FROM tblMFTask
+		WHERE intOrderHeaderId = @intOrderHeaderId
+
 		DECLARE @tblPutAwayLot TABLE (
 			intLotRecordId INT Identity(1, 1)
 			,intLotId INT

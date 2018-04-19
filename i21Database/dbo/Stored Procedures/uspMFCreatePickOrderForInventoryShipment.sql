@@ -17,6 +17,7 @@ BEGIN TRY
 		,@strReferenceNo NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
 		,@intItemId INT
+		,@ysnGenerateTaskOnCreatePickOrder BIT
 
 	SELECT @strInventoryShipmentNo = strShipmentNumber
 		,@intShipFromLocationId = intShipFromLocationId
@@ -44,8 +45,16 @@ BEGIN TRY
 		,@ysnProposed = 0
 		,@strPatternString = @strOrderNo OUTPUT
 
-	SELECT @intStageLocationId = intDefaultShipmentStagingLocation
-	FROM tblMFCompanyPreference
+	SELECT @intStageLocationId = intStorageLocationId
+	FROM tblICInventoryShipmentItem
+	WHERE intInventoryShipmentId = @intInventoryShipmentId
+		AND intStorageLocationId IS NOT NULL
+
+	IF @intStageLocationId IS NULL
+	BEGIN
+		SELECT @intStageLocationId = intDefaultShipmentStagingLocation
+		FROM tblMFCompanyPreference
+	END
 
 	IF EXISTS (
 			SELECT 1
@@ -105,6 +114,7 @@ BEGIN TRY
 		,intLineNo
 		,intSanitizationOrderDetailsId
 		,strLineItemNote
+		,intStagingLocationId
 		)
 	SELECT @intOrderHeaderId
 		,SHI.intItemId
@@ -124,10 +134,11 @@ BEGIN TRY
 			)
 		,NULL
 		,''
+		,SHI.intStorageLocationId
 	FROM dbo.tblICInventoryShipment ISH
 	JOIN tblICInventoryShipmentItem SHI ON SHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 	JOIN dbo.tblICItem I ON I.intItemId = SHI.intItemId
-	Left JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.intUnitMeasureId = I.intWeightUOMId
 	WHERE ISH.intInventoryShipmentId = @intInventoryShipmentId
 
@@ -207,6 +218,16 @@ BEGIN TRY
 			WHERE intLotId = tblICStockReservation.intLotId
 				AND intOrderHeaderId = tblICStockReservation.intTransactionId
 			)
+
+	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
+	FROM tblMFCompanyPreference
+
+	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
+	BEGIN
+		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
+			,@intEntityUserSecurityId = @intUserId
+			,@ysnAllTasksNotGenerated = 0
+	END
 END TRY
 
 BEGIN CATCH

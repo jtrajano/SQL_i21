@@ -165,7 +165,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]			
-			
+			,[ysnRebuild]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -215,7 +215,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger'
-
+			,[ysnRebuild] = CASE WHEN B.strJournalType = 'Origin Journal' THEN 1 ELSE 0 END
 		
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
@@ -262,6 +262,7 @@ ELSE
 			,[strTransactionForm]
 			,[strModuleName]			
 			,strRateType
+			,[ysnRebuild]
 		)
 		SELECT 
 			 [strTransactionId]		= B.[strJournalId]
@@ -293,6 +294,7 @@ ELSE
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger' 
 			,strCurrencyExchangeRateType
+			,[ysnRebuild] = CASE WHEN B.strJournalType = 'Origin Journal' THEN 1 ELSE 0 END
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B  ON A.[intJournalId] = B.[intJournalId]
 		LEFT JOIN tblSMCurrencyExchangeRateType Rate on A.intCurrencyExchangeRateTypeId = Rate.intCurrencyExchangeRateTypeId
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)

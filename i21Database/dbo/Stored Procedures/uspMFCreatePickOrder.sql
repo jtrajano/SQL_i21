@@ -54,6 +54,7 @@ BEGIN TRY
 		,@strPickByUpperToleranceQty NVARCHAR(50)
 		,@ysnPickRemainingQty BIT
 		,@strReferernceNo NVARCHAR(50)
+		,@ysnGenerateTaskOnCreatePickOrder BIT
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -963,6 +964,16 @@ BEGIN TRY
 			WHERE intLotId = tblICStockReservation.intLotId
 				AND intOrderHeaderId = tblICStockReservation.intTransactionId
 			)
+
+	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
+	FROM tblMFCompanyPreference
+
+	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
+	BEGIN
+		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
+			,@intEntityUserSecurityId = @intUserId
+			,@ysnAllTasksNotGenerated = 0
+	END
 
 	COMMIT TRANSACTION
 

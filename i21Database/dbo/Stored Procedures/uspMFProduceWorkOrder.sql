@@ -31,6 +31,7 @@
 	,@ysnFillPartialPallet BIT = 0
 	,@intSpecialPalletLotId INT = NULL
 	,@ysnRecap BIT = 0
+	,@intLotStatusId int=NULL
 	)
 AS
 BEGIN
@@ -384,6 +385,10 @@ BEGIN
 			,@intWorkOrderProducedLotId
 			,NULL
 			,@intShiftId
+			,NULL
+			,NULL
+			,NULL
+			,@intLotStatusId
 	END
 	ELSE
 	BEGIN
@@ -420,6 +425,7 @@ BEGIN
 			,@intStorageLocationId = @intStorageLocationId
 			,@dtmProductionDate = @dtmProductionDate
 			,@intTransactionDetailId = @intWorkOrderProducedLotId
+			,@intLotStatusId=@intLotStatusId
 	END
 
 	IF @strParentLotNumber IS NULL
