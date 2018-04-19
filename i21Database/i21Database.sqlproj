@@ -6344,6 +6344,7 @@
     <Build Include="dbo\Tables\tblLGShippingLineServiceContractDetail.sql" />
     <Build Include="dbo\Tables\tblSMReplicationConfiguration.sql" />
     <Build Include="dbo\Tables\tblMFRecipeCategory.sql" />
+    <Build Include="dbo\Functions\fnCMGetACHTransactionCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
