@@ -65,5 +65,6 @@
 	intLotDueDays int CONSTRAINT [DF_tblMFCompanyPreference_intLotDueDays] DEFAULT 0,
 	ysnLifeTimeByEndOfMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLifeTimeByEndOfMonth] DEFAULT 0,
 	ysnSendEDIOnRepost int CONSTRAINT [DF_tblMFCompanyPreference_ysnSendEDIOnRepost] DEFAULT 1
+	ysnGenerateTaskOnCreatePickOrder int CONSTRAINT [DF_tblMFCompanyPreference_ysnGenerateTaskOnCreatePickOrder] DEFAULT 0
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

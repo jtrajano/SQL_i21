@@ -17,6 +17,7 @@ BEGIN TRY
 		,@strReferenceNo NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
 		,@intItemId INT
+		,@ysnGenerateTaskOnCreatePickOrder BIT
 
 	SELECT @strInventoryShipmentNo = strShipmentNumber
 		,@intShipFromLocationId = intShipFromLocationId
@@ -46,7 +47,8 @@ BEGIN TRY
 
 	SELECT @intStageLocationId = intStorageLocationId
 	FROM tblICInventoryShipmentItem
-	WHERE intInventoryShipmentId = @intInventoryShipmentId and intStorageLocationId is not null
+	WHERE intInventoryShipmentId = @intInventoryShipmentId
+		AND intStorageLocationId IS NOT NULL
 
 	IF @intStageLocationId IS NULL
 	BEGIN
@@ -216,6 +218,16 @@ BEGIN TRY
 			WHERE intLotId = tblICStockReservation.intLotId
 				AND intOrderHeaderId = tblICStockReservation.intTransactionId
 			)
+
+	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
+	FROM tblMFCompanyPreference
+
+	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
+	BEGIN
+		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
+			,@intEntityUserSecurityId = @intUserId
+			,@ysnAllTasksNotGenerated = 0
+	END
 END TRY
 
 BEGIN CATCH
