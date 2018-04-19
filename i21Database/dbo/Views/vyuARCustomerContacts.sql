@@ -24,4 +24,4 @@ FROM dbo.tblARCustomer AS A INNER JOIN
 	dbo.tblEMEntityPhoneNumber as EnPhoneNo ON C.[intEntityContactId] = EnPhoneNo.[intEntityId] LEFT OUTER JOIN
 	dbo.[tblEMEntityLocation] AS E ON C.intEntityLocationId = E.intEntityLocationId
 	LEFT JOIN tblEMEntityLocation F ON A.intEntityId = F.intEntityId AND F.ysnDefaultLocation = 1
-	LEFT JOIN tblSMCompanyLocation G ON F.intWarehouseId = G.intCompanyLocationId
+	LEFT JOIN (SELECT intCompanyLocationId FROM tblSMCompanyLocation) G ON F.intWarehouseId = G.intCompanyLocationId
