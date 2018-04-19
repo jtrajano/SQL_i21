@@ -21,6 +21,7 @@
 	,@ShipViaId						INT				= NULL
 	,@PaymentMethodId				INT				= NULL
 	,@InvoiceOriginId				NVARCHAR(25)	= NULL
+	,@MobileBillingShiftNo			NVARCHAR(50)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
 	,@Comment						NVARCHAR(500)	= ''			
@@ -386,6 +387,7 @@ BEGIN TRY
 		,[intShipViaId]
 		,[intPaymentMethodId]
 		,[strInvoiceOriginId]
+		,[strMobileBillingShiftNo]
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
@@ -459,6 +461,7 @@ BEGIN TRY
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
 		,[strInvoiceOriginId]			= @InvoiceOriginId
+		,[strMobileBillingShiftNo]		= @MobileBillingShiftNo
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END

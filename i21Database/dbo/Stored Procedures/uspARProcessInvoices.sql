@@ -179,6 +179,7 @@ DECLARE  @Id									INT
 		,@PaymentMethodId						INT
 		,@InvoiceOriginId						NVARCHAR(25)
 		,@UseOriginIdAsInvoiceNumber			BIT
+		,@MobileBillingShiftNo					NVARCHAR(50)
 		,@PONumber								NVARCHAR(25)
 		,@BOLNumber								NVARCHAR(50)
 		,@Comment								NVARCHAR(500)
@@ -342,6 +343,7 @@ BEGIN
 		,@PaymentMethodId				= [intPaymentMethodId]
 		,@InvoiceOriginId				= [strInvoiceOriginId]
 		,@UseOriginIdAsInvoiceNumber	= [ysnUseOriginIdAsInvoiceNumber]
+		,@MobileBillingShiftNo			= [strMobileBillingShiftNo]
 		,@PONumber						= [strPONumber]
 		,@BOLNumber						= [strBOLNumber]
 		,@Comment						= [strComments]
@@ -581,6 +583,7 @@ BEGIN
 			,@PaymentMethodId				= @PaymentMethodId
 			,@InvoiceOriginId				= @InvoiceOriginId
 			,@UseOriginIdAsInvoiceNumber	= @UseOriginIdAsInvoiceNumber
+			,@MobileBillingShiftNo			= @MobileBillingShiftNo
 			,@PONumber						= @PONumber
 			,@BOLNumber						= @BOLNumber
 			,@Comment						= @Comment
@@ -1237,6 +1240,7 @@ BEGIN TRY
 			,@ShipViaId						= [intShipViaId]
 			,@PaymentMethodId				= [intPaymentMethodId]
 			,@InvoiceOriginId				= [strInvoiceOriginId]
+			,@MobileBillingShiftNo			= [strMobileBillingShiftNo]
 			,@PONumber						= [strPONumber]
 			,@BOLNumber						= [strBOLNumber]
 			,@Comment						= [strComments]
@@ -1369,6 +1373,7 @@ BEGIN TRY
 			,[intShipViaId]				= ISNULL(@ShipViaId, EL.[intShipViaId])
 			,[intPaymentMethodId]		= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
 			,[strInvoiceOriginId]		= @InvoiceOriginId
+			,[strMobileBillingShiftNo]	= @MobileBillingShiftNo
 			,[strPONumber]				= @PONumber
 			,[strBOLNumber]				= @BOLNumber
 			,[strComments]				= @Comment

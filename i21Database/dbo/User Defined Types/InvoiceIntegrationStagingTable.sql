@@ -63,6 +63,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intPaymentMethodId]					INT												NULL		-- NULL
 	,[strInvoiceOriginId]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Reference to the original/parent record
 	,[ysnUseOriginIdAsInvoiceNumber]		BIT												NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
+	,[strMobileBillingShiftNo]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Mobile Billing Shift Number
 	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Purchase Order Number
 	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number	
 	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Comments		
