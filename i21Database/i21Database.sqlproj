@@ -6346,6 +6346,7 @@
     <Build Include="dbo\Tables\tblMFRecipeCategory.sql" />
     <Build Include="dbo\Functions\fnCMGetACHTransactionCode.sql" />
     <Build Include="dbo\Views\vyuICGetItemVendorPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
