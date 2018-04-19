@@ -10,6 +10,8 @@ BEGIN
 
 		SET @strStatusMsg = 'Success'
 
+		DECLARE @ysnUpdateCheckoutStatus BIT = 1
+
 		DECLARE @intEntityCustomerId INT = (SELECT intCheckoutCustomerId FROM tblSTStore 
 											WHERE intStoreId = (
 												SELECT intStoreId FROM tblSTCheckoutHeader
@@ -32,25 +34,60 @@ BEGIN
 		DECLARE @intCreatedInvoiceId INT = NULL
 
 
-		----------------------------------------------------
-		----------- Verify Posting Direction ---------------
-		----------------------------------------------------
+		----------------------------------------------------------------------
+		-------------------- Check current Invoice status --------------------
+		----------------------------------------------------------------------
+		DECLARE @ysnCurrentInvoiceStatus BIT = NULL
+		IF(@intCreatedInvoiceId IS NOT NULL)
+			BEGIN
+				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCreatedInvoiceId)
+					BEGIN
+						SET @ysnCurrentInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCreatedInvoiceId)
+					END
+				
+			END
+		----------------------------------------------------------------------
+		------------------ End check current Invoice status ------------------
+		----------------------------------------------------------------------
+
+
+		----------------------------------------------------------------------
+		-------------------- Verify Posting Direction ------------------------
+		----------------------------------------------------------------------
 		IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Manager Verified')
 			BEGIN
-				SET @ysnPost = 1
+				IF(@ysnCurrentInvoiceStatus = 0 OR @ysnCurrentInvoiceStatus IS NULL) -- The Invoice current status is 'UnPosted' OR not yet Created
+					BEGIN
+						SET @ysnPost = 1
+					END
+				ELSE IF(@ysnCurrentInvoiceStatus = 1) -- The Invoice is already been 'Posted' 
+					BEGIN
+						SET @ysnPost = NULL -- Set to Null so Posting will not continue
+						SET @ysnUpdateCheckoutStatus = 1
+						SET @strStatusMsg = 'Checkout already been Posted'
+					END
 			END
 		ELSE IF (@strDirection = 'UnPost' AND @CheckoutCurrentStatus = 'Posted')
 			BEGIN
-				SET @ysnPost = 0
+				IF(@ysnCurrentInvoiceStatus = 1) -- The Invoice current status is 'Posted'
+					BEGIN
+						SET @ysnPost = 0
+					END
+				ELSE IF(@ysnCurrentInvoiceStatus = 0) -- The Invoice is already been 'UnPosted' 
+					BEGIN
+						SET @ysnPost = NULL -- Set to Null so UnPosting will not continue
+						SET @ysnUpdateCheckoutStatus = 1
+						SET @strStatusMsg = 'Checkout already been UnPosted'
+					END
 			END
-		----------------------------------------------------
-		----------- End Verify Posting Direction -----------
-		----------------------------------------------------
+		----------------------------------------------------------------------
+		-------------------- End Verify Posting Direction --------------------
+		----------------------------------------------------------------------
 
 
-		----------------------------------------------------
-		------------ POST / UNPOST PUMP TOTALS -------------
-		----------------------------------------------------
+		----------------------------------------------------------------------
+		--------------------- POST / UNPOST PUMP TOTALS ----------------------
+		----------------------------------------------------------------------
 		IF(@ysnPost IS NOT NULL)
 		BEGIN
 			IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
@@ -256,44 +293,48 @@ BEGIN
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
+								SET @ysnUpdateCheckoutStatus = 1
 								SET @strStatusMsg = 'Success'
 							END
 						ELSE
 							BEGIN
+								SET @ysnUpdateCheckoutStatus = 0
 								SET @strStatusMsg = @ErrorMessage
 							END	
 				END
 			ELSE
 				BEGIN
+					SET @ysnUpdateCheckoutStatus = 0
 					SET @strStatusMsg = 'No records found to Post in Pump Totals'
 				END
 		END
-		----------------------------------------------------
-		---------- END POST / UNPOST PUMP TOTALS -----------
-		----------------------------------------------------
+		----------------------------------------------------------------------
+		------------------- END POST / UNPOST PUMP TOTALS --------------------
+		----------------------------------------------------------------------
 		
-		
-		IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Manager Verified')
+
+		IF(@ysnUpdateCheckoutStatus = 1)
 			BEGIN
-				SET @strNewCheckoutStatus = 'Posted'
-			END
-		ELSE IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Open')
-			BEGIN
-				SET @strNewCheckoutStatus = 'Manager Verified'
-			END
-		ELSE IF (@strDirection = 'UnPost' AND @CheckoutCurrentStatus = 'Posted')
-			BEGIN
-				SET @strNewCheckoutStatus = 'Manager Verified'
-			END
-		ELSE IF (@strDirection = 'SendBackToStore' AND @CheckoutCurrentStatus = 'Manager Verified')
-			BEGIN
-				SET @strNewCheckoutStatus = 'Open'
-			END
+				-- Determine Status
+				IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Manager Verified')
+					BEGIN
+						SET @strNewCheckoutStatus = 'Posted'
+					END
+				ELSE IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Open')
+					BEGIN
+						SET @strNewCheckoutStatus = 'Manager Verified'
+					END
+				ELSE IF (@strDirection = 'UnPost' AND @CheckoutCurrentStatus = 'Posted')
+					BEGIN
+						SET @strNewCheckoutStatus = 'Manager Verified'
+					END
+				ELSE IF (@strDirection = 'SendBackToStore' AND @CheckoutCurrentStatus = 'Manager Verified')
+					BEGIN
+						SET @strNewCheckoutStatus = 'Open'
+					END
 
 
 
-		IF(@strStatusMsg = 'Success')
-			BEGIN
 				IF(@ysnPost IS NULL)
 					BEGIN
 						UPDATE dbo.tblSTCheckoutHeader 
