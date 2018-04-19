@@ -6,6 +6,7 @@
 	,@TransactionDate			DATETIME		= NULL
 	,@Quantity					NUMERIC(18,6)
 	,@Price						NUMERIC(18,6)	= NULL OUTPUT
+	,@UnitPrice					NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing					NVARCHAR(250)	= NULL OUTPUT	
 	,@ContractHeaderId			INT				= NULL OUTPUT
 	,@ContractDetailId			INT				= NULL OUTPUT
@@ -52,6 +53,7 @@ AS
 
 	SELECT
 		 @Price							= dblPrice
+		,@UnitPrice						= dblUnitPrice
 		,@Pricing						= strPricing
 		,@ContractHeaderId				= intContractHeaderId
 		,@ContractDetailId				= intContractDetailId

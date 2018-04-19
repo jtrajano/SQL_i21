@@ -221,6 +221,8 @@ USING
 		,[intOrderUOMId]						= IE.[intOrderUOMId]
 		,[dblQtyShipped]						= ISNULL(IE.[dblQtyShipped], @ZeroDecimal)
 		,[intItemUOMId]							= IE.[intItemUOMId]
+		,[intPriceUOMId]						= ISNULL(IE.[intPriceUOMId], IE.[intItemUOMId])
+		,[dblUnitQuantity]						= ISNULL(IE.[dblContractPriceUOMQty], 1.000000)
 		,[dblItemWeight]						= IE.[dblItemWeight]
 		,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
 		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
@@ -337,6 +339,8 @@ INSERT(
 	,[intOrderUOMId]
 	,[dblQtyShipped]
 	,[intItemUOMId]
+	,[intPriceUOMId]
+	,[dblUnitQuantity]
 	,[dblItemWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
@@ -437,6 +441,8 @@ VALUES(
 	,[intOrderUOMId]
 	,[dblQtyShipped]
 	,[intItemUOMId]
+	,[intPriceUOMId]
+	,[dblUnitQuantity]
 	,[dblItemWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
