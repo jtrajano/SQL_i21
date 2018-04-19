@@ -20,4 +20,5 @@
 	,[strLineItemNote]					NVARCHAR(MAX)
 	,intStagingLocationId				int
 	,[strLastUpdateBy]					NVARCHAR(100)
-	,dblSurplusQtyInStageLocation		NUMERIC(18, 6))
+	,dblSurplusQtyInStageLocation		NUMERIC(18, 6)
+	,intOwnershipType INT)
