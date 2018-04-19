@@ -261,6 +261,26 @@ BEGIN
 					dtmStartDate
 				,intContractSeq
 
+			--get another contract if contract number from file does not available
+			IF(@intContractDetailId IS NULL)
+			BEGIN
+			SET @intContractDetailId = NULL
+			SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+						,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
+			FROM
+				[vyuCTCustomerContract] ARCC
+			WHERE
+				ARCC.[intEntityCustomerId] = @intCustomerEntityId
+				AND ARCC.[intItemId] = @intItemId
+				AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+													CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+				AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+				AND (ARCC.[dblAvailableQty] > 0) 				
+			ORDER BY
+					dtmStartDate
+				,intContractSeq
+			END
+
 			IF(NOT @intContractDetailId IS NULL) 
 			BEGIN 
 				SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
