@@ -31,15 +31,15 @@ namespace iRely.Inventory.BusinessLayer
             return entity.intItemPricingLevelId;
         }
 
-        //public override string DuplicateFoundMessage()
-        //{
-        //    return "Pricing levels cannot have the same effective date.";
-        //}
+        public override string DuplicateFoundMessage()
+        {
+            return "Pricing levels cannot have the same effective date.";
+        }
 
-        //protected override Expression<Func<tblICItemPricingLevel, bool>> GetUniqueKeyExpression(tblICItemPricingLevel entity)
-        //{
-        //    return (e => e.intItemPricingLevelId == entity.intItemPricingLevelId);
-        //}
+        protected override Expression<Func<tblICItemPricingLevel, bool>> GetUniqueKeyExpression(tblICItemPricingLevel entity)
+        {
+            return (e => e.dtmEffectiveDate == entity.dtmEffectiveDate);
+        }
 
         public override tblICItemPricingLevel Process(CsvRecord record)
         {
