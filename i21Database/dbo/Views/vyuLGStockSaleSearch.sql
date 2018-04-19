@@ -22,6 +22,10 @@ SELECT DISTINCT SSH.intStockSalesHeaderId
 	  ,0 AS intLoadId
 	  ,'' AS strLoadNumber
 	  ,CAST(0 AS BIT) AS ysnDelivered
+	  ,SSH.intBookId
+	  ,BO.strBook
+	  ,SSH.intSubBookId
+	  ,SB.strSubBook
 FROM tblLGStockSalesHeader SSH
 JOIN tblLGStockSalesLotDetail SSLD ON SSH.intStockSalesHeaderId = SSLD.intStockSalesHeaderId
 JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = SSH.intAllocationHeaderId
@@ -35,3 +39,5 @@ JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationI
 JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+LEFT JOIN tblCTBook BO ON BO.intBookId = SSH.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = SSH.intSubBookId

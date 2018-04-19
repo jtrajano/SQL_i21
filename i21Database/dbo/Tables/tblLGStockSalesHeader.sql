@@ -18,6 +18,8 @@
 	[intContractCityId] INT NULL,
 	[dblHedgePrice] NUMERIC(18,6),
 	[intCompanyId] INT NULL,
+	[intBookId] INT NULL,
+	[intSubBookId] INT NULL,
 
     CONSTRAINT [PK_tblLGStockSalesHeader_intStockSalesHeaderId] PRIMARY KEY ([intStockSalesHeaderId]), 
 	CONSTRAINT [UK_tblLGStockSalesHeader_intReferenceNumber] UNIQUE ([strStockSalesNumber]),
@@ -29,5 +31,7 @@
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]),
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblLGAllocationHeader_intAllocationHeaderId] FOREIGN KEY ([intAllocationHeaderId]) REFERENCES [tblLGAllocationHeader]([intAllocationHeaderId]),
 	CONSTRAINT [FK_tblLGStockSalesHeader_tblLGPickLotHeader_intPickLotHeaderId] FOREIGN KEY ([intPickLotHeaderId]) REFERENCES [tblLGPickLotHeader]([intPickLotHeaderId]),
-    CONSTRAINT [FK_tblLGStockSalesHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
+    CONSTRAINT [FK_tblLGStockSalesHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
+	CONSTRAINT [FK_tblLGStockSalesHeader_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+	CONSTRAINT [FK_tblLGStockSalesHeader_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
 )

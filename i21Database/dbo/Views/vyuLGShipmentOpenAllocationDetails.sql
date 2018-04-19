@@ -81,6 +81,7 @@ FROM (
 		FROM tblLGLoadDetail SP
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
 			AND L.intPurchaseSale = 3
+			AND L.intShipmentType = 1
 		GROUP BY SP.intAllocationDetailId
 		) LD ON AD.intAllocationDetailId = LD.intAllocationDetailId
 	LEFT JOIN (

@@ -14,8 +14,12 @@
 [ysnPosted] BIT NULL,
 [dtmPosted] DATETIME NULL,
 [intCompanyId] INT NULL,
+[intBookId] INT NULL,
+[intSubBookId] INT NULL,
 
 CONSTRAINT [PK_tblLGWeightClaim_intWeightClaimId] PRIMARY KEY ([intWeightClaimId]), 
 CONSTRAINT [UK_tblLGWeightClaim_intReferenceNumber] UNIQUE ([strReferenceNumber]),
-CONSTRAINT [FK_tblLGWeightClaim_tblLGShipment_intShipmentId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId])
+CONSTRAINT [FK_tblLGWeightClaim_tblLGShipment_intShipmentId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]),
+CONSTRAINT [FK_tblLGWeightClaim_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+CONSTRAINT [FK_tblLGWeightClaim_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
 )
