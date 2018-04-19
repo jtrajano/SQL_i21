@@ -32,7 +32,7 @@ DECLARE @intContractDetailId AS INT,
 		@splitDistribution AS NVARCHAR(40),
 		@ticketStatus AS NVARCHAR(10),
 		@intContractCostId AS INT,
-		@intShipToId INT
+		@intShipToId INT,
 		@intFreightTermId INT;
 
 DECLARE @SALES_CONTRACT AS INT = 1
@@ -62,9 +62,11 @@ FROM dbo.tblICItemUOM UM
 JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 
-SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId FROM tblARCustomer WHERE intEntityId = SC.intEntityId
+SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId FROM tblARCustomer AR
+LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+WHERE AR.intEntityId = @intEntityId
 
-IF ISNULL(@intFreightTermId, 0) = 0
+IF ISNULL(@intShipToId, 0) = 0
 BEGIN
 	RAISERROR('Customer is missing The "Ship To" information, To correct, click on customer link and fill up "Ship To" on the Customer tab', 11, 1);
 	RETURN;
