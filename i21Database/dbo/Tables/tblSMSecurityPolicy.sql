@@ -21,6 +21,7 @@
     [intReqCaptchaAfter] INT NOT NULL DEFAULT 3, 
     [intLockUserAccountAfter] INT NOT NULL DEFAULT 10, 
     [intLockUserAccountDuration] INT NOT NULL DEFAULT 30, 
+	[intRememberMeExpiration] INT NOT NULL DEFAULT 7, 
     [strAfterHoursLogin] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Allow' , 
     [dtmBusHoursStartTime] DATETIME NOT NULL DEFAULT CAST(CAST(GETDATE() AS DATE) AS DATETIME) + '07:00:00', 
     [dtmBusHoursEndTime] DATETIME NOT NULL DEFAULT CAST(CAST(GETDATE() AS DATE) AS DATETIME) + '18:00:00', 
