@@ -10,6 +10,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @strNewCountLine NVARCHAR(50)
+SELECT @strNewCountLine = strCountNo FROM tblICInventoryCount WHERE intInventoryCountId = @intNewCountId
+
 INSERT INTO tblICInventoryCountDetail(
 			  intInventoryCountId
 			, intItemId
@@ -58,7 +61,7 @@ SELECT @intNewCountId
 		, dblSystemCount
 		, dblLastCost
 		, strAutoCreatedLotNumber
-		, strCountLine
+		, strCountLine = @strNewCountLine + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intInventoryCountDetailId ASC) AS NVARCHAR(50))
 		, dblPallets
 		, dblQtyPerPallet
 		, dblPhysicalCount
