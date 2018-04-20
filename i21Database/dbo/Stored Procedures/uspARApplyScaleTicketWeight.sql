@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARApplyScaleTicketWeight]
 	  @intSalesOrderId	INT
+	, @intTicketId		INT
 	, @intScaleUOMId    INT = NULL
-	, @intUserId		INT = NULL
+	, @intUserId		INT = NULL	
 	, @dblNetWeight		NUMERIC(18, 6) = 0
 	, @intNewInvoiceId	INT = NULL OUTPUT
 AS
@@ -34,6 +35,12 @@ BEGIN
 	IF ISNULL(@intSalesOrderId, 0) = 0
 		BEGIN
 			RAISERROR('Sales Order ID is required.', 16, 1)
+			RETURN;
+		END
+
+	IF ISNULL(@intTicketId, 0) = 0
+		BEGIN
+			RAISERROR('Scale Ticket ID is required.', 16, 1)
 			RETURN;
 		END
 
@@ -79,13 +86,23 @@ BEGIN
 			UPDATE tblARInvoiceDetail
 			SET dblQtyShipped = @dblNetWeight - @dblTotalTreatment
 			  , intItemUOMId = @intScaleUOMId
+			  , intTicketId = @intTicketId
 			WHERE intSalesOrderDetailId = @intSalesOrderDetailId
 			  AND intInvoiceId = @intNewInvoiceId
 
 			EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intNewInvoiceId, @UserId = @intUserId
+			EXEC dbo.uspARReComputeInvoiceTaxes @intNewInvoiceId
 
-			UPDATE tblSOSalesOrder
-			SET strOrderStatus = 'Short Closed'
-			WHERE intSalesOrderId = @intSalesOrderId
+			UPDATE SO 
+			SET SO.strOrderStatus = CASE WHEN SOD.dblQtyShipped >= SOD.dblQtyOrdered THEN 'Closed' ELSE 'Short Closed' END
+			FROM tblSOSalesOrder SO
+			CROSS APPLY (
+				SELECT dblQtyOrdered = SUM(DETAIL.dblQtyOrdered)
+					 , dblQtyShipped = SUM(DETAIL.dblQtyShipped)
+				FROM tblSOSalesOrderDetail DETAIL
+				WHERE DETAIL.intSalesOrderId = SO.intSalesOrderId
+				GROUP BY DETAIL.intSalesOrderId
+			) SOD
+			WHERE SO.intSalesOrderId = @intSalesOrderId
 		END
 END
