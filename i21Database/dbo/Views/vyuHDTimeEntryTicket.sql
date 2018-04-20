@@ -3,6 +3,7 @@
 		select
 			a.intTicketId
 			,a.strTicketNumber
+			,a.strSubject
 			,a.intCurrencyId
 			,a.intCurrencyExchangeRateTypeId
 			,a.dblCurrencyRate

@@ -32,6 +32,7 @@
 			,strCurrencyExchangeRateType = g.strCurrencyExchangeRateType
 			,strDate = convert(nvarchar(20), a.dtmDate, 101)
 			,strItemNo = h.strItemNo
+			,intTimeEntryId = 1
 		from
 			tblHDTicketHoursWorked a
 			left join tblEMEntity b on b.intEntityId = a.intAgentEntityId
