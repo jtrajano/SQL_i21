@@ -1,6 +1,64 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemRunningStock]
 	AS
-SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
+WITH InvTransaction AS(
+		SELECT	t.intItemId,
+			intItemUOMId		= CASE WHEN t.intLotId IS NULL THEN t.intItemUOMId ELSE Lot.intItemUOMId END,
+			intItemLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intItemLocationId ELSE Lot.intItemLocationId END,
+			intSubLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END,
+			intStorageLocationId= CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END,
+			t.intLotId,
+			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
+			dblQty				= CASE WHEN t.intLotId IS NULL THEN t.dblQty ELSE Lot.dblQty END,
+			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)),
+			dblCost,
+			intOwnershipType	= 1
+	FROM tblICInventoryTransaction t
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
+	UNION ALL
+		SELECT	t.intItemId,
+			intItemUOMId		= CASE WHEN t.intLotId IS NULL THEN t.intItemUOMId ELSE Lot.intItemUOMId END,
+			intItemLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intItemLocationId ELSE Lot.intItemLocationId END,
+			intSubLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END,
+			intStorageLocationId= CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END,
+			t.intLotId,
+			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
+			dblQty				= CAST(0 AS NUMERIC(38, 20)),
+			dblUnitStorage		= CASE WHEN t.intLotId IS NULL THEN t.dblQty ELSE Lot.dblQty END,
+			dblCost,
+			intOwnershipType	= 2
+	FROM tblICInventoryTransactionStorage t 
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
+	UNION ALL
+	SELECT	i.intItemId,
+			intItemUOMId		= ItemUOMStock.intItemUOMId,
+			intItemLocationId	= DefaultLocation.intItemLocationId,
+			intSubLocationId	= NULL,
+			intStorageLocationId= NULL,
+			intLotId			= NULL,
+			dtmDate				= CAST(CONVERT(VARCHAR(10),GETDATE(),112) AS datetime),
+			dblQty				= CAST(0 AS NUMERIC(38, 20)) ,
+			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)) ,
+			dblCost				= ItemPricing.dblLastCost,
+			intOwnershipType	= 1
+	FROM tblICItem i
+	CROSS APPLY(
+		SELECT	intItemUOMId
+		FROM	tblICItemUOM iuStock 
+		WHERE iuStock.intItemId = i.intItemId AND iuStock.ysnStockUnit = 1
+					
+	) ItemUOMStock
+	CROSS APPLY (
+		SELECT	ItemLocation.intItemLocationId
+		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
+			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
+		WHERE ItemLocation.intItemId = i.intItemId
+	) DefaultLocation
+	LEFT JOIN tblICItemPricing ItemPricing 
+		ON i.intItemId = ItemPricing.intItemId 
+		AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
+	WHERE i.strLotTracking = 'No'
+)
+SELECT intKey						= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	,i.intItemId
 	,i.strItemNo 
 	,ItemUOM.intItemUOMId
@@ -9,29 +67,31 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLoc
 	,ItemUOM.ysnStockUnit
 	,ItemUOM.dblUnitQty
 	,ItemLocation.intLocationId
-	,strLocationName			= CompanyLocation.strLocationName
+	,strLocationName				= CompanyLocation.strLocationName
 	,t.intSubLocationId
 	,SubLocation.strSubLocationName
 	,t.intStorageLocationId
-	,strStorageLocationName		= strgLoc.strName
+	,strStorageLocationName			= strgLoc.strName
 	,Lot.intLotId
 	,Lot.strLotNumber
-	,Lot.intOwnershipType
+	,t.intOwnershipType
+	,strOwnershipType				= dbo.fnICGetOwnershipType(t.intOwnershipType)
 	,Lot.dtmExpiryDate
 	,Lot.intItemOwnerId
-	,intWeightUOMId			= Lot.intWeightUOMId
-	,strWeightUOM			= wUOM.strUnitMeasure
+	,intWeightUOMId					= Lot.intWeightUOMId
+	,strWeightUOM					= wUOM.strUnitMeasure
 	,Lot.dblWeight
 	,Lot.dblWeightPerQty
-	,intLotStatusId			= Lot.intLotStatusId
-	,strLotStatus			= LotStatus.strSecondaryStatus
-	,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
+	,intLotStatusId					= Lot.intLotStatusId
+	,strLotStatus					= LotStatus.strSecondaryStatus
+	,strLotPrimaryStatus			= LotStatus.strPrimaryStatus
 	,ItemOwner.intOwnerId
 	,strOwner = LotEntity.strName
-	,dtmAsOfDate			= CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
-	,dblQty = SUM(t.dblQty)
-	,dblCost = MAX(t.dblCost)
-FROM tblICInventoryTransaction t 
+	,dtmAsOfDate					= t.dtmDate
+	,dblQty							= CASE WHEN Lot.intLotId IS NOT NULL THEN SUM(t.dblUnitStorage + t.dblQty) ELSE SUM(t.dblQty) END
+	,dblUnitStorage					= CASE WHEN Lot.intLotId IS NOT NULL THEN 0 ELSE SUM(t.dblUnitStorage) END
+	,dblCost						= MAX(t.dblCost)
+FROM InvTransaction t 
 LEFT JOIN tblICItem i 
 	ON i.intItemId = t.intItemId
 INNER JOIN (
@@ -73,7 +133,7 @@ GROUP BY i.intItemId
 		,strgLoc.strName
 		,Lot.intLotId
 		,Lot.strLotNumber
-		,Lot.intOwnershipType
+		,t.intOwnershipType
 		,Lot.dtmExpiryDate
 		,Lot.intItemOwnerId
 		,Lot.dblWeight
@@ -85,4 +145,4 @@ GROUP BY i.intItemId
 		,LotStatus.strPrimaryStatus
 		,ItemOwner.intOwnerId
 		,LotEntity.strName
-		,CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
+		,t.dtmDate
