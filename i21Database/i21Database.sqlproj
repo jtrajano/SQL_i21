@@ -6347,6 +6347,8 @@
     <Build Include="dbo\Functions\fnCMGetACHTransactionCode.sql" />
     <Build Include="dbo\Views\vyuICGetItemVendorPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntry.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
