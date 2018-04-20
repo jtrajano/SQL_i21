@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutDeleteInvoice]
 @intCurrentUserId INT,
 @intCheckoutId INT,
+@intInvoiceId INT,
 @intStoreId INT,
 @intShiftNo INT,
 @dtmCheckoutDate DATE,
@@ -17,7 +18,6 @@ BEGIN
 		--DECLARE @dtmCheckoutDate DATE = NULL
 
 		-- Values for deleting from tblSTCheckoutHeader, UnPosting Sales Invoice
-		DECLARE @intInvoiceId INT = NULL
 		DECLARE @strInvoiceId NVARCHAR(50) = ''
 		DECLARE @ysnInvoiceIsPosted BIT = NULL
 		DECLARE @intSuccessfullCount INT
@@ -66,6 +66,7 @@ BEGIN
 							FROM tblARInvoice 
 							WHERE intInvoiceId = @intInvoiceId 
 							AND ISNULL(ysnPosted,0) = 1
+
 
 							IF(@ysnInvoiceIsPosted = 1)
 								BEGIN

@@ -28,8 +28,8 @@ BEGIN
 		DECLARE @intShipViaId INT = (SELECT TOP 1 1 intShipViaId FROM tblEMEntityLocation WHERE intEntityId = @intEntityCustomerId AND intShipViaId IS NOT NULL)
 		DECLARE @intTaxGroupId INT = (SELECT intTaxGroupId FROM tblSTStore WHERE intStoreId = (SELECT intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
-		DECLARE @CheckoutCurrentStatus NVARCHAR(50) = (SELECT strCheckoutStatus FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
 		DECLARE @ysnPost BIT = NULL
+		DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
 		DECLARE @intCurrentInvoiceId INT = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
 		DECLARE @intCreatedInvoiceId INT = NULL
 
@@ -52,8 +52,22 @@ BEGIN
 				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCurrentInvoiceId)
 					BEGIN
 						SET @ysnCurrentInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCurrentInvoiceId)
+						
+						IF(@ysnCurrentInvoiceStatus = 1)
+							BEGIN
+								SET @CheckoutCurrentStatus = 'Posted'
+							END
+						ELSE IF(@ysnCurrentInvoiceStatus = 0)
+							BEGIN
+								SET @CheckoutCurrentStatus = 'Manager Verified'
+							END
 					END
-				
+			END
+		ELSE
+			BEGIN
+				SELECT @CheckoutCurrentStatus = strCheckoutStatus
+				FROM tblSTCheckoutHeader
+				WHERE intCheckoutId = @intCheckoutId
 			END
 		----------------------------------------------------------------------
 		------------------ End check current Invoice status ------------------
@@ -97,8 +111,8 @@ BEGIN
 		----------------------------------------------------------------------
 		--------------------- POST / UNPOST PUMP TOTALS ----------------------
 		----------------------------------------------------------------------
-		IF(@ysnPost = 1) -- POST
-		BEGIN
+		IF(@ysnPost = 1)
+			BEGIN
 			IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
 				BEGIN
 					INSERT INTO @EntriesForInvoice(
@@ -317,13 +331,13 @@ BEGIN
 					SET @strStatusMsg = 'No records found to Post in Pump Totals'
 				END
 			END
-		ELSE IF(@ysnPost = 0) -- UNPOST
+		ELSE IF(@ysnPost = 0)
 			BEGIN
 				SET @strInvoiceId = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
 
 				EXEC [dbo].[uspARPostInvoice]
 						@batchId			= NULL,
-						@post				= @ysnPost, -- 0 = UnPost
+						@post				= 0, -- 0 = UnPost
 						@recap				= 0,
 						@param				= @strInvoiceId,
 						@userId				= @intCurrentUserId,
@@ -344,17 +358,6 @@ BEGIN
 				-- @intInvalidCount: 0
 				-- @ysnSuccess: 1
 				-- @strBatchIdUsed: BATCH-722
-
-				IF(@ysnSuccess = 1)
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 1
-						SET @strStatusMsg = 'Success'
-					END
-				ELSE
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @ErrorMessage
-					END	
 			END
 		----------------------------------------------------------------------
 		------------------- END POST / UNPOST PUMP TOTALS --------------------
