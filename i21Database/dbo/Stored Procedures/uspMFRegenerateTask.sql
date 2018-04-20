@@ -43,6 +43,8 @@ BEGIN TRY
 		,@strPickByFullPallet NVARCHAR(50)
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
+		,@intAlternateOwnershipType INT
+		,@intOwnershipType INT
 
 	SELECT @strOrderType = OT.strOrderType
 	FROM tblMFOrderHeader oh
@@ -73,6 +75,7 @@ BEGIN TRY
 		,@intAlternateItemId = intItemId
 		,@dtmAlternateLotExpiryDate = dtmExpiryDate
 		,@intAlternateParentLotId = intParentLotId
+		,@intAlternateOwnershipType = intOwnershipType
 	FROM tblICLot
 	WHERE strLotNumber = @strAlternateLotNo
 		AND intStorageLocationId = @intStorageLocationId
@@ -119,6 +122,7 @@ BEGIN TRY
 
 	SELECT @intItemId = intItemId
 		,@intParentLotId = intParentLotId
+		,@intOwnershipType = intOwnershipType
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -126,6 +130,15 @@ BEGIN TRY
 	BEGIN
 		RAISERROR (
 				'ALTERNATE LOT BELONGS TO A DIFFERENT ITEM. CANNOT CONTINUE.'
+				,16
+				,1
+				)
+	END
+
+	IF @intOwnershipType <> @intAlternateOwnershipType
+	BEGIN
+		RAISERROR (
+				'ALTERNATE LOT BELONGS TO A DIFFERENT OWNERSHIP TYPE. CANNOT CONTINUE.'
 				,16
 				,1
 				)
