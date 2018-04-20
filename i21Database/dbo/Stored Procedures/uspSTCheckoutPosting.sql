@@ -33,6 +33,15 @@ BEGIN
 		DECLARE @intCurrentInvoiceId INT = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
 		DECLARE @intCreatedInvoiceId INT = NULL
 
+		-- FOR UNPOST
+		DECLARE @strInvoiceId NVARCHAR(50) = ''
+		DECLARE @ysnInvoiceIsPosted BIT = NULL
+		DECLARE @intSuccessfullCount INT
+		DECLARE @intInvalidCount INT
+		DECLARE @ysnSuccess BIT
+		DECLARE @strBatchIdUsed NVARCHAR(40)
+		DECLARE @ysnError BIT = 1
+
 
 		----------------------------------------------------------------------
 		-------------------- Check current Invoice status --------------------
@@ -88,7 +97,7 @@ BEGIN
 		----------------------------------------------------------------------
 		--------------------- POST / UNPOST PUMP TOTALS ----------------------
 		----------------------------------------------------------------------
-		IF(@ysnPost IS NOT NULL)
+		IF(@ysnPost = 1) -- POST
 		BEGIN
 			IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)
 				BEGIN
@@ -307,7 +316,46 @@ BEGIN
 					SET @ysnUpdateCheckoutStatus = 0
 					SET @strStatusMsg = 'No records found to Post in Pump Totals'
 				END
-		END
+			END
+		ELSE IF(@ysnPost = 0) -- UNPOST
+			BEGIN
+				SET @strInvoiceId = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
+
+				EXEC [dbo].[uspARPostInvoice]
+						@batchId			= NULL,
+						@post				= @ysnPost, -- 0 = UnPost
+						@recap				= 0,
+						@param				= @strInvoiceId,
+						@userId				= @intCurrentUserId,
+						@beginDate			= NULL,
+						@endDate			= NULL,
+						@beginTransaction	= NULL,
+						@endTransaction		= NULL,
+						@exclude			= NULL,
+						@successfulCount	= @intSuccessfullCount OUTPUT,
+						@invalidCount		= @intInvalidCount OUTPUT,
+						@success			= @ysnSuccess OUTPUT,
+						@batchIdUsed		= @strBatchIdUsed OUTPUT,
+						@transType			= N'all',
+						@raiseError			= @ysnError
+
+				-- Example OutPut params
+				-- @intSuccessfullCount: 1
+				-- @intInvalidCount: 0
+				-- @ysnSuccess: 1
+				-- @strBatchIdUsed: BATCH-722
+
+				IF(@ysnSuccess = 1)
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 1
+						SET @strStatusMsg = 'Success'
+					END
+				ELSE
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = @ErrorMessage
+					END	
+			END
 		----------------------------------------------------------------------
 		------------------- END POST / UNPOST PUMP TOTALS --------------------
 		----------------------------------------------------------------------

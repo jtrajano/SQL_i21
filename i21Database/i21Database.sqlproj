@@ -6349,6 +6349,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Tables\tblHDTimeEntry.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutDeleteInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
