@@ -462,24 +462,33 @@ BEGIN
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
 				,intItemUOMId				=	CASE	WHEN Lot.intLotId IS NULL THEN 
 															ItemUOM.intItemUOMId
+														WHEN Lot.intWeightUOMId IS NULL THEN 
+															Lot.intItemUOMId
 														ELSE
-															LotItemUOM.intItemUOMId
+															Lot.intWeightUOMId
 			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
 				,dblQty						=	CASE	WHEN  Lot.intLotId IS NULL THEN 
 															-ISNULL(DetailItem.dblQuantity, 0) 
-														ELSE
+														WHEN Lot.intWeightUOMId IS NULL THEN 
 															-ISNULL(DetailLot.dblQuantityShipped, 0)
+														ELSE
+															-dbo.fnMultiply(
+																DetailLot.dblQuantityShipped
+																, DetailLot.dblWeightPerQty
+															)
 												END
 
 				,dblUOMQty					=	CASE	WHEN  Lot.intLotId IS NULL THEN 
 															ItemUOM.dblUnitQty
-														ELSE
+														WHEN  Lot.intWeightUOMId IS NULL THEN 
 															LotItemUOM.dblUnitQty
+														ELSE
+															LotWeightUOM.dblUnitQty
 												END
 
-				,dblCost					= 0.00
+				,dblCost					= 0.00 
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
@@ -489,9 +498,9 @@ BEGIN
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
-				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId)
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
-				,dblForexRate				= 1		 
+				,dblForexRate				= 1 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -501,7 +510,9 @@ BEGIN
 				LEFT JOIN tblICLot Lot 
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            			
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId   
+				LEFT JOIN tblICItemUOM LotWeightUOM
+					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId					         
 				LEFT JOIN tblICItem i
 					ON DetailItem.intItemId = i.intItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
@@ -729,24 +740,33 @@ BEGIN
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
 				,intItemUOMId				=	CASE	WHEN Lot.intLotId IS NULL THEN 
 															ItemUOM.intItemUOMId
+														WHEN Lot.intWeightUOMId IS NULL THEN 
+															Lot.intItemUOMId
 														ELSE
-															LotItemUOM.intItemUOMId
+															Lot.intWeightUOMId
 			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
 				,dblQty						=	CASE	WHEN  Lot.intLotId IS NULL THEN 
 															-ISNULL(DetailItem.dblQuantity, 0) 
-														ELSE
+														WHEN Lot.intWeightUOMId IS NULL THEN 
 															-ISNULL(DetailLot.dblQuantityShipped, 0)
+														ELSE
+															-dbo.fnMultiply(
+																DetailLot.dblQuantityShipped
+																, DetailLot.dblWeightPerQty
+															)
 												END
 
 				,dblUOMQty					=	CASE	WHEN  Lot.intLotId IS NULL THEN 
 															ItemUOM.dblUnitQty
-														ELSE
+														WHEN  Lot.intWeightUOMId IS NULL THEN 
 															LotItemUOM.dblUnitQty
+														ELSE
+															LotWeightUOM.dblUnitQty
 												END
 
-				,dblCost					=  0.00 
+				,dblCost					= 0.00 
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
@@ -758,7 +778,7 @@ BEGIN
 				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
 				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
-				,dblForexRate				= 1		 
+				,dblForexRate				= 1 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -768,7 +788,9 @@ BEGIN
 				LEFT JOIN tblICLot Lot 
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId   
+				LEFT JOIN tblICItemUOM LotWeightUOM
+					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId					         
 				LEFT JOIN tblICItem i
 					ON DetailItem.intItemId = i.intItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
