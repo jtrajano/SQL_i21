@@ -48,6 +48,8 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.intTaxGroupId
 	, ReceiptCharge.intForexRateTypeId
 	, ReceiptCharge.dblForexRate
+	, Book.strBook
+	, SubBook.strSubBook
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -61,3 +63,5 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblEMEntity ReceiptVendor ON ReceiptVendor.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCurrencyExchangeRateType forexRateType ON ReceiptCharge.intForexRateTypeId = forexRateType.intCurrencyExchangeRateTypeId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) 
+	LEFT JOIN tblCTBook Book ON Book.intBookId = Receipt.intBookId
+	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId

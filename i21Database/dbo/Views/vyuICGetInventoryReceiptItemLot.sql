@@ -61,6 +61,8 @@ SELECT
 	,receiptItemLot.dblPhysicalVsStated
 	,receiptItem.intCurrencyId
 	,receiptItem.strCurrency
+	,receiptItem.strBook
+	,receiptItem.strSubBook
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId

@@ -57,6 +57,8 @@ SELECT Receipt.intInventoryReceiptId
 	, strEntityName = Entity.strName
 	, Receipt.strActualCostId
 	, Receipt.strWarehouseRefNo
+	, Book.strBook
+	, SubBook.strSubBook
 	, dblSubTotal = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 1),0)
 	, dblTotalTax = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 2),0)
 	, dblTotalCharges = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 3),0)
@@ -75,4 +77,6 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuEMEntity Entity ON Entity.intEntityId = Receipt.intEntityId AND Entity.strType = 'User'
 	LEFT JOIN [tblEMEntityLocation] ShipFrom ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
+	LEFT JOIN tblCTBook Book ON Book.intBookId = Receipt.intBookId
+	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId
 	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId
