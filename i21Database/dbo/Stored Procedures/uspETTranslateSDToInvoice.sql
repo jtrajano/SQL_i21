@@ -78,6 +78,7 @@ BEGIN
 
 	DECLARE @ContractAvailableQuantity	NUMERIC(18, 6)
 	DECLARE @ContractOverFillQuantity	NUMERIC(18, 6)
+	DECLARE @getARPrice	BIT
 	DECLARE @strStatus					NVARCHAR(50)
 	
 	DECLARE @ResultTableLog TABLE(
@@ -168,6 +169,7 @@ BEGIN
 			SET @strStatus = ''
 			SET @strContractNumber = ''
 			SET @dblQuantity = 0
+			SET @getARPrice = 0
 			--SET @ysnProcessNextAsHeader = 0
 			--Get the first Record and create Invoice
 			SELECT TOP 1 
@@ -263,38 +265,62 @@ BEGIN
 
 			--get another contract if contract number from file does not available
 			IF(@intContractDetailId IS NULL)
-			BEGIN
-			SET @intContractDetailId = NULL
-			SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
-						,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
-			FROM
-				[vyuCTCustomerContract] ARCC
-			WHERE
-				ARCC.[intEntityCustomerId] = @intCustomerEntityId
-				AND ARCC.[intItemId] = @intItemId
-				AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
-													CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
-				AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
-				AND (ARCC.[dblAvailableQty] > 0) 				
-			ORDER BY
-					dtmStartDate
-				,intContractSeq
-			END
-
-			IF(NOT @intContractDetailId IS NULL) 
-			BEGIN 
-				SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
-								
-				IF(@ContractOverFillQuantity > 0) -- Has contract number from file - but it overfills the contract.
 				BEGIN
-					SET @dblQuantity = @ContractAvailableQuantity
-					SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+				SET @intContractDetailId = NULL
+				SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+							,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
+				FROM
+					[vyuCTCustomerContract] ARCC
+				WHERE
+					ARCC.[intEntityCustomerId] = @intCustomerEntityId
+					AND ARCC.[intItemId] = @intItemId
+					AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+														CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+					AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+					AND (ARCC.[dblAvailableQty] > 0) 				
+				ORDER BY
+						dtmStartDate
+					,intContractSeq
+
+				SET @getARPrice = 1
+				SET @strStatus = @strStatus + ', Has Contract Discrepancy' --Has contract number from file - but contract does not have available qty
+
+					IF(NOT @intContractDetailId IS NULL)
+						BEGIN
+							SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
+								
+							IF(@ContractOverFillQuantity > 0) 
+							BEGIN
+								SET @dblQuantity = @ContractAvailableQuantity
+								--SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+							END
+						END
+      --              ELSE
+						--BEGIN
+						--	--SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+						--END
+		
 				END
-			END
 			ELSE
-			BEGIN
-				SET @strStatus = @strStatus + ', Has Contract Discrepancy' -- Has contract number from file - but no available contract found upon import.
-			END
+				BEGIN
+					SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
+								
+					IF(@ContractOverFillQuantity > 0) -- Has contract number from file - but it overfills the contract.
+					BEGIN
+						SET @dblQuantity = @ContractAvailableQuantity
+						SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+					END
+
+					SET @getARPrice = 0
+				END
+			--IF(NOT @intContractDetailId IS NULL) 
+			--BEGIN 
+				
+			--END
+			--ELSE
+			--BEGIN
+			--	SET @strStatus = @strStatus + ', Has Contract Discrepancy' -- Has contract number from file - but no available contract found upon import.
+			--END
 
 			END
 
@@ -336,6 +362,7 @@ BEGIN
 						,@RaiseError			   = 0
 						,@UseOriginIdAsInvoiceNumber = 1
 						,@InvoiceOriginId         = @strInvoiceNumber
+						,@RefreshPrice = @getARPrice
 
 					--GEt the created invoice number
 					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
@@ -378,6 +405,7 @@ BEGIN
 						,@ItemCurrencyExchangeRateTypeId = NULL            
                         ,@ItemCurrencyExchangeRateId = NULL            
 						,@RecomputeTax			   = 1
+						,@RefreshPrice = @getARPrice
 
 				LOGDETAILENTRY:
 				IF 	LTRIM(@strErrorMessage) != ''
@@ -390,9 +418,7 @@ BEGIN
 						GOTO CONTINUELOOP
 					END
 			END
-
-			
-			
+		
 						
 			BEGIN TRY
 
@@ -403,7 +429,7 @@ BEGIN
 				----------------------------------------------------------------------------------------------------------------------------------------
 				IF (@ContractOverFillQuantity > 0) 
 				BEGIN
-			
+				SET @getARPrice = 1
 				--EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
 				--EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
 			
@@ -443,6 +469,7 @@ BEGIN
 					BEGIN
 						SET @dblQuantity = @ContractOverFillQuantity
 						SET @ContractOverFillQuantity = 0
+						
 					END
 
 					GOTO ADDITEM									
