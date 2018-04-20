@@ -40,6 +40,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strContractNumber		= CONTRACTS.strContractNumber
 	 , strItemNo				= ITEM.strItemNo
 	 , strUnitMeasure			= UOM.strUnitMeasure
+	 , strPriceUnitMeasure		= PUOM.strUnitMeasure
 	 , dtmDate					= SO.dtmDate
 	 , ysnBlended				= SODETAIL.ysnBlended
 	 , intTaxGroupId			= SODETAIL.intTaxGroupId
@@ -110,6 +111,18 @@ LEFT JOIN (
 		 , strUnitMeasure
 	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 ) UOM ON ICUOM.intUnitMeasureId = UOM.intUnitMeasureId
+LEFT JOIN (
+	SELECT intItemId
+		 , intUnitMeasureId
+		 , intItemUOMId
+	FROM dbo.tblICItemUOM WITH (NOLOCK)
+) ICPUOM ON SODETAIL.intItemId = ICPUOM.intItemId
+       AND SODETAIL.intItemUOMId = ICPUOM.intItemUOMId
+LEFT JOIN (
+	SELECT intUnitMeasureId
+		 , strUnitMeasure
+	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+) PUOM ON ICPUOM.intUnitMeasureId = PUOM.intUnitMeasureId
 LEFT JOIN (
 	SELECT CH.intContractHeaderId
 		 , CD.intContractDetailId
