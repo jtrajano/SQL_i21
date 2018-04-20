@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[intCurrencyId]				INT,
 	[dblRate]					NUMERIC(18, 6) NOT NULL,
 	[intItemUOMId]				INT NULL,
+	[intRateTypeId]				INT NULL,
 	[dblFX]						NUMERIC(18,6),
 	[ysnAccrue]					BIT NOT NULL CONSTRAINT [DF_tblCTContractCost_ysnAccrue]  DEFAULT ((1)),
 	[ysnMTM]					BIT NULL,
@@ -30,5 +31,6 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intVendorId_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity](intEntityId),
 	CONSTRAINT [FK_tblCTContractCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblCTContractCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblCTContractCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblCTContractCost_tblSMCurrencyExchangeRateType_intRateTypeId_intCurrencyExchangeRateId] FOREIGN KEY (intRateTypeId) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 )
