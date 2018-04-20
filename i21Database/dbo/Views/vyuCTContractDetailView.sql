@@ -43,7 +43,7 @@ AS
 			ST.strSplitNumber,													U4.strUnitMeasure				AS	strStockItemUOM,
 			CU.intMainCurrencyId,				CU.strCurrency,					CY.strCurrency					AS	strMainCurrency,
 			ISNULL(IM.ysnUseWeighScales,0)		ysnUseWeighScales,				U7.strUnitMeasure				AS	strNetWeightUOM,
-																				ST.strDescription				AS	strSplitDescription,
+			BK.strBook,							SO.strSubBook,					ST.strDescription				AS	strSplitDescription,
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)															AS	ysnSubCurrency,
 			MONTH(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityMonth,
 			YEAR(dtmUpdatedAvailabilityDate)																	AS	intUpdatedAvailabilityYear,
@@ -125,7 +125,7 @@ AS
 			ISNULL(WU.dblUnitQty,1)	AS dblWeightUnitQty,
 			ISNULL(IU.dblUnitQty,1)	AS dblUnitQty,
 			RT.strCurrencyExchangeRateType,		RT.strDescription	AS strCurrencyExchangeRateTypeDesc,
-			B.strBook,							SB1.strSubBook,
+			
 
 			--Header Detail
 
@@ -171,8 +171,8 @@ AS
 	JOIN	tblICUnitMeasure				U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId			LEFT	
 	JOIN	tblICItemUOM					AU	ON	AU.intItemUOMId				=	CD.intAdjItemUOMId			LEFT
 	JOIN	tblICUnitMeasure				U3	ON	U3.intUnitMeasureId			=	AU.intUnitMeasureId			LEFT	
-	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId				AND	
-													SM.ysnStockUnit				=	1							LEFT
+	JOIN	tblICItemUOM					SM	ON	SM.intItemId				=	CD.intItemId					
+												AND	SM.ysnStockUnit				=	1							LEFT
 	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	SM.intUnitMeasureId			LEFT
 	JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		LEFT
 	JOIN	tblICUnitMeasure				U7	ON	U7.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT	
@@ -181,18 +181,18 @@ AS
 	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
 	JOIN	tblSMCountry					CG	ON	CG.intCountryID				=	IC.intCountryId				LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
-	JOIN	tblSMShipVia					SV	ON	SV.[intEntityId]		=	CD.intShipViaId				LEFT
+	JOIN	tblSMShipVia					SV	ON	SV.[intEntityId]			=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
 	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
 	JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
 	JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblAPVendor						VR	ON	VR.[intEntityId]		=	CD.intBillTo				LEFT
+	JOIN	tblAPVendor						VR	ON	VR.[intEntityId]			=	CD.intBillTo				LEFT
 	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
 	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
 	JOIN	tblSMCurrency					CY	ON	CY.intCurrencyID			=	CU.intMainCurrencyId		LEFT
 	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
-	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				AND
-													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
+	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				
+												AND	IL.intLocationId			=	CD.intCompanyLocationId		LEFT
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
 	JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN	tblSMCity						LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
@@ -201,6 +201,9 @@ AS
 	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
 	JOIN	tblEMEntitySplit				ST	ON	ST.intSplitId				=	CD.intSplitId				LEFT
 	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
+	JOIN	tblCTBook						BK	ON	BK.intBookId				=	CD.intBookId				LEFT 
+	JOIN	tblCTSubBook					SO	ON	SO.intSubBookId				=	CD.intSubBookId				LEFT
+
 	JOIN	(
 				SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
 				FROM	tblICItemUOM		IU	LEFT 
@@ -233,6 +236,4 @@ AS
 			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
-	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	LEFT 
-	JOIN	tblCTBook						B	ON	B.intBookId					=	CD.intBookId					LEFT 
-	JOIN	tblCTSubBook					SB1	ON	SB1.intSubBookId			=	CD.intSubBookId
+	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 

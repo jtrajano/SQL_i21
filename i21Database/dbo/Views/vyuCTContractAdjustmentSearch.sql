@@ -6,7 +6,7 @@ AS
 			CD.strContractNumber,
 			CD.intContractSeq,
 			CD.strContractType,
-			CE.strName AS strEntityName,
+			CE.strName			AS strEntityName,
 			CE.strEntityNo,
 			CD.strPricingType,
 			CD.strFutureMonth,
@@ -17,6 +17,8 @@ AS
 			CD.dblDetailQuantity dblQuantity,
 			CD.dblBalance,
 			CD.strItemUOM,
+			CD.strSeqBook		AS	strBook,
+			CD.strSeqSubBook 	AS	strSubBook,
 
 			AD.intAdjustmentId,
 			AD.strAdjustmentNo,
@@ -37,6 +39,7 @@ AS
 
 			EC.strName	AS strCreatedBy,
 			EU.strName	AS strUpdatedBy		
+
 	FROM	[vyuCTSearchContractDetail]	CD	LEFT
 	JOIN	tblCTContractAdjustment	AD	ON	AD.intContractDetailId	=	CD.intContractDetailId	LEFT 
 	JOIN	tblEMEntity				EC	ON	EC.intEntityId			=	AD.intCreatedById		LEFT
