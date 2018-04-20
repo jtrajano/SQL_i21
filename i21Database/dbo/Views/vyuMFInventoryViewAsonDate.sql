@@ -38,6 +38,11 @@ SELECT l.intLotId
 	,l.ysnProduced
 	,l.ysnStorage
 	,l.intOwnershipType
+	,strOwnershipType = (CASE WHEN l.intOwnershipType = 1 THEN 'Own'
+						WHEN l.intOwnershipType = 2 THEN 'Storage'
+						WHEN l.intOwnershipType = 3 THEN 'Consigned Purchase'
+						WHEN l.intOwnershipType = 4 THEN 'Consigned Sale'
+						END)
 	,l.intGradeId
 	,l.intCreatedUserId
 	,l.intConcurrencyId
