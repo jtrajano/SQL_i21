@@ -1,33 +1,35 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemRunningStock]
 	AS
 WITH InvTransaction AS(
-		SELECT	intItemId,
-			intItemUOMId,
-			intItemLocationId,
-			intSubLocationId,
-			intStorageLocationId,
-			intLotId,
+		SELECT	t.intItemId,
+			intItemUOMId		= CASE WHEN t.intLotId IS NULL THEN t.intItemUOMId ELSE Lot.intItemUOMId END,
+			intItemLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intItemLocationId ELSE Lot.intItemLocationId END,
+			intSubLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END,
+			intStorageLocationId= CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END,
+			t.intLotId,
 			intCostingMethod,
 			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
-			dblQty				= dblQty,
+			dblQty				= CASE WHEN t.intLotId IS NULL THEN t.dblQty ELSE Lot.dblQty END,
 			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)),
 			dblCost,
 			intOwnershipType	= 1
-	FROM tblICInventoryTransaction
+	FROM tblICInventoryTransaction t
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
 	UNION ALL
-		SELECT	intItemId,
-			intItemUOMId,
-			intItemLocationId,
-			intSubLocationId,
-			intStorageLocationId,
-			intLotId,
+		SELECT	t.intItemId,
+			intItemUOMId		= CASE WHEN t.intLotId IS NULL THEN t.intItemUOMId ELSE Lot.intItemUOMId END,
+			intItemLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intItemLocationId ELSE Lot.intItemLocationId END,
+			intSubLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END,
+			intStorageLocationId= CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END,
+			t.intLotId,
 			intCostingMethod,
 			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
 			dblQty				= CAST(0 AS NUMERIC(38, 20)),
-			dblUnitStorage		= dblQty,
+			dblUnitStorage		= CASE WHEN t.intLotId IS NULL THEN t.dblQty ELSE Lot.dblQty END,
 			dblCost,
 			intOwnershipType	= 2
-	FROM tblICInventoryTransactionStorage
+	FROM tblICInventoryTransactionStorage t 
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
 	UNION ALL
 	SELECT	i.intItemId,
 			intItemUOMId		= ItemUOMStock.intItemUOMId,
@@ -49,7 +51,7 @@ WITH InvTransaction AS(
 					
 	) ItemUOMStock
 	CROSS APPLY (
-		SELECT	ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
+		SELECT	ItemLocation.intItemLocationId, DefaultLocation.intCostingMethod
 		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
 			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
 		WHERE ItemLocation.intItemId = i.intItemId
@@ -57,6 +59,7 @@ WITH InvTransaction AS(
 	LEFT JOIN tblICItemPricing ItemPricing 
 		ON i.intItemId = ItemPricing.intItemId 
 		AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
+	WHERE i.strLotTracking = 'No'
 )
 SELECT intKey						= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	,i.intItemId
