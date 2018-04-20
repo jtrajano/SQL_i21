@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemRunningStock]
 	AS
 WITH InvTransaction AS(
-	SELECT	intItemId,
+		SELECT	intItemId,
 			intItemUOMId,
 			intItemLocationId,
 			intSubLocationId,
@@ -10,7 +10,7 @@ WITH InvTransaction AS(
 			intCostingMethod,
 			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
 			dblQty				= dblQty,
-			dblUnitStorage		= 0,
+			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)),
 			dblCost,
 			intOwnershipType	= 1
 	FROM tblICInventoryTransaction
@@ -23,11 +23,40 @@ WITH InvTransaction AS(
 			intLotId,
 			intCostingMethod,
 			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
-			dblQty				= 0,
+			dblQty				= CAST(0 AS NUMERIC(38, 20)),
 			dblUnitStorage		= dblQty,
 			dblCost,
 			intOwnershipType	= 2
 	FROM tblICInventoryTransactionStorage
+	UNION ALL
+	SELECT	i.intItemId,
+			intItemUOMId		= ItemUOMStock.intItemUOMId,
+			intItemLocationId	= DefaultLocation.intItemLocationId,
+			intSubLocationId	= NULL,
+			intStorageLocationId= NULL,
+			intLotId			= NULL,
+			intCostingMethod	= DefaultLocation.intCostingMethod,
+			dtmDate				= CAST(CONVERT(VARCHAR(10),GETDATE(),112) AS datetime),
+			dblQty				= CAST(0 AS NUMERIC(38, 20)) ,
+			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)) ,
+			dblCost				= ItemPricing.dblLastCost,
+			intOwnershipType	= 1
+	FROM tblICItem i
+	CROSS APPLY(
+		SELECT	intItemUOMId
+		FROM	tblICItemUOM iuStock 
+		WHERE iuStock.intItemId = i.intItemId AND iuStock.ysnStockUnit = 1
+					
+	) ItemUOMStock
+	CROSS APPLY (
+		SELECT	ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
+		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
+			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
+		WHERE ItemLocation.intItemId = i.intItemId
+	) DefaultLocation
+	LEFT JOIN tblICItemPricing ItemPricing 
+		ON i.intItemId = ItemPricing.intItemId 
+		AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
 )
 SELECT intKey						= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	,i.intItemId
