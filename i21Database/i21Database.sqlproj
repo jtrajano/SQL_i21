@@ -6351,6 +6351,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutDeleteInvoice.sql" />
     <Build Include="dbo\Tables\tblRKCollateralHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCollateralHistoryInsert.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
