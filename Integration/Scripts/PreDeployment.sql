@@ -235,6 +235,7 @@
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 :r "..\dbo\Stored Procedures\uspARImportDefaultGLAccounts.sql"
 :r "..\dbo\Stored Procedures\uspARImportInvoiceBackupAGORDMST.sql"
+:r "..\dbo\Stored Procedures\uspARUpdateTaxGroup.sql"
 
 :r "..\dbo\Stored Procedures\deleteSP.sql" 
 
