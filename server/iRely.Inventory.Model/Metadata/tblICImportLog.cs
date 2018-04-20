@@ -17,6 +17,7 @@ namespace iRely.Inventory.Model
         public string strFileType { get; set; }
         public int? intTotalRows { get; set; }
         public int? intRowsImported { get; set; }
+        public int? intRowsUpdated { get; set; }
         public int? intTotalErrors { get; set; }
         public int? intTotalWarnings { get; set; }
         public decimal? dblTimeSpentInSeconds { get; set; }

@@ -33,12 +33,12 @@ namespace iRely.Inventory.BusinessLayer
 
         public override string DuplicateFoundMessage()
         {
-            return "Pricing levels cannot have the same effective date.";
+            return "Pricing levels cannot have the same location and price level.";
         }
 
         protected override Expression<Func<tblICItemPricingLevel, bool>> GetUniqueKeyExpression(tblICItemPricingLevel entity)
         {
-            return (e => e.dtmEffectiveDate == entity.dtmEffectiveDate);
+            return (e => e.intItemId == entity.intItemId && e.strPriceLevel.ToLower() == entity.strPriceLevel.ToLower() && e.intItemLocationId == entity.intItemLocationId);
         }
 
         public override tblICItemPricingLevel Process(CsvRecord record)

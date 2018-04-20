@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsbbf8bf7280fe8a7ba35498757f19a3c97ed082b98167fe120bb07753b6c5e45f))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc87ecc35d33b49b8ac53ce199a912c0ab9d88d6964ac199b7c2bdafdef0d6a46))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -22,15 +22,15 @@ namespace Edm_EntityMappingGeneratedViews
     /// <summary>
     /// Implements a mapping view cache.
     /// </summary>
-    [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsbbf8bf7280fe8a7ba35498757f19a3c97ed082b98167fe120bb07753b6c5e45f : DbMappingViewCache
+    [GeneratedCode("Entity Framework 6 Power Tools", "0.9.2.0")]
+    internal sealed class ViewsForBaseEntitySetsc87ecc35d33b49b8ac53ce199a912c0ab9d88d6964ac199b7c2bdafdef0d6a46 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "bbf8bf7280fe8a7ba35498757f19a3c97ed082b98167fe120bb07753b6c5e45f"; }
+            get { return "c87ecc35d33b49b8ac53ce199a912c0ab9d88d6964ac199b7c2bdafdef0d6a46"; }
         }
 
         /// <summary>
@@ -2481,7 +2481,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICImportLog
-        [CodeFirstDatabaseSchema.tblICImportLog](T1.tblICImportLog_intImportLogId, T1.tblICImportLog_strDescription, T1.tblICImportLog_strType, T1.tblICImportLog_strFileType, T1.tblICImportLog_intTotalRows, T1.tblICImportLog_intRowsImported, T1.tblICImportLog_intTotalErrors, T1.tblICImportLog_intTotalWarnings, T1.tblICImportLog_dblTimeSpentInSeconds, T1.tblICImportLog_intUserEntityId, T1.tblICImportLog_strFileName, T1.tblICImportLog_dtmDateImported, T1.tblICImportLog_ysnAllowDuplicates, T1.tblICImportLog_ysnAllowOverwriteOnImport, T1.tblICImportLog_strLineOfBusiness, T1.tblICImportLog_ysnContinueOnFailedImports, T1.tblICImportLog_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICImportLog](T1.tblICImportLog_intImportLogId, T1.tblICImportLog_strDescription, T1.tblICImportLog_strType, T1.tblICImportLog_strFileType, T1.tblICImportLog_intTotalRows, T1.tblICImportLog_intRowsImported, T1.tblICImportLog_intRowsUpdated, T1.tblICImportLog_intTotalErrors, T1.tblICImportLog_intTotalWarnings, T1.tblICImportLog_dblTimeSpentInSeconds, T1.tblICImportLog_intUserEntityId, T1.tblICImportLog_strFileName, T1.tblICImportLog_dtmDateImported, T1.tblICImportLog_ysnAllowDuplicates, T1.tblICImportLog_ysnAllowOverwriteOnImport, T1.tblICImportLog_strLineOfBusiness, T1.tblICImportLog_ysnContinueOnFailedImports, T1.tblICImportLog_intConcurrencyId)
     FROM (
         SELECT 
             T.intImportLogId AS tblICImportLog_intImportLogId, 
@@ -2490,6 +2490,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strFileType AS tblICImportLog_strFileType, 
             T.intTotalRows AS tblICImportLog_intTotalRows, 
             T.intRowsImported AS tblICImportLog_intRowsImported, 
+            T.intRowsUpdated AS tblICImportLog_intRowsUpdated, 
             T.intTotalErrors AS tblICImportLog_intTotalErrors, 
             T.intTotalWarnings AS tblICImportLog_intTotalWarnings, 
             T.dblTimeSpentInSeconds AS tblICImportLog_dblTimeSpentInSeconds, 
@@ -2540,7 +2541,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICImportLogs
-        [iRely.Inventory.Model.tblICImportLog](T1.tblICImportLog_intImportLogId, T1.tblICImportLog_strDescription, T1.tblICImportLog_strType, T1.tblICImportLog_strFileType, T1.tblICImportLog_intTotalRows, T1.tblICImportLog_intRowsImported, T1.tblICImportLog_intTotalErrors, T1.tblICImportLog_intTotalWarnings, T1.tblICImportLog_dblTimeSpentInSeconds, T1.tblICImportLog_intUserEntityId, T1.tblICImportLog_strFileName, T1.tblICImportLog_dtmDateImported, T1.tblICImportLog_ysnAllowDuplicates, T1.tblICImportLog_ysnAllowOverwriteOnImport, T1.tblICImportLog_strLineOfBusiness, T1.tblICImportLog_ysnContinueOnFailedImports, T1.tblICImportLog_intConcurrencyId)
+        [iRely.Inventory.Model.tblICImportLog](T1.tblICImportLog_intImportLogId, T1.tblICImportLog_strDescription, T1.tblICImportLog_strType, T1.tblICImportLog_strFileType, T1.tblICImportLog_intTotalRows, T1.tblICImportLog_intRowsImported, T1.tblICImportLog_intRowsUpdated, T1.tblICImportLog_intTotalErrors, T1.tblICImportLog_intTotalWarnings, T1.tblICImportLog_dblTimeSpentInSeconds, T1.tblICImportLog_intUserEntityId, T1.tblICImportLog_strFileName, T1.tblICImportLog_dtmDateImported, T1.tblICImportLog_ysnAllowDuplicates, T1.tblICImportLog_ysnAllowOverwriteOnImport, T1.tblICImportLog_strLineOfBusiness, T1.tblICImportLog_ysnContinueOnFailedImports, T1.tblICImportLog_intConcurrencyId)
     FROM (
         SELECT 
             T.intImportLogId AS tblICImportLog_intImportLogId, 
@@ -2549,6 +2550,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strFileType AS tblICImportLog_strFileType, 
             T.intTotalRows AS tblICImportLog_intTotalRows, 
             T.intRowsImported AS tblICImportLog_intRowsImported, 
+            T.intRowsUpdated AS tblICImportLog_intRowsUpdated, 
             T.intTotalErrors AS tblICImportLog_intTotalErrors, 
             T.intTotalWarnings AS tblICImportLog_intTotalWarnings, 
             T.dblTimeSpentInSeconds AS tblICImportLog_dblTimeSpentInSeconds, 

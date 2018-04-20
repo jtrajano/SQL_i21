@@ -30,6 +30,7 @@ namespace iRely.Inventory.BusinessLayer
                             logs.strDescription,
                             logs.intTotalRows,
                             logs.intRowsImported,
+                            logs.intRowsUpdated,
                             logs.intTotalErrors,
                             logs.intTotalWarnings,
                             logs.dblTimeSpentInSeconds,

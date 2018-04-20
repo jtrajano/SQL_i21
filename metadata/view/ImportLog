@@ -538,9 +538,9 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Allow Duplicates",
+                                                        "fieldLabel": "Rows Updated",
                                                         "fieldStyle": "color: #606060;text-decoration:underline;text-decoration-style: dotted",
-                                                        "itemId": "lblDuplicates",
+                                                        "itemId": "lblRowsUpdated",
                                                         "layout|flex": 1,
                                                         "value": ""
                                                     },

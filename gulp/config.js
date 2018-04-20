@@ -1,7 +1,7 @@
 var env = 'dev';
 var src = './app';
-var dest_prod = '../../../artifacts/build/app/Inventory';
-var dest_dev = '../../../artifacts/build/debug/app/Inventory';
+var dest_prod = '../../../artifacts/mcp/app/Inventory';
+var dest_dev = '../../../artifacts/mcp/debug/app/Inventory';
 var test_ui_dest = '../../../QC1730/Inventory/test-ui';
 
 module.exports = {

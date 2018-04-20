@@ -29,6 +29,7 @@ namespace iRely.Inventory.BusinessLayer
                 strDescription = result.Description.Length > 1000 ? result.Description.Substring(0, 999) : result.Description,
                 intTotalRows = result.TotalRows,
                 intRowsImported = result.RowsImported,
+                intRowsUpdated = result.RowsUpdated,
                 intTotalErrors = result.Errors,
                 intTotalWarnings = result.Warnings,
                 dblTimeSpentInSeconds = (decimal)result.TimeSpentInSeconds,

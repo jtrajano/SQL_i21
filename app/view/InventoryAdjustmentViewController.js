@@ -135,7 +135,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intOwnershipType',
                                 value: 4,
                                 condition: 'noteq'
-                            }
+                            } 
                         ],
                         readOnly: '{disableOwnership}',
                         origValueField: 'intOwnershipType',

@@ -16,6 +16,7 @@ namespace iRely.Inventory.BusinessLayer
         public bool IsUpdate { get; set; }
         public int TotalRows { get; set; }
         public int RowsImported { get; set; }
+        public int RowsUpdated { get; set; }
         public double TimeSpentInSeconds { get; set; }
         private int _errors = 0;
         private int _warnings = 0;

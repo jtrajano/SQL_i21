@@ -468,6 +468,7 @@ Ext.define('Inventory.view.OriginConversionOptionViewController', {
                     },
                     { dataIndex: 'intTotalRows', text: 'Total Rows', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
                     { dataIndex: 'intRowsImported', text: 'Rows Imported', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
+                    { dataIndex: 'intRowsUpdated', text: 'Rows Updated', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
                     { dataIndex: 'intTotalErrors', text: 'Errors', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
                     { dataIndex: 'intTotalWarnings', text: 'Warnings', flex: 1, dataType: 'numeric', allowNull: true, xtype: 'numbercolumn', required: false },
                     { dataIndex: 'dblTimeSpentInSeconds', text: 'Duration', flex: 1, 

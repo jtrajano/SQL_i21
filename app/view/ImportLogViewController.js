@@ -19,6 +19,7 @@ Ext.define('Inventory.view.ImportLogViewController', {
             lblFileType: '{current.strFileType}',
             lblTotalRows: '{current.intTotalRows}',
             lblRowsImported: '{current.intRowsImported}',
+            lblRowsUpdated: '{current.intRowsUpdated}',
             lblTotalErrors: '{current.intTotalErrors}',
             lblTotalWarnings: '{current.intTotalWarnings}',
             lblDuration: '{duration}',

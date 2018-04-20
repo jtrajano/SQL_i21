@@ -1792,22 +1792,19 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             }
             
-            if(pricingLevelStore.count() > 0) {
-                //Validate effective date duplicates
-                for (var i = 0; i < pricingLevelStore.count(); i++){
-                    var p = pricingLevelStore.data.items[i],
-                        duplicateCount = 1;
-                    for(var ii = i + 1; (!p.dummy && ii < pricingLevelStore.count()); ii++){
-                        var pp = pricingLevelStore.data.items[ii];
-                        duplicateCount += (!pp.dummy && Ext.Date.isEqual(p.data.dtmEffectiveDate, pp.data.dtmEffectiveDate)) ? 1: 0;
-                        if(duplicateCount > 1) {
-                            iRely.Msg.showError('Pricing levels cannot have the same effective date.', Ext.MessageBox.OK, win);
-                            action(false);
-                            return;
-                        }
-                    }
-                }
+
+            var keys = [];
+            var pricingLevels = pricingLevelStore.data.items;
+            _.each(pricingLevels, function (value, key, list) {
+                if(!value.dummy)
+                keys.push(value.data.intItemLocationId.toString() + value.data.strPriceLevel);
+            });
+            if(_.size(keys) !== _.size(_.uniq(keys))) {
+                iRely.Functions.showErrorDialog("Pricing levels cannot have the same location and price level.");
+                action(false);
+                return;
             }
+
             action(true);                    
         });        
     },

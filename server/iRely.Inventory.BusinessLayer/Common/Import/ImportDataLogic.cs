@@ -334,6 +334,8 @@ namespace iRely.Inventory.BusinessLayer
                 Exception = null,
                 Message = isNew ? "Import successful." : "Update successful."
             });
+            if(!isNew)
+                ImportResult.RowsUpdated++;
             ImportResult.Type = Constants.TYPE_INFO;
         }
 

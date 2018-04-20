@@ -204,8 +204,8 @@ Ext.define('Inventory.view.ImportLog', {
                                                 {
                                                     xtype: 'displayfield',
                                                     flex: 1,
-                                                    itemId: 'lblDuplicates',
-                                                    fieldLabel: 'Allow Duplicates',
+                                                    itemId: 'lblRowsUpdated',
+                                                    fieldLabel: 'Rows Updated',
                                                     value: '',
                                                     fieldStyle: 'color: #606060;text-decoration:underline;text-decoration-style: dotted'
                                                 },
