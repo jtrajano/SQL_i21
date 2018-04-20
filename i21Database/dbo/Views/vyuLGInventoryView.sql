@@ -55,6 +55,15 @@ SELECT
 	,Shipment.strPosition
 	,Shipment.intLoadId
 	,CD.intCompanyLocationId
+	,Shipment.intBookId
+	,Shipment.strBook
+	,Shipment.intSubBookId
+	,Shipment.strSubBook
+	,Shipment.intCropYear
+	,Shipment.strCropYear
+	,Shipment.strProducer
+	,Shipment.strCertification
+	,Shipment.strCertificationId
 FROM vyuLGInboundShipmentView Shipment
 LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
@@ -104,6 +113,15 @@ SELECT
 	,Spot.strPosition
 	,L.intLoadId
 	,CD.intCompanyLocationId
+	,Spot.intBookId
+	,Spot.strBook
+	,Spot.intSubBookId
+	,Spot.strSubBook
+	,Spot.intCropYear
+	,Spot.strCropYear
+	,Spot.strProducer
+	,Spot.strCertification
+	,Spot.strCertificationId
 FROM vyuLGPickOpenInventoryLots Spot
 LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId

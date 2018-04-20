@@ -85,6 +85,15 @@ SELECT Lot.intLotId
 	   , CTDetail.dblTotalCost
 	   , LD.intWeightItemUOMId
 	   , PO.strPosition
+	   , 0 AS intBookId
+	   , '' COLLATE Latin1_General_CI_AS AS strBook  
+	   , 0 AS intSubBookId 
+	   , '' COLLATE Latin1_General_CI_AS AS strSubBook 
+	   , 0 AS intCropYear
+	   , '' COLLATE Latin1_General_CI_AS AS strCropYear 
+	   , '' COLLATE Latin1_General_CI_AS AS strProducer 
+	   , '' COLLATE Latin1_General_CI_AS AS strCertification  
+	   , '' COLLATE Latin1_General_CI_AS AS strCertificationId 
 FROM tblICLot Lot
 JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
