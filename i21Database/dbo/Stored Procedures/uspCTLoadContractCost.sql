@@ -2,27 +2,7 @@
 	@intContractDetailId	INT
 AS
 
-	SELECT		CC.intContractCostId, 
-				CC.intContractDetailId, 
-				CC.intConcurrencyId, 
-				CC.intItemId, 
-				CC.intVendorId, 
-				CC.strCostMethod, 
-				CC.intCurrencyId,
-				CC.dblRate,
-				CC.intItemUOMId, 
-				CC.dblFX, 
-				CC.ysnAccrue, 
-				CC.ysnMTM, 
-				CC.ysnPrice, 
-				CC.ysnAdditionalCost,
-				CC.ysnBasis,
-				CC.strReference,
-				CC.ysnReceivable,
-				CC.strPaidBy,
-                CC.strStatus,
-				CC.dblReqstdAmount,
-				CC.dblRcvdPaidAmount,
+	SELECT		CC.*,
 
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,
@@ -35,11 +15,6 @@ AS
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
 				CAST(ISNULL((SELECT TOP 1 intBillDetailId FROM tblAPBillDetail WHERE intContractCostId = CC.intContractCostId),0) AS BIT) ysnBilled,
 				CH.intTermId,					
-                CC.strAPAR,
-				CC.strPayToReceiveFrom,
-				CC.dtmDueDate,
-				CC.strReferenceNo,
-				CC.strRemarks,			
 				IM.strCostType,
 				IM.ysnInventoryCost,
 				CH.strContractNumber,
@@ -50,7 +25,8 @@ AS
 							CC.dblRate
 						WHEN	CC.strCostMethod = 'Percentage' THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
-				END   dblAmount
+				END   dblAmount,
+				RT.strCurrencyExchangeRateType
 
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
@@ -68,3 +44,4 @@ AS
 	LEFT JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId	
 	LEFT JOIN	tblICItemUOM		CM	ON	CM.intUnitMeasureId		=	IU.intUnitMeasureId
 										AND CM.intItemId			=	CD.intItemId	
+	LEFT JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CC.intRateTypeId
