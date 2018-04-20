@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Accounts (Portal)' AND strCommand = N'CardFueling.view.Account?showSearch=true' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5926,20 +5926,6 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TKDeliverySheetsMenuId, 1)
 END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @GrainPortalParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Position Report (Portal)', N'Risk Management', @GrainPortalParentMenuId, N'Position Report (Portal)', N'Portal Menu', N'Screen', N'RiskManagement.view.LiveDPR', N'small-menu-portal', 1, 0, 0, 1, 3, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'RiskManagement.view.LiveDPR' WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @GrainPortalParentMenuId
-
-DECLARE @RKPositionReportMenuId INT
-SELECT  @RKPositionReportMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @GrainPortalParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @GrainPortalParentMenuId)
-BEGIN
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @RKPositionReportMenuId)
-	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@RKPositionReportMenuId, 1)
-END
-
 /* Logistics */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Logistics (Portal)' AND strModuleName = 'Logistics' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
@@ -6188,6 +6174,35 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'W-2s (Portal)
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRW2SMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRW2SMenuId, 1)
+END
+
+/* Risk Management */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Risk Management (Portal)', N'Risk Management', 0, N'Risk Management (Portal)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 2, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, intRow = 2 WHERE strMenuName = 'Risk Management (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = 0
+
+DECLARE @RiskManagementPortalParentMenuId INT
+SELECT @RiskManagementPortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @RiskManagementPortalParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@RiskManagementPortalParentMenuId, 1)
+
+-- Move from Grain to Risk Management
+UPDATE tblSMMasterMenu SET intParentMenuID = @RiskManagementPortalParentMenuId WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @GrainPortalParentMenuId
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Position Report (Portal)', N'Risk Management', @RiskManagementPortalParentMenuId, N'Position Report (Portal)', N'Portal Menu', N'Screen', N'RiskManagement.view.LiveDPR', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.LiveDPR' WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId
+
+DECLARE @RKPositionReportMenuId INT
+SELECT  @RKPositionReportMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @RKPositionReportMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@RKPositionReportMenuId, 1)
 END
 
 GO
