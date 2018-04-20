@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemRunningStock]
 	AS
 WITH InvTransaction AS(
-		SELECT	t.intItemId,
+				SELECT	t.intItemId,
 			intItemUOMId		= CASE WHEN t.intLotId IS NULL THEN t.intItemUOMId ELSE Lot.intItemUOMId END,
 			intItemLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intItemLocationId ELSE Lot.intItemLocationId END,
 			intSubLocationId	= CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END,
@@ -9,7 +9,7 @@ WITH InvTransaction AS(
 			t.intLotId,
 			intCostingMethod,
 			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
-			dblQty				= CASE WHEN t.intLotId IS NULL THEN t.dblQty ELSE Lot.dblQty END,
+			dblQty				= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty),
 			dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)),
 			dblCost,
 			intOwnershipType	= 1
@@ -25,7 +25,7 @@ WITH InvTransaction AS(
 			intCostingMethod,
 			dtmDate				= CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime),
 			dblQty				= CAST(0 AS NUMERIC(38, 20)),
-			dblUnitStorage		= CASE WHEN t.intLotId IS NULL THEN t.dblQty ELSE Lot.dblQty END,
+			dblUnitStorage		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty),
 			dblCost,
 			intOwnershipType	= 2
 	FROM tblICInventoryTransactionStorage t 
