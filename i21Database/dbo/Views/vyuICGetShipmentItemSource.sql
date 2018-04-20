@@ -117,7 +117,8 @@ SELECT
 			ELSE 0.00
 			END
 		),
-	dblCost = ItemPricing.dblLastCost
+	dblCost = ItemPricing.dblLastCost,
+	strFieldNo = CASE Shipment.intOrderType WHEN 1 THEN CASE Shipment.intSourceType WHEN 0 THEN Farm.strFarmFieldNumber ELSE NULL END ELSE NULL END
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 
@@ -136,6 +137,9 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
 			AND Shipment.intOrderType = 1
 			
+		LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
+		LEFT JOIN tblEMEntityLocation Farm ON Farm.intEntityId = ContractDetail.intFarmFieldId
+		AND Farm.strLocationType = 'Farm'
 		--LEFT JOIN vyuTRGetLoadReceipt TransportView
 		--	ON TransportView.intLoadReceiptId = ShipmentItem.intSourceId
 		--	AND Shipment.intSourceType = 3

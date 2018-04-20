@@ -67,6 +67,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItem.dblDestinationQuantity
 	, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, UOM.strUnitMeasure) 
 	, dblCostUOMConv = ItemPriceUOM.dblUnitQty
+	, ShipmentItemSource.strFieldNo
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
