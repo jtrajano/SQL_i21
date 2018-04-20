@@ -51,7 +51,7 @@ WITH InvTransaction AS(
 					
 	) ItemUOMStock
 	CROSS APPLY (
-		SELECT	ItemLocation.intItemLocationId, DefaultLocation.intCostingMethod
+		SELECT	ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
 		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
 			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
 		WHERE ItemLocation.intItemId = i.intItemId
