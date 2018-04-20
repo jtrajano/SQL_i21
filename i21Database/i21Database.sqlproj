@@ -6349,6 +6349,8 @@
     <Build Include="dbo\Tables\tblHDTimeEntry.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutDeleteInvoice.sql" />
+    <Build Include="dbo\Tables\tblRKCollateralHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCollateralHistoryInsert.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
