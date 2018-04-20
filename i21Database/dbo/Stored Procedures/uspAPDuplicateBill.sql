@@ -46,6 +46,7 @@ UPDATE A
 	SET A.strBillId = @generatedBillRecordId
 	,A.intTransactionType = @tranType
 	,A.intEntityId = @userId
+	,strReference = A.strReference + ' Duplicate of ' + A.strBillId
 	,A.dblDiscount = CASE WHEN A.intTransactionType > 1 THEN 0 ELSE A.dblDiscount END
 FROM #tmpDuplicateBill A
 
@@ -59,7 +60,6 @@ BEGIN
 		,dblWithheld = 0
 		,strVendorOrderNumber = NULL
 		--,strBillId = @generatedBillRecordId
-		,strReference = A.strReference + ' Duplicate of ' + A.strBillId
 		,intEntityId = @userId
 		,ysnApproved = 0
 		,ysnForApprovalSubmitted = 0
