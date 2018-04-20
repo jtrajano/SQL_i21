@@ -14,6 +14,7 @@
 	[intCreatedUserId] INT NULL,
 	[intEntityId] INT NULL,
     [intSort] INT NULL, 
+	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICBuildAssembly] PRIMARY KEY ([intBuildAssemblyId]), 
     CONSTRAINT [AK_tblICBuildAssembly_strBuildNo] UNIQUE ([strBuildNo]), 

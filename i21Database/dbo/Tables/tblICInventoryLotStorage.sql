@@ -91,6 +91,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLotStorage] PRIMARY KEY NONCLUSTERED ([intInventoryLotStorageId]),
 		CONSTRAINT [FK_tblICInventoryLotStorage_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),

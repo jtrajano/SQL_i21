@@ -9,6 +9,7 @@
     [dtmDateCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
 	[intCreatedEntityId] INT NULL,
+	[intCompanyId] INT NULL, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblICParentLot_intConcurrencyId] DEFAULT 0,
 	CONSTRAINT [PK_tblICParentLot_intParentLotId] PRIMARY KEY ([intParentLotId]),
 	CONSTRAINT [UQ_tblICParentLot_strParentLotId] UNIQUE ([strParentLotNumber]),

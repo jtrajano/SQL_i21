@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[intReadingPointId] INT NULL, 
 		[ysnActive] BIT NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageLocationMeasurement] PRIMARY KEY ([intStorageLocationMeasurementId]), 
 		CONSTRAINT [FK_tblICStorageLocationMeasurement_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 

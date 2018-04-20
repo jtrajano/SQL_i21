@@ -15,6 +15,7 @@ Type the overview for the table here.
 		[intReadingPointId] INT NOT NULL IDENTITY, 
 		[strReadingPoint] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intSort] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICReadingPoint] PRIMARY KEY ([intReadingPointId]), 
 		CONSTRAINT [AK_tblICReadingPoint_strReadingPoint] UNIQUE ([strReadingPoint])

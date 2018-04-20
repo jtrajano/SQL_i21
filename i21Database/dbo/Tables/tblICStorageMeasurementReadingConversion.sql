@@ -17,6 +17,7 @@
 	[dblGainLoss] NUMERIC(18, 6) NULL,
 	[dblVariance] NUMERIC(18, 6) NULL,
     [intSort] INT NULL, 
+	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageMeasurementReadingConversion] PRIMARY KEY ([intStorageMeasurementReadingConversionId]), 
     CONSTRAINT [FK_tblICStorageMeasurementReadingConversion_tblICStorageMeasurementReading] FOREIGN KEY ([intStorageMeasurementReadingId]) REFERENCES [tblICStorageMeasurementReading]([intStorageMeasurementReadingId]) ON DELETE CASCADE, 

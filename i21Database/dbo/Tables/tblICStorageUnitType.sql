@@ -26,6 +26,7 @@ Type the overview for the table here.
 		[intPalletStack] INT NULL DEFAULT ((0)), 
 		[intPalletColumn] INT NULL DEFAULT ((0)), 
 		[intPalletRow] INT NULL DEFAULT ((0)), 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageUnitType] PRIMARY KEY ([intStorageUnitTypeId]), 
 		CONSTRAINT [FK_tblICStorageUnitType_CapacityUnitMeasure] FOREIGN KEY ([intCapacityUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

@@ -14,6 +14,7 @@
 	[dtmUnpostedDate] DATETIME NULL, 
 	[intSourceId] INT NULL, 
 	[intSourceTransactionTypeId] INT NULL, 
+	[intCompanyId] INT NULL, 
 	[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
     CONSTRAINT [PK_tblICInventoryAdjustment] PRIMARY KEY ([intInventoryAdjustmentId]), 
     CONSTRAINT [AK_tblICInventoryAdjustment_strAdjustmentNo] UNIQUE ([strAdjustmentNo]), 

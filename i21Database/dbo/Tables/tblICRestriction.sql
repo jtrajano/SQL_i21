@@ -20,6 +20,7 @@ Type the overview for the table here.
 		[strLastUpdateBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[dtmLastUpdateOn] DATETIME NOT NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICRestriction] PRIMARY KEY ([intRestrictionId]) 
 	)

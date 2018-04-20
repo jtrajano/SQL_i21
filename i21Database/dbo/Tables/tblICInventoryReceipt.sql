@@ -56,6 +56,7 @@ Type the overview for the table here.
 		[intSourceInventoryReceiptId] [int] NULL,
 		[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
 		[dtmLastFreeWhseDate] DATETIME NULL,
+		[intCompanyId] INT NULL, 
 		CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
 		CONSTRAINT [AK_tblICInventoryReceipt_strReceiptNumber] UNIQUE ([strReceiptNumber]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 

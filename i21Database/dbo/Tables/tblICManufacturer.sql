@@ -25,6 +25,7 @@ Type the overview for the table here.
 		[strWebsite] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strEmail] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICManufacturer] PRIMARY KEY ([intManufacturerId]), 
 		CONSTRAINT [AK_tblICManufacturer_strManufacturer] UNIQUE ([strManufacturer])

@@ -19,6 +19,7 @@ Type the overview for the table here.
 		[intCountryId] INT NULL, 
 		[strCertificationIdName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strCertificationCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCertification] PRIMARY KEY ([intCertificationId]), 
 		CONSTRAINT [AK_tblICCertification_strCertificationName] UNIQUE ([strCertificationName]), 
