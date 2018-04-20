@@ -3653,7 +3653,7 @@ IF @recap = 0
 							id INT
 							)
 							INSERT INTO @idInvoiceUnpost(id)
-							SELECT intInvoiceId FROM @PostInvoiceData
+							SELECT intInvoiceId FROM @PostInvoiceData WHERE strTransactionType = 'Cash Refund'
 
 							DECLARE @curIdInvoiceUnpost INT
 							WHILE EXISTS(SELECT TOP 1 1 FROM @idInvoiceUnpost)
