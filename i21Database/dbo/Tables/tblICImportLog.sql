@@ -4,6 +4,7 @@
 	[strDescription] NVARCHAR(4000) COLLATE Latin1_General_CI_AS NULL,
 	[intTotalRows] INT NULL,
 	[intRowsImported] INT NULL,
+	[intRowsUpdated] INT NULL,
 	[intTotalErrors] INT NULL,
 	[intTotalWarnings] INT NULL,
 	[dblTimeSpentInSeconds] NUMERIC(18, 6) NULL,

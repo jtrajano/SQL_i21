@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspCMApplyCheckChangeForCheckPrint
+﻿CREATE PROCEDURE [dbo].[uspCMApplyCheckChangeForCheckPrint]
 	@intBankAccountId INT = NULL,
 	@intBankTransactionTypeId INT = NULL,
 	@strTransactionId NVARCHAR(50) = NULL,
@@ -44,7 +43,11 @@ DECLARE @BANK_DEPOSIT INT = 1
 IF(@strProcessType = 'ACH From Customer')
 BEGIN
 	UPDATE U
-	SET U.ysnToProcess = @ysnCheckToBePrinted
+	SET U.ysnToProcess =
+		CASE WHEN @ysnCheckToBePrinted = 1 AND ISNULL(U.ysnHold ,0)=0
+			THEN 1 
+			ELSE 0 
+		END
 		,U.intConcurrencyId = U.intConcurrencyId + 1
 	FROM tblCMUndepositedFund U
 	INNER JOIN tblCMBankTransaction B ON U.intBankDepositId = B.intTransactionId
@@ -57,7 +60,11 @@ END
 ELSE
 BEGIN
 	UPDATE	[dbo].[tblCMBankTransaction]
-	SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
+	SET		ysnCheckToBePrinted = 
+		CASE WHEN @ysnCheckToBePrinted = 1 AND ISNULL(ysnHold ,0) =0
+			THEN 1 
+			ELSE 0 
+		END
 			,intConcurrencyId = intConcurrencyId + 1
 	WHERE	intBankAccountId = @intBankAccountId
 			AND intBankTransactionTypeId = @intBankTransactionTypeId

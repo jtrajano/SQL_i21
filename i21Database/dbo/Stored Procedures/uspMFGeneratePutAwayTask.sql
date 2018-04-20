@@ -1,54 +1,57 @@
-﻿CREATE PROCEDURE uspMFGeneratePutAwayTask
-	@intOrderHeaderId INT, 
-	@intLotId INT, 
-	@intEntityUserSecurityId INT, 
-	@intAssigneeId INT = 0
+﻿CREATE PROCEDURE uspMFGeneratePutAwayTask @intOrderHeaderId INT
+	,@intLotId INT
+	,@intEntityUserSecurityId INT
+	,@intAssigneeId INT = 0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
-	DECLARE @intTaskId INT
-	DECLARE @strTaskNo NVARCHAR(64)
-	DECLARE @intToStorageLocationId INT
-	DECLARE @intFromStorageLocationId INT
-	DECLARE @dblLotQty AS NUMERIC(18, 6)
-	DECLARE @intItemUOMId INT
-	DECLARE @dblLotWeight AS NUMERIC(18, 6)
-	DECLARE @intWeightUOMId INT
-	DECLARE @intDirectionId INT
-	DECLARE @intItemId INT
-	DECLARE @intStatusId INT
-	DECLARE @dtmReleaseDate DATETIME
-	DECLARE @dblSplitAndPickQty NUMERIC(18,6)
-	DECLARE @dblWeightPerQty NUMERIC(18,6)
-	DECLARE @strErrMsg NVARCHAR(MAX)
-			,@strMask1 nvarchar(MAX)
-			,@intStorageLocationId int
 
-	SELECT @strTaskNo = strOrderNo, 
-	    @intToStorageLocationId = intStagingLocationId
+	DECLARE @intTaskId INT
+		,@strTaskNo NVARCHAR(64)
+		,@intToStorageLocationId INT
+		,@intFromStorageLocationId INT
+		,@dblLotQty AS NUMERIC(18, 6)
+		,@intItemUOMId INT
+		,@dblLotWeight AS NUMERIC(18, 6)
+		,@intWeightUOMId INT
+		,@intItemId INT
+		,@intStatusId INT
+		,@dtmReleaseDate DATETIME
+		,@dblWeightPerQty NUMERIC(18, 6)
+		,@strErrMsg NVARCHAR(MAX)
+		,@strMask1 NVARCHAR(MAX)
+		,@intStorageLocationId INT
+
+	SELECT @strTaskNo = strOrderNo
+		,@intToStorageLocationId = intStagingLocationId
 	FROM tblMFOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @dblSplitAndPickQty = dblQty
-		  ,@intItemUOMId = intItemUOMId
-		  ,@intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
-		  ,@dblWeightPerQty = Case When intWeightUOMId is null Then 1 Else dblWeightPerQty End
-		  ,@intFromStorageLocationId = intStorageLocationId
-		  ,@dblLotQty = dblQty
-		  ,@intItemId = intItemId
-		  ,@dblLotWeight = Case When intWeightUOMId is null Then dblQty Else dblWeight End
-		  ,@intItemUOMId = intItemUOMId
-		  ,@intWeightUOMId = IsNULL(intWeightUOMId,intItemUOMId)
+	SELECT @intItemId = intItemId
+		,@intFromStorageLocationId = intStorageLocationId
+		,@dblLotQty = dblQty
+		,@intItemUOMId = intItemUOMId
+		,@dblLotWeight = CASE 
+			WHEN intWeightUOMId IS NULL
+				THEN dblQty
+			ELSE dblWeight
+			END
+		,@intWeightUOMId = IsNULL(intWeightUOMId, intItemUOMId)
+		,@dblWeightPerQty = CASE 
+			WHEN intWeightUOMId IS NULL
+				THEN 1
+			ELSE dblWeightPerQty
+			END
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	Select @strMask1 =strMask1 
-	from dbo.tblICItem
-	Where intItemId=@intItemId
+	SELECT @strMask1 = strMask1
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
 
-	Select @intStorageLocationId =intStorageLocationId 
-	From tblICStorageLocation
-	Where strName Like @strMask1
+	SELECT @intStorageLocationId = intStorageLocationId
+	FROM tblICStorageLocation
+	WHERE strName LIKE @strMask1
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId
@@ -75,14 +78,17 @@ BEGIN TRY
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
-		,dblPickQty)
-	VALUES 
-		(0
+		,dblPickQty
+		)
+	VALUES (
+		0
 		,@strTaskNo
 		,5
-		,CASE WHEN @intAssigneeId > 0 
-			THEN 2
-		 ELSE 1 END
+		,CASE 
+			WHEN @intAssigneeId > 0
+				THEN 2
+			ELSE 1
+			END
 		,@intOrderHeaderId
 		,NULL
 		,NULL
@@ -91,31 +97,37 @@ BEGIN TRY
 		,2
 		,ISNULL(@dtmReleaseDate, GETDATE())
 		,@intFromStorageLocationId
-		,IsNUll(@intStorageLocationId,@intToStorageLocationId)
+		,IsNUll(@intStorageLocationId, @intToStorageLocationId)
 		,@intItemId
 		,@intLotId
-		,@dblSplitAndPickQty
-		,@intItemUOMId
 		,@dblLotQty
+		,@intItemUOMId
+		,@dblLotWeight
 		,@intWeightUOMId
 		,@dblWeightPerQty
 		,@intEntityUserSecurityId
 		,GETDATE()
 		,@intEntityUserSecurityId
 		,GETDATE()
-		,@dblLotWeight)
-
-
+		,@dblLotQty
+		)
 END TRY
 
 BEGIN CATCH
 	IF @@TRANCOUNT > 0
 		ROLLBACK TRANSACTION
+
 	SET @strErrMsg = ERROR_MESSAGE()
 
 	IF @strErrMsg != ''
 	BEGIN
 		SET @strErrMsg = 'uspMFGeneratePutAwayTask' + @strErrMsg
-		RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
+
+		RAISERROR (
+				@strErrMsg
+				,16
+				,1
+				,'WITH NOWAIT'
+				)
 	END
 END CATCH

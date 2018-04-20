@@ -44,6 +44,8 @@ SELECT intSalesOrderDetailId	= D.intSalesOrderDetailId
      , ysnProcessed				= H.ysnProcessed
 	 , intCurrencyExchangeRateTypeId	= D.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate	= D.dblCurrencyExchangeRate 
+	 , D.intPriceUOMId 
+	 , strPriceUOM				= PriceUOM.strUnitMeasure
 FROM dbo.tblSOSalesOrderDetail D WITH (NOLOCK)
 LEFT JOIN (
 	SELECT intSalesOrderId
@@ -98,3 +100,14 @@ LEFT JOIN (
 	FROM dbo.tblCTContractDetail WITH (NOLOCK)
 ) CD ON D.intContractDetailId = CD.intContractDetailId 
    AND CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN (
+	SELECT intItemUOMId
+		 , intUnitMeasureId
+		 , dblUnitQty
+	FROM dbo.tblICItemUOM WITH (NOLOCK)
+) ItemPriceUOM ON D.intPriceUOMId = ItemPriceUOM.intItemUOMId
+LEFT JOIN (
+	SELECT intUnitMeasureId
+		 , strUnitMeasure
+	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+) PriceUOM ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId

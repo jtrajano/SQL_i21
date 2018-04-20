@@ -237,7 +237,12 @@ BEGIN
 	SET		pod.dblQtyReceived = pod.dblQtyOrdered
 	FROM	tblPOPurchase po INNER JOIN tblPOPurchaseDetail pod
 				ON po.intPurchaseId = pod.intPurchaseId
-	WHERE	po.intPurchaseId = @poId AND pod.intItemId IS NOT NULL --DO NOT UPDATE MISC ENTRY
+			LEFT JOIN tblICItem i
+					ON i.intItemId = pod.intItemId
+	WHERE	po.intPurchaseId = @poId 
+			AND pod.intItemId IS NOT NULL				--DO NOT UPDATE MISC ENTRY
+			AND i.strType NOT IN ('Other Charge')		--DOT NOT UPDATE OTHER CHARGES TYPE
+
 
 	-- Update the On-Order Qty
 	BEGIN 
@@ -276,7 +281,11 @@ BEGIN
 				LEFT JOIN tblICItemUOM iu
 					ON iu.intItemId = POD.intItemId 
 					AND iu.intItemUOMId = POD.intUnitOfMeasureId 
-		WHERE	PO.intPurchaseId = @poId  AND POD.intItemId IS NOT NULL
+				LEFT JOIN tblICItem i
+					ON i.intItemId = POD.intItemId
+		WHERE	PO.intPurchaseId = @poId  
+				AND POD.intItemId IS NOT NULL			--DO NOT UPDATE MISC ENTRY
+				AND i.strType NOT IN ('Other Charge')   --DOT NOT UPDATE OTHER CHARGES TYPE     
 
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty 

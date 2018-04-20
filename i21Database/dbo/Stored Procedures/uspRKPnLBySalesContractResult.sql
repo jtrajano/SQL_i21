@@ -2,8 +2,7 @@
 		@intSContractDetailId	INT,
 		@intCurrencyId			INT,-- currency
 		@intUnitMeasureId		INT,--- Price uom	
-		@intWeightUOMId			INT -- weight 
-		
+		@intWeightUOMId			INT -- weight 		
 AS
 
 DECLARE @ysnSubCurrency BIT
@@ -186,8 +185,8 @@ SELECT @dblPurchaseBasisUSD = sum(dblBasisUSD),@dblPurchaseBasis = sum(dblBasis)
 FROM @Result
 WHERE strContractType = 'Purchase'
 
-SELECT @POCostUSD = sum(dblAccounting) FROM @PhysicalFuturesResult WHERE strDescription like  'Purchase -%'
-SELECT @SOCostUSD = sum(dblAccounting) FROM @PhysicalFuturesResult WHERE strDescription like  'Sale -%'
+SELECT @POCostUSD = sum(dblAccounting) FROM @PhysicalFuturesResult WHERE strDescription  not in('Invoice','Supp. Invoice')
+SELECT @SOCostUSD =0 FROM @PhysicalFuturesResult WHERE strDescription  not in('Invoice','Supp. Invoice')
 
 --RESULT
 INSERT INTO @Result (strContractType,dblBasis,strUnitMeasure,dblInvoicePrice,dblPriceVariation,strUOMVariation)
@@ -238,8 +237,8 @@ INSERT INTO @Result (
 
 SELECT 'SO Costs'
 	,sum(dblBasis * AllocatedQty) / sum(AllocatedQty) dblBasis
-	,@POCostUSD
-	,(@POCostUSD/sum(AllocatedQty)) * case when @ysnSubCurrency = 1 then 100 else 1 end
+	,@SOCostUSD
+	,(@SOCostUSD/sum(AllocatedQty)) * case when @ysnSubCurrency = 1 then 100 else 1 end
 	,sum(dblBasis * AllocatedQty)/ sum(AllocatedQty) dblCostUSD
 	,@strUnitMeasure,sum(AllocatedQty) AllocatedQty
 FROM (SELECT 
@@ -296,7 +295,7 @@ select 'Physical Profit - USD',dblQty,dblUSD,dblBasis,isnull(dblUSD,0)-isnull(db
 SELECT @dblQty dblQty
 	,(
 		sum(dblUSD) 
-		- ISNULL((
+		+ ISNULL((
 				SELECT SUM(dblUSD)
 				FROM @Result
 				WHERE strContractType = 'Total Costs USD'
@@ -445,8 +444,7 @@ UNION
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId			
 	WHERE intSContractDetailId = @intSContractDetailId
 	) t
-
-
+	
 ---- Profit
 
 INSERT INTO @Result (
@@ -473,21 +471,19 @@ INSERT INTO @Result (
 	strContractType
 	,dblBasis
 	,dblQty
-	,dblUSD
+	, dblUSD
+	,dblInvoicePrice
 	,dblPriceVariation
 	)
-SELECT 'Net SO Profit - USD',
-    (select sum (dblBasis) from
-	(select isnull(dblBasis, 0) dblBasis from @Result where strContractType='Physical Profit - USD'
-	union all
-	select isnull(dblBasis, 0) dblBasis from @Result where strContractType='Physical Profit - USD'
-	)t)
-	,@dblQty
-	,isnull(dblUSD, 0) + isnull((select sum(dblUSD) from @Result where strContractType='Futures Impact - USD'),0)
-	,isnull(dblUSD, 0) + isnull((select sum(dblUSD) from @Result where strContractType='Futures Impact - USD'),0)-
-	 (select isnull(dblBasis, 0) from @Result where strContractType='Physical Profit - USD')
+select *,dblUSD/case when isnull(dblQty,0)=0 then 1 else dblQty end,isnull(dblBasis,0)+isnull(dblUSD,0) from (
+SELECT 
+distinct 'Net SO Profit - USD' strContractType,
+	isnull(dblBasis, 0) dblBasis,	
+	@dblQty  dblQty,
+	isnull(dblUSD, 0) + isnull((select sum(dblUSD) from @Result where strContractType='Futures Impact - USD'),0) dblUSD
+
 FROM @Result
-WHERE strContractType = 'Physical Profit - USD'
+WHERE strContractType = 'Physical Profit - USD')t
 
 SELECT *
 FROM @Result

@@ -159,12 +159,13 @@ print 'BEGIN POST DEPLOYMENT'
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 :r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
--- Canned Panels
+-- Canned Panels \ Dashboard Panels
 :r .\DB\1_CannedPanels_Panel.sql
 :r .\DB\2_CannedPanels_Column.sql
 :r .\DB\3_CannedPanels_Format.sql
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
+:r .\DB\7_DeleteAllFloatingPanels.sql
 
 -- General Ledger
 :r .\GL\DefaultData\1a_AccountStructure.sql
@@ -262,6 +263,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateBillDetailRate.sql
 :r .\AP\DeleteInvalidBasisAdvanceStaging.sql
 :r .\AP\CleanBasisAdvance.sql
+:r .\AP\UpdatePOPendingStatus.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -386,6 +388,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\DataMigration\1740_Moving_Farm_Info_to_Location.sql
 :r .\EM\1740_Activate_Default_Contact.sql
 :r .\EM\1810_Set_Default_Language.sql
+:r .\EM\1810_Fix_Check_Payee_Name.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

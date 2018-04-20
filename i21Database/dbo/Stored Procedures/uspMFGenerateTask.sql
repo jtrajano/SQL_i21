@@ -60,6 +60,7 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
+		,@intOwnershipType INT
 
 	SELECT @ysnPickByQty = 1
 
@@ -189,6 +190,7 @@ BEGIN TRY
 			,intParentLotId INT
 			,intUnitPerPallet INT
 			,strInventoryTracking NVARCHAR(50)
+			,intOwnershipType INT
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -229,6 +231,7 @@ BEGIN TRY
 			,intParentLotId
 			,intUnitPerPallet
 			,strInventoryTracking
+			,intOwnershipType
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -264,6 +267,7 @@ BEGIN TRY
 			,oli.intParentLotId
 			,IsNULL(i.intUnitPerLayer * i.intLayerPerPallet, 0)
 			,i.strInventoryTracking
+			,oli.intOwnershipType
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -311,6 +315,8 @@ BEGIN TRY
 
 			SELECT @strInventoryTracking = NULL
 
+			SELECT @intOwnershipType = NULL
+
 			DELETE
 			FROM @tblLot
 
@@ -327,6 +333,7 @@ BEGIN TRY
 				,@intUnitPerPallet = intUnitPerPallet
 				,@intUnitPerPallet2 = intUnitPerPallet
 				,@strInventoryTracking = strInventoryTracking
+				,@intOwnershipType = intOwnershipType
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -640,7 +647,8 @@ BEGIN TRY
 						SELECT RT.intRestrictionId
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
-					AND LI.ysnPickAllowed=1
+					AND LI.ysnPickAllowed = 1
+					AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty
@@ -856,7 +864,8 @@ BEGIN TRY
 						SELECT RT.intRestrictionId
 						FROM tblMFInventoryShipmentRestrictionType RT
 						)
-					AND LI.ysnPickAllowed=1
+					AND LI.ysnPickAllowed = 1
+					AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
 				GROUP BY L.intLotId
 					,L.intItemId
 					,L.dblQty
@@ -1064,9 +1073,9 @@ BEGIN TRY
 
 					SELECT @dblSplitAndPickQty = (
 							CASE 
-								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) > @dblRequiredQty
+								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) >= @dblRequiredQty
 									THEN dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredUOMId, @intLotItemUOMId, @dblRequiredQty)
-								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredUOMId, @intLotItemUOMId, @dblRemainingLotQty)
+								ELSE @dblRemainingLotQty
 								END
 							)
 
@@ -1082,7 +1091,7 @@ BEGIN TRY
 
 					SET @dblRequiredQty = @dblRequiredQty - (
 							CASE 
-								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) > @dblRequiredQty
+								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty) >= @dblRequiredQty
 									THEN @dblRequiredQty
 								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intLotItemUOMId, @intRequiredUOMId, @dblRemainingLotQty)
 								END
@@ -1261,15 +1270,20 @@ BEGIN TRY
 
 		IF @intTaskCount <= 0
 		BEGIN
-			RAISERROR (
-					'System was unable to generate task for one or more item(s).'
-					,16
-					,1
-					)
+			SET @ysnAllTasksNotGenerated = 1
+				--RAISERROR (
+				--		'System was unable to generate task for one or more item(s).'
+				--		,16
+				--		,1
+				--		)
 		END
 	END
 	ELSE
 	BEGIN
+		DELETE
+		FROM tblMFTask
+		WHERE intOrderHeaderId = @intOrderHeaderId
+
 		DECLARE @tblPutAwayLot TABLE (
 			intLotRecordId INT Identity(1, 1)
 			,intLotId INT

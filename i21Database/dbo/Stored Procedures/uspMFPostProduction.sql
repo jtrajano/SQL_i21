@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intLoadDistributionDetailId INT = NULL
 	,@dblUnitCost NUMERIC(38, 20) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
+	,@intLotStatusId INT=NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -61,6 +62,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strLocationName NVARCHAR(50)
 	,@strProduceBatchId NVARCHAR(40)
 	,@intManufacturingCellId INT
+	
 
 SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
 
@@ -323,6 +325,7 @@ BEGIN
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
+		,@intLotStatusId
 
 	SELECT TOP 1 @intLotId = intLotId
 	FROM #GeneratedLotItems

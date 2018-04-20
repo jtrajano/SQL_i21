@@ -15,6 +15,7 @@
 RETURNS @returntable TABLE
 (
 	 dblPrice							NUMERIC(18,6)
+	,dblUnitPrice						NUMERIC(18,6)
 	,strPricing							NVARCHAR(250)
 	,intCurrencyExchangeRateTypeId		INT
     ,strCurrencyExchangeRateType		NVARCHAR(20)
@@ -43,6 +44,7 @@ AS
 BEGIN
 
 DECLARE	 @Price							NUMERIC(18,6)
+		,@UnitPrice						NUMERIC(18,6)
 		,@Pricing						NVARCHAR(250)
 		,@ContractNumber				NVARCHAR(50)
 		,@ContractSeq					INT
@@ -76,6 +78,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 			
 	SELECT TOP 1
 		 @Price							= ARCC.[dblCashPrice]
+		,@UnitPrice						= ARCC.[dblUnitPrice]
 		,@CurrencyId					= ARCC.[intSubCurrencyId]
 		,@SubCurrencyRate				= ARCC.[dblSubCurrencyRate]
 		,@SubCurrency					= ARCC.[strSubCurrency]
@@ -127,6 +130,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		SET @Pricing = 'Contracts'
 		INSERT @returntable(
 			 [dblPrice]
+			,[dblUnitPrice]
 			,[strPricing]
 			,[intCurrencyExchangeRateTypeId]
             ,[strCurrencyExchangeRateType]
@@ -153,6 +157,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		)
 		SELECT
 			 [dblPrice]							= @Price
+			,[dblUnitPrice]						= @UnitPrice
 			,[strPricing]						= @Pricing
 			,[intCurrencyExchangeRateTypeId]	= @CurrencyExchangeRateTypeId
             ,[strCurrencyExchangeRateType]		= @CurrencyExchangeRateType
@@ -191,6 +196,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 			
 	SELECT TOP 1
 		 @Price							= ARCC.[dblCashPrice]
+		,@UnitPrice						= ARCC.[dblUnitPrice]
 		,@CurrencyId					= ARCC.[intSubCurrencyId]
 		,@SubCurrencyRate				= ARCC.[dblSubCurrencyRate]
 		,@SubCurrency					= ARCC.[strSubCurrency]
@@ -238,6 +244,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		SET @Pricing = 'Contracts'
 		INSERT @returntable(
 			 [dblPrice]
+			,[dblUnitPrice]
 			,[strPricing]
 			,[intCurrencyExchangeRateTypeId]
             ,[strCurrencyExchangeRateType]
@@ -264,6 +271,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		)
 		SELECT
 			 [dblPrice]							= @Price
+			,[dblUnitPrice]						= @UnitPrice
 			,[strPricing]						= @Pricing
 			,[intCurrencyExchangeRateTypeId]	= @CurrencyExchangeRateTypeId
             ,[strCurrencyExchangeRateType]		= @CurrencyExchangeRateType
@@ -291,7 +299,58 @@ DECLARE	 @Price							NUMERIC(18,6)
 		RETURN
 	END
 	
-	INSERT @returntable([dblPrice], [strPricing], [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType], [dblCurrencyExchangeRate], [intSubCurrencyId], [dblSubCurrencyRate], [strSubCurrency], [intContractUOMId], [strContractUOM], [intPriceUOMId], [strPriceUOM], [intContractHeaderId], [intContractDetailId], [strContractNumber], [intContractSeq], [dblPriceUOMQuantity], [dblQuantity], [dblAvailableQty], [ysnUnlimitedQty], [strPricingType], [intTermId], [ysnMaxPrice], [intCompanyLocationPricingLevelId])
-	SELECT @Price, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @CurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @termId, @IsMaxPrice, @ContractPricingLevelId
+	INSERT @returntable(
+			 [dblPrice]
+			,[dblUnitPrice]
+			,[strPricing]
+			,[intCurrencyExchangeRateTypeId]
+            ,[strCurrencyExchangeRateType]
+            ,[dblCurrencyExchangeRate]
+			,[intSubCurrencyId]
+			,[dblSubCurrencyRate]
+			,[strSubCurrency]
+			,[intContractUOMId] 
+			,[strContractUOM]
+			,[intPriceUOMId] 
+			,[strPriceUOM]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[strContractNumber]
+			,[intContractSeq]
+			,[dblPriceUOMQuantity]
+			,[dblQuantity]
+			,[dblAvailableQty]
+			,[ysnUnlimitedQty]
+			,[strPricingType]
+			,[intTermId]
+			,[ysnMaxPrice]
+			,[intCompanyLocationPricingLevelId]
+		)
+		SELECT
+			 [dblPrice]							= @Price
+			,[dblUnitPrice]						= @Price
+			,[strPricing]						= @Pricing
+			,[intCurrencyExchangeRateTypeId]	= @CurrencyExchangeRateTypeId
+            ,[strCurrencyExchangeRateType]		= @CurrencyExchangeRateType
+            ,[dblCurrencyExchangeRate]			= @CurrencyExchangeRate
+			,[intSubCurrencyId]					= @CurrencyId
+			,[dblSubCurrencyRate]				= @SubCurrencyRate
+			,[strSubCurrency]					= @SubCurrency
+			,[intContractUOMId]					= @ContractUOMId
+			,[strContractUOM]					= @ContractUOM
+			,[intPriceUOMId]					= @PriceUOMId
+			,[strPriceUOM]						= @PriceUOM
+			,[intContractHeaderId]				= @ContractHeaderId
+			,[intContractDetailId]				= @ContractDetailId
+			,[strContractNumber]				= @ContractNumber
+			,[intContractSeq]					= @ContractSeq
+			,[dblPriceUOMQuantity]				= @PriceUOMQuantity
+			,[dblQuantity]						= @Quantity
+			,[dblAvailableQty]					= @AvailableQuantity
+			,[ysnUnlimitedQty]					= @UnlimitedQuantity
+			,[strPricingType]					= @PricingType
+			,[intTermId]						= @termId
+			,[ysnMaxPrice]						= @IsMaxPrice
+			,[intCompanyLocationPricingLevelId] = @ContractPricingLevelId
 	RETURN				
 END

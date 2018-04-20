@@ -236,6 +236,7 @@ BEGIN
 			,intLotId
 			,strNewLotNumber
 			,intItemUOMId
+			,intOwnershipType
 			,intNewItemUOMId
 			,dblQuantity
 			,dblAdjustByQuantity
@@ -263,6 +264,7 @@ BEGIN
 			,intLotId					= Lot.intLotId
 			,strNewLotNumber			= @strNewLotNumber	
 			,intItemUOMId				= @intItemUOMId 
+			,intOwnershipType			= Lot.intOwnershipType
 			,intNewItemUOMId			= @intNewItemUOMId
 			--,dblQuantity				= Lot.dblQty
 			,dblQuantity				=	CASE	WHEN Lot.intItemUOMId = @intItemUOMId THEN Lot.dblQty

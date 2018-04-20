@@ -130,6 +130,7 @@ BEGIN
 			,intStorageLocationId
 			,intItemId
 			,intLotId
+			,intOwnershipType
 			,dtmExpiryDate
 			,dtmNewExpiryDate
 			,intSort
@@ -141,6 +142,7 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
+			,intOwnershipType			= Lot.intOwnershipType
 			,dtmExpiryDate				= dbo.fnRemoveTimeOnDate(Lot.dtmExpiryDate)
 			,dtmNewExpiryDate			= dbo.fnRemoveTimeOnDate(@dtmNewExpiryDate) 
 			,intSort					= 1

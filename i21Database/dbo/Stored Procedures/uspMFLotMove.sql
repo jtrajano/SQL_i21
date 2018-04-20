@@ -53,7 +53,7 @@ BEGIN TRY
 		,@intSourceLocationRestrictionId INT
 		,@intDestinatinLocationRestrictionId INT
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType BIT
-				,@strSubLocationName NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
 		,@strName NVARCHAR(50)
 		,@intBondStatusId INT
 		,@intStorageUnitTypeId INT
@@ -67,7 +67,6 @@ BEGIN TRY
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
 	FROM tblMFCompanyPreference
 
-
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -75,7 +74,6 @@ BEGIN TRY
 		,@strLotNumber = strLotNumber
 		,@dblLotQty = dblQty
 		,@intLotStatusId = intLotStatusId
-		,@intNewLocationId = intLocationId
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
@@ -91,6 +89,7 @@ BEGIN TRY
 		SELECT @intSourceLocationRestrictionId = 0
 
 	SELECT @intDestinatinLocationRestrictionId = intRestrictionId
+		,@intNewLocationId = intLocationId
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intNewStorageLocationId
 
@@ -616,7 +615,8 @@ BEGIN TRY
 	IF @intSourceLocationRestrictionId <> @intDestinatinLocationRestrictionId
 		AND @ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = 1
 	BEGIN
-		SELECT @intLotStatusId=NULL
+		SELECT @intLotStatusId = NULL
+
 		SELECT @intLotStatusId = intLotStatusId
 		FROM tblMFStorageLocationRestrictionTypeLotStatus
 		WHERE intRestrictionId = @intDestinatinLocationRestrictionId

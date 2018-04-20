@@ -302,3 +302,5 @@ WITH Pricing AS
     WHERE   CDT.intContractDetailId NOT IN (SELECT intContractDetailId FROM Pricing)
     AND CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0
 ) t 
+
+

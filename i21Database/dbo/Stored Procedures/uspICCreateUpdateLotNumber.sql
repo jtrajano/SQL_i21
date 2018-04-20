@@ -27,6 +27,9 @@ DECLARE @strSubLocatioNameFrom AS NVARCHAR(50)
 DECLARE @strSubLocatioNameTo AS NVARCHAR(50)
 DECLARE @strStorageLocatioNameFrom AS NVARCHAR(50)
 DECLARE @strStorageLocatioNameTo AS NVARCHAR(50)
+DECLARE @dtmCreatedDate AS DATETIME;
+DECLARE @strOwnershipType AS NVARCHAR(50)
+DECLARE @strOwnershipTypeNew AS NVARCHAR(50)
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
@@ -507,6 +510,29 @@ BEGIN
 		GOTO _Exit_Loop;
 	END 
 
+	-- Validate If Lot already exist for Ownership Type 
+	IF (@intOwnershipType IS NOT NULL)
+	BEGIN 
+		SET @strItemNo = NULL;
+
+		SELECT TOP 1 @strOwnershipType = dbo.fnICGetOwnershipType(intOwnershipType)
+		FROM tblICLot
+		WHERE intItemId = @intItemId
+			AND strLotNumber = @strLotNumber
+			AND intLocationId = @intLocationId
+			AND intSubLocationId = @intSubLocationId
+			AND intStorageLocationId = @intStorageLocationId
+			AND intOwnershipType <> @intOwnershipType
+
+		IF(@strOwnershipType IS NOT NULL)
+		BEGIN
+			SET @strOwnershipTypeNew = dbo.fnICGetOwnershipType(@intOwnershipType);
+			--'Ownership of {Lot Number} is {Ownership}. Cannot add  inventory to it'
+			EXEC uspICRaiseError 80209, @strLotNumber, @strOwnershipType, @strOwnershipTypeNew;
+			SET @intReturnCode = -80209;
+		END
+	END
+
 	----------------------------------------------
 	-- Special process on the Item Qty and Weight
 	-- If there is weight and item qty is fractional, convert item uom into weight uom. 
@@ -568,7 +594,13 @@ BEGIN
 				AND Lot.intLocationId = @intLocationId
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-				
+
+		-- Get Date Created from Source Lot
+		SELECT @dtmCreatedDate = Lot.dtmDateCreated
+		FROM	dbo.tblICLot Lot
+		WHERE	Lot.intLotId = @intSplitFromLotId
+
+
 		-- Get the Lot id or insert a new record on the Lot master table. 
 		MERGE	
 		INTO	dbo.tblICLot 
@@ -863,7 +895,7 @@ BEGIN
 				,@dtmManufacturedDate
 				,@ysnReleasedToWarehouse
 				,@ysnProduced
-				,GETDATE()
+				,@dtmCreatedDate
 				,@intEntityUserSecurityId
 				,1
 				,@intOwnershipType

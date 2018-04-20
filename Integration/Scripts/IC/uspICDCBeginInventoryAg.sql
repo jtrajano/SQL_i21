@@ -81,6 +81,16 @@ BEGIN
 	
 		IF @cnt > 0
 		BEGIN
+		--** Update the item status, that are discontinued in Origin to Active so the the Adjustment Posting will not fail 
+				UPDATE inv SET strOriginStatus = strStatus, strStatus = 'Active'
+				FROM	tblICItem inv INNER JOIN agitmmst itm 
+							ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+						LEFT JOIN tblICItemUOM uom 
+							on uom.intItemId = inv.intItemId 
+				WHERE	agitm_un_on_hand <> 0 
+				AND agitm_loc_no = @adjLoc
+				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+
 			--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
 			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
 
@@ -213,6 +223,16 @@ BEGIN
 
 				GOTO BreakLoopWithError
 			END CATCH 
+
+		--** Revert the original Origin status, after the posting 
+				UPDATE inv SET  strStatus = strOriginStatus
+				FROM	tblICItem inv INNER JOIN agitmmst itm 
+							ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+						LEFT JOIN tblICItemUOM uom 
+							on uom.intItemId = inv.intItemId 
+				WHERE	agitm_un_on_hand <> 0 
+				AND agitm_loc_no = @adjLoc
+				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 
 			-- Tweak the contra-gl account used. 
 			BEGIN 

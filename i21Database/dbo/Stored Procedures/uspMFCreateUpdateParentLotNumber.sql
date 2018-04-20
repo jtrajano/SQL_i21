@@ -99,6 +99,26 @@ BEGIN
 	FROM tblICParentLot
 	WHERE strParentLotNumber = @strParentLotNumber
 
+	SELECT @strLotNumber=strLotNumber
+	FROM tblICLot
+	WHERE intLotId = @intLotId
+
+	IF EXISTS (
+			SELECT 1
+			FROM tblICLot
+			WHERE strLotNumber=@strLotNumber and intItemId<>@intItemId
+			and dblQty>0
+			)
+	BEGIN
+		RAISERROR (
+				'Lot number already exists. Note: Same lot number cannot be used by more than one item.'
+				,16
+				,1
+				)
+
+		RETURN - 1;
+	END
+
 	IF NOT EXISTS (
 			SELECT 1
 			FROM tblICLot

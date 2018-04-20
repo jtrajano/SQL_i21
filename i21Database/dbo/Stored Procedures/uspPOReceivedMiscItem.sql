@@ -20,13 +20,15 @@ BEGIN
 			,B.intItemId
 			,A.ysnPosted
 	INTO	#tmpReceivedPOMiscItems
-	FROM	tblAPBill A INNER JOIN tblAPBillDetail B 
+	FROM	tblAPBill A 
+			INNER JOIN tblAPBillDetail B 
 				ON A.intBillId = B.intBillId
-			INNER JOIN tblICItem C
+			LEFT JOIN tblICItem C
 				ON B.intItemId = C.intItemId
+			LEFT JOIN tblPOPurchaseDetail D
+					ON D.intPurchaseDetailId = B.intPurchaseDetailId
 	WHERE	A.intBillId= @billId
-	AND C.strType IN ('Service','Software','Non-Inventory','Other Charge')
-
+	AND (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR C.intItemId IS NULL)
 	
 	--UPDATING ON ORDER QUANTITY
 	DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType
@@ -74,11 +76,12 @@ BEGIN
 
 
 	UPDATE	A
-	SET		A.dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (A.dblQtyReceived + B.dblQtyReceived) 
+	SET		A.dblQtyReceived = (CASE	WHEN	 @posted = 1 THEN ( B.dblQtyReceived) 
+										WHEN	 @posted = 0 THEN ( B.dblQtyReceived)
 									ELSE (A.dblQtyReceived - B.dblQtyReceived) 
-							END
+								END)
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOMiscItems B 
-				ON A.intItemId = B.intItemId 
+				ON (A.intItemId = B.intItemId OR A.intItemId IS NULL)
 				AND A.intPurchaseDetailId = B.[intPurchaseDetailId]
 
 	--Validate
