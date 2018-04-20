@@ -6279,6 +6279,7 @@
     <Build Include="dbo\Views\vyuARCustomerAgingSubview.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
+    <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
