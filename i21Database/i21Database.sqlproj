@@ -6557,4 +6557,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\NM_NewMexico.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\EM\1810_Fix_CustomTab_ControlName.sql" />
+  </ItemGroup>
 </Project>
