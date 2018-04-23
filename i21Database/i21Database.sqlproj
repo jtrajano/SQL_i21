@@ -6288,6 +6288,7 @@
     <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCommission.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
+    <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
