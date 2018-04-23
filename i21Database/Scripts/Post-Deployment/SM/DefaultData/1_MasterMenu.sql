@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inter-Company Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Entry' AND strModuleName = 'Help Desk' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Help Desk'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4685,6 +4685,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Ho
 	VALUES (N'Export Hours Worked', N'Help Desk', @HelpDeskActivitiesParentMenuId, N'Export Hours Worked', N'Activity', N'Screen', N'HelpDesk.view.ExportHoursWorked', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'HelpDesk.view.ExportHoursWorked' WHERE strMenuName = 'Export Hours Worked' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Entry' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Time Entry', N'Help Desk', @HelpDeskActivitiesParentMenuId, N'Time Entry', N'Activity', N'Screen', N'HelpDesk.view.TimeEntry', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'HelpDesk.view.TimeEntry' WHERE strMenuName = 'Time Entry' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Milestones' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
