@@ -85,10 +85,14 @@ AS
 				intGrossNetUOMId			=	ISNULL(CD.intNetWeightUOMId,0),	
 				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
-				dblCost						=	ISNULL(AD.dblSeqPrice,0),
-				intCostUOMId				=	ISNULL(AD.intSeqPriceUOMId, CD.intItemUOMId), -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
+				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
+														THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + 
+																dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis)
+														ELSE	dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice)
+												END,
+				intCostUOMId				=	IU.intItemUOMId, -- If Seq-price-uom is null, then use the contract-detail-item-uom. 
 				intCurrencyId				=	ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId),
-				intSubCurrencyCents			=	ISNULL(SubCurrency.intCent, 1), 
+				intSubCurrencyCents			=	ISNULL(SY.intCent, 1), 
 				dblExchangeRate				=	1,
 				intLotId					=	NULL ,
 				intSubLocationId			=	IL.intSubLocationId,
@@ -98,20 +102,25 @@ AS
 				intSourceType		 		=	0,
 				strSourceId					=	CH.strContractNumber,
 				strSourceScreenName			=	'Contract',
-				ysnSubCurrency				=	SubCurrency.ysnSubCurrency,
+				ysnSubCurrency				=	SY.ysnSubCurrency,
 				intForexRateTypeId			=	CD.intRateTypeId,
 				dblForexRate				=	CD.dblRate
 
 		FROM	tblCTContractDetail			CD	
-		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN	tblICItemLocation			IL	ON	IL.intItemId	=	CD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+		JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CD.intItemId	
+												AND	IU.ysnStockUOM			=	1		
+		JOIN	tblICItemLocation			IL	ON	IL.intItemId			=	CD.intItemId 
+												AND IL.intLocationId		=	CD.intCompanyLocationId
+
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CH.intEntityId	AND
-													EL.ysnDefaultLocation	=	1				LEFT
-		JOIN	vyuICGetItemStock			SK	ON	SK.intItemId			=	CD.intItemId	AND		
-													SK.intLocationId		=	CD.intCompanyLocationId
-		LEFT JOIN tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
-		LEFT JOIN tblSMCurrency				SubCurrency  ON SubCurrency.intCurrencyID = CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
+
+		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CH.intEntityId	
+												AND	EL.ysnDefaultLocation	=	1				
+  LEFT	JOIN	vyuICGetItemStock			SK	ON	SK.intItemId			=	CD.intItemId			
+												AND	SK.intLocationId		=	CD.intCompanyLocationId
+  LEFT  JOIN	tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
+  LEFT  JOIN	tblSMCurrency				SY  ON	SY.intCurrencyID		=	CASE WHEN SC.intMainCurrencyId IS NOT NULL THEN  CD.intCurrencyId ELSE NULL END 
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges

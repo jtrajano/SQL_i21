@@ -249,6 +249,11 @@ BEGIN TRY
 				)
 			)
 
+	INSERT INTO tblMFWorkOrderRecipeCategory(intWorkOrderId,intRecipeCategoryId,intRecipeId,intCategoryId,intRecipeItemTypeId)
+	Select @intWorkOrderId,intRecipeCategoryId,intRecipeId,intCategoryId,intRecipeItemTypeId
+	From tblMFRecipeCategory
+	Where intRecipeId=@intRecipeId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 END TRY

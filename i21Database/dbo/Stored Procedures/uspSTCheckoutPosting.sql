@@ -3,7 +3,8 @@
 @intCheckoutId INT,
 @strDirection NVARCHAR(50),
 @strStatusMsg NVARCHAR(1000) OUTPUT,
-@strNewCheckoutStatus NVARCHAR(100) OUTPUT
+@strNewCheckoutStatus NVARCHAR(100) OUTPUT,
+@ysnInvoiceStatus BIT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -12,24 +13,24 @@ BEGIN
 
 		DECLARE @ysnUpdateCheckoutStatus BIT = 1
 
-		DECLARE @intEntityCustomerId INT = (SELECT intCheckoutCustomerId FROM tblSTStore 
-											WHERE intStoreId = (
-												SELECT intStoreId FROM tblSTCheckoutHeader
-												WHERE intCheckoutId = @intCheckoutId
-											))
+		DECLARE @intEntityCustomerId INT
+		DECLARE @intCompanyLocationId INT
+		DECLARE @intTaxGroupId INT
 
-		DECLARE @intCompanyLocationId INT = (SELECT intCompanyLocationId FROM tblSTStore 
-											WHERE intStoreId = (
-												SELECT intStoreId FROM tblSTCheckoutHeader
-												WHERE intCheckoutId = @intCheckoutId
-											))
+		SELECT @intCompanyLocationId = intCompanyLocationId
+			   , @intEntityCustomerId = intCheckoutCustomerId
+			   , @intTaxGroupId = intTaxGroupId
+		FROM tblSTStore 
+		WHERE intStoreId = (
+				SELECT intStoreId FROM tblSTCheckoutHeader
+				WHERE intCheckoutId = @intCheckoutId
+		)
 
 		DECLARE @intCurrencyId INT = (SELECT intDefaultCurrencyId FROM tblSMCompanyPreference)
 		DECLARE @intShipViaId INT = (SELECT TOP 1 1 intShipViaId FROM tblEMEntityLocation WHERE intEntityId = @intEntityCustomerId AND intShipViaId IS NOT NULL)
-		DECLARE @intTaxGroupId INT = (SELECT intTaxGroupId FROM tblSTStore WHERE intStoreId = (SELECT intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId))
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		DECLARE @ysnPost BIT = NULL
-		DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
+		-- DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
 		DECLARE @intCurrentInvoiceId INT = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
 		DECLARE @intCreatedInvoiceId INT = NULL
 
@@ -53,21 +54,25 @@ BEGIN
 					BEGIN
 						SET @ysnCurrentInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCurrentInvoiceId)
 						
-						IF(@ysnCurrentInvoiceStatus = 1)
-							BEGIN
-								SET @CheckoutCurrentStatus = 'Posted'
-							END
-						ELSE IF(@ysnCurrentInvoiceStatus = 0)
-							BEGIN
-								SET @CheckoutCurrentStatus = 'Manager Verified'
-							END
+						SET @ysnInvoiceStatus = @ysnCurrentInvoiceStatus
+
+						--IF(@ysnCurrentInvoiceStatus = 1)
+						--	BEGIN
+						--		SET @CheckoutCurrentStatus = 'Posted'
+						--	END
+						--ELSE IF(@ysnCurrentInvoiceStatus = 0)
+						--	BEGIN
+						--		SET @CheckoutCurrentStatus = 'Manager Verified'
+						--	END
 					END
 			END
 		ELSE
 			BEGIN
-				SELECT @CheckoutCurrentStatus = strCheckoutStatus
-				FROM tblSTCheckoutHeader
-				WHERE intCheckoutId = @intCheckoutId
+				SET @ysnInvoiceStatus = NULL
+
+				--SELECT @CheckoutCurrentStatus = strCheckoutStatus
+				--FROM tblSTCheckoutHeader
+				--WHERE intCheckoutId = @intCheckoutId
 			END
 		----------------------------------------------------------------------
 		------------------ End check current Invoice status ------------------
@@ -77,7 +82,7 @@ BEGIN
 		----------------------------------------------------------------------
 		-------------------- Verify Posting Direction ------------------------
 		----------------------------------------------------------------------
-		IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Manager Verified')
+		IF(@strDirection = 'Post')
 			BEGIN
 				IF(@ysnCurrentInvoiceStatus = 0 OR @ysnCurrentInvoiceStatus IS NULL) -- The Invoice current status is 'UnPosted' OR not yet Created
 					BEGIN
@@ -90,7 +95,7 @@ BEGIN
 						SET @strStatusMsg = 'Checkout already been Posted'
 					END
 			END
-		ELSE IF (@strDirection = 'UnPost' AND @CheckoutCurrentStatus = 'Posted')
+		ELSE IF (@strDirection = 'UnPost')
 			BEGIN
 				IF(@ysnCurrentInvoiceStatus = 1) -- The Invoice current status is 'Posted'
 					BEGIN
@@ -318,6 +323,7 @@ BEGIN
 							BEGIN
 								SET @ysnUpdateCheckoutStatus = 1
 								SET @strStatusMsg = 'Success'
+								SET @ysnInvoiceStatus = 1
 							END
 						ELSE
 							BEGIN
@@ -358,6 +364,11 @@ BEGIN
 				-- @intInvalidCount: 0
 				-- @ysnSuccess: 1
 				-- @strBatchIdUsed: BATCH-722
+
+				IF(@ysnSuccess = 1)
+					BEGIN
+						SET @ysnInvoiceStatus = 0
+					END
 			END
 		----------------------------------------------------------------------
 		------------------- END POST / UNPOST PUMP TOTALS --------------------
@@ -367,23 +378,22 @@ BEGIN
 		IF(@ysnUpdateCheckoutStatus = 1)
 			BEGIN
 				-- Determine Status
-				IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Manager Verified')
+				IF(@strDirection = 'Post')
 					BEGIN
 						SET @strNewCheckoutStatus = 'Posted'
 					END
-				ELSE IF(@strDirection = 'Post' AND @CheckoutCurrentStatus = 'Open')
+				ELSE IF (@strDirection = 'UnPost')
 					BEGIN
 						SET @strNewCheckoutStatus = 'Manager Verified'
 					END
-				ELSE IF (@strDirection = 'UnPost' AND @CheckoutCurrentStatus = 'Posted')
+				ELSE IF (@strDirection = 'SendToOffice')
 					BEGIN
 						SET @strNewCheckoutStatus = 'Manager Verified'
 					END
-				ELSE IF (@strDirection = 'SendBackToStore' AND @CheckoutCurrentStatus = 'Manager Verified')
+				ELSE IF (@strDirection = 'SendBackToStore')
 					BEGIN
 						SET @strNewCheckoutStatus = 'Open'
 					END
-
 
 
 				IF(@ysnPost IS NULL)

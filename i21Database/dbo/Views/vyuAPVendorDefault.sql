@@ -28,7 +28,11 @@ SELECT
 	B.intGLAccountExpenseId,
 	K.strAccountId,
 	B.intBillToId,
-	CASE WHEN B.intBillToId > 0 THEN C2.strCheckPayeeName ELSE C.strCheckPayeeName END AS strPayTo
+	CASE WHEN B.intBillToId > 0 THEN C2.strCheckPayeeName ELSE C.strCheckPayeeName END AS strPayTo,
+	intBookId,
+	strBook,
+	intSubBookId,
+	strSubBook
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -55,6 +59,18 @@ FROM
 		ON B.intTermsId = J.intTermID
 	LEFT JOIN dbo.tblGLAccount K
 		ON B.intGLAccountExpenseId = K.intAccountId
+	OUTER APPLY (
+		SELECT TOP 1
+			bookEntity.intEntityId
+			,bookEntity.intBookId
+			,ctbook.strBook
+			,bookEntity.intSubBookId
+			,ctsubbook.strSubBook
+		FROM tblCTBookVsEntity bookEntity
+		INNER JOIN tblCTBook ctbook ON bookEntity.intBookId = ctbook.intBookId
+		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
+		WHERE bookEntity.intEntityId = A.intEntityId
+	) ctBookEntities
 GO
 
 
