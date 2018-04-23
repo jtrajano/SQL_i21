@@ -85,10 +85,10 @@ SELECT Lot.intLotId
 	   , CTDetail.dblTotalCost
 	   , LD.intWeightItemUOMId
 	   , PO.strPosition
-	   , 0 AS intBookId
-	   , '' COLLATE Latin1_General_CI_AS AS strBook  
-	   , 0 AS intSubBookId 
-	   , '' COLLATE Latin1_General_CI_AS AS strSubBook 
+	   , CTDetail.intBookId AS intBookId
+	   , BO.strBook COLLATE Latin1_General_CI_AS AS strBook  
+	   , CTDetail.intSubBookId AS intSubBookId 
+	   , SB.strSubBook COLLATE Latin1_General_CI_AS AS strSubBook 
 	   , 0 AS intCropYear
 	   , '' COLLATE Latin1_General_CI_AS AS strCropYear 
 	   , '' COLLATE Latin1_General_CI_AS AS strProducer 
@@ -118,5 +118,7 @@ LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightU
 LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId	= Item.intOriginId	AND CA.strType = 'Origin'
 LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
+LEFT JOIN tblCTBook BO ON BO.intBookId = CTDetail.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CTDetail.intSubBookId
 WHERE Lot.dblQty > 0 
 ) InvLots
