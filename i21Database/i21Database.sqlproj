@@ -6356,6 +6356,7 @@
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeCategory.sql" />
     <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
