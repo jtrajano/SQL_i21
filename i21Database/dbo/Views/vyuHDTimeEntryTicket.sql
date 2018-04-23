@@ -10,6 +10,7 @@
 			,a.dtmExchangeRateDate
 			,b.strCurrency
 			,c.strCurrencyExchangeRateType
+			,a.intCustomerId
 		from
 			tblHDTicket a
 			left join tblSMCurrency b on b.intCurrencyID = a.intCurrencyId
