@@ -28,6 +28,7 @@ SELECT InventoryCount.intInventoryCountId,
 	InventoryCount.ysnRecount,
 	InventoryCount.intRecountReferenceId,
 	InventoryCount.intStatus,
+	strRecountReferenceNo = ReferenceCount.strCountNo,
 	strStatus = (CASE WHEN InventoryCount.intStatus = 1 THEN 'Open'
 					WHEN InventoryCount.intStatus = 2 THEN 'Count Sheet Printed'
 					WHEN InventoryCount.intStatus = 3 THEN 'Inventory Locked'
@@ -36,6 +37,7 @@ SELECT InventoryCount.intInventoryCountId,
 	strShiftNo = InventoryCount.strShiftNo,
 	InventoryCount.intSort
 FROM tblICInventoryCount InventoryCount
+	LEFT JOIN tblICInventoryCount ReferenceCount ON ReferenceCount.intInventoryCountId = InventoryCount.intRecountReferenceId
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = InventoryCount.intLocationId
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = InventoryCount.intCategoryId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = InventoryCount.intCommodityId
