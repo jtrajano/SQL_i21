@@ -1001,6 +1001,7 @@ USING
 		,[ysnCalculated]				= ISNULL(ITG.[ysnCalculated],0)
 		,[ysnSplitted]					= ISNULL(ITG.[ysnSplitted],0)		
 		,[ysnImpactInventory]			= ISNULL(ITG.[ysnImpactInventory],0)
+		,[ysnIncludeTaxOnDiscount]		= ISNULL(SMT.[ysnIncludeTaxOnDiscount], 0)
 		,[dblSplitPercent]				= 1.000000		
 		,[ysnImportedFromOrigin]		= 0
 		,[ysnImportedAsPosted]			= 0
@@ -1060,7 +1061,10 @@ USING
 			AND ITG.intBillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
-			ON ARC.[intBillToId] = BL1.intEntityLocationId		
+			ON ARC.[intBillToId] = BL1.intEntityLocationId
+	LEFT OUTER JOIN
+		(SELECT [intTermID], [ysnIncludeTaxOnDiscount] FROM [tblSMTerm]) SMT
+			ON SMT.[intTermID] = ISNULL(ISNULL(ITG.intTermId, ARC.[intTermsId]), EL.[intTermsId])
 	)
 AS Source
 ON Target.[intInvoiceId] = Source.[intInvoiceId]
@@ -1130,6 +1134,7 @@ INSERT(
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+	,[ysnIncludeTaxOnDiscount]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1219,6 +1224,7 @@ VALUES(
 	,[ysnCalculated]
 	,[ysnSplitted]
 	,[ysnImpactInventory]
+	,[ysnIncludeTaxOnDiscount]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]

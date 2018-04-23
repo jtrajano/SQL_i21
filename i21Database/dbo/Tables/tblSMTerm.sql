@@ -16,6 +16,7 @@
     [ysnActive]					BIT             DEFAULT ((1)) NOT NULL,
 	[ysnEnergyTrac]				BIT             DEFAULT ((0)) NOT NULL,
 	[ysnDeferredPay]			BIT             DEFAULT ((0)) NOT NULL,
+	[ysnIncludeTaxOnDiscount]	BIT             DEFAULT ((0)) NOT NULL,
     [intSort]					INT             NULL,
     [intConcurrencyId]			INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 

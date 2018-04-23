@@ -414,6 +414,7 @@ BEGIN TRY
 		,[ysnCalculated]
 		,[ysnSplitted]
 		,[ysnImpactInventory]
+		,[ysnIncludeTaxOnDiscount]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -488,6 +489,7 @@ BEGIN TRY
 		,[ysnCalculated]				= ISNULL(@Calculated,0)
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
 		,[ysnImpactInventory]			= ISNULL(@ImpactInventory,0)		
+		,[ysnIncludeTaxOnDiscount]		= ISNULL(SMT.[ysnIncludeTaxOnDiscount], 0)
 		,[intPaymentId]					= @PaymentId 
 		,[intSplitId]					= @SplitId 
 		,[intLoadDistributionHeaderId]	= @LoadDistributionHeaderId 
@@ -539,7 +541,10 @@ BEGIN TRY
 			AND @BillToLocationId = BL.intEntityLocationId		
 	LEFT OUTER JOIN
 		[tblEMEntityLocation] BL1
-			ON C.intBillToId = BL1.intEntityLocationId	
+			ON C.intBillToId = BL1.intEntityLocationId
+	LEFT OUTER JOIN
+		[tblSMTerm] SMT
+			ON SMT.[intTermID] = ISNULL(ISNULL(@TermId, C.[intTermsId]), EL.[intTermsId])
 	WHERE C.[intEntityId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()

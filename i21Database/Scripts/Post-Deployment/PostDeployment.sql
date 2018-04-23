@@ -234,6 +234,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql
 :r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
+:r .\AR\DefaultData\35_UpdateTaxedQuantityAndPrice.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
