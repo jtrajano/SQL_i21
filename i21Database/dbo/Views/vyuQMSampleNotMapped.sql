@@ -21,6 +21,8 @@ SELECT S.intSampleId
 	,S1.strSampleNumber AS strParentSampleNo
 	,SL.strName AS strStorageLocationName
 	,CD.strItemSpecification
+	,B.strBook
+	,SB.strSubBook
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -38,4 +40,6 @@ LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = S.intSampleUOMId
 LEFT JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = S.intRepresentingUOMId
 LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
+LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId

@@ -50,7 +50,11 @@ SELECT
 	CONI.strContractItemName,
 	OG.strCountry AS strOrigin,
 	BILL.strBillId,
-	BILL.intBillId
+	BILL.intBillId,
+	WC.intBookId, 
+	BO.strBook,
+	WC.intSubBookId, 
+	SB.strSubBook
 
 
 FROM tblLGWeightClaim WC
@@ -72,3 +76,5 @@ LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = WD.intCurrencyId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = WD.intPriceItemUOMId
 LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
 LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
+LEFT JOIN tblCTBook BO ON BO.intBookId = WC.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = WC.intSubBookId

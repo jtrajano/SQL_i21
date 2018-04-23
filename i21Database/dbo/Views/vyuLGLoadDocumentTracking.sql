@@ -230,6 +230,10 @@ SELECT CH.strContractNumber
 	,LOAD.ysn4cRegistration
 	,LOAD.ysnProvisionalInvoice
 	,LOAD.ysnQuantityFinal
+	,LOAD.intBookId
+	,BO.strBook
+	,LOAD.intSubBookId
+	,SB.strSubBook
 FROM tblLGLoad LOAD
 JOIN tblLGLoadDetail LD ON LOAD.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
@@ -261,4 +265,6 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentType
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = LOAD.intDispatcherId
 LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
+LEFT JOIN tblCTBook BO ON BO.intBookId = LOAD.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = LOAD.intSubBookId
 WHERE LOAD.intShipmentType = 1

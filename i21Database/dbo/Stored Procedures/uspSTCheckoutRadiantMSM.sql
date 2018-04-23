@@ -65,41 +65,41 @@ BEGIN
     END
        
     UPDATE dbo.tblSTCheckoutSalesTaxTotals
-    SET dblTaxableSales = CASE WHEN intTaxNo = 1 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+    SET dblTaxableSales = CASE WHEN strTaxNo = '1' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
                                                                                         AND MiscellaneousSummarySubCodeModifier = 1
                                                                                         )
-                                                    WHEN intTaxNo = 2 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+                                                    WHEN strTaxNo = '2' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
                                                                                         AND MiscellaneousSummarySubCodeModifier = 2
                                                                                         )
-                                                    WHEN intTaxNo = 3 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+                                                    WHEN strTaxNo = '3' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
                                                                                         AND MiscellaneousSummarySubCodeModifier = 3
                                                                                         )
-                                                    WHEN intTaxNo = 4 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+                                                    WHEN strTaxNo = '4' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =1
                                                                                         AND MiscellaneousSummarySubCodeModifier = 4
                                                                                         )
                                             END
-    , dblTotalTax = CASE WHEN intTaxNo = 1 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+    , dblTotalTax = CASE WHEN strTaxNo = '1' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
                                                                                         AND MiscellaneousSummarySubCodeModifier = 1
                                                                                         )
-                                                    WHEN intTaxNo = 2 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+                                                    WHEN strTaxNo = '2' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
                                                                                         AND MiscellaneousSummarySubCodeModifier = 2
                                                                                         )
-                                                    WHEN intTaxNo = 3 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+                                                    WHEN strTaxNo = '3' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
                                                                                         AND MiscellaneousSummarySubCodeModifier = 3
                                                                                         )
-                                                    WHEN intTaxNo = 4 THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
+                                                    WHEN strTaxNo = '4' THEN (SELECT CAST(MiscellaneousSummaryAmount as decimal(18,6))FROM #tempCheckoutInsert 
                                                                                         WHERE MiscellaneousSummaryCode = 17 AND MiscellaneousSummarySubCode =3
                                                                                         AND MiscellaneousSummarySubCodeModifier = 4
                                                                                         )
                                             END
-    WHERE intCheckoutId = @intCheckoutId AND intTaxNo IN (1, 2, 3, 4)
+    WHERE intCheckoutId = @intCheckoutId AND strTaxNo IN ('1', '2', '3', '4')
 
     --UPDATE dbo.tblSTCheckoutHeader 
     --SET dblCustomerCount = (SELECT SUM(CAST(TenderTransactionsCount as int)) FROM #tempCheckoutInsert) 

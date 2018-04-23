@@ -895,6 +895,7 @@ BEGIN TRY
 					,@intSpecialPalletLotId = @intSpecialPalletLotId
 					,@ysnRecap = @ysnRecap
 					,@intWorkOrderProducedLotId=@intWorkOrderProducedLotId OUTPUT
+					,@intLotStatusId=@intLotStatusId
 
 				IF @intLotStatusId IS NOT NULL
 					AND NOT EXISTS (
@@ -973,6 +974,7 @@ BEGIN TRY
 				,@intSpecialPalletLotId = @intSpecialPalletLotId
 				,@ysnRecap = @ysnRecap
 				,@intWorkOrderProducedLotId=@intWorkOrderProducedLotId OUTPUT
+				,@intLotStatusId=@intLotStatusId
 
 			IF @intLotStatusId IS NOT NULL
 				AND NOT EXISTS (

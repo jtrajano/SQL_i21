@@ -45,7 +45,8 @@ BEGIN
 		, ysnFetched
 		, intEntityUserSecurityId
 		, intConcurrencyId
-		, intSort)
+		, intSort
+		, dblPhysicalCount)
 	SELECT 
 		  @intInventoryCountId
 		, intItemId
@@ -69,6 +70,7 @@ BEGIN
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1
 		, intSort = 1
+		, NULL
 	FROM vyuICGetItemStockSummaryByLot
 	WHERE (intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
@@ -109,7 +111,8 @@ BEGIN
 		, ysnFetched
 		, intEntityUserSecurityId
 		, intConcurrencyId
-		, intSort)
+		, intSort
+		, dblPhysicalCount)
 	SELECT
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
@@ -127,6 +130,7 @@ BEGIN
 		, intEntityUserSecurityId = @intEntityUserSecurityId
 		, intConcurrencyId = 1
 		, intSort = 1
+		, NULL
 	FROM tblICItemLocation il
 		INNER JOIN tblICItemPricing p ON p.intItemLocationId = il.intItemLocationId
 			AND p.intItemId = il.intItemId

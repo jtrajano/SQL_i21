@@ -25,6 +25,7 @@ When stock is returned, this table will log the transactions that returned the s
 		[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
 		[intTransactionTypeId] INT NOT NULL,
 		[intTransactionDetailId] INT NULL,
+		[intCompanyId] INT NULL, 
 		CONSTRAINT [PK_tblICInventoryReturned] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

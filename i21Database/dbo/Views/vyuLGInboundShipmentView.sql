@@ -163,7 +163,19 @@ SELECT
 		PCT.dblBasis, 
 		PCT.intPriceItemUOMId, 
 		PCT.dblTotalCost,
-		LD.intWeightItemUOMId
+		LD.intWeightItemUOMId,
+		L.intBookId, 
+		BO.strBook,
+		L.intSubBookId, 
+		SB.strSubBook,
+		PCH.intCropYearId AS intCropYear,
+		CRY.strCropYear,
+		PRO.strName AS strProducer,
+		(SELECT TOP 1 CER.strCertificationName FROM tblCTContractCertification CC 
+		JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId
+		WHERE CC.intContractDetailId = PCT.intContractDetailId
+		) AS strCertification, 
+		'' COLLATE Latin1_General_CI_AS AS strCertificationId 
 
 FROM tblLGLoad  L  --  tblLGShipmentBLContainerContract SC
 JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId AND L.intPurchaseSale=1 --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
@@ -202,3 +214,7 @@ LEFT JOIN tblICUnitMeasure CONTUOM ON CONTUOM.intUnitMeasureId = L.intUnitMeasur
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = LW.intSubLocationId
+LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCT.intProducerId
+LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId

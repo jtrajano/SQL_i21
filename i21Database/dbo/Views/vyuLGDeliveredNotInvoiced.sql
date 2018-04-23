@@ -22,6 +22,10 @@ SELECT   Load.intLoadId
 		,PLH.strPickLotNumber 
 		,CLSL.strSubLocationName
 		,CLSL.strSubLocationDescription
+		,Load.intBookId
+		,BO.strBook
+		,Load.intSubBookId
+		,SB.strSubBook
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -40,6 +44,8 @@ LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId= LoadDetail.intPickLo
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = Load.intLoadId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+LEFT JOIN tblCTBook BO ON BO.intBookId = Load.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = Load.intSubBookId
 WHERE LoadDetail.intLoadDetailId NOT IN (SELECT ISNULL(tblARInvoiceDetail.intLoadDetailId,0) FROM tblARInvoiceDetail)
   AND Load.intPurchaseSale IN (2,3)
   AND Load.intShipmentType = 1

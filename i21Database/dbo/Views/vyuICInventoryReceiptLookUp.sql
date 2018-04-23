@@ -13,6 +13,8 @@ SELECT
 	, strShipFrom = ShipFrom.strLocationName
 	, ShipVia.strShipVia
 	, FreightTerm.strFreightTerm
+	, Book.strBook
+	, SubBook.strSubBook
 FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN tblSMCompanyLocation Location 
@@ -29,6 +31,10 @@ FROM tblICInventoryReceipt Receipt LEFT JOIN vyuAPVendor Vendor
 		ON ShipFrom.intEntityLocationId = Receipt.intShipFromId
 	LEFT JOIN tblSMShipVia ShipVia
 		ON ShipVia.[intEntityId] = Receipt.intShipViaId
+	LEFT JOIN tblCTBook Book
+		ON Book.intBookId = Receipt.intBookId
+	LEFT JOIN tblCTSubBook SubBook
+		ON SubBook.intSubBookId = Receipt.intSubBookId
 
 	--LEFT JOIN tblSMCompanyLocation Transferor 
 	--	ON Transferor.intCompanyLocationId = Receipt.intTransferorId

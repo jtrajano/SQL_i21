@@ -7,6 +7,7 @@
     [intYear] INT NOT NULL, 
     [intMonth] INT NOT NULL, 
     [dtmRebuildDate] DATETIME NOT NULL,
+	[intCompanyId] INT NULL, 
     CONSTRAINT [PK_tblICRebuildValuationGLSnapshot] PRIMARY KEY ([intId]), 
 	CONSTRAINT [UN_tblICRebuildValuationGLSnapshot] UNIQUE NONCLUSTERED ([intAccountId] ASC, [intYear] ASC, [intMonth] ASC, [dtmRebuildDate] ASC),		
     CONSTRAINT [FK_tblICRebuildValuationGLSnapshot_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])

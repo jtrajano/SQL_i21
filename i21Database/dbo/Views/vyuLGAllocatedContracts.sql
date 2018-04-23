@@ -97,6 +97,10 @@ SELECT
 							WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1), 0)
 	,PCO.strCountry AS strPOrigin
 	,SCO.strCountry AS strSOrigin
+	,ALH.intBookId
+	,BO.strBook
+	,ALH.intSubBookId
+	,SB.strSubBook
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
@@ -137,3 +141,5 @@ LEFT JOIN tblICItemUOM SPU ON SPU.intItemUOMId = SCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U4 ON U4.intUnitMeasureId = SPU.intUnitMeasureId
 LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate SFR ON SFR.intFreightRateId = SCT.intFreightRateId
+LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId

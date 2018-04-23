@@ -6,6 +6,7 @@
     [strFieldName]     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strSourceData]    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strTargetData]    NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyId]	   INT            NULL,
     [intConcurrencyId] INT            NOT NULL,
     CONSTRAINT [PK_tblARCustomerFieldXRef] PRIMARY KEY CLUSTERED ([intFieldXRefId] ASC)
 );

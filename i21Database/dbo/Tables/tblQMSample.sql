@@ -2,6 +2,7 @@
 (
 	[intSampleId] INT NOT NULL IDENTITY, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMSample_intConcurrencyId] DEFAULT 0, 
+	intCompanyId INT NULL,
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intParentSampleId] INT, 
@@ -54,6 +55,8 @@
 	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
 	ysnAdjustInventoryQtyBySampleQty BIT CONSTRAINT [DF_tblQMSample_ysnAdjustInventoryQtyBySampleQty] DEFAULT 0,
 	intStorageLocationId INT,
+	intBookId INT,
+	intSubBookId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),

@@ -588,6 +588,27 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
+DECLARE @InvoiceIds TABLE(
+	id  	INT
+)
+INSERT INTO @InvoiceIds(id)
+SELECT distinct intInvoiceId FROM @PostInvoiceData
+
+WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds ORDER BY id)
+BEGIN				
+	DECLARE @InvoiceId1 INT
+				
+	SELECT TOP 1 @InvoiceId1 = id FROM @InvoiceIds ORDER BY id
+
+	EXEC [dbo].[uspICPostStockReservation]
+		@intTransactionId		= @InvoiceId1
+		,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+		,@ysnPosted				= @post
+		
+	DELETE FROM @InvoiceIds WHERE id = @InvoiceId1
+END		 
+
+
 	
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -3273,7 +3294,7 @@ IF @post = 0
 					ON PID.intInvoiceId = ARID.intInvoiceId					
 			INNER JOIN
 				(SELECT intInvoiceId, intCompanyLocationId, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-					ON ARID.intInvoiceId = ARI.intInvoiceId	AND strTransactionType IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')				 	
+					ON ARID.intInvoiceId = ARI.intInvoiceId	AND strTransactionType IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
 			INNER JOIN
 				(SELECT intItemUOMId FROM dbo.tblICItemUOM WITH (NOLOCK) ) ItemUOM 
 					ON ItemUOM.intItemUOMId = ARID.intItemUOMId
@@ -3625,6 +3646,33 @@ IF @recap = 0
 																												
 							END 							
 								
+
+							/* UNPOST Cash Refund here */
+
+							DECLARE @idInvoiceUnpost TABLE(
+							id INT
+							)
+							INSERT INTO @idInvoiceUnpost(id)
+							SELECT intInvoiceId FROM @PostInvoiceData WHERE strTransactionType = 'Cash Refund'
+
+							DECLARE @curIdInvoiceUnpost INT
+							WHILE EXISTS(SELECT TOP 1 1 FROM @idInvoiceUnpost)
+								BEGIN
+									SELECT TOP 1 @curIdInvoiceUnpost = id FROM @idInvoiceUnpost
+									DECLARE @Paymentid INT
+								
+									SELECT DISTINCT @Paymentid = intPaymentId FROM tblARPaymentDetail WHERE intInvoiceId = @curIdInvoiceUnpost
+
+									DECLARE @strNewPaymentIdUnpost AS VARCHAR(MAX)
+									SET @strNewPaymentIdUnpost = CAST(@Paymentid AS VARCHAR(MAX))
+
+									EXEC uspARPostPayment @post=0,@recap=0,@param = @strNewPaymentIdUnpost
+
+									DELETE FROM tblARPayment WHERE intPaymentId = @Paymentid and ysnPosted = 0
+									DELETE FROM @idInvoiceUnpost where id = @curIdInvoiceUnpost
+								END
+
+							/* END UNPOST CASH REFUND*/
 																
 					END TRY
 					BEGIN CATCH
@@ -3639,8 +3687,8 @@ IF @recap = 0
 					UPDATE ARI						
 					SET
 						 ARI.ysnPosted					= 1
-						,ARI.ysnPaid					= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.dblAmountDue = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
-						,ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+						,ARI.ysnPaid					= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.dblAmountDue = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
+						,ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash') 
 																THEN @ZeroDecimal
 																ELSE (CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 																		   THEN 
@@ -3651,7 +3699,7 @@ IF @recap = 0
 																		   ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
 																	  END) 
 														   END)
-						,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+						,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') 
 																THEN @ZeroDecimal 
 																ELSE (CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 																		   THEN 
@@ -3668,8 +3716,8 @@ IF @recap = 0
 						,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
 						,ARI.dblInterest				= @ZeroDecimal
 						,ARI.dblBaseInterest			= @ZeroDecimal
-						,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
-						,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
+						,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+						,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
 					FROM
@@ -3759,13 +3807,94 @@ IF @recap = 0
 						)
 						INSERT INTO @idInvoice(id)
 						select intInvoiceId From @PostInvoiceData
+
 						DECLARE @curIdInvoice INT
 						WHILE EXISTS(SELECT TOP 1 1 FROM @idInvoice)
-						BEGIN
-							SELECT TOP 1 @curIdInvoice = id FROM @idInvoice
+							BEGIN
+								SELECT TOP 1 @curIdInvoice = id FROM @idInvoice
 								EXEC uspARCreateRCVForCreditMemo 					
-									@intInvoiceId = @curIdInvoice,
-									@intUserId = @userId
+										 @intInvoiceId = @curIdInvoice,
+										 @intUserId = @userId								
+
+								IF EXISTS(SELECT 1 FROM tblARInvoice WHERE intInvoiceId = @curIdInvoice AND strTransactionType = 'Cash Refund')
+									BEGIN
+													--create payment entry
+										DECLARE  @_EntityCustomerId		INT
+												,@_CompanyLocationId	INT
+												,@_CurrencyId			INT				= NULL
+												,@_DatePaid				DATETIME
+												,@_BankAccountId		INT				= NULL
+												,@_AmountPaid			NUMERIC(18,6)	= 0.000000
+												,@_PaymentMethodId		INT
+												,@_PaymentInfo			NVARCHAR(50)	= NULL
+												,@_Notes				NVARCHAR(250)	= ''
+												,@_EntityId				INT
+												,@_RaiseError			BIT				= 0
+												,@_ErrorMessage			NVARCHAR(250)	= NULL		
+												,@_NewPaymentId			INT				= NULL		
+												,@_InvoiceId			INT				= NULL
+												,@_Payment				NUMERIC(18,6)	= 0.000000
+												,@AR_AccountId			INT				= NULL
+
+										SELECT TOP 1 @_EntityCustomerId = I.intEntityCustomerId
+												,@_CompanyLocationId = I.intCompanyLocationId
+												,@_DatePaid = GETDATE()
+												,@_AmountPaid = I.dblInvoiceTotal *-1
+												,@_EntityId = I.intEntityId
+												,@_Payment = I.dblInvoiceTotal *-1
+												,@_InvoiceId = I.intInvoiceId
+										FROM tblARInvoice I
+										INNER JOIN @idInvoice PID
+											ON PID.id = I.intInvoiceId
+										WHERE I.strTransactionType = 'Cash Refund'
+
+										SELECT @_BankAccountId = intBankAccountId
+											  ,@AR_AccountId = intARAccount 
+										FROM tblSMCompanyLocation A
+										INNER JOIN tblCMBankAccount B
+											ON intGLAccountId = intCashAccount
+										WHERE A.intCompanyLocationId = @_CompanyLocationId
+
+										--CREATE PAYMENT
+										SELECT @AR_AccountId ACcountiD
+										EXEC uspARCreateCustomerPayment 
+											 @EntityCustomerId	= @_EntityCustomerId
+											,@CompanyLocationId	= @_CompanyLocationId
+											,@CurrencyId		= NULL
+											,@DatePaid			= @_DatePaid
+											,@AccountId			= @AR_AccountId
+											,@BankAccountId		= @_BankAccountId
+											,@AmountPaid		= @_AmountPaid
+											,@PaymentMethodId	= 5
+											,@PaymentInfo		= NULL
+											,@ApplytoBudget		= 0
+											,@ApplyOnAccount	= 0
+											,@Notes				= ''
+											,@EntityId			= @_EntityId
+											,@AllowPrepayment	= 0
+											,@AllowOverpayment	= 0
+											,@RaiseError		= 0
+											,@ErrorMessage		= NULL
+											,@NewPaymentId		= @_NewPaymentId OUTPUT
+											,@InvoiceId			= @_InvoiceId
+											,@Payment			= @_Payment
+											,@ApplyTermDiscount	= 1
+											,@Discount			= 0.000000	
+											,@Interest			= 0.000000			
+											,@InvoicePrepayment	= 0
+											,@WriteOffAccountId	= NULL 
+											,@PaymentOriginalId	= NULL		
+											,@UseOriginalIdAsPaymentNumber = 0	
+										--POST PAYMENT
+										IF(ISNULL(@_NewPaymentId,0) != 0)
+											BEGIN
+												DECLARE @strNewPaymentId AS VARCHAR(MAX)
+												SET @strNewPaymentId = CAST(@_NewPaymentId AS VARCHAR(MAX))
+												EXEC uspARPostPayment @post=1,@recap=0,@param = @strNewPaymentId--, @bankAccountId = @_BankAccountId
+											END
+
+
+									END															
 							DELETE FROM @idInvoice where id = @curIdInvoice
 						END
 																
@@ -3870,7 +3999,7 @@ IF @post = 0
 	BEGIN
 		UPDATE ARI
 		SET
-			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') 
 									THEN @ZeroDecimal 
 									ELSE 
 										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WITH(NOLOCK) WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
@@ -3885,7 +4014,7 @@ IF @post = 0
 		SET
 			ARI.ysnPosted				= 0
 			,ARI.ysnPaid				= 0
-			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 			,ARI.dblDiscount			= @ZeroDecimal
 			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
 			,ARI.dblInterest			= @ZeroDecimal
@@ -3904,7 +4033,7 @@ ELSE
 	BEGIN
 		UPDATE ARI
 		SET
-			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) 
+			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') 
 									THEN @ZeroDecimal 
 									ELSE 
 										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
@@ -3920,9 +4049,9 @@ ELSE
 		UPDATE ARI						
 		SET
 			ARI.ysnPosted				= 1
-			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash', 'Cash Refund' ) OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
+			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
 			,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
-			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 			,ARI.dblDiscount			= @ZeroDecimal
 			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
 			,ARI.dblInterest			= @ZeroDecimal			
@@ -3934,6 +4063,7 @@ ELSE
 			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate,intConcurrencyId,
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
+
 				ON PID.intInvoiceId = ARI.intInvoiceId 	
 	END
 

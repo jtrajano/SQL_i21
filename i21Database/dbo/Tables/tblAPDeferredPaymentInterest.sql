@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAPDeferredPaymentInterest]
 (
 	[intDeferredPaymentInterestId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
+    [intCompanyId] INT NULL,
     [dtmCalculationDate] DATETIME NULL, 
     [dtmPaymentPostDate] DATETIME NULL, 
     [dtmPaymentInvoiceDate] DATETIME NULL, 

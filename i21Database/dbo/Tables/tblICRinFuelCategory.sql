@@ -17,6 +17,7 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strEquivalenceValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL, 
 		CONSTRAINT [PK_tblICRinFuelCategory] PRIMARY KEY ([intRinFuelCategoryId]), 
 		CONSTRAINT [AK_tblICRinFuelCategory_strRinFuelCategoryCode] UNIQUE ([strRinFuelCategoryCode])

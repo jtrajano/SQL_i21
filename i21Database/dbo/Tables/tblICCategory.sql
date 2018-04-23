@@ -48,6 +48,7 @@ Type the overview for the table here.
 		[ysnSellable] BIT NULL DEFAULT ((0)), 
 		[ysnYieldAdjustment] BIT NULL DEFAULT ((0)), 
 		[ysnWarehouseTracked] BIT NULL DEFAULT((0)),
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
 		CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 

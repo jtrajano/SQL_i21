@@ -90,6 +90,10 @@ BEGIN
 				ELSE NULL
 				END
 			) AS strRefNo
+		,C.intBookId
+		,C.strBook
+		,C.intSubBookId
+		,C.strSubBook
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
 	WHERE C.intContractDetailId = @intProductValueId
@@ -137,6 +141,10 @@ BEGIN
 				ELSE NULL
 				END
 			) AS strRefNo
+		,C.intBookId
+		,C.strBook
+		,C.intSubBookId
+		,C.strSubBook
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -180,6 +188,10 @@ BEGIN
 				ELSE NULL
 				END
 			) AS strRefNo
+		,C.intBookId
+		,C.strBook
+		,C.intSubBookId
+		,C.strSubBook
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'

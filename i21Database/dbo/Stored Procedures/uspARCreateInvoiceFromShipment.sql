@@ -162,10 +162,12 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[intItemUOMId]
 	,[intPriceUOMId]
 	,[dblQtyShipped]
+	,[dblContractPriceUOMQty]
 	,[dblDiscount]
 	,[dblItemWeight]
 	,[intItemWeightUOMId]
 	,[dblPrice]
+	,[dblUnitPrice]
 	,[strPricing]
 	,[ysnRefreshPrice]
 	,[strMaintenanceType]
@@ -272,11 +274,13 @@ SELECT
 	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
 	,[intPriceUOMId]						= ARSI.[intPriceUOMId]
-	,[dblQtyShipped]						= ARSI.[dblQtyShipped] 
+	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
+	,[dblContractPriceUOMQty]				= ARSI.[dblPriceUOMQuantity]
 	,[dblDiscount]							= ARSI.[dblDiscount] 
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-	,[dblPrice]								= ARSI.[dblShipmentUnitPrice] 
+	,[dblPrice]								= ARSI.[dblUnitPrice]
+	,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice] 
 	,[strPricing]							= ARSI.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
@@ -392,10 +396,12 @@ SELECT
 	,[intItemUOMId]							= NULL
 	,[intPriceUOMId]						= NULL
 	,[dblQtyShipped]						= @ZeroDecimal
+	,[dblContractPriceUOMQty]				= @ZeroDecimal
 	,[dblDiscount]							= @ZeroDecimal
 	,[dblItemWeight]						= @ZeroDecimal
 	,[intItemWeightUOMId]					= @ZeroDecimal
 	,[dblPrice]								= @ZeroDecimal
+	,[dblUnitPrice]							= @ZeroDecimal
 	,[strPricing]							= SOD.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
@@ -518,10 +524,12 @@ SELECT
 	,[intPriceUOMId]						= ICISI.intPriceUOMId
 	--,[dblQtyShipped]						= (CASE WHEN ISNULL(ICISI.dblDestinationQuantity,0) = 0 THEN ISNULL(ICISI.dblQuantity,0) ELSE ICISI.dblDestinationQuantity END)
 	,[dblQtyShipped]						= ISNULL(ICISI.dblQuantity,0)
+	,[dblContractPriceUOMQty]				= ISNULL(ICISI.dblQuantity,0)
 	,[dblDiscount]							= @ZeroDecimal
 	,[dblItemWeight]						= @ZeroDecimal
 	,[intItemWeightUOMId]					= @ZeroDecimal
 	,[dblPrice]								= ICISI.dblUnitPrice
+	,[dblUnitPrice]							= ICISI.dblUnitPrice
 	,[strPricing]							= 'Inventory Shipment'
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL

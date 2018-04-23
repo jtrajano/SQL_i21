@@ -46,8 +46,10 @@ SELECT id							= NEWID()
 	 , dblShipmentQuantity			= SHIPPEDITEMS.dblShipmentQuantity
 	 , dblShipmentQtyShippedTotal	= SHIPPEDITEMS.dblShipmentQtyShippedTotal
 	 , dblQtyRemaining				= SHIPPEDITEMS.dblQtyRemaining
+	 , dblPriceUOMQuantity			= SHIPPEDITEMS.dblPriceUOMQuantity
 	 , dblDiscount					= SHIPPEDITEMS.dblDiscount
 	 , dblPrice						= SHIPPEDITEMS.dblPrice
+	 , dblUnitPrice					= SHIPPEDITEMS.dblPrice
 	 , dblShipmentUnitPrice			= SHIPPEDITEMS.dblShipmentUnitPrice
 	 , strPricing					= SHIPPEDITEMS.strPricing
 	 , strVFDDocumentNumber			= SHIPPEDITEMS.strVFDDocumentNumber
@@ -95,6 +97,10 @@ SELECT id							= NEWID()
 	 , intSubCurrencyId				= SHIPPEDITEMS.intSubCurrencyId
 	 , dblSubCurrencyRate			= ISNULL(ISNULL(SHIPPEDITEMS.dblSubCurrencyRate, CAST(CURRENCY.intCent AS NUMERIC(18,6))), 1.000000)
 	 , strSubCurrency				= CURRENCY.strCurrency
+	 , intBookId					= SHIPPEDITEMS.intBookId
+	 , intSubBookId					= SHIPPEDITEMS.intSubBookId
+	 , strBook						= BOOK.strBook
+	 , strSubBook					= SUBBOOK.strSubBook
 FROM (
 	SELECT strTransactionType				= 'Inventory Shipment'
 		 , strTransactionNumber				= SHP.strShipmentNumber
@@ -124,7 +130,7 @@ FROM (
 		 , intItemId						= SOD.intItemId	
 		 , strItemDescription				= SOD.strItemDescription
 		 , intItemUOMId						= SHP.intItemUOMId
-		 , intPriceUOMId					= SHP.intPriceUOMId
+		 , intPriceUOMId					= SOD.intPriceUOMId
 		 , intOrderUOMId					= SOD.intItemUOMId
 		 , intShipmentItemUOMId				= SHP.intItemUOMId
 		 , intWeightUOMId					= SHP.intWeightUOMId
@@ -134,9 +140,11 @@ FROM (
 		 , dblShipmentQuantity				= SHP.dblQuantity	
 		 , dblShipmentQtyShippedTotal		= SHP.dblQuantity
 		 , dblQtyRemaining					= SHP.dblQuantity - ISNULL(INVOICEDETAIL.dblQtyShipped, 0)
+		 , dblPriceUOMQuantity				= SOD.dblUnitQuantity
 		 , dblDiscount						= SOD.dblDiscount 
 		 , dblPrice							= CAST(SOD.dblPrice AS DECIMAL(18,6))
-		 , dblShipmentUnitPrice				= CAST(SHP.dblUnitPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
+		 , dblShipmentUnitPrice				= CAST(SOD.dblUnitPrice AS DECIMAL(18,6))
 		 , strPricing						= SOD.strPricing
 		 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
 		 , dblTotalTax						= SOD.dblTotalTax
@@ -169,6 +177,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= SHP.dblForexRate
 		 , intSubCurrencyId					= SOD.intSubCurrencyId
 		 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	INNER JOIN (
 		SELECT *
@@ -280,17 +290,19 @@ FROM (
 	     , strItemDescription				= NULL
 	     , intItemUOMId						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
 		 , intPriceUOMId					= ICISI.intPriceUOMId
-	     , intOrderUOMId					= NULL--CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
+	     , intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
 	     , dblQtyShipped					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END
-	     , dblQtyOrdered					= 0.000000 --CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
+	     , dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
 	     , dblShipmentQuantity				= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblShipmentQtyShippedTotal		= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE ISNULL(ICISI.dblQuantity,0) END
 	     , dblQtyRemaining					= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) - ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ICISI.dblQuantity,0) - ISNULL(ID.dblQtyShipped, 0) END
+		 , dblPriceUOMQuantity				= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblPriceUOMQuantity ELSE (CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END) END
 	     , dblDiscount						= 0.000000 
 	     , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST((CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
@@ -324,6 +336,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= ICISI.dblForexRate
 	     , intSubCurrencyId					= NULL
 	     , dblSubCurrencyRate				= 1
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -406,9 +420,11 @@ FROM (
 			 , strUnitMeasure
 			 , intOrderUOMId
 			 , intItemUOMId
+			 , intPriceItemUOMId
 			 , strOrderUnitMeasure
 			 , intItemWeightUOMId
 			 , dblCashPrice
+			 , dblUnitPrice
 			 , dblDetailQuantity
 			 , intFreightTermId
 			 , dblShipQuantity
@@ -418,6 +434,9 @@ FROM (
 			 , strCurrencyExchangeRateType
 			 , intCurrencyExchangeRateId
 			 , dblCurrencyExchangeRate
+			 , dblPriceUOMQuantity
+			 , intBookId
+			 , intSubBookId
 		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
@@ -480,8 +499,10 @@ FROM (
 		 , dblShipmentQuantity				= 1
 		 , dblShipmentQtyShippedTotal		= 1
 		 , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST(ICISC.dblAmount AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(ICISC.dblAmount AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(ICISC.dblAmount AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -515,6 +536,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ICISC.dblForexRate
 		 , intSubCurrencyId					= NULL
 		 , dblSubCurrencyRate				= 1
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -566,7 +589,7 @@ FROM (
 		 , intItemId						= MFG.intItemId
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= MFG.intItemUOMId
-		 , intPriceUOMId					= NULL
+		 , intPriceUOMId					= MFG.intItemUOMId
 		 , intOrderUOMId					= MFG.intItemUOMId
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
 		 , intWeightUOMId					= NULL
@@ -576,8 +599,10 @@ FROM (
 		 , dblShipmentQuantity				= MFG.dblQuantity
 		 , dblShipmentQtyShippedTotal		= MFG.dblQuantity
 		 , dblQtyRemaining					= MFG.dblQuantity
+		 , dblPriceUOMQuantity				= MFG.dblQuantity
 		 , dblDiscount						= 0.00
 		 , dblPrice							= CAST(MFG.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -611,6 +636,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 		 , intSubCurrencyId					= NULL
 		 , dblSubCurrencyRate				= 1
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(0, SO.intSalesOrderId) MFG
 	LEFT OUTER JOIN (
@@ -672,7 +699,7 @@ FROM (
 		 , intItemId						= MFG.intItemId	
 		 , strItemDescription				= NULL
 		 , intItemUOMId						= MFG.intItemUOMId
-		 , intPriceUOMId					= NULL
+		 , intPriceUOMId					= MFG.intItemUOMId
 		 , intOrderUOMId					= NULL		
 		 , intShipmentItemUOMId				= MFG.intItemUOMId
 		 , intWeightUOMId					= NULL
@@ -682,8 +709,10 @@ FROM (
 		 , dblShipmentQuantity				= MFG.dblQuantity
 		 , dblShipmentQtyShippedTotal		= MFG.dblQuantity
 		 , dblQtyRemaining					= MFG.dblQuantity
+		 , dblPriceUOMQuantity				= MFG.dblQuantity
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST(MFG.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(MFG.dblPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -717,6 +746,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ICISI.dblForexRate
 		 , intSubCurrencyId					= ICISI.intCurrencyId
 		 , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(ICISI.intInventoryShipmentItemId, 0) MFG	
 	INNER JOIN (
@@ -784,8 +815,10 @@ FROM (
 		 , dblShipmentQuantity				= dblShipmentQuantity
 		 , dblShipmentQtyShippedTotal		= dblShipmentQtyShippedTotal
 		 , dblQtyRemaining					= dblQtyRemaining
+		 , dblPriceUOMQuantity				= dblNetWt
 	     , dblDiscount						= dblDiscount
 	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
@@ -819,6 +852,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= dblCurrencyExchangeRate
 	     , intSubCurrencyId					= intSubCurrencyId
 	     , dblSubCurrencyRate				= dblSubCurrencyRate
+		 , intBookId						= intBookId
+		 , intSubBookId						= intSubBookId
 	FROM 
 		vyuLGLoadScheduleForInvoice
 	 
@@ -862,8 +897,10 @@ FROM (
 	     , dblShipmentQuantity				= 1 
 	     , dblShipmentQtyShippedTotal		= 1
 	     , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 	     , dblDiscount						= 0
 	     , dblPrice							= CAST(LWS.dblPrice AS DECIMAL(18,6))
+		 , dblUnitPrice						= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
@@ -897,6 +934,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 	     , intSubCurrencyId					= LWS.intCurrencyId
 	     , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM (
 		SELECT intLoadDetailId
 			 , intCurrencyId
@@ -976,8 +1015,10 @@ FROM (
 	     , dblShipmentQuantity				= 1 
 	     , dblShipmentQtyShippedTotal		= 1
 	     , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 	     , dblDiscount						= 0
 	     , dblPrice							= CAST(LC.dblPrice AS DECIMAL(18,6))
+		 , dblPrice							= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
@@ -1011,6 +1052,8 @@ FROM (
 	     , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 	     , intSubCurrencyId					= LC.intCurrencyId
 	     , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM (
 		SELECT intLoadId
 		     , intLoadDetailId
@@ -1098,8 +1141,10 @@ FROM (
 		 , dblShipmentQuantity				= 1 
 		 , dblShipmentQtyShippedTotal		= 1
 		 , dblQtyRemaining					= 1
+		 , dblPriceUOMQuantity				= 1
 		 , dblDiscount						= 0
 		 , dblPrice							= CAST(LC.dblPrice AS DECIMAL(18,6))
+		 , dblPrice							= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 		 , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
@@ -1133,6 +1178,8 @@ FROM (
 		 , dblCurrencyExchangeRate			= ARID.dblCurrencyExchangeRate
 		 , intSubCurrencyId					= LC.intCurrencyId
 		 , dblSubCurrencyRate				= NULL
+		 , intBookId						= NULL
+		 , intSubBookId						= NULL
 	FROM (
 		SELECT intLoadId
 			 , intLoadDetailId
@@ -1327,6 +1374,16 @@ LEFT OUTER JOIN (
 	SELECT *
 	FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
 ) CURRENCYERT ON SHIPPEDITEMS.intCurrencyExchangeRateTypeId = CURRENCYERT.intCurrencyExchangeRateTypeId
+LEFT OUTER JOIN (
+	SELECT intBookId
+		 , strBook 
+	FROM dbo.tblCTBook WITH (NOLOCK)
+) BOOK ON BOOK.intBookId = SHIPPEDITEMS.intBookId
+LEFT OUTER JOIN (
+	SELECT intSubBookId
+		 , strSubBook
+	FROM dbo.tblCTSubBook WITH (NOLOCK)
+) SUBBOOK ON SUBBOOK.intSubBookId = SHIPPEDITEMS.intSubBookId
 OUTER APPLY (
 	SELECT TOP 1 intDefaultCurrencyId 
 	FROM dbo.tblSMCompanyPreference WITH (NOLOCK) 

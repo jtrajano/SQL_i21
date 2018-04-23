@@ -2,7 +2,7 @@
 AS 
 SELECT DISTINCT
 	  intEntityId			= CUSTOMER.intEntityId
-	, strCustomerNumber		= entityToCustomer.strEntityNo --CUSTOMER.strCustomerNumber
+	, strCustomerNumber		= entityToCustomer.strEntityNo
 	, strName				= entityToCustomer.strName
 	, strPhone				= entityPhone.strPhone
 	, strSalesPersonName	= entityToSalesperson.strName
@@ -56,6 +56,7 @@ SELECT DISTINCT
 	, strFreightTerm		= fTerms.strFreightTerm
 	, intShipViaId			= custLocation.intShipViaId
 	, strShipViaName		= shipVia.strShipVia
+	, strInternalNotes		= entityToCustomer.strInternalNotes
 	, ysnPORequired			= ISNULL(CUSTOMER.ysnPORequired, CAST(0 AS BIT))
 	, intCreditStopDays		= CUSTOMER.intCreditStopDays
 	, strCreditCode			= CUSTOMER.strCreditCode

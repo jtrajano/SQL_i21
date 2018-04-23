@@ -7,6 +7,7 @@
 	[intItemUOMId]					INT	NULL,
     [dblQuantity]					NUMERIC (18, 6) NULL,
 	[dblUnitQuantity]				NUMERIC (18, 6) NULL,
+	[intCompanyId]					INT NULL,
     [intConcurrencyId]				INT CONSTRAINT [DF_tblARInvoiceDetailComponent_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARInvoiceDetailComponent_intInvoiceDetailComponentId] PRIMARY KEY CLUSTERED ([intInvoiceDetailComponentId] ASC)
 )

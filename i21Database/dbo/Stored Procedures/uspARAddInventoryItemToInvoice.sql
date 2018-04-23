@@ -8,11 +8,12 @@
 	,@RaiseError					BIT				= 0	
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL		
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@OrderUOMId					INT				= NULL
-	,@PriceUOMId					INT				= NULL
+	,@ItemOrderUOMId				INT				= NULL
+	,@ItemPriceUOMId				INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
+	,@ItemUnitQuantity				NUMERIC(18,6)	= 1.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
@@ -126,6 +127,16 @@ FROM
 	tblARInvoice
 WHERE
 	intInvoiceId = @InvoiceId
+
+
+IF @ItemPriceUOMId IS NULL
+BEGIN
+	SET @ItemPriceUOMId		= @ItemUOMId
+	SET @ItemUnitQuantity	= 1.000000
+END
+
+SET @ItemCurrencyExchangeRate = CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemCurrencyExchangeRate, 1.000000) END
+SET @ItemSubCurrencyId = CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemSubCurrencyRate, 1.000000) END
 	
 	
 IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
@@ -179,32 +190,46 @@ BEGIN
 END
 	
 	
-DECLARE  @ContractNumber	NVARCHAR(50)
-		,@ContractSeq		INT
-		,@InvoiceType		NVARCHAR(200)
-		,@TermId			INT
-		,@Pricing			NVARCHAR(250)	= NULL
-		,@ContractHeaderId	INT				= NULL
-		,@ContractDetailId	INT				= NULL
-		,@SpecialPrice		NUMERIC(18,6)	= 0.000000	
+DECLARE  @ContractNumber				NVARCHAR(50)
+		,@ContractSeq					INT
+		,@InvoiceType					NVARCHAR(200)
+		,@TermId						INT
+		,@Pricing						NVARCHAR(250)	= NULL
+		,@ContractHeaderId				INT				= NULL
+		,@ContractDetailId				INT				= NULL
+		,@SpecialPrice					NUMERIC(18,6)	= 0.000000
+		,@ContractUOMId					INT
+		,@PriceUOMId					INT
+		,@PriceUOMQuantity				NUMERIC(18,6)	= 1.000000
+		,@CurrencyExchangeRateTypeId	INT
+		,@CurrencyExchangeRate			NUMERIC(18,6)
+		,@SubCurrencyId					INT
+		,@SubCurrencyRate				NUMERIC(18,6)
 
 BEGIN TRY
 SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 EXEC dbo.[uspARGetItemPrice]  
-		@ItemId					= @ItemId
-	,@CustomerId				= @EntityCustomerId
-	,@LocationId				= @CompanyLocationId
-	,@ItemUOMId					= @ItemUOMId
-	,@TransactionDate			= @InvoiceDate
-	,@Quantity					= @ItemQtyShipped
-	,@Price						= @SpecialPrice			OUTPUT
-	,@Pricing					= @Pricing				OUTPUT
-	,@ContractHeaderId			= @ContractHeaderId		OUTPUT
-	,@ContractDetailId			= @ContractDetailId		OUTPUT
-	,@ContractNumber			= @ContractNumber		OUTPUT
-	,@ContractSeq				= @ContractSeq			OUTPUT
-	,@TermDiscount				= @ItemTermDiscount		OUTPUT
-	,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
+		 @ItemId						= @ItemId
+		,@CustomerId					= @EntityCustomerId
+		,@LocationId					= @CompanyLocationId
+		,@ItemUOMId						= @ItemUOMId
+		,@TransactionDate				= @InvoiceDate
+		,@Quantity						= @ItemQtyShipped
+		,@Price							= @SpecialPrice					OUTPUT
+		,@Pricing						= @Pricing						OUTPUT
+		,@ContractHeaderId				= @ContractHeaderId				OUTPUT
+		,@ContractDetailId				= @ContractDetailId				OUTPUT
+		,@ContractNumber				= @ContractNumber				OUTPUT
+		,@ContractSeq					= @ContractSeq					OUTPUT
+		,@TermDiscount					= @ItemTermDiscount				OUTPUT
+		,@TermDiscountBy				= @ItemTermDiscountBy			OUTPUT
+		,@ContractUOMId					= @ContractUOMId				OUTPUT
+		,@PriceUOMId					= @PriceUOMId					OUTPUT
+		,@PriceUOMQuantity				= @PriceUOMQuantity				OUTPUT
+		,@CurrencyExchangeRateTypeId	= @CurrencyExchangeRateTypeId	OUTPUT
+		,@CurrencyExchangeRate			= @CurrencyExchangeRate			OUTPUT
+		,@SubCurrencyId					= @SubCurrencyId				OUTPUT
+		,@SubCurrencyRate				= @SubCurrencyRate				OUTPUT
 	--,@AvailableQuantity			= NULL OUTPUT
 	--,@UnlimitedQuantity			= 0    OUTPUT
 	--,@OriginalQuantity			= NULL
@@ -227,6 +252,18 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 		SET @ItemPricing = @Pricing
 		SET @ItemContractHeaderId = @ContractHeaderId
 		SET @ItemContractDetailId = @ContractDetailId
+		IF ISNULL(@ContractDetailId,0) <> 0
+		BEGIN
+			SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
+			SET @ItemPriceUOMId					= @PriceUOMId
+			SET @ItemUOMId						= @ContractUOMId
+			SET @ItemOrderUOMId					= @ContractUOMId
+			SET @ItemUnitQuantity				= ISNULL(@PriceUOMQuantity, 1.000000)
+			SET @ItemCurrencyExchangeRateTypeId	= @CurrencyExchangeRateTypeId
+			SET @ItemCurrencyExchangeRate		= ISNULL(@CurrencyExchangeRate, 1.000000)
+			SET @ItemSubCurrencyId				= @SubCurrencyId
+			SET @ItemSubCurrencyRate			= ISNULL(@SubCurrencyRate, 1.000000)
+		END
 	END
 		
 END TRY
@@ -266,6 +303,7 @@ BEGIN TRY
 				,[dblQtyOrdered]
 				,[intItemUOMId]
 				,[dblQtyShipped]
+				,[dblUnitQuantity]
 				,[dblDiscount]
 				,[dblItemTermDiscount]
 				,[strItemTermDiscountBy]
@@ -346,11 +384,12 @@ BEGIN TRY
 				,[dblPrepayRate]					= @ItemPrepayRate
 				,[strDocumentNumber]				= @ItemDocumentNumber
 				,[strItemDescription]				= (CASE WHEN ISNULL(@ItemDescription, '') = '' THEN IC.[strDescription] ELSE ISNULL(@ItemDescription, '') END)
-				,[intOrderUOMId]					= @OrderUOMId
-				,[intPriceUOMId]					= @PriceUOMId
+				,[intOrderUOMId]					= @ItemOrderUOMId
+				,[intPriceUOMId]					= @ItemPriceUOMId
 				,[dblQtyOrdered]					= ISNULL(@ItemQtyOrdered, @ZeroDecimal)
 				,[intItemUOMId]						= ISNULL(ISNULL(@ItemUOMId, IL.intIssueUOMId), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = IC.[intItemId] ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
+				,[dblUnitQuantity]					= @ItemUnitQuantity
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
 				,[strItemTermDiscountBy]			= @ItemTermDiscountBy

@@ -27,6 +27,9 @@ DECLARE @ysnStrictTracking BIT
 	,@dblRequiredWeight NUMERIC(18, 6)
 	,@intTaskLotId INT
 	,@dtmDateCreated DATETIME
+	,@intOwnershipType INT
+
+SELECT @intOwnershipType = NULL
 
 SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -47,6 +50,7 @@ SELECT @ysnStrictTracking = i.ysnStrictFIFO
 			WHERE t.intOrderHeaderId = oh.intOrderHeaderId
 				AND t.intItemId = oli.intItemId
 			), 0)
+	,@intOwnershipType = intOwnershipType
 FROM tblMFOrderHeader oh
 JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -242,6 +246,7 @@ BEGIN
 				ELSE L.intLotId
 				END
 			)
+		AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
 	GROUP BY L.intLotId
 		,L.intItemId
 		,L.dblQty
@@ -474,6 +479,7 @@ BEGIN
 				ELSE L.intLotId
 				END
 			)
+		AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
 	GROUP BY L.intLotId
 		,L.intItemId
 		,L.dblQty

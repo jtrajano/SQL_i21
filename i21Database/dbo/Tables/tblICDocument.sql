@@ -21,6 +21,7 @@ Type the overview for the table here.
 		[intCertificationId] INT,
 		[intOriginal] INT,
 		[intCopies] INT,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [AK_tblICDocument_strDocumentName] UNIQUE ([strDocumentName],[intCommodityId]), 
 		CONSTRAINT [PK_tblICDocument] PRIMARY KEY ([intDocumentId]), 

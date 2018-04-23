@@ -1290,6 +1290,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Mark To Market')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 134
+			,[strTransactionType]	= N'Allocation Detail'
+			,[strPrefix]			= N'ALD-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Mark To Market')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

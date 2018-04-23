@@ -92,19 +92,20 @@ BEGIN
 	SELECT [intHeaderId], [ysnPost] FROM @InvoiceIds WHERE ISNULL([ysnFromPosting], 0 ) = 1
 
 	--AR-4146 TODO -- FOR IC - provide a version of [uspICPostStockReservation] that can handle multiple transactions
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsForPosting ORDER BY intInvoiceId)
-	BEGIN				
-		DECLARE @InvoiceId1 INT, @Post BIT;
+	--Moved this code before the validation of invoices
+	-- WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsForPosting ORDER BY intInvoiceId)
+	-- BEGIN				
+	-- 	DECLARE @InvoiceId1 INT, @Post BIT;
 					
-		SELECT TOP 1 @InvoiceId1 = intInvoiceId, @Post = ISNULL([ysnPost], 0) FROM @IdsForPosting ORDER BY intInvoiceId
+	-- 	SELECT TOP 1 @InvoiceId1 = intInvoiceId, @Post = ISNULL([ysnPost], 0) FROM @IdsForPosting ORDER BY intInvoiceId
 
-		EXEC [dbo].[uspICPostStockReservation]
-			 @intTransactionId		= @InvoiceId1
-			,@intTransactionTypeId	= @TransactionTypeId
-			,@ysnPosted				= @Post
+	-- 	EXEC [dbo].[uspICPostStockReservation]
+	-- 		 @intTransactionId		= @InvoiceId1
+	-- 		,@intTransactionTypeId	= @TransactionTypeId
+	-- 		,@ysnPosted				= @Post
 			
-		DELETE FROM @IdsForPosting WHERE intInvoiceId = @InvoiceId1
-	END		 
+	-- 	DELETE FROM @IdsForPosting WHERE intInvoiceId = @InvoiceId1
+	-- END		 
 END
 
 GO

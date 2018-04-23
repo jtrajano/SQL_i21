@@ -661,6 +661,26 @@ IF(@Exclude IS NOT NULL)
 	END
 	
 
+DECLARE @TempInvoiceIds TABLE(
+	id  	INT
+)
+INSERT INTO @TempInvoiceIds(id)
+SELECT distinct intInvoiceId FROM @PostInvoiceData
+
+WHILE EXISTS(SELECT TOP 1 NULL FROM @TempInvoiceIds ORDER BY id)
+BEGIN				
+	DECLARE @InvoiceId1 INT
+				
+	SELECT TOP 1 @InvoiceId1 = id FROM @TempInvoiceIds ORDER BY id
+
+	EXEC [dbo].[uspICPostStockReservation]
+		@intTransactionId		= @InvoiceId1
+		,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+		,@ysnPosted				= @Post
+		
+	DELETE FROM @TempInvoiceIds WHERE id = @InvoiceId1
+END		
+
 INSERT INTO @InvalidInvoiceData(
 	 [intInvoiceId]
 	,[strInvoiceNumber]
@@ -3561,12 +3581,12 @@ IF @Recap = 0
 			UPDATE CUSTOMER
 			SET dblARBalance = dblARBalance + (CASE WHEN @Post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-			INNER JOIN (SELECT intEntityId
-							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
+			INNER JOIN (SELECT intEntityCustomerId
+							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice', 'Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
-						GROUP BY intEntityId
-			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityId
+						GROUP BY intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 
 			--UPDATE BatchIds Used
 			UPDATE tblARInvoice 

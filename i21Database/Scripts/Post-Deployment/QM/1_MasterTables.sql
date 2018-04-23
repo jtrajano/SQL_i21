@@ -1185,3 +1185,8 @@ JOIN tblICLot L ON L.intLotId = S.intProductValueId
 WHERE S.intProductTypeId = 6
 	AND S.intStorageLocationId IS NULL
 GO
+
+UPDATE tblQMCompanyPreference
+SET ysnCaptureItemInProperty = 0
+WHERE ysnCaptureItemInProperty IS NULL
+GO

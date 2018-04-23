@@ -1420,6 +1420,12 @@ BEGIN
     VALUES(2,'By Percentage')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFRecipeType WHERE intRecipeTypeId = 3)
+BEGIN
+    INSERT INTO tblMFRecipeType(intRecipeTypeId,strName)
+    VALUES(3,'By Bulk')
+END
+GO
 Update tblMFRecipe Set intRecipeTypeId=1 Where intRecipeTypeId IS NULL
 GO
 
@@ -3408,4 +3414,8 @@ GO
 UPDATE tblMFCompanyPreference
 SET ysnSendEDIOnRepost = 1
 Where ysnSendEDIOnRepost IS NULL
+Go
+UPDATE tblMFCompanyPreference
+SET ysnGenerateTaskOnCreatePickOrder =0
+Where ysnGenerateTaskOnCreatePickOrder IS NULL
 Go

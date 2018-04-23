@@ -5,5 +5,6 @@
 	[intUserId] INT NOT NULL,
 	[strOperation] VARCHAR(50) NOT NULL,
 	[strRemarks] VARCHAR(200) NULL,
+	[intCompanyId] INT NULL, 
 	CONSTRAINT [PK_tblICBackup] PRIMARY KEY NONCLUSTERED ([intBackupId])
 )

@@ -47,11 +47,17 @@ SELECT DT.strContractNumber
 	,DT.dblQuantity
 	,DT.ysnInvoice
 	,CASE WHEN ISNULL(DT.ysnInvoice,0) = 0 THEN 'No' ELSE 'Yes' END strInvoice
+	,L.intBookId
+	,BO.strBook
+	,L.intSubBookId
+	,SB.strSubBook
 FROM vyuLGLoadDocumentTracking DT
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = DT.intContractHeaderId
 JOIN tblLGLoad L ON L.intLoadId = DT.intLoadId
 LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblEMEntity E ON E.intEntityId = CH.intProducerId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 WHERE L.intShipmentType = 1	
 GROUP BY DT.strContractNumber
 	,DT.intContractHeaderId
@@ -67,3 +73,7 @@ GROUP BY DT.strContractNumber
 	,DT.dblQuantity
 	,DT.ysnInvoice
 	,intDaysToETAPOD
+	,L.intBookId
+	,BO.strBook
+	,L.intSubBookId
+	,SB.strSubBook

@@ -43,8 +43,8 @@ BEGIN
 				(SELECT ISNULL(SUM(intNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intLFutOptTransactionId))
 				BEGIN				
 		
-					INSERT INTO tblRKAssignFuturesToContractSummaryHeader
-					SELECT 1 
+					INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId)
+					VALUES(1)
 					SET @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY()
 	
 			INSERT INTO tblRKAssignFuturesToContractSummary 

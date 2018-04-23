@@ -5,6 +5,7 @@
     [dtmDate] DATETIME NOT NULL DEFAULT (GETDATE()), 
     [strReadingNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intSort] INT NULL, 
+	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStorageMeasurementReading] PRIMARY KEY ([intStorageMeasurementReadingId]), 
     CONSTRAINT [FK_tblICStorageMeasurementReading_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 

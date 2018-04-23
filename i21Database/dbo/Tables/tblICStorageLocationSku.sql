@@ -22,6 +22,7 @@ Type the overview for the table here.
 		[intLotStatusId] INT NULL, 
 		[intOwnerId] INT NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageLocationSku] PRIMARY KEY ([intStorageLocationSkuId]), 
 		CONSTRAINT [FK_tblICStorageLocationSku_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 

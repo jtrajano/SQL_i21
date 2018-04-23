@@ -59,6 +59,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY ([intInventoryTransactionId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

@@ -5,7 +5,7 @@ BEGIN
 
 PRINT '*** ----  Start Fix Check Payee Name  ---- ***'
 
-	update tblEMEntityLocation set strCheckPayeeName = strLocationName where strCheckPayeeName is null
+	UPDATE tblEMEntityLocation SET strCheckPayeeName = strLocationName WHERE strCheckPayeeName IS NULL OR strCheckPayeeName = ''
 
 INSERT INTO [tblEMEntityPreferences] ( strPreference, strValue)
 	VALUES('Fix Check Payee Name', 1)

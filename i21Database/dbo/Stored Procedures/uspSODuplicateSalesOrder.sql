@@ -200,6 +200,9 @@ BEGIN
 				   ,[intTaxId]
 				   ,[dblPrice]
 				   ,[dblBasePrice]
+				   ,[dblUnitPrice]
+				   ,[dblBaseUnitPrice]
+				   ,[dblUnitQuantity]
 				   ,[strPricing]
 				   ,[dblTotalTax] 
 				   ,[dblBaseTotalTax] 
@@ -230,6 +233,11 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
+				   ,[dblLastCost]
+				   ,[dblPriceMargin]
+				   ,[dblMarginPercentage]
+				   ,[intVendorId]
+				   ,[intPurchaseOrderId]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -243,6 +251,9 @@ BEGIN
 				   ,[intTaxId]
 				   ,[dblPrice]
 				   ,[dblBasePrice]
+				   ,[dblUnitPrice]
+				   ,[dblBaseUnitPrice]
+				   ,[dblUnitQuantity]
 				   ,[strPricing]
 				   ,[dblTotalTax]
 				   ,[dblBaseTotalTax]
@@ -273,6 +284,11 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
+				   ,[dblLastCost]
+				   ,[dblPriceMargin]
+				   ,[dblMarginPercentage]
+				   ,[intVendorId]
+				   ,[intPurchaseOrderId]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

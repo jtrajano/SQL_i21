@@ -12,6 +12,9 @@
     [intUserSecurityId] INT NOT NULL, 	
 	[intDeliveryHeaderId] INT NULL,
 	[intParentPickLotHeaderId] INT NULL,
+	[intCompanyId] INT NULL,
+	[intBookId] INT NULL,
+	[intSubBookId] INT NULL,
 
     CONSTRAINT [PK_tblLGPickLotHeader_intPickLotHeaderId] PRIMARY KEY ([intPickLotHeaderId]), 
 	CONSTRAINT [UK_tblLGPickLotHeader_intReferenceNumber] UNIQUE ([strPickLotNumber]),
@@ -20,5 +23,7 @@
     CONSTRAINT [FK_tblLGPickLotHeader_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblLGPickLotHeader_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblLGPickLotHeader_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-    CONSTRAINT [FK_tblLGPickLotHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId])
+    CONSTRAINT [FK_tblLGPickLotHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
+	CONSTRAINT [FK_tblLGPickLotHeader_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+	CONSTRAINT [FK_tblLGPickLotHeader_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
 )

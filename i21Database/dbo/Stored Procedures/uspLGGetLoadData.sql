@@ -65,6 +65,8 @@ BEGIN
 				,DENSE_RANK() OVER (
 					ORDER BY L.intLoadId DESC
 					) intRankNo
+				,BO.strBook
+				,SB.strSubBook
 			FROM tblLGLoad L
 			LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 			LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -94,6 +96,8 @@ BEGIN
 			LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDespatchCurrencyId
 			LEFT JOIN tblICUnitMeasure LoadingUnit ON LoadingUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
 			LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
+			LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 			WHERE L.intLoadId IN (
 					SELECT *
 					FROM dbo.fnSplitString(@strLoadId, ',')
@@ -150,6 +154,8 @@ BEGIN
 			,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
 			,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
 			,Driver.strName AS strDriver
+			,BO.strBook
+			,SB.strSubBook
 		FROM tblLGLoad L
 		LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 		LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -179,6 +185,8 @@ BEGIN
 		LEFT JOIN tblSMCurrency DespatchCurrency ON DespatchCurrency.intCurrencyID = L.intDespatchCurrencyId
 		LEFT JOIN tblICUnitMeasure LoadingUnit ON LoadingUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
 		LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
+		LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 		WHERE L.strLoadNumber COLLATE Latin1_General_CI_AS IN (
 				SELECT *
 				FROM dbo.fnSplitString(@strLoadNumber, ',')

@@ -18,6 +18,7 @@
     [strSplitType]        NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strFieldMapFileName] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strDirections]       NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyId]		  INT             NULL,
     [intConcurrencyId]    INT            NOT NULL,
     CONSTRAINT [PK_tblARCustomerFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC),
 	CONSTRAINT [FK_tblARCustomerFarm_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),

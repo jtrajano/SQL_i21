@@ -18,15 +18,16 @@ SELECT intInventoryTransferId
 	, intToLocationId
 	, strToLocation = ToLocation.strLocationName
 	, ysnShipmentRequired
-	, Transfer.intStatusId
-	, Status.strStatus
+	, InvTransfer.intStatusId
+	, InvStatus.strStatus
 	, ysnPosted
-	, strUser = Transfer.intEntityId
+	, strUser = InvTransfer.intEntityId
 	, UserEntity.strName
-	, Transfer.intSort
-FROM tblICInventoryTransfer Transfer
-	LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = Transfer.intTransferredById
-	LEFT JOIN tblSMCompanyLocation FromLocation ON FromLocation.intCompanyLocationId = Transfer.intFromLocationId
-	LEFT JOIN tblSMCompanyLocation ToLocation ON ToLocation.intCompanyLocationId = Transfer.intToLocationId
-	LEFT JOIN tblICStatus Status ON Status.intStatusId = Transfer.intStatusId
-	LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = Transfer.intEntityId
+	, InvTransfer.intSort
+	, InvTransfer.intConcurrencyId
+FROM tblICInventoryTransfer InvTransfer
+	LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = InvTransfer.intTransferredById
+	LEFT JOIN tblSMCompanyLocation FromLocation ON FromLocation.intCompanyLocationId = InvTransfer.intFromLocationId
+	LEFT JOIN tblSMCompanyLocation ToLocation ON ToLocation.intCompanyLocationId = InvTransfer.intToLocationId
+	LEFT JOIN tblICStatus InvStatus ON InvStatus.intStatusId = InvTransfer.intStatusId
+	LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = InvTransfer.intEntityId

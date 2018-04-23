@@ -144,6 +144,7 @@ BEGIN
 			,intStorageLocationId
 			,intItemId
 			,intLotId
+			,intOwnershipType
 			,intLotStatusId
 			,intNewLotStatusId
 			,intSort
@@ -155,6 +156,7 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
+			,intOwnershipType			= Lot.intOwnershipType
 			,intLotStatusId				= Lot.intLotStatusId
 			,intNewLotStatusId			= @intNewLotStatusId
 			,intSort					= 1

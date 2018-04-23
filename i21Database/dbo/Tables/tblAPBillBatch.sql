@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAPBillBatch] (
     [intBillBatchId]     INT             IDENTITY (1, 1) NOT NULL,
     [intAccountId]       INT             NOT NULL,
+    [intCompanyId]				INT             NULL ,
     [ysnPosted]          BIT             DEFAULT ((0)) NULL,
 	[dtmBatchDate]		DATETIME NULL ,
     [strBillBatchNumber] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,

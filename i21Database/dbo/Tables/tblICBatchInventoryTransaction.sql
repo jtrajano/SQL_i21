@@ -55,6 +55,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		--[intCreatedUserId] INT NULL, 
 		[dtmCreated] DATETIME NULL DEFAULT GETDATE(), 
 		[intCreatedEntityId] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		CONSTRAINT [PK_tblICBatchInventoryTransaction] PRIMARY KEY ([intBatchInventoryTransactionId]),
 		CONSTRAINT [FK_tblICBatchInventoryTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

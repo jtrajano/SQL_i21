@@ -13,5 +13,6 @@
 	[dtmDateUpdated] DATETIME NULL,
 	[ysnComplete] BIT NULL,
 	[ysnDetail] BIT NULL,
+	[ysnReadyToTransfer] BIT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0
 )

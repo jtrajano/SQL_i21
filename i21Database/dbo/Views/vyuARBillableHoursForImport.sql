@@ -9,31 +9,30 @@ SELECT
 	,T.[strSubject]
 	,HW.[intTicketHoursWorkedId]
 	,HW.[intAgentEntityId]
-	,U.[strName]					AS "strAgentName"
-	,GETDATE()						AS	"dtmBilled"
+	,U.[strName]						AS "strAgentName"
+	,GETDATE()							AS	"dtmBilled"
 	,HW.[dtmDate]
 	,HW.[intInvoiceId] 
-	,JC.[intJobCodeId]
-	,JC.[strJobCode]
-	,ISNULL(EML.[intWarehouseId], ISNULL(JC.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)))
-									AS "intCompanyLocationId"
-	,JC.[intItemId]
-	,JC.[intItemUOMId] 
+	,intJobCodeId = IC.intItemId
+	,strJobCode = IC.strItemNo
+	,ISNULL(EML.[intWarehouseId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
+										AS "intCompanyLocationId"
+	,HW.[intItemId]
+	,HW.[intItemUOMId] 
 	,IC.[strItemNo]
 	,HW.[intHours]
-	,HW.[dblRate]					AS "dblPrice"
-	,HW.[intHours] * HW.[dblRate]	AS "dblTotal"
+	,HW.[dblRate]						AS "dblPrice"
+	,HW.[intHours] * HW.[dblRate]		AS "dblTotal"
+	,HW.[intCurrencyId]					AS "intCurrencyId"
+	,HW.[intCurrencyExchangeRateTypeId] AS "intCurrencyExchangeRateTypeId"
+	,HW.[dblCurrencyRate]				AS "dblCurrencyExchangeRate"
+	,HW.[intCurrencyId]					AS "intSubCurrencyId"
+	,HW.[dblCurrencyRate]				AS "dblSubCurrencyRate"
 FROM
-	tblHDJobCode JC
+	tblHDTicketHoursWorked HW
 INNER JOIN 
 	tblICItem IC
-		ON JC.[intItemId] = IC.[intItemId]	
-INNER JOIN
-	tblHDTicketHoursWorked HW
-		ON JC.[intJobCodeId] = HW.[intJobCodeId]
-		AND HW.[ysnBillable] = 1
-		AND HW.[ysnBilled] = 0
-		AND (HW.[intInvoiceId] IS NULL OR HW.[intInvoiceId] = 0)
+		ON HW.[intItemId] = IC.[intItemId]
 INNER JOIN
 	tblHDTicket T
 		ON HW.[intTicketId] = T.[intTicketId]
@@ -50,3 +49,7 @@ LEFT JOIN
 INNER JOIN
 	tblEMEntity U
 		ON HW.[intAgentEntityId] = U.[intEntityId]
+where
+	HW.[ysnBillable] = 1
+		AND HW.[ysnBilled] = 0
+		AND (HW.[intInvoiceId] IS NULL OR HW.[intInvoiceId] = 0)

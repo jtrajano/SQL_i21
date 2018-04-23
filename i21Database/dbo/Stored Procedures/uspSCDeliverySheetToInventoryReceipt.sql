@@ -34,10 +34,8 @@ DECLARE @ysnIsStorage AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
-DECLARE @intInventoryReceiptItemId AS INT
-		,@intOrderId INT
-		,@intOwnershipType INT
-		,@intPricingTypeId INT
+		,@intStorageScheduleTypeId INT
+		,@intInventoryReceiptItemId AS INT
 		,@intBillId AS INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
@@ -81,13 +79,13 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38, 20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -320,7 +318,7 @@ OPEN intListCursor;
 					END
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 		END;
 
 CLOSE intListCursor;

@@ -30,6 +30,11 @@ IF @strAsOfDateFrom <> ''
 
 SET @intEntityUserId			= NULLIF(@intEntityUserId, 0)
 
+IF @dtmAsOfDateFrom = @dtmAsOfDate
+BEGIN
+	set @dtmAsOfDate = dateadd(SECOND,-1,dateadd(day,1, @dtmAsOfDate))
+END
+
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
 	   strCustomerName

@@ -9,10 +9,12 @@
 			,d.strProjectName
 			,intCustomerId = f.intEntityId
 			,strCustomerName = f.strName
+			,k.strModule
 			,a.dtmDate
 			,intAgentEntityId = g.intEntityId
 			,strAgentName = g.strName
 			,a.intHours
+			,intBilledAmount = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end) * a.dblRate
 			,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end)
 			,intNonBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then a.intHours else 0 end)
 			,h.intJobCodeId
@@ -36,3 +38,5 @@
 			left join tblEMEntity g on g.intEntityId = a.intAgentEntityId
 			left join tblHDJobCode h on h.intJobCodeId = a.intJobCodeId
 			left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
+			left join tblHDModule j on j.intModuleId = b.intModuleId
+			left join tblSMModule k on k.intModuleId = j.intSMModuleId

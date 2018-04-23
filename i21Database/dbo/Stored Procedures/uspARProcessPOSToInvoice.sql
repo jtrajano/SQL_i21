@@ -188,6 +188,179 @@ JOIN tblARCustomer Cus on Cus.[intEntityId] = POS.intEntityCustomerId
 JOIN tblEMEntityLocation Loc on Loc.intEntityId = Cus.[intEntityId] and Loc.ysnDefaultLocation = 1
 Where POS.intPOSId = @intPOSId
 
+
+--insert discount as line item in invoice detail
+IF((SELECT dblDiscountPercent FROM tblARPOS WHERE intPOSId = @intPOSId) > 0)
+BEGIN
+	INSERT INTO @EntriesForInvoice(
+	 [strTransactionType]
+	,[strType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intLoadDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnPost]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblPrice]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+	,[ysnClearDetailTaxes]					
+	,[intTempDetailIdForTaxes]
+	,[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]
+	,[dblSubCurrencyRate]
+	)
+	SELECT TOP 1
+	 [strTransactionType]					= InvoiceEntry.strTransactionType
+	,[strType]								= 'POS'
+	,[strSourceTransaction]					= 'POS'
+	,[intSourceId]							= InvoiceEntry.intSourceId
+	,[strSourceId]							= InvoiceEntry.strSourceId
+	,[intInvoiceId]							= InvoiceEntry.intInvoiceId
+	,[intEntityCustomerId]					= InvoiceEntry.intEntityCustomerId
+	,[intCompanyLocationId]					= InvoiceEntry.intCompanyLocationId
+	,[intCurrencyId]						= InvoiceEntry.intCurrencyId
+	,[intTermId]							= InvoiceEntry.intTermId
+	,[dtmDate]								= InvoiceEntry.dtmDate
+	,[dtmDueDate]							= NULL
+	,[dtmShipDate]							= InvoiceEntry.dtmShipDate
+	,[intEntitySalespersonId]				= NULL
+	,[intFreightTermId]						= NULL 
+	,[intShipViaId]							= NULL 
+	,[intPaymentMethodId]					= NULL
+	,[strInvoiceOriginId]					= ''
+	,[strPONumber]							= ''
+	,[strBOLNumber]							= ''
+	,[strComments]							= InvoiceEntry.strComments
+	,[intShipToLocationId]					= NULL
+	,[intBillToLocationId]					= NULL
+	,[ysnTemplate]							= 0
+	,[ysnForgiven]							= 0
+	,[ysnCalculated]						= 0
+	,[ysnSplitted]							= 0
+	,[intPaymentId]							= NULL
+	,[intSplitId]							= NULL
+	,[intLoadDistributionHeaderId]			= NULL
+	,[strActualCostId]						= ''
+	,[intShipmentId]						= NULL
+	,[intTransactionId]						= 0
+	,[intEntityId]							= InvoiceEntry.intEntityId
+	,[ysnResetDetails]						= 0   
+	,[ysnPost]								= 1 
+	,[intInvoiceDetailId]					= InvoiceEntry.intInvoiceDetailId
+	,[intItemId]							= NULL
+	,[ysnInventory]							= 0
+	,[strItemDescription]					= 'POS Discount - ' + CAST(CAST(POS.dblDiscountPercent AS INT) AS VARCHAR(3)) + '%'
+	,[intItemUOMId]							= NULL
+	,[dblQtyOrdered]						= 0.0
+	,[dblQtyShipped]						= 1
+	,[dblDiscount]							= 0.0
+	,[dblPrice]								= POS.dblTotal * -1
+	,[ysnRefreshPrice]						= 0
+	,[strMaintenanceType]					= ''
+    ,[strFrequency]							= ''
+    ,[dtmMaintenanceDate]					= NULL
+    ,[dblMaintenanceAmount]					= NULL
+    ,[dblLicenseAmount]						= NULL
+	,[intTaxGroupId]						= NULL
+	,[ysnRecomputeTax]						= 0
+	,[intSCInvoiceId]						= NULL
+	,[strSCInvoiceNumber]					= ''
+	,[intInventoryShipmentItemId]			= NULL
+	,[strShipmentNumber]					= ''
+	,[intSalesOrderDetailId]				= NULL
+	,[strSalesOrderNumber]					= ''
+	,[intContractHeaderId]					= NULL
+	,[intContractDetailId]					= NULL
+	,[intShipmentPurchaseSalesContractId]	= NULL
+	,[intTicketId]							= NULL
+	,[intTicketHoursWorkedId]				= NULL
+	,[intSiteId]							= NULL
+	,[strBillingBy]							= ''
+	,[dblPercentFull]						= NULL
+	,[dblNewMeterReading]					= NULL
+	,[dblPreviousMeterReading]				= NULL
+	,[dblConversionFactor]					= NULL
+	,[intPerformerId]						= NULL
+	,[ysnLeaseBilling]						= NULL
+	,[ysnVirtualMeterReading]				= NULL
+	,[ysnClearDetailTaxes]					= 1
+	,[intTempDetailIdForTaxes]				= @intPOSId
+	,[intCurrencyExchangeRateTypeId]		= NULL
+	,[intCurrencyExchangeRateId]			= NULL
+	,[dblCurrencyExchangeRate]				= 1.000000
+	,[intSubCurrencyId]						= NULL
+	,[dblSubCurrencyRate]					= 1.000000
+	FROM @EntriesForInvoice AS InvoiceEntry
+	INNER JOIN tblARPOS AS POS ON InvoiceEntry.intSourceId = POS.intPOSId
+
+END
+
+
 DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 
 DECLARE @UpdatedIvoices AS NVARCHAR(MAX)

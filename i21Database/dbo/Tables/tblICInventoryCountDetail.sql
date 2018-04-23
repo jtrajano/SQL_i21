@@ -20,7 +20,7 @@
     [strCountLine] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblPallets] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [dblQtyPerPallet] NUMERIC(38, 20) NULL DEFAULT ((0)), 
-    [dblPhysicalCount] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
+    [dblPhysicalCount] NUMERIC(38, 20) NULL, 
     [intItemUOMId] INT NULL,  
     [intWeightUOMId] INT NULL,
     [dblWeightQty] NUMERIC(38, 20) NULL DEFAULT((0)),

@@ -28,6 +28,7 @@
 	[intImportFlagInternal] INT NULL,
     [intLockType] INT NULL,
     [intSort] INT NULL, 
+	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryCount] PRIMARY KEY ([intInventoryCountId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 

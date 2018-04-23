@@ -32,6 +32,7 @@
 	,@intSpecialPalletLotId INT = NULL
 	,@ysnRecap BIT = 0
 	,@intWorkOrderProducedLotId int=NULL OUTPUT
+	,@intLotStatusId int=NULL
 	)
 AS
 BEGIN
@@ -387,6 +388,7 @@ BEGIN
 			,NULL
 			,NULL
 			,@strComment
+			,@intLotStatusId
 	END
 	ELSE
 	BEGIN
@@ -424,6 +426,7 @@ BEGIN
 			,@dtmProductionDate = @dtmProductionDate
 			,@intTransactionDetailId = @intWorkOrderProducedLotId
 			,@strNotes=@strComment
+			,@intLotStatusId=@intLotStatusId
 	END
 
 	IF @strParentLotNumber IS NULL

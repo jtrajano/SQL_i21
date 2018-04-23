@@ -32,6 +32,8 @@
 		,strCurrencyExchangeRateType = w.strCurrencyExchangeRateType
 		,intMoveToStatusId = y.intTicketStatusId
 		,strMoveToStatus = y.strStatus
+		,strFeedbackWithSolution = (case a.intFeedbackWithSolutionId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end)
+		,strFeedbackWithRepresentative = (case a.intFeedbackWithRepresentativeId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end)
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId

@@ -116,6 +116,10 @@ SELECT   L.intLoadId
 		,PTS.strPricingType AS strSPricingType
 		,PDetail.intContractDetailId AS intPContractDetailId
 		,SDetail.intContractDetailId AS intSContractDetailId
+	    ,L.intBookId
+	    ,BO.strBook
+	    ,L.intSubBookId
+	    ,SB.strSubBook
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -140,3 +144,5 @@ LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeI
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intStaticValueCurrencyId
 LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId

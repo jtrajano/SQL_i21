@@ -108,6 +108,7 @@
     [dtmEndOfDayDate] DATETIME NULL, 
     [intEndOfDayShiftNo] INT NULL, 
 	[intTaxGroupId] int NULL,
+	[intCheckoutCustomerId] int NULL,
 	[strDepartment] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
@@ -124,5 +125,6 @@
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intLoyaltyDiscountMopId] FOREIGN KEY ([intLoyaltyDiscountMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intRemovePropCardMopId] FOREIGN KEY ([intRemovePropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intAddPropCardMopId] FOREIGN KEY ([intAddPropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
-	CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
+	CONSTRAINT [FK_tblSTStore_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	CONSTRAINT [FK_tblSTStore_tblEMEntity_intCheckoutCustomerId] FOREIGN KEY ([intCheckoutCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId])
    );

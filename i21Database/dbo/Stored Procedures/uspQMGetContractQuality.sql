@@ -54,7 +54,9 @@ BEGIN TRY
 	 LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 	 LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
 	 LEFT JOIN tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
-	 LEFT JOIN tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId'
+	 LEFT JOIN tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId
+	 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+	 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -112,6 +114,8 @@ BEGIN TRY
 			,E1.strEntityNo AS strShipperCode
 			,E1.strName AS strShipperName
 			,CS.strSubLocationName
+			,B.strBook
+			,SB.strSubBook
 			,L.strLoadNumber
 			,S.dtmSampleReceivedDate
 			,S.dtmSamplingEndDate
@@ -140,7 +144,9 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
 		LEFT JOIN tblICItem AS I1 ON I1.intItemId = S.intItemBundleId
-		LEFT JOIN tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId'
+		LEFT JOIN tblEMEntity AS E1 ON E1.intEntityId = S.intShipperEntityId
+		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -162,7 +168,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strContractNumber,strName,strContractItemName,strBundleItemNo,strItemNo,strDescription,strItemSpecification'
-	SET @strColumnsList = @strColumnsList + ',strLoadNumber,strContainerNumber,strMarks,strShipperCode,strShipperName,strSubLocationName,strSampleNumber,strSampleRefNo,strSampleTypeName'
+	SET @strColumnsList = @strColumnsList + ',strLoadNumber,strContainerNumber,strMarks,strShipperCode,strShipperName,strSubLocationName,strBook,strSubBook,strSampleNumber,strSampleRefNo,strSampleTypeName'
 	SET @strColumnsList = @strColumnsList + ',strStatus,intSampleId,dtmSampleReceivedDate,dtmSamplingEndDate,strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
   intTotalCount
@@ -179,6 +185,8 @@ BEGIN TRY
   ,strShipperCode
   ,strShipperName
   ,strSubLocationName
+  ,strBook
+  ,strSubBook
   ,strSampleNumber  
   ,strSampleRefNo
   ,strSampleTypeName  
@@ -203,6 +211,8 @@ BEGIN TRY
 		,strShipperCode
 		,strShipperName
 		,strSubLocationName
+		,strBook
+		,strSubBook
 		,strSampleNumber
 		,strSampleRefNo
 		,strSampleTypeName

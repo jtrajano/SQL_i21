@@ -52,6 +52,8 @@ BEGIN TRY
 	DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
 	DECLARE @intDayOfYear INT=DATEPART(dy, @dtmDate)
 	Declare @strPackagingCategoryId NVARCHAR(Max)
+	Declare @intPlannedShiftId int
+	DECLARE @strSavedWONo NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -75,6 +77,7 @@ BEGIN TRY
 		,intBlendRequirementId INT
 		,intItemUOMId INT
 		,intUserId INT
+		,intPlannedShiftId INT
 		)
 	DECLARE @tblItem TABLE (
 		intRowNo INT Identity(1, 1)
@@ -129,6 +132,7 @@ BEGIN TRY
 		,intBlendRequirementId
 		,intItemUOMId
 		,intUserId
+		,intPlannedShiftId
 		)
 	SELECT intWorkOrderId
 		,intItemId
@@ -145,6 +149,7 @@ BEGIN TRY
 		,intBlendRequirementId
 		,intItemUOMId
 		,intUserId
+		,intPlannedShiftId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intItemId INT
@@ -161,6 +166,7 @@ BEGIN TRY
 			,intBlendRequirementId INT
 			,intItemUOMId INT
 			,intUserId INT
+			,intPlannedShiftId INT
 			)
 
 	INSERT INTO @tblLot (
@@ -381,6 +387,22 @@ End
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 	and UPPER(at.strAttributeName)=UPPER('All input items mandatory for consumption')
 
+	Select @intPlannedShiftId=intPlannedShiftId From @tblBlendSheet
+	IF ISNULL(@intPlannedShiftId,0)=0
+	BEGIN
+		If ISNULL(@intBusinessShiftId,0)=0
+			BEGIN
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND intShiftSequence = 1
+			END
+		Else
+			Set @intPlannedShiftId=@intBusinessShiftId
+
+		Update @tblBlendSheet set intPlannedShiftId=@intPlannedShiftId
+	END
+
 	--Missing Item Check / Required Qty Check
 	if @ysnAllInputItemsMandatory=1
 	Begin
@@ -502,9 +524,14 @@ End
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
 			)
+	Begin
+		Select @strSavedWONo=strWorkOrderNo From tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
 		DELETE
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+	End
 
 	DECLARE @intItemCount INT
 		,@intLotCount INT
@@ -674,16 +701,22 @@ End
 		END
 
 		--Create WorkOrder
-		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-				,@intItemId = @intBlendItemId
-				,@intManufacturingId = @intCellId
-				,@intSubLocationId = 0
-				,@intLocationId = @intLocationId
-				,@intOrderTypeId = NULL
-				,@intBlendRequirementId = @intBlendRequirementId
-				,@intPatternCode = 93
-				,@ysnProposed = 0
-				,@strPatternString = @strNextWONo OUTPUT
+		If ISNULL(@strSavedWONo,'')=''
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+					,@intItemId = @intBlendItemId
+					,@intManufacturingId = @intCellId
+					,@intSubLocationId = 0
+					,@intLocationId = @intLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = @intBlendRequirementId
+					,@intPatternCode = 93
+					,@ysnProposed = 0
+					,@strPatternString = @strNextWONo OUTPUT
+		Else
+		Begin
+			Set @strNextWONo=@strSavedWONo
+			Set @strSavedWONo=''
+		End
 
 		SET @intExecutionOrder = @intExecutionOrder + 1
 
@@ -713,6 +746,8 @@ End
 			,dtmReleasedDate
 			,intManufacturingProcessId
 			,intTransactionFrom
+			,intPlannedShiftId
+			,dtmPlannedDate
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -743,6 +778,8 @@ End
 			,GetDate()
 			,@intManufacturingProcessId
 			,1
+			,intPlannedShiftId
+			,dtmDueDate
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()

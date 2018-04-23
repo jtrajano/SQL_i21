@@ -10,6 +10,7 @@
     [ysnMonthExpired] BIT NULL, 
     [dtmExpirationDate] DATETIME NULL, 
     [strOptMonthSymbol] NCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
+	[intCompanyId] INT NULL,
     CONSTRAINT [PK_tblRKOptionsMonth_intOptionMonthId] PRIMARY KEY ([intOptionMonthId]), 
     CONSTRAINT [FK_tblRKOptionsMonth_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 
     CONSTRAINT [FK_tblRKOptionsMonth_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]), 

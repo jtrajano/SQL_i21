@@ -483,12 +483,15 @@ BEGIN TRY
 		,[intOrderUOMId]
 		,[dblQtyOrdered]
 		,[intItemUOMId]
+		,[intPriceUOMId]
 		,[dblQtyShipped]
+		,[dblUnitQuantity]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
 		,[dblPrice]
 		,[dblBasePrice]
 		,[dblUnitPrice]
+		,[dblBaseUnitPrice]
 		,[strPricing]
 		,[dblTotalTax]
 		,[dblBaseTotalTax]
@@ -558,6 +561,7 @@ BEGIN TRY
 		,[intOrderUOMId]				= NULL --ARID.[intOrderUOMId] 																							
 		,[dblQtyOrdered]				= NULL --ARID.[dblQtyOrdered] 
 		,[intItemUOMId]					= ARID.[intItemUOMId]
+		,[intPriceUOMId]				= ARID.[intPriceUOMId] 
 		,[dblQtyShipped]				= CASE	WHEN (ISNULL(SOSOD.intSalesOrderDetailId,0) = 0 AND ISNULL(ICISI.intInventoryShipmentItemId,0) = 0) OR @IsCancel = 1
 													THEN ARID.[dblQtyShipped]
 												WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) <> 0
@@ -566,11 +570,13 @@ BEGIN TRY
 													THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ARID.intItemUOMId, (dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped) - ICISI.dblQuantity))
 												ELSE ARID.[dblQtyShipped]
 										  END
+		,[dblUnitQuantity]				= ARID.[dblUnitQuantity]
 		,[dblDiscount]					= ARID.[dblDiscount]
 		,[dblItemTermDiscount]			= ARID.[dblItemTermDiscount]
 		,[dblPrice]						= ARID.[dblPrice]
 		,[dblBasePrice]					= ARID.[dblBasePrice]
 		,[dblUnitPrice]					= ARID.[dblUnitPrice]
+		,[dblBaseUnitPrice]				= ARID.[dblBaseUnitPrice]
 		,[strPricing]					= ARID.[strPricing]
 		,[dblTotalTax]					= ARID.[dblTotalTax]
 		,[dblBaseTotalTax]				= ARID.[dblBaseTotalTax]

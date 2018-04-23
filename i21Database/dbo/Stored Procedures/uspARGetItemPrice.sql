@@ -6,12 +6,15 @@
 	,@TransactionDate			DATETIME		= NULL
 	,@Quantity					NUMERIC(18,6)
 	,@Price						NUMERIC(18,6)	= NULL OUTPUT
+	,@UnitPrice					NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing					NVARCHAR(250)	= NULL OUTPUT	
 	,@ContractHeaderId			INT				= NULL OUTPUT
 	,@ContractDetailId			INT				= NULL OUTPUT
 	,@ContractNumber			NVARCHAR(50)	= NULL OUTPUT
 	,@ContractSeq				INT				= NULL OUTPUT
-	,@NewQuantity				NUMERIC(18,6)   = NULL OUTPUT
+	,@PriceUOMQuantity			NUMERIC(18,6)   = NULL OUTPUT
+	,@ContractUOMId				INT			    = NULL OUTPUT
+	,@ContractUOM				NVARCHAR(50)	= NULL OUTPUT
 	,@PriceUOMId				INT			    = NULL OUTPUT
 	,@PriceUOM					NVARCHAR(50)	= NULL OUTPUT
 	,@AvailableQuantity			NUMERIC(18,6)   = NULL OUTPUT
@@ -33,6 +36,9 @@
 	,@InvoiceType				NVARCHAR(200)	= NULL
 	,@TermId					INT				= NULL
 	,@CurrencyId				INT				= NULL
+	,@CurrencyExchangeRateTypeId    INT            = NULL OUTPUT
+    ,@CurrencyExchangeRateType  NVARCHAR(20)    = NULL OUTPUT
+    ,@CurrencyExchangeRate      NUMERIC(18,6)    = NULL OUTPUT
 	,@SubCurrencyId				INT				= NULL OUTPUT
 	,@SubCurrency				NVARCHAR(250)	= NULL OUTPUT
 	,@SubCurrencyRate			NUMERIC(18,6)	= NULL OUTPUT
@@ -46,26 +52,32 @@
 AS	
 
 	SELECT
-		 @Price				= dblPrice
-		,@Pricing			= strPricing
-		,@ContractHeaderId	= intContractHeaderId
-		,@ContractDetailId	= intContractDetailId
-		,@ContractNumber	= strContractNumber
-		,@ContractSeq		= intContractSeq
-		,@PriceUOMId		= intPriceUOMId
-		,@PriceUOM			= strPriceUOM
-		,@NewQuantity		= dblQuantity
-		,@AvailableQuantity = dblAvailableQty
-		,@UnlimitedQuantity = ysnUnlimitedQty
-		,@Deviation			= dblDeviation
-		,@TermDiscount		= dblTermDiscount  
-		,@PricingType		= strPricingType
-		,@TermIdOut			= intTermId
-		,@TermDiscountBy	= strTermDiscountBy
-		,@SubCurrencyId		= intSubCurrencyId
-		,@SubCurrency		= strSubCurrency
-		,@SubCurrencyRate	= dblSubCurrencyRate
-		,@SpecialPriceId	= intSpecialPriceId
+		 @Price							= dblPrice
+		,@UnitPrice						= dblUnitPrice
+		,@Pricing						= strPricing
+		,@ContractHeaderId				= intContractHeaderId
+		,@ContractDetailId				= intContractDetailId
+		,@ContractNumber				= strContractNumber
+		,@ContractSeq					= intContractSeq
+		,@ContractUOMId					= intContractUOMId
+		,@ContractUOM					= strContractUOM
+		,@PriceUOMId					= intPriceUOMId
+		,@PriceUOM						= strPriceUOM
+		,@PriceUOMQuantity				= dblPriceUOMQuantity
+		,@AvailableQuantity				= dblAvailableQty
+		,@UnlimitedQuantity				= ysnUnlimitedQty
+		,@Deviation						= dblDeviation
+		,@TermDiscount					= dblTermDiscount  
+		,@PricingType					= strPricingType
+		,@TermIdOut						= intTermId
+		,@TermDiscountBy				= strTermDiscountBy
+		,@CurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
+        ,@CurrencyExchangeRateType      = strCurrencyExchangeRateType
+        ,@CurrencyExchangeRate          = dblCurrencyExchangeRate
+		,@SubCurrencyId					= intSubCurrencyId
+		,@SubCurrency					= strSubCurrency
+		,@SubCurrencyRate				= dblSubCurrencyRate
+		,@SpecialPriceId				= intSpecialPriceId
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId

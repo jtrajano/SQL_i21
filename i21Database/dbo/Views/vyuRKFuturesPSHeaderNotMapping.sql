@@ -39,5 +39,6 @@ mh.intCurrencyExchangeRateTypeId,mh.intConcurrencyId,
 mh.intBankId,
 mh.intBankAccountId,
 mh.ysnPosted,
+mh.intCompanyId,
 cl.strLocationName,c.strCommodityCode,m.strFutMarketName,fm.strFutureMonth,e.strName,ba.strAccountNumber,b.strBook,sb.strSubBook,
 ert.strCurrencyExchangeRateType,bk.strBankName,bac.strBankAccountNo, intSelectedInstrumentTypeId

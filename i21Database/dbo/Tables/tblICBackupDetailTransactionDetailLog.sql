@@ -16,6 +16,7 @@
     [dblQuantity] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 	[ysnLoad] BIT NULL DEFAULT((0)),
 	[intLoadReceive] INT NULL DEFAULT ((0)),
+	[intCompanyId] INT NULL, 
     CONSTRAINT [PK_tblICBackupDetailTransactionDetailLog] PRIMARY KEY ([intBackupDetailId]),
 	CONSTRAINT [FK_tblICBackupDetailTransactionDetailLog_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])	
 )

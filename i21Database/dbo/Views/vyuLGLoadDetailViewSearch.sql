@@ -221,6 +221,10 @@ SELECT   Load.intLoadId
 		,PTP.strPricingType AS strPPricingType
 		,SDetail.intPricingTypeId AS intSPricingTypeId
 		,PTS.strPricingType AS strSPricingType
+		,Load.intBookId
+		,BO.strBook
+		,Load.intSubBookId
+		,SB.strSubBook
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
@@ -266,3 +270,5 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 			END
 		)
 LEFT JOIN tblCTPosition POS ON POS.intPositionId = Load.intPositionId
+LEFT JOIN tblCTBook BO ON BO.intBookId = Load.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = Load.intSubBookId

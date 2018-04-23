@@ -41,9 +41,9 @@
     [intShipViaId]					INT												NULL,
     [intPaymentMethodId]			INT												NULL, 	        
     [strInvoiceOriginId]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
+	[strMobileBillingShiftNo]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     [strPONumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
-	[strBOLNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,     
-	--[strDeliverPickup]				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL,
+	[strBOLNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,    
     [strComments]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,	
 	[strFooterComments]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
     [intShipToLocationId]			INT												NULL,
@@ -100,8 +100,11 @@
 	[intPostedById]					INT												NULL,
 	[intLineOfBusinessId]			INT												NULL,
 	[intICTId]						INT												NULL,
+	[intBookId]						INT												NULL,
+	[intSubBookId]					INT												NULL,
 	[intSalesOrderId]				INT												NULL,
 	[dtmForgiveDate]				DATETIME										NULL,
+	[intCompanyId]					INT												NULL,
 	[intConcurrencyId]				INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
@@ -129,6 +132,8 @@
 	CONSTRAINT [FK_tblARInvoice_tblARSalesperson_intTruckDriverId] FOREIGN KEY ([intTruckDriverId]) REFERENCES [tblARSalesperson]([intEntityId]),
 	CONSTRAINT [FK_tblARInvoice_tblSMLineOfBusiness_intLineOfBusinessId] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblSMLineOfBusiness]([intLineOfBusinessId]),
 	CONSTRAINT [FK_tblARInvoice_tblARICT_intICTId] FOREIGN KEY ([intICTId]) REFERENCES [tblARICT]([intICTId]),
+	CONSTRAINT [FK_tblARInvoice_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+	CONSTRAINT [FK_tblARInvoice_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
 	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
 );
 

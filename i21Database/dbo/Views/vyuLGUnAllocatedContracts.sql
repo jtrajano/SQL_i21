@@ -45,6 +45,10 @@ FROM (
 		,CH.dtmContractDate
 		,CH.strCustomerContract
 		,EY.strEntityName
+		,CD.intBookId
+		,BO.strBook
+		,CD.intSubBookId
+		,SB.strSubBook
 	FROM tblCTContractDetail CD
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -60,6 +64,8 @@ FROM (
 	LEFT JOIN tblLGAllocationDetail SAL ON SAL.intSContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblICUnitMeasure U5 ON U5.intUnitMeasureId = PAL.intPUnitMeasureId
 	LEFT JOIN tblICUnitMeasure U6 ON U6.intUnitMeasureId = SAL.intSUnitMeasureId
+	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	GROUP BY CD.intContractDetailId
 		,CD.intContractSeq
 		,CD.intCompanyLocationId
@@ -100,5 +106,9 @@ FROM (
 		,CH.dtmContractDate
 		,CH.strCustomerContract
 		,EY.strEntityName
+		,CD.intBookId
+		,BO.strBook
+		,CD.intSubBookId
+		,SB.strSubBook
 	) tbl
 WHERE dblUnAllocatedQty > 0

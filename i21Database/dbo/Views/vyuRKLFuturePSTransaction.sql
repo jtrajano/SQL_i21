@@ -25,20 +25,9 @@ SELECT intSelectedInstrumentTypeId,
       ,ISNULL(ot.intBookId,0) as intBookId
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
-      ,fm.dblContractSize							
-	  --This filter is to get the correct commission based on date						
-      ,dblFutCommission = ISNULL((select TOP 1
-		(case when bc.intFuturesRateType = 2 then 0  
-			else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 'true' then cur.intCent else 1 end 
-		end) as dblFutCommission
-		from tblRKBrokerageCommission bc
-		LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
-		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate),0) * -1 --commision is always negative (RM-1174)
-		,intBrokerageCommissionId =(select TOP 1
-		bc.intBrokerageCommissionId
-		from tblRKBrokerageCommission bc
-		LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
-		where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId and  ot.dtmTransactionDate between bc.dtmEffectiveDate and bc.dtmEndDate)
+      ,fm.dblContractSize												
+      ,ot.dblCommission as dblFutCommission
+	  ,ot.intBrokerageCommissionId
 	  ,dtmFilledDate
 	  ,ot.intFutOptTransactionHeaderId,
 	   c.intCurrencyID as intCurrencyId

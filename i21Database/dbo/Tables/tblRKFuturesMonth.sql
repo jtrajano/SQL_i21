@@ -13,6 +13,7 @@
     [dtmLastTradingDate] DATETIME NULL, 
     [dtmSpotDate] DATETIME NOT NULL, 
     [ysnExpired] BIT NOT NULL, 
+	[intCompanyId] INT NULL,
    	CONSTRAINT [PK_tblRKFuturesMonth_intFuturesMonthId] PRIMARY KEY ([intFutureMonthId]), 
     CONSTRAINT [FK_tblRKFuturesMonth_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
     CONSTRAINT [UK_tblRKFuturesMonth_intFutureMarketId_strFutureMonth] UNIQUE (intFutureMarketId, strFutureMonth, intCommodityMarketId)

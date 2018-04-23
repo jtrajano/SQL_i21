@@ -92,6 +92,8 @@ SELECT strTransactionType = 'Load Schedule'
 			THEN CU.intCent
 		ELSE 1.000000
 		END
+	, intBookId	= CH.intBookId
+	, intSubBookId = CH.intSubBookId
 FROM (
 	SELECT intLoadId
 		,strLoadNumber

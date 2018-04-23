@@ -97,8 +97,8 @@ AS
 					CAST (NULL AS NUMERIC(18, 6)) AS	dblFutures,
 					CAST (NULL AS NUMERIC(18, 6)) AS	dblCashPrice,
 					CAST (NULL AS INT)			AS	intPriceItemUOMId,
-					CAST (NULL AS INT)			AS	intBookId,
-					CAST (NULL AS INT)			AS	intSubBookId,
+					CH.intBookId,
+					CH.intSubBookId,
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
@@ -113,8 +113,8 @@ AS
 					CD.strEntityContract,
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
 					MAX(CD.dtmEndDate)			AS	dtmEndDate,
-					CD.strBook,
-					CD.strSubBook,
+					BK.strBook,
+					SB.strSubBook,
 					CD.strPriceUOM,
 					NULL						AS	strPriceContractNo,
 					strCurrency,
@@ -123,11 +123,14 @@ AS
 					CD.strPricingType
 
 		FROM		vyuCTContractSequence		CD
-		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId		=		CH.intCommodityUOMId
-		JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId	
-		JOIN		tblICItemUOM				PU	ON	PU.intItemUOMId		=	CD.intPriceItemUOMId		
-		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.intUnitMeasureId = PU.intUnitMeasureId 
+		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId
+		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
+		JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=	QU.intUnitMeasureId	
+		JOIN		tblICItemUOM				PU	ON	PU.intItemUOMId					=	CD.intPriceItemUOMId		
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId				=	CD.intCommodityId 
+													AND CU.intUnitMeasureId				=	PU.intUnitMeasureId 
+LEFT	JOIN		tblCTBook					BK	ON	BK.intBookId					=	CH.intBookId						
+LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId	
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		AND			CD.intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId NOT IN (2,3)
@@ -147,8 +150,10 @@ AS
 					CU.intCommodityUnitMeasureId,
 					CH.dblNoOfLots,
 					CD.strEntityContract,
-					CD.strBook,
-					CD.strSubBook,
+					BK.strBook,
+					SB.strSubBook,
+					CH.intBookId,
+					CH.intSubBookId,
 					CD.strPriceUOM,
 					strCurrency,
 					ysnSubCurrency,
@@ -252,8 +257,8 @@ AS
 					CAST (NULL AS NUMERIC(18, 6)) AS	dblFutures,
 					CAST (NULL AS NUMERIC(18, 6)) AS	dblCashPrice,
 					CAST (NULL AS INT)			AS	intPriceItemUOMId,
-					CAST (NULL AS INT)			AS	intBookId,
-					CAST (NULL AS INT)			AS	intSubBookId,
+					CH.intBookId,
+					CH.intSubBookId,
 					CD.intSalespersonId,
 					MAX(intCurrencyId)			AS	intCurrencyId,
 					MAX(intCompanyLocationId)	AS	intCompanyLocationId,
@@ -272,8 +277,8 @@ AS
 					CD.strEntityContract,
 					MAX(CD.dtmStartDate)		AS	dtmStartDate,
 					MAX(CD.dtmEndDate)			AS	dtmEndDate,
-					CD.strBook,
-					CD.strSubBook,
+					BK.strBook,
+					SB.strSubBook,
 					CD.strPriceUOM,
 					PC.strPriceContractNo,
 					strCurrency,
@@ -282,12 +287,15 @@ AS
 					CD.strPricingType
 
 		FROM		tblCTPriceFixation			PF
-		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
-		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId
-		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
-		JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId		
-		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
+		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId			=	PF.intPriceContractId
+		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId			=	PF.intContractHeaderId
+		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId
+		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId				=	CD.intCommodityId 
+													AND CU.ysnDefault					=	1 				
+LEFT	JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=	QU.intUnitMeasureId		
+LEFT	JOIN		tblCTBook					BK	ON	BK.intBookId					=	CH.intBookId						
+LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId	
 		WHERE		ISNULL(CD.ysnMultiplePriceFixation,0) = 1
 		GROUP BY	CD.intContractHeaderId,
 					CD.strContractNumber,
@@ -308,8 +316,10 @@ AS
 					CU.intCommodityUnitMeasureId,
 					CD.strEntityContract,
 					PF.intPriceContractId,
-					CD.strBook,
-					CD.strSubBook,
+					BK.strBook,
+					SB.strSubBook,
+					CH.intBookId,
+					CH.intSubBookId,
 					CD.strPriceUOM,
 					PC.strPriceContractNo,
 					strCurrency,

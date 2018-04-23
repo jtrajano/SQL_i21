@@ -183,7 +183,7 @@ ELSE
 			, intOwnershipType				= CASE WHEN SODETAIL.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
 			, dblQuantity					= SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)
 			, intItemUOMId					= ITEMUOM.intItemUOMId
-			, intPriceUOMId					= SODETAIL.intPriceUOMId
+			, intPriceUOMId					= SODETAIL.intItemUOMId
 			, intItemLotGroup				= NULL
 			, intOrderId					= SODETAIL.intSalesOrderId
 			, intSourceId					= NULL

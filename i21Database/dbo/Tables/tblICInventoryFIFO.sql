@@ -88,6 +88,7 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryFIFO] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOId]) 
 	)

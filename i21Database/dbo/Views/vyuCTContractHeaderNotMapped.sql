@@ -66,7 +66,9 @@ AS
 						CA.strCommodityAttributeId,
 						EL.intEntityLocationId		AS	intEntityDefaultLocationId,
 						EL.strLocationName			AS	strEntityDefaultLocation,
-						PO.intNoOfDays				AS	intPositionNoOfDays
+						PO.intNoOfDays				AS	intPositionNoOfDays,
+						BK.strBook,
+						SB.strSubBook
 
 				FROM	tblCTContractHeader					CH	
 				
@@ -113,6 +115,8 @@ AS
 				JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
 				JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
 				
+				JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						LEFT
+				JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						LEFT
 
 				JOIN	tblCTPriceFixation					PF	ON	CH.intContractHeaderId				=		PF.intContractHeaderId 
 																AND CH.ysnMultiplePriceFixation			=		1							

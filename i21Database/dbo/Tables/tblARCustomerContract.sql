@@ -13,6 +13,7 @@
     [ysnMaxPrice]         BIT            NOT NULL DEFAULT ((0)),
     [strPickupDelivery]   NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
     [strPriceLevel]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyId]		  INT			 NULL,
     [intConcurrencyId]    INT            NOT NULL,
     CONSTRAINT [PK_tblARCustomerContract] PRIMARY KEY CLUSTERED ([intContractId] ASC),
 	CONSTRAINT [UKstrContractNumber] UNIQUE NONCLUSTERED ([strContractNumber] ASC)

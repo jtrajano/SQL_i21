@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[tblLGRoute]
 	[intEntityShipViaId] INT NULL,
 	[intEntityShipViaTruckId] INT NULL,
 	[dblRouteHours] NUMERIC(18, 6) NULL,
+	[intCompanyId] INT NULL,
 
 	CONSTRAINT [PK_tblLGRoute] PRIMARY KEY ([intRouteId]), 
 	CONSTRAINT [FK_tblLGRoute_tblEMEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEMEntity]([intEntityId]),

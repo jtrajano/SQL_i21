@@ -35,6 +35,7 @@
 	[ysnNoGLPosting] BIT NULL DEFAULT 0, 
 	[intCreatedUserId] INT NULL, 
 	[intCreatedEntityId] INT NULL, 
+	[intCompanyId] INT NULL, 
 	CONSTRAINT [PK_tblICBackupDetailInventoryTransaction] PRIMARY KEY ([intBackupDetailId]),
 	CONSTRAINT [FK_tblICBackupDetailInventoryTransaction_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])
 )
