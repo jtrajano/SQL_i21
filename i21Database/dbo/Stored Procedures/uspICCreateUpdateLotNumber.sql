@@ -107,7 +107,8 @@ DECLARE
 	,@intInventoryReceiptItemId	AS INT 
 	,@intInventoryReceiptItemLotId	AS INT
 	,@intSeasonCropYear			AS INT
-
+	,@intBookId					AS INT
+	,@intSubBookId				AS INT 
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
@@ -200,6 +201,8 @@ SELECT  intId
 		,intInventoryReceiptItemId
 		,intInventoryReceiptItemLotId
 		,intSeasonCropYear
+		,intBookId
+		,intSubBookId 
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -254,6 +257,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intInventoryReceiptItemId
 		,@intInventoryReceiptItemLotId
 		,@intSeasonCropYear
+		,@intBookId
+		,@intSubBookId 
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -627,6 +632,8 @@ BEGIN
 						,strCondition = @strCondition 
 						,intSeasonCropYear = @intSeasonCropYear
 						,intUnitPallet = @intUnitPallet
+						,intBookId = @intBookId
+						,intSubBookId = @intSubBookId 
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -777,6 +784,26 @@ BEGIN
 													ELSE 
 														LotMaster.dblGrossWeight 
 											END 
+				,intBookId			=	CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN 
+												@intBookId  
+											ELSE 
+												LotMaster.intBookId 
+										END
+				,intSubBookId		=	CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN 
+												@intSubBookId  
+											ELSE 
+												LotMaster.intSubBookId 
+										END
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -865,6 +892,8 @@ BEGIN
 				,strContainerNo
 				,strCondition
 				,intSeasonCropYear
+				,intBookId
+				,intSubBookId 
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -914,6 +943,8 @@ BEGIN
 				,@strContainerNo
 				,@strCondition
 				,@intSeasonCropYear
+				,@intBookId
+				,@intSubBookId 
 			)
 		;
 	
@@ -1102,6 +1133,8 @@ BEGIN
 		,@intInventoryReceiptItemId
 		,@intInventoryReceiptItemLotId
 		,@intSeasonCropYear
+		,@intBookId
+		,@intSubBookId
 	;
 END
 
