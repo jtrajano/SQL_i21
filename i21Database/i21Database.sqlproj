@@ -6358,6 +6358,7 @@
     <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
     <Build Include="dbo\Tables\tblCFNetworkCost.sql" />
     <Build Include="dbo\Views\vyuARGetPurchaseOrder.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
