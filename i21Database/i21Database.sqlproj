@@ -6356,6 +6356,9 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeCategory.sql" />
     <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
     <Build Include="dbo\Tables\tblCFNetworkCost.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkCostStaging.sql" />
+    <Build Include="dbo\Tables\tblCFImportNetworkCostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportNetworkCost.sql" />
     <Build Include="dbo\Views\vyuARGetPurchaseOrder.sql" />
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
