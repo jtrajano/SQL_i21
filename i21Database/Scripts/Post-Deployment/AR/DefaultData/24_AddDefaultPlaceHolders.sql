@@ -87,52 +87,12 @@ IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
 	DELETE FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] = 'PH-6'
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<table id="t01" style="width:100%" border="1">
-<tbody>
-<tr>
-	<th>
-		<span style="font-family: Arial; font-size:9">
-		Invoice Date
-		</span>
-	</th>
-	<th>
-		<span style="font-family: Arial; font-size:9">
-		Invoice Number
-		</span>
-	</th>
-	<th style="text-align:right">
-		<span style="font-family: Arial; font-size:9">
-		Amount Due
-		</span>
-	</th>
-</tr>
-</tbody>
-</table>', N'vyuARCollectionOverdueReport', N'dtmDate, strInvoiceNumber, dblTotalDue', N'dtmDate, strInvoiceNumber, dblTotalDue', N'Invoice Date, Invoice Number, Amount Due', 0, N'PH-6', 1, N'datetime, nvarchar, numeric')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<table id="t01" style="width:100%" border="1"><tbody><tr><th><span style="font-family: Arial; font-size:9">Due Date</span></th><th><span style="font-family: Arial; font-size:9">Invoice Number</span></th><th style="text-align:right"><span style="font-family: Arial; font-size:9">Amount Due</span></th></tr></tbody></table>', N'vyuARCollectionOverdueReport', N'dtmDueDate, strInvoiceNumber, dblTotalDue', N'dtmDueDate, strInvoiceNumber, dblTotalDue', N'Due Date, Invoice Number, Amount Due', 0, N'PH-6', 1, N'datetime, nvarchar, numeric')
 END
 ELSE
 BEGIN
 	SELECT @intPlaceHolderId = MAX([intPlaceHolderId]) + 1 FROM tblARLetterPlaceHolder
-	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<table id="t01" style="width:100%" border="1">
-<tbody>
-<tr>
-	<th>
-		<span style="font-family: Arial; font-size:9">
-		Invoice Date
-		</span>
-	</th>
-	<th>
-		<span style="font-family: Arial; font-size:9">
-		Invoice Number
-		</span>
-	</th>
-	<th style="text-align:right">
-		<span style="font-family: Arial; font-size:9">
-		Amount Due
-		</span>
-	</th>
-</tr>
-</tbody>
-</table>', N'vyuARCollectionOverdueReport', N'dtmDate, strInvoiceNumber, dblTotalDue', N'dtmDate, strInvoiceNumber, dblTotalDue', N'Invoice Date, Invoice Number, Amount Due', 0, N'PH-6', 1, N'datetime, nvarchar, numeric')
+	INSERT [dbo].[tblARLetterPlaceHolder] ([intPlaceHolderId], [strModules], [strPlaceHolder], [strSourceTable], [strSourceColumn], [strPlaceHolderName], [strPlaceHolderDescription], [intConcurrencyId], [strPlaceHolderId], [ysnTable], [strDataType]) VALUES (@intPlaceHolderId, N'Sales', N'<table id="t01" style="width:100%" border="1"><tbody><tr><th><span style="font-family: Arial; font-size:9">Due Date</span></th><th><span style="font-family: Arial; font-size:9">Invoice Number</span></th><th style="text-align:right"><span style="font-family: Arial; font-size:9">Amount Due</span></th></tr></tbody></table>', N'vyuARCollectionOverdueReport', N'dtmDueDate, strInvoiceNumber, dblTotalDue', N'dtmDueDate, strInvoiceNumber, dblTotalDue', N'Due Date, Invoice Number, Amount Due', 0, N'PH-6', 1, N'datetime, nvarchar, numeric')
 END
 
 IF EXISTS(SELECT * FROM [tblARLetterPlaceHolder] WHERE [strPlaceHolderId] IN ('PH-7', 'PH-9'))
