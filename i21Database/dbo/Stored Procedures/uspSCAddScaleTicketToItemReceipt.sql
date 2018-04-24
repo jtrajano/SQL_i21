@@ -480,16 +480,16 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intChargeId]						= LoadCost.intItemId
 								,[intForexRateTypeId]				= RE.intForexRateTypeId
 								,[dblForexRate]						= RE.dblForexRate
-								,[ysnInventoryCost]					= IC.ysnInventoryCost
-								,[strCostMethod]                    = CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
+								,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
+								,[strCostMethod]                    = LoadCost.strCostMethod
 								,[dblRate]							= CASE
-																		WHEN IC.strCostMethod = 'Amount' THEN 0
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN 0
 																		ELSE RE.dblFreightRate
 																	END
 								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 								,[dblAmount]						= CASE
-																		WHEN IC.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 2)
+																		WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 2)
 																		ELSE 0
 																	END						
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
@@ -610,13 +610,13 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
 								,[strCostMethod]					= IC.strCostMethod
 								,[dblRate]							= CASE
-																		WHEN IC.strCostMethod = 'Amount' THEN 0
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 0
 																		ELSE ContractCost.dblRate
 																	END
 								,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
-																		WHEN IC.strCostMethod = 'Amount' THEN 
+																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
 																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
