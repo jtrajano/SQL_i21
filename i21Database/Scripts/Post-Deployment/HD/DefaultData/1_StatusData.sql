@@ -191,8 +191,11 @@ end
 if not exists (select * from tblHDTimeEntry where intTimeEntryId = 1)
 begin
 	set identity_insert tblHDTimeEntry on;
-	insert into tblHDTimeEntry (intTimeEntryId) select tblHDTimeEntry = 1;
+	insert into tblHDTimeEntry (intTimeEntryId) select intTimeEntryId = 1;
 	set identity_insert tblHDTimeEntry off;
+
+	update tblHDTicketHoursWorked set intTimeEntryId = 1;
+
 end
 
 GO
