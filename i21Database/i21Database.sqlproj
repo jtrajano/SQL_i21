@@ -6361,6 +6361,7 @@
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInTransitDirect.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
