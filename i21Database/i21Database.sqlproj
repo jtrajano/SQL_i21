@@ -6357,6 +6357,7 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeCategory.sql" />
     <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
     <Build Include="dbo\Tables\tblCFNetworkCost.sql" />
+    <Build Include="dbo\Views\vyuARGetPurchaseOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
