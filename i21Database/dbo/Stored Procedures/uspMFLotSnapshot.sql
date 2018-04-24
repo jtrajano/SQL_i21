@@ -2,10 +2,20 @@
 AS
 DECLARE @dtmCurrentDate DATETIME
 	,@intLotSnapshotId INT
+	,@ysnLotSnapshotByFiscalMonth BIT
 
 SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
 
-IF NOT EXISTS (
+SELECT @ysnLotSnapshotByFiscalMonth = ysnLotSnapshotByFiscalMonth
+FROM tblMFCompanyPreference
+
+IF @ysnLotSnapshotByFiscalMonth IS NULL
+BEGIN
+	SELECT @ysnLotSnapshotByFiscalMonth = 1
+END
+
+IF @ysnLotSnapshotByFiscalMonth = 1
+	AND NOT EXISTS (
 		SELECT *
 		FROM tblGLFiscalYearPeriod
 		WHERE dtmStartDate = @dtmCurrentDate

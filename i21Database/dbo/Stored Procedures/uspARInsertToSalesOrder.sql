@@ -198,8 +198,8 @@ BEGIN
 			,[dblLastCost]
 			,[dblPriceMargin]
 			,[dblMarginPercentage]
-			,[intVendorId]
-			,[intPurchaseOrderId])
+			,[intEntityVendorId]
+			,[intPurchaseDetailId])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -245,8 +245,8 @@ BEGIN
 			,[dblLastCost]
 			,[dblPriceMargin]
 			,[dblMarginPercentage]
-			,[intVendorId]
-			,[intPurchaseOrderId]
+			,[intEntityVendorId]
+			,[intPurchaseDetailId]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 

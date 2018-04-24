@@ -11,4 +11,5 @@
 	,[dtmOrderDate]						DateTime NULL
 	,[strLastUpdateBy]					NVARCHAR(100)
 	,intLocationId						int
+	,intDockDoorId						int
 	)

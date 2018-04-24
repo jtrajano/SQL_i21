@@ -456,6 +456,108 @@ GO
 
 GO
 	PRINT N'End updating Help Desk Ticket comment image link.'
+	PRINT N'Start creating Non-Billable Inventory Item.';
+GO
+
+		/*Create Hour Unit Of measure*/
+
+	declare @intUnitMeasureId int;
+
+	if not exists (select * from tblICUnitMeasure where strUnitMeasure = 'Hour')
+	begin
+		INSERT INTO [dbo].[tblICUnitMeasure]
+				   ([strUnitMeasure]
+				   ,[strSymbol]
+				   ,[strUnitType]
+				   ,[intConcurrencyId]
+				   ,[intDecimalPlaces])
+			 VALUES
+				   ('Hour'
+				   ,'HR'
+				   ,'Time'
+				   ,1
+				   ,null);
+	end
+	
+	set @intUnitMeasureId = (select top 1 intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'Hour');
+
+	/*Create Service Category*/
+
+	declare @intCategoryId int;
+
+	if not exists (select * from tblICCategory where strCategoryCode = 'Category' and strInventoryType = 'Service')
+	begin
+		INSERT INTO [dbo].[tblICCategory]
+				   ([strCategoryCode]
+				   ,[strDescription]
+				   ,[strInventoryType]
+				   ,[intConcurrencyId])
+			 VALUES
+				   ('Category'
+				   ,'Help Desk Category for Non-Billable'
+				   ,'Service'
+				   ,1)
+	end
+	
+	set @intCategoryId = (select top 1 intCategoryId from tblICCategory where strCategoryCode = 'Category' and strInventoryType = 'Service');
+
+	/*Create HDNonBillable Item*/
+
+	declare @intItemId int;
+
+	if not exists (select * from tblICItem where strItemNo = 'HDNonBillable')
+	begin
+		INSERT INTO [dbo].[tblICItem]
+				   ([strItemNo]
+				   ,[strType]
+				   ,[strDescription]
+				   ,[intCategoryId]
+				   ,[ysnBillable]
+				   ,[intLifeTime]
+					,[ysnLandedCost]
+					,[ysnTaxable]
+					,[ysnDropShip]
+					,[ysnCommisionable]
+					,[ysnSpecialCommission]
+				   ,[intConcurrencyId])
+			 VALUES
+				   ('HDNonBillable'
+				   ,'Service'
+				   ,'HDNonBillable item for Help Desk non-billable Hours Worked'
+				   ,@intCategoryId
+				   ,convert(bit,0)
+				   ,0
+					,convert(bit,0)
+					,convert(bit,0)
+					,convert(bit,0)
+					,convert(bit,0)
+					,convert(bit,0)
+				   ,1)
+	end
+	
+	set @intItemId = (select top 1 intItemId from tblICItem where strItemNo = 'HDNonBillable');
+
+	/*Create HDNonBillable Item UOM*/
+
+	declare @intItemUOMId int;
+
+	if not exists (select * from tblICItemUOM where intItemId = @intItemId and intUnitMeasureId = @intUnitMeasureId)
+	begin
+		INSERT INTO [dbo].[tblICItemUOM]
+				   ([intItemId]
+				   ,[intUnitMeasureId]
+				   ,[intConcurrencyId])
+			 VALUES
+				   (@intItemId
+				   ,@intUnitMeasureId
+				   ,1)
+	end
+		set @intItemUOMId = (select top 1 intItemUOMId from tblICItemUOM where intItemId = @intItemId and intUnitMeasureId = @intUnitMeasureId);
+
+	update tblHDJobCode set intItemId = @intItemId, intItemUOMId = @intItemUOMId, intUnitMeasureId = @intUnitMeasureId where intItemId is null;
+
+GO
+	PRINT N'End creating Non-Billable Inventory Item.';
 	PRINT N'Start converting Help Desk Jobcode to Inventory Item.';
 GO
 

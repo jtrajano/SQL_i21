@@ -18,6 +18,7 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@intItemId INT
 		,@ysnGenerateTaskOnCreatePickOrder BIT
+		,@intDockDoorId INT
 
 	SELECT @strInventoryShipmentNo = strShipmentNumber
 		,@intShipFromLocationId = intShipFromLocationId
@@ -46,13 +47,21 @@ BEGIN TRY
 		,@strPatternString = @strOrderNo OUTPUT
 
 	SELECT @intStageLocationId = intStorageLocationId
+		,@intDockDoorId = intDockDoorId
 	FROM tblICInventoryShipmentItem
 	WHERE intInventoryShipmentId = @intInventoryShipmentId
 		AND intStorageLocationId IS NOT NULL
+		OR intDockDoorId IS NOT NULL
 
 	IF @intStageLocationId IS NULL
 	BEGIN
 		SELECT @intStageLocationId = intDefaultShipmentStagingLocation
+		FROM tblMFCompanyPreference
+	END
+
+	IF @intDockDoorId IS NULL
+	BEGIN
+		SELECT @intDockDoorId = intDefaultShipmentDockDoorLocation
 		FROM tblMFCompanyPreference
 	END
 
@@ -82,6 +91,7 @@ BEGIN TRY
 		,dtmOrderDate
 		,strLastUpdateBy
 		,intLocationId
+		,intDockDoorId
 		)
 	SELECT 1
 		,5
@@ -93,6 +103,7 @@ BEGIN TRY
 		,@dtmCurrentDate
 		,@strUserName
 		,@intShipFromLocationId
+		,@intDockDoorId
 
 	INSERT INTO @tblMFOrderHeader
 	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
