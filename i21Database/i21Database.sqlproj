@@ -6291,6 +6291,7 @@
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
+    <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
