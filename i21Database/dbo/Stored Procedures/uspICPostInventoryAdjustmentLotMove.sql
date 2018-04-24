@@ -180,7 +180,7 @@ BEGIN
 										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
+			,intCurrencyId			= NULL
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
@@ -211,7 +211,7 @@ BEGIN
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Own -- process only company-owned stocks
 
-	
+
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
@@ -251,17 +251,17 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intItemUOMId 
+			,intItemUOMId			= StockUOM.intItemUOMId--Detail.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
-			,dblUOMQty				= ItemUOM.dblUnitQty
+			,dblQty					= dbo.fnMultiply(ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0), ItemUOM.dblUnitQty)--ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
+			,dblUOMQty				= StockUOM.dblUnitQty--ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
-										,Detail.intItemUOMId
+										,StockUOM.intItemUOMId--,Detail.intItemUOMId
 										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL 
+			,intCurrencyId			= NULL
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
@@ -286,18 +286,21 @@ BEGIN
 				AND WeightUOM.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
-				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId					
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId	
+			LEFT JOIN dbo.tblICItemUOM StockUOM
+				ON StockUOM.intItemUOMId = dbo.fnGetItemStockUOM(Detail.intItemId)
+				AND StockUOM.intItemId = Detail.intItemId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks
-
 
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
 	IF EXISTS (SELECT TOP 1 1 FROM @MergeLotSourceStorage)
 	BEGIN
+
 		EXEC dbo.uspICPostStorage
 			@MergeLotSourceStorage  
 			,@strBatchId  
