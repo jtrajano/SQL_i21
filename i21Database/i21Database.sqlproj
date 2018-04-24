@@ -6235,7 +6235,6 @@
     <Build Include="dbo\Tables\tblTFTaxAuthorityCountyLocation.sql" />
     <Build Include="dbo\Tables\tblTFCountyLocation.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityCountyLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuICGetItemsWithNoLocation.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebatePrograms.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicNM.sql" />
@@ -6360,6 +6359,7 @@
     <Build Include="dbo\Views\vyuARGetPurchaseOrder.sql" />
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
