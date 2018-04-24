@@ -136,7 +136,7 @@ BEGIN
 END
 
 SET @ItemCurrencyExchangeRate = CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemCurrencyExchangeRate, 1.000000) END
-SET @ItemSubCurrencyId = CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemSubCurrencyRate, 1.000000) END
+SET @ItemSubCurrencyRate = CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemSubCurrencyRate, 1.000000) END
 	
 	
 IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
