@@ -6360,6 +6360,7 @@
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

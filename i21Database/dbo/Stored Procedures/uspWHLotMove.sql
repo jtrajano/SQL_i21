@@ -60,7 +60,6 @@ BEGIN TRY
 		,@strLotNumber = strLotNumber
 		,@dblLotQty = dblQty
 		,@intLotStatusId = intLotStatusId
-		,@intNewLocationId = intLocationId
 		,@dblWeightPerQty = dblWeightPerQty
 		,@intWeightUOMId = intWeightUOMId
 		,@dblWeight = dblWeight
@@ -81,6 +80,7 @@ BEGIN TRY
 		SELECT @intSourceLocationRestrictionId = 0
 
 	SELECT @intDestinatinLocationRestrictionId = intRestrictionId
+		,@intNewLocationId = intLocationId
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @intNewStorageLocationId
 
