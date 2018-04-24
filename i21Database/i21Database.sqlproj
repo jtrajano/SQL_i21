@@ -6290,6 +6290,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
