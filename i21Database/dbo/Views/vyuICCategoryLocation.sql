@@ -7,7 +7,8 @@ SELECT
 	,companyLocation.intCompanyLocationId
 	,strProductCodeId = defaultProductCode.strRegProdCode
 	,strFamilyId = defaultFamily.strSubcategoryId
-	,strClassId = defaultClass.strSubcategoryId		
+	,strClassId = defaultClass.strSubcategoryId
+	,strGeneralItemNo = Item.strItemNo
 FROM	
 	tblICCategoryLocation categoryLocation
 	LEFT JOIN tblSMCompanyLocation companyLocation
@@ -18,3 +19,4 @@ FROM
 		ON categoryLocation.intFamilyId = defaultFamily.intSubcategoryId
 	LEFT JOIN tblSTSubcategory defaultClass
 		ON categoryLocation.intClassId = defaultClass.intSubcategoryId
+	LEFT JOIN tblICItem Item ON Item.intItemId = categoryLocation.intGeneralItemId
