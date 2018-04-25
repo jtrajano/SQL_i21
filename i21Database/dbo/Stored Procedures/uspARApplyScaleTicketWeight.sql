@@ -84,7 +84,7 @@ BEGIN
 	ELSE
 		BEGIN
 			UPDATE tblARInvoiceDetail
-			SET dblQtyShipped = @dblNetWeight - @dblTotalTreatment
+			SET dblQtyShipped = @dblNetWeight -- - @dblTotalTreatment
 			  , intItemUOMId = @intScaleUOMId
 			  , intTicketId = @intTicketId
 			WHERE intSalesOrderDetailId = @intSalesOrderDetailId
