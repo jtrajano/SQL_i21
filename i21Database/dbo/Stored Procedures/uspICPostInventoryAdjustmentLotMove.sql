@@ -251,13 +251,13 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= StockUOM.intItemUOMId--Detail.intItemUOMId 
+			,intItemUOMId			= WeightUOM.intItemUOMId--Detail.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= dbo.fnMultiply(ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0), ItemUOM.dblUnitQty)--ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
-			,dblUOMQty				= StockUOM.dblUnitQty--ItemUOM.dblUnitQty
+			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
+			,dblUOMQty				= WeightUOM.dblUnitQty --ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
-										,StockUOM.intItemUOMId--,Detail.intItemUOMId
+										,Detail.intItemUOMId
 										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
@@ -300,7 +300,6 @@ BEGIN
 	-------------------------------------------
 	IF EXISTS (SELECT TOP 1 1 FROM @MergeLotSourceStorage)
 	BEGIN
-
 		EXEC dbo.uspICPostStorage
 			@MergeLotSourceStorage  
 			,@strBatchId  
