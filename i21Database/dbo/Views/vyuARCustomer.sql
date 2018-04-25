@@ -40,6 +40,8 @@ SELECT
 ,ysnHasBudgetSetup = cast(case when (select top 1 1 from tblARCustomerBudget where intEntityCustomerId = Cus.[intEntityId]) = 1 then 1 else 0 end as bit)
 ,intServiceChargeId
 ,strCustomerTerm = TERM.strTerm
+,Entity.strInternalNotes
+,Entity.strEmail
 ,STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') as intEntityLineOfBusinessIds
 FROM tblEMEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityId]

@@ -25,6 +25,8 @@ SELECT
 	, intLotId = lot.intLotId
 	, strWeightUOM = weightUOM.strUnitMeasure
 	, strCostUOM = costUOM.strUnitMeasure
+	, book.strBook
+	, subBook.strSubBook
 FROM tblICLot lot
 	INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
 	LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
@@ -40,3 +42,5 @@ FROM tblICLot lot
 	LEFT JOIN tblICItemUOM icostUOM ON icostUOM.intItemId = lot.intItemId AND icostUOM.ysnStockUnit=1
 	LEFT JOIN tblICUnitMeasure costUOM ON costUOM.intUnitMeasureId = icostUOM.intUnitMeasureId
 	LEFT JOIN tblICLotStatus lotStatus ON lotStatus.intLotStatusId = lot.intLotStatusId
+	LEFT JOIN tblCTBook book ON book.intBookId = lot.intBookId
+	LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = lot.intSubBookId

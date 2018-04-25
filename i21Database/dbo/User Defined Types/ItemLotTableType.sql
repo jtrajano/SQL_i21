@@ -216,4 +216,6 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intInventoryReceiptItemId]	INT NULL 
 	,[intInventoryReceiptItemLotId]	INT NULL
 	,[intSeasonCropYear]		INT NULL
+	,[intBookId]				INT NULL
+	,[intSubBookId]				INT NULL 
 )

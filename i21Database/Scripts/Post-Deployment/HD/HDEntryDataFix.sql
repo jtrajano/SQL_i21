@@ -571,4 +571,11 @@ GO
 
 GO
 	PRINT N'End converting Help Desk Jobcode to Inventory Item.';
+	PRINT N'Start Creating Help Desk Project Image Id';
+GO
+
+	update tblHDProject set strProjectImageId = NEWID() where strProjectImageId is null;
+
+GO
+	PRINT N'End Creating Help Desk Project Image Id';
 GO

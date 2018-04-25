@@ -72,6 +72,9 @@ EXEC dbo.[uspARUpdateReservedStock] @intTransactionId, 0, @intUserId, 1, @ysnPos
 --In Transit Outbound Quantities 
 EXEC dbo.[uspARUpdateInTransit] @intTransactionId, @ysnPost, 0
 
+--In Transit Direct Quantities
+EXEC dbo.[uspARUpdateInTransitDirect] @intTransactionId, @ysnPost
+
 DECLARE	@EntityCustomerId INT
 		,@LoadId INT
 

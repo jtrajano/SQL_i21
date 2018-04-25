@@ -76,6 +76,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[intCreatedUserId]			INT NULL,
 		[intCreatedEntityId]		INT NULL,
 		[intCompanyId]				INT NULL, 
+		[intBookId]					INT NULL,
+		[intSubBookId]				INT NULL,
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
 		CONSTRAINT [PK_tblICLot] PRIMARY KEY CLUSTERED ([intLotId] ASC),
 		CONSTRAINT [UN_tblICLot] UNIQUE NONCLUSTERED ([strLotNumber] ASC, [intItemId] ASC, [intLocationId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC),		
