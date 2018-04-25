@@ -106,13 +106,16 @@ SELECT
     strCode = DOC.strCode,
     strTitle = DOC.strTitle,
 	strOpportunityName = OPUR.strName,
-    strLineOfBusiness = SB.strLineOfBusiness
+    strLineOfBusiness = SB.strLineOfBusiness,
+	intCreditStopDays = CUS.intCreditStopDays,
+	strCreditCode = CUS.strCreditCode
 
 	FROM tblSOSalesOrder SO
 		JOIN ( SELECT	intEntityId,			strCustomerNumber,
 						intEntityContactId,		strName,
 						dblCreditLimit,			dblARBalance,
-						ysnPORequired,			intEntityLineOfBusinessIds
+						ysnPORequired,			intEntityLineOfBusinessIds,
+						intCreditStopDays,		strCreditCode
 			FROM vyuARCustomerSearch WITH (NOLOCK) ) CUS
 				ON CUS.intEntityId = SO.intEntityCustomerId 
 		LEFT JOIN ( SELECT intEntityId,		strName

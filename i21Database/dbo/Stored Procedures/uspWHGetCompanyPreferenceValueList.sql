@@ -41,7 +41,8 @@ BEGIN
 					   CAST((SELECT intMaximumPalletsOnForklift FROM tblMFCompanyPreference) AS NVARCHAR(255)) intMaximumPalletsOnForklift,
 					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder,
 					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld,
-					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty
+					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty,
+					   CAST((SELECT ISNULL(ysnAllowLotMoveacrossLocations,0) ysnAllowLotMoveacrossLocations FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnAllowLotMoveacrossLocations
 				FROM tblWHCompanyPreference
 				) p
 			UNPIVOT(SettingValue FOR SettingName IN (
@@ -67,6 +68,7 @@ BEGIN
 						,ysnGenerateInvShipmentStagingOrder
 						,ysnSetDefaultQtyOnHandheld
 						,ysnSplitLotOnPartialQty
+						,ysnAllowLotMoveacrossLocations
 						)) AS unpvt
 			) tblCompanyPreference
 		WHERE intCompanyLocationId = @intCompanyLocationId
@@ -100,7 +102,8 @@ BEGIN
 					   CAST((SELECT intMaximumPalletsOnForklift FROM tblMFCompanyPreference) AS NVARCHAR(255)) intMaximumPalletsOnForklift,
 					   CAST((SELECT ysnGenerateInvShipmentStagingOrder ysnGenerateInvShipmentStagingOrder FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnGenerateInvShipmentStagingOrder,
 					   CAST((SELECT ysnSetDefaultQtyOnHandheld ysnSetDefaultQtyOnHandheld FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSetDefaultQtyOnHandheld,
-					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty
+					   CAST((SELECT ISNULL(ysnSplitLotOnPartialQty,0) ysnSplitLotOnPartialQty FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnSplitLotOnPartialQty,
+					   CAST((SELECT ISNULL(ysnAllowLotMoveacrossLocations,0) ysnAllowLotMoveacrossLocations FROM tblMFCompanyPreference) AS NVARCHAR(255)) ysnAllowLotMoveacrossLocations
 				FROM tblWHCompanyPreference
 			) p
 		UNPIVOT(SettingValue FOR SettingName IN (
@@ -126,6 +129,7 @@ BEGIN
 					,ysnGenerateInvShipmentStagingOrder
 					,ysnSetDefaultQtyOnHandheld
 					,ysnSplitLotOnPartialQty
+					,ysnAllowLotMoveacrossLocations
 					)) AS unpvt
 				) tblCompanyPreference
 	END

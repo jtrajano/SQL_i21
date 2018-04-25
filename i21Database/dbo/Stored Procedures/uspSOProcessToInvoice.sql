@@ -25,6 +25,13 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 		RETURN;
 	END
 
+--VALIDATE IF SO IS FOR APPROVAL
+IF EXISTS(SELECT NULL FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order' AND intTransactionId = @SalesOrderId)
+	BEGIN
+		RAISERROR('Sales Order is still waiting for approval.', 16, 1)
+		RETURN;
+	END
+
 --VALIDATE IF HAS NON-STOCK ITEMS
 IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 				LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId WHERE ISNULL(I.strLotTracking, 'No') = 'No' AND SO.intSalesOrderId = @SalesOrderId AND SI.dblQtyRemaining > 0)

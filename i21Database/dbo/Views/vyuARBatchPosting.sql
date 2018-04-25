@@ -21,6 +21,7 @@ WHERE
 	AND (ISNULL(intTransactionId, 0) = 0 AND strType <> 'CF Tran') 
 	AND ISNULL(ysnRecurring,0) = 0 
 	AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
+	AND intInvoiceId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Invoice')
 
 UNION ALL
 

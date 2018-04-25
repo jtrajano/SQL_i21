@@ -133,3 +133,4 @@ LEFT JOIN (
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
   AND ((dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No') OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
+  AND SO.intSalesOrderId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order')
