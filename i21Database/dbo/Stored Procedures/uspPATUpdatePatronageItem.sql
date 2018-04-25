@@ -19,8 +19,17 @@ DECLARE @error NVARCHAR(100);
 BEGIN TRANSACTION
 
 BEGIN TRY
-	UPDATE tblICItem SET intPatronageCategoryId = @patronageCategory, intPatronageCategoryDirectId = @directSale
-	WHERE intItemId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@itemIds));
+	IF (@patronageCategory IS NOT NULL)
+	BEGIN
+		UPDATE tblICItem SET intPatronageCategoryId = @patronageCategory
+		WHERE intItemId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@itemIds));
+	END
+
+	IF(@directSale IS NOT NULL)
+	BEGIN
+		UPDATE tblICItem SET intPatronageCategoryDirectId = @directSale
+		WHERE intItemId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@itemIds));
+	END
 
 	SELECT @rowsProcessed = COUNT([intID]) FROM [dbo].[fnGetRowsFromDelimitedValues](@itemIds);
 

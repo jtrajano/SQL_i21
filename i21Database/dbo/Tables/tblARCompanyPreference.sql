@@ -6,6 +6,7 @@
 	[intWriteOffAccountId]			INT NULL,
 	[intInterestIncomeAccountId]	INT NULL,
 	[intDeferredRevenueAccountId]	INT NULL,
+	[intAPClearingAccountId]		INT NULL,
 	[intServiceChargeAccountId]		INT NULL,
 	[intServiceChargeTermId]		INT NULL,
 	[strServiceChargeCalculation]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -28,5 +29,6 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDeferredRevenueAccountId] FOREIGN KEY ([intDeferredRevenueAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intServiceChargeAccountId] FOREIGN KEY ([intServiceChargeAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intConversionAccountId] FOREIGN KEY ([intConversionAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intAPClearingAccountId] FOREIGN KEY ([intAPClearingAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intServiceChargeTermId] FOREIGN KEY ([intServiceChargeTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 )

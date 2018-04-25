@@ -6352,17 +6352,22 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutDeleteInvoice.sql" />
     <Build Include="dbo\Tables\tblRKCollateralHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCollateralHistoryInsert.sql" />
-    <Build Include="dbo\Tables\tblSMInterCompanyConfiguration.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyTransactionConfiguration.sql" />
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeCategory.sql" />
     <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
     <Build Include="dbo\Tables\tblCFNetworkCost.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkCostStaging.sql" />
+    <Build Include="dbo\Tables\tblCFImportNetworkCostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportNetworkCost.sql" />
     <Build Include="dbo\Views\vyuARGetPurchaseOrder.sql" />
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInTransitDirect.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyTransactionType.sql" />
+    <Build Include="dbo\Views\vyuPATSetupItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6534,6 +6539,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\SC_SouthCarolina.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\PA_Pennsylvania.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

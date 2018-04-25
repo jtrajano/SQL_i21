@@ -277,7 +277,7 @@ BEGIN
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
 										,[intTaxGroupId]			= @intTaxGroupId
-										,[ysnRecomputeTax]			= 0 -- not sure
+										,[ysnRecomputeTax]			= 1 -- not sure
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
 										,[intInventoryShipmentItemId] = NULL
@@ -478,7 +478,7 @@ BEGIN
 											,[dblMaintenanceAmount]		= NULL
 											,[dblLicenseAmount]			= NULL
 											,[intTaxGroupId]			= @intTaxGroupId
-											,[ysnRecomputeTax]			= 0 -- not sure
+											,[ysnRecomputeTax]			= 1 -- not sure
 											,[intSCInvoiceId]			= NULL
 											,[strSCInvoiceNumber]		= NULL
 											,[intInventoryShipmentItemId] = NULL
@@ -543,7 +543,7 @@ BEGIN
 							@InvoiceEntries	 = @EntriesForInvoice
 							--,@LineItemTaxEntries = NULL
 							,@UserId			 = @intCurrentUserId
-		 					,@GroupingOption	 = 7 -- 11
+		 					,@GroupingOption	 = 11
 							,@RaiseError		 = 1
 							,@ErrorMessage		 = @ErrorMessage OUTPUT
 							,@CreatedIvoices	 = @CreatedIvoices OUTPUT
