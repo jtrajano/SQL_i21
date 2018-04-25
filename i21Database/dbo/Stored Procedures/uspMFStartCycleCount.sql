@@ -1548,6 +1548,11 @@ BEGIN TRY
 				)
 	END
 
+	If @strInstantConsumption='True'
+	Begin
+		Update tblMFProcessCycleCount Set dblRequiredQty =0,dblSystemQty =dblQtyInProdStagingLocation,dblQuantity =dblQtyInProdStagingLocation  Where intCycleCountSessionId =@intCycleCountSessionId 
+	End
+
 	--COMMIT TRANSACTION
 	EXEC sp_xml_removedocument @idoc
 END TRY

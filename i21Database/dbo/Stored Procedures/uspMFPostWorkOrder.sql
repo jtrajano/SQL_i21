@@ -74,9 +74,7 @@ BEGIN TRY
 		,@ysnYieldAdjustmentAllowed = @ysnNegativeQtyAllowed
 		,@intUserId = @intUserId
 
-	IF @dblProduceQty > 0
-	BEGIN
-		SELECT @intManufacturingProcessId = intManufacturingProcessId
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
 			,@intLocationId = intLocationId
 			,@intItemId = intItemId
 			,@intManufacturingCellId = intManufacturingCellId
@@ -84,6 +82,18 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT @intAttributeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Is Instant Consumption'
+
+	SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intAttributeId
+
+	IF @dblProduceQty > 0 and @strInstantConsumption='False'
+	BEGIN
 		SELECT @intYieldCostId = intAttributeId
 		FROM tblMFAttribute
 		WHERE strAttributeName = 'Add yield cost to output item'
@@ -101,15 +111,7 @@ BEGIN TRY
 			SELECT @ysnPostGL = 1
 		END
 
-		SELECT @intAttributeId = intAttributeId
-		FROM tblMFAttribute
-		WHERE strAttributeName = 'Is Instant Consumption'
-
-		SELECT @strInstantConsumption = strAttributeValue
-		FROM tblMFManufacturingProcessAttribute
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intLocationId = @intLocationId
-			AND intAttributeId = @intAttributeId
+		
 
 		SELECT @str3rdPartyPalletsMandatory = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
@@ -489,7 +491,7 @@ BEGIN TRY
 				,PL.intItemUOMId
 				,abs(PL.dblQuantity)
 				,PL.intItemUOMId
-				,@intTransactionId
+				,IsNULL(PL.intBatchId, @intTransactionId)
 				,9999
 				,@dtmCurrentDateTime
 				,@intUserId
@@ -540,7 +542,7 @@ BEGIN TRY
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
 				,dblExchangeRate = 1
-				,intTransactionId = @intTransactionId
+				,intTransactionId = cl.intBatchId 
 				,intTransactionDetailId = cl.intWorkOrderConsumedLotId
 				,strTransactionId = @strTransactionId
 				,intTransactionTypeId = @INVENTORY_CONSUME
