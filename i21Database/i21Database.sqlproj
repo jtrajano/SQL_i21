@@ -6368,6 +6368,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInTransitDirect.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransactionType.sql" />
     <Build Include="dbo\Views\vyuPATSetupItem.sql" />
+    <Build Include="dbo\Tables\tblCFItemCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
