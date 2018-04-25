@@ -52,8 +52,8 @@ BEGIN
 		,C.intLocationId
 		,C.strCustomer
 		,NULL --dblOldOriginalQuantity set to null when newly added and delete 
-		,CASE WHEN @action = 'ADD' THEN C.dblOriginalQuantity ELSE C.dblOriginalQuantity * -1 END --Set the negative if the action is delete to make it a reverse entry
-		,CASE WHEN @action = 'ADD' THEN C.dblRemainingQuantity ELSE C.dblRemainingQuantity * -1 END --Set the negative if the action is delete to make it a reverse entry
+		,CASE WHEN @action = 'ADD' THEN C.dblOriginalQuantity ELSE 0 END --Set the 0 if the action is delete
+		,CASE WHEN @action = 'ADD' THEN C.dblRemainingQuantity ELSE 0 END --Set the 0 if the action is delete 
 		,C.intUnitMeasureId
 		,C.intContractHeaderId
 		,C.intTransNo
@@ -62,7 +62,7 @@ BEGIN
 		,NULL --dtmOldAdjustmentDate set to null when newly added and delete
 		,CA.dtmAdjustmentDate
 		,NULL --dblOldAdjustmentAmount set to null when newly added and delete
-		,CASE WHEN @action = 'ADD' THEN CA.dblAdjustmentAmount ELSE CA.dblAdjustmentAmount * -1 END --Set the to negative if the action is delete to make it a reverse entry
+		,CASE WHEN @action = 'ADD' THEN CA.dblAdjustmentAmount ELSE 0 END --Set the to 0 if the action is delete
 		,CA.strAdjustmentNo
 		,GETDATE()
 		,(SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @userId)
