@@ -63,7 +63,7 @@ DECLARE
 	,@ItemIsInventory					BIT				= 0
 	,@ItemDocumentNumber				NVARCHAR(100)	= NULL			
 	,@ItemDescription					NVARCHAR(500)	= NULL
-	,@OrderUOMId						INT				= NULL
+	,@ItemOrderUOMId					INT				= NULL
 	,@ItemQtyOrdered					NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId							INT				= NULL
 	,@ItemQtyShipped					NUMERIC(18,6)	= 0.000000
@@ -151,7 +151,7 @@ SELECT TOP 1
 	,@ItemIsInventory					= 0
 	,@ItemDocumentNumber				= NULL			
 	,@ItemDescription					= 'Overpayment for '+ ARP.strRecordNumber
-	,@OrderUOMId						= NULL
+	,@ItemOrderUOMId					= NULL
 	,@ItemQtyOrdered					= @ZeroDecimal
 	,@ItemUOMId							= NULL
 	,@ItemQtyShipped					= 1.000000
@@ -248,7 +248,7 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemIsInventory					= @ItemIsInventory
 	,@ItemDocumentNumber				= @ItemDocumentNumber
 	,@ItemDescription					= @ItemDescription
-	,@OrderUOMId						= @OrderUOMId
+	,@ItemOrderUOMId					= @ItemOrderUOMId
 	,@ItemQtyOrdered					= @ItemQtyOrdered
 	,@ItemUOMId							= @ItemUOMId
 	,@ItemQtyShipped					= @ItemQtyShipped

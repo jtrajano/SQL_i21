@@ -10,11 +10,12 @@
 	,@RaiseError					BIT				= 0		
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@OrderUOMId					INT				= NULL
-	,@PriceUOMId					INT				= NULL
+	,@ItemOrderUOMId				INT				= NULL
+	,@ItemPriceUOMId				INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
+	,@ItemUnitQuantity				NUMERIC(18,6)	= 1.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
@@ -118,6 +119,15 @@ FROM
 WHERE
 	intInvoiceId = @InvoiceId
 
+IF @ItemPriceUOMId IS NULL
+BEGIN
+	SET @ItemPriceUOMId		= @ItemUOMId
+	SET @ItemUnitQuantity	= 1.000000
+END
+
+SET @ItemCurrencyExchangeRate = CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemCurrencyExchangeRate, 1.000000) END
+SET @ItemSubCurrencyRate = CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemSubCurrencyRate, 1.000000) END
+
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
 	IF @InitTranCount = 0
@@ -141,11 +151,12 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@RaiseError					= @RaiseError
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@OrderUOMId					= @OrderUOMId
-			,@PriceUOMId					= @PriceUOMId
+			,@ItemOrderUOMId				= @ItemOrderUOMId
+			,@ItemPriceUOMId				= @ItemPriceUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemUOMId						= @ItemUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
+			,@ItemUnitQuantity				= @ItemUnitQuantity
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemTermDiscount				= @ItemTermDiscount
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
@@ -254,16 +265,23 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 	BEGIN
 		BEGIN TRY
 
-		DECLARE  @ContractNumber	INT
-		,@ContractSeq		INT
-		,@InvoiceType		NVARCHAR(200)
-		,@TermId			INT
-		,@Pricing			NVARCHAR(250)	= NULL
-		,@ContractHeaderId	INT				= NULL
-		,@ContractDetailId	INT				= NULL
-		,@EntityCustomerId	INT
-		,@InvoiceDate		DATETIME
-		,@SpecialPrice		NUMERIC(18,6)	= 0.000000	
+		DECLARE @ContractNumber					INT
+				,@ContractSeq					INT
+				,@InvoiceType					NVARCHAR(200)
+				,@TermId						INT
+				,@Pricing						NVARCHAR(250)	= NULL
+				,@ContractHeaderId				INT				= NULL
+				,@ContractDetailId				INT				= NULL
+				,@EntityCustomerId				INT
+				,@InvoiceDate					DATETIME
+				,@SpecialPrice					NUMERIC(18,6)	= 0.000000
+				,@ContractUOMId					INT
+				,@PriceUOMId					INT
+				,@PriceUOMQuantity				NUMERIC(18,6)
+				,@CurrencyExchangeRateTypeId	INT
+				,@CurrencyExchangeRate			NUMERIC(18,6)
+				,@SubCurrencyId					INT
+				,@SubCurrencyRate				NUMERIC(18,6)
 
 		BEGIN TRY
 		SELECT 
@@ -286,20 +304,27 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 
 
 		EXEC dbo.[uspARGetItemPrice]  
-			 @ItemId					= @ItemId
-			,@CustomerId				= @EntityCustomerId
-			,@LocationId				= @CompanyLocationId
-			,@ItemUOMId					= @ItemUOMId
-			,@TransactionDate			= @InvoiceDate
-			,@Quantity					= @ItemQtyShipped
-			,@Price						= @SpecialPrice			OUTPUT
-			,@Pricing					= @Pricing				OUTPUT
-			,@ContractHeaderId			= @ContractHeaderId		OUTPUT
-			,@ContractDetailId			= @ContractDetailId		OUTPUT
-			,@ContractNumber			= @ContractNumber		OUTPUT
-			,@ContractSeq				= @ContractSeq			OUTPUT
-			,@TermDiscount				= @ItemTermDiscount		OUTPUT
-			,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT
+			 @ItemId						= @ItemId
+			,@CustomerId					= @EntityCustomerId
+			,@LocationId					= @CompanyLocationId
+			,@ItemUOMId						= @ItemUOMId
+			,@TransactionDate				= @InvoiceDate
+			,@Quantity						= @ItemQtyShipped
+			,@Price							= @SpecialPrice					OUTPUT
+			,@Pricing						= @Pricing						OUTPUT
+			,@ContractHeaderId				= @ContractHeaderId				OUTPUT
+			,@ContractDetailId				= @ContractDetailId				OUTPUT
+			,@ContractNumber				= @ContractNumber				OUTPUT
+			,@ContractSeq					= @ContractSeq					OUTPUT			
+			,@TermDiscount					= @ItemTermDiscount				OUTPUT
+			,@TermDiscountBy				= @ItemTermDiscountBy			OUTPUT
+			,@ContractUOMId					= @ContractUOMId				OUTPUT
+			,@PriceUOMId					= @PriceUOMId					OUTPUT
+			,@PriceUOMQuantity				= @PriceUOMQuantity				OUTPUT
+			,@CurrencyExchangeRateTypeId	= @CurrencyExchangeRateTypeId	OUTPUT
+			,@CurrencyExchangeRate			= @CurrencyExchangeRate			OUTPUT
+			,@SubCurrencyId					= @SubCurrencyId				OUTPUT
+			,@SubCurrencyRate				= @SubCurrencyRate				OUTPUT
 			--,@AvailableQuantity			= NULL OUTPUT
 			--,@UnlimitedQuantity			= 0    OUTPUT
 			--,@OriginalQuantity			= NULL
@@ -317,11 +342,23 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 
 		IF (ISNULL(@RefreshPrice,0) = 1)
 			BEGIN
-				SET @ItemPrice = @SpecialPrice
-				SET @ItemUnitPrice = @SpecialPrice
-				SET @ItemPricing = @Pricing
-				SET @ItemContractHeaderId = @ContractHeaderId
-				SET @ItemContractDetailId = @ContractDetailId
+				SET @ItemPrice				= @SpecialPrice
+				SET @ItemUnitPrice			= @SpecialPrice
+				SET @ItemPricing			= @Pricing
+				SET @ItemContractHeaderId	= @ContractHeaderId
+				SET @ItemContractDetailId	= @ContractDetailId
+				IF ISNULL(@ContractDetailId,0) <> 0
+				BEGIN
+					SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
+					SET @ItemPriceUOMId					= @PriceUOMId
+					SET @ItemUOMId						= @ContractUOMId
+					SET @ItemOrderUOMId					= @ContractUOMId
+					SET @ItemUnitQuantity				= ISNULL(@PriceUOMQuantity, 1.000000)
+					SET @ItemCurrencyExchangeRateTypeId	= @CurrencyExchangeRateTypeId
+					SET @ItemCurrencyExchangeRate		= ISNULL(@CurrencyExchangeRate, 1.000000)
+					SET @ItemSubCurrencyId				= @SubCurrencyId
+					SET @ItemSubCurrencyRate			= ISNULL(@SubCurrencyRate, 1.000000)
+				END
 			END
 		
 		END TRY
@@ -346,6 +383,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intContractDetailId]
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
+				,[dblUnitQuantity]
 				,[dblDiscount]
 				,[dblItemTermDiscount]
 				,[strItemTermDiscountBy]
@@ -393,13 +431,14 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemPrepayRate 
 				,@ItemDescription
 				,@ItemDocumentNumber
-				,@OrderUOMId
-				,@PriceUOMId
+				,@ItemOrderUOMId
+				,@ItemPriceUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
+				,@ItemUnitQuantity
 				,@ItemDiscount
 				,@ItemTermDiscount
 				,@ItemTermDiscountBy
@@ -422,11 +461,11 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemMaintenanceType
 				,@ItemFrequency
 				,@ItemMaintenanceDate
-				,[intCurrencyExchangeRateTypeId]	= @ItemCurrencyExchangeRateTypeId
-				,[intCurrencyExchangeRateId]		= @ItemCurrencyExchangeRateId
-				,[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END
+				,@ItemCurrencyExchangeRateTypeId
+				,@ItemCurrencyExchangeRateId
+				,@ItemCurrencyExchangeRate
 				,ISNULL(@ItemSubCurrencyId, @CurrencyId)
-				,CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1 ELSE ISNULL(@ItemSubCurrencyRate, 1) END
+				,@ItemSubCurrencyRate
 				,@ItemIsBlended
 				,@ItemRecipeId
 				,@ItemSublocationId

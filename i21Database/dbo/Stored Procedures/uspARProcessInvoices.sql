@@ -214,11 +214,12 @@ DECLARE  @Id									INT
 		,@Inventory								BIT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
-		,@OrderUOMId							INT
+		,@ItemOrderUOMId						INT
 		,@ItemQtyOrdered						NUMERIC(18, 6)
 		,@ItemUOMId								INT
-		,@PriceUOMId							INT
+		,@ItemPriceUOMId						INT
 		,@ItemQtyShipped						NUMERIC(18, 6)
+		,@ItemUnitQuantity						NUMERIC(18, 6)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemTermDiscount						NUMERIC(18, 6)
 		,@ItemTermDiscountBy					NVARCHAR(50)
@@ -375,11 +376,12 @@ BEGIN
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
 		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL(ISNULL([strDocumentNumber], @SourceNumber),[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
-		,@OrderUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
+		,@ItemOrderUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
 		,@ItemUOMId						= (CASE WHEN @GroupingOption = 0 THEN [intItemUOMId] ELSE NULL END)
-		,@PriceUOMId					= (CASE WHEN @GroupingOption = 0 THEN [intPriceUOMId] ELSE NULL END)
+		,@ItemPriceUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intPriceUOMId] ELSE NULL END)
 		,@ItemQtyShipped				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyShipped] ELSE NULL END)
+		,@ItemUnitQuantity				= (CASE WHEN @GroupingOption = 0 THEN [dblContractPriceUOMQty] ELSE NULL END)
 		,@ItemDiscount					= (CASE WHEN @GroupingOption = 0 THEN [dblDiscount] ELSE NULL END)
 		,@ItemTermDiscount				= (CASE WHEN @GroupingOption = 0 THEN [dblItemTermDiscount] ELSE NULL END)
 		,@ItemTermDiscountBy			= (CASE WHEN @GroupingOption = 0 THEN [strItemTermDiscountBy] ELSE NULL END)
@@ -607,11 +609,12 @@ BEGIN
 			,@ItemIsInventory				= @Inventory
 			,@ItemDocumentNumber			= @ItemDocumentNumber
 			,@ItemDescription				= @ItemDescription
-			,@OrderUOMId					= @OrderUOMId
+			,@ItemOrderUOMId				= @ItemOrderUOMId
 			,@ItemQtyOrdered				= @ItemQtyOrdered
 			,@ItemUOMId						= @ItemUOMId
-			,@PriceUOMId					= @PriceUOMId
+			,@ItemPriceUOMId				= @ItemPriceUOMId
 			,@ItemQtyShipped				= @ItemQtyShipped
+			,@ItemUnitQuantity				= @ItemUnitQuantity
 			,@ItemDiscount					= @ItemDiscount
 			,@ItemTermDiscount				= @ItemTermDiscount
 			,@ItemTermDiscountBy			= @ItemTermDiscountBy
@@ -772,11 +775,12 @@ BEGIN
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
 					,@ItemDescription				= [strItemDescription]
-					,@OrderUOMId					= [intOrderUOMId]					
+					,@ItemOrderUOMId				= [intOrderUOMId]					
 					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemUOMId						= [intItemUOMId]
-					,@PriceUOMId					= [intPriceUOMId]
+					,@ItemPriceUOMId				= [intPriceUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
+					,@ItemUnitQuantity				= [dblContractPriceUOMQty]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemTermDiscount				= [dblItemTermDiscount]
 					,@ItemTermDiscountBy			= [strItemTermDiscountBy]
@@ -863,11 +867,12 @@ BEGIN
 						,@RaiseError					= @RaiseError
 						,@ItemDocumentNumber			= @ItemDocumentNumber
 						,@ItemDescription				= @ItemDescription
-						,@OrderUOMId					= @OrderUOMId
+						,@ItemOrderUOMId				= @ItemOrderUOMId
 						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemUOMId						= @ItemUOMId
-						,@PriceUOMId					= @PriceUOMId
+						,@ItemPriceUOMId				= @ItemPriceUOMId
 						,@ItemQtyShipped				= @ItemQtyShipped
+						,@ItemUnitQuantity				= @ItemUnitQuantity
 						,@ItemDiscount					= @ItemDiscount
 						,@ItemTermDiscount				= @ItemTermDiscount
 						,@ItemTermDiscountBy			= @ItemTermDiscountBy
@@ -1464,11 +1469,12 @@ BEGIN TRY
 						,@Inventory						= [ysnInventory]
 						,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
 						,@ItemDescription				= [strItemDescription]
-						,@OrderUOMId					= [intOrderUOMId]
+						,@ItemOrderUOMId				= [intOrderUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemUOMId						= [intItemUOMId]
-						,@PriceUOMId					= [intPriceUOMId]
+						,@ItemPriceUOMId				= [intPriceUOMId]
 						,@ItemQtyShipped				= [dblQtyShipped]
+						,@ItemUnitQuantity				= [dblContractPriceUOMQty]
 						,@ItemDiscount					= [dblDiscount]
 						,@ItemPrice						= [dblPrice]
 						,@ItemUnitPrice					= [dblUnitPrice]
@@ -1551,11 +1557,12 @@ BEGIN TRY
 							,@RaiseError					= @RaiseError
 							,@ItemDocumentNumber			= @ItemDocumentNumber
 							,@ItemDescription				= @ItemDescription
-							,@OrderUOMId					= @OrderUOMId
+							,@ItemOrderUOMId				= @ItemOrderUOMId
 							,@ItemQtyOrdered				= @ItemQtyOrdered
 							,@ItemUOMId						= @ItemUOMId
-							,@PriceUOMId					= @PriceUOMId
+							,@ItemPriceUOMId				= @ItemPriceUOMId
 							,@ItemQtyShipped				= @ItemQtyShipped
+							,@ItemUnitQuantity				= @ItemUnitQuantity
 							,@ItemDiscount					= @ItemDiscount
 							,@ItemPrice						= @ItemPrice
 							,@ItemUnitPrice					= @ItemUnitPrice
@@ -1771,11 +1778,12 @@ BEGIN TRY
 					,@Inventory						= [ysnInventory]
 					,@ItemDocumentNumber			= ISNULL([strDocumentNumber],@SourceNumber)
 					,@ItemDescription				= [strItemDescription]
-					,@OrderUOMId					= [intOrderUOMId]
+					,@ItemOrderUOMId				= [intOrderUOMId]
 					,@ItemQtyOrdered				= [dblQtyOrdered]
 					,@ItemUOMId						= [intItemUOMId]
-					,@PriceUOMId					= [intPriceUOMId]
+					,@ItemPriceUOMId				= [intPriceUOMId]
 					,@ItemQtyShipped				= [dblQtyShipped]
+					,@ItemUnitQuantity				= [dblContractPriceUOMQty]
 					,@ItemDiscount					= [dblDiscount]
 					,@ItemPrice						= [dblPrice]
 					,@ItemUnitPrice					= [dblUnitPrice]
@@ -1851,28 +1859,56 @@ BEGIN TRY
 								,@ContractNumber	INT
 								,@ContractSeq		INT
 								,@InvoiceType		NVARCHAR(200)
+								,@ContractUOMId					INT
+								,@PriceUOMId					INT
+								,@PriceUOMQuantity				NUMERIC(18,6)
+								,@CurrencyExchangeRateTypeId	INT
+								,@CurrencyExchangeRate			NUMERIC(18,6)
+								,@SubCurrencyId					INT
+								,@SubCurrencyRate				NUMERIC(18,6)
+								,@SpecialPrice					NUMERIC(18,6)	= 0.000000
 
 						BEGIN TRY
 						SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
 						EXEC dbo.[uspARGetItemPrice]  
-							 @ItemId					= @ItemId
-							,@CustomerId				= @EntityCustomerId
-							,@LocationId				= @CompanyLocationId
-							,@ItemUOMId					= @ItemUOMId
-							,@TransactionDate			= @Date
-							,@Quantity					= @ItemQtyShipped
-							,@Price						= @ItemPrice			OUTPUT
-							,@Pricing					= @Pricing				OUTPUT
-							,@ContractHeaderId			= @ContractHeaderId		OUTPUT
-							,@ContractDetailId			= @ItemContractDetailId	OUTPUT
-							,@ContractNumber			= @ContractNumber		OUTPUT
-							,@ContractSeq				= @ContractSeq			OUTPUT
-							,@TermDiscount				= @ItemTermDiscount		OUTPUT
-							,@TermDiscountBy			= @ItemTermDiscountBy	OUTPUT							
-							,@InvoiceType				= @InvoiceType
-							,@TermId					= @TermId
+							 @ItemId						= @ItemId
+							,@CustomerId					= @EntityCustomerId
+							,@LocationId					= @CompanyLocationId
+							,@ItemUOMId						= @ItemUOMId
+							,@TransactionDate				= @Date
+							,@Quantity						= @ItemQtyShipped
+							,@Price							= @SpecialPrice					OUTPUT
+							,@Pricing						= @Pricing						OUTPUT
+							,@ContractHeaderId				= @ContractHeaderId				OUTPUT
+							,@ContractDetailId				= @ItemContractDetailId			OUTPUT
+							,@ContractNumber				= @ContractNumber				OUTPUT
+							,@ContractSeq					= @ContractSeq					OUTPUT
+							,@TermDiscount					= @ItemTermDiscount				OUTPUT
+							,@TermDiscountBy				= @ItemTermDiscountBy			OUTPUT							
+							,@PriceUOMId					= @PriceUOMId					OUTPUT
+							,@PriceUOMQuantity				= @PriceUOMQuantity				OUTPUT
+							,@CurrencyExchangeRateTypeId	= @CurrencyExchangeRateTypeId	OUTPUT
+							,@CurrencyExchangeRate			= @CurrencyExchangeRate			OUTPUT
+							,@SubCurrencyId					= @SubCurrencyId				OUTPUT
+							,@SubCurrencyRate				= @SubCurrencyRate				OUTPUT
+							,@InvoiceType					= @InvoiceType
+							,@TermId						= @TermId
 
-						SET @ItemUnitPrice = @ItemPrice
+						SET @ItemPrice				= @SpecialPrice
+						SET @ItemUnitPrice			= @SpecialPrice
+						SET @ItemPricing			= @Pricing
+						IF ISNULL(@ItemContractDetailId,0) <> 0
+						BEGIN
+							SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
+							SET @ItemPriceUOMId					= @PriceUOMId
+							SET @ItemUOMId						= @ContractUOMId
+							SET @ItemOrderUOMId					= @ContractUOMId
+							SET @ItemUnitQuantity				= ISNULL(@PriceUOMQuantity, 1.000000)
+							SET @ItemCurrencyExchangeRateTypeId	= @CurrencyExchangeRateTypeId
+							SET @ItemCurrencyExchangeRate		= ISNULL(@CurrencyExchangeRate, 1.000000)
+							SET @ItemSubCurrencyId				= @SubCurrencyId
+							SET @ItemSubCurrencyRate			= ISNULL(@SubCurrencyRate, 1.000000)
+						END
 						END TRY
 						BEGIN CATCH
 							SET @ErrorMessage = ERROR_MESSAGE();
@@ -1891,11 +1927,12 @@ BEGIN TRY
 						,[dblPrepayRate]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPrepayRate ELSE [dblPrepayRate] END
 						,[strDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDocumentNumber ELSE [strDocumentNumber] END
 						,[strItemDescription]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDescription ELSE [strItemDescription] END
-						,[intOrderUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @OrderUOMId ELSE [intOrderUOMId] END
+						,[intOrderUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemOrderUOMId ELSE [intOrderUOMId] END
 						,[dblQtyOrdered]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemQtyOrdered ELSE [dblQtyOrdered] END
 						,[intItemUOMId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemUOMId ELSE [intItemUOMId] END
-						,[intPriceUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @PriceUOMId ELSE [intPriceUOMId] END
+						,[intPriceUOMId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPriceUOMId ELSE [intPriceUOMId] END
 						,[dblQtyShipped]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemQtyShipped ELSE [dblQtyShipped] END
+						,[dblUnitQuantity]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemUnitQuantity ELSE [dblUnitQuantity] END
 						,[dblDiscount]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemDiscount ELSE [dblDiscount] END
 						,[dblItemTermDiscount]					= @ItemTermDiscount
 						,[strItemTermDiscountBy]				= @ItemTermDiscountBy

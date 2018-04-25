@@ -6,12 +6,15 @@
 	,@TransactionDate			DATETIME		= NULL
 	,@Quantity					NUMERIC(18,6)
 	,@Price						NUMERIC(18,6)	= NULL OUTPUT
+	,@UnitPrice					NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing					NVARCHAR(250)	= NULL OUTPUT	
 	,@ContractHeaderId			INT				= NULL OUTPUT
 	,@ContractDetailId			INT				= NULL OUTPUT
 	,@ContractNumber			NVARCHAR(50)	= NULL OUTPUT
 	,@ContractSeq				INT				= NULL OUTPUT
-	,@NewQuantity				NUMERIC(18,6)   = NULL OUTPUT
+	,@PriceUOMQuantity			NUMERIC(18,6)   = NULL OUTPUT
+	,@ContractUOMId				INT			    = NULL OUTPUT
+	,@ContractUOM				NVARCHAR(50)	= NULL OUTPUT
 	,@PriceUOMId				INT			    = NULL OUTPUT
 	,@PriceUOM					NVARCHAR(50)	= NULL OUTPUT
 	,@AvailableQuantity			NUMERIC(18,6)   = NULL OUTPUT
@@ -50,14 +53,17 @@ AS
 
 	SELECT
 		 @Price							= dblPrice
+		,@UnitPrice						= dblUnitPrice
 		,@Pricing						= strPricing
 		,@ContractHeaderId				= intContractHeaderId
 		,@ContractDetailId				= intContractDetailId
 		,@ContractNumber				= strContractNumber
 		,@ContractSeq					= intContractSeq
+		,@ContractUOMId					= intContractUOMId
+		,@ContractUOM					= strContractUOM
 		,@PriceUOMId					= intPriceUOMId
 		,@PriceUOM						= strPriceUOM
-		,@NewQuantity					= dblQuantity
+		,@PriceUOMQuantity				= dblPriceUOMQuantity
 		,@AvailableQuantity				= dblAvailableQty
 		,@UnlimitedQuantity				= ysnUnlimitedQty
 		,@Deviation						= dblDeviation

@@ -160,7 +160,7 @@ WHERE intTicketHoursWorkedId IN (SELECT intTicketHoursWorkedId FROM @TicketHours
 --INNER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
 --INNER JOIN tblHDTicketHoursWorked V ON D.intTicketHoursWorkedId = V.intTicketHoursWorkedId
 --INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
---							    AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
+--				    AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
 		                    
 IF @Post = 1
 	BEGIN
