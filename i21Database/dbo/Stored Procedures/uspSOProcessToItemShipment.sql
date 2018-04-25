@@ -29,6 +29,13 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 		RETURN;
 	END
 
+--VALIDATE IF SO IS FOR APPROVAL
+IF EXISTS(SELECT NULL FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order' AND intTransactionId = @SalesOrderId)
+	BEGIN
+		RAISERROR('Sales Order is still waiting for approval.', 16, 1)
+		RETURN;
+	END
+
 --IF UNSHIP
 IF @Unship = 1
 	BEGIN

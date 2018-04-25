@@ -135,3 +135,4 @@ LEFT JOIN (
 		 , strFreightTerm
 	FROM dbo.tblSMFreightTerms WITH (NOLOCK)
 ) FREIGHT ON SO.intFreightTermId = FREIGHT.intFreightTermId
+WHERE SO.intSalesOrderId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order')
