@@ -173,8 +173,23 @@ IF(ISNULL(@Post,0)) = 1
 			(SELECT [intEntityId], [strCustomerNumber], [ysnActive] FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
 				ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 		WHERE
-			ARC.[ysnActive] = 0		
+			ARC.[ysnActive] = 0
+			
+		UNION
 		
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Invoice - ' + I.strInvoiceNumber + ' is not yet Approved!'
+		FROM 
+			@Invoices I	
+		INNER JOIN
+			(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
+				ON I.intInvoiceId = FAT.intTransactionId
 		
 		UNION
 		--UOM is required
