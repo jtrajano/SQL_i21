@@ -101,8 +101,6 @@ SELECT
 	INV.intSubBookId,
 	INV.strMobileBillingShiftNo,
 	
-
-
 	strPONumber = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strPONumber END,                                    
 	strDeliverPickup = '',
     strComments = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strComments END,
@@ -137,13 +135,16 @@ SELECT
 	strICTName = ISNULL(ICT.strICTName, ''),
 	strSourceSONumber = SO.strSalesOrderNumber,
 	strBook = CBOOK.strBook,
-	strSubBook = CSBOOK.strSubBook
+	strSubBook = CSBOOK.strSubBook,
+	intCreditStopDays = CUS.intCreditStopDays,
+	strCreditCode = CUS.strCreditCode
 FROM 
 tblARInvoice INV
 JOIN (SELECT intEntityId,					strCustomerNumber, 
 				intEntityLineOfBusinessIds,	ysnCreditHold,
 				dblCreditLimit,				dblARBalance, 
 				ysnPORequired,					strName,
+				intCreditStopDays,		strCreditCode,
 				intEntityContactId
 				FROM vyuARCustomerSearch WITH ( NOLOCK) ) CUS
 	ON CUS.intEntityId = INV.intEntityCustomerId --AND INV.intEntityContactId = CUS.intEntityContactId
