@@ -1,17 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiryReport]
 AS 
 SELECT 
-  CAR.strCustomerName
-, CAR.intEntityCustomerId
-, CAR.dbl0Days
-, CAR.dbl10Days
-, CAR.dbl30Days
-, CAR.dbl60Days
-, CAR.dbl90Days
-, CAR.dbl91Days
-, CAR.dblTotalDue
-, CAR.dblAmountPaid
-, CAR.dblInvoiceTotal
+  strCustomerName			= CAR.strCustomerName
+, intEntityCustomerId		= CAR.intEntityCustomerId
+, dbl0Days					= CAR.dbl0Days
+, dbl10Days					= CAR.dbl10Days
+, dbl30Days					= CAR.dbl30Days
+, dbl60Days					= CAR.dbl60Days
+, dbl90Days					= CAR.dbl90Days
+, dbl91Days					= CAR.dbl91Days
+, dblTotalDue				= CAR.dblTotalDue
+, dblAmountPaid				= CAR.dblAmountPaid
+, dblInvoiceTotal			= CAR.dblInvoiceTotal
 , dblYTDSales				= ISNULL(YTDSALES.dblYTDSales, 0)
 , dblYDTServiceCharge       = ISNULL(YTDSERVICECHARGE.dblYDTServiceCharge, 0)
 , dblHighestAR				= ISNULL(HIGHESTAR.dblInvoiceTotal, 0)

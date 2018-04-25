@@ -495,7 +495,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= @ysnAccrue
-								,[ysnPrice]							= @ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = LoadDetail.intPContractDetailId
@@ -558,7 +558,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
-								,[ysnPrice]							= LoadCost.ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = LoadDetail.intPContractDetailId
@@ -626,7 +626,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= @ysnAccrue
-								,[ysnPrice]							= @ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblCTContractCost ContractCost
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
@@ -691,7 +691,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
-								,[ysnPrice]							= ContractCost.ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblCTContractCost ContractCost 
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
@@ -755,7 +755,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId)
 								,[intContractDetailId]				= @intLoadContractId
 								,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
-								,[ysnPrice]							= LoadCost.ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblLGLoadDetail LoadDetail
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = LoadDetail.intPContractDetailId
@@ -818,7 +818,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = ContractCost.intContractDetailId)
 								,[intContractDetailId]				= ContractCost.intContractDetailId
 								,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
-								,[ysnPrice]							= ContractCost.ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM tblCTContractCost ContractCost
 								LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
@@ -887,7 +887,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intContractHeaderId]				= NULL
 						,[intContractDetailId]				= NULL
 						,[ysnAccrue]						= @ysnAccrue
-						,[ysnPrice]							= @ysnPrice
+						,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 						,[strChargesLink]					= RE.strChargesLink
 						FROM @ReceiptStagingTable RE 
 						LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -964,7 +964,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intContractHeaderId]				= RE.intContractHeaderId
 							,[intContractDetailId]				= RE.intContractDetailId
 							,[ysnAccrue]						= @ysnAccrue
-							,[ysnPrice]							= @ysnPrice
+							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
 							FROM @ReceiptStagingTable RE
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -1031,7 +1031,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[intContractHeaderId]				= RE.intContractHeaderId
 							,[intContractDetailId]				= RE.intContractDetailId
 							,[ysnAccrue]						= @ysnAccrue
-							,[ysnPrice]							= @ysnPrice
+							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
 							FROM tblCTContractCost ContractCost
 							LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
@@ -1095,7 +1095,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intContractHeaderId]				= NULL
 								,[intContractDetailId]				= NULL
 								,[ysnAccrue]						= @ysnAccrue
-								,[ysnPrice]							= @ysnPrice
+								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
 								FROM @ReceiptStagingTable RE 
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -1157,7 +1157,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				,[intContractHeaderId]				= RE.intContractHeaderId
 				,[intContractDetailId]				= RE.intContractDetailId
 				,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
-				,[ysnPrice]							= ContractCost.ysnPrice
+				,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 				,[strChargesLink]					= RE.strChargesLink
 				FROM tblCTContractCost ContractCost
 				LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId

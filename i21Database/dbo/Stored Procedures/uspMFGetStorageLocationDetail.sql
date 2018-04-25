@@ -7,6 +7,12 @@ BEGIN
 		,SL.intSubLocationId
 		,COUNT(SL.intStorageLocationId) OVER () AS intStorageLocationCount
 	FROM tblICStorageLocation SL
-	WHERE SL.intLocationId = @intLocationId
+	WHERE SL.intLocationId = (
+			CASE 
+				WHEN @intLocationId = 0
+					THEN SL.intLocationId
+				ELSE @intLocationId
+				END
+			)
 		AND SL.strName = @strStorageLocation
 END

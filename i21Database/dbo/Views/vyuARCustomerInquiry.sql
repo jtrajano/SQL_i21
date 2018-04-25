@@ -2,18 +2,25 @@
 AS 
 SELECT intEntityCustomerId          = C.intEntityId
      , intEntityId					= C.intEntityId
+	 , intTermsId					= C.intTermsId
 	 , strCustomerName				= C.strName
 	 , strTerm						= C.strCustomerTerm
-	 , C.strCustomerNumber
-	 , C.strAddress
-	 , C.strZipCode
-	 , C.strCity
-	 , C.strState
+	 , strCustomerNumber			= C.strCustomerNumber
+	 , strAddress					= C.strAddress
+	 , strZipCode					= C.strZipCode
+	 , strCity						= C.strCity
+	 , strState						= C.strState
 	 , strCountry					= C.strCountry
+	 , strEmail						= C.strEmail
 	 , strPhone1					= C.strPhone1
 	 , strPhone2					= C.strPhone2
 	 , strBusinessLocation			= C.strLocationName
-	 , CI.strBudgetStatus
+	 , strInternalNotes				= C.strInternalNotes
+	 , strBudgetStatus				= CI.strBudgetStatus
+	 , strBillToAddress				= C.strBillToAddress
+	 , strBillToCity				= C.strBillToCity
+	 , strBillToState				= C.strBillToState
+	 , strBillToZipCode				= C.strBillToZipCode
 	 , dblYTDSales					= ISNULL(CI.dblYTDSales, CONVERT(NUMERIC(18,6), 0))
 	 , dblYDTServiceCharge			= ISNULL(CI.dblYDTServiceCharge, CONVERT(NUMERIC(18,6), 0))
 	 , dblHighestAR					= ISNULL(CI.dblHighestAR, CONVERT(NUMERIC(18,6), 0))
