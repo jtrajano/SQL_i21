@@ -7,6 +7,7 @@
 	[intInterestIncomeAccountId]	INT NULL,
 	[intDeferredRevenueAccountId]	INT NULL,
 	[intAPClearingAccountId]		INT NULL,
+	[intCommissionExpenseAccountId]	INT NULL,
 	[intServiceChargeAccountId]		INT NULL,
 	[intServiceChargeTermId]		INT NULL,
 	[strServiceChargeCalculation]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
