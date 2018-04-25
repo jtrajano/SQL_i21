@@ -895,7 +895,7 @@ BEGIN
 				,@dtmManufacturedDate
 				,@ysnReleasedToWarehouse
 				,@ysnProduced
-				,@dtmCreatedDate
+				,ISNULL(@dtmCreatedDate, GETDATE())
 				,@intEntityUserSecurityId
 				,1
 				,@intOwnershipType
