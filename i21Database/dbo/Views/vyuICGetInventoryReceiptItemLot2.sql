@@ -52,6 +52,11 @@ SELECT
 		,receiptItemLot.dblPhysicalVsStated
 		,receipt.intCurrencyId
 		,Currency.strCurrency
+		,receiptItemLot.strCertificate
+		,receiptItemLot.intProducerId
+		,strProducer = Producer.strName
+		,receiptItemLot.strCertificateId
+		,receiptItemLot.strTrackingNumber
 FROM	tblICInventoryReceiptItemLot receiptItemLot
 		INNER JOIN tblICInventoryReceiptItem item 
 			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
@@ -82,3 +87,5 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 			ON weightUOM.intUnitMeasureId = itemWeightUOM.intUnitMeasureId
 		LEFT JOIN tblSMCurrency Currency
 			ON Currency.intCurrencyID = receipt.intCurrencyId
+		LEFT JOIN tblEMEntity Producer
+			ON Producer.intEntityId = receiptItemLot.intProducerId

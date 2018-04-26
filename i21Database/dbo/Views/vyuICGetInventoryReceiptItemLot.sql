@@ -63,6 +63,10 @@ SELECT
 	,receiptItem.strCurrency
 	,receiptItem.strBook
 	,receiptItem.strSubBook
+	,receiptItemLot.strCertificate
+	,strProducer = Producer.strName
+	,receiptItemLot.strCertificateId
+	,receiptItemLot.strTrackingNumber
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId
@@ -72,3 +76,4 @@ LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureI
 LEFT JOIN tblAPVendor Vendor ON Vendor.[intEntityId] = receiptItemLot.intEntityVendorId
 LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = receiptItemLot.intOriginId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = receiptItemLot.intGradeId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = receiptItemLot.intProducerId
