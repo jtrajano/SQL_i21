@@ -9,8 +9,7 @@
   @amount DECIMAL = NULL,
   @dueDate DATETIME = NULL,
   @submitType NVARCHAR(250) = NULL,
-  @approverConfiguration ApprovalConfigurationType READONLY,
-  @result BIT OUTPUT
+  @approverConfiguration ApprovalConfigurationType READONLY
 AS
 BEGIN
 	DECLARE @countValue INT = 0
@@ -21,8 +20,6 @@ BEGIN
 	DECLARE @transactionId INT = NULL
 	DECLARE @submitApprovalId INT
 	DECLARE @waitingForApprovalId INT
-
-	SET @result = 0
 
 	DECLARE @Approvers TABLE
 	(
@@ -421,6 +418,4 @@ BEGIN
 				@maxOrder,
 				@transactionId
 		END
-
-	RETURN @result
 END
