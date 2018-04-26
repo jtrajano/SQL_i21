@@ -18,6 +18,7 @@
 	,[dblTax]						NUMERIC(18, 6)	NULL
 	,[strImportFormat]				NVARCHAR(50)	NULL
 	,[intOriginalInvoiceId]			INT				NULL
+	,[strInvoiceOriginId]           NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
 	,[intDistributionHeaderId]		INT				NULL
 	,[intLoadDistributionHeaderId]	INT				NULL
 	,[intLoadId]					INT				NULL
