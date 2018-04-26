@@ -6371,6 +6371,8 @@
     <Build Include="dbo\Tables\tblCFItemCategory.sql" />
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContractQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessInterCompanyLogisticsXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
