@@ -16,7 +16,7 @@ BEGIN
 
 	---clear Import Log
 	DELETE FROM tblCFImportNetworkCostResult
-	WHERE intEntityId = intEntityId 
+	WHERE intEntityId = @intEntityId 
 
 
 
@@ -83,7 +83,7 @@ BEGIN
 		AND NOT EXISTS(SELECT TOP 1 1 
 						FROM tblCFSite 
 						WHERE strSiteNumber COLLATE Latin1_General_CI_AS = A.strSiteNumber COLLATE Latin1_General_CI_AS
-							AND intNetworkId = @intEntityId)
+							AND intNetworkId = @intNetworkId)
 
 	--Update ysnProcessed based on site
 	UPDATE #tmpStagingTable
@@ -236,7 +236,8 @@ BEGIN
 					 FROM tblCFNetworkCost 
 					 WHERE dtmDate = A.dtmDate 
 						AND intSiteId =  A.intSiteId 
-						AND intItemId = A.intItemId)
+						AND intItemId = A.intItemId
+						AND intNetworkId = @intNetworkId)
 
 	------------------------------------------------------------------------------------
 	------------END No Validation Issues on Site and product------------------------
