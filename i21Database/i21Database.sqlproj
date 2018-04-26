@@ -6299,6 +6299,10 @@
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
     <Build Include="dbo\Views\vyuPATSetupItem.sql" />
+    <Build Include="dbo\Tables\tblAPBalanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

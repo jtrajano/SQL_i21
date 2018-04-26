@@ -580,6 +580,19 @@ BEGIN
 	DECLARE @paymentCounter INT = 0;
 	SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
 
+	-- --UPDATE tblAPBalance
+	-- DECLARE @idsToUpdateBalance AS Id
+	-- INSERT INTO @idsToUpdateBalance
+	-- SELECT intId FROM @payments
+	-- UNION ALL 
+	-- SELECT intId FROM @prepayIds
+	-- DECLARE @apBalance DECIMAL(18,6),  @apGLBalance DECIMAL(18,6);
+	-- SELECT
+	-- 	@apBalance = dblAPBalance, @apGLBalance = dblAPGLBalance
+	-- FROM dbo.fnAPGetVoucherBalance(@idsToUpdateBalance, @GLEntries, 1, @post);
+	
+	-- EXEC uspAPUpdateBalance @userId, @apBalance, @apGLBalance
+
 	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN
 		SELECT @PaymentId = CAST((SELECT TOP(1) intPaymentId FROM #tmpPayablePostData) AS NVARCHAR(50))
