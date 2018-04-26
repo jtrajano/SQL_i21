@@ -48,7 +48,7 @@ SET ANSI_WARNINGS OFF
 			JOIN	tblARCustomer				CV	ON	LTRIM(RtRIM(CV.strCustomerNumber)) collate Latin1_General_CI_AS  = LTRIM(RtRIM(CT.gacnt_cus_no))  
 			JOIN	tblICCommodity				CO	ON	LTRIM(RtRIM(CO.strCommodityCode)) collate Latin1_General_CI_AS = LTRIM(RtRIM(CT.gacnt_com_cd))
 			JOIN	gacommst					CM	ON	LTRIM(RtRIM(CM.gacom_com_cd)) = CT.gacnt_com_cd
-			JOIN	tblICUnitMeasure			UM	ON	LTRIM(RtRIM(UM.strSymbol)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacom_un_desc))
+			JOIN	tblICUnitMeasure			UM	ON	LTRIM(RtRIM(UM.strUnitMeasure)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacom_un_desc))
 			JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CO.intCommodityId AND CU.intUnitMeasureId = UM.intUnitMeasureId
 			JOIN	tblCTContractText			TX	ON	TX.intContractType		= TY.intContractTypeId AND
 													TX.intContractPriceType = PT.intPricingTypeId AND
@@ -134,7 +134,7 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		JOIN	tblARCustomer				CV	ON	LTRIM(RtRIM(CV.strCustomerNumber)) collate Latin1_General_CI_AS  = LTRIM(RtRIM(CT.gacnt_cus_no))  
 		JOIN	tblICCommodity				CO	ON	LTRIM(RtRIM(CO.strCommodityCode)) collate Latin1_General_CI_AS = LTRIM(RtRIM(CT.gacnt_com_cd))
 		JOIN	gacommst					CM	ON	LTRIM(RtRIM(CM.gacom_com_cd)) = CT.gacnt_com_cd
-		JOIN	tblICUnitMeasure			UM	ON	LTRIM(RtRIM(UM.strSymbol)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacom_un_desc))
+		JOIN	tblICUnitMeasure			UM	ON	LTRIM(RtRIM(UM.strUnitMeasure)) collate Latin1_General_CI_AS = LTRIM(RtRIM(gacom_un_desc))
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CO.intCommodityId AND CU.intUnitMeasureId = UM.intUnitMeasureId
 		JOIN	tblCTContractText			TX	ON	TX.intContractType		= TY.intContractTypeId AND
 												TX.intContractPriceType = PT.intPricingTypeId AND
