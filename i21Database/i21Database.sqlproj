@@ -6386,6 +6386,10 @@
     <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
     <Build Include="dbo\User Defined Types\QualityPropertyValueTable.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCreateForScaleTicket.sql" />
+    <Build Include="dbo\User Defined Types\ApprovalConfigurationType.sql" />
+    <Build Include="dbo\Functions\fnSMCompareApproverConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddApprovalsForTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSubmitTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
