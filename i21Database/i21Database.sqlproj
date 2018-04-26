@@ -6541,6 +6541,7 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\PA_Pennsylvania.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
