@@ -6304,6 +6304,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
+    <Build Include="dbo\Views\vyuSOGetSalesOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

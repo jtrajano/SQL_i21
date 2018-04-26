@@ -33,17 +33,18 @@ SET ANSI_WARNINGS OFF
 
 IF EXISTS( 
 				SELECT TOP 1 1
-				FROM dbo.tblCMBankTransaction CHK 
-				  INNER JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum
-				  INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-				  INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-				  INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
-				  INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-				  INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
-				  INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
-				WHERE  CHK.strTransactionId = CHK.strTransactionId
-				  AND INVRCPTITEM.intSourceId IS NOT NULL 
-				  AND PYMT.strPaymentRecordNum IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+    FROM dbo.tblCMBankTransaction CHK 
+      INNER JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum
+      INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+      INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+      INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+      INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+      INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
+      INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+    WHERE  CHK.strTransactionId = CHK.strTransactionId
+      AND INVRCPTITEM.intSourceId IS NOT NULL 
+      AND PYMT.strPaymentRecordNum IN  (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds)) --('PAY-153')
+      AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId
 
 				UNION ALL
 				SELECT TOP 1 1 
