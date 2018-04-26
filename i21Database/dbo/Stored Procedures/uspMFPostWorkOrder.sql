@@ -75,12 +75,12 @@ BEGIN TRY
 		,@intUserId = @intUserId
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
-			,@intLocationId = intLocationId
-			,@intItemId = intItemId
-			,@intManufacturingCellId = intManufacturingCellId
-			,@intSubLocationId = intSubLocationId
-		FROM dbo.tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+		,@intLocationId = intLocationId
+		,@intItemId = intItemId
+		,@intManufacturingCellId = intManufacturingCellId
+		,@intSubLocationId = intSubLocationId
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -92,27 +92,26 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
 
-	IF @dblProduceQty > 0 and @strInstantConsumption='False'
+	SELECT @intYieldCostId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Add yield cost to output item'
+
+	SELECT @strYieldCostValue = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intYieldCostId
+
+	IF @strYieldCostValue = 'False'
+		OR @strYieldCostValue IS NULL
+		OR @strYieldCostValue = ''
 	BEGIN
-		SELECT @intYieldCostId = intAttributeId
-		FROM tblMFAttribute
-		WHERE strAttributeName = 'Add yield cost to output item'
+		SELECT @ysnPostGL = 1
+	END
 
-		SELECT @strYieldCostValue = strAttributeValue
-		FROM tblMFManufacturingProcessAttribute
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intLocationId = @intLocationId
-			AND intAttributeId = @intYieldCostId
-
-		IF @strYieldCostValue = 'False'
-			OR @strYieldCostValue IS NULL
-			OR @strYieldCostValue = ''
-		BEGIN
-			SELECT @ysnPostGL = 1
-		END
-
-		
-
+	IF @dblProduceQty > 0
+		AND @strInstantConsumption = 'False'
+	BEGIN
 		SELECT @str3rdPartyPalletsMandatory = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
@@ -426,7 +425,7 @@ BEGIN TRY
 		,@intUserId = @intUserId
 
 	IF @dblProduceQty > 0
-		AND @strInstantConsumption = 'False'
+		--AND @strInstantConsumption = 'False'
 	BEGIN
 		DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
@@ -439,7 +438,6 @@ BEGIN TRY
 			,@ItemsForPost AS ItemCostingTableType
 			,@dtmBusinessDate DATETIME
 			,@intBusinessShiftId INT
-			
 
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
@@ -542,7 +540,7 @@ BEGIN TRY
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
 				,dblExchangeRate = 1
-				,intTransactionId = cl.intBatchId 
+				,intTransactionId = cl.intBatchId
 				,intTransactionDetailId = cl.intWorkOrderConsumedLotId
 				,strTransactionId = @strTransactionId
 				,intTransactionTypeId = @INVENTORY_CONSUME
@@ -707,8 +705,8 @@ BEGIN TRY
 			,[intCostUOMId] = PL.intItemUOMId
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost*PL.dblQuantity
-				ELSE (@dblNewUnitCost * RI.dblPercentage / 100)*PL.dblQuantity
+					THEN @dblNewUnitCost * PL.dblQuantity
+				ELSE (@dblNewUnitCost * RI.dblPercentage / 100) * PL.dblQuantity
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId

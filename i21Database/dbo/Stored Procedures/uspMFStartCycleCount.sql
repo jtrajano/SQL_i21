@@ -417,7 +417,7 @@ BEGIN TRY
 					FROM tblMFWorkOrderProducedLot WP
 					WHERE WP.intWorkOrderId = ri.intWorkOrderId
 						AND WP.intItemId = ri.intItemId
-						AND WP.ysnProductionReversed =0
+						AND WP.ysnProductionReversed = 0
 					)
 			)
 	BEGIN
@@ -1052,8 +1052,16 @@ BEGIN TRY
 		SELECT I.intItemId
 			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(I.dblRequiredQty, 0)
 			,CASE 
-				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
-					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - CASE 
+						WHEN @strInstantConsumption = 'False'
+							THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+						ELSE 0
+						END > 0
+					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - CASE 
+							WHEN @strInstantConsumption = 'False'
+								THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+							ELSE 0
+							END
 				ELSE 0
 				END
 			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
@@ -1134,8 +1142,16 @@ BEGIN TRY
 		SELECT I.intItemId
 			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - Round((IsNULL(I.dblRequiredQty, 0) * IsNULL(dblRatio, 100) / 100), @intNoOfDecimalPlacesOnConsumption)
 			,CASE 
-				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0) > 0
-					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+				WHEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - CASE 
+						WHEN @strInstantConsumption = 'False'
+							THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+						ELSE 0
+						END > 0
+					THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - CASE 
+							WHEN @strInstantConsumption = 'False'
+								THEN IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)
+							ELSE 0
+							END
 				ELSE 0
 				END
 			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0)
@@ -1548,10 +1564,19 @@ BEGIN TRY
 				)
 	END
 
-	If @strInstantConsumption='True'
-	Begin
-		Update tblMFProcessCycleCount Set dblRequiredQty =0,dblSystemQty =dblQtyInProdStagingLocation,dblQuantity =dblQtyInProdStagingLocation  Where intCycleCountSessionId =@intCycleCountSessionId 
-	End
+	IF @strInstantConsumption = 'True'
+	BEGIN
+		UPDATE tblMFProcessCycleCount
+		SET dblRequiredQty = 0
+			,dblSystemQty = dblQtyInProdStagingLocation
+			,dblQuantity = dblQtyInProdStagingLocation
+		WHERE intCycleCountSessionId = @intCycleCountSessionId
+
+		UPDATE tblMFProductionSummary
+		SET dblOpeningQuantity = dblOpeningQuantity - (dblInputQuantity - dblConsumedQuantity)
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId = 1
+	END
 
 	--COMMIT TRANSACTION
 	EXEC sp_xml_removedocument @idoc

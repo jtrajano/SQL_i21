@@ -949,13 +949,11 @@ BEGIN TRY
 						IF @ysnYieldAdjustmentAllowed = 1
 							AND @dblNewQty <> 0
 						BEGIN
-							IF (
-									@strAttributeValue = 'False'
-									OR (
-										@strAttributeValue = 'True'
-										AND @strInstantConsumption = 'True'
-										)
-									)
+							IF (@strAttributeValue = 'False')
+								--OR (
+								--	@strAttributeValue = 'True'
+								--	AND @strInstantConsumption = 'True'
+								--	)
 							BEGIN
 								EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 									-- Parameters for filtering:
@@ -1263,6 +1261,11 @@ BEGIN TRY
 											AND SR.intTransactionId <> @intWorkOrderId
 											AND SR.strTransactionId <> @strWorkOrderNo
 											AND ISNULL(ysnPosted, 0) = 0
+										), 0) - ISNULL((
+										SELECT SUM(dblQuantity)
+										FROM tblMFWorkOrderProducedLotTransaction LT
+										WHERE LT.intWorkOrderId = @intWorkOrderId
+											AND LT.intLotId = L.intLotId
 										), 0)
 								)
 						FROM dbo.tblICLot L
@@ -1290,17 +1293,16 @@ BEGIN TRY
 											AND SR.strTransactionId <> @strWorkOrderNo
 											AND ISNULL(ysnPosted, 0) = 0
 										), 0)
-								) - abs(@dblYieldQuantity) >= 0
+								) - ISNULL((
+									SELECT SUM(dblQuantity)
+									FROM tblMFWorkOrderProducedLotTransaction LT
+									WHERE LT.intWorkOrderId = @intWorkOrderId
+										AND LT.intLotId = L.intLotId
+									), 0) - abs(@dblYieldQuantity) >= 0
 							AND L.strLotNumber IN (
 								SELECT WI.strLotNumber
 								FROM @tblMFWorkOrderInputLot WI
 								WHERE WI.intMachineId = @intMachineId
-								)
-							AND NOT EXISTS (
-								SELECT *
-								FROM tblMFWorkOrderProducedLotTransaction LT
-								WHERE LT.intWorkOrderId = @intWorkOrderId
-									AND LT.intLotId = L.intLotId
 								)
 						ORDER BY dtmDateCreated DESC
 
@@ -1332,6 +1334,11 @@ BEGIN TRY
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
+											), 0) - ISNULL((
+											SELECT SUM(dblQuantity)
+											FROM tblMFWorkOrderProducedLotTransaction LT
+											WHERE LT.intWorkOrderId = @intWorkOrderId
+												AND LT.intLotId = L.intLotId
 											), 0)
 									)
 							FROM dbo.tblICLot L
@@ -1358,18 +1365,17 @@ BEGIN TRY
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
+											), 0) - ISNULL((
+											SELECT SUM(dblQuantity)
+											FROM tblMFWorkOrderProducedLotTransaction LT
+											WHERE LT.intWorkOrderId = @intWorkOrderId
+												AND LT.intLotId = L.intLotId
 											), 0)
 									) > 0
 								AND L.strLotNumber IN (
 									SELECT WI.strLotNumber
 									FROM @tblMFWorkOrderInputLot WI
 									WHERE WI.intMachineId = @intMachineId
-									)
-								AND NOT EXISTS (
-									SELECT *
-									FROM tblMFWorkOrderProducedLotTransaction LT
-									WHERE LT.intWorkOrderId = @intWorkOrderId
-										AND LT.intLotId = L.intLotId
 									)
 							ORDER BY dtmDateCreated DESC
 
@@ -1406,6 +1412,11 @@ BEGIN TRY
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
+											), 0) - ISNULL((
+											SELECT SUM(dblQuantity)
+											FROM tblMFWorkOrderProducedLotTransaction LT
+											WHERE LT.intWorkOrderId = @intWorkOrderId
+												AND LT.intLotId = L.intLotId
 											), 0)
 									)
 							FROM dbo.tblICLot L
@@ -1433,13 +1444,12 @@ BEGIN TRY
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
 											), 0)
-									) - abs(@dblYieldQuantity) >= 0
-								AND NOT EXISTS (
-									SELECT *
-									FROM tblMFWorkOrderProducedLotTransaction LT
-									WHERE LT.intWorkOrderId = @intWorkOrderId
-										AND LT.intLotId = L.intLotId
-									)
+									) - ISNULL((
+										SELECT SUM(dblQuantity)
+										FROM tblMFWorkOrderProducedLotTransaction LT
+										WHERE LT.intWorkOrderId = @intWorkOrderId
+											AND LT.intLotId = L.intLotId
+										), 0) - abs(@dblYieldQuantity) >= 0
 							ORDER BY dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
@@ -1471,6 +1481,11 @@ BEGIN TRY
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
+											), 0) - ISNULL((
+											SELECT SUM(dblQuantity)
+											FROM tblMFWorkOrderProducedLotTransaction LT
+											WHERE LT.intWorkOrderId = @intWorkOrderId
+												AND LT.intLotId = L.intLotId
 											), 0)
 									)
 							FROM dbo.tblICLot L
@@ -1497,14 +1512,13 @@ BEGIN TRY
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
+											), 0) - ISNULL((
+											SELECT SUM(dblQuantity)
+											FROM tblMFWorkOrderProducedLotTransaction LT
+											WHERE LT.intWorkOrderId = @intWorkOrderId
+												AND LT.intLotId = L.intLotId
 											), 0)
 									) > 0
-								AND NOT EXISTS (
-									SELECT *
-									FROM tblMFWorkOrderProducedLotTransaction LT
-									WHERE LT.intWorkOrderId = @intWorkOrderId
-										AND LT.intLotId = L.intLotId
-									)
 							ORDER BY dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
@@ -1552,13 +1566,11 @@ BEGIN TRY
 							IF @ysnYieldAdjustmentAllowed = 1
 								AND @dblNewQty <> 0
 							BEGIN
-								IF (
-										@strAttributeValue = 'False'
-										OR (
-											@strAttributeValue = 'True'
-											AND @strInstantConsumption = 'True'
-											)
-										)
+								IF (@strAttributeValue = 'False')
+									--OR (
+									--	@strAttributeValue = 'True'
+									--	AND @strInstantConsumption = 'True'
+									--	)
 								BEGIN
 									EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 										-- Parameters for filtering:
