@@ -21,7 +21,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, ShipmentItemSource.strSourceNumber
 	, ShipmentItem.dblGross
 	, ShipmentItem.dblTare
-	, ShipmentItem.dblNet
+	, dblNet = ShipmentItem.dblGross - ShipmentItem.dblTare
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
