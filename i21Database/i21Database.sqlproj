@@ -6303,6 +6303,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
+    <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
