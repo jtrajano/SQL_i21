@@ -6374,6 +6374,8 @@
     <Build Include="dbo\Stored Procedures\uspLGUpdateContractQty.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessInterCompanyLogisticsXML.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPopulateLoadXML.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompLogisticsStg.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompLogisticsAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
