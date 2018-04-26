@@ -10,22 +10,17 @@ BEGIN
 DECLARE @Type nvarchar(100)
 DECLARE @BalanceDue int, @DayMonthDue int, @DueNextMonth int
 DECLARE @DueDate datetime
-DECLARE @MaxDaysInMonth int
 
 SELECT 
-	@Type = strType 
+	 @Type = strType 
 	,@BalanceDue = ISNULL(intBalanceDue, 0)
 	,@DayMonthDue = ISNULL(intDayofMonthDue, 0)
 	,@DueNextMonth = ISNULL(intDueNextMonth, 0)
 	,@DueDate = ISNULL(dtmDueDate, @TransactionDate)
-	,@MaxDaysInMonth = DATEDIFF(DAY, DATEADD(DAY, 1-DAY(@TransactionDate), @TransactionDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(@TransactionDate), @TransactionDate)))
 FROM
 	tblSMTerm
 WHERE
 	intTermID = @TermId
-
-IF (@MaxDaysInMonth < @DayMonthDue)
-	SET @DayMonthDue = @MaxDaysInMonth
 
 IF (@Type = 'Standard')
 	BEGIN
