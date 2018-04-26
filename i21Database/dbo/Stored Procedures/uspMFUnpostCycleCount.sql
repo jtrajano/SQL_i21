@@ -29,6 +29,13 @@ BEGIN TRY
 		,@intProductionStagingId INT
 		,@intConsumptionStorageLocationId INT
 		,@intConsumptionSubLocationId INT
+		,@ItemsForPost AS ItemCostingTableType
+		,@dtmCurrentDateTime DATETIME
+		,@INVENTORY_CONSUME AS INT = 8
+		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
+		,@STARTING_NUMBER_BATCH AS INT = 3
+
+	SELECT @dtmCurrentDateTime = Getdate()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -208,7 +215,11 @@ BEGIN TRY
 			AND intWorkOrderProducedLotTransactionId > @intWorkOrderProducedLotTransactionId
 	END
 
-	IF @strAttributeValue = 'False'
+			SELECT @strWorkOrderNo = strWorkOrderNo
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+	IF @strAttributeValue = 'False' --Is Instant Consumption
 	BEGIN
 		SELECT @strBatchId = NULL
 			,@intBatchId = NULL
@@ -219,9 +230,7 @@ BEGIN TRY
 		FROM tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @strWorkOrderNo = strWorkOrderNo
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+
 
 		DELETE
 		FROM @GLEntries
@@ -296,6 +305,117 @@ BEGIN TRY
 
 		DELETE
 		FROM dbo.tblMFWorkOrderProducedLotTransaction
+		WHERE intWorkOrderId = @intWorkOrderId
+	END
+	ELSE
+	BEGIN
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+			,@strBatchId OUTPUT
+
+		DELETE
+		FROM @ItemsForPost
+
+		--Lot Tracking
+		INSERT INTO @ItemsForPost (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,intSourceTransactionId
+			,strSourceTransactionId
+			)
+		SELECT intItemId = l.intItemId
+			,intItemLocationId = l.intItemLocationId
+			,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
+			,dtmDate = @dtmCurrentDateTime
+			,dblQty = cl.dblQuantity
+			,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
+			,dblCost = l.dblLastCost
+			,dblSalesPrice = 0
+			,intCurrencyId = NULL
+			,dblExchangeRate = 1
+			,intTransactionId = cl.intBatchId
+			,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+			,strTransactionId = @strTransactionId
+			,intTransactionTypeId = @INVENTORY_CONSUME
+			,intLotId = l.intLotId
+			,intSubLocationId = l.intSubLocationId
+			,intStorageLocationId = l.intStorageLocationId
+			,intSourceTransactionId = @INVENTORY_CONSUME
+			,strSourceTransactionId = @strTransactionId
+		FROM dbo.tblMFWorkOrderConsumedLot cl
+		JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+		JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+		WHERE cl.intWorkOrderId = @intWorkOrderId
+			AND intSequenceNo = 9999
+
+		DELETE
+		FROM @GLEntries
+
+		-- Call the post routine 
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			)
+		EXEC dbo.uspICPostCosting @ItemsForPost
+			,@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intUserId
+
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,1
+
+		DELETE
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intSequenceNo = 9999
+
+		DELETE
+		FROM tblMFWorkOrderProducedLotTransaction
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
 
