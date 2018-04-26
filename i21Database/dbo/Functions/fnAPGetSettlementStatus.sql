@@ -19,7 +19,8 @@ BEGIN
 				  INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
 				  INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 				WHERE  CHK.strTransactionId = CHK.strTransactionId
-				  AND INVRCPTITEM.intSourceId IS NOT NULL 
+				  AND INVRCPTITEM.intSourceId IS NOT NULL
+					AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId 
 				  AND PYMT.strPaymentRecordNum = @strTransactionId
 
 				UNION ALL

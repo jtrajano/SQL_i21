@@ -16,6 +16,7 @@ WHERE intTransactionType = 1
  AND NOT EXISTS(
 	SELECT 1 FROM vyuAPForApprovalTransaction B WHERE A.intBillId = B.intTransactionId AND B.strScreenName = 'Voucher'
  )
+ AND A.ysnRecurring = 0
 UNION ALL
 SELECT 'Payable' AS strTransactionType,
        intPaymentId,

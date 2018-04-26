@@ -152,6 +152,7 @@
 :r .\13_RK\01_DropTableScript.sql
 
 --CT
+:r .\14_CT\CleanCostDataCorrection.sql
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql

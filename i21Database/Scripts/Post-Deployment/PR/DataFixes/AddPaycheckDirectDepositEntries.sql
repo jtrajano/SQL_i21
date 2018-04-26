@@ -7,23 +7,29 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[uspPRPaych
 BEGIN
   
 EXEC ('
-DECLARE @intPaycheckId INT
-WHILE EXISTS (SELECT TOP 1 1 FROM tblPRPaycheck WHERE ysnDirectDeposit = 1 
-				AND ysnPosted = 1 AND intPaycheckId NOT IN (SELECT intPaycheckId FROM tblPRPaycheckDirectDeposit)
-				AND intPaycheckId NOT IN (
-					SELECT intPaycheckId FROM tblPRPaycheck WHERE intEntityEmployeeId IN (
-						SELECT intEntityEmployeeId FROM tblPREmployee 
-						WHERE intEntityEmployeeId NOT IN (SELECT DISTINCT intEntityId FROM tblEMEntityEFTInformation))))
-BEGIN
-	SELECT TOP 1 @intPaycheckId = intPaycheckId FROM tblPRPaycheck 
-	WHERE ysnDirectDeposit = 1 AND ysnPosted = 1 
-	AND intPaycheckId NOT IN (SELECT intPaycheckId FROM tblPRPaycheckDirectDeposit)
-	AND intPaycheckId NOT IN (SELECT intPaycheckId FROM tblPRPaycheck 
-								WHERE intEntityEmployeeId IN (SELECT intEntityEmployeeId FROM tblPREmployee 
-															WHERE intEntityEmployeeId NOT IN (SELECT DISTINCT intEntityId FROM tblEMEntityEFTInformation)))
+	DECLARE @intPaycheckId INT
 
-	EXEC uspPRPaycheckEFTDistribution @intPaycheckId
-END
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID(''tempdb..#tmpPaychecks'')) DROP TABLE #tmpPaychecks
+
+	SELECT DISTINCT intPaycheckId 
+	INTO #tmpPaychecks
+	FROM tblPRPaycheck WHERE ysnDirectDeposit = 1 
+		AND ysnPosted = 1 AND intPaycheckId NOT IN (SELECT intPaycheckId FROM tblPRPaycheckDirectDeposit)
+		AND intPaycheckId NOT IN (
+			SELECT intPaycheckId FROM tblPRPaycheck WHERE intEntityEmployeeId IN (
+				SELECT intEntityId FROM tblPREmployee 
+				WHERE intEntityId NOT IN (SELECT DISTINCT intEntityId FROM tblEMEntityEFTInformation)))
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPaychecks)
+	BEGIN
+		SELECT TOP 1 @intPaycheckId = intPaycheckId FROM #tmpPaychecks
+
+		EXEC uspPRPaycheckEFTDistribution @intPaycheckId
+
+		DELETE FROM #tmpPaychecks WHERE intPaycheckId = @intPaycheckId
+	END
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID(''tempdb..#tmpPaychecks'')) DROP TABLE #tmpPaychecks
 ')
 
 END

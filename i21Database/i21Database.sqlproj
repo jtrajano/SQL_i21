@@ -750,6 +750,7 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
     <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
@@ -6376,6 +6377,14 @@
     <Build Include="dbo\Stored Procedures\uspLGPopulateLoadXML.sql" />
     <Build Include="dbo\Tables\tblLGIntrCompLogisticsStg.sql" />
     <Build Include="dbo\Tables\tblLGIntrCompLogisticsAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedMiscItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
+    <Build Include="dbo\Tables\tblAPBalanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6649,5 +6658,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\NM_NewMexico.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\EM\1810_Fix_CustomTab_ControlName.sql" />
   </ItemGroup>
 </Project>

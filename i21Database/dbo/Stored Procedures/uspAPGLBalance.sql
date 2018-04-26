@@ -30,6 +30,7 @@ CREATE TABLE #tmpAPGLAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMA
 INSERT INTO #tmpAPGLAccountBalance
 SELECT
 	B.strAccountId,
+	CASE WHEN A.strJournalLineDescription LIKE '%Posted%' THEN A.strTransactionId ELSE A.strJournalLineDescription END strBillId,
 	SUM(ISNULL(A.dblCredit,0)) - SUM(ISNULL(A.dblDebit, 0))
 FROM tblGLDetail A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
