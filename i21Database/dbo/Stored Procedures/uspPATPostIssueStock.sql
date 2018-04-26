@@ -12,6 +12,7 @@
 AS
 BEGIN
 
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -478,14 +479,34 @@ BEGIN
 					@transType			= N'all',
 					@raiseError			= @error
 
+
+
 			END TRY
 			BEGIN CATCH
 				RAISERROR(@error,16,1);
 				GOTO Post_Rollback;
 			END CATCH
 
+			DECLARE @intInvoiceId INT, @intTotalInvoice INT;
 
-			DELETE FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tempCustomerStock) AND ysnPaid <> 1;
+			SELECT	intCustomerStockId,
+					intInvoiceId
+			INTO #tempInvoiceTbl
+			FROM #tempCustomerStock
+			WHERE intInvoiceId IS NOT NULL;
+
+			WHILE EXISTS(SELECT 1 FROM #tempInvoiceTbl)
+			BEGIN
+				SELECT TOP 1 @intInvoiceId = intInvoiceId FROM #tempInvoiceTbl;
+
+				EXEC [dbo].[uspARDeleteInvoice]
+					@InvoiceId = @intInvoiceId,
+					@UserId = @intUserId
+
+				DELETE FROM #tempInvoiceTbl WHERE intInvoiceId = @intInvoiceId;
+			END					
+			
+			DELETE FROM tblPATRetireStock WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tempCustomerStock);
 			DELETE FROM tblPATCustomerStock WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tempCustomerStock);
 			
 		END
