@@ -435,7 +435,7 @@ WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
 ON
 A.intEntityCustomerId	 = B.intEntityCustomerId
 AND A.intInvoiceId		 = B.intInvoiceId
-
+ 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 OUTER APPLY (
@@ -443,4 +443,4 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-LEFT JOIN (SELECT intEntityCustomerId, dblARBalance FROM vyuARCustomerSearch) CUSTAR ON CUSTAR.intEntityCustomerId = AGING.intEntityCustomerId
+LEFT JOIN (SELECT intEntityCustomerId, dblARBalance FROM vyuARCustomerSearch) CUSTAR ON CUSTAR.intEntityCustomerId = AGING.intEntityCustomerId 
