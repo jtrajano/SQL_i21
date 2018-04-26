@@ -6384,6 +6384,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
+    <Build Include="dbo\Tables\tblCFAccountQuoteSite.sql" />
     <Build Include="dbo\User Defined Types\QualityPropertyValueTable.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCreateForScaleTicket.sql" />
     <Build Include="dbo\User Defined Types\ApprovalConfigurationType.sql" />
