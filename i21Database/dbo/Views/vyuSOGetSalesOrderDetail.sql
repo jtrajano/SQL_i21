@@ -59,6 +59,15 @@ SELECT
         SO.intCurrencyExchangeRateTypeId,
         SO.intCurrencyExchangeRateId,
         SO.dblCurrencyExchangeRate,
+		SO.intEntityVendorId,
+		SO.intPurchaseDetailId,
+		SO.intPriceUOMId,
+		SO.dblUnitQuantity,
+		SO.dblUnitPrice,
+		SO.dblPriceMargin,
+		SO.dblMarginPercentage,
+		SO.dblLastCost,
+		SO.dblBaseUnitPrice,
         strItemNo = ITM.strItemNo,
         strBundleType = ITM.strBundleType,
         strUnitMeasure = ITMUOM.strUnitMeasure,
@@ -88,9 +97,10 @@ SELECT
         dblDiscountAmount = CASE WHEN ISNULL(SO.dblDiscount, 0) > 0 THEN  ((SO.dblQtyOrdered * SO.dblPrice) * (SO.dblDiscount / 100)) ELSE 0 END,
         strStorageTypeDescription = STORAGETYPE.strStorageTypeDescription,
         strRequired = ITM.strRequired,
-        strCurrencyExchangeRateType = CURTYPE.strCurrencyExchangeRateType
-
-	
+        strCurrencyExchangeRateType = CURTYPE.strCurrencyExchangeRateType,
+		strVendorName = VPER.strName,
+		strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
+		strPriceUOM = PITMUOM.strUnitMeasure
 	from tblSOSalesOrderDetail SO
 		INNER JOIN ( SELECT intSalesOrderId, intCompanyLocationId 
 			FROM tblSOSalesOrder  WITH(NOLOCK) ) OSO
@@ -143,3 +153,15 @@ SELECT
 								strStorageTypeDescription
 			FROM tblGRStorageType ) STORAGETYPE
 		ON SO.intStorageScheduleTypeId = STORAGETYPE.intStorageScheduleTypeId
+		LEFT JOIN ( SELECT		intEntityId,			strName
+			FROM tblEMEntity WITH(NOLOCK) ) VPER
+		ON SO.intEntityVendorId = VPER.intEntityId
+		LEFT JOIN ( SELECT		intPurchaseDetailId,	strPurchaseOrderNumber
+			FROM tblPOPurchase ZPO WITH(NOLOCK) 
+				JOIN tblPOPurchaseDetail ZPOD WITH(NOLOCK)
+					ON ZPO.intPurchaseId = ZPOD.intPurchaseId)  PO
+		ON SO.intPurchaseDetailId = PO.intPurchaseDetailId
+		LEFT JOIN ( SELECT		intItemUOMId,			strUnitMeasure,
+								intUnitMeasureId
+			FROM vyuARItemUOM WITH(NOLOCK)) PITMUOM
+		ON SO.intPriceUOMId = PITMUOM.intItemUOMId
