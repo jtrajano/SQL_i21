@@ -33,61 +33,25 @@ IF (@Type = 'Standard')
 	END	
 ELSE IF (@Type = 'Date Driven')
 	BEGIN
- 
-	DECLARE @daysOfMonth		INT
-            ,@daysOfDueMonth	INT
-            ,@dayDueMonthDiff	INT
-            ,@dayOfDueMonth		INT
-            ,@maxDayOfMonth		INT
-            ,@currentDueDate	DATE
-	
-            --get the actual number of days in current month
-			SELECT @daysOfMonth = [dbo].[fnGetDaysInMonth](@TransactionDate)
- 
-			--set the day of due if it was more than a day available for first due date
-            IF(@daysOfMonth < @DayMonthDue)
-				SET @DayMonthDue = @daysOfMonth
-			
-            SET @currentDueDate = DATEADD(DAY, -DATEPART(DAY,@TransactionDate), @TransactionDate)
-            SET @currentDueDate = DATEADD(DAY, @DayMonthDue, @currentDueDate)	
-            SET @maxDayOfMonth = @DayMonthDue - @DueNextMonth
 
-            if(DATEPART(DAY,@TransactionDate) < @maxDayOfMonth)
-				RETURN @currentDueDate;
-            ELSE
-				BEGIN		
-					SET @DueDate = DATEADD(MONTH, 1, @currentDueDate);			 
-					
-					--get the actual number of days in due month
-					SET @daysOfDueMonth = [dbo].[fnGetDaysInMonth](@DueDate);					 			
-					
-					--get the actual day of the due month					
-					SET @dayOfDueMonth = DATEPART(DAY,@DueDate)					 
+		DECLARE @InvoiceDate	INT,
+				@DaysInDueMonth	INT,
+				@DueDateTemp	DATE,
+				@MToAdd			INT = 1
 
-					--get the original due day
-					if (@daysOfDueMonth > @DayMonthDue )		 
-						SET @DayMonthDue = @dayOfDueMonth						 
-					
-					--current due month must have equal number days of every n of the month
-					IF(@dayOfDueMonth <> @daysOfDueMonth AND @dayOfDueMonth <> @DayMonthDue)
-					BEGIN					 
-						SET @dayDueMonthDiff = @daysOfDueMonth - @dayOfDueMonth
-						SET @DueDate = DATEADD(DAY, @dayOfDueMonth, @DueDate)
-												
-						RETURN @DueDate;						
-					END
-					
-					IF(@dayOfDueMonth <> @daysOfDueMonth)  
-					BEGIN					 
-						SET @dayDueMonthDiff = @daysOfDueMonth - @dayOfDueMonth
-						SET @DueDate = DATEADD(DAY, @dayDueMonthDiff, @DueDate)
-												
-						RETURN @DueDate;						
-					END
-							 
-					RETURN @DueDate;
-					
-				END		
+        SET @InvoiceDate = DAY(@TransactionDate)
+        IF @InvoiceDate > @DueNextMonth
+            SET @MToAdd = 2
+
+        SET @DueDateTemp = DATEADD(MONTH, @MToAdd, @TransactionDate)
+        SET @DaysInDueMonth = [dbo].[fnGetDaysInMonth](@DueDateTemp)
+
+        IF @DayMonthDue > @DaysInDueMonth
+            SET @DayMonthDue = @DaysInDueMonth;
+
+				
+        RETURN CAST((CAST(YEAR(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(MONTH(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(@DayMonthDue AS NVARCHAR(10))) AS DATE)
+ 
 	END
 ELSE
 	BEGIN
