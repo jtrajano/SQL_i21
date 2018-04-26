@@ -187,27 +187,27 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.strOwnedPhysicalStock='Customer' )a
 
-UNION
+--UNION
 
-SELECT CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,strDistributionOption,'' strShipDistributionOption,'' strAdjDistributionOption,'' strCountDistributionOption,
-'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,
-dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblGrossUnits)  tranRecQty,
-'' tranAdjNumber,0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty
-,r.intInventoryReceiptId ,null intInventoryShipmentId, null intInventoryAdjustmentId,null intInventoryCountId,null intInvoiceId
-FROM 
- tblICInventoryReceiptItem ir 
- JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
-JOIN tblICItem i on i.intItemId=ir.intItemId 
- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 							AND  st.intProcessingLocationId  IN (
-													SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
- JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
- 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
-		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
-WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
-and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge' and  s.intStorageScheduleTypeId > 0 
+--SELECT CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,strDistributionOption,'' strShipDistributionOption,'' strAdjDistributionOption,'' strCountDistributionOption,
+--'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,
+--dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblGrossUnits)  tranRecQty,
+--'' tranAdjNumber,0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty
+--,r.intInventoryReceiptId ,null intInventoryShipmentId, null intInventoryAdjustmentId,null intInventoryCountId,null intInvoiceId
+--FROM 
+-- tblICInventoryReceiptItem ir 
+-- JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
+--JOIN tblICItem i on i.intItemId=ir.intItemId 
+-- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 							AND  st.intProcessingLocationId  IN (
+--													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+--													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+--													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+--													ELSE isnull(ysnLicensed, 0) END)
+-- JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
+-- 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
+--		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+--WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
+--and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge' and  s.intStorageScheduleTypeId > 0 
  )t
 
  select  convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* from(
