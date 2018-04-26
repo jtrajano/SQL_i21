@@ -164,6 +164,9 @@ BEGIN
 		UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category = 1, dbl1099 = ROUND(@dbl1099Amount, 2), intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
 		WHERE intBillId = @intCreatedBillId AND strMiscDescription != N'Service Fee';
 
+		UPDATE tblAPBillDetail SET int1099Form = 0, int1099Category = 0, intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') 
+		WHERE intBillId = @intCreatedBillId AND strMiscDescription = N'Service Fee';
+
 		UPDATE tblPATRefundCustomer SET intBillId = @intCreatedBillId WHERE intRefundCustomerId = @intRefundCustomerId;
 
 		IF EXISTS(SELECT 1 FROM tblAPBillDetailTax WHERE intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intCreatedBillId))
