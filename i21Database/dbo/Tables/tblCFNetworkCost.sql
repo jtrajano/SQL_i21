@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCFNetworkCost](
 	[intNetworkCostId] [int] IDENTITY(1,1)  NOT NULL,
 	[intSiteId] [int] NULL,
+	[intNetworkId] [int] NOT NULL,
 	[dtmDate] [datetime] NULL,
 	[intItemId] [int] NULL,
 	[dblTransferCost] [numeric](18, 6) NULL,

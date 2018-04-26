@@ -147,6 +147,7 @@ BEGIN
 		,intItemId
 		,dblTransferCost
 		,dblTaxesPerUnit
+		,intNetworkId
 	)
 	SELECT 
 		intSiteId = A.intSiteId
@@ -154,6 +155,7 @@ BEGIN
 		,intItemId = A.intItemId
 		,dblTransferCost = A.dblTransferCost
 		,dblTaxesPerUnit  = A.dblTaxesPerUnit
+		,intNetworkId = @intNetworkId
 	FROM #tmpWithSiteIssue A
 
 	-----------------------------------------------------------------------------
@@ -208,6 +210,7 @@ BEGIN
 		,intItemId
 		,dblTransferCost
 		,dblTaxesPerUnit
+		,intNetworkId
 	)
 	SELECT	
 		intSiteId = A.intSiteId
@@ -215,6 +218,7 @@ BEGIN
 		,intItemId = A.intItemId
 		,dblTransferCost = A.dblTransferCost
 		,dblTaxesPerUnit  = A.dblTaxesPerUnit
+		,intNetworkId = @intNetworkId
 	FROM #tmpNoSiteItemIssue A
 	WHERE NOT EXISTS(SELECT TOP 1 1 
 					 FROM tblCFNetworkCost 
