@@ -1,5 +1,6 @@
 ﻿--THIS WILL FIXED THOSE PO PENDING STATUS
-IF(EXISTS(SELECT 1 FROM sys.objects WHERE name = 'tblPOPurchase'))
+
+IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intOrderStatusId = 7)
 BEGIN
 		UPDATE  A
 		SET A.intOrderStatusId = (SELECT (CASE	WHEN 
