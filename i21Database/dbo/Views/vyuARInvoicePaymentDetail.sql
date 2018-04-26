@@ -1,12 +1,21 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoicePaymentDetail]
 AS 
-SELECT PAYMENTS.*
-	 , I.dblInvoiceTotal
-	 , I.dblAmountDue
-	 , I.dblDiscount
-	 , I.dtmDueDate
-FROM dbo.tblARInvoice I 
-INNER JOIN (
+SELECT intInvoiceId			= I.intInvoiceId
+	 , dblInvoiceTotal		= I.dblInvoiceTotal
+	 , dblAmountDue			= I.dblAmountDue - I.dblDiscountAvailable
+	 , dblDiscount			= I.dblDiscountAvailable
+	 , dtmDueDate			= I.dtmDueDate
+	 , intPaymentId			= PAYMENTS.intPaymentId
+	 , dblTotalPayment		= ISNULL(PAYMENTS.dblTotalPayment, 0.00)
+	 , strRecordNumber		= PAYMENTS.strRecordNumber
+	 , strPaymentMethod		= PAYMENTS.strPaymentMethod
+	 , strPaymentInfo		= PAYMENTS.strPaymentInfo
+	 , dtmDatePaid			= PAYMENTS.dtmDatePaid
+	 , strPaymentSource		= PAYMENTS.strPaymentSource
+	 , dtmDiscountDate      = DATEADD(DAYOFYEAR, T.intDiscountDay, I.dtmDate) 
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+LEFT JOIN dbo.tblSMTerm T WITH (NOLOCK) ON I.intTermId = T.intTermID
+LEFT JOIN (
 	SELECT PD.intInvoiceId
 		 , P.intPaymentId
 		 , dblTotalPayment		= ISNULL(dblPayment, 0)

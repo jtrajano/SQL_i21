@@ -10,7 +10,9 @@ EXEC (
     '
       ALTER VIEW [dbo].[vyuGLglhstmstDifference] AS
 
-     select A.strJournalId, A.strAccountId, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strSourceId, A.strSourceType, A.strSourceKey, B.glhst_acct1_8, B.glhst_acct9_16, B.glhst_amt, B.glhst_units, B.glhst_dr_cr_ind, B.Debit, B.Credit, B.DebitUnit, B.CreditUnit, B.glhst_date, B.glhst_period, B.glhst_src_id, B.glhst_src_seq, B.A4GLIdentity from ( SELECT	   B.strJournalId,
+     select A.strJournalId, A.strAccountId, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strSourceId, A.strSourceType, A.strSourceKey,
+	  B.glhst_acct1_8, B.glhst_acct9_16, B.glhst_amt, B.glhst_units, B.glhst_dr_cr_ind, B.Debit, B.Credit, B.DebitUnit, B.CreditUnit, B.glhst_date, B.glhst_period, B.glhst_src_id, B.glhst_src_seq, CAST(B.A4GLIdentity AS int) A4GLIdentity
+	  from ( SELECT	   B.strJournalId,
                   A.intLineNo,
                   C.intAccountId,
                   C.strAccountId,
@@ -74,6 +76,7 @@ EXEC (
 					   glhst_acct9_16
                      FROM glhstmst AS A
 					 INNER JOIN glactmst AS B ON A.glhst_acct1_8 = B.glact_acct1_8
+					 AND A.glhst_acct9_16 = B.glact_acct9_16
 				      INNER JOIN tblGLCOACrossReference AS C ON C.intLegacyReferenceId = B.A4GLIdentity
                           INNER JOIN tblGLAccount AS D ON D.intAccountId = C.inti21Id
                      GROUP BY A.glhst_dr_cr_ind,

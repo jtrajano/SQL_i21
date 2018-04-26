@@ -72,9 +72,9 @@ BEGIN
 			,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
 			,dblSSTipsTax = (SSTAX.dblTotal * TIPS.dblTipsPercent)
 			,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
-			,dblMedTax = ((MEDTAX.dblTotal) - (ADDMED.dblTotal))
-			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
-			,dblAddMedTax = (ADDMED.dblTotal)
+			,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
+			,dblTaxableAddMed = ISNULL(ADDMED.dblTotal, 0) / 0.009
+			,dblAddMedTax = ISNULL(ADDMED.dblTotal, 0)
 			,dblTaxDueUnreported = 0
 			,dblAdjustFractionCents = 0
 			,dblAdjustSickPay = 0
@@ -82,9 +82,9 @@ BEGIN
 			,dblTotalDeposit = 0
 			,ysnRefundOverpayment = 0
 			,intScheduleType = 1
-			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotal, 0))
-			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotal, 0))
-			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotal, 0))
+			,dblMonth1 = ISNULL(MONTH1.dblMonthTotal, 0)
+			,dblMonth2 = ISNULL(MONTH2.dblMonthTotal, 0)
+			,dblMonth3 = ISNULL(MONTH3.dblMonthTotal, 0)
 			,ysnStoppedWages = 0
 			,dtmStoppedWages = NULL
 			,ysnSeasonalEmployer = 0
@@ -124,8 +124,8 @@ BEGIN
 			
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
-			(SELECT dblTotal = SUM(dblTaxTotalSS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [SSTAX],
-			(SELECT dblTotal = SUM(dblTaxTotalMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [MEDTAX],
+			(SELECT dblTotal = SUM(dblTaxTotalSS) + SUM(dblLiabilitySS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [SSTAX],
+			(SELECT dblTotal = SUM(dblTaxTotalMed) + SUM(dblLiabilityMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [MEDTAX],
 			(SELECT dblTotal = SUM(dblTaxTotalAddMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [ADDMED],
 
 			/* Monthly Totals */
@@ -163,12 +163,12 @@ BEGIN
 			,dblTaxableSSTips = CASE WHEN (ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLSSTIPS.dblTotal, 0) - ISNULL(PRTXSS.dblTotal, 0) END
 			,dblSSTipsTax = (SSTAX.dblTotal * TIPS.dblTipsPercent)
 			,dblTaxableMed = CASE WHEN (ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLMED.dblTotal, 0) - ISNULL(PRTXMED.dblTotal, 0) END
-			,dblMedTax = ((MEDTAX.dblTotal) - (ADDMED.dblTotal))
-			,dblTaxableAddMed = (ADDMED.dblTotal) / 0.009
-			,dblAddMedTax = (ADDMED.dblTotal)
-			,dblMonth1 = (ISNULL(MONTH1.dblMonthTotal, 0))
-			,dblMonth2 = (ISNULL(MONTH2.dblMonthTotal, 0))
-			,dblMonth3 = (ISNULL(MONTH3.dblMonthTotal, 0))
+			,dblMedTax = ISNULL(MEDTAX.dblTotal, 0)
+			,dblTaxableAddMed = ISNULL(ADDMED.dblTotal, 0) / 0.009
+			,dblAddMedTax = ISNULL(ADDMED.dblTotal, 0)
+			,dblMonth1 = ISNULL(MONTH1.dblMonthTotal, 0)
+			,dblMonth2 = ISNULL(MONTH2.dblMonthTotal, 0)
+			,dblMonth3 = ISNULL(MONTH3.dblMonthTotal, 0)
 		FROM 
 		
 			/* Taxable Amount */
@@ -184,8 +184,8 @@ BEGIN
 			
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
-			(SELECT dblTotal = SUM(dblTaxTotalSS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [SSTAX],
-			(SELECT dblTotal = SUM(dblTaxTotalMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [MEDTAX],
+			(SELECT dblTotal = SUM(dblTaxTotalSS) + SUM(dblLiabilitySS) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [SSTAX],
+			(SELECT dblTotal = SUM(dblTaxTotalMed) + SUM(dblLiabilityMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [MEDTAX],
 			(SELECT dblTotal = SUM(dblTaxTotalAddMed) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [ADDMED],
 
 			/* Monthly Totals */
