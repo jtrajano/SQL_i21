@@ -6373,6 +6373,7 @@
     <Build Include="dbo\Views\vyuSOGetSalesOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateContractQty.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessInterCompanyLogisticsXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPopulateLoadXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
