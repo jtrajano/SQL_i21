@@ -1046,7 +1046,7 @@ BEGIN TRY
 				 intCustomerStorageId = SST.intCustomerStorageId
 				,intItemId			  = ReceiptCharge.[intChargeId]
 				,[intAccountId]		  = NULL
-				,[dblQtyReceived]	  = (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits
+				,[dblQtyReceived]	  = CASE WHEN ISNULL(Item.strCostMethod,'')='Gross Unit' THEN (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits ELSE SST.dblUnits END
 				,[strMiscDescription] = Item.[strItemNo]
 				,[dblCost]			  =  CASE 
 							 			 	  WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0 THEN    ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate),2)
