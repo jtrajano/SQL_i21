@@ -120,6 +120,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblAssumedFX] [numeric](18, 6) NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPackingDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	dblYield NUMERIC(18, 6) NULL, 
 	[intCurrencyExchangeRateId] INT NULL,
 	[intRateTypeId] INT NULL,
     intCreatedById INT,
