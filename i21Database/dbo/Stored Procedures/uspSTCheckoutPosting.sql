@@ -264,9 +264,9 @@ BEGIN
 										,[intItemId]				= I.intItemId
 										,[ysnInventory]				= 1
 										,[strItemDescription]		= I.strDescription
-										,[intOrderUOMId]			= NULL
+										,[intOrderUOMId]			= UOM.intItemUOMId
 										,[dblQtyOrdered]			= CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
-										,[intItemUOMId]				= NULL
+										,[intItemUOMId]				= UOM.intItemUOMId
 										,[dblQtyShipped]			= CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
 										,[dblPrice]					= CPT.dblPrice --(Select dblPrice From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
@@ -318,6 +318,7 @@ BEGIN
 												AND CH.intStoreId = ST.intStoreId
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
+							AND UOM.ysnStockUnit = CAST(1 AS BIT)
 
 					END
 				END
@@ -465,12 +466,12 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= NULL
+											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= IM.intQtySold
-											,[intItemUOMId]				= NULL
+											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= IM.intQtySold
 											,[dblDiscount]				= 0
-											,[dblPrice]					= IM.dblCurrentPrice
+											,[dblPrice]					= IM.dblTotalSales / IM.intQtySold --IM.dblCurrentPrice
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -478,7 +479,7 @@ BEGIN
 											,[dblMaintenanceAmount]		= NULL
 											,[dblLicenseAmount]			= NULL
 											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
-											,[ysnRecomputeTax]			= 1 -- not sure
+											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
 											,[intSCInvoiceId]			= NULL
 											,[strSCInvoiceNumber]		= NULL
 											,[intInventoryShipmentItemId] = NULL
@@ -519,6 +520,7 @@ BEGIN
 													AND CH.intStoreId = ST.intStoreId
 								WHERE IM.intCheckoutId = @intCheckoutId
 								AND IM.dblTotalSales > 0
+								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
 				ELSE 
@@ -665,12 +667,48 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= NULL
-											,[dblQtyOrdered]			= DT.intTotalSalesCount
-											,[intItemUOMId]				= NULL
-											,[dblQtyShipped]			= DT.intTotalSalesCount
+											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[dblQtyOrdered]			= CASE 
+																			WHEN 
+																				(
+																					CAST((DT.dblTotalSalesAmount - (
+																														SELECT SUM(dblTotalSales)
+																														FROM tblSTCheckoutItemMovements IM
+																														JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																														JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																														JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																														WHERE intCheckoutId = @intCheckoutId
+																														AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
+																										           )
+																				) > 1 THEN 1
+																			ELSE -1
+																		  END
+											,[intItemUOMId]				= UOM.intItemUOMId
+											,[dblQtyShipped]			= CASE 
+																			WHEN 
+																				(
+																					CAST((DT.dblTotalSalesAmount - (
+																														SELECT SUM(dblTotalSales)
+																														FROM tblSTCheckoutItemMovements IM
+																														JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																														JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																														JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																														WHERE intCheckoutId = @intCheckoutId
+																														AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
+																										           )
+																				) > 1 THEN 1
+																			ELSE -1
+																		  END
 											,[dblDiscount]				= 0
-											,[dblPrice]					= CAST((DT.dblTotalSalesAmount / DT.intTotalSalesCount) AS NUMERIC(18, 6))
+											,[dblPrice]					= CAST((DT.dblTotalSalesAmount - (
+																											SELECT SUM(dblTotalSales)
+																											FROM tblSTCheckoutItemMovements IM
+																											JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																											JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																											JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																											WHERE intCheckoutId = @intCheckoutId
+																											AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
+																										 )
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -678,7 +716,7 @@ BEGIN
 											,[dblMaintenanceAmount]		= NULL
 											,[dblLicenseAmount]			= NULL
 											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
-											,[ysnRecomputeTax]			= 0 -- not sure
+											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
 											,[intSCInvoiceId]			= NULL
 											,[strSCInvoiceNumber]		= NULL
 											,[intInventoryShipmentItemId] = NULL
@@ -710,6 +748,8 @@ BEGIN
 											,[dblSubCurrencyRate]		= 1.000000
 								FROM tblSTCheckoutDepartmetTotals DT
 								JOIN tblICItem I ON DT.intItemId = I.intItemId
+								--JOIN tblICCategory CAT ON I.intCategoryId = CAT.intCategoryId
+								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
 								JOIN tblSTCheckoutHeader CH ON DT.intCheckoutId = CH.intCheckoutId
 								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
 								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
@@ -718,6 +758,7 @@ BEGIN
 													AND CH.intStoreId = ST.intStoreId
 								WHERE DT.intCheckoutId = @intCheckoutId
 								AND DT.dblTotalSalesAmount > 0
+								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
 				ELSE 
