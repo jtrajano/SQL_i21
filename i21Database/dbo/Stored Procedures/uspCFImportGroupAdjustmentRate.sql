@@ -134,12 +134,14 @@ BEGIN
 				intSiteGroupId
 				,intPriceGroupId
 				,intARItemId
-				,dblRate)
+				,dblRate
+				,dtmStartEffectiveDate)
 			SELECT 
 				intSiteGroupId = @intSiteGroupId
 				,intPriceGroupId = @intPriceRuleGroupId
 				,intARItemId = @intItemId
 				,dblRate = @dblRate
+				,dtmStartEffectiveDate = @dtmDate
 		END
 		
 		COMMIT TRANSACTION
