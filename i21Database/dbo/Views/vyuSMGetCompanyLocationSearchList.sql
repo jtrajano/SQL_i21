@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMGetCompanyLocationSearchList]
-AS 
-SELECT 
- compLoc.[intCompanyLocationId]
+AS
+SELECT compLoc.[intCompanyLocationId]
 ,compLoc.[strLocationName]
 ,compLoc.[strLocationNumber]
 ,compLoc.[strLocationType]
@@ -57,6 +56,7 @@ SELECT
 ,compLoc.[intSalesDiscounts]
 ,compLoc.[intCashOverShort]
 ,compLoc.[intWriteOff]
+,compLoc.[intCommissionExpense]
 ,compLoc.[intCreditCardFee]
 ,compLoc.[intSalesAccount]
 ,compLoc.[intCostofGoodsSold]

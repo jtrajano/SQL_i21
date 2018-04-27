@@ -58,6 +58,7 @@
 	[intSalesDiscounts] INT NULL,
 	[intCashOverShort] INT NULL,
 	[intWriteOff] INT NULL,
+	[intCommissionExpense] INT NULL,
 	[intCreditCardFee] INT NULL,
 	[intSalesAccount] INT NULL,
 	[intCostofGoodsSold] INT NULL,
@@ -241,7 +242,8 @@
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount21] FOREIGN KEY([intFreightAPAccount]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount22] FOREIGN KEY([intFreightExpenses]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]), 
     CONSTRAINT [FK_tblSMCompanyLocation_tblSMTaxGroup] FOREIGN KEY (intTaxGroupId) REFERENCES tblSMTaxGroup(intTaxGroupId),
-	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount23] FOREIGN KEY([intDeferredPayableInterestId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount23] FOREIGN KEY([intDeferredPayableInterestId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSMCompanyLocation_tblGLAccount24] FOREIGN KEY([intCommissionExpense]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [AK_tblSMCompanyLocation_strLocationNumber] ON [tblSMCompanyLocation]([strLocationNumber]) WHERE [strLocationNumber] IS NOT NULL
