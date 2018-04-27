@@ -243,10 +243,20 @@ BEGIN TRY
 
 	END
 
-	IF @strSourceType < > 'InventoryShipment'
-	BEGIN
-			EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
-	END
+	--BEGIN--------------------------------------------------------------------------------------------------------------------
+		-- Commented out: 
+		-- 1. @strSourceType = 'Invoice'
+		--		uspARPostInvoice is already calling uspICPostStorage. No need to call uspICIncreaseOnStorageQty. 
+		-- 2. @strSourceType = 'Scale'
+		--		This does not impact the storage stock. No need to call uspICIncreaseOnStorageQty.
+		-- 3. @strSourceType = 'InventoryShipment'
+		--		uspICPostShipment is already calling uspICPostStorage. No need to call uspICIncreaseOnStorageQty. 
+		----------------------------------------------------------------------------------------------------------------------
+		--IF @strSourceType < > 'InventoryShipment'
+		--BEGIN
+		--		EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+		--END
+	--END--------------------------------------------------------------------------------------------------------------------
 	 
 END TRY
 BEGIN CATCH

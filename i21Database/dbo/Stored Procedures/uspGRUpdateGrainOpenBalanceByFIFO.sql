@@ -380,10 +380,10 @@ BEGIN TRY
         
 		--1.Invoice Calls uspICPostStorage to Update Inventory.
 		--2.GRN-616- Since Load Out Scale Ticket Update OnStore Inventory
-		IF @strSourceType NOT IN ('Invoice','InventoryShipment')
-		BEGIN
-			EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
-		END
+		--IF @strSourceType NOT IN ('Invoice','InventoryShipment')
+		--BEGIN
+		--	EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+		--END
 
 		UPDATE CS
 		SET CS.dblOpenBalance = CS.dblOpenBalance - tblFIFO.dblOpenBalance
