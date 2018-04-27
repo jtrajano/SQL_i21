@@ -596,6 +596,15 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
+
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+-- Create a unique transaction name for recap. 
+DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
+if @recap = 1 AND @raiseError = 0
+	SAVE TRAN @TransactionName
+
 DECLARE @InvoiceIds TABLE(
 	id  	INT
 )
@@ -680,18 +689,29 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		BEGIN
 			IF @InitTranCount = 0
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR @recap = 1
 						ROLLBACK TRANSACTION
 					IF (XACT_STATE()) = 1
 						COMMIT TRANSACTION
 				END		
 			ELSE
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR @recap = 1
 						ROLLBACK TRANSACTION  @Savepoint
 					--IF (XACT_STATE()) = 1
 					--	COMMIT TRANSACTION  @Savepoint
 				END	
+
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT 	
+				'asdffadsfasd' + [strPostingError]
+				,[strTransactionType]
+				,[strInvoiceNumber]
+				,[strBatchId]
+				,[intInvoiceId]
+			FROM
+				@InvalidInvoiceData 
+					ORDER BY strPostingError DESC
 		END
 
 		IF @raiseError = 1
@@ -881,14 +901,6 @@ BEGIN CATCH
 		
 	GOTO Post_Exit
 END CATCH
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
--- Create a unique transaction name for recap. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-if @recap = 1 AND @raiseError = 0
-	SAVE TRAN @TransactionName
 
 --Process Finished Good Items
 INSERT INTO @FinishedGoodItems
