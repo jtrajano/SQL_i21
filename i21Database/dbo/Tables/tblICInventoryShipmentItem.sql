@@ -46,6 +46,7 @@ Type the overview for the table here.
 		[intChildItemLinkId] INT NULL,
 		[dblLineTotal] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),		
+		[dblNet] NUMERIC(38, 20) NULL,
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
