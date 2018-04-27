@@ -16,7 +16,7 @@
 	,@dtmProductionDate DATETIME = NULL
 	,@intTransactionDetailId INT = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
-	,@intLotStatusId INT=NULL
+	,@intLotStatusId INT = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -58,6 +58,10 @@ BEGIN
 		,@strLocationName NVARCHAR(50)
 		,@intManufacturingCellId INT
 		,@ysnLifeTimeByEndOfMonth BIT
+		,@strCertificate NVARCHAR(50)
+		,@intProducerId INT
+		,@strCertificateId NVARCHAR(50)
+		,@strTrackingNumber NVARCHAR(255)
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
@@ -353,6 +357,23 @@ BEGIN
 		ELSE
 			SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
 
+		IF (
+				SELECT Count(DISTINCT strCertificate)
+				FROM dbo.tblICLot L
+				JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
+				WHERE WC.intWorkOrderId = @intWorkOrderId
+					AND WC.intBatchId = @intBatchId
+				) = 1
+		BEGIN
+			SELECT @strCertificate = strCertificate
+				,@intProducerId = intProducerId
+				,@strCertificateId = strCertificateId
+				,@strTrackingNumber = strTrackingNumber
+			FROM dbo.tblICLot L
+			JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
+			WHERE WC.intWorkOrderId = @intWorkOrderId AND WC.intBatchId = @intBatchId
+		END
+
 		INSERT INTO @ItemsThatNeedLotId (
 			intLotId
 			,strLotNumber
@@ -382,6 +403,10 @@ BEGIN
 			,strTransactionId
 			,strSourceTransactionId
 			,intSourceTransactionTypeId
+			,strCertificate
+			,intProducerId
+			,strCertificateId
+			,strTrackingNumber
 			)
 		SELECT intLotId = NULL
 			,strLotNumber = @strLotNumber
@@ -411,6 +436,10 @@ BEGIN
 			,strTransactionId = @strWorkOrderNo
 			,strSourceTransactionId = @strWorkOrderNo
 			,intSourceTransactionTypeId = @INVENTORY_PRODUCE
+			,strCertificate = @strCertificate
+			,intProducerId = @intProducerId
+			,strCertificateId = @strCertificateId
+			,strTrackingNumber = @strTrackingNumber
 
 		EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 			,@intUserId
