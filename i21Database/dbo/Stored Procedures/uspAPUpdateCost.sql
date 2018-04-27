@@ -4,13 +4,13 @@
 */
 CREATE PROCEDURE [dbo].[uspAPUpdateCost]
 	@billDetailId INT,
-	@cost DECIMAL(18,6),
+	@cost DECIMAL(38,20),
 	@costAdjustment BIT = 0
 AS
 
 BEGIN TRY
-DECLARE @newCost DECIMAL(18,6) = @cost;
-DECLARE @receiptCost DECIMAL(18,6) = 0;
+DECLARE @newCost DECIMAL(38,20) = @cost;
+DECLARE @receiptCost DECIMAL(38,20) = 0;
 DECLARE @posted BIT = 0;
 DECLARE @voucherId INT;
 DECLARE @hasReceipt BIT = 0;
