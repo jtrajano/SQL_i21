@@ -6397,6 +6397,7 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateQuoting.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptReport.sql" />
     <Build Include="dbo\Views\vyuCTContractCertification.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportGroupAdjustmentRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
