@@ -17,7 +17,26 @@ BEGIN
 	DECLARE @intAccountId							  INT = 0
 	DECLARE @intExpenseItemId						  INT = 0
 	DECLARE @intDepartmentId						  INT = 0
+	DECLARE @strAccountId		NVARCHAR(30)
+	DECLARE @strVehicleNumber	NVARCHAR(30)
+	DECLARE @strDepartment		NVARCHAR(30)
+	DECLARE @strExpenseItemId		NVARCHAR(30)
+	DECLARE @ysnCardForOwnUse BIT
+     
+	DECLARE @strCustomerUnitNumber NVARCHAR(30)
+	DECLARE @strVehicleDescription NVARCHAR(30)
+	DECLARE @strLicencePlateNumber NVARCHAR(30)
+
+	DECLARE @intDaysBetweenService INT = 0
+	DECLARE @intMilesBetweenService INT = 0
+	DECLARE @intLastReminderOdometer INT = 0
+	DECLARE @dtmLastReminderDate DATETIME
+	DECLARE @dtmLastServiceDate DATETIME
+	DECLARE @intLastServiceOdometer INT = 0
+	DECLARE @strNoticeMessageLine1 NVARCHAR(30)
+	DECLARE @ysnActive BIT 
 	---------------------------------------------------------
+
 
 
 	---------------------------------------------------------
