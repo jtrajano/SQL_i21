@@ -78,8 +78,8 @@ BEGIN
 		BEGIN
 			SELECT TOP 1
 				@approverDetailId = intApproverConfigurationDetailId,
-				@approverDetailFor = LTRIM(RTRIM(strApprovalFor)),
-				@approverDetailValue = LTRIM(RTRIM(strValue)),
+				@approverDetailFor = UPPER(LTRIM(RTRIM(strApprovalFor))),
+				@approverDetailValue = UPPER(LTRIM(RTRIM(strValue))),
 				@approverDetailValueInt = intValueId,
 				@approverDetailType = strType
 			FROM @ApproverConfigurationDetail
@@ -97,8 +97,8 @@ BEGIN
 			BEGIN
 
 				SELECT TOP 1
-					@approverDetailParamFor = LTRIM(RTRIM(strApprovalFor)),
-					@approverDetailParamValue = LTRIM(RTRIM(strValue))
+					@approverDetailParamFor = UPPER(LTRIM(RTRIM(strApprovalFor))),
+					@approverDetailParamValue = UPPER(LTRIM(RTRIM(strValue)))
 				FROM @ApprovalConfigurationDetailParam
 
 				IF @approverDetailType = 'Combobox'
