@@ -14,8 +14,8 @@ SELECT C.*
 									   WHEN CD.strSourceType = 'tblGLDetail'
 											THEN GL.strTransactionId
 								  END	 
-FROM tblARCommissionDetail CD WITH (NOLOCK)
-INNER JOIN vyuARCommission C ON CD.intCommissionId = C.intCommissionId
+FROM vyuARCommission C
+INNER JOIN tblARCommissionDetail CD WITH (NOLOCK) ON CD.intCommissionId = C.intCommissionId
 LEFT JOIN (
 	SELECT intEntityId
 		 , strName

@@ -1,6 +1,26 @@
 ﻿CREATE VIEW [dbo].[vyuARCommission]
 AS 
-SELECT C.*
+SELECT intCommissionId				= C.intCommissionId
+	 , intCommissionScheduleId		= C.intCommissionScheduleId
+	 , intCommissionPlanId			= C.intCommissionPlanId
+	 , intEntityId					= C.intEntityId
+	 , intApproverEntityId			= C.intApproverEntityId
+	 , intBillId					= C.intBillId
+	 , intPaymentId					= C.intPaymentId
+	 , intPaycheckId				= C.intPaycheckId
+	 , dtmStartDate					= C.dtmStartDate
+	 , dtmEndDate					= C.dtmEndDate
+	 , ysnConditional				= C.ysnConditional
+	 , ysnApproved					= C.ysnApproved
+	 , ysnRejected					= C.ysnRejected
+	 , ysnPayroll					= C.ysnPayroll
+	 , ysnPayables					= C.ysnPayables
+	 , ysnPosted					= C.ysnPosted
+	 , ysnPaid						= C.ysnPaid
+	 , dblTotalAmount				= C.dblTotalAmount
+	 , strCommissionNumber			= C.strCommissionNumber
+	 , strReason					= C.strReason
+	 , intConcurrencyId				= C.intConcurrencyId	 
 	 , strCommissionEntityName		= E.strName
 	 , intCommissionEntityId		= C.intEntityId
      , strCommissionPlanName		= CP.strCommissionPlanName
@@ -55,4 +75,3 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0)
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
-WHERE C.ysnConditional = 0 OR (C.ysnConditional = 1 AND C.ysnApproved = 1)

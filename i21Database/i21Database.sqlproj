@@ -6368,6 +6368,10 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInTransitDirect.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransactionType.sql" />
     <Build Include="dbo\Views\vyuPATSetupItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPayCommission.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidCommissionForPosting.sql" />
+    <Build Include="dbo\User Defined Types\CommissionPostingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
