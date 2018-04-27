@@ -29,6 +29,7 @@ SELECT	ItemAddOn.intItemAddOnId,
 		dblComponentConvFactor = ComponentUOM.dblUnitQty,
 		strComponentUOM = cUOM.strUnitMeasure,
 		strComponentUOMType = cUOM.strUnitType,
+		ysnComponentAutoAdd = ItemAddOn.ysnAutoAdd,
 
 		-- Stock UOM of Components
 		intComponentStockUOMId = StockUOM.intItemUOMId,

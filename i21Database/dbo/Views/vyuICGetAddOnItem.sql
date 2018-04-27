@@ -10,6 +10,7 @@ SELECT	ItemAddOn.intItemAddOnId
 		,ItemAddOn.dblQuantity
 		,ItemAddOn.intItemUOMId
 		,UOM.strUnitMeasure
+		,ItemAddOn.ysnAutoAdd
 FROM	tblICItemAddOn ItemAddOn
 		LEFT JOIN tblICItem Item ON Item.intItemId = ItemAddOn.intItemId
 		LEFT JOIN tblICItem AddOnComponent ON AddOnComponent.intItemId = ItemAddOn.intAddOnItemId
