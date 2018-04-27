@@ -25,20 +25,33 @@ SELECT
 	, '' AS 'strVendor'
 	, '' AS 'strShipFrom'
 	, '' AS 'strItemNo'
+	, '' AS 'intInventoryReceiptItemId'
+	, '' AS 'intItemId'
 	, '' AS 'dblGross'
 	, '' AS 'dblNet'
-	, '' AS 'dblOpenReceive'
+	, '' AS 'dblQtyToReceive'
 	, '' AS 'strUnitMeasure'
-	, '' AS 'dblOrderQty'
+	, '' AS 'strQtyReceived'
+	, '' AS 'dblOrdered'
+	, '' AS 'strOrderNumber'
 	, '' AS 'strOwnershipType'
-	, '' AS '.dblUnitCost'
+	, '' AS 'dblUnitCost'
 	, '' AS 'strCostUOM'
+	, '' AS 'strCost'
+	, '' AS 'strTax'
+	, '' AS 'dblTax'
 	, '' AS 'strCurrency'
 	, '' AS 'strStorageLocation'
-	, '' AS 'strStorageUnit '
-	, '' AS 'strItemType '
+	, '' AS 'strStorageUnit'
+	, '' AS 'strItemType'
 	, '' AS 'strLotTracking'
-	, '' AS 'ri.dblLineTotal'
+	, '' AS 'dblLineTotal'
+	, '' AS 'strBillOfLading'
+	, '' AS 'strFreightTerm'
+	, '' AS 'strFobPoint'
+	, '' AS 'strWarehouseRefNo'
+	, '' AS 'strVendorRefNo'
+	, '' AS 'strReceiver'
 	RETURN
 END
 
@@ -92,16 +105,19 @@ SELECT
 	, strVendor = e.strName
 	, strShipFrom = el.strLocationName
 	, strItemNo = i.strItemNo
-	, ri.dblGross
-	, ri.dblNet
-	, ri.dblOpenReceive
-	, strUnitMeasure = qu.strUnitMeasure
-	, strQtyReceived = dbo.fnICFormatNumber(ri.dblOpenReceive) + ' ' + qu.strUnitMeasure
-	, ri.dblOrderQty
-	, strOwnershipType = dbo.fnICGetOwnershipType(ri.intOwnershipType)
+	, ri.intInventoryReceiptItemId
+	, i.intItemId
+	, dblGross = ri.dblGrossWgt
+	, dblNet = ri.dblNetWgt
+	, ri.dblQtyToReceive
+	, strUnitMeasure = ri.strUnitMeasure
+	, strQtyReceived = dbo.fnICFormatNumber(ri.dblQtyToReceive) + ' ' + ri.strUnitMeasure
+	, ri.dblOrdered
+	, ri.strOrderNumber
+	, strOwnershipType = dbo.fnICGetOwnershipType(rr.intOwnershipType)
 	, ri.dblUnitCost
-	, strCostUOM = cu.strUnitMeasure
-	, strCost = dbo.fnICFormatNumber(ri.dblUnitCost) + ' ' + cu.strUnitMeasure
+	, strCostUOM = ri.strCostUOM
+	, strCost = dbo.fnICFormatNumber(ri.dblUnitCost) + ' ' + ri.strCostUOM
 	, strTax = dbo.fnICFormatNumber(ri.dblTax)
 	, dblTax = ri.dblTax
 	, strCurrency = c.strCurrency
@@ -110,19 +126,23 @@ SELECT
 	, strItemType = i.strType
 	, i.strLotTracking
 	, ri.dblLineTotal
-	, ri.strComments
+	, r.strBillOfLading
+	, strFreightTerm = fr.strFreightTerm
+	, strFobPoint = fr.strFobPoint
+	, r.strWarehouseRefNo
+	, r.strVendorRefNo
+	, strReceiver = us.strUserName
 FROM tblICInventoryReceipt r
-	LEFT JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	LEFT JOIN vyuICGetInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	LEFT JOIN tblICInventoryReceiptItem rr ON rr.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
 	LEFT JOIN tblEMEntity e ON e.intEntityId = r.intEntityVendorId
 	LEFT JOIN tblEMEntityLocation el ON el.intEntityLocationId = r.intShipFromId
 	LEFT JOIN tblICItem i ON i.intItemId = ri.intItemId
-	LEFT JOIN tblICItemUOM qum ON qum.intItemUOMId = ri.intUnitMeasureId
-	LEFT JOIN tblICUnitMeasure qu ON qu.intUnitMeasureId = qum.intUnitMeasureId
-	LEFT JOIN tblICItemUOM cum ON cum.intItemUOMId = ri.intCostUOMId
-	LEFT JOIN tblICUnitMeasure cu ON cu.intUnitMeasureId = ri.intUnitMeasureId
 	LEFT JOIN tblSMCurrency c ON c.intCurrencyID = r.intCurrencyId
 	LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = ri.intSubLocationId
 	LEFT JOIN tblICStorageLocation su ON su.intStorageLocationId = ri.intStorageLocationId
+	LEFT JOIN tblSMFreightTerms fr ON fr.intFreightTermId = r.intFreightTermId
+	LEFT JOIN tblSMUserSecurity us ON us.intEntityId = r.intReceiverId
 WHERE r.strReceiptNumber = @strReceiptNumber
 ORDER BY r.intInventoryReceiptId DESC
