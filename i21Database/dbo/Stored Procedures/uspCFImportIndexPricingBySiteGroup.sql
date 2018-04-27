@@ -2,9 +2,9 @@
 	
 	 @strPriceIndex					NVARCHAR(MAX)	 =	 ''
 	,@strSiteGroup					NVARCHAR(MAX)	 =	 ''
-	,@strDate						NVARCHAR(MAX)	 =	 ''
+	,@dtmDate						DATETIME	     =	 NULL
 	,@strItemNumber					NVARCHAR(MAX)	 =	 ''
-	,@strPrice						NVARCHAR(MAX)	 =	 ''
+	,@dblIndexPrice					NUMERIC(18,6)	 =	 0
 AS
 BEGIN
 	---------------------------------------------------------
@@ -13,10 +13,14 @@ BEGIN
 	DECLARE @ysnHasError							  BIT = 0
 	DECLARE @intDuplicateCard					      INT = 0
 	---------------------------------------------------------
-	DECLARE @intVehicleId							  INT = 0
-	DECLARE @intAccountId							  INT = 0
-	DECLARE @intExpenseItemId						  INT = 0
-	DECLARE @intDepartmentId						  INT = 0
+	DECLARE @intSiteGroupId							  INT = 0
+	DECLARE @intPriceIndexId						  INT = 0
+	DECLARE @intItemId								  INT = 0
+	DECLARE @intIndexPricingBySiteGroupHeaderId		  INT = 0
+	DECLARE @intIndexPricingBySiteGroupId			  INT = 0
+	
+	
+	
 	---------------------------------------------------------
 
 
@@ -40,16 +44,16 @@ BEGIN
 		VALUES (@strPriceIndex,'Site Group is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strDate = NULL OR @strDate = '')
+	IF(@dtmDate = NULL OR @dtmDate = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strDate,'Date is required')
+		VALUES (@strPriceIndex,'Date is required')
 		SET @ysnHasError = 1
 	END
 	IF(@strItemNumber = NULL OR @strItemNumber = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-		VALUES (@strItemNumber,'Item NUmber is required')
+		VALUES (@strItemNumber,'Item Number is required')
 		SET @ysnHasError = 1
 	END
 	---------------------------------------------------------
@@ -63,181 +67,126 @@ BEGIN
 	---------------------------------------------------------
 	--				VALID VALUE TO OTHER TABLE		       --
 	---------------------------------------------------------
-
-	--Account
-	IF (@strSiteGroup != '')
-		BEGIN 
-			SELECT @strSiteGroup = CFAcc.intAccountId
-			FROM tblCF as ARCus
-			INNER JOIN tblCFAccount as CFAcc
-			ON ARCus.[intEntityId] = CFAcc.intCustomerId
-			WHERE strCustomerNumber = @strAccountId
-			IF (@intAccountId = 0)
-			BEGIN
-				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-				VALUES (@strVehicleNumber,'Unable to find match for '+ @strAccountId +' on account list')
-				SET @ysnHasError = 1
-			END
-			ELSE
-			BEGIN
-				---------------------------------------------------------
-				--			      DUPLICATE VEHICLE NUMBER				   --
-				---------------------------------------------------------
-				SELECT @intDuplicateCard = COUNT(*) FROM tblCFVehicle WHERE strVehicleNumber = @strVehicleNumber AND intAccountId = @intAccountId 
-				IF (@intDuplicateCard > 0)
-				BEGIN
-					INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-					VALUES (@strVehicleNumber,'Duplicate vehicle for '+ @strVehicleNumber)
-					SET @ysnHasError = 1
-				END
-	
-				---------------------------------------------------------
-			END
-		END
-	ELSE
-		BEGIN
-			SET @intAccountId = NULL
-		END
-
-
-	--Expense Item
-	IF (@strExpenseItemId != '')
-		BEGIN 
-			SELECT @intExpenseItemId = intItemId  
-			FROM tblICItem
-			WHERE strItemNo = @strExpenseItemId
-			IF (@intExpenseItemId = 0)
-			BEGIN
-				INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-				VALUES (@strVehicleNumber,'Unable to find match for '+ @strExpenseItemId +' on item list')
-				SET @ysnHasError = 1
-			END
-		END
-	ELSE
-		BEGIN
-			SET @intExpenseItemId = NULL
-		END
-
-	---------------------------------------------------------
-
-
-	--Department
-	IF (@strDepartment != '' AND @intAccountId > 0)
+	---Price Index
+	IF (@strPriceIndex != '')
 	BEGIN 
-		SELECT @intDepartmentId = ISNULL(intDepartmentId ,0)
-		FROM tblCFDepartment 
-		WHERE strDepartment = @strDepartment AND intAccountId = @intAccountId
+		SELECT @intPriceIndexId = intPriceIndexId
+		FROM tblCFPriceIndex 
+		WHERE strPriceIndex = @strPriceIndex
 
-		IF (@intDepartmentId = 0)
+
+		IF (ISNULL(@intPriceIndexId,0) = 0)
 		BEGIN
-			INSERT tblCFDepartment (intAccountId,strDepartment)
-			VALUES (@intAccountId,@strDepartment)
-			SET @intDepartmentId = SCOPE_IDENTITY()
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strPriceIndex,'Unable to find match for '+ @strPriceIndex +' on site price index list')
+			SET @ysnHasError = 1
 		END
 	END
-	ELSE
-	BEGIN
-		SET @intDepartmentId = NULL
+
+	--Site Group
+	IF (@strSiteGroup != '')
+	BEGIN 
+		SELECT @intSiteGroupId = intSiteGroupId
+		FROM tblCFSiteGroup 
+		WHERE strSiteGroup = @strSiteGroup
+
+		IF (ISNULL(@intSiteGroupId,0) = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strPriceIndex,'Unable to find match for '+ @strSiteGroup +' on site group list')
+			SET @ysnHasError = 1
+		END
 	END
 	
-	IF(@ysnHasError = 1)
-	BEGIN
-		RETURN
+	--Product
+	IF (@strItemNumber != '')
+	BEGIN 
+		SELECT @intItemId = intItemId
+		FROM tblICItem 
+		WHERE strItemNo = @strItemNumber
+
+		IF (ISNULL(@intItemId,0) = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strPriceIndex,'Unable to find match for '+ @strItemNumber +' on Item list')
+			SET @ysnHasError = 1
+		END
 	END
-
-	---------------------------------------------------------
-	--				VALID PREDEFINED VALUES			       --		
-	---------------------------------------------------------
-
-	--Active
-	IF (@ysnCardForOwnUse = 'N')
-		BEGIN 
-			SET @ysnCardForOwnUse = 0
-		END
-	ELSE IF (@ysnCardForOwnUse = 'Y')
-		BEGIN
-			SET @ysnCardForOwnUse = 1	
-		END
-	ELSE
-		BEGIN 
-			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strVehicleNumber,'Invalid card for own use '+ @ysnCardForOwnUse +'. Value should be Y or N only')
-			SET @ysnHasError = 1
-		END
-
-
-		IF (@ysnActive = 'N')
-		BEGIN 
-			SET @ysnActive = 0
-		END
-	ELSE IF (@ysnActive = 'Y')
-		BEGIN
-			SET @ysnActive = 1	
-		END
-	ELSE
-		BEGIN 
-			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strVehicleNumber,'Invalid card for own use '+ @ysnActive +'. Value should be Y or N only')
-			SET @ysnHasError = 1
-		END
-
-	---------------------------------------------------------
 
 	IF(@ysnHasError = 1)
 	BEGIN
 		RETURN
 	END
 
-	---------------------------------------------------------
-	--				INSERT ACCOUNT RECORD			       --		
-	---------------------------------------------------------
+	
+	----------------------Check IndexPricingBySiteGroup Header
+
+	SELECT TOP 1 @intIndexPricingBySiteGroupHeaderId = intIndexPricingBySiteGroupHeaderId
+	FROM tblCFIndexPricingBySiteGroupHeader
+	WHERE intPriceIndexId = @intPriceIndexId
+		AND intSiteGroupId = @intSiteGroupId
+		AND dtmDate = @dtmDate
+	
+	----- CHECK for IndexPricingBySiteGroup Detail
+	SELECT TOP 1 @intIndexPricingBySiteGroupId = intIndexPricingBySiteGroupId
+	FROM tblCFIndexPricingBySiteGroup
+	WHERE intIndexPricingBySiteGroupHeaderId = @intIndexPricingBySiteGroupHeaderId
+		AND intARItemID = @intItemId
+
+
+	IF(ISNULL(@intIndexPricingBySiteGroupId,0) <> 0)
+	BEGIN
+		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+		VALUES (@strPriceIndex,'Item price for - ' + @strItemNumber + ' is changed to ' + CAST(@dblIndexPrice AS NVARCHAR(30)))
+	END
+
 	BEGIN TRANSACTION
-		BEGIN TRY
+	BEGIN TRY
+		IF(ISNULL(@intIndexPricingBySiteGroupHeaderId,0) = 0)
+		BEGIN
+			----INSERt Header
+			INSERT INTO tblCFIndexPricingBySiteGroupHeader(
+				intPriceIndexId
+				,intSiteGroupId
+				,dtmDate)
+			SELECT 
+				@intPriceIndexId
+				,@intSiteGroupId
+				,@dtmDate
 
-			INSERT INTO tblCFVehicle(
-				 intAccountId
-				,strVehicleNumber
-				,strCustomerUnitNumber
-				,strVehicleDescription
-				,strLicencePlateNumber
-				,ysnCardForOwnUse
-				,intExpenseItemId
-				,intDaysBetweenService
-				,intMilesBetweenService
-				,intLastReminderOdometer
-				,dtmLastReminderDate
-				,dtmLastServiceDate
-				,intLastServiceOdometer
-				,strNoticeMessageLine1
-				,ysnActive
-				,intDepartmentId)
-			VALUES(
-				 @intAccountId
-				,@strVehicleNumber
-				,@strCustomerUnitNumber
-				,@strVehicleDescription
-				,@strLicencePlateNumber
-				,@ysnCardForOwnUse
-				,@intExpenseItemId
-				,@intDaysBetweenService
-				,@intMilesBetweenService
-				,@intLastReminderOdometer
-				,@dtmLastReminderDate
-				,@dtmLastServiceDate
-				,@intLastServiceOdometer
-				,@strNoticeMessageLine1
-				,@ysnActive
-				,@intDepartmentId)
+			SET @intIndexPricingBySiteGroupHeaderId = @@IDENTITY
+		END
 
-			COMMIT TRANSACTION
-			RETURN 1
-		END TRY
-		BEGIN CATCH
-			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
-			VALUES (@strVehicleNumber,'Internal Error - ' + ERROR_MESSAGE())
-			SET @ysnHasError = 1
-			ROLLBACK TRANSACTION
-			RETURN 0
-		END CATCH
+
+		IF(ISNULL(@intIndexPricingBySiteGroupId,0) <> 0)
+		BEGIN
+			UPDATE tblCFIndexPricingBySiteGroup SET
+				intARItemID = @dblIndexPrice
+			WHERE intIndexPricingBySiteGroupHeaderId = @intIndexPricingBySiteGroupHeaderId
+				AND intARItemID = @intItemId
+				AND intIndexPricingBySiteGroupId = @intIndexPricingBySiteGroupId
+		END
+		ELSE
+		BEGIN
+			---Insert Detail
+			INSERT INTO tblCFIndexPricingBySiteGroup(
+				intIndexPricingBySiteGroupHeaderId
+				,intARItemID
+				,dblIndexPrice)
+			SELECT 
+				@intIndexPricingBySiteGroupHeaderId
+				,@intItemId
+				,@dblIndexPrice
+		END
 		
+		COMMIT TRANSACTION
+		RETURN 1
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION
+		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+		VALUES (@strPriceIndex,'Internal Error - ' + ERROR_MESSAGE())
+		SET @ysnHasError = 1
+		RETURN 0
+	END CATCH
 END
