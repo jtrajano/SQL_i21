@@ -320,7 +320,7 @@ BEGIN
 	SELECT
 			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]					=	@batchId,
-			[intAccountId]					=	@DiscountAccount,
+			[intAccountId]					=	loc.intDiscountAccountId,
 			[dblDebit]						=	0,
 			[dblCredit]						=	CAST(B.dblDiscount * paymentForex.dblExchangeRate AS DECIMAL(18,2)),
 			[dblDebitUnit]					=	0,
@@ -354,6 +354,8 @@ BEGIN
 			INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON A.intPaymentId = paymentForex.intPaymentId
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill B2 ON B2.intBillId = ISNULL(B.intBillId, B.intOrigBillId)
+				INNER JOIN tblSMCompanyLocation loc ON B2.intShipToId = loc.intCompanyLocationId
 				INNER JOIN tblAPVendor C
 					ON A.intEntityVendorId = C.[intEntityId]
 				LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
@@ -490,7 +492,7 @@ BEGIN
 	SELECT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
-		[intAccountId]					=	@InterestAccount,
+		[intAccountId]					=	loc.intInterestAccountId,
 		[dblDebit]						=	CAST(B.dblInterest * paymentForex.dblExchangeRate AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -524,6 +526,8 @@ BEGIN
 			INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON A.intPaymentId = paymentForex.intPaymentId
 			INNER JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill B2 ON B2.intBillId = ISNULL(B.intBillId, B.intOrigBillId)
+			INNER JOIN tblSMCompanyLocation loc ON B2.intShipToId = loc.intCompanyLocationId
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
