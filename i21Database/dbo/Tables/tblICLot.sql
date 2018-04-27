@@ -91,7 +91,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		CONSTRAINT [FK_tblICLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICLot_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]),
-		CONSTRAINT [FK_tblICLot_tblICItemOwner] FOREIGN KEY ([intItemOwnerId]) REFERENCES [tblICItemOwner]([intItemOwnerId]) 
+		CONSTRAINT [FK_tblICLot_tblICItemOwner] FOREIGN KEY ([intItemOwnerId]) REFERENCES [tblICItemOwner]([intItemOwnerId]),
+		CONSTRAINT [FK_tblICLot_tblEMEntity_Producer] FOREIGN KEY ([intProducerId]) REFERENCES [tblEMEntity]([intEntityId])  
 	)
 	GO
 

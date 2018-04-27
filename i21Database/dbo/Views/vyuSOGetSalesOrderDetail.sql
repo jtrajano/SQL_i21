@@ -59,14 +59,14 @@ SELECT
         SO.intCurrencyExchangeRateTypeId,
         SO.intCurrencyExchangeRateId,
         SO.dblCurrencyExchangeRate,
-		SO.intEntityVendorId,
-		SO.intPurchaseDetailId,
+		--SO.intEntityVendorId,
+		--SO.intPurchaseDetailId,
 		SO.intPriceUOMId,
 		SO.dblUnitQuantity,
 		SO.dblUnitPrice,
-		SO.dblPriceMargin,
-		SO.dblMarginPercentage,
-		SO.dblLastCost,
+		--SO.dblPriceMargin,
+		--SO.dblMarginPercentage,
+		--SO.dblLastCost,
 		SO.dblBaseUnitPrice,
         strItemNo = ITM.strItemNo,
         strBundleType = ITM.strBundleType,
@@ -98,8 +98,8 @@ SELECT
         strStorageTypeDescription = STORAGETYPE.strStorageTypeDescription,
         strRequired = ITM.strRequired,
         strCurrencyExchangeRateType = CURTYPE.strCurrencyExchangeRateType,
-		strVendorName = VPER.strName,
-		strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
+		--strVendorName = VPER.strName,
+		--strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
 		strPriceUOM = PITMUOM.strUnitMeasure
 	from tblSOSalesOrderDetail SO
 		INNER JOIN ( SELECT intSalesOrderId, intCompanyLocationId 
@@ -153,14 +153,14 @@ SELECT
 								strStorageTypeDescription
 			FROM tblGRStorageType ) STORAGETYPE
 		ON SO.intStorageScheduleTypeId = STORAGETYPE.intStorageScheduleTypeId
-		LEFT JOIN ( SELECT		intEntityId,			strName
-			FROM tblEMEntity WITH(NOLOCK) ) VPER
-		ON SO.intEntityVendorId = VPER.intEntityId
-		LEFT JOIN ( SELECT		intPurchaseDetailId,	strPurchaseOrderNumber
-			FROM tblPOPurchase ZPO WITH(NOLOCK) 
-				JOIN tblPOPurchaseDetail ZPOD WITH(NOLOCK)
-					ON ZPO.intPurchaseId = ZPOD.intPurchaseId)  PO
-		ON SO.intPurchaseDetailId = PO.intPurchaseDetailId
+		--LEFT JOIN ( SELECT		intEntityId,			strName
+		--	FROM tblEMEntity WITH(NOLOCK) ) VPER
+		--ON SO.intEntityVendorId = VPER.intEntityId
+		--LEFT JOIN ( SELECT		intPurchaseDetailId,	strPurchaseOrderNumber
+		--	FROM tblPOPurchase ZPO WITH(NOLOCK) 
+		--		JOIN tblPOPurchaseDetail ZPOD WITH(NOLOCK)
+		--			ON ZPO.intPurchaseId = ZPOD.intPurchaseId)  PO
+		--ON SO.intPurchaseDetailId = PO.intPurchaseDetailId
 		LEFT JOIN ( SELECT		intItemUOMId,			strUnitMeasure,
 								intUnitMeasureId
 			FROM vyuARItemUOM WITH(NOLOCK)) PITMUOM

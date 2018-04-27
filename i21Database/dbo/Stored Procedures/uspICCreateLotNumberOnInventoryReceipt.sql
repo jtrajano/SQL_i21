@@ -230,6 +230,10 @@ BEGIN
 			,intUnitPallet
 			,intBookId
 			,intSubBookId
+			,strCertificate
+			,intProducerId
+			,strCertificateId
+			,strTrackingNumber
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -278,6 +282,10 @@ BEGIN
 			,intUnitPallet			= ItemLot.intUnitPallet	
 			,intBookId				= Receipt.intBookId
 			,intSubBookId			= Receipt.intSubBookId
+			,strCertificate			= ItemLot.strCertificate
+			,intProducerId			= ItemLot.intProducerId
+			,strCertificateId		= ItemLot.strCertificateId
+			,strTrackingNumber		= ItemLot.strTrackingNumber
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
