@@ -26,6 +26,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[strAPAR]					NVARCHAR(100) NULL,
 	[strPayToReceiveFrom]		NVARCHAR(100) NULL,
 	[strReferenceNo]			NVARCHAR(200) NULL,
+	[intContractCostRefId]		INT,
 	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
 	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intVendorId_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity](intEntityId),

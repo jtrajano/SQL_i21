@@ -6398,6 +6398,20 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptReport.sql" />
     <Build Include="dbo\Views\vyuCTContractCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportGroupAdjustmentRate.sql" />
+    <Build Include="dbo\Tables\tblCTContractStage.sql" />
+    <Build Include="dbo\Tables\tblCTContractAcknowledgementStage.sql" />
+    <Build Include="dbo\Tables\tblCTPriceContractStage.sql" />
+    <Build Include="dbo\Tables\tblCTPriceContractAcknowledgementStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractProcessAckXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
