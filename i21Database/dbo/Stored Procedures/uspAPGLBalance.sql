@@ -25,7 +25,7 @@ SELECT @prepaymentCategory = intAccountCategoryId FROM tblGLAccountCategory WHER
 
 --GET THE BALANCE
 IF OBJECT_ID(N'tempdb..#tmpAPGLAccountBalance') IS NOT NULL DROP TABLE #tmpAPGLAccountBalance
-CREATE TABLE #tmpAPGLAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMAL(18,6))
+CREATE TABLE #tmpAPGLAccountBalance(strAccountId NVARCHAR(40),strBillId NVARCHAR(40), dblBalance DECIMAL(18,6),)
 
 INSERT INTO #tmpAPGLAccountBalance
 SELECT
