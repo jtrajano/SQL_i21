@@ -64,17 +64,17 @@ BEGIN
 		AND ARID.[intLoadDetailId] IS NULL
 		AND ARID.[intLotId] IS NULL
 
-	IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
-		EXEC [uspICCreateStockReservation]
-			 @ItemsToReserve		= @items
-			,@intTransactionId		= @InvoiceId
-			,@intTransactionTypeId	= @TransactionTypeId
+	-- IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
+	-- 	EXEC [uspICCreateStockReservation]
+	-- 		 @ItemsToReserve		= @items
+	-- 		,@intTransactionId		= @InvoiceId
+	-- 		,@intTransactionTypeId	= @TransactionTypeId
 
-	IF ISNULL(@FromPosting, 0 ) = 1
-		EXEC [dbo].[uspICPostStockReservation]
-			 @intTransactionId		= @InvoiceId
-			,@intTransactionTypeId	= @TransactionTypeId
-			,@ysnPosted				= @Post
+	-- IF ISNULL(@FromPosting, 0 ) = 1
+	-- 	EXEC [dbo].[uspICPostStockReservation]
+	-- 		 @intTransactionId		= @InvoiceId
+	-- 		,@intTransactionTypeId	= @TransactionTypeId
+	-- 		,@ysnPosted				= @Post
 	 
 END
 
