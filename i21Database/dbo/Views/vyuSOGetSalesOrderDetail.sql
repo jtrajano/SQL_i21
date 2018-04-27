@@ -68,8 +68,8 @@ SELECT
 		--SO.dblMarginPercentage,
 		--SO.dblLastCost,
 		SO.dblBaseUnitPrice,
-        strItemNo = ITM.strItemNo,
-        strBundleType = ITM.strBundleType,
+        strItemNo = ITMNO.strItemNo,
+        strBundleType = ITMNO.strBundleType,
         strUnitMeasure = ITMUOM.strUnitMeasure,
         intUnitMeasureId = ITMUOM.intUnitMeasureId,
 
@@ -77,9 +77,9 @@ SELECT
         strStorageLocation = SLOC.strName,
         strContractNumber = CDET.strContractNumber,
         intContractSeq = CDET.intContractSeq,
-        strItemType = ITM.strType,
-        strLotTracking = ITM.strLotTracking,
-        strModule = ITM.strModule,
+        strItemType = ITMNO.strType,
+        strLotTracking = ITMNO.strLotTracking,
+        strModule = ITMNO.strModule,
         dblOriginalQty = SO.dblQtyOrdered,
         dblOriginalPrice = SO.dblPrice,
         intOriginalItemUOMId = SO.intItemUOMId,
@@ -96,7 +96,7 @@ SELECT
 										ELSE 0 END,
         dblDiscountAmount = CASE WHEN ISNULL(SO.dblDiscount, 0) > 0 THEN  ((SO.dblQtyOrdered * SO.dblPrice) * (SO.dblDiscount / 100)) ELSE 0 END,
         strStorageTypeDescription = STORAGETYPE.strStorageTypeDescription,
-        strRequired = ITM.strRequired,
+        strRequired = ITMNO.strRequired,
         strCurrencyExchangeRateType = CURTYPE.strCurrencyExchangeRateType,
 		--strVendorName = VPER.strName,
 		--strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
@@ -104,22 +104,30 @@ SELECT
 	from tblSOSalesOrderDetail SO
 		INNER JOIN ( SELECT intSalesOrderId, intCompanyLocationId 
 			FROM tblSOSalesOrder  WITH(NOLOCK) ) OSO
-		ON SO.intSalesOrderId = OSO.intSalesOrderId 
-		LEFT JOIN ( SELECT		ICITM.intItemId,		strItemNo,
+		ON SO.intSalesOrderId = OSO.intSalesOrderId
+		LEFT JOIN (SELECT		intItemId,				strItemNo,
 								strBundleType,			strType,
-								strLotTracking,			ICPRICING.intItemLocationId,
-								strModule,				strRequired,
-								strMaintenanceCalculationMethod,
+								strLotTracking,			strModule,				
+								strRequired,			strMaintenanceCalculationMethod							
+			FROM tblICItem ICITM
+				LEFT JOIN tblSMModule MODULE WITH(NOLOCK)
+					ON ICITM.intModuleId = MODULE.intModuleId) ITMNO
+		ON SO.intItemId = ITMNO.intItemId 
+		LEFT JOIN ( SELECT		ICITM.intItemId,		ICPRICING.intItemLocationId,
+								strType,				strMaintenanceCalculationMethod,					
 								dblSalePrice = ISNULL(ICPRICING.dblSalePrice, 0),
 								dblMaintenanceRate = ISNULL(dblMaintenanceRate, 0),
-								dblMaintenanceRatePercentage = ISNULL(dblSalePrice, 0) * (ISNULL(dblMaintenanceRate, 0) / 100)
-			FROM tblICItem ICITM WITH(NOLOCK) 
+								dblMaintenanceRatePercentage = ISNULL(dblSalePrice, 0) * (ISNULL(dblMaintenanceRate, 0) / 100),
+								intLocationId
+			FROM tblICItem ICITM WITH(NOLOCK) 				
+				LEFT JOIN tblICItemLocation CLOC WITH(NOLOCK)  
+					ON ICITM.intItemId = CLOC.intItemId					
 				LEFT JOIN tblICItemPricing ICPRICING WITH(NOLOCK) 
 					ON ICITM.intItemId = ICPRICING.intItemId 
-				LEFT JOIN tblSMModule MODULE WITH(NOLOCK)
-					ON ICITM.intModuleId = MODULE.intModuleId
+						AND CLOC.intItemLocationId = ICPRICING.intItemLocationId
+				
 		) ITM
-		ON SO.intItemId = ITM.intItemId-- AND ITM.intItemLocationId = OSO.intCompanyLocationId
+		ON SO.intItemId = ITM.intItemId AND ITM.intLocationId = OSO.intCompanyLocationId
 
 		LEFT JOIN ( SELECT		intItemUOMId,			strUnitMeasure,
 								intUnitMeasureId
