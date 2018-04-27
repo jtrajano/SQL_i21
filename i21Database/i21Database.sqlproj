@@ -6391,6 +6391,10 @@
     <Build Include="dbo\Stored Procedures\uspSMAddApprovalsForTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSubmitTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportIndexPricingBySiteGroup.sql" />
+    <Build Include="dbo\Tables\tblCFCSRSingleQuoteDetailTax.sql" />
+    <Build Include="dbo\Tables\tblCFCSRSingleQuote.sql" />
+    <Build Include="dbo\Tables\tblCFAccountQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateQuoting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
