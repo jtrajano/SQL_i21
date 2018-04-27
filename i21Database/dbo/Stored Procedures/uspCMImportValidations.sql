@@ -10,6 +10,7 @@ CREATE PROCEDURE [dbo].[uspCMImportValidations]
 	,@Invalid_GL_Account_Id_Found AS BIT OUTPUT
 	,@Missing_GL_Account_Id AS BIT OUTPUT
 	,@Invalid_Currency_Id_Found AS BIT OUTPUT
+	,@Invalid_Bank_Account_Found AS BIT OUTPUT
 	,@Missing_Default_Currency AS BIT OUTPUT
 	,@Missing_Cash_Account_Group AS BIT OUTPUT
 	,@Future_Clear_Date_Found AS BIT OUTPUT
