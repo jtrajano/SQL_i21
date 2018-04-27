@@ -293,6 +293,7 @@ BEGIN
 
 	DECLARE @firstApprover BIT = 1
 	DECLARE @requireForApproval BIT = 0
+	DECLARE @requireForApprovalOnce BIT = 0
 
 	WHILE EXISTS(SELECT 1 FROM @Approvers)
 	BEGIN
@@ -377,11 +378,16 @@ BEGIN
 			SET ysnCurrent = 0
 			WHERE intApprovalId = @submitApprovalId
 		END
+
+		IF @requireForApproval = 1 AND @requireForApprovalOnce = 0
+		BEGIN
+			SET @requireForApprovalOnce = 1
+		END
 	   
 		DELETE FROM @Approvers WHERE intApprovalListUserSecurityId = @approverListId  
 	END
 
-	IF @requireForApproval = 0
+	IF @requireForApprovalOnce = 0
 		BEGIN
 			PRINT('no need for approval')
 
