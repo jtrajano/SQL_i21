@@ -6396,6 +6396,7 @@
     <Build Include="dbo\Tables\tblCFAccountQuote.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGenerateQuoting.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptReport.sql" />
+    <Build Include="dbo\Views\vyuCTContractCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
