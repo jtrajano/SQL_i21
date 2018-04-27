@@ -4,7 +4,7 @@
 	dblWeightLoss				DECIMAL(18,6),
 	dblFranchiseWeight			DECIMAL(18,6),
 	dblQtyReceived				DECIMAL(18,6),
-	dblCost						DECIMAL(18,6),
+	dblCost						DECIMAL(38,20),
 	dblCostUnitQty				DECIMAL(38,20),
 	dblWeightUnitQty			DECIMAL(18,6),
 	dblUnitQty					DECIMAL(18,6),

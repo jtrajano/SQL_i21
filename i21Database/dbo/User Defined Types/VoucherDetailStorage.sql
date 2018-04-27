@@ -6,7 +6,7 @@
 	[intAccountId]				INT	NULL,
 	[dblQtyReceived]			DECIMAL(18, 6)	NOT NULL, 
 	[strMiscDescription]		NVARCHAR(500)	NULL, 
-    [dblCost]					DECIMAL(18, 6)	NOT NULL,
+    [dblCost]					DECIMAL(38, 20)	NOT NULL,
 	[intContractHeaderId]		INT NULL,
 	[intContractDetailId]		INT NULL,
 	[intUnitOfMeasureId] 		INT NULL,
