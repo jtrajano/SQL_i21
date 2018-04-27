@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerAgingReport]
 AS
-WITH RESULT(intInvoiceId, intEntityCustomerId, dblInvoiceTotal, dblDiscountTerm, strAge, dblAmountPaid, dblTotalDue, dblAvailableCredit, dblPrepayments, dblFuture, dbl0Days, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl91Days)
+WITH RESULT_CTE(intInvoiceId, intEntityCustomerId, dblInvoiceTotal, dblDiscountTerm, strAge, dblAmountPaid, dblTotalDue, dblAvailableCredit, dblPrepayments, dblFuture, dbl0Days, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl91Days)
 AS(
 SELECT I.intInvoiceId
 	  , I.intEntityCustomerId
@@ -102,7 +102,7 @@ FROM (
 		 , dblCredits			= SUM(dblAvailableCredit) * -1
 		 , dblPrepayments		= SUM(dblPrepayments) * -1
 		 , dblPrepaids			= 0.000000
-	FROM RESULT
+	FROM RESULT_CTE
 	GROUP BY intEntityCustomerId
 	--HAVING dbo.fnRoundBanker(SUM(dblTotalDue) - SUM(dblAvailableCredit) - SUM(dblPrepayments), 2) <> 0.00 
 	--	OR dbo.fnRoundBanker(SUM(dblAvailableCredit) * -1, 2) <> 0.00 
