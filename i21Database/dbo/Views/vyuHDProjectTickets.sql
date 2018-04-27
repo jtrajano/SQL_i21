@@ -15,9 +15,9 @@
 			,t.dtmDueDate
 			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101)
 			,ysnCompleted = Convert(bit,(case when t.intTicketStatusId = 2 then 1 else 0 end))
-			,t.dblQuotedHours
-			,t.dblActualHours
-			,dblOverShort = (t.dblQuotedHours-t.dblActualHours)
+			,dblQuotedHours = isnull(t.dblQuotedHours,0)
+			,dblActualHours = isnull(t.dblActualHours,0)
+			,dblOverShort = (isnull(t.dblQuotedHours,0)-isnull(t.dblActualHours,0))
 			,strMilestone = ms.strDescription
 			,ms.intPriority
 			,ts.strBackColor
