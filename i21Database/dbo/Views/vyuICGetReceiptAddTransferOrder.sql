@@ -74,6 +74,11 @@ FROM (
 			, strParentLotNumber		= LotItem.strParentLotNumber
 			, intLotStatusId			= d.intNewLotStatusId
 			, strLotCondition			= d.strLotCondition			
+			, strCertificate			= LotItem.strCertificate
+			, intProducerId				= LotItem.intProducerId
+			, strProducer				= LotItem.strProducer
+			, strCertificateId			= LotItem.strCertificateId
+			, strTrackingNumber			= LotItem.strTrackingNumber
 			-- Cost UOM --------------------------------------------------------
 			, intCostUOMId				= CostUOM.intItemUOMId -- intItemUOMId
 			, strCostUOM				= CostUnitMeasure.strUnitMeasure
@@ -174,6 +179,11 @@ FROM (
 						,LotItem.intParentLotId
 						,LotItem.intItemUOMId 
 						,pl.strParentLotNumber
+						,LotItem.strCertificate
+						,LotItem.intProducerId
+						,strProducer = producer.strName
+						,LotItem.strCertificateId
+						,LotItem.strTrackingNumber
 				FROM	dbo.tblICLot LotItem 
 						--INNER JOIN tblICInventoryTransaction t_lot
 						--	ON LotItem.intLotId = t_lot.intLotId
@@ -185,6 +195,8 @@ FROM (
 						--	AND t_lot.intItemId = d.intItemId
 						LEFT JOIN tblICParentLot pl
 							ON pl.intParentLotId = LotItem.intParentLotId 
+						LEFT JOIN tblEMEntity producer
+							ON producer.intEntityId = LotItem.intProducerId
 				WHERE	LotItem.intLotId = t.intLotId
 			) LotItem
 
