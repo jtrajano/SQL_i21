@@ -6390,6 +6390,7 @@
     <Build Include="dbo\Functions\fnSMCompareApproverConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddApprovalsForTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSubmitTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportIndexPricingBySiteGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
