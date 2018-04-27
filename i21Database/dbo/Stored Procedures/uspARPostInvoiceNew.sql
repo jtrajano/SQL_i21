@@ -661,6 +661,16 @@ IF(@Exclude IS NOT NULL)
 	END
 	
 
+
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+--BEGIN TRAN @TransactionName
+if @Recap = 1 AND @RaiseError = 0
+	SAVE TRAN @TransactionName
+
+
+
 DECLARE @TempInvoiceIds TABLE(
 	id  	INT
 )
@@ -744,14 +754,14 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		BEGIN
 			IF @InitTranCount = 0
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR  @Recap = 1
 						ROLLBACK TRANSACTION
 					IF (XACT_STATE()) = 1
 						COMMIT TRANSACTION
 				END		
 			ELSE
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR  @Recap = 1
 						ROLLBACK TRANSACTION  @Savepoint
 				END	
 		END
@@ -764,15 +774,6 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			END				
 		GOTO Post_Exit	
 	END
-
-
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
---BEGIN TRAN @TransactionName
-if @Recap = 1 AND @RaiseError = 0
-	SAVE TRAN @TransactionName
 
 
 --Process Split Invoice
