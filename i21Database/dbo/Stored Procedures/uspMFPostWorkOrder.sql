@@ -457,10 +457,6 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 
 		IF @strYieldCostValue = 'True'
-			--and exists(SELECT *
-			--	FROM tblMFWorkOrderProducedLotTransaction PL
-			--	WHERE intWorkOrderId = @intWorkOrderId
-			--		AND PL.dblQuantity < 0)
 		BEGIN
 			INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 				intWorkOrderId
@@ -485,9 +481,9 @@ BEGIN TRY
 			SELECT @intWorkOrderId
 				,PL.intItemId
 				,PL.intLotId
-				,abs(PL.dblQuantity)
+				,PL.dblQuantity
 				,PL.intItemUOMId
-				,abs(PL.dblQuantity)
+				,PL.dblQuantity
 				,PL.intItemUOMId
 				,IsNULL(PL.intBatchId, @intTransactionId)
 				,9999
@@ -504,7 +500,6 @@ BEGIN TRY
 			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
 			WHERE intWorkOrderId = @intWorkOrderId
 
-			--AND PL.dblQuantity < 0
 			DELETE
 			FROM @ItemsForPost
 

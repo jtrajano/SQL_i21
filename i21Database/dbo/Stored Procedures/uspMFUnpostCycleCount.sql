@@ -215,9 +215,9 @@ BEGIN TRY
 			AND intWorkOrderProducedLotTransactionId > @intWorkOrderProducedLotTransactionId
 	END
 
-			SELECT @strWorkOrderNo = strWorkOrderNo
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
+	SELECT @strWorkOrderNo = strWorkOrderNo
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF @strAttributeValue = 'False' --Is Instant Consumption
 	BEGIN
@@ -229,8 +229,6 @@ BEGIN TRY
 			,@intBatchId = intBatchId
 		FROM tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
-
-
 
 		DELETE
 		FROM @GLEntries
@@ -309,114 +307,121 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
-			,@strBatchId OUTPUT
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderProducedLotTransaction
+				WHERE intWorkOrderId = @intWorkOrderId
+				)
+		BEGIN
+			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+				,@strBatchId OUTPUT
 
-		DELETE
-		FROM @ItemsForPost
+			DELETE
+			FROM @ItemsForPost
 
-		--Lot Tracking
-		INSERT INTO @ItemsForPost (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,intSourceTransactionId
-			,strSourceTransactionId
-			)
-		SELECT intItemId = l.intItemId
-			,intItemLocationId = l.intItemLocationId
-			,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-			,dtmDate = @dtmCurrentDateTime
-			,dblQty = cl.dblQuantity
-			,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-			,dblCost = l.dblLastCost
-			,dblSalesPrice = 0
-			,intCurrencyId = NULL
-			,dblExchangeRate = 1
-			,intTransactionId = cl.intBatchId
-			,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-			,strTransactionId = @strTransactionId
-			,intTransactionTypeId = @INVENTORY_CONSUME
-			,intLotId = l.intLotId
-			,intSubLocationId = l.intSubLocationId
-			,intStorageLocationId = l.intStorageLocationId
-			,intSourceTransactionId = @INVENTORY_CONSUME
-			,strSourceTransactionId = @strTransactionId
-		FROM dbo.tblMFWorkOrderConsumedLot cl
-		JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
-		JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
-		LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
-		WHERE cl.intWorkOrderId = @intWorkOrderId
-			AND intSequenceNo = 9999
+			--Lot Tracking
+			INSERT INTO @ItemsForPost (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,intTransactionDetailId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId
+				,intSourceTransactionId
+				,strSourceTransactionId
+				)
+			SELECT intItemId = l.intItemId
+				,intItemLocationId = l.intItemLocationId
+				,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
+				,dtmDate = @dtmCurrentDateTime
+				,dblQty = cl.dblQuantity
+				,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
+				,dblCost = l.dblLastCost
+				,dblSalesPrice = 0
+				,intCurrencyId = NULL
+				,dblExchangeRate = 1
+				,intTransactionId = cl.intBatchId
+				,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+				,strTransactionId = @strTransactionId
+				,intTransactionTypeId = @INVENTORY_CONSUME
+				,intLotId = l.intLotId
+				,intSubLocationId = l.intSubLocationId
+				,intStorageLocationId = l.intStorageLocationId
+				,intSourceTransactionId = @INVENTORY_CONSUME
+				,strSourceTransactionId = @strTransactionId
+			FROM dbo.tblMFWorkOrderConsumedLot cl
+			JOIN dbo.tblICLot l ON cl.intLotId = l.intLotId
+			JOIN dbo.tblICItemUOM ItemUOM ON l.intItemUOMId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICItemUOM WeightUOM ON l.intWeightUOMId = WeightUOM.intItemUOMId
+			WHERE cl.intWorkOrderId = @intWorkOrderId
+				AND intSequenceNo = 9999
 
-		DELETE
-		FROM @GLEntries
+			DELETE
+			FROM @GLEntries
 
-		-- Call the post routine 
-		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strRateType]
-			)
-		EXEC dbo.uspICPostCosting @ItemsForPost
-			,@strBatchId
-			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-			,@intUserId
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+				[dtmDate]
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[strRateType]
+				)
+			EXEC dbo.uspICPostCosting @ItemsForPost
+				,@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intUserId
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,1
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,1
 
-		DELETE
-		FROM tblMFWorkOrderConsumedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intSequenceNo = 9999
+			DELETE
+			FROM tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intSequenceNo = 9999
 
-		DELETE
-		FROM tblMFWorkOrderProducedLotTransaction
-		WHERE intWorkOrderId = @intWorkOrderId
+			DELETE
+			FROM tblMFWorkOrderProducedLotTransaction
+			WHERE intWorkOrderId = @intWorkOrderId
+		END
 	END
 
 	SELECT @intInputItemId = intItemId
