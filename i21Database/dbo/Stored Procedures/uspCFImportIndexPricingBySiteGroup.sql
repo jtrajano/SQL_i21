@@ -184,7 +184,7 @@ BEGIN
 		IF(ISNULL(@intIndexPricingBySiteGroupId,0) <> 0)
 		BEGIN
 			UPDATE tblCFIndexPricingBySiteGroup SET
-				intARItemID = @dblIndexPrice
+				dblIndexPrice = @dblIndexPrice
 			WHERE intIndexPricingBySiteGroupHeaderId = @intIndexPricingBySiteGroupHeaderId
 				AND intARItemID = @intItemId
 				AND intIndexPricingBySiteGroupId = @intIndexPricingBySiteGroupId
