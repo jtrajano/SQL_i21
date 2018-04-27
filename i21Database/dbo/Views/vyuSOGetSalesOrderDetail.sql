@@ -109,7 +109,7 @@ SELECT
 				LEFT JOIN tblSMModule MODULE WITH(NOLOCK)
 					ON ICITM.intModuleId = MODULE.intModuleId
 		) ITM
-		ON SO.intItemId = ITM.intItemId AND ITM.intItemLocationId = OSO.intCompanyLocationId
+		ON SO.intItemId = ITM.intItemId-- AND ITM.intItemLocationId = OSO.intCompanyLocationId
 
 		LEFT JOIN ( SELECT		intItemUOMId,			strUnitMeasure,
 								intUnitMeasureId
