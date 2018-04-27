@@ -81,7 +81,12 @@ SET @curDate = GETDATE();
 
 SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 
-SELECT @remainingUnits = SUM(SCD.dblNet), @ticketTotalUnitQty = SUM(SCT.dblNetUnits)
+
+SELECT @remainingUnits = SUM(SCD.dblNet)
+FROM tblSCDeliverySheet SCD
+WHERE SCD.intDeliverySheetId = @intDeliverySheetId
+
+SELECT @ticketTotalUnitQty = SUM(SCT.dblNetUnits)
 FROM tblSCDeliverySheet SCD
 INNER JOIN tblSCTicket SCT ON SCD.intDeliverySheetId = SCT.intDeliverySheetId AND SCT.strTicketStatus = 'H'
 WHERE SCD.intDeliverySheetId = @intDeliverySheetId
@@ -113,7 +118,7 @@ BEGIN
 	BEGIN
 		IF @NetUnits = 0
 			SET @NetUnits = @ticketTotalUnitQty;
-		SET @tmpUnits = ROUND(((@NetUnits * @SplitAverage) / 100), @currencyDecimal);
+		SET @tmpUnits = (@NetUnits * @SplitAverage) / 100;
 		IF @remainingUnits < @tmpUnits
 			SET @tmpUnits = @remainingUnits;
 
@@ -198,7 +203,7 @@ BEGIN
 			ELSE
 				UPDATE tblSCDeliverySheetHistory set intStorageScheduleTypeId = @intStorageScheduleTypeId
 				, dblQuantity = ISNULL(@tmpUnits,0) , dblSplitPercent = ISNULL(@SplitAverage,0) 
-				WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intDeliverySheetId
+				WHERE intEntityId = @intEntityId AND intDeliverySheetId = @intDeliverySheetId AND dtmDeliverySheetHistoryDate = @curDate
 
 		SET @remainingUnits -= @tmpUnits;
 
