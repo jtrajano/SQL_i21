@@ -127,7 +127,7 @@ SELECT
 		LEFT JOIN ( SELECT		intContractDetailId,	strContractNumber,
 								intContractSeq,			intPricingTypeId,
 								strPricingType,			ysnLoad
-			FROM vyuARCustomerContract WITH(NOLOCK)) CDET
+			FROM vyuCTCustomerContract WITH(NOLOCK)) CDET
 		ON SO.intContractDetailId = CDET.intContractDetailId
 		LEFT JOIN ( SELECT		intTaxGroupId,			strTaxGroup 
 			FROM tblSMTaxGroup ) TAXGRP
