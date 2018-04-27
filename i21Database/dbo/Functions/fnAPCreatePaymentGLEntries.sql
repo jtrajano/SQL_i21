@@ -137,15 +137,15 @@ BEGIN
 	(
 		SELECT		DISTINCT
 					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate != 1 THEN CAST(
+					[dblCredit]	 					=	CASE WHEN paymentForex.dblExchangeRate != 1 THEN CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-															paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
+															paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(paymentForex.dblExchangeRate,0),1) 
 														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
 														ELSE
 															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
 					[dblCreditForeign]				=	
-														CASE WHEN A.dblExchangeRate != 1 THEN 
+														CASE WHEN paymentForex.dblExchangeRate != 1 THEN 
 														CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
@@ -155,6 +155,7 @@ BEGIN
 															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
 				
 			FROM	[dbo].tblAPPayment A 
+			INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON A.intPaymentId = paymentForex.intPaymentId
 			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
 			INNER JOIN tblAPBill voucher ON paymentDetail.intBillId = voucher.intBillId
 			CROSS APPLY
@@ -166,7 +167,7 @@ BEGIN
 			OUTER APPLY (
 				SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
 			) withHoldData
-			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
+			-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 			AND paymentDetail.dblPayment != 0
 			GROUP BY 
@@ -180,7 +181,7 @@ BEGIN
 			paymentDetail.dblPayment, 
 			paymentDetail.dblWithheld,
 			intTransactionType , 
-			dblExchangeRate
+			paymentForex.dblExchangeRate
 			) AS tmpSummaryPayment
 			GROUP BY tmpSummaryPayment.intPaymentId
 	)MainQuery	
