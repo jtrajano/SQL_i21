@@ -1,11 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGProcessInterCompanyLogisticsXML]
-	--uspCTProcessInterCompanyXML 13
-	--@intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
---	BEGIN TRANSACTION
+BEGIN TRANSACTION
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intId INT
@@ -44,8 +42,10 @@ BEGIN TRY
 	DECLARE @NewLoadWarehouseServicesId INT
 	DECLARE @NewLoadCostId INT
 	DECLARE @NewLoadStorageCostId INT
+	DECLARE @intPurchaseSale INT
 	DECLARE @strDetailReplaceXml NVARCHAR(max) = ''
 	DECLARE @strDetailReplaceXmlForContainers NVARCHAR(max) = ''
+	DECLARE @intStartingNumberType INT
 	DECLARE @tempLoadDetail TABLE (
 		[intLoadDetailId] INT NOT NULL
 		,[intConcurrencyId] INT NOT NULL
@@ -90,7 +90,6 @@ BEGIN TRY
 		,[ysnNoClaim] BIT
 		)
 
-	--SELECT * FROM tblLGIntrCompLogistics
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompLogistics
 	WHERE strFeedStatus IS NULL
@@ -144,12 +143,29 @@ BEGIN TRY
 			,@strTransactionType = strTransactionType
 		FROM tblLGIntrCompLogistics
 		WHERE intId = @intId
+		
+		IF( @strTransactionType LIKE '%Instruction%')
+		BEGIN
+			SET @intStartingNumberType = 106
+		END
+		ELSE 
+		BEGIN
+			SET @intStartingNumberType = 39
+		END
 
-		--IF @strTransactionType ='Outbound Shipping Instruction'
+		IF (@strTransactionType LIKE '%Inbound%')
+		BEGIN
+			SET @intPurchaseSale = 1
+		END
+		ELSE 
+		BEGIN
+			SET @intPurchaseSale = 2
+		END
+
 		BEGIN
 			DECLARE @newLoadNumber NVARCHAR(100)
 
-			EXEC uspSMGetStartingNumber 106
+			EXEC uspSMGetStartingNumber @intStartingNumberType
 				,@newLoadNumber OUTPUT
 
 			SET @strTagRelaceXML = NULL
@@ -296,102 +312,197 @@ BEGIN TRY
 			SELECT @intMinXMLLoadDetailId = MIN(intId)
 			FROM @tempXMLLoadDetail
 
-			--SELECT '@tempXMLLoadDetail',* FROM @tempXMLLoadDetail
 			WHILE ISNULL(@intMinXMLLoadDetailId, 0) > 0
 			BEGIN
 				SET @intLoadDetailId = NULL
 				SET @intPContractDetailId = NULL
 				SET @intSContractDetailId = NULL
+				SET @NewLoadDetailId = NULL
 
-				SELECT @intPContractDetailId = intPContractDetailId
-					,@intLoadDetailId = intLoadDetailId
-				FROM @tempXMLLoadDetail
-				WHERE intId = @intMinXMLLoadDetailId
+				IF (@intPurchaseSale = 1)
+				BEGIN
+					SELECT @intSContractDetailId = intSContractDetailId
+						,@intLoadDetailId = intLoadDetailId
+					FROM @tempXMLLoadDetail
+					WHERE intId = @intMinXMLLoadDetailId
 
-				--SELECT '@tempXMLLoadDetail',* FROM @tempXMLLoadDetail
-				SELECT @intSContractDetailId = intContractDetailId
-				FROM tblCTContractDetail
-				WHERE intContractDetailRefId = @intPContractDetailId
+					SELECT @intPContractDetailId = intContractDetailId
+					FROM tblCTContractDetail
+					WHERE intContractDetailRefId = @intSContractDetailId
 
-				UPDATE @tempXMLLoadDetail
-				SET intSContractDetailId = @intSContractDetailId
-					,intPContractDetailId = NULL
-					,intLoadId = @NewLoadId
-					,intLoadDetailRefId = intLoadDetailId
-				WHERE intLoadDetailId = @intLoadDetailId
+					UPDATE @tempXMLLoadDetail
+					SET intSContractDetailId = NULL
+						,intPContractDetailId = @intPContractDetailId
+						,intLoadId = @NewLoadId
+						,intLoadDetailRefId = intLoadDetailId
+					WHERE intLoadDetailId = @intLoadDetailId
 
-				INSERT INTO tblLGLoadDetail (
-					intLoadId
-					,intVendorEntityId
-					,intVendorEntityLocationId
-					,intCustomerEntityId
-					,intCustomerEntityLocationId
-					,intItemId
-					,intPContractDetailId
-					,intSContractDetailId
-					,intPCompanyLocationId
-					,intSCompanyLocationId
-					,dblQuantity
-					,intItemUOMId
-					,dblGross
-					,dblTare
-					,dblNet
-					,intWeightItemUOMId
-					,dblDeliveredQuantity
-					,dblDeliveredGross
-					,dblDeliveredTare
-					,dblDeliveredNet
-					,strLotAlias
-					,strScheduleInfoMsg
-					,ysnUpdateScheduleInfo
-					,ysnPrintScheduleInfo
-					,strLoadDirectionMsg
-					,ysnUpdateLoadDirections
-					,ysnPrintLoadDirections
-					,strVendorReference
-					,strCustomerReference
-					,intPSubLocationId
-					,intSSubLocationId
-					,intNumberOfContainers
-					,intLoadDetailRefId
-					,intConcurrencyId
-					)
-				SELECT @NewLoadId
-					,intVendorEntityId
-					,intVendorEntityLocationId
-					,intCustomerEntityId
-					,intCustomerEntityLocationId
-					,intItemId
-					,intPContractDetailId
-					,intSContractDetailId
-					,intPCompanyLocationId
-					,intSCompanyLocationId
-					,dblQuantity
-					,intItemUOMId
-					,dblGross
-					,dblTare
-					,dblNet
-					,intWeightItemUOMId
-					,dblDeliveredQuantity
-					,dblDeliveredGross
-					,dblDeliveredTare
-					,dblDeliveredNet
-					,strLotAlias
-					,strScheduleInfoMsg
-					,ysnUpdateScheduleInfo
-					,ysnPrintScheduleInfo
-					,strLoadDirectionMsg
-					,ysnUpdateLoadDirections
-					,ysnPrintLoadDirections
-					,strVendorReference
-					,strCustomerReference
-					,intPSubLocationId
-					,intSSubLocationId
-					,intNumberOfContainers
-					,intLoadDetailRefId
-					,1
-				FROM @tempXMLLoadDetail
-				WHERE intSContractDetailId = @intSContractDetailId
+					INSERT INTO tblLGLoadDetail (
+						intLoadId
+						,intVendorEntityId
+						,intVendorEntityLocationId
+						,intCustomerEntityId
+						,intCustomerEntityLocationId
+						,intItemId
+						,intPContractDetailId
+						,intSContractDetailId
+						,intPCompanyLocationId
+						,intSCompanyLocationId
+						,dblQuantity
+						,intItemUOMId
+						,dblGross
+						,dblTare
+						,dblNet
+						,intWeightItemUOMId
+						,dblDeliveredQuantity
+						,dblDeliveredGross
+						,dblDeliveredTare
+						,dblDeliveredNet
+						,strLotAlias
+						,strScheduleInfoMsg
+						,ysnUpdateScheduleInfo
+						,ysnPrintScheduleInfo
+						,strLoadDirectionMsg
+						,ysnUpdateLoadDirections
+						,ysnPrintLoadDirections
+						,strVendorReference
+						,strCustomerReference
+						,intPSubLocationId
+						,intSSubLocationId
+						,intNumberOfContainers
+						,intLoadDetailRefId
+						,intConcurrencyId
+						)
+					SELECT @NewLoadId
+						,intVendorEntityId
+						,intVendorEntityLocationId
+						,intCustomerEntityId
+						,intCustomerEntityLocationId
+						,intItemId
+						,intPContractDetailId
+						,intSContractDetailId
+						,intPCompanyLocationId
+						,intSCompanyLocationId
+						,dblQuantity
+						,intItemUOMId
+						,dblGross
+						,dblTare
+						,dblNet
+						,intWeightItemUOMId
+						,dblDeliveredQuantity
+						,dblDeliveredGross
+						,dblDeliveredTare
+						,dblDeliveredNet
+						,strLotAlias
+						,strScheduleInfoMsg
+						,ysnUpdateScheduleInfo
+						,ysnPrintScheduleInfo
+						,strLoadDirectionMsg
+						,ysnUpdateLoadDirections
+						,ysnPrintLoadDirections
+						,strVendorReference
+						,strCustomerReference
+						,intPSubLocationId
+						,intSSubLocationId
+						,intNumberOfContainers
+						,intLoadDetailRefId
+						,1
+					FROM @tempXMLLoadDetail
+					WHERE intPContractDetailId = @intPContractDetailId
+
+				END
+				ELSE
+				BEGIN
+					SELECT @intPContractDetailId = intPContractDetailId
+						,@intLoadDetailId = intLoadDetailId
+					FROM @tempXMLLoadDetail
+					WHERE intId = @intMinXMLLoadDetailId
+
+					SELECT @intSContractDetailId = intContractDetailId
+					FROM tblCTContractDetail
+					WHERE intContractDetailRefId = @intPContractDetailId
+
+					UPDATE @tempXMLLoadDetail
+					SET intSContractDetailId = @intSContractDetailId
+						,intPContractDetailId = NULL
+						,intLoadId = @NewLoadId
+						,intLoadDetailRefId = intLoadDetailId
+					WHERE intLoadDetailId = @intLoadDetailId
+					
+					INSERT INTO tblLGLoadDetail (
+						intLoadId
+						,intVendorEntityId
+						,intVendorEntityLocationId
+						,intCustomerEntityId
+						,intCustomerEntityLocationId
+						,intItemId
+						,intPContractDetailId
+						,intSContractDetailId
+						,intPCompanyLocationId
+						,intSCompanyLocationId
+						,dblQuantity
+						,intItemUOMId
+						,dblGross
+						,dblTare
+						,dblNet
+						,intWeightItemUOMId
+						,dblDeliveredQuantity
+						,dblDeliveredGross
+						,dblDeliveredTare
+						,dblDeliveredNet
+						,strLotAlias
+						,strScheduleInfoMsg
+						,ysnUpdateScheduleInfo
+						,ysnPrintScheduleInfo
+						,strLoadDirectionMsg
+						,ysnUpdateLoadDirections
+						,ysnPrintLoadDirections
+						,strVendorReference
+						,strCustomerReference
+						,intPSubLocationId
+						,intSSubLocationId
+						,intNumberOfContainers
+						,intLoadDetailRefId
+						,intConcurrencyId
+						)
+					SELECT @NewLoadId
+						,intVendorEntityId
+						,intVendorEntityLocationId
+						,intCustomerEntityId
+						,intCustomerEntityLocationId
+						,intItemId
+						,intPContractDetailId
+						,intSContractDetailId
+						,intPCompanyLocationId
+						,intSCompanyLocationId
+						,dblQuantity
+						,intItemUOMId
+						,dblGross
+						,dblTare
+						,dblNet
+						,intWeightItemUOMId
+						,dblDeliveredQuantity
+						,dblDeliveredGross
+						,dblDeliveredTare
+						,dblDeliveredNet
+						,strLotAlias
+						,strScheduleInfoMsg
+						,ysnUpdateScheduleInfo
+						,ysnPrintScheduleInfo
+						,strLoadDirectionMsg
+						,ysnUpdateLoadDirections
+						,ysnPrintLoadDirections
+						,strVendorReference
+						,strCustomerReference
+						,intPSubLocationId
+						,intSSubLocationId
+						,intNumberOfContainers
+						,intLoadDetailRefId
+						,1
+					FROM @tempXMLLoadDetail
+					WHERE intSContractDetailId = @intSContractDetailId
+
+				END
 
 				SET @NewLoadDetailId = SCOPE_IDENTITY()
 
@@ -565,13 +676,44 @@ BEGIN TRY
 
 			IF (@strLoadWarehouseContainer IS NOT NULL)
 			BEGIN
+				DECLARE @idoc4 INT
+				DECLARE @tblContainerWarehouseId AS TABLE (
+					intRowNo INT identity
+					,intLoadWarehouseId INT
+					)
+
+				EXEC sp_xml_preparedocument @idoc4 OUTPUT
+					,@strLoadWarehouseContainer
+
+				INSERT INTO @tblContainerWarehouseId (intLoadWarehouseId)
+				SELECT DISTINCT intLoadWarehouseId
+				FROM OPENXML(@idoc4, 'tblLGLoadWarehouseContainers/tblLGLoadWarehouseContainer', 2) WITH (intLoadWarehouseId INT)
+
+				DECLARE @strWarehouseContainerReplaceXml NVARCHAR(max) = ''
+				DECLARE @strWarehouseContainerReplaceXmlForOthers NVARCHAR(max) = ''
+
+				SELECT @strWarehouseContainerReplaceXmlForOthers = @strWarehouseContainerReplaceXmlForOthers + '<tags>' + '<toFind>&lt;intLoadWarehouseId&gt;' + LTRIM(t1.intLoadWarehouseId) + '&lt;/intLoadWarehouseId&gt;</toFind>' + '<toReplace>&lt;intLoadWarehouseId&gt;' + LTRIM(t1.intNewLoadWarehouseId) + '&lt;/intLoadWarehouseId&gt;</toReplace>' + '</tags>'
+				FROM (
+					SELECT t.intLoadWarehouseId intNewLoadWarehouseId
+						,td.intLoadWarehouseId
+					FROM (
+						SELECT ROW_NUMBER() OVER (
+								ORDER BY intLoadWarehouseId
+								) intRowNo
+							,*
+						FROM tblLGLoadWarehouse cd
+						WHERE cd.intLoadId = @NewLoadId
+						) t
+					JOIN @tblContainerWarehouseId td ON t.intRowNo = td.intRowNo
+					) t1
+
 				SET @strWarehouseReplaceXml = NULL
-				SET @strWarehouseReplaceXml = '<root>' + @strWarehouseReplaceXmlForOthers + @strContainerReplaceXmlForWarehouse + '</root>'
+				SET @strWarehouseReplaceXml = '<root>' + @strWarehouseContainerReplaceXmlForOthers + @strContainerReplaceXmlForWarehouse + '</root>'
 				SET @strLoadWarehouseContainer = REPLACE(@strLoadWarehouseContainer, 'intLoadWarehouseContainerId>', 'intLoadWarehouseContainerRefId>')
 
 				EXEC uspCTInsertINTOTableFromXML 'tblLGLoadWarehouseContainer'
 					,@strLoadWarehouseContainer
-					,@NewLoadWarehouseId OUTPUT
+					,@NewLoadWarehouseContainerId OUTPUT
 					,@strWarehouseReplaceXml
 			END
 		END
@@ -591,12 +733,14 @@ BEGIN TRY
 		SET intPurchaseSale = 2
 		WHERE intLoadId = @NewLoadId
 
-		UPDATE tblLGLoadDetail
-		SET intCustomerEntityId = intVendorEntityId
-			,intCustomerEntityLocationId = intVendorEntityLocationId
-			,intVendorEntityId = NULL
-			,intVendorEntityLocationId = NULL
-		WHERE intLoadId = @NewLoadId
+		UPDATE LD	
+			SET intCustomerEntityId = CH.intEntityId,
+				intVendorEntityId = NULL,
+				intVendorEntityLocationId = NULL
+		FROM tblLGLoadDetail LD
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE LD.intLoadId = @NewLoadId		
 	END
 
 	IF @strTransactionType IN (
@@ -605,50 +749,54 @@ BEGIN TRY
 			)
 	BEGIN
 		UPDATE tblLGLoad
-		SET intPurchaseSale = 1
+		SET intPurchaseSale = 1,
+			intSourceType = 2
 		WHERE intLoadId = @NewLoadId
 
-		UPDATE tblLGLoadDetail
-		SET intVendorEntityId = intCustomerEntityId
-			,intVendorEntityLocationId = intCustomerEntityLocationId
-			,intCustomerEntityId = NULL
-			,intCustomerEntityLocationId = NULL
-		WHERE intLoadId = @NewLoadId
+		UPDATE LD	
+			SET intVendorEntityId = CH.intEntityId,
+				intCustomerEntityId = NULL,
+				intCustomerEntityLocationId = NULL
+		FROM tblLGLoadDetail LD
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE LD.intLoadId = @NewLoadId		
 	END
 
 	EXEC uspLGUpdateContractQty @intLoadId = @NewLoadId
 
-	SELECT *
-	FROM tblLGLoad
+	--SELECT *
+	--FROM tblLGLoad
 
-	SELECT *
-	FROM tblLGLoadDetail
+	--SELECT *
+	--FROM tblLGLoadDetail
 
-	SELECT *
-	FROM tblLGLoadNotifyParties
+	--SELECT *
+	--FROM tblLGLoadNotifyParties
 
-	SELECT *
-	FROM tblLGLoadDocuments
+	--SELECT *
+	--FROM tblLGLoadDocuments
 
-	SELECT *
-	FROM tblLGLoadContainer
+	--SELECT *
+	--FROM tblLGLoadContainer
 
-	SELECT *
-	FROM tblLGLoadDetailContainerLink
+	--SELECT *
+	--FROM tblLGLoadDetailContainerLink
 
-	SELECT *
-	FROM tblLGLoadWarehouse
+	--SELECT *
+	--FROM tblLGLoadWarehouse
 
-	SELECT *
-	FROM tblLGLoadWarehouseContainer
+	--SELECT *
+	--FROM tblLGLoadWarehouseContainer
 
-	SELECT *
-	FROM tblLGLoadWarehouseServices
+	--SELECT *
+	--FROM tblLGLoadWarehouseServices
 
---	ROLLBACK TRANSACTION
+COMMIT TRANSACTION
 END TRY
 
 BEGIN CATCH
+	ROLLBACK TRANSACTION
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspLGPopulateLoadXML
+﻿CREATE PROCEDURE uspLGPopulateLoadUpdateXML -- uspLGPopulateLoadXML 48, 'Inbound Shipment', 1
 	@intLoadId INT,
 	@strToTransactionType NVARCHAR(100),
 	@intToCompanyId INT,
@@ -279,6 +279,7 @@ BEGIN TRY
 	SET strTransactionType = @strToTransactionType,
 		intMultiCompanyId = @intToCompanyId
 	WHERE intId = @intScopeIdentityId
+
 END TRY
 
 BEGIN CATCH
