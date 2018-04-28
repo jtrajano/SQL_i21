@@ -1254,7 +1254,7 @@ BEGIN TRY
 						IF @ysnYieldLoss = 0
 						BEGIN
 							SELECT @intLotId = WC.intLotId,@intWeightUOMId=intItemUOMId,@dblWeight=dblQuantity
-							FROM tblMFWorkOrderConsumeLot WC
+							FROM tblMFWorkOrderConsumedLot WC
 							WHERE intWorkOrderId = @intWorkOrderId
 								AND intBatchId = @intBatchId
 								AND NOT EXISTS (

@@ -20,10 +20,23 @@
 	,intCreatedUserId int NULL
 	,dtmCreated datetime NULL CONSTRAINT DF_tblMFProductionSummary_dtmCreated DEFAULT GetDate()
 	,intConcurrencyId INT NULL CONSTRAINT DF_tblMFProductionSummary_intConcurrencyId DEFAULT 0 
-	,dblRequiredQty NUMERIC(18, 6) NULL, 
-	intMachineId int,
-	intStageLocationId int
-    CONSTRAINT PK_tblMFProductionSummary_intProductionSummaryId PRIMARY KEY (intProductionSummaryId)
+	,dblRequiredQty NUMERIC(18, 6) NULL
+	,intMachineId int
+	,intStageLocationId int
+	,dblDirectCost Numeric(38,20)
+	,intDirectCostId int
+	,dblIndirectCost Numeric(38,20)
+	,intIndirectCostId int
+	,dblMarketRate NUMERIC(38,20)
+	,intMarketRateId int
+	,intMarketRatePerUnitId int
+	,dblGradeDiff NUMERIC(38,20)
+	,dblCoEfficient Numeric(38,20)
+	,dblCoEfficientApplied Numeric(38,20)
+	,dblStandardUnitRate Numeric(38,20)
+	,dblProductionUnitRate Numeric(38,20)
+	,dblCost Numeric(38,20)
+    ,CONSTRAINT PK_tblMFProductionSummary_intProductionSummaryId PRIMARY KEY (intProductionSummaryId)
 	,CONSTRAINT FK_tblMFProductionSummary_tblMFWorkOrder_intWorkOrderId FOREIGN KEY (intWorkOrderId) REFERENCES dbo.tblMFWorkOrder(intWorkOrderId) ON DELETE CASCADE
 	,CONSTRAINT FK_tblMFProductionSummary_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES dbo.tblICItem(intItemId)
 	)

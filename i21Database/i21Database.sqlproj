@@ -6416,6 +6416,7 @@
     <Build Include="dbo\Stored Procedures\uspARPostCommission.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidCommissionForPosting.sql" />
     <Build Include="dbo\User Defined Types\CommissionPostingTable.sql" />
+    <Build Include="dbo\Tables\tblMFItemGradeDiff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
