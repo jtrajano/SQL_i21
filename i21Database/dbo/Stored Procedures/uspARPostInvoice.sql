@@ -1403,7 +1403,7 @@ IF @post = 1
 
 					IF EXISTS (SELECT TOP 1 1 FROM @InTransitItemsForReversal)
 					BEGIN 
-						-- Call the post routine 
+						DELETE FROM @TempGLEntries
 						INSERT INTO @TempGLEntries (
 							[dtmDate] 
 							,[strBatchId]
@@ -1457,12 +1457,10 @@ IF @post = 1
 					UPDATE
 						@TempGLEntries
 					SET
-						[strDescription] = SUBSTRING('Reverse Provisional Invoice - ' + ISNULL([strDescription],''), 1, 255)
+						[strDescription] = SUBSTRING('Reverse Provisional Invoice' + ISNULL(' - ' + [strDescription],''), 1, 255)
 
 					INSERT INTO @GLEntries
-					SELECT * FROM @TempGLEntries
-
-					DELETE FROM @TempGLEntries
+					SELECT * FROM @TempGLEntries					
 				END
 
 					
@@ -1691,7 +1689,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseAmountDue - A.dblBaseInvoiceTotal ELSE 0 END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal																				
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -1723,7 +1721,7 @@ IF @post = 1
 				(SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1916,7 +1914,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -1950,7 +1948,7 @@ IF @post = 1
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 	
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 	
 			LEFT OUTER JOIN 
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId AND A.intCompanyLocationId = ICIS.intLocationId 
 			LEFT OUTER JOIN
@@ -2004,7 +2002,7 @@ IF @post = 1
 											  ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2089,7 +2087,7 @@ IF @post = 1
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 
 			LEFT OUTER JOIN 
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId  AND A.intCompanyLocationId = ICIS.intLocationId
 			LEFT OUTER JOIN
@@ -2141,7 +2139,7 @@ IF @post = 1
 											  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END				
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2225,7 +2223,7 @@ IF @post = 1
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				(SELECT intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) IST ON B.intItemId = IST.intItemId AND A.intCompanyLocationId = IST.intLocationId
 			LEFT OUTER JOIN 
@@ -2276,7 +2274,7 @@ IF @post = 1
 											  ELSE 0  END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2355,7 +2353,7 @@ IF @post = 1
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId AND A.intCompanyLocationId = ICIS.intLocationId 
 			LEFT OUTER JOIN
@@ -2384,7 +2382,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END							
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2422,7 +2420,7 @@ IF @post = 1
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
@@ -2461,7 +2459,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
 				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END							
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2498,7 +2496,7 @@ IF @post = 1
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]			
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
@@ -3213,7 +3211,7 @@ IF @post = 1
 
 				IF EXISTS (SELECT TOP 1 1 FROM @InTransitItemsForFinalInvoice)
 				BEGIN 
-					-- Call the post routine 
+					DELETE FROM @TempGLEntries
 					INSERT INTO @TempGLEntries (
 						[dtmDate] 
 						,[strBatchId]
@@ -3270,9 +3268,7 @@ IF @post = 1
 						[strDescription] = SUBSTRING('Final Invoice' + ISNULL((' - ' + [strDescription]),''), 1, 255)
 
 					INSERT INTO @GLEntries
-					SELECT * FROM @TempGLEntries
-
-					DELETE FROM @TempGLEntries
+					SELECT * FROM @TempGLEntries					
 
 				END
 			END
