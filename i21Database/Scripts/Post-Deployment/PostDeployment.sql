@@ -268,6 +268,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateBillDetailRate.sql
 :r .\AP\DeleteInvalidBasisAdvanceStaging.sql
 :r .\AP\CleanBasisAdvance.sql
+:r .\AP\UpdatePOPendingStatus.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

@@ -11,6 +11,7 @@
 	dtmLastModified DATETIME,
 	intConcurrencyId INT NOT NULL,
 	intCompanyId INT,
+	intPriceContractRefId INT,
 
 	CONSTRAINT [PK_tblCTPriceContract_intPriceContractId] PRIMARY KEY CLUSTERED (intPriceContractId ASC),
 	CONSTRAINT [UQ_tblCTPriceContract_strPriceContractNo] UNIQUE (strPriceContractNo), 

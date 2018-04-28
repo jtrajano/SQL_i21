@@ -111,6 +111,12 @@ BEGIN
 			,[intSourceTransactionTypeId]
 			,[strContainerNo]
 			,[strCondition]
+			,[intBookId]
+			,[intSubBookId]
+			,[strCertificate]
+			,[intProducerId]
+			,[strCertificateId]
+			,[strTrackingNumber]
 	)
 	SELECT	[intLotId]					= TargetLot.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -232,7 +238,12 @@ BEGIN
 			,[intSourceTransactionTypeId] = SourceLot.intSourceTransactionTypeId
 			,[strContainerNo]			= SourceLot.strContainerNo
 			,[strCondition]				= SourceLot.strCondition
-
+			,[intBookId]				= SourceLot.intBookId
+			,[intSubBookId]				= SourceLot.intSubBookId
+			,[strCertificate]			= SourceLot.strCertificate
+			,[intProducerId]			= SourceLot.intProducerId
+			,[strCertificateId]			= SourceLot.strCertificateId
+			,[strTrackingNumber]		= SourceLot.strTrackingNumber 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation

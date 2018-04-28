@@ -26,6 +26,7 @@
 	[intFutOptTransactionId] INT,
 	[dblFinalPrice] NUMERIC(18,6) NULL,
 	[strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL ,
+	[intPriceFixationDetailRefId] INT,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
 	CONSTRAINT [UK_tblCTPackingDescriptionDetail_strTradeNo] UNIQUE ([strTradeNo]),

@@ -77,7 +77,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 							,GETDATE() as dtmDate
 							,@intEntityId
 							,@strJournalType
-					FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals,@strJournalType, @ysnPost)
+					FROM dbo.[fnGLGetPostErrors] (@tmpPostJournals, @ysnPost)
 					OUTER APPLY(SELECT TOP 1 B.intJournalId,B.strJournalId FROM @tmpPostJournals A JOIN tblGLJournal B ON A.intJournalId = B.intJournalId) j
 	END
 

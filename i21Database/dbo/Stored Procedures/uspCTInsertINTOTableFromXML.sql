@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTInsertINTOTableFromXML]
 
-	@strTblName NVARCHAR(MAX),
-	@XML		NVARCHAR(MAX),
-	@intId		INT = NULL OUTPUT
+	@strTblName			NVARCHAR(MAX),
+	@XML				NVARCHAR(MAX),
+	@intId				INT = NULL OUTPUT,
+	@strTagRelaceXML	NVARCHAR(MAX) = NULL
 	
 AS
 
@@ -14,7 +15,11 @@ BEGIN TRY
 			@strXMLColumns	NVARCHAR(MAX),
 			@ErrMsg			NVARCHAR(MAX),
 			@idoc			INT,
-			@strSQL			NVARCHAR(MAX)
+			@idoc2			INT,
+			@strSQL			NVARCHAR(MAX),
+			@intUniqueId    INT,
+			@toFind			NVARCHAR(MAX),		
+			@toReplace		NVARCHAR(MAX)
 
 	IF OBJECT_ID('tempdb..##tblColumns') IS NOT NULL  	
 		DROP TABLE ##tblColumns	
@@ -30,8 +35,32 @@ BEGIN TRY
 		ysnIdentity					BIT,
 	)
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML ,'<row xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>'
+	EXEC sp_xml_preparedocument @idoc2 OUTPUT, @strTagRelaceXML
 
+	IF OBJECT_ID('tempdb..#TagsTable') IS NOT NULL  	
+		DROP TABLE #TagsTable
+
+	SELECT	ROW_NUMBER() OVER (ORDER BY toFind ASC) intUniqueId,*
+	INTO	#TagsTable
+	FROM	OPENXML(@idoc2, 'root/tags',2)
+	WITH
+	(
+			toFind			NVARCHAR(MAX),
+			toReplace		NVARCHAR(MAX)
+	)  
+	
+	SELECT @intUniqueId= MIN(intUniqueId) FROM #TagsTable
+	
+	WHILE	ISNULL(@intUniqueId,0) > 0
+	BEGIN
+			SELECT	@toFind = toFind, @toReplace = toReplace FROM #TagsTable WHERE intUniqueId = @intUniqueId
+			SELECT	@XML = REPLACE(@XML,@toFind,@toReplace)
+			
+			SELECT	@intUniqueId= MIN(intUniqueId) FROM #TagsTable WHERE intUniqueId > @intUniqueId
+	END
+
+	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML ,'<row xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>'
+	
 	IF @strTblName LIKE '#%'
 	BEGIN
 		INSERT INTO ##tblColumns

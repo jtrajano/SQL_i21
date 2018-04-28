@@ -233,11 +233,6 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
-				   ,[dblLastCost]
-				   ,[dblPriceMargin]
-				   ,[dblMarginPercentage]
-				   ,[intEntityVendorId]
-				   ,[intPurchaseDetailId]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -284,11 +279,6 @@ BEGIN
 				   ,[strVFDDocumentNumber]
 				   ,[intCurrencyExchangeRateTypeId]
 				   ,[dblCurrencyExchangeRate]
-				   ,[dblLastCost]
-				   ,[dblPriceMargin]
-				   ,[dblMarginPercentage]
-				   ,[intEntityVendorId]
-				   ,[intPurchaseDetailId]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

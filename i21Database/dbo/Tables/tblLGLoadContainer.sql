@@ -52,6 +52,7 @@
 [dblAmount] NUMERIC(18, 6) NULL,
 [intAmountCurrencyId] INT,
 [strRemarks] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
+[intLoadContainerRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoadContainer] PRIMARY KEY ([intLoadContainerId]), 
 CONSTRAINT [FK_tblLGLoadContainer_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,

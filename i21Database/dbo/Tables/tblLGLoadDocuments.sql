@@ -12,6 +12,7 @@
 [dtmSentDate] DATETIME NULL,
 [ysnReceived] [bit] NULL,
 [dtmReceivedDate] DATETIME NULL,
+[intLoadDocumentRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoadDocuments] PRIMARY KEY ([intLoadDocumentId]), 
 CONSTRAINT [FK_tblLGLoadDocuments_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,

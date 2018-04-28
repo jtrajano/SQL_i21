@@ -160,6 +160,7 @@ IF (@param IS NOT NULL)
 				,[dblTax]
 				,[strImportFormat]
 				,[intOriginalInvoiceId]
+				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -210,6 +211,7 @@ IF (@param IS NOT NULL)
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -267,6 +269,7 @@ IF (@param IS NOT NULL)
 				,[dblTax]
 				,[strImportFormat]
 				,[intOriginalInvoiceId]
+				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -317,6 +320,7 @@ IF (@param IS NOT NULL)
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -376,6 +380,7 @@ IF(@beginDate IS NOT NULL)
 				,[dblTax]
 				,[strImportFormat]
 				,[intOriginalInvoiceId]
+				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -426,6 +431,7 @@ IF(@beginDate IS NOT NULL)
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -485,6 +491,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblTax]
 				,[strImportFormat]
 				,[intOriginalInvoiceId]
+				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]
 				,[intLoadId]
@@ -535,6 +542,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 				,[intLoadId]					= ARI.[intLoadId]
@@ -588,6 +596,15 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT NULL FROM @InvoicesExclude B WHERE A.[intInvoiceId] = B.[intInvoiceId])
 	END
+
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+-- Create a unique transaction name for recap. 
+DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
+if @recap = 1 AND @raiseError = 0
+	SAVE TRAN @TransactionName
+
 DECLARE @InvoiceIds TABLE(
 	id  	INT
 )
@@ -672,18 +689,29 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		BEGIN
 			IF @InitTranCount = 0
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR @recap = 1
 						ROLLBACK TRANSACTION
 					IF (XACT_STATE()) = 1
 						COMMIT TRANSACTION
 				END		
 			ELSE
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR @recap = 1
 						ROLLBACK TRANSACTION  @Savepoint
 					--IF (XACT_STATE()) = 1
 					--	COMMIT TRANSACTION  @Savepoint
 				END	
+
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT 	
+				'asdffadsfasd' + [strPostingError]
+				,[strTransactionType]
+				,[strInvoiceNumber]
+				,[strBatchId]
+				,[intInvoiceId]
+			FROM
+				@InvalidInvoiceData 
+					ORDER BY strPostingError DESC
 		END
 
 		IF @raiseError = 1
@@ -873,14 +901,6 @@ BEGIN CATCH
 		
 	GOTO Post_Exit
 END CATCH
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
--- Create a unique transaction name for recap. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-if @recap = 1 AND @raiseError = 0
-	SAVE TRAN @TransactionName
 
 --Process Finished Good Items
 INSERT INTO @FinishedGoodItems
@@ -1149,113 +1169,109 @@ IF @post = 1
 			-- Call the post routine 
 			--IF ISNULL(@HasImpactForProvisional, 0) = 1
 			--	BEGIN
-					--INSERT INTO @GLEntries (
-					--	 [dtmDate]
-					--	,[strBatchId]
-					--	,[intAccountId]
-					--	,[dblDebit]
-					--	,[dblCredit]
-					--	,[dblDebitUnit]
-					--	,[dblCreditUnit]
-					--	,[strDescription]
-					--	,[strCode]
-					--	,[strReference]
-					--	,[intCurrencyId]
-					--	,[dblExchangeRate]
-					--	,[dtmDateEntered]
-					--	,[dtmTransactionDate]
-					--	,[strJournalLineDescription]
-					--	,[intJournalLineNo]
-					--	,[ysnIsUnposted]
-					--	,[intUserId]
-					--	,[intEntityId]
-					--	,[strTransactionId]
-					--	,[intTransactionId]
-					--	,[strTransactionType]
-					--	,[strTransactionForm]
-					--	,[strModuleName]
-					--	,[intConcurrencyId]
-					--	,[dblDebitForeign]
-					--	,[dblDebitReport]
-					--	,[dblCreditForeign]
-					--	,[dblCreditReport]
-					--	,[dblReportingRate]
-					--	,[dblForeignRate]
-					--	,[strRateType]
-					--)
-					--SELECT dtmDate						= CAST(ISNULL(P.dtmPostDate, P.dtmDate) AS DATE)
-					--	 , strBatchID					= @batchIdUsed
-					--	 , intAccountId					= GL.intAccountId
-					--	 , dblDebit						= GL.dblCredit
-					--	 , dblCredit					= GL.dblDebit
-					--	 , dblDebitUnit					= GL.dblCreditUnit
-					--	 , dblCreditUnit				= GL.dblDebitUnit
-					--	 , strDescription				= 'Provisional Invoice - ' + ISNULL(GL.strDescription, '')
-					--	 , strCode						= @CODE
-					--	 , strReference					= GL.strReference
-					--	 , intCurrencyId				= GL.intCurrencyId 
-					--	 , dblExchangeRate				= GL.dblExchangeRate
-					--	 , dtmDateEntered				= @PostDate
-					--	 , dtmTransactionDate			= P.dtmDate
-					--	 , strJournalLineDescription	= 'Provisional Invoice - ' + PROV.strInvoiceNumber
-					--	 , intJournalLineNo				= PROV.intInvoiceId
-					--	 , ysnIsUnposted				= 0
-					--	 , intUserId					= @userId
-					--	 , intEntityId					= @UserEntityID	
-					--	 , strTransactionId				= P.strInvoiceNumber
-					--	 , intTransactionId				= P.intInvoiceId
-					--	 , strTransactionType			= PROV.strTransactionType
-					--	 , strTransactionForm			= @SCREEN_NAME
-					--	 , strModuleName				= @MODULE_NAME
-					--	 , intConcurrencyId				= 1
-					--	 , [dblDebitForeign]			= GL.dblCreditForeign
-					--	 , [dblDebitReport]				= GL.dblCreditReport
-					--	 , [dblCreditForeign]			= GL.dblDebitForeign
-					--	 , [dblCreditReport]			= GL.dblDebitReport
-					--	 , [dblReportingRate]			= GL.dblReportingRate
-					--	 , [dblForeignRate]				= GL.dblForeignRate
-					--	 , [strRateType]				= NULL
-					--FROM (
-					--	SELECT intOriginalInvoiceId
-					--		 , intInvoiceId
-					--		 , dtmPostDate
-					--		 , dtmDate
-					--		 , strInvoiceNumber
-					--	FROM @PostInvoiceData
-					--	WHERE ISNULL(intOriginalInvoiceId, 0) <> 0
-					--) P
-					--INNER JOIN (						
-					--	SELECT intInvoiceId
-					--		 , strInvoiceNumber
-					--		 , strTransactionType
-					--	FROM @PostProvisionalData
-					--) PROV ON P.intOriginalInvoiceId = PROV.intInvoiceId
-					--INNER JOIN (
-					--	SELECT intAccountId
-					--		 , intGLDetailId
-					--		 , intTransactionId
-					--		 , strTransactionId
-					--		 , dblCredit
-					--		 , dblDebit
-					--		 , dblCreditUnit
-					--		 , dblDebitUnit
-					--		 , strReference
-					--		 , strDescription
-					--		 , intCurrencyId
-					--		 , dblExchangeRate
-					--		 , dblCreditForeign
-					--		 , dblCreditReport
-					--		 , dblDebitForeign
-					--		 , dblDebitReport
-					--		 , dblReportingRate
-					--		 , dblForeignRate
-					--	FROM tblGLDetail WITH (NOLOCK)
-					--	WHERE 
-					--		ysnIsUnposted = 0
-					--		AND strModuleName = @MODULE_NAME
-					--) GL ON PROV.intInvoiceId = GL.intTransactionId
-					--	AND PROV.strInvoiceNumber = GL.strTransactionId
-					--ORDER BY GL.intGLDetailId
+					INSERT INTO @GLEntries (
+                         [dtmDate]
+                        ,[strBatchId]
+                        ,[intAccountId]
+                        ,[dblDebit]
+                        ,[dblCredit]
+                        ,[dblDebitUnit]
+                        ,[dblCreditUnit]
+                        ,[strDescription]
+                        ,[strCode]
+                        ,[strReference]
+                        ,[intCurrencyId]
+                        ,[dblExchangeRate]
+                        ,[dtmDateEntered]
+                        ,[dtmTransactionDate]
+                        ,[strJournalLineDescription]
+                        ,[intJournalLineNo]
+                        ,[ysnIsUnposted]
+                        ,[intUserId]
+                        ,[intEntityId]
+                        ,[strTransactionId]
+                        ,[intTransactionId]
+                        ,[strTransactionType]
+                        ,[strTransactionForm]
+                        ,[strModuleName]
+                        ,[intConcurrencyId]
+                        ,[dblDebitForeign]
+                        ,[dblDebitReport]
+                        ,[dblCreditForeign]
+                        ,[dblCreditReport]
+                        ,[dblReportingRate]
+                        ,[dblForeignRate]
+                        ,[strRateType]
+                    )
+                    SELECT dtmDate                      = CAST(ISNULL(P.dtmPostDate, P.dtmDate) AS DATE)
+                         , strBatchID                   = @batchIdUsed
+                         , intAccountId                 = GL.intAccountId
+                         , dblDebit                     = GL.dblCredit
+                         , dblCredit                    = GL.dblDebit
+                         , dblDebitUnit                 = GL.dblCreditUnit
+                         , dblCreditUnit                = GL.dblDebitUnit
+                         , strDescription               = 'Provisional Invoice - ' + ISNULL(GL.strDescription, '')
+                         , strCode                      = @CODE
+                         , strReference                 = 'Provisional Invoice - ' + GL.strReference
+                         , intCurrencyId                = GL.intCurrencyId 
+                         , dblExchangeRate               = GL.dblExchangeRate
+                         , dtmDateEntered               = @PostDate
+                         , dtmTransactionDate           = P.dtmDate
+                         , strJournalLineDescription	= 'Provisional Invoice - ' + P.strInvoiceNumber
+                         , intJournalLineNo             = P.intOriginalInvoiceId
+                         , ysnIsUnposted                = 0
+                         , intUserId                    = @userId
+                         , intEntityId                  = @UserEntityID    
+                         , strTransactionId             = P.strInvoiceNumber
+                         , intTransactionId             = P.intInvoiceId
+                         , strTransactionType           = P.strTransactionType
+                         , strTransactionForm           = @SCREEN_NAME
+                         , strModuleName                = @MODULE_NAME
+                         , intConcurrencyId             = 1
+                         , [dblDebitForeign]            = GL.dblCreditForeign
+                         , [dblDebitReport]             = GL.dblCreditReport
+                         , [dblCreditForeign]           = GL.dblDebitForeign
+                         , [dblCreditReport]            = GL.dblDebitReport
+                         , [dblReportingRate]           = GL.dblReportingRate
+                         , [dblForeignRate]             = GL.dblForeignRate
+                         , [strRateType]                = NULL
+                    FROM (
+                        SELECT intOriginalInvoiceId
+                             , intInvoiceId
+                             , dtmPostDate
+                             , dtmDate
+                             , strInvoiceNumber
+                             , strTransactionType
+                             , [strInvoiceOriginId]
+                        FROM @PostInvoiceData
+                        WHERE ISNULL(intOriginalInvoiceId, 0) <> 0
+                    ) P
+                    INNER JOIN (
+                        SELECT intAccountId
+                             , intGLDetailId
+                             , intTransactionId
+                             , strTransactionId
+                             , dblCredit
+                             , dblDebit
+                             , dblCreditUnit
+                             , dblDebitUnit
+                             , strReference
+                             , strDescription
+                             , intCurrencyId
+                             , dblExchangeRate
+                             , dblCreditForeign
+                             , dblCreditReport
+                             , dblDebitForeign
+                             , dblDebitReport
+                             , dblReportingRate
+                             , dblForeignRate
+                        FROM tblGLDetail WITH (NOLOCK)
+                        WHERE 
+                            ysnIsUnposted = 0
+                            AND strModuleName = @MODULE_NAME
+                    ) GL ON P.intOriginalInvoiceId = GL.intTransactionId
+                        AND P.[strInvoiceOriginId] = GL.strTransactionId
+                    ORDER BY GL.intGLDetailId
 				--END
 						
 			INSERT INTO @GLEntries (

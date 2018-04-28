@@ -20,6 +20,7 @@
 	[strCompanyName]            NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]         NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strAgingType]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strEntityNo]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [dblCreditLimit]			NUMERIC(18, 6) NULL, 
     [dblTotalAR]				NUMERIC(18, 6) NULL, 
     [dblFuture]					NUMERIC(18, 6) NULL, 
@@ -36,5 +37,6 @@
     [dblInvoiceTotal]			NUMERIC(18, 6) NULL, 
     [dblCredits]				NUMERIC(18, 6) NULL, 
     [dblPrepayments]			NUMERIC(18, 6) NULL, 
-    [dblPrepaids]				NUMERIC(18, 6) NULL
+    [dblPrepaids]				NUMERIC(18, 6) NULL,
+    [dblTotalCustomerAR] [numeric](18, 6) NULL 
 )

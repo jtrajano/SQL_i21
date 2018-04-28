@@ -109,9 +109,14 @@ DECLARE
 	,@intSeasonCropYear			AS INT
 	,@intBookId					AS INT
 	,@intSubBookId				AS INT 
+	,@strCertificate			AS NVARCHAR(50)
+	,@intProducerId				AS INT
+	,@strCertificateId			AS NVARCHAR(50)
+	,@strTrackingNumber			AS NVARCHAR(255) 
 
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
+		,@intEntityProducerId AS INT 
 
 DECLARE @OwnerShipType_Own AS INT = 1
 
@@ -203,6 +208,10 @@ SELECT  intId
 		,intSeasonCropYear
 		,intBookId
 		,intSubBookId 
+		,strCertificate
+		,intProducerId
+		,strCertificateId
+		,strTrackingNumber
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -259,6 +268,10 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intSeasonCropYear
 		,@intBookId
 		,@intSubBookId 
+		,@strCertificate
+		,@intProducerId
+		,@strCertificateId
+		,@strTrackingNumber
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -482,40 +495,42 @@ BEGIN
 	WHERE	intItemId = @intItemId
 	SET @intLotStatusId_ItemLotTable = COALESCE(@intLotStatusId, @intLotStatusId_ItemLotTable, @lotStatusFromItemSetup, @LotStatus_Active)
 
-	-- Initialize the Item-Owner Id.
-	SET @intItemOwnerId = NULL  
+	-- Validate the Item Owner Id. 
+	BEGIN
+		SET @intItemOwnerId = NULL  
 
-	-- Get the Item-Owner id. 
-	SELECT	@intItemOwnerId = o.intItemOwnerId
-	FROM	tblICItemOwner o
-	WHERE	o.intItemId = @intItemId
-			AND o.intOwnerId = @intOwnerId 
+		-- Get the Item-Owner id. 
+		SELECT	@intItemOwnerId = o.intItemOwnerId
+		FROM	tblICItemOwner o
+		WHERE	o.intItemId = @intItemId
+				AND o.intOwnerId = @intOwnerId 
 
-	-- If Item-Owner is null and @intOwnerId is null, then use the default item-owner id. 
-	SELECT	@intItemOwnerId = defaultOwner.intItemOwnerId
-	FROM	tblICItemOwner defaultOwner
-	WHERE	defaultOwner.intItemId = @intItemId
-			AND defaultOwner.ysnDefault = 1
-			AND @intItemOwnerId IS NULL 
-			AND @intOwnerId IS NULL 
+		-- If Item-Owner is null and @intOwnerId is null, then use the default item-owner id. 
+		SELECT	@intItemOwnerId = defaultOwner.intItemOwnerId
+		FROM	tblICItemOwner defaultOwner
+		WHERE	defaultOwner.intItemId = @intItemId
+				AND defaultOwner.ysnDefault = 1
+				AND @intItemOwnerId IS NULL 
+				AND @intOwnerId IS NULL 
 
-	-- Validate Owner Id 
-	IF (@intOwnerId IS NOT NULL) AND (@intItemOwnerId IS NULL)
-	BEGIN 
-		SET @strItemNo = NULL 
-		SELECT	@strItemNo = strItemNo
-		FROM	dbo.tblICItem Item
-		WHERE	Item.intItemId = @intItemId
+		-- Validate Owner Id 
+		IF (@intOwnerId IS NOT NULL) AND (@intItemOwnerId IS NULL)
+		BEGIN 
+			SET @strItemNo = NULL 
+			SELECT	@strItemNo = strItemNo
+			FROM	dbo.tblICItem Item
+			WHERE	Item.intItemId = @intItemId
 		
-		SET @strName = NULL 
-		SELECT	@strName = e.strName
-		FROM	tblEMEntity e
-		WHERE	e.intEntityId = @intOwnerId
+			SET @strName = NULL 
+			SELECT	@strName = e.strName
+			FROM	tblEMEntity e
+			WHERE	e.intEntityId = @intOwnerId
 
-		--'Invalid Owner. {Owner Name} is not configured as an Owner for {Item Name}. Please check the Item setup.'
-		EXEC uspICRaiseError 80105, @strName, @strItemNo;
-		SET @intReturnCode = -80105;
-		GOTO _Exit_Loop;
+			--'Invalid Owner. {Owner Name} is not configured as an Owner for {Item Name}. Please check the Item setup.'
+			EXEC uspICRaiseError 80105, @strName, @strItemNo;
+			SET @intReturnCode = -80105;
+			GOTO _Exit_Loop;
+		END 
 	END 
 
 	-- Validate If Lot already exist for Ownership Type 
@@ -540,6 +555,27 @@ BEGIN
 			SET @intReturnCode = -80209;
 		END
 	END
+
+	-- Validate the Producer Id. 
+	BEGIN
+		SET @intEntityProducerId = NULL  
+		SET	@strName = NULL 
+
+		SELECT	@intEntityProducerId = et.intEntityId
+				,@strName  = e.strName
+		FROM	tblEMEntity e LEFT JOIN tblEMEntityType et
+					ON e.intEntityId = et.intEntityId
+					AND et.strType = 'Producer'
+		WHERE	e.intEntityId = @intProducerId
+
+		IF (@intProducerId IS NOT NULL) AND (@intEntityProducerId IS NULL)
+		BEGIN 
+			--'Invalid Producer. {Entity Name} is not configured as a Producer type. Please check the Entity setup.'
+			EXEC uspICRaiseError 80210, @strName, @strItemNo;
+			SET @intReturnCode = -80210;
+			GOTO _Exit_Loop;
+		END 
+	END 
 
 	----------------------------------------------
 	-- Special process on the Item Qty and Weight
@@ -804,6 +840,46 @@ BEGIN
 											ELSE 
 												LotMaster.intSubBookId 
 										END
+				,strCertificate		=	CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN 
+												@strCertificate  
+											ELSE 
+												LotMaster.strCertificate 
+										END
+				,intProducerId		=	CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN 
+												@intProducerId  
+											ELSE 
+												LotMaster.intProducerId 
+										END
+				,strCertificateId		=	CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN 
+												@strCertificateId  
+											ELSE 
+												LotMaster.strCertificateId 
+										END
+				,strTrackingNumber		=	CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN 
+												@strTrackingNumber  
+											ELSE 
+												LotMaster.strTrackingNumber 
+										END
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -894,6 +970,10 @@ BEGIN
 				,intSeasonCropYear
 				,intBookId
 				,intSubBookId 
+				,strCertificate
+				,intProducerId
+				,strCertificateId
+				,strTrackingNumber
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -945,6 +1025,10 @@ BEGIN
 				,@intSeasonCropYear
 				,@intBookId
 				,@intSubBookId 
+				,@strCertificate
+				,@intProducerId
+				,@strCertificateId
+				,@strTrackingNumber
 			)
 		;
 	
@@ -1135,6 +1219,10 @@ BEGIN
 		,@intSeasonCropYear
 		,@intBookId
 		,@intSubBookId
+		,@strCertificate
+		,@intProducerId
+		,@strCertificateId
+		,@strTrackingNumber
 	;
 END
 

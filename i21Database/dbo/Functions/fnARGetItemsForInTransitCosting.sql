@@ -109,7 +109,7 @@ WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
-			(ARI.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = ARI.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 0))
+			(ARI.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = ARI.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 1))
 		OR
 			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
 		)
@@ -148,7 +148,7 @@ INNER JOIN
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId]
 	 FROM @Invoices INV
 	 WHERE
-		((INV.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = INV.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 0))
+		((INV.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = INV.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 1))
 			OR
 		(INV.[strType] = 'Provisional' AND INV.[ysnImpactForProvisional] = 1)
 		)

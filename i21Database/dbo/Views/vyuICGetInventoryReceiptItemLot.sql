@@ -10,7 +10,7 @@ SELECT
 	,receiptItem.strOrderNumber
 	,receiptItem.strLocationName
 	,receiptItem.strSourceType
-	,receiptItem.strSourceNumber
+	,receiptItem.strSourceNumber 
 	,receiptItem.dtmReceiptDate
 	,receiptItem.strBillOfLading
 	,receiptItem.ysnPosted
@@ -63,12 +63,21 @@ SELECT
 	,receiptItem.strCurrency
 	,receiptItem.strBook
 	,receiptItem.strSubBook
+	,receiptItemLot.strCertificate
+	,strProducer = Producer.strName
+	,receiptItemLot.strCertificateId
+	,receiptItemLot.strTrackingNumber
+	,strWeightUOM = WeightUOM.strUnitMeasure
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+LEFT JOIN tblICInventoryReceiptItem rItem ON rItem.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = receiptItemLot.intStorageLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItemLot.intItemUnitMeasureId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = rItem.intWeightUOMId
+LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblAPVendor Vendor ON Vendor.[intEntityId] = receiptItemLot.intEntityVendorId
 LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = receiptItemLot.intOriginId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = receiptItemLot.intGradeId
+LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = receiptItemLot.intProducerId

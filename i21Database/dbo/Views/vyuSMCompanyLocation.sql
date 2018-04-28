@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMCompanyLocation]
 AS
-SELECT 
-compLoc.intCompanyLocationId
+SELECT compLoc.intCompanyLocationId
 ,compLoc.strLocationName
 ,compLoc.strLocationNumber
 ,compLoc.strLocationType
@@ -59,6 +58,7 @@ compLoc.intCompanyLocationId
 ,compLoc.intSalesDiscounts
 ,compLoc.intCashOverShort
 ,compLoc.intWriteOff
+,compLoc.intCommissionExpense
 ,compLoc.intCreditCardFee
 ,compLoc.intSalesAccount
 ,compLoc.intCostofGoodsSold
@@ -218,6 +218,7 @@ compLoc.intCompanyLocationId
 ,ISNULL(salesDiscounts.[strAccountId], '') as strSalesDiscounts
 ,ISNULL(cashOverShort.[strAccountId], '') as strCashOverShort
 ,ISNULL(writeOff.[strAccountId], '') as strWriteOff
+,ISNULL(commissionExpense.[strAccountId], '') as strCommissionExpense
 ,ISNULL(creditCardFee.[strAccountId], '') as strCreditCardFee
 ,ISNULL(salesAccount.[strAccountId], '') as strSalesAccount
 ,ISNULL(costofGoodsSold.[strAccountId], '') as strCostofGoodsSold
@@ -265,6 +266,7 @@ LEFT JOIN tblGLAccount serviceCharges ON compLoc.intServiceCharges = serviceChar
 LEFT JOIN tblGLAccount salesDiscounts ON compLoc.intSalesDiscounts = salesDiscounts.intAccountId
 LEFT JOIN tblGLAccount cashOverShort ON compLoc.intCashOverShort = cashOverShort.intAccountId
 LEFT JOIN tblGLAccount writeOff ON compLoc.intWriteOff = writeOff.intAccountId
+LEFT JOIN tblGLAccount commissionExpense ON compLoc.intCommissionExpense = commissionExpense.intAccountId
 LEFT JOIN tblGLAccount creditCardFee ON compLoc.intCreditCardFee = creditCardFee.intAccountId
 LEFT JOIN tblGLAccount salesAccount ON compLoc.intSalesAccount = salesAccount.intAccountId
 LEFT JOIN tblGLAccount costofGoodsSold ON compLoc.intCostofGoodsSold = costofGoodsSold.intAccountId

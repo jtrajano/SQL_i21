@@ -47,12 +47,17 @@ Type the overview for the table here.
 		[dblStatedNetPerUnit] NUMERIC(38, 20) NULL DEFAULT ((0)), 		
 		[dblStatedTotalNet] NUMERIC(38, 20) NULL DEFAULT ((0)), 		
 		[dblPhysicalVsStated] NUMERIC(38, 20) NULL DEFAULT ((0)), 		
+		[strCertificate] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+		[intProducerId] INT	NULL,
+		[strCertificateId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+		[strTrackingNumber] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryReceiptItemLot] PRIMARY KEY ([intInventoryReceiptItemLotId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
+		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
+		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblEMEntity] FOREIGN KEY ([intProducerId]) REFERENCES [tblEMEntity]([intEntityId])
 	)
 	GO
 

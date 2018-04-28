@@ -78,6 +78,10 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[intCompanyId]				INT NULL, 
 		[intBookId]					INT NULL,
 		[intSubBookId]				INT NULL,
+		[strCertificate]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+		[intProducerId]				INT	NULL,
+		[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+		[strTrackingNumber]			NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
 		CONSTRAINT [PK_tblICLot] PRIMARY KEY CLUSTERED ([intLotId] ASC),
 		CONSTRAINT [UN_tblICLot] UNIQUE NONCLUSTERED ([strLotNumber] ASC, [intItemId] ASC, [intLocationId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC),		
@@ -87,7 +91,8 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		CONSTRAINT [FK_tblICLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICLot_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]),
-		CONSTRAINT [FK_tblICLot_tblICItemOwner] FOREIGN KEY ([intItemOwnerId]) REFERENCES [tblICItemOwner]([intItemOwnerId]) 
+		CONSTRAINT [FK_tblICLot_tblICItemOwner] FOREIGN KEY ([intItemOwnerId]) REFERENCES [tblICItemOwner]([intItemOwnerId]),
+		CONSTRAINT [FK_tblICLot_tblEMEntity_Producer] FOREIGN KEY ([intProducerId]) REFERENCES [tblEMEntity]([intEntityId])  
 	)
 	GO
 

@@ -12,6 +12,7 @@
 	[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intSort] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)),
+	[intLoadDetailLotRefId] INT NULL,
 
 	CONSTRAINT [PK_tblLGLoadDetailLot_intLoadDetailLotId] PRIMARY KEY CLUSTERED ([intLoadDetailLotId] ASC),
 	CONSTRAINT [FK_tblLGLoadDetailLot_tblICLoadDetail] FOREIGN KEY([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId]) ON DELETE CASCADE, 

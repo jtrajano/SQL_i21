@@ -120,9 +120,10 @@ SELECT l.intLotId
 	,LI.dtmDueDate
 	,ls.strBackColor
 	,l.intSeasonCropYear AS intCropYear
-	,'' AS strProducer
-	,'' AS strCertification
-	,'' AS strCertificationId
+	,e3.strName AS strProducer
+	,l.strCertificate AS strCertification
+	,l.strCertificateId AS strCertificationId
+	,l.strTrackingNumber
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -146,3 +147,4 @@ LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
 LEFT JOIN tblMFWorkOrder w ON l.strTransactionId = w.strWorkOrderNo
 LEFT JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
+Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId

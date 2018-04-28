@@ -25,6 +25,7 @@
 [ysnExported] [bit] NULL,
 [dtmExportedDate] DATETIME NULL,
 [dtmIntegrationOrderDate] DATETIME NULL,
+[intLoadDetailContainerLinkRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoadDetailContainerLink_intLoadDetailContainerLinkId] PRIMARY KEY ([intLoadDetailContainerLinkId]), 
 CONSTRAINT [FK_tblLGLoadDetailContainerLink_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,

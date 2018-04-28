@@ -217,5 +217,9 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intInventoryReceiptItemLotId]	INT NULL
 	,[intSeasonCropYear]		INT NULL
 	,[intBookId]				INT NULL
-	,[intSubBookId]				INT NULL 
+	,[intSubBookId]				INT NULL
+	,[strCertificate]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intProducerId]			INT	NULL
+	,[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strTrackingNumber]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL	 
 )

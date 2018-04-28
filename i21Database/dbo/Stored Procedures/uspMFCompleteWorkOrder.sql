@@ -734,6 +734,7 @@ BEGIN TRY
 					,@ysnProducedQtyByWeight = 1
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@dblProducePartialQty = @dblProduceQty
+					,@intMachineId=@intMachineId
 			END
 			ELSE
 			BEGIN
@@ -746,6 +747,7 @@ BEGIN TRY
 					,@ysnProducedQtyByWeight = 1
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@dblProducePartialQty = 0
+					,@intMachineId=@intMachineId
 			END
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
@@ -772,6 +774,7 @@ BEGIN TRY
 					,@ysnProducedQtyByWeight = 0
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@dblProducePartialQty = @dblPhysicalCount
+					,@intMachineId=@intMachineId
 			END
 			ELSE
 			BEGIN
@@ -784,6 +787,7 @@ BEGIN TRY
 					,@ysnProducedQtyByWeight = 0
 					,@ysnFillPartialPallet = @ysnFillPartialPallet
 					,@dblProducePartialQty = 0
+					,@intMachineId=@intMachineId
 			END
 
 			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
