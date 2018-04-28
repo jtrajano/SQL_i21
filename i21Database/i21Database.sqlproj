@@ -6421,6 +6421,7 @@
     <Build Include="dbo\Stored Procedures\uspLGInterCompanyTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPopulateLoadUpdateXML.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetAcknowledgementXML.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
