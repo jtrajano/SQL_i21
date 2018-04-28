@@ -51,19 +51,42 @@ BEGIN TRY
 
 	SET @strTransactionType = @strPurchaseSale + ' ' + @strShipmentType
 
-	IF EXISTS(SELECT 1 FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType)
+	IF EXISTS (
+			SELECT 1
+			FROM tblSMInterCompanyTransactionConfiguration CTC
+			JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId
+			JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId
+			WHERE CTTF.strTransactionType = @strTransactionType
+			)
 	BEGIN
-	     SELECT 
-		 @strFromTransactionType = strFromTransactionType 
-		,@intFromCompanyId		 = intFromCompanyId		 
-		,@intFromProfitCenterId	 = intFromProfitCenterId	 
-		,@strToTransactionType	 = strToTransactionType	 
-		,@intToCompanyId		 = intToCompanyId		 
-		,@intToProfitCenterId	 = intToProfitCenterId	 
-		,@intToEntityId			 = intToEntityId			 
-		,@strInsert				 = strInsert				 
-		,@strUpdate			   	 = strUpdate
-		FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType
+
+		SELECT 
+			@strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
+		--	,[intFromTransactionTypeId]
+			,@intFromCompanyId = intFromCompanyId
+			,@intFromProfitCenterId = intFromBookId
+			--,CTTT.strTransactionType
+			,@intToCompanyId = intToCompanyId
+			,@intToProfitCenterId = intToBookId
+			--,@intToEntityId = intToEntityId
+			,@strInsert = strInsert
+			,@strUpdate = strUpdate
+		FROM tblSMInterCompanyTransactionConfiguration CTC
+		JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
+		JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
+		WHERE CTTF.strTransactionType = @strTransactionType
+
+	 --    SELECT 
+		-- @strFromTransactionType = strFromTransactionType 
+		--,@intFromCompanyId		 = intFromCompanyId		 
+		--,@intFromProfitCenterId	 = intFromProfitCenterId	 
+		--,@strToTransactionType	 = strToTransactionType	 
+		--,@intToCompanyId		 = intToCompanyId		 
+		--,@intToProfitCenterId	 = intToProfitCenterId	 
+		--,@intToEntityId			 = intToEntityId			 
+		--,@strInsert				 = strInsert				 
+		--,@strUpdate			   	 = strUpdate
+		--FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType
 		
 		IF @strInsert = 'Insert' AND @strRowState = 'Added'
 		BEGIN
