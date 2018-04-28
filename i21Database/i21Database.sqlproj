@@ -6302,6 +6302,7 @@
     <Build Include="dbo\Views\vyuPATSetupItem.sql" />
     <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrderDetail.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
