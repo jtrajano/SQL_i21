@@ -115,9 +115,10 @@ SELECT
 												THEN [strComments]
 										   WHEN @IsCancel = 1
 												THEN 'Invoice Cancelled: ' + [strInvoiceNumber] 
-										ELSE CASE WHEN strTransactionType <> 'Credit Memo' 
-												THEN [strComments] + ' DUP: ' + [strInvoiceNumber]  
-											ELSE [strComments] END
+										ELSE /*CASE WHEN strTransactionType <> 'Credit Memo' 
+												THEN [strComments]  + ' DUP: ' + [strInvoiceNumber]  
+											ELSE [strComments] END*/
+										[strComments]
 									  END
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
@@ -147,7 +148,7 @@ FROM
 	tblARInvoice
 WHERE
 	[intInvoiceId] = @InvoiceId
-	
+	/*
 	IF @TransactionType NOT IN ('Credit Memo') 
 	BEGIN
 		DECLARE @NewDocumentId INT
@@ -186,7 +187,7 @@ WHERE
 
 		END
 	END
-
+	*/
 
 --VALIDATE INVOICE TYPES
 IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
