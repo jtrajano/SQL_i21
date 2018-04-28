@@ -51,42 +51,42 @@ BEGIN TRY
 
 	SET @strTransactionType = @strPurchaseSale + ' ' + @strShipmentType
 
-	--IF EXISTS(SELECT 1 FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType)
-	--BEGIN
-	--     SELECT 
-	--	 @strFromTransactionType = strFromTransactionType 
-	--	,@intFromCompanyId		 = intFromCompanyId		 
-	--	,@intFromProfitCenterId	 = intFromProfitCenterId	 
-	--	,@strToTransactionType	 = strToTransactionType	 
-	--	,@intToCompanyId		 = intToCompanyId		 
-	--	,@intToProfitCenterId	 = intToProfitCenterId	 
-	--	,@intToEntityId			 = intToEntityId			 
-	--	,@strInsert				 = strInsert				 
-	--	,@strUpdate			   	 = strUpdate
-	--	FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType
+	IF EXISTS(SELECT 1 FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType)
+	BEGIN
+	     SELECT 
+		 @strFromTransactionType = strFromTransactionType 
+		,@intFromCompanyId		 = intFromCompanyId		 
+		,@intFromProfitCenterId	 = intFromProfitCenterId	 
+		,@strToTransactionType	 = strToTransactionType	 
+		,@intToCompanyId		 = intToCompanyId		 
+		,@intToProfitCenterId	 = intToProfitCenterId	 
+		,@intToEntityId			 = intToEntityId			 
+		,@strInsert				 = strInsert				 
+		,@strUpdate			   	 = strUpdate
+		FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType
 		
-	--	IF @strInsert = 'Insert' AND @strRowState = 'Added'
-	--	BEGIN
-	--		IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intConcurrencyId =1)
-	--		BEGIN
-	--		      EXEC uspLGPopulateLoadXML @intLoadId,
-	--										@strToTransactionType,
-	--										@intToCompanyId,
-	--										@strRowState
-	--		END
-	--	END
+		IF @strInsert = 'Insert' AND @strRowState = 'Added'
+		BEGIN
+			IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intConcurrencyId =1)
+			BEGIN
+			      EXEC uspLGPopulateLoadXML @intLoadId,
+											@strToTransactionType,
+											@intToCompanyId,
+											@strRowState
+			END
+		END
 		
-	--	IF @strUpdate = 'Update' AND @strRowState = 'Modified'
-	--	BEGIN
-	--		IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId)
-	--		BEGIN
-	--		      EXEC uspLGPopulateLoadUpdateXML @intLoadId,
-	--											  @strToTransactionType,
-	--											  @intToCompanyId,
-	--											  @strRowState
-	--		END
-	--	END
-	--END
+		IF @strUpdate = 'Update' AND @strRowState = 'Modified'
+		BEGIN
+			IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId)
+			BEGIN
+			      EXEC uspLGPopulateLoadUpdateXML @intLoadId,
+												  @strToTransactionType,
+												  @intToCompanyId,
+												  @strRowState
+			END
+		END
+	END
 
 END TRY
 
