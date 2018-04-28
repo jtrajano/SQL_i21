@@ -17,6 +17,7 @@
 	,[dblShipping]					NUMERIC(18, 6)	NULL
 	,[dblTax]						NUMERIC(18, 6)	NULL
 	,[strImportFormat]				NVARCHAR(50)	NULL
+	,[intSourceId]					INT				NULL
 	,[intOriginalInvoiceId]			INT				NULL
 	,[strInvoiceOriginId]           NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
 	,[intDistributionHeaderId]		INT				NULL

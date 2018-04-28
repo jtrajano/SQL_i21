@@ -159,6 +159,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intSourceId]
 				,[intOriginalInvoiceId]
 				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
@@ -210,6 +211,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intSourceId]					= ARI.[intSourceId]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
@@ -268,6 +270,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intSourceId]
 				,[intOriginalInvoiceId]
 				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
@@ -319,6 +322,7 @@ IF (@param IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intSourceId]					= ARI.[intSourceId]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
@@ -379,6 +383,7 @@ IF(@beginDate IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intSourceId]
 				,[intOriginalInvoiceId]
 				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
@@ -430,6 +435,7 @@ IF(@beginDate IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intSourceId]					= ARI.[intSourceId]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
@@ -490,6 +496,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblShipping]
 				,[dblTax]
 				,[strImportFormat]
+				,[intSourceId]
 				,[intOriginalInvoiceId]
 				,[strInvoiceOriginId]
 				,[intDistributionHeaderId]
@@ -541,6 +548,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[dblShipping]					= ARI.[dblShipping]
 				,[dblTax]						= ARI.[dblTax]
 				,[strImportFormat]				= ARI.[strImportFormat]
+				,[intSourceId]					= ARI.[intSourceId]
 				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
 				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
@@ -771,6 +779,9 @@ BEGIN TRY
 							,[dblShipping]
 							,[dblTax]
 							,[strImportFormat]
+							,[intSourceId]
+							,[intOriginalInvoiceId]
+							,[strInvoiceOriginId]
 							,[intDistributionHeaderId]
 							,[intLoadDistributionHeaderId]
 							,[intLoadId]
@@ -820,6 +831,9 @@ BEGIN TRY
 							,[dblShipping]					= ARI.[dblShipping]
 							,[dblTax]						= ARI.[dblTax]
 							,[strImportFormat]				= ARI.[strImportFormat]
+							,[intSourceId]					= ARI.[intSourceId]
+							,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+							,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 							,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
 							,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
 							,[intLoadId]					= ARI.[intLoadId]
@@ -1167,112 +1181,145 @@ IF @post = 1
 		
 		BEGIN TRY
 			-- Call the post routine 
-			--IF ISNULL(@HasImpactForProvisional, 0) = 1
-			--	BEGIN
-					INSERT INTO @GLEntries (
-                         [dtmDate]
-                        ,[strBatchId]
-                        ,[intAccountId]
-                        ,[dblDebit]
-                        ,[dblCredit]
-                        ,[dblDebitUnit]
-                        ,[dblCreditUnit]
-                        ,[strDescription]
-                        ,[strCode]
-                        ,[strReference]
-                        ,[intCurrencyId]
-                        ,[dblExchangeRate]
-                        ,[dtmDateEntered]
-                        ,[dtmTransactionDate]
-                        ,[strJournalLineDescription]
-                        ,[intJournalLineNo]
-                        ,[ysnIsUnposted]
-                        ,[intUserId]
-                        ,[intEntityId]
-                        ,[strTransactionId]
-                        ,[intTransactionId]
-                        ,[strTransactionType]
-                        ,[strTransactionForm]
-                        ,[strModuleName]
-                        ,[intConcurrencyId]
-                        ,[dblDebitForeign]
-                        ,[dblDebitReport]
-                        ,[dblCreditForeign]
-                        ,[dblCreditReport]
-                        ,[dblReportingRate]
-                        ,[dblForeignRate]
-                        ,[strRateType]
-                    )
-                    SELECT dtmDate                      = CAST(ISNULL(P.dtmPostDate, P.dtmDate) AS DATE)
-                         , strBatchID                   = @batchIdUsed
-                         , intAccountId                 = GL.intAccountId
-                         , dblDebit                     = GL.dblCredit
-                         , dblCredit                    = GL.dblDebit
-                         , dblDebitUnit                 = GL.dblCreditUnit
-                         , dblCreditUnit                = GL.dblDebitUnit
-                         , strDescription               = 'Provisional Invoice - ' + ISNULL(GL.strDescription, '')
-                         , strCode                      = @CODE
-                         , strReference                 = 'Provisional Invoice - ' + GL.strReference
-                         , intCurrencyId                = GL.intCurrencyId 
-                         , dblExchangeRate               = GL.dblExchangeRate
-                         , dtmDateEntered               = @PostDate
-                         , dtmTransactionDate           = P.dtmDate
-                         , strJournalLineDescription	= 'Provisional Invoice - ' + P.strInvoiceNumber
-                         , intJournalLineNo             = P.intOriginalInvoiceId
-                         , ysnIsUnposted                = 0
-                         , intUserId                    = @userId
-                         , intEntityId                  = @UserEntityID    
-                         , strTransactionId             = P.strInvoiceNumber
-                         , intTransactionId             = P.intInvoiceId
-                         , strTransactionType           = P.strTransactionType
-                         , strTransactionForm           = @SCREEN_NAME
-                         , strModuleName                = @MODULE_NAME
-                         , intConcurrencyId             = 1
-                         , [dblDebitForeign]            = GL.dblCreditForeign
-                         , [dblDebitReport]             = GL.dblCreditReport
-                         , [dblCreditForeign]           = GL.dblDebitForeign
-                         , [dblCreditReport]            = GL.dblDebitReport
-                         , [dblReportingRate]           = GL.dblReportingRate
-                         , [dblForeignRate]             = GL.dblForeignRate
-                         , [strRateType]                = NULL
+			IF EXISTS(SELECT NULL FROM @PostInvoiceData WHERE intOriginalInvoiceId IS NOT NULL AND [intSourceId] IS NOT NULL AND intOriginalInvoiceId <> 0 AND [intSourceId] = 2)
+				BEGIN
+					INSERT INTO @GLEntries
+						([dtmDate]
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strDocument]
+						,[strComments]
+						,[strSourceDocumentId]
+						,[intSourceLocationId]
+						,[intSourceUOMId]
+						,[dblSourceUnitDebit]
+						,[dblSourceUnitCredit]
+						,[intCommodityId]
+						,[intSourceEntityId])
+                    SELECT 
+						 [dtmDate]						= CAST(ISNULL(P.[dtmPostDate], P.[dtmDate]) AS DATE)
+						,[strBatchId]					= @batchIdUsed
+						,[intAccountId]					= GL.[intAccountId]
+						,[dblDebit]						= GL.[dblCredit]
+						,[dblCredit]					= GL.[dblDebit]
+						,[dblDebitUnit]					= GL.[dblCreditUnit]
+						,[dblCreditUnit]				= GL.[dblDebitUnit]
+						,[strDescription]				= ISNULL(GL.strDescription, '')
+						,[strCode]						= @CODE
+						,[strReference]					= GL.[strReference]
+						,[intCurrencyId]				= GL.[intCurrencyId]
+						,[dblExchangeRate]				= GL.[dblExchangeRate]
+						,[dtmDateEntered]				= @PostDate
+						,[dtmTransactionDate]			= P.[dtmDate]
+						,[strJournalLineDescription]	= 'Reverse Provisional Invoice - ' + P.[strInvoiceOriginId]
+						,[intJournalLineNo]				= P.[intOriginalInvoiceId]
+						,[ysnIsUnposted]				= 0
+						,[intUserId]					= @userId
+						,[intEntityId]					= @UserEntityID
+						,[strTransactionId]				= P.[strInvoiceNumber]
+						,[intTransactionId]				= P.[intInvoiceId]
+						,[strTransactionType]			= P.[strTransactionType]
+						,[strTransactionForm]			= @SCREEN_NAME
+						,[strModuleName]				= @MODULE_NAME
+						,[intConcurrencyId]				= 1
+						,[dblDebitForeign]				= GL.[dblCreditForeign]
+						,[dblDebitReport]				= GL.[dblCreditReport]
+						,[dblCreditForeign]				= GL.[dblDebitForeign]
+						,[dblCreditReport]				= GL.[dblDebitReport]
+						,[dblReportingRate]				= GL.[dblReportingRate]
+						,[dblForeignRate]				= GL.[dblForeignRate]
+						,[strDocument]					= GL.[strDocument]
+						,[strComments]					= GL.[strComments]
+						,[strSourceDocumentId]			= GL.[strSourceDocumentId]
+						,[intSourceLocationId]			= GL.[intSourceLocationId]
+						,[intSourceUOMId]				= GL.[intSourceUOMId]
+						,[dblSourceUnitDebit]			= GL.[dblSourceUnitCredit]
+						,[dblSourceUnitCredit]			= GL.[dblSourceUnitDebit]
+						,[intCommodityId]				= GL.[intCommodityId]
+						,[intSourceEntityId]			= GL.[intSourceEntityId]
                     FROM (
-                        SELECT intOriginalInvoiceId
-                             , intInvoiceId
-                             , dtmPostDate
-                             , dtmDate
-                             , strInvoiceNumber
-                             , strTransactionType
-                             , [strInvoiceOriginId]
-                        FROM @PostInvoiceData
-                        WHERE ISNULL(intOriginalInvoiceId, 0) <> 0
+                        SELECT 
+							 [intOriginalInvoiceId]
+							,[intInvoiceId]
+							,[dtmPostDate]
+							,[dtmDate]
+							,[strInvoiceNumber]
+							,[strTransactionType]
+							,[strInvoiceOriginId]
+                        FROM
+							@PostInvoiceData
+                        WHERE
+							[intOriginalInvoiceId] IS NOT NULL 
+							AND [intSourceId] IS NOT NULL 
+							AND intOriginalInvoiceId <> 0 
+							AND [intSourceId] = 2
                     ) P
                     INNER JOIN (
-                        SELECT intAccountId
-                             , intGLDetailId
-                             , intTransactionId
-                             , strTransactionId
-                             , dblCredit
-                             , dblDebit
-                             , dblCreditUnit
-                             , dblDebitUnit
-                             , strReference
-                             , strDescription
-                             , intCurrencyId
-                             , dblExchangeRate
-                             , dblCreditForeign
-                             , dblCreditReport
-                             , dblDebitForeign
-                             , dblDebitReport
-                             , dblReportingRate
-                             , dblForeignRate
-                        FROM tblGLDetail WITH (NOLOCK)
+                        SELECT 
+							 [intAccountId]
+							,[intGLDetailId]
+							,[intTransactionId]
+							,[strTransactionId]
+							,[dblCredit]
+							,[dblDebit]
+							,[dblCreditUnit]
+							,[dblDebitUnit]
+							,[strReference]
+							,[strDescription]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+							,[strDocument]
+							,[strComments]
+							,[strSourceDocumentId]
+							,[intSourceLocationId]
+							,[intSourceUOMId]
+							,[dblSourceUnitDebit]
+							,[dblSourceUnitCredit]
+							,[intCommodityId]
+							,[intSourceEntityId]
+                        FROM
+							tblGLDetail WITH (NOLOCK)
                         WHERE 
-                            ysnIsUnposted = 0
-                            AND strModuleName = @MODULE_NAME
-                    ) GL ON P.intOriginalInvoiceId = GL.intTransactionId
-                        AND P.[strInvoiceOriginId] = GL.strTransactionId
+                            [ysnIsUnposted] = 0
+                            AND [strModuleName] = @MODULE_NAME
+                    ) GL ON P.[intOriginalInvoiceId] = GL.[intTransactionId]
+                        AND P.[strInvoiceOriginId] = GL.[strTransactionId]
                     ORDER BY GL.intGLDetailId
-				--END
+				END
 						
 			INSERT INTO @GLEntries (
 				 [dtmDate]
