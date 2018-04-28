@@ -21,7 +21,7 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
 
 IF @raiseError = 1
 	SET XACT_ABORT ON
@@ -497,6 +497,8 @@ ELSE
 		SET ysnPosted = CASE WHEN @post = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 		FROM tblARCommission COMM
 		INNER JOIN @PostCommissionData PDC ON COMM.intCommissionId = PDC.intCommissionId AND COMM.strCommissionNumber = PDC.strCommissionNumber
+
+		RETURN 1;
 	END
 
 Post_Exit:

@@ -17,7 +17,7 @@
 	[ysnPayables]				BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPayables] DEFAULT ((0)),
 	[ysnPosted]					BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPosted] DEFAULT ((0)),
 	[ysnPaid]					BIT NOT NULL CONSTRAINT [DF_tblARCommission_ysnPaid] DEFAULT ((0)),
-	[dblTotalAmount]			NUMERIC(18,6) NULL DEFAULT 0,
+	[dblTotalAmount]			NUMERIC(18,6) NOT NULL DEFAULT 0,
 	[strCommissionNumber]		NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL,	
 	[strReason]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]			INT NOT NULL DEFAULT ((0)),
