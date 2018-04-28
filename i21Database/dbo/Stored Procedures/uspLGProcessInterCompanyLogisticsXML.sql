@@ -46,6 +46,30 @@ BEGIN TRANSACTION
 	DECLARE @strDetailReplaceXml NVARCHAR(max) = ''
 	DECLARE @strDetailReplaceXmlForContainers NVARCHAR(max) = ''
 	DECLARE @intStartingNumberType INT
+	DECLARE @intLogisticsAcknowledgementStageId INT
+
+	DECLARE @strHeaderCondition NVARCHAR(MAX)
+	
+	DECLARE @strContractDetailAllId NVARCHAR(MAX)
+	DECLARE @strAckLoadXML NVARCHAR(MAX)
+	DECLARE @strAckLoadDetailXML NVARCHAR(MAX)
+	DECLARE @strAckLoadNotifyPartyXML NVARCHAR(MAX)
+	DECLARE @strAckLoadDocumentXML NVARCHAR(MAX)
+	DECLARE @strAckLoadContainerXML NVARCHAR(MAX)
+	DECLARE @strAckLoadDetailContainerLinkXML NVARCHAR(MAX)
+	DECLARE @strAckLoadWarehouseXML NVARCHAR(MAX)
+	DECLARE @strAckLoadWarehouseContainerXML NVARCHAR(MAX)
+	DECLARE @strAckLoadWarehouseServicesXML NVARCHAR(MAX)
+	DECLARE @strAckLoadCostXML NVARCHAR(MAX)
+	DECLARE @strAckLoadStorageCostXML NVARCHAR(MAX)
+	DECLARE @strLoadContainerId NVARCHAR(500)
+	DECLARE @strLoadWarehouseId NVARCHAR(500)
+	DECLARE @strLoadDetailContainerLinkCondition NVARCHAR(MAX)
+	DECLARE @strLoadWarehouseCondition NVARCHAR(MAX)
+
+	--DECLARE @strAckCostXML		NVARCHAR(MAX)
+	--DECLARE @strAckDocumentXML NVARCHAR(MAX)
+	
 	DECLARE @tempLoadDetail TABLE (
 		[intLoadDetailId] INT NOT NULL
 		,[intConcurrencyId] INT NOT NULL
@@ -181,6 +205,33 @@ BEGIN TRANSACTION
 				,@strLoad
 				,@NewLoadId OUTPUT
 				,@strTagRelaceXML
+
+			INSERT INTO tblLGIntrCompLogisticsAck 
+			(
+				 intLoadId
+				,strLoadNumber
+				,dtmFeedDate
+				,strMessage
+				,strTransactionType
+				,intMultiCompanyId
+			)
+			SELECT 
+				 @NewLoadId
+				,@newLoadNumber
+				,GETDATE()
+				,'Success'
+				,@strTransactionType
+				,@intMultiCompanyId
+
+			SELECT @intLogisticsAcknowledgementStageId = SCOPE_IDENTITY();
+
+			SELECT @strHeaderCondition = 'intLoadId = ' + LTRIM(@NewLoadId)
+						
+			EXEC uspCTGetTableDataInXML 'tblLGLoad',@strHeaderCondition,@strAckLoadXML  OUTPUT
+
+			UPDATE  tblLGIntrCompLogisticsAck 
+			SET		strLoad =@strAckLoadXML 
+			WHERE   intAcknowledgementId =@intLogisticsAcknowledgementStageId
 
 			IF OBJECT_ID('tempdb..#tempLoadDetail') IS NOT NULL
 				DROP TABLE #tempLoadDetail
@@ -512,6 +563,12 @@ BEGIN TRANSACTION
 				FROM @tempXMLLoadDetail
 				WHERE intId > @intMinXMLLoadDetailId
 			END
+						
+			EXEC uspCTGetTableDataInXML 'tblLGLoadDetail',@strHeaderCondition,@strAckLoadDetailXML  OUTPUT
+
+			UPDATE  tblLGIntrCompLogisticsAck 
+			SET		strLoadDetail = @strAckLoadDetailXML 
+			WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 
 			SET @strDetailReplaceXmlForContainers = @strDetailReplaceXml
 			SET @strDetailReplaceXml = '<root>' + @strDetailReplaceXml + '</root>'
@@ -538,6 +595,13 @@ BEGIN TRANSACTION
 					,@strLoadNotifyParty
 					,@NewLoadNotifyPartyId OUTPUT
 					,@strHeaderReplaceXml
+
+				EXEC uspCTGetTableDataInXML 'tblLGLoadNotifyParties',@strHeaderCondition,@strAckLoadNotifyPartyXML  OUTPUT
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadNotifyParty = @strAckLoadNotifyPartyXML 
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
+
 			END
 
 			IF (@strLoadDocument IS NOT NULL)
@@ -548,6 +612,12 @@ BEGIN TRANSACTION
 					,@strLoadDocument
 					,@NewLoadDocumentId OUTPUT
 					,@strHeaderReplaceXml
+
+				EXEC uspCTGetTableDataInXML 'tblLGLoadDocuments',@strHeaderCondition,@strAckLoadDocumentXML  OUTPUT
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadDocument = @strAckLoadDocumentXML 
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 
 			IF (@strLoadContainer IS NOT NULL)
@@ -558,6 +628,12 @@ BEGIN TRANSACTION
 					,@strLoadContainer
 					,@NewLoadContainerId OUTPUT
 					,@strHeaderReplaceXml
+
+				EXEC uspCTGetTableDataInXML 'tblLGLoadContainer',@strHeaderCondition,@strAckLoadContainerXML  OUTPUT
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadContainer = @strAckLoadContainerXML 
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 
 			IF (@strLoadDetailContainerLink IS NOT NULL)
@@ -600,6 +676,22 @@ BEGIN TRANSACTION
 					,@strLoadDetailContainerLink
 					,@NewLoadContainerId OUTPUT
 					,@strContainerReplaceXml
+
+				SELECT @strLoadContainerId = COALESCE(@strLoadContainerId + ',', '') + CAST(intLoadContainerId AS VARCHAR(5))
+				FROM tblLGLoadContainer
+				WHERE intLoadId = @NewLoadId
+
+				SELECT @strLoadDetailContainerLinkCondition = 'intLoadContainerId IN (' + LTRIM(@strLoadContainerId) + ')'
+
+				EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDetailContainerLink'
+					,@strLoadDetailContainerLinkCondition
+					,@strAckLoadDetailContainerLinkXML OUTPUT
+					,NULL
+					,NULL
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadDetailContainerLink = @strAckLoadDetailContainerLinkXML
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 
 			IF (@strLoadCost IS NOT NULL)
@@ -610,6 +702,12 @@ BEGIN TRANSACTION
 					,@strLoadCost
 					,@NewLoadCostId OUTPUT
 					,@strHeaderReplaceXml
+
+				EXEC uspCTGetTableDataInXML 'tblLGLoadCost',@strHeaderCondition,@strAckLoadCostXML  OUTPUT
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadCost = @strAckLoadCostXML 
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 
 			IF (@strLoadStorageCost IS NOT NULL)
@@ -620,6 +718,12 @@ BEGIN TRANSACTION
 					,@strLoadStorageCost
 					,@NewLoadStorageCostId OUTPUT
 					,@strHeaderReplaceXml
+
+				EXEC uspCTGetTableDataInXML 'tblLGLoadStorageCost',@strHeaderCondition,@strAckLoadStorageCostXML  OUTPUT
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadStorageCost = @strAckLoadStorageCostXML 
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 
 			IF (@strLoadWarehouse IS NOT NULL)
@@ -630,6 +734,18 @@ BEGIN TRANSACTION
 					,@strLoadWarehouse
 					,@NewLoadWarehouseId OUTPUT
 					,@strHeaderReplaceXml
+
+				EXEC uspCTGetTableDataInXML 'tblLGLoadWarehouse',@strHeaderCondition,@strAckLoadWarehouseXML  OUTPUT
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadWarehouse = @strAckLoadWarehouseXML 
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
+
+				SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(5))
+				FROM tblLGLoadWarehouse
+				WHERE intLoadId = @NewLoadId
+
+				SELECT @strLoadWarehouseCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 			END
 
 			IF (@strLoadWarehouseServices IS NOT NULL)
@@ -672,6 +788,16 @@ BEGIN TRANSACTION
 					,@strLoadWarehouseServices
 					,@NewLoadWarehouseId OUTPUT
 					,@strWarehouseReplaceXml
+
+				EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadWarehouseServices'
+					,@strLoadWarehouseCondition
+					,@strAckLoadWarehouseServicesXML OUTPUT
+					,NULL
+					,NULL
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadWarehouseServices = @strAckLoadWarehouseServicesXML
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 
 			IF (@strLoadWarehouseContainer IS NOT NULL)
@@ -715,6 +841,16 @@ BEGIN TRANSACTION
 					,@strLoadWarehouseContainer
 					,@NewLoadWarehouseContainerId OUTPUT
 					,@strWarehouseReplaceXml
+
+				EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadWarehouseContainer'
+					,@strLoadWarehouseCondition
+					,@strAckLoadContainerXML OUTPUT
+					,NULL
+					,NULL
+
+				UPDATE  tblLGIntrCompLogisticsAck 
+				SET		strLoadWarehouseContainer = @strAckLoadContainerXML
+				WHERE   intAcknowledgementId = @intLogisticsAcknowledgementStageId
 			END
 		END
 
