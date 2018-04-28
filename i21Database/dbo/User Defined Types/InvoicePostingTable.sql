@@ -50,4 +50,5 @@
 	,[intUserId]					INT				NULL
 	,[ysnAllowOtherUserToPost]		BIT				NULL
 	,[ysnImpactForProvisional]		BIT				NULL
+	,[strDescription]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
 )

@@ -63,6 +63,7 @@ SET @PostDate = GETDATE()
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
+		,@TempGLEntries AS RecapTableType
 
 
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
@@ -121,7 +122,7 @@ FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	strName = @SCREEN_NAME
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000	
+SET @ZeroDecimal = 0.000000
 
 -- Ensure @post and @recap is not NULL  
 SET @post = ISNULL(@post, 0)
@@ -192,6 +193,7 @@ IF (@param IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 				,[ysnImpactForProvisional]
+				,[strDescription]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -244,6 +246,10 @@ IF (@param IS NOT NULL)
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
 				,[ysnImpactForProvisional]		= @HasImpactForProvisional
+				,[strDescription]				= CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+														WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
+														ELSE ARI.[strComments]
+												END
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -303,6 +309,7 @@ IF (@param IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 				,[ysnImpactForProvisional]
+				,[strDescription]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -355,6 +362,10 @@ IF (@param IS NOT NULL)
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
 				,[ysnImpactForProvisional]		= @HasImpactForProvisional
+				,[strDescription]				= CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+														WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
+														ELSE ARI.[strComments]
+												END
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -416,6 +427,7 @@ IF(@beginDate IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 				,[ysnImpactForProvisional]
+				,[strDescription]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -468,6 +480,10 @@ IF(@beginDate IS NOT NULL)
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
 				,[ysnImpactForProvisional]		= @HasImpactForProvisional
+				,[strDescription]				= CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+														WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
+														ELSE ARI.[strComments]
+												END
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -529,6 +545,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[intUserId]
 				,[ysnAllowOtherUserToPost]
 				,[ysnImpactForProvisional]
+				,[strDescription]
 			)
 			 SELECT
 				 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -581,6 +598,10 @@ IF(@beginTransaction IS NOT NULL)
 				,[intUserId]					= @UserEntityID
 				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
 				,[ysnImpactForProvisional]		= @HasImpactForProvisional
+				,[strDescription]				= CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+														WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
+														ELSE ARI.[strComments]
+												END
 			FROM
 				dbo.tblARInvoice ARI WITH (NOLOCK) 
 			WHERE
@@ -812,6 +833,7 @@ BEGIN TRY
 							,[intUserId]
 							,[ysnAllowOtherUserToPost]
 							,[ysnImpactForProvisional]
+							,[strDescription]
 						)
 						 SELECT DISTINCT
 							 [intInvoiceId]					= ARI.[intInvoiceId]
@@ -863,7 +885,11 @@ BEGIN TRY
 							,[strPostingMessage]			= ''
 							,[intUserId]					= @UserEntityID
 							,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
-							,[ysnImpactForProvisional]		= @HasImpactForProvisional									
+							,[ysnImpactForProvisional]		= @HasImpactForProvisional		
+							,[strDescription]				= CASE WHEN ARI.[strType] = 'Provisional' AND @HasImpactForProvisional = 1 THEN SUBSTRING(('Provisional Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1, 255)
+																	WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARI.[strComments]),'')), 1 , 255)
+																	ELSE ARI.[strComments]
+															END			
 						FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd) DV ON ARI.intInvoiceId = DV.intID
 						WHERE ARI.[ysnPosted] = 0 
@@ -1183,6 +1209,7 @@ IF @post = 1
 			-- Call the post routine 
 			IF EXISTS(SELECT NULL FROM @PostInvoiceData WHERE intOriginalInvoiceId IS NOT NULL AND [intSourceId] IS NOT NULL AND intOriginalInvoiceId <> 0 AND [intSourceId] = 2)
 				BEGIN
+					SET @HasImpactForProvisional = 1
 					INSERT INTO @GLEntries
 						([dtmDate]
 						,[strBatchId]
@@ -1232,14 +1259,14 @@ IF @post = 1
 						,[dblCredit]					= GL.[dblDebit]
 						,[dblDebitUnit]					= GL.[dblCreditUnit]
 						,[dblCreditUnit]				= GL.[dblDebitUnit]
-						,[strDescription]				= ISNULL(GL.strDescription, '')
+						,[strDescription]				= 'Reverse Provisional Invoice' + ISNULL((' - ' + GL.strDescription), '')
 						,[strCode]						= @CODE
 						,[strReference]					= GL.[strReference]
 						,[intCurrencyId]				= GL.[intCurrencyId]
 						,[dblExchangeRate]				= GL.[dblExchangeRate]
 						,[dtmDateEntered]				= @PostDate
 						,[dtmTransactionDate]			= P.[dtmDate]
-						,[strJournalLineDescription]	= 'Reverse Provisional Invoice - ' + P.[strInvoiceOriginId]
+						,[strJournalLineDescription]	= GL.[strJournalLineDescription]
 						,[intJournalLineNo]				= P.[intOriginalInvoiceId]
 						,[ysnIsUnposted]				= 0
 						,[intUserId]					= @userId
@@ -1294,6 +1321,7 @@ IF @post = 1
 							,[dblDebitUnit]
 							,[strReference]
 							,[strDescription]
+							,[strJournalLineDescription]
 							,[intCurrencyId]
 							,[dblExchangeRate]
 							,[dblCreditForeign]
@@ -1319,7 +1347,128 @@ IF @post = 1
                     ) GL ON P.[intOriginalInvoiceId] = GL.[intTransactionId]
                         AND P.[strInvoiceOriginId] = GL.[strTransactionId]
                     ORDER BY GL.intGLDetailId
+
+					DECLARE @InTransitItemsForReversal AS ItemInTransitCostingTableType				
+					INSERT INTO @InTransitItemsForReversal (
+						 [intItemId] 
+						,[intItemLocationId] 
+						,[intItemUOMId] 
+						,[dtmDate] 
+						,[dblQty] 
+						,[dblUOMQty] 
+						,[dblCost] 
+						,[dblValue] 
+						,[dblSalesPrice] 
+						,[intCurrencyId] 
+						,[dblExchangeRate] 
+						,[intTransactionId] 
+						,[intTransactionDetailId] 
+						,[strTransactionId] 
+						,[intTransactionTypeId] 
+						,[intLotId] 
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId] 
+						,[intFobPointId] 
+						,[intInTransitSourceLocationId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
+					)
+					SELECT
+						 [intItemId] 
+						,[intItemLocationId] 
+						,[intItemUOMId] 
+						,[dtmDate] 
+						,[dblQty] 
+						,[dblUOMQty] 
+						,[dblCost] 
+						,[dblValue] 
+						,[dblSalesPrice] 
+						,[intCurrencyId] 
+						,[dblExchangeRate] 
+						,[intTransactionId] 
+						,[intTransactionDetailId] 
+						,[strTransactionId] 
+						,[intTransactionTypeId] 
+						,[intLotId] 
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId] 
+						,[intFobPointId] 
+						,[intInTransitSourceLocationId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
+					FROM 
+						dbo.[fnARGetItemsForInTransitCostingForProvisionalReversal](@PostInvoiceData, @post)
+
+					IF EXISTS (SELECT TOP 1 1 FROM @InTransitItemsForReversal)
+					BEGIN 
+						-- Call the post routine 
+						INSERT INTO @TempGLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]
+							,[dblDebitReport]
+							,[dblCreditForeign]
+							,[dblCreditReport]
+							,[dblReportingRate]
+							,[dblForeignRate]
+						)
+						EXEC	dbo.uspICPostInTransitCosting  
+								@InTransitItemsForReversal  
+								,@batchIdUsed  
+								,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+								,@UserEntityID
+
+						DELETE FROM ICIT
+						FROM
+							(SELECT [intTransactionId], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+						INNER JOIN
+							@InTransitItemsForReversal SIFP
+								ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+								AND ICIT.[strTransactionId] = SIFP.[strTransactionId]
+								AND ICIT.[ysnIsUnposted] <> 1
+								AND @recap  = 1
+								AND @post = 1
+
+					UPDATE
+						@TempGLEntries
+					SET
+						[strDescription] = SUBSTRING('Reverse Provisional Invoice - ' + ISNULL([strDescription],''), 1, 255)
+
+					INSERT INTO @GLEntries
+					SELECT * FROM @TempGLEntries
+
+					DELETE FROM @TempGLEntries
 				END
+
+					
+				END
+			ELSE
+				SET @HasImpactForProvisional = 0
 						
 			INSERT INTO @GLEntries (
 				 [dtmDate]
@@ -1417,7 +1566,7 @@ IF @post = 1
 																									AND ARID.dblQtyShipped <> @ZeroDecimal  
 																								)
 																							END																						
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -1449,7 +1598,7 @@ IF @post = 1
 				(SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
 			-- LEFT OUTER JOIN
 			-- 	(
 			-- 	--Credit Memo Prepaids
@@ -1489,7 +1638,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE A.dblBaseAmountDue END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal																				
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -1521,7 +1670,7 @@ IF @post = 1
 				(SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1578,7 +1727,7 @@ IF @post = 1
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
-						A.dblAmountDue <> @ZeroDecimal
+						(A.dblBaseAmountDue - A.dblBaseInvoiceTotal) <> @ZeroDecimal
 						OR
 						EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN (SELECT intItemId, strType FROM tblICItem) ICI ON ARID.intItemId = ICI.intItemId AND ICI.strType <> 'Comment' WHERE ARID.intInvoiceId  = A.[intInvoiceId])
 					)
@@ -1649,7 +1798,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  0 ELSE A.dblBasePayment - ISNULL(@ZeroDecimal, @ZeroDecimal) END
 				,dblDebitUnit				= @ZeroDecimal
 				,dblCreditUnit				= @ZeroDecimal					
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -1680,7 +1829,7 @@ IF @post = 1
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
 				(SELECT intCompanyLocationId, intUndepositedFundsId FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
@@ -2384,7 +2533,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseShipping ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0							
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2419,7 +2568,7 @@ IF @post = 1
 				(SELECT intCompanyLocationId, intFreightIncome FROM tblSMCompanyLocation WITH (NOLOCK)) L
 					ON A.intCompanyLocationId = L.intCompanyLocationId	
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData)	P
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId	
 			WHERE
 				A.dblShipping <> @ZeroDecimal		
@@ -2442,7 +2591,7 @@ IF @post = 1
 											  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0								
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2500,7 +2649,7 @@ IF @post = 1
 				tblSMCompanyLocation SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId 
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData )	P
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P
 					ON A.intInvoiceId = P.intInvoiceId				
 			LEFT OUTER JOIN
 				(SELECT intTaxCodeId, intSalesTaxAccountId FROM tblSMTaxCode WITH (NOLOCK)) TC
@@ -2528,7 +2677,7 @@ IF @post = 1
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].fnRoundBanker(((D.dblDiscount/100.00) * [dbo].fnRoundBanker((D.dblQtyShipped * D.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0								
-				,strDescription				= A.strComments
+				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
@@ -2567,7 +2716,7 @@ IF @post = 1
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.intEntityCustomerId = C.[intEntityId]
 			INNER JOIN 
-				(SELECT intInvoiceId FROM @PostInvoiceData) P
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData) P
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				(
@@ -2897,8 +3046,9 @@ IF @post = 1
 		BEGIN TRY
 			-- Get the items to post  
 			DECLARE @InTransitItems AS ItemInTransitCostingTableType 
+					,@InTransitItemsForFinalInvoice AS ItemInTransitCostingTableType 
 					,@FOB_ORIGIN AS INT = 1
-					,@FOB_DESTINATION AS INT = 2
+					,@FOB_DESTINATION AS INT = 2			
 
 			INSERT INTO @InTransitItems (
 				 [intItemId] 
@@ -2950,7 +3100,7 @@ IF @post = 1
 				,[intForexRateTypeId]
 				,[dblForexRate]
 			FROM 
-				[fnARGetItemsForInTransitCosting](@PostInvoiceData, @post)
+				dbo.[fnARGetItemsForInTransitCosting](@PostInvoiceData, @post)
 
 			IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 			BEGIN 
@@ -3005,6 +3155,126 @@ IF @post = 1
 						AND @recap  = 1
 						AND @post = 1
 
+			END
+
+			IF @HasImpactForProvisional = 1
+			BEGIN
+				INSERT INTO @InTransitItemsForFinalInvoice (
+					 [intItemId] 
+					,[intItemLocationId] 
+					,[intItemUOMId] 
+					,[dtmDate] 
+					,[dblQty] 
+					,[dblUOMQty] 
+					,[dblCost] 
+					,[dblValue] 
+					,[dblSalesPrice] 
+					,[intCurrencyId] 
+					,[dblExchangeRate] 
+					,[intTransactionId] 
+					,[intTransactionDetailId] 
+					,[strTransactionId] 
+					,[intTransactionTypeId] 
+					,[intLotId] 
+					,[intSourceTransactionId] 
+					,[strSourceTransactionId] 
+					,[intSourceTransactionDetailId] 
+					,[intFobPointId] 
+					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
+				)
+				SELECT
+					 [intItemId] 
+					,[intItemLocationId] 
+					,[intItemUOMId] 
+					,[dtmDate] 
+					,[dblQty] 
+					,[dblUOMQty] 
+					,[dblCost] 
+					,[dblValue] 
+					,[dblSalesPrice] 
+					,[intCurrencyId] 
+					,[dblExchangeRate] 
+					,[intTransactionId] 
+					,[intTransactionDetailId] 
+					,[strTransactionId] 
+					,[intTransactionTypeId] 
+					,[intLotId] 
+					,[intSourceTransactionId] 
+					,[strSourceTransactionId] 
+					,[intSourceTransactionDetailId] 
+					,[intFobPointId] 
+					,[intInTransitSourceLocationId]
+					,[intForexRateTypeId]
+					,[dblForexRate]
+				FROM 
+					dbo.[fnARGetItemsForInTransitCostingForFinalInvoice](@PostInvoiceData, @post)
+
+				IF EXISTS (SELECT TOP 1 1 FROM @InTransitItemsForFinalInvoice)
+				BEGIN 
+					-- Call the post routine 
+					INSERT INTO @TempGLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+					)
+					EXEC	dbo.uspICPostInTransitCosting  
+							@InTransitItemsForFinalInvoice  
+							,@batchIdUsed  
+							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+							,@UserEntityID
+
+					DELETE FROM ICIT
+					FROM
+						(SELECT [intTransactionId], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
+					INNER JOIN
+						@InTransitItemsForFinalInvoice SIFP
+							ON ICIT.[intTransactionId] = SIFP.[intTransactionId]
+							AND ICIT.[strTransactionId] = SIFP.[strTransactionId]
+							AND ICIT.[ysnIsUnposted] <> 1
+							AND @recap  = 1
+							AND @post = 1
+
+					UPDATE
+						@TempGLEntries
+					SET
+						[strDescription] = SUBSTRING('Final Invoice' + ISNULL((' - ' + [strDescription]),''), 1, 255)
+
+					INSERT INTO @GLEntries
+					SELECT * FROM @TempGLEntries
+
+					DELETE FROM @TempGLEntries
+
+				END
 			END
 		END TRY 
 		BEGIN CATCH

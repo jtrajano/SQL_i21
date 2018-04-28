@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnARGetItemsForInTransitCosting]
+﻿CREATE FUNCTION [dbo].[fnARGetItemsForInTransitCostingForProvisionalReversal]
 (
 	 @Invoices	[dbo].[InvoicePostingTable] READONLY
 	,@Post		BIT	= 0
@@ -69,13 +69,14 @@ INSERT INTO @returntable
 	,[intInTransitSourceLocationId]
 	,[intForexRateTypeId]
 	,[dblForexRate])
--- FOR Provisional and Standard Invoices From Inventory Shipment
+
+-- FOR Provisional Reversal
 SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ARI.[dtmShipDate]
-	,[dblQty]						= -ICIT.[dblQty]
+	,[dblQty]						= ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -98,7 +99,7 @@ FROM
 	@Invoices ARI 
 INNER JOIN 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
-		ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+		ON ARI.[intOriginalInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN 
 	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
@@ -107,13 +108,13 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
 		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId] AND [ysnIsUnposted] = 0			 
 WHERE
-	ICIT.[intFobPointId] = @FOB_DESTINATION
+	ARI.[strType] <> 'Provisional' 
+	AND ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
-	AND (
-			(ARI.[strType] <> 'Provisional' AND (ARI.[intOriginalInvoiceId] IS NULL OR ARI.[intSourceId] <> 2))
-		OR
-			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
-		)
+	AND ARI.[intOriginalInvoiceId] IS NOT NULL 
+	AND ARI.[intSourceId] IS NOT NULL
+	AND ARI.[intOriginalInvoiceId] <> 0
+	AND ARI.[intSourceId] = 2
 
 UNION ALL
 
@@ -122,7 +123,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ARI.[dtmShipDate]
-	,[dblQty]						= -ICIT.[dblQty]
+	,[dblQty]						= ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -144,16 +145,17 @@ SELECT
 FROM 
 	(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [intInvoiceDetailId], [ysnBlended], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 
-	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], [intOriginalInvoiceId], [intSourceId],
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId]
+	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId]
 	 FROM @Invoices INV
 	 WHERE
-		((INV.[strType] <> 'Provisional' AND (INV.[intOriginalInvoiceId] IS NULL OR INV.[intSourceId] <> 2))
-			OR
-		(INV.[strType] = 'Provisional' AND INV.[ysnImpactForProvisional] = 1)
-		)
+		INV.[strType] <> 'Provisional' 
+		AND INV.[intOriginalInvoiceId] IS NOT NULL 
+		AND INV.[intSourceId] IS NOT NULL
+		AND INV.[intOriginalInvoiceId] <> 0
+		AND INV.[intSourceId] = 2
 			) ARI 
-			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+			ON ARID.[intInvoiceId] = ARI.[intOriginalInvoiceId]
 INNER JOIN
     (SELECT [intLoadId], [intPurchaseSale], [strLoadNumber] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARI.[intLoadId]
@@ -173,7 +175,6 @@ WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
-
 										
 	RETURN
 END
