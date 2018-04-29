@@ -806,41 +806,48 @@ End
 	Insert Into @tblNodeDataFinal([key],intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
 	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId,strImage,strNodeText,strToolTip,
 	intControlPointId)
-	Select intRecordId AS [key],
-	intRecordId,intParentId,strTransactionName,intLotId,strLotNumber,strLotAlias,intItemId,strItemNo,strItemDesc,intCategoryId,strCategoryCode,
-	dblQuantity,strUOM,dtmTransactionDate,intParentLotId,strVendor,strCustomer,strProcessName,strType,intAttributeTypeId,intImageTypeId,
-	Case When strType IN ('L','IT') Then 
-		Case When intImageTypeId = 2 Then './resources/images/graphics/traceability-raw-material.png' 
-			When intImageTypeId = 4 Then './resources/images/graphics/traceability-wip-material.png' 
-			When intImageTypeId = 6 Then './resources/images/graphics/traceability-finished-goods.png' 
+	Select n.intRecordId AS [key],
+	n.intRecordId,n.intParentId,n.strTransactionName,n.intLotId,n.strLotNumber,n.strLotAlias,n.intItemId,n.strItemNo,n.strItemDesc,n.intCategoryId,n.strCategoryCode,
+	n.dblQuantity,n.strUOM,n.dtmTransactionDate,n.intParentLotId,n.strVendor,n.strCustomer,n.strProcessName,n.strType,n.intAttributeTypeId,n.intImageTypeId,
+	Case When n.strType IN ('L','IT') Then 
+		Case When n.intImageTypeId = 2 Then './resources/images/graphics/traceability-raw-material.png' 
+			When n.intImageTypeId = 4 Then './resources/images/graphics/traceability-wip-material.png' 
+			When n.intImageTypeId = 6 Then './resources/images/graphics/traceability-finished-goods.png' 
 			Else './resources/images/graphics/traceability-wip-material.png'
 		End
-	When strType='W' Then 
-		Case When intAttributeTypeId=3 Then './resources/images/graphics/traceability-packaging.png' 
+	When n.strType='W' Then 
+		Case When n.intAttributeTypeId=3 Then './resources/images/graphics/traceability-packaging.png' 
 		Else './resources/images/graphics/traceability-wip-process.png' End
-	When strType='R' Then './resources/images/graphics/traceability-receipt.png'
-	When strType='S' Then './resources/images/graphics/traceability-shipment.png'
-	When strType='C' Then './resources/images/graphics/contract.png'
-	When strType='IS' Then './resources/images/graphics/traceability-shipment.png'
-	When strType='CN' Then './resources/images/graphics/container.png'
-	When strType='SO' Then './resources/images/graphics/sales-order.png'
-	When strType='IN' Then './resources/images/graphics/invoice.png'
+	When n.strType='R' Then './resources/images/graphics/traceability-receipt.png'
+	When n.strType='S' Then './resources/images/graphics/traceability-shipment.png'
+	When n.strType='C' Then './resources/images/graphics/contract.png'
+	When n.strType='IS' Then './resources/images/graphics/traceability-shipment.png'
+	When n.strType='CN' Then './resources/images/graphics/container.png'
+	When n.strType='SO' Then './resources/images/graphics/sales-order.png'
+	When n.strType='IN' Then './resources/images/graphics/invoice.png'
 	End AS strImage,
-	CASE When ISNULL(strProcessName,'')='' THEN  strLotNumber Else strLotNumber + CHAR(13) + '(' + strProcessName + ')' End AS strNodeText,
-	'Item No.	  : ' + ISNULL(strItemNo,'') + CHAR(13) +
-	'Item Desc.   : ' + ISNULL(strItemDesc,'') + CHAR(13) +
-	'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(dblQuantity),'') + ' ' + ISNULL(strUOM + CHAR(13),'') + CHAR(13) +
-	'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR,dtmTransactionDate),'') + CHAR(13) +
-	CASE WHEN strType='R' THEN 'Vendor     : ' + ISNULL(strVendor,'') ELSE '' END + 
-	CASE WHEN strType='S' THEN 'Customer     : ' + ISNULL(strCustomer,'') ELSE '' END
+	CASE When ISNULL(n.strProcessName,'')='' THEN  n.strLotNumber Else n.strLotNumber + CHAR(13) + '(' + n.strProcessName + ')' End AS strNodeText,
+	'Item No.           : ' + ISNULL(n.strItemNo,'') + CHAR(13) +
+	'Item Desc.        : ' + ISNULL(n.strItemDesc,'') + CHAR(13) +
+	'Quantity           : ' + ISNULL(dbo.fnRemoveTrailingZeroes(n.dblQuantity),'') + ' ' + ISNULL(n.strUOM,'') + CHAR(13) +
+	'Tran. Date        : ' + ISNULL(CONVERT(VARCHAR,n.dtmTransactionDate),'') + CHAR(13) +
+	CASE WHEN n.strType='R' THEN 'Vendor            : ' + ISNULL(n.strVendor,'') ELSE '' END + 
+	CASE WHEN n.strType='S' THEN 'Customer          : ' + ISNULL(n.strCustomer,'') ELSE '' END + 
+	CASE WHEN n.strType='L' THEN 'Crop Year         : ' + ISNULL(CONVERT(VARCHAR(100),l.intSeasonCropYear),'') ELSE '' END + CHAR(13) +
+	CASE WHEN n.strType='L' THEN 'Producer           : ' + ISNULL(e.strName,'') ELSE '' END + CHAR(13) +
+	CASE WHEN n.strType='L' THEN 'Certification      : ' + ISNULL(l.strCertificate,'') ELSE '' END + CHAR(13) + 
+	CASE WHEN n.strType='L' THEN 'Certification Id  : ' + ISNULL(l.strCertificateId,'') ELSE '' END + CHAR(13) + 
+	CASE WHEN n.strType='L' THEN 'Tracking No      : ' + ISNULL(l.strTrackingNumber,'') ELSE '' END
 	AS strToolTip,
-	Case When strType='L' Then 
-		Case When intImageTypeId = 2 Then 5 
+	Case When n.strType='L' Then 
+		Case When n.intImageTypeId = 2 Then 5 
 			Else 6
 		End
 	Else 5 
 	End AS intControlPointId
-	From @tblNodeData
+	From @tblNodeData n 
+	Left Join tblICLot l on n.intLotId=l.intLotId AND n.strType='L'
+	Left Join tblEMEntity e on l.intProducerId=e.intEntityId
 
 	--Generate Group Row No
 	Update f set f.ysnExcludedNode=1,f.intGroupRowNo=t.intRowNo From @tblNodeDataFinal f Join
