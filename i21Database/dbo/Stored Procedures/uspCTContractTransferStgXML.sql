@@ -8,7 +8,7 @@ BEGIN TRY
 
 	SELECT *
 	FROM tblCTContractStage
-	WHERE intMultiCompanyId = @intToCompanyId
+	WHERE intMultiCompanyId = @intToCompanyId AND ISNULL(strFeedStatus, '') = ''
 
 	UPDATE tblCTContractStage SET strFeedStatus='Awt Ack' WHERE intMultiCompanyId = @intToCompanyId
 

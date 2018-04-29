@@ -137,6 +137,9 @@ BEGIN TRY
 
 		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
 	END
+	
+	EXEC [uspCTInterCompanyPriceContract] @intPriceContractId
+
 END TRY
 
 BEGIN CATCH

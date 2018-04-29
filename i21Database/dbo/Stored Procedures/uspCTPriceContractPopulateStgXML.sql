@@ -3,6 +3,7 @@
 	,@intToEntityId		    INT
 	,@strToTransactionType  NVARCHAR(100)
 	,@intToCompanyId		INT
+	,@strRowState NVARCHAR(100)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -43,11 +44,13 @@ BEGIN TRY
 		 intPriceContractId
 		,strPriceContractNo
 		,strPriceContractXML
+		,strRowState
 	)
 	SELECT 
 		intPriceContractId   = @intPriceContractId
 		,strPriceContractNo  = @strPriceContractNo
 		,strPriceContractXML = @strPriceContractXML
+		,strRowState		 = @strRowState
 
 	SET @intPriceContractStageId = SCOPE_IDENTITY();
 	---------------------------------------------PriceFixation------------------------------------------

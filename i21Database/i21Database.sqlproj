@@ -6425,6 +6425,9 @@
     <Build Include="dbo\Functions\fnARGetItemsForInTransitCostingForFinalInvoice.sql" />
     <Build Include="dbo\Functions\fnARGetItemsForInTransitCostingForProvisionalReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessLogisticsAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInterCompanyContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInterCompanyPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractProcessUpdateStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

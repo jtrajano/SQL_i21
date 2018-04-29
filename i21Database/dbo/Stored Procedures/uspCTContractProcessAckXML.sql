@@ -1,6 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractProcessAckXML]
-	@param1 int = 0,
-	@param2 int
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -47,8 +45,7 @@ BEGIN TRY
 		BEGIN
 			
 			------------------Header------------------------------------------------------
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckHeaderXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckHeaderXML
 
 			SELECT @intContractHeaderId  = intContractHeaderId
 				,@intContractHeaderRefId = intContractHeaderRefId
@@ -120,7 +117,7 @@ BEGIN TRY
 				AND ContractDocument.intContractDocumentRefId IS NULL
 
 			---UPDATE Feed Status in Staging
-			UPDATE tblCTIntrCompContract
+			UPDATE tblCTContractStage
 			SET strFeedStatus = 'Ack Rcvd'
 				,strMessage = 'Success'
 			WHERE intContractHeaderId = @intContractHeaderRefId AND strFeedStatus = 'Awt Ack'

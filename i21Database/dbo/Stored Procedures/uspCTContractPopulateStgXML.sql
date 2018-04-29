@@ -3,6 +3,7 @@
 	,@intToEntityId INT
 	,@strToTransactionType NVARCHAR(100)
 	,@intToCompanyId INT
+	,@strRowState NVARCHAR(100)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -45,11 +46,13 @@ BEGIN TRY
 		intContractHeaderId
 		,strContractNumber
 		,strHeaderXML
+		,strRowState
 	)
 	SELECT 
 		 intContractHeaderId = @ContractHeaderId
 		,strContractNumber   = @strContractNumber
 		,strHeaderXML        = @strHeaderXML
+		,strRowState		 = @strRowState
 
 	SET @intContractStageId = SCOPE_IDENTITY();
 	---------------------------------------------Detail------------------------------------------
