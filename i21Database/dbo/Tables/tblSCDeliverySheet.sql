@@ -16,6 +16,7 @@
 	[dblShrink] NUMERIC(38, 20) NULL DEFAULT ((0)),
 	[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)),
     [ysnPost] BIT NULL DEFAULT (0),
+	[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
 	[strOfflineGuid] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
