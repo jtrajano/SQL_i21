@@ -45,7 +45,7 @@
 	[ysnDepartmentGrouping]           BIT         DEFAULT ((0))   NOT NULL,
 	[ysnSummaryByDeptVehicleProd]	  BIT		  DEFAULT ((0))	  NOT NULL,
 	[strPrimaryDepartment]         NVARCHAR(8)  COLLATE Latin1_General_CI_AS DEFAULT(N'Card') NOT NULL,
-	[intCustomerGroup]       INT             NULL,
+	[intCustomerGroupId]       INT             NULL,
 	[intQuoteProduct1Id]       INT             NULL,
 	[intQuoteProduct2Id]       INT             NULL,
 	[intQuoteProduct3Id]       INT             NULL,
