@@ -1,7 +1,7 @@
 ﻿/*
-	This stored procedure handles the updating of the Stock Quantity in tblICItemStock and tblICItemStockUOM. 
+	This stored procedure handles the updating of the Storage Quantity in tblICItemStock and tblICItemStockUOM. 
 */
-CREATE PROCEDURE [dbo].[uspICPostStockQuantity]
+CREATE PROCEDURE [dbo].[uspICPostStorageQuantity]
 	@intItemId AS INT,
 	@intItemLocationId AS INT,
 	@intSubLocationId AS INT,
@@ -80,13 +80,14 @@ BEGIN
 	-- If matched, update the unit on hand qty. 
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
+		SET		dblUnitStorage = ISNULL(ItemStock.dblUnitStorage, 0) + StockToUpdate.Qty
 
 	-- If none found, insert a new item stock record
 	WHEN NOT MATCHED THEN 
 		INSERT (
 			intItemId
 			,intItemLocationId
+			,dblUnitStorage
 			,dblUnitOnHand
 			,dblOrderCommitted
 			,dblOnOrder
@@ -97,7 +98,8 @@ BEGIN
 		VALUES (
 			StockToUpdate.intItemId
 			,StockToUpdate.intItemLocationId
-			,StockToUpdate.Qty -- dblUnitOnHand
+			,StockToUpdate.Qty -- dblUnitStorage
+			,0 
 			,0
 			,0
 			,0
@@ -217,7 +219,7 @@ BEGIN
 							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
-								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId)
+								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId) 
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intItemUOMId = @intItemUOMId
 							AND Lot.intItemLocationId = @intItemLocationId
@@ -241,7 +243,7 @@ BEGIN
 							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
-								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId)
+								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId) 
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intWeightUOMId = @intItemUOMId
 							AND Lot.intItemLocationId = @intItemLocationId
@@ -271,7 +273,7 @@ BEGIN
 							INNER JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
-								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId)
+								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId) 
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intItemLocationId = @intItemLocationId
 							AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
@@ -335,7 +337,7 @@ BEGIN
 	-- If matched, update the unit on hand qty. 
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+		SET		dblUnitStorage = ISNULL(ItemStockUOM.dblUnitStorage, 0) + RawStockData.Qty
 
 	-- If none found, insert a new item stock record
 	WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -345,6 +347,7 @@ BEGIN
 			,intItemUOMId
 			,intSubLocationId
 			,intStorageLocationId
+			,dblUnitStorage
 			,dblOnHand
 			,dblOnOrder
 			,intConcurrencyId
@@ -356,6 +359,7 @@ BEGIN
 			,RawStockData.intSubLocationId
 			,RawStockData.intStorageLocationId
 			,RawStockData.Qty
+			,0 
 			,0
 			,1	
 		)

@@ -246,6 +246,21 @@ BEGIN
 			,@dblForexRate
 	END
 
+	------------------------------------------------------------
+	-- Update the Storage Quantity
+	------------------------------------------------------------
+	BEGIN 
+		EXEC [dbo].[uspICPostStorageQuantity]
+			@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty
+			,@dblUOMQty
+			,@intLotId
+	END 
+
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO 
 		@intId
@@ -276,9 +291,3 @@ END;
 
 CLOSE loopItems;
 DEALLOCATE loopItems;
-
------------------------------------
--- Update the Item Stock table
------------------------------------
-EXEC uspICIncreaseOnStorageQty
-	@ItemsToStorage
