@@ -86,6 +86,7 @@ ELSE
 				SELECT TOP 1 @intCommissionPayableId = intCommissionId
 						   , @intVendorId			 = intEntityId
 						   , @strCommissionNumber	 = strCommissionNumber
+						   , @dblTotalAmount		 = dblTotalAmount
 				FROM @tblCommissions 
 				WHERE ysnPayables = 1 ORDER BY intCommissionId ASC
 
@@ -113,6 +114,7 @@ ELSE
 											 , @vendorId				= 1583-- @intVendorId
 											 , @type					= 1
 											 , @currencyId				= @intDefaultCurrencyId
+											 , @vendorOrderNumber		= @strCommissionNumber
 											 , @voucherNonInvDetails	= @tblVoucherDetail
 											 , @billId					= @intNewBillId OUT
 				
