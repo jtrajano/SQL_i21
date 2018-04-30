@@ -251,89 +251,6 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= WeightUOM.intItemUOMId--Detail.intItemUOMId 
-			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
-			,dblUOMQty				= WeightUOM.dblUnitQty --ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
-										dbo.fnGetItemStockUOM(Detail.intItemId)
-										,Detail.intItemUOMId
-										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
-									)
-			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL
-			,dblExchangeRate		= 1
-			,intTransactionId		= Header.intInventoryAdjustmentId
-			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
-			,strTransactionId		= Header.strAdjustmentNo
-			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMove
-			,intLotId				= Detail.intLotId
-			,intSubLocationId		= Detail.intSubLocationId
-			,intStorageLocationId	= Detail.intStorageLocationId
-	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
-				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
-			INNER JOIN dbo.tblICItemLocation ItemLocation 
-				ON ItemLocation.intLocationId = Header.intLocationId 
-				AND ItemLocation.intItemId = Detail.intItemId
-			INNER JOIN dbo.tblICLot Lot
-				ON Lot.intLotId = Detail.intLotId
-				AND Lot.intItemId = Detail.intItemId
-			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-				AND ItemUOM.intItemId = Detail.intItemId
-			LEFT JOIN dbo.tblICItemUOM WeightUOM
-				ON WeightUOM.intItemUOMId = Detail.intWeightUOMId
-				AND WeightUOM.intItemId = Detail.intItemId
-			LEFT JOIN dbo.tblICItemPricing ItemPricing
-				ON ItemPricing.intItemId = Detail.intItemId
-				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId	
-			LEFT JOIN dbo.tblICItemUOM StockUOM
-				ON StockUOM.intItemUOMId = dbo.fnGetItemStockUOM(Detail.intItemId)
-				AND StockUOM.intItemId = Detail.intItemId
-	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND Detail.dblNewQuantity IS NOT NULL 
-			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
-			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks
-
-	-------------------------------------------
-	-- Call the costing SP	
-	-------------------------------------------
-	IF EXISTS (SELECT TOP 1 1 FROM @MergeLotSource)
-	BEGIN
-		EXEC	dbo.uspICPostCosting  
-				@MergeLotSource  
-				,@strBatchId  
-				,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intEntityUserSecurityId
-	END
-
-END
-
---------------------------------------------------------------------------------
--- REDUCE THE SOURCE LOT NUMBER WITH STORAGE
---------------------------------------------------------------------------------
-BEGIN
-	INSERT INTO @MergeLotSourceStorage (
-			intItemId			
-			,intItemLocationId	
-			,intItemUOMId		
-			,dtmDate			
-			,dblQty				
-			,dblUOMQty			
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,intTransactionDetailId  
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-	)
-	SELECT 	intItemId				= Detail.intItemId
-			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
@@ -374,7 +291,6 @@ BEGIN
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks
-
 
 	-------------------------------------------
 	-- Call the costing SP	
