@@ -62,13 +62,11 @@ BEGIN TRY
 
 		SELECT 
 			@strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
-		--	,[intFromTransactionTypeId]
 			,@intFromCompanyId = intFromCompanyId
 			,@intFromProfitCenterId = intFromBookId
-			--,CTTT.strTransactionType
+			,@strToTransactionType = CTTT.strTransactionType
 			,@intToCompanyId = intToCompanyId
 			,@intToProfitCenterId = intToBookId
-			--,@intToEntityId = intToEntityId
 			,@strInsert = strInsert
 			,@strUpdate = strUpdate
 		FROM tblSMInterCompanyTransactionConfiguration CTC

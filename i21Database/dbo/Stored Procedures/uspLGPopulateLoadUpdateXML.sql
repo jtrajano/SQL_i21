@@ -61,7 +61,7 @@ BEGIN TRY
 		,NULL
 
 	-- LOAD HEADER TABLE
-	INSERT INTO tblLGIntrCompLogistics (
+	INSERT INTO tblLGIntrCompLogisticsStg (
 		intLoadId
 		,strLoadNumber
 		,strLoad
@@ -86,7 +86,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadDetail = ISNULL(strLoadDetail, '') + @strLoadDetailXML
 	WHERE intId = @intScopeIdentityId
 
@@ -105,7 +105,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadDetailLot = ISNULL(strLoadDetailLot, '') + @strLoadDetailLotXML
 	WHERE intId = @intScopeIdentityId
 
@@ -121,7 +121,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadDocument = ISNULL(strLoadDocument, '') + @strLoadDocumentXML
 	WHERE intId = @intScopeIdentityId
 
@@ -137,7 +137,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadNotifyParty = ISNULL(strLoadNotifyParty, '') + @strLoadNotifyPartyXML
 	WHERE intId = @intScopeIdentityId
 
@@ -153,7 +153,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadContainer = ISNULL(strLoadContainer, '') + @strLoadContainerXML
 	WHERE intId = @intScopeIdentityId
 
@@ -180,7 +180,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 
-		UPDATE tblLGIntrCompLogistics
+		UPDATE tblLGIntrCompLogisticsStg
 		SET strLoadDetailContainerLink = ISNULL(strLoadDetailContainerLink, '') + @strLoadDetailContainerLinkXML
 		WHERE intId = @intScopeIdentityId
 	END
@@ -196,7 +196,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadWarehouse = ISNULL(strLoadWarehouse, '') + @strLoadWarehouseXML
 	WHERE intId = @intScopeIdentityId
 
@@ -218,7 +218,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 
-		UPDATE tblLGIntrCompLogistics
+		UPDATE tblLGIntrCompLogisticsStg
 		SET strLoadWarehouseServices = ISNULL(strLoadWarehouseServices, '') + @strLoadWarehouseServicesXML
 		WHERE intId = @intScopeIdentityId
 	END
@@ -237,7 +237,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 
-		UPDATE tblLGIntrCompLogistics
+		UPDATE tblLGIntrCompLogisticsStg
 		SET strLoadWarehouseContainer = ISNULL(strLoadWarehouseContainer, '') + @strLoadWarehouseContainerXML
 		WHERE intId = @intScopeIdentityId
 	END
@@ -254,7 +254,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadCost = ISNULL(strLoadCost, '') + @strLoadCostXML
 	WHERE intId = @intScopeIdentityId
 
@@ -270,12 +270,12 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadStorageCost = ISNULL(strLoadStorageCost, '') + @strLoadStorageCostXML
 	WHERE intId = @intScopeIdentityId
 
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strTransactionType = @strToTransactionType,
 		intMultiCompanyId = @intToCompanyId
 	WHERE intId = @intScopeIdentityId

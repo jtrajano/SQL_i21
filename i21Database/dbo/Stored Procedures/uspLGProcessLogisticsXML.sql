@@ -7,11 +7,11 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SELECT *
-	FROM tblLGIntrCompLogistics
+	FROM tblLGIntrCompLogisticsStg
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND strFeedStatus IS NULL
 
-	UPDATE tblLGIntrCompLogistics
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strFeedStatus = 'Awt Ack'
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND strFeedStatus IS NULL

@@ -115,7 +115,7 @@ BEGIN TRANSACTION
 		)
 
 	SELECT @intId = MIN(intId)
-	FROM tblLGIntrCompLogistics
+	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
 
 	WHILE @intId > 0
@@ -165,7 +165,7 @@ BEGIN TRANSACTION
 			,@intReferenceId = intReferenceId
 			,@intEntityId = intEntityId
 			,@strTransactionType = strTransactionType
-		FROM tblLGIntrCompLogistics
+		FROM tblLGIntrCompLogisticsStg
 		WHERE intId = @intId
 		
 		IF( @strTransactionType LIKE '%Instruction%')
@@ -854,8 +854,12 @@ BEGIN TRANSACTION
 			END
 		END
 
+		UPDATE tblLGIntrCompLogisticsStg 
+		SET strFeedStatus = 'Processed' 
+		WHERE intId = @intId
+
 		SELECT @intId = MIN(intId)
-		FROM tblLGIntrCompLogistics
+		FROM tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
 			AND strFeedStatus IS NULL
 	END

@@ -32,8 +32,7 @@ BEGIN TRY
 
 	SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
 	FROM tblLGIntrCompLogisticsAck
-	WHERE strMessage = 'Success'
-		AND ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''
 
 	WHILE @intAcknowledgementStageId > 0
 	BEGIN
@@ -255,7 +254,7 @@ BEGIN TRY
 				AND LWC.intLoadWarehouseContainerRefId IS NULL
 
 			---UPDATE Feed Status in Staging
-			UPDATE tblLGIntrCompLogistics
+			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Ack Rcvd'
 				,strMessage = 'Success'
 			WHERE intLoadId = @intLoadRefId AND strFeedStatus = 'Awt Ack'
@@ -266,10 +265,13 @@ BEGIN TRY
 			WHERE intAcknowledgementId = @intAcknowledgementStageId
 		END
 
+		--UPDATE tblLGIntrCompLogisticsAck 
+		--SET strFeedStatus = 'Processed'
+		--WHERE intAcknowledgementId > @intAcknowledgementStageId
+
 		SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
 		FROM tblLGIntrCompLogisticsAck
 		WHERE intAcknowledgementId > @intAcknowledgementStageId
-			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
 	END
 END TRY
