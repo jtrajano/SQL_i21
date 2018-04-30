@@ -33,6 +33,7 @@ BEGIN TRY
 		,@intYieldCostId INT
 		,@strYieldCostValue NVARCHAR(50)
 		,@ysnPostGL BIT
+		,@dblOtherCharges NUMERIC(18, 6)
 
 	SELECT @ysnPostGL = 0
 
@@ -757,17 +758,17 @@ BEGIN TRY
 				,@dblCoEfficientApplied NUMERIC(38, 20)
 				,@dblStandardUnitRate NUMERIC(38, 20)
 
-			Select @dblInputCost=0
+			SELECT @dblInputCost = 0
 
 			INSERT INTO @tblMFConsumedLot (
 				intBatchId
 				,strBatchId
 				)
-			SELECT distinct intBatchId
+			SELECT DISTINCT intBatchId
 				,strBatchId
 			FROM tblMFWorkOrderConsumedLot
 			WHERE intWorkOrderId = @intWorkOrderId
-				AND IsNULL(ysnConsumptionReversed,0) = 0
+				AND IsNULL(ysnConsumptionReversed, 0) = 0
 
 			SELECT @intWorkOrderConsumedLotId = MIN(intWorkOrderConsumedLotId)
 			FROM @tblMFConsumedLot WC
@@ -787,6 +788,16 @@ BEGIN TRY
 				SELECT @intWorkOrderConsumedLotId = MIN(intWorkOrderConsumedLotId)
 				FROM @tblMFConsumedLot CL
 				WHERE intWorkOrderConsumedLotId > @intWorkOrderConsumedLotId
+			END
+
+			SELECT @dblOtherCharges = SUM(dblOtherCharges)
+			FROM tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND ysnProductionReversed = 0
+
+			IF @dblOtherCharges IS NOT NULL
+			BEGIN
+				SELECT @dblInputCost = abs(@dblInputCost) + @dblOtherCharges
 			END
 
 			DECLARE @tblMFProductionSummary TABLE (
@@ -846,46 +857,66 @@ BEGIN TRY
 					,3
 					)
 
-			--Calculate co efficient
-			SELECT @intProductionSummaryId = min(intProductionSummaryId)
-			FROM @tblMFProductionSummary
-
-			UPDATE @tblMFProductionSummary
-			SET dblCoEfficient = 1
-			WHERE intProductionSummaryId = @intProductionSummaryId
-
-			SELECT @intFirstGradeItemId = intItemId
-			FROM @tblMFProductionSummary
-			WHERE intProductionSummaryId = @intProductionSummaryId
-
-			SELECT @dblFirstGradeDiff = dblGradeDiff
-			FROM tblMFItemGradeDiff
-			WHERE intItemId = @intFirstGradeItemId
-
-			UPDATE PS
-			SET dblCoEfficient = 0
-			FROM @tblMFProductionSummary PS
-			JOIN tblICItem I ON I.intItemId = PS.intItemId
-				AND I.ysnSellableItem = 1
-
 			UPDATE PS
 			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
-						SELECT TOP 1 intFutureMonthId
-						FROM tblRKFuturesMonth
-						WHERE ysnExpired = 0
-							AND dtmSpotDate <= @dtmCurrentDateTime
-							AND intFutureMarketId = C.intFutureMarketId
-						ORDER BY 1 DESC
-						), @dtmCurrentDateTime),0)
+							SELECT TOP 1 intFutureMonthId
+							FROM tblRKFuturesMonth
+							WHERE ysnExpired = 0
+								AND dtmSpotDate <= @dtmCurrentDateTime
+								AND intFutureMarketId = C.intFutureMarketId
+							ORDER BY 1 DESC
+							), @dtmCurrentDateTime), 0)
 			FROM @tblMFProductionSummary PS
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 
 			UPDATE PS
-			SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / (PS.dblMarketRate + @dblFirstGradeDiff)
-			,dblGradeDiff=GD.dblGradeDiff
+			SET dblGradeDiff = GD.dblGradeDiff
 			FROM @tblMFProductionSummary PS
 			JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
+
+			--Calculate co efficient
+			IF EXISTS (
+					SELECT *
+					FROM @tblMFProductionSummary PS
+					JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
+					WHERE GD.dblCoEfficient IS NULL
+					)
+			BEGIN
+				SELECT @intProductionSummaryId = min(intProductionSummaryId)
+				FROM @tblMFProductionSummary
+
+				UPDATE @tblMFProductionSummary
+				SET dblCoEfficient = 1
+				WHERE intProductionSummaryId = @intProductionSummaryId
+
+				SELECT @intFirstGradeItemId = intItemId
+				FROM @tblMFProductionSummary
+				WHERE intProductionSummaryId = @intProductionSummaryId
+
+				SELECT @dblFirstGradeDiff = dblGradeDiff
+				FROM tblMFItemGradeDiff
+				WHERE intItemId = @intFirstGradeItemId
+
+				UPDATE PS
+				SET dblCoEfficient = 0
+				FROM @tblMFProductionSummary PS
+				JOIN tblICItem I ON I.intItemId = PS.intItemId
+					AND I.ysnSellableItem = 1
+
+				UPDATE PS
+				SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / (PS.dblMarketRate + @dblFirstGradeDiff)
+				FROM @tblMFProductionSummary PS
+				JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
+				WHERE PS.dblCoEfficient IS NULL
+			END
+			ELSE
+			BEGIN
+				UPDATE PS
+				SET dblCoEfficient = GD.dblCoEfficient
+				FROM @tblMFProductionSummary PS
+				JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
+			END
 
 			UPDATE @tblMFProductionSummary
 			SET dblCoEfficientApplied = dblOutputQuantity * dblCoEfficient
@@ -894,9 +925,11 @@ BEGIN TRY
 			FROM @tblMFProductionSummary
 
 			UPDATE @tblMFProductionSummary
-			SET @dblStandardUnitRate=dblStandardUnitRate = abs(@dblInputCost) / @dblCoEfficientApplied
-				,dblProductionUnitRate = @dblStandardUnitRate * dblCoEfficient
-				,dblDirectCost =@dblInputCost
+			SET dblStandardUnitRate = abs(@dblInputCost) / @dblCoEfficientApplied
+				,dblDirectCost = abs(@dblInputCost)
+
+			UPDATE @tblMFProductionSummary
+			SET dblProductionUnitRate = dblStandardUnitRate * dblCoEfficient
 
 			UPDATE PS1
 			SET dblDirectCost = PS.dblDirectCost

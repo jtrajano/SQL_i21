@@ -260,7 +260,7 @@ BEGIN
 
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
 		,@ysnConsumptionRequired BIT
-
+		,@dblTotalOtherCharges NUMERIC(18, 6)
 	SELECT @ysnConsumptionRequired = ysnConsumptionRequired
 	FROM tblMFWorkOrderRecipeItem RI
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -304,7 +304,7 @@ BEGIN
 		GROUP BY RI.intRecipeItemId
 			,RI.intItemId
 
-		SELECT @dblOtherCharges = SUM(dblOtherCharge)
+		SELECT @dblTotalOtherCharges = SUM(dblOtherCharge)
 		FROM @tblMFOtherChargeItem
 	END
 
@@ -319,10 +319,10 @@ BEGIN
 		SELECT @dblCostPerStockUOM = dbo.fnCalculateUnitCost(@dblNewUnitCost, @dblUnitQty)
 	END
 
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
+	IF @dblTotalOtherCharges IS NOT NULL
+		AND @dblTotalOtherCharges > 0
 	BEGIN
-		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
+		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblTotalOtherCharges
 	END
 
 	IF @strLotTracking <> 'No'
@@ -464,12 +464,12 @@ BEGIN
 		,@dblOtherCharge NUMERIC(18, 6)
 		,@intOtherChargeItemLocationId INT
 
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
+	IF @dblTotalOtherCharges IS NOT NULL
+		AND @dblTotalOtherCharges > 0
 	BEGIN
 		SELECT @intRecipeItemUOMId = intItemUOMId
-		FROM tblMFWorkOrderRecipe
-		WHERE intWorkOrderId = @intWorkOrderId
+		FROM tblMFWorkOrderRecipeItem
+		WHERE intWorkOrderId = @intWorkOrderId and intItemId=@intItemId
 	END
 
 	DELETE
@@ -765,7 +765,13 @@ BEGIN
 		AND intBatchId = @intBatchId
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
-	SET strBatchId = @strBatchId
+	SET strBatchId = @strBatchId,dblOtherCharges=(
+					CASE 
+						WHEN @intRecipeItemUOMId = @intItemUOMId
+							THEN @dblOtherCharges * @dblQty
+						ELSE @dblOtherCharges * @dblWeight
+						END
+					)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
 
