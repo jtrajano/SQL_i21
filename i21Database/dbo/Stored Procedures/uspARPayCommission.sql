@@ -111,7 +111,7 @@ ELSE
 
 				--CREATE VOUCHER
 				EXEC dbo.[uspAPCreateBillData] @userId					= @intUserId
-											 , @vendorId				= 1583-- @intVendorId
+											 , @vendorId				= @intVendorId
 											 , @type					= 1
 											 , @currencyId				= @intDefaultCurrencyId
 											 , @vendorOrderNumber		= @strCommissionNumber
