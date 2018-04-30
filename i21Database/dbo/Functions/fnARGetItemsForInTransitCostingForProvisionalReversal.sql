@@ -28,6 +28,8 @@ RETURNS @returntable TABLE
 	,[intInTransitSourceLocationId]			INT					NULL 
 	,[intForexRateTypeId]					INT					NULL
 	,[dblForexRate]							NUMERIC(38, 20)		NULL		DEFAULT 1 
+	,[intOriginalInvoiceId]					INT					NULL
+	,[strInvoiceOriginId]					NVARCHAR(40)		COLLATE Latin1_General_CI_AS NOT NULL
 )
 AS
 BEGIN
@@ -68,7 +70,9 @@ INSERT INTO @returntable
 	,[intFobPointId] 
 	,[intInTransitSourceLocationId]
 	,[intForexRateTypeId]
-	,[dblForexRate])
+	,[dblForexRate]
+	,[intOriginalInvoiceId]
+	,[strInvoiceOriginId])
 
 -- FOR Provisional Reversal
 SELECT
@@ -95,6 +99,8 @@ SELECT
 	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+	,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 FROM 
 	@Invoices ARI 
 INNER JOIN 
@@ -142,11 +148,13 @@ SELECT
 	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
+	,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
 FROM 
 	(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [intInvoiceDetailId], [ysnBlended], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId]
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId], [strInvoiceOriginId]
 	 FROM @Invoices INV
 	 WHERE
 		INV.[strType] <> 'Provisional' 

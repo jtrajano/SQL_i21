@@ -1351,7 +1351,34 @@ IF @post = 1
                         AND P.[strInvoiceOriginId] = GL.[strTransactionId]
                     ORDER BY GL.intGLDetailId
 
-					DECLARE @InTransitItemsForReversal AS ItemInTransitCostingTableType				
+					DECLARE @InTransitItemsForReversal AS TABLE(
+						 [intId]						INT IDENTITY PRIMARY KEY CLUSTERED	
+						,[intItemId]					INT NOT NULL
+						,[intItemLocationId]			INT NULL
+						,[intItemUOMId]					INT NOT NULL
+						,[dtmDate]						DATETIME NOT NULL
+						,[dblQty]						NUMERIC(38, 20) NOT NULL DEFAULT 0
+						,[dblUOMQty]					NUMERIC(38, 20) NOT NULL DEFAULT 1
+						,[dblCost]						NUMERIC(38, 20) NOT NULL DEFAULT 0
+						,[dblValue]						NUMERIC(38, 20) NOT NULL DEFAULT 0
+						,[dblSalesPrice]				NUMERIC(18, 6) NOT NULL DEFAULT 0
+						,[intCurrencyId]				INT NULL
+						,[dblExchangeRate]				NUMERIC (38, 20) DEFAULT 1 NOT NULL
+						,[intTransactionId]				INT NOT NULL
+						,[intTransactionDetailId]		INT NULL
+						,[strTransactionId]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+						,[intTransactionTypeId]			INT NOT NULL
+						,[intLotId]						INT NULL
+						,[intSourceTransactionId]		INT NULL
+						,[strSourceTransactionId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+						,[intSourceTransactionDetailId]	INT NULL
+						,[intFobPointId]				TINYINT NULL
+						,[intInTransitSourceLocationId]	INT NULL 
+						,[intForexRateTypeId]			INT NULL
+						,[dblForexRate]					NUMERIC(38, 20) NULL DEFAULT 1 
+						,[intOriginalInvoiceId]			INT					NULL
+						,[strInvoiceOriginId]			NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL
+					)				
 					INSERT INTO @InTransitItemsForReversal (
 						 [intItemId] 
 						,[intItemLocationId] 
@@ -1376,6 +1403,8 @@ IF @post = 1
 						,[intInTransitSourceLocationId]
 						,[intForexRateTypeId]
 						,[dblForexRate]
+						,[intOriginalInvoiceId]
+						,[strInvoiceOriginId]
 					)
 					SELECT
 						 [intItemId] 
@@ -1401,11 +1430,106 @@ IF @post = 1
 						,[intInTransitSourceLocationId]
 						,[intForexRateTypeId]
 						,[dblForexRate]
+						,[intOriginalInvoiceId]
+						,[strInvoiceOriginId]
 					FROM 
 						dbo.[fnARGetItemsForInTransitCostingForProvisionalReversal](@PostInvoiceData, @post)
 
 					IF EXISTS (SELECT TOP 1 1 FROM @InTransitItemsForReversal)
-					BEGIN 
+					BEGIN
+					    DECLARE @InTransitItemsForReversalForPassing AS ItemInTransitCostingTableType
+						INSERT INTO @InTransitItemsForReversalForPassing (
+							 [intItemId] 
+							,[intItemLocationId] 
+							,[intItemUOMId] 
+							,[dtmDate] 
+							,[dblQty] 
+							,[dblUOMQty] 
+							,[dblCost] 
+							,[dblValue] 
+							,[dblSalesPrice] 
+							,[intCurrencyId] 
+							,[dblExchangeRate] 
+							,[intTransactionId] 
+							,[intTransactionDetailId] 
+							,[strTransactionId] 
+							,[intTransactionTypeId] 
+							,[intLotId] 
+							,[intSourceTransactionId] 
+							,[strSourceTransactionId] 
+							,[intSourceTransactionDetailId] 
+							,[intFobPointId] 
+							,[intInTransitSourceLocationId]
+							,[intForexRateTypeId]
+							,[dblForexRate]							
+						)
+						SELECT
+							 [intItemId] 
+							,[intItemLocationId] 
+							,[intItemUOMId] 
+							,[dtmDate] 
+							,[dblQty] 
+							,[dblUOMQty] 
+							,[dblCost] 
+							,[dblValue] 
+							,[dblSalesPrice] 
+							,[intCurrencyId] 
+							,[dblExchangeRate] 
+							,[intTransactionId] 
+							,[intTransactionDetailId] 
+							,[strTransactionId] 
+							,[intTransactionTypeId] 
+							,[intLotId] 
+							,[intSourceTransactionId] 
+							,[strSourceTransactionId] 
+							,[intSourceTransactionDetailId] 
+							,[intFobPointId] 
+							,[intInTransitSourceLocationId]
+							,[intForexRateTypeId]
+							,[dblForexRate]							
+						FROM                 
+							@InTransitItemsForReversal
+
+						WHILE EXISTS(SELECT TOP 1 NULL FROM @InTransitItemsForReversal ORDER BY [intTransactionId])
+						BEGIN
+				
+							DECLARE @OriginalInvoiceId INT
+									,@InvoiceOriginId NVARCHAR(80)
+									,@WStorageCount0 INT
+									,@WOStorageCount0 INT
+					
+							SELECT TOP 1 @OriginalInvoiceId = [intOriginalInvoiceId], @InvoiceOriginId = [strInvoiceOriginId] 
+							FROM	@InTransitItemsForReversal ORDER BY [intTransactionId]
+
+							SELECT @WStorageCount0 = COUNT(1) FROM tblARInvoiceDetail WITH (NOLOCK) WHERE intInvoiceId = @OriginalInvoiceId AND (ISNULL(intItemId, 0) <> 0) AND (ISNULL(intStorageScheduleTypeId,0) <> 0)	
+							SELECT @WOStorageCount0 = COUNT(1) FROM tblARInvoiceDetail WITH (NOLOCK) WHERE intInvoiceId = @OriginalInvoiceId AND (ISNULL(intItemId, 0) <> 0) AND (ISNULL(intStorageScheduleTypeId,0) = 0)
+							IF @WStorageCount0 > 0
+							BEGIN
+								-- Unpost onhand stocks. 
+								EXEC	dbo.uspICUnpostCosting
+											@OriginalInvoiceId
+											,@InvoiceOriginId
+											,@batchIdUsed
+											,@UserEntityID
+											,@recap 
+							END
+
+							IF @WOStorageCount0 > 0 
+							BEGIN 
+								-- Unpost storage stocks. 
+								EXEC	dbo.uspICUnpostStorage
+										@OriginalInvoiceId
+										,@InvoiceOriginId
+										,@batchIdUsed
+										,@UserEntityID
+										,@recap
+							END					
+										
+							DELETE FROM @InTransitItemsForReversal 
+							WHERE	[intOriginalInvoiceId] = @OriginalInvoiceId 
+									AND [strInvoiceOriginId] = @InvoiceOriginId 												
+						END		
+
 						DELETE FROM @TempGLEntries
 						INSERT INTO @TempGLEntries (
 							[dtmDate] 
@@ -1441,8 +1565,8 @@ IF @post = 1
 							,[dblForeignRate]
 						)
 						EXEC	dbo.uspICPostInTransitCosting  
-								@InTransitItemsForReversal  
-								,@batchIdUsed  
+								@InTransitItemsForReversalForPassing  
+								,@batchIdUsed
 								,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 								,@UserEntityID
 
@@ -1457,14 +1581,15 @@ IF @post = 1
 								AND @recap  = 1
 								AND @post = 1
 
-					UPDATE
-						@TempGLEntries
-					SET
-						[strDescription] = SUBSTRING('Reverse Provisional Invoice' + ISNULL(' - ' + [strDescription],''), 1, 255)
 
-					INSERT INTO @GLEntries
-					SELECT * FROM @TempGLEntries					
-				END
+						UPDATE
+							@TempGLEntries
+						SET
+							[strDescription] = SUBSTRING('Reverse Provisional Invoice' + ISNULL(' - ' + [strDescription],''), 1, 255)
+
+						INSERT INTO @GLEntries
+						SELECT * FROM @TempGLEntries					
+					END
 
 					
 				END
