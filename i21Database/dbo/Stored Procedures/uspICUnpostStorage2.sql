@@ -112,7 +112,7 @@ BEGIN
 		, intStorageLocationId
 		, intItemUOMId
 		, dtmDate
-		, dblQty * -1
+		, -dblQty
 		, dblUOMQty
 		, dblCost
 		, dblValue
@@ -261,10 +261,10 @@ BEGIN
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
 			,[dtmDate]								= ActualTransaction.dtmDate
-			,[dblQty]								= ActualTransaction.dblQty * -1
+			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
-			,[dblValue]								= ActualTransaction.dblValue * -1
+			,[dblValue]								= -ActualTransaction.dblValue
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
@@ -322,7 +322,7 @@ BEGIN
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
 			,[dtmDate]					= ActualTransaction.dtmDate
-			,[dblQty]					= ActualTransaction.dblQty * -1
+			,[dblQty]					= -ActualTransaction.dblQty
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
 			,[intTransactionId]			= ActualTransaction.intTransactionId

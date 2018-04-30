@@ -505,7 +505,16 @@ BEGIN
 				,@intEntityUserSecurityId
 				,@ysnRecap
 		
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit				
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit		
+		
+		EXEC	@intReturnValue = dbo.uspICUnpostStorage
+				@intTransactionId
+				,@strTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@ysnRecap
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit		
 	END 
 
 	IF @adjustmentType = @ADJUSTMENT_TYPE_QuantityChange
