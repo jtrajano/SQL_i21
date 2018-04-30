@@ -70,7 +70,9 @@ BEGIN TRY
 			,[intTransactionTypeId] = @intTransactionTypeId
 			,[intSubLocationId]=@intSubLocationId
 
-		EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
+		--TODO: Use uspICInventoryAdjustment_CreatePostQtyChange to adjust the storage stocks instead of uspICIncreaseOnStorageQty. 
+		--Commented the code below: 
+		--EXEC dbo.uspICIncreaseOnStorageQty @ItemCostingTableType
 	END
 END TRY
 

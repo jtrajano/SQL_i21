@@ -76,7 +76,7 @@ BEGIN
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
-			,-1 * ISNULL(ItemTrans.dblQty, 0) 
+			,ISNULL(-ItemTrans.dblQty, 0) 
 			,ItemTrans.dblCost
 			,ItemTrans.dblUOMQty		
 			,ItemTrans.intSubLocationId
@@ -372,13 +372,72 @@ BEGIN
 	FROM	dbo.tblICLot Lot INNER JOIN @ItemsToUnpost ItemToUnpost
 				ON Lot.intItemLocationId = ItemToUnpost.intItemLocationId
 				AND Lot.intLotId = ItemToUnpost.intLotId
-END
 
------------------------------------
--- Update the Item Stock table
------------------------------------
-BEGIN 
-	EXEC uspICIncreaseOnStorageQty
-		@DecreaseOnStorageQty
+
+	------------------------------------------------------------
+	-- Update the Storage Quantity
+	------------------------------------------------------------
+	BEGIN 
+		DECLARE loopItemsToUnpost CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT  intItemId 
+				,intItemUOMId 
+				,intItemLocationId 
+				,intSubLocationId 
+				,intStorageLocationId 
+				,dblQty 
+				,dblUOMQty 
+				,dblCost
+				,intLotId 
+		FROM	@ItemsToUnpost 
+
+		OPEN loopItemsToUnpost;	
+
+		-- Initial fetch attempt
+		FETCH NEXT FROM loopItemsToUnpost INTO 
+			@intItemId
+			,@intItemUOMId
+			,@intItemLocationId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
+			,@dblQty 
+			,@dblUOMQty 
+			,@dblCost
+			,@intLotId
+		;
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Start of the loop
+		-----------------------------------------------------------------------------------------------------------------------------
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+			EXEC [dbo].[uspICPostStorageQuantity]
+				@intItemId
+				,@intItemLocationId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@intItemUOMId
+				,@dblQty
+				,@dblUOMQty
+				,@intLotId
+
+			FETCH NEXT FROM loopItemsToUnpost INTO 
+				@intItemId
+				,@intItemUOMId
+				,@intItemLocationId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost
+				,@intLotId				
+		END;
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- End of the loop
+		-----------------------------------------------------------------------------------------------------------------------------
+		CLOSE loopItemsToUnpost;
+		DEALLOCATE loopItemsToUnpost;
+	END
 END
 ;
