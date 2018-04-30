@@ -224,6 +224,7 @@ BEGIN
 		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
 		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
 		WHEN @msgId = 80210 THEN 'Invalid Producer. %s is not configured as a Producer type. Please check the Entity setup.'
+		WHEN @msgId = 80211 THEN 'Certificate %s is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
 	END 
 
 	RETURN @msg

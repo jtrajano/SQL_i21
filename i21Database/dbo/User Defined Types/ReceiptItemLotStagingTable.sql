@@ -48,4 +48,8 @@ CREATE TYPE [dbo].[ReceiptItemLotStagingTable] AS TABLE
 		,[intParentLotId] INT NULL
 		,[strParentLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[strParentLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[strCertificate] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[intProducerId] INT NULL
+		,[strCertificateId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 	
+		,[strTrackingNumber] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL
 	)
