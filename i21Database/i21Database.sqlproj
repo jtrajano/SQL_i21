@@ -6433,6 +6433,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetStorageDetailByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOpenContractByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetStorageOffSiteDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
