@@ -139,6 +139,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I					
 		WHERE
 			I.[dblInvoiceTotal] = @ZeroDecimal
+			AND strTransactionType != 'Cash Refund'
 			AND ISNULL(I.[strImportFormat], '') <> 'CarQuest'		
 			AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ISNULL(ARID.[intItemId], 0) <> 0)		
 
@@ -1307,7 +1308,23 @@ ELSE
 		INNER JOIN 
 			@Invoices I
 				ON ARPD.[intInvoiceId] = I.[intInvoiceId]
-		WHERE @Recap = 0
+		WHERE @Recap = 0 AND I.strTransactionType != 'Cash Refund'
+
+		UNION
+		SELECT 
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'You cannot Unpost transactions with Voucher.'
+		FROM
+			@Invoices IC
+		INNER JOIN tblAPBill A
+			ON A.strVendorOrderNumber = I.strInvoiceNumber
+		WHERE
+			@Recap = 0
 
 		UNION
 		--Invoice with created Bank Deposit

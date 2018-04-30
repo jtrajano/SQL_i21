@@ -329,7 +329,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid invoice type!', 16, 1, @TransactionType);

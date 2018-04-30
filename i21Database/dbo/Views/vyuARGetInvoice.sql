@@ -100,6 +100,7 @@ SELECT
 	INV.intBookId,
 	INV.intSubBookId,
 	INV.strMobileBillingShiftNo,
+    INV.ysnRefundProcessed,
 	
 	strPONumber = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strPONumber END,                                    
 	strDeliverPickup = '',

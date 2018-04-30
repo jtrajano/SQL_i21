@@ -6428,6 +6428,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyPriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractProcessUpdateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessRefund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

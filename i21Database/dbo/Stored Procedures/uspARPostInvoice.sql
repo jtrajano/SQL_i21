@@ -1124,6 +1124,9 @@ BEGIN CATCH
 	GOTO Post_Exit
 END CATCH
 --------------------------------------------------------------------------------------------  
+-- GL ENTRIES START
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------
 
@@ -1617,6 +1620,7 @@ IF @post = 1
 			-- 		A.[intInvoiceId]
 			-- 	) CM
 			-- 		ON A.[intInvoiceId] = CM.[intInvoiceId]
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1625,6 +1629,7 @@ IF @post = 1
 						EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN (SELECT intItemId, strType FROM tblICItem) ICI ON ARID.intItemId = ICI.intItemId AND ICI.strType <> 'Comment' WHERE ARID.intInvoiceId  = A.[intInvoiceId])
 					)
 				AND NOT(A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL)
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 
 			UNION ALL
 			--DEBIT Amount Due - Final Invoice
@@ -1669,6 +1674,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1677,6 +1683,7 @@ IF @post = 1
 						EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN (SELECT intItemId, strType FROM tblICItem) ICI ON ARID.intItemId = ICI.intItemId AND ICI.strType <> 'Comment' WHERE ARID.intInvoiceId  = A.[intInvoiceId])
 					)
 				AND A.intSourceId = 2 
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 				AND A.intOriginalInvoiceId IS NOT NULL
 
 			UNION ALL
@@ -1722,6 +1729,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1731,16 +1739,17 @@ IF @post = 1
 					)
 				AND A.intSourceId = 2 
 				AND A.intOriginalInvoiceId IS NOT NULL
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 
 
-			/*UNION ALL
+			UNION ALL
 			--DEBIT Prepaids
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchIdUsed
-				,intAccountId				= ARI1.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
+				,intAccountId				= ARPAC.intAccountId
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
 				,dblDebitUnit				= @ZeroDecimal 
 				,dblCreditUnit				= @ZeroDecimal
 				,strDescription				= A.strComments
@@ -1750,7 +1759,7 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Applied Prepaid - ' + ARI1.[strInvoiceNumber] 
+				,strJournalLineDescription	= 'Applied Prepaid - ' + ARPAC.[strInvoiceNumber] 
 				,intJournalLineNo			= ARPAC.[intPrepaidAndCreditId]
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -1761,30 +1770,32 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
 				,[dblReportingRate]			= 0
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''	 
 			FROM
-				(SELECT [intInvoiceId], [intPrepaidAndCreditId], [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount]
-				 FROM tblARPrepaidAndCredit WITH (NOLOCK)) ARPAC
+				(SELECT I.strInvoiceNumber,PPC.[intInvoiceId],I.intAccountId, [intPrepaidAndCreditId], [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount]
+				 FROM tblARPrepaidAndCredit PPC WITH (NOLOCK)
+				 INNER JOIN tblARInvoice I
+				 ON I.intInvoiceId = PPC.intPrepaymentId) ARPAC
 			INNER JOIN
-				(SELECT [intInvoiceId], strInvoiceNumber, dtmDate, dtmPostDate, strTransactionType, intCurrencyId, [intEntityCustomerId], strComments, intPeriodsToAccrue
+				(SELECT [intInvoiceId],intAccountId, strInvoiceNumber, dtmDate, dtmPostDate, strTransactionType, intCurrencyId, [intEntityCustomerId], strComments, intPeriodsToAccrue
 				 FROM tblARInvoice WITH (NOLOCK)) A
 					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
-			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId, strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
-					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]				 
+			--INNER JOIN
+			--	(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId, strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
+			--		ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]				 
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData ) P ON A.intInvoiceId = P.intInvoiceId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1			
-			*/
+			
 			UNION ALL
 
 			--Debit Payment
@@ -1831,6 +1842,7 @@ IF @post = 1
 			INNER JOIN
 				(SELECT intCompanyLocationId, intUndepositedFundsId FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			/*LEFT OUTER JOIN
 				(
 				--Credit Memo Prepaids
@@ -1852,15 +1864,17 @@ IF @post = 1
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal)) <> @ZeroDecimal
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 			
-			/*UNION ALL
+			--/*
+			UNION ALL
 			--Credit Prepaids
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchIdUsed
-				,intAccountId				= ARI1.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
-				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,intAccountId				= CASE WHEN ARPAC.strTransactionType IN('Customer Prepayment','Credit Memo') THEN CPref.intAPClearingAccountId ELSE ARPAC.intAccountId END
+				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,dblDebitUnit				= @ZeroDecimal 
 				,dblCreditForeign			= @ZeroDecimal
 				,strDescription				= A.strComments
@@ -1870,7 +1884,7 @@ IF @post = 1
 				,dblExchangeRate			= 1
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Applied Prepaid - ' + ARI1.[strInvoiceNumber] 
+				,strJournalLineDescription	= 'Applied Prepaid - ' + ARPAC.[strInvoiceNumber] 
 				,intJournalLineNo			= ARPAC.[intPrepaidAndCreditId]
 				,ysnIsUnposted				= 0
 				,intUserId					= @userId
@@ -1881,29 +1895,32 @@ IF @post = 1
 				,strTransactionForm			= @SCREEN_NAME
 				,strModuleName				= @MODULE_NAME
 				,intConcurrencyId			= 1
-				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
-				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
-				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
-				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+				,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+				,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,[dblReportingRate]			= 0
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''
 			FROM
-				(SELECT [intInvoiceId], [intPrepaidAndCreditId], [intPrepaymentId], dblAppliedInvoiceDetailAmount, [ysnApplied], [dblBaseAppliedInvoiceDetailAmount]
-				 FROM tblARPrepaidAndCredit WITH (NOLOCK)) ARPAC
+				(SELECT  I.strInvoiceNumber, PPC.[intInvoiceId],I.strTransactionType,I.intAccountId, [intPrepaidAndCreditId], [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount]
+				 FROM tblARPrepaidAndCredit PPC WITH (NOLOCK)
+				 INNER JOIN tblARInvoice I
+				 ON I.intInvoiceId = PPC.intPrepaymentId) ARPAC
 			INNER JOIN
-				(SELECT [intInvoiceId], strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue
+				(SELECT [intInvoiceId],intAccountId, strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue
 				 FROM tblARInvoice WITH (NOLOCK) ) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND  ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal				 
-			INNER JOIN
-				(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)  WHERE strTransactionType NOT IN ('Credit Memo', 'Credit Note')) ARI1 
-					ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
+			--INNER JOIN
+			--	(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)  WHERE strTransactionType NOT IN ('Credit Memo', 'Credit Note')) ARI1 
+			--		ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
+			CROSS APPLY (SELECT TOP 1 * FROM tblARCompanyPreference) CPref
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
-			*/		
+			--*/		
 			--CREDIT MISC
 			UNION ALL 
 			SELECT
@@ -1949,6 +1966,7 @@ IF @post = 1
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]		
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 	
+			INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
 			LEFT OUTER JOIN 
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId AND A.intCompanyLocationId = ICIS.intLocationId 
 			LEFT OUTER JOIN
@@ -1960,6 +1978,7 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				--B.dblTotal <> @ZeroDecimal AND 
 				((B.intItemId IS NULL OR B.intItemId = 0)
@@ -1967,6 +1986,7 @@ IF @post = 1
 				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (B.dblTotal <> 0 OR B.dblQtyShipped <> 0)
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 
 			--CREDIT Software -- License
 			UNION ALL 
@@ -2098,13 +2118,15 @@ IF @post = 1
 					FROM
 						tblSMCurrencyExchangeRateType
 				)SMCERT
-					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId					
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC					
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND (ISNULL(A.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0))
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 
 			--DEBIT Software -- License
 			UNION ALL 
@@ -2236,14 +2258,15 @@ IF @post = 1
 					FROM
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
-					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId		
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC	
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND (ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0)
-
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 			--CREDIT Software -- Maintenance
 			UNION ALL 
 			SELECT
@@ -2364,15 +2387,18 @@ IF @post = 1
 					FROM
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
-					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId							
+					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC						
 			WHERE
 				B.dblMaintenanceAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 
 			--CREDIT SALES
+			---asdasd
 			UNION ALL 
 			SELECT			
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
@@ -2425,6 +2451,7 @@ IF @post = 1
 			INNER JOIN
 				(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
 					ON B.intItemId = I.intItemId
+			INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
 			LEFT OUTER JOIN
 				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
 					ON B.intItemId = ICIS.intItemId 
@@ -2438,6 +2465,7 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE			 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND ISNULL(I.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
@@ -2448,7 +2476,7 @@ IF @post = 1
                     OR
                         (B.dblQtyShipped = @ZeroDecimal AND A.dblInvoiceTotal = @ZeroDecimal)
                     )
-
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
 			SELECT			
@@ -2514,13 +2542,14 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				B.dblQtyShipped <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
 				AND A.strType NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND ISNULL(I.strType,'') <> 'Comment'
-
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
@@ -2568,8 +2597,10 @@ IF @post = 1
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				A.dblShipping <> @ZeroDecimal		
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 				
 		UNION ALL 
 			--CREDIT Tax
@@ -2661,9 +2692,11 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				DT.dblAdjustedTax <> @ZeroDecimal
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 				
 			UNION ALL 
 			--DEBIT Discount
@@ -2724,9 +2757,11 @@ IF @post = 1
 					FROM
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
-					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId				
+					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
+			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC			
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
+				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
 			
 			--UNION ALL 
 			----DEBIT COGS - Inbound Shipment
@@ -3683,7 +3718,9 @@ IF @post = 0
 		END CATCH										
 				
 	END 
-	
+--------------------------------------------------------------------------------------------  
+-- GL ENTRIES END
+--------------------------------------------------------------------------------------------	
 	
 IF @recap = 1		
 	BEGIN
@@ -3889,7 +3926,11 @@ IF @recap = 0
 																		 THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal))
 																		 ELSE (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal)
 																	END
-															   ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
+															   ELSE 
+																	CASE WHEN (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) = ISNULL(ARI.dblPayment, @ZeroDecimal))
+																			THEN ISNULL(ARI.dblPayment, @ZeroDecimal)
+																			ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
+																		END
 														  END
 						,ARI.dblBaseAmountDue			= CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 															   THEN 
@@ -3897,7 +3938,11 @@ IF @recap = 0
 																		 THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
 																		 ELSE (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal)
 																	END
-															   ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+															   ELSE 
+																	CASE WHEN (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) = ISNULL(ARI.dblBasePayment, @ZeroDecimal))
+																			THEN ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+																			ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+																		END
 														  END												
 						,ARI.dblDiscount				= @ZeroDecimal
 						,ARI.dblBaseDiscount			= @ZeroDecimal
@@ -3905,8 +3950,8 @@ IF @recap = 0
 						,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
 						,ARI.dblInterest				= @ZeroDecimal
 						,ARI.dblBaseInterest			= @ZeroDecimal
-						,ARI.dblPayment					= ISNULL(dblPayment, @ZeroDecimal)
-						,ARI.dblBasePayment				= ISNULL(dblBasePayment, @ZeroDecimal)
+						,ARI.dblPayment					= CASE WHEN ARI.strTransactionType = 'Cash' OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN @ZeroDecimal ELSE ISNULL(dblPayment, @ZeroDecimal) END
+						,ARI.dblBasePayment				= CASE WHEN ARI.strTransactionType = 'Cash' OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN @ZeroDecimal ELSE ISNULL(dblBasePayment, @ZeroDecimal) END
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 					FROM
@@ -3914,7 +3959,7 @@ IF @recap = 0
 					INNER JOIN
 						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, strTransactionType, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, dblInvoiceTotal, dblBaseInvoiceTotal, dtmDate 
 						 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
-
+					CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1) PPC
 					--Insert Successfully unposted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT 
@@ -3982,7 +4027,7 @@ IF @recap = 0
 							id INT
 							)
 							INSERT INTO @idInvoiceUnpost(id)
-							SELECT intInvoiceId FROM @PostInvoiceData WHERE strTransactionType = 'Cash Refund'
+							SELECT intInvoiceId FROM @PostInvoiceData A CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC WHERE strTransactionType = 'Cash Refund' and PPC.PPC = 0
 
 							DECLARE @curIdInvoiceUnpost INT
 							WHILE EXISTS(SELECT TOP 1 1 FROM @idInvoiceUnpost)
@@ -4017,7 +4062,7 @@ IF @recap = 0
 					SET
 						 ARI.ysnPosted					= 1
 						,ARI.ysnPaid					= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.dblAmountDue = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
-						,ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash') 
+						,ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash') OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0)
 																THEN @ZeroDecimal
 																ELSE (CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 																		   THEN 
@@ -4028,7 +4073,7 @@ IF @recap = 0
 																		   ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
 																	  END) 
 														   END)
-						,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') 
+						,ARI.dblBaseAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0)
 																THEN @ZeroDecimal 
 																ELSE (CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 																		   THEN 
@@ -4045,8 +4090,8 @@ IF @recap = 0
 						,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
 						,ARI.dblInterest				= @ZeroDecimal
 						,ARI.dblBaseInterest			= @ZeroDecimal
-						,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
-						,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
+						,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash') OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
+						,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash') OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
 					FROM
@@ -4054,6 +4099,7 @@ IF @recap = 0
 					INNER JOIN
 						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblInvoiceTotal, dblBaseInvoiceTotal, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, strTransactionType, dtmDate 
 						 FROM dbo.tblARInvoice WITH (NOLOCK))  ARI ON PID.intInvoiceId = ARI.intInvoiceId
+					CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1) PPC
 
 					UPDATE ARPD
 					SET
@@ -4141,11 +4187,15 @@ IF @recap = 0
 						WHILE EXISTS(SELECT TOP 1 1 FROM @idInvoice)
 							BEGIN
 								SELECT TOP 1 @curIdInvoice = id FROM @idInvoice
-								EXEC uspARCreateRCVForCreditMemo 					
-										 @intInvoiceId = @curIdInvoice,
-										 @intUserId = @userId								
+								IF (SELECT PPC FROM tblARInvoice A CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC WHERE intInvoiceId = @curIdInvoice AND strTransactionType = 'Cash Refund' ) = 0
+									BEGIN 
+										EXEC uspARCreateRCVForCreditMemo 					
+												 @intInvoiceId = @curIdInvoice,
+												 @intUserId = @userId						
+									END
+										
 
-								IF EXISTS(SELECT 1 FROM tblARInvoice WHERE intInvoiceId = @curIdInvoice AND strTransactionType = 'Cash Refund')
+								IF (SELECT PPC FROM tblARInvoice A CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC WHERE intInvoiceId = @curIdInvoice AND strTransactionType = 'Cash Refund' ) = 0
 									BEGIN
 													--create payment entry
 										DECLARE  @_EntityCustomerId		INT
@@ -4183,7 +4233,7 @@ IF @recap = 0
 										INNER JOIN tblCMBankAccount B
 											ON intGLAccountId = intCashAccount
 										WHERE A.intCompanyLocationId = @_CompanyLocationId
-
+										
 										--CREATE PAYMENT
 										SELECT @AR_AccountId ACcountiD
 										EXEC uspARCreateCustomerPayment 
@@ -4220,8 +4270,9 @@ IF @recap = 0
 												DECLARE @strNewPaymentId AS VARCHAR(MAX)
 												SET @strNewPaymentId = CAST(@_NewPaymentId AS VARCHAR(MAX))
 												EXEC uspARPostPayment @post=1,@recap=0,@param = @strNewPaymentId--, @bankAccountId = @_BankAccountId
+												SELECT 'Done Posting'
 											END
-
+											
 
 									END															
 							DELETE FROM @idInvoice where id = @curIdInvoice
@@ -4328,9 +4379,9 @@ IF @post = 0
 	BEGIN
 		UPDATE ARI
 		SET
-			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') 
+			ARI.dblPayment	=(CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') 
 									THEN @ZeroDecimal 
-									ELSE 
+									ELSE
 										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WITH(NOLOCK) WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
 								END)
 		FROM
@@ -4395,6 +4446,8 @@ ELSE
 
 				ON PID.intInvoiceId = ARI.intInvoiceId 	
 	END
+
+
 
 
 Do_Rollback:
