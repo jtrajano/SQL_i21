@@ -3,6 +3,7 @@
 	[intTicketFormatId] INT NOT NULL IDENTITY, 
     [strTicketFormat] NVARCHAR(25) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intTicketFormatSelection] INT NOT NULL, 
+	[ysnSuppressSplit] BIT NULL,
     [ysnSuppressCompanyName] BIT NULL, 
     [ysnFormFeedEachCopy] BIT NULL, 
     [intSuppressDiscountOptionId] INT NULL, 
@@ -94,3 +95,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketFormat',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Suppress Split Information',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketFormat',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSuppressSplit'
+GO
