@@ -35,6 +35,39 @@ BEGIN TRY
 			,@intUserId = @intEntityUserSecurityId
 			,@NewInvoiceId = @intNewId OUTPUT
 	END
+	ELSE IF (@intPurchaseSale = 3)
+	BEGIN
+		DECLARE @intContractDetaild INT
+		DECLARE @intContractTypeId INT
+		
+		SET @intMemoType = NULL
+		
+		SELECT @intContractDetaild = intContractDetailId
+		FROM tblLGWeightClaimDetail
+		WHERE intWeightClaimId = @intWeightClaimId
+
+		SELECT @intContractTypeId = CH.intContractTypeId
+		FROM tblCTContractHeader CH
+		JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE CD.intContractDetailId = @intContractDetaild
+
+		IF(@intContractTypeId = 1)
+		BEGIN
+			EXEC uspLGCreateVoucherForWeightClaims 
+				 @intWeightClaimId = @intWeightClaimId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@strBillId = @intNewId OUTPUT
+			SET @intMemoType = 1
+		END
+		ELSE 
+		BEGIN
+			EXEC uspLGCreateInvoiceForWeightClaims 
+				 @intWeightClaimId = @intWeightClaimId
+				,@intUserId = @intEntityUserSecurityId
+				,@NewInvoiceId = @intNewId OUTPUT
+			SET @intMemoType = 2
+		END
+	END
 
 END TRY
 

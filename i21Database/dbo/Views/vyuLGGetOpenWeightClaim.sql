@@ -126,9 +126,7 @@ FROM (
 			)
 		,dblFranchisePercent = WG.dblFranchise
 		,dblFranchise = WG.dblFranchise / 100
-		,dblFranchiseWt = CASE LOAD.intPurchaseSale
-			WHEN 1
-				THEN CASE 
+		,dblFranchiseWt =CASE 
 						WHEN (
 								CASE 
 									WHEN (
@@ -171,8 +169,6 @@ FROM (
 									)
 						ELSE 0.0
 						END
-			ELSE 0.0
-			END
 		,dblWeightLoss = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN CASE 
@@ -320,10 +316,19 @@ FROM (
 	FROM tblLGLoad LOAD
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = LOAD.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE LOAD.intPurchaseSale
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId 
+		  = CASE LOAD.intPurchaseSale
+			WHEN 3
+				THEN LD.intSContractDetailId
+			END OR CD.intContractDetailId = CASE LOAD.intPurchaseSale
+			WHEN 3
+				THEN LD.intPContractDetailId
+			END OR CD.intContractDetailId = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN LD.intPContractDetailId
-			ELSE LD.intSContractDetailId
+			END OR CD.intContractDetailId = CASE LOAD.intPurchaseSale
+			WHEN 2
+				THEN LD.intSContractDetailId
 			END
 	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
