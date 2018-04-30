@@ -1320,7 +1320,7 @@ ELSE
 			,[strBatchId]			= I.[strBatchId]
 			,[strPostingError]		= 'You cannot Unpost transactions with Voucher.'
 		FROM
-			@Invoices IC
+			@Invoices I
 		INNER JOIN tblAPBill A
 			ON A.strVendorOrderNumber = I.strInvoiceNumber
 		WHERE
