@@ -312,7 +312,7 @@ BEGIN
 
 		IF (@approverId = @currentUserEntityId) 	
 		BEGIN
-			PRINT('continued 1st loop')
+			PRINT('continued 1st loop - current user is the approver (should not insert new submit record)')
 			DELETE FROM @Approvers WHERE intApprovalListUserSecurityId = @approverListId
 			CONTINUE
 		END	
@@ -390,6 +390,9 @@ BEGIN
 	IF @requireForApprovalOnce = 0
 		BEGIN
 			PRINT('no need for approval')
+
+			UPDATE tblSMTransaction
+			SET strApprovalStatus = 'No Need for Approval' WHERE intTransactionId = @transactionId
 
 			DELETE FROM tblSMApproval WHERE intApprovalId = @waitingForApprovalId
 			-- Increment this

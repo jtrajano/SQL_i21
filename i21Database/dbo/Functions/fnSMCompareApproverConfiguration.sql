@@ -111,7 +111,9 @@ BEGIN
 					SET @passedCount = @passedCount + 1
 				END
 
-				DELETE FROM @ApprovalConfigurationDetailParam WHERE strApprovalFor = @approverDetailParamFor AND strValue = @approverDetailParamValue
+				DELETE FROM @ApprovalConfigurationDetailParam 
+				WHERE UPPER(LTRIM(RTRIM(strApprovalFor))) = UPPER(LTRIM(RTRIM(@approverDetailParamFor))) AND 
+					  UPPER(LTRIM(RTRIM(strValue))) = UPPER(LTRIM(RTRIM(@approverDetailParamValue)))
 			END
 
 			DELETE FROM @ApproverConfigurationDetail WHERE intApproverConfigurationDetailId = @approverDetailId
