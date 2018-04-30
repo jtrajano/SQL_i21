@@ -733,7 +733,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT 	
-				'asdffadsfasd' + [strPostingError]
+				[strPostingError]
 				,[strTransactionType]
 				,[strInvoiceNumber]
 				,[strBatchId]
