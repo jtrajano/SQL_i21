@@ -100,14 +100,16 @@ BEGIN
 		,strControllerType
 		,strSiteNumber
 		,strSiteName
+		,strPPSiteType
 	)
 	SELECT DISTINCT
 		intNetworkId = @intNetworkId
-		,strSiteType = 'Local/Network'
+		,strSiteType = 'Remote'
 		,intARLocationId = B.intLocationId
 		,strControllerType = 'PacPride'
 		,strSiteNumber = A.strSiteNumber
 		,strSiteName = A.strSiteNumber
+		,strPPSiteType = 'Network'
 	FROM #tmpNoSiteRecords A 
 		,(SELECT TOP 1 intLocationId 
 			FROM tblCFNetwork
