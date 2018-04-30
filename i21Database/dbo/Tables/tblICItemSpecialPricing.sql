@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intItemSpecialPricingId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[intItemLocationId] INT NOT NULL, 
+		[intItemLocationId] INT NULL, 
 		[strPromotionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmBeginDate] DATETIME NULL, 
 		[dtmEndDate] DATETIME NULL, 
