@@ -52,6 +52,9 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@intTaskId INT
 
+	If @strTaskId =''
+	Select @strTaskId=NULL
+
 	SELECT @dtmDate = GETDATE()
 
 	DECLARE @tblTasks TABLE (
