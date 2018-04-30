@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspMFGetLotLocation (@strLotNo NVARCHAR(50))
+﻿CREATE PROCEDURE uspMFGetLotLocation @strLotNo NVARCHAR(50)
+	,@intCompanyLocationId INT
 AS
 BEGIN
 	DECLARE @intCount INT
@@ -8,6 +9,7 @@ BEGIN
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	WHERE L.strLotNumber = @strLotNo
 		AND L.dblQty > 0
+		AND L.intLocationId = @intCompanyLocationId
 
 	SELECT TOP 1 L.intLotId
 		,L.strLotNumber
@@ -18,4 +20,5 @@ BEGIN
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	WHERE L.strLotNumber = @strLotNo
 		AND L.dblQty > 0
+		AND L.intLocationId = @intCompanyLocationId
 END
