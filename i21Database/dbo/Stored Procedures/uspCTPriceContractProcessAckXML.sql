@@ -1,6 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTPriceContractProcessAckXML]
-	@param1 int = 0,
-	@param2 int
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -91,10 +89,7 @@ BEGIN TRY
 					,intPriceFixationDetailRefId INT
 					,intPriceFixationId INT
 			) XMLCost
-			
-			
-			SELECT * FROM tblCTPriceFixationDetail
-			
+
 			UPDATE PFD
 			SET PFD.intPriceFixationDetailRefId = XMLCost.intPriceFixationDetailId
 			FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH 

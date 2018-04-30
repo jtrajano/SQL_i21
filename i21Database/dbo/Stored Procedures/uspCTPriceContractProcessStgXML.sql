@@ -1,6 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTPriceContractProcessStgXML]
-	@param1 int = 0,
-	@param2 int
+﻿CREATE PROCEDURE [dbo].[uspCTPriceContractProcessStgXML]	
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -9,6 +7,7 @@ BEGIN TRY
 	DECLARE @intPriceContractStageId					INT
 	DECLARE @intPriceContractId	int
 	DECLARE @strPriceContractNo		NVARCHAR(MAX)
+	DECLARE @strNewPriceContractNo		NVARCHAR(MAX)
 	
 	DECLARE @strPriceContractXML		NVARCHAR(MAX)
 	DECLARE @strPriceFixationXML		NVARCHAR(MAX)
@@ -79,7 +78,7 @@ BEGIN TRY
 	)
 
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
-	FROM tblCTPriceContractStage
+	FROM tblCTPriceContractStage WHERE ISNULL(strFeedStatus,'')=''
 
 	WHILE @intPriceContractStageId > 0
 	BEGIN
@@ -117,16 +116,20 @@ BEGIN TRY
 			 WHERE intPriceContractStageId = @intPriceContractStageId
 			 
 			
-			 IF @strTransactionType ='Purchase Price Fixation'
+			 IF @strTransactionType ='Sales Price Fixation'
 			 BEGIN
 					
 					-------------------------PriceContract-----------------------------------------------------------
+					EXEC uspCTGetStartingNumber 'Price Contract',@strNewPriceContractNo OUTPUT
+					
+					SET @strPriceContractXML= REPLACE(@strPriceContractXML,@strPriceContractNo,@strNewPriceContractNo)
+
 					EXEC uspCTInsertINTOTableFromXML 'tblCTPriceContract',@strPriceContractXML,@NewPriceContractId OUTPUT
 					
-					EXEC uspCTGetStartingNumber 'Price Contract',@strPriceContractNo OUTPUT
+					
 
 					UPDATE tblCTPriceContract 
-					SET    strPriceContractNo    = @strPriceContractNo
+					SET    strPriceContractNo    = @strNewPriceContractNo
 						  ,intPriceContractRefId = @intPriceContractId
 					WHERE  intPriceContractId    = @NewPriceContractId
 
@@ -141,7 +144,7 @@ BEGIN TRY
 						)
 						SELECT 
 							 @NewPriceContractId
-							,@strPriceContractNo
+							,@strNewPriceContractNo
 							,GETDATE()
 							,'Success'
 							,@strTransactionType
@@ -438,10 +441,11 @@ BEGIN TRY
 				-----------------------------------------------------------------------------------------------------------------------------------------------------
 			 END
 		
-	
+		UPDATE tblCTPriceContractStage SET strFeedStatus = 'Processed' WHERE intPriceContractStageId = @intPriceContractStageId
+
 		SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 		FROM tblCTPriceContractStage
-		WHERE intPriceContractStageId > @intPriceContractStageId
+		WHERE intPriceContractStageId > @intPriceContractStageId AND ISNULL(strFeedStatus,'')=''
 
 	END
 

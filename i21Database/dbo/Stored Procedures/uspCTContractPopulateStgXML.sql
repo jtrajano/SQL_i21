@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractPopulateStgXML]
 	 @ContractHeaderId INT
 	,@intToEntityId INT
+	,@intCompanyLocationId INT
 	,@strToTransactionType NVARCHAR(100)
 	,@intToCompanyId INT
 	,@strRowState NVARCHAR(100)
@@ -17,6 +18,8 @@ BEGIN TRY
 		,@strContractDetailAllId NVARCHAR(MAX)
 		,@strCostXML			 NVARCHAR(MAX)
 		,@strDocumentXML		 NVARCHAR(MAX)
+		,@strConditionXML		 NVARCHAR(MAX)
+		,@strCertificationXML	 NVARCHAR(MAX)
 		,@strCostCondition		 NVARCHAR(MAX)
 		,@intContractStageId	 INT
 		,@intMultiCompanyId		 INT
@@ -106,12 +109,41 @@ BEGIN TRY
 	UPDATE tblCTContractStage
 	SET strDocumentXML = ISNULL(strDocumentXML, '') + @strDocumentXML
 	WHERE intContractStageId = @intContractStageId
+	-------------------------------------------------------------Condition----------------------------------------
+	SELECT @strConditionXML = NULL
+	
+	EXEC [dbo].[uspCTGetTableDataInXML] 
+		'tblCTContractCondition'
+		,@strHeaderCondition
+		,@strConditionXML OUTPUT
+		,NULL
+		,NULL
+
+	UPDATE tblCTContractStage
+	SET strConditionXML = ISNULL(strConditionXML, '') + @strConditionXML
+	WHERE intContractStageId = @intContractStageId
+
+	-------------------------------------------------------------Certification----------------------------------------
+	SELECT @strCertificationXML = NULL
+	
+	EXEC [dbo].[uspCTGetTableDataInXML] 
+		'tblCTContractCertification'
+		,@strCostCondition
+		,@strCertificationXML OUTPUT
+		,NULL
+		,NULL
+
+	UPDATE tblCTContractStage
+	SET strCertificationXML = ISNULL(strCertificationXML, '') + @strCertificationXML
+	WHERE intContractStageId = @intContractStageId
+
 
 	UPDATE  tblCTContractStage
-	SET		intEntityId		   = @intToEntityId
-		   ,strTransactionType = @strToTransactionType
-		   ,intMultiCompanyId  = @intToCompanyId
-	WHERE  intContractStageId  = @intContractStageId
+	SET		intEntityId			 = @intToEntityId
+		   ,intCompanyLocationId = @intCompanyLocationId
+		   ,strTransactionType   = @strToTransactionType
+		   ,intMultiCompanyId    = @intToCompanyId
+	WHERE  intContractStageId    = @intContractStageId
 
 END TRY
 

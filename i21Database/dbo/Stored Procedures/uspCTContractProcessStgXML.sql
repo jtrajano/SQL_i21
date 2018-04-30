@@ -5,14 +5,15 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg					NVARCHAR(MAX)
-	DECLARE @intContractStageId					INT
-	DECLARE @intContractHeaderId	int
+	DECLARE @intContractStageId		INT
+	DECLARE @intContractHeaderId	INT
 	DECLARE @strCustomerContract	NVARCHAR(MAX)
 	DECLARE @strContractNumber		NVARCHAR(MAX)
-	DECLARE @strHeaderXML		NVARCHAR(MAX)
-	DECLARE @strDetailXML		NVARCHAR(MAX)
-	DECLARE @strCostXML		NVARCHAR(MAX)
-	DECLARE @strDocumentXML	NVARCHAR(MAX)
+	DECLARE @strNewContractNumber	NVARCHAR(MAX)
+	DECLARE @strHeaderXML			NVARCHAR(MAX)
+	DECLARE @strDetailXML			NVARCHAR(MAX)
+	DECLARE @strCostXML				NVARCHAR(MAX)
+	DECLARE @strDocumentXML			NVARCHAR(MAX)
 	DECLARE @strReference			NVARCHAR(MAX)
 	DECLARE @strRowState			NVARCHAR(MAX)
 	DECLARE @strFeedStatus			NVARCHAR(MAX)
@@ -20,6 +21,7 @@ BEGIN TRY
 	DECLARE @strMessage				NVARCHAR(MAX)
 	DECLARE @intMultiCompanyId		INT
 	DECLARE @intEntityId			INT
+	DECLARE @intCompanyLocationId	INT
 	DECLARE @strTransactionType		NVARCHAR(MAX)
 	DECLARE @strTagRelaceXML		NVARCHAR(MAX)
 
@@ -31,15 +33,16 @@ BEGIN TRY
 	DECLARE @strHeaderCondition		NVARCHAR(MAX)
 	DECLARE @strCostCondition		NVARCHAR(MAX)
 	DECLARE @strContractDetailAllId NVARCHAR(MAX)
-	DECLARE @strAckHeaderXML	NVARCHAR(MAX)
-	DECLARE @strAckDetailXML	NVARCHAR(MAX)
-	DECLARE @strAckCostXML		NVARCHAR(MAX)
-	DECLARE @strAckDocumentXML NVARCHAR(MAX)
+	DECLARE @strAckHeaderXML		NVARCHAR(MAX)
+	DECLARE @strAckDetailXML		NVARCHAR(MAX)
+	DECLARE @strAckCostXML			NVARCHAR(MAX)
+	DECLARE @strAckDocumentXML		NVARCHAR(MAX)
 		
 	
 
 	SELECT @intContractStageId = MIN(intContractStageId)
-	FROM tblCTContractStage
+	FROM tblCTContractStage 
+	WHERE ISNULL(strFeedStatus,'')=''
 	
 
 	
@@ -48,10 +51,10 @@ BEGIN TRY
 			
 			SET @intContractHeaderId	= NULL
 			SET @strContractNumber		= NULL
-			SET @strHeaderXML		= NULL
-			SET @strDetailXML		= NULL
-			SET @strCostXML		= NULL
-			SET @strDocumentXML	= NULL
+			SET @strHeaderXML			= NULL
+			SET @strDetailXML			= NULL
+			SET @strCostXML				= NULL
+			SET @strDocumentXML			= NULL
 			SET @strReference			= NULL
 			SET @strRowState			= NULL
 			SET @strFeedStatus			= NULL
@@ -60,16 +63,17 @@ BEGIN TRY
 			SET @intMultiCompanyId		= NULL
 			
 			SET @intEntityId			= NULL
+			SET @intCompanyLocationId	= NULL
 			SET @strTransactionType		= NULL
 
 			 SELECT
 			  @intContractHeaderId	= intContractHeaderId	
 			 ,@strContractNumber	= strContractNumber
 			 ,@strCustomerContract	= strContractNumber		
-			 ,@strHeaderXML	= strHeaderXML		
-			 ,@strDetailXML	= strDetailXML		
-			 ,@strCostXML		= strCostXML
-			 ,@strDocumentXML  = strDocumentXML		
+			 ,@strHeaderXML			= strHeaderXML		
+			 ,@strDetailXML			= strDetailXML		
+			 ,@strCostXML			= strCostXML
+			 ,@strDocumentXML		= strDocumentXML		
 			 ,@strReference			= strReference			
 			 ,@strRowState			= strRowState			
 			 ,@strFeedStatus		= strFeedStatus			
@@ -77,7 +81,8 @@ BEGIN TRY
 			 ,@strMessage			= strMessage			
 			 ,@intMultiCompanyId	= intMultiCompanyId		
 			 		
-			 ,@intEntityId			= intEntityId			
+			 ,@intEntityId			= intEntityId
+			 ,@intCompanyLocationId = intCompanyLocationId			
 			 ,@strTransactionType	= strTransactionType
 			 FROM tblCTContractStage
 			 WHERE intContractStageId = @intContractStageId
@@ -87,15 +92,16 @@ BEGIN TRY
 			 BEGIN
 					
 					------------------Header------------------------------------------------------
-					EXEC uspCTInsertINTOTableFromXML 'tblCTContractHeader',@strHeaderXML,@NewContractHeaderId OUTPUT
+					EXEC uspCTGetStartingNumber 'SaleContract',@strNewContractNumber OUTPUT
 					
-					EXEC uspCTGetStartingNumber 'SaleContract',@strContractNumber OUTPUT
+					SET @strHeaderXML = REPLACE(@strHeaderXML,@strContractNumber,@strNewContractNumber)
+
+					EXEC uspCTInsertINTOTableFromXML 'tblCTContractHeader',@strHeaderXML,@NewContractHeaderId OUTPUT
 
 					UPDATE tblCTContractHeader 
 					SET  intContractTypeId      = 2
 					    ,intEntityId            = @intEntityId
 						,intContractHeaderRefId = @intContractHeaderId
-						,strContractNumber		= @strContractNumber
 						,strCustomerContract	= @strCustomerContract
 					WHERE intContractHeaderId   = @NewContractHeaderId
 
@@ -110,7 +116,7 @@ BEGIN TRY
 						)
 						SELECT 
 							 @NewContractHeaderId
-							,@strContractNumber
+							,@strNewContractNumber
 							,GETDATE()
 							,'Success'
 							,@strTransactionType
@@ -138,6 +144,9 @@ BEGIN TRY
 					
 					EXEC uspCTInsertINTOTableFromXML 'tblCTContractDetail',@strDetailXML,@NewContractDetailId OUTPUT,	@strTagRelaceXML
 
+						UPDATE tblCTContractDetail 
+						SET intCompanyLocationId	 = @intCompanyLocationId
+						WHERE  intContractHeaderId   = @NewContractHeaderId
 					
 						SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@NewContractHeaderId)
 						
@@ -232,7 +241,7 @@ BEGIN TRY
 					EXEC uspSMSubmitTransaction
 					  @type = 'ContractManagement.view.Contract',
 					  @recordId = @NewContractHeaderId,
-					  @transactionNo = @strContractNumber,
+					  @transactionNo = @strNewContractNumber,
 					  @transactionEntityId = @intEntityId,
 					  @currentUserEntityId = @intCreatedById,
 					  @amount = 0,
@@ -241,11 +250,12 @@ BEGIN TRY
 					--------------------------------------------------------------------------------------------------------------------------
 
 			 END
-		
+		     
+			 UPDATE tblCTContractStage SET strFeedStatus = 'Processed' WHERE intContractStageId = @intContractStageId
 	
 		SELECT @intContractStageId = MIN(intContractStageId)
 		FROM tblCTContractStage
-		WHERE intContractStageId > @intContractStageId
+		WHERE intContractStageId > @intContractStageId AND ISNULL(strFeedStatus,'')=''
 	END
 
 END TRY
