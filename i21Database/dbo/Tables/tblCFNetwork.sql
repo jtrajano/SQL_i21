@@ -53,7 +53,7 @@
     [ysnPostForeignSales]                   BIT             NULL,
     [strExportValidURL]                     NVARCHAR (MAX)  NULL,
     [intAdvanceMappingId]                   INT             NULL,
-	[intNetworkCostMapping]               INT             NULL,
+	[intNetworkCostMappingId]               INT             NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFNetwork_tblCFAdvanceMapping] FOREIGN KEY ([intAdvanceMappingId]) REFERENCES [dbo].[tblCFAdvanceMapping] ([intAdvanceMappingId]),
