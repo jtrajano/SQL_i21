@@ -10,6 +10,7 @@
 	[strEntityNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NULL,
 	[strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intCompanyLocationId] INT NULL,
 	[strLocationNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[dblGrossWeight] DECIMAL(13, 3) NULL, 
 	[dtmGrossDateTime] DATETIME NULL, 

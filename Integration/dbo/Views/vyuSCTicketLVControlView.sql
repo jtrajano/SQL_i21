@@ -13,22 +13,22 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 			CREATE VIEW [dbo].[vyuSCTicketLVControlView]
 			AS SELECT
 				A4GLIdentity AS intTicketId 
-				,gasct_tic_no AS strTicketNumber
+				,gasct_tic_no COLLATE Latin1_General_CI_AS AS strTicketNumber
 				,(CASE 
 					WHEN gasct_tic_type = ''I'' THEN ''Load In''
 					WHEN gasct_tic_type = ''O'' THEN ''Load Out''
 					WHEN gasct_tic_type = ''M'' THEN ''Memo Weight''
 					ELSE gasct_tic_type
 				END) AS strTicketType
-				,gasct_tic_type AS strInOutFlag
+				,gasct_tic_type COLLATE Latin1_General_CI_AS AS strInOutFlag
 				,(CASE 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
 				,gasct_open_close_ind as strTicketStatus
-				,gasct_cus_no AS strEntityNo
-				,gasct_itm_no AS strItemNo
-				,gasct_loc_no AS strLocationNumber
+				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
+				,gasct_itm_no COLLATE Latin1_General_CI_AS AS strItemNo
+				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
 				,gasct_gross_wgt AS dblGrossWeight
 				,(CASE 
 					WHEN gasct_gross_rev_dt > 1 AND gasct_gross_time > 1 THEN DATEADD(second, gasct_gross_time, convert(datetime, convert(char(8), gasct_gross_rev_dt)))
@@ -45,20 +45,20 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					ELSE NULL
 					END) AS strDiscountId
 				,gasct_trkr_un_rt AS dblFreightRate
-				,gasct_trkr_no AS strHaulerName
+				,gasct_trkr_no COLLATE Latin1_General_CI_AS AS strHaulerName
 				,gasct_fees AS dblTicketFees
 				,CAST(
 					CASE WHEN gasct_frt_deduct_yn = ''Y'' THEN 1
 					ELSE 0 END
 					AS BIT) AS ysnFarmerPaysFreight
-				,gasct_currency AS strCurrency
-				,gasct_bin_no AS strBinNumber
-				,gasct_cnt_no AS strContractNumber
+				,gasct_currency COLLATE Latin1_General_CI_AS AS strCurrency
+				,gasct_bin_no COLLATE Latin1_General_CI_AS AS strBinNumber
+				,gasct_cnt_no COLLATE Latin1_General_CI_AS AS strContractNumber
 				,gasct_cnt_seq AS intContractSequence
-				,gasct_weigher AS strScaleOperatorUser
-				,gasct_truck_id AS strTruckName
-				,gasct_driver as strDriverName
-				,gasct_cus_ref_no AS strCustomerReference
+				,gasct_weigher COLLATE Latin1_General_CI_AS AS strScaleOperatorUser
+				,gasct_truck_id COLLATE Latin1_General_CI_AS AS strTruckName
+				,gasct_driver COLLATE Latin1_General_CI_AS AS strDriverName
+				,gasct_cus_ref_no COLLATE Latin1_General_CI_AS AS strCustomerReference
 				,CAST(gasct_axel_no AS INT) AS intAxleCount
 				,CAST(
 				CASE WHEN gasct_driver_on_yn = ''Y'' THEN 1
@@ -82,10 +82,10 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 						WHEN gasct_dist_option = ''S'' THEN ''Spot Sale''
 						ELSE gasct_dist_option
 				END) AS strDistributionDescription
-				,gasct_pit_no AS strPitNumber
-				,gasct_tic_pool AS strTicketPool
-				,gasct_spl_no AS strSplitNumber
-				,gasct_scale_id AS strStationShortDescription
+				,gasct_pit_no COLLATE Latin1_General_CI_AS AS strPitNumber
+				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
+				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
+				,gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
 			from gasctmst
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
@@ -110,14 +110,18 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[strInOutFlag]
 					,[dtmTicketDateTime]
 					,[strTicketStatus]
+					,[intEntityId]
 					,[strEntityNo]
+					,[intItemId]
 					,[strItemNo]
+					,[intCompanyLocationId]
 					,[strLocationNumber]
 					,[dblGrossWeight]
 					,[dtmGrossDateTime]
 					,[dblTareWeight]
 					,[dtmTareDateTime]
 					,[strTicketComment]
+					,[intDiscountId]
 					,[strDiscountId]
 					,[dblFreightRate]
 					,[strHaulerName]
@@ -137,8 +141,11 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[ysnTareManual]
 					,[strDistributionOption]
 					,[strPitNumber]
+					,[intTicketPoolId]
 					,[strTicketPool]
 					,[strSplitNumber]
+					,[intScaleSetupId]
+					,[strStationShortDescription]
 					,[ysnProcessedData]
 					,[intOriginTicketId]
 				)
@@ -148,14 +155,18 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,LTRIM(RTRIM(SC.strInOutFlag))
 				,SC.dtmTicketDateTime
 				,LTRIM(RTRIM(SC.strTicketStatus))
+				,AP.intEntityId
 				,LTRIM(RTRIM(SC.strEntityNo))
+				,IC.intItemId
 				,LTRIM(RTRIM(SC.strItemNo))
+				,SM.intCompanyLocationId
 				,LTRIM(RTRIM(SC.strLocationNumber))
 				,SC.dblGrossWeight
 				,SC.dtmGrossDateTime
 				,SC.dblTareWeight
 				,SC.dtmTareDateTime
 				,LTRIM(RTRIM(SC.strTicketComment))
+				,GRDI.intDiscountId
 				,LTRIM(RTRIM(SC.strDiscountId))
 				,SC.dblFreightRate
 				,LTRIM(RTRIM(SC.strHaulerName))
@@ -175,12 +186,21 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,SC.ysnTareManual
 				,LTRIM(RTRIM(SC.strDistributionOption))
 				,LTRIM(RTRIM(SC.strPitNumber))
+				,SCTP.intTicketPoolId
 				,LTRIM(RTRIM(SC.strTicketPool))
 				,LTRIM(RTRIM(SC.strSplitNumber))
+				,SCS.intScaleSetupId
+				,SC.strStationShortDescription
 				,0
 				,SC.intTicketId
 				FROM vyuSCTicketLVControlView SC 
 				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
+				LEFT JOIN tblAPVendor AP ON AP.strVendorId = SC.strEntityNo
+				LEFT JOIN tblICItem IC ON IC.strItemNo = SC.strItemNo
+				LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
+				LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
+				LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
+				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 			END
 		')
 		PRINT 'End creating trigger'
