@@ -16,6 +16,9 @@ BEGIN
 	[intNumberOfAdmin],
 	[intNumberOfUser],
 	[strDescription],
+	[strURL],
+	[ysnExternalAccess],
+	[strType],
 	[intNumberOfSite],
 	[dtmDateIssued],
 	[dtmDateExpiration],
@@ -31,6 +34,9 @@ BEGIN
 	CASE @intCount WHEN 0 
 		   THEN 'DUP: ' + [strDescription] 
 		   ELSE 'DUP: ' + [strDescription] + ' (' + CAST(@intCount AS NVARCHAR) + ')' END,
+	[strURL],
+	[ysnExternalAccess],
+	[strType],
 	[intNumberOfSite],
 	GETDATE(),
 	[dtmDateExpiration],
