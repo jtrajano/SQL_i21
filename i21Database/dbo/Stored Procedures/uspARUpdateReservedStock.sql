@@ -65,16 +65,40 @@ BEGIN
 		AND ARID.[intLotId] IS NULL
 
 	-- IF NOT (ISNULL(@FromPosting, 0 ) = 1 AND ISNULL(@Post, 0 ) = 0)
-	-- 	EXEC [uspICCreateStockReservation]
-	-- 		 @ItemsToReserve		= @items
-	-- 		,@intTransactionId		= @InvoiceId
-	-- 		,@intTransactionTypeId	= @TransactionTypeId
+	IF (ISNULL(@FromPosting, 0 ) = 0)
+	BEGIN
+		
+		DECLARE @strInvalidItemNo AS NVARCHAR(50) 		
+		DECLARE @intInvalidItemId AS INT
+		DECLARE @intReturn AS INT
+		SET  @intReturn = 0 
+			-- Validate the reservation 
+		EXEC @intReturn = dbo.uspICValidateStockReserves 
+			@items
+			,@strInvalidItemNo OUTPUT 
+			,@intInvalidItemId OUTPUT 
 
-	-- IF ISNULL(@FromPosting, 0 ) = 1
-	-- 	EXEC [dbo].[uspICPostStockReservation]
-	-- 		 @intTransactionId		= @InvoiceId
-	-- 		,@intTransactionTypeId	= @TransactionTypeId
-	-- 		,@ysnPosted				= @Post
+		IF @intReturn <> 0 
+			RETURN @intReturn
+
+		-- If there are enough stocks, let the system create the reservations
+		IF (@intInvalidItemId IS NULL)	
+		BEGIN 
+			EXEC [uspICCreateStockReservation]
+			 @ItemsToReserve		= @items
+			,@intTransactionId		= @InvoiceId
+			,@intTransactionTypeId	= @TransactionTypeId
+		END 
+		
+		
+
+	END
+
+	IF ISNULL(@FromPosting, 0 ) = 1
+		EXEC [dbo].[uspICPostStockReservation]
+			 @intTransactionId		= @InvoiceId
+			,@intTransactionTypeId	= @TransactionTypeId
+			,@ysnPosted				= @Post
 	 
 END
 

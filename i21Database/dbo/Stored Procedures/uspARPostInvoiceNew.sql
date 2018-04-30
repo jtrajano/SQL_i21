@@ -683,10 +683,11 @@ BEGIN
 				
 	SELECT TOP 1 @InvoiceId1 = id FROM @TempInvoiceIds ORDER BY id
 
-	EXEC [dbo].[uspICPostStockReservation]
-		@intTransactionId		= @InvoiceId1
-		,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
-		,@ysnPosted				= @Post
+	-- EXEC [dbo].[uspICPostStockReservation]
+	-- 	@intTransactionId		= @InvoiceId1
+	-- 	,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+	-- 	,@ysnPosted				= @Post
+	EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @UserId, 1, @Post
 		
 	DELETE FROM @TempInvoiceIds WHERE id = @InvoiceId1
 END		
