@@ -21,6 +21,9 @@ BEGIN TRY
 	DECLARE @intPurchaseSale		INT
 	DECLARE @strPurchaseSale		NVARCHAR(200)
 	DECLARE @strTransactionType		NVARCHAR(100)
+	DECLARE @intToCompanyLocationId	INT
+	DECLARE @intToBookId			INT
+	DECLARE @intToSubBookId			INT
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId)
 	BEGIN
@@ -69,6 +72,9 @@ BEGIN TRY
 			,@intToProfitCenterId = intToBookId
 			,@strInsert = strInsert
 			,@strUpdate = strUpdate
+			,@intToCompanyLocationId = intCompanyLocationId
+			,@intToBookId = intToBookId
+			,@intToSubBookId = @intToSubBookId
 		FROM tblSMInterCompanyTransactionConfiguration CTC
 		JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
 		JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
@@ -93,7 +99,9 @@ BEGIN TRY
 			      EXEC uspLGPopulateLoadXML @intLoadId,
 											@strToTransactionType,
 											@intToCompanyId,
-											@strRowState
+											@strRowState,
+											@intToCompanyLocationId,
+											@intToBookId
 			END
 		END
 		

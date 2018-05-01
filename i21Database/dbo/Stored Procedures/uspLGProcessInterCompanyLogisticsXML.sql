@@ -66,6 +66,7 @@ BEGIN TRANSACTION
 	DECLARE @strLoadWarehouseId NVARCHAR(500)
 	DECLARE @strLoadDetailContainerLinkCondition NVARCHAR(MAX)
 	DECLARE @strLoadWarehouseCondition NVARCHAR(MAX)
+	DECLARE @intToBookId INT
 
 	--DECLARE @strAckCostXML		NVARCHAR(MAX)
 	--DECLARE @strAckDocumentXML NVARCHAR(MAX)
@@ -142,6 +143,7 @@ BEGIN TRANSACTION
 		SET @intReferenceId = NULL
 		SET @intEntityId = NULL
 		SET @strTransactionType = NULL
+		SET @intToBookId = NULL
 
 		SELECT @intLoadId = intLoadId
 			,@strLoadNumber = strLoadNumber
@@ -165,6 +167,7 @@ BEGIN TRANSACTION
 			,@intReferenceId = intReferenceId
 			,@intEntityId = intEntityId
 			,@strTransactionType = strTransactionType
+			,@intToBookId = intToBookId
 		FROM tblLGIntrCompLogisticsStg
 		WHERE intId = @intId
 		
@@ -875,6 +878,8 @@ BEGIN TRANSACTION
 
 		UPDATE LD	
 			SET intCustomerEntityId = CH.intEntityId,
+				intSCompanyLocationId = CD.intCompanyLocationId,
+				intPCompanyLocationId = NULL,
 				intVendorEntityId = NULL,
 				intVendorEntityLocationId = NULL
 		FROM tblLGLoadDetail LD
@@ -888,13 +893,30 @@ BEGIN TRANSACTION
 			,'Inbound Shipping Instruction'
 			)
 	BEGIN
+		DECLARE @intFreightTermId INT
+
+		SELECT @intFreightTermId = intFreightTermId 
+		FROM tblSMFreightTerms 
+		WHERE strFreightTerm = 'Pickup'
+
 		UPDATE tblLGLoad
 		SET intPurchaseSale = 1,
-			intSourceType = 2
+			intSourceType = 2,
+			intFreightTermId = @intFreightTermId
 		WHERE intLoadId = @NewLoadId
+
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @NewLoadId AND ISNULL(intBookId,'') = '')
+		BEGIN
+			UPDATE tblLGLoad
+			SET intBookId = @intToBookId
+			WHERE intLoadId = @NewLoadId
+		END
 
 		UPDATE LD	
 			SET intVendorEntityId = CH.intEntityId,
+				intPCompanyLocationId = CD.intCompanyLocationId,
+				intSCompanyLocationId = NULL,
 				intCustomerEntityId = NULL,
 				intCustomerEntityLocationId = NULL
 		FROM tblLGLoadDetail LD

@@ -2,7 +2,9 @@
 	@intLoadId INT,
 	@strToTransactionType NVARCHAR(100),
 	@intToCompanyId INT,
-	@strRowState NVARCHAR(100)
+	@strRowState NVARCHAR(100),
+	@intToCompanyLocationId INT = NULL,
+	@intToBookId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -277,8 +279,11 @@ BEGIN TRY
 
 	UPDATE tblLGIntrCompLogisticsStg
 	SET strTransactionType = @strToTransactionType,
-		intMultiCompanyId = @intToCompanyId
+		intMultiCompanyId = @intToCompanyId,
+		intToCompanyLocationId = @intToCompanyLocationId,
+		intToBookId = @intToBookId
 	WHERE intId = @intScopeIdentityId
+
 END TRY
 
 BEGIN CATCH
