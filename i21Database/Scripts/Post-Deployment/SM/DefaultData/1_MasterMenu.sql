@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Basis Component' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Contract Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Network Cost' AND strModuleName = 'Card Fueling' AND strCommand = N'CardFueling.view.NetworkCost?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4254,9 +4254,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Network Cost' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Network Cost', N'Card Fueling', @CardFuelingActivitiesParentMenuId, N'Network Cost', N'Activity', N'Screen', N'CardFueling.view.Network Cost', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Network Cost', N'Card Fueling', @CardFuelingActivitiesParentMenuId, N'Network Cost', N'Activity', N'Screen', N'CardFueling.view.NetworkCost?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Network Cost', intSort = 3 WHERE strMenuName = 'Network Cost' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.NetworkCost?showSearch=true', intSort = 3 WHERE strMenuName = 'Network Cost' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
