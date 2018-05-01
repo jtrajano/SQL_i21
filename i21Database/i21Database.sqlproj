@@ -6436,6 +6436,13 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVendorPricingFromCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGenerateAccountQuoting.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryTransferStgXML.sql" />
+    <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryAcknowledgementStage.sql" />
+    <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
