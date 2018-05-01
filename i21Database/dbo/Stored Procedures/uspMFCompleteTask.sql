@@ -51,6 +51,7 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@intTransactionCount INT
 		,@intTaskId INT
+		,@intOrderDirectionId int
 
 	If @strTaskId =''
 	Select @strTaskId=NULL
@@ -84,6 +85,7 @@ BEGIN TRY
 		,@strReferenceNo = strReferenceNo
 		,@intOrderId = intOrderHeaderId
 		,@intLocationId = intLocationId
+		,@intOrderDirectionId=intOrderDirectionId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -455,7 +457,7 @@ BEGIN TRY
 			)
 
 		IF @ysnLoad = 0
-			AND @intCustomerLabelTypeId <> 2
+			AND @intCustomerLabelTypeId <> 2 and @intOrderDirectionId=2
 		BEGIN
 			INSERT INTO tblMFOrderManifest (
 				intConcurrencyId
