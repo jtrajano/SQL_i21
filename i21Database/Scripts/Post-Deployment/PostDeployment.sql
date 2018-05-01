@@ -468,6 +468,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Card Fueling
 :r .\CF\1_ImportMapping.sql
 :r .\CF\2_DataFix.sql
+:r .\CF\3_DataFixPriceAdjustment.sql
 
 
 print 'END POST DEPLOYMENT'

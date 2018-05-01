@@ -6443,6 +6443,8 @@
     <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryTransferStgXML.sql" />
     <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryAcknowledgementStage.sql" />
     <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryStage.sql" />
+    <Build Include="dbo\Tables\tblCFSiteGroupPriceAdjustmentHeader.sql" />
+    <None Include="Scripts\Post-Deployment\CF\3_DataFixPriceAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
