@@ -646,4 +646,9 @@ BEGIN
   UPDATE tblCTCompanyPreference SET ysnAmdWoAppvl = 1 WHERE ysnAmdWoAppvl IS NULL
 END
 GO
+IF EXISTS(SELECT 1 FROM tblCTSequenceAmendmentLog WHERE intConcurrencyId IS NULL)
+BEGIN
+  UPDATE tblCTSequenceAmendmentLog SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
+END
+GO
 PRINT('Contract 1_MasterTables End')
