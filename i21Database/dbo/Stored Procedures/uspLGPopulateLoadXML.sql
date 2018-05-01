@@ -93,17 +93,17 @@ BEGIN TRY
 	SET @strLoadDetailLotCondition = NULL
 	SET @strLoadDetailLotXML = NULL
 
-	SELECT @strLoadDetailId = COALESCE(@strLoadDetailId + ',', '') + CAST(intLoadDetailId AS VARCHAR(5))
+	SELECT @strLoadDetailId = COALESCE(@strLoadDetailId + ',', '') + CAST(intLoadDetailId AS VARCHAR(1000))
 	FROM tblLGLoadDetail
 	WHERE intLoadId = @intLoadId
 
-	SELECT @strLoadDetailLotCondition = 'intLoadDetailId IN (' + LTRIM(@strLoadDetailId) + ')'
+	--SELECT @strLoadDetailLotCondition = 'intLoadDetailId IN (' + LTRIM(@strLoadDetailId) + ')'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDetailLot'
-		,@strLoadDetailLotCondition
-		,@strLoadDetailLotXML OUTPUT
-		,NULL
-		,NULL
+	--EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDetailLot'
+	--	,@strLoadDetailLotCondition
+	--	,@strLoadDetailLotXML OUTPUT
+	--	,NULL
+	--	,NULL
 
 	UPDATE tblLGIntrCompLogisticsStg
 	SET strLoadDetailLot = ISNULL(strLoadDetailLot, '') + @strLoadDetailLotXML
@@ -163,7 +163,7 @@ BEGIN TRY
 		AND intLoadContainerId > @intLoadContainerId
 
 	--  LOAD DETAIL CONTAINER LINK
-	SELECT @strLoadContainerId = COALESCE(@strLoadContainerId + ',', '') + CAST(intLoadContainerId AS VARCHAR(5))
+	SELECT @strLoadContainerId = COALESCE(@strLoadContainerId + ',', '') + CAST(intLoadContainerId AS VARCHAR(1000))
 	FROM tblLGLoadContainer
 	WHERE intLoadId = @intLoadId
 
@@ -200,7 +200,7 @@ BEGIN TRY
 	SET strLoadWarehouse = ISNULL(strLoadWarehouse, '') + @strLoadWarehouseXML
 	WHERE intId = @intScopeIdentityId
 
-	SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(5))
+	SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(1000))
 	FROM tblLGLoadWarehouse
 	WHERE intLoadId = @intLoadId
 
