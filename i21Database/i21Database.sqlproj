@@ -6434,6 +6434,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetOpenContractByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetStorageOffSiteDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVendorPricingFromCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
