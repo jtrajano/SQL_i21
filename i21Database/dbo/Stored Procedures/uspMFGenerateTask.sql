@@ -1188,7 +1188,7 @@ BEGIN TRY
 
 				DELETE
 				FROM @tblLot
-				WHERE intLotId = @intLotId
+				WHERE intLotRecordId = @intLotRecordId
 
 				IF @intUnitPerPallet > @dblRequiredQty
 				BEGIN
