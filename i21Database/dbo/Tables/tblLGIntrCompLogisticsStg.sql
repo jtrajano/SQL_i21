@@ -21,6 +21,7 @@
 		[dtmFeedDate] DATETIME,
 		[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		[intMultiCompanyId] INT,
+		[intToCompanyLocationId] INT,
 		[intToBookId] INT,
 		[intReferenceId] INT,
 		[intEntityId] INT,
