@@ -1312,12 +1312,12 @@ ELSE
 
 		UNION
 		SELECT 
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-			,[intItemId]			= I.[intItemId]
-			,[strBatchId]			= I.[strBatchId]
+			 [intInvoiceId]			= IC.[intInvoiceId]
+			,[strInvoiceNumber]		= IC.[strInvoiceNumber]		
+			,[strTransactionType]	= IC.[strTransactionType]
+			,[intInvoiceDetailId]	= IC.[intInvoiceDetailId]
+			,[intItemId]			= IC.[intItemId]
+			,[strBatchId]			= IC.[strBatchId]
 			,[strPostingError]		= 'You cannot Unpost transactions with Voucher.'
 		FROM
 			@Invoices I
