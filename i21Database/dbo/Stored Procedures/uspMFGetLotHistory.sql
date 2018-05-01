@@ -205,6 +205,122 @@ BEGIN
 	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
 
+	INSERT INTO #tempLotHistory
+	SELECT ilt.dtmCreated AS dtmDateTime
+		,l.strLotNumber AS strLotNo
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN i.strItemNo
+			ELSE i1.strItemNo
+			END AS strItem
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN i.strDescription
+			ELSE i1.strDescription
+			END AS strDescription
+		,c.strCategoryCode
+		,clsl.strSubLocationName AS strSubLocation
+		,sl.strName AS strStorageLocation
+		,CASE 
+			WHEN itt.strName = 'Produce'
+				AND ilt.dblQty < 0
+				THEN 'Produce Reversal'
+			WHEN itt.strName = 'Consume'
+				AND ilt.dblQty > 0
+				THEN 'Consume Reversal'
+			ELSE itt.strName
+			END AS strTransaction
+		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
+		,CONVERT(NUMERIC(38, 20), ilt.dblQty) AS dblTransactionWeight
+		,uwm.strUnitMeasure AS strTransactionWeightUOM
+		,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
+		,CONVERT(NUMERIC(38, 20), ilt.dblQty / CASE 
+				WHEN l.dblWeightPerQty = 0
+					THEN 1
+				ELSE l.dblWeightPerQty
+				END) AS dblTransactionQty
+		,um.strUnitMeasure AS strTransactionQtyUOM
+		,CASE 
+			WHEN ilt.intTransactionTypeId IN (
+					4
+					,5
+					,8
+					,9
+					,23
+					)
+				THEN ilt.strTransactionId
+			WHEN ilt.intTransactionTypeId IN (
+					17
+					,19
+					,20
+					)
+				THEN (
+						CASE 
+							WHEN iad.intNewLotId = @intLotId
+								THEN L1.strLotNumber
+							ELSE iad.strNewLotNumber
+							END
+						)
+			END AS strRelatedLotId
+		,CASE 
+			WHEN iad.intNewItemId IS NULL
+				THEN NULL
+			ELSE i.strItemNo
+			END AS strPreviousItem
+		,CASE 
+			WHEN iad.intNewLotId = @intLotId
+				THEN clsl2.strSubLocationName
+			ELSE clsl1.strSubLocationName
+			END AS strSourceSubLocation
+		,CASE 
+			WHEN iad.intNewLotId = @intLotId
+				THEN sl2.strName
+			ELSE sl1.strName
+			END AS strSourceStorageLocation
+		,NULL AS strNewStatus
+		,NULL AS strOldStatus
+		,NULL AS strNewLotAlias
+		,NULL AS strOldLotAlias
+		,iad.dtmNewExpiryDate AS dtmNewExpiryDate
+		,iad.dtmExpiryDate AS dtmOldExpiryDate
+		,'' AS strNewVendorNo
+		,'' AS strOldVendorNo
+		,'' AS strNewVendorLotNo
+		,'' AS strOldVendorLotNo
+		,IA.strDescription AS strNotes
+		,us.strUserName AS strUser
+		,ilt.strBatchId
+		,ilt.dtmDate AS dtmTransactionDate
+		,NULL AS strOldOwnerName
+		,NULL AS strNewOwnerName
+	FROM tblICLot l
+	JOIN tblICInventoryTransactionStorage ilt ON ilt.intLotId = l.intLotId
+	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
+	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ilt.intTransactionDetailId = iad.intInventoryAdjustmentDetailId
+	LEFT JOIN tblICInventoryAdjustment IA ON IA.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
+	JOIN tblICItem i ON i.intItemId = ISNULL((
+				CASE 
+					WHEN ilt.intTransactionTypeId = 15
+						THEN iad.intItemId
+					ELSE ilt.intItemId
+					END
+				), ilt.intItemId)
+	JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
+	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
+	JOIN tblICItemUOM iwu ON iwu.intItemUOMId = IsNULL(l.intWeightUOMId, l.intItemUOMId)
+	JOIN tblICUnitMeasure uwm ON uwm.intUnitMeasureId = iwu.intUnitMeasureId
+	JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
+	JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = ilt.intSubLocationId
+	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ilt.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation clsl1 ON clsl1.intCompanyLocationSubLocationId = iad.intNewSubLocationId
+	LEFT JOIN tblICStorageLocation sl1 ON sl1.intStorageLocationId = iad.intNewStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation clsl2 ON clsl2.intCompanyLocationSubLocationId = iad.intSubLocationId
+	LEFT JOIN tblICStorageLocation sl2 ON sl2.intStorageLocationId = iad.intStorageLocationId
+	LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = ilt.intCreatedEntityId
+	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
+	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
+	WHERE l.intLotId = @intLotId
+
 	DECLARE @ysnLotHistoryByStorageLocation BIT
 
 	SELECT @ysnLotHistoryByStorageLocation = ysnLotHistoryByStorageLocation
