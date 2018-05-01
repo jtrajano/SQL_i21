@@ -6435,6 +6435,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetStorageOffSiteDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVendorPricingFromCSV.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateAccountQuoting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
