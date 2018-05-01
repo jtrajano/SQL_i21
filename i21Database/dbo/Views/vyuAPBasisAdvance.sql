@@ -33,18 +33,21 @@ SELECT TOP 100 PERCENT * FROM (
         ,(ISNULL(basisFutures.dblPrice, 0) + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) * ISNULL(receiptItem.dblOpenReceive,0) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
         ,0.00 AS dblAdvance
-        ,CAST(((
-            ((ISNULL(basisFutures.dblPrice, 0) + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) * ISNULL(receiptItem.dblOpenReceive,0)) 
-            - ISNULL(discounts.dblAmount,0)
-            + ISNULL(charges.dblAmount, 0)
-            + ISNULL(taxes.dblTax,0.00)) 
-            * (ISNULL(basisCommodity.dblPercentage,0.00) / 100))
-            - ISNULL(priorAdvances.dblPriorAdvance,0.00) AS DECIMAL(18,2)) AS dblAmountToAdvance
+        ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0
+                ELSE CAST(((
+                    ((ISNULL(basisFutures.dblPrice, 0) 
+                        + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) 
+                        * ISNULL(receiptItem.dblOpenReceive,0)) 
+                    - ISNULL(discounts.dblAmount,0)
+                    + ISNULL(charges.dblAmount, 0)
+                    + ISNULL(taxes.dblTax,0.00)) 
+                    * (ISNULL(basisCommodity.dblPercentage,0.00) / 100))
+                    - ISNULL(priorAdvances.dblPriorAdvance,0.00) AS DECIMAL(18,2)) END AS dblAmountToAdvance
         ,ISNULL(priorAdvances.dblPriorAdvance,0.00) AS dblPriorAdvance
         ,priorAdvances.strBillIds
         ,uom.strUnitMeasure
         ,ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0) AS dblUnitBasis
-        ,ISNULL(basisFutures.dblPrice, 0) AS dblFuturesPrice
+        ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0 ELSE ISNULL(basisFutures.dblPrice, 0) END AS dblFuturesPrice
         ,ISNULL(discounts.dblAmount,0) AS dblDiscountAmount
         ,ISNULL(charges.dblAmount,0) AS dblChargeAmount
         ,futureMarket.intFutureMarketId
@@ -135,6 +138,7 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
+    LEFT JOIN tblAPBasisAdvanceStaging staging ON staging.intContractDetailId = ctd.intContractDetailId
     WHERE ctd.intPricingTypeId = 2
 ) basisAdvance
 ORDER BY intTicketId DESC
