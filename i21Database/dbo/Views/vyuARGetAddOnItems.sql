@@ -10,6 +10,7 @@ SELECT intItemId			= ITEMADDON.intItemId
 	 , strUnitMeasure		= ITEMUOM.strUnitMeasure
 	 , dblQuantity			= ITEMADDON.dblQuantity
 	 , dblPrice				= dbo.fnICConvertUOMtoStockUnit(ITEMADDON.intAddOnItemId, ITEMADDON.intItemUOMId, 1) * ITEMLOCATION.dblSalePrice
+	 , ysnAutoAdd			= ITEMADDON.ysnAutoAdd
 FROM dbo.tblICItemAddOn ITEMADDON WITH (NOLOCK)
 INNER JOIN (
 	SELECT intItemId
