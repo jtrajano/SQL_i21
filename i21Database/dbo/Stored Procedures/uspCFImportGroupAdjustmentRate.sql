@@ -15,6 +15,7 @@ BEGIN
 	DECLARE @intItemId								  INT = 0
 	DECLARE @intPriceRuleGroupId					  INT = NULL
 	DECLARE @intSiteGroupPriceAdjustmentId			  INT = 0
+	DECLARE @intSiteGroupPriceAdjustmentHeaderId		INT = 0
 	
 	---------------------------------------------------------
 
@@ -110,40 +111,73 @@ BEGIN
 	END
 
 	
-	----- CHECK for Existing site group price adjustment
-	SELECT TOP 1 @intSiteGroupPriceAdjustmentId = intSiteGroupPriceAdjustmentId
-	FROM tblCFSiteGroupPriceAdjustment
+	----- CHECK for Existing site group price adjustment header
+	SELECT TOP 1 @intSiteGroupPriceAdjustmentHeaderId = intSiteGroupPriceAdjustmentHeaderId
+	FROM tblCFSiteGroupPriceAdjustmentHeader
 	WHERE intSiteGroupId = @intSiteGroupId
-		AND intARItemId = @intItemId
-		AND intPriceGroupId = @intPriceRuleGroupId
-		AND DATEADD(dd, DATEDIFF(dd, 0,dtmStartEffectiveDate), 0) = DATEADD(dd, DATEDIFF(dd, 0,@dtmDate), 0)
-
+		AND DATEADD(dd, DATEDIFF(dd, 0,dtmEffectiveDate), 0) = DATEADD(dd, DATEDIFF(dd, 0,@dtmDate), 0)
 
 	BEGIN TRANSACTION
 	BEGIN TRY
-		IF(ISNULL(@intSiteGroupPriceAdjustmentId,0) <> 0)
+		IF(ISNULL(@intSiteGroupPriceAdjustmentHeaderId,0) = 0)
 		BEGIN
-			UPDATE tblCFSiteGroupPriceAdjustment SET
-				dblRate = @dblRate
-			WHERE intSiteGroupPriceAdjustmentId = @intSiteGroupPriceAdjustmentId
-		END
-		ELSE
-		BEGIN
+			-- INSERt HEader record
+			INSERT INTO tblCFSiteGroupPriceAdjustmentHeader (
+				intSiteGroupId
+				,dtmEffectiveDate
+			)
+			SELECT 
+				intSiteGroupId = @intSiteGroupId
+				,dtmEffectiveDate = DATEADD(dd, DATEDIFF(dd, 0,@dtmDate), 0)
+		
+			SET @intSiteGroupPriceAdjustmentHeaderId = @@IDENTITY
+
 			---Insert Detail
 			INSERT INTO tblCFSiteGroupPriceAdjustment(
-				intSiteGroupId
+				intSiteGroupPriceAdjustmentHeaderId
 				,intPriceGroupId
 				,intARItemId
 				,dblRate
-				,dtmStartEffectiveDate)
+			)
 			SELECT 
-				intSiteGroupId = @intSiteGroupId
+				intSiteGroupPriceAdjustmentHeaderId = @intSiteGroupPriceAdjustmentHeaderId
 				,intPriceGroupId = @intPriceRuleGroupId
 				,intARItemId = @intItemId
 				,dblRate = @dblRate
-				,dtmStartEffectiveDate = @dtmDate
 		END
-		
+		ELSE
+		BEGIN
+
+			----- CHECK for Existing price adjustment
+			SELECT TOP 1 @intSiteGroupPriceAdjustmentId = intSiteGroupPriceAdjustmentId
+			FROM tblCFSiteGroupPriceAdjustment
+			WHERE intSiteGroupPriceAdjustmentHeaderId = @intSiteGroupPriceAdjustmentHeaderId
+				AND intARItemId = @intItemId
+				AND intPriceGroupId = @intPriceRuleGroupId
+
+
+			IF(ISNULL(@intSiteGroupPriceAdjustmentId,0) <> 0)
+			BEGIN
+				UPDATE tblCFSiteGroupPriceAdjustment SET
+					dblRate = @dblRate
+				WHERE intSiteGroupPriceAdjustmentId = @intSiteGroupPriceAdjustmentId
+			END
+			ELSE
+			BEGIN
+				---Insert Detail
+				INSERT INTO tblCFSiteGroupPriceAdjustment(
+					intSiteGroupPriceAdjustmentHeaderId
+					,intPriceGroupId
+					,intARItemId
+					,dblRate
+				)
+				SELECT 
+					intSiteGroupPriceAdjustmentHeaderId = @intSiteGroupPriceAdjustmentHeaderId
+					,intPriceGroupId = @intPriceRuleGroupId
+					,intARItemId = @intItemId
+					,dblRate = @dblRate
+			END
+		END
 		COMMIT TRANSACTION
 		RETURN 1
 	END TRY
