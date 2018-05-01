@@ -24,6 +24,7 @@
     [ysnCardForOwnUse]        BIT            NULL,
     [ysnActive]				  BIT			 CONSTRAINT [DF_tblCFVehicle_ysnActive]  DEFAULT ((1)) NOT NULL,
     [intDepartmentId] INT NULL, 
+	[strComment]     NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCFVehicle] PRIMARY KEY CLUSTERED ([intVehicleId] ASC),
     CONSTRAINT [FK_tblCFVehicle_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCFVehicle_tblICItem] FOREIGN KEY ([intExpenseItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
