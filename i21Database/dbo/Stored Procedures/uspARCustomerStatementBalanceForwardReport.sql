@@ -258,35 +258,7 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
-
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
-INSERT INTO tblARCustomerAgingStagingTable (
-		  strCustomerName
-		, strCustomerNumber
-		, strCustomerInfo
-		, intEntityCustomerId
-		, intEntityUserId
-		, dblCreditLimit
-		, dblTotalAR
-		, dblFuture
-		, dbl0Days
-		, dbl10Days
-		, dbl30Days
-		, dbl60Days
-		, dbl90Days
-		, dbl91Days
-		, dblTotalDue
-		, dblAmountPaid
-		, dblCredits
-		, dblPrepayments
-		, dblPrepaids
-		, dtmAsOfDate
-		, strSalespersonName
-		, strSourceTransaction
-		, strCompanyName
-		, strCompanyAddress
-		, strAgingType
-)		
+	
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
 										  , @strCompanyLocation = @strLocationNameLocal
 										  , @strCustomerName = @strCustomerNameLocal
@@ -319,34 +291,6 @@ FROM tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
-INSERT INTO tblARCustomerAgingStagingTable (
-		  strCustomerName
-		, strCustomerNumber
-		, strCustomerInfo
-		, intEntityCustomerId
-		, intEntityUserId
-		, dblCreditLimit
-		, dblTotalAR
-		, dblFuture
-		, dbl0Days
-		, dbl10Days
-		, dbl30Days
-		, dbl60Days
-		, dbl90Days
-		, dbl91Days
-		, dblTotalDue
-		, dblAmountPaid
-		, dblCredits
-		, dblPrepayments
-		, dblPrepaids
-		, dtmAsOfDate
-		, strSalespersonName
-		, strSourceTransaction
-		, strCompanyName
-		, strCompanyAddress
-		, strAgingType
-)
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
 										  , @strCompanyLocation = @strLocationNameLocal											
 										  , @strCustomerName = @strCustomerNameLocal
