@@ -18,14 +18,26 @@ BEGIN
 	--	SET @intCnt = @intCnt + 1
 	--END
 
+
+
+	--INSERT INTO @tbl
+	--SELECT TC.strStoreTaxNumber AS strTaxNumber
+	--		, TC.intSalesTaxAccountId AS intAccountId
+	--FROM dbo.tblSMTaxCode TC 
+	--JOIN dbo.tblSMTaxGroupCode TGC ON TGC.intTaxCodeId = TC.intTaxCodeId
+	--JOIN dbo.tblSTStore ST ON ST.intTaxGroupId = TGC.intTaxGroupId
+	--LEFT JOIN dbo.tblGLAccount GLA ON GLA.intAccountId = TC.intSalesTaxAccountId
+	--WHERE ST.intStoreId = @intStoreId
+
+
 	INSERT INTO @tbl
 	SELECT TC.strStoreTaxNumber AS strTaxNumber
 			, TC.intSalesTaxAccountId AS intAccountId
-	FROM dbo.tblSMTaxCode TC 
-	JOIN dbo.tblSMTaxGroupCode TGC ON TGC.intTaxCodeId = TC.intTaxCodeId
-	JOIN dbo.tblSTStore ST ON ST.intTaxGroupId = TGC.intTaxGroupId
-	LEFT JOIN dbo.tblGLAccount GLA ON GLA.intAccountId = TC.intSalesTaxAccountId
-	WHERE ST.intStoreId = @intStoreId
+	FROM tblSTStoreTaxTotals STT
+	JOIN tblSTStore ST ON STT.intStoreId = ST.intStoreNo
+	JOIN tblSMTaxCode TC ON STT.intTaxCodeId = TC.intTaxCodeId
+	JOIN tblICItem I ON STT.intItemId = I.intItemId
+	WHERE STT.intStoreId = @intStoreId
 
 	SELECT t.strTaxNumber
 		 , t.intAccountId

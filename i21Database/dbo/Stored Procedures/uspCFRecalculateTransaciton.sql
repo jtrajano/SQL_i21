@@ -66,6 +66,7 @@
 ,@TaxValue8							NUMERIC(18,6)	= 0.000000
 ,@TaxValue9							NUMERIC(18,6)	= 0.000000
 ,@TaxValue10						NUMERIC(18,6)	= 0.000000
+,@CustomerId						INT				= 0
 
 AS
 
@@ -203,6 +204,9 @@ BEGIN
 		,[intTaxCodeId]					INT
 		,[dblTaxRate]					NUMERIC(18,6)
 		,[strTaxCode]					NVARCHAR(MAX)
+		,[intTaxGroupId]				INT
+		,[strTaxGroup]					NVARCHAR(MAX)
+		,[strCalculationMethod]			NVARCHAR(MAX)
 	);
 
 	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
@@ -281,7 +285,7 @@ BEGIN
 		FROM tblCFNetwork 
 		WHERE intNetworkId = @intNetworkId
 	END
-	ELSE
+	ELSE IF(ISNULL(@intCardId,0) != 0)
 	BEGIN
 		SELECT TOP 1
 		 @intCustomerId = cfAccount.intCustomerId
@@ -291,7 +295,10 @@ BEGIN
 		ON cfCard.intAccountId = cfAccount.intAccountId
 		WHERE cfCard.intCardId = @intCardId
 	END
-
+	ELSE
+	BEGIN
+		SET @intCustomerId = @CustomerId
+	END
 
 	--GET @ysnActive CUSTOMER--
 
@@ -3675,6 +3682,9 @@ BEGIN
 			,intTaxCodeId
 			,dblTaxRate 
 			,strTaxCode
+			,intTaxGroupId
+			,strTaxGroup
+			,strCalculationMethod
 			)
 			SELECT 
 			 ISNULL(dblCalculatedTax,0) AS 'dblTaxCalculatedAmount'
@@ -3682,6 +3692,9 @@ BEGIN
 			,intTaxCodeId
 			,dblRate AS 'dblTaxRate'
 			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
+			,intTaxGroupId
+			,(SELECT TOP 1 strTaxGroup FROM tblSMTaxGroup WHERE intTaxGroupId = T.intTaxGroupId) as 'strTaxGroup'
+			,strCalculationMethod
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 		END
