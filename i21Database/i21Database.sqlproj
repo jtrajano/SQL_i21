@@ -6450,6 +6450,7 @@
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetailPerPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemByRecipe.sql" />
     <Build Include="dbo\Views\vyuHDProjectSalesrepAndLob.sql" />
+    <Build Include="dbo\Views\vyuLGInsurancePremiumFactor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
