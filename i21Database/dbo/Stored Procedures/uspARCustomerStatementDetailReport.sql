@@ -244,34 +244,6 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-INSERT INTO tblARCustomerAgingStagingTable (
-	   strCustomerName
-	 , strCustomerNumber
-	 , strCustomerInfo
-	 , intEntityCustomerId
-	 , intEntityUserId
-	 , dblCreditLimit
-	 , dblTotalAR
-	 , dblFuture
-	 , dbl0Days
-	 , dbl10Days
-	 , dbl30Days
-	 , dbl60Days
-	 , dbl90Days
-	 , dbl91Days
-	 , dblTotalDue
-	 , dblAmountPaid
-	 , dblCredits
-	 , dblPrepayments
-	 , dblPrepaids
-	 , dtmAsOfDate
-	 , strSalespersonName
-	 , strSourceTransaction
-	 , strCompanyName
-	 , strCompanyAddress
-	 , strAgingType
-)
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName, @intEntityUserId = @intEntityUserId
  
 SET @query = 'SELECT * FROM

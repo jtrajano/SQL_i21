@@ -6307,6 +6307,11 @@
     <Build Include="dbo\Functions\fnAPGetPaymentForexRate.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
