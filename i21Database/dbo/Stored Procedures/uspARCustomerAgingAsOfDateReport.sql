@@ -286,6 +286,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyAddress
 	 , strAgingType
 	 , dblTotalCustomerAR
+
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
