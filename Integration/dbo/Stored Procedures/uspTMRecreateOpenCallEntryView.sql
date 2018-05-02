@@ -62,6 +62,7 @@ BEGIN
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 				,strFillMethod = N.strFillMethod
 				,strLocation = O.vwloc_loc_no
+				,strCity = B.strCity
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
@@ -130,7 +131,7 @@ BEGIN
 				,ysnCallEntryPrinted = ISNULL(A.ysnCallEntryPrinted,0)
 				,intOpenWorkOrder = ISNULL(M.intOpenCount,0)
 				,strFillMethod = N.strFillMethod
-
+				,strCity = B.strCity
 			FROM tblTMDispatch A
 			INNER JOIN tblTMSite B
 				ON A.intSiteID = B.intSiteID
