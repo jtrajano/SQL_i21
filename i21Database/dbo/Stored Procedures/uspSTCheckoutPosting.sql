@@ -223,7 +223,7 @@ BEGIN
 										,[dblSubCurrencyRate]
 									)
 									SELECT 
-										 [strSourceTransaction]		= 'Invoice'
+										 [strSourceTransaction]		= 'Store Checkout'
 										,[strTransactionType]		= 'Invoice'
 										,[intSourceId]				= @intCheckoutId
 										,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
@@ -425,7 +425,7 @@ BEGIN
 											,[dblSubCurrencyRate]
 										)
 										SELECT 
-											 [strSourceTransaction]		= 'Invoice'
+											 [strSourceTransaction]		= 'Store Checkout'
 											,[strTransactionType]		= 'Invoice'
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
@@ -626,7 +626,7 @@ BEGIN
 											,[dblSubCurrencyRate]
 										)
 										SELECT 
-											 [strSourceTransaction]		= 'Invoice'
+											 [strSourceTransaction]		= 'Store Checkout'
 											,[strTransactionType]		= 'Invoice'
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
