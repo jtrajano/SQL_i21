@@ -833,11 +833,11 @@ End
 	'Tran. Date        : ' + ISNULL(CONVERT(VARCHAR,n.dtmTransactionDate),'') + CHAR(13) +
 	CASE WHEN n.strType='R' THEN 'Vendor            : ' + ISNULL(n.strVendor,'') ELSE '' END + 
 	CASE WHEN n.strType='S' THEN 'Customer          : ' + ISNULL(n.strCustomer,'') ELSE '' END + 
-	CASE WHEN n.strType='L' THEN 'Crop Year         : ' + ISNULL(CONVERT(VARCHAR(100),l.intSeasonCropYear),'') ELSE '' END + CHAR(13) +
-	CASE WHEN n.strType='L' THEN 'Producer           : ' + ISNULL(e.strName,'') ELSE '' END + CHAR(13) +
-	CASE WHEN n.strType='L' THEN 'Certification      : ' + ISNULL(l.strCertificate,'') ELSE '' END + CHAR(13) + 
-	CASE WHEN n.strType='L' THEN 'Certification Id  : ' + ISNULL(l.strCertificateId,'') ELSE '' END + CHAR(13) + 
-	CASE WHEN n.strType='L' THEN 'Tracking No      : ' + ISNULL(l.strTrackingNumber,'') ELSE '' END
+	CASE WHEN n.strType='L' AND ISNULL(CONVERT(VARCHAR(100),l.intSeasonCropYear),'')<>'' THEN 'Crop Year         : ' + ISNULL(CONVERT(VARCHAR(100),l.intSeasonCropYear),'') + CHAR(13) ELSE '' END +
+	CASE WHEN n.strType='L' AND ISNULL(e.strName,'')<>'' THEN 'Producer           : ' + ISNULL(e.strName,'') + CHAR(13) ELSE '' END +
+	CASE WHEN n.strType='L' AND ISNULL(l.strCertificate,'')<>'' THEN 'Certification      : ' + ISNULL(l.strCertificate,'') + CHAR(13) ELSE '' END + 
+	CASE WHEN n.strType='L' AND ISNULL(l.strCertificateId,'')<>'' THEN 'Certification Id  : ' + ISNULL(l.strCertificateId,'') + CHAR(13) ELSE '' END + 
+	CASE WHEN n.strType='L' AND ISNULL(l.strTrackingNumber,'')<>'' THEN 'Tracking No      : ' + ISNULL(l.strTrackingNumber,'') ELSE '' END
 	AS strToolTip,
 	Case When n.strType='L' Then 
 		Case When n.intImageTypeId = 2 Then 5 
