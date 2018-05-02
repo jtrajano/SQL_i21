@@ -250,6 +250,7 @@ BEGIN TRY
 			,intLastModifiedUserId = @intUserId
 			,dtmLastModified = @dtmCurrentDate
 			,strComment = 'Manullay Updated.'
+			,intToStorageLocationId=@intToStorageLocationId
 		WHERE intTaskId = @intTaskId
 	END
 
