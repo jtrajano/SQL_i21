@@ -6769,4 +6769,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTargetVersionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="567a0aef-d4fb-4006-a001-fde50f8c07e3" ChangeDateTime="05/02/2018 14:08:59">
+    <Property Name="ElementName" Value="[dbo].[tblLGShippingLineServiceContractDetail].[strContractNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGShippingLineServiceContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strServiceContractNumber]" />
+  </Operation>
 </Operations>
