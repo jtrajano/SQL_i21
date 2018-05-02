@@ -17,6 +17,7 @@ AS
 		,dtmDateSync = D.dtmDateSync
 		,intConcurrencyId = 0
 		,intSiteID = C.intSiteID
+		,strLocation = G.strLocationName
 	FROM tblTMDeliveryHistory  A
 	INNER JOIN tblTMSite C 
 		ON C.intSiteID = A.intSiteID 
@@ -28,4 +29,6 @@ AS
 		ON E.intCustomerNumber = B.intEntityId
 	LEFT JOIN tblTMFillMethod F
 		ON C.intFillMethodId = F.intFillMethodId
+	LEFT JOIN tblSMCompanyLocation G
+		ON G.intCompanyLocationId = C.intLocationId
 GO

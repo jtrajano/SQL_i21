@@ -39,7 +39,8 @@ BEGIN
 
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
 	BEGIN
-		IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1
+		IF (((SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwcusmst') = 1)
+			AND ((SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwlocmst') = 1))
 		BEGIN
 			EXEC('
 				CREATE VIEW [dbo].[vyuTMOutOfRangeBurnRateSearch]
@@ -69,6 +70,7 @@ BEGIN
 						,dtmDateSync = D.dtmDateSync
 						,intConcurrencyId = 0
 						,intSiteID = C.intSiteID
+						,strLocation = G.vwloc_loc_no
 					FROM tblTMDeliveryHistory  A
 					INNER JOIN tblTMSite C 
 						ON C.intSiteID = A.intSiteID 
@@ -80,6 +82,9 @@ BEGIN
 						ON E.intCustomerNumber = B.A4GLIdentity
 					LEFT JOIN tblTMFillMethod F
 						ON C.intFillMethodId = F.intFillMethodId
+					LEFT JOIN vwlocmst G
+						ON G.A4GLIdentity = C.intLocationId
+
 				')
 		END
 		ELSE
@@ -110,6 +115,7 @@ BEGIN
 					,dtmDateSync = D.dtmDateSync
 					,intConcurrencyId = 0
 					,intSiteID = C.intSiteID
+					,strLocation = G.strLocationName
 				FROM tblTMDeliveryHistory  A
 				INNER JOIN tblTMSite C 
 					ON C.intSiteID = A.intSiteID 
@@ -121,6 +127,8 @@ BEGIN
 					ON E.intCustomerNumber = B.intEntityId
 				LEFT JOIN tblTMFillMethod F
 					ON C.intFillMethodId = F.intFillMethodId
+				LEFT JOIN tblSMCompanyLocation G
+					ON G.intCompanyLocationId = C.intLocationId
 		')
 	END
 END
