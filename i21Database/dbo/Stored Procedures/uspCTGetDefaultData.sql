@@ -48,7 +48,8 @@ BEGIN
 		strPurchasingGroup		NVARCHAR(100),
 		strSubLocationName		NVARCHAR(100),
 		strStorageLocationName	NVARCHAR(100),
-		strContractItemName		NVARCHAR(100)
+		strContractItemName		NVARCHAR(100),
+		dblYield				NUMERIC(18,6)
 	)
 
 	IF @strType = 'FutureMarket'
@@ -147,12 +148,12 @@ BEGIN
 			IF EXISTS(SELECT * FROM vyuCTInventoryItem WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND intItemId = @intItemId)
 			BEGIN
 				INSERT INTO @Item
-				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null,dblEstimatedYieldRate  FROM vyuCTInventoryItem WHERE intItemId = @intItemId
 			END
 			ELSE
 			BEGIN
 				INSERT INTO @Item
-				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null  FROM vyuCTInventoryItem 
+				SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null,dblEstimatedYieldRate  FROM vyuCTInventoryItem 
 				WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND strStatus <> 'Discontinued'
 				ORDER BY intItemId ASC
 			END
@@ -160,7 +161,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @Item
-			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null FROM vyuCTInventoryItem 
+			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null,dblEstimatedYieldRate FROM vyuCTInventoryItem 
 			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND strStatus <> 'Discontinued'
 			ORDER BY intItemId ASC
 		END

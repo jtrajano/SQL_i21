@@ -256,8 +256,38 @@ WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
+	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 	
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , strCustomerInfo
+	 , intEntityCustomerId
+	 , intEntityUserId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+	 , strAgingType
+	 , dblTotalCustomerAR
+
+)	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
 	 , strCustomerInfo		= CUSTOMER.strCustomerName + ' ' + CUSTOMER.strCustomerNumber
@@ -283,6 +313,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= COMPANY.strCompanyName
 	 , strCompanyAddress	= COMPANY.strCompanyAddress
 	 , strAgingType			= 'Summary'
+	 , dblTotalCustomerAR	= CUSTAR.dblARBalance
 FROM
 (SELECT A.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
@@ -486,4 +517,5 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+LEFT JOIN (SELECT intEntityCustomerId, dblARBalance FROM vyuARCustomerSearch) CUSTAR ON CUSTAR.intEntityCustomerId = AGING.intEntityCustomerId 
 ORDER BY strCustomerName

@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[strRinFeedStockCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICRinFeedStock] PRIMARY KEY ([intRinFeedStockId]), 
 		CONSTRAINT [AK_tblICRinFeedStock_strRinFeedStockCode] UNIQUE ([strRinFeedStockCode])

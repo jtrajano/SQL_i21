@@ -9,6 +9,7 @@
 	[dblAmount] NUMERIC(18,6),
 	[intCurrency] INT,
 	[intCostType] INT,
+	[intLoadStorageCostRefId] INT NULL,
 
 	CONSTRAINT [PK_intLoadStorageCostId] PRIMARY KEY ([intLoadStorageCostId]), 
 	CONSTRAINT [FK_tblLGLoadStorageCost_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,

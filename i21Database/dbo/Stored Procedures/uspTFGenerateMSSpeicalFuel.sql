@@ -31,19 +31,19 @@ BEGIN TRY
 			, @DyedDiesel_17 NUMERIC(18, 0) = 0
 			, @DyedDiesel_18 NUMERIC(18, 0) = 0
 			, @DyedDiesel_19 NUMERIC(18, 0) = 0
-			, @DyedDiesel_20 NUMERIC(18, 0) = 0
-			, @DyedDiesel_21 NUMERIC(18, 0) = 0
+			, @DyedDiesel_20 NUMERIC(18, 4) = 0
+			, @DyedDiesel_21 NUMERIC(18, 2) = 0
 			, @DyedDiesel_22 NUMERIC(18, 0) = 0
 			, @DyedDiesel_23 NUMERIC(18, 0) = 0
 			, @DyedDiesel_24 NUMERIC(18, 0) = 0
-			, @DyedDiesel_25 NUMERIC(18, 0) = 0
+			, @DyedDiesel_25 NUMERIC(18, 4) = 0
 			, @DyedDiesel_26 NUMERIC(18, 0) = 0
 			, @DyedDiesel_27 NUMERIC(18, 0) = 0
 			, @DyedDiesel_28 NUMERIC(18, 0) = 0	
-			, @DyedDiesel_29 NUMERIC(18, 0) = 0
+			, @DyedDiesel_29 NUMERIC(18, 4) = 0
 			, @DyedDiesel_30 NUMERIC(18, 0) = 0	
 			, @DyedDiesel_31 NUMERIC(18, 0) = 0
-			, @DyedDiesel_32 NUMERIC(18, 0) = 0	
+			, @DyedDiesel_32 NUMERIC(18, 2) = 0	
 
 			, @FuelOil_1 NUMERIC(18, 0) = 0
 			, @FuelOil_2 NUMERIC(18, 0) = 0
@@ -62,8 +62,8 @@ BEGIN TRY
 			, @FuelOil_17 NUMERIC(18, 0) = 0
 			, @FuelOil_18 NUMERIC(18, 0) = 0
 			, @FuelOil_19 NUMERIC(18, 0) = 0
-			, @FuelOil_20 NUMERIC(18, 0) = 0
-			, @FuelOil_21 NUMERIC(18, 0) = 0
+			, @FuelOil_20 NUMERIC(18, 4) = 0
+			, @FuelOil_21 NUMERIC(18, 2) = 0
 			--, @FuelOil_22 NUMERIC(18, 0) = 0
 			--, @FuelOil_23 NUMERIC(18, 0) = 0
 			, @FuelOil_24 NUMERIC(18, 0) = 0
@@ -71,10 +71,10 @@ BEGIN TRY
 			, @FuelOil_26 NUMERIC(18, 0) = 0
 			, @FuelOil_27 NUMERIC(18, 0) = 0
 			, @FuelOil_28 NUMERIC(18, 0) = 0
-			, @FuelOil_29 NUMERIC(18, 0) = 0		
+			, @FuelOil_29 NUMERIC(18, 4) = 0		
 			, @FuelOil_30 NUMERIC(18, 0) = 0
 			, @FuelOil_31 NUMERIC(18, 0) = 0
-			, @FuelOil_32 NUMERIC(18, 0) = 0
+			, @FuelOil_32 NUMERIC(18, 2) = 0
 			  
 			, @UndyedDiesel_1 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_2 NUMERIC(18, 0) = 0
@@ -93,8 +93,8 @@ BEGIN TRY
 			, @UndyedDiesel_17 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_18 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_19 NUMERIC(18, 0) = 0
-			, @UndyedDiesel_20 NUMERIC(18, 0) = 0
-			, @UndyedDiesel_21 NUMERIC(18, 0) = 0
+			, @UndyedDiesel_20 NUMERIC(18, 4) = 0
+			, @UndyedDiesel_21 NUMERIC(18, 2) = 0
 			--, @UndyedDiesel_22 NUMERIC(18, 0) = 0
 			--, @UndyedDiesel_23 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_24 NUMERIC(18, 0) = 0
@@ -102,7 +102,7 @@ BEGIN TRY
 			, @UndyedDiesel_26 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_27 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_28 NUMERIC(18, 0) = 0
-			, @UndyedDiesel_29 NUMERIC(18, 0) = 0
+			, @UndyedDiesel_29 NUMERIC(18, 4) = 0
 			, @UndyedDiesel_30 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_31 NUMERIC(18, 0) = 0
 			, @UndyedDiesel_32 NUMERIC(18, 0) = 0
@@ -124,8 +124,8 @@ BEGIN TRY
 			, @JetFuel_17 NUMERIC(18, 0) = 0
 			, @JetFuel_18 NUMERIC(18, 0) = 0
 			, @JetFuel_19 NUMERIC(18, 0) = 0
-			, @JetFuel_20 NUMERIC(18, 0) = 0
-			, @JetFuel_21 NUMERIC(18, 0) = 0
+			, @JetFuel_20 NUMERIC(18, 4) = 0
+			, @JetFuel_21 NUMERIC(18, 2) = 0
 			--, @JetFuel_22 NUMERIC(18, 0) = 0
 			--, @JetFuel_23 NUMERIC(18, 0) = 0
 			, @JetFuel_24 NUMERIC(18, 0) = 0
@@ -133,7 +133,7 @@ BEGIN TRY
 			, @JetFuel_26 NUMERIC(18, 0) = 0
 			, @JetFuel_27 NUMERIC(18, 0) = 0
 			, @JetFuel_28 NUMERIC(18, 0) = 0		
-			, @JetFuel_29 NUMERIC(18, 0) = 0
+			, @JetFuel_29 NUMERIC(18, 4) = 0
 			, @JetFuel_30 NUMERIC(18, 0) = 0
 			
 			, @Line31 NUMERIC(18, 2) = 0

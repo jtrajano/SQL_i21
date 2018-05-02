@@ -18,7 +18,13 @@ AS
 			EF.strFieldNumber,																					
 			ISNULL(IM.ysnUseWeighScales,0)		ysnUseWeighScales,																								
 			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)	AS	dblAvailableQty,											
-			dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))			AS	dblAvailableQtyInItemStockUOM,													
+			CASE	WHEN	CH.ysnLoad = 1 
+					THEN	dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,CD.dblQuantityPerLoad) * ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)		
+					ELSE	dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))			
+			END		AS		dblAvailableQtyInItemStockUOM,			
+			CD.dblQuantityPerLoad,
+			dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,CD.dblQuantityPerLoad) dblQtyPerLoadInItemStockUOM,
+			CD.intNoOfLoad,										
 			CS.strContractStatus,																	
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS	ysnAllowedToShow,																		
 			CAST(																										
@@ -36,9 +42,11 @@ AS
 			CH.strContractNumber,
 			CH.ysnUnlimitedQuantity,
 			CD.intContractSeq,
-			CD.intPricingTypeId
+			CD.intPricingTypeId,
+			CH.ysnLoad
 																												
-	FROM	tblCTContractDetail				CD	CROSS																						
+	FROM	tblCTContractDetail				CD	
+	CROSS																						
 	JOIN	tblCTCompanyPreference			CP																									
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId																			
 	JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT

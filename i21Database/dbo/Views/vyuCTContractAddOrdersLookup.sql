@@ -74,9 +74,9 @@ SELECT	  CD.intContractDetailId
 								AND CD.dblRate IS NOT NULL 
 								AND CD.intFXPriceUOMId IS NOT NULL 
 						THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intFXPriceUOMId,1)
+							dbo.fnCTConvertQtyToTargetItemUOM(UM.intItemUOMId,CD.intFXPriceUOMId,1)
 						ELSE
-							dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
+							dbo.fnCTConvertQtyToTargetItemUOM(UM.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
 					END 
 		, CH.strGrade
 		, CH.intGradeId
@@ -90,7 +90,8 @@ FROM	tblCTContractDetail CD
 	CROSS APPLY tblCTCompanyPreference CP
 	LEFT JOIN vyuCTContractHeaderView CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId					
-	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId =	CD.intItemUOMId				
+	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId =	CD.intItemUOMId
+	LEFT JOIN tblICItemUOM UM ON UM.intItemId =	CD.intItemId AND UM.ysnStockUOM = 1 						
 	LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblAPVendor VR ON VR.[intEntityId] = CD.intBillTo
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId

@@ -45,6 +45,7 @@
 	[dtmDateCreated]			DATETIME NULL,
 	[intCreatedUserId]			INT NULL,
 	[intCreatedEntityId]		INT NULL,
+	[intCompanyId]				INT NULL, 
 	CONSTRAINT [PK_tblICBackupDetailLot] PRIMARY KEY CLUSTERED ([intBackupDetailId] ASC),
 	CONSTRAINT [FK_tblICBackupDetailLot_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])
 )

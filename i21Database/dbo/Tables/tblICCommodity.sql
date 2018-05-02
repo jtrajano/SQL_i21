@@ -37,6 +37,7 @@ Type the overview for the table here.
 		[dblMaxOver] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intAdjustInventorySales] INT NULL,
 		[intAdjustInventoryTransfer] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
 		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 

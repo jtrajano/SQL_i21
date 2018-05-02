@@ -137,7 +137,7 @@ BEGIN
 		WHEN @msgId = 80121 THEN 'Gross/Net UOM is invalid for item %s.'
 		WHEN @msgId = 80122 THEN 'Cost UOM is invalid or missing for item %s.'
 		WHEN @msgId = 80123 THEN 'Lot ID %s is invalid for item %s.'
-		-- OBSOLETE: WHEN @msgId = 80124 THEN 'Other Charge Item Id is invalid or missing.'
+		WHEN @msgId = 80124 THEN 'Other Charge Item Id is invalid or missing.'
 		WHEN @msgId = 80125 THEN 'Cost Method for Other Charge item %s is invalid or missing.'
 		-- OBSOLETE: WHEN @msgId = 80126 THEN 'Cost Currency Id is invalid or missing for other charge item %s.'
 		WHEN @msgId = 80127 THEN 'Vendor Id is invalid for other charge item %s.'
@@ -175,7 +175,6 @@ BEGIN
 		WHEN @msgId = 80159 THEN 'Item: %s, Qty: %s, Cost: %s'
 		WHEN @msgId = 80160 THEN 'Transaction not saved. Stocks for %s will have an over-return.'
 		WHEN @msgId = 80161 THEN 'Return no longer allowed. All of the stocks are returned.'
-		--WHEN @msgId = 80162 THEN '%s is using a foreign currency. Please check if %s has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from %s to %s.'
 		WHEN @msgId = 80162 THEN 'The transaction is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency'
 		WHEN @msgId = 80163 THEN '%s is set as %s type and that type is not allowed for Shipment.'
 		WHEN @msgId = 80164 THEN 'There are no receipt items to process.'
@@ -224,6 +223,8 @@ BEGIN
 		WHEN @msgId = 80207 THEN 'Lot type of %s is different from %s. Items should have the same lot types.'
 		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
 		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
+		WHEN @msgId = 80210 THEN 'Invalid Producer. %s is not configured as a Producer type. Please check the Entity setup.'
+		WHEN @msgId = 80211 THEN 'Certificate %s is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
 	END 
 
 	RETURN @msg

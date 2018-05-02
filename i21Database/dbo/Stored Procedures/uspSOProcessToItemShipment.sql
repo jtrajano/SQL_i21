@@ -29,6 +29,13 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 		RETURN;
 	END
 
+--VALIDATE IF SO IS FOR APPROVAL
+IF EXISTS(SELECT NULL FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order' AND intTransactionId = @SalesOrderId)
+	BEGIN
+		RAISERROR('Sales Order is still waiting for approval.', 16, 1)
+		RETURN;
+	END
+
 --IF UNSHIP
 IF @Unship = 1
 	BEGIN
@@ -183,7 +190,7 @@ ELSE
 			, intOwnershipType				= CASE WHEN SODETAIL.intStorageScheduleTypeId IS NULL THEN 1 ELSE 2 END
 			, dblQuantity					= SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)
 			, intItemUOMId					= ITEMUOM.intItemUOMId
-			, intPriceUOMId					= SODETAIL.intPriceUOMId
+			, intPriceUOMId					= SODETAIL.intItemUOMId
 			, intItemLotGroup				= NULL
 			, intOrderId					= SODETAIL.intSalesOrderId
 			, intSourceId					= NULL

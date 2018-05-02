@@ -513,6 +513,7 @@ BEGIN
 			,0 AS intParentPropertyId
 			,0 AS intRepNo
 			,PP.strIsMandatory
+			,PRT.intItemId AS intPropertyItemId
 			,PRT.intDataTypeId
 			,PRT.intDecimalPlaces
 			,PRT.intListId
@@ -576,6 +577,7 @@ BEGIN
 			,0 AS intParentPropertyId
 			,0 AS intRepNo
 			,PP.strIsMandatory
+			,PRT.intItemId AS intPropertyItemId
 			,PRT.intDataTypeId
 			,PRT.intDecimalPlaces
 			,PRT.intListId

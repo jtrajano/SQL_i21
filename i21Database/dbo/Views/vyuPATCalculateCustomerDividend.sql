@@ -2,21 +2,21 @@
 	AS
 SELECT CS.intCustomerStockId,
 	CS.intCustomerPatronId AS intCustomerId,
-	NEWID() as id,
 	CS.strStockStatus,
 	CS.intStockId,
 	SC.strStockName,
 	CS.strCertificateNo,
-	CS.dtmIssueDate,
+	IssueStk.dtmIssueDate,
 	CS.dblParValue,
 	CS.dblSharesNo,
-	CS.ysnPosted,
 	SC.dblDividendsPerShare
 	FROM tblPATStockClassification SC
-INNER JOIN tblPATIssueStock CS
+INNER JOIN tblPATCustomerStock CS
 	ON CS.intStockId = SC.intStockId
+INNER JOIN tblPATIssueStock IssueStk
+	ON IssueStk.intCustomerStockId = CS.intCustomerStockId
 INNER JOIN tblEMEntity ENT
 	ON ENT.intEntityId = CS.intCustomerPatronId
 INNER JOIN tblARCustomer ARC
 	ON ARC.intEntityId = ENT.intEntityId
-WHERE CS.ysnPosted = 1
+WHERE CS.strActivityStatus = 'Open'

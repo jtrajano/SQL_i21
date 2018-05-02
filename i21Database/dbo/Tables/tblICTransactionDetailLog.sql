@@ -18,6 +18,7 @@
 	[dblGross] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[intSourceInventoryDetailId] INT NULL,
+	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICTransactionDetailLog] PRIMARY KEY ([intTransactionDetailLogId]) 
 )

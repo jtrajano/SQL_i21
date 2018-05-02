@@ -199,7 +199,7 @@ ELSE IF @strBasis = @BASIS_REVENUE
 			 , I.dblInvoiceTotal
 			 , I.dtmPostDate
 		FROM tblARInvoice I
-		INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intCommissionPlanSalespersonId
+		INNER JOIN tblARCommissionPlanSalesperson SP ON I.intEntitySalespersonId = SP.intEntitySalespersonId
 		WHERE I.ysnPosted = 1
 		 AND I.intEntitySalespersonId IS NOT NULL
 		 AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmCalcStartDate AND @dtmCalcEndDate

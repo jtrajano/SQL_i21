@@ -25,6 +25,9 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , dblQtyRemaining			= SODETAIL.dblQtyRemaining
 	 , dblPrice					= SODETAIL.dblPrice
 	 , dblBasePrice				= SODETAIL.dblBasePrice
+	 , dblUnitPrice				= SODETAIL.dblUnitPrice
+	 , dblBaseUnitPrice			= SODETAIL.dblBaseUnitPrice
+	 , dblUnitQuantity			= SODETAIL.dblUnitQuantity
 	 , dblDiscount				= SODETAIL.dblDiscount
 	 , dblCurrencyExchangeRate	= SODETAIL.dblCurrencyExchangeRate
 	 , dblSubCurrencyRate		= SODETAIL.dblSubCurrencyRate
@@ -40,6 +43,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strContractNumber		= CONTRACTS.strContractNumber
 	 , strItemNo				= ITEM.strItemNo
 	 , strUnitMeasure			= UOM.strUnitMeasure
+	 , strPriceUnitMeasure		= PUOM.strUnitMeasure
 	 , dtmDate					= SO.dtmDate
 	 , ysnBlended				= SODETAIL.ysnBlended
 	 , intTaxGroupId			= SODETAIL.intTaxGroupId
@@ -67,6 +71,9 @@ INNER JOIN (
 		 , dblQtyRemaining = dblQtyOrdered - dblQtyShipped
 		 , dblPrice
 		 , dblBasePrice
+		 , dblUnitPrice
+		 , dblBaseUnitPrice
+		 , dblUnitQuantity
 		 , dblDiscount
 		 , dblCurrencyExchangeRate
 		 , dblSubCurrencyRate
@@ -111,6 +118,18 @@ LEFT JOIN (
 	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 ) UOM ON ICUOM.intUnitMeasureId = UOM.intUnitMeasureId
 LEFT JOIN (
+	SELECT intItemId
+		 , intUnitMeasureId
+		 , intItemUOMId
+	FROM dbo.tblICItemUOM WITH (NOLOCK)
+) ICPUOM ON SODETAIL.intItemId = ICPUOM.intItemId
+       AND SODETAIL.intItemUOMId = ICPUOM.intItemUOMId
+LEFT JOIN (
+	SELECT intUnitMeasureId
+		 , strUnitMeasure
+	FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+) PUOM ON ICPUOM.intUnitMeasureId = PUOM.intUnitMeasureId
+LEFT JOIN (
 	SELECT CH.intContractHeaderId
 		 , CD.intContractDetailId
 		 , CD.intContractSeq
@@ -127,3 +146,4 @@ LEFT JOIN (
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
   AND ((dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 0 OR ISNULL(strLotTracking, 'No') = 'No') OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
+  AND SO.intSalesOrderId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order')

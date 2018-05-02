@@ -97,6 +97,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[dblUnitRetail] NUMERIC(38, 20) NULL DEFAULT 0,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLot] PRIMARY KEY NONCLUSTERED ([intInventoryLotId]),
 		CONSTRAINT [FK_tblICInventoryLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),

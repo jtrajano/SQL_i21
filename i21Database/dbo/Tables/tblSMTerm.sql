@@ -5,7 +5,7 @@
     [dblDiscountEP]				NUMERIC (18, 6) NULL,
     [intBalanceDue]				INT             NULL,
     [intDiscountDay]			INT             NULL,
-    [intDiscountDueNextMonth]	INT        NULL,
+    [intDiscountDueNextMonth]	INT				NULL,
     [dblAPR]					NUMERIC (18, 6) NULL,
     [strTermCode]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
     [ysnAllowEFT]				BIT             DEFAULT ((1)) NOT NULL,
@@ -16,6 +16,7 @@
     [ysnActive]					BIT             DEFAULT ((1)) NOT NULL,
 	[ysnEnergyTrac]				BIT             DEFAULT ((0)) NOT NULL,
 	[ysnDeferredPay]			BIT             DEFAULT ((0)) NOT NULL,
+	[ysnIncludeTaxOnDiscount]	BIT             DEFAULT ((0)) NOT NULL,
     [intSort]					INT             NULL,
     [intConcurrencyId]			INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 
@@ -168,6 +169,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMTerm',
     @level2type = N'COLUMN',
     @level2name = N'ysnDeferredPay'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Include Tax on Discount',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMTerm',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnIncludeTaxOnDiscount'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Term is Active',

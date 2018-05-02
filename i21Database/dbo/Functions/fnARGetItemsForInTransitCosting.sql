@@ -69,6 +69,7 @@ INSERT INTO @returntable
 	,[intInTransitSourceLocationId]
 	,[intForexRateTypeId]
 	,[dblForexRate])
+-- FOR Provisional and Standard Invoices From Inventory Shipment
 SELECT
 	 [intItemId]					= ICIT.[intItemId]
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
@@ -109,11 +110,10 @@ WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
-			(ARI.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = ARI.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 0))
+			(ARI.[strType] <> 'Provisional' AND (ARI.[intOriginalInvoiceId] IS NULL OR ARI.[intSourceId] <> 2))
 		OR
 			(ARI.[strType] = 'Provisional' AND ARI.[ysnImpactForProvisional] = 1)
 		)
-
 
 UNION ALL
 
@@ -144,11 +144,11 @@ SELECT
 FROM 
 	(SELECT [intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [intInvoiceDetailId], [ysnBlended], [intInventoryShipmentItemId], [dblPrice], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [intLoadDetailId], [intLotId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN 
-	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
+	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], [intOriginalInvoiceId], [intSourceId],
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId]
 	 FROM @Invoices INV
 	 WHERE
-		((INV.[strType] <> 'Provisional' AND NOT EXISTS(SELECT NULL FROM tblARInvoice I WHERE I.[intInvoiceId] = INV.[intOriginalInvoiceId] AND I.[strType] = 'Provisional' AND I.[ysnPosted] = 0))
+		((INV.[strType] <> 'Provisional' AND (INV.[intOriginalInvoiceId] IS NULL OR INV.[intSourceId] <> 2))
 			OR
 		(INV.[strType] = 'Provisional' AND INV.[ysnImpactForProvisional] = 1)
 		)

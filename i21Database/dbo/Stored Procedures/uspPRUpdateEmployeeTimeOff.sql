@@ -5,12 +5,62 @@ AS
 BEGIN
 
 	--Get Employees with specified Time Off
-	SELECT E.[intEntityId], DATEDIFF(YEAR, ISNULL(E.dtmDateHired, GETDATE()), GETDATE()) intYearsOfService
+	SELECT E.intEntityId
+		,intYearsOfService = DATEDIFF(YEAR, ISNULL(E.dtmDateHired, GETDATE()), GETDATE())
+		,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
+								ISNULL(T.dtmEligible, E.dtmDateHired)
+							ELSE
+								ISNULL(T.dtmLastAward, E.dtmDateHired)
+						  END
+		,dtmNextAward = CAST(NULL AS DATETIME)
+		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblRate
+		,dblPerPeriod
+		,strPeriod
+		,dblRateFactor
+		,strAwardPeriod
+		,dtmDateHired
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
-	ON E.[intEntityId] = T.intEntityEmployeeId
-	WHERE E.[intEntityId] = ISNULL(@intEntityEmployeeId, E.[intEntityId])
+		ON E.intEntityId = T.intEntityEmployeeId
+	WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
+
+	--Calculate Next Award Date
+	UPDATE #tmpEmployees 
+		SET dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN
+								CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)
+							 WHEN (strAwardPeriod = 'End of Week') THEN
+								CASE WHEN (dtmLastAward) < CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN
+									DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))
+								ELSE 
+									CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)
+								END
+							 WHEN (strAwardPeriod = 'Start of Month') THEN
+								CAST(DATEADD(M, DATEDIFF(M, 0, GETDATE()), 0) AS DATE)
+							 WHEN (strAwardPeriod = 'End of Month') THEN
+								CAST(DATEADD(S, -1, DATEADD(MM, DATEDIFF(M, 0, GETDATE()) + 1, 0)) AS DATE)
+							 WHEN (strAwardPeriod = 'Start of Quarter') THEN
+								CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE)
+							 WHEN (strAwardPeriod = 'End of Quarter') THEN
+								CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE)
+							 WHEN (strAwardPeriod = 'Start of Year') THEN
+								CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)) THEN
+									DATEADD(YY, DATEDIFF(YY,0,GETDATE()), 0)
+								ELSE 
+									DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, 0)
+								END
+							 WHEN (strAwardPeriod = 'End of Year') THEN
+								CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), -1)) THEN
+									DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1)
+								ELSE 
+									DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, -1)
+								END
+							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
+								DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
+							 ELSE NULL 
+						END
 
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
@@ -54,6 +104,35 @@ BEGIN
 		) T
 		WHERE tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 			AND tblPREmployeeTimeOff.intTypeTimeOffId = @intTypeTimeOffId
+
+		--Reset Adjustments, Move Earned to Carryover
+		UPDATE EOT
+			SET dblHoursUsed = CASE WHEN (T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward) THEN 0
+									WHEN (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
+									ELSE EOT.dblHoursUsed END
+				,dblHoursCarryover = CASE WHEN (T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward) THEN 
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed) < dblMaxCarryover) 
+												THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed)
+												ELSE dblMaxCarryover END
+										  WHEN (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed) < dblMaxCarryover) 
+											THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed)
+											ELSE dblMaxCarryover END
+									ELSE dblHoursCarryover END
+				,dblHoursEarned = CASE WHEN (T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward) THEN 0
+									WHEN (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
+									ELSE dblHoursEarned END
+		FROM 
+			tblPREmployeeTimeOff EOT
+			INNER JOIN #tmpEmployees T
+				ON EOT.intEntityEmployeeId = T.intEntityId
+			LEFT JOIN vyuPREmployeeTimeOffUsedYTD YTD
+				ON T.intEntityId = YTD.intEntityEmployeeId
+		WHERE T.[intEntityId] = @intEmployeeId
+			AND EOT.intEntityEmployeeId = @intEmployeeId
+			AND EOT.intTypeTimeOffId = @intTypeTimeOffId
+			AND YTD.intTypeTimeOffId = @intTypeTimeOffId
+			AND YTD.intYear = YEAR(T.dtmLastAward)
 
 		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END

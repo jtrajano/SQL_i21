@@ -66,7 +66,9 @@ SELECT	CH.intContractHeaderId,
 		CS.intUnitMeasureId AS intStockCommodityUnitMeasureId,
 		U1.strUnitMeasure AS strStockCommodityUnitMeasure,
 		PY.strName AS strCounterParty,
-		CD.intUnitMeasureId	AS	intDefaultCommodityUnitMeasureId
+		CD.intUnitMeasureId	AS	intDefaultCommodityUnitMeasureId,
+		BK.strBook,
+		SB.strSubBook
 
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
@@ -103,4 +105,6 @@ JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=
 JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
 JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
 JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
-JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId	
+JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
+JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						LEFT
+JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						

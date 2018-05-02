@@ -16,10 +16,12 @@ SELECT
 	,strNewValue		            =  SAL.strNewValue
 	,intCommodityId		            =  CH.intCommodityId
 	,strCommodityCode	            =  CO.strCommodityCode
-	,ysnPrinted			            =  CH.ysnPrinted
+	,ysnPrinted			            =  CASE WHEN ISNULL(SAL.strAmendmentNumber,'') <>'' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	,intCompanyLocationId           =  CD.intCompanyLocationId
 	,strLocationName                =  CL.strLocationName
 	,strAmendmentNumber		        =  SAL.strAmendmentNumber
+	,ysnSigned						=  SAL.ysnSigned
+	,dtmSigned					    =  SAL.dtmSigned
 FROM tblCTSequenceAmendmentLog	   SAL
 JOIN tblCTContractHeader		   CH  ON CH.intContractHeaderId     = SAL.intContractHeaderId
 JOIN tblEMEntity				   EY  ON EY.intEntityId		     = CH.intEntityId

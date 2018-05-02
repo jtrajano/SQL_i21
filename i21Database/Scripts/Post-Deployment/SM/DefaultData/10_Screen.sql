@@ -130,6 +130,12 @@ GO
 	ELSE
 		UPDATE tblSMScreen SET strTableName = 'tblSOSalesOrder', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction' WHERE strNamespace = 'AccountsReceivable.view.SalesOrder'
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.Invoice') 
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Invoice', N'Invoice', N'AccountsReceivable.view.Invoice', N'Accounts Receivable', N'tblARInvoice', 1,  1,  0, N'Transaction')
+	ELSE
+		UPDATE tblSMScreen SET strTableName = 'tblARInvoice', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction' WHERE strNamespace = 'AccountsReceivable.view.Invoice'
+
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName],[ysnApproval], [ysnActivity], [ysnDocumentSource], [intConcurrencyId], [strGroupName]) 

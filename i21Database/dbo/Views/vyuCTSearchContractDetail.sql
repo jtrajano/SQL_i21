@@ -69,8 +69,8 @@ AS
 			CA.strDescription				AS	strProductType,
 			dbo.fnCTGetApprovedSampleQuantity(CD.intContractDetailId) AS dblApprovedQty,
 			SB.strSubLocationName,
-			BK.strBook,
-			SK.strSubBook,
+			BK.strBook strSeqBook,
+			SK.strSubBook strSeqSubBook,
 
 			--Required by other modules
 		

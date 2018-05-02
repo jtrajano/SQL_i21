@@ -6,23 +6,29 @@ SELECT
 	,E.[strName]
 	,T.[intTicketId]
 	,T.[strTicketNumber]
-	,T.[strSubject]
+	--,T.[strSubject]
+	,strSubject = HW.[strDescription]
 	,HW.[intTicketHoursWorkedId]
 	,HW.[intAgentEntityId]
-	,U.[strName]					AS "strAgentName"
-	,GETDATE()						AS	"dtmBilled"
+	,U.[strName]						AS "strAgentName"
+	,GETDATE()							AS	"dtmBilled"
 	,HW.[dtmDate]
 	,HW.[intInvoiceId] 
 	,intJobCodeId = IC.intItemId
 	,strJobCode = IC.strItemNo
 	,ISNULL(EML.[intWarehouseId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
-									AS "intCompanyLocationId"
+										AS "intCompanyLocationId"
 	,HW.[intItemId]
 	,HW.[intItemUOMId] 
 	,IC.[strItemNo]
 	,HW.[intHours]
-	,HW.[dblRate]					AS "dblPrice"
-	,HW.[intHours] * HW.[dblRate]	AS "dblTotal"
+	,HW.[dblRate]						AS "dblPrice"
+	,HW.[intHours] * HW.[dblRate]		AS "dblTotal"
+	,HW.[intCurrencyId]					AS "intCurrencyId"
+	,HW.[intCurrencyExchangeRateTypeId] AS "intCurrencyExchangeRateTypeId"
+	,HW.[dblCurrencyRate]				AS "dblCurrencyExchangeRate"
+	,HW.[intCurrencyId]					AS "intSubCurrencyId"
+	,HW.[dblCurrencyRate]				AS "dblSubCurrencyRate"
 FROM
 	tblHDTicketHoursWorked HW
 INNER JOIN 

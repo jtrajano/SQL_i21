@@ -127,7 +127,9 @@ BEGIN
 			  intItemId			= inv.intItemId
 			, intUnitMeasureId	= unm.intUnitMeasureId
 			, dblUnitQty		= min(itm.ptitm_pak_qty)
-			, strUpcCode		= RTRIM(min(itm.ptitm_upc_code)) COLLATE Latin1_General_CI_AS
+			, strUpcCode		= CASE WHEN RTRIM(min(itm.ptitm_upc_code)) COLLATE Latin1_General_CI_AS = '' 
+									   THEN NULL 
+									   ELSE RTRIM(min(itm.ptitm_upc_code)) COLLATE Latin1_General_CI_AS END 
 			, ysnStockUnit		= CAST(1 AS BIT)
 			, ysnAllowPurchase	= CAST(1 AS BIT)
 			, ysnAllowSale		= CAST(1 AS BIT)

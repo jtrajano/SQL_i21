@@ -143,6 +143,7 @@ BEGIN
 		intEntityCustomerId	INT NOT NULL,
 		intInvoiceId INT,
 		strInvoiceNumber	VARCHAR(MAX)	COLLATE Latin1_General_CI_AS, 
+		dtmDueDate			DATETIME, 
 		dtmDate				DATETIME, 
 		dbl10Days			NUMERIC(18,6), 
 		dbl30Days			NUMERIC(18,6), 
@@ -151,7 +152,6 @@ BEGIN
 		dbl120Days			NUMERIC(18,6), 
 		dbl121Days			NUMERIC(18,6),
 		dblAmount			NUMERIC(18,6) DEFAULT(0),
-		dtmDueDate			DATETIME, 
 		strTerm				NVARCHAR(100)	COLLATE Latin1_General_CI_AS
 	)
 
@@ -533,6 +533,8 @@ BEGIN
 	WHILE EXISTS(SELECT NULL FROM @temp_SelectedCustomer)
 		BEGIN
 			DECLARE @CustomerId INT
+			DECLARE @ARBalance DECIMAL(18,6);
+
 			SELECT TOP 1 @CustomerId = intEntityCustomerId FROM @temp_SelectedCustomer ORDER BY intEntityCustomerId
 							
 			WHILE EXISTS(SELECT NULL FROM @SelectedPlaceHolderTable)
@@ -564,8 +566,8 @@ BEGIN
 							, @NotTableQuery	VARCHAR(MAX);
 
 					SET @NotTableQuery = 'DECLARE @SetQuery				VARCHAR(MAX)
-													,@InsertQuery		VARCHAR(MAX)							 						
- 
+													,@InsertQuery		VARCHAR(MAX)
+
 											IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
 											CREATE TABLE #Records(
 												RowId							INT,
@@ -610,7 +612,7 @@ BEGIN
 												, intEntityCustomerId
 												, strValues = STUFF((SELECT '', '' + ' + @SourceColumn + ' 												
 																	FROM 
-																		@TermTable 
+																		@TermTable
 																	WHERE 
 																		intEntityCustomerId = t.intEntityCustomerId
 																	FOR XML PATH(''''), TYPE)
@@ -620,8 +622,8 @@ BEGIN
 											FROM 
 												@TermTable t
 											GROUP BY 
-												intEntityCustomerId		
-																					
+												intEntityCustomerId	
+											
 						 					UPDATE 
 												#Records
 											SET strValues = 
@@ -660,16 +662,18 @@ BEGIN
 					BEGIN CATCH
 						PRINT 'Exception' --To catch exception only
 					END CATCH	
-
-					DECLARE @ARBalance DECIMAL(18,6);
-					
+			
 					IF(@strTableSource = 'vyuARCollectionOverdueReport')
 					BEGIN
-						SELECT @ARBalance = SUM(O.dblTotalDue) 
-						FROM  vyuARCollectionOverdueReport O
-						INNER JOIN #TransactionLetterDetail D ON D.intInvoiceId = O.intInvoiceId
-						WHERE O.intEntityCustomerId = @CustomerId
-						GROUP BY O.intEntityCustomerId
+						SELECT @ARBalance = SUM(D.dblAmount) 
+						FROM (
+							SELECT DISTINCT intInvoiceId, intEntityCustomerId, dblInvoiceTotal, dblTotalDue 
+							FROM vyuARCollectionOverdueReport
+							WHERE dblTotalDue >= 0
+						) OVERDUE
+						INNER JOIN (SELECT DISTINCT dblAmount, intInvoiceId, strInvoiceNumber FROM #TransactionLetterDetail) D ON D.intInvoiceId = OVERDUE.intInvoiceId
+						WHERE OVERDUE.intEntityCustomerId = @CustomerId
+						GROUP BY OVERDUE.intEntityCustomerId
 					END
 					ELSE IF(@strTableSource = 'vyuARServiceChargeInvoiceReport')
 					BEGIN
@@ -689,7 +693,25 @@ BEGIN
 					UPDATE #CustomerPlaceHolder 
 					SET strValue = CONVERT(varchar, CAST(@ARBalance AS money), 1)
 					WHERE strPlaceHolder = '[ARBalance]' AND intEntityCustomerId = @CustomerId;
-
+					
+					IF(@PlaceHolder IN ('[TransactionNumber]','[TransactionTotal]'))
+					BEGIN
+						SET @NotTableQuery = '
+							UPDATE #CustomerPlaceHolder
+							SET strValue = STUFF((SELECT '', '' + ' + @SourceColumn + ' 												
+								FROM 
+									(SELECT intInvoiceId, strInvoiceNumber, dblInvoiceTotal = CONVERT(varchar, CAST(MAX(dblAmount) AS money), 1), intEntityCustomerId 
+										FROM #TransactionLetterDetail
+										GROUP BY intInvoiceId, strInvoiceNumber, intEntityCustomerId
+									) t
+								WHERE 
+									intEntityCustomerId = t.intEntityCustomerId
+								FOR XML PATH(''''), TYPE).value(''.'',''NVARCHAR(MAX)''),1,2,'' '')
+							WHERE strPlaceHolder = '''+ @PlaceHolder +'''
+							AND intEntityCustomerId = ' + CAST(@CustomerId AS VARCHAR(200)) + '
+						';
+						EXEC sp_sqlexec @NotTableQuery
+					END
 				END
 			ELSE
 				BEGIN
@@ -951,24 +973,24 @@ BEGIN
 						WHERE 
 							[intEntityCustomerId] = ' + CAST(@CustomerId AS VARCHAR(200))
 						+ ' AND strInvoiceNumber IN (SELECT strInvoiceNumber FROM #TransactionLetterDetail) ORDER BY intInvoiceId DESC
-				 
- 
+						
   						IF OBJECT_ID(''tempdb..#RecordsNoRowId'') IS NOT NULL DROP TABLE #RecordsNoRowId
 						SELECT 		
 							RowId = ROW_NUMBER() OVER (ORDER BY (SELECT NULL))						
-							, strInvoiceNumber
-							, SUM(dblTotalDue) dblTotalDue 
+							, TR.strInvoiceNumber
+							, SUM(TR.dblTotalDue) dblTotalDue 
 						INTO
 							#RecordsNoRowId
 						FROM 
-							#TempRecords 
-						GROUP BY strInvoiceNumber
+							(SELECT DISTINCT dblTotalDue, strInvoiceNumber FROM #TempRecords) TR
+						GROUP BY TR.strInvoiceNumber
 					
 								
 						IF OBJECT_ID(''tempdb..#Records'') IS NOT NULL DROP TABLE #Records
 						SELECT 
 								RowId
 							, INV.dtmDate
+							, INV.dtmDueDate
 							, #RecordsNoRowId.strInvoiceNumber
 							, #RecordsNoRowId.dblTotalDue 
 						INTO
@@ -978,6 +1000,7 @@ BEGIN
 						INNER JOIN (SELECT 
 											strInvoiceNumber
 											, dtmDate
+											, dtmDueDate
 									FROM 
 										tblARInvoice WITH(NOLOCK)
 									WHERE 
@@ -1528,8 +1551,6 @@ BEGIN
 		 , intEntityCustomerId	= [intEntityCustomerId]
 		 , strPlaceValue		= [strValue]
 	FROM #CustomerPlaceHolder
-	
-	DECLARE @SAMP VARCHAR(MAX) = dbo.[fnARConvertLetterMessage](@originalMsgInHTML, 1308, @PlaceHolderTable);
 	
 	SELECT SC.*
 		, blbMessage			= dbo.[fnARConvertLetterMessage](@strMessage, SC.intEntityCustomerId , @PlaceHolderTable)

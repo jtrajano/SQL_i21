@@ -750,6 +750,7 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
     <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
@@ -2423,7 +2424,6 @@
     <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseOnStorageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
@@ -6235,7 +6235,6 @@
     <Build Include="dbo\Tables\tblTFTaxAuthorityCountyLocation.sql" />
     <Build Include="dbo\Tables\tblTFCountyLocation.sql" />
     <Build Include="dbo\Views\vyuTFGetTaxAuthorityCountyLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuICGetItemsWithNoLocation.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebatePrograms.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicNM.sql" />
@@ -6319,7 +6318,6 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOSampleDetail.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1830_AttachmentMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
     <Build Include="dbo\Views\vyuHDTicketHoursWorked.sql" />
     <Build Include="dbo\Tables\tblSMCSVDynamicImport.sql" />
@@ -6333,7 +6331,123 @@
     <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesHistoryInsert.sql" />
     <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
     <Build Include="dbo\Tables\tblLGAllocationHeaderOrigin.sql" />
+    <Build Include="dbo\Views\vyuARForApprovalTransction.sql" />
     <Build Include="dbo\Views\vyuHDInventoryItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPosting.sql" />
+    <Build Include="dbo\Tables\tblCTBookVsEntity.sql" />
+    <Build Include="dbo\Views\vyuCTBookVsEntity.sql" />
+    <Build Include="dbo\Tables\tblLGInsurancePremiumFactor.sql" />
+    <Build Include="dbo\Tables\tblLGInsurancePremiumFactorDetail.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLineServiceContract.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLineServiceContractDetail.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationConfiguration.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeCategory.sql" />
+    <Build Include="dbo\Functions\fnCMGetACHTransactionCode.sql" />
+    <Build Include="dbo\Views\vyuICGetItemVendorPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
+    <Build Include="dbo\Tables\tblHDTimeEntry.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutDeleteInvoice.sql" />
+    <Build Include="dbo\Tables\tblRKCollateralHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCollateralHistoryInsert.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyTransactionConfiguration.sql" />
+    <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderRecipeCategory.sql" />
+    <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkCost.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkCostStaging.sql" />
+    <Build Include="dbo\Tables\tblCFImportNetworkCostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportNetworkCost.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoice.sql" />
+    <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInTransitDirect.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyTransactionType.sql" />
+    <Build Include="dbo\Views\vyuPATSetupItem.sql" />
+    <Build Include="dbo\Tables\tblCFItemCategory.sql" />
+    <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
+    <Build Include="dbo\Views\vyuSOGetSalesOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateContractQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessInterCompanyLogisticsXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPopulateLoadXML.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompLogisticsStg.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompLogisticsAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedMiscItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
+    <Build Include="dbo\Tables\tblAPBalanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
+    <Build Include="dbo\Tables\tblCFAccountQuoteSite.sql" />
+    <Build Include="dbo\User Defined Types\QualityPropertyValueTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleCreateForScaleTicket.sql" />
+    <Build Include="dbo\User Defined Types\ApprovalConfigurationType.sql" />
+    <Build Include="dbo\Functions\fnSMCompareApproverConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddApprovalsForTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMSubmitTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportIndexPricingBySiteGroup.sql" />
+    <Build Include="dbo\Tables\tblCFCSRSingleQuoteDetailTax.sql" />
+    <Build Include="dbo\Tables\tblCFCSRSingleQuote.sql" />
+    <Build Include="dbo\Tables\tblCFAccountQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateQuoting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptReport.sql" />
+    <Build Include="dbo\Views\vyuCTContractCertification.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportGroupAdjustmentRate.sql" />
+    <Build Include="dbo\Tables\tblCTContractStage.sql" />
+    <Build Include="dbo\Tables\tblCTContractAcknowledgementStage.sql" />
+    <Build Include="dbo\Tables\tblCTPriceContractStage.sql" />
+    <Build Include="dbo\Tables\tblCTPriceContractAcknowledgementStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceContractProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPayCommission.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostCommission.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidCommissionForPosting.sql" />
+    <Build Include="dbo\User Defined Types\CommissionPostingTable.sql" />
+    <Build Include="dbo\Tables\tblMFItemGradeDiff.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessLogisticsXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGInterCompanyTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPopulateLoadUpdateXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetAcknowledgementXML.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Functions\fnARGetItemsForInTransitCostingForFinalInvoice.sql" />
+    <Build Include="dbo\Functions\fnARGetItemsForInTransitCostingForProvisionalReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessLogisticsAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInterCompanyContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInterCompanyPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTContractProcessUpdateStgXML.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessRefund.sql" />
+    <Build Include="dbo\Tables\tblSTStoreTaxTotals.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetStorageDetailByDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetOpenContractByDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetStorageOffSiteDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVendorPricingFromCSV.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateAccountQuoting.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInterCompanyDerivativeEntryTransferStgXML.sql" />
+    <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryAcknowledgementStage.sql" />
+    <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryStage.sql" />
+    <Build Include="dbo\Tables\tblCFSiteGroupPriceAdjustmentHeader.sql" />
+    <None Include="Scripts\Post-Deployment\CF\3_DataFixPriceAdjustment.sql" />
+    <Build Include="dbo\Functions\fnAPGetPaymentForexRate.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherCheckOffDetailPerPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6504,6 +6618,9 @@
     <None Include="Scripts\Post-Deployment\TR\CleanUp_TR_Data.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\SC_SouthCarolina.sql" />
     <None Include="Scripts\Post-Deployment\TF\DefaultData\PA_Pennsylvania.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -6604,5 +6721,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\NM_NewMexico.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\EM\1810_Fix_CustomTab_ControlName.sql" />
   </ItemGroup>
 </Project>

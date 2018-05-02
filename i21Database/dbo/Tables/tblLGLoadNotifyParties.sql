@@ -11,6 +11,7 @@
 [intEntityLocationId] INT NULL,
 [intCompanyLocationId] INT NULL,
 [strText] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
+[intLoadNotifyPartyRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoadNotifyParties] PRIMARY KEY ([intLoadNotifyPartyId]), 
 CONSTRAINT [FK_tblLGLoadNotifyParties_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]) ON DELETE CASCADE,

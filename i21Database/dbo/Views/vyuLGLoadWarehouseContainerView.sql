@@ -96,6 +96,10 @@ SELECT DISTINCT  L.intLoadId
 		END COLLATE Latin1_General_CI_AS AS strShipmentType
 		,BI.strBillId
 		,BI.intBillId
+	    ,L.intBookId
+	    ,BO.strBook
+	    ,L.intSubBookId
+	    ,SB.strSubBook
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -117,4 +121,6 @@ LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
 LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 WHERE L.intShipmentType = 1

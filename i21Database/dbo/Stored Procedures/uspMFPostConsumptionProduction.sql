@@ -16,7 +16,7 @@
 	,@dtmProductionDate DATETIME = NULL
 	,@intTransactionDetailId INT = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
-	,@intLotStatusId INT=NULL
+	,@intLotStatusId INT = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -58,6 +58,10 @@ BEGIN
 		,@strLocationName NVARCHAR(50)
 		,@intManufacturingCellId INT
 		,@ysnLifeTimeByEndOfMonth BIT
+		,@strCertificate NVARCHAR(50)
+		,@intProducerId INT
+		,@strCertificateId NVARCHAR(50)
+		,@strTrackingNumber NVARCHAR(255)
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
@@ -256,7 +260,7 @@ BEGIN
 
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
 		,@ysnConsumptionRequired BIT
-
+		,@dblTotalOtherCharges NUMERIC(18, 6)
 	SELECT @ysnConsumptionRequired = ysnConsumptionRequired
 	FROM tblMFWorkOrderRecipeItem RI
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -300,7 +304,7 @@ BEGIN
 		GROUP BY RI.intRecipeItemId
 			,RI.intItemId
 
-		SELECT @dblOtherCharges = SUM(dblOtherCharge)
+		SELECT @dblTotalOtherCharges = SUM(dblOtherCharge)
 		FROM @tblMFOtherChargeItem
 	END
 
@@ -315,10 +319,10 @@ BEGIN
 		SELECT @dblCostPerStockUOM = dbo.fnCalculateUnitCost(@dblNewUnitCost, @dblUnitQty)
 	END
 
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
+	IF @dblTotalOtherCharges IS NOT NULL
+		AND @dblTotalOtherCharges > 0
 	BEGIN
-		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
+		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblTotalOtherCharges
 	END
 
 	IF @strLotTracking <> 'No'
@@ -353,6 +357,23 @@ BEGIN
 		ELSE
 			SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
 
+		IF (
+				SELECT Count(DISTINCT strCertificate)
+				FROM dbo.tblICLot L
+				JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
+				WHERE WC.intWorkOrderId = @intWorkOrderId
+					AND WC.intBatchId = @intBatchId
+				) = 1
+		BEGIN
+			SELECT @strCertificate = strCertificate
+				,@intProducerId = intProducerId
+				,@strCertificateId = strCertificateId
+				,@strTrackingNumber = strTrackingNumber
+			FROM dbo.tblICLot L
+			JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
+			WHERE WC.intWorkOrderId = @intWorkOrderId AND WC.intBatchId = @intBatchId
+		END
+
 		INSERT INTO @ItemsThatNeedLotId (
 			intLotId
 			,strLotNumber
@@ -382,6 +403,10 @@ BEGIN
 			,strTransactionId
 			,strSourceTransactionId
 			,intSourceTransactionTypeId
+			,strCertificate
+			,intProducerId
+			,strCertificateId
+			,strTrackingNumber
 			)
 		SELECT intLotId = NULL
 			,strLotNumber = @strLotNumber
@@ -411,6 +436,10 @@ BEGIN
 			,strTransactionId = @strWorkOrderNo
 			,strSourceTransactionId = @strWorkOrderNo
 			,intSourceTransactionTypeId = @INVENTORY_PRODUCE
+			,strCertificate = @strCertificate
+			,intProducerId = @intProducerId
+			,strCertificateId = @strCertificateId
+			,strTrackingNumber = @strTrackingNumber
 
 		EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 			,@intUserId
@@ -435,12 +464,12 @@ BEGIN
 		,@dblOtherCharge NUMERIC(18, 6)
 		,@intOtherChargeItemLocationId INT
 
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
+	IF @dblTotalOtherCharges IS NOT NULL
+		AND @dblTotalOtherCharges > 0
 	BEGIN
 		SELECT @intRecipeItemUOMId = intItemUOMId
-		FROM tblMFWorkOrderRecipe
-		WHERE intWorkOrderId = @intWorkOrderId
+		FROM tblMFWorkOrderRecipeItem
+		WHERE intWorkOrderId = @intWorkOrderId and intItemId=@intItemId
 	END
 
 	DELETE
@@ -736,7 +765,13 @@ BEGIN
 		AND intBatchId = @intBatchId
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
-	SET strBatchId = @strBatchId
+	SET strBatchId = @strBatchId,dblOtherCharges=(
+					CASE 
+						WHEN @intRecipeItemUOMId = @intItemUOMId
+							THEN @dblOtherCharges * @dblQty
+						ELSE @dblOtherCharges * @dblWeight
+						END
+					)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
 

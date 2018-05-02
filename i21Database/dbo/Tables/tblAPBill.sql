@@ -5,7 +5,10 @@
     [intTermsId]           INT             NOT NULL DEFAULT 0,
     [intTransactionReversed]				INT             NULL ,
 	[intCommodityId]				INT             NULL ,
+	[intCompanyId]				INT             NULL ,
 	[intBankInfoId]				INT             NULL ,
+	[intBookId]	INT NULL,
+	[intSubBookId] INT NULL,
 	[ysnPrepayHasPayment]				BIT             NOT NULL DEFAULT 0,
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
@@ -95,7 +98,9 @@
 	CONSTRAINT [FK_tblAPBill_intPurchaseOrderId] FOREIGN KEY ([intPurchaseOrderId]) REFERENCES tblPOPurchase([intPurchaseId]),
 	CONSTRAINT [FK_tblAPBill_intPayToAddressId] FOREIGN KEY ([intPayToAddressId]) REFERENCES tblEMEntityLocation([intEntityLocationId]),
 	CONSTRAINT [FK_tblAPBill_intStoreLocationId] FOREIGN KEY ([intStoreLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
-	CONSTRAINT [FK_tblAPBill_intDeferredVoucherId] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES tblAPBill([intBillId])
+	CONSTRAINT [FK_tblAPBill_intDeferredVoucherId] FOREIGN KEY ([intDeferredVoucherId]) REFERENCES tblAPBill([intBillId]),
+	CONSTRAINT [FK_tblAPBill_intBookId] FOREIGN KEY ([intBookId]) REFERENCES tblCTBook([intBookId]),
+	CONSTRAINT [FK_tblAPBill_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES tblCTSubBook([intSubBookId])
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_intBillBatchId]

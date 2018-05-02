@@ -219,8 +219,48 @@ WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
+	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 	
+
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+INSERT INTO tblARCustomerAgingStagingTable (
+		  strCustomerName
+		, strCustomerNumber
+		, strCustomerInfo
+		, strInvoiceNumber
+		, strRecordNumber
+		, intInvoiceId
+		, intPaymentId
+		, strBOLNumber
+		, intEntityCustomerId
+		, intEntityUserId
+		, dblCreditLimit
+		, dblTotalAR
+		, dblFuture
+		, dbl0Days
+		, dbl10Days
+		, dbl30Days
+		, dbl60Days
+		, dbl90Days
+		, dbl120Days
+		, dbl121Days
+		, dblTotalDue
+		, dblAmountPaid
+		, dblInvoiceTotal
+		, dblCredits
+		, dblPrepayments
+		, dblPrepaids
+		, dtmDate
+		, dtmDueDate
+		, dtmAsOfDate
+		, strSalespersonName
+		, intCompanyLocationId
+		, strSourceTransaction
+		, strType
+		, strCompanyName
+		, strCompanyAddress
+		, strAgingType
+)	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
 	 , strCustomerInfo		= CUSTOMER.strCustomerName + CHAR(13) + CUSTOMER.strCustomerNumber
@@ -435,7 +475,7 @@ WHERE I.strTransactionType IN ('Invoice', 'Debit Memo')
 ON
 A.intEntityCustomerId	 = B.intEntityCustomerId
 AND A.intInvoiceId		 = B.intInvoiceId
-
+ 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 OUTER APPLY (
@@ -443,3 +483,4 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+LEFT JOIN (SELECT intEntityCustomerId, dblARBalance FROM vyuARCustomerSearch) CUSTAR ON CUSTAR.intEntityCustomerId = AGING.intEntityCustomerId 

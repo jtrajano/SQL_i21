@@ -89,6 +89,10 @@ SELECT CD.intContractDetailId
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 	,CO.strCountry AS strOrigin
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -110,6 +114,8 @@ LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND CD.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
@@ -238,6 +244,10 @@ SELECT CD.intContractDetailId
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 	,CO.strCountry AS strOrigin
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -253,6 +263,8 @@ LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND CD.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
@@ -347,3 +359,7 @@ GROUP BY CD.intContractDetailId
 	,WG.ysnSample
 	,CD.dblShippingInstructionQty
 	,CO.strCountry
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook

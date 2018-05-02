@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[intStorageLocationId] INT NOT NULL, 
 		[intCategoryId] INT NOT NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageLocationCategory] PRIMARY KEY ([intStorageLocationCategoryId]), 
 		CONSTRAINT [FK_tblICStorageLocationCategory_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 

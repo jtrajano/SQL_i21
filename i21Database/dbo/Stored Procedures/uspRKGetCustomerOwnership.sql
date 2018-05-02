@@ -1,11 +1,9 @@
 ﻿CREATE PROC [dbo].[uspRKGetCustomerOwnership]
-
        @dtmFromTransactionDate datetime = null,
 	   @dtmToTransactionDate datetime = null,
 	   @intCommodityId int =  null,
 	   @intItemId int= null,
 		  @strPositionIncludes nvarchar(100) = NULL
-
 AS
 
 IF OBJECT_ID('tempdb..#tempCustomer') IS NOT NULL
@@ -15,40 +13,34 @@ IF OBJECT_ID('tempdb..##temp1') IS NOT NULL
 IF OBJECT_ID('tempdb..#final') IS NOT NULL
     DROP TABLE #final
 
-DECLARE @ysnDisplayAllStorage bit
-select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
-
-SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId 
-INTO #tempCustomer FROM (
-   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(dblOutQty,2)) dblOut,round(sum(dblInQty),2)-round(sum(dblOutQty),2) dblNet,intStorageScheduleTypeId FROM(		
+SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet
+ into #tempCustomer 
+ FROM (
+   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2))dblOut,round(sum(dblInQty),2)-sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2)) dblNet FROM(		
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
-																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty ,gs.intStorageScheduleTypeId 				
+																								CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty  
+			,(select sum(SH.dblUnits) from tblGRStorageHistory SH
+				JOIN  tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+				JOIN tblGRSettleStorageTicket ST1 ON ST1.intCustomerStorageId = CS.intCustomerStorageId AND ST1.intSettleStorageId = SH.intSettleStorageId
+				JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = ST1.intSettleStorageId 
+				WHERE strType='Settlement' 
+				AND  ysnPosted=1 and CS.intTicketId=st.intTicketId and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
+										= convert(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110)) 	dblSettleUnit																										
 		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId 		
-							AND  st.intProcessingLocationId  IN (
-													SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i on i.intItemId=st.intItemId 								
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
 		WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer' and strTicketStatus='C'
-		  )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
+		AND  st.intProcessingLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		  )t     GROUP BY  dtmDate,strStorageTypeDescription
 ) t1
-
-IF (@ysnDisplayAllStorage=1)
-	BEGIN			 
-		declare @intRowNumber int
-		SELECT TOP 1 @intRowNumber=intRowNum FROM #tempCustomer order by intRowNum desc
-		INSERT INTO #tempCustomer (intRowNum,dtmDate,strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId)
-			SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription))+@intRowNumber,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),strStorageTypeDescription,0.0,0.0,0.0,intStorageScheduleTypeId
-			FROM tblGRStorageType  
-			WHERE ISNULL(ysnActive,0) = 1 AND intStorageScheduleTypeId > 0 AND intStorageScheduleTypeId not in(SELECT DISTINCT intStorageScheduleTypeId FROM #tempCustomer)
-	END
-	
 declare @TempTableCreate nvarchar(max)=''
 SELECT @TempTableCreate+='['+t.strDistribution +'_strDistribution] NVARCHAR(100)  COLLATE Latin1_General_CI_AS  NULL,'+
 	   '['+t.strDistribution +'_In]  NUMERIC(18, 6) NULL,'+

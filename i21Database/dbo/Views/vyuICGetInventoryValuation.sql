@@ -117,9 +117,9 @@ FROM 	tblICItem i
 					AND ld.intItemId = t.intItemId		
 					AND ty.intTransactionTypeId = 44
 		) loadShipmentSchedule 
-		LEFT JOIN tblGRCustomerStorage settleStorage 
-			ON settleStorage.intCustomerStorageId = t.intTransactionId
-			AND settleStorage.intCustomerStorageId = t.intTransactionDetailId
+		LEFT JOIN tblGRSettleStorage settleStorage 
+			ON settleStorage.intSettleStorageId = t.intTransactionId
+			AND settleStorage.intSettleStorageId = t.intTransactionDetailId
 			AND t.strTransactionForm IN ('Settle Storage', 'Storage Settlement')
 			AND ty.intTransactionTypeId = 44 
 		LEFT JOIN tblEMEntity e 

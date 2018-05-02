@@ -30,6 +30,8 @@
 			,d.dtmJiraCreated
 			,d.dtmJiraUpdated
 			,d.strFixedVersion
+			,d.strOriginalEstimate
+			,d.intOriginalEstimateSeconds
 		from
 			tblHDTicket b
 			,tblHDTicketJIRAIssue d

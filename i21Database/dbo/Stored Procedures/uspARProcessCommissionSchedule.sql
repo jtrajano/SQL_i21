@@ -191,7 +191,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 										, 0
 										, CS.ysnPayroll
 										, CS.ysnPayables
-										, @dblLineTotal
+										, ISNULL(@dblLineTotal, 0)
 										, NULL
 										, @batchId
 										, 1
@@ -234,7 +234,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 												, ysnRejected
 												, ysnPayroll
 												, ysnPayables
-												, dblTotalAmount
+												, ISNULL(dblTotalAmount, 0)
 												, strReason
 												, 1
 											FROM tblARCommissionRecap

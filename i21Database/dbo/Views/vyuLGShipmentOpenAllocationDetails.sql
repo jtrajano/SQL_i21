@@ -59,6 +59,10 @@ FROM (
 		,(ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)) AS dblAvailableAllocationQty
 		,dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId) dblQtyConversionFactor
 		,(ISNULL(CDP.dblQuantity,0)-ISNULL(CDP.dblScheduleQty,0)) dblAvailableContractQty
+		,AH.intBookId
+		,BO.strBook
+		,AH.intSubBookId
+		,SB.strSubBook
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 	JOIN tblCTContractDetail CDP ON CDP.intContractDetailId = AD.intPContractDetailId
@@ -81,6 +85,7 @@ FROM (
 		FROM tblLGLoadDetail SP
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
 			AND L.intPurchaseSale = 3
+			AND L.intShipmentType = 1
 		GROUP BY SP.intAllocationDetailId
 		) LD ON AD.intAllocationDetailId = LD.intAllocationDetailId
 	LEFT JOIN (
@@ -103,6 +108,8 @@ FROM (
 	LEFT JOIN tblSMCountry CP ON CP.intCountryID = CAP.intCountryID
 	LEFT JOIN tblICCommodityAttribute CAS ON CAS.intCommodityAttributeId = ITS.intOriginId
 	LEFT JOIN tblSMCountry CS ON CS.intCountryID = CAS.intCountryID
+	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
 		AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
 	  ) tbl 

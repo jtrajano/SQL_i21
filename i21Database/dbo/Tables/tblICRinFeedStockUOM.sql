@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[intUnitMeasureId] INT NULL, 
 		[strRinFeedStockUOMCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICRinFeedStockUOM] PRIMARY KEY ([intRinFeedStockUOMId]), 
 		CONSTRAINT [FK_tblICRinFeedStockUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

@@ -43,6 +43,10 @@ SELECT DISTINCT SSH.intStockSalesHeaderId
 		ELSE SL.strSubLocationName
 		END AS strContractCity
 	,CN.strCountry AS strContractCountry
+	,SSH.intBookId
+	,BO.strBook
+	,SSH.intSubBookId
+	,SB.strSubBook
 FROM tblLGStockSalesHeader SSH
 JOIN tblLGStockSalesLotDetail SSLD ON SSH.intStockSalesHeaderId = SSLD.intStockSalesHeaderId
 JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = SSH.intAllocationHeaderId
@@ -60,3 +64,5 @@ LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocation
 LEFT JOIN tblSMCurrency C ON C.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 LEFT JOIN tblSMCountry CN ON CN.intCountryID = CH.intCountryId
+LEFT JOIN tblCTBook BO ON BO.intBookId = SSH.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = SSH.intSubBookId

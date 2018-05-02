@@ -7,6 +7,7 @@
     [strRate]          NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
     [dblCommission]    NUMERIC (18, 2) NULL,
     [intSalespersonId] INT             NULL,
+	[intCompanyId]	   INT			   NULL,
     [intConcurrencyId] INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerCommission] PRIMARY KEY CLUSTERED ([intCommissionId] ASC)
 );

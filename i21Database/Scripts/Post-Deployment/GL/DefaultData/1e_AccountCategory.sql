@@ -106,7 +106,22 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			,1
 		);
 	SET  IDENTITY_INSERT tblGLAccountCategory OFF
-GO
+	
+	GO
+		PRINT 'Finished generating default account categories'
+	GO
+		PRINT 'Started removing unused account categories'
+	IF EXISTS (SELECT TOP 1  1 FROM tblGLAccountCategory WHERE strAccountCategory IN ('DP Income', 'DP Liability', 'Rail Freight'))
+	BEGIN --GL-4338
+		UPDATE t  SET intAccountCategoryId = 47  -- Set to General Category
+		FROM tblGLAccountSegment t JOIN tblGLAccountCategory g 
+		ON g.intAccountCategoryId = t.intAccountCategoryId WHERE strAccountCategory IN ('DP Income', 'DP Liability', 'Rail Freight')
+		DELETE FROM tblGLAccountCategory WHERE strAccountCategory IN ('DP Income', 'DP Liability', 'Rail Freight')
+
+	END
+	GO
+		PRINT 'Finished removing unused account categories'
+	GO
 
 
 BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
@@ -198,8 +213,6 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Maintenance Sales'
 	END	
 END
-GO
-	PRINT 'Finished generating default account categories'
 GO
 	PRINT 'Start updating account group category ids'
 GO

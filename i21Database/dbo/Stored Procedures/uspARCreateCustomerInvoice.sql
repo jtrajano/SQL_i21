@@ -21,6 +21,7 @@
 	,@ShipViaId						INT				= NULL
 	,@PaymentMethodId				INT				= NULL
 	,@InvoiceOriginId				NVARCHAR(25)	= NULL
+	,@MobileBillingShiftNo			NVARCHAR(50)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
 	,@Comment						NVARCHAR(500)	= ''			
@@ -52,11 +53,12 @@
 	,@ItemIsInventory				BIT				= 0
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
-	,@OrderUOMId					INT				= NULL
+	,@ItemOrderUOMId				INT				= NULL
 	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
 	,@ItemUOMId						INT				= NULL
-	,@PriceUOMId					INT				= NULL
+	,@ItemPriceUOMId				INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
+	,@ItemUnitQuantity				NUMERIC(18,6)	= 1.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
@@ -327,7 +329,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid invoice type!', 16, 1, @TransactionType);
@@ -385,6 +387,7 @@ BEGIN TRY
 		,[intShipViaId]
 		,[intPaymentMethodId]
 		,[strInvoiceOriginId]
+		,[strMobileBillingShiftNo]
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
@@ -458,6 +461,7 @@ BEGIN TRY
 		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= (SELECT intPaymentMethodID FROM tblSMPaymentMethod WHERE intPaymentMethodID = @PaymentMethodId)
 		,[strInvoiceOriginId]			= @InvoiceOriginId
+		,[strMobileBillingShiftNo]		= @MobileBillingShiftNo
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
@@ -604,10 +608,10 @@ BEGIN TRY
 		,@RaiseError					= @RaiseError
 		,@ItemDocumentNumber			= @ItemDocumentNumber
 		,@ItemDescription				= @ItemDescription
-		,@OrderUOMId					= @OrderUOMId
+		,@ItemOrderUOMId				= @ItemOrderUOMId
 		,@ItemQtyOrdered				= @ItemQtyOrdered
 		,@ItemUOMId						= @ItemUOMId
-		,@PriceUOMId					= @PriceUOMId
+		,@ItemPriceUOMId				= @ItemPriceUOMId
 		,@ItemQtyShipped				= @ItemQtyShipped
 		,@ItemDiscount					= @ItemDiscount
 		,@ItemTermDiscount				= @ItemTermDiscount

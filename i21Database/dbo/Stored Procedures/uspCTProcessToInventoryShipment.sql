@@ -82,20 +82,23 @@ AS
 				intLineNo				=	CD.intContractDetailId,
 				intWeightUOMId			=	CD.intNetWeightUOMId,
 				dblUnitPrice			=	CASE	WHEN	CD.intPricingTypeId = 2 
-													THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + CD.dblBasis
-													ELSE	AD.dblSeqPrice
+													THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + 
+															dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis)
+													ELSE	dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice)
 											END,
 				intCurrencyId			=	AD.intSeqCurrencyId,
 				intForexRateTypeId		=	CD.intRateTypeId,
 				dblForexRate			=	CD.dblRate,
 				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq),
-				intPriceUOMId			=	CD.intPriceItemUOMId
+				intPriceUOMId			=	IU.intItemUOMId
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		JOIN	tblEMEntityLocation			EL	ON	EL.intEntityId			=	CH.intEntityId	AND
-													EL.ysnDefaultLocation	=	1				
+													EL.ysnDefaultLocation	=	1			
+		JOIN	tblICItemUOM				IU	ON	IU.intItemId	=	CD.intItemId	
+												AND	IU.ysnStockUOM	=	1															
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		INSERT	INTO	@OtherCharges

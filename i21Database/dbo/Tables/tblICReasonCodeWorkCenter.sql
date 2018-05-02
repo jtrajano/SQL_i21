@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[intReasonCodeId] INT NOT NULL, 
 		[strWorkCenterId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intSort] INT NULL DEFAULT ((0)), 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICReasonCodeWorkCenter] PRIMARY KEY ([intReasonCodeWorkCenterId]), 
 		CONSTRAINT [FK_tblICReasonCodeWorkCenter_tblICReasonCode] FOREIGN KEY ([intReasonCodeId]) REFERENCES [tblICReasonCode]([intReasonCodeId]) ON DELETE CASCADE 

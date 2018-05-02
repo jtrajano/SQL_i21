@@ -9,6 +9,7 @@
 	[ysnForgiven]				BIT				NULL DEFAULT(0),
 	[ysnCalculated]				BIT				NULL DEFAULT(0),
 	[dtmCalculated]				DATETIME		NULL,
+	[intCompanyId]				INT				NULL,
     [intConcurrencyId]			INT				NOT NULL,
     CONSTRAINT [PK_tblARCustomerBudget] PRIMARY KEY CLUSTERED ([intCustomerBudgetId] ASC),
 	CONSTRAINT [FK_tblARCustomerBudget_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE

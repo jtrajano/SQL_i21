@@ -14,6 +14,7 @@
 	[strFormulaParser] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strDefaultValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblQMProperty_strDefaultValue] DEFAULT '',
 	[ysnNotify] bit CONSTRAINT [DF_tblQMProperty_ysnNotify] DEFAULT 0,
+	[intItemId] INT, 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProperty_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
@@ -23,5 +24,6 @@
 	CONSTRAINT [AK_tblQMProperty_strPropertyName] UNIQUE ([strPropertyName]), 
 	CONSTRAINT [FK_tblQMProperty_tblQMAnalysisType] FOREIGN KEY ([intAnalysisTypeId]) REFERENCES [tblQMAnalysisType]([intAnalysisTypeId]), 
 	CONSTRAINT [FK_tblQMProperty_tblQMDataType] FOREIGN KEY ([intDataTypeId]) REFERENCES [tblQMDataType]([intDataTypeId]), 
+	CONSTRAINT [FK_tblQMProperty_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
 	CONSTRAINT [FK_tblQMProperty_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId]) 
 )

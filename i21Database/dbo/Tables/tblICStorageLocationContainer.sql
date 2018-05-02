@@ -20,6 +20,7 @@ Type the overview for the table here.
 		[strLastUpdatedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmLastUpdatedOn] DATETIME NULL, 
 		[intSort] INT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageLocationContainer] PRIMARY KEY ([intStorageLocationContainerId]), 
 		CONSTRAINT [FK_tblICStorageLocationContainer_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 

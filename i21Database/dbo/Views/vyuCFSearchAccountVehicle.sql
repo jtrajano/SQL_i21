@@ -25,6 +25,7 @@ emEnt.strName AS strCustomerName
 ,icItem.strItemNo as strItem
 ,icItem.strDescription as strItemDescription
 ,strDepartment =  cfDept.strDepartment
+,cfVehicle.strComment
 FROM   dbo.tblCFVehicle AS cfVehicle 
 INNER JOIN dbo.tblCFAccount AS cfAccount ON cfAccount.intAccountId = cfVehicle.intAccountId 
 INNER JOIN dbo.tblARCustomer AS arCust ON arCust.intEntityId = cfAccount.intCustomerId

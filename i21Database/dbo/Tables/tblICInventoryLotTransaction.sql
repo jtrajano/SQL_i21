@@ -33,6 +33,7 @@ This table logs all inventory transactions related to Lot
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLotTransaction] PRIMARY KEY ([intInventoryLotTransactionId]),
 		CONSTRAINT [FK_tblICInventoryLotTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

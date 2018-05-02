@@ -44,7 +44,11 @@ AS
 			CD.dblAdjustment,
 			CD.dblScheduleQty,
 			CD.dblBalance,
-			CD.strItemSpecification
+			CD.strItemSpecification,
+			CD.intBookId,
+			BO.strBook,
+			CD.intSubBookId, 
+			SB.strSubBook
 
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -59,4 +63,6 @@ AS
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = CA.intCountryID
 	LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = CH.intCommodityId
+	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	WHERE CD.dblQuantity - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) > 0.0

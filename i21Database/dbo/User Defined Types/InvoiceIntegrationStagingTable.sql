@@ -23,6 +23,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- "Meter Billing"
 																											-- "Store"
 																											-- "Card Fueling"
+																											-- "POS"
+																											-- "Store Checkout"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
@@ -63,6 +65,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intPaymentMethodId]					INT												NULL		-- NULL
 	,[strInvoiceOriginId]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Reference to the original/parent record
 	,[ysnUseOriginIdAsInvoiceNumber]		BIT												NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
+	,[strMobileBillingShiftNo]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Mobile Billing Shift Number
 	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Purchase Order Number
 	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number	
 	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Comments		
@@ -109,6 +112,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
     ,[dblQtyOrdered]						NUMERIC(18, 6)									NULL		-- The quantity ordered
 	,[intItemUOMId]							INT												NULL		-- The UOM Id
 	,[intPriceUOMId]						INT												NULL		-- The UOM Id From Contract Sequence/Inventory Shipment
+	,[dblContractPriceUOMQty]				NUMERIC(18, 6)									NULL		-- The Contract Quantity based on Price UOM
     ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
 	,[dblItemTermDiscount]					NUMERIC(18, 6)									NULL		-- The Term discount to apply to a line item upon payment

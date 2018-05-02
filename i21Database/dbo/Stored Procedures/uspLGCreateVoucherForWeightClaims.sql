@@ -83,15 +83,15 @@ BEGIN TRY
 		RETURN 0;
 	END
 
-	SELECT @intAPAccount = ISNULL(intAPAccount,0)
+	SELECT TOP 1 @intAPAccount = (ISNULL(intAPAccount,0))
 	FROM tblLGWeightClaim WC 
 	JOIN (
-		SELECT TOP 1 ISNULL(LD.intPCompanyLocationId, intSCompanyLocationId) intCompanyLocationId, L.intLoadId
+		SELECT ISNULL(LD.intPCompanyLocationId, intSCompanyLocationId) intCompanyLocationId, L.intLoadId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		) t ON t.intLoadId = WC.intLoadId
 	JOIN tblSMCompanyLocation CL ON t.intCompanyLocationId = CL.intCompanyLocationId
-	WHERE WC.intWeightClaimId = 1
+	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	IF @intAPAccount = 0
 	BEGIN

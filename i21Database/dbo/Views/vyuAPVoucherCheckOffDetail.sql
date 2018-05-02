@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAPVoucherCheckOffDetail] AS
 
+--VOUCHER WITH CHECK OFF TAX 
 SELECT	DISTINCT			
 			 APB.intBillId	 
 			,APB.strBillId
@@ -14,6 +15,7 @@ SELECT	DISTINCT
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
+			,TC.strCounty
 			,APBDT.strCalculationMethod
 			,APBDT.dblRate AS dblTaxRate
 			,APBDT.dblTax AS dblTaxAmount
@@ -22,6 +24,7 @@ SELECT	DISTINCT
 			,strItem = IE.strItemNo 
 			,intTicketId
 			,SC.strTicketNumber
+			,SS.strDeliverySheetNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,APBD.dblTotal 
@@ -45,6 +48,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
+			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
@@ -73,6 +77,76 @@ WHERE
 	  APB.ysnPosted = 1 
 		  AND Payment.ysnPosted = 1 
 		  AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
+
+UNION ALL 
+
+--VOUCHER W/ APPLIED PREPAID WITH CHECK OFF TAX 
+SELECT	DISTINCT			
+			 APB.intBillId
+			,APB.strBillId
+			,V.strVendorId
+			,APB.intEntityVendorId
+			,strVendorName =  E.strName
+			,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL))
+			,ISNULL(EL.strCity, 'N/A') AS strVendorCity
+			,ISNULL(EL.strState, 'N/A') AS strVendorState
+			,ISNULL(EL.strZipCode,'N/A') AS strVendorZipCode
+			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
+			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
+			,TC.strTaxCode
+			,TC.strDescription AS strTaxCodeDesc
+			,TC.strCounty
+			,APBDT.strCalculationMethod
+			,APBDT.dblRate AS dblTaxRate
+			,APBDT.dblTax AS dblTaxAmount
+			,APBD.dblQtyReceived
+			,C.strCommodityCode 
+			,strItem = IE.strItemNo 
+			,intTicketId
+			,SC.strTicketNumber
+			,SS.strDeliverySheetNumber
+			,APB.strVendorOrderNumber
+			,APB.dtmBillDate
+			,APBD.dblTotal 
+			,APBD.dblTax
+			,0 AS dblCommodityTotal
+			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
+			,strCompanyAddress = (SELECT TOP 1 
+				   ISNULL(RTRIM(strAddress) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
+				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
+			--,TAXDETAIL.*
+FROM		dbo.tblAPBill APB
+			INNER JOIN dbo.tblAPBillDetail APBD  ON APBD.intBillId = APB.intBillId
+			INNER JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
+			INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
+			INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
+			INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
+			LEFT JOIN dbo.tblEMEntityLocation EL ON (EL.intEntityId = E.intEntityId) AND (EL.intEntityLocationId = APB.intShipFromId)  AND ysnDefaultLocation  =1 
+			INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
+			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
+			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
+			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
+			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
+			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
+			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
+			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
+			INNER JOIN dbo.tblAPAppliedPrepaidAndDebit APD ON APD.intBillId = APB.intBillId
+			INNER JOIN dbo.tblAPBill APB2 ON APD.intTransactionId = APB2.intBillId
+			OUTER APPLY (
+				SELECT TOP 1	
+						strEmail,
+						strEmail2,
+						strPhone,
+						strPhone2 
+				FROM tblEMEntity E1
+				WHERE E1.intEntityId = EC.intEntityContactId 
+			) vendor
+WHERE  
+	  APB.ysnPosted = 1 
+	 AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
+	 AND APBD.dblTax < 0
 GO
 
 

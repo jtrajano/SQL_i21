@@ -122,6 +122,10 @@
 [strBatchId]  NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 [strGenerateLoadEquipmentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strGenerateLoadHauler] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[intCompanyId] INT NULL,
+[intBookId] INT NULL,
+[intSubBookId] INT NULL,
+[intLoadRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
@@ -157,7 +161,9 @@ CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasu
 CONSTRAINT [FK_tblLGLoad_tblLGShippingMode_intShippingModeId_intShippingModeId] FOREIGN KEY ([intShippingModeId]) REFERENCES [tblLGShippingMode]([intShippingModeId]),
 CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
 CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETSPOLReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETSPOLReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
-CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPODReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId])
+CONSTRAINT [FK_tblLGLoad_tblLGReasonCode_intETAPODReasonCodeId_intReasonCodeId] FOREIGN KEY ([intETAPODReasonCodeId]) REFERENCES [tblLGReasonCode]([intReasonCodeId]),
+CONSTRAINT [FK_tblLGLoad_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+CONSTRAINT [FK_tblLGLoad_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
 )
 
 go

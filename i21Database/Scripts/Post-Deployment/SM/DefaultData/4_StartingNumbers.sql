@@ -1290,6 +1290,26 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Mark To Market')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 134
+			,[strTransactionType]	= N'Allocation Detail'
+			,[strPrefix]			= N'ALD-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Mark To Market')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 135
+			,[strTransactionType]	= N'Commission'
+			,[strPrefix]			= N'COMM-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Commission')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

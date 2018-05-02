@@ -53,7 +53,9 @@ BEGIN TRY
 		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 		JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
 		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		JOIN tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId'
+		JOIN tblICLotStatus AS LS ON LS.intLotStatusId = PL.intLotStatusId
+		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -100,6 +102,8 @@ BEGIN TRY
 			,LS.strSecondaryStatus AS strLotStatus
 			,L.strLotAlias
 			,S.strSampleNumber
+			,B.strBook
+			,SB.strSubBook
 			,S.strSampleRefNo
 			,SS.strSecondaryStatus AS strSampleStatus
 			,ST.strSampleTypeName
@@ -132,7 +136,9 @@ BEGIN TRY
 	END
 
 	SET @SQL = @SQL + ' JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId'
+		LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = L.intItemOwnerId
+		LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId'
 
 	IF (LEN(@strFilterCriteria) > 0)
 	BEGIN
@@ -157,6 +163,8 @@ BEGIN TRY
 			,LS.strSecondaryStatus
 			,L.strLotAlias
 			,S.strSampleNumber
+			,B.strBook
+			,SB.strSubBook
 			,S.strSampleRefNo
 			,SS.strSecondaryStatus
 			,ST.strSampleTypeName
@@ -167,7 +175,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'intTotalCount,strCategoryCode,intItemId,strItemNo,strDescription,intLotId,strLotNumber'
-	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strSampleRefNo,strSampleStatus,strSampleTypeName,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
+	SET @strColumnsList = @strColumnsList + ',strLotStatus,strLotAlias,strSampleNumber,strBook,strSubBook,strSampleRefNo,strSampleStatus,strSampleTypeName,dblLotQty,strUnitMeasure,dtmDateCreated,intSampleId'
 	SET @strColumnsList = @strColumnsList + ',strComment,' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT   
 	intTotalCount
@@ -180,6 +188,8 @@ BEGIN TRY
 	,strLotStatus
 	,strLotAlias
 	,strSampleNumber
+	,strBook
+	,strSubBook
 	,strSampleRefNo
 	,strSampleStatus
 	,strSampleTypeName
@@ -200,6 +210,8 @@ BEGIN TRY
 			,strLotStatus
 			,strLotAlias
 			,strSampleNumber
+			,strBook
+			,strSubBook
 			,strSampleRefNo
 			,strSampleStatus
 			,strSampleTypeName

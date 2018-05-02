@@ -124,7 +124,7 @@ where U.ysnStockUnit = 1)
 ----====================================STEP 9======================================
 --Setup a grain discount category for each commodity if grain discounts are setup
 insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
-select rtrim(gacom_com_cd)+'Discount', rtrim(gacom_desc)+' Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
+select distinct rtrim(gacom_com_cd)+'Discount', rtrim(gacom_desc)+' Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(od.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 

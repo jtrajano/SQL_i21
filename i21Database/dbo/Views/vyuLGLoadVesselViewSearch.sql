@@ -49,6 +49,10 @@ SELECT  L.intLoadId
 			THEN 'Vessel Nomination'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
+	   ,L.intBookId
+	   ,BO.strBook
+	   ,L.intSubBookId
+	   ,SB.strSubBook
 FROM tblLGLoad L
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
@@ -57,4 +61,6 @@ LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 WHERE ISNULL(L.strBLNumber,'') <> ''

@@ -22,6 +22,7 @@ Type the overview for the table here.
 		[ysnExplanationRequired] BIT NULL DEFAULT ((0)), 
 		[strLastUpdatedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmLastUpdatedOn] DATETIME NOT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICReasonCode] PRIMARY KEY ([intReasonCodeId]), 
 		CONSTRAINT [AK_tblICReasonCode_strReasonCode] UNIQUE ([strReasonCode])

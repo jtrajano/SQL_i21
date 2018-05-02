@@ -52,6 +52,8 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
+DECLARE @ysnFilter NVARCHAR(50) = 0
+DECLARE @dtmDateFilter NVARCHAR(50)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -61,6 +63,7 @@ BEGIN
 	SELECT 
 		NULL AS dtmDate,
 		NULL AS dtmDueDate,
+		NULL AS dtmDateFilter,
 		NULL AS strVendorId,
 		NULL AS strVendorName,
 		0 AS intEntityVendorId,
@@ -74,6 +77,7 @@ BEGIN
 		NULL AS strVendorIdName,
 		NULL AS strAge,
 		NULL AS strClass,
+		NULL AS strDateDesc,
 		0 AS intAccountId,
 		0 AS dblTotal,
 		0 AS dblAmountPaid,
@@ -149,29 +153,35 @@ SET @prepaidInnerQuery = 'SELECT --DISTINCT
 
 IF @dateFrom IS NOT NULL
 BEGIN
+	SET @ysnFilter = 1
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateFrom, 101) +''')';
 	END
 	ELSE
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateTo, 101) +''')';
 	END  
 	
 END
 ELSE IF @dtmDueDate IS NOT NULL
 BEGIN
+	SET @ysnFilter = 1
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''''
+		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dtmDueDate, 101) +''')';
 	END
 	ELSE
 	BEGIN
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDueDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
+		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateTo, 101) +''')';
 	END  
 	
 END
@@ -179,6 +189,8 @@ ELSE
 BEGIN
 	SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
 	SET @dateTo = GETDATE();
+	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
+    
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
@@ -223,6 +235,8 @@ SET @query = '
 		,strCompanyName
 		,strCompanyAddress
 		,strClass
+		,strDateDesc
+		,dtmDateFilter
 		,SUM(dblCurrent) dblCurrent
 		,SUM(dbl0) dbl0
 		,SUM(dbl1) dbl1
@@ -247,6 +261,8 @@ SET @query = '
 		,A.intAccountId
 		,D.strAccountId
 		,EC.strClass
+		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
+		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
@@ -320,6 +336,8 @@ SET @query = '
 		,strCompanyName
 		,strCompanyAddress
 		,strClass
+		,strDateDesc
+		,dtmDateFilter
 	) MainQuery 
 '
 

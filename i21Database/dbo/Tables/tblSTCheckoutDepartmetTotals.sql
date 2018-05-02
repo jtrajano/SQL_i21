@@ -18,8 +18,10 @@
     [dblTaxAmount2] DECIMAL(18, 6) NULL, 
     [dblTaxAmount3] DECIMAL(18, 6) NULL, 
     [dblTaxAmount4] DECIMAL(18, 6) NULL, 
+	[intItemId] INT NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTCheckoutDepartmetTotals_intDepartmentTotalId] PRIMARY KEY ([intDepartmentTotalId]) ,
 	CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE, 
+	CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
     CONSTRAINT [FK_tblSTCheckoutDepartmetTotals_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) 
 )

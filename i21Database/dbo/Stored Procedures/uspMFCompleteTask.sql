@@ -50,7 +50,11 @@ BEGIN TRY
 		,@strDescription NVARCHAR(50)
 		,@strInventoryTracking NVARCHAR(50)
 		,@intTransactionCount INT
-		,@intTaskId int
+		,@intTaskId INT
+		,@intOrderDirectionId int
+
+	If @strTaskId =''
+	Select @strTaskId=NULL
 
 	SELECT @dtmDate = GETDATE()
 
@@ -81,6 +85,7 @@ BEGIN TRY
 		,@strReferenceNo = strReferenceNo
 		,@intOrderId = intOrderHeaderId
 		,@intLocationId = intLocationId
+		,@intOrderDirectionId=intOrderDirectionId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -112,7 +117,7 @@ BEGIN TRY
 			)
 	END
 
-	IF @strTaskId is not null
+	IF @strTaskId IS NOT NULL
 	BEGIN
 		IF @ysnLoad = 0
 		BEGIN
@@ -211,7 +216,6 @@ BEGIN TRY
 				,@blnInventoryMove = 0
 				,@intLotId = intLotId
 				,@intItemId = T.intItemId
-				,@intNewSubLocationId = SL.intSubLocationId
 				,@intStorageLocationId = T.intFromStorageLocationId
 			FROM tblMFTask T
 			JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
@@ -273,116 +277,123 @@ BEGIN TRY
 		WHERE intOrderHeaderId = @intOrderHeaderId
 			AND intItemId = @intItemId
 
-		IF @strInventoryTracking = 'Lot Level'
+		IF @intNewStorageLocationId = @intStorageLocationId
 		BEGIN
-			EXEC uspMFLotMove @intLotId = @intLotId
-				,@intNewSubLocationId = @intNewSubLocationId
-				,@intNewStorageLocationId = @intNewStorageLocationId
-				,@dblMoveQty = @dblMoveQty
-				,@intMoveItemUOMId = @intMoveItemUOMId
-				,@intUserId = @intUserId
-				,@blnValidateLotReservation = 0
-				,@blnInventoryMove = @blnInventoryMove
-				,@strNotes = @strDescription
-
-			SELECT TOP 1 @intNewLotId = intLotId
-			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber
-				AND intItemId = @intItemId
-				AND intLocationId = @intLotLocationId
-				AND intSubLocationId = @intNewSubLocationId
-				AND intStorageLocationId = @intNewStorageLocationId
+			SELECT @intNewLotId = @intLotId
 		END
 		ELSE
 		BEGIN
-			DELETE
-			FROM @TransferEntries
-
-			-- Insert the data needed to create the inventory transfer.
-			INSERT INTO @TransferEntries (
-				-- Header
-				[dtmTransferDate]
-				,[strTransferType]
-				,[intSourceType]
-				,[strDescription]
-				,[intFromLocationId]
-				,[intToLocationId]
-				,[ysnShipmentRequired]
-				,[intStatusId]
-				,[intShipViaId]
-				,[intFreightUOMId]
-				-- Detail
-				,[intItemId]
-				,[intLotId]
-				,[intItemUOMId]
-				,[dblQuantityToTransfer]
-				,[strNewLotId]
-				,[intFromSubLocationId]
-				,[intToSubLocationId]
-				,[intFromStorageLocationId]
-				,[intToStorageLocationId]
-				-- Integration Field
-				,[intInventoryTransferId]
-				,[intSourceId]
-				,[strSourceId]
-				,[strSourceScreenName]
-				)
-			SELECT -- Header
-				[dtmTransferDate] = @dtmDate
-				,[strTransferType] = 'Storage to Storage'
-				,[intSourceType] = 0
-				,[strDescription] = NULL
-				,[intFromLocationId] = @intLocationId
-				,[intToLocationId] = @intLocationId
-				,[ysnShipmentRequired] = 0
-				,[intStatusId] = 3
-				,[intShipViaId] = NULL
-				,[intFreightUOMId] = NULL
-				-- Detail
-				,[intItemId] = @intItemId
-				,[intLotId] = NULL
-				,[intItemUOMId] = @intMoveItemUOMId
-				,[dblQuantityToTransfer] = @dblMoveQty
-				,[strNewLotId] = NULL
-				,[intFromSubLocationId] = @intSubLocationId
-				,[intToSubLocationId] = @intNewSubLocationId
-				,[intFromStorageLocationId] = @intStorageLocationId
-				,[intToStorageLocationId] = @intNewStorageLocationId
-				-- Integration Field
-				,[intInventoryTransferId] = NULL
-				,[intSourceId] = @intTaskId
-				,[strSourceId] = @strDescription
-				,[strSourceScreenName] = 'Pick List'
-
-			-- Call uspICAddInventoryTransfer stored procedure.
-			EXEC dbo.uspICAddInventoryTransfer @TransferEntries
-				,@intUserId
-
-			WHILE EXISTS (
-					SELECT TOP 1 1
-					FROM #tmpAddInventoryTransferResult
-					)
+			IF @strInventoryTracking = 'Lot Level'
 			BEGIN
-				SELECT @intTransferId = NULL
-					,@strTransactionId = NULL
+				EXEC uspMFLotMove @intLotId = @intLotId
+					,@intNewSubLocationId = @intNewSubLocationId
+					,@intNewStorageLocationId = @intNewStorageLocationId
+					,@dblMoveQty = @dblMoveQty
+					,@intMoveItemUOMId = @intMoveItemUOMId
+					,@intUserId = @intUserId
+					,@blnValidateLotReservation = 0
+					,@blnInventoryMove = @blnInventoryMove
+					,@strNotes = @strDescription
 
-				SELECT TOP 1 @intTransferId = intInventoryTransferId
-				FROM #tmpAddInventoryTransferResult
-
-				-- Post the Inventory Transfer that was created
-				SELECT @strTransactionId = strTransferNo
-				FROM tblICInventoryTransfer
-				WHERE intInventoryTransferId = @intTransferId
-
-				EXEC dbo.uspICPostInventoryTransfer 1
-					,0
-					,@strTransactionId
-					,@intUserId;
-
+				SELECT TOP 1 @intNewLotId = intLotId
+				FROM tblICLot
+				WHERE strLotNumber = @strLotNumber
+					AND intItemId = @intItemId
+					AND intLocationId = @intLotLocationId
+					AND intSubLocationId = @intNewSubLocationId
+					AND intStorageLocationId = @intNewStorageLocationId
+			END
+			ELSE
+			BEGIN
 				DELETE
-				FROM #tmpAddInventoryTransferResult
-				WHERE intInventoryTransferId = @intTransferId
-			END;
+				FROM @TransferEntries
+
+				-- Insert the data needed to create the inventory transfer.
+				INSERT INTO @TransferEntries (
+					-- Header
+					[dtmTransferDate]
+					,[strTransferType]
+					,[intSourceType]
+					,[strDescription]
+					,[intFromLocationId]
+					,[intToLocationId]
+					,[ysnShipmentRequired]
+					,[intStatusId]
+					,[intShipViaId]
+					,[intFreightUOMId]
+					-- Detail
+					,[intItemId]
+					,[intLotId]
+					,[intItemUOMId]
+					,[dblQuantityToTransfer]
+					,[strNewLotId]
+					,[intFromSubLocationId]
+					,[intToSubLocationId]
+					,[intFromStorageLocationId]
+					,[intToStorageLocationId]
+					-- Integration Field
+					,[intInventoryTransferId]
+					,[intSourceId]
+					,[strSourceId]
+					,[strSourceScreenName]
+					)
+				SELECT -- Header
+					[dtmTransferDate] = @dtmDate
+					,[strTransferType] = 'Storage to Storage'
+					,[intSourceType] = 0
+					,[strDescription] = NULL
+					,[intFromLocationId] = @intLocationId
+					,[intToLocationId] = @intLocationId
+					,[ysnShipmentRequired] = 0
+					,[intStatusId] = 3
+					,[intShipViaId] = NULL
+					,[intFreightUOMId] = NULL
+					-- Detail
+					,[intItemId] = @intItemId
+					,[intLotId] = NULL
+					,[intItemUOMId] = @intMoveItemUOMId
+					,[dblQuantityToTransfer] = @dblMoveQty
+					,[strNewLotId] = NULL
+					,[intFromSubLocationId] = @intSubLocationId
+					,[intToSubLocationId] = @intNewSubLocationId
+					,[intFromStorageLocationId] = @intStorageLocationId
+					,[intToStorageLocationId] = @intNewStorageLocationId
+					-- Integration Field
+					,[intInventoryTransferId] = NULL
+					,[intSourceId] = @intTaskId
+					,[strSourceId] = @strDescription
+					,[strSourceScreenName] = 'Pick List'
+
+				-- Call uspICAddInventoryTransfer stored procedure.
+				EXEC dbo.uspICAddInventoryTransfer @TransferEntries
+					,@intUserId
+
+				WHILE EXISTS (
+						SELECT TOP 1 1
+						FROM #tmpAddInventoryTransferResult
+						)
+				BEGIN
+					SELECT @intTransferId = NULL
+						,@strTransactionId = NULL
+
+					SELECT TOP 1 @intTransferId = intInventoryTransferId
+					FROM #tmpAddInventoryTransferResult
+
+					-- Post the Inventory Transfer that was created
+					SELECT @strTransactionId = strTransferNo
+					FROM tblICInventoryTransfer
+					WHERE intInventoryTransferId = @intTransferId
+
+					EXEC dbo.uspICPostInventoryTransfer 1
+						,0
+						,@strTransactionId
+						,@intUserId;
+
+					DELETE
+					FROM #tmpAddInventoryTransferResult
+					WHERE intInventoryTransferId = @intTransferId
+				END;
+			END
 		END
 
 		IF @ysnLoadProcessEnabled = 0
@@ -446,7 +457,7 @@ BEGIN TRY
 			)
 
 		IF @ysnLoad = 0
-			AND @intCustomerLabelTypeId <> 2
+			AND @intCustomerLabelTypeId <> 2 and @intOrderDirectionId=2
 		BEGIN
 			INSERT INTO tblMFOrderManifest (
 				intConcurrencyId
@@ -510,6 +521,24 @@ BEGIN TRY
 			WHERE s.strShipmentNumber = @strShipmentNo
 				AND intItemId = @intLotItemId
 
+			IF EXISTS (
+					SELECT *
+					FROM dbo.tblICInventoryShipmentItem
+					WHERE intInventoryShipmentItemId = @intShipmentItemId
+						AND (
+							intSubLocationId IS NULL
+							OR intStorageLocationId IS NULL
+							OR intDockDoorId IS NULL
+							)
+					)
+			BEGIN
+				UPDATE tblICInventoryShipmentItem
+				SET intSubLocationId = @intNewSubLocationId
+					,intStorageLocationId = @intNewStorageLocationId
+					,intDockDoorId = @intNewStorageLocationId
+				WHERE intInventoryShipmentItemId = @intShipmentItemId
+			END
+
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblICInventoryShipmentItemLot
@@ -523,6 +552,7 @@ BEGIN TRY
 					,dblQuantityShipped
 					,dblGrossWeight
 					,dblTareWeight
+					,dblWeightPerQty
 					,intConcurrencyId
 					)
 				VALUES (
@@ -531,6 +561,7 @@ BEGIN TRY
 					,@dblMoveQty
 					,@dblMoveQty * @dblWeightPerQty
 					,0
+					,@dblWeightPerQty
 					,1
 					)
 			END
@@ -549,6 +580,11 @@ BEGIN TRY
 			FROM tblICInventoryShipmentItemLot
 			WHERE intInventoryShipmentItemId = @intShipmentItemId
 				AND intLotId = @intNewLotId
+
+			IF @dblAllocatedQty IS NULL
+			BEGIN
+				SELECT @dblAllocatedQty = 0
+			END
 
 			SELECT @dblQty = NULL
 

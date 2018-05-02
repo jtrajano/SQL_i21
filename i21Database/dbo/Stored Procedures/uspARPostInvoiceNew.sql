@@ -661,6 +661,37 @@ IF(@Exclude IS NOT NULL)
 	END
 	
 
+
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+--BEGIN TRAN @TransactionName
+if @Recap = 1 AND @RaiseError = 0
+	SAVE TRAN @TransactionName
+
+
+
+DECLARE @TempInvoiceIds TABLE(
+	id  	INT
+)
+INSERT INTO @TempInvoiceIds(id)
+SELECT distinct intInvoiceId FROM @PostInvoiceData
+
+WHILE EXISTS(SELECT TOP 1 NULL FROM @TempInvoiceIds ORDER BY id)
+BEGIN				
+	DECLARE @InvoiceId1 INT
+				
+	SELECT TOP 1 @InvoiceId1 = id FROM @TempInvoiceIds ORDER BY id
+
+	-- EXEC [dbo].[uspICPostStockReservation]
+	-- 	@intTransactionId		= @InvoiceId1
+	-- 	,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
+	-- 	,@ysnPosted				= @Post
+	EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @UserId, 1, @Post
+		
+	DELETE FROM @TempInvoiceIds WHERE id = @InvoiceId1
+END		
+
 INSERT INTO @InvalidInvoiceData(
 	 [intInvoiceId]
 	,[strInvoiceNumber]
@@ -724,14 +755,14 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		BEGIN
 			IF @InitTranCount = 0
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR  @Recap = 1
 						ROLLBACK TRANSACTION
 					IF (XACT_STATE()) = 1
 						COMMIT TRANSACTION
 				END		
 			ELSE
 				BEGIN
-					IF (XACT_STATE()) = -1
+					IF (XACT_STATE()) = -1 OR  @Recap = 1
 						ROLLBACK TRANSACTION  @Savepoint
 				END	
 		END
@@ -744,15 +775,6 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			END				
 		GOTO Post_Exit	
 	END
-
-
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
---BEGIN TRAN @TransactionName
-if @Recap = 1 AND @RaiseError = 0
-	SAVE TRAN @TransactionName
 
 
 --Process Split Invoice
@@ -3561,12 +3583,12 @@ IF @Recap = 0
 			UPDATE CUSTOMER
 			SET dblARBalance = dblARBalance + (CASE WHEN @Post = 1 THEN ISNULL(dblTotalInvoice, 0) ELSE ISNULL(dblTotalInvoice, 0) * -1 END)
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
-			INNER JOIN (SELECT intEntityId
-							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice, Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
+			INNER JOIN (SELECT intEntityCustomerId
+							 , dblTotalInvoice = SUM(CASE WHEN strTransactionType IN ('Invoice', 'Debit Memo') THEN dblInvoiceTotal ELSE dblInvoiceTotal * -1 END)
 						FROM dbo.tblARInvoice WITH (NOLOCK)
 						WHERE intInvoiceId IN (SELECT [intHeaderId] FROM @InvoiceToUpdate)
-						GROUP BY intEntityId
-			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityId
+						GROUP BY intEntityCustomerId
+			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 
 			--UPDATE BatchIds Used
 			UPDATE tblARInvoice 

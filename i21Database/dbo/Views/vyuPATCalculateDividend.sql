@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuPATCalculateDividend]
 	AS
-SELECT	intCustomerId = CS.intCustomerPatronId,
+SELECT	id = CAST(ROW_NUMBER() OVER (ORDER BY CS.intCustomerStockId) AS INT),
+		intCustomerId = CS.intCustomerPatronId,
 		ENT.strEntityNo,
 		ENT.strName,
 		IssueStk.dtmIssueDate,

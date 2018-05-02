@@ -1235,18 +1235,17 @@ Post_Exit:
 *****************************************/
 IF (@isSuccessful <> 0)
 BEGIN
-	/* Update the Employee Time Off Tiers and Accrued Hours */
-	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOff FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
+	/* Update the Employee Time Off Tiers and trigger Hours Reset */
+	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOffTiers FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
 		
 	DECLARE @intTypeTimeOffId INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOff)
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOffTiers)
 	BEGIN
-		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOff
+		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOffTiers
 
 		EXEC uspPRUpdateEmployeeTimeOff @intTypeTimeOffId, @intEmployeeId
-		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
 
-		DELETE FROM #tmpEmployeeTimeOff WHERE intTypeTimeOffId = @intTypeTimeOffId
+		DELETE FROM #tmpEmployeeTimeOffTiers WHERE intTypeTimeOffId = @intTypeTimeOffId
 	END
 
 	IF (@ysnPost = 1) 
@@ -1287,8 +1286,20 @@ BEGIN
 		END
 	END
 
+	/* Update the Employee Accrued or Earned Hours */
+	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOffHours FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOffHours)
+	BEGIN
+		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOffHours
+
+		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
+
+		DELETE FROM #tmpEmployeeTimeOffHours WHERE intTypeTimeOffId = @intTypeTimeOffId
+	END
+
 	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
 END
 END
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOff')) DROP TABLE #tmpEmployeeTimeOff
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOffTiers')) DROP TABLE #tmpEmployeeTimeOffTiers
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOffHours')) DROP TABLE #tmpEmployeeTimeOffHours

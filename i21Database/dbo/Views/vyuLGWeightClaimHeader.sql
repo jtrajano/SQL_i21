@@ -23,7 +23,11 @@ SELECT
 						 LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 						 LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
 						 WHERE WCD.intWeightClaimId = WC.intWeightClaimId),
-	intBillOrInvoiceId = B.intBillOrInvoiceId
+	intBillOrInvoiceId = B.intBillOrInvoiceId,
+	WC.intBookId, 
+	BO.strBook,
+	WC.intSubBookId, 
+	SB.strSubBook
 FROM tblLGWeightClaim WC
 JOIN tblLGLoad Load ON Load.intLoadId = WC.intLoadId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
@@ -32,3 +36,5 @@ JOIN (SELECT DISTINCT WC.intWeightClaimId
 	  FROM tblLGWeightClaim WC
 	  JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 	  )B ON B.intWeightClaimId = WC.intWeightClaimId
+LEFT JOIN tblCTBook BO ON BO.intBookId = WC.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = WC.intSubBookId

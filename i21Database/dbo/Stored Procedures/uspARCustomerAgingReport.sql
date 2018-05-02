@@ -161,6 +161,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 	 , strAgingType
+	 , dblTotalCustomerAR 
 )
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @dtmDateTo = @dtmDateTo

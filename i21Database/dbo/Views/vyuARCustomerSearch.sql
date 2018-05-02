@@ -63,6 +63,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'')
+	 , intCreditStopDays		= CUSTOMER.intCreditStopDays
+	 , strCreditCode			= CUSTOMER.strCreditCode
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -95,6 +97,8 @@ INNER JOIN (
 		 , intPaymentMethodId	= C.intPaymentMethodId
 		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
 		 , ysnCreditHold
+		 , intCreditStopDays
+		 , strCreditCode
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT S.intEntityId

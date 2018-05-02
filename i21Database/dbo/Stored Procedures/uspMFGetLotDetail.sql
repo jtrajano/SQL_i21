@@ -80,6 +80,11 @@ BEGIN
 		,strWarehouseRefNo
 		,@intReasonCodeId AS intReasonCodeId
 		,@strReasonCode AS strReasonCode
+		,intCropYear
+		,strProducer
+		,strCertification
+		,strCertificationId
+		,strTrackingNumber
 	FROM vyuMFInventoryView
 	WHERE intLotId = @intLotId
 END

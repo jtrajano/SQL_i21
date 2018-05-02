@@ -6,6 +6,7 @@
     [dtmEndDate]         DATETIME        NULL,
     [dblDiscount]        NUMERIC (18, 6) NULL,
     [strNotes]           NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+	[intCompanyId]		 INT			 NULL,
     [intConcurrencyId]   INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerCategoryPrice] PRIMARY KEY CLUSTERED ([intCategoryPriceId] ASC)
 );

@@ -12,8 +12,7 @@ SET ANSI_WARNINGS OFF
       
 DECLARE @idoc int       
 Declare @intAssignFuturesToContractHeaderId int      
-
-Declare @intContractHeaderId int     
+   
 Declare @intContractDetailId  int      
 Declare @dtmMatchDate datetime      
 Declare @intFutOptTransactionId int      
@@ -110,7 +109,79 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
        
 COMMIT TRAN      
       
-EXEC sp_xml_removedocument @idoc       
+EXEC sp_xml_removedocument @idoc
+
+--============================================================================================
+-- This block is to insert to inter company staging table if the following conditions are met
+--   * It is a hedge transaction
+--   * Short or Long Futures are configured in Inter Company Transaction Configuration
+--=============================================================================================
+
+DECLARE @ysnShortFuturesConfigured BIT,
+		@ysnLongFuturesConfigured BIT,
+		@intInterCompanyTransactionConfigurationId INT
+
+SELECT TOP 1 
+	@ysnShortFuturesConfigured = 1, 
+	@intInterCompanyTransactionConfigurationId = intInterCompanyTransactionConfigurationId
+FROM tblSMInterCompanyTransactionConfiguration TC 
+    JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+WHERE TT.strTransactionType ='Short Futures'
+
+SELECT TOP 1 
+	@ysnLongFuturesConfigured = 1, 
+	@intInterCompanyTransactionConfigurationId = intInterCompanyTransactionConfigurationId
+FROM tblSMInterCompanyTransactionConfiguration TC 
+    JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+WHERE TT.strTransactionType ='Long Futures'
+
+
+SELECT *
+INTO #tempRKAssignFuturesToContractSummary 
+FROM tblRKAssignFuturesToContractSummary
+WHERE intAssignFuturesToContractHeaderId = @intAssignFuturesToContractHeaderId
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tempRKAssignFuturesToContractSummary)
+	BEGIN
+		DECLARE @intAssignFuturesToContractSummaryId INT,
+				@ysnIsHedged BIT,
+				@strBuySell NVARCHAR(20),
+				@strContractType NVARCHAR(20),
+				@intFutOptTransactionHeaderId INT,
+				@intContractHeaderId INT,
+				@strInternalTradeNo NVARCHAR(20),
+				@intHedgedLots INT
+				
+		SELECT TOP 1 
+			@intAssignFuturesToContractSummaryId = intAssignFuturesToContractSummaryId
+		FROM #tempRKAssignFuturesToContractSummary
+
+		SELECT DISTINCT
+			 @ysnIsHedged = ysnIsHedged
+			,@strBuySell = strBuySell
+			,@intFutOptTransactionHeaderId = intFutOptTransactionHeaderId
+			,@intContractHeaderId = intContractHeaderId
+			,@strInternalTradeNo = strInternalTradeNo
+			,@intHedgedLots = intHedgedLots
+		FROM vyuRKAssignFuturesToContractSummary
+		WHERE intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
+
+		IF @ysnIsHedged = 1
+		BEGIN
+			IF @strBuySell = 'Sell' AND @ysnShortFuturesConfigured = 1 
+			BEGIN
+				EXEC uspRKInterCompanyDerivativeEntryPopulateStgXML @intFutOptTransactionHeaderId,@intContractHeaderId,@strInternalTradeNo,@intHedgedLots,'SELL','ADDED', @intInterCompanyTransactionConfigurationId
+			END
+
+			IF @strBuySell = 'Buy' AND @ysnLongFuturesConfigured = 1 
+			BEGIN
+				EXEC uspRKInterCompanyDerivativeEntryPopulateStgXML @intFutOptTransactionHeaderId,@intContractHeaderId,@strInternalTradeNo,@intHedgedLots,'BUY','ADDED', @intInterCompanyTransactionConfigurationId
+			END
+		END
+
+		DELETE FROM #tempRKAssignFuturesToContractSummary WHERE intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
+
+	END       
       
 END TRY        
         

@@ -19,9 +19,9 @@ SELECT
 	,[strItemNo]					= ICI.[strItemNo]
 	,[strItemDescription]			= ICI.[strDescription]
 	,[intItemUOMId]					= LS.[intItemUOMId]
-	,[strUnitMeasure]				= UOM.[strUnitMeasure]
+	,[strUnitMeasure]				= ARCC.[strUnitMeasure]
 	,[intPriceUOMId]				= ARCC.[intPriceItemUOMId]
-	,[strPriceUnitMeasure]			= UOM.[strUnitMeasure]
+	,[strPriceUnitMeasure]			= ARCC.[strPriceUnitMeasure]
 	,[intShipmentItemUOMId]			= LS.[intShipmentItemUOMId]
 	,[strShipmentUnitMeasure]		= SUOM.[strUnitMeasure]
 	,[dblQtyShipped]				= LS.[dblQtyShipped]
@@ -61,6 +61,10 @@ SELECT
 	,[strDestinationGrade]			= ARCC.[strDestinationGrade]
 	,[intDestinationWeightId]		= LS.[intDestinationWeightId]
 	,[strDestinationWeight]			= ARCC.[strDestinationWeight]
+	,[intBookId]					= ARCC.[intBookId]
+	,[intSubBookId]					= ARCC.[intSubBookId]
+	,[strBook]						= ARCC.[strBook]
+	,[strSubBook]					= ARCC.[strSubBook]
 FROM
 	vyuLGLoadScheduleForInvoice LS
 LEFT OUTER JOIN (
@@ -71,6 +75,7 @@ LEFT OUTER JOIN (
 		 , strDestinationGrade
 		 , strDestinationWeight
 		 , strUnitMeasure
+		 , strPriceUnitMeasure
 		 , intOrderUOMId
 		 , intPriceItemUOMId
 		 , strSubCurrency
@@ -78,12 +83,19 @@ LEFT OUTER JOIN (
 		 , intCompanyLocationId
 		 , intTermId
 		 , intShipViaId
+		 , intBookId
+		 , intSubBookId
+		 , strBook
+		 , strSubBook
 	 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
-	) ARCC ON LS.[intContractDetailId] = ARCC.intContractDetailId
-INNER JOIN
-	(SELECT [intItemId], [strItemNo], [strDescription] FROM tblICItem WITH(NOLOCK)) ICI
-		ON LS.[intItemId] = ICI.[intItemId]
-LEFT JOIN(
+) ARCC ON LS.[intContractDetailId] = ARCC.intContractDetailId
+INNER JOIN (
+	SELECT [intItemId]
+		 , [strItemNo]
+		 , [strDescription] 
+	FROM tblICItem WITH(NOLOCK)
+) ICI ON LS.[intItemId] = ICI.[intItemId]
+LEFT JOIN (
 	SELECT intItemUOMId
 		 , intItemId
 		 , IU.intUnitMeasureId
@@ -93,31 +105,15 @@ LEFT JOIN(
 		SELECT intUnitMeasureId
 			 , strUnitMeasure
 		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId) UOM
-		ON ARCC.intOrderUOMId = UOM.intItemUOMId
-LEFT JOIN(
-	SELECT intItemUOMId
-		 , intItemId
-		 , IU.intUnitMeasureId
-		 , UM.strUnitMeasure
-	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intUnitMeasureId
-			 , strUnitMeasure
-		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId) SUOM
-		ON ISNULL(ARCC.intPriceItemUOMId,LS.intItemUOMId) = SUOM.intItemUOMId							
-LEFT OUTER JOIN
-	(SELECT [intItemId], [intAccountId], [intLocationId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId] FROM vyuARGetItemAccount) ARIA
-		ON LS.[intItemId] = ARIA.[intItemId]
-		AND ARCC.[intCompanyLocationId] = ARIA.[intLocationId]
-LEFT OUTER JOIN(
-	SELECT intTermID
-		 , strTerm
-	FROM dbo.tblSMTerm WITH (NOLOCK)) SMT
-		ON ARCC.[intTermId] = SMT.[intTermID]	
-LEFT OUTER JOIN(
-	SELECT intEntityId
-		 , strShipVia
-	FROM dbo.tblSMShipVia WITH (NOLOCK)) SMSV
-		ON ARCC.[intShipViaId] = SMSV.[intEntityId]
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) SUOM ON ISNULL(ARCC.intPriceItemUOMId,LS.intItemUOMId) = SUOM.intItemUOMId							
+LEFT OUTER JOIN (
+	SELECT [intItemId]
+		 , [intAccountId]
+		 , [intLocationId]
+		 , [intCOGSAccountId]
+		 , [intSalesAccountId]
+		 , [intInventoryAccountId] 
+	FROM vyuARGetItemAccount
+) ARIA ON LS.[intItemId] = ARIA.[intItemId]
+	 AND ARCC.[intCompanyLocationId] = ARIA.[intLocationId]

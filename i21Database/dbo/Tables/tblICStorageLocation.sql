@@ -41,6 +41,7 @@ Type the overview for the table here.
 		[dblEffectiveDepth] NUMERIC(18, 6) DEFAULT ((0)),
 		[dblUnitPerFoot] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblResidualUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageLocation] PRIMARY KEY ([intStorageLocationId]), 
 		CONSTRAINT [AK_tblICStorageLocation_strName] UNIQUE ([strName], [intLocationId], [intSubLocationId]), 

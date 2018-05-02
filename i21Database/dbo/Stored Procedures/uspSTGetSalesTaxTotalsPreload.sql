@@ -3,7 +3,14 @@
 AS
 BEGIN
 
-	DECLARE @tbl TABLE (strTaxNumber NVARCHAR(20), intAccountId INT)
+	DECLARE @tbl TABLE 
+	(
+		strTaxNumber NVARCHAR(20)
+		, intAccountId INT
+		, intItemId INT
+		, strItemNo NVARCHAR(50)
+		, strItemDescription NVARCHAR(150)
+	)
 
 	--DECLARE @intCnt int
 	--SET @intCnt = 1
@@ -18,18 +25,37 @@ BEGIN
 	--	SET @intCnt = @intCnt + 1
 	--END
 
+
+
+	--INSERT INTO @tbl
+	--SELECT TC.strStoreTaxNumber AS strTaxNumber
+	--		, TC.intSalesTaxAccountId AS intAccountId
+	--FROM dbo.tblSMTaxCode TC 
+	--JOIN dbo.tblSMTaxGroupCode TGC ON TGC.intTaxCodeId = TC.intTaxCodeId
+	--JOIN dbo.tblSTStore ST ON ST.intTaxGroupId = TGC.intTaxGroupId
+	--LEFT JOIN dbo.tblGLAccount GLA ON GLA.intAccountId = TC.intSalesTaxAccountId
+	--WHERE ST.intStoreId = @intStoreId
+
+
 	INSERT INTO @tbl
 	SELECT TC.strStoreTaxNumber AS strTaxNumber
 			, TC.intSalesTaxAccountId AS intAccountId
-	FROM dbo.tblSMTaxCode TC 
-	JOIN dbo.tblSMTaxGroupCode TGC ON TGC.intTaxCodeId = TC.intTaxCodeId
-	JOIN dbo.tblSTStore ST ON ST.intTaxGroupId = TGC.intTaxGroupId
-	LEFT JOIN dbo.tblGLAccount GLA ON GLA.intAccountId = TC.intSalesTaxAccountId
-	WHERE ST.intStoreId = @intStoreId
+			, I.intItemId AS intItemId
+			, I.strItemNo AS strItemNo
+			, I.strDescription AS strItemDescription
+	FROM tblSTStoreTaxTotals STT
+	JOIN tblSTStore ST ON STT.intStoreId = ST.intStoreNo
+	JOIN tblSMTaxCode TC ON STT.intTaxCodeId = TC.intTaxCodeId
+	JOIN tblICItem I ON STT.intItemId = I.intItemId
+	WHERE STT.intStoreId = @intStoreId
+
 
 	SELECT t.strTaxNumber
 		 , t.intAccountId
 		 , Acc.strAccountId 
+		 , t.intItemId
+		 , t.strItemNo
+		 , t.strItemDescription
 	FROM @tbl t
 	LEFT JOIN dbo.tblGLAccount Acc ON Acc.intAccountId = t.intAccountId
 

@@ -163,6 +163,12 @@ BEGIN
 			,[dblWeight]
 			--,[dblGrossWeight]
 			--,[dblWeightPerQty]
+			,[intBookId]
+			,[intSubBookId]
+			,[strCertificate]
+			,[intProducerId]
+			,[strCertificateId]
+			,[strTrackingNumber]
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
@@ -204,6 +210,12 @@ BEGIN
 				END 
 			--,[dblGrossWeight] 		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN TransferItem.dblGross ELSE NULL END
 			--,[dblWeightPerQty]		= CASE WHEN TransferItem.intGrossNetUOMId IS NOT NULL THEN CASE WHEN ISNULL(NULLIF(TransferItem.dblNet, 0), 0) = 0 THEN 0 ELSE TransferItem.dblQuantity / TransferItem.dblNet END ELSE NULL END
+			,[intBookId]				= SourceLot.intBookId
+			,[intSubBookId]				= SourceLot.intSubBookId
+			,[strCertificate]			= SourceLot.strCertificate
+			,[intProducerId]			= SourceLot.intProducerId
+			,[strCertificateId]			= SourceLot.strCertificateId
+			,[strTrackingNumber]		= SourceLot.strTrackingNumber 
 	FROM	dbo.tblICInventoryTransfer [Transfer] INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 			INNER JOIN dbo.tblICItem Item

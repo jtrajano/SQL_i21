@@ -50,6 +50,7 @@ BEGIN
 		,PC.intControlPointId
 		,0 AS intRepNo
 		,DT.strIsMandatory
+		,PRT.intItemId AS intPropertyItemId
 		,PRT.intDataTypeId
 		,PRT.intDecimalPlaces
 		,PRT.intListId

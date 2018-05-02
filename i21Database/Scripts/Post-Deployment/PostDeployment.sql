@@ -66,8 +66,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_RenameCompanyToMultiCompany.sql
 :r .\SM\1810_UpdatePortalMenus.sql
 :r .\SM\1810_UpdateTransactionsApprovalFor.sql
-:r .\SM\1830_AttachmentMigration.sql
-
+:r .\SM\DefaultData\33_InterCompanyTransactionType.sql
 
 
 
@@ -233,6 +232,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
 :r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql
+:r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -267,6 +267,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateBillDetailRate.sql
 :r .\AP\DeleteInvalidBasisAdvanceStaging.sql
 :r .\AP\CleanBasisAdvance.sql
+:r .\AP\UpdatePOPendingStatus.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -466,6 +467,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Card Fueling
 :r .\CF\1_ImportMapping.sql
 :r .\CF\2_DataFix.sql
+:r .\CF\3_DataFixPriceAdjustment.sql
 
 
 print 'END POST DEPLOYMENT'

@@ -217,7 +217,8 @@ SELECT
 				)
 				ELSE NULL 
 			END
-		)	
+		)
+	, strFieldNo = CASE Receipt.strReceiptType WHEN 'Purchase Contract' THEN CASE Receipt.intSourceType WHEN 0 THEN Farm.strFarmFieldNumber ELSE NULL END ELSE NULL END
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt 
 	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -226,6 +227,9 @@ LEFT JOIN vyuICGetItemUOM ItemUOM
 LEFT JOIN vyuCTCompactContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 	AND strReceiptType = 'Purchase Contract'
+LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
+LEFT JOIN tblEMEntityLocation Farm ON Farm.intEntityId = ContractDetail.intFarmFieldId
+	AND Farm.strLocationType = 'Farm'
 LEFT JOIN vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
 	ON LogisticsView.intLoadDetailId = CASE WHEN Receipt.intSourceType = 2 THEN ReceiptItem.intSourceId ELSE NULL END 
 	AND intLoadContainerId = ReceiptItem.intContainerId

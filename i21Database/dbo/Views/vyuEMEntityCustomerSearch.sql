@@ -51,6 +51,7 @@ SELECT DISTINCT
 	, intTermsId			= CUSTOMER.intTermsId
 	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds
 	, ysnProspect			= entityType.Prospect
+	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
@@ -58,6 +59,8 @@ SELECT DISTINCT
 	, strShipViaName		= shipVia.strShipVia
 	, strInternalNotes		= entityToCustomer.strInternalNotes
 	, ysnPORequired			= ISNULL(CUSTOMER.ysnPORequired, CAST(0 AS BIT))
+	, intCreditStopDays		= CUSTOMER.intCreditStopDays
+	, strCreditCode			= CUSTOMER.strCreditCode
 	, ysnHasPastDueBalances	= CASE 
 			WHEN CI.dbl10Days > 0 OR CI.dbl30Days > 0 OR CI.dbl60Days > 0 OR CI.dbl90Days > 0 OR CI.dbl91Days > 0 THEN CAST(1 AS BIT)
 			ELSE CAST(0 AS BIT)

@@ -238,9 +238,12 @@ BEGIN TRY
 			END
 		END
 
-		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadReceipt
+		IF EXISTS (SELECT TOP 1 1 FROM tblTRLoadReceipt TR
+		LEFT JOIN tblTRLoadHeader TL ON TL.intLoadHeaderId = TR.intLoadHeaderId
 		WHERE strBillOfLading = @strBOL
-			AND intLoadHeaderId != @intLoadHeaderId)
+			AND TL.intLoadHeaderId != @intLoadHeaderId
+			AND intTerminalId = @intTerminal
+			AND TL.dtmLoadDateTime = @dtmLoadDateTime)
 		BEGIN
 			SET @err = 'BOL ' + @strBOL + ' already exists on another Transport Load'
 			RAISERROR(@err, 16, 1)

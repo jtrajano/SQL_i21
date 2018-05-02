@@ -267,7 +267,9 @@ BEGIN
 		,[intOrderUOMId]
 		,[dblQtyOrdered]
 		,[intItemUOMId]
+		,[intPriceUOMId]
 		,[dblQtyShipped]
+		,[dblContractPriceUOMQty]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
 		,[strItemTermDiscountBy]
@@ -398,7 +400,9 @@ BEGIN
 		,[intOrderUOMId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intOrderUOMId] ELSE NULL END)
 		,[dblQtyOrdered]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblQtyOrdered] ELSE NULL END)
 		,[intItemUOMId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemUOMId] ELSE NULL END)
+		,[intPriceUOMId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intPriceUOMId] ELSE NULL END)
 		,[dblQtyShipped]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblQtyShipped] ELSE NULL END)
+		,[dblContractPriceUOMQty]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblContractPriceUOMQty] ELSE NULL END)
 		,[dblDiscount]						= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscount] ELSE NULL END)
 		,[dblItemTermDiscount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblItemTermDiscount] ELSE NULL END)
 		,[strItemTermDiscountBy]			= (CASE WHEN @GroupingOption = 0 THEN IE.[strItemTermDiscountBy] ELSE NULL END)
@@ -599,7 +603,9 @@ BEGIN
 			,[intOrderUOMId]
 			,[dblQtyOrdered]
 			,[intItemUOMId]
+			,[intPriceUOMId]
 			,[dblQtyShipped]
+			,[dblContractPriceUOMQty]
 			,[dblDiscount]
 			,[dblItemTermDiscount]
 			,[strItemTermDiscountBy]
@@ -736,7 +742,9 @@ BEGIN
 			,[intOrderUOMId]						= ITG.[intOrderUOMId]
 			,[dblQtyOrdered]						= ITG.[dblQtyOrdered]
 			,[intItemUOMId]							= ITG.[intItemUOMId]
+			,[intPriceUOMId]						= ITG.[intPriceUOMId]
 			,[dblQtyShipped]						= ITG.[dblQtyShipped]
+			,[dblContractPriceUOMQty]				= ITG.[dblContractPriceUOMQty]
 			,[dblDiscount]							= ITG.[dblDiscount]
 			,[dblItemTermDiscount]					= ITG.[dblItemTermDiscount]
 			,[strItemTermDiscountBy]				= ITG.[strItemTermDiscountBy]
@@ -1201,7 +1209,9 @@ BEGIN
 		,[intOrderUOMId]
 		,[dblQtyOrdered]
 		,[intItemUOMId]
+		,[intPriceUOMId]
 		,[dblQtyShipped]
+		,[dblContractPriceUOMQty]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
 		,[strItemTermDiscountBy]
@@ -1333,7 +1343,9 @@ BEGIN
 		,[intOrderUOMId]					= IE.[intOrderUOMId]
 		,[dblQtyOrdered]					= IE.[dblQtyOrdered]
 		,[intItemUOMId]						= IE.[intItemUOMId]
+		,[intPriceUOMId]					= IE.[intPriceUOMId]
 		,[dblQtyShipped]					= IE.[dblQtyShipped]
+		,[dblContractPriceUOMQty]			= IE.[dblContractPriceUOMQty]
 		,[dblDiscount]						= IE.[dblDiscount]
 		,[dblItemTermDiscount]				= IE.[dblItemTermDiscount]
 		,[strItemTermDiscountBy]			= IE.[strItemTermDiscountBy]

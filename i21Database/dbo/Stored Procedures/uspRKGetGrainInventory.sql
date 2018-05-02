@@ -1,5 +1,4 @@
 ﻿CREATE PROC [dbo].[uspRKGetGrainInventory]
-
 		@dtmFromTransactionDate datetime = null,
 		@dtmToTransactionDate datetime = null,
 		@intCommodityId int =  null,
@@ -7,6 +6,11 @@
 		  @strPositionIncludes nvarchar(100) = NULL
 
 AS
+--DECLARE		@dtmFromTransactionDate datetime = '2018-04-19 00:00:00',
+--		@dtmToTransactionDate datetime = '2018-04-19 00:00:00',
+--		@intCommodityId int =  6,
+--		@intItemId int= 0,
+--		  @strPositionIncludes nvarchar(100) = 'All Storage'
 
 DECLARE @tblResult TABLE
 (Id INT identity(1,1),
@@ -33,13 +37,19 @@ intInventoryCountId int,
 intInvoiceId int
 
 )
+DECLARE @intCommodityUnitMeasureId INT= NULL
+SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
+
+
 
 INSERT INTO @tblResult(dtmDate,strDistributionOption,strShipDistributionOption,strAdjDistributionOption,strCountDistributionOption,tranShipmentNumber,tranShipQty,
 	tranReceiptNumber,tranRecQty,tranAdjNumber,dblAdjustmentQty,tranCountNumber,dblCountQty,tranInvoiceNumber,dblInvoiceQty
 ,intInventoryReceiptId ,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId,BalanceForward)
 
 SELECT *,round(isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0),6) BalanceForward FROM 
-(SELECT dtmDate,
+(
+select distinct * from(
+SELECT dtmDate,
 	(SELECT top 1 strDistributionOption FROM tblICInventoryReceipt ir 
 	 JOIN tblICInventoryReceiptItem ir1 on ir.intInventoryReceiptId=ir1.intInventoryReceiptId
 	 JOIN tblSCTicket st ON st.intTicketId = ir1.intSourceId WHERE ir.strReceiptNumber=it.strTransactionId
@@ -51,21 +61,24 @@ SELECT *,round(isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQt
        '' as strAdjDistributionOption,
 	   '' as strCountDistributionOption,
 (SELECT top 1 strShipmentNumber FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipmentNumber,
-round((SELECT TOP 1 dblQty FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) ,6)tranShipQty,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId)) ,6)tranShipQty,
 (SELECT top 1 strReceiptNumber FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId) tranReceiptNumber,
-ROUND((SELECT TOP 1 dblQty FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId),6) tranRecQty,
-(SELECT top 1 strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId) tranAdjNumber,
-ROUND((SELECT TOP 1 dblQty FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId ),6) dblAdjustmentQty,
-(SELECT top 1 strCountNo FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId) tranCountNumber,
-ROUND((SELECT TOP 1 dblQty FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId ),6) dblCountQty,
+
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId)) ,6) tranRecQty,
+
+isnull((SELECT top 1 strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId),'') tranAdjNumber,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId)) ,6) dblAdjustmentQty,
+
+isnull((SELECT top 1 strCountNo FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId),'') tranCountNumber,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId )) ,6) dblCountQty,
 
 (SELECT top 1 strInvoiceNumber FROM tblARInvoice ia
 	JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  
 	WHERE ia.strInvoiceNumber=it.strTransactionId) tranInvoiceNumber,
-ROUND((SELECT TOP 1 dblQty FROM tblARInvoice ia
-	JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  
-	WHERE ia.strInvoiceNumber=it.strTransactionId ),6) dblInvoiceQty,
 
+ROUND(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(SELECT TOP 1 dblQty FROM tblARInvoice ia
+																										JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  
+																										WHERE ia.strInvoiceNumber=it.strTransactionId )) ,6) dblInvoiceQty,
 
 ROUND((SELECT TOP 1 intInventoryReceiptId FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId),6) intInventoryReceiptId,
 ROUND((SELECT TOP 1 intInventoryShipmentId FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) ,6)intInventoryShipmentId,
@@ -75,20 +88,20 @@ ROUND((SELECT top 1 ia.intInvoiceId FROM tblARInvoice ia
 	JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  
 	WHERE ia.strInvoiceNumber=it.strTransactionId),6) intInvoiceId
 
-
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(33,4,5,10,23)
-JOIN tblICItemLocation il on it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
+join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
+JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and it.intItemId=il.intItemId and isnull(il.strDescription,'') <> 'In-Transit' 
 										AND  il.intLocationId  IN (
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 													ELSE isnull(ysnLicensed, 0) END)
-WHERE intCommodityId=@intCommodityId
+WHERE i.intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
-and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%'
-
+and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%')t
 union
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
 		'' as strAdjDistributionOption,
@@ -109,7 +122,9 @@ SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributio
 		null intInventoryCountId,
 		null intInvoiceId 
 FROM(
-SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,r.strReceiptNumber,
+SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='I' THEN st.dblNetUnits ELSE 0 END) ,6) dblInQty,
+r.strReceiptNumber,
 		strDistributionOption ,r.intInventoryReceiptId
 FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 
@@ -120,12 +135,14 @@ FROM tblSCTicket st
 													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 													ELSE isnull(ysnLicensed, 0) END)
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
-		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
+		join tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId   
 WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
+		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 )a
 
 
 Union
@@ -148,7 +165,9 @@ SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributio
 		null intInventoryCountId,
 		null intInvoiceId 
 FROM(
-SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,r.strShipmentNumber,
+SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END) ,6) dblOutQty,
+r.strShipmentNumber,
 		strDistributionOption ,r.intInventoryShipmentId
 FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId 
@@ -160,34 +179,39 @@ FROM tblSCTicket st
 		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
+		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.intStorageScheduleTypeId > 0 and gs.strOwnedPhysicalStock='Customer')a
+		and  gs.strOwnedPhysicalStock='Customer' )a
 
-UNION
+--UNION
 
-SELECT CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,strDistributionOption,'' strShipDistributionOption,'' strAdjDistributionOption,'' strCountDistributionOption,
-'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblGrossUnits tranRecQty,
-'' tranAdjNumber,0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty
-,r.intInventoryReceiptId ,null intInventoryShipmentId, null intInventoryAdjustmentId,null intInventoryCountId,null intInvoiceId
-FROM 
- tblICInventoryReceiptItem ir 
- JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
-JOIN tblICItem i on i.intItemId=ir.intItemId 
- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 							AND  st.intProcessingLocationId  IN (
-													SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
- JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
-WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
-and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-
+--SELECT CONVERT(VARCHAR(10),dtmTicketDateTime,110) AS dtmDate,strDistributionOption,'' strShipDistributionOption,'' strAdjDistributionOption,'' strCountDistributionOption,
+--'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,
+--dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,dblGrossUnits)  tranRecQty,
+--'' tranAdjNumber,0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty
+--,r.intInventoryReceiptId ,null intInventoryShipmentId, null intInventoryAdjustmentId,null intInventoryCountId,null intInvoiceId
+--FROM 
+-- tblICInventoryReceiptItem ir 
+-- JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ir.intInventoryReceiptId  and ysnPosted=1
+--JOIN tblICItem i on i.intItemId=ir.intItemId 
+-- JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId 							AND  st.intProcessingLocationId  IN (
+--													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+--													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+--													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+--													ELSE isnull(ysnLicensed, 0) END)
+-- JOIN tblGRStorageType s ON st.intStorageScheduleTypeId=s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType,0) = 1
+-- 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
+--		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+--WHERE convert(datetime,CONVERT(VARCHAR(10),dtmTicketDateTime,110)) between convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110))  and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110)) and i.intCommodityId= @intCommodityId
+--and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge' and  s.intStorageScheduleTypeId > 0 
  )t
 
-SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
+ select  convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,* from(
+SELECT distinct 
     dtmDate [dtmDate],case when isnull(tranReceiptNumber,'') <> '' then tranReceiptNumber	
                                             when isnull(tranShipmentNumber,'') <> '' then tranShipmentNumber
                                             when isnull(tranAdjNumber,'') <> '' then tranAdjNumber
@@ -198,10 +222,10 @@ SELECT convert(int,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum,
                                             WHEN isnull(strShipDistributionOption,'') <> '' then strShipDistributionOption
                                             END 
                                             strDistribution,
-       tranRecQty [dblIN],tranShipmentNumber [strShipTicketNo],
+       tranRecQty [dblIN],isnull(tranShipmentNumber,'') [strShipTicketNo],
 	   isnull(tranShipQty,0) + isnull(dblInvoiceQty,0)   [dblOUT],
 	   tranAdjNumber [strAdjNo],
        dblAdjustmentQty [dblAdjQty],tranCountNumber [strCountNumber],dblCountQty [dblCountQty],BalanceForward dblDummy,
 (SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward,strShipDistributionOption,
 	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId
-FROM @tblResult T1
+FROM @tblResult T1)t order by strReceiptNumber

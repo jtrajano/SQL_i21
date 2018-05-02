@@ -20,6 +20,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
+	[intCompanyId] INT NULL, 
     CONSTRAINT [PK_tblICInventoryTransfer] PRIMARY KEY ([intInventoryTransferId]), 
     CONSTRAINT [AK_tblICInventoryTransfer_strTransferNo] UNIQUE ([strTransferNo]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity] FOREIGN KEY ([intTransferredById]) REFERENCES tblEMEntity([intEntityId]), 

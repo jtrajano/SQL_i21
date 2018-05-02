@@ -38,6 +38,11 @@ SELECT l.intLotId
 	,l.ysnProduced
 	,l.ysnStorage
 	,l.intOwnershipType
+	,strOwnershipType = (CASE WHEN l.intOwnershipType = 1 THEN 'Own'
+						WHEN l.intOwnershipType = 2 THEN 'Storage'
+						WHEN l.intOwnershipType = 3 THEN 'Consigned Purchase'
+						WHEN l.intOwnershipType = 4 THEN 'Consigned Sale'
+						END)
 	,l.intGradeId
 	,l.intCreatedUserId
 	,l.intConcurrencyId
@@ -109,11 +114,16 @@ SELECT l.intLotId
 	,l.intUnitPallet
 	,w.intWorkOrderId
 	,mp.intAttributeTypeId
-	,DATEDIFF(dd,  l.dtmDateCreated,GETDATE()) AS intAge
+	,DATEDIFF(dd, l.dtmDateCreated, GETDATE()) AS intAge
 	,DATEDIFF(dd, GETDATE(), l.dtmExpiryDate) AS intRemainingLife
 	,LI.dtmLastMoveDate
 	,LI.dtmDueDate
 	,ls.strBackColor
+	,l.intSeasonCropYear AS intCropYear
+	,e3.strName AS strProducer
+	,l.strCertificate AS strCertification
+	,l.strCertificateId AS strCertificationId
+	,l.strTrackingNumber
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -137,3 +147,4 @@ LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
 LEFT JOIN tblMFWorkOrder w ON l.strTransactionId = w.strWorkOrderNo
 LEFT JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
+Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId

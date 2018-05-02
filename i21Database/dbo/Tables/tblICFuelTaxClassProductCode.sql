@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[intFuelTaxClassId] INT NOT NULL, 
 		[strState] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strProductCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intCompanyId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICFuelTaxClassProductCode] PRIMARY KEY ([intFuelTaxClassProductCodeId]), 

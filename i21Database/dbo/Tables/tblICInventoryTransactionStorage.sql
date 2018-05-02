@@ -46,6 +46,7 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		[intForexRateTypeId] INT NULL,
 		[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1,
 		[dblUnitRetail] NUMERIC(38, 20), 
+		[intCompanyId] INT NULL, 
 		CONSTRAINT [PK_tblICInventoryTransactionStorage] PRIMARY KEY ([intInventoryTransactionStorageId]),
 		CONSTRAINT [FK_tblICInventoryTransactionStorage_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryTransactionStorage_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),

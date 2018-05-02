@@ -69,6 +69,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[intForexRateTypeId]
 		,[dblForexRate]
 		,[dblUnitRetail]
+		,[ysnIsUnposted]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
@@ -100,6 +101,7 @@ SELECT	[intItemId]								= @intItemId
 		,[intForexRateTypeId]					= @intForexRateTypeId
 		,[dblForexRate]							= @dblForexRate
 		,[dblUnitRetail]						= @dblUnitRetail
+		,[ysnIsUnposted]						= 0
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

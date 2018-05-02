@@ -46,6 +46,7 @@ AS
 	, TransferDetail.intToStorageLocationId
 	, strToStorageLocationName = ToStorageLocation.strName
 	, TransferDetail.intItemUOMId
+	, strItemUOM = ItemUOM.strUnitMeasure
 	, strUnitMeasure = ItemUOM.strUnitMeasure
 	, strUnitMeasureSymbol = COALESCE(NULLIF(ItemUOM.strSymbol, ''), NULLIF(ItemUOM.strUnitMeasure, ''))
 	, dblItemUOMCF = ItemUOM.dblUnitQty
@@ -59,7 +60,7 @@ AS
 	, StockFrom.dblOnOrder
 	, StockFrom.dblReservedQty
 	, dblAvailableQty = 
-			CASE	WHEN [Transfer].ysnPosted = 1 THEN 						
+			--CASE	WHEN [Transfer].ysnPosted = 1 THEN 						
 						CASE	WHEN TransferDetail.intOwnershipType = 1 THEN -- Own
 									TransferDetail.dblOriginalAvailableQty
 								WHEN TransferDetail.intOwnershipType = 2 THEN -- Storage
@@ -67,17 +68,17 @@ AS
 								ELSE	-- Consigned Purchase
 									TransferDetail.dblOriginalAvailableQty
 						END
-					ELSE	
-						CASE	WHEN Lot.intLotId IS NOT NULL THEN 
-										Lot.dblQty										
-								ELSE	
-									CASE WHEN TransferDetail.intOwnershipType = 1 THEN 
-											StockFrom.dblAvailableQty
-										ELSE 
-											StockFrom.dblStorageQty
-									END 
-						END
-			END 
+					--ELSE	
+					--	CASE	WHEN Lot.intLotId IS NOT NULL THEN 
+					--					Lot.dblQty										
+					--			ELSE	
+					--				CASE WHEN TransferDetail.intOwnershipType = 1 THEN 
+					--						StockFrom.dblAvailableQty
+					--					ELSE 
+					--						StockFrom.dblStorageQty
+					--				END 
+					--	END
+			--END 
 	, TransferDetail.dblQuantity
 	, TransferDetail.intOwnershipType
 	, strOwnershipType = (CASE WHEN TransferDetail.intOwnershipType = 1 THEN 'Own'
@@ -130,6 +131,9 @@ AS
 	, Receipt.strWarehouseRefNo
 	, TransferDetail.strLotCondition
 	, TransferDetail.dblWeightPerQty
+	, TransferDetail.intCostingMethod
+	, strCostingMethod = ISNULL(CostingMethod.strCostingMethod, '')
+	, TransferDetail.intConcurrencyId
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
@@ -157,4 +161,4 @@ AS
 		LEFT JOIN tblICParentLot ParentLot ON ParentLot.intParentLotId = Lot.intParentLotId 
 			AND ParentLot.intItemId = TransferDetail.intItemId 
 			AND TransferDetail.intLotId = Lot.intLotId
-
+		LEFT JOIN tblICCostingMethod CostingMethod ON CostingMethod.intCostingMethodId = TransferDetail.intCostingMethod

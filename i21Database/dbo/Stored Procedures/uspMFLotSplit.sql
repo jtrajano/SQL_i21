@@ -10,6 +10,7 @@
 	,@intInventoryAdjustmentId INT = NULL OUTPUT
 	,@dtmDate DATETIME = NULL
 	,@strReasonCode NVARCHAR(MAX) = NULL
+	,@intTaskId int=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT

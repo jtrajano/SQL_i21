@@ -5,6 +5,7 @@
 	[intSupplyPointId]						INT         NULL,
 	[ysnQuote]								BIT         NULL,
 	[intEntityCustomerLocationId]			INT			NULL,	
+	[intCompanyId]							INT			NULL,
 	[intConcurrencyId]						INT         CONSTRAINT [DF_tblARCustomerRackQuoteVendor_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARCustomerRackQuoteVendor] PRIMARY KEY CLUSTERED ([intCustomerRackQuoteVendorId] ASC),
 	CONSTRAINT [FK_tblARCustomerRackQuoteHeader_tblARCustomerRackQuoteHeader] FOREIGN KEY ([intCustomerRackQuoteHeaderId]) REFERENCES [dbo].[tblARCustomerRackQuoteHeader] ([intCustomerRackQuoteHeaderId]) ON DELETE CASCADE,

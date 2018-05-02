@@ -139,6 +139,7 @@ IF(ISNULL(@Post,0)) = 1
 			@Invoices I					
 		WHERE
 			I.[dblInvoiceTotal] = @ZeroDecimal
+			AND strTransactionType != 'Cash Refund'
 			AND ISNULL(I.[strImportFormat], '') <> 'CarQuest'		
 			AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID WHERE ARID.[intInvoiceId] = I.[intInvoiceId] AND ISNULL(ARID.[intItemId], 0) <> 0)		
 
@@ -173,8 +174,23 @@ IF(ISNULL(@Post,0)) = 1
 			(SELECT [intEntityId], [strCustomerNumber], [ysnActive] FROM dbo.tblARCustomer WITH (NOLOCK)) ARC
 				ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 		WHERE
-			ARC.[ysnActive] = 0		
+			ARC.[ysnActive] = 0
+			
+		UNION
 		
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Invoice - ' + I.strInvoiceNumber + ' is not yet Approved!'
+		FROM 
+			@Invoices I	
+		INNER JOIN
+			(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
+				ON I.intInvoiceId = FAT.intTransactionId
 		
 		UNION
 		--UOM is required
@@ -1163,11 +1179,11 @@ IF(ISNULL(@Post,0)) = 1
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'The contract item - ' + ICI.[strItemNo] + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARID.[dblPrice],@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY),2) + ').'
+			,[strPostingError]		= 'The contract item - ' + ICI.[strItemNo] + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARID.[dblUnitPrice],@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY),2) + ').'
 		FROM 					
 			@Invoices I
 		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblPrice], [intLoadDetailId], [strPricing], [intShipmentId], [intInventoryShipmentItemId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
+			(SELECT [intInvoiceId], [intItemId], [intContractHeaderId], [intContractDetailId], [dblUnitPrice], [intLoadDetailId], [strPricing], [intShipmentId], [intInventoryShipmentItemId] FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		INNER JOIN
 			(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge')) ICI
@@ -1180,8 +1196,8 @@ IF(ISNULL(@Post,0)) = 1
 				ON ARID.[intContractHeaderId] = ARCC.[intContractHeaderId] 
 				AND ARID.[intContractDetailId] = ARCC.[intContractDetailId] 			 				
 		WHERE
-			ARID.[dblPrice] <> @ZeroDecimal				
-			AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(ARID.[dblPrice], @ZeroDecimal) AS MONEY)
+			ARID.[dblUnitPrice] <> @ZeroDecimal				
+			AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(ARID.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 			AND ARCC.[strPricingType] <> 'Index'
 			AND ISNULL(ARID.[intLoadDetailId],0) = 0
 			AND ISNULL(ARID.[intShipmentId],0) = 0
@@ -1292,7 +1308,23 @@ ELSE
 		INNER JOIN 
 			@Invoices I
 				ON ARPD.[intInvoiceId] = I.[intInvoiceId]
-		WHERE @Recap = 0
+		WHERE @Recap = 0 AND I.strTransactionType != 'Cash Refund'
+
+		UNION
+		SELECT 
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'You cannot Unpost transactions with Voucher.'
+		FROM
+			@Invoices I
+		INNER JOIN tblAPBill A
+			ON A.strVendorOrderNumber = I.strInvoiceNumber
+		WHERE
+			@Recap = 0
 
 		UNION
 		--Invoice with created Bank Deposit

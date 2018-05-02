@@ -120,6 +120,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblAssumedFX] [numeric](18, 6) NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPackingDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	dblYield NUMERIC(18, 6) NULL, 
 	[intCurrencyExchangeRateId] INT NULL,
 	[intRateTypeId] INT NULL,
     intCreatedById INT,
@@ -138,6 +139,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblAllocationAdjQty] NUMERIC(18, 6) NULL, 
     [dblInvoicedQty] NUMERIC(18, 6) NULL, 
 	ysnPriceChanged BIT,
+	[intContractDetailRefId] INT,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

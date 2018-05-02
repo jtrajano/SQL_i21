@@ -58,6 +58,8 @@ SELECT A.[intPanelId]
       ,A.[strOrderByFieldName]
       ,A.[ysnOrderByFieldDescending]
 	  ,D.[strPanelName] as strDrillDownName
+	  ,A.[strTableName]
+	  ,A.[strColumnName]
   FROM [dbo].[tblDBPanel] A
   LEFT JOIN [dbo].[tblRMConnection] B ON B.intConnectionId = A.intConnectionId
   LEFT JOIN [dbo].[tblDBPanelFilter] C ON C.intFilterId = A.intFilterId

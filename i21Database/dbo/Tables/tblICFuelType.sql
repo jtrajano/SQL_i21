@@ -25,6 +25,7 @@ Type the overview for the table here.
 		[ysnRenewableBiomass] BIT NULL, 
 		[dblPercentDenaturant] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnDeductDenaturant] BIT NULL, 
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICFuelType] PRIMARY KEY ([intFuelTypeId]), 
 		CONSTRAINT [FK_tblICFuelType_tblICRinFuelType] FOREIGN KEY ([intRinFuelCategoryId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]),

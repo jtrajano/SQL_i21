@@ -117,6 +117,8 @@ BEGIN TRY
 		,intStorageLocationId = x.intStorageLocationId
 		,ysnAdjustInventoryQtyBySampleQty = x.ysnAdjustInventoryQtyBySampleQty
 		,intEntityId = x.intEntityId
+		,intBookId = x.intBookId
+		,intSubBookId = x.intSubBookId
 		,intShipperEntityId = @intShipperEntityId
 		,strShipmentNumber = x.strShipmentNumber
 		,strLotNumber = x.strLotNumber
@@ -166,6 +168,8 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,ysnAdjustInventoryQtyBySampleQty BIT
 			,intEntityId INT
+			,intBookId INT
+			,intSubBookId INT
 			,strShipmentNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
@@ -296,6 +300,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,intPropertyItemId
 		,dtmPropertyValueCreated
 		,intCreatedUserId
 		,dtmCreated
@@ -335,6 +340,7 @@ BEGIN TRY
 		,strFormula
 		,intListItemId
 		,strIsMandatory
+		,intPropertyItemId
 		,CASE 
 			WHEN strPropertyValue <> ''
 				THEN GETDATE()
@@ -376,6 +382,7 @@ BEGIN TRY
 			,strFormula NVARCHAR(MAX)
 			,intListItemId INT
 			,strIsMandatory NVARCHAR(20)
+			,intPropertyItemId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

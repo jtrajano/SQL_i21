@@ -1264,6 +1264,7 @@ SET @BatchIdUsed = @BatchId
 					WHERE
 						P.[intEntityId] <> @UserEntityID
 				END
+				
 								
 				---overpayment
 				INSERT INTO
@@ -1295,7 +1296,8 @@ SET @BatchIdUsed = @BatchId
 					tblARInvoice I
 						ON A.[strRecordNumber] = I.strComments OR A.[intPaymentId] = I.[intPaymentId] 				
 				WHERE
-					I.[strTransactionType] = 'Customer Prepayment'					
+					I.[strTransactionType] = 'Customer Prepayment'		
+					
 					
 			END
 		

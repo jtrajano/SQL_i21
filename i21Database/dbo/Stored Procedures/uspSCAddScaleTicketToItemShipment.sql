@@ -31,7 +31,9 @@ DECLARE @intContractDetailId AS INT,
 		@ysnPrice AS BIT,
 		@splitDistribution AS NVARCHAR(40),
 		@ticketStatus AS NVARCHAR(10),
-		@intContractCostId AS INT;
+		@intContractCostId AS INT,
+		@intShipToId INT,
+		@intFreightTermId INT;
 
 DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
@@ -52,14 +54,22 @@ DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;
 
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-	, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
-	, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
-	, @intContractCostId = SC.intContractCostId
-	FROM dbo.tblICItemUOM UM	
-	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
+, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
+, @intContractCostId = SC.intContractCostId
+FROM dbo.tblICItemUOM UM	
+JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+
+SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId FROM tblARCustomer AR
+LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+WHERE AR.intEntityId = @intEntityId
+
+IF ISNULL(@intShipToId, 0) = 0
+BEGIN
+	RAISERROR('Customer is missing The "Ship To" information, To correct, click on customer link and fill up "Ship To" on the Customer tab', 11, 1);
+	RETURN;
 END
 
 DECLARE @ShipmentStagingTable AS ShipmentStagingTable,
@@ -125,9 +135,9 @@ BEGIN
 											END
 									END
 		,intShipFromLocationId		= SC.intProcessingLocationId
-		,intShipToLocationId		= AR.intShipToId
+		,intShipToLocationId		= @intShipToId
 		,intShipViaId				= SC.intFreightCarrierId
-		,intFreightTermId			= (select top 1 intFreightTermId from tblEMEntityLocation where intEntityLocationId = AR.intShipToId)
+		,intFreightTermId			= @intFreightTermId
 		,strBOLNumber				= SC.strTicketNumber
 		,intDiscountSchedule		= SC.intDiscountId
 		,intForexRateTypeId			= CASE
@@ -235,7 +245,6 @@ BEGIN
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
-		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
 

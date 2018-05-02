@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnHazMat] BIT NULL DEFAULT ((0)), 
 		[strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICTag] PRIMARY KEY ([intTagId]), 
 		CONSTRAINT [AK_tblICTag_strTagNumber] UNIQUE ([strTagNumber])

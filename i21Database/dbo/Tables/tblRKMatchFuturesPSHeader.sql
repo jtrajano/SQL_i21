@@ -18,6 +18,7 @@
 	[intBankId] INT NULL,
 	[intBankAccountId] INT NULL,
     [ysnPosted] BIT NULL, 
+	[intCompanyId] INT NULL,
     CONSTRAINT [PK_tblRKMatchFuturesPSHeader_intMatchFuturesPSHeaderId] PRIMARY KEY (intMatchFuturesPSHeaderId), 
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),

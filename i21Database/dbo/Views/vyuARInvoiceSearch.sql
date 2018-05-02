@@ -66,6 +66,10 @@ SELECT
 	,strStatus						= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured.' END	
 	,dtmForgiveDate					= I.dtmForgiveDate
 	,strSalesOrderNumber			= SO.strSalesOrderNumber
+	,intBookId						= I.intBookId
+	,intSubBookId					= I.intSubBookId
+	,strBook						= BOOK.strBook
+	,strSubBook						= SUBBOOK.strSubBook
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -119,6 +123,16 @@ LEFT OUTER JOIN (
 		 , strName 
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) USERENTERED ON USERENTERED.intEntityId = I.intPostedById
+LEFT OUTER JOIN (
+	SELECT intBookId
+		 , strBook 
+	FROM dbo.tblCTBook WITH (NOLOCK)
+) BOOK ON BOOK.intBookId = I.intBookId
+LEFT OUTER JOIN (
+	SELECT intSubBookId
+		 , strSubBook
+	FROM dbo.tblCTSubBook WITH (NOLOCK)
+) SUBBOOK ON SUBBOOK.intSubBookId = I.intSubBookId
 OUTER APPLY (
 	SELECT TOP 1 strBatchId 
 	FROM dbo.tblARPayment A WITH (NOLOCK)

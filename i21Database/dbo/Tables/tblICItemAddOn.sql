@@ -5,6 +5,7 @@
 	[intAddOnItemId] INT NOT NULL, 
 	[dblQuantity] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	[intItemUOMId] INT NULL, 
+	[ysnAutoAdd] BIT NULL DEFAULT((0)),
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblICItemAddOn] PRIMARY KEY ([intItemAddOnId]),
 	CONSTRAINT [FK_tblICItemAddOn_Item] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 

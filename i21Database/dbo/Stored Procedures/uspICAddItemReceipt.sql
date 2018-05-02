@@ -1569,6 +1569,56 @@ BEGIN
 								GOTO _Exit_With_Rollback;
 							END
 
+						-- Validate the Producer Id. 
+						BEGIN
+							DECLARE @intEntityProducerId AS INT
+							DECLARE @intProducerId AS INT 
+							DECLARE @strEntityName AS NVARCHAR(50) 
+
+							SET @intEntityProducerId = NULL  
+							SET	@strEntityName = NULL 
+
+							SELECT	TOP 1 
+									@intProducerId = ItemLot.intProducerId 
+									,@intEntityProducerId = et.intEntityId
+									,@strEntityName  = e.strName
+							FROM	@LotEntries ItemLot LEFT JOIN tblICItem i
+										ON ItemLot.intItemId = i.intItemId 
+									LEFT JOIN tblEMEntity e 
+										ON ItemLot.intProducerId = e.intEntityId 
+									LEFT JOIN tblEMEntityType et
+										ON e.intEntityId = et.intEntityId
+										AND et.strType = 'Producer'
+							WHERE	ItemLot.intProducerId IS NOT NULL 
+									AND et.intEntityId IS NULL 
+
+							IF (@intProducerId IS NOT NULL) AND (@intEntityProducerId IS NULL)
+							BEGIN 
+								--'Invalid Producer. {Entity Name} is not configured as a Producer type. Please check the Entity setup.'
+								EXEC uspICRaiseError 80210, @strEntityName;
+								GOTO _Exit_With_Rollback;
+							END 
+						END 
+
+						-- Validate the Certificate. 
+						BEGIN
+							DECLARE @strCertificateName AS NVARCHAR(50) 
+
+							SELECT	TOP 1 
+									@strCertificateName = ItemLot.strCertificate 									
+							FROM	@LotEntries ItemLot LEFT JOIN tblICCertification c
+										ON ItemLot.strCertificate = c.strCertificationName 
+							WHERE	ItemLot.strCertificate IS NOT NULL 
+									AND c.strCertificationName IS NULL 
+
+							IF (@strCertificateName IS NOT NULL)
+							BEGIN 
+								--'Certificate {Certificate Name} is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
+								EXEC uspICRaiseError 80211, @strCertificateName;
+								GOTO _Exit_With_Rollback;
+							END 
+						END 
+
 						-- Insert Lot for Receipt Item
 						INSERT INTO dbo.tblICInventoryReceiptItemLot (
 							[intInventoryReceiptItemId]		
@@ -1602,6 +1652,10 @@ BEGIN
 							,[intParentLotId]
 							,[strParentLotNumber]
 							,[strParentLotAlias]
+							,[strCertificate]
+							,[intProducerId]
+							,[strCertificateId]
+							,[strTrackingNumber]
 							,[intSort]
 							,[intConcurrencyId]
 						)
@@ -1637,6 +1691,10 @@ BEGIN
 							,[intParentLotId] = ItemLot.intParentLotId
 							,[strParentLotNumber] = ItemLot.strParentLotNumber
 							,[strParentLotAlias] = ItemLot.strParentLotAlias
+							,[strCertificate] = ItemLot.strCertificate
+							,[intProducerId] = ItemLot.intProducerId
+							,[strCertificateId] = ItemLot.strCertificateId
+							,[strTrackingNumber] = ItemLot.strTrackingNumber 
 							,[intSort] = 1
 							,[intConcurrencyId] = 1
 						FROM @LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData

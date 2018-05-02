@@ -90,6 +90,7 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 		[dblUnitRetail] NUMERIC(38, 20) NULL DEFAULT 0,
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
+		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryActualCost] PRIMARY KEY NONCLUSTERED ([intInventoryActualCostId]) 
 	)
