@@ -56,12 +56,29 @@ BEGIN
        
     IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
     BEGIN
-            DECLARE @tbl TABLE (intCnt int, intAccountId int, strAccountId nvarchar(100))
+            DECLARE @tbl TABLE (intCnt int, intAccountId int, strAccountId nvarchar(100), intItemId INT, strItemNo NVARCHAR(100), strItemDescription NVARCHAR(100))
             INSERT into @tbl
             EXEC uspSTGetSalesTaxTotalsPreload 0
 
             INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
-            Select @intCheckoutId, intCnt, NULL, NULL, NULL, intAccountId, 0 from @tbl
+			(
+				intCheckoutId
+				, strTaxNo
+				, dblTotalTax
+				, dblTaxableSales
+				, dblTaxExemptSales
+				, intSalesTaxAccount
+				, intConcurrencyId
+			)
+            SELECT 
+				@intCheckoutId
+				, intCnt
+				, NULL
+				, NULL
+				, NULL
+				, intAccountId
+				, 0 
+			FROM @tbl
     END
        
     UPDATE dbo.tblSTCheckoutSalesTaxTotals

@@ -772,6 +772,209 @@ BEGIN
 
 
 
+
+				----------------------------------------------------------------------
+				-------------------------- SALES TAX TOTALS --------------------------
+				----------------------------------------------------------------------
+				IF EXISTS(SELECT * FROM tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId AND dblTotalTax > 0)
+					BEGIN																																																																																																																																																																																						BEGIN
+							INSERT INTO @EntriesForInvoice(
+											 [strSourceTransaction]
+											,[strTransactionType]
+											,[intSourceId]
+											,[strSourceId]
+											,[intInvoiceId]
+											,[intEntityCustomerId]
+											,[intCompanyLocationId]
+											,[intCurrencyId]
+											,[intTermId]
+											,[dtmDate]
+											,[dtmDueDate]
+											,[dtmShipDate]
+											,[dtmCalculated]
+											,[dtmPostDate]
+											,[intEntitySalespersonId]
+											,[intFreightTermId]
+											,[intShipViaId]
+											,[intPaymentMethodId]
+											,[strInvoiceOriginId]
+											,[strPONumber]
+											,[strBOLNumber]
+											,[strComments]
+											,[intShipToLocationId]
+											,[intBillToLocationId]
+											,[ysnTemplate]
+											,[ysnForgiven]
+											,[ysnCalculated]
+											,[ysnSplitted]
+											,[intPaymentId]
+											,[intSplitId]
+											,[intLoadDistributionHeaderId]
+											,[strActualCostId]
+											,[intShipmentId]
+											,[intTransactionId]
+											,[intEntityId]
+											,[ysnResetDetails]
+											,[ysnPost]
+											,[intInvoiceDetailId]
+											,[intItemId]
+											,[ysnInventory]
+											,[strItemDescription]
+											,[intOrderUOMId]
+											,[dblQtyOrdered]
+											,[intItemUOMId]
+											,[dblQtyShipped]
+											,[dblDiscount]
+											,[dblPrice]
+											,[ysnRefreshPrice]
+											,[strMaintenanceType]
+											,[strFrequency]
+											,[dtmMaintenanceDate]
+											,[dblMaintenanceAmount]
+											,[dblLicenseAmount]
+											,[intTaxGroupId]
+											,[ysnRecomputeTax]
+											,[intSCInvoiceId]
+											,[strSCInvoiceNumber]
+											,[intInventoryShipmentItemId]
+											,[strShipmentNumber]
+											,[intSalesOrderDetailId]
+											,[strSalesOrderNumber]
+											,[intContractHeaderId]
+											,[intContractDetailId]
+											,[intShipmentPurchaseSalesContractId]
+											,[intTicketId]
+											,[intTicketHoursWorkedId]
+											,[intSiteId]
+											,[strBillingBy]
+											,[dblPercentFull]
+											,[dblNewMeterReading]
+											,[dblPreviousMeterReading]
+											,[dblConversionFactor]
+											,[intPerformerId]
+											,[ysnLeaseBilling]
+											,[ysnVirtualMeterReading]
+											,[strImportFormat]
+											,[dblCOGSAmount]
+											,[intTempDetailIdForTaxes]
+											,[intConversionAccountId]
+											,[intCurrencyExchangeRateTypeId]
+											,[intCurrencyExchangeRateId]
+											,[dblCurrencyExchangeRate]
+											,[intSubCurrencyId]
+											,[dblSubCurrencyRate]
+										)
+										SELECT 
+											 [strSourceTransaction]		= 'Store Checkout'
+											,[strTransactionType]		= 'Invoice'
+											,[intSourceId]				= @intCheckoutId
+											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
+											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
+											,[intEntityCustomerId]		= @intEntityCustomerId
+											,[intCompanyLocationId]		= @intCompanyLocationId
+											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
+											,[intTermId]				= NULL
+											,[dtmDate]					= GETDATE()
+											,[dtmDueDate]				= GETDATE()
+											,[dtmShipDate]				= GETDATE()
+											,[dtmCalculated]			= GETDATE()
+											,[dtmPostDate]				= GETDATE()
+											,[intEntitySalespersonId]	= NULL
+											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
+											,[intShipViaId]				= @intShipViaId
+											,[intPaymentMethodId]		= NULL
+											,[strInvoiceOriginId]		= NULL -- not sure
+											,[strPONumber]				= NULL -- not sure
+											,[strBOLNumber]				= NULL -- not sure
+											,[strComments]				= @strComments
+											,[intShipToLocationId]		= NULL
+											,[intBillToLocationId]		= NULL
+											,[ysnTemplate]				= 0
+											,[ysnForgiven]				= 0
+											,[ysnCalculated]			= 0 -- not sure
+											,[ysnSplitted]				= 0
+											,[intPaymentId]				= NULL
+											,[intSplitId]				= NULL
+											,[intLoadDistributionHeaderId]	= NULL
+											,[strActualCostId]			= NULL
+											,[intShipmentId]			= NULL
+											,[intTransactionId]			= NULL
+											,[intEntityId]				= @intCurrentUserId
+											,[ysnResetDetails]			= 1
+											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
+											,[intInvoiceDetailId]		= NULL
+											,[intItemId]				= I.intItemId
+											,[ysnInventory]				= 1
+											,[strItemDescription]		= I.strDescription
+											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[dblQtyOrdered]			= 1
+											,[intItemUOMId]				= UOM.intItemUOMId
+											,[dblQtyShipped]			= 1
+											,[dblDiscount]				= 0
+											,[dblPrice]					= STT.dblTotalTax
+											,[ysnRefreshPrice]			= 0
+											,[strMaintenanceType]		= NULL
+											,[strFrequency]				= NULL
+											,[dtmMaintenanceDate]		= NULL
+											,[dblMaintenanceAmount]		= NULL
+											,[dblLicenseAmount]			= NULL
+											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
+											,[intSCInvoiceId]			= NULL
+											,[strSCInvoiceNumber]		= NULL
+											,[intInventoryShipmentItemId] = NULL
+											,[strShipmentNumber]		= NULL
+											,[intSalesOrderDetailId]	= NULL
+											,[strSalesOrderNumber]		= NULL
+											,[intContractHeaderId]		= NULL
+											,[intContractDetailId]		= NULL
+											,[intShipmentPurchaseSalesContractId]	= NULL
+											,[intTicketId]				= NULL
+											,[intTicketHoursWorkedId]	= NULL
+											,[intSiteId]				= NULL -- not sure
+											,[strBillingBy]				= NULL -- not sure
+											,[dblPercentFull]			= NULL
+											,[dblNewMeterReading]		= NULL
+											,[dblPreviousMeterReading]	= NULL -- not sure
+											,[dblConversionFactor]		= NULL -- not sure
+											,[intPerformerId]			= NULL -- not sure
+											,[ysnLeaseBilling]			= NULL
+											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
+											,[strImportFormat]			= 'Not Familiar'
+											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[intTempDetailIdForTaxes]  = I.intItemId
+											,[intConversionAccountId]	= NULL -- not sure
+											,[intCurrencyExchangeRateTypeId]	= NULL
+											,[intCurrencyExchangeRateId]		= NULL
+											,[dblCurrencyExchangeRate]	= 1.000000
+											,[intSubCurrencyId]			= NULL
+											,[dblSubCurrencyRate]		= 1.000000
+								FROM tblSTCheckoutSalesTaxTotals STT
+								JOIN tblICItem I ON STT.intItemId = I.intItemId
+								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
+								JOIN tblSTCheckoutHeader CH ON STT.intCheckoutId = CH.intCheckoutId
+								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
+														AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
+													AND CH.intStoreId = ST.intStoreId
+								WHERE STT.intCheckoutId = @intCheckoutId
+								AND STT.dblTotalTax > 0
+								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+					END
+				END
+				ELSE 
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Department Totals'
+					END
+				----------------------------------------------------------------------
+				---------------------- END SALES TAX TOTALS --------------------------
+				----------------------------------------------------------------------
+
+
+
+
 				----------------------------------------------------------------------
 				------------------------------- POST ---------------------------------
 				----------------------------------------------------------------------
@@ -789,7 +992,7 @@ BEGIN
 								,@RaiseError		 = 1
 								,@ErrorMessage		 = @ErrorMessage OUTPUT
 								,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-					END TRY
+				END TRY
 
 				BEGIN CATCH
 					SET @ErrorMessage = ERROR_MESSAGE()
@@ -817,23 +1020,33 @@ BEGIN
 			BEGIN
 				SET @strInvoiceId = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
 
-				EXEC [dbo].[uspARPostInvoice]
-						@batchId			= NULL,
-						@post				= 0, -- 0 = UnPost
-						@recap				= 0,
-						@param				= @strInvoiceId,
-						@userId				= @intCurrentUserId,
-						@beginDate			= NULL,
-						@endDate			= NULL,
-						@beginTransaction	= NULL,
-						@endTransaction		= NULL,
-						@exclude			= NULL,
-						@successfulCount	= @intSuccessfullCount OUTPUT,
-						@invalidCount		= @intInvalidCount OUTPUT,
-						@success			= @ysnSuccess OUTPUT,
-						@batchIdUsed		= @strBatchIdUsed OUTPUT,
-						@transType			= N'all',
-						@raiseError			= @ysnError
+				BEGIN TRY
+						EXEC [dbo].[uspARPostInvoice]
+								@batchId			= NULL,
+								@post				= 0, -- 0 = UnPost
+								@recap				= 0,
+								@param				= @strInvoiceId,
+								@userId				= @intCurrentUserId,
+								@beginDate			= NULL,
+								@endDate			= NULL,
+								@beginTransaction	= NULL,
+								@endTransaction		= NULL,
+								@exclude			= NULL,
+								@successfulCount	= @intSuccessfullCount OUTPUT,
+								@invalidCount		= @intInvalidCount OUTPUT,
+								@success			= @ysnSuccess OUTPUT,
+								@batchIdUsed		= @strBatchIdUsed OUTPUT,
+								@transType			= N'all',
+								@raiseError			= 1
+
+						SET @ysnSuccess = 1
+				END TRY
+
+				BEGIN CATCH
+					SET @ysnUpdateCheckoutStatus = 0
+					SET @ysnSuccess = 0
+					SET @strStatusMsg = ERROR_MESSAGE()
+				END CATCH
 
 				-- Example OutPut params
 				-- @intSuccessfullCount: 1
