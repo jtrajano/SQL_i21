@@ -196,7 +196,7 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0) 
+		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0)
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -249,6 +249,7 @@ BEGIN
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
 		,@ysnConsumptionRequired BIT
 		,@dblTotalOtherCharges NUMERIC(18, 6)
+
 	SELECT @ysnConsumptionRequired = ysnConsumptionRequired
 	FROM tblMFWorkOrderRecipeItem RI
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -269,7 +270,7 @@ BEGIN
 			,SUM((
 					CASE 
 						WHEN intCostDriverId = 2
-							THEN  ISNULL(RI.dblCostRate, 0)
+							THEN ISNULL(RI.dblCostRate, 0)
 						ELSE ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblCostRate, 0)
 						END
 					) / R.dblQuantity)
@@ -359,7 +360,8 @@ BEGIN
 				,@strTrackingNumber = strTrackingNumber
 			FROM dbo.tblICLot L
 			JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
-			WHERE WC.intWorkOrderId = @intWorkOrderId AND WC.intBatchId = @intBatchId
+			WHERE WC.intWorkOrderId = @intWorkOrderId
+				AND WC.intBatchId = @intBatchId
 		END
 
 		INSERT INTO @ItemsThatNeedLotId (
@@ -455,9 +457,14 @@ BEGIN
 	IF @dblTotalOtherCharges IS NOT NULL
 		AND @dblTotalOtherCharges > 0
 	BEGIN
-		SELECT @intRecipeItemUOMId = intItemUOMId
-		FROM tblMFWorkOrderRecipeItem
-		WHERE intWorkOrderId = @intWorkOrderId and intItemId=@intItemId
+		SELECT @intRecipeItemUOMId = IsNULL(RS.intItemUOMId, RI.intItemUOMId)
+		FROM tblMFWorkOrderRecipeItem RI
+		LEFT JOIN tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+		WHERE RI.intWorkOrderId = @intWorkOrderId
+			AND (
+				RI.intItemId = @intItemId
+				OR RS.intSubstituteItemId = @intItemId
+				)
 	END
 
 	DELETE
@@ -753,13 +760,14 @@ BEGIN
 		AND intBatchId = @intBatchId
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
-	SET strBatchId = @strBatchId,dblOtherCharges=(
-					CASE 
-						WHEN @intRecipeItemUOMId = @intItemUOMId
-							THEN @dblOtherCharges * @dblQty
-						ELSE @dblOtherCharges * @dblWeight
-						END
-					)
+	SET strBatchId = @strBatchId
+		,dblOtherCharges = (
+			CASE 
+				WHEN @intRecipeItemUOMId = @intItemUOMId
+					THEN @dblTotalOtherCharges * @dblQty
+				ELSE @dblTotalOtherCharges * @dblWeight
+				END
+			)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
 
