@@ -112,6 +112,7 @@
 	[strDepartment] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerChargesItemId] int NULL,
 	[intCustomerPaymentItemId] int NULL,
+	[intOverShortItemId] int NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 
@@ -131,4 +132,5 @@
 	CONSTRAINT [FK_tblSTStore_tblEMEntity_intCheckoutCustomerId] FOREIGN KEY ([intCheckoutCustomerId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerChargesItemId] FOREIGN KEY ([intCustomerChargesItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSTStore_tblICItem_intCustomerPaymentItemId] FOREIGN KEY ([intCustomerPaymentItemId]) REFERENCES [tblICItem]([intItemId]),
-   );
+	CONSTRAINT [FK_tblSTStore_tblICItem_intOverShortItemId] FOREIGN KEY ([intOverShortItemId]) REFERENCES [tblICItem]([intItemId])
+  );
