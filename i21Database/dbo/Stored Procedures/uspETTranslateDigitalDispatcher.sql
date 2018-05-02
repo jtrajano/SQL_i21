@@ -39,24 +39,19 @@ BEGIN
 	DECLARE @intSiteId								INT
 	DECLARE @intTaxGroupId							INT		
 	DECLARE @LogId									INT
+	DECLARE @strStatus NVARCHAR(50)
 	
 	--DECLARE @TransactionType						NVARCHAR(25)
 	--DECLARE @intTermCode							INT
 	--DECLARE @strErrorMessage						NVARCHAR(MAX) 
 	--SET @strAllErrorMessage = ''
-			
-	--DECLARE @ResultTableLog TABLE(
-	--	strCustomerNumber			NVARCHAR(100)
-	--	,strInvoiceNumber			NVARCHAR(25)
-	--	,strSiteNumber				NVARCHAR(5)
-	--	,dtmDate					DATETIME
-	--	,intLineItem				INT
-	--	,strFileName				NVARCHAR(300)
-	--	,strStatus					NVARCHAR(MAX)
-	--	,ysnSuccessful				BIT
-	--	,intInvoiceId				INT
-	--	,strTransactionType 		NVARCHAR(25)
-	--)
+	
+	DECLARE @WarningTableLog TABLE(
+		strCustomerNumber			NVARCHAR(100)
+		,strSiteNumber				NVARCHAR(5)
+		,intLineItem				INT
+		,strWarning					NVARCHAR(MAX)
+	)
 
 	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDDToInvoice')) 
 	BEGIN
@@ -108,14 +103,56 @@ BEGIN
 
 			--TM - Get Site Id
 			-------------------------------------------------------------------------------------------------------------------------------------------------
-			SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
-														WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
-			
-			--Get Tax Group Id
-			SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strTaxGroup)
+			--SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+			--											WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
 
+			DECLARE @intSiteItemTaxId INT
+			DECLARE @intSiteProductId INT
+			DECLARE @dblSiteProductPrice NUMERIC(18,6)
+			SELECT TOP 1 @intSiteId = B.intSiteID
+						,@intSiteItemTaxId = intTaxStateID	
+						,@dblSiteProductPrice = dblPrice
+			FROM tblTMCustomer A
+					INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+					LEFT JOIN tblTMDispatch C ON B.intSiteID = C.intSiteID
+			WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
+
+			SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strTaxGroup)
+			--Tax Mismatch Checking...
+			IF ISNULL(@intSiteItemTaxId,0) <> ISNULL(@intTaxGroupId,0)
+					BEGIN
+						INSERT INTO @WarningTableLog (strCustomerNumber ,strSiteNumber,intLineItem ,strWarning)
+						SELECT strCustomerNumber = @strCustomerNumber 
+								,strSiteNumber = @strSiteNumber 
+								,intLineItem = @intImportDDToInvoiceId 
+								,strStatus = 'Tax Mismatch'
+					END
+		
 			--Get Item id
 			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+			--Item Mismatch Checking...
+			IF ISNULL(@intSiteProductId,0) <> ISNULL(@intItemId,0)
+					BEGIN
+						
+						INSERT INTO @WarningTableLog (strCustomerNumber ,strSiteNumber,intLineItem ,strWarning)
+						SELECT strCustomerNumber = @strCustomerNumber 
+								,strSiteNumber = @strSiteNumber 
+								,intLineItem = @intImportDDToInvoiceId 
+								,strStatus = 'Product Mismatch'
+					END
+
+			
+			 SET @dblSiteProductPrice =  (SELECT TOP 1 dblPrice   FROM tblTMDispatch  WHERE intSiteID = @intSiteId)
+			--Price Mismatch Checking...
+			IF ISNULL(@dblPrice,0) <> ISNULL(@dblSiteProductPrice ,0)
+					BEGIN
+						
+						INSERT INTO @WarningTableLog (strCustomerNumber ,strSiteNumber,intLineItem ,strWarning)
+						SELECT strCustomerNumber = @strCustomerNumber 
+								,strSiteNumber = @strSiteNumber 
+								,intLineItem = @intImportDDToInvoiceId 
+								,strStatus = 'Price Mismatch'
+					END
 
 				--Invoice Number
 			SET @stri21InvoiceNumber =  ISNULL((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , '')
@@ -348,7 +385,7 @@ BEGIN
 					--SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
 	-------------------------------------------------------------------------------------------------------------------------------------------------------
-	--INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )
+	
 	
 	SELECT * FROM (	SELECT 	NULL AS strCustomerNumber		
 					,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber		
