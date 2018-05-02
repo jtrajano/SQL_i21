@@ -217,13 +217,13 @@ BEGIN TRY
 				,@intLotId = intLotId
 				,@intItemId = T.intItemId
 				,@intStorageLocationId = T.intFromStorageLocationId
+				,@intMoveItemUOMId = T.intItemUOMId
 			FROM tblMFTask T
 			JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
 			WHERE T.intTaskId = @intTaskId
 
 			SELECT @strLotNumber = strLotNumber
 				,@intLotLocationId = intLocationId
-				,@intMoveItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE intLotId = @intLotId
 
