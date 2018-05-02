@@ -15,6 +15,7 @@ SELECT	DISTINCT
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
+			,TC.strCounty
 			,APBDT.strCalculationMethod
 			,APBDT.dblRate AS dblTaxRate
 			,APBDT.dblTax AS dblTaxAmount
@@ -23,6 +24,7 @@ SELECT	DISTINCT
 			,strItem = IE.strItemNo 
 			,intTicketId
 			,SC.strTicketNumber
+			,SS.strDeliverySheetNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,APBD.dblTotal 
@@ -46,6 +48,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
+			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
@@ -92,6 +95,7 @@ SELECT	DISTINCT
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
+			,TC.strCounty
 			,APBDT.strCalculationMethod
 			,APBDT.dblRate AS dblTaxRate
 			,APBDT.dblTax AS dblTaxAmount
@@ -100,6 +104,7 @@ SELECT	DISTINCT
 			,strItem = IE.strItemNo 
 			,intTicketId
 			,SC.strTicketNumber
+			,SS.strDeliverySheetNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,APBD.dblTotal 
@@ -123,6 +128,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
+			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
@@ -140,7 +146,7 @@ FROM		dbo.tblAPBill APB
 WHERE  
 	  APB.ysnPosted = 1 
 	 AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
-	 AND APBD.dblTax < 0		  
+	 AND APBD.dblTax < 0
 GO
 
 
