@@ -75,6 +75,7 @@ BEGIN
 						,intLocationId = C.intLocationId
 						,F.strInvoiceNumber
 						,K.strFillMethod
+						,strItemDescription = I.vwitm_desc COLLATE Latin1_General_CI_AS
 					FROM tblTMSite C 
 					INNER JOIN tblTMCustomer E 
 						ON C.intCustomerID = E.intCustomerID
@@ -120,6 +121,7 @@ BEGIN
 					,intLocationId = C.intLocationId
 					,F.strInvoiceNumber
 					,K.strFillMethod
+					,strItemDescription = I.strDescription
 				FROM tblTMSite C 
 				INNER JOIN tblTMCustomer E 
 					ON C.intCustomerID = E.intCustomerID

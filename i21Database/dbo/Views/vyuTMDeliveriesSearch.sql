@@ -21,6 +21,7 @@ AS
 		,intLocationId = C.intLocationId
 		,F.strInvoiceNumber
 		,K.strFillMethod
+		,strItemDescription = I.strDescription		
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID
