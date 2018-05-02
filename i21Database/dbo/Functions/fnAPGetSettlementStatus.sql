@@ -20,7 +20,7 @@ BEGIN
 				  INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 				WHERE  CHK.strTransactionId = CHK.strTransactionId
 				  AND INVRCPTITEM.intSourceId IS NOT NULL
-					AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId 
+			      AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId  
 				  AND PYMT.strPaymentRecordNum = @strTransactionId
 
 				UNION ALL
