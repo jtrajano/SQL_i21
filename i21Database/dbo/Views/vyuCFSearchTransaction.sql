@@ -58,7 +58,8 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 	,dblTotalFET = ISNULL(FETTaxes_1.dblTaxCalculatedAmount, 0) 
     ,dblTotalSET = ISNULL(SETTaxes_1.dblTaxCalculatedAmount, 0)
     ,dblTotalSST = ISNULL(SSTTaxes_1.dblTaxCalculatedAmount, 0) 
-    ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)           
+    ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)
+	,strItemCategory = iccategory.strCategoryCode           
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
@@ -147,6 +148,10 @@ LEFT OUTER JOIN (SELECT intTransactionId,
                         AND ( strTaxClass <> 'SST' ) 
                 GROUP  BY intTransactionId) AS LCTaxes_1 
     ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 
+LEFT JOIN tblICItem icitem
+	ON cfTransaction.intARItemId = icitem.intItemId
+LEFT JOIN tblICCategory iccategory
+	ON icitem.intCategoryId = iccategory.intCategoryId
 GO
 
 
