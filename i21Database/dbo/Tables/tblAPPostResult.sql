@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPPostResult] (
     [intId]              INT            IDENTITY (1, 1) NOT NULL,
-    [strMessage]           NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+    [strMessage]           NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
     [strTransactionType] NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strTransactionId]   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strBatchNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
