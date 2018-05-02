@@ -1231,7 +1231,7 @@ BEGIN
 		,[strCertificate]		= ICC.strCertificationName
 		,[intProducerId]		= CTC.intProducerId
 		,[strCertificateId]		= CTC.strCertificationId
-		,[strTrackingNumber]	= ''
+		,[strTrackingNumber]	= CTC.strTrackingNumber
 		,[intSourceType]		= RE.intSourceType
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
