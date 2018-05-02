@@ -240,7 +240,7 @@ BEGIN TRY
 			RAISERROR('Contract does not exist.',16,1)
 		END
 
-		IF ISNULL(@dblQty,0) = 0
+		IF ISNULL(@intFromItemUOMId,0) = 0
 		BEGIN
 			RAISERROR('UOM does not exist.',16,1)
 		END

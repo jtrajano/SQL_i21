@@ -6427,7 +6427,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyPriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractProcessUpdateStgXML.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessRefund.sql" />
     <Build Include="dbo\Tables\tblSTStoreTaxTotals.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetStorageDetailByDate.sql" />
@@ -6445,6 +6445,9 @@
     <Build Include="dbo\Tables\tblRKInterCompanyDerivativeEntryStage.sql" />
     <Build Include="dbo\Tables\tblCFSiteGroupPriceAdjustmentHeader.sql" />
     <None Include="Scripts\Post-Deployment\CF\3_DataFixPriceAdjustment.sql" />
+    <Build Include="dbo\Functions\fnAPGetPaymentForexRate.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

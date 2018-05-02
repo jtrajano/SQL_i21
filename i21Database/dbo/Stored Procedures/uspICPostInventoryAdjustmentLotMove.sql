@@ -180,7 +180,7 @@ BEGIN
 										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL
+			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
@@ -211,7 +211,7 @@ BEGIN
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Own -- process only company-owned stocks
 
-
+	
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
@@ -291,6 +291,7 @@ BEGIN
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks
+
 
 	-------------------------------------------
 	-- Call the costing SP	

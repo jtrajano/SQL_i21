@@ -47,7 +47,7 @@
 	[strCostUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strgrossNetUOM]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblWeightUnitQty]				DECIMAL(18,6),
-	[dblCostUnitQty]				DECIMAL(18,6),
+	[dblCostUnitQty]				DECIMAL(38,20),
 	[dblUnitQty]					DECIMAL(18,6),
 	[intCurrencyId]					INT NULL,
 	[strCurrency]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,

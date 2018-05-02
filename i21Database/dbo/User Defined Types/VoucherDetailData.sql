@@ -14,7 +14,7 @@
 	[intPrepayTypeId]				INT             NULL,
     [dblQtyReceived]				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount]					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-    [dblCost]						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblCost]						DECIMAL(38, 20) NOT NULL DEFAULT 0, 
 	[dblPrepayPercentage]			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[int1099Form]					INT NOT NULL DEFAULT 0, 
     [int1099Category]				INT NOT NULL DEFAULT 0, 

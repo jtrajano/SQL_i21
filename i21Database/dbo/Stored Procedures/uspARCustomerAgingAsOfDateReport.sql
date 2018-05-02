@@ -256,8 +256,36 @@ WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')	
+	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 	
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
+INSERT INTO tblARCustomerAgingStagingTable (
+	   strCustomerName
+	 , strCustomerNumber
+	 , strCustomerInfo
+	 , intEntityCustomerId
+	 , intEntityUserId
+	 , dblCreditLimit
+	 , dblTotalAR
+	 , dblFuture
+	 , dbl0Days
+	 , dbl10Days
+	 , dbl30Days
+	 , dbl60Days
+	 , dbl90Days
+	 , dbl91Days
+	 , dblTotalDue
+	 , dblAmountPaid
+	 , dblCredits
+	 , dblPrepayments
+	 , dblPrepaids
+	 , dtmAsOfDate
+	 , strSalespersonName
+	 , strSourceTransaction
+	 , strCompanyName
+	 , strCompanyAddress
+	 , strAgingType
+)	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
 	 , strCustomerInfo		= CUSTOMER.strCustomerName + ' ' + CUSTOMER.strCustomerNumber

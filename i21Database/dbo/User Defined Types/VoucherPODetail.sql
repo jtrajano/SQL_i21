@@ -4,7 +4,7 @@
 	[intPurchaseDetailId]			INT             NOT NULL,
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
     [dblDiscount]					DECIMAL(18, 6)	NULL DEFAULT 0, 
-    [dblCost]						DECIMAL(18, 6)	NULL, 
+    [dblCost]						DECIMAL(38, 20)	NULL, 
     [intTaxGroupId]					INT NULL,
 	PRIMARY KEY CLUSTERED ([intPurchaseDetailId] ASC)  
 )
