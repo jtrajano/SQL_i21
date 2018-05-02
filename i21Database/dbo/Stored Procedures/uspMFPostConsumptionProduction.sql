@@ -141,13 +141,7 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblIssuedQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
-		,dblCost = ISNULL(IP.dblLastCost, 0) + ISNULL((
-				CASE 
-					WHEN intMarginById = 2
-						THEN ISNULL(RI.dblMargin, 0) / R.dblQuantity
-					ELSE (ISNULL(IP.dblLastCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
-					END
-				), 0)
+		,dblCost = ISNULL(IP.dblLastCost, 0)
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -202,13 +196,7 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
-		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0) + ISNULL((
-				CASE 
-					WHEN intMarginById = 2
-						THEN ISNULL(RI.dblMargin, 0) / R.dblQuantity
-					ELSE (ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0) * ISNULL(RI.dblMargin, 0) / 100)
-					END
-				), 0)
+		,dblCost = ISNULL(dbo.[fnCalculateCostBetweenUOM](IU.intItemUOMId, cl.intItemUOMId, l.dblLastCost), 0) 
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
@@ -270,7 +258,7 @@ BEGIN
 	DECLARE @tblMFOtherChargeItem TABLE (
 		intRecipeItemId INT
 		,intItemId INT
-		,dblOtherCharge NUMERIC(18, 6)
+		,dblOtherCharge NUMERIC(38, 20)
 		)
 
 	IF @ysnConsumptionRequired = 1
@@ -280,9 +268,9 @@ BEGIN
 			,RI.intItemId
 			,SUM((
 					CASE 
-						WHEN intMarginById = 2
-							THEN ISNULL(P.dblStandardCost, 0) + ISNULL(RI.dblMargin, 0)
-						ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+						WHEN intCostDriverId = 2
+							THEN  ISNULL(RI.dblCostRate, 0)
+						ELSE ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblCostRate, 0)
 						END
 					) / R.dblQuantity)
 		FROM dbo.tblMFWorkOrderRecipeItem RI

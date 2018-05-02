@@ -139,6 +139,8 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId
+		,intCostDriverId 
+	    ,dblCostRate
 		)
 	SELECT intRecipeItemId
 		,intRecipeId
@@ -176,6 +178,8 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId
+		,intCostDriverId 
+	    ,dblCostRate
 	FROM dbo.tblMFRecipeItem ri
 	WHERE intRecipeId = @intRecipeId
 		AND (

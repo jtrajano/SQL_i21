@@ -40,6 +40,8 @@
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_intConcurrencyId] DEFAULT 0,
+	[intCostDriverId] [int] NULL,
+	[dblCostRate] NUMERIC(18,6) NULL,
 	CONSTRAINT [PK_tblMFWorkOrderRecipeItem_intRecipeItemId] PRIMARY KEY ([intRecipeItemId],[intWorkOrderId]), 
     CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId],[intWorkOrderId]) REFERENCES [tblMFWorkOrderRecipe]([intRecipeId],[intWorkOrderId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
