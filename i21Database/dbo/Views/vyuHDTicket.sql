@@ -45,6 +45,7 @@ AS
 		,strEntityLocation = enloc.strLocationName
 		,tic.strDescription
 		,tic.strResolution
+		,tic.strImageId
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
