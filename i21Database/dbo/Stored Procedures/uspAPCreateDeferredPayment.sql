@@ -88,7 +88,8 @@ BEGIN
 				A.dtmDueDate = deferredInterest.dtmPaymentDueDateOverride, 
 				A.dtmBillDate = deferredInterest.dtmPaymentInvoiceDate,
 				A.intTermsId = term.intTermID,
-				A.intDeferredVoucherId = @currentVoucherId
+				A.intDeferredVoucherId = @currentVoucherId,
+				A.strComment = deferredInterest.strCheckComment
 		FROM tblAPBill A
 		CROSS APPLY tblAPDeferredPaymentInterest deferredInterest
 		INNER JOIN tblSMTerm term ON deferredInterest.strTerm = term.strTerm
