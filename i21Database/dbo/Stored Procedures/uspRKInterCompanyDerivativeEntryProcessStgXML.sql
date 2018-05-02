@@ -171,6 +171,9 @@ WHERE strFeedStatus IS NULL
 			1
 		  )  
 
+		  UPDATE tblRKInterCompanyDerivativeEntryStage
+		  SET strFeedStatus = 'Processed'
+		  WHERE intDerivativeEntryStageId = @intDerivativeEntryStageId
 
 		SELECT @intDerivativeEntryStageId = MIN(intDerivativeEntryStageId)
 		FROM tblRKInterCompanyDerivativeEntryStage
