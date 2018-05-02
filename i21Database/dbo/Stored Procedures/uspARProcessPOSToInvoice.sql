@@ -319,7 +319,7 @@ BEGIN
 	,[dblQtyOrdered]						= 0.0
 	,[dblQtyShipped]						= 1
 	,[dblDiscount]							= 0.0
-	,[dblPrice]								= POS.dblTotal * -1
+	,[dblPrice]								= POS.dblDiscount * -1
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
