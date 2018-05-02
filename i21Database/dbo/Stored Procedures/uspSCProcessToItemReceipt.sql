@@ -510,11 +510,12 @@ BEGIN TRY
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
 		
 	UPDATE	SC
-	SET		SC.intLotId = ICLot.intLotId
+	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
 	FROM	dbo.tblSCTicket SC 
 	INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
 	INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
 	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+	WHERE SC.intTicketId = @intTicketId
 
 	-- VOUCHER INTEGRATION
 	IF OBJECT_ID (N'tempdb.dbo.#tmpReceiptItem') IS NOT NULL
