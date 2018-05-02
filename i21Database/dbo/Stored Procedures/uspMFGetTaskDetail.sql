@@ -30,6 +30,8 @@ BEGIN
 			) AS dblAvailableQty
 		,0.0 AS dblReservedWeight -- Not used in client
 		,0.0 AS dblAvailableWeight -- Not used in client
+		,T.intToStorageLocationId
+		,SL1.strName AS strToStorageLocationName
 	FROM tblMFTask T
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
 	JOIN tblICItem I ON I.intItemId = T.intItemId
@@ -37,5 +39,6 @@ BEGIN
 	JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblICLot L ON L.intLotId = T.intLotId
 	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+	LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = T.intToStorageLocationId
 	WHERE T.intTaskId = @intTaskId
 END
