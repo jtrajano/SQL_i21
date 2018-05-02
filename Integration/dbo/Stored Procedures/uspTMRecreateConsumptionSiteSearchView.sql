@@ -93,7 +93,8 @@ BEGIN
 				,A.dblTotalReserve
 				,A.dtmRunOutDate
 				,A.dtmForecastedDelivery
-				FROM tblTMSite A
+				,ysnCustomerActive = CAST((CASE WHEN C.vwcus_active_yn = ''Y'' THEN 1 ELSE 0 END) AS BIT)
+				FROM tblTMSite A WITH(NOLOCK)
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN vwcusmst C
@@ -202,7 +203,8 @@ BEGIN
 				,A.dblTotalReserve
 				,A.dtmRunOutDate
 				,A.dtmForecastedDelivery
-				FROM tblTMSite A
+				,ysnCustomerActive = ISNULL(D.ysnActive,0)
+				FROM tblTMSite A WITH(NOLOCK)
 				INNER JOIN tblTMCustomer B
 					ON A.intCustomerID = B.intCustomerID
 				INNER JOIN tblEMEntity C
@@ -254,7 +256,6 @@ BEGIN
 					ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 				LEFT JOIN tblSMCompanyLocationPricingLevel S
 					ON A.intCompanyLocationPricingLevelId = S.intCompanyLocationPricingLevelId
-				WHERE ISNULL(D.ysnActive,0) = 1
 		')
 	END
 END

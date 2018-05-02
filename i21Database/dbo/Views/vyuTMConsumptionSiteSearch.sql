@@ -69,7 +69,8 @@ AS
 	,A.dblTotalReserve
 	,A.dtmRunOutDate
 	,A.dtmForecastedDelivery
-	FROM tblTMSite A
+	,ysnCustomerActive = ISNULL(D.ysnActive,0)
+	FROM tblTMSite A WITH(NOLOCK)
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
 	INNER JOIN tblEMEntity C
@@ -121,6 +122,4 @@ AS
 		ON A.intLostCustomerReasonId = AA.intLostCustomerReasonId
 	LEFT JOIN tblSMCompanyLocationPricingLevel S
 		ON A.intCompanyLocationPricingLevelId = S.intCompanyLocationPricingLevelId
-
-	WHERE ISNULL(D.ysnActive,0) = 1
 GO
