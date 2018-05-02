@@ -6,7 +6,8 @@ SELECT
 	,E.[strName]
 	,T.[intTicketId]
 	,T.[strTicketNumber]
-	,T.[strSubject]
+	--,T.[strSubject]
+	,strSubject = HW.[strDescription]
 	,HW.[intTicketHoursWorkedId]
 	,HW.[intAgentEntityId]
 	,U.[strName]						AS "strAgentName"
