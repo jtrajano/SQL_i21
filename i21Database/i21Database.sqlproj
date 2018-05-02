@@ -6318,7 +6318,6 @@
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOSampleDetail.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1830_AttachmentMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_Check_Payee_Name.sql" />
     <Build Include="dbo\Views\vyuHDTicketHoursWorked.sql" />
     <Build Include="dbo\Tables\tblSMCSVDynamicImport.sql" />

@@ -66,7 +66,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_RenameCompanyToMultiCompany.sql
 :r .\SM\1810_UpdatePortalMenus.sql
 :r .\SM\1810_UpdateTransactionsApprovalFor.sql
-:r .\SM\1830_AttachmentMigration.sql
 :r .\SM\DefaultData\33_InterCompanyTransactionType.sql
 
 
