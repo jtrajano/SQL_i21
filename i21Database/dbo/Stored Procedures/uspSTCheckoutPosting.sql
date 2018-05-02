@@ -139,6 +139,7 @@ BEGIN
 						--INSERT INTO CopierDB.dbo.InvoiceIntegrationStagingTable(
 										 [strSourceTransaction]
 										,[strTransactionType]
+										,[strType]
 										,[intSourceId]
 										,[strSourceId]
 										,[intInvoiceId]
@@ -223,8 +224,9 @@ BEGIN
 										,[dblSubCurrencyRate]
 									)
 									SELECT 
-										 [strSourceTransaction]		= 'Store Checkout'
+										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= 'Invoice'
+										,[strType]					= 'Store Checkout'
 										,[intSourceId]				= @intCheckoutId
 										,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 										,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -341,6 +343,7 @@ BEGIN
 							--INSERT INTO CopierDB.dbo.InvoiceIntegrationStagingTable(
 											 [strSourceTransaction]
 											,[strTransactionType]
+											,[strType]
 											,[intSourceId]
 											,[strSourceId]
 											,[intInvoiceId]
@@ -425,8 +428,9 @@ BEGIN
 											,[dblSubCurrencyRate]
 										)
 										SELECT 
-											 [strSourceTransaction]		= 'Store Checkout'
+											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
+											,[strType]					= 'Store Checkout'
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -542,6 +546,7 @@ BEGIN
 							INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
 											,[strTransactionType]
+											,[strType]
 											,[intSourceId]
 											,[strSourceId]
 											,[intInvoiceId]
@@ -626,8 +631,9 @@ BEGIN
 											,[dblSubCurrencyRate]
 										)
 										SELECT 
-											 [strSourceTransaction]		= 'Store Checkout'
+											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
+											,[strType]					= 'Store Checkout'
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -781,6 +787,7 @@ BEGIN
 							INSERT INTO @EntriesForInvoice(
 											 [strSourceTransaction]
 											,[strTransactionType]
+											,[strType]
 											,[intSourceId]
 											,[strSourceId]
 											,[intInvoiceId]
@@ -865,8 +872,9 @@ BEGIN
 											,[dblSubCurrencyRate]
 										)
 										SELECT 
-											 [strSourceTransaction]		= 'Store Checkout'
+											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
+											,[strType]					= 'Store Checkout'
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
