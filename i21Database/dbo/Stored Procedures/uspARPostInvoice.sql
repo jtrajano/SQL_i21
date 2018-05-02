@@ -634,16 +634,6 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() 
 if @recap = 1 AND @raiseError = 0
 	SAVE TRAN @TransactionName
 
-
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
--- Create a unique transaction name for recap. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-if @recap = 1 AND @raiseError = 0
-	SAVE TRAN @TransactionName
-
 DECLARE @InvoiceIds TABLE(
 	id  	INT
 )
