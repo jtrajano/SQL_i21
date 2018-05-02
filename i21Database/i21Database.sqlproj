@@ -6297,6 +6297,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
     <Build Include="dbo\Views\vyuPATSetupItem.sql" />
+    <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
