@@ -6448,6 +6448,7 @@
     <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetailPerPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemByRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
