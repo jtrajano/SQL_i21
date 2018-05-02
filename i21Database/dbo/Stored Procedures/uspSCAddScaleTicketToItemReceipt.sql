@@ -1200,6 +1200,10 @@ BEGIN
 		,[intEntityVendorId]
 		,[dtmManufacturedDate]
 		,[strBillOfLadding]
+		,[strCertificate]
+		,[intProducerId]
+		,[strCertificateId]
+		,[strTrackingNumber]
 		,[intSourceType]
 	)
 	SELECT 
@@ -1224,11 +1228,17 @@ BEGIN
 		,[intEntityVendorId]	= RE.intEntityVendorId
 		,[dtmManufacturedDate]	= RE.dtmDate
 		,[strBillOfLadding]		= ''
+		,[strCertificate]		= ICC.strCertificationName
+		,[intProducerId]		= CTC.intProducerId
+		,[strCertificateId]		= CTC.strCertificationId
+		,[strTrackingNumber]	= ''
 		,[intSourceType]		= RE.intSourceType
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
 		INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
+		LEFT JOIN tblCTContractCertification CTC ON CTC.intContractDetailId = RE.intContractDetailId
+		LEFT JOIN tblICCertification ICC ON ICC.intCertificationId = CTC.intCertificationId
 END
 
 EXEC dbo.uspICAddItemReceipt 
