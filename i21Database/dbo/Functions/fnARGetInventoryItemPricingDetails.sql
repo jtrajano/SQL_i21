@@ -170,6 +170,18 @@ BEGIN
 	
 	--Item Pricing Level
 	SET @Price = 0
+	IF ISNULL(@PricingLevelId,0) = 0
+		BEGIN
+			SELECT TOP 1 @PricingLevelId = CPL.intCompanyLocationPricingLevelId 
+			FROM tblSMCompanyLocationPricingLevel CPL
+			INNER JOIN (
+				SELECT strLevel
+				FROM tblARCustomer
+				WHERE intEntityId = @CustomerId				  
+			) C ON CPL.strPricingLevelName = C.strLevel
+			WHERE CPL.intCompanyLocationId = @LocationId
+		END
+		
 	IF ISNULL(@PricingLevelId,0) <> 0
 	BEGIN
 
