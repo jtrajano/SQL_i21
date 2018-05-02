@@ -56,7 +56,9 @@ DECLARE @intStorageScheduleId AS INT
 		,@dblInventoryReceiptCost NUMERIC (38,20)
 		,@intTaxId INT
 		,@vendorOrderNumber NVARCHAR(50)
-		,@voucherDate DATETIME;
+		,@voucherDate DATETIME
+		,@createVoucher AS BIT
+		,@postVoucher AS BIT;
 
 BEGIN 
 	SELECT DISTINCT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
@@ -345,147 +347,151 @@ END
 	EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
 
 	-- VOUCHER INTEGRATION
-	IF OBJECT_ID (N'tempdb.dbo.#tmpReceiptItem') IS NOT NULL
-		DROP TABLE #tmpReceiptItem
-	CREATE TABLE #tmpReceiptItem (
-		[intInventoryReceiptItemId] INT PRIMARY KEY
-		,[intInventoryReceiptId] INT
-		,[intEntityVendorId] INT
-		,[intContractDetailId] INT
-		,[intPricingTypeId] INT
-		,[ysnPosted] BIT
-		,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
-		,[dblQtyReceived] NUMERIC(38,20)
-		,[dblCost] NUMERIC(38,20)
-		,[intOwnershipType] INT
-		UNIQUE ([intInventoryReceiptItemId])
-	);
-	INSERT INTO #tmpReceiptItem(
-		[intInventoryReceiptItemId]
-		,[intInventoryReceiptId]
-		,[intEntityVendorId]
-		,[intContractDetailId]
-		,[intPricingTypeId]
-		,[ysnPosted]
-		,[strChargesLink]
-		,[dblQtyReceived]
-		,[dblCost]
-		,[intOwnershipType]
-	)
-	SELECT 
-		ri.intInventoryReceiptItemId
-		,ri.intInventoryReceiptId
-		,r.intEntityVendorId
-		,CT.intContractDetailId 
-		,ISNULL(CT.intPricingTypeId,0)
-		,r.ysnPosted 
-		,ri.strChargesLink
-		,ri.dblOpenReceive - ri.dblBillQty
-		,ri.dblUnitCost
-		,ri.intOwnershipType
-	FROM tblICInventoryReceipt r 
-	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
-	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1
-	-- Assemble the voucher items 
-	BEGIN 
-		INSERT INTO @voucherItems (
-				[intInventoryReceiptType]
-				,[intInventoryReceiptItemId]
-				,[dblQtyReceived]
-				,[dblCost]
-				,[intTaxGroupId]
+	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
+	IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
+	BEGIN
+		IF OBJECT_ID (N'tempdb.dbo.#tmpReceiptItem') IS NOT NULL
+			DROP TABLE #tmpReceiptItem
+		CREATE TABLE #tmpReceiptItem (
+			[intInventoryReceiptItemId] INT PRIMARY KEY
+			,[intInventoryReceiptId] INT
+			,[intEntityVendorId] INT
+			,[intContractDetailId] INT
+			,[intPricingTypeId] INT
+			,[ysnPosted] BIT
+			,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+			,[dblQtyReceived] NUMERIC(38,20)
+			,[dblCost] NUMERIC(38,20)
+			,[intOwnershipType] INT
+			UNIQUE ([intInventoryReceiptItemId])
+		);
+		INSERT INTO #tmpReceiptItem(
+			[intInventoryReceiptItemId]
+			,[intInventoryReceiptId]
+			,[intEntityVendorId]
+			,[intContractDetailId]
+			,[intPricingTypeId]
+			,[ysnPosted]
+			,[strChargesLink]
+			,[dblQtyReceived]
+			,[dblCost]
+			,[intOwnershipType]
 		)
 		SELECT 
-				[intInventoryReceiptType] = 
-				CASE 
-					WHEN ri.intOrderId > 0 THEN 2
-					ELSE 1
-				END 
-				,[intInventoryReceiptItemId] = ri.intInventoryReceiptItemId
-				,[dblQtyReceived] = ri.dblOpenReceive - ri.dblBillQty
-				,[dblCost] = ri.dblUnitCost
-				,[intTaxGroupId] = ri.intTaxGroupId
-		FROM	tblICInventoryReceiptItem ri
-				INNER JOIN #tmpReceiptItem tmp ON tmp.intInventoryReceiptItemId = ri.intInventoryReceiptItemId AND tmp.intPricingTypeId IN (0,1,6)
-		WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
-				AND tmp.intOwnershipType = 1		
-	END 
-
-	-- Assemble the Other Charges
-	BEGIN
-		INSERT INTO @voucherOtherCharges (
-				[intInventoryReceiptChargeId]
-				,[dblQtyReceived]
-				,[dblCost]
-				,[intTaxGroupId]
-		)
-		SELECT	
-				[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
-				,[dblQtyReceived] = rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
-				,[dblCost] = 
+			ri.intInventoryReceiptItemId
+			,ri.intInventoryReceiptId
+			,r.intEntityVendorId
+			,CT.intContractDetailId 
+			,ISNULL(CT.intPricingTypeId,0)
+			,r.ysnPosted 
+			,ri.strChargesLink
+			,ri.dblOpenReceive - ri.dblBillQty
+			,ri.dblUnitCost
+			,ri.intOwnershipType
+		FROM tblICInventoryReceipt r 
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
+		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1
+		-- Assemble the voucher items 
+		BEGIN 
+			INSERT INTO @voucherItems (
+					[intInventoryReceiptType]
+					,[intInventoryReceiptItemId]
+					,[dblQtyReceived]
+					,[dblCost]
+					,[intTaxGroupId]
+			)
+			SELECT 
+					[intInventoryReceiptType] = 
 					CASE 
-						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
-						ELSE rc.dblAmount
+						WHEN ri.intOrderId > 0 THEN 2
+						ELSE 1
 					END 
-				,[intTaxGroupId] = rc.intTaxGroupId
-		FROM	#tmpReceiptItem tmp 
-				INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
-		WHERE	tmp.ysnPosted = 1
-				AND tmp.intInventoryReceiptId = @InventoryReceiptId
-				AND tmp.intOwnershipType = 1
-				AND 
-				(
-					(
-						rc.ysnPrice = 1
-						AND ISNULL(-rc.dblAmountPriced, 0) < rc.dblAmount
-					)
-					OR (
-						rc.ysnAccrue = 1 
-						AND tmp.intEntityVendorId = rc.intEntityVendorId 
-						AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
-					)
-				)
-	END 
+					,[intInventoryReceiptItemId] = ri.intInventoryReceiptItemId
+					,[dblQtyReceived] = ri.dblOpenReceive - ri.dblBillQty
+					,[dblCost] = ri.dblUnitCost
+					,[intTaxGroupId] = ri.intTaxGroupId
+			FROM	tblICInventoryReceiptItem ri
+					INNER JOIN #tmpReceiptItem tmp ON tmp.intInventoryReceiptItemId = ri.intInventoryReceiptItemId AND tmp.intPricingTypeId IN (0,1,6)
+			WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
+					AND tmp.intOwnershipType = 1		
+		END 
 
-	SELECT @total = COUNT(*) FROM @voucherItems;
-	IF (@total > 0)
-	BEGIN
-	EXEC [dbo].[uspAPCreateBillData]
-			@userId = @intUserId
-			,@vendorId = @intEntityId
-			,@type = 1
-			,@voucherDetailReceipt = @voucherItems
-			,@voucherDetailReceiptCharge = @voucherOtherCharges
-			,@shipTo = @intLocationId
-			,@shipFrom = @intShipFrom
-			,@vendorOrderNumber = @vendorOrderNumber
-			,@voucherDate = @voucherDate
-			,@currencyId = @intCurrencyId
-			,@billId = @intBillId OUTPUT
-	END
-
-	IF ISNULL(@intBillId , 0) != 0
-	BEGIN
-		SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
-
-		EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
-		@type = N'AccountsPayable.view.Voucher',
-		@transactionEntityId = @intEntityId,
-		@currentUserEntityId = @intUserId,
-		@locationId = @intLocationId,
-		@amount = @dblTotal,
-		@requireApproval = @requireApproval OUTPUT
-
-		IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+		-- Assemble the Other Charges
 		BEGIN
-			EXEC [dbo].[uspAPPostBill]
-			@post = 1
-			,@recap = 0
-			,@isBatch = 0
-			,@param = @intBillId
-			,@userId = @intUserId
-			,@success = @success OUTPUT
+			INSERT INTO @voucherOtherCharges (
+					[intInventoryReceiptChargeId]
+					,[dblQtyReceived]
+					,[dblCost]
+					,[intTaxGroupId]
+			)
+			SELECT	
+					[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
+					,[dblQtyReceived] = rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
+					,[dblCost] = 
+						CASE 
+							WHEN rc.strCostMethod = 'Amount' THEN rc.dblRate
+							ELSE rc.dblAmount
+						END 
+					,[intTaxGroupId] = rc.intTaxGroupId
+			FROM	#tmpReceiptItem tmp 
+					INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink AND tmp.intPricingTypeId IN (0,1,6)
+			WHERE	tmp.ysnPosted = 1
+					AND tmp.intInventoryReceiptId = @InventoryReceiptId
+					AND tmp.intOwnershipType = 1
+					AND 
+					(
+						(
+							rc.ysnPrice = 1
+							AND ISNULL(-rc.dblAmountPriced, 0) < rc.dblAmount
+						)
+						OR (
+							rc.ysnAccrue = 1 
+							AND tmp.intEntityVendorId = rc.intEntityVendorId 
+							AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
+						)
+					)
+		END 
+
+		SELECT @total = COUNT(*) FROM @voucherItems;
+		IF (@total > 0)
+		BEGIN
+		EXEC [dbo].[uspAPCreateBillData]
+				@userId = @intUserId
+				,@vendorId = @intEntityId
+				,@type = 1
+				,@voucherDetailReceipt = @voucherItems
+				,@voucherDetailReceiptCharge = @voucherOtherCharges
+				,@shipTo = @intLocationId
+				,@shipFrom = @intShipFrom
+				,@vendorOrderNumber = @vendorOrderNumber
+				,@voucherDate = @voucherDate
+				,@currencyId = @intCurrencyId
+				,@billId = @intBillId OUTPUT
+		END
+
+		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
+		BEGIN
+			SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
+
+			EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+			@type = N'AccountsPayable.view.Voucher',
+			@transactionEntityId = @intEntityId,
+			@currentUserEntityId = @intUserId,
+			@locationId = @intLocationId,
+			@amount = @dblTotal,
+			@requireApproval = @requireApproval OUTPUT
+
+			IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+			BEGIN
+				EXEC [dbo].[uspAPPostBill]
+				@post = 1
+				,@recap = 0
+				,@isBatch = 0
+				,@param = @intBillId
+				,@userId = @intUserId
+				,@success = @success OUTPUT
+			END
 		END
 	END
 _Exit:
