@@ -73,6 +73,7 @@ BEGIN
 								   END) COLLATE Latin1_General_CI_AS
 					,strLocation = vwcus_bus_loc_no COLLATE Latin1_General_CI_AS
 					,ysnActive = CAST((CASE WHEN vwcus_active_yn = ''Y'' THEN 1 ELSE 0 END) AS BIT)
+					,strAccountStatus = vwcus_acct_stat_x_1
 				FROM vwcusmst 
 				')
 		END
@@ -105,6 +106,7 @@ BEGIN
 				,strAddress = Loc.strAddress
 				,strLocation = Loc.strLocationName
 				,ysnActive = Cus.ysnActive
+				,strAccountStatus = STATUSCODES.strAccountStatusCode
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityId
@@ -116,6 +118,20 @@ BEGIN
 			INNER JOIN tblEMEntityLocation Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
+			OUTER APPLY (
+				SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+				FROM (
+					SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
+					FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+					INNER JOIN (
+						SELECT intAccountStatusId
+								, strAccountStatusCode
+						FROM dbo.tblARAccountStatus WITH (NOLOCK)
+					) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+					WHERE CAS.intEntityCustomerId = Ent.intEntityId
+					FOR XML PATH ('''')
+				) SC (strAccountStatusCode)
+			) STATUSCODES
 		')
 	END
 END

@@ -390,7 +390,7 @@ BEGIN
 				,vwcus_balance = ISNULL(CI.dblTotalDue,0.0)
 				,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 				,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
-				,vwcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId)
+				,vwcus_acct_stat_x_1 = STATUSCODES.strAccountStatusCode
 				,dblFutureCurrent = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl0Days,0.0)
 				,intConcurrencyId = 0
 				,strFullLocation =  ISNULL(Loc.strLocationName ,'''')
@@ -429,6 +429,20 @@ BEGIN
 				ON Con.intEntityId = F.intEntityId  
 			LEFT JOIN tblSMTerm T
 				ON Cus.intTermsId = T.intTermID
+			OUTER APPLY (
+				SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
+				FROM (
+					SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + '', ''
+					FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+					INNER JOIN (
+						SELECT intAccountStatusId
+								, strAccountStatusCode
+						FROM dbo.tblARAccountStatus WITH (NOLOCK)
+					) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+					WHERE CAS.intEntityCustomerId = Ent.intEntityId
+					FOR XML PATH ('''')
+				) SC (strAccountStatusCode)
+			) STATUSCODES
 		
 		')
 	END
