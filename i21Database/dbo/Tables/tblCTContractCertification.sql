@@ -4,6 +4,7 @@
     [intContractDetailId]	INT  NOT NULL, 
     [intCertificationId]	INT  NULL, 
 	strCertificationId      NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strTrackingNumber       NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intProducerId			INT  NULL,
 	dblQuantity				NUMERIC(18,6),
     [intConcurrencyId]		INT NOT NULL,
