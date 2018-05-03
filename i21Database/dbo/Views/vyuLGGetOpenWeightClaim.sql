@@ -140,7 +140,7 @@ FROM (
 												WHERE intLoadDetailId = LD.intLoadDetailId
 												)
 									ELSE LD.dblNet
-									END * dblFranchise / 100
+									END * WG.dblFranchise / 100
 								) > 0.0
 							THEN (
 									(
@@ -165,7 +165,7 @@ FROM (
 													AND IRI.intOrderId = CH.intContractHeaderId
 													AND IR.strReceiptType = 'Inventory Return'
 												), 0)
-										) * dblFranchise / 100
+										) * WG.dblFranchise / 100
 									)
 						ELSE 0.0
 						END
@@ -238,7 +238,7 @@ FROM (
 													)
 										ELSE LD.dblNet
 										END
-									) + (LD.dblNet * dblFranchise / 100)
+									) + (LD.dblNet * WG.dblFranchise / 100)
 								) < 0.0
 							THEN (
 									(
@@ -255,7 +255,7 @@ FROM (
 														)
 											ELSE LD.dblNet
 											END
-										) + (LD.dblNet * dblFranchise / 100)
+										) + (LD.dblNet * WG.dblFranchise / 100)
 									)
 						ELSE (
 								RI.dblNet - CASE 
@@ -360,7 +360,8 @@ FROM (
 		AND RI.intLineNo = LD.intPContractDetailId
 		AND RI.intOrderId = CH.intContractHeaderId
 		AND LOAD.intPurchaseSale = 1
-	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = LOAD.intLoadId
+	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblLGWeightClaim WC ON WCD.intWeightClaimId = WC.intWeightClaimId
 	WHERE LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN 4
