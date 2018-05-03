@@ -63,27 +63,21 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
                 ,[strTransferType]          = 'Location to Location'
                 ,[intSourceType]            = 1
                 ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
-                ,[intFromLocationId]        = (select top 1 intLocationId from tblSCScaleSetup where intScaleSetupId = SC.intScaleSetupId)
+                ,[intFromLocationId]        = SCS.intLocationId
                 ,[intToLocationId]          = SC.intProcessingLocationId
                 ,[ysnShipmentRequired]      = 1
                 ,[intStatusId]              = 1
-                ,[intShipViaId]             = SC.intFreightCarrierId
-                ,[intFreightUOMId]          = (SELECT	TOP 1 
-											            IU.intUnitMeasureId											
-											            FROM dbo.tblICItemUOM IU 
-											            WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
+                ,[intShipViaId]             = NULL
+                ,[intFreightUOMId]          = null
                 -- Detail
                 ,[intItemId]                = SC.intItemId
-                ,[intLotId]                 = NULL
-                ,[intItemUOMId]             = (SELECT	TOP 1 
-											            IU.intItemUOMId											
-											            FROM dbo.tblICItemUOM IU 
-											            WHERE	IU.intItemId = SC.intItemId and IU.ysnStockUnit = 1)
+                ,[intLotId]                 = SC.intLotId
+                ,[intItemUOMId]             = SC.intItemUOMIdTo
                 ,[dblQuantityToTransfer]    = SC.dblNetUnits
                 ,[strNewLotId]              = NULL
-                ,[intFromSubLocationId]     = NULL
+                ,[intFromSubLocationId]     = SC.intSubLocationId
                 ,[intToSubLocationId]       = NULL
-                ,[intFromStorageLocationId] = NULL
+                ,[intFromStorageLocationId] = SC.intStorageLocationId
                 ,[intToStorageLocationId]   = NULL
 				,[ysnWeights]				= CASE
 												WHEN SC.intWeightId > 0 THEN 1
@@ -95,6 +89,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 				,[strSourceId]				= SC.strTicketNumber
 				,[strSourceScreenName]		= 'Scale Ticket'
     FROM	tblSCTicket SC 
+	INNER JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
     WHERE	SC.intTicketId = @intTicketId 
 			
 
