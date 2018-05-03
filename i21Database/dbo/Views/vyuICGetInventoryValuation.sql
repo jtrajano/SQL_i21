@@ -16,7 +16,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,t.intStorageLocationId
 		,strStorageLocationName		= strgLoc.strName
 		,dtmDate					= dbo.fnRemoveTimeOnDate(t.dtmDate)
-		,strTransactionType			= ty.strName
+		,strTransactionType			= (CASE WHEN ty.strName = 'Invoice' THEN invoice.strTransactionType ELSE ty.strName END)
 		,t.strTransactionForm
 		,t.strTransactionId
 		,dblBeginningQtyBalance		= CAST(0 AS NUMERIC(38, 20)) 
