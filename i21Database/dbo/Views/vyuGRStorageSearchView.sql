@@ -39,7 +39,15 @@ SELECT TOP 100 PERCENT
 ,strContractNumber			  = CH.strContractNumber
 ,strDeliverySheetNumber		  = DeliverySheet.strDeliverySheetNumber
 ,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
-,dblSplitPercent			  = ISNULL(SCTicketSplit.dblSplitPercent,100)
+,dblSplitPercent			  = --ISNULL(SCTicketSplit.dblSplitPercent,100)
+    CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
+            THEN 
+                CASE WHEN DSS.dblSplitPercent IS NOT NULL
+                    THEN DSS.dblSplitPercent ELSE 100
+                END
+            ELSE SCTicketSplit.dblSplitPercent
+	END
+,intSplitId					   = EMSplit.intSplitId
 FROM tblGRCustomerStorage       CS  
 JOIN tblSMCompanyLocation       LOC				ON LOC.intCompanyLocationId			= CS.intCompanyLocationId  
 JOIN tblGRStorageType	        ST				ON ST.intStorageScheduleTypeId		= CS.intStorageTypeId  
@@ -51,7 +59,10 @@ JOIN tblGRStorageScheduleRule   SR				ON SR.intStorageScheduleRuleId		= CS.intSt
 JOIN tblGRDiscountSchedule		DS		        ON DS.intDiscountScheduleId			= CS.intDiscountScheduleId
 LEFT JOIN tblGRStorageHistory   SH				ON SH.intCustomerStorageId			= CS.intCustomerStorageId
 LEFT JOIN tblCTContractHeader   CH				ON CH.intContractHeaderId			= SH.intContractHeaderId
-LEFT JOIN tblSCDeliverySheet    DeliverySheet   ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId  
+--LEFT JOIN tblSCDeliverySheet    DeliverySheet   ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId  
+LEFT JOIN (tblSCDeliverySheet    DeliverySheet 
+			INNER JOIN tblSCDeliverySheetSplit    DSS	ON DSS.intDeliverySheetId	= DeliverySheet.intDeliverySheetId
+		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId AND DSS.intEntityId = E.intEntityId
 LEFT JOIN tblSCTicket		    SC				ON SC.intTicketId					= CS.intTicketId
 LEFT JOIN tblSCTicketSplit	    SCTicketSplit	ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId --AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
 LEFT JOIN tblEMEntitySplit		EMSplit		    ON EMSplit.intSplitId				= SC.intSplitId
