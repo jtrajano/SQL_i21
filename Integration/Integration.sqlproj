@@ -166,6 +166,7 @@
     <None Include="dbo\Stored Procedures\uspPRImportOriginTaxTypes.sql" />
     <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportSettleScaleTicket.sql" />
+    <None Include="dbo\Stored Procedures\uspGRImportReceiptandBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />

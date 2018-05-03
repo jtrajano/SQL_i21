@@ -121,8 +121,8 @@ BEGIN
 	)
 	 SELECT	 
 	 intConcurrencyId 		   =  A4GLIdentity
-	,strTicketStatus		   = 'O'
-	,strTicketNumber		   = LTRIM(RTRIM(gastl_tic_no))
+	,strTicketStatus		   = 'C'
+	,strTicketNumber		   = LTRIM(RTRIM(gastl_tic_no))+'/'+LTRIM(GT.gastl_rec_type)+'/'+LTRIM(GT.gastl_tie_breaker)
 	,intScaleSetupId		   = @intScaleSetupId
 	,intTicketPoolId		   = @intTicketPoolId
 	,intTicketLocationId	   = CL.intCompanyLocationId
@@ -196,7 +196,7 @@ BEGIN
 	,intGradingFactor		   = NULL
 	,strVarietyType			   = NULL
 	,strFarmNumber			   = NULL
-	,strFieldNumber			   = NULL
+	,strFieldNumber			   = 'NonScale'
 	,strDiscountComment		   = LTRIM(RTRIM(gastl_tic_comment))
 	,strCommodityCode		   = LTRIM(RTRIM(gastl_com_cd))
 	,intCommodityId			   = CO.intCommodityId
@@ -245,13 +245,12 @@ BEGIN
 					  ,CD.intContractSeq
 				FROM tblCTContractHeader CH
 				JOIN tblCTContractDetail CD ON CD.intContractHeaderId =CH.intContractHeaderId
-			  ) [Contract] ON [Contract].strContractNumber = LTRIM(RTRIM(GT.gastl_cnt_no)) collate Latin1_General_CI_AS 
+			  ) [Contract] ON LEFT([Contract].strContractNumber,8) = LTRIM(RTRIM(GT.gastl_cnt_no)) collate Latin1_General_CI_AS 
 			  			  AND [Contract].intContractSeq	 = gastl_cnt_seq_no 
 			  			  AND [Contract].intEntityId		 = t.intEntityId
 			  			  AND [Contract].intCommodityId	 = CO.intCommodityId
 			  			  AND [Contract].intContractTypeId = CASE WHEN GT.gastl_pur_sls_ind='P' THEN 1 ELSE 2 END
 	WHERE GT.gastl_pd_yn <> 'Y' AND GT.gastl_rec_type IN('C','M','1','2','3','4','5','6','7','8')
-	AND LTRIM(RTRIM(gastl_tic_no)) NOT IN('14170j0000','473468')
 	
   
 	UPDATE tblSCTicket SET strDistributionOption='CNT',intStorageScheduleTypeId = -2 WHERE intContractId >0

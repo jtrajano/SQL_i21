@@ -53,6 +53,17 @@ BEGIN
 			FROM tblAPVendor
 			WHERE strVendorId = CUS.strCustomerNumber
 			)
+	UNION ALL
+
+	SELECT DISTINCT CUS.intEntityId
+	FROM gastrmst
+	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastl_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	WHERE gastr_pur_sls_ind = 'P'
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblAPVendor
+			WHERE strVendorId = CUS.strCustomerNumber
+			)
 
 	EXEC uspEMConvertCustomerToVendor @CustomerId
 		,@UserId
@@ -286,9 +297,9 @@ BEGIN
 					  ,CD.intContractSeq
 				FROM tblCTContractHeader CH
 				JOIN tblCTContractDetail CD ON CD.intContractHeaderId =CH.intContractHeaderId
-			  ) [Contract] ON [Contract].strContractNumber = LTRIM(RTRIM(GT.gasct_cnt_no)) collate Latin1_General_CI_AS 
+			  ) [Contract] ON LEFT([Contract].strContractNumber,8) = LTRIM(RTRIM(GT.gasct_cnt_no)) collate Latin1_General_CI_AS 
 			  			  AND [Contract].intContractSeq	 = gasct_cnt_seq 
-			  			  AND [Contract].intEntityId		 = t.intEntityId
+			  			  AND [Contract].intEntityId	 = t.intEntityId
 			  			  AND [Contract].intCommodityId	 = CO.intCommodityId
 			  			  AND [Contract].intContractTypeId = CASE WHEN GT.gasct_tic_type = 'I' THEN 1 ELSE 2 END
 
