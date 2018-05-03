@@ -54,12 +54,23 @@ BEGIN
 	RETURN 0
 END
 
-DECLARE @NewInvoices TABLE(intEntityCustomerId INT, intCompanyLocationId INT)
+DECLARE @NewInvoices TABLE(intEntityCustomerId INT
+	, intCompanyLocationId INT
+	, intCurrencyId INT
+	, intCurrencyExchangeRateTypeId INT
+	, dblCurrencyExchangeRate DECIMAL(18,6)
+	, intSubCurrencyId INT
+	, dblSubCurrencyRate DECIMAL(18,6))
 DECLARE @NewlyCreatedInvoices TABLE(intInvoiceId INT)
 
 INSERT INTO @NewInvoices
 SELECT DISTINCT V.intEntityId
 			  , ISNULL(@CompanyLocationId, V.intCompanyLocationId)
+			  , MAX(V.intCurrencyId)
+			  , MAX(V.intCurrencyExchangeRateTypeId)
+			  , MAX(V.dblCurrencyExchangeRate)
+			  , MAX(V.intSubCurrencyId)
+			  , MAX(V.dblSubCurrencyRate)
 FROM vyuARBillableHoursForImport V
 INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
 INNER JOIN tblARCustomer C ON V.intEntityId = C.intEntityId
@@ -72,9 +83,19 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			  , @NewInvoiceId INT
 			  , @ErrorMessage NVARCHAR(250)
 			  , @CustomerName NVARCHAR(250)
-				
+			  , @CurrencyId INT
+			  , @ItemCurrencyExchangeRateTypeId INT
+			  , @ItemCurrencyExchangeRate DECIMAL(18,6)
+			  , @ItemSubCurrencyId INT
+			  , @ItemSubCurrencyRate DECIMAL(18,6)
+
 		SELECT TOP 1 @EntityCustomerId = intEntityCustomerId
 		           , @ComLocationId = intCompanyLocationId 
+				   , @CurrencyId = intCurrencyId
+				   , @ItemCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+				   , @ItemCurrencyExchangeRate = dblCurrencyExchangeRate
+				   , @ItemSubCurrencyId = intSubCurrencyId
+				   , @ItemSubCurrencyRate = dblSubCurrencyRate
 		FROM @NewInvoices
 				
 		EXEC [dbo].[uspARCreateCustomerInvoice]
@@ -84,7 +105,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			@EntityId = @UserId,
 			@NewInvoiceId = @NewInvoiceId OUTPUT,
 			@ErrorMessage = @ErrorMessage OUTPUT,
-			@DocumentMaintenanceId = @DocumentMaintenanceId
+			@DocumentMaintenanceId = @DocumentMaintenanceId,
+			@CurrencyId = @CurrencyId,
+			@ItemCurrencyExchangeRateTypeId = @ItemCurrencyExchangeRateTypeId,
+			@ItemCurrencyExchangeRate = @ItemCurrencyExchangeRate,
+			@ItemSubCurrencyId = @ItemSubCurrencyId,
+			@ItemSubCurrencyRate = @ItemSubCurrencyRate
 			
 		IF ISNULL(@NewInvoiceId, 0) = 0 OR ISNULL(@ErrorMessage, '') <> ''
 		BEGIN
@@ -109,6 +135,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			,[dblQtyOrdered]
 			,[dblQtyShipped]
 			,[dblPrice]
+			,[intCurrencyExchangeRateTypeId]
+			,[dblCurrencyExchangeRate]
 			,[dblTotal]
 			,[intAccountId]
 			,[intCOGSAccountId]
@@ -126,6 +154,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 			,V.[intHours]												--[dblQtyOrdered]
 			,V.[intHours]												--[dblQtyShipped]
 			,V.[dblPrice] 												--[dblPrice]
+			,V.[intCurrencyExchangeRateTypeId]
+			,V.[dblCurrencyExchangeRate]
 			,V.[dblTotal]  												--[dblTotal]
 			,Acct.[intAccountId]										--[intAccountId]
 			,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
