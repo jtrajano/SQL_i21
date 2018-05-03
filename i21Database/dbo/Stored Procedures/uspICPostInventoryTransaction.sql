@@ -32,6 +32,8 @@
 	,@strDescription NVARCHAR(255) = NULL 
 	,@strActualCostId NVARCHAR(50) = NULL  
 	,@dblUnitRetail NUMERIC(38,20) = NULL  
+	,@dblCategoryCostValue NUMERIC(38,20) = NULL  
+	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -97,6 +99,8 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[strDescription]
 		,[strActualCostId]
 		,[dblUnitRetail]
+		,[dblCategoryCostValue]
+		,[dblCategoryRetailValue]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -133,6 +137,8 @@ SELECT	[intItemId]							= @intItemId
 		,[strDescription]					= @strDescription
 		,[strActualCostId]					= @strActualCostId
 		,[dblUnitRetail]					= @dblUnitRetail
+		,[dblCategoryCostValue]				= @dblCategoryCostValue
+		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

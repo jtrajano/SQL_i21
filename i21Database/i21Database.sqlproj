@@ -6448,6 +6448,8 @@
     <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
     <Build Include="dbo\Views\vyuAPVoucherCheckOffDetailPerPayment.sql" />
+    <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCategoryCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
