@@ -20,7 +20,7 @@ BEGIN
 				AND intItemId = @intItemId
 				AND intUnitMeasureId = @intUnitMeasureId
 				AND dtmBeginDate <= @dtmDate
-				AND dtmEndDate >= @dtmDate
+				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
 	)
 	BEGIN
@@ -31,7 +31,7 @@ BEGIN
 				AND intItemId = @intItemId
 				AND intUnitMeasureId = @intUnitMeasureId
 				AND dtmBeginDate <= @dtmDate
-				AND dtmEndDate >= @dtmDate
+				AND ISNULL(dtmEndDate ,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
 		RETURN
 	END
@@ -43,7 +43,7 @@ BEGIN
 				AND intItemId = @intItemId
 				AND intUnitMeasureId = @intUnitMeasureId
 				AND dtmBeginDate <= @dtmDate
-				AND dtmEndDate >= @dtmDate
+				AND ISNULL(dtmEndDate, '1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
 	)
 	BEGIN
@@ -54,7 +54,7 @@ BEGIN
 				AND intItemId = @intItemId
 				AND intUnitMeasureId = @intUnitMeasureId
 				AND dtmBeginDate <= @dtmDate
-				AND dtmEndDate >= @dtmDate
+				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
 		RETURN
 	END
@@ -66,7 +66,7 @@ BEGIN
 				AND intItemId IS NULL
 				AND intUnitMeasureId = @intUnitMeasureId
 				AND dtmBeginDate <= @dtmDate
-				AND dtmEndDate >= @dtmDate
+				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
 	)
 	BEGIN
@@ -77,7 +77,7 @@ BEGIN
 				AND intItemId IS NULL
 				AND intUnitMeasureId = @intUnitMeasureId
 				AND dtmBeginDate <= @dtmDate
-				AND dtmEndDate >= @dtmDate
+				AND ISNULL(dtmEndDate,'1/1/9999') >= @dtmDate
 				AND intProgramChargeId = @intProgramChargeId
 		RETURN
 	END
