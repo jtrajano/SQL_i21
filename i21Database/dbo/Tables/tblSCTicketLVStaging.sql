@@ -10,6 +10,9 @@
 	[strEntityNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NULL,
 	[strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intCommodityId] INT NULL,
+	[strCommodityCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strCommodityDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intCompanyLocationId] INT NULL,
 	[strLocationNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[dblGrossWeight] DECIMAL(13, 3) NULL, 
@@ -37,6 +40,7 @@
 	[ysnDriverOff] BIT NULL, 
 	[ysnGrossManual] BIT NULL, 
 	[ysnTareManual] BIT NULL, 
+	[intStorageScheduleTypeId] INT NULL,
 	[strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
 	[strPitNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketPoolId] INT NULL, 
@@ -45,7 +49,9 @@
 	[intSplitId] INT NULL,
 	[strStationShortDescription] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
 	[strSplitNumber] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,    
+	[strItemUOM] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnProcessedData] BIT NULL DEFAULT((0)),
+	[ysnSplitWeightTicket] BIT NULL DEFAULT((0)),
 	[intOriginTicketId] INT NOT NULL,
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 
 )

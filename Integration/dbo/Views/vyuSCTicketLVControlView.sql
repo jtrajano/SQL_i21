@@ -76,7 +76,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 						WHEN gasct_dist_option = ''C'' THEN ''CNT''
 						WHEN gasct_dist_option = ''S'' THEN ''SPT''
 						ELSE gasct_dist_option
-				END) AS strDistributionOption
+				END) COLLATE Latin1_General_CI_AS AS strDistributionOption
 				, (CASE 
 						WHEN gasct_dist_option = ''C'' THEN ''Contract''
 						WHEN gasct_dist_option = ''S'' THEN ''Spot Sale''
@@ -86,6 +86,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
 				,gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
+				,dbo.fnCTConvertYNToBit(gasct_split_wgt_yn,0) AS ysnSplitWeightTicket
 			from gasctmst
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
@@ -114,6 +115,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[strEntityNo]
 					,[intItemId]
 					,[strItemNo]
+					,[intCommodityId]
+					,[strCommodityCode]
+					,[strCommodityDescription]
 					,[intCompanyLocationId]
 					,[strLocationNumber]
 					,[dblGrossWeight]
@@ -139,6 +143,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[ysnDriverOff]
 					,[ysnGrossManual]
 					,[ysnTareManual]
+					,[intStorageScheduleTypeId]
 					,[strDistributionOption]
 					,[strPitNumber]
 					,[intTicketPoolId]
@@ -159,6 +164,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,LTRIM(RTRIM(SC.strEntityNo))
 				,IC.intItemId
 				,LTRIM(RTRIM(SC.strItemNo))
+				,ICC.intCommodityId
+				,ICC.strCommodityCode
+				,ICC.strDescription
 				,SM.intCompanyLocationId
 				,LTRIM(RTRIM(SC.strLocationNumber))
 				,SC.dblGrossWeight
@@ -184,6 +192,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,SC.ysnDriverOff
 				,SC.ysnGrossManual
 				,SC.ysnTareManual
+				,GRS.intStorageScheduleTypeId
 				,LTRIM(RTRIM(SC.strDistributionOption))
 				,LTRIM(RTRIM(SC.strPitNumber))
 				,SCTP.intTicketPoolId
@@ -197,10 +206,121 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 				LEFT JOIN tblAPVendor AP ON AP.strVendorId = SC.strEntityNo
 				LEFT JOIN tblICItem IC ON IC.strItemNo = SC.strItemNo
+				LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 				LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
 				LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
 				LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
 				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
+				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
+
+				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
+				SELECT 
+				DISTINCT 
+					gasct_reading AS dblGradeReading
+					,gasct_shrk_what AS strShrinkWhat
+					,gasct_shrk_pct AS dblShrinkPercent
+					,intDiscountScheduleCodeId
+					,intOriginTicketId
+					,intOriginTicketId AS intTicketFileId
+					,''Scale'' AS strSourceType
+					,''Dollar'' strDiscountChargeType 
+				FROM (
+						SELECT	
+							gasct_disc_cd_1		gasct_disc_cd,
+							gasct_reading_1		gasct_reading,
+							gasct_disc_calc_1	gasct_disc_calc,
+							gasct_un_disc_amt_1 gasct_un_disc_amt,
+							gasct_shrk_what_1	gasct_shrk_what,
+							gasct_shrk_pct_1	gasct_shrk_pct,
+							A4GLIdentity		
+							FROM gasctmst 
+							WHERE gasct_disc_cd_1 IS NOT NULL
+
+						UNION ALL
+							SELECT gasct_disc_cd_2,gasct_reading_2,gasct_disc_calc_2,gasct_un_disc_amt_2,gasct_shrk_what_2,gasct_shrk_pct_2,A4GLIdentity      
+							FROM gasctmst  WHERE gasct_disc_cd_2 IS NOT NULL
+						UNION ALL
+			
+							SELECT gasct_disc_cd_3,gasct_reading_3,gasct_disc_calc_3,gasct_un_disc_amt_3,gasct_shrk_what_3,gasct_shrk_pct_3,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_3 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW'' 
+						UNION ALL
+							SELECT gasct_disc_cd_4,gasct_reading_4,gasct_disc_calc_4,gasct_un_disc_amt_4,gasct_shrk_what_4,gasct_shrk_pct_4,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_4 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW''
+						UNION ALL
+							(
+							 SELECT disc_cd
+				 				,SUM(reading)
+				 				,SUM(disc_calc)
+				 				,SUM(un_disc)
+				 				,shrk_what
+				 				,SUM(gasct_shrk_pct)
+				 				,A4GLIdentity
+							 FROM (
+				 					SELECT 
+				 					 gasct_disc_cd_4 disc_cd
+				 					,Convert(FLOAT, gasct_reading_4) reading
+				 					,Convert(FLOAT, gasct_disc_calc_4) disc_calc
+				 					,Convert(FLOAT, gasct_un_disc_amt_4) un_disc
+				 					,gasct_shrk_what_4 shrk_what
+				 					,Convert(FLOAT, gasct_shrk_pct_4) gasct_shrk_pct
+				 					,A4GLIdentity
+				 					FROM gasctmst
+				 					WHERE gasct_disc_cd_4 IS NOT NULL
+				 	    				AND gasct_disc_cd_3 IS NOT NULL
+				 	    				AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    				AND gasct_disc_cd_4 = ''TW''
+				 	
+				 				UNION ALL
+				 	
+				 				SELECT 
+				 					gasct_disc_cd_3
+				 					,Convert(FLOAT, gasct_reading_3)
+				 					,Convert(FLOAT, gasct_disc_calc_3)
+				 					,Convert(FLOAT, gasct_un_disc_amt_3)
+				 					,gasct_shrk_what_3
+				 					,Convert(FLOAT, gasct_shrk_pct_3)
+				 					,A4GLIdentity
+				 					FROM gasctmst
+				 					WHERE gasct_disc_cd_3 IS NOT NULL
+				 	    				AND gasct_disc_cd_4 IS NOT NULL
+				 	    				AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    				AND gasct_disc_cd_3 = ''TW''
+				 				) t
+							 GROUP BY disc_cd
+				 				,shrk_what
+				 				,A4GLIdentity
+				 
+							) 
+						UNION ALL
+							SELECT gasct_disc_cd_5,gasct_reading_5,gasct_disc_calc_5,gasct_un_disc_amt_5,gasct_shrk_what_5,gasct_shrk_pct_5,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_5 IS NOT NULL 
+						UNION ALL
+							SELECT gasct_disc_cd_6,gasct_reading_6,gasct_disc_calc_6,gasct_un_disc_amt_6,gasct_shrk_what_6,gasct_shrk_pct_6,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_6 IS NOT NULL
+						UNION ALL
+							SELECT gasct_disc_cd_7,gasct_reading_7,gasct_disc_calc_7,gasct_un_disc_amt_7,gasct_shrk_what_7,gasct_shrk_pct_7,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_7 IS NOT NULL 
+						UNION ALL
+							SELECT gasct_disc_cd_8,gasct_reading_8,gasct_disc_calc_8,gasct_un_disc_amt_8,gasct_shrk_what_8,gasct_shrk_pct_8,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_8 IS NOT NULL  
+						UNION ALL
+							SELECT gasct_disc_cd_9,gasct_reading_9,gasct_disc_calc_9,gasct_un_disc_amt_9,gasct_shrk_what_9,gasct_shrk_pct_9,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_9 IS NOT NULL 
+						UNION ALL
+							SELECT gasct_disc_cd_10,gasct_reading_10,gasct_disc_calc_10,gasct_un_disc_amt_10,gasct_shrk_what_10,gasct_shrk_pct_10,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_10 IS NOT NULL 
+						UNION ALL
+							SELECT gasct_disc_cd_11,gasct_reading_11,gasct_disc_calc_11,gasct_un_disc_amt_11,gasct_shrk_what_11,gasct_shrk_pct_11,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_11 IS NOT NULL 
+						UNION ALL
+							SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
+							FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+				)b 
+				INNER JOIN tblSCTicketLVStaging k ON	k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
+				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  CONCAT(k.strCommodityDescription, '' Discount'')
+				INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
+				INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+				WHERE b.gasct_disc_cd is not null
 			END
 		')
 		PRINT 'End creating trigger'
