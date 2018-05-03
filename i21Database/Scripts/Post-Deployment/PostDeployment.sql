@@ -69,6 +69,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\33_InterCompanyTransactionType.sql
 
 
+:r .\SM\1810_Reset_Hours_Terms.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
