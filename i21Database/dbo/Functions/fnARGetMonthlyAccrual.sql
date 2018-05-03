@@ -25,7 +25,7 @@ BEGIN
 	INSERT @accrual(intInvoiceId, dtmAccrualDate,dblAmount, RunningTotal)
 	SELECT intInvoiceId, dtmAccrualDate, dblAmount, RunningTotal = 0
 	FROM dbo.tblARInvoiceAccrual
-	WHERE intInvoiceId = 668
+	WHERE intInvoiceId = @intInvoiceId
 	ORDER BY dtmAccrualDate
 
 	UPDATE @accrual
