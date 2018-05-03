@@ -64,6 +64,7 @@ AS
 	WHERE B.dblPrice = 0
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)
+		AND ISNULL(P.dblRate,0) <> 0
 		AND B.strBuybackSubmitted <> 'E'
 		AND A.ysnPosted = 1
 GO
