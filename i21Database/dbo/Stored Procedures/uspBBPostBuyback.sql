@@ -78,7 +78,7 @@ AS
 			,[dblPrice] = B.dblBuybackRate
 			,[intSalesAccountId] = ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](	B.intItemId
 																						, (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = B.intItemId AND intLocationId = @CompanyLocation)
-																						, 'Other Charge Income'))
+																						, 'Sales Account'))
 			,[strItemDescription] = CASE WHEN B.strCharge = 'Inventory' THEN NULL ELSE B.strCharge END
 		FROM tblBBBuybackDetail B
 		INNER JOIN tblBBBuyback A
@@ -147,7 +147,7 @@ AS
 		SELECT 
 			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](	B.intItemId
 																						, C.intItemLocationId
-																						, 'Other Charge Income'))
+																						, 'Sales Account'))
 			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
 			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
 			,[dblQtyReceived] = A.dblBuybackQuantity	
