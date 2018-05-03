@@ -37,17 +37,17 @@ BEGIN
 		-- ) BaseCurrency
 		-- WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.intCurrencyId != BaseCurrency.intDefaultCurrencyId     
 		--MAKE SURE PAYMENT DETAILS ONLY HAS ONE RECORD
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT
-			'Multiple prepayment details is not yet supported.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
-		FROM tblAPPayment A 
-		INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		GROUP BY A.strPaymentRecordNum, A.intPaymentId
-		HAVING COUNT(B.intPaymentDetailId) > 1 
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		-- SELECT
+		-- 	'Multiple prepayment details is not yet supported.',
+		-- 	'Payable',
+		-- 	A.strPaymentRecordNum,
+		-- 	A.intPaymentId
+		-- FROM tblAPPayment A 
+		-- INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+		-- WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		-- GROUP BY A.strPaymentRecordNum, A.intPaymentId
+		-- HAVING COUNT(B.intPaymentDetailId) > 1 
 
 		--MAKE SURE ysnPrepay set to true.
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
