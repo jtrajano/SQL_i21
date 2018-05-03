@@ -39,13 +39,10 @@ BEGIN TRY
 		FROM tblCTPriceContractAcknowledgementStage
 		WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 
-		IF @strTransactionType = 'Purchase Price Fixation'
+		IF @strTransactionType = 'Sales Price Fixation'
 		BEGIN
-			--<tblCTContractHeaders><tblCTPriceFixation>
-			
 			-------------------------PriceContract-----------------------------------------------------------
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckPriceContractXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceContractXML
 
 			SELECT @intPriceContractId = intPriceContractId
 				,@intPriceContractRefId = intPriceContractRefId
@@ -62,8 +59,7 @@ BEGIN TRY
 			---------------------------------------------PriceFixation------------------------------------------
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckPriceFixationXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationXML
 
 			UPDATE PriceFixation
 			SET PriceFixation.intPriceFixationRefId = XMLDetail.intPriceFixationId
@@ -78,11 +74,8 @@ BEGIN TRY
 			---------------------------------------------PriceFixationDetail-----------------------------------------------
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckPriceFixationDetailXML
-			
-			
-			SELECT @strAckPriceFixationDetailXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationDetailXML
+
 			SELECT * FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH 
 			(
 					intPriceFixationDetailId INT
@@ -106,7 +99,7 @@ BEGIN TRY
 			
 
 			---UPDATE Feed Status in Staging
-			UPDATE tblCTStgPriceContract
+			UPDATE tblCTPriceContractStage
 			SET strFeedStatus = 'Ack Rcvd'
 				,strMessage = 'Success'
 			WHERE intPriceContractId = @intPriceContractRefId

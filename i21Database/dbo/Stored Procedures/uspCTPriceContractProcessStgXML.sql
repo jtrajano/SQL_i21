@@ -3,46 +3,40 @@ AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @ErrMsg					NVARCHAR(MAX)
+	DECLARE @ErrMsg										NVARCHAR(MAX)
 	DECLARE @intPriceContractStageId					INT
-	DECLARE @intPriceContractId	int
-	DECLARE @strPriceContractNo		NVARCHAR(MAX)
-	DECLARE @strNewPriceContractNo		NVARCHAR(MAX)
-	
-	DECLARE @strPriceContractXML		NVARCHAR(MAX)
-	DECLARE @strPriceFixationXML		NVARCHAR(MAX)
-	DECLARE @strPriceFixationDetailXML		NVARCHAR(MAX)
-	
-	DECLARE @strReference			NVARCHAR(MAX)
-	DECLARE @strRowState			NVARCHAR(MAX)
-	DECLARE @strFeedStatus			NVARCHAR(MAX)
-	DECLARE @dtmFeedDate			DATETIME
-	DECLARE @strMessage				NVARCHAR(MAX)
-	DECLARE @intMultiCompanyId		INT	
-	DECLARE @intEntityId			INT
-	DECLARE @strTransactionType		NVARCHAR(MAX)
-	DECLARE @strTagRelaceXML		NVARCHAR(MAX)
-
-	DECLARE @NewPriceContractId	INT
-	DECLARE @NewPriceFixationId	INT
-	DECLARE @NewPriceFixationDetailId      INT
-	
-	DECLARE @intPriceContractAcknowledgementStageId       INT
-	DECLARE @strPriceContractCondition		NVARCHAR(MAX)
-	DECLARE @strPriceFixationCondition		NVARCHAR(MAX)
-	DECLARE @strPriceFixationAllId			NVARCHAR(MAX)
-
-	DECLARE @strAckPriceContractXML			NVARCHAR(MAX)
-	DECLARE @strAckPriceFixationXML			NVARCHAR(MAX)
-	DECLARE @strAckPriceFixationDetailXML   NVARCHAR(MAX)
-	DECLARE @strHedgeXML					NVARCHAR(MAX)
-
-	DECLARE @TempPriceFixationId    INT
-	DECLARE @intPriceFixationId     INT	
-	DECLARE @intContractHeaderId    INT
-	DECLARE @intContractDetailId    INT
-	DECLARE @intPriceFixationRefId  INT
-	DECLARE @idoc					INT 
+	DECLARE @intPriceContractId							INT
+	DECLARE @strPriceContractNo							NVARCHAR(MAX)
+	DECLARE @strNewPriceContractNo						NVARCHAR(MAX)	
+	DECLARE @strPriceContractXML						NVARCHAR(MAX)
+	DECLARE @strPriceFixationXML						NVARCHAR(MAX)
+	DECLARE @strPriceFixationDetailXML					NVARCHAR(MAX)
+	DECLARE @strReference								NVARCHAR(MAX)
+	DECLARE @strRowState								NVARCHAR(MAX)
+	DECLARE @strFeedStatus								NVARCHAR(MAX)
+	DECLARE @dtmFeedDate								DATETIME
+	DECLARE @strMessage									NVARCHAR(MAX)
+	DECLARE @intMultiCompanyId							INT	
+	DECLARE @intEntityId								INT
+	DECLARE @strTransactionType							NVARCHAR(MAX)
+	DECLARE @strTagRelaceXML							NVARCHAR(MAX)
+	DECLARE @NewPriceContractId							INT
+	DECLARE @NewPriceFixationId							INT
+	DECLARE @NewPriceFixationDetailId					INT	
+	DECLARE @intPriceContractAcknowledgementStageId     INT
+	DECLARE @strPriceContractCondition					NVARCHAR(MAX)
+	DECLARE @strPriceFixationCondition					NVARCHAR(MAX)
+	DECLARE @strPriceFixationAllId						NVARCHAR(MAX)
+	DECLARE @strAckPriceContractXML						NVARCHAR(MAX)
+	DECLARE @strAckPriceFixationXML						NVARCHAR(MAX)
+	DECLARE @strAckPriceFixationDetailXML				NVARCHAR(MAX)
+	DECLARE @strHedgeXML								NVARCHAR(MAX)
+	DECLARE @TempPriceFixationId						INT
+	DECLARE @intPriceFixationId							INT	
+	DECLARE @intContractHeaderId						INT
+	DECLARE @intContractDetailId						INT
+	DECLARE @intPriceFixationRefId						INT
+	DECLARE @idoc										INT 
 
 	DECLARE @tblCTPriceFixation AS TABLE
 	(
@@ -87,8 +81,7 @@ BEGIN TRY
 			SET @strPriceContractNo			= NULL
 			SET @strPriceContractXML		= NULL
 			SET @strPriceFixationXML		= NULL
-			SET @strPriceFixationDetailXML	= NULL
-			
+			SET @strPriceFixationDetailXML	= NULL			
 			SET @strReference				= NULL
 			SET @strRowState				= NULL
 			SET @strFeedStatus				= NULL
@@ -261,10 +254,10 @@ BEGIN TRY
 								SET @intPriceFixationRefId = NULL
 
 								SELECT 
-								 @intPriceFixationId   = intPriceFixationId   
-								,@intContractHeaderId  = intContractHeaderId  
-								,@intContractDetailId  = intContractDetailId  
-								,@intPriceFixationRefId= intPriceFixationRefId
+								 @intPriceFixationId    = intPriceFixationId   
+								,@intContractHeaderId   = intContractHeaderId  
+								,@intContractDetailId   = intContractDetailId  
+								,@intPriceFixationRefId = intPriceFixationRefId
 								FROM @tblCTPriceFixation 
 								WHERE TempPriceFixationId = @TempPriceFixationId
 								
@@ -339,11 +332,11 @@ BEGIN TRY
 									FROM @tblCTPriceFixation 
 									WHERE TempPriceFixationId = @TempPriceFixationId
 								  
-								  SET @NewPriceFixationId =SCOPE_IDENTITY();
+								  SET @NewPriceFixationId = SCOPE_IDENTITY();
 
 								  UPDATE tblCTPriceFixation 
 								  SET intPriceFixationRefId = @intPriceFixationId 
-								  WHERE intPriceFixationId = @NewPriceFixationId
+								  WHERE intPriceFixationId  = @NewPriceFixationId
 
 							SELECT @TempPriceFixationId = MIN(TempPriceFixationId)
 							FROM @tblCTPriceFixation WHERE TempPriceFixationId > @TempPriceFixationId
@@ -399,7 +392,7 @@ BEGIN TRY
 						EXEC uspCTGetTableDataInXML 'tblCTPriceContract',@strPriceContractCondition,@strAckPriceContractXML  OUTPUT
 
 						UPDATE  tblCTPriceContractAcknowledgementStage 
-						SET		strAckPriceContractXML =@strAckPriceContractXML 
+						SET		strAckPriceContractXML = @strAckPriceContractXML 
 						WHERE   intPriceContractAcknowledgementStageId =@intPriceContractAcknowledgementStageId
 
 						---------------------------------------------PriceFixation------------------------------------------
