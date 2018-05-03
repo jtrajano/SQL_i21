@@ -115,6 +115,8 @@ BEGIN
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
 			,[intMeterReadingId]
+			,[ysnUseOriginIdAsInvoiceNumber]
+			,[strInvoiceOriginId]
 		)
 		SELECT
 			[strType]								= 'Meter Billing'
@@ -194,6 +196,8 @@ BEGIN
 			,[ysnClearDetailTaxes]					= 1
 			,[intTempDetailIdForTaxes]				= @intRecordKey
 			,[intMeterReadingId]					= @intRecordKey
+			,[ysnUseOriginIdAsInvoiceNumber]		= 1
+			,[strInvoiceOriginId]					= MRDetail.strTransactionId
 		FROM vyuMBGetMeterReadingDetail MRDetail
 		LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
 		LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
