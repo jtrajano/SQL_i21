@@ -394,6 +394,41 @@ END CATCH
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 UPDATE tblARInvoice SET ysnReturned = 1 WHERE intInvoiceId = @InvoiceId
 
+--POS RETURN
+
+DECLARE @creditMemoIntId AS NVARCHAR(10)
+	   ,@creditMemoStrType VARCHAR(5)
+	   ,@creditMemoStrTransactionType VARCHAR(20)
+
+SELECT @creditMemoStrType = strType
+	  ,@creditMemoStrTransactionType = strTransactionType
+	  ,@creditMemoIntId = CAST(@NewInvoiceId AS NVARCHAR(10))
+FROM @EntriesForInvoice
+
+IF(@creditMemoStrType = 'POS' AND @creditMemoStrTransactionType = 'Credit Memo')
+BEGIN
+
+	--post credit memo created
+	EXEC uspARPostInvoice @param = @creditMemoIntId, @post = 1
+
+	DECLARE @posStrPayment VARCHAR(10)
+
+	SELECT @posStrPayment = posPayment.strPaymentMethod
+	FROM tblARPOSPayment posPayment
+	INNER JOIN tblARPOS pos ON posPayment.intPOSId = pos.intPOSId
+	WHERE pos.intInvoiceId = @InvoiceId
+
+	IF(@posStrPayment != 'On Account')
+	BEGIN
+		--create cash refund
+		EXEC uspARProcessRefund @param = @creditMemoIntId
+	END
+
+
+END
+
+--END OF POS RETURN
+
 IF ISNULL(@RaiseError,0) = 0
 	COMMIT TRANSACTION 
 	
