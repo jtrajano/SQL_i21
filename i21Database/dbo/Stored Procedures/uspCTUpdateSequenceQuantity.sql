@@ -58,6 +58,7 @@ BEGIN TRY
 	UPDATE 	tblCTContractDetail
 	SET		dblQuantity			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewQuantity ELSE dblQuantity END,
 			intNoOfLoad			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN intNoOfLoad ELSE @dblNewQuantity END,
+			dblNetWeight		=	dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,@dblNewQuantity),
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractDetailId =	@intContractDetailId
 	
