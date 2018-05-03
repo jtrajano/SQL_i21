@@ -1258,5 +1258,99 @@ FROM
 			
 	) Qty
 	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
+
+	UNION ALL
+	SELECT [intEntityVendorId] = I.intEntityCustomerId
+	  ,[dtmDate]								= I.dtmDate
+	  ,[strReference]							= I.strInvoiceNumber
+	  ,[strSourceNumber]						= I.strInvoiceNumber
+	  ,[strPurchaseOrderNumber]					= NULL
+	  ,[intPurchaseOrderDetailId]				= NULL
+	  ,[intItemId]								= NULL
+	  ,[strMiscDescription]						= 'Cash Refund'
+	  ,[strItemNo]								= NULL	
+	  ,[strDescription]							= ''
+	  ,[intPurchaseTaxGroupId]					= NULL	
+	  ,[dblOrderQty]							= 1	
+	  ,[dblPOOpenReceive]						= 0	
+	  ,[dblOpenReceive]							= 1
+	  ,[dblQuantityToBill]						= 1	
+	  ,[dblQuantityBilled]						= 0
+	  ,[intLineNo]								= I.intInvoiceId	
+	  ,[intInventoryReceiptItemId]				= NULL
+	  ,[intInventoryReceiptChargeId]			= NULL	
+	  ,[intContractChargeId]					= NULL	
+	  ,[dblUnitCost]							= I.dblInvoiceTotal	
+	  ,[dblDiscount]							= 0	
+	  ,[dblTax]									= 0	
+	  ,[dblRate]								= 1	
+	  ,[strRateType]							= RT.strCurrencyExchangeRateType	
+	  ,[intCurrencyExchangeRateTypeId]			= ID.intCurrencyExchangeRateTypeId	
+	  ,[ysnSubCurrency]							= 0	
+	  ,[intSubCurrencyCents]					= 0
+	  ,[intAccountId]							= APC.intAPClearingAccountId
+	  ,[strAccountId]							= APC.strAccountId	
+	  ,[strAccountDesc]							= APC.strDescription	
+	  ,[strName]								= E.strName
+	  ,[strVendorId]							= CAST(I.intEntityCustomerId AS VARCHAR)
+	  ,[strShipVia]								= NULL
+	  ,[strTerm]								= NULL
+	  ,[intTermId]								= I.intTermId
+	  ,[strContractNumber]						= NULL	
+	  ,[strBillOfLading]						= NULL	
+	  ,[intContractHeaderId]					= NULL	
+	  ,[intContractDetailId]					= NULL	
+	  ,[intContractSequence]					= NULL	
+	  ,[intScaleTicketId]						= NULL	
+	  ,[strScaleTicketNumber]					= CAST(NULL AS NVARCHAR(50))	
+	  ,[intShipmentId]							= 0
+	  ,[intShipmentContractQtyId]				= NULL
+	  ,[intUnitMeasureId]						= NULL
+	  ,[strUOM]									= NULL
+	  ,[intWeightUOMId]							= NULL
+	  ,[intCostUOMId]							= NULL
+	  ,[dblNetWeight]							= NULL
+	  ,[strCostUOM]								= NULL
+	  ,[strgrossNetUOM]							= NULL
+	  ,[dblWeightUnitQty]						= NULL
+	  ,[dblCostUnitQty]							= NULL
+	  ,[dblUnitQty]								= NULL
+	  ,[intCurrencyId]							= I.intCurrencyId
+	  ,[strCurrency]							= CY.strCurrency
+	  ,[intCostCurrencyId]						= NULL
+	  ,[strCostCurrency]						= NULL
+	  ,[strVendorLocation]						= NULL
+	  ,[str1099Form]							= NULL		 
+	  ,[str1099Type]							= NULL
+	  ,[intStorageLocationId]					= NULL
+	  ,[strStorageLocationName]					= NULL
+	  ,[dblNetShippedWeight]					= 0.00
+	  ,[dblWeightLoss]							= 0.00
+	  ,[dblFranchiseWeight]						= 0.00
+	  ,[dblClaimAmount]							= 0.00
+	  ,[intLocationId]							= NULL 
+	  ,[strReceiptLocation]						= NULL
+	  ,[intInventoryShipmentItemId]				= NULL
+	  ,[intInventoryShipmentChargeId]			= NULL
+	  ,[intTaxGroupId]							= NULL
+	  ,[ysnReturn]								= CAST(0 AS BIT)
+	  ,[strTaxGroup]							= NULL
+	FROM tblARInvoice I
+	INNER JOIN tblARInvoiceDetail ID
+		ON ID.intInvoiceId = I.intInvoiceId
+	INNER JOIN tblARPaymentDetail PD
+		ON PD.intInvoiceId = I.intInvoiceId
+	INNER JOIN tblARPayment P
+		ON P.intPaymentId = PD.intPaymentId
+	LEFT JOIN tblARInvoice SourceInvoice
+		ON SourceInvoice.intInvoiceId = I.intSourceId
+	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = ID.intCurrencyExchangeRateId
+	CROSS APPLY(SELECT TOP 1 intAPClearingAccountId, strAccountId, strDescription FROM tblARCompanyPreference ACP INNER JOIN tblGLAccount GL ON ACP.intAPClearingAccountId = GL.intAccountId) APC
+	LEFT JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId)
+		ON I.intEntityCustomerId = V.intEntityId
+	LEFT JOIN tblSMCurrency CY	
+		ON	CY.intCurrencyID = I.intCurrencyId
+WHERE 
+I.ysnPosted = 1 AND P.ysnPosted = 1 and I.strTransactionType = 'Cash Refund' and I.intInvoiceId NOT IN(SELECT intInvoiceId FROM tblAPBillDetail WHERE intInvoiceId IS NOT NULL)
 ) Items
 GO
