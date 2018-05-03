@@ -43,7 +43,6 @@ BEGIN
 		,[intFreightTermId]
 		,[intShipViaId]
 		,[intPaymentMethodId]
-		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
 		,[strComments]
@@ -122,7 +121,6 @@ BEGIN
 		,[intFreightTermId]						= NULL 
 		,[intShipViaId]							= NULL 
 		,[intPaymentMethodId]					= NULL
-		,[strInvoiceOriginId]					= ''
 		,[strPONumber]							= NULL
 		,[strBOLNumber]							= ''
 		,[strComments]							= MRDetail.strInvoiceComment
