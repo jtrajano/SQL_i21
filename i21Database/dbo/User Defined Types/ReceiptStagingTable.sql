@@ -25,6 +25,8 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intTaxGroupId] INT NULL								-- Overriding Tax Group Id, if you want to override the Tax Group that will be used from the Ship From Location setup.
 	,[intSubCurrencyCents] INT NULL DEFAULT 1
 	,[intTransferorId] INT NULL 
+	,[intBookId] INT NULL 
+	,[intSubBookId] INT NULL 
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 

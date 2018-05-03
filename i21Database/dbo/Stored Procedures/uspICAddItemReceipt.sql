@@ -342,7 +342,70 @@ BEGIN
 			EXEC dbo.uspSMGetStartingNumber @startingNumberId_InventoryReceipt, @receiptNumber OUTPUT, @intLocationId
 			IF @@ERROR <> 0 OR @receiptNumber IS NULL GOTO _BreakLoop;
 		END 
+
+		-- Validate the Book Id
+		BEGIN 
+			DECLARE @valueBookId INT
+
+			SELECT	TOP 1 
+					@valueBookId = RawData.intBookId
+			FROM	@ReceiptEntries RawData LEFT JOIN tblCTBook book
+						ON RawData.intBookId = book.intBookId 
+			WHERE	RawData.intBookId IS NOT NULL 
+					AND book.intBookId IS NULL 
+
+			IF @valueBookId IS NOT NULL 
+			BEGIN
+				-- 'Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
+				EXEC uspICRaiseError 80212
+				GOTO _Exit_With_Rollback;
+			END
+		END 
 		
+		-- Validate the Sub Book Id
+		BEGIN 
+			DECLARE @valueSubBookId INT
+
+			SELECT	TOP 1 
+					@valueSubBookId = RawData.intSubBookId
+			FROM	@ReceiptEntries RawData LEFT JOIN tblCTSubBook subBook
+						ON RawData.intSubBookId = subBook.intSubBookId 
+			WHERE	RawData.intSubBookId IS NOT NULL 
+					AND subBook.intSubBookId IS NULL 
+
+			IF @valueSubBookId IS NOT NULL 
+			BEGIN
+				-- 'Sub Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
+				EXEC uspICRaiseError 80213
+				GOTO _Exit_With_Rollback;
+			END
+		END 
+
+		-- Validate the Sub Book Id against its parent book. 
+		BEGIN 
+			DECLARE @valueSubBookId2 INT
+					,@strBook NVARCHAR(50)
+					,@strSubBook NVARCHAR(50)
+
+			SELECT	TOP 1 
+					@valueSubBookId2 = RawData.intSubBookId
+					,@strBook = book.strBook
+					,@strSubBook = subBook.strSubBook
+			FROM	@ReceiptEntries RawData LEFT JOIN tblCTSubBook subBook
+						ON RawData.intSubBookId = subBook.intSubBookId 
+					LEFT JOIN tblCTBook book 
+						ON book.intBookId = subBook.intBookId 
+			WHERE	RawData.intSubBookId IS NOT NULL 
+					AND ISNULL(RawData.intBookId, 0) <> ISNULL(book.intBookId, 0) 
+
+			IF @valueSubBookId2 IS NOT NULL 
+			BEGIN
+				-- '{Sub Book} is not a sub book of {Book}. You can correct it at Contract Management -> Books.'
+				EXEC uspICRaiseError 80214, @strSubBook, @strBook 
+				GOTO _Exit_With_Rollback;
+			END
+		END 
+				
 		MERGE	
 		INTO	dbo.tblICInventoryReceipt 
 		WITH	(HOLDLOCK) 
@@ -399,6 +462,8 @@ BEGIN
 				,strActualCostId		= IntegrationData.strActualCostId
 				--,intTaxGroupId			= IntegrationData.intTaxGroupId
 				,intTransferorId		= IntegrationData.intTransferorId 
+				,intBookId				= IntegrationData.intBookId
+				,intSubBookId			= IntegrationData.intSubBookId
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -436,6 +501,8 @@ BEGIN
 				,strActualCostId
 				--,intTaxGroupId
 				,intTransferorId
+				,intBookId
+				,intSubBookId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -473,6 +540,8 @@ BEGIN
 				/*strActualCostId*/				,IntegrationData.strActualCostId
 				/*intTaxGroupId*/				--,IntegrationData.intTaxGroupId
 				/*intTransferorId*/				,IntegrationData.intTransferorId 
+				/*intBookId*/					,IntegrationData.intBookId
+				/*intSubBookId*/				,IntegrationData.intSubBookId 
 			)
 		;
 				

@@ -225,6 +225,9 @@ BEGIN
 		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
 		WHEN @msgId = 80210 THEN 'Invalid Producer. %s is not configured as a Producer type. Please check the Entity setup.'
 		WHEN @msgId = 80211 THEN 'Certificate %s is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
+		WHEN @msgId = 80212 THEN 'Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
+		WHEN @msgId = 80213 THEN 'Sub Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
+		WHEN @msgId = 80214 THEN '%s is not a sub book of %s. You can correct it at Contract Management -> Books.'
 	END 
 
 	RETURN @msg
