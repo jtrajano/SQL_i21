@@ -62,7 +62,9 @@ SELECT
 
 	,[strName]									= Entity.strName
 	,[strVendorId]								= Vendor.strVendorId
+	,[intOwnershipType]							= ChargesLink.intOwnershipType											
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
+	,[intContractSeq]							= vReceiptCharge.intContractSeq
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
 	,[intCurrencyId]							= vReceiptCharge.intCurrencyId 
@@ -120,11 +122,13 @@ FROM
 
 	OUTER APPLY (
 		SELECT	A.intInventoryReceiptItemId
+				,A.intOwnershipType
 				,c = COUNT(1) 
 		FROM	tblICInventoryReceiptItem A		
 		WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				AND A.strChargesLink = ReceiptCharge.strChargesLink
-		GROUP BY A.intInventoryReceiptItemId		
+		GROUP BY A.intInventoryReceiptItemId
+				,A.intOwnershipType
 		HAVING	COUNT(1) = 1 
 
 	) ChargesLink  
@@ -221,7 +225,9 @@ SELECT
 
 	,[strName]									= Entity.strName
 	,[strVendorId]								= Vendor.strVendorId
+	,[intOwnershipType]							= ChargesLink.intOwnershipType
 	,[strContractNumber]						= vReceiptCharge.strContractNumber
+	,[intContractSeq]							= vReceiptCharge.intContractSeq
 	,[intContractHeaderId]						= ReceiptCharge.intContractId
 	,[intContractDetailId]						= ReceiptCharge.intContractDetailId 
 	,[intCurrencyId]							= ISNULL(ReceiptCharge.intCurrencyId,Receipt.intCurrencyId)
@@ -279,11 +285,13 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 
 	OUTER APPLY (
 		SELECT	A.intInventoryReceiptItemId
+				,A.intOwnershipType
 				,c = COUNT(1) 
 		FROM	tblICInventoryReceiptItem A		
 		WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				AND A.strChargesLink = ReceiptCharge.strChargesLink
 		GROUP BY A.intInventoryReceiptItemId		
+				,A.intOwnershipType
 		HAVING	COUNT(1) = 1 
 
 	) ChargesLink
