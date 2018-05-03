@@ -13,8 +13,8 @@ SELECT ST.intStoreId
 	   , CAST(NULL AS decimal(18,6)) AS dblUnitPrice
 	   , CAST(NULL AS decimal(18,6)) AS dblGallons
 FROM tblSTStore ST
-JOIN tblICItem I ON ST.intCustomerChargesItemId = I.intItemId
-JOIN tblICItemUOM UOM ON ST.intCustomerChargesItemId = UOM.intItemId
-JOIN tblEMEntity EM ON ST.intCheckoutCustomerId = EM.intEntityId
-JOIN tblARCustomer ARC ON ST.intCheckoutCustomerId = ARC.intEntityId
+LEFT JOIN tblICItem I ON ST.intCustomerChargesItemId = I.intItemId
+LEFT JOIN tblICItemUOM UOM ON ST.intCustomerChargesItemId = UOM.intItemId
+LEFT JOIN tblEMEntity EM ON ST.intCheckoutCustomerId = EM.intEntityId
+LEFT JOIN tblARCustomer ARC ON ST.intCheckoutCustomerId = ARC.intEntityId
 WHERE UOM.ysnStockUnit = CAST(1 AS BIT)
