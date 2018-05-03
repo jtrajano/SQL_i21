@@ -27,6 +27,8 @@ AS
 	DECLARE @batchIdUsed NVARCHAR(100)
 	DECLARE @APDate DATETIME
 	DECLARE @intDetailAccount INT
+	DECLARE @intAPAccount INT
+	DECLARE @strCompanyLocation NVARCHAR(100)
 	SET @ysnSuccess = 0
 
 	SET @strReimbursementType = 'AR'
@@ -142,6 +144,17 @@ AS
 			@strReimbursementNo = strReimbursementNo
 		FROM tblBBBuyback
 
+		---Check for AP account int company location
+		SELECT TOP 1 
+			@intAPAccount = intAPAccount 
+			,@strCompanyLocation = strLocationName
+		FROM tblSMCompanyLocation WHERE intCompanyLocationId =  @CompanyLocation
+
+		IF(@intAPAccount IS NULL)
+		BEGIN
+			SET @strPostingError = 'Invalid default AP Account for company location "' + @strCompanyLocation + '".'
+			GOTO ENDPOST
+		END
 
 		---Staging 
 		SELECT 
@@ -185,16 +198,19 @@ AS
 			,[dblQtyReceived]
 			,[dblCost]
 		FROM #tmpStagingInsert 
+		
+	
 
 		SET @APDate = GETDATE()
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId	= @intUserId
 			,@vendorId = @intVendorId
 			,@type = 3	
-			,@vendorOrderNumber = strReimbursementNo
+			,@vendorOrderNumber = @strReimbursementNo
 			,@voucherDate = @APDate
 			,@voucherNonInvDetails = @voucherNonInvDetails
 			,@billId = @intCreatedBillId OUTPUT
+		
 
 		UPDATE tblAPBillDetail
 		SET intBuybackChargeId = A.intBuybackChargeId
