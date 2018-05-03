@@ -60,6 +60,8 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL, 
 		[intCompanyId] INT NULL, 
+		[dblCategoryCostValue] NUMERIC(38, 20) NULL, 
+		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
 		CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY ([intInventoryTransactionId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

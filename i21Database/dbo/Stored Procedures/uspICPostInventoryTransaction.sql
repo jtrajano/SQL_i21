@@ -31,6 +31,8 @@
 	,@dblForexRate NUMERIC(38, 20) = 1
 	,@strDescription NVARCHAR(255) = NULL 
 	,@strActualCostId NVARCHAR(50) = NULL  
+	,@dblCategoryCostValue NUMERIC(38,20) = NULL  
+	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -95,6 +97,8 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[dblForexRate]
 		,[strDescription]
 		,[strActualCostId]
+		,[dblCategoryCostValue]
+		,[dblCategoryRetailValue]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -130,6 +134,8 @@ SELECT	[intItemId]							= @intItemId
 		,[dblForexRate]						= @dblForexRate
 		,[strDescription]					= @strDescription
 		,[strActualCostId]					= @strActualCostId
+		,[dblCategoryCostValue]				= @dblCategoryCostValue
+		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
