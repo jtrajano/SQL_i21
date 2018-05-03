@@ -6452,6 +6452,7 @@
     <Build Include="dbo\Views\vyuHDProjectSalesrepAndLob.sql" />
     <Build Include="dbo\Views\vyuLGInsurancePremiumFactor.sql" />
     <Build Include="dbo\Views\vyuLGShippingLineServiceContract.sql" />
+    <Build Include="dbo\Views\vyuSTStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
