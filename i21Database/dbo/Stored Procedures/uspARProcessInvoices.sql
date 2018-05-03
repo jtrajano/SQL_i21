@@ -1139,9 +1139,9 @@ DECLARE	@successfulCount INT
 
 DECLARE @TempInvoiceIdTable AS TABLE ([intInvoiceId] INT)
 
---UnPosting posted Invoices for update
+--UnPosting Updated Invoices
+DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
 BEGIN TRY
-	DECLARE @IdsForUnPosting VARCHAR(MAX)
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
@@ -1151,25 +1151,28 @@ BEGIN TRY
 	INNER JOIN
 		@InvoiceEntries IE
 			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+
 	WHERE
 		ISNULL(EFP.[ysnForUpdate],0) = 1
-		AND ISNULL(EFP.[ysnProcessed],0) = 0
+		--AND ISNULL(EFP.[ysnProcessed],0) = 1
 		AND ISNULL(EFP.[intInvoiceId],0) <> 0
-		AND EFP.[ysnPost] IS NOT NULL AND EFP.[ysnPost] = 0
-		AND ISNULL(IE.[ysnUpdateAvailableDiscount], 0) = 0
-
+		AND IE.[ysnPost] IS NOT NULL
+		AND IE.[ysnPost] = 0
+		AND ISNULL(EFP.[ysnRecap],0) <> 1
+			
 	SELECT
-		@IdsForUnPosting = COALESCE(@IdsForUnPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
-	
+			
 		
-	IF LEN(RTRIM(LTRIM(@IdsForUnPosting))) > 0
+	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
+		BEGIN			
 		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= NULL,
+			@batchId			= null,
 			@post				= 0,
 			@recap				= 0,
-			@param				= @IdsForUnPosting,
+			@param				= @IdsForUnPostingUpdated,
 			@userId				= @UserId,
 			@beginDate			= NULL,
 			@endDate			= NULL,
@@ -1183,6 +1186,62 @@ BEGIN TRY
 			@recapId			= @recapId OUTPUT,
 			@transType			= N'all',
 			@raiseError			= @RaiseError
+
+			SET @BatchIdForExistingUnPost = @batchIdUsed
+			SET @UnPostedExistingCount = @successfulCount
+		END
+
+	SET @IdsForUnPostingUpdated = ''
+	SET @batchIdUsed = ''
+	SET @successfulCount = 0
+
+	DELETE FROM @TempInvoiceIdTable
+	INSERT INTO @TempInvoiceIdTable
+	SELECT DISTINCT
+		EFP.[intInvoiceId]
+	FROM
+		#EntriesForProcessing EFP
+	INNER JOIN
+		@InvoiceEntries IE
+			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+	WHERE
+		ISNULL(EFP.[ysnForUpdate],0) = 1
+		--AND ISNULL(EFP.[ysnProcessed],0) = 1
+		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+		AND IE.[ysnPost] IS NOT NULL
+		AND IE.[ysnPost] = 0
+		AND ISNULL(EFP.[ysnRecap],0) = 1
+
+	SELECT
+		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+	FROM
+		@TempInvoiceIdTable	
+		
+		
+	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
+		BEGIN			
+		EXEC [dbo].[uspARPostInvoice]
+			@batchId			= null,
+			@post				= 0,
+			@recap				= 1,
+			@param				= @IdsForUnPostingUpdated,
+			@userId				= @UserId,
+			@beginDate			= NULL,
+			@endDate			= NULL,
+			@beginTransaction	= NULL,
+			@endTransaction		= NULL,
+			@exclude			= NULL,
+			@successfulCount	= @successfulCount OUTPUT,
+			@invalidCount		= @invalidCount OUTPUT,
+			@success			= @success OUTPUT,
+			@batchIdUsed		= @batchIdUsed OUTPUT,
+			@recapId			= @recapId OUTPUT,
+			@transType			= N'all',
+			@raiseError			= @RaiseError
+
+			SET @BatchIdForExistingUnPostRecap = @batchIdUsed
+			SET @RecapUnPostedExistingCount = @successfulCount
+		END
 
 END TRY
 BEGIN CATCH
@@ -1201,7 +1260,6 @@ BEGIN CATCH
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
-
 
 --UPDATE
 BEGIN TRY
@@ -2430,120 +2488,7 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
---UnPosting Updated Invoices
-DECLARE @IdsForUnPostingUpdated VARCHAR(MAX)
-BEGIN TRY
-	DELETE FROM @TempInvoiceIdTable
-	INSERT INTO @TempInvoiceIdTable
-	SELECT DISTINCT
-		[intInvoiceId]
-	FROM
-		#EntriesForProcessing
-	WHERE
-		ISNULL([ysnForUpdate],0) = 1
-		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceId],0) <> 0
-		AND [ysnPost] IS NOT NULL
-		AND [ysnPost] = 0
-		AND ISNULL([ysnRecap],0) <> 1
-			
-	SELECT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
-	FROM
-		@TempInvoiceIdTable
-			
-		
-	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
-		BEGIN			
-		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= @BatchIdForExistingUnPost,
-			@post				= 0,
-			@recap				= 0,
-			@param				= @IdsForUnPostingUpdated,
-			@userId				= @UserId,
-			@beginDate			= NULL,
-			@endDate			= NULL,
-			@beginTransaction	= NULL,
-			@endTransaction		= NULL,
-			@exclude			= NULL,
-			@successfulCount	= @successfulCount OUTPUT,
-			@invalidCount		= @invalidCount OUTPUT,
-			@success			= @success OUTPUT,
-			@batchIdUsed		= @batchIdUsed OUTPUT,
-			@recapId			= @recapId OUTPUT,
-			@transType			= N'all',
-			@raiseError			= @RaiseError
 
-			SET @BatchIdForExistingUnPost = @batchIdUsed
-			SET @UnPostedExistingCount = @successfulCount
-		END
-
-	SET @IdsForUnPostingUpdated = ''
-	SET @batchIdUsed = ''
-	SET @successfulCount = 0
-
-	DELETE FROM @TempInvoiceIdTable
-	INSERT INTO @TempInvoiceIdTable
-	SELECT DISTINCT
-		[intInvoiceId]
-	FROM
-		#EntriesForProcessing
-	WHERE
-		ISNULL([ysnForUpdate],0) = 1
-		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceId],0) <> 0
-		AND [ysnPost] IS NOT NULL
-		AND [ysnPost] = 0
-		AND ISNULL([ysnRecap],0) = 1
-
-	SELECT
-		@IdsForUnPostingUpdated = COALESCE(@IdsForUnPostingUpdated + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
-	FROM
-		@TempInvoiceIdTable	
-		
-		
-	IF LEN(RTRIM(LTRIM(@IdsForUnPostingUpdated))) > 0
-		BEGIN			
-		EXEC [dbo].[uspARPostInvoice]
-			@batchId			= @BatchIdForExistingUnPostRecap,
-			@post				= 0,
-			@recap				= 1,
-			@param				= @IdsForUnPostingUpdated,
-			@userId				= @UserId,
-			@beginDate			= NULL,
-			@endDate			= NULL,
-			@beginTransaction	= NULL,
-			@endTransaction		= NULL,
-			@exclude			= NULL,
-			@successfulCount	= @successfulCount OUTPUT,
-			@invalidCount		= @invalidCount OUTPUT,
-			@success			= @success OUTPUT,
-			@batchIdUsed		= @batchIdUsed OUTPUT,
-			@recapId			= @recapId OUTPUT,
-			@transType			= N'all',
-			@raiseError			= @RaiseError
-
-			SET @BatchIdForExistingUnPostRecap = @batchIdUsed
-			SET @RecapUnPostedExistingCount = @successfulCount
-		END
-
-END TRY
-BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
-	BEGIN
-		IF @InitTranCount = 0
-			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION
-		ELSE
-			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION @Savepoint
-	END
-
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
-	RETURN 0;
-END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)
