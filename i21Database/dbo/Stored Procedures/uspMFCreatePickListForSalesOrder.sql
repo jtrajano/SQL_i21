@@ -14,6 +14,8 @@ Declare @intLotId INT
 Declare @dblAvailableQty NUMERIC(38,20)
 Declare @intPickListId INT
 Declare @dblDefaultResidueQty NUMERIC(38,20)
+Declare @intSubLocationId int
+Declare @intStorageLocationId int
 
 DECLARE @tblInputItem TABLE (
 	intRowNo INT IDENTITY(1, 1)
@@ -21,6 +23,8 @@ DECLARE @tblInputItem TABLE (
 	,dblQty NUMERIC(38,20)
 	,intItemUOMId int
 	,strLotTracking nvarchar(50)
+	,intSubLocationId int
+	,intStorageLocationId int
 	)
 
 DECLARE @tblInputItemCopy TABLE (
@@ -55,10 +59,10 @@ DECLARE @tblPickedLot TABLE(
 
 Select TOP 1 @dblDefaultResidueQty=ISNULL(dblDefaultResidueQty,0.00001) From tblMFCompanyPreference
 
-Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId,strLotTracking)
-Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId,i.strLotTracking 
+Insert Into @tblInputItem(intItemId,dblQty,intItemUOMId,strLotTracking,intSubLocationId,intStorageLocationId)
+Select sd.intItemId,SUM(sd.dblQtyOrdered),sd.intItemUOMId,i.strLotTracking,sd.intSubLocationId,sd.intStorageLocationId 
 From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
-Where intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Comment','Other Charge') Group By sd.intItemId,sd.intItemUOMId,i.strLotTracking
+Where intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Comment','Other Charge') Group By sd.intItemId,sd.intItemUOMId,i.strLotTracking,sd.intSubLocationId,sd.intStorageLocationId
 
 
 If Exists (Select 1 From tblMFPickList Where intSalesOrderId=@intSalesOrderId)
@@ -85,8 +89,15 @@ Select @intMinItem = MIN(intRowNo) From @tblInputItem
 
 While @intMinItem is not null
 Begin
-	Select @intItemId=intItemId,@dblRequiredQty=dblQty,@dblItemRequiredQty=dblQty,@intItemUOMId=intItemUOMId,@strLotTracking=strLotTracking 
+	Set @intSubLocationId=NULL
+	Set @intStorageLocationId=NULL
+
+	Select @intItemId=intItemId,@dblRequiredQty=dblQty,@dblItemRequiredQty=dblQty,@intItemUOMId=intItemUOMId,@strLotTracking=strLotTracking,
+	@intSubLocationId=intSubLocationId,@intStorageLocationId=intStorageLocationId 
 	From @tblInputItem Where intRowNo=@intMinItem
+
+	If @intSubLocationId is null
+		Select @intSubLocationId=intSubLocationId From tblICStorageLocation where intStorageLocationId=@intStorageLocationId
 
 	DELETE FROM @tblLot
 
@@ -101,7 +112,9 @@ Begin
 		,intStorageLocationId
 		)
 		Select 0,sd.intItemId,dbo.fnMFConvertQuantityToTargetItemUOM(sd.intItemUOMId,@intItemUOMId,sd.dblAvailableQty),@intItemUOMId,
-		sd.intLocationId,sd.intSubLocationId,sd.intStorageLocationId
+		sd.intLocationId,
+		ISNULL(@intSubLocationId,sd.intSubLocationId),
+		ISNULL(@intStorageLocationId,sd.intStorageLocationId)
 		From vyuMFGetItemStockDetail sd 
 		Where sd.intItemId=@intItemId AND sd.dblAvailableQty > @dblDefaultResidueQty AND sd.intLocationId=@intLocationId AND ISNULL(sd.ysnStockUnit,0)=1 ORDER BY sd.intItemStockUOMId
 	Else
@@ -114,15 +127,26 @@ Begin
 		,intSubLocationId
 		,intStorageLocationId
 		)
+	SELECT   intLotId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,intLocationId
+			,intSubLocationId
+			,intStorageLocationId
+	FROM
+	(
 	SELECT L.intLotId
 		,L.intItemId
 		,dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,@intItemUOMId,L.dblQty) - 
 		(Select ISNULL(SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(sr.intItemUOMId,@intItemUOMId,sr.dblQty),0)),0) 
 		From tblICStockReservation sr Where sr.intLotId=L.intLotId AND ISNULL(sr.ysnPosted,0)=0) AS dblQty
-		,@intItemUOMId
+		,@intItemUOMId AS intItemUOMId
 		,L.intLocationId
 		,L.intSubLocationId
 		,L.intStorageLocationId
+		,CASE WHEN L.intStorageLocationId=@intStorageLocationId THEN 0 ELSE 1 END AS intOrderById
+		,L.dtmDateCreated
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 	WHERE L.intItemId = @intItemId
@@ -132,7 +156,7 @@ Begin
 			)
 		AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
 		AND L.dblQty  > @dblDefaultResidueQty
-		ORDER BY L.dtmDateCreated
+	) t ORDER BY t.intOrderById,t.dtmDateCreated
 
 	Delete From @tblLot Where dblQty < @dblDefaultResidueQty
 
