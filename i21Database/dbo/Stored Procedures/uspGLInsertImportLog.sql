@@ -1,11 +1,11 @@
-﻿CREATE PROCEDURE uspGLInsertImportLog
-	@intImportLogId INT NULL,
+﻿CREATE PROCEDURE dbo.[uspGLInsertImportLog]
+	@intImportLogId INT = NULL,
 	@strEventDescription NVARCHAR(MAX),
-	@strTransactionId NVARCHAR(30) NULL,
-	@intEntityId INT NULL, 
-	@strVersion NVARCHAR(40) NULL, 
-	@strFilePath NVARCHAR(500) NULL, 
-	@strType NVARCHAR(50) NULL -- module
+	@strTransactionId NVARCHAR(30) = NULL,
+	@intEntityId INT = NULL, 
+	@strVersion NVARCHAR(40) = NULL, 
+	@strFilePath NVARCHAR(500) = NULL, 
+	@strType NVARCHAR(50) = NULL -- module
 AS
 IF @intImportLogId IS NULL
 BEGIN
