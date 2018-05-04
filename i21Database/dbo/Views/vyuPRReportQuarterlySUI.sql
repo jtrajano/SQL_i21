@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuPRReportQuarterlySUI]
+CREATE VIEW [dbo].[vyuPRReportQuarterlyFUI]
 AS
 SELECT 
 	tblPREmployee.strEmployeeId
@@ -10,34 +10,19 @@ SELECT
 	,tblPRPaycheck.intYear
 	,tblPRPaycheck.intQuarter
 	,dblGross = SUM(tblPRPaycheck.dblGross)
-	,dblPretax = SUM(tblPRPaycheck.dblGross) - SUM(tblPRPaycheck.dblAdjustedGross)
+	,dblPretax = SUM(tblPRPaycheck.dblPretax)
 	,dblAdjustedGross = SUM(tblPRPaycheck.dblAdjustedGross)
-	,dblGrossYTD = MAX(tblPRPaycheck.dblAdjustedGrossYTD)
-	,dblTaxable = CASE WHEN (dblLimit - (dblLimit - ISNULL((SELECT MAX (dblAdjustedGrossYTD) FROM vyuPRPaycheckYTD 
-												   WHERE YEAR(vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intYear
-												   AND DATEPART(QQ, vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intQuarter
-												   AND vyuPRPaycheckYTD.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId), 0)) > dblLimit) THEN 
-									CASE WHEN (dblLimit - (dblLimit - ISNULL((SELECT MAX (dblAdjustedGrossYTD) FROM vyuPRPaycheckYTD 
-												   WHERE YEAR(vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intYear
-												   AND DATEPART(QQ, vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intQuarter - 1
-												   AND vyuPRPaycheckYTD.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId), dblLimit)) > 0) 
-											THEN 
-												CASE WHEN (dblLimit - ISNULL((SELECT MAX (dblAdjustedGrossYTD) FROM vyuPRPaycheckYTD 
-														   WHERE YEAR(vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intYear
-														   AND DATEPART(QQ, vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intQuarter - 1
-														   AND vyuPRPaycheckYTD.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId), 0)) > 0 
-													THEN 
-														   (dblLimit - ISNULL((SELECT MAX (dblAdjustedGrossYTD) FROM vyuPRPaycheckYTD 
-														   WHERE YEAR(vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intYear
-														   AND DATEPART(QQ, vyuPRPaycheckYTD.dtmPayDate) = tblPRPaycheck.intQuarter - 1
-														   AND vyuPRPaycheckYTD.intEntityEmployeeId = tblPRPaycheck.intEntityEmployeeId), 0))
-													ELSE 0
-												END
-											ELSE 0 
-									END
+	,dblGrossYTD = MAX(tblPRPaycheck.dblGrossYTD)
+	,dblAdjustedGrossYTD = MAX(dblAdjustedGrossYTD)
+	,dblTaxable = CASE WHEN (dblLimit - ISNULL(MAX(dblAdjustedGrossYTD), dblLimit) < 0) THEN 0
 						ELSE
-							  (dblLimit - (dblLimit - SUM (tblPRPaycheck.dblAdjustedGross)))
-					END
+						CASE WHEN ((dblLimit - ISNULL(MAX(dblAdjustedGrossYTD), dblLimit)) > SUM(tblPRPaycheck.dblAdjustedGross))
+							THEN 
+								SUM(tblPRPaycheck.dblAdjustedGross)
+							ELSE 
+								dblLimit - (dblLimit - SUM(tblPRPaycheck.dblAdjustedGross))
+							END
+						END
 	,dblLimit = vyuPRPaycheckTax.dblLimit
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal)
 	,vyuPRPaycheckTax.intTypeTaxId
@@ -46,15 +31,31 @@ SELECT
 	,intPaychecks = COUNT(tblPRPaycheck.intPaycheckId)
 FROM
 	(tblPREmployee 
-		INNER JOIN (SELECT PC.*
-					,PCYTD.dblGrossYTD
-					,PCYTD.dblAdjustedGrossYTD
-					,PCYTD.dblTotalHoursYTD
-					,CAST(YEAR(PC.dtmPayDate)AS INT) intYear
-					,DATEPART(QQ, PC.dtmPayDate) intQuarter 
-					FROM tblPRPaycheck PC
-			INNER JOIN vyuPRPaycheckYTD PCYTD ON PC.intPaycheckId = PCYTD.intPaycheckId) tblPRPaycheck
-      ON tblPREmployee.intEntityId = tblPRPaycheck.intEntityEmployeeId)
+		INNER JOIN 
+		(SELECT
+			intEntityEmployeeId = PE.intEntityEmployeeId,
+			intPaycheckId = PE.intPaycheckId,
+			intYear = PE.intYear,
+			intQuarter = PE.intQuarter,
+			dblGross = PE.dblGross,
+			dblPretax = ISNULL(PD.dblPretax, 0),
+			dblAdjustedGross = ISNULL(PE.dblGross, 0) - ISNULL(PD.dblPretax, 0),
+			dblGrossYTD = PE.dblGrossYTD,
+			dblPretaxYTD = PD.dblPretaxYTD,
+			dblAdjustedGrossYTD = ISNULL(PE.dblGrossYTD, 0) - ISNULL(PD.dblPretaxYTD, 0),
+			dblTotalHoursYTD = PE.dblTotalHoursYTD
+		FROM 
+			(SELECT intPaycheckId, intEntityEmployeeId, intYear = YEAR(dtmPayDate), intQuarter = DATEPART(QQ, dtmPayDate), 
+					dblGross = SUM(dblTotal), dblTotalHours = SUM(dblHours), 
+					dblGrossYTD = SUM(dblTotalYTD), dblTotalHoursYTD = SUM(dblHoursYTD)
+			FROM vyuPRPaycheckEarning WHERE ysnSUITaxable = 1 
+			GROUP BY intPaycheckId, intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) PE
+			LEFT JOIN
+			(SELECT intPaycheckId, intYear = YEAR(dtmPayDate), intQuarter = DATEPART(QQ, dtmPayDate), dblPretax = SUM(dblTotal), dblPretaxYTD = SUM(dblTotalYTD)
+			FROM vyuPRPaycheckDeduction WHERE ysnSUITaxable = 1
+			GROUP BY intPaycheckId, YEAR(dtmPayDate), DATEPART(QQ, dtmPayDate)) PD
+			ON PE.intPaycheckId = PD.intPaycheckId) tblPRPaycheck
+		ON tblPREmployee.[intEntityId] = tblPRPaycheck.intEntityEmployeeId)
 	INNER JOIN vyuPRPaycheckTax ON tblPRPaycheck.intPaycheckId = vyuPRPaycheckTax.intPaycheckId
 								AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
 								AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
@@ -72,3 +73,5 @@ GROUP BY
 	, vyuPRPaycheckTax.intTypeTaxStateId
 	, tblPRPaycheck.intEntityEmployeeId
 HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0
+
+GO

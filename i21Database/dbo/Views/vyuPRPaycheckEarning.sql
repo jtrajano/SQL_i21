@@ -97,6 +97,16 @@ SELECT
 													 AND strCalculationType = 'USA State' 
 													 AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None')
 														OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)')))), 0) AS BIT)
+	,ysnFUITaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
+								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId
+													 AND strCalculationType = 'USA FUTA')), 0) AS BIT)
+	,ysnSUITaxable = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheckEarningTax 
+								WHERE intPaycheckEarningId = tblPRPaycheckEarning.intPaycheckEarningId 
+								AND intTypeTaxId IN (SELECT intTypeTaxId FROM tblPRPaycheckTax 
+													 WHERE intPaycheckId = tblPRPaycheck.intPaycheckId
+													 AND strCalculationType = 'USA SUTA')), 0) AS BIT)
 	,tblPRPaycheckEarning.intAccountId
 	,tblPRPaycheckEarning.intTaxCalculationType
 	,tblPRPaycheckEarning.intSort
@@ -111,3 +121,5 @@ FROM
 	LEFT JOIN tblPRWorkersCompensation ON tblPRPaycheckEarning.intWorkersCompensationId = tblPRWorkersCompensation.intWorkersCompensationId
 WHERE
 	tblPRPaycheck.ysnPosted = 1
+
+GO
