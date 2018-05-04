@@ -127,32 +127,32 @@ BEGIN TRY
 		WHERE Trans.uniqTransactionGuid = @Guid
 		GROUP BY strFormCode, strScheduleCode, strType
 	
-		SELECT @AutomotiveGas_6D =  ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '6D' AND strType = 'Automotive Gas'
+		SELECT @AutomotiveGas_6D =  ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '6D' AND strType = 'Automotive Gas'
 		SELECT @AutomotiveGas_1 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '1' AND strType = 'Automotive Gas'
 		SELECT @AutomotiveGas_2 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2' AND strType = 'Automotive Gas'
 		SELECT @AutomotiveGas_2A = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2A' AND strType = 'Automotive Gas'
 		SELECT @AutomotiveGas_2B = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2B' AND strType = 'Automotive Gas'
 		SELECT @AutomotiveGas_2C = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2C' AND strType = 'Automotive Gas'
 		SELECT @AutomotiveGas_2X = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2X' AND strType = 'Automotive Gas'
-		SELECT @AutomotiveGas_5B = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Automotive Gas'
-		SELECT @AutomotiveGas_5D = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Automotive Gas'
-		SELECT @AutomotiveGas_7 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Automotive Gas'
-		SELECT @AutomotiveGas_8 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Automotive Gas'
-		SELECT @AutomotiveGas_13H = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Automotive Gas'
+		SELECT @AutomotiveGas_5B = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Automotive Gas'
+		SELECT @AutomotiveGas_5D = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Automotive Gas'
+		SELECT @AutomotiveGas_7 = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Automotive Gas'
+		SELECT @AutomotiveGas_8 = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Automotive Gas'
+		SELECT @AutomotiveGas_13H = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Automotive Gas'
 
 
-		SELECT @AviationGas_6D = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '6D' AND strType = 'Aviation Gas'
+		SELECT @AviationGas_6D = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '6D' AND strType = 'Aviation Gas'
 		SELECT @AviationGas_1 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '1' AND strType = 'Aviation Gas'
 		SELECT @AviationGas_2 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2' AND strType = 'Aviation Gas'
 		SELECT @AviationGas_2A = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2A' AND strType = 'Aviation Gas'
 		SELECT @AviationGas_2B = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2B' AND strType = 'Aviation Gas'
 		SELECT @AviationGas_2C = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2C' AND strType = 'Aviation Gas'
 		SELECT @AviationGas_2X = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '2X' AND strType = 'Aviation Gas'
-		SELECT @AviationGas_5B = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Aviation Gas'
-		SELECT @AviationGas_5D = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Aviation Gas'
-		SELECT @AviationGas_7 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Aviation Gas'
-		SELECT @AviationGas_8 = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Aviation Gas'
-		SELECT @AviationGas_13H = ISNULL(dblReceived, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Aviation Gas'	
+		SELECT @AviationGas_5B = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5B' AND strType = 'Aviation Gas'
+		SELECT @AviationGas_5D = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '5D' AND strType = 'Aviation Gas'
+		SELECT @AviationGas_7 = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '7' AND strType = 'Aviation Gas'
+		SELECT @AviationGas_8 = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '8' AND strType = 'Aviation Gas'
+		SELECT @AviationGas_13H = ISNULL(dblBillQty, 0) FROM @transaction WHERE strFormCode = 'Gas' AND strScheduleCode = '13H' AND strType = 'Aviation Gas'	
 
 		-- Line 9
 		SET @AutomotiveGas_9 = @AutomotiveGas_1 + @AutomotiveGas_2 + @AutomotiveGas_2A +  @AutomotiveGas_2B + @AutomotiveGas_2C +  @AutomotiveGas_2X + @AutomotiveGas_5B +  @AutomotiveGas_5D
