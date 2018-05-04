@@ -14,3 +14,7 @@
     CONSTRAINT [AK_tblTFTerminalControlNumber_strTerminalControlNumber] UNIQUE ([strTerminalControlNumber]) 
 );
 
+
+GO
+
+CREATE INDEX [IX_tblTFTerminalControlNumber_intMasterId] ON [dbo].[tblTFTerminalControlNumber] ([intMasterId])
