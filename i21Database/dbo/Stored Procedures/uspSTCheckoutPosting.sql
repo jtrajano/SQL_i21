@@ -28,6 +28,7 @@ BEGIN
 		DECLARE @intCompanyLocationId INT
 		DECLARE @intTaxGroupId INT
 		DECLARE @strComments NVARCHAR(MAX) = 'Store Checkout' -- All comments should be same to create a single Invoice
+		DECLARE @strInvoiceType AS NVARCHAR(50) = 'Store Checkout'
 
 		SELECT @intCompanyLocationId = intCompanyLocationId
 			   , @intEntityCustomerId = intCheckoutCustomerId
@@ -226,7 +227,7 @@ BEGIN
 									SELECT 
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= 'Invoice'
-										,[strType]					= 'Store Checkout'
+										,[strType]					= @strInvoiceType
 										,[intSourceId]				= @intCheckoutId
 										,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 										,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -271,7 +272,23 @@ BEGIN
 										,[intItemUOMId]				= UOM.intItemUOMId
 										,[dblQtyShipped]			= CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
-										,[dblPrice]					= CPT.dblPrice --(Select dblPrice From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
+
+										-- Should remove tax to calculate Net Price --CPT.dblPrice
+										-- ,[dblPrice]				    = CPT.dblPrice --(Select dblPrice From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
+										,[dblPrice]					= CPT.dblPrice - CAST((SELECT SUM(dblAdjustedTax) 
+																						  FROM [dbo].[fnGetItemTaxComputationForCustomer]
+																						  (
+																								I.intItemId
+																								, ST.intCheckoutCustomerId
+																								, GETDATE()
+																								, CPT.dblPrice
+																								, 1
+																								, ST.intTaxGroupId
+																								, ST.intCompanyLocationId
+																								, EL.intEntityLocationId
+																								, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+																						  )) AS DECIMAL(18,6))
+
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
 										,[strFrequency]				= NULL
@@ -279,7 +296,7 @@ BEGIN
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
 										,[intTaxGroupId]			= @intTaxGroupId
-										,[ysnRecomputeTax]			= 1 -- not sure
+										,[ysnRecomputeTax]			= 1 -- Should recompute tax only for Pump Total Items
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
 										,[intInventoryShipmentItemId] = NULL
@@ -318,6 +335,7 @@ BEGIN
 													AND IL.intItemLocationId = IP.intItemLocationId
 							JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 												AND CH.intStoreId = ST.intStoreId
+							JOIN dbo.tblEMEntityLocation EL ON ST.intCheckoutCustomerId = EL.intEntityId
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
 							AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -430,7 +448,7 @@ BEGIN
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
-											,[strType]					= 'Store Checkout'
+											,[strType]					= @strInvoiceType
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -633,7 +651,7 @@ BEGIN
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
-											,[strType]					= 'Store Checkout'
+											,[strType]					= @strInvoiceType
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -873,7 +891,7 @@ BEGIN
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
-											,[strType]					= 'Store Checkout'
+											,[strType]					= @strInvoiceType
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -1077,7 +1095,7 @@ BEGIN
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= 'Invoice'
-											,[strType]					= 'Store Checkout'
+											,[strType]					= @strInvoiceType
 											,[intSourceId]				= @intCheckoutId
 											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
