@@ -184,14 +184,24 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		DELETE FROM @NewInvoices WHERE intEntityCustomerId = @EntityCustomerId AND intCompanyLocationId = @ComLocationId
 	END
 	
-UPDATE tblHDTicketHoursWorked
-SET tblHDTicketHoursWorked.intInvoiceId = I.intInvoiceId, tblHDTicketHoursWorked.ysnBilled = convert(bit,1), tblHDTicketHoursWorked.dtmBilled = GETDATE()
-FROM @NewlyCreatedInvoices I
-WHERE intTicketHoursWorkedId IN (SELECT intTicketHoursWorkedId FROM @TicketHoursWorked)
---INNER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
---INNER JOIN tblHDTicketHoursWorked V ON D.intTicketHoursWorkedId = V.intTicketHoursWorkedId
---INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
---				    AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
+UPDATE 
+	tblHDTicketHoursWorked
+SET
+	 tblHDTicketHoursWorked.intInvoiceId = I.intInvoiceId
+	,tblHDTicketHoursWorked.ysnBilled = convert(bit,1)
+	,tblHDTicketHoursWorked.dtmBilled = GETDATE()
+FROM 
+	@NewlyCreatedInvoices I
+INNER JOIN
+	tblARInvoiceDetail D 
+		ON I.intInvoiceId = D.intInvoiceId
+INNER JOIN
+	tblHDTicketHoursWorked V 
+		ON D.intTicketHoursWorkedId = V.intTicketHoursWorkedId
+INNER JOIN
+	@TicketHoursWorked HW 
+		ON V.intTicketId = HW.intTicketId
+		AND V.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
 		                    
 IF @Post = 1
 	BEGIN
