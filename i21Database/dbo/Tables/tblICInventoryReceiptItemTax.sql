@@ -31,6 +31,7 @@ Type the overview for the table here.
 		[dblQty] NUMERIC(38, 20) NULL DEFAULT ((1)),
 		[dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intUnitMeasureId] INT NULL,
+		[ysnAddToCost] BIT NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryReceiptItemTax] PRIMARY KEY ([intInventoryReceiptItemTaxId]), 

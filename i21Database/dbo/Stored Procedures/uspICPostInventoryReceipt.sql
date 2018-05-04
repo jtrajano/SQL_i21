@@ -562,8 +562,8 @@ BEGIN
 								-- 2.2. If it is a Lot, convert the cost from Cost UOM to Lot UOM. 
 							-- 3. If sub-currency exists, then convert it to sub-currency. 
 
-							-- If Sub-Currency: (A / C + B) 
-							-- Else: (A + B) 
+							-- If Sub-Currency: (A / C + B + D) 
+							-- Else: (A + B + D) 
 
 							CASE	
 								WHEN DetailItem.ysnSubCurrency = 1 AND ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN 
@@ -593,8 +593,9 @@ BEGIN
 											ELSE 
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-										END 									
-
+										END 	
+										-- (D) Add Tax to Cost								
+										+ dbo.fnGetAddTaxToCostFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 									)										
 								ELSE 
 									(
@@ -622,6 +623,8 @@ BEGIN
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 										END
+										-- (D) Add Tax to Cost
+										+ dbo.fnGetAddTaxToCostFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 									)							
 							END
 
@@ -1358,9 +1361,8 @@ BEGIN
 								-- 2.2. If it is a Lot, convert the cost from Cost UOM to Lot UOM. 
 							-- 3. If sub-currency exists, then convert it to sub-currency. 
 
-							-- If Sub-Currency: (A / C + B) 
-							-- Else: (A + B) 
-
+							-- If Sub-Currency: (A / C + B + D) 
+							-- Else: (A + B + D) 
 							CASE	
 								WHEN DetailItem.ysnSubCurrency = 1 AND ISNULL(Header.intSubCurrencyCents, 1) <> 0 THEN 
 									(
@@ -1389,8 +1391,9 @@ BEGIN
 											ELSE 
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-										END 									
-
+										END
+										-- (D) Add Tax to Cost 									
+										+ dbo.fnGetAddTaxToCostFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 									)										
 								ELSE 
 									(
@@ -1418,6 +1421,8 @@ BEGIN
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 										END
+										-- (D) Add Tax to Cost
+										+ dbo.fnGetAddTaxToCostFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 									)							
 							END							
 
