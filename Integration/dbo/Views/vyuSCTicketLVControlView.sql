@@ -86,7 +86,10 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
 				,gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
-				,dbo.fnCTConvertYNToBit(gasct_split_wgt_yn,0) AS ysnSplitWeightTicket
+				,CAST(
+				CASE WHEN gasct_split_wgt_yn = ''Y'' THEN 1
+				ELSE 0 END
+				AS BIT) AS ysnSplitWeightTicket
 			from gasctmst
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
