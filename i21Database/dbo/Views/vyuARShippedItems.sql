@@ -494,7 +494,7 @@ FROM (
 		 , intShipmentItemUOMId				= ICISC.intCostUOMId
 		 , intWeightUOMId					= NULL
 		 , dblWeight						= NULL
-		 , dblQtyShipped					= 1 	
+		 , dblQtyShipped					= ICISC.dblQuantity 	
 		 , dblQtyOrdered					= 0 
 		 , dblShipmentQuantity				= 1
 		 , dblShipmentQtyShippedTotal		= 1
@@ -507,7 +507,7 @@ FROM (
 		 , strPricing						= ''
 		 , strVFDDocumentNumber				= NULL
 		 , dblTotalTax						= 0
-		 , dblTotal							= 1 * ICISC.dblAmount
+		 , dblTotal							= ICISC.dblQuantity  * ICISC.dblAmount
 		 , intStorageLocationId				= NULL
 		 , intTermId						= NULL
 		 , intEntityShipViaId				= NULL
