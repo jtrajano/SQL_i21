@@ -6456,6 +6456,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
+    <Build Include="dbo\Views\vyuICBlendReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
