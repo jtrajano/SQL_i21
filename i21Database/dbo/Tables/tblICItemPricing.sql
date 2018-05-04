@@ -25,6 +25,7 @@ Type the overview for the table here.
 		[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[ysnIsPendingUpdate] BIT NULL, 
+		[dtmDateChanged] DATETIME NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
 		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE, 
@@ -156,3 +157,15 @@ Type the overview for the table here.
 	
 	GO
 	
+CREATE TRIGGER [dbo].[trgtblICItemPricingDateChanged]
+    ON [dbo].[tblICItemPricing]
+   AFTER INSERT, UPDATE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+   UPDATE tblICItemPricing
+      SET tblICItemPricing.dtmDateChanged = GETDATE()
+     FROM   inserted
+    WHERE tblICItemPricing.intItemPricingId = inserted.intItemPricingId
+END
