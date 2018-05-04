@@ -54,5 +54,8 @@
 	[ysnProcessedData] BIT NULL DEFAULT((0)),
 	[ysnSplitWeightTicket] BIT NULL DEFAULT((0)),
 	[intOriginTicketId] INT NOT NULL,
+	[intItemUOMIdFrom] INT NULL, 
+	[intItemUOMIdTo] INT NULL,
+	[strCostMethod] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,   
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 
 )

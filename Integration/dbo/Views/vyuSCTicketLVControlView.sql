@@ -157,6 +157,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[strStationShortDescription]
 					,[ysnProcessedData]
 					,[intOriginTicketId]
+					,[intItemUOMIdFrom]
+					,[intItemUOMIdTo]
+					,[strCostMethod]
 				)
 				SELECT 
 				LTRIM(RTRIM(SC.strTicketNumber))
@@ -207,6 +210,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,SC.strStationShortDescription
 				,0
 				,SC.intTicketId
+				,UOM.intItemUOMId
+				,ICUOM.intItemUOMId
+				,''Per Unit''
 				FROM vyuSCTicketLVControlView SC 
 				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 				LEFT JOIN tblAPVendor AP ON AP.strVendorId = SC.strEntityNo
@@ -218,6 +224,8 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
 				LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
+				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUOM = 1
+				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 
 				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
 				SELECT 
