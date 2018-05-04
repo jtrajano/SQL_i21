@@ -10,6 +10,8 @@ SELECT ST.intStoreId
 	   , '' AS strComment
 	   , UOM.intItemUOMId AS intProduct
 	   , UOM.strUpcCode AS strUpcCode
+	   , I.strItemNo AS strItemNo
+	   , I.strDescription AS strItemDescription
 	   , CAST(NULL AS decimal(18,6)) AS dblUnitPrice
 	   , CAST(NULL AS decimal(18,6)) AS dblGallons
 FROM tblSTStore ST

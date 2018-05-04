@@ -1595,6 +1595,8 @@ BEGIN
 								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
 								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 														AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
+												AND CH.intStoreId = ST.intStoreId
 								WHERE CP.intCheckoutId = @intCheckoutId
 								AND CP.dblAmount > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
