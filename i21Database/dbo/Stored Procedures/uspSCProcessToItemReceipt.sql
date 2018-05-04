@@ -79,7 +79,9 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@dblGrossUnits AS NUMERIC(38, 20)
 		,@dblTicketNetUnits AS NUMERIC(38, 20)
 		,@createVoucher AS BIT
-		,@postVoucher AS BIT;
+		,@postVoucher AS BIT
+		,@intLotType INT
+		,@intLotId INT;
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -518,6 +520,49 @@ BEGIN TRY
 	INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
 	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 	WHERE SC.intTicketId = @intTicketId
+
+	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+    IF @intLotType != 0
+    BEGIN
+        DECLARE @QualityPropertyValueTable AS QualityPropertyValueTable;
+        INSERT INTO @QualityPropertyValueTable(
+            strPropertyName
+            ,strPropertyValue
+            ,strComment
+        )
+        SELECT 
+            strPropertyName = IC.strItemNo
+            ,strPropertyValue = QM.dblDiscountAmount
+            ,strComment = QM.strShrinkWhat 
+        FROM tblQMTicketDiscount QM 
+        INNER JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+        INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+        WHERE QM.intTicketId = @intTicketId AND QM.strSourceType = 'Scale'
+
+        DECLARE lotCursor CURSOR LOCAL FAST_FORWARD
+        FOR
+        SELECT ICLot.intLotId FROM dbo.tblSCTicket SC 
+        INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
+        INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
+        INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+        WHERE SC.intTicketId = @intTicketId
+
+        OPEN lotCursor;
+
+        -- Initial fetch attempt
+        FETCH NEXT FROM lotCursor INTO @intLotId
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            IF    ISNULL(@intLotId,0) != 0
+            EXEC dbo.uspQMSampleCreateForScaleTicket @intItemId,'Inbound Scale Sample', @intLotId, @intUserId, @QualityPropertyValueTable
+            FETCH NEXT FROM lotCursor INTO @intLotId;
+        END
+
+        CLOSE lotCursor;
+        DEALLOCATE lotCursor;
+    END
+
 
 	-- VOUCHER INTEGRATION
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
