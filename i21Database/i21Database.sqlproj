@@ -6459,6 +6459,7 @@
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetDailyStockPosition.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
