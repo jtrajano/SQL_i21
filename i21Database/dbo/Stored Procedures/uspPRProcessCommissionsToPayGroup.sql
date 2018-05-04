@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRProcessCommissionsToPayGroup]
 	@intCommissionId	INT
 	,@intUserId			INT = NULL
+	,@isSuccessful		BIT = 0 OUTPUT
 AS
 BEGIN
 
@@ -84,6 +85,11 @@ FROM
 	tblPREmployeeEarning EE
 WHERE EE.intTypeEarningId = @intCommissionEarningId
 	AND intEntityEmployeeId = @intEntityId
+
+IF (@@ERROR <> 0)
+	GOTO Process_Exit
+ELSE
+	SET @isSuccessful = 1
 
 Process_Exit:
 
