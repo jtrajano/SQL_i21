@@ -1,37 +1,11 @@
 ﻿/*
-	This is the stored procedure that handles the moving average costing method. 
+	This is the stored procedure that handles the Category Costing Method. 
 	
 	Parameters: 
-	@intItemId - The item to process
 
-	@intLocationId - The location where the item is being process. 
-
-	@intItemUOMId - The UOM used for the item in a transaction. Each transaction can use different kinds of UOM on its items. 
-	
-	@dtmDate - The date used in the transaction and posting. 
-
-	@dblQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
-
-	@dblUOMQty - The stock unit qty associated with the UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
-
-	@dblCost - The cost per base qty of the item. 
-
-	@dblSalesPrice - The sales price of an item sold to the customer. 
-
-	@intCurrencyId - The foreign currency associated with the transaction. 
-
-	@dblExchangeRate - The conversion factor between the base currency and the foreign currency. 
-
-	@intTransactionId - The primary key id used in a transaction. 
-
-	@strTransactionId - The string value of a transaction id. 
-
-	@strBatchId - The batch id to use in generating the g/l entries. 
-
-	@intEntityUserSecurityId - The user who initiated or called this stored procedure. 
 */
 
-CREATE PROCEDURE [dbo].[uspICPostCategoryCosting]	
+CREATE PROCEDURE [dbo].[uspICPostCategory]	
 	@intCategoryId AS INT
 	,@intItemId AS INT
 	,@intItemLocationId AS INT
@@ -79,6 +53,7 @@ DECLARE @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35;
 -- Create the variables 
 DECLARE  @dblCostValue AS NUMERIC(38,20)
 		,@dblRetailValue AS NUMERIC(38,20)
+		,@dblAverageMargin AS NUMERIC(38,20)
 
 DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
@@ -95,14 +70,62 @@ END
 -- Post the Inventory transaction
 IF @intTransactionTypeId NOT IN (@TransactionType_InventoryReturn) AND @dblAdjustRetailValue IS NULL 
 BEGIN 
-	SET @dblCostValue = dbo.fnMultiply(@dblCost, @dblQty) 
-	SET @dblRetailValue = dbo.fnMultiply(@dblCost, @dblUnitRetail) 	
+	-- If Adding stocks, compute the cost value and retail value. 
+	IF @dblQty > 0 
+	BEGIN 
+		SET @dblRetailValue = dbo.fnMultiply(@dblQty, @dblUnitRetail) 	
+		SET @dblCostValue = dbo.fnMultiply(@dblQty, @dblCost) 		
+	END 
+	
+	-- If Reducing stocks, get the retail value and compute the cost. 
+	IF @dblQty < 0 
+	BEGIN 
+		-- Get the Average Margin from the Category Pricing. 
+		SELECT	@dblAverageMargin = ISNULL(CategoryPricing.dblAverageMargin, 0)
+		FROM	tblICCategoryPricing CategoryPricing 
+		WHERE	CategoryPricing.intCategoryId = @intCategoryId
+				AND CategoryPricing.intItemLocationId = @intItemLocationId
 
+		-- Get the retail price from the Item Pricing > Sales Price 
+		-- and Compute the cost from the Sales Price. 
+		SELECT	@dblUnitRetail = itemPricing.dblSalePrice
+				,@dblCost = 
+					dbo.fnMultiply(
+						itemPricing.dblSalePrice
+						,@dblAverageMargin
+					)
+		FROM	tblICItemPricing itemPricing 
+		WHERE	itemPricing.intItemId = @intItemId
+				AND itemPricing.intItemLocationId = @intItemLocationId
+				
+		-- Convert the cost and unit retail from stock unit to @intItemUOM 
+		SELECT	@dblUnitRetail = dbo.fnCalculateCostBetweenUOM(
+					stockUOM.intItemUOMId
+					, @intItemUOMId
+					, @dblUnitRetail
+				)
+				,@dblCost = dbo.fnCalculateCostBetweenUOM(
+					stockUOM.intItemUOMId
+					, @intItemUOMId
+					, @dblCost
+				)
+		FROM	tblICItemUOM stockUOM
+		WHERE	stockUOM.intItemId = @intItemId 
+				AND stockUOM.ysnStockUnit = 1						
+		
+		-- Compute the cost value and retail values
+		SET @dblRetailValue = dbo.fnMultiply(@dblQty, @dblUnitRetail) 
+		SET @dblCostValue = dbo.fnMultiply(@dblQty, @dblCost) 				
+	END 
+
+	-- Update the Category Pricing 
 	UPDATE	CategoryPricing
 	SET		dblTotalCostValue = ISNULL(dblTotalCostValue, 0) + ISNULL(@dblCostValue, 0) 
 			,dblTotalRetailValue = ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) 
 			,dblAverageMargin = 
 				CASE 
+					WHEN @dblQty < 1 THEN 
+						CategoryPricing.dblAverageMargin 
 					WHEN ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) <> 0 THEN 
 						dbo.fnDivide(
 							(
@@ -112,7 +135,7 @@ BEGIN
 							, (ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0))
 						)						
 					ELSE 
-						0
+						0.00
 				END
 	FROM	tblICCategoryPricing CategoryPricing 
 	WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
@@ -130,7 +153,7 @@ BEGIN
 			,@dblUOMQty = @dblUOMQty
 			,@dblCost = @dblCost
 			,@dblValue = NULL 
-			,@dblSalesPrice = @dblRetailValue
+			,@dblSalesPrice = @dblSalesPrice
 			,@intCurrencyId = @intCurrencyId
 			,@intTransactionId = @intTransactionId
 			,@intTransactionDetailId = @intTransactionDetailId
@@ -143,7 +166,7 @@ BEGIN
 			,@strRelatedTransactionId = NULL 
 			,@strTransactionForm = @strTransactionForm
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@intCostingMethod = @AVERAGECOST
+			,@intCostingMethod = @CATEGORY
 			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 			,@intForexRateTypeId = @intForexRateTypeId
 			,@dblForexRate = @dblForexRate
@@ -188,7 +211,7 @@ BEGIN
 			,@dblUOMQty = @dblUOMQty
 			,@dblCost = @dblCost
 			,@dblValue = NULL 
-			,@dblSalesPrice = @dblRetailValue
+			,@dblSalesPrice = @dblSalesPrice
 			,@intCurrencyId = @intCurrencyId
 			,@intTransactionId = @intTransactionId
 			,@intTransactionDetailId = @intTransactionDetailId
@@ -201,7 +224,7 @@ BEGIN
 			,@strRelatedTransactionId = NULL 
 			,@strTransactionForm = @strTransactionForm
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@intCostingMethod = @AVERAGECOST
+			,@intCostingMethod = @CATEGORY
 			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 			,@intForexRateTypeId = @intForexRateTypeId
 			,@dblForexRate = @dblForexRate
