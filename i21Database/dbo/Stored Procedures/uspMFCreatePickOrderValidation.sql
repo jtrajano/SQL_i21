@@ -52,9 +52,10 @@ BEGIN TRY
 		,@intPMStageLocationId INT
 		,@intStagingLocationId INT
 		,@strPickByUpperToleranceQty NVARCHAR(50)
-		,@ysnPickRemainingQty bit
-		,@strReferernceNo nvarchar(50)
+		,@ysnPickRemainingQty BIT
+		,@strReferernceNo NVARCHAR(50)
 		,@intOrderHeaderId INT
+		,@strInventoryTracking NVARCHAR(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -66,15 +67,15 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = x.intLocationId
 		,@intUserId = intUserId
-		,@ysnPickRemainingQty=IsNULL(ysnPickRemainingQty,1)
+		,@ysnPickRemainingQty = IsNULL(ysnPickRemainingQty, 1)
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingProcessId INT
 			,intLocationId INT
 			,intUserId INT
-			,ysnPickRemainingQty Bit
+			,ysnPickRemainingQty BIT
 			) x
-	--Select @ysnPickRemainingQty=0
 
+	--Select @ysnPickRemainingQty=0
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
 		,intItemId INT
@@ -205,7 +206,12 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	Select @strReferernceNo=strWorkOrderNo from tblMFWorkOrder Where intWorkOrderId in (Select intWorkOrderId from @tblMFWorkOrder)
+	SELECT @strReferernceNo = strWorkOrderNo
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId IN (
+			SELECT intWorkOrderId
+			FROM @tblMFWorkOrder
+			)
 
 	INSERT INTO @OrderHeaderInformation (
 		intOrderStatusId
@@ -236,7 +242,6 @@ BEGIN TRY
 
 	--INSERT INTO @tblMFOrderHeader
 	--EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
-
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM @tblMFOrderHeader
 
@@ -326,6 +331,7 @@ BEGIN TRY
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
 			,intStagingLocationId
+			,strInventoryTracking
 			)
 		SELECT @intOrderHeaderId
 			,ri.intItemId
@@ -411,6 +417,7 @@ BEGIN TRY
 					THEN @intPMStageLocationId
 				ELSE NULL
 				END
+			,I.strInventoryTracking
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.ysnActive = 1
@@ -433,15 +440,14 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId IN (
-				1
-				--,2
-				)
+			AND ri.intConsumptionMethodId IN (1)
+		--,2
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
 			,I.intUnitPerLayer
 			,I.intLayerPerPallet
 			,C.intCategoryId
+			,I.strInventoryTracking
 
 		DECLARE @tblMFRequiredQty TABLE (
 			intItemId INT
@@ -464,9 +470,8 @@ BEGIN TRY
 				)
 		GROUP BY OD1.intItemId
 
-		If @ysnPickRemainingQty=1
-		Begin
-
+		IF @ysnPickRemainingQty = 1
+		BEGIN
 			DECLARE @tblMFStagedQty TABLE (
 				intItemId INT
 				,dblStagedQty DECIMAL(38, 20)
@@ -523,7 +528,7 @@ BEGIN TRY
 					END
 			FROM @OrderDetail OD
 			LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
-		End
+		END
 
 		SELECT @intWorkOrderId = intWorkOrderId
 			,@intProductId = intItemId
@@ -546,6 +551,7 @@ BEGIN TRY
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
 			,intStagingLocationId
+			,strInventoryTracking
 			)
 		SELECT intOrderHeaderId
 			,intItemId
@@ -562,6 +568,7 @@ BEGIN TRY
 			,intSanitizationOrderDetailsId
 			,strLineItemNote
 			,intStagingLocationId
+			,strInventoryTracking
 		FROM @OrderDetail
 
 		SELECT @dblMinQtyCanBeProduced = - 1
@@ -576,31 +583,53 @@ BEGIN TRY
 				,@dblRequiredQty = NULL
 				,@intItemUOMId = NULL
 				,@intStagingLocationId = NULL
+				,@strInventoryTracking = NULL
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
 				,@dblRequiredQty = dblRequiredQty
 				,@intItemUOMId = intItemUOMId
 				,@intStagingLocationId = intStagingLocationId
+				,@strInventoryTracking = strInventoryTracking
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
-			SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
-			FROM dbo.tblICLot L
-			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-			JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
-				AND R.strInternalCode = 'STOCK'
-			JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-				AND BS.strPrimaryStatus = 'Active'
-			WHERE L.intItemId = @intItemId
-				AND L.intLocationId = @intLocationId
-				AND L.intLotStatusId = 1
-				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-				AND L.intStorageLocationId NOT IN (
-					SELECT intStageLocationId
-					FROM @tblMFStageLocation
-					)
+			IF @strInventoryTracking = 'Item Level'
+			BEGIN
+				SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, @intItemUOMId, S.dblOnHand - S.dblUnitReserved))
+				FROM dbo.tblICItemStockUOM S
+				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+					AND S.intItemId = @intItemId
+					AND S.dblOnHand - S.dblUnitReserved > 0
+				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+					AND IU.ysnStockUnit = 1
+				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+				WHERE S.intItemId = @intItemId
+					AND IL.intLocationId = @intLocationId
+					AND S.intStorageLocationId NOT IN (
+						SELECT intStageLocationId
+						FROM @tblMFStageLocation
+						)
+			END
+			ELSE
+			BEGIN
+				SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
+					AND R.strInternalCode = 'STOCK'
+				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				WHERE L.intItemId = @intItemId
+					AND L.intLocationId = @intLocationId
+					AND L.intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+					AND L.intStorageLocationId NOT IN (
+						SELECT intStageLocationId
+						FROM @tblMFStageLocation
+						)
+			END
 
 			--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
 			--from tblMFOrderDetail OD 
@@ -631,19 +660,23 @@ BEGIN TRY
 					,intSubstituteItemId INT
 					,dblSubstituteRatio NUMERIC(18, 6)
 					,dblMaxSubstituteRatio NUMERIC(18, 6)
+					,strInventoryTracking NVARCHAR(50)
 					)
 
 				INSERT INTO @tblSubstituteItem (
 					intSubstituteItemId
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
+					,strInventoryTracking
 					)
 				SELECT rs.intSubstituteItemId
 					,dblSubstituteRatio
 					,dblMaxSubstituteRatio
+					,I.strInventoryTracking
 				FROM dbo.tblMFRecipe r
 				JOIN dbo.tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
 				JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+				JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 				WHERE r.intItemId = @intProductId
 					AND r.intLocationId = @intLocationId
 					AND r.ysnActive = 1
@@ -657,10 +690,12 @@ BEGIN TRY
 					SELECT @dblSubstituteRatio = NULL
 						,@dblMaxSubstituteRatio = NULL
 						,@intSubstituteItemId = NULL
+						,@strInventoryTracking = NULL
 
 					SELECT @dblSubstituteRatio = dblSubstituteRatio
 						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
 						,@intSubstituteItemId = intSubstituteItemId
+						,@strInventoryTracking = strInventoryTracking
 					FROM @tblSubstituteItem
 					WHERE intItemRecordId = @intItemRecordId
 
@@ -675,23 +710,43 @@ BEGIN TRY
 
 					SELECT @dblAvailableQty = 0
 
-					SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
-					FROM dbo.tblICLot L
-					JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
-					JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId,R.intRestrictionId)
-						AND R.strInternalCode = 'STOCK'
-					JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-					JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
-						AND BS.strPrimaryStatus = 'Active'
-					JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-					WHERE L.intItemId = @intSubstituteItemId
-						AND L.intLocationId = @intLocationId
-						AND LS.strPrimaryStatus = 'Active'
-						AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
-						AND L.intStorageLocationId NOT IN (
-							SELECT intStageLocationId
-							FROM @tblMFStageLocation
-							)
+					IF @strInventoryTracking = 'Item Level'
+					BEGIN
+						SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, @intItemUOMId, S.dblOnHand - S.dblUnitReserved))
+						FROM dbo.tblICItemStockUOM S
+						JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+							AND S.intItemId = @intItemId
+							AND S.dblOnHand - S.dblUnitReserved > 0
+						JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+							AND IU.ysnStockUnit = 1
+						JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+						WHERE S.intItemId = @intItemId
+							AND IL.intLocationId = @intLocationId
+							AND S.intStorageLocationId NOT IN (
+								SELECT intStageLocationId
+								FROM @tblMFStageLocation
+								)
+					END
+					ELSE
+					BEGIN
+						SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
+						FROM dbo.tblICLot L
+						JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+						JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
+							AND R.strInternalCode = 'STOCK'
+						JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+						JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+							AND BS.strPrimaryStatus = 'Active'
+						JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+						WHERE L.intItemId = @intSubstituteItemId
+							AND L.intLocationId = @intLocationId
+							AND LS.strPrimaryStatus = 'Active'
+							AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+							AND L.intStorageLocationId NOT IN (
+								SELECT intStageLocationId
+								FROM @tblMFStageLocation
+								)
+					END
 
 					--Select @dblAvailableQty=@dblAvailableQty- IsNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(OD.intItemUOMId, @intItemUOMId, OD.dblRequiredQty )), 0)
 					--from tblMFOrderDetail OD 
@@ -846,7 +901,8 @@ BEGIN TRY
 		END
 	END
 
-	IF @dblMinQtyCanBeProduced > - 1 and @ysnPickRemainingQty=1
+	IF @dblMinQtyCanBeProduced > - 1
+		AND @ysnPickRemainingQty = 1
 	BEGIN
 		SELECT @intItemUOMId = intItemUOMId
 		FROM tblMFWorkOrder
@@ -861,7 +917,7 @@ BEGIN TRY
 		WHERE intUnitMeasureId = @intUnitMeasureId
 
 		SELECT @strMinQtyCanBeProduced = @strMinQtyCanBeProduced + ' ' + @strUnitMeasure
-		
+
 		SELECT @strValidationMsg = 'Available qty for item ' + @strItemNo + ' is ' + @strAvailableQty + ' which is less than the required qty ' + @strRequiredQty + '. ' + @strMinQtyCanBeProduced + ' can be produced with the available inputs. Do you want to continue ?.'
 	END
 

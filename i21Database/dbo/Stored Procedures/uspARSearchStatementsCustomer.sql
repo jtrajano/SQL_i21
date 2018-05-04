@@ -23,34 +23,6 @@ SET @strLocationNameLocal		= NULLIF(@strCompanyLocation, '')
 SET @dtmAsOfDate				= ISNULL(CONVERT(DATETIME, @strAsOfDate), GETDATE())
 SET @intEntityUserId			= NULLIF(@intEntityUserId, 0)
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-INSERT INTO tblARCustomerAgingStagingTable (
-	   strCustomerName
-	 , strCustomerNumber
-	 , strCustomerInfo
-	 , intEntityCustomerId
-	 , intEntityUserId
-	 , dblCreditLimit
-	 , dblTotalAR
-	 , dblFuture
-	 , dbl0Days
-	 , dbl10Days
-	 , dbl30Days
-	 , dbl60Days
-	 , dbl90Days
-	 , dbl91Days
-	 , dblTotalDue
-	 , dblAmountPaid
-	 , dblCredits
-	 , dblPrepayments
-	 , dblPrepaids
-	 , dtmAsOfDate
-	 , strSalespersonName
-	 , strSourceTransaction
-	 , strCompanyName
-	 , strCompanyAddress
-	 , strAgingType
-)
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo = @dtmAsOfDate
 										, @strCompanyLocation = @strCompanyLocation
 										, @intEntityUserId = @intEntityUserId

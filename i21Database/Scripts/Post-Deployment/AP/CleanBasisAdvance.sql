@@ -19,6 +19,20 @@ OUTER APPLY (
 ) ticketSelected
 WHERE ticketSelected.ysnSelected IS NULL
 
+--DELETE DUPLICATE in tblAPBasisAdvanceFuture
+DELETE A
+FROM tblAPBasisAdvanceFuture A
+WHERE A.intBasisAdvanceFuturesId IN (
+	SELECT intBasisAdvanceFuturesId
+	FROM (
+		SELECT 
+			intBasisAdvanceFuturesId
+			,ROW_NUMBER() OVER(PARTITION BY intFutureMarketId, intMonthId ORDER BY intBasisAdvanceFuturesId) AS intCount
+		FROM tblAPBasisAdvanceFuture
+	) duplicateFutures
+	WHERE intCount != 1
+)
+
 --tblAPBasisAdvanceCommodity
 DELETE A
 FROM tblAPBasisAdvanceCommodity A
@@ -32,5 +46,6 @@ OUTER APPLY (
 	WHERE basisAdvance.intCommodityId = A.intCommodityId
 ) ticketSelected
 WHERE ticketSelected.ysnSelected IS NULL
+
 
 PRINT('END CLEANING BASIS ADVANCE')

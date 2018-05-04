@@ -49,6 +49,7 @@ BEGIN TRY
 		,@ErrorMessage AS NVARCHAR(4000)
 		,@strPickLot NVARCHAR(50)
 		,@AccountCategory_Cost_Adjustment NVARCHAR(50)
+		,@dblOtherCharges NUMERIC(38, 20)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -404,6 +405,16 @@ BEGIN TRY
 				AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
 		END
 
+		SELECT @dblOtherCharges = SUM(dblOtherCharges)
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		IF @dblOtherCharges IS NOT NULL
+		BEGIN
+			SELECT @dblOtherCost = abs(@dblOtherCost) + @dblOtherCharges
+		END
+
 		SET @dblNewCost = ISNULL(@dblOtherCost, 0)
 		SET @dblNewCost = ABS(@dblNewCost)
 
@@ -453,8 +464,8 @@ BEGIN TRY
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
 					THEN @dblNewCost
-				ELSE (@dblNewCost * RI.dblPercentage / 100)*(PL.dblQuantity/SUM(PL.dblQuantity)Over(PARTITION BY PL.intItemId))
-				END-ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
+				ELSE (@dblNewCost * RI.dblPercentage / 100) * (PL.dblQuantity / SUM(PL.dblQuantity) OVER (PARTITION BY PL.intItemId))
+				END - ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
 				FROM tblSMCompanyPreference

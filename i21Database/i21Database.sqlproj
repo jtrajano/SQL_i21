@@ -2424,7 +2424,6 @@
     <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseOnStorageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
@@ -6296,8 +6295,24 @@
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoice.sql" />
+    <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
     <Build Include="dbo\Views\vyuPATSetupItem.sql" />
-    <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
+    <Build Include="dbo\Tables\tblAPBalanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPGetBalance.sql" />
+    <Build Include="dbo\Triggers\trgDeleteEntityToContact.sql" />
+    <Build Include="dbo\Views\vyuSOGetSalesOrderDetail.sql" />
+    <Build Include="dbo\Functions\fnAPGetPaymentForexRate.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

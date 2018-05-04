@@ -11,9 +11,12 @@ BEGIN
 	FROM tblMFAttribute
 	WHERE strAttributeName = 'Category for Ingredient Demand Report'
 
-	SELECT @strBlendAttributeValue = strAttributeValue
+	Select @strBlendAttributeValue=''
+
+	SELECT @strBlendAttributeValue =@strBlendAttributeValue+ strAttributeValue+','
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intAttributeId = @intBlendAttributeId
+		AND strAttributeValue <> ''
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL

@@ -51,6 +51,10 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@intTransactionCount INT
 		,@intTaskId INT
+		,@intOrderDirectionId int
+
+	If @strTaskId =''
+	Select @strTaskId=NULL
 
 	If @strTaskId =''
 	Select @strTaskId=NULL
@@ -84,6 +88,7 @@ BEGIN TRY
 		,@strReferenceNo = strReferenceNo
 		,@intOrderId = intOrderHeaderId
 		,@intLocationId = intLocationId
+		,@intOrderDirectionId=intOrderDirectionId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -214,15 +219,14 @@ BEGIN TRY
 				,@blnInventoryMove = 0
 				,@intLotId = intLotId
 				,@intItemId = T.intItemId
-				,@intNewSubLocationId = SL.intSubLocationId
 				,@intStorageLocationId = T.intFromStorageLocationId
+				,@intMoveItemUOMId = T.intItemUOMId
 			FROM tblMFTask T
 			JOIN tblICStorageLocation SL ON T.intToStorageLocationId = SL.intStorageLocationId
 			WHERE T.intTaskId = @intTaskId
 
 			SELECT @strLotNumber = strLotNumber
 				,@intLotLocationId = intLocationId
-				,@intMoveItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE intLotId = @intLotId
 
@@ -276,9 +280,11 @@ BEGIN TRY
 		WHERE intOrderHeaderId = @intOrderHeaderId
 			AND intItemId = @intItemId
 
-		SELECT @intNewLotId = @intLotId
-
-		IF @intNewStorageLocationId <> @intStorageLocationId
+		IF @intNewStorageLocationId = @intStorageLocationId
+		BEGIN
+			SELECT @intNewLotId = @intLotId
+		END
+		ELSE
 		BEGIN
 			IF @strInventoryTracking = 'Lot Level'
 			BEGIN
@@ -454,7 +460,7 @@ BEGIN TRY
 			)
 
 		IF @ysnLoad = 0
-			AND @intCustomerLabelTypeId <> 2
+			AND @intCustomerLabelTypeId <> 2 and @intOrderDirectionId=2
 		BEGIN
 			INSERT INTO tblMFOrderManifest (
 				intConcurrencyId
@@ -518,6 +524,24 @@ BEGIN TRY
 			WHERE s.strShipmentNumber = @strShipmentNo
 				AND intItemId = @intLotItemId
 
+			IF EXISTS (
+					SELECT *
+					FROM dbo.tblICInventoryShipmentItem
+					WHERE intInventoryShipmentItemId = @intShipmentItemId
+						AND (
+							intSubLocationId IS NULL
+							OR intStorageLocationId IS NULL
+							OR intDockDoorId IS NULL
+							)
+					)
+			BEGIN
+				UPDATE tblICInventoryShipmentItem
+				SET intSubLocationId = @intNewSubLocationId
+					,intStorageLocationId = @intNewStorageLocationId
+					,intDockDoorId = @intNewStorageLocationId
+				WHERE intInventoryShipmentItemId = @intShipmentItemId
+			END
+
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblICInventoryShipmentItemLot
@@ -531,6 +555,7 @@ BEGIN TRY
 					,dblQuantityShipped
 					,dblGrossWeight
 					,dblTareWeight
+					,dblWeightPerQty
 					,intConcurrencyId
 					)
 				VALUES (
@@ -539,6 +564,7 @@ BEGIN TRY
 					,@dblMoveQty
 					,@dblMoveQty * @dblWeightPerQty
 					,0
+					,@dblWeightPerQty
 					,1
 					)
 			END
@@ -557,6 +583,11 @@ BEGIN TRY
 			FROM tblICInventoryShipmentItemLot
 			WHERE intInventoryShipmentItemId = @intShipmentItemId
 				AND intLotId = @intNewLotId
+
+			IF @dblAllocatedQty IS NULL
+			BEGIN
+				SELECT @dblAllocatedQty = 0
+			END
 
 			SELECT @dblQty = NULL
 

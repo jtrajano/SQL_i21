@@ -33,45 +33,7 @@ DECLARE @temp_return_table TABLE(
 )
 
 IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
-	BEGIN
-		DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-		INSERT INTO tblARCustomerAgingStagingTable (
-			  strCustomerName
-			, strCustomerNumber
-			, strCustomerInfo
-			, strInvoiceNumber
-			, strRecordNumber
-			, intInvoiceId
-			, strBOLNumber
-			, intEntityCustomerId
-			, intEntityUserId
-			, dblCreditLimit
-			, dblTotalAR
-			, dblFuture
-			, dbl0Days
-			, dbl10Days
-			, dbl30Days
-			, dbl60Days
-			, dbl90Days
-			, dbl120Days
-			, dbl121Days
-			, dblTotalDue
-			, dblAmountPaid
-			, dblInvoiceTotal
-			, dblCredits
-			, dblPrepayments
-			, dblPrepaids
-			, dtmDate
-			, dtmDueDate
-			, dtmAsOfDate
-			, strSalespersonName
-			, intCompanyLocationId
-			, strSourceTransaction
-			, strType
-			, strCompanyName
-			, strCompanyAddress
-			, strAgingType
-		)
+	BEGIN		
 		EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
 													  , @intEntityUserId = @intEntityUserId
 

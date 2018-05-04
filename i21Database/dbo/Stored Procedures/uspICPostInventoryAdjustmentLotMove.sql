@@ -180,7 +180,7 @@ BEGIN
 										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL
+			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
@@ -211,7 +211,7 @@ BEGIN
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Own -- process only company-owned stocks
 
-
+	
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
@@ -251,17 +251,17 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= WeightUOM.intItemUOMId--Detail.intItemUOMId 
+			,intItemUOMId			= Detail.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
-			,dblUOMQty				= WeightUOM.dblUnitQty --ItemUOM.dblUnitQty
+			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
 										,Detail.intItemUOMId
 										,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
-			,intCurrencyId			= NULL
+			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
@@ -286,14 +286,12 @@ BEGIN
 				AND WeightUOM.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemPricing ItemPricing
 				ON ItemPricing.intItemId = Detail.intItemId
-				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId	
-			LEFT JOIN dbo.tblICItemUOM StockUOM
-				ON StockUOM.intItemUOMId = dbo.fnGetItemStockUOM(Detail.intItemId)
-				AND StockUOM.intItemId = Detail.intItemId
+				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId					
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) < 0 -- ensure it is reducing the stock. 
 			AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks
+
 
 	-------------------------------------------
 	-- Call the costing SP	

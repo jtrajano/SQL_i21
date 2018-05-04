@@ -3368,3 +3368,7 @@ UPDATE tblMFCompanyPreference
 SET ysnGenerateTaskOnCreatePickOrder =0
 Where ysnGenerateTaskOnCreatePickOrder IS NULL
 Go
+UPDATE tblMFCompanyPreference
+SET ysnLotSnapshotByFiscalMonth =1
+Where ysnLotSnapshotByFiscalMonth IS NULL
+Go

@@ -48,6 +48,7 @@ BEGIN TRY
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
 		,@strRestrictPickQtyByRequiredQty NVARCHAR(50)
+		,@intToStorageLocationId2 int
 	DECLARE @tblMFTask TABLE (
 		intAlternateTaskId INT
 		,dblAlternateTaskQty NUMERIC(18, 6)
@@ -67,6 +68,7 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intUserId = intUserId
 		,@intOrderDetailId = intOrderDetailId
+		,@intToStorageLocationId2=intToStorageLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intTaskId INT
 			,intLotId INT
@@ -76,6 +78,7 @@ BEGIN TRY
 			,intLocationId INT
 			,intUserId INT
 			,intOrderDetailId INT
+			,intToStorageLocationId int
 			)
 
 	SELECT @strTaskNo = strOrderNo
@@ -114,7 +117,7 @@ BEGIN TRY
 		SELECT @dblLotWeight = @dblTaskQty
 	END
 
-	SELECT @intToStorageLocationId = IsNULL(intStagingLocationId, @intToStorageLocationId)
+	SELECT @intToStorageLocationId = IsNULL(@intToStorageLocationId2,IsNULL(intStagingLocationId, @intToStorageLocationId))
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intItemId = @intItemId
@@ -247,6 +250,7 @@ BEGIN TRY
 			,intLastModifiedUserId = @intUserId
 			,dtmLastModified = @dtmCurrentDate
 			,strComment = 'Manullay Updated.'
+			,intToStorageLocationId=@intToStorageLocationId
 		WHERE intTaskId = @intTaskId
 	END
 

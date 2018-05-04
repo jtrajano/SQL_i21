@@ -217,8 +217,7 @@ BEGIN
 							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
-								AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
-								AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
+								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId)
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intItemUOMId = @intItemUOMId
 							AND Lot.intItemLocationId = @intItemLocationId
@@ -242,8 +241,7 @@ BEGIN
 							LEFT JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
-								AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
-								AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
+								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId)
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intWeightUOMId = @intItemUOMId
 							AND Lot.intItemLocationId = @intItemLocationId
@@ -273,8 +271,7 @@ BEGIN
 							INNER JOIN dbo.tblICItemUOM LotStockUOM 
 								ON LotStockUOM.intItemId = Lot.intItemId
 								AND LotStockUOM.ysnStockUnit = 1
-								AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
-								AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
+								AND LotStockUOM.intItemUOMId NOT IN (Lot.intItemUOMId, Lot.intWeightUOMId)
 					WHERE	Lot.intLotId = @intLotId
 							AND Lot.intItemLocationId = @intItemLocationId
 							AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)

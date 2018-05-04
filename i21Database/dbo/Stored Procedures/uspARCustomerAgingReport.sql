@@ -133,35 +133,7 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-	
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-INSERT INTO tblARCustomerAgingStagingTable (
-	   strCustomerName
-	 , strCustomerNumber
-	 , strCustomerInfo
-	 , intEntityCustomerId
-	 , intEntityUserId
-	 , dblCreditLimit
-	 , dblTotalAR
-	 , dblFuture
-	 , dbl0Days
-	 , dbl10Days
-	 , dbl30Days
-	 , dbl60Days
-	 , dbl90Days
-	 , dbl91Days
-	 , dblTotalDue
-	 , dblAmountPaid
-	 , dblCredits
-	 , dblPrepayments
-	 , dblPrepaids
-	 , dtmAsOfDate
-	 , strSalespersonName
-	 , strSourceTransaction
-	 , strCompanyName
-	 , strCompanyAddress
-	 , strAgingType
-)
+
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom = @dtmDateFrom
 										, @dtmDateTo = @dtmDateTo
 										, @strSalesperson = @strSalesperson

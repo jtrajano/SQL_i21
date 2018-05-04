@@ -27,7 +27,7 @@ EXEC('
 									WHEN 8 THEN ''USA Local''
 									WHEN 9 THEN ''USA State''
 									ELSE ''Fixed Amount'' END
-			,dblAmount = 0
+			,dblAmount = CASE WHEN (prtax_tax_type IN (3, 4)) THEN prtax_tbl_pct_1 ELSE 0 END
 			,ysnRoundToDollar = 0
 			,dblLimit = CASE WHEN (prtax_tax_type IN (3, 4)) THEN prtax_wage_cutoff ELSE 0 END
 			,strPaidBy = CASE WHEN (prtax_paid_by = ''C'') THEN ''Company'' ELSE ''Employee'' END

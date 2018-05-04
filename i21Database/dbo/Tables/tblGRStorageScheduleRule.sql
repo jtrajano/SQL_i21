@@ -9,7 +9,7 @@
     [dtmEffectiveDate] DATETIME NULL, 
     [dtmTerminationDate] DATETIME NULL,     
     [intCurrencyID] INT NOT NULL, 
-    [strScheduleId] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strScheduleId] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strStorageRate] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [strFirstMonth] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [strLastMonth] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
