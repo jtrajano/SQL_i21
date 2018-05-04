@@ -16,6 +16,7 @@
 	[intTaxCalculationType] INT NULL DEFAULT ((0)),
 	[intSort] [int] NULL,
 	[intTimeOffRequestId] [int] NULL,
+	[intCommissionId] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRPaycheckEarning] PRIMARY KEY ([intPaycheckEarningId]),
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,

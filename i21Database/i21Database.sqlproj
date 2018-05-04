@@ -6457,6 +6457,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -211,6 +211,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[intAccountId]
 			,[intTaxCalculationType]
 			,[intTimeOffRequestId]
+			,[intCommissionId]
 			,[intSort]
 			,[intConcurrencyId])
 		OUTPUT
@@ -233,6 +234,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,E.intAccountId
 			,E.intTaxCalculationType
 			,T.intTimeOffRequestId
+			,P.intCommissionId
 			,P.intSort
 			,1
 		FROM tblPRPayGroupDetail P 
@@ -372,6 +374,11 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 	SET intPaycheckId = @intPaycheckId
 	WHERE ysnPostedToCalendar = 1 AND intPaycheckId IS NULL
 	AND intEntityEmployeeId = @intEmployee AND intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM #tmpPayGroupDetail)
+
+	/* Update Commission Paycheck Id*/
+	UPDATE tblARCommission 
+	SET intPaycheckId = @intPaycheckId 
+	WHERE intCommissionId IN (SELECT intCommissionId FROM tblPRPayGroupDetail WHERE intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM #tmpPayGroupDetail))
 
 	/* Delete Processed Pay Group Details */
 	DELETE FROM tblPRPayGroupDetail WHERE intPayGroupDetailId IN (SELECT intPayGroupDetailId FROM #tmpPayGroupDetail)
