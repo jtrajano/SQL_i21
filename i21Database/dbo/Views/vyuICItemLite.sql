@@ -10,6 +10,7 @@ SELECT
 	, bi.intItemId AS [intBundleItemId]
 	, bi.strItemNo AS [strBundleItemNo]
 	, i.ysnAvailableTM
+	, i.dblDefaultFull
 FROM tblICItem i
 	LEFT OUTER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
 	LEFT OUTER JOIN tblICItemPricing ipr ON ipr.intItemId = i.intItemId AND ipr.intItemLocationId = il.intItemLocationId
