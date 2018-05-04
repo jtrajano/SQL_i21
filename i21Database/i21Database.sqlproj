@@ -6464,6 +6464,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\34_ReplicationConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\MF\MAS500 Recipe Import.sql" />
     <Build Include="dbo\Views\vyuICItemLite.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
