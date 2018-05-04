@@ -6457,6 +6457,8 @@
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
     <Build Include="dbo\Functions\fnARIsItemTermDiscountExempt.sql" />
+    <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCategory.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
@@ -6484,8 +6486,6 @@
     <Build Include="dbo\Views\vyuSTFuelDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
-    <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCategoryCosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

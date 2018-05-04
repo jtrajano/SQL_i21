@@ -33,6 +33,10 @@ USING	(
 		SELECT 
 			[intCostingMethodId] = 5,
 			[strCostingMethod] = 'ACTUAL COST'
+		UNION ALL
+		SELECT 
+			[intCostingMethodId] = 6,
+			[strCostingMethod] = 'CATEGORY COST'
 
 ) AS HardCodedCostingMethods
 	ON  CostingMethods.intCostingMethodId = HardCodedCostingMethods.intCostingMethodId
