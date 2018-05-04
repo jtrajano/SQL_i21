@@ -13,12 +13,17 @@ SELECT
 	,OD.dblQty 
 	,IU.intItemUOMId
 	,UM.intUnitMeasureId
-	,UM.strUnitMeasure 
+	,UM.strUnitMeasure
+	,ISNULL(OD.intStagingLocationId, OH.intStagingLocationId) AS intToStorageLocationId
+	,ISNULL(SL.strName, SL1.strName) AS strToStorageLocationName
 FROM tblICItem I
 JOIN tblMFOrderDetail OD ON I.intItemId = OD.intItemId
 	AND intOrderHeaderId = @intOrderHeaderId
+JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OD.intOrderHeaderId
 JOIN tblICItemUOM IU on IU.intItemUOMId =OD.intItemUOMId 
-JOIN tblICUnitMeasure UM on UM.intUnitMeasureId =IU.intUnitMeasureId 
+JOIN tblICUnitMeasure UM on UM.intUnitMeasureId =IU.intUnitMeasureId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = OD.intStagingLocationId
+LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = OH.intStagingLocationId
 WHERE I.intItemId = (
 		CASE 
 			WHEN @intItemId > 0

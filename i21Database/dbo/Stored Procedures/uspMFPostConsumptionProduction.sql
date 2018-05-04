@@ -15,7 +15,7 @@
 	,@intStorageLocationId INT
 	,@dtmProductionDate DATETIME = NULL
 	,@intTransactionDetailId INT = NULL
-	,@intLotStatusId INT=NULL
+	,@intLotStatusId INT = NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -253,6 +253,7 @@ BEGIN
 
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
 		,@ysnConsumptionRequired BIT
+		,@dblTotalOtherCharges NUMERIC(18, 6)
 
 	SELECT @ysnConsumptionRequired = ysnConsumptionRequired
 	FROM tblMFWorkOrderRecipeItem RI
@@ -297,7 +298,7 @@ BEGIN
 		GROUP BY RI.intRecipeItemId
 			,RI.intItemId
 
-		SELECT @dblOtherCharges = SUM(dblOtherCharge)
+		SELECT @dblTotalOtherCharges = SUM(dblOtherCharge)
 		FROM @tblMFOtherChargeItem
 	END
 
@@ -312,10 +313,10 @@ BEGIN
 		SELECT @dblCostPerStockUOM = dbo.fnCalculateUnitCost(@dblNewUnitCost, @dblUnitQty)
 	END
 
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
+	IF @dblTotalOtherCharges IS NOT NULL
+		AND @dblTotalOtherCharges > 0
 	BEGIN
-		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblOtherCharges
+		SELECT @dblCostPerStockUOM = @dblCostPerStockUOM + @dblTotalOtherCharges
 	END
 
 	IF @strLotTracking <> 'No'
@@ -428,12 +429,17 @@ BEGIN
 		,@dblOtherCharge NUMERIC(18, 6)
 		,@intOtherChargeItemLocationId INT
 
-	IF @dblOtherCharges IS NOT NULL
-		AND @dblOtherCharges > 0
+	IF @dblTotalOtherCharges IS NOT NULL
+		AND @dblTotalOtherCharges > 0
 	BEGIN
-		SELECT @intRecipeItemUOMId = intItemUOMId
-		FROM tblMFWorkOrderRecipe
-		WHERE intWorkOrderId = @intWorkOrderId
+		SELECT @intRecipeItemUOMId = IsNULL(RS.intItemUOMId,RI.intItemUOMId )
+		FROM tblMFWorkOrderRecipeItem RI
+		LEFT JOIN tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+		WHERE RI.intWorkOrderId = @intWorkOrderId
+			AND (
+				RI.intItemId = @intItemId
+				OR RS.intSubstituteItemId = @intItemId
+				)
 	END
 
 	DELETE
@@ -730,6 +736,13 @@ BEGIN
 
 	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET strBatchId = @strBatchId
+		,dblOtherCharges = (
+			CASE 
+				WHEN @intRecipeItemUOMId = @intItemUOMId
+					THEN @dblTotalOtherCharges * @dblQty
+				ELSE @dblTotalOtherCharges * @dblWeight
+				END
+			)
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
 

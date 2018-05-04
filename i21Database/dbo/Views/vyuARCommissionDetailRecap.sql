@@ -2,7 +2,7 @@
 AS
 SELECT CRD.*
      , strEntityName	= EM.strName
-	 , strDocumentNumber = CASE WHEN CRD.strSourceType = 'tblARInvoiceDetail'
+	 , strDocumentNumber = CASE WHEN CRD.strSourceType IN ('tblARInvoiceDetail', 'tblARInvoice')
 									THEN I.strInvoiceNumber
 								WHEN CRD.strSourceType = 'tblGLDetail'
 									THEN GL.strTransactionId

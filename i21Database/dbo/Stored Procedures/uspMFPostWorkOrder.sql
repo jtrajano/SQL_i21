@@ -33,6 +33,7 @@ BEGIN TRY
 		,@intYieldCostId INT
 		,@strYieldCostValue NVARCHAR(50)
 		,@ysnPostGL BIT
+		,@dblOtherCharges DECIMAL(38, 24)
 
 	SELECT @ysnPostGL = 0
 
@@ -437,7 +438,6 @@ BEGIN TRY
 			,@ItemsForPost AS ItemCostingTableType
 			,@dtmBusinessDate DATETIME
 			,@intBusinessShiftId INT
-			
 
 		SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
@@ -657,6 +657,16 @@ BEGIN TRY
 				AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
 		END
 
+		SELECT @dblOtherCharges = SUM(dblOtherCharges)
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		IF @dblOtherCharges IS NOT NULL
+		BEGIN
+			SELECT @dblOtherCost = abs(@dblOtherCost) + @dblOtherCharges
+		END
+
 		SET @dblNewCost = ABS(@dblNewCost) + ISNULL(@dblOtherCost, 0)
 		SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
 
@@ -705,8 +715,8 @@ BEGIN TRY
 			,[intCostUOMId] = PL.intItemUOMId
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost*PL.dblQuantity
-				ELSE (@dblNewUnitCost * RI.dblPercentage / 100)*PL.dblQuantity
+					THEN @dblNewUnitCost * PL.dblQuantity
+				ELSE (@dblNewUnitCost * RI.dblPercentage / 100) * PL.dblQuantity
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
