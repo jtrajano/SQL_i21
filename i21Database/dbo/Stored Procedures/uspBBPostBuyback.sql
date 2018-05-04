@@ -27,6 +27,8 @@ AS
 	DECLARE @batchIdUsed NVARCHAR(100)
 	DECLARE @APDate DATETIME
 	DECLARE @intDetailAccount INT
+	DECLARE @intAPAccount INT
+	DECLARE @strCompanyLocation NVARCHAR(100)
 	SET @ysnSuccess = 0
 
 	SET @strReimbursementType = 'AR'
@@ -78,7 +80,7 @@ AS
 			,[dblPrice] = B.dblBuybackRate
 			,[intSalesAccountId] = ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](	B.intItemId
 																						, (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = B.intItemId AND intLocationId = @CompanyLocation)
-																						, 'Other Charge Income'))
+																						, 'Sales Account'))
 			,[strItemDescription] = CASE WHEN B.strCharge = 'Inventory' THEN NULL ELSE B.strCharge END
 		FROM tblBBBuybackDetail B
 		INNER JOIN tblBBBuyback A
@@ -142,12 +144,23 @@ AS
 			@strReimbursementNo = strReimbursementNo
 		FROM tblBBBuyback
 
+		---Check for AP account int company location
+		SELECT TOP 1 
+			@intAPAccount = intAPAccount 
+			,@strCompanyLocation = strLocationName
+		FROM tblSMCompanyLocation WHERE intCompanyLocationId =  @CompanyLocation
+
+		IF(@intAPAccount IS NULL)
+		BEGIN
+			SET @strPostingError = 'Invalid default AP Account for company location "' + @strCompanyLocation + '".'
+			GOTO ENDPOST
+		END
 
 		---Staging 
 		SELECT 
 			[intAccountId]	=  ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](	B.intItemId
 																						, C.intItemLocationId
-																						, 'Other Charge Income'))
+																						, 'Sales Account'))
 			,[intItemId]	= CASE WHEN A.strCharge = 'Inventory' THEN A.intItemId ELSE NULL END
 			,[strMiscDescription]  = CASE WHEN A.strCharge = 'Inventory' THEN B.strDescription ELSE A.strCharge END
 			,[dblQtyReceived] = A.dblBuybackQuantity	
@@ -185,16 +198,19 @@ AS
 			,[dblQtyReceived]
 			,[dblCost]
 		FROM #tmpStagingInsert 
+		
+	
 
 		SET @APDate = GETDATE()
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId	= @intUserId
 			,@vendorId = @intVendorId
 			,@type = 3	
-			,@vendorOrderNumber = strReimbursementNo
+			,@vendorOrderNumber = @strReimbursementNo
 			,@voucherDate = @APDate
 			,@voucherNonInvDetails = @voucherNonInvDetails
 			,@billId = @intCreatedBillId OUTPUT
+		
 
 		UPDATE tblAPBillDetail
 		SET intBuybackChargeId = A.intBuybackChargeId

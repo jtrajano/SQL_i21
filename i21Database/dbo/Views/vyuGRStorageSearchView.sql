@@ -65,6 +65,6 @@ LEFT JOIN (tblSCDeliverySheet    DeliverySheet
 		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId AND DSS.intEntityId = E.intEntityId
 LEFT JOIN tblSCTicket		    SC				ON SC.intTicketId					= CS.intTicketId
 LEFT JOIN tblSCTicketSplit	    SCTicketSplit	ON SCTicketSplit.intTicketId		= CS.intTicketId AND SCTicketSplit.intCustomerId = CS.intEntityId --AND SCTicketSplit.intStorageScheduleTypeId=CS.intStorageTypeId
-LEFT JOIN tblEMEntitySplit		EMSplit		    ON EMSplit.intSplitId				= SC.intSplitId
+LEFT JOIN tblEMEntitySplit		EMSplit		    ON EMSplit.intSplitId				= SC.intSplitId OR EMSplit.intSplitId = DeliverySheet.intSplitId
 Where ISNULL(CS.strStorageType,'') <> 'ITR' AND ST.ysnCustomerStorage=0 AND SH.strType IN('From Scale','From Transfer','From Delivery Sheet')
 ORDER BY CS.intCustomerStorageId

@@ -55,7 +55,6 @@ BEGIN
 			,[intFreightTermId]
 			,[intShipViaId]
 			,[intPaymentMethodId]
-			,[strInvoiceOriginId]
 			,[strPONumber]
 			,[strBOLNumber]
 			,[strComments]
@@ -115,6 +114,8 @@ BEGIN
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
 			,[intMeterReadingId]
+			,[ysnUseOriginIdAsInvoiceNumber]
+			,[strInvoiceOriginId]
 		)
 		SELECT
 			[strType]								= 'Meter Billing'
@@ -133,7 +134,6 @@ BEGIN
 			,[intFreightTermId]						= NULL 
 			,[intShipViaId]							= NULL 
 			,[intPaymentMethodId]					= NULL
-			,[strInvoiceOriginId]					= ''
 			,[strPONumber]							= NULL
 			,[strBOLNumber]							= ''
 			,[strComments]							= ''
@@ -194,6 +194,8 @@ BEGIN
 			,[ysnClearDetailTaxes]					= 1
 			,[intTempDetailIdForTaxes]				= @intRecordKey
 			,[intMeterReadingId]					= @intRecordKey
+			,[ysnUseOriginIdAsInvoiceNumber]		= 1
+			,[strInvoiceOriginId]					= MRDetail.strTransactionId
 		FROM vyuMBGetMeterReadingDetail MRDetail
 		LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
 		LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId

@@ -23,6 +23,8 @@
 	[dblBaseSalesOrderTotal]	NUMERIC (18, 6) NULL,
     [dblDiscount]				NUMERIC (18, 6) NULL,
 	[dblBaseDiscount]			NUMERIC (18, 6) NULL,
+	[dblTotalDiscount]			NUMERIC (18, 6) NULL,
+	[dblBaseTotalDiscount]		NUMERIC (18, 6) NULL,
 	[dblDiscountAvailable]		NUMERIC(18, 6)	NULL DEFAULT 0,	
 	[dblBaseDiscountAvailable]	NUMERIC(18, 6)	NULL DEFAULT 0,	
     [dblAmountDue]				NUMERIC (18, 6) NULL,

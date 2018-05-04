@@ -50,6 +50,56 @@ BEGIN TRY
 			WHERE	intPriceFixationId	=	@intPriceFixationId
 		END
 		
+		UPDATE  CC
+		SET	    CC.dblAccruedAmount	=	(CASE	
+												WHEN	CC.strCostMethod = 'Per Unit'	THEN 
+																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
+												WHEN	CC.strCostMethod = 'Amount'		THEN
+																							CC.dblRate
+												WHEN	CC.strCostMethod = 'Percentage' THEN 
+																							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
+										END)*CC.dblRemainingPercent/100
+		FROM	tblCTContractCost	CC
+		JOIN	tblCTContractDetail	CD	   ON CD.intContractDetailId	=	CC.intContractDetailId
+		LEFT JOIN	tblICItemUOM		IU ON IU.intItemUOMId			=	CC.intItemUOMId
+		LEFT JOIN	tblICItemUOM		PU ON PU.intItemUOMId			=	CD.intPriceItemUOMId	
+		LEFT JOIN	tblICItemUOM		QU ON QU.intItemUOMId			=	CD.intItemUOMId	
+		LEFT JOIN	tblICItemUOM		CM ON CM.intUnitMeasureId		=	IU.intUnitMeasureId
+									    AND CM.intItemId				=	CD.intItemId		
+		WHERE	CC.intContractDetailId = @intContractDetailId
+
+		UPDATE  CC
+		SET	    CC.dblActualAmount = tblBilled.dblTotal
+		FROM	tblCTContractCost	CC
+		JOIN ( 
+			   SELECT intContractCostId,SUM(dblTotal) dblTotal 
+			   FROM tblAPBillDetail 
+			   WHERE intContractCostId > 0 
+			   GROUP BY intContractCostId
+			 ) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
+       
+		/*
+		JOIN	(
+					SELECT Bill.intEntityVendorId
+						  ,BillDetail.intContractDetailId
+						  ,BillDetail.intItemId
+						  ,SUM(BillDetail.dblTotal)  dblTotal
+					FROM tblAPBillDetail BillDetail
+					JOIN tblAPBill Bill ON Bill.intBillId = BillDetail.intBillId
+					JOIN tblICItem Item ON Item.intItemId = BillDetail.intItemId
+					WHERE 
+						Item.strType ='Other Charge' 
+					AND Item.strCostType IN('Freight','Commission')
+					AND ISNULL(BillDetail.intContractDetailId,0) <> 0
+					GROUP BY Bill.intEntityVendorId
+							,BillDetail.intContractDetailId
+							,BillDetail.intItemId
+				) tblBilled ON tblBilled.intContractDetailId = CD.intContractDetailId 
+			 AND  tblBilled.intItemId						 = CC.intItemId 
+			 AND  tblBilled.intEntityVendorId				 = CH.intEntityId
+		  */			
+		WHERE	CC.intContractDetailId = @intContractDetailId
+
 		UPDATE	CC 
 		SET		CC.intItemUOMId		=	CU.intItemUOMId
 		FROM	tblCTContractCost	CC

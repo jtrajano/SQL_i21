@@ -929,7 +929,9 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	AND ysnBilled = 0
+	AND ysnBilled = 0 
+	AND CC.strCostStatus = 'Open'
+	
 	UNION ALL
 
 	SELECT

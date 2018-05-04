@@ -192,6 +192,7 @@
 		END
 	 AS BIT) AS ysnFeesActive
 	 ,SCSetup.intScaleProcessing
+	 ,SCSetup.intLocationId AS intScaleStationLocationId
 	 ,SCSetup.ysnActive AS ysnScaleStationActive
 	 
 	,CT.strShowContractNumber

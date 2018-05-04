@@ -57,7 +57,7 @@ BEGIN
 
 	SELECT DISTINCT CUS.intEntityId
 	FROM gastrmst
-	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastl_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
+	JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = gastr_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
 	WHERE gastr_pur_sls_ind = 'P'
 		AND NOT EXISTS (
 			SELECT *

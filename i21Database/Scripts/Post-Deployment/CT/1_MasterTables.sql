@@ -651,4 +651,9 @@ BEGIN
   UPDATE tblCTSequenceAmendmentLog SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 END
 GO
+IF EXISTS(SELECT 1 FROM tblCTContractCost WHERE strCostStatus IS NULL)
+BEGIN
+  UPDATE tblCTContractCost SET strCostStatus = 'Open' WHERE strCostStatus IS NULL
+END
+GO
 PRINT('Contract 1_MasterTables End')

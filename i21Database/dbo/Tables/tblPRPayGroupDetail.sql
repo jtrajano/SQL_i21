@@ -15,6 +15,7 @@
     [dtmDateFrom]				DATETIME        NULL,
 	[dtmDateTo]					DATETIME        NULL,
 	[intSource]					INT             NULL DEFAULT ((0)),
+	[intCommissionId]			INT             NULL,
 	[intSort]					INT             NULL DEFAULT ((1)),
     [intConcurrencyId]			INT             DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblPRPayGroupDetail] PRIMARY KEY CLUSTERED ([intPayGroupDetailId] ASC),

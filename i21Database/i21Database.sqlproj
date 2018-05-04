@@ -6458,6 +6458,8 @@
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
     <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCategoryCosting.sql" />
+    <Build Include="dbo\Views\vyuICBlendReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

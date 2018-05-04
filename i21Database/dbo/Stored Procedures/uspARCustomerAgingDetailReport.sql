@@ -138,46 +138,6 @@ ELSE
 
 SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-INSERT INTO tblARCustomerAgingStagingTable (
-	  strCustomerName
-	, strCustomerNumber
-	, strCustomerInfo
-	, strInvoiceNumber
-	, strRecordNumber
-	, intInvoiceId
-	, intPaymentId
-	, strBOLNumber
-	, intEntityCustomerId
-	, intEntityUserId
-	, dblCreditLimit
-	, dblTotalAR
-	, dblFuture
-	, dbl0Days
-	, dbl10Days
-	, dbl30Days
-	, dbl60Days
-	, dbl90Days
-	, dbl120Days
-	, dbl121Days
-	, dblTotalDue
-	, dblAmountPaid
-	, dblInvoiceTotal
-	, dblCredits
-	, dblPrepayments
-	, dblPrepaids
-	, dtmDate
-	, dtmDueDate
-	, dtmAsOfDate
-	, strSalespersonName
-	, intCompanyLocationId
-	, strSourceTransaction
-	, strType
-	, strCompanyName
-	, strCompanyAddress
-	, strAgingType
-	, dblTotalCustomerAR 
-)
 EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
 											  , @dtmDateTo = @dtmDateTo
 											  , @strSalesperson = @strSalesperson

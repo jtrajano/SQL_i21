@@ -7,6 +7,7 @@ SELECT CAST(CAST(IP.intItemPricingId AS NVARCHAR(10)) + '0' + CAST(UOM.intItemUO
 , CL.intCompanyLocationId
 , CL.strLocationName
 , I.intItemId
+, I.strItemNo
 , I.strDescription
 , UOM.intItemUOMId
 , UOM.strUpcCode

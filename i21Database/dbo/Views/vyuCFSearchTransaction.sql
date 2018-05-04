@@ -63,7 +63,7 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
-		INNER JOIN tblEMEntity emEntity 
+		LEFT JOIN tblEMEntity emEntity 
 			ON cfNetwork.intCustomerId = emEntity.intEntityId) as cfNetwork  
 	ON cfNetwork.intNetworkId = cfTransaction.intNetworkId
 LEFT OUTER JOIN

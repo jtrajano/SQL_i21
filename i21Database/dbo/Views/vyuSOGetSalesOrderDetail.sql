@@ -14,6 +14,7 @@ SELECT
         SO.dblQtyOrdered,
         SO.dblQtyAllocated,
         SO.dblDiscount,
+		SO.dblDiscountValue,
         SO.dblItemTermDiscount,
         SO.strItemTermDiscountBy,
         SO.dblPrice,
