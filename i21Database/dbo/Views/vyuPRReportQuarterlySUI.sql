@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuPRReportQuarterlyFUI]
+CREATE VIEW [dbo].[vyuPRReportQuarterlySUI]
 AS
 SELECT 
 	tblPREmployee.strEmployeeId
