@@ -8,7 +8,7 @@ SELECT Detail.intTaxAuthorityBeginEndInventoryId
 	, strTADescription = TA.strDescription
 	, TA.dtmBeginDate
 	, TA.dtmEndDate
-	, Detail.intEntityLocationId
+	, Detail.intCompanyLocationId
 	, [Location].strLocationName
 	, [Location].strOregonFacilityNumber
 	, Detail.intProductCodeId
@@ -20,4 +20,4 @@ SELECT Detail.intTaxAuthorityBeginEndInventoryId
 FROM tblTFTaxAuthorityBeginEndInventory Detail
 LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Detail.intProductCodeId AND Detail.intTaxAuthorityId = PC.intTaxAuthorityId
 LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = Detail.intTaxAuthorityId
-LEFT JOIN tblSMCompanyLocation  [Location] ON [Location].intCompanyLocationId  = Detail.intEntityLocationId 
+LEFT JOIN tblSMCompanyLocation  [Location] ON [Location].intCompanyLocationId  = Detail.intCompanyLocationId 

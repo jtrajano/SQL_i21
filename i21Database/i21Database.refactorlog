@@ -6762,6 +6762,20 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strNMLocation" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6372e58e-555d-46fc-b9c3-24c3eb08337c" ChangeDateTime="03/20/2018 02:43:38">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[intTargetVersion]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTargetVersionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="567a0aef-d4fb-4006-a001-fde50f8c07e3" ChangeDateTime="05/02/2018 14:08:59">
+    <Property Name="ElementName" Value="[dbo].[tblLGShippingLineServiceContractDetail].[strContractNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblLGShippingLineServiceContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strServiceContractNumber]" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="65fa1e21-f5fe-433b-9be3-886255a44896" ChangeDateTime="05/04/2018 01:24:49">
     <Property Name="ElementName" Value="[dbo].[tblTFTerminalControlNumber].[IX_tblTFTerminalControlNumber_Column]" />
     <Property Name="ElementType" Value="SqlIndex" />
@@ -6775,12 +6789,5 @@
     <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventory]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCompanyLocationId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="e32e70dd-8bb1-4b7f-95e7-87c5725629d7" ChangeDateTime="05/08/2018 06:27:40">
-    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventory].[intCompanyLocationId]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventory]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intEntityLocationId" />
   </Operation>
 </Operations>
