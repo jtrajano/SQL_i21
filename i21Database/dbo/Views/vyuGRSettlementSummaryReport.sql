@@ -35,7 +35,7 @@ FROM
 			,InboundGrossDollars		  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal													  END)
 			,InboundTax					  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTax														  END)
 			,InboundDiscount			  = ISNULL(BillByReceipt.dblTotal, 0)
-			,InboundNetDue				  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) END)
+			,InboundNetDue				  = SUM(CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 ELSE BillDtl.dblTotal + BillDtl.dblTax END)+ ISNULL(BillByReceipt.dblTotal, 0)
 			,OutboundNetWeight			  = 0
 			,OutboundGrossDollars		  = 0
 			,OutboundTax				  = 0
