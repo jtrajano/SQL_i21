@@ -134,6 +134,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[strHaulerName]
 					,[dblTicketFees]
 					,[ysnFarmerPaysFreight]
+					,[intCurrencyId]
 					,[strCurrency]
 					,[strBinNumber]
 					,[strContractNumber]
@@ -183,6 +184,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,LTRIM(RTRIM(SC.strHaulerName))
 				,SC.dblTicketFees
 				,SC.ysnFarmerPaysFreight
+				,SMCR.intCurrencyID
 				,LTRIM(RTRIM(SC.strCurrency))
 				,LTRIM(RTRIM(SC.strBinNumber))
 				,LTRIM(RTRIM(SC.strContractNumber))
@@ -215,6 +217,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
 				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
+				LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
 
 				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
 				SELECT 

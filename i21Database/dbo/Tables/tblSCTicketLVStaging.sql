@@ -27,6 +27,7 @@
 	[strHaulerName] NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 	[dblTicketFees]	NUMERIC(38, 20) NULL, 
 	[ysnFarmerPaysFreight] BIT NULL, 
+	[intCurrencyId] INT NULL,
 	[strCurrency] NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL,
 	[strBinNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[intContractId] INT NULL,
