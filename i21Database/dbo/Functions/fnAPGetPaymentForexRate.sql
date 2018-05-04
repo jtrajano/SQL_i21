@@ -1,17 +1,18 @@
 ﻿CREATE FUNCTION [dbo].[fnAPGetPaymentForexRate]()
-RETURNS @table TABLE(intPaymentId INT PRIMARY KEY, dblExchangeRate DECIMAL(18,6))
+RETURNS @table TABLE(intBillId INT PRIMARY KEY, dblExchangeRate DECIMAL(18,6))
 AS
 BEGIN
 	--GET THE AVERAGE OF FOREX PER PAYMENT
 	--GET THE FOREX RATE OF VOUCHER IF IT HAS A CONTRACT, IF NOT USE THE CURRENCY EXCHANGE RATE SETUP
 	INSERT INTO @table
 	SELECT
-		intPaymentId
+		intBillId
 		,SUM(ISNULL(NULLIF(paymentRate.dblRate,0), 1)) / COUNT(*)
 	FROM (
 		SELECT
-			payment.intPaymentId
-			,CASE WHEN voucherDetail.intContractDetailId > 0 AND ISNULL(voucherDetail.dblRate,1) != 1 THEN payment.dblExchangeRate ELSE ISNULL(forexRate.dblRate,1) END dblRate
+			voucher.intBillId
+			,CASE WHEN voucherDetail.intContractDetailId > 0 AND ISNULL(voucherDetail.dblRate,1) != 1 
+					THEN voucherDetail.dblRate ELSE ISNULL(payment.dblExchangeRate,1) END dblRate
 		FROM tblAPPayment payment
 		INNER JOIN tblAPPaymentDetail paymentDetail ON payment.intPaymentId = paymentDetail.intPaymentId
 		INNER JOIN tblAPBill voucher ON ISNULL(paymentDetail.intBillId, paymentDetail.intOrigBillId) = voucher.intBillId
@@ -29,7 +30,7 @@ BEGIN
 		) forexRate
 		WHERE paymentDetail.dblPayment != 0
 	) paymentRate
-	GROUP BY intPaymentId
+	GROUP BY intBillId
 
 	RETURN;
 END
