@@ -19,6 +19,10 @@
 	[dtmGrossDateTime] DATETIME NULL, 
 	[dblTareWeight] DECIMAL(13, 3) NULL,
 	[dtmTareDateTime] DATETIME NULL, 
+	[dblGrossUnits] NUMERIC(38,20),
+	[dblNetUnits] NUMERIC(38,20),
+	[dblUnitPrice] NUMERIC(38,20),
+	[dblUnitBasis] NUMERIC(38,20),
 	[strTicketComment] NVARCHAR(80) COLLATE Latin1_General_CI_AS NULL,
 	[intDiscountId] INT NULL,
 	[strDiscountId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -57,5 +61,7 @@
 	[intItemUOMIdFrom] INT NULL, 
 	[intItemUOMIdTo] INT NULL,
 	[strCostMethod] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,   
+	[strSourceType] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId] INT NULL DEFAULT((1)), 
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 
 )
