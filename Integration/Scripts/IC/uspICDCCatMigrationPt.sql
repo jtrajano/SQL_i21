@@ -26,7 +26,7 @@ USING
 		  strCategoryCode			= RTRIM(ptcls_class) COLLATE Latin1_General_CI_AS
 		, strDescription			= RTRIM(ptcls_desc) COLLATE Latin1_General_CI_AS
 		, strMaterialFee			= RTRIM(ptcls_amf_yn) COLLATE Latin1_General_CI_AS
-		, strInventoryType			= CASE WHEN (SELECT COUNT(*) cnt FROM ptitmmst WHERE ptitm_class = ptclsmst.ptcls_class AND ptitm_phys_inv_yno = 'Y') > 1 THEN 'Inventory' ELSE 'Other Charge' END COLLATE Latin1_General_CI_AS
+		, strInventoryType			= CASE WHEN (SELECT COUNT(*) cnt FROM ptitmmst WHERE ptitm_class = ptclsmst.ptcls_class AND ptitm_phys_inv_yno = 'Y') > 0 THEN 'Inventory' ELSE 'Other Charge' END COLLATE Latin1_General_CI_AS
 		, intCostingMethod			= '1'
 		, strInventoryTracking		= 'Item Level'
 		, intConcurrencyId			= 1
