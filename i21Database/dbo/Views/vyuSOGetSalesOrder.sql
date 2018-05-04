@@ -28,6 +28,8 @@ SELECT
     SO.dblBaseSalesOrderTotal,
     SO.dblDiscount,
     SO.dblBaseDiscount,
+    SO.dblTotalDiscount,
+    SO.dblBaseTotalDiscount,
     SO.dblAmountDue,
     SO.dblBaseAmountDue,
     SO.dblPayment,

@@ -76,6 +76,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , dblTotalWeight			= ISNULL(SO.dblTotalWeight, 0)
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Pick Ticket')
 	 , ysnListBundleSeparately	= ISNULL(SALESORDERDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
+	 , dblTotalDiscount			= ISNULL(dblTotalDiscount,0) * -1
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 LEFT JOIN (
 	SELECT intSalesOrderId
