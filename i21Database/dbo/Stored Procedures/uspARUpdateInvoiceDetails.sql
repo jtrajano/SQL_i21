@@ -25,7 +25,9 @@ IF ISNULL(@intPriceUOMId, 0) <> 0 AND NOT EXISTS(SELECT TOP 1 intItemUOMId FROM 
 	END
 
 DECLARE @intInvoiceId				INT = NULL
+	  , @intItemId					INT = NULL
 	  , @intOldPriceUOMId			INT = NULL
+	  , @intNewPriceUOMId			INT = NULL
 	  , @ysnPosted					BIT = 0
 	  , @strInvoiceNumber			NVARCHAR(50) = ''
 	  , @dblOldQtyShipped			NUMERIC(18, 6) = 0
@@ -52,6 +54,7 @@ DECLARE @intInvoiceId				INT = NULL
 	  , @dblNewDiscountAvailable	NUMERIC(18, 6) = 0
 
 SELECT @intInvoiceId				= I.intInvoiceId
+	 , @intItemId					= ID.intItemId
 	 , @intOldPriceUOMId			= ID.intPriceUOMId
 	 , @strInvoiceNumber			= I.strInvoiceNumber
 	 , @dblOldQtyShipped			= ID.dblQtyShipped
@@ -85,7 +88,8 @@ WHERE intInvoiceDetailId = @intInvoiceDetailId
 EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @UserId = @intEntityId
 EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @intInvoiceId
 
-SELECT @dblNewQtyShipped			= ID.dblQtyShipped
+SELECT @intNewPriceUOMId			= ID.intPriceUOMId
+     , @dblNewQtyShipped			= ID.dblQtyShipped
 	 , @dblNewPrice					= ID.dblPrice
 	 , @dblNewTotal					= ID.dblTotal
 	 , @dblNewItemTermDiscount		= ID.dblItemTermDiscount
@@ -155,6 +159,13 @@ BEGIN
 		END
 
 	SET @strDetailData = '{"change":"tblARInvoiceDetails","children":[{"action":"Updated","change":"Updated by Price Contracts - Record: ' + @strInvoiceDetailId + '","keyValue":' + @strInvoiceDetailId +',"iconCls":"small-tree-modified","children":['
+
+	IF @intOldPriceUOMId <> @intNewPriceUOMId
+		BEGIN
+			SET @strValueFrom = (SELECT TOP 1 UOM.strUnitMeasure FROM tblICItemUOM IUOM INNER JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId  WHERE IUOM.intItemUOMId = @intOldPriceUOMId AND IUOM.intItemId = @intItemId)
+			SET @strValueTo = (SELECT TOP 1 UOM.strUnitMeasure FROM tblICItemUOM IUOM INNER JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId  WHERE IUOM.intItemUOMId = @intNewPriceUOMId AND IUOM.intItemId = @intItemId)
+			SET @strDetailData = @strDetailData + '{"change":"intPriceUOMId","from":"'+ @strValueFrom +'","to":"'+ @strValueTo +'","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + @strInvoiceDetailId +',"associationKey":"tblARInvoiceDetails","changeDescription":"Price UOM","hidden":false},'
+		END
 
 	IF @dblOldQtyShipped <> @dblNewQtyShipped
 		BEGIN
