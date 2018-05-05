@@ -251,7 +251,6 @@ BEGIN TRY
 
 		INSERT @tblTempOne
 		EXEC (@SqlQuery1)
-
 	END 
 
 
@@ -280,7 +279,6 @@ BEGIN TRY
 
 		INSERT @tblTempOne
 		EXEC (@SqlQuery1)
-
  END 
 
 
@@ -310,7 +308,6 @@ BEGIN TRY
 
 		INSERT @tblTempOne
 		EXEC (@SqlQuery1)
-	
  END 
 
 
@@ -706,7 +703,7 @@ BEGIN TRY
 								, @intCurrentUserId
 								, 1
 						)
-						--=================================================================================================
+						-- =================================================================================================
 
 						--Clear
 						SET @ItemPricingAuditLog = ''
@@ -714,7 +711,7 @@ BEGIN TRY
 
 						DELETE TOP (1) FROM @tblId
 					END
-					--==========================================================================================================================================
+					-- ==========================================================================================================================================
 	 END
 
 
@@ -731,7 +728,9 @@ BEGIN TRY
 
 	DELETE FROM @tblTempOne WHERE strOldData = strNewData
 
-   select @strCompanyName as CompanyName
+
+   -- Query Preview display
+   SELECT @strCompanyName as CompanyName
 		  --, FORMAT(GETDATE(), 'D', 'en-US' ) as DateToday
 		  --, CONVERT(VARCHAR(8), GETDATE(), 108) + ' ' + RIGHT(CONVERT(VARCHAR(30), GETDATE(), 9), 2) as TimeToday
 		  , LEFT(DATENAME(DW,GETDATE()),10) + ' ' + DATENAME(MONTH, SYSDATETIME())+ ' ' + RIGHT('0' + DATENAME(DAY, SYSDATETIME()), 2) + ', ' + DATENAME(YEAR, SYSDATETIME()) as DateToday
@@ -742,7 +741,8 @@ BEGIN TRY
 		  , strChangeDescription
 		  , strOldData
 		  , strNewData
-   from @tblTempOne
+   FROM @tblTempOne
+   ORDER BY strItemDescription, strChangeDescription ASC
     
    DELETE FROM @tblTempOne
 END TRY

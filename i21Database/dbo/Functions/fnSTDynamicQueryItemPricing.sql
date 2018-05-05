@@ -40,7 +40,7 @@ AS BEGIN
 	END
 
 
-    SET @strGeneratedSql =  ' SELECT' + CHAR(13)
+    SET @strGeneratedSql =  ' SELECT DISTINCT' + CHAR(13)
 								   + ' CL.intCompanyLocationId' + CHAR(13)
 								   + '  , CL.strLocationName' + CHAR(13)
 								   + '	, UOM.strUpcCode' + CHAR(13)
@@ -54,13 +54,15 @@ AS BEGIN
 						   + @strItemUOM + CHAR(13)
 						   + ' JOIN tblICItem I ON IP.intItemId = I.intItemId' + CHAR(13)
 						   + ' JOIN tblICItemLocation IL ON IP.intItemId = IL.intItemId' + CHAR(13)
+						   + '                          AND IP.intItemLocationId = IL.intItemLocationId' + CHAR(13)
 						   + ' JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId ' + CHAR(13)
 
 		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 ' 
 
 		   IF ((@strCompanyLocationId != '') AND (@strCompanyLocationId IS NOT NULL))
 		   BEGIN 
-				SET @strGeneratedSql = @strGeneratedSql + ' and IL.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
+				-- SET @strGeneratedSql = @strGeneratedSql + ' and IL.intLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
+				SET @strGeneratedSql = @strGeneratedSql + ' and CL.intCompanyLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
 		   END
 		 
 		   IF ((@strVendorId != '') AND (@strVendorId IS NOT NULL))
