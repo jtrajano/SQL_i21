@@ -855,6 +855,7 @@ BEGIN TRY
 				AND intItemTypeId NOT IN (
 					1
 					,3
+					,5
 					)
 
 			UPDATE PS

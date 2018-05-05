@@ -22,6 +22,7 @@ BEGIN TRY
 		,@intManufacturingCellId INT
 		,@intManufacturingProcessId INT
 		,@strSampleTypeName NVARCHAR(50)
+		,@intRecipeTypeId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -313,12 +314,19 @@ BEGIN TRY
 		END
 	END
 
+	SELECT @intRecipeTypeId=intRecipeTypeId
+			FROM tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+
 	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 10
 		,dtmStartedDate = @dtmCurrentDate
 		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
+		,intRecipeTypeId=@intRecipeTypeId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFScheduleWorkOrder
