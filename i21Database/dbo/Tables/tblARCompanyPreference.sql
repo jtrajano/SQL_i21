@@ -22,6 +22,7 @@
 	[ysnChargeonCharge]				BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnChargeonCharge] DEFAULT ((1)),
 	[ysnPrintInvoicePaymentDetail]  BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPrintInvoicePaymentDetail] DEFAULT ((0)),
 	[ysnPrintPricePerBushel]		BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPrintPricePerBushel] DEFAULT ((0)),
+	[ysnExcludePaidInvoices]		BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnExcludePaidInvoices] DEFAULT ((0)),
 	[intConcurrencyId]				INT NOT NULL DEFAULT 1,
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intARAccountId] FOREIGN KEY ([intARAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDiscountAccountId] FOREIGN KEY ([intDiscountAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
