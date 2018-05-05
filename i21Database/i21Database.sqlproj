@@ -6465,6 +6465,7 @@
     <None Include="Scripts\Post-Deployment\MF\MAS500 Recipe Import.sql" />
     <Build Include="dbo\Views\vyuICItemLite.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
