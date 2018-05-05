@@ -91,7 +91,7 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
 
-	SELECT @strWarehouseRefNo = strWarehouseRefNo
+	SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
 		,@intParentLotId = L.intParentLotId
 	FROM dbo.tblICLot L
 	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
