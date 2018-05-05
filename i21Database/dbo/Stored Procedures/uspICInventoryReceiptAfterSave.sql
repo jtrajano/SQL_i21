@@ -700,6 +700,26 @@ BEGIN
 		EXEC dbo.[uspICUpdateTransferOrderStatus] @ReceiptId, 1 -- Set status of the transfer order to 'Open'
 END
 
+-- Delete Quality Management Inspection
+DECLARE @intProductTypeId AS INT = 3 -- Receipt
+	,@intProductValueId AS INT = @ReceiptId -- intInventoryReceiptId
+
+IF @ForDelete = 1
+BEGIN
+	EXEC uspQMInspectionDeleteResult @intProductValueId, @intProductTypeId
+END
+ELSE
+BEGIN
+	DECLARE @intControlPointId AS INT = 3
+	DECLARE @QualityInspectionTable QualityInspectionTable
+ 
+	INSERT INTO @QualityInspectionTable (intPropertyId,strPropertyName,strPropertyValue,strComment)
+	SELECT iri.intQAPropertyId, iri.strPropertyName,'true / false', iri.strComment
+	FROM tblICInventoryReceiptInspection iri
+ 
+	EXEC uspQMInspectionSaveResult @intControlPointId, @intProductTypeId, @intProductValueId, @UserId, @QualityInspectionTable	
+END
+
 -- Delete the data snapshot. 
 DELETE	FROM tblICTransactionDetailLog 
 WHERE	strTransactionType = 'Inventory Receipt' 

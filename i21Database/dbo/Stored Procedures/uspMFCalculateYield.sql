@@ -707,7 +707,7 @@ BEGIN TRY
 							WHERE LT.intWorkOrderId = @intWorkOrderId
 								AND LT.intLotId = L.intLotId
 							)
-					ORDER BY LT.dtmDateCreated DESC
+					ORDER BY L.dtmDateCreated DESC
 
 					IF @intLotId IS NOT NULL
 					BEGIN
@@ -776,7 +776,7 @@ BEGIN TRY
 								WHERE LT.intWorkOrderId = @intWorkOrderId
 									AND LT.intLotId = L.intLotId
 								)
-						ORDER BY LT.dtmDateCreated DESC
+						ORDER BY L.dtmDateCreated DESC
 
 						IF @intLotId IS NOT NULL
 						BEGIN
@@ -845,7 +845,7 @@ BEGIN TRY
 								WHERE LT.intWorkOrderId = @intWorkOrderId
 									AND LT.intLotId = L.intLotId
 								)
-						ORDER BY LT.dtmDateCreated DESC
+						ORDER BY L.dtmDateCreated DESC
 
 						IF @intLotId IS NOT NULL
 						BEGIN
@@ -910,7 +910,7 @@ BEGIN TRY
 								WHERE LT.intWorkOrderId = @intWorkOrderId
 									AND LT.intLotId = L.intLotId
 								)
-						ORDER BY LT.dtmDateCreated DESC
+						ORDER BY L.dtmDateCreated DESC
 
 						IF @intLotId IS NOT NULL
 						BEGIN
@@ -1411,7 +1411,7 @@ BEGIN TRY
 									FROM @tblMFWorkOrderInputLot WI
 									WHERE WI.intMachineId = @intMachineId
 									)
-							ORDER BY LT.dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN
@@ -1484,7 +1484,7 @@ BEGIN TRY
 										WHERE LT.intWorkOrderId = @intWorkOrderId
 											AND LT.intLotId = L.intLotId
 										), 0) - abs(@dblYieldQuantity) >= 0
-							ORDER BY LT.dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN
@@ -1553,7 +1553,7 @@ BEGIN TRY
 												AND LT.intLotId = L.intLotId
 											), 0)
 									) > 0
-							ORDER BY LT.dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN
