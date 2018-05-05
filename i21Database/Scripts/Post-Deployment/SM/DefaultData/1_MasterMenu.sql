@@ -6213,6 +6213,20 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CFCardAccountsMenuId, 1)
 END
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Quote (Portal)', N'Card Fueling', @CardFuelingPortalParentMenuId, N'Quote (Portal)', N'Portal Menu', N'Screen', N'CardFueling.view.CSRSingleQuotePortal', N'small-menu-portal', 1, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'CardFueling.view.CSRSingleQuotePortal' WHERE strMenuName = 'Quote (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId
+
+DECLARE @CFQuoteMenuId INT
+SELECT  @CFQuoteMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Quote (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CFQuoteMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CFQuoteMenuId, 1)
+END
+
 /* Tank Management */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tank Management (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
