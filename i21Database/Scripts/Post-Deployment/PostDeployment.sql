@@ -67,8 +67,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_UpdatePortalMenus.sql
 :r .\SM\1810_UpdateTransactionsApprovalFor.sql
 :r .\SM\DefaultData\33_InterCompanyTransactionType.sql
-
-
+:r .\SM\DefaultData\34_ReplicationConfiguration.sql
 :r .\SM\1810_Reset_Hours_Terms.sql
 
 -- Canned Report

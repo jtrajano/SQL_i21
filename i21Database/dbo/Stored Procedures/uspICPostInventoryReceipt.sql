@@ -321,6 +321,20 @@ BEGIN
 			GOTO With_Rollback_Exit; 
 		END 
 	END
+
+	-- Update Warehouse Ref# for line items and lots
+	UPDATE ri
+	SET ri.strWarehouseRefNo = r.strWarehouseRefNo
+	FROM tblICInventoryReceiptItem ri
+		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	WHERE r.intInventoryReceiptId = @intTransactionId
+
+	UPDATE lot
+	SET lot.strWarehouseRefNo = ri.strWarehouseRefNo
+	FROM tblICInventoryReceiptItemLot lot 
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	WHERE r.intInventoryReceiptId = @intTransactionId
 	
 	/*
 		Check if receipt items and lots have gross/net UOM and have gross qty and net qty when the items have Lot Weights Required enabled in Item setup.

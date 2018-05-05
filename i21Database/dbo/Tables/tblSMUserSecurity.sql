@@ -32,9 +32,8 @@
 	[strEmployeeOriginId]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[ysnStoreManager]				BIT NOT NULL DEFAULT(0), 
 
-	[intScaleSetupId]				INT NULL,
-	[dtmScaleDate]				DATE NULL,
-	[intEntityScaleOperatorId]				INT  NULL,
+	[dtmScaleDate]					DATE NULL,
+	[intEntityScaleOperatorId]		INT  NULL,
 
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,

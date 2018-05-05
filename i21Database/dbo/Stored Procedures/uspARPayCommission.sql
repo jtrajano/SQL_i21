@@ -142,7 +142,7 @@ ELSE
 						UPDATE dbo.tblARCommission
 						SET ysnPaid			= 1
 						  , intBillId		 = @intNewBillId
-						  , @intNewPaymentId = @intNewPaymentId
+						  , intPaymentId	= @intNewPaymentId
 						WHERE intCommissionId = @intCommissionPayableId
 					END
 
@@ -152,6 +152,26 @@ ELSE
 		--TODO: CREATE PAYCHECK
 		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnPayroll = 1)
 			BEGIN
-				SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnPayroll = 1
+				DECLARE @intCommissionPayrollId INT = NULL
+					  , @intNewPaygroupId		INT = NULL
+					  , @ysnSuccessPayroll		BIT = 0
+
+				SELECT TOP 1 @intCommissionPayrollId = intCommissionId 
+				FROM @tblCommissions 
+				WHERE ysnPayroll = 1 ORDER BY intCommissionId ASC
+
+				EXEC dbo.uspPRProcessCommissionsToPayGroup @intCommissionId = @intCommissionPayrollId
+													     , @intUserId = @intUserId
+														 , @isSuccessful = @ysnSuccessPayroll OUT
+
+				IF @ysnSuccessPayroll = 1 --AND @intNewPaygroupId IS NOT NULL
+					BEGIN
+						UPDATE dbo.tblARCommission
+						SET ysnPaid			= 1
+						  , intPaycheckId	= @intNewPaygroupId
+						WHERE intCommissionId = @intCommissionPayrollId
+					END
+
+				DELETE FROM @tblCommissions WHERE intCommissionId = @intCommissionPayrollId AND ysnPayroll = 1
 			END				
 	END

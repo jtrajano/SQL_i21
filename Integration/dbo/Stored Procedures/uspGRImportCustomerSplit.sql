@@ -8,7 +8,7 @@ CREATE PROCEDURE uspGRImportCustomerSplit
 	,@Total INT = 0 OUTPUT
 AS
 BEGIN
-	--================================================
+		--================================================
 	--     IMPORT GRAIN Customer Split
 	--================================================
 	IF (@Checking = 1)
@@ -38,7 +38,7 @@ BEGIN
 		SELECT 
 		   intSplitId		= OSplit.A4GLIdentity  
 		  ,intEntityId		= EY.intEntityId
-		  ,strSplitNumber	= LTRIM(RTRIM(OSplit.ssspl_split_no))
+		  ,strSplitNumber	= LTRIM(RTRIM(OSplit.ssspl_split_no))+'-'+ssspl_rec_type
 		  ,strDescription	= LTRIM(RTRIM(OSplit.ssspl_desc))
 		  ,dblAcres			= OSplit.ssspl_acres
 		  ,intCategoryId	= NULL
@@ -96,8 +96,11 @@ BEGIN
 		 )t 
 		 JOIN	tblEMEntity EY	ON	LTRIM(RTRIM(EY.strEntityNo)) collate Latin1_General_CI_AS	= LTRIM(RTRIM(t.Entity))
 		 JOIN	tblEMEntityType ET	ON	ET.intEntityId = EY.intEntityId AND ET.strType = 'Customer'
+		 JOIN	tblEMEntitySplit S ON S.intSplitId=t.A4GLIdentity
 		 LEFT  JOIN tblGRStorageType St ON St.strStorageTypeCode collate Latin1_General_CI_AS = t.strStorageCode
+
 		 WHERE t.Entity IS NOT NULL AND t.Percentage >0
+
 
 END
 GO

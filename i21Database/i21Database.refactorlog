@@ -6783,4 +6783,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[IX_tblTFTerminalControlNumber_intMasterId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9f24b417-659e-4216-8702-7f56154e0f93" ChangeDateTime="05/04/2018 06:01:57">
+    <Property Name="ElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventory].[intEntityLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTaxAuthorityBeginEndInventory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyLocationId" />
+  </Operation>
 </Operations>

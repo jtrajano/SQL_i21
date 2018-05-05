@@ -473,7 +473,7 @@ Begin --Sales Order Pick List
 			JOIN tblMFPickListDetail pld ON pl.intPickListId=pld.intPickListId
 			JOIN tblICItem i on pld.intItemId=i.intItemId
 			Left JOIN tblICLot l on l.intLotId=pld.intLotId
-			Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=l.intStorageLocationId
+			Left JOIN tblICStorageLocation sl on sl.intStorageLocationId=pld.intStorageLocationId
 			Join tblICItemUOM iu on pld.intPickUOMId=iu.intItemUOMId
 			Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 			Join tblSOSalesOrder so on pl.intSalesOrderId=so.intSalesOrderId
@@ -503,7 +503,7 @@ Begin --Sales Order Pick List
 			so.strSalesOrderNumber strWorkOrderNo,  
 			'' strLotNumber,
 			'' strLotAlias,
-			'' AS strStorageLocationName,
+			sl.strName AS strStorageLocationName,
 			i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
 			ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
 			dbo.fnRemoveTrailingZeroes(sd.dblQtyOrdered) AS dblPickQuantity,
@@ -581,6 +581,7 @@ Begin --Sales Order Pick List
 			Left Join tblEMEntitySplit es on so.intSplitId=es.intSplitId
 			Left Join vyuEMCustomerApplicator ca on so.intEntityApplicatorId=ca.intEntityId
 			Left Join tblMFMethodOfApp ma on rg.intMethodOfAppId=ma.intMethodOfAppId
+			Left Join tblICStorageLocation sl on sl.intStorageLocationId=sd.intStorageLocationId
 			WHERE so.intSalesOrderId=@intSalesOrderId AND i.strType<>'Other Charge'
 		End
 

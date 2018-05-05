@@ -26,6 +26,7 @@
 	[strContact]				   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strPaid]					   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strPaymentMethod]			   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strTicketNumbers]			   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyName]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strUserId]					   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

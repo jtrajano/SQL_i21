@@ -21,13 +21,16 @@ AS
 	DECLARE @tblComputedBalances TABLE (intEntityId INT, dblTotalAR NUMERIC(18, 6))
 	DECLARE @tblTypeServiceCharge	  [dbo].[ServiceChargeTableType]
 	DECLARE @tempTblTypeServiceCharge [dbo].[ServiceChargeTableType]	
-	DECLARE @zeroDecimal		NUMERIC(18, 6) = 0
-	      , @dblMinimumSC		NUMERIC(18, 6) = 0
-		  , @dblMinFinanceSC    NUMERIC(18, 6) = 0
-		  , @ysnChargeonCharge	BIT = 1
-		  , @strCustomerIds		NVARCHAR(MAX) = NULL
+	DECLARE @zeroDecimal			NUMERIC(18, 6) = 0
+	      , @dblMinimumSC			NUMERIC(18, 6) = 0
+		  , @dblMinFinanceSC		NUMERIC(18, 6) = 0
+		  , @ysnChargeonCharge		BIT = 1
+		  , @ysnExcludePaidInvoices	BIT = 0
+		  , @strCustomerIds			NVARCHAR(MAX) = NULL
 
-	SELECT TOP 1 @ysnChargeonCharge = ISNULL(ysnChargeonCharge, 1) FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+	SELECT TOP 1 @ysnChargeonCharge = ISNULL(ysnChargeonCharge, 1)
+			   , @ysnExcludePaidInvoices = ISNULL(ysnExcludePaidInvoices, 0)
+	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 	--VALIDATION
 	IF ISNULL(@arAccountId, 0) = 0
@@ -241,7 +244,8 @@ AS
 									)
                                 AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
                                 AND I.dblInvoiceTotal - ISNULL(PAYMENT.dblAmountPaid, @zeroDecimal) > @zeroDecimal
-								AND ((@ysnChargeonCharge = 0 AND I.strType NOT IN ('Service Charge')) OR (@ysnChargeonCharge = 1))
+								AND ((@ysnChargeonCharge = 0 AND I.strType NOT IN ('Service Charge')) OR @ysnChargeonCharge = 1)
+								AND ((@ysnExcludePaidInvoices = 1 AND I.ysnPaid = 0) OR @ysnExcludePaidInvoices = 0)
 						END
 					ELSE
 						BEGIN

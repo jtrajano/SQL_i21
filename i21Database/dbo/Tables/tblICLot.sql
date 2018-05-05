@@ -39,6 +39,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[dblLastCost]				NUMERIC(38,20) DEFAULT ((0)) NULL,		
 		[dtmExpiryDate]				DATETIME NULL,
 		[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strWarehouseRefNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intLotStatusId]			INT NOT NULL DEFAULT ((1)),
 		[intParentLotId]			INT NULL,
 		[intSplitFromLotId]			INT NULL,

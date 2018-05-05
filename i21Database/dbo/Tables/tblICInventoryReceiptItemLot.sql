@@ -49,6 +49,7 @@ Type the overview for the table here.
 		[dblPhysicalVsStated] NUMERIC(38, 20) NULL DEFAULT ((0)), 		
 		[strCertificate] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 		[intProducerId] INT	NULL,
+		[strWarehouseRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strCertificateId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 		[strTrackingNumber] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
 		[intSort] INT NULL, 

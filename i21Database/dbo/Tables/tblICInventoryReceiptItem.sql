@@ -54,6 +54,7 @@ Type the overview for the table here.
 		[ysnLotWeightsRequired] BIT NULL DEFAULT((0)),
 		[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 		[strItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strWarehouseRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intParentItemLinkId] INT NULL,
 		[intChildItemLinkId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 

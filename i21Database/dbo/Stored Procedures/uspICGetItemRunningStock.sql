@@ -156,6 +156,7 @@ DECLARE @tblInventoryTransaction TABLE(
 						WHEN t.intCostingMethod = 2 THEN FIFO.dblCost
 						ELSE MAX(t.dblCost) 
 					END
+			,Lot.strWarehouseRefNo
 		FROM @tblInventoryTransaction t 
 		LEFT JOIN tblICItem i 
 			ON i.intItemId = t.intItemId
@@ -230,6 +231,7 @@ DECLARE @tblInventoryTransaction TABLE(
 				,t.intCostingMethod	
 				,CostMethod.strCostingMethod
 				,FIFO.dblCost	
+				,Lot.strWarehouseRefNo
 	END
 	ELSE
 	BEGIN
@@ -272,6 +274,7 @@ DECLARE @tblInventoryTransaction TABLE(
 						WHEN t.intCostingMethod = 2 THEN FIFO.dblCost
 						ELSE MAX(t.dblCost) 
 					END
+			, Lot.strWarehouseRefNo
 		FROM @tblInventoryTransaction t 
 		LEFT JOIN tblICItem i 
 			ON i.intItemId = t.intItemId
@@ -346,5 +349,6 @@ DECLARE @tblInventoryTransaction TABLE(
 				,t.intCostingMethod	
 				,CostMethod.strCostingMethod
 				,FIFO.dblCost
+				,Lot.strWarehouseRefNo
 	END
 END

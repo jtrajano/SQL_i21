@@ -13,6 +13,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, SubLocation.strSubLocationName
 		, strStorageLocationName = StorageLocation.strName
 		, strGrade = Grade.strDescription
+		, strWarehouseRefNo = ReceiptItem.strWarehouseRefNo
 		, Item.intCommodityId
 		, strWeightUOM = WeightUOM.strUnitMeasure
 		, intWeightUnitMeasureId = WeightUOM.intUnitMeasureId

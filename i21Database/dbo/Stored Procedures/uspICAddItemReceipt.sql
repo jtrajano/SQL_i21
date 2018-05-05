@@ -1406,9 +1406,13 @@ BEGIN
 								,@valueLotRecordNo NVARCHAR(50) = NULL
 
 						-- Validate Lot Entity Id
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intEntityVendorId IS NULL OR ItemLot.intEntityVendorId NOT IN (SELECT intEntityId FROM tblEMEntity)
+						SELECT TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblEMEntity Entity
+									ON ItemLot.intEntityVendorId = Entity.intEntityId									
+						WHERE	RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) <> 'transfer order'
+								AND Entity.intEntityId IS NULL 
+								AND ItemLot.intEntityVendorId IS NOT NULL 
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
