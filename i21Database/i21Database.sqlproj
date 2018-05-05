@@ -6456,9 +6456,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Functions\fnARIsItemTermDiscountExempt.sql" />
-=======
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
@@ -6469,7 +6467,6 @@
     <Build Include="dbo\Views\vyuICItemLite.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
->>>>>>> 18.3Dev
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
