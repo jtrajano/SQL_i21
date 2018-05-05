@@ -16,7 +16,11 @@ Type the overview for the table here.
 		[intItemId] INT NOT NULL, 
 		[intUnitMeasureId] INT NOT NULL, 
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICItemManufacturingUOM] PRIMARY KEY ([intItemManufacturingUOMId]), 
 		CONSTRAINT [FK_tblICItemManufacturingUOM_tblICItemManufacturing] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemManufacturingUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

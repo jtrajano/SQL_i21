@@ -20,7 +20,11 @@ Type the overview for the table here.
 		[strCertificationIdName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strCertificationCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+		[dtmDateModified] DATETIME NULL,
+		[intCreatedByUserId] INT NULL,
+		[intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICCertification] PRIMARY KEY ([intCertificationId]), 
 		CONSTRAINT [AK_tblICCertification_strCertificationName] UNIQUE ([strCertificationName]), 
 		CONSTRAINT [FK_tblICCertification_tblSMCountry] FOREIGN KEY ([intCountryId]) REFERENCES [tblSMCountry]([intCountryID])

@@ -19,6 +19,10 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[intDecimalPlaces] INT NULL DEFAULT 6, 
 		[intCompanyId] INT NULL, 
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]), 
 		CONSTRAINT [AK_tblICUnitMeasure_strUnitMeasure] UNIQUE ([strUnitMeasure]) 
 	)

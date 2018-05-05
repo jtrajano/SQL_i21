@@ -19,6 +19,10 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL, 
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICRinFuelCategory] PRIMARY KEY ([intRinFuelCategoryId]), 
 		CONSTRAINT [AK_tblICRinFuelCategory_strRinFuelCategoryCode] UNIQUE ([strRinFuelCategoryCode])
 	)

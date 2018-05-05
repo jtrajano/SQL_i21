@@ -13,5 +13,9 @@
     [strOriginLastTask] NVARCHAR(600) NULL, 
     [strIRUnpostMode] NVARCHAR(50) NULL DEFAULT 'Default', 
     [strReturnPostMode] NVARCHAR(50) NULL DEFAULT 'Default',
+    [dtmDateCreated] DATETIME NULL,
+    [dtmDateModified] DATETIME NULL,
+    [intCreatedByUserId] INT NULL,
+    [intModifiedByUserId] INT NULL,
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

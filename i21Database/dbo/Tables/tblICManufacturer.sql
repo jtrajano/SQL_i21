@@ -26,7 +26,11 @@ Type the overview for the table here.
 		[strEmail] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICManufacturer] PRIMARY KEY ([intManufacturerId]), 
 		CONSTRAINT [AK_tblICManufacturer_strManufacturer] UNIQUE ([strManufacturer])
 	)

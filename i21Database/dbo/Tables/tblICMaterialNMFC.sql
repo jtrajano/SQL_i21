@@ -22,7 +22,11 @@ Type the overview for the table here.
 		[dtmLastUpdateOn] DATETIME NOT NULL, 
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICMaterialNMFC] PRIMARY KEY ([intMaterialNMFCId])
 	)
 

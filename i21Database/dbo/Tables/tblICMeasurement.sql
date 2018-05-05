@@ -18,7 +18,11 @@ Type the overview for the table here.
 		[strMeasurementType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICMeasurement] PRIMARY KEY ([intMeasurementId]), 
 		CONSTRAINT [AK_tblICMeasurement_strMeasurementName] UNIQUE ([strMeasurementName]) 
 	)
