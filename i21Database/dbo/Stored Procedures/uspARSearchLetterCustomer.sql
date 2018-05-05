@@ -34,8 +34,22 @@ DECLARE @temp_return_table TABLE(
 
 IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
 	BEGIN		
-		EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
-													  , @intEntityUserId = @intEntityUserId
+		DECLARE @strCustomerIds NVARCHAR(MAX) = NULL
+			  , @dtmAsOfDate    DATETIME = GETDATE()
+
+        SELECT @strCustomerIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+        FROM (
+            SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
+            FROM tblARCustomer WITH(NOLOCK)
+            WHERE ISNULL(dblARBalance, 0) <> 0
+              AND ysnActive = 1
+            FOR XML PATH ('')
+        ) C (intEntityId)
+
+        EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @dtmAsOfDate
+                                                      , @ysnInclude120Days = 1
+                                                      , @strCustomerIds = @strCustomerIds
+                                                      , @intEntityUserId = @intEntityUserId
 
 		DELETE AGING
 		FROM tblARCustomerAgingStagingTable AGING
