@@ -21,6 +21,7 @@ SELECT
 	INV.dblDiscount,
 	INV.dblItemTermDiscount,
 	INV.strItemTermDiscountBy,
+	INV.dblItemTermDiscountExemption,
 	INV.dblPrice,
 	INV.dblBasePrice,
 	INV.dblUnitPrice,
