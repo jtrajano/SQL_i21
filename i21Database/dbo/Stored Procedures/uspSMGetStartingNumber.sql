@@ -52,15 +52,15 @@ BEGIN
 END
 
 -- PADDING AND NUMBER OF DIGITS
---DECLARE @padding NVARCHAR(10)
---DECLARE @digit INT
+DECLARE @padding NVARCHAR(10)
+DECLARE @digit INT
 
---SET @padding = '000000000' 
+SET @padding = '000000000' 
 
---IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId)	
---BEGIN
---	SELECT @digit = ISNULL(intDigits, 0) FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
---END
+IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId)	
+BEGIN
+	SELECT @digit = ISNULL(intDigits, 0) FROM tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
+END
 
 -- BY COMPANY LOCATION
 IF @intCompanyLocationId IS NOT NULL
@@ -80,7 +80,7 @@ BEGIN
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumberLocation WHERE intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId)
 			BEGIN
-				SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(location.intNumber AS NVARCHAR(20)) --CASE WHEN @digit = 0 THEN CAST(location.intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(location.intNumber, 1) AS NVARCHAR(20)), @digit) END
+				SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(location.intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(location.intNumber, 1) AS NVARCHAR(20)), @digit) END --CAST(location.intNumber AS NVARCHAR(20))
 				FROM tblSMStartingNumberLocation location
 				INNER JOIN tblSMStartingNumber number
 				ON location.intStartingNumberId = number.intStartingNumberId
@@ -96,8 +96,8 @@ BEGIN
 				INSERT INTO tblSMStartingNumberLocation (intStartingNumberId, intCompanyLocationId, intNumber, intConcurrencyId)
 				VALUES (@intStartingNumberId, @intCompanyLocationId, 2, 1)
 
-				-- Assemble the string ID. 
-				SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(1 AS NVARCHAR(20))--CASE WHEN @digit = 0 THEN CAST(1 AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(1, 1) AS NVARCHAR(20)), @digit) END
+				-- Assemble the string ID.
+				SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(1 AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(1 AS NVARCHAR(20)), @digit) END--CAST(1 AS NVARCHAR(20))
 				FROM	tblSMStartingNumber
 				WHERE	intStartingNumberId = @intStartingNumberId
 			END
@@ -108,7 +108,7 @@ BEGIN
 	ELSE
 	BEGIN
 		-- Assemble the string ID. 
-		SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(intNumber AS NVARCHAR(20))
+		SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
 		FROM	tblSMStartingNumber
 		WHERE	intStartingNumberId = @intStartingNumberId
 
@@ -121,7 +121,7 @@ END
 ELSE
 BEGIN
 	-- Assemble the string ID. 
-	SELECT	@strID = @locationNumber + strPrefix + @parameters + CAST(intNumber AS NVARCHAR(20))
+	SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
 	FROM	tblSMStartingNumber
 	WHERE	intStartingNumberId = @intStartingNumberId
 
