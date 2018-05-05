@@ -28,8 +28,6 @@
 	[dblBaseDiscount]				NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblDiscountAvailable]			NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[dblBaseDiscountAvailable]		NUMERIC(18, 6)									NULL DEFAULT 0,	
-	[dblDiscountExemption]			NUMERIC(18, 6)									NULL DEFAULT 0,	
-	[dblBaseDiscountExemption]		NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[dblInterest]					NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblBaseInterest]				NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblAmountDue]					NUMERIC(18, 6)									NULL DEFAULT 0,
