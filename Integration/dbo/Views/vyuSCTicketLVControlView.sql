@@ -225,7 +225,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,SC.intTicketId
 				,UOM.intItemUOMId
 				,ICUOM.intItemUOMId
-				,ICUOM.strUnitMeasure
+				,UM.strUnitMeasure
 				,''Per Unit''
 				,''LV Control''
 				FROM vyuSCTicketLVControlView SC 
@@ -240,6 +240,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
 				LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
 				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUOM = 1
+				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 
 				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
