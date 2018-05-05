@@ -610,18 +610,15 @@ SELECT @UpdateCount = COUNT(DISTINCT intParentId) FROM @tblTempOne WHERE strOldD
 
 		DELETE FROM tblSTMassUpdateReportMaster
 
-		INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData, intParentId, intChildId)
+		INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
 		SELECT strLocation
 			  , strUpc
 			  , strItemDescription
 			  , strChangeDescription
 			  , strOldData
 			  , strNewData 
-			  , intParentId
-			  , intChildId
 		FROM @tblTempOne
 		WHERE strOldData != strNewData
-		ORDER BY intParentId ASC
 
 		--OLD
 		--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    
