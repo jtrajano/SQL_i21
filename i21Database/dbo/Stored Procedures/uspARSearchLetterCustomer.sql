@@ -41,7 +41,21 @@ DECLARE @temp_return_table TABLE(
 
 IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Review', 'Service Charge Invoices Letter') AND ISNULL(@ysnSystemDefined, 1) = 1
 	BEGIN
-		EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
+		DECLARE @strCustomerIds NVARCHAR(MAX) = NULL
+			  , @dtmAsOfDate	DATETIME = GETDATE()
+
+		SELECT @strCustomerIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
+			FROM tblARCustomer WITH(NOLOCK)
+			WHERE ISNULL(dblARBalance, 0) <> 0
+			  AND ysnActive = 1
+			FOR XML PATH ('')
+		) C (intEntityId)
+
+		EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @dtmAsOfDate
+													  , @ysnInclude120Days = 1
+													  , @strCustomerIds = @strCustomerIds
 													  , @intEntityUserId = @intEntityUserId
 
 		DELETE AGING
@@ -148,22 +162,22 @@ ELSE IF @strLetterName = '1 Day Overdue Collection Letter'
 			WHERE (ISNULL(dbl10DaysSum,0) <> 0 OR ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)		
 			AND ARCO.intEntityUserId = @intEntityUserId
 		END		
-	ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
-		BEGIN		
-			INSERT INTO @temp_availablecustomer_table		
-			SELECT ARCO.intEntityCustomerId		
-				 , ENTITY.strName		
-				 , ENTITY.strCustomerNumber		
-			FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)		
-			INNER JOIN (SELECT intEntityId 		
-							 , strName		
-							 , strCustomerNumber		
-						FROM dbo.vyuARCustomer WITH (NOLOCK) 		
-						WHERE ysnActive = 1		
-			) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId		
-			WHERE (ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)		
-			AND ARCO.intEntityUserId = @intEntityUserId
-		END
+ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
+	BEGIN		
+		INSERT INTO @temp_availablecustomer_table		
+		SELECT ARCO.intEntityCustomerId		
+				, ENTITY.strName		
+				, ENTITY.strCustomerNumber		
+		FROM dbo.tblARCollectionOverdue ARCO WITH (NOLOCK)		
+		INNER JOIN (SELECT intEntityId 		
+							, strName		
+							, strCustomerNumber		
+					FROM dbo.vyuARCustomer WITH (NOLOCK) 		
+					WHERE ysnActive = 1		
+		) ENTITY ON ARCO.intEntityCustomerId = ENTITY.intEntityId		
+		WHERE (ISNULL(dbl30DaysSum,0) <> 0 OR ISNULL(dbl60DaysSum,0) <> 0 OR ISNULL(dbl90DaysSum,0) <> 0 OR ISNULL(dbl120DaysSum,0) <> 0 OR ISNULL(dbl121DaysSum,0) <> 0)		
+		AND ARCO.intEntityUserId = @intEntityUserId
+	END
 ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 	BEGIN
 		INSERT INTO @temp_availablecustomer_table

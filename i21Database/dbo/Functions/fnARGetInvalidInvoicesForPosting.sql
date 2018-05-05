@@ -1205,29 +1205,29 @@ IF(ISNULL(@Post,0)) = 1
 			AND ARID.[strPricing] NOT IN ('Contracts-Max Price','Contracts-Pricing Level')
 			
 
-		UNION
-		--Lot Tracked Item - Direct Invoice
-		SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-			,[intItemId]			= I.[intItemId]
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'Direct Invoice - Posting lot tracked item(' + ARID.[strItemDescription] + ') is not allowed.'
-		FROM 
-			@Invoices I	
-		INNER JOIN
-			(SELECT [intInvoiceId], [intItemId], [strItemDescription], [intInventoryShipmentItemId], [intLoadDetailId], [ysnBlended], [intTicketId] FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
-				ON I.[intInvoiceId] = ARID.[intInvoiceId]		 
-		WHERE
-			ISNULL(ARID.[intItemId],0) <> 0
-			AND [dbo].[fnGetItemLotType](ARID.[intItemId]) <> 0
-			AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
-			AND ISNULL(ARID.[intLoadDetailId],0) = 0
-			AND ISNULL(ARID.[intTicketId],0) = 0
-			AND ISNULL(ARID.[ysnBlended],0) = 0
-			AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
+		--UNION
+		----Lot Tracked Item - Direct Invoice
+		--SELECT
+		--	 [intInvoiceId]			= I.[intInvoiceId]
+		--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		--	,[strTransactionType]	= I.[strTransactionType]
+		--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		--	,[intItemId]			= I.[intItemId]
+		--	,[strBatchId]			= I.[strBatchId]
+		--	,[strPostingError]		= 'Direct Invoice - Posting lot tracked item(' + ARID.[strItemDescription] + ') is not allowed.'
+		--FROM 
+		--	@Invoices I	
+		--INNER JOIN
+		--	(SELECT [intInvoiceId], [intItemId], [strItemDescription], [intInventoryShipmentItemId], [intLoadDetailId], [ysnBlended], [intTicketId] FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
+		--		ON I.[intInvoiceId] = ARID.[intInvoiceId]		 
+		--WHERE
+		--	ISNULL(ARID.[intItemId],0) <> 0
+		--	AND [dbo].[fnGetItemLotType](ARID.[intItemId]) <> 0
+		--	AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+		--	AND ISNULL(ARID.[intLoadDetailId],0) = 0
+		--	AND ISNULL(ARID.[intTicketId],0) = 0
+		--	AND ISNULL(ARID.[ysnBlended],0) = 0
+		--	AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
 																																			
 	END
 ELSE
