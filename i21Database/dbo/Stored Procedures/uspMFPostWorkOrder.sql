@@ -906,7 +906,7 @@ BEGIN TRY
 					AND I.ysnSellableItem = 1
 
 				UPDATE PS
-				SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / (PS.dblMarketRate + @dblFirstGradeDiff)
+				SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / Case When (PS.dblMarketRate + @dblFirstGradeDiff)=0 Then 1 else (PS.dblMarketRate + @dblFirstGradeDiff) End
 				FROM @tblMFProductionSummary PS
 				JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
 				WHERE PS.dblCoEfficient IS NULL
@@ -926,7 +926,7 @@ BEGIN TRY
 			FROM @tblMFProductionSummary
 
 			UPDATE @tblMFProductionSummary
-			SET dblStandardUnitRate = abs(@dblInputCost) / @dblCoEfficientApplied
+			SET dblStandardUnitRate = abs(@dblInputCost) / Case When @dblCoEfficientApplied=0 then 1 else @dblCoEfficientApplied end
 				,dblDirectCost = abs(@dblInputCost)
 
 			UPDATE @tblMFProductionSummary
@@ -991,7 +991,7 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = PS.dblProductionUnitRate * PL.dblQuantity
+				,[dblNewCost] = PS.dblProductionUnitRate * PL.dblQuantity- ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
 				,[intCurrencyId] = (
 					SELECT TOP 1 intDefaultReportingCurrencyId
 					FROM tblSMCompanyPreference

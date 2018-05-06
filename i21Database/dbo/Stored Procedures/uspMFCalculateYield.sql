@@ -1039,7 +1039,8 @@ BEGIN TRY
 					,@dblQuantity = NULL
 
 				SELECT @intBatchId = intBatchId
-					,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intYieldItemUOMId, dblQuantity)
+					--,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intYieldItemUOMId, dblQuantity)
+					,@dblQuantity = dblQuantity
 				FROM @tblMFWorkOrderOutputLot
 				WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
@@ -1422,6 +1423,8 @@ BEGIN TRY
 										END
 
 								SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
+								if @dblYieldQuantity<0.0001
+								Select @dblYieldQuantity=0
 							END
 						END
 
