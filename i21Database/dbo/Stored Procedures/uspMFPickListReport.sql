@@ -398,6 +398,11 @@ Begin --Sales Order Pick List
 		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
 
+	Declare @intCommonUOMId int
+	Select TOP 1 @intCommonUOMId=iu.intUnitMeasureId From tblSOSalesOrderDetail sd Join tblICItemUOM iu on sd.intItemId=iu.intItemId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId where sd.intSalesOrderId=@intSalesOrderId
+	group by iu.intUnitMeasureId having count(iu.intUnitMeasureId)=(Select count(1) from tblSOSalesOrderDetail where intSalesOrderId=@intSalesOrderId)
+
 	If @intPickListId>0
 		Begin
 			INSERT INTO @tblItems
@@ -416,7 +421,7 @@ Begin --Sales Order Pick List
 					'' strParentLotNumber,
 					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
 					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
-					pld.dblQuantity AS dblQuantity,
+					CASE WHEN ISNULL(@intCommonUOMId,0)=0 THEN pld.dblQuantity ELSE [dbo].[fnMFConvertQuantityToTargetItemUOM](pld.intItemUOMId,(Select TOP 1 intItemUOMId From tblICItemUOM Where intItemId=i.intItemId AND intUnitMeasureId=@intCommonUOMId),pld.dblQuantity) END AS dblQuantity,
 					CASE WHEN ISNULL(pld.intLotId,0)>0 THEN (dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0))
 					- ((dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0) * ISNULL(sd.dblDiscount,0.0))/100)
 					Else (pld.dblQuantity * ISNULL(sd.dblPrice,0.0)) - ((pld.dblQuantity * ISNULL(sd.dblPrice,0.0) * ISNULL(sd.dblDiscount,0.0))/100) END AS dblCost,
@@ -513,7 +518,7 @@ Begin --Sales Order Pick List
 			'' strParentLotNumber,
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
 			dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
-			sd.dblQtyOrdered AS dblQuantity,
+			CASE WHEN ISNULL(@intCommonUOMId,0)=0 THEN sd.dblQtyOrdered ELSE [dbo].[fnMFConvertQuantityToTargetItemUOM](sd.intItemUOMId,(Select TOP 1 intItemUOMId From tblICItemUOM Where intItemId=sd.intItemId AND intUnitMeasureId=@intCommonUOMId),sd.dblQtyOrdered) END AS dblQuantity,
             (sd.dblQtyOrdered * ISNULL(sd.dblPrice,0)) - ((sd.dblQtyOrdered * ISNULL(sd.dblPrice,0) * ISNULL(sd.dblDiscount,0.0))/100)  AS dblCost,
 			@dblTotalCost AS dblTotalCost
 			,@strCompanyName AS strCompanyName
