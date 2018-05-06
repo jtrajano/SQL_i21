@@ -159,7 +159,11 @@ BEGIN TRY
 			) +  ' ' + 
 			CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
 			' per ' + FM.strUnitMeasure AS strFXFinalPriceDesc,
-			@LastModifiedUserSign AS strLastModifiedUserSign
+			@LastModifiedUserSign AS strLastModifiedUserSign,
+			dbo.fnRemoveTrailingZeroes(ISNULL(PF.dblTotalLots,0)) AS strTotalLots,
+			MA.strFutMarketName +  ' '  + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strMarketMonth,
+			ISNULL(@strCity + ', ', '') + CONVERT(NVARCHAR(20),GETDATE(),106) strCompanyCityAndDate,
+			@strCompanyName strCompanyName
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
@@ -192,7 +196,9 @@ BEGIN TRY
 	JOIN	tblICItemUOM				WU	ON	WU.intItemUOMId					=	CD.intNetWeightUOMId	LEFT
 	JOIN	tblICUnitMeasure			U7	ON	U7.intUnitMeasureId				=	WU.intUnitMeasureId		LEFT	
 	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		LEFT
-	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId	
+	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
+	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	CD.intFutureMarketId	LEFT
+	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 

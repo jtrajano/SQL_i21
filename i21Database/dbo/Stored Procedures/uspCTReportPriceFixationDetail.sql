@@ -32,7 +32,10 @@ BEGIN TRY
 			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
 			PD.strNotes,
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPriceDesc,
-			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots
+			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots,
+			dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) + ' Lot(s) fixed ' + 
+			MA.strFutMarketName +  ' '  + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' at ' + 
+			dbo.fnRemoveTrailingZeroes(PD.dblFutures) + CY.strCurrency + '-' + CM.strUnitMeasure	AS strGABPrice
 				
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
