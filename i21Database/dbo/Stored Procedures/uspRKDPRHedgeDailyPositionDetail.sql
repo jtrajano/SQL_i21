@@ -341,7 +341,7 @@ BEGIN
 						ELSE isnull(ysnLicensed, 0) END
 						)
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 
-			WHERE cd.intCommodityId = @intCommodityId 
+			WHERE cd.intCommodityId = @intCommodityId  and st.strTicketStatus <> 'V'
 			AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end)t) as PurBasisDelivary,
 
 			isnull((SELECT SUM(dblRemainingQuantity) CollateralSale
@@ -594,7 +594,7 @@ SELECT @strDescription,
 									ELSE isnull(ysnLicensed, 0) END
 									)
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId
-			WHERE intSourceType = 1
+			WHERE intSourceType = 1 and st.strTicketStatus <> 'V'
 				AND strReceiptType IN ('Purchase Contract')	AND cd.intCommodityId = @intCommodityId	
 				AND r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
 		
@@ -628,7 +628,8 @@ SELECT @strDescription,
 									)
 			INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = r.intLocationId		
 			INNER JOIN tblICCommodityUnitMeasure um on um.intCommodityId= @intCommodityId and um.intUnitMeasureId=iu.intUnitMeasureId	
-			WHERE r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end
+			WHERE r.intLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then r.intLocationId else @intLocationId end and
+			st.strTicketStatus <> 'V'
 			
 			)t
 						
@@ -670,6 +671,7 @@ SELECT @strDescription,
 			LEFT JOIN tblICInventoryShipmentCharge pi on ici.intInventoryShipmentId	=pi.intInventoryShipmentId
 			WHERE intOrderType IN (1) AND intSourceType = 1	AND st.intCommodityId = @intCommodityId
 				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end	
+				and st.strTicketStatus <> 'V'
 			) t
 		
 UNION 
@@ -708,7 +710,7 @@ UNION
 			LEFT JOIN tblICInventoryShipmentCharge pi on ici.intInventoryShipmentId	=pi.intInventoryShipmentId
 			WHERE intOrderType IN (4)
 				AND intSourceType = 1
-				AND st.intCommodityId = @intCommodityId
+				AND st.intCommodityId = @intCommodityId and st.strTicketStatus <> 'V'
 				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 			) t	
 			
@@ -1086,7 +1088,7 @@ SELECT @strDescription, 'Sales Gross Dollars' [strType], 'Sales Gross Dollars',I
 			LEFT JOIN tblARPaymentDetail R  ON R.intInvoiceId = I.intInvoiceId and isnull(R.dblPayment, 0)>0
 			WHERE intOrderType IN (1) AND intSourceType = 1	AND st.intCommodityId = @intCommodityId
 				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end	
-				AND st.intEntityId= @intVendorId 	
+				AND st.intEntityId= @intVendorId and	st.strTicketStatus <> 'V'
 			) t
 		
 UNION 
@@ -1126,7 +1128,7 @@ UNION
 				AND intSourceType = 1
 				AND st.intCommodityId = @intCommodityId
 				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-				AND st.intEntityId= @intVendorId 	
+				AND st.intEntityId= @intVendorId  and st.strTicketStatus <> 'V'	
 			) t	
 				
 	INSERT INTO @tempFinal (strCommodityCode,strType,strSubType,dblTotal,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
@@ -1165,7 +1167,7 @@ UNION
 			LEFT JOIN tblARPaymentDetail R  ON R.intInvoiceId = I.intInvoiceId and isnull(R.dblPayment, 0)>0
 			WHERE intOrderType IN (1) AND intSourceType = 1	AND st.intCommodityId = @intCommodityId
 				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end	
-				AND st.intEntityId= @intVendorId 	
+				AND st.intEntityId= @intVendorId 	 and st.strTicketStatus <> 'V'
 			) t
 		
 UNION 
@@ -1201,7 +1203,7 @@ UNION
 				AND intSourceType = 1
 				AND st.intCommodityId = @intCommodityId
 				AND st.intProcessingLocationId= case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-				AND st.intEntityId= @intVendorId 	
+				AND st.intEntityId= @intVendorId  and st.strTicketStatus <> 'V'	
 			) t	
 
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
