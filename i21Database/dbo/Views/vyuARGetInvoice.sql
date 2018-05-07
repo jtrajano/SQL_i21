@@ -33,7 +33,7 @@ SELECT
 	INV.dblTotalTermDiscount,
 	INV.dblBaseTotalTermDiscount,
 	INV.dblTotalTermDiscountExemption,
-	INV.dblTotalBaseTermDiscountExemption,
+	INV.dblBaseTotalTermDiscountExemption,
     INV.dblInterest,
     INV.dblBaseInterest,
     INV.dblAmountDue,

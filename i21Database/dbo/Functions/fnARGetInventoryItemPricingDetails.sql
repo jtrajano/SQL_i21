@@ -72,7 +72,7 @@ BEGIN
 					
 	--Item Promotional Pricing 
 	SELECT TOP 1
-		@Price			= @Quantity *
+		@Price			= @UOMQuantity *
 							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblUnitAfterDiscount
 							ELSE
 								(CASE
@@ -95,7 +95,7 @@ BEGIN
 							END) 									
 		,@DiscountBy	= ICISP.strDiscountBy
 		,@PromotionType	= ICISP.strPromotionType
-		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, @ZeroDecimal)/ISNULL(ICISP.dblUnit, @ZeroDecimal)) * @Quantity, @ZeroDecimal) ELSE @ZeroDecimal END)
+		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, @ZeroDecimal)/ISNULL(ICISP.dblUnit, @ZeroDecimal)) * @UOMQuantity, @ZeroDecimal) ELSE @ZeroDecimal END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing ICISP

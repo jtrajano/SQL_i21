@@ -31,7 +31,7 @@
 	[dblTotalTermDiscount]				NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[dblBaseTotalTermDiscount]			NUMERIC(18, 6)									NULL DEFAULT 0,	
 	[dblTotalTermDiscountExemption]		NUMERIC(18, 6)									NULL DEFAULT 0,	
-	[dblTotalBaseTermDiscountExemption]	NUMERIC(18, 6)									NULL DEFAULT 0,		
+	[dblBaseTotalTermDiscountExemption]	NUMERIC(18, 6)									NULL DEFAULT 0,		
 	[dblInterest]						NUMERIC(18, 6)									NULL DEFAULT 0,
 	[dblBaseInterest]					NUMERIC(18, 6)									NULL DEFAULT 0,
     [dblAmountDue]						NUMERIC(18, 6)									NULL DEFAULT 0,
