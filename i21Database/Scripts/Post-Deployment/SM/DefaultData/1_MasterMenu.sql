@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Card Fueling'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5060,9 +5060,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Meter Readings', N'Meter Billing', @MeterBillingCreateParentMenuId, N'New Meter Readings', N'Create', N'Screen', N'MeterBilling.view.MeterReadings?action=new', N'small-menu-Create', 0, 0, 0, 1, 1, 1)
+	VALUES (N'New Meter Readings', N'Meter Billing', @MeterBillingCreateParentMenuId, N'New Meter Readings', N'Create', N'Screen', N'MeterBilling.view.MeterReadings?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'MeterBilling.view.MeterReadings?action=new', intSort = 1 WHERE strMenuName = 'New Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'MeterBilling.view.MeterReadings?action=new', intSort = 0 WHERE strMenuName = 'New Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingCreateParentMenuId
 
 /* END of Meter Billing */
 
