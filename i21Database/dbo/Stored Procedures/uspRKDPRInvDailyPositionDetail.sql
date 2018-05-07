@@ -173,6 +173,7 @@ SELECT DISTINCT GR1.intCustomerStorageId,GR.strStorageTypeDescription [Storage T
 	WHERE SCT.strTicketStatus = 'H' and isnull(SCT.intDeliverySheetId,0) <>0
 	AND SCT.intCommodityId = @intCommodityId  AND isnull(GR.intStorageScheduleTypeId,0) > 0  and isnull(SCD.ysnPost,0) =1
 	AND	l.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then l.intCompanyLocationId else @intLocationId end	
+	and SCT.strTicketStatus <> 'V'
 	UNION
 		SELECT SCDS.intDeliverySheetSplitId, GR.strStorageTypeDescription [Storage Type],@strDescription strCommodityCode,GR.strStorageTypeDescription strType,
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,((SCT.dblNetUnits * SCDS.dblSplitPercent) / 100)) dblTotal,
@@ -191,6 +192,7 @@ SELECT DISTINCT GR1.intCustomerStorageId,GR.strStorageTypeDescription [Storage T
 	WHERE SCT.strTicketStatus = 'H' and isnull(SCT.intDeliverySheetId,0) <>0 and isnull(SCD.ysnPost,0) = 0
 	AND SCT.intCommodityId = @intCommodityId  AND GR.intStorageScheduleTypeId > 0
 		AND	l.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then l.intCompanyLocationId else @intLocationId end
+		and SCT.strTicketStatus <> 'V'
 	)t 
 	WHERE dblTotal >0 AND intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -239,6 +241,7 @@ BEGIN
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 				WHERE st.intCommodityId  = @intCommodityId and isnull(st.intDeliverySheetId,0) =0
 					  AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+					  and st.strTicketStatus <> 'V'
 				)t 	WHERE intLocationId IN (
 					SELECT intCompanyLocationId FROM tblSMCompanyLocation
 					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -509,6 +512,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+			and st.strTicketStatus <> 'V'
 			)t	WHERE  intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -612,7 +616,9 @@ JOIN tblICItem i1 on i1.intItemId=st.intItemId
 JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 WHERE st.intCommodityId  = @intCommodityId and isnull(st.intDeliverySheetId,0) =0
-	  AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end)t
+	  AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
+	  and st.strTicketStatus <> 'V'
+	  )t
 				WHERE intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -650,6 +656,7 @@ BEGIN
                            WHERE st.intCommodityId  = @intCommodityId
                                     AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
                                     AND st.intEntityId= @intVendorId and isnull(st.intDeliverySheetId,0) =0
+									and st.strTicketStatus <> 'V'
                            )t     WHERE intLocationId IN (
                                   SELECT intCompanyLocationId FROM tblSMCompanyLocation
                                   WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -909,7 +916,7 @@ BEGIN
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
 			WHERE cd.intCommodityId = @intCommodityId 
 			AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			AND st.intEntityId= @intVendorId 
+			AND st.intEntityId= @intVendorId and st.strTicketStatus <> 'V'
 			)t 	WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -958,7 +965,7 @@ BEGIN
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
 		WHERE st.intCommodityId  = @intCommodityId
 			  AND st.intProcessingLocationId  = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
-			  AND st.intEntityId= @intVendorId and isnull(st.intDeliverySheetId,0) =0 )t
+			  AND st.intEntityId= @intVendorId and isnull(st.intDeliverySheetId,0) =0 and st.strTicketStatus <> 'V')t
 				WHERE intCompanyLocationId IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 

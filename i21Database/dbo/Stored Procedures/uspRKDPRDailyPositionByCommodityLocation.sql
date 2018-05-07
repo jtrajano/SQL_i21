@@ -204,7 +204,7 @@ SELECT DISTINCT c.intCommodityId
 			INNER JOIN tblEMEntity E on E.intEntityId=SCDS.intEntityId
 			LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId 				
 			WHERE
-			 isnull(GR.intStorageScheduleTypeId,0) > 0 and isnull(SCD.ysnPost,0) =1 and 
+			 isnull(GR.intStorageScheduleTypeId,0) > 0 and isnull(SCD.ysnPost,0) =1  and SCT.strTicketStatus <> 'V' and 
 			 SCT.strTicketStatus = 'H' AND isnull(SCT.intDeliverySheetId, 0) <> 0 AND SCT.intCommodityId = c.intCommodityId 
 			 AND l.intCompanyLocationId = cl.intCompanyLocationId AND strOwnedPhysicalStock = 'Customer' AND E.intEntityId = CASE WHEN isnull(@intVendorId, 0) = 0 THEN E.intEntityId ELSE @intVendorId END
 			 ) t where dblTotal >0 
@@ -222,7 +222,7 @@ SELECT DISTINCT c.intCommodityId
 			LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId 
 			WHERE SCT.strTicketStatus = 'H' AND isnull(SCT.intDeliverySheetId, 0) <> 0 AND SCT.intCommodityId = c.intCommodityId AND l.intCompanyLocationId = cl.intCompanyLocationId 
 			AND strOwnedPhysicalStock = 'Customer' AND E.intEntityId = CASE WHEN isnull(@intVendorId, 0) = 0 THEN E.intEntityId ELSE @intVendorId END
-			and isnull(SCD.ysnPost,0) =0 AND GR.intStorageScheduleTypeId > 0
+			and isnull(SCD.ysnPost,0) =0 AND GR.intStorageScheduleTypeId > 0  and SCT.strTicketStatus <> 'V'
 			) t where dblTotal >0 
 			)t1
 		) AS DPCustomer
@@ -251,6 +251,7 @@ SELECT DISTINCT c.intCommodityId
 			 isnull(GR.intStorageScheduleTypeId,0) > 0 and isnull(SCD.ysnPost,0) =1 and 
 			 SCT.strTicketStatus = 'H' AND isnull(SCT.intDeliverySheetId, 0) <> 0 AND SCT.intCommodityId = c.intCommodityId 
 			 AND l.intCompanyLocationId = cl.intCompanyLocationId  AND E.intEntityId = CASE WHEN isnull(@intVendorId, 0) = 0 THEN E.intEntityId ELSE @intVendorId END
+			  and SCT.strTicketStatus <> 'V'
 			 ) t where dblTotal >0 
 			 UNION ALL
 			 SELECT SUM(dblTotal)  dblTotal from(
@@ -266,7 +267,7 @@ SELECT DISTINCT c.intCommodityId
 			LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = SCDS.intStorageScheduleTypeId 
 			WHERE SCT.strTicketStatus = 'H' AND isnull(SCT.intDeliverySheetId, 0) <> 0 AND SCT.intCommodityId = c.intCommodityId AND l.intCompanyLocationId = cl.intCompanyLocationId 
 			 AND E.intEntityId = CASE WHEN isnull(@intVendorId, 0) = 0 THEN E.intEntityId ELSE @intVendorId END
-			and isnull(SCD.ysnPost,0) =0 AND GR.intStorageScheduleTypeId > 0	
+			and isnull(SCD.ysnPost,0) =0 AND GR.intStorageScheduleTypeId > 0  and SCT.strTicketStatus <> 'V'	
 			) t where dblTotal >0 
 			)t1
 		) AS dblGrainBalance
@@ -291,7 +292,7 @@ SELECT DISTINCT c.intCommodityId
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 			INNER JOIN tblSMCompanyLocation cl1 ON cl1.intCompanyLocationId = st.intProcessingLocationId
-			WHERE cd.intCommodityId = c.intCommodityId AND cl1.intCompanyLocationId = cl.intCompanyLocationId
+			WHERE cd.intCommodityId = c.intCommodityId AND cl1.intCompanyLocationId = cl.intCompanyLocationId  and st.strTicketStatus <> 'V'
 			) t
 		) AS PurBasisDelivary
 	,(
@@ -304,6 +305,7 @@ SELECT DISTINCT c.intCommodityId
 				JOIN tblICItemUOM iuom ON i1.intItemId = iuom.intItemId AND ysnStockUnit = 1
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i1.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
 				WHERE st.intCommodityId = c.intCommodityId AND st.intProcessingLocationId = cl.intCompanyLocationId AND st.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN st.intEntityId ELSE @intVendorId END AND isnull(st.intDeliverySheetId, 0) = 0
+				 and st.strTicketStatus <> 'V'
 				)
 			) t
 		) AS OnHold
