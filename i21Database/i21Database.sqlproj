@@ -6467,6 +6467,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Functions\fnSTDynamicQueryInventoryMass.sql" />
+    <Build Include="dbo\Views\vyuSTFuelSummaryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
