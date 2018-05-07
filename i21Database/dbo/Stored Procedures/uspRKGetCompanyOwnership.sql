@@ -29,7 +29,7 @@ FROM (
 		,(
 			SELECT sum(dblQty) BalanceForward
 			FROM tblICInventoryTransaction it
-			JOIN tblICItem i ON i.intItemId = it.intItemId AND it.intTransactionTypeId IN (4, 5, 10, 23, 44)
+			JOIN tblICItem i ON i.intItemId = it.intItemId AND it.intTransactionTypeId IN (4, 5, 10, 23,33, 44)
 			JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId AND isnull(il.strDescription, '') <> 'In-Transit' AND il.intLocationId IN (
 					SELECT intCompanyLocationId
 					FROM tblSMCompanyLocation
