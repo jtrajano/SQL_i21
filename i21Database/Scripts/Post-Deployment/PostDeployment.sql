@@ -66,6 +66,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1810_UpdatePortalMenus.sql
 :r .\SM\1810_UpdateTransactionsApprovalFor.sql
 :r .\SM\1810_Reset_Hours_Terms.sql
+:r .\SM\1810_tblSMCompanyGridlayout_DeleteDuplicateRecords.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
