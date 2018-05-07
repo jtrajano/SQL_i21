@@ -326,14 +326,17 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT TOP 1 @strVendorRefNo = LI.strVendorRefNo
-			,@strWarehouseRefNo = LI.strWarehouseRefNo
-			,@strReceiptNumber = LI.strReceiptNumber
-			,@dtmReceiptDate = dtmReceiptDate
+		SELECT TOP 1 @strVendorRefNo = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.strVendorRefNo else R.strVendorRefNo End
+			,@strWarehouseRefNo = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.strWarehouseRefNo else R.strWarehouseRefNo End
+			,@strReceiptNumber = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.strReceiptNumber else R.strReceiptNumber End
+			,@dtmReceiptDate = Case When LI.strReceiptNumber=R.strReceiptNumber Then LI.dtmReceiptDate else R.dtmReceiptDate End
 		FROM tblMFLotInventory LI
 		JOIN tblICLot L ON L.intLotId = LI.intLotId
+		JOIN tblICInventoryReceiptItemLot RL on RL.intLotId=L.intLotId
+		JOIN tblICInventoryReceiptItem RI on RI.intInventoryReceiptItemId=RL.intInventoryReceiptItemId
+		JOIN tblICInventoryReceipt R on R.intInventoryReceiptId=RI.intInventoryReceiptId
 		WHERE L.strLotNumber = @strLotNumber
-		ORDER BY L.intLotId DESC
+		ORDER BY R.intInventoryReceiptId DESC
 
 		SELECT @strTransactionId = strTransactionId
 		FROM tblICLot
