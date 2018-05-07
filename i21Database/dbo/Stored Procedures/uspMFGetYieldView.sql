@@ -238,6 +238,7 @@ BEGIN TRY
 				,dblCountQuantity
 				,dblOpeningOutputQuantity
 				,dblCountOutputQuantity
+				,dblConsumedQuantity
 				)) AS UnPvt
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = UnPvt.intWorkOrderId
 		AND UnPvt.dblQuantity > 0
@@ -831,11 +832,17 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblRequiredQty = 0
 
-					SELECT @dblRequiredQty = Sum(dblRequiredQty)
-					FROM ##tblMFFinalInputItemYield
+					--SELECT @dblRequiredQty = Sum(dblRequiredQty)
+					--FROM ##tblMFFinalInputItemYield
+					--WHERE intWorkOrderId = @intWorkOrderId
+					--	AND intCategoryId <> @intCategoryId
+					--	AND strTransactionType ='INPUT'
+
+					SELECT @dblRequiredQty = SUM(dblQuantity)
+					FROM ##tblMFTransaction
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND intCategoryId <> @intCategoryId
-						AND strTransactionType ='INPUT'
+					AND intCategoryId <> @intCategoryId
+					AND strTransactionType = 'dblConsumedQuantity'
 
 					Select @intFromUnitMeasureId=intUnitMeasureId 
 					from tblICItemUOM Where intItemUOMId=@intInputItemUOMId
@@ -1635,13 +1642,22 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblRequiredQty = 0
 
-					SELECT @dblRequiredQty = SUM(dblRequiredQty)
-					FROM ##tblMFFinalInputItemYieldByDate
+					--SELECT @dblRequiredQty = SUM(dblRequiredQty)
+					--FROM ##tblMFFinalInputItemYieldByDate
+					--WHERE intItemId = @intPrimaryItemId
+					--	AND dtmDate = @dtmDate
+					--	AND intShiftId = IsNULL(@intShiftId, intShiftId)
+					--	AND intCategoryId <> @intCategoryId
+					--	AND strTransactionType ='INPUT'
+
+					SELECT @dblRequiredQty = SUM(dblQuantity)
+					FROM ##tblMFTransaction
 					WHERE intItemId = @intPrimaryItemId
 						AND dtmDate = @dtmDate
-						AND intShiftId = IsNULL(@intShiftId, intShiftId)
-						AND intCategoryId <> @intCategoryId
-						AND strTransactionType ='INPUT'
+						AND intShiftId = IsNULL(@intShiftId, intShiftId) 
+						and intCategoryId <> @intCategoryId
+					AND strTransactionType = 'dblConsumedQuantity'
+
 
 					Select @intFromUnitMeasureId=intUnitMeasureId 
 					from tblICItemUOM Where intItemUOMId=@intInputItemUOMId
