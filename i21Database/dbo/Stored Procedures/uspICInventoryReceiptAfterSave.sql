@@ -716,6 +716,7 @@ BEGIN
 	INSERT INTO @QualityInspectionTable (intPropertyId,strPropertyName,strPropertyValue,strComment)
 	SELECT iri.intQAPropertyId, iri.strPropertyName,'true / false', iri.strComment
 	FROM tblICInventoryReceiptInspection iri
+	WHERE iri.intInventoryReceiptId = @ReceiptId
  
 	EXEC uspQMInspectionSaveResult @intControlPointId, @intProductTypeId, @intProductValueId, @UserId, @QualityInspectionTable	
 END
