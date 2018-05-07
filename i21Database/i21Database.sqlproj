@@ -6473,6 +6473,7 @@
     <Build Include="dbo\Views\vyuAPYearPATR.sql" />
     <Build Include="dbo\Views\vyuAPYearDIV.sql" />
     <Build Include="dbo\Views\vyuAPYearINT.sql" />
+    <Build Include="dbo\Views\vyuPOSGetLoggedIn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
