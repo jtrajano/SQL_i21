@@ -153,7 +153,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblSCTicketFormat.strTicketHeader,
 	tblSCTicketFormat.ysnSuppressCompanyName,
 	tblSCTicketFormat.intSuppressDiscountOptionId,
-	tblSCTicketFormat.ysnSuppressSplit
+	tblSCTicketFormat.ysnSuppressSplit,
+	SMS.blbDetail
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -172,3 +173,4 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
+  LEFT JOIN tblSMSignature SMS ON SMS.intEntityId = SC.intEntityScaleOperatorId

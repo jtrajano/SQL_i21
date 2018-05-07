@@ -10,6 +10,7 @@ SELECT ST.intStoreId
 	   , '' AS strComment
 	   , I.intItemId AS intItemId
 	   , I.strItemNo AS strItemNo
+	   , I.strDescription AS strItemDescription
 	   , '' AS strCheckNo
 FROM tblSTStore ST
 LEFT JOIN tblICItem I ON ST.intCustomerPaymentItemId = I.intItemId

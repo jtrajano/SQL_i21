@@ -128,10 +128,11 @@ AS
 		,DEFAULT 
 		,DEFAULT 
 	)
-	, Receipt.strWarehouseRefNo
 	, TransferDetail.strLotCondition
 	, TransferDetail.dblWeightPerQty
 	, TransferDetail.intCostingMethod
+	, TransferDetail.strWarehouseRefNo
+	, TransferDetail.strNewWarehouseRefNo
 	, strCostingMethod = ISNULL(CostingMethod.strCostingMethod, '')
 	, TransferDetail.intConcurrencyId
 	FROM tblICInventoryTransferDetail TransferDetail

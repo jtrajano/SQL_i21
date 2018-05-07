@@ -18,7 +18,7 @@ SELECT
 	dtmLastLogin = u.dtmDate,
 	strResult = u.strResult,
 	ysnHasSMTP = Cast( case when isnull(j.intSMTPInformationId, 0) > 0 then 1 else 0 end as bit),
-	c.intScaleSetupId,
+	k.intScaleSetupId,
 	intEntityScaleOperatorId,
 	dtmScaleDate,
 	strStationShortDescription = k.strStationShortDescription,
@@ -41,8 +41,10 @@ FROM
 		on i.intEntityId = g.intEntityId
 	left join tblEMEntitySMTPInformation j
 		on g.intEntityId = j.intEntityId
-	left join tblSCScaleSetup k
-		on c.intScaleSetupId = k.intScaleSetupId
+	left join ( --left join tblSCScaleSetup k on c.intScaleSetupId = k.intScaleSetupId
+		select lss.intEntityId, ss.intScaleSetupId, ss.strStationShortDescription from tblSCScaleSetup ss
+		inner join tblSCLastScaleSetup lss on ss.intScaleSetupId = lss.intScaleSetupId
+	) k on c.intEntityId = k.intEntityId
 	left join tblEMEntity l
 		on l.intEntityId = c.intEntityScaleOperatorId
 	outer apply 

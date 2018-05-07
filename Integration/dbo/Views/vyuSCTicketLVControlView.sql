@@ -90,6 +90,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				CASE WHEN gasct_split_wgt_yn = ''Y'' THEN 1
 				ELSE 0 END
 				AS BIT) AS ysnSplitWeightTicket
+				,gasct_un_prc AS dblUnitPrice
+				,gasct_gross_un AS dblGrossUnits
+				,gasct_net_un AS dblNetUnits
 			from gasctmst
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
@@ -155,8 +158,17 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[strSplitNumber]
 					,[intScaleSetupId]
 					,[strStationShortDescription]
+					,[dblGrossUnits]
+					,[dblNetUnits]
+					,[dblUnitPrice]
+					,[dblUnitBasis]
 					,[ysnProcessedData]
 					,[intOriginTicketId]
+					,[intItemUOMIdFrom]
+					,[intItemUOMIdTo]
+					,[strItemUOM]
+					,[strCostMethod]
+					,[strSourceType]
 				)
 				SELECT 
 				LTRIM(RTRIM(SC.strTicketNumber))
@@ -205,8 +217,17 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,LTRIM(RTRIM(SC.strSplitNumber))
 				,SCS.intScaleSetupId
 				,SC.strStationShortDescription
+				,SC.dblGrossUnits
+				,SC.dblNetUnits
+				,SC.dblUnitPrice
+				,0
 				,0
 				,SC.intTicketId
+				,UOM.intItemUOMId
+				,ICUOM.intItemUOMId
+				,UM.strUnitMeasure
+				,''Per Unit''
+				,''LV Control''
 				FROM vyuSCTicketLVControlView SC 
 				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 				LEFT JOIN tblAPVendor AP ON AP.strVendorId = SC.strEntityNo
@@ -218,6 +239,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
 				LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
+				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUOM = 1
+				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
+				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 
 				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
 				SELECT 

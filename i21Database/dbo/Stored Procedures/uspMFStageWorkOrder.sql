@@ -66,6 +66,11 @@ BEGIN TRY
 		,@intEnteredItemUOMId INT
 		,@intItemStockUOMId INT
 		,@strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
+		,@intRecipeTypeId INT
+		,@intItemId2 INT
+		,@intRecipeSubstituteItemId INT
+		,@intRecipeId INT
+		,@intRecipeItemId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -208,6 +213,7 @@ BEGIN TRY
 
 	SELECT TOP 1 --@dtmPlannedDate = dtmPlannedDate
 		@strWorkOrderNo = strWorkOrderNo
+		,@intRecipeTypeId = intRecipeTypeId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -256,51 +262,54 @@ BEGIN TRY
 			AND intAttributeId = @intProductionStagingId
 	END
 
-	SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
-		,@intConsumptionStorageLocationId = CASE 
-			WHEN RI.intConsumptionMethodId = 1
-				THEN @intProductionStageLocationId
-			ELSE RI.intStorageLocationId
-			END
-		,@intItemTypeId = (
-			CASE 
-				WHEN RS.intSubstituteItemId IS NOT NULL
-					AND RS.intSubstituteItemId = @intInputItemId
-					THEN 3
-				ELSE 1
-				END
-			)
-	FROM dbo.tblMFWorkOrderRecipeItem RI
-	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
-	WHERE RI.intWorkOrderId = @intWorkOrderId
-		AND RI.intRecipeItemTypeId = 1
-		AND (
-			RI.intItemId = @intInputItemId
-			OR RS.intSubstituteItemId = @intInputItemId
-			)
-
-	SELECT @intConsumptionSubLocationId = intSubLocationId
-	FROM dbo.tblICStorageLocation
-	WHERE intStorageLocationId = @intConsumptionStorageLocationId
-
-	IF @intInputItemId IS NULL
-		OR @intInputItemId = 0
+	IF @intRecipeTypeId <> 3
 	BEGIN
-		SELECT @strItemNo = strItemNo
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
-
-		SELECT @strInputItemNo = strItemNo
-		FROM dbo.tblICItem
-		WHERE intItemId = @intInputItemId
-
-		RAISERROR (
-				'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
-				,14
-				,1
-				,@strInputItemNo
-				,@strItemNo
+		SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
+			,@intConsumptionStorageLocationId = CASE 
+				WHEN RI.intConsumptionMethodId = 1
+					THEN @intProductionStageLocationId
+				ELSE RI.intStorageLocationId
+				END
+			,@intItemTypeId = (
+				CASE 
+					WHEN RS.intSubstituteItemId IS NOT NULL
+						AND RS.intSubstituteItemId = @intInputItemId
+						THEN 3
+					ELSE 1
+					END
 				)
+		FROM dbo.tblMFWorkOrderRecipeItem RI
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+		WHERE RI.intWorkOrderId = @intWorkOrderId
+			AND RI.intRecipeItemTypeId = 1
+			AND (
+				RI.intItemId = @intInputItemId
+				OR RS.intSubstituteItemId = @intInputItemId
+				)
+
+		SELECT @intConsumptionSubLocationId = intSubLocationId
+		FROM dbo.tblICStorageLocation
+		WHERE intStorageLocationId = @intConsumptionStorageLocationId
+
+		IF @intInputItemId IS NULL
+			OR @intInputItemId = 0
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem
+			WHERE intItemId = @intItemId
+
+			SELECT @strInputItemNo = strItemNo
+			FROM dbo.tblICItem
+			WHERE intItemId = @intInputItemId
+
+			RAISERROR (
+					'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
+					,14
+					,1
+					,@strInputItemNo
+					,@strItemNo
+					)
+		END
 	END
 
 	IF @intConsumptionMethodId = 1
@@ -398,6 +407,219 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFWorkOrderRecipeItem RI
+			LEFT JOIN tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+			WHERE (
+					RI.intItemId = @intInputItemId
+					OR RS.intSubstituteItemId = @intInputItemId
+					)
+				AND RI.intWorkOrderId = @intWorkOrderId
+			)
+	BEGIN
+		SELECT @intRecipeId = intRecipeId
+		FROM tblMFWorkOrderRecipe
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipeItem RI
+				WHERE RI.intWorkOrderId = @intWorkOrderId
+					AND RI.dblCalculatedQuantity <> 0
+					AND RI.intRecipeItemTypeId = 1
+				)
+		BEGIN
+			SELECT @intRecipeItemId = Max(intRecipeItemId) + 1
+			FROM tblMFWorkOrderRecipeItem
+
+			INSERT INTO tblMFWorkOrderRecipeItem (
+				intRecipeItemId
+				,intRecipeId
+				,intItemId
+				,dblQuantity
+				,dblCalculatedQuantity
+				,[intItemUOMId]
+				,intRecipeItemTypeId
+				,strItemGroupName
+				,dblUpperTolerance
+				,dblLowerTolerance
+				,dblCalculatedUpperTolerance
+				,dblCalculatedLowerTolerance
+				,dblShrinkage
+				,ysnScaled
+				,intConsumptionMethodId
+				,intStorageLocationId
+				,dtmValidFrom
+				,dtmValidTo
+				,ysnYearValidationRequired
+				,ysnMinorIngredient
+				,intReferenceRecipeId
+				,ysnOutputItemMandatory
+				,dblScrap
+				,ysnConsumptionRequired
+				,dblPercentage
+				,intMarginById
+				,dblMargin
+				,ysnCostAppliedAtInvoice
+				,ysnPartialFillConsumption
+				,intManufacturingCellId
+				,intWorkOrderId
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				,intConcurrencyId
+				,intCostDriverId
+				,dblCostRate
+				)
+			SELECT intRecipeItemId = @intRecipeItemId
+				,intRecipeId = @intRecipeId
+				,intItemId = @intInputItemId
+				,dblQuantity = 1
+				,dblCalculatedQuantity = 1
+				,[intItemUOMId] = @intInputWeightUOMId
+				,intRecipeItemTypeId = 1
+				,strItemGroupName = ''
+				,dblUpperTolerance = 100
+				,dblLowerTolerance = 100
+				,dblCalculatedUpperTolerance = 2
+				,dblCalculatedLowerTolerance = 1
+				,dblShrinkage = 0
+				,ysnScaled = 1
+				,intConsumptionMethodId = 1
+				,intStorageLocationId = NULL
+				,dtmValidFrom = '2018-01-01'
+				,dtmValidTo = '2018-12-31'
+				,ysnYearValidationRequired = 0
+				,ysnMinorIngredient = 0
+				,intReferenceRecipeId = NULL
+				,ysnOutputItemMandatory = 0
+				,dblScrap = 0
+				,ysnConsumptionRequired = 0
+				,[dblCostAllocationPercentage] = NULL
+				,intMarginById = NULL
+				,dblMargin = NULL
+				,ysnCostAppliedAtInvoice = NULL
+				,ysnPartialFillConsumption = 1
+				,intManufacturingCellId = @intManufacturingCellId
+				,intWorkOrderId = @intWorkOrderId
+				,intCreatedUserId = @intUserId
+				,dtmCreated = @dtmCurrentDateTime
+				,intLastModifiedUserId = @intUserId
+				,dtmLastModified = @dtmCurrentDateTime
+				,intConcurrencyId = 1
+				,intCostDriverId = NULL
+				,dblCostRate = NULL
+		END
+		ELSE
+		BEGIN
+			SELECT @intRecipeSubstituteItemId = Max(intRecipeSubstituteItemId) + 1
+			FROM tblMFWorkOrderRecipeSubstituteItem
+
+			IF @intRecipeSubstituteItemId IS NULL
+			BEGIN
+				SELECT @intRecipeSubstituteItemId = 1
+			END
+
+			SELECT @intItemId2 = intItemId
+				,@intRecipeItemId = intRecipeItemId
+			FROM tblMFWorkOrderRecipeItem RI
+			WHERE RI.intWorkOrderId = @intWorkOrderId
+				AND RI.dblCalculatedQuantity <> 0
+				AND RI.intRecipeItemTypeId = 1
+
+			INSERT INTO tblMFWorkOrderRecipeSubstituteItem (
+				intWorkOrderId
+				,intRecipeSubstituteItemId
+				,intRecipeItemId
+				,intRecipeId
+				,intItemId
+				,intSubstituteItemId
+				,dblQuantity
+				,intItemUOMId
+				,dblSubstituteRatio
+				,dblMaxSubstituteRatio
+				,dblCalculatedUpperTolerance
+				,dblCalculatedLowerTolerance
+				,intRecipeItemTypeId
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				,intConcurrencyId
+				)
+			SELECT intWorkOrderId = @intWorkOrderId
+				,intRecipeSubstituteItemId = @intRecipeSubstituteItemId
+				,intRecipeItemId = @intRecipeItemId
+				,intRecipeId = @intRecipeId
+				,intItemId = @intItemId2
+				,intSubstituteItemId = @intInputItemId
+				,dblQuantity = 1
+				,intItemUOMId = @intInputWeightUOMId
+				,dblSubstituteRatio = 1
+				,dblMaxSubstituteRatio = 100
+				,dblCalculatedUpperTolerance = 2
+				,dblCalculatedLowerTolerance = 0
+				,intRecipeItemTypeId = 1
+				,intCreatedUserId = @intUserId
+				,dtmCreated = @dtmCurrentDateTime
+				,intLastModifiedUserId = @intUserId
+				,dtmLastModified = @dtmCurrentDateTime
+				,intConcurrencyId = 1
+		END
+
+		IF @intRecipeTypeId = 3
+		BEGIN
+			SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
+				,@intConsumptionStorageLocationId = CASE 
+					WHEN RI.intConsumptionMethodId = 1
+						THEN @intProductionStageLocationId
+					ELSE RI.intStorageLocationId
+					END
+				,@intItemTypeId = (
+					CASE 
+						WHEN RS.intSubstituteItemId IS NOT NULL
+							AND RS.intSubstituteItemId = @intInputItemId
+							THEN 3
+						ELSE 1
+						END
+					)
+			FROM dbo.tblMFWorkOrderRecipeItem RI
+			LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
+			WHERE RI.intWorkOrderId = @intWorkOrderId
+				AND RI.intRecipeItemTypeId = 1
+				AND (
+					RI.intItemId = @intInputItemId
+					OR RS.intSubstituteItemId = @intInputItemId
+					)
+
+			SELECT @intConsumptionSubLocationId = intSubLocationId
+			FROM dbo.tblICStorageLocation
+			WHERE intStorageLocationId = @intConsumptionStorageLocationId
+
+			IF @intInputItemId IS NULL
+				OR @intInputItemId = 0
+			BEGIN
+				SELECT @strItemNo = strItemNo
+				FROM dbo.tblICItem
+				WHERE intItemId = @intItemId
+
+				SELECT @strInputItemNo = strItemNo
+				FROM dbo.tblICItem
+				WHERE intItemId = @intInputItemId
+
+				RAISERROR (
+						'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
+						,14
+						,1
+						,@strInputItemNo
+						,@strItemNo
+						)
+			END
+		END
+	END
+
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
@@ -437,12 +659,12 @@ BEGIN TRY
 		,@intInputLotId
 		,(
 			CASE 
-				WHEN @intInputWeightUOMId = IsNULL(@intNewItemUOMId,0)
+				WHEN @intInputWeightUOMId = IsNULL(@intNewItemUOMId, 0)
 					THEN @dblInputWeight * @dblWeightPerQty
 				ELSE @dblInputWeight
 				END
 			)
-		,IsNULL(Isnull(@intWeightUOMId, @intNewItemUOMId),@intInputWeightUOMId)
+		,IsNULL(Isnull(@intWeightUOMId, @intNewItemUOMId), @intInputWeightUOMId)
 		,@dblInputWeight
 		,@intInputWeightUOMId
 		,1

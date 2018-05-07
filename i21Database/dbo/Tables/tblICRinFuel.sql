@@ -17,7 +17,11 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICRinFuel] PRIMARY KEY ([intRinFuelId]), 
 		CONSTRAINT [AK_tblICRinFuel_strRinFuelCode] UNIQUE ([strRinFuelCode])
 	)

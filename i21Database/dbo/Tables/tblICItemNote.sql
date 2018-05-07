@@ -18,7 +18,11 @@ Type the overview for the table here.
 		[strCommentType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICItemNote] PRIMARY KEY ([intItemNoteId]), 
 		CONSTRAINT [FK_tblICItemNote_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemNote_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])

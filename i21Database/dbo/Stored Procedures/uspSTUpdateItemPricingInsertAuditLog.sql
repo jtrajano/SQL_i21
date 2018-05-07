@@ -179,7 +179,7 @@ DECLARE @tblTemp TABLE
 )
 
 INSERT INTO @tblTemp (strLocation, strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
-SELECT strLocation, strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId
+SELECT DISTINCT strLocation, strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId
 FROM #tempAudit
 
 
@@ -193,32 +193,61 @@ DECLARE @intId AS INT
 		, @intParentId INT
 		, @intChildId INT
 
--- ##################################################
+-- ################################################## #01
 WHILE EXISTS(SELECT * FROM @tblTemp)
 BEGIN
 	SELECT TOP 1 @intParentId = intParentId FROM @tblTemp
 
+
+	-- ########################################
+	--              START  CLEAR
+	-- ########################################
+	--tblICItemPricing
 	SET @strItemPricingRowDataFinalLog = ''
+	SET @ItemPricingCombineRemoveComma = ''
+	SET @strItemPricingRowDataFormatLog = ''
+	SET @strItemPricingRowDataLog = ''
+
+	--tblICItemSpecialPricing
 	SET @strItemSpecialPricingRowDataFinalLog = ''
+	SET @ItemSpecialPricingCombineRemoveComma = ''
+	SET @strItemSpecialPricingRowDataFormatLog = ''
+	SET @strItemSpecialPricingRowDataLog = ''
+	-- ########################################
+	--               END CLEAR
+	-- ########################################
 
-	-- ##################################################
-	WHILE EXISTS(SELECT DISTINCT strLocation FROM @tblTemp WHERE intParentId = @intParentId)
+
+
+	-- ################################################## #02
+	WHILE EXISTS(SELECT * FROM @tblTemp WHERE intParentId = @intParentId)
 	BEGIN
-		SELECT TOP 1 @strLocation = strLocation
-		, @intChildId = intChildId
-		FROM @tblTemp WHERE intParentId = @intParentId
+		SELECT TOP 1 
+			 @intChildId = intChildId
+		FROM @tblTemp 
+		WHERE intParentId = @intParentId
 
-		-- ##################################################
-		WHILE EXISTS(SELECT * FROM @tblTemp WHERE intParentId = @intParentId AND strLocation = @strLocation)
+		SET @strStandardCostLog = ''
+		SET @strSalePriceLog = ''
+		SET @strUnitAfterDiscountLog = ''
+		SET @strBeginDateLog = ''
+		SET @strEndDateLog = ''
+
+		-- ##################################################################
+		--    UNIQUE row combination ParentId, ChangeDescription, Location 
+		-- ##################################################################
+		WHILE EXISTS(SELECT * FROM @tblTemp WHERE intParentId = @intParentId AND intChildId = @intChildId)
 		BEGIN
 			SELECT TOP 1 
 			@intId = intId
+			, @strLocation = strLocation
 			, @strItemDescription = strItemDescription
 			, @strOldData = strOldData
 			, @strNewData = strNewData
 			, @strChangeDescription = strChangeDescription
-			FROM @tblTemp WHERE intParentId = @intParentId
-			AND strLocation = @strLocation
+			FROM @tblTemp 
+			WHERE intParentId = @intParentId
+			AND intChildId = @intChildId
 
 			IF(@strChangeDescription = 'Standard Cost' OR @strChangeDescription = 'Retail Price')
 			BEGIN
@@ -255,8 +284,12 @@ BEGIN
 
 			
 
-			DELETE @tblTemp 
-			WHERE intId = @intId
+			DELETE FROM @tblTemp 
+			--WHERE intId = @intId
+			WHERE intParentId = @intParentId
+			AND intChildId = @intChildId
+			AND strChangeDescription = @strChangeDescription
+			AND strLocation = @strLocation
 		END
 
 		-- Check if has Value
@@ -277,9 +310,10 @@ BEGIN
 			SET @strItemSpecialPricingRowDataLog = @strItemSpecialPricingRowDataLog + REPLACE(REPLACE(@strItemSpecialPricingRowDataFormatLog, '{CHILDREN}', @ItemSpecialPricingCombineRemoveComma), '{UPDATEDRECORD}', @strLocation)
 		END
 
-		DELETE @tblTemp WHERE intParentId = @intParentId
-		AND strLocation = @strLocation
-		AND intChildId = @intChildId
+		DELETE FROM @tblTemp 
+		WHERE intChildId = @intChildId
+		AND intParentId = @intParentId
+
 	END
 
 	-- Final
@@ -317,8 +351,9 @@ BEGIN
 			, 1
 		)
 
-
-	DELETE @tblTemp WHERE intParentId = @intParentId
+	-- Remove from Loop #01
+	DELETE FROM @tblTemp 
+	WHERE intParentId = @intParentId
 END
 -- ##################################################################################
 

@@ -16,7 +16,11 @@ Type the overview for the table here.
 		[intItemContractId] INT NOT NULL, 
 		[intDocumentId] INT NOT NULL, 
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICItemContractDocument] PRIMARY KEY ([intItemContractDocumentId]), 
 		CONSTRAINT [FK_tblICItemContractDocument_tblICItemContract] FOREIGN KEY ([intItemContractId]) REFERENCES [tblICItemContract]([intItemContractId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemContractDocument_tblICDocument] FOREIGN KEY ([intDocumentId]) REFERENCES [tblICDocument]([intDocumentId])

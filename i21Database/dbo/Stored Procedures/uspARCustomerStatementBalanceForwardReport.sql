@@ -117,7 +117,8 @@ DECLARE @temp_statement_table TABLE(
     ,[dblPayment]					NUMERIC(18,6)
     ,[dblBalance]					NUMERIC(18,6)	
     ,[strSalespersonName]			NVARCHAR(100)
-	,[strAccountStatusCode]			NVARCHAR(50)	
+	,[strAccountStatusCode]			NVARCHAR(50)
+	,[strTicketNumbers]				NVARCHAR(MAX)	
 	,[strLocationName]				NVARCHAR(100)
     ,[strFullAddress]				NVARCHAR(MAX)
 	,[strComment]					NVARCHAR(MAX)
@@ -343,6 +344,7 @@ SELECT intInvoiceId			= NULL
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , strType				= NULL
 	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
+	 , strTicketNumbers		= NULL
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
@@ -381,6 +383,7 @@ SELECT intInvoiceId			= NULL
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , strType				= NULL
 	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
+	 , strTicketNumbers		= NULL
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
@@ -421,6 +424,7 @@ SELECT intInvoiceId			= NULL
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , strType				= NULL
 	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
+	 , strTicketNumbers		= NULL
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT PD.intPaymentId
@@ -481,6 +485,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , dblBalance			= TRANSACTIONS.dblBalance
 	  , strSalespersonName  = C.strSalesPersonName
 	  , strAccountStatusCode = STATUSCODES.strAccountStatusCode
+	  , strTicketNumbers	= TRANSACTIONS.strTicketNumbers
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strComment			= TRANSACTIONS.strComment
@@ -519,7 +524,23 @@ FROM vyuARCustomerSearch C
 			 , dtmDatePaid			= PCREDITS.dtmDatePaid
 			 , strType				= I.strType
 			 , strComment			= I.strComments
+			 , strTicketNumbers		= SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		OUTER APPLY (
+			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+			FROM (
+				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + '', ''
+				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+				INNER JOIN (
+					SELECT intTicketId
+						 , strTicketNumber 
+					FROM dbo.tblSCTicket WITH(NOLOCK)
+				) T ON ID.intTicketId = T.intTicketId
+				WHERE ID.intInvoiceId = I.intInvoiceId
+				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+				FOR XML PATH ('''')
+			) INV (strTicketNumber)
+		) SCALETICKETS
 		LEFT JOIN (
 			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
 				 , intInvoiceId 
@@ -631,6 +652,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblBalance					= dblBudgetAmount - dblAmountPaid
 				  , strSalespersonName			= NULL
 				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
+				  , strTicketNumbers			= NULL
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strStatementFooterComment	= NULL
@@ -888,6 +910,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dblPrepayments
 	, ysnStatementCreditLimit
 	, blbLogo
+	, strTicketNumbers
 )
 SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, intInvoiceId				= MAINREPORT.intInvoiceId
@@ -931,6 +954,7 @@ SELECT intEntityCustomerId		= MAINREPORT.intEntityCustomerId
 	, dblPrepayments			= ISNULL(AGINGREPORT.dblPrepayments, 0)	
 	, ysnStatementCreditLimit	= MAINREPORT.ysnStatementCreditLimit
 	, blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	, strTicketNumbers			= MAINREPORT.strTicketNumbers
 FROM (
 	--- Without CF Report
 	SELECT intEntityCustomerId					= STATEMENTREPORT.intEntityCustomerId
@@ -959,7 +983,8 @@ FROM (
 		 , strStatementFooterComment			= STATEMENTREPORT.strStatementFooterComment
 		 , strCompanyName
 		 , strCompanyAddress
-		 , ysnStatementCreditLimit		 
+		 , ysnStatementCreditLimit
+		 , strTicketNumbers		 
 	FROM @temp_statement_table AS STATEMENTREPORT	
 	WHERE STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
@@ -992,7 +1017,8 @@ FROM (
 		 , strStatementFooterComment			= STATEMENTREPORT.strStatementFooterComment
 		 , strCompanyName
 		 , strCompanyAddress
-		 , ysnStatementCreditLimit		 
+		 , ysnStatementCreditLimit
+		 , strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
 	INNER JOIN (SELECT intInvoiceId
 					, strInvoiceNumber

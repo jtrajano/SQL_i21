@@ -29,15 +29,17 @@ SELECT TOP 100 PERCENT * FROM (
         ,0.00 AS dblFuture
         ,cur.strCurrency
         ,ctd.intCurrencyId
-        ,ISNULL(receiptItem.dblOpenReceive,0) AS dblQuantity
-        ,(ISNULL(basisFutures.dblPrice, 0) + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) * ISNULL(receiptItem.dblOpenReceive,0) AS dblGross
+        ,ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
+        ,(ISNULL(basisFutures.dblPrice, 0) 
+                + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) 
+            * (ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0)) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
         ,0.00 AS dblAdvance
         ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0
                 ELSE CAST(((
                     ((ISNULL(basisFutures.dblPrice, 0) 
                         + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) 
-                        * ISNULL(receiptItem.dblOpenReceive,0)) 
+                        * (ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
                     - ISNULL(discounts.dblAmount,0)
                     + ISNULL(charges.dblAmount, 0)
                     + ISNULL(taxes.dblTax,0.00)) 
@@ -135,6 +137,14 @@ SELECT TOP 100 PERCENT * FROM (
 		WHERE voucherDetail.intScaleTicketId = ticket.intTicketId
         AND voucher.intTransactionType = 13
     ) priorAdvances
+    OUTER APPLY (
+        SELECT
+            SUM(voucherDetail.dblQtyReceived) AS dblQtyPriced
+        FROM tblAPBill voucher
+        INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
+        WHERE voucherDetail.intContractDetailId = ctd.intContractDetailId
+        AND voucher.intTransactionType = 1
+    ) pricedSequence
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId

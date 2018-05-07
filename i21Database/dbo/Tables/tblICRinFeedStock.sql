@@ -18,6 +18,10 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICRinFeedStock] PRIMARY KEY ([intRinFeedStockId]), 
 		CONSTRAINT [AK_tblICRinFeedStock_strRinFeedStockCode] UNIQUE ([strRinFeedStockCode])
 	)

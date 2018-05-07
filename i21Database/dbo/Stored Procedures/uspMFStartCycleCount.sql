@@ -1575,7 +1575,7 @@ BEGIN TRY
 		UPDATE tblMFProductionSummary
 		SET dblOpeningQuantity = dblOpeningQuantity - (dblInputQuantity - dblConsumedQuantity)
 		WHERE intWorkOrderId = @intWorkOrderId
-			AND intItemTypeId = 1
+			AND intItemTypeId in ( 1,3)
 	END
 
 	--COMMIT TRANSACTION

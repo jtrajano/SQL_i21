@@ -73,6 +73,7 @@
 	ysnFeedCloseWorkorder bit CONSTRAINT [DF_tblMFWorkOrder_ysnFeedCloseWorkorder] DEFAULT 0,
 	intTransactionFrom int CONSTRAINT [DF_tblMFWorkOrder_intTransactionFrom] DEFAULT 3,
 	strCostAdjustmentBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+	intRecipeTypeId INT,
     CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

@@ -24,7 +24,11 @@ CREATE TABLE [dbo].[tblICItemStockDetail]
 	,[intSubLocationId] INT NULL
 	,[intStorageLocationId] INT NULL
 	,[strTransactionId] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL
-	,[dblQty] NUMERIC(38, 20) NULL DEFAULT ((0))	
+	,[dblQty] NUMERIC(38, 20) NULL DEFAULT ((0))
+	,[dtmDateCreated] DATETIME NULL
+	,[dtmDateModified] DATETIME NULL
+	,[intCreatedByUserId] INT NULL
+	,[intModifiedByUserId] INT NULL
 	,[intConcurrencyId] INT NULL DEFAULT ((1))
 	,CONSTRAINT [PK_tblICItemStockDetail] PRIMARY KEY NONCLUSTERED ([intItemStockDetailId])
 	,CONSTRAINT [FK_tblICItemStockDetail_tblICItemStockType] FOREIGN KEY ([intItemStockTypeId]) REFERENCES [tblICItemStockType]([intItemStockTypeId])

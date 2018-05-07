@@ -65,7 +65,8 @@ DECLARE @temp_statement_table TABLE(
 	,[strName]						NVARCHAR(100)
 	,[strBOLNumber]					NVARCHAR(100)
 	,[dblCreditLimit]				NUMERIC(18,6)
-	,[strAccountStatusCode]			NVARCHAR(50)	
+	,[strAccountStatusCode]			NVARCHAR(50)
+	,[strTicketNumbers]				NVARCHAR(MAX)
 	,[strLocationName]				NVARCHAR(100)
 	,[strFullAddress]				NVARCHAR(MAX)
 	,[strStatementFooterComment]	NVARCHAR(MAX)	
@@ -239,6 +240,7 @@ FROM (
 		 , strBOLNumber					= I.strBOLNumber
 		 , dblCreditLimit				= C.dblCreditLimit
 		 , strAccountStatusCode			= STATUSCODES.strAccountStatusCode
+		 , strTicketNumbers				= I.strTicketNumbers
 		 , strLocationName				= CL.strLocationName
 		 , strFullAddress				= [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
@@ -265,7 +267,23 @@ FROM (
 			 , dtmPostDate
 			 , dtmDueDate
 			 , ysnImportedFromOrigin
+			 , strTicketNumbers	= SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		OUTER APPLY (
+			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+			FROM (
+				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + '', ''
+				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+				INNER JOIN (
+					SELECT intTicketId
+						 , strTicketNumber 
+					FROM dbo.tblSCTicket WITH(NOLOCK)
+				) T ON ID.intTicketId = T.intTicketId
+				WHERE ID.intInvoiceId = I.intInvoiceId
+				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+				FOR XML PATH ('''')
+			) INV (strTicketNumber)
+		) SCALETICKETS
 		WHERE ysnPosted  = 1		
 		AND ysnCancelled = 0
 		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
@@ -377,6 +395,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , strBOLNumber				= NULL
 				  , dblCreditLimit				= C.dblCreditLimit
 				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
+				  , strTicketNumbers			= NULL
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strStatementFooterComment	= NULL
@@ -536,6 +555,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strCompanyName
 	, strCompanyAddress
 	, ysnStatementCreditLimit
+	, strTicketNumbers
 	, dblCreditAvailable
 	, dblFuture
 	, dbl0Days
@@ -549,7 +569,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dtmAsOfDate
 	, blbLogo
 	, intEntityUserId
-	, strStatementFormat
+	, strStatementFormat	
 )
 SELECT MAINREPORT.* 
 	 , dblCreditAvailable	= MAINREPORT.dblCreditLimit - ISNULL(AGINGREPORT.dblTotalAR, 0)
@@ -588,7 +608,8 @@ FROM (
 		 , STATEMENTREPORT.strStatementFooterComment	  
 		 , STATEMENTREPORT.strCompanyName
 		 , STATEMENTREPORT.strCompanyAddress
-		 , STATEMENTREPORT.ysnStatementCreditLimit	  		
+		 , STATEMENTREPORT.ysnStatementCreditLimit
+		 , STATEMENTREPORT.strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
 	WHERE strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table)
 
@@ -616,7 +637,8 @@ FROM (
 		 , STATEMENTREPORT.strStatementFooterComment	  
 		 , STATEMENTREPORT.strCompanyName
 		 , STATEMENTREPORT.strCompanyAddress
-		 , STATEMENTREPORT.ysnStatementCreditLimit	  
+		 , STATEMENTREPORT.ysnStatementCreditLimit
+		 , STATEMENTREPORT.strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
 	INNER JOIN (
 		SELECT intInvoiceId
@@ -639,6 +661,7 @@ FROM (
 			, STATEMENTREPORT.strCompanyAddress
 			, STATEMENTREPORT.ysnStatementCreditLimit
 			, STATEMENTREPORT.intEntityCustomerId
+			, STATEMENTREPORT.strTicketNumbers
 ) MAINREPORT
 LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId

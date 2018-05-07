@@ -1221,8 +1221,8 @@ BEGIN
 									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.intItemUOMIdFrom
 									ELSE RE.intItemUOMId
 								END
-		,[dblQuantity]			= RE.dblQty
-		,[dblGrossWeight]		= RE.dblQty
+		,[dblQuantity]			= (ISNULL(CTC.dblQuantity, 1) / ISNULL(CTD.dblQuantity,1)) * RE.dblQty
+		,[dblGrossWeight]		= (ISNULL(CTC.dblQuantity, 1) / ISNULL(CTD.dblQuantity,1)) * RE.dblQty
 		,[dblTareWeight]		= 0
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
@@ -1237,6 +1237,7 @@ BEGIN
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
 		INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
+		LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = RE.intContractDetailId
 		LEFT JOIN tblCTContractCertification CTC ON CTC.intContractDetailId = RE.intContractDetailId
 		LEFT JOIN tblICCertification ICC ON ICC.intCertificationId = CTC.intCertificationId
 END

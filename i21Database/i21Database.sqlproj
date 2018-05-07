@@ -6460,6 +6460,15 @@
     <Build Include="dbo\Stored Procedures\uspICPostCategory.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetDailyStockPosition.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDiscountLVStaging.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\34_ReplicationConfiguration.sql" />
+    <None Include="Scripts\Post-Deployment\MF\MAS500 Recipe Import.sql" />
+    <Build Include="dbo\Views\vyuICItemLite.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="dbo\Functions\fnSTDynamicQueryInventoryMass.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

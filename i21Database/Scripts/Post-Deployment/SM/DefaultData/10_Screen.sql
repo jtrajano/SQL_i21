@@ -639,3 +639,394 @@ ELSE
 		WHERE strNamespace = 'Manufacturing.view.Recipe'
 	END
 GO
+	------------------------ START REPLICATION SCREEN ------------------------
+
+	-- Parent
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.EntityUser') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Users', N'Users', N'i21.view.EntityUser', N'System Manager', N'tblSMUserSecurity', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.UserRole') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'User Roles', N'User Roles', N'i21.view.UserRole', N'System Manager', N'tblSMUserRole', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Country') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Countries', N'Countries', N'i21.view.Country', N'System Manager', N'tblSMCountry', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Currency') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Currencies', N'Currencies', N'i21.view.Currency', N'System Manager', N'tblSMCurrency', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.EntityShipVia') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Ship Via', N'Ship Via', N'i21.view.EntityShipVia', N'System Manager', N'tblSMShipVia', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.PaymentMethod') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Payment Methods', N'Payment Methods', N'i21.view.PaymentMethod', N'System Manager', N'tblSMPaymentMethod', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.Term') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Terms', N'Terms', N'i21.view.Term', N'System Manager', N'tblSMTerm', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.CompanyLocation') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Company Locations', N'Company Locations', N'i21.view.CompanyLocation', N'System Manager', N'tblSMCompanyLocation', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.FreightTerm') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Freight Terms', N'Freight Terms', N'i21.view.FreightTerm', N'System Manager', N'tblSMFreightTerm', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.City') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Cities', N'Cities', N'i21.view.City', N'System Manager', N'tblSMCity', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.CurrencyExchangeRate') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Currency Exchange Rates', N'Currency Exchange Rates', N'i21.view.CurrencyExchangeRate', N'System Manager', N'tblSMCurrencyExchangeRate', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.CurrencyExchangeRateType') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Currency Exchange Rate Types', N'Currency Exchange Rate Types', N'i21.view.CurrencyExchangeRateType', N'System Manager', N'tblSMCurrencyExchangeRateType', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'i21.view.LineOfBusiness') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Lines of Business', N'Lines of Business', N'i21.view.LineOfBusiness', N'System Manager', N'tblSMLineOfBusiness', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.ScreenLabel') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Screen Labels', N'Screen Labels', N'GlobalComponentEngine.view.ScreenLabel', N'System Manager', N'tblSMScreenLabel', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GlobalComponentEngine.view.ReportLabel') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Report Labels', N'Report Labels', N'GlobalComponentEngine.view.ReportLabel', N'System Manager', N'tblSMReportLabel', 1, N'System Manager')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.BrokerageAccount') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Brokerage Accounts', N'Brokerage Accounts', N'RiskManagement.view.BrokerageAccount', N'Risk Management', N'tblRKBrokerageAccount', 1, N'Risk Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor?searchCommand=EntityFuturesBroker') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Futures Broker', N'Futures Broker', N'AccountsPayable.view.EntityVendor?searchCommand=EntityFuturesBroker', N'Risk Management', N'tblRKFuturesBroker', 1, N'Risk Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.FuturesOptionsSettlementPrices') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Settlement Price', N'Settlement Price', N'RiskManagement.view.FuturesOptionsSettlementPrices', N'Risk Management', N'tblRKFutSettlementPriceMarketMap', 1, N'Risk Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.BasisEntry') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Basis Entry', N'Basis Entry', N'RiskManagement.view.BasisEntry', N'Risk Management', N'tblRKM2MBasis', 1, N'Risk Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.QualityParameters') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Quality Parameters', N'Quality Parameters', N'Quality.view.QualityParameters', N'Quality', N'tblQMAttribute', 1, N'Quality')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Payroll.view.EntityEmployee') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Employees', N'Employees', N'Payroll.view.EntityEmployee', N'Payroll', N'tblPREmployee', 1, N'Payroll')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor?searchCommand=EntityShippingLine') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Shipping Lines', N'Shipping Lines', N'AccountsPayable.view.EntityVendor?searchCommand=EntityShippingLine', N'Logistics', N'tblEMEntity', 1, N'Logistics')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor?searchCommand=EntityForwardingAgent') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Forwarding Agents', N'Forwarding Agents', N'AccountsPayable.view.EntityVendor?searchCommand=EntityForwardingAgent', N'Logistics', N'tblEMEntity', 1, N'Logistics')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor?searchCommand=EntityTerminal') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Terminals', N'Terminals', N'AccountsPayable.view.EntityVendor?searchCommand=EntityTerminal', N'Logistics', N'tblEMEntity', 1, N'Logistics')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ShippingMode') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Shipping Mode', N'Shipping Mode', N'Logistics.view.ShippingMode', N'Logistics', N'tblLGShippingMode', 1, N'Logistics')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ReasonCode') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Reason Code', N'Reason Code', N'Logistics.view.ReasonCode', N'Logistics', N'tblLGReasonCode', 1, N'Logistics')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ContainerType') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Container Types', N'Container Types', N'Logistics.view.ContainerType', N'Logistics', N'tblLGContainerType', 1, N'Logistics')
+	END
+		
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.WarehouseRateMatrix') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Warehouse Rate Matrix', N'Warehouse Rate Matrix', N'Logistics.view.WarehouseRateMatrix', N'Logistics', N'tblLGWarehouseRateMatrixDetail', 1, N'Logistics')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Items', N'Items', N'Inventory.view.Item', N'Inventory', N'tblICItem', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Commodity') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Commodities', N'Commodities', N'Inventory.view.Commodity', N'Inventory', N'tblICCommodity', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Category') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Categories', N'Categories', N'Inventory.view.Category', N'Inventory', N'tblICCategory', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryUOM') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Inventory UOM', N'Inventory UOM', N'Inventory.view.InventoryUOM', N'Inventory', N'tblICUnitMeasure', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.StorageUnit') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Storage Units', N'Storage Units', N'Inventory.view.StorageUnit', N'Inventory', N'tblICStorageUnitType', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.FiscalYear') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Fiscal Year', N'Fiscal Year', N'GeneralLedger.view.FiscalYear', N'General Ledger', N'tblGLCurrentFiscalYear', 1, N'General Ledger')
+	END
+		
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.ChartOfAccounts') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Chart of Accounts', N'Chart of Accounts', N'GeneralLedger.view.ChartOfAccounts', N'General Ledger', N'tblGLAccount', 1, N'General Ledger')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.AccountStructure') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Account Structure', N'Account Structure', N'GeneralLedger.view.AccountStructure', N'General Ledger', N'tblGLAccountStructure', 1, N'General Ledger')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'GeneralLedger.view.AccountGroups') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Account Groups', N'Account Groups', N'GeneralLedger.view.AccountGroups', N'General Ledger', N'tblGLAccountGroup', 1, N'General Ledger')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Condition') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Condition', N'Condition', N'ContractManagement.view.Condition', N'Contract Management', N'tblCTCondition', 1, N'Contract Management')
+	END
+		
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.ContractDocument') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Documents', N'Documents', N'ContractManagement.view.ContractDocument', N'Contract Management', N'tblICDocument', 1, N'Contract Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Associations') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Associations', N'Associations', N'ContractManagement.view.Associations', N'Contract Management', N'tblCTAssociation', 1, N'Contract Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.INCOShipTerm') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'INCO/Ship Term', N'INCO/Ship Term', N'ContractManagement.view.INCOShipTerm', N'Contract Management', N'tblCTContractBasis', 1, N'Contract Management')
+	END
+		
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Reporting.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'AOP Vs Actual', N'AOP Vs Actual', N'Reporting.view.ReportManager?group=Contract Management&report=AOPVsActual&direct=true&showCriteria=true', N'Contract Management', N'tblCTAOP', 1, N'Contract Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.WeightGrades') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Weight/Grades', N'Weight/Grades', N'ContractManagement.view.WeightGrades', N'Contract Management', N'tblCTWeightGrade', 1, N'Contract Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.Banks') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Banks', N'Banks', N'CashManagement.view.Banks', N'Cash Management', N'tblCMBank', 1, N'Cash Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.BankAccounts') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Bank Accounts', N'Bank Accounts', N'CashManagement.view.BankAccounts', N'Cash Management', N'tblCMBankAccount', 1, N'Cash Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'CashManagement.view.BankAccounts') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Bank Accounts', N'Bank Accounts', N'CashManagement.view.BankAccounts', N'Cash Management', N'tblCMBankAccount', 1, N'Cash Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Customers', N'Customers', N'AccountsReceivable.view.EntityCustomer', N'Accounts Receivable', N'tblARCustomer', 1, N'Accounts Receivable')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntitySalesperson') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Sales Reps', N'Sales Reps', N'AccountsReceivable.view.EntitySalesperson', N'Accounts Receivable', N'tblARSalesperson', 1, N'Accounts Receivable')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.EntityVendor') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Vendors', N'Vendors', N'AccountsPayable.view.EntityVendor', N'Accounts Payable', N'tblAPVendor', 1, N'Accounts Payable')
+	END
+
+
+	-- Subsidiary
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.OptionsLifecycle') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Option Lifecycle', N'Option Lifecycle', N'RiskManagement.view.OptionsLifecycle', N'Risk Management', N'tblRKFutOptTransactionHeader', 1, N'Risk Management')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.DerivativeEntry') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Derivative Entry', N'Derivative Entry', N'RiskManagement.view.DerivativeEntry', N'Risk Management', NULL, 1, N'Risk Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.AssignFuturesToContracts') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Assign Derivatives', N'Assign Derivatives', N'RiskManagement.view.AssignFuturesToContracts', N'Risk Management', 'tblRKAssignFuturesToContractSummary', 1, N'Risk Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.MatchDerivatives') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
+		VALUES (N'Match Derivatives', N'Match Derivatives', N'RiskManagement.view.MatchDerivatives', N'Risk Management', 'tblRKOptionsMatchPnSHeader', 1, N'Risk Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Quality.view.QualitySample') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Sample Entry', N'Sample Entry', N'Quality.view.QualitySample', N'Quality', NULL, 1, N'Quality')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.WeightClaims') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Weight Claims', N'Weight Claims', N'Logistics.view.WeightClaims', N'Logistics', 'tblLGWeightClaim', 1, N'Logistics')
+	END	
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ShipmentSchedule') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Load / Shipment Schedules', N'Load / Shipment Schedules', N'Logistics.view.ShipmentSchedule', N'Logistics', 'tblLGLoad', 1, N'Logistics')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryAdjustment') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Inventory Adjustments', N'Inventory Adjustments', N'Inventory.view.InventoryAdjustment', N'Inventory', 'tblICInventoryAdjustment', 1, N'Inventory')
+	END
+			
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Inventory Receipts', N'Inventory Receipts', N'Inventory.view.InventoryReceipt', N'Inventory', 'tblICInventoryReceipt', 1, N'Inventory')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryShipment') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Inventory Shipments', N'Inventory Shipments', N'Inventory.view.InventoryShipment', N'Inventory', 'tblICInventoryShipment', 1, N'Inventory')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryTransfer') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Inventory Transfers', N'Inventory Transfers', N'Inventory.view.InventoryTransfer', N'Inventory', 'tblICInventoryTransfer', 1, N'Inventory')
+	END
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryCount') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Inventory Count', N'Inventory Count', N'Inventory.view.InventoryCount', N'Inventory', 'tblICInventoryCount', 1, N'Inventory')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Contracts', N'Contracts', N'ContractManagement.view.Contract', N'Contract Management', 'tblCTContractCost', 1, N'Contract Management')
+	END
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.Invoice') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Invoices', N'Invoices', N'AccountsReceivable.view.Invoice', N'Accounts Receivable', 'tblARInvoice', 1, N'Accounts Receivable')
+	END
+			
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher') 
+	BEGIN
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
+		VALUES (N'Vouchers', N'Vouchers', N'AccountsPayable.view.Voucher', N'Accounts Payable', 'tblAPBill', 1, N'Accounts Payable')
+	END
+
+	------------------------ END REPLICATION SCREEN ------------------------
+GO

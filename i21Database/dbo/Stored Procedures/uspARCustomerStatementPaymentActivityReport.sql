@@ -75,7 +75,8 @@ DECLARE @temp_statement_table TABLE(
     ,[dblPayment]					NUMERIC(18,6)
     ,[dblBalance]					NUMERIC(18,6)
     ,[strSalespersonName]			NVARCHAR(100)
-	,[strAccountStatusCode]			NVARCHAR(50)	
+	,[strAccountStatusCode]			NVARCHAR(50)
+	,[strTicketNumbers]				NVARCHAR(MAX)	
 	,[strLocationName]				NVARCHAR(100)    
     ,[strFullAddress]				NVARCHAR(MAX)
 	,[strStatementFooterComment]	NVARCHAR(MAX)
@@ -240,6 +241,7 @@ SELECT intEntityCustomerId	= C.intEntityId
 	  , dblBalance			= CASE WHEN I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1 ELSE I.dblInvoiceTotal END - ISNULL(TOTALPAYMENT.dblPayment, 0)
 	  , strSalespersonName  = C.strSalesPersonName
 	  , strAccountStatusCode = STATUSCODES.strAccountStatusCode
+	  , strTicketNumbers	= I.strTicketNumbers
 	  , strLocationName		= CL.strLocationName
 	  , strFullAddress		= dbo.fnARFormatCustomerAddress('''', '''', C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
 	  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
@@ -264,7 +266,23 @@ FROM vyuARCustomerSearch C
 			 , dtmDueDate
 			 , dtmShipDate
 			 , ysnImportedFromOrigin
+			 , strTicketNumbers = SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		OUTER APPLY (
+			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+			FROM (
+				SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + '', ''
+				FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+				INNER JOIN (
+					SELECT intTicketId
+						 , strTicketNumber 
+					FROM dbo.tblSCTicket WITH(NOLOCK)
+				) T ON ID.intTicketId = T.intTicketId
+				WHERE ID.intInvoiceId = I.intInvoiceId
+				GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+				FOR XML PATH ('''')
+			) INV (strTicketNumber)
+		) SCALETICKETS
 		WHERE ysnPosted = 1
 		AND ysnCancelled = 0
 		AND I.strType <> ''CF Tran''
@@ -390,6 +408,7 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblBalance					= dblBudgetAmount - dblAmountPaid
 				  , strSalespersonName			= NULL
 				  , strAccountStatusCode		= STATUSCODES.strAccountStatusCode
+				  , strTicketNumbers			= NULL
 				  , strLocationName				= NULL
 				  , strFullAddress				= NULL
 				  , strStatementFooterComment	= NULL
@@ -543,6 +562,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strCompanyName
 	, strCompanyAddress
 	, ysnStatementCreditLimit
+	, strTicketNumbers
 	, dblCreditAvailable
 	, dblFuture
 	, dbl0Days
@@ -599,7 +619,8 @@ FROM (
 		 , strStatementFooterComment	= STATEMENTREPORT.strStatementFooterComment
 		 , strCompanyName
 		 , strCompanyAddress
-		 , ysnStatementCreditLimit		= STATEMENTREPORT.ysnStatementCreditLimit		 
+		 , ysnStatementCreditLimit		= STATEMENTREPORT.ysnStatementCreditLimit
+		 , strTicketNumbers				= STATEMENTREPORT.strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
 	WHERE STATEMENTREPORT.intInvoiceId NOT IN (SELECT intInvoiceId FROM @temp_cf_table)
 
@@ -631,6 +652,7 @@ FROM (
 		 , strCompanyName
 		 , strCompanyAddress
 		 , ysnStatementCreditLimit		= STATEMENTREPORT.ysnStatementCreditLimit
+		 , strTicketNumbers				= STATEMENTREPORT.strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
 	INNER JOIN (
 		SELECT intInvoiceId

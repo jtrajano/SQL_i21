@@ -19,7 +19,6 @@
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_intConcurrencyId] DEFAULT 0,
     CONSTRAINT [PK_tblMFWorkOrderRecipeSubstituteItem_intRecipeSubstituteItemId] PRIMARY KEY ([intRecipeSubstituteItemId],[intWorkOrderId]),
-	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId],[intWorkOrderId]) REFERENCES [tblMFWorkOrderRecipeItem]([intRecipeItemId],[intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId],[intWorkOrderId]) REFERENCES [tblMFWorkOrderRecipe]([intRecipeId],[intWorkOrderId]), 
 	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblICItem_intItemId_intSubstituteItemId] FOREIGN KEY ([intSubstituteItemId]) REFERENCES [tblICItem]([intItemId]),

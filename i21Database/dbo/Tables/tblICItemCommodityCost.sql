@@ -9,6 +9,10 @@
     [dblEOMCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
+    [dtmDateCreated] DATETIME NULL,
+    [dtmDateModified] DATETIME NULL,
+    [intCreatedByUserId] INT NULL,
+    [intModifiedByUserId] INT NULL,
     CONSTRAINT [PK_tblICItemCommodityCost] PRIMARY KEY ([intItemCommodityCostId]), 
     CONSTRAINT [FK_tblICItemCommodityCost_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemCommodityCost_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])

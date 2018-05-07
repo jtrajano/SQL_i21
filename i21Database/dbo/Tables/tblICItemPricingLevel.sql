@@ -28,7 +28,12 @@ Type the overview for the table here.
 		[dblCommissionRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intCurrencyId] [int] NULL,
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmDateChanged] DATETIME NULL,
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
@@ -187,3 +192,17 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemPricingLevel',
     @level2type = N'COLUMN',
     @level2name = N'dblAmountRate'
+GO
+
+CREATE TRIGGER [dbo].[trgItemPricingLevelDateChanged]
+    ON [dbo].[tblICItemPricingLevel]
+   AFTER INSERT, UPDATE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+   UPDATE tblICItemPricingLevel
+      SET tblICItemPricingLevel.dtmDateChanged = GETDATE()
+     FROM   inserted
+    WHERE tblICItemPricingLevel.intItemPricingLevelId = inserted.intItemPricingLevelId
+END

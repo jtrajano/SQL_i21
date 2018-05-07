@@ -7,6 +7,10 @@
     [dblDeltaPercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
+    [dtmDateCreated] DATETIME NULL,
+    [dtmDateModified] DATETIME NULL,
+    [intCreatedByUserId] INT NULL,
+    [intModifiedByUserId] INT NULL,
     CONSTRAINT [PK_tblICCommodityProductLine] PRIMARY KEY ([intCommodityProductLineId]), 
     CONSTRAINT [FK_tblICCommodityProductLine_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]) ON DELETE CASCADE
 )
