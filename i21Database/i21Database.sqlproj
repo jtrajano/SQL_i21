@@ -6469,6 +6469,9 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Functions\fnSTDynamicQueryInventoryMass.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCategory.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
