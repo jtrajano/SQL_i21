@@ -34,6 +34,7 @@ BEGIN
 			,@TaxExempt			BIT
 			,@InvalidSetup		BIT
 			,@State				NVARCHAR(100)
+			,@SiteNumberId		INT
 	
 	SET @TaxCodeExemption = NULL
 	SET @ExemptionPercent = 0.00000
@@ -54,6 +55,13 @@ BEGIN
 				,[strExemptionNotes] = @TaxCodeExemption
 				,[dblExemptionPercent] = @ExemptionPercent
 			RETURN 
+		END
+
+	IF ISNULL(@SiteId, 0) <> 0
+		BEGIN
+			SELECT TOP 1 @SiteNumberId = intSiteNumber
+			FROM tblTMSite 
+			WHERE intSiteID = @SiteId
 		END
 				
 		--END
@@ -233,7 +241,7 @@ BEGIN
 			ON TE.[intVehicleId] = CFV.[intVehicleId] 
 	LEFT OUTER JOIN
 		tblTMSite TMS
-			ON TE.[intSiteNumber] = TMS.[intSiteID]
+			ON TE.[intSiteNumber] = TMS.[intSiteNumber]
 	WHERE
 		TE.[intEntityCustomerId] = @CustomerId		
 		AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(TE.[dtmStartDate], @TransactionDate) AS DATE) AND CAST(ISNULL(TE.[dtmEndDate], @TransactionDate) AS DATE)
@@ -243,7 +251,7 @@ BEGIN
 		AND (ISNULL(TE.[intTaxCodeId], 0) = 0 OR TE.[intTaxCodeId] = @TaxCodeId)
 		AND (ISNULL(TE.[intTaxClassId], 0) = 0 OR TE.[intTaxClassId] = @TaxClassId)
 		AND (ISNULL(TE.[intCardId], 0) = 0 OR TE.[intCardId] = @CardId)
-		AND (ISNULL(TE.[intSiteNumber], 0) = 0 OR TE.[intSiteNumber] = @SiteId)
+		AND (ISNULL(TE.[intSiteNumber], 0) = 0 OR TE.[intSiteNumber] = @SiteNumberId)
 		AND (ISNULL(TE.[intVehicleId], 0) = 0 OR TE.[intVehicleId] = @VehicleId)
 		AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR (TE.[strState] = @State AND @State = @TaxState) OR LEN(LTRIM(RTRIM(ISNULL(@State,'')))) <= 0 )
 		--AND (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) <= 0 OR ISNULL(TE.[intTaxCodeId], 0) = 0 OR (LEN(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) > 0 AND UPPER(LTRIM(RTRIM(ISNULL(TE.[strState],'')))) = UPPER(LTRIM(RTRIM(@TaxState)))))
