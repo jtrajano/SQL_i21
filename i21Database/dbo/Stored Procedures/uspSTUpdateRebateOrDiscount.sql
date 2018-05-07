@@ -226,7 +226,7 @@ BEGIN TRY
 	 BEGIN
 	    SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
 				(
-					'Accumlated Amount'
+					'Accumulated Amount'
 					, 'CAST(IP.dblAccumulatedAmount AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, 'CAST(' + CAST(@AccumAmount AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, @Location
@@ -248,7 +248,7 @@ BEGIN TRY
 	 BEGIN
 	     SET @SQL1 = dbo.fnSTDynamicQueryRebateOrDiscount
 				(
-					'Accumlated Quantity'
+					'Accumulated Quantity'
 					, 'CAST(IP.dblAccumulatedQty AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, 'CAST(' + CAST(@AccumlatedQty AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
 					, @Location
@@ -556,19 +556,19 @@ END
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblDiscount","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Accumlated Amount')
+				ELSE IF(@strChangeDescription = 'Accumulated Amount')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblAccumulatedAmount","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Accumlated Quantity')
+				ELSE IF(@strChangeDescription = 'Accumulated Quantity')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblAccumulatedQty","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Discoount through amount')
+				ELSE IF(@strChangeDescription = 'Discount through amount')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblDiscountThruAmount","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Discoount through quantity')
+				ELSE IF(@strChangeDescription = 'Discount through quantity')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblDiscountThruQty","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
@@ -626,12 +626,15 @@ END
     
 
 --NEW
-SELECT @UpdateCount = COUNT(*)
-FROM 
-(
-  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
-) T1
-SELECT  @RecCount as RecCount,  @UpdateCount as UpdateRebateOrDiscountCount
+--SELECT @UpdateCount = COUNT(*)
+--FROM 
+--(
+--  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
+--) T1
+
+SELECT @UpdateCount = COUNT(DISTINCT intChildId) FROM @tblTempOne
+
+SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemPrcicingCount
 
 DELETE FROM tblSTMassUpdateReportMaster
 
@@ -643,13 +646,14 @@ SELECT strLocation
 	  , strOldData
 	  , strNewData 
 FROM @tblTempOne
+ORDER BY strItemDescription ASC
 
 
 --OLD
 --SELECT  @RecCount as RecCount,  @UpdateCount as UpdateRebateOrDiscountCount	
 
 -- Update Register Notification
-EXEC uspSTUpdateRegisterNotification	  
+--EXEC uspSTUpdateRegisterNotification ''  
 
 END TRY
 
