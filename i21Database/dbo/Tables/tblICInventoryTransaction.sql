@@ -60,6 +60,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL, 
 		[intCompanyId] INT NULL, 
+		[dblUnitRetail] NUMERIC(38, 20) NULL,
 		[dblCategoryCostValue] NUMERIC(38, 20) NULL, 
 		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 		[intCategoryId] INT NULL,

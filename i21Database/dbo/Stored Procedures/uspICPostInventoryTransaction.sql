@@ -31,6 +31,7 @@
 	,@dblForexRate NUMERIC(38, 20) = 1
 	,@strDescription NVARCHAR(255) = NULL 
 	,@strActualCostId NVARCHAR(50) = NULL  
+	,@dblUnitRetail NUMERIC(38,20) = NULL  
 	,@dblCategoryCostValue NUMERIC(38,20) = NULL  
 	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
 AS
@@ -97,6 +98,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[dblForexRate]
 		,[strDescription]
 		,[strActualCostId]
+		,[dblUnitRetail]
 		,[dblCategoryCostValue]
 		,[dblCategoryRetailValue]
 		,[intCategoryId]
@@ -135,6 +137,7 @@ SELECT	[intItemId]							= @intItemId
 		,[dblForexRate]						= @dblForexRate
 		,[strDescription]					= @strDescription
 		,[strActualCostId]					= @strActualCostId
+		,[dblUnitRetail]					= @dblUnitRetail
 		,[dblCategoryCostValue]				= @dblCategoryCostValue
 		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
 		,[intCategoryId]					= i.intCategoryId

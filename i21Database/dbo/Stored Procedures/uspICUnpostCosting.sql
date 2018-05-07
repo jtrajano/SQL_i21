@@ -289,6 +289,7 @@ BEGIN
 			,[dblUOMQty]
 			,[dblCost]
 			,[dblValue]
+			,[dblUnitRetail]
 			,[dblSalesPrice]
 			,[intCurrencyId]
 			,[dblExchangeRate]
@@ -314,7 +315,8 @@ BEGIN
 			,[dblForexRate]
 			,[intCompanyId]
 			,[dblCategoryCostValue]
-			,[dblCategoryRetailValue]			
+			,[dblCategoryRetailValue]
+			,[intCategoryId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -327,6 +329,7 @@ BEGIN
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
 			,[dblValue]								= -ActualTransaction.dblValue
+			,[dblUnitRetail]						= ActualTransaction.dblUnitRetail 
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
@@ -353,7 +356,7 @@ BEGIN
 			,[intCompanyId]							= ActualTransaction.intCompanyId
 			,[dblCategoryCostValue]					= -ActualTransaction.dblCategoryCostValue
 			,[dblCategoryRetailValue]				= -ActualTransaction.dblCategoryRetailValue
-
+			,[intCategoryId]						= ActualTransaction.intCategoryId 
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
