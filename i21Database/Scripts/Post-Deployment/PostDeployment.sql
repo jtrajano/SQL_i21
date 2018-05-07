@@ -69,6 +69,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\33_InterCompanyTransactionType.sql
 :r .\SM\DefaultData\34_ReplicationConfiguration.sql
 :r .\SM\1810_Reset_Hours_Terms.sql
+:r .\SM\1810_tblSMCompanyGridlayout_DeleteDuplicateRecords.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
