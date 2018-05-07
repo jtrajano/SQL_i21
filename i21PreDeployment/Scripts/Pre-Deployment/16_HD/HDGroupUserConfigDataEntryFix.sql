@@ -20,8 +20,8 @@ GO
 				exec(
 						'Update
 							a set
-							a.intUserSecurityEntityId = b.intEntityUserSecurityId
-							,a.intUserSecurityId = b.intEntityUserSecurityId
+							a.intUserSecurityEntityId = b.intEntityId
+							,a.intUserSecurityId = b.intEntityId
 						from
 							tblHDGroupUserConfig a, tblSMUserSecurity b
 						where
