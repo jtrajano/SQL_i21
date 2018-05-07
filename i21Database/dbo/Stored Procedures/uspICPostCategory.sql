@@ -118,29 +118,73 @@ BEGIN
 		SET @dblCostValue = dbo.fnMultiply(@dblQty, @dblCost) 				
 	END 
 
-	-- Update the Category Pricing 
-	UPDATE	CategoryPricing
-	SET		dblTotalCostValue = ISNULL(dblTotalCostValue, 0) + ISNULL(@dblCostValue, 0) 
-			,dblTotalRetailValue = ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) 
-			,dblAverageMargin = 
+	MERGE	
+	INTO	dbo.tblICCategoryPricing 
+	WITH	(HOLDLOCK) 
+	AS		CategoryPricing	
+	USING (
+			SELECT	intCategoryId = @intCategoryId
+					,intItemLocationId = @intItemLocationId
+					,dblCostValue = @dblCostValue
+					,dblRetailValue = @dblRetailValue
+	) AS CategoryCosting
+		ON CategoryPricing.intCategoryId = CategoryCosting.intCategoryId
+		AND CategoryPricing.intItemLocationId = CategoryCosting.intItemLocationId
+
+	-- If matched, update the unit on hand qty. 
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET		dblTotalCostValue = ISNULL(dblTotalCostValue, 0) + ISNULL(@dblCostValue, 0) 
+				,dblTotalRetailValue = ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) 
+				,dblAverageMargin = 
+					CASE 
+						WHEN @dblQty < 1 THEN 
+							CategoryPricing.dblAverageMargin 
+						WHEN ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) <> 0 THEN 
+							dbo.fnDivide(
+								(
+									(ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0))
+									- (ISNULL(dblTotalCostValue, 0) + ISNULL(@dblCostValue, 0))
+								)
+								, (ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0))
+							)						
+						ELSE 
+							0.00
+					END
+
+	-- If none found, insert a new item stock record
+	WHEN NOT MATCHED THEN 
+		INSERT (
+			[intCategoryId]
+			,[intItemLocationId]
+			,[dblTotalCostValue]
+			,[dblTotalRetailValue]
+			,[dblAverageMargin]
+			,[intSort]
+			,[intConcurrencyId]
+		)
+		VALUES (
+			@intCategoryId --[intCategoryId]
+			,@intItemLocationId--,[intItemLocationId]
+			,ISNULL(@dblCostValue,0)--,[dblTotalCostValue]
+			,ISNULL(@dblRetailValue, 0)--,[dblTotalRetailValue]
+			,--,[dblAverageMargin]
 				CASE 
-					WHEN @dblQty < 1 THEN 
-						CategoryPricing.dblAverageMargin 
-					WHEN ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) <> 0 THEN 
-						dbo.fnDivide(
-							(
-								(ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0))
-								- (ISNULL(dblTotalCostValue, 0) + ISNULL(@dblCostValue, 0))
-							)
-							, (ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0))
-						)						
-					ELSE 
-						0.00
-				END
-	FROM	tblICCategoryPricing CategoryPricing 
-	WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
-			AND CategoryPricing.intCategoryId = @intCategoryId
-			AND CategoryPricing.intItemLocationId = @intItemLocationId
+						WHEN ISNULL(@dblRetailValue, 0) <> 0 THEN 
+							dbo.fnDivide(
+								(
+									ISNULL(@dblRetailValue, 0)
+									- ISNULL(@dblCostValue, 0)
+								)
+								, ISNULL(@dblRetailValue, 0)
+							)						
+						ELSE 
+							0.00
+					END
+			,1--,[intSort]
+			,1--,[intConcurrencyId]
+		)
+	;
 
 	EXEC [dbo].[uspICPostInventoryTransaction]
 			@intItemId = @intItemId
@@ -171,8 +215,8 @@ BEGIN
 			,@intForexRateTypeId = @intForexRateTypeId
 			,@dblForexRate = @dblForexRate
 			,@dblUnitRetail = @dblUnitRetail
-			,@dblCostValue = @dblCostValue
-			,@dblRetailValue = @dblRetailValue 
+			,@dblCategoryCostValue = @dblCostValue
+			,@dblCategoryRetailValue = @dblRetailValue 
 END 
 
 -- Adjust the retail value. 
@@ -229,6 +273,6 @@ BEGIN
 			,@intForexRateTypeId = @intForexRateTypeId
 			,@dblForexRate = @dblForexRate
 			,@dblUnitRetail = @dblUnitRetail
-			,@dblCostValue = NULL
-			,@dblRetailValue = @dblAdjustRetailValue 
+			,@dblCategoryCostValue = NULL
+			,@dblCategoryRetailValue = @dblAdjustRetailValue 
 END 
