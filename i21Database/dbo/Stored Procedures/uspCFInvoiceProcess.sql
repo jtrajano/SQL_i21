@@ -216,7 +216,7 @@ BEGIN TRY
 
 	INSERT INTO tblCFInvoiceProcessHistory
 	(
-			intCustomerId
+		 intCustomerId
 		,intInvoiceId
 		,intPaymentId
 		,strCustomerNumber
@@ -227,6 +227,7 @@ BEGIN TRY
 		,dblTotalQuantity
 		,dblDiscountEligibleQuantity
 		,dblDiscountAmount
+		,dtmInvoiceDate
 	)
 	SELECT
 		 intCustomerId
@@ -240,6 +241,7 @@ BEGIN TRY
 		,dblInvoiceQuantity
 		,dblInvoiceQuantity
 		,dblInvoiceDiscount
+		,dtmInvoiceDate
 	FROM tblCFInvoiceProcessResult as ipr
 	INNER JOIN tblEMEntity as ent
 	ON ipr.intCustomerId = ent.intEntityId
