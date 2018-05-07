@@ -99,6 +99,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[strActualCostId]
 		,[dblCategoryCostValue]
 		,[dblCategoryRetailValue]
+		,[intCategoryId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -136,7 +137,10 @@ SELECT	[intItemId]							= @intItemId
 		,[strActualCostId]					= @strActualCostId
 		,[dblCategoryCostValue]				= @dblCategoryCostValue
 		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
-WHERE	@intItemId IS NOT NULL
+		,[intCategoryId]					= i.intCategoryId
+FROM	tblICItem i 
+WHERE	i.intItemId = @intItemId
+		AND @intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
 
