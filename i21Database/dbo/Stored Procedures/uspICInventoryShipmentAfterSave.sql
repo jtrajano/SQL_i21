@@ -483,6 +483,27 @@ BEGIN
 	DEALLOCATE loopForStockReservation;
 END
 
+-- Delete Quality Management Inspection
+DECLARE @intProductTypeId AS INT = 4 -- Shipment
+	,@intProductValueId AS INT = @ShipmentId -- intInventoryShipmentId
+
+IF @ForDelete = 1
+BEGIN
+	EXEC uspQMInspectionDeleteResult @intProductValueId, @intProductTypeId
+END
+ELSE
+BEGIN
+	DECLARE @intControlPointId AS INT = 3
+	DECLARE @QualityInspectionTable QualityInspectionTable
+ 
+	INSERT INTO @QualityInspectionTable (intPropertyId,strPropertyName,strPropertyValue,strComment)
+	SELECT iri.intQAPropertyId, iri.strPropertyName,'true / false', iri.strComment
+	FROM tblICInventoryShipmentInspection iri
+	WHERE iri.intInventoryShipmentId = @ShipmentId
+ 
+	EXEC uspQMInspectionSaveResult @intControlPointId, @intProductTypeId, @intProductValueId, @UserId, @QualityInspectionTable	
+END
+
 DROP TABLE #tmpLogShipmentItems
 DROP TABLE #tmpShipmentItems
 

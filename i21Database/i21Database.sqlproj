@@ -6477,6 +6477,9 @@
     <Build Include="dbo\Views\vyuPOSGetLoggedIn.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDataInsertAuditLog.sql" />
 	<Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentUOMChange.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTableShipmentInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSaveShipmentInspection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
