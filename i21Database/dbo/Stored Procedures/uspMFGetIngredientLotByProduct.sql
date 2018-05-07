@@ -78,10 +78,7 @@ BEGIN
 					THEN SU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFRecipe R
-		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-			AND R.intItemId = @intItemId
-			AND R.intLocationId = @intLocationId
-			AND R.ysnActive = 1
+		LEFT JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
 			AND RI.intConsumptionMethodId = (
 				CASE 
@@ -92,10 +89,21 @@ BEGIN
 				)
 		LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 			AND SI.intRecipeId = R.intRecipeId
-		JOIN dbo.tblICLot L ON (
-				L.intItemId = RI.intItemId
-				OR L.intItemId = SI.intSubstituteItemId
+		LEFT JOIN dbo.tblMFRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
+			AND RC.intRecipeItemTypeId = 1
+		JOIN dbo.tblICItem I ON (
+				I.intItemId = RI.intItemId
+				OR I.intItemId = SI.intSubstituteItemId
+				OR (
+					I.intCategoryId = IsNULL(RC.intCategoryId, I.intCategoryId)
+					AND R.intRecipeTypeId = 3
+					)
 				)
+			AND I.strInventoryTracking = 'Lot Level'
+		JOIN dbo.tblICLot L ON I.intItemId = L.intItemId
+			AND R.intItemId = @intItemId
+			AND R.intLocationId = @intLocationId
+			AND R.ysnActive = 1
 			AND L.intStorageLocationId = @intStorageLocationId
 			AND L.intItemId = (
 				CASE 
@@ -104,8 +112,6 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
-		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-			AND I.strInventoryTracking = 'Lot Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
@@ -145,7 +151,7 @@ BEGIN
 						THEN L.dblWeight
 					ELSE L.dblQty
 					END
-				) - IsNULL(SR.dblWeight, 0) >0
+				) - IsNULL(SR.dblWeight, 0) > 0
 		
 		UNION
 		
@@ -181,10 +187,7 @@ BEGIN
 				ELSE RU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFRecipe R
-		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-			AND R.intItemId = @intItemId
-			AND R.intLocationId = @intLocationId
-			AND R.ysnActive = 1
+		LEFT JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
 			AND RI.intConsumptionMethodId = (
 				CASE 
@@ -195,10 +198,17 @@ BEGIN
 				)
 		LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 			AND SI.intRecipeId = R.intRecipeId
-		JOIN dbo.tblICItemStockUOM S ON (
-				S.intItemId = RI.intItemId
-				OR S.intItemId = SI.intSubstituteItemId
+		LEFT JOIN tblMFRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
+		JOIN dbo.tblICItem I ON (
+				I.intItemId = RI.intItemId
+				OR I.intItemId = SI.intSubstituteItemId
+				OR (
+					I.intCategoryId = IsNULL(RC.intCategoryId, I.intCategoryId)
+					AND R.intRecipeTypeId = 3
+					)
 				)
+			AND I.strInventoryTracking = 'Item Level'
+		JOIN dbo.tblICItemStockUOM S ON I.intItemId = S.intItemId
 			AND S.intStorageLocationId = @intStorageLocationId
 			AND S.intItemId = (
 				CASE 
@@ -207,8 +217,9 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
-		JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
-			AND I.strInventoryTracking = 'Item Level'
+			AND R.intItemId = @intItemId
+			AND R.intLocationId = @intLocationId
+			AND R.ysnActive = 1
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
@@ -271,9 +282,8 @@ BEGIN
 					THEN SU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFWorkOrderRecipe R
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
-			AND R.intWorkOrderId = @intWorkOrderId
 			AND RI.intRecipeItemTypeId = 1
 			AND RI.intConsumptionMethodId = (
 				CASE 
@@ -282,12 +292,20 @@ BEGIN
 					ELSE @intConsumptionMethodId
 					END
 				)
+		LEFT JOIN tblMFRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
 		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 			AND SI.intRecipeId = R.intRecipeId
-		JOIN dbo.tblICLot L ON (
-				L.intItemId = RI.intItemId
-				OR L.intItemId = SI.intSubstituteItemId
+		JOIN dbo.tblICItem I ON (
+				I.intItemId = RI.intItemId
+				OR I.intItemId = SI.intSubstituteItemId
+				OR (
+					I.intCategoryId = IsNULL(RC.intCategoryId, I.intCategoryId)
+					AND R.intRecipeTypeId = 3
+					)
 				)
+			AND I.strInventoryTracking = 'Lot Level'
+			AND R.intWorkOrderId = @intWorkOrderId
+		JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
 			AND L.intStorageLocationId = @intStorageLocationId
 			AND L.intItemId = (
 				CASE 
@@ -296,8 +314,6 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
-		JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-			AND I.strInventoryTracking = 'Lot Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
@@ -313,7 +329,7 @@ BEGIN
 			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
 			AND SUOM.intItemId = I.intItemId
-		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
+		LEFT JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
@@ -337,7 +353,7 @@ BEGIN
 						THEN L.dblWeight
 					ELSE L.dblQty
 					END
-				) - IsNULL(SR.dblWeight, 0) >0
+				) - IsNULL(SR.dblWeight, 0) > 0
 		
 		UNION
 		
@@ -373,9 +389,8 @@ BEGIN
 				ELSE RU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 		FROM dbo.tblMFWorkOrderRecipe R
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
-			AND R.intWorkOrderId = @intWorkOrderId
 			AND RI.intRecipeItemTypeId = 1
 			AND RI.intConsumptionMethodId = (
 				CASE 
@@ -386,10 +401,18 @@ BEGIN
 				)
 		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 			AND SI.intRecipeId = R.intRecipeId
-		JOIN dbo.tblICItemStockUOM S ON (
-				S.intItemId = RI.intItemId
-				OR S.intItemId = SI.intSubstituteItemId
+		LEFT JOIN tblMFRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
+		JOIN dbo.tblICItem I ON (
+				I.intItemId = RI.intItemId
+				OR I.intItemId = SI.intSubstituteItemId
+				OR (
+					I.intCategoryId = IsNULL(RC.intCategoryId, I.intCategoryId)
+					AND R.intRecipeTypeId = 3
+					)
 				)
+			AND I.strInventoryTracking = 'Item Level'
+			AND R.intWorkOrderId = @intWorkOrderId
+		JOIN dbo.tblICItemStockUOM S ON S.intItemId = I.intItemId
 			AND S.intStorageLocationId = @intStorageLocationId
 			AND S.intItemId = (
 				CASE 
@@ -398,8 +421,6 @@ BEGIN
 					ELSE @intInputItemId
 					END
 				)
-		JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
-			AND I.strInventoryTracking = 'Item Level'
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
@@ -408,7 +429,7 @@ BEGIN
 			AND RUOM.intItemId = I.intItemId
 		LEFT JOIN dbo.tblICItemUOM SUOM ON SUOM.intItemUOMId = SI.intItemUOMId
 			AND SUOM.intItemId = I.intItemId
-		JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
+		LEFT JOIN dbo.tblICUnitMeasure RU ON RU.intUnitMeasureId = ISNULL(RUOM.intUnitMeasureId, SUOM.intUnitMeasureId)
 		WHERE S.dblOnHand - S.dblUnitReserved > 0
 			AND I.strStatus = 'Active'
 		ORDER BY dtmDateCreated ASC

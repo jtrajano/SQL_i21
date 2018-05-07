@@ -18,6 +18,10 @@ Type the overview for the table here.
 		[strIRSTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmDateCreated] DATETIME NULL,
+		[dtmDateModified] DATETIME NULL,
+		[intCreatedByUserId] INT NULL,
+		[intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICFuelTaxClass] PRIMARY KEY ([intFuelTaxClassId]), 
 		CONSTRAINT [AK_tblICFuelTaxClass_strTaxClassCode] UNIQUE ([strTaxClassCode])
 	)

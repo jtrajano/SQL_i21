@@ -18,7 +18,11 @@ Type the overview for the table here.
 		[ysnDefault] BIT NULL DEFAULT ((0)), 
 		[intPreference] INT NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICItemFactoryManufacturingCell] PRIMARY KEY ([intItemFactoryManufacturingCellId]), 
 		CONSTRAINT [FK_tblICItemFactoryManufacturingCell_tblICItemFactory] FOREIGN KEY ([intItemFactoryId]) REFERENCES [tblICItemFactory]([intItemFactoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemFactoryManufacturingCell_tblICManufacturingCell] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblMFManufacturingCell]([intManufacturingCellId])

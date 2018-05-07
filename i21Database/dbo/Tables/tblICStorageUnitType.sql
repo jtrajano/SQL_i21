@@ -27,7 +27,11 @@ Type the overview for the table here.
 		[intPalletColumn] INT NULL DEFAULT ((0)), 
 		[intPalletRow] INT NULL DEFAULT ((0)), 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICStorageUnitType] PRIMARY KEY ([intStorageUnitTypeId]), 
 		CONSTRAINT [FK_tblICStorageUnitType_CapacityUnitMeasure] FOREIGN KEY ([intCapacityUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICStorageUnitType_DimensionUnitMeasure] FOREIGN KEY ([intDimensionUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

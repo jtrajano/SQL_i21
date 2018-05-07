@@ -25,6 +25,15 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 3
 			THEN 'Orders'
 		END AS strDefaultShipmentSourceType
+	,CP.intCreateShipmentDefaultSourceType
+	,CASE CP.intCreateShipmentDefaultSourceType
+		WHEN 2
+			THEN 'Contracts'
+		WHEN 5
+			THEN 'Picked Lots'
+		WHEN 6
+			THEN 'Pick Lots'
+		END AS strCreateShipmentDefaultSourceType
 	,CP.intDefaultTransportationMode
 	,CASE CP.intDefaultTransportationMode
 		WHEN 1

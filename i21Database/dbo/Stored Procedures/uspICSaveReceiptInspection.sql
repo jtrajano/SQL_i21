@@ -25,11 +25,13 @@ BEGIN
 		intPropertyId
 		,strPropertyName
 		,strPropertyValue
+		,strComment
 	)
 	SELECT 
 		ReceiptInspection.intQAPropertyId
 		,ReceiptInspection.strPropertyName
 		,CASE WHEN ReceiptInspection.ysnSelected = 1 THEN 'true' ELSE 'false' END
+		,ReceiptInspection.strComment
 	FROM tblICInventoryReceiptInspection ReceiptInspection
 	WHERE ReceiptInspection.intInventoryReceiptId = @ReceiptId
 

@@ -18,7 +18,12 @@ Type the overview for the table here.
 		[ysnSelected] BIT NOT NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[strPropertyName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[strComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICInventoryReceiptInspection] PRIMARY KEY ([intInventoryReceiptInspectionId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptInspection_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE
 	)

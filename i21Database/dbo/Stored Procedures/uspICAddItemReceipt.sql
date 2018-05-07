@@ -1465,10 +1465,14 @@ BEGIN
 
 						-- Validate Lot Ship From Id --
 						SET @valueLotRecordNo = NULL
-
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intShipFromId IS NULL OR ItemLot.intShipFromId NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = ItemLot.intEntityVendorId)
+						
+						SELECT TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblEMEntityLocation el
+									ON ItemLot.intShipFromId = el.intEntityLocationId						
+						WHERE	RTRIM(LTRIM(LOWER(ItemLot.strReceiptType))) <> 'transfer order'
+								AND ItemLot.intShipFromId IS NOT NULL 
+								AND el.intEntityLocationId IS NULL 							
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
@@ -1480,9 +1484,12 @@ BEGIN
 						-- Validate Lot Source Type Id
 						SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intSourceType IS NULL OR ItemLot.intSourceType > 5 OR ItemLot.intSourceType < 0
+						SELECT TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot
+						WHERE	ItemLot.intSourceType IS NULL 
+								OR ItemLot.intSourceType > 5 
+								OR ItemLot.intSourceType < 0
 
 						IF @valueLotRecordNo IS NOT NULL
 							BEGIN
@@ -1494,62 +1501,76 @@ BEGIN
 						-- Validate Lot Item Id
 						SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot	   
-						WHERE ItemLot.intItemId IS NULL OR ItemLot.intItemId NOT IN (SELECT intItemId FROM tblICItem)
+						SELECT TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot	LEFT JOIN tblICItem i 
+									ON ItemLot.intItemId = i.intItemId
+						WHERE	ItemLot.intItemId IS NULL 
+								OR i.intItemId IS NULL 
 
 						IF @valueLotRecordNo IS NOT NULL
-							BEGIN
-								-- Item Id is invalid or missing for lot {Lot Number}.
-								EXEC uspICRaiseError 80153, @valueLotRecordNo;
-								GOTO _Exit_With_Rollback;
-							END
+						BEGIN
+							-- Item Id is invalid or missing for lot {Lot Number}.
+							EXEC uspICRaiseError 80153, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Lot Sub Location Id
 						SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot	   	   
-						WHERE ItemLot.intSubLocationId IS NULL OR ItemLot.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = ItemLot.intLocationId)
+						SELECT TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot	LEFT JOIN tblSMCompanyLocationSubLocation subLocation
+									ON ItemLot.intLocationId = subLocation.intCompanyLocationId
+									AND ItemLot.intSubLocationId = subLocation.intCompanyLocationSubLocationId
+						WHERE	ItemLot.intSubLocationId IS NULL 
+								OR subLocation.intCompanyLocationSubLocationId IS NULL 
 
 						IF @valueLotRecordNo IS NOT NULL
-							BEGIN
-								-- Sub Location is invalid or missing for {Lot Number}.
-								EXEC uspICRaiseError 80155, @valueLotRecordNo;
-								GOTO _Exit_With_Rollback;
-							END
+						BEGIN
+							-- Sub Location is invalid or missing for {Lot Number}.
+							EXEC uspICRaiseError 80155, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Lot Storage Location Id
 						SET @valueLotRecordNo = NULL
 
-						SELECT @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot   
-						WHERE ItemLot.intStorageLocationId IS NULL OR ItemLot.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation WHERE intLocationId = ItemLot.intLocationId AND intSubLocationId = ItemLot.intSubLocationId)
+						SELECT	TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblICStorageLocation storageLocation
+									ON ItemLot.intLocationId = storageLocation.intLocationId
+									AND ItemLot.intSubLocationId= storageLocation.intSubLocationId
+									AND ItemLot.intStorageLocationId = storageLocation.intStorageLocationId									
+						WHERE	ItemLot.intStorageLocationId IS NULL 
+								OR storageLocation.intStorageLocationId IS NULL
 								 
 						IF @valueLotRecordNo IS NOT NULL
-							BEGIN
-								-- 'Storage Unit is invalid or missing for lot {Lot Number}.
-								EXEC uspICRaiseError 80155, @valueLotRecordNo
-								GOTO _Exit_With_Rollback;
-							END
+						BEGIN
+							-- 'Storage Unit is invalid or missing for lot {Lot Number}.
+							EXEC uspICRaiseError 80155, @valueLotRecordNo
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Lot Id
 						DECLARE @valueLotRecordLotId INT = NULL
 						SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordLotId = ItemLot.intLotId, @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intLotId NOT IN (SELECT intLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId)
-						ORDER BY ItemLot.intLotId ASC
+						SELECT TOP 1 
+								@valueLotRecordLotId = ItemLot.intLotId
+								, @valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblICLot l
+									ON ItemLot.intLotId = l.intLotId
+						WHERE	l.intLotId IS NULL 
 
 						IF @valueLotRecordLotId > 0
-							BEGIN
-								DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
-								SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
-								-- Lot ID {Lot Id} is invalid for lot {Lot Number}.
-								EXEC uspICRaiseError 80157, @valueLotRecordLotIdStr, @valueLotRecordNo;
-								GOTO _Exit_With_Rollback;
-							END
+						BEGIN
+							DECLARE @valueLotRecordLotIdStr NVARCHAR(50)
+							SET @valueLotRecordLotIdStr = CAST(@valueLotRecordLotId AS NVARCHAR(50))
+							-- Lot ID {Lot Id} is invalid for lot {Lot Number}.
+							EXEC uspICRaiseError 80157, @valueLotRecordLotIdStr, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Lot Number
 						DECLARE @valueLotRecordLotNo NVARCHAR(50) = NULL
@@ -1557,90 +1578,99 @@ BEGIN
 								,@valueLotRecordItemNo NVARCHAR(50) = NULL
 
 						SELECT TOP 1 @valueLotRecordItemId = ItemLot.intItemId
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.strLotNumber IS NULL 
-								OR (ItemLot.intLotId > 0 AND ItemLot.strLotNumber NOT IN (SELECT strLotNumber FROM tblICLot WHERE intLotId = ItemLot.intLotId))
-						ORDER BY ItemLot.strLotNumber ASC
+						FROM	@LotEntries ItemLot LEFT JOIN tblICLot l
+									ON ItemLot.strLotNumber = l.strLotNumber
+									AND ItemLot.intLotId = l.intLotId
+						WHERE	ItemLot.strLotNumber IS NULL 
+								AND l.strLotNumber IS NULL 
 
 						IF @valueLotRecordItemId > 0
-							BEGIN
-								SELECT @valueLotRecordItemNo = strItemNo
-								FROM tblICItem
-								WHERE intItemId = @valueLotRecordItemId
+						BEGIN
+							SELECT @valueLotRecordItemNo = strItemNo
+							FROM tblICItem
+							WHERE intItemId = @valueLotRecordItemId
 
-								-- Lot Number is invalid or missing for item {ItemNo.}.
-								EXEC uspICRaiseError 80130, @valueLotRecordItemNo;
-								GOTO _Exit_With_Rollback;
-							END
+							-- Lot Number is invalid or missing for item {ItemNo.}.
+							EXEC uspICRaiseError 80130, @valueLotRecordItemNo;
+							GOTO _Exit_With_Rollback;
+						END
 
-							-- Validate Lot Item UOM Id
-							SET @valueLotRecordNo = NULL
+						-- Validate Lot Item UOM Id
+						SET @valueLotRecordNo = NULL
 								 
-							SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.intItemUnitMeasureId IS NULL OR
-									ItemLot.intItemUnitMeasureId NOT IN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = ItemLot.intItemId)
-							ORDER BY ItemLot.intItemUnitMeasureId ASC
+						SELECT	TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblICItemUOM iu
+									ON ItemLot.intItemId = iu.intItemId
+									AND ItemLot.intItemUnitMeasureId = iu.intItemUOMId 
+						WHERE	ItemLot.intItemUnitMeasureId IS NULL 
+								AND iu.intItemUOMId IS NULL 
 
-							IF @valueLotRecordNo IS NOT NULL
-								BEGIN
-									-- Item UOM Id is invalid or missing for lot {Lot Number}.
-									EXEC uspICRaiseError 80156, @valueLotRecordNo;
-									GOTO _Exit_With_Rollback;
-								END
+						IF @valueLotRecordNo IS NOT NULL
+						BEGIN
+							-- Item UOM Id is invalid or missing for lot {Lot Number}.
+							EXEC uspICRaiseError 80156, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Lot Condition
 						DECLARE @valueLotRecordLotCondition NVARCHAR(50) = NULL
-							SET @valueLotRecordNo = NULL
+						SET @valueLotRecordNo = NULL
 
-							SELECT TOP 1 @valueLotRecordLotCondition = ItemLot.strCondition, @valueLotRecordNo = ItemLot.strLotNumber
-							FROM @LotEntries ItemLot
-							WHERE ItemLot.strCondition IS NOT NULL 
-									AND RTRIM(LTRIM(LOWER(ItemLot.strCondition))) NOT IN ('sound/full', 'slack', 'damaged', 'clean wgt')
-							ORDER BY ItemLot.strCondition ASC
+						SELECT TOP 1 
+								@valueLotRecordLotCondition = ItemLot.strCondition, @valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot
+						WHERE	ItemLot.strCondition IS NOT NULL 
+								AND RTRIM(LTRIM(LOWER(ItemLot.strCondition))) NOT IN ('sound/full', 'slack', 'damaged', 'clean wgt')
 
-							IF @valueLotRecordLotCondition IS NOT NULL
-								BEGIN
-									-- Lot Condition {Lot Condition} is invalid for lot {Lot Number}.
-									EXEC uspICRaiseError 80131, @valueLotRecordLotCondition, @valueLotRecordNo;
-									GOTO _Exit_With_Rollback;
-								END
+						IF @valueLotRecordLotCondition IS NOT NULL
+						BEGIN
+							-- Lot Condition {Lot Condition} is invalid for lot {Lot Number}.
+							EXEC uspICRaiseError 80131, @valueLotRecordLotCondition, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Parent Lot Id
 						DECLARE @valueLotRecordParentLotId INT = NULL
 								,@valueLotRecordParentLotIdStr NVARCHAR(50)
 						SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordParentLotId = ItemLot.intParentLotId, @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intParentLotId NOT IN (SELECT intParentLotId FROM tblICLot WHERE intItemId = ItemLot.intItemId AND intLotId = ItemLot.intLotId)
-						ORDER BY ItemLot.intParentLotId ASC
+						SELECT TOP 1 
+								@valueLotRecordParentLotId = ItemLot.intParentLotId
+								, @valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblICLot l
+									ON ItemLot.intLotId = l.intLotId
+									AND ItemLot.intParentLotId = l.intParentLotId
+						WHERE	ItemLot.intParentLotId IS NOT NULL 
+								AND l.intParentLotId IS NULL 
 
 						IF @valueLotRecordParentLotId > 0
-							BEGIN
-								SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
-								-- Parent Lot Id {Parent Lot Id} is invalid for lot {Lot Number}.
-								EXEC uspICRaiseError 80132, @valueLotRecordParentLotIdStr, @valueLotRecordNo;
-								GOTO _Exit_With_Rollback;
-							END
+						BEGIN
+							SET @valueLotRecordParentLotIdStr = CAST(@valueLotRecordParentLotId AS NVARCHAR(50))
+							-- Parent Lot Id {Parent Lot Id} is invalid for lot {Lot Number}.
+							EXEC uspICRaiseError 80132, @valueLotRecordParentLotIdStr, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate Parent Lot Number
 						DECLARE @valueLotRecordParentLotNo NVARCHAR(50) = NULL
 						SET @valueLotRecordNo = NULL
 
-						SELECT TOP 1 @valueLotRecordNo = ItemLot.strLotNumber
-						FROM @LotEntries ItemLot
-						WHERE ItemLot.intParentLotId > 0
-								AND (ItemLot.strParentLotNumber IS NULL OR
-								(ItemLot.strParentLotNumber NOT IN (SELECT strParentLotNumber FROM tblICParentLot WHERE intItemId = ItemLot.intItemId AND intParentLotId = ItemLot.intParentLotId)))
-						ORDER BY ItemLot.strParentLotNumber ASC
+						SELECT TOP 1 
+								@valueLotRecordNo = ItemLot.strLotNumber
+						FROM	@LotEntries ItemLot LEFT JOIN tblICParentLot parentLot
+									ON ItemLot.intItemId = parentLot.intItemId
+									AND ItemLot.intParentLotId = parentLot.intParentLotId
+									AND ItemLot.strParentLotNumber = parentLot.strParentLotNumber
+						WHERE	ItemLot.intParentLotId IS NOT NULL 
+								AND parentLot.intParentLotId IS NULL 
 
 						IF @valueLotRecordNo IS NOT NULL
-							BEGIN
-								-- Parent Lot Number is invalid or missing for lot {Lot Number}.
-								EXEC uspICRaiseError 80133, @valueLotRecordNo;
-								GOTO _Exit_With_Rollback;
-							END
+						BEGIN
+							-- Parent Lot Number is invalid or missing for lot {Lot Number}.
+							EXEC uspICRaiseError 80133, @valueLotRecordNo;
+							GOTO _Exit_With_Rollback;
+						END
 
 						-- Validate the Producer Id. 
 						BEGIN

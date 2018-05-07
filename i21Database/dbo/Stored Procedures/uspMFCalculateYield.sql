@@ -707,7 +707,7 @@ BEGIN TRY
 							WHERE LT.intWorkOrderId = @intWorkOrderId
 								AND LT.intLotId = L.intLotId
 							)
-					ORDER BY dtmDateCreated DESC
+					ORDER BY L.dtmDateCreated DESC
 
 					IF @intLotId IS NOT NULL
 					BEGIN
@@ -776,7 +776,7 @@ BEGIN TRY
 								WHERE LT.intWorkOrderId = @intWorkOrderId
 									AND LT.intLotId = L.intLotId
 								)
-						ORDER BY dtmDateCreated DESC
+						ORDER BY L.dtmDateCreated DESC
 
 						IF @intLotId IS NOT NULL
 						BEGIN
@@ -845,7 +845,7 @@ BEGIN TRY
 								WHERE LT.intWorkOrderId = @intWorkOrderId
 									AND LT.intLotId = L.intLotId
 								)
-						ORDER BY dtmDateCreated DESC
+						ORDER BY L.dtmDateCreated DESC
 
 						IF @intLotId IS NOT NULL
 						BEGIN
@@ -910,7 +910,7 @@ BEGIN TRY
 								WHERE LT.intWorkOrderId = @intWorkOrderId
 									AND LT.intLotId = L.intLotId
 								)
-						ORDER BY dtmDateCreated DESC
+						ORDER BY L.dtmDateCreated DESC
 
 						IF @intLotId IS NOT NULL
 						BEGIN
@@ -1039,7 +1039,8 @@ BEGIN TRY
 					,@dblQuantity = NULL
 
 				SELECT @intBatchId = intBatchId
-					,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intYieldItemUOMId, dblQuantity)
+					--,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intYieldItemUOMId, dblQuantity)
+					,@dblQuantity = dblQuantity
 				FROM @tblMFWorkOrderOutputLot
 				WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
@@ -1337,7 +1338,7 @@ BEGIN TRY
 									FROM @tblMFWorkOrderInputLot WI
 									WHERE WI.intMachineId = @intMachineId
 									)
-							ORDER BY dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN
@@ -1411,7 +1412,7 @@ BEGIN TRY
 									FROM @tblMFWorkOrderInputLot WI
 									WHERE WI.intMachineId = @intMachineId
 									)
-							ORDER BY dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN
@@ -1422,6 +1423,8 @@ BEGIN TRY
 										END
 
 								SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
+								if @dblYieldQuantity<0.0001
+								Select @dblYieldQuantity=0
 							END
 						END
 
@@ -1484,7 +1487,7 @@ BEGIN TRY
 										WHERE LT.intWorkOrderId = @intWorkOrderId
 											AND LT.intLotId = L.intLotId
 										), 0) - abs(@dblYieldQuantity) >= 0
-							ORDER BY dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN
@@ -1553,7 +1556,7 @@ BEGIN TRY
 												AND LT.intLotId = L.intLotId
 											), 0)
 									) > 0
-							ORDER BY dtmDateCreated DESC
+							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
 							BEGIN

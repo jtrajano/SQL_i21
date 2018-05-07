@@ -17,7 +17,11 @@ Type the overview for the table here.
 		[strSLAContract] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 		[dblContractPrice] NUMERIC(18, 6) NULL, 
 		[ysnServiceWarranty] BIT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICItemPOSSLA] PRIMARY KEY ([intItemPOSSLAId]), 
 		CONSTRAINT [FK_tblICItemPOSSLA_tblICItemPOS] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE
 	)

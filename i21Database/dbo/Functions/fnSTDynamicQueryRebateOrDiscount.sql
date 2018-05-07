@@ -24,7 +24,11 @@ AS BEGIN
 
     SET @strGeneratedSql =  ' SELECT' + CHAR(13)
 								   + ' CL.strLocationName' + CHAR(13)
-								   + '	, UOM.strUpcCode' + CHAR(13)
+								   --+ '	, UOM.strUpcCode' + CHAR(13)
+								   + '  , CASE ' + CHAR(13)
+								   + '		WHEN UOM.strUpcCode IS NOT NULL OR UOM.strUpcCode != '''' THEN UOM.strUpcCode ' + CHAR(13)
+								   + '		WHEN UOM.strLongUPCCode IS NOT NULL OR UOM.strLongUPCCode != '''' THEN UOM.strLongUPCCode ' + CHAR(13)
+								   + '    END AS strUpcCode ' + CHAR(13)
 								   + '	, I.strDescription' + CHAR(13)
 								   + '	,''' + @strChangeDescription + '''' + CHAR(13)
 								   + '	,' + @strOldData + '' + CHAR(13)

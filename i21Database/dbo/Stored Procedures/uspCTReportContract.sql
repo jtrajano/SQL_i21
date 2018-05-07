@@ -325,7 +325,7 @@ BEGIN TRY
 			,strText							    = ISNULL(TX.strText,'') +' '+ ISNULL(CH.strPrintableRemarks,'') 
 			,strContractCompanyName					= SQ.strContractCompanyName
 			,strContractPrintSignOff			    = SQ.strContractPrintSignOff
-			,strCompanyName							= LTRIM(RTRIM(EY.strEntityName))
+			,strEntityName							= LTRIM(RTRIM(EY.strEntityName))
 			,strApprovalText					    = @strApprovalText
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
@@ -342,29 +342,45 @@ BEGIN TRY
 													  	  ELSE NULL END
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
-		     
+		    ,strINCOTermWithWeight					=	CB.strContractBasis + ISNULL(', ' + W1.strWeightGradeDesc,'')
+			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + UM.strUnitMeasure
+			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
+			,strStartAndEndDate						=	SQ.strStartAndEndDate
+			,strNoOfContainerAndType				=	SQ.strNoOfContainerAndType
+			,strFutureMonthYear						=	SQ.strFutureMonthYear
+			,strPricing								=	SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear +
+														CASE WHEN SQ.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END +  
+														LTRIM(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
+														' price fixation in ' + SQ.strBuyerSeller + 
+														'''s option, before first notice day. (Number of Lots to be fixed:'+LTRIM(dblLotsToFix)+').'
+			,strGABHeader							=	'Confirmation of ' + TP.strContractType + ' ' + CH.strContractNumber		
+			,strGABAssociation						=	'We confirm having bought today, at the conditions ' + AN.strComment + ' ('+AN.strName+')'+' latest edition.'
+			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + CONVERT(NVARCHAR(20),GETDATE(),106)
+			,strCompanyName							=	@strCompanyName
 
-	FROM	tblCTContractHeader CH
-	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
-	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
-	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CH.intEntityId	AND
-										EY.strEntityType		=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
-	JOIN	tblCTCropYear		CY	ON	CY.intCropYearId		=	CH.intCropYearId		LEFT
-	JOIN	tblCTContractBasis	CB	ON	CB.intContractBasisId	=	CH.intContractBasisId	LEFT
-	JOIN	tblCTWeightGrade	W1	ON	W1.intWeightGradeId		=	CH.intWeightId			LEFT
-	JOIN	tblCTWeightGrade	W2	ON	W2.intWeightGradeId		=	CH.intGradeId			LEFT
-	JOIN	tblCTContractText	TX	ON	TX.intContractTextId	=	CH.intContractTextId	LEFT
-	JOIN	tblCTAssociation	AN	ON	AN.intAssociationId		=	CH.intAssociationId		LEFT
-	JOIN	tblSMTerm			TM	ON	TM.intTermID			=	CH.intTermId			LEFT
-	JOIN	tblSMCity			AB	ON	AB.intCityId			=	CH.intArbitrationId		LEFT
-	JOIN	tblSMCountry		RY	ON	RY.intCountryID			=	AB.intCountryId			LEFT
-	JOIN	tblCTInsuranceBy	IB	ON	IB.intInsuranceById		=	CH.intInsuranceById		LEFT	
-	JOIN	tblEMEntity			PR	ON	PR.intEntityId			=	CH.intProducerId		LEFT
-	JOIN	tblCTPosition		PO	ON	PO.intPositionId		=	CH.intPositionId		LEFT
-	JOIN	tblSMCountry		CO	ON	CO.intCountryID			=	CH.intCountryId			LEFT
-	JOIN	tblAPVendor			VR	ON	VR.intEntityId			=	CH.intEntityId			LEFT
-	JOIN	tblARCustomer		CR	ON	CR.intEntityId			=	CH.intEntityId			LEFT	
-	JOIN	tblSMCity			CT	ON	CT.intCityId			=	CH.intINCOLocationTypeId	LEFT
+	FROM	tblCTContractHeader			CH
+	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId
+	JOIN	tblCTContractType			TP	ON	TP.intContractTypeId			=	CH.intContractTypeId
+	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
+												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
+	JOIN	tblCTCropYear				CY	ON	CY.intCropYearId				=	CH.intCropYearId			LEFT
+	JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId			=	CH.intContractBasisId		LEFT
+	JOIN	tblCTWeightGrade			W1	ON	W1.intWeightGradeId				=	CH.intWeightId				LEFT
+	JOIN	tblCTWeightGrade			W2	ON	W2.intWeightGradeId				=	CH.intGradeId				LEFT
+	JOIN	tblCTContractText			TX	ON	TX.intContractTextId			=	CH.intContractTextId		LEFT
+	JOIN	tblCTAssociation			AN	ON	AN.intAssociationId				=	CH.intAssociationId			LEFT
+	JOIN	tblSMTerm					TM	ON	TM.intTermID					=	CH.intTermId				LEFT
+	JOIN	tblSMCity					AB	ON	AB.intCityId					=	CH.intArbitrationId			LEFT
+	JOIN	tblSMCountry				RY	ON	RY.intCountryID					=	AB.intCountryId				LEFT
+	JOIN	tblCTInsuranceBy			IB	ON	IB.intInsuranceById				=	CH.intInsuranceById			LEFT	
+	JOIN	tblEMEntity					PR	ON	PR.intEntityId					=	CH.intProducerId			LEFT
+	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId			LEFT
+	JOIN	tblSMCountry				CO	ON	CO.intCountryID					=	CH.intCountryId				LEFT
+	JOIN	tblAPVendor					VR	ON	VR.intEntityId					=	CH.intEntityId				LEFT
+	JOIN	tblARCustomer				CR	ON	CR.intEntityId					=	CH.intEntityId				LEFT	
+	JOIN	tblSMCity					CT	ON	CT.intCityId					=	CH.intINCOLocationTypeId	LEFT
+	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		LEFT
+	JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId			LEFT
 	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId LEFT
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
@@ -382,15 +398,33 @@ BEGIN TRY
 							CL.strContractCompanyName				AS strContractCompanyName,
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
 							CD.strERPPONumber,
-							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots
+							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
+							IM.strDescription + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
+							CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
+							LTRIM(CD.intNumberOfContainers) + ' x ' + CT.strContainerType AS strNoOfContainerAndType,
+							DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
+							CD.dblBasis,
+							CD.strBuyerSeller,
+							ISNULL(PF.dblTotalLots - ISNULL(PF.dblLotsFixed,0), 0) AS dblLotsToFix,
+							CD.intPricingTypeId,
+							CY.strCurrency + '-' + UM.strUnitMeasure AS	strPriceCurrencyAndUOM
+
 				FROM		tblCTContractDetail		CD
+				JOIN		tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
 				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
 				JOIN		tblSMCity				LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
 				JOIN		tblSMCity				DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
 				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
 				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
-				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
-			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1
+				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		LEFT
+				JOIN		tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
+				JOIN		tblLGContainerType		CT	ON	CT.intContainerTypeId		=	CD.intContainerTypeId		LEFT
+				JOIN		tblCTPriceFixation		PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
+				JOIN		tblICItemUOM			IU	ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
+				JOIN		tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
+
+			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
+														AND SQ.intRowNum = 1
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference

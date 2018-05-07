@@ -19,7 +19,11 @@ Type the overview for the table here.
 		[ysnActive] BIT NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICStorageLocationMeasurement] PRIMARY KEY ([intStorageLocationMeasurementId]), 
 		CONSTRAINT [FK_tblICStorageLocationMeasurement_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
 	)

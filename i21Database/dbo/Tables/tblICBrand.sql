@@ -19,6 +19,10 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmDateCreated] DATETIME NULL,
+		[dtmDateModified] DATETIME NULL,
+		[intCreatedByUserId] INT NULL,
+		[intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICBrand] PRIMARY KEY ([intBrandId]), 
 		CONSTRAINT [AK_tblICBrand_strBrand] UNIQUE ([strBrandCode]), 
 		CONSTRAINT [FK_tblICBrand_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId])
