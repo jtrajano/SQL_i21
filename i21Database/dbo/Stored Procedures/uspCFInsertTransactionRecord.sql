@@ -1610,6 +1610,16 @@ BEGIN
 			,intTaxCodeId	
 			,dblTaxRate	
 		FROM ##tblCFTransactionTaxType
+
+
+		UPDATE tblCFTransaction
+		SET
+		dblCalculatedTotalTax		= (SELECT 
+		SUM(ISNULL(dblTaxCalculatedAmount,0))
+		FROM ##tblCFTransactionTaxType as tax)
+		,dblOriginalTotalTax		= (SELECT 
+		SUM(ISNULL(dblTaxOriginalAmount,0))
+		FROM ##tblCFTransactionTaxType as tax)
 	
 
 		------------------------------------------------------------
