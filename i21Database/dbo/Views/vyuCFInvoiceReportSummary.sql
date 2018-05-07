@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
@@ -61,15 +62,15 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
        cfTrans.intOdometer, 
        ISNULL(cfTrans.dblQuantity, 0)                        AS 
        dblTotalQuantity, 
-       ISNULL(cfTransGrossPrice.dblCalculatedAmount, 0)      AS 
+       ISNULL(cfTrans.dblCalculatedGrossPrice, 0)      AS 
        dblTotalGrossAmount, 
-       ISNULL(Round(cfTransPrice.dblCalculatedAmount, 2), 0) - ( 
+       ISNULL(Round(cfTrans.dblCalculatedTotalPrice, 2), 0) - ( 
        ISNULL(FETTaxes_1.dblTaxCalculatedAmount, 0) 
        + ISNULL(SETTaxes_1.dblTaxCalculatedAmount, 0) 
        + ISNULL(SSTTaxes_1.dblTaxCalculatedAmount, 0) 
        + ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0) )       AS 
        dblTotalNetAmount, 
-       ISNULL(Round(cfTransPrice.dblCalculatedAmount, 2), 0) AS 
+       ISNULL(Round(cfTrans.dblCalculatedTotalPrice, 2), 0) AS 
        dblTotalAmount, 
        ISNULL(FETTaxes_1.dblTaxCalculatedAmount, 0) 
        + ISNULL(SETTaxes_1.dblTaxCalculatedAmount, 0) 
@@ -240,40 +241,40 @@ FROM   dbo.vyuCFInvoice AS arInv
                ON cfTrans.intSiteId = cfSiteItem.intSiteId 
                   AND cfTrans.intNetworkId = cfSiteItem.intNetworkId 
                   AND cfSiteItem.intItemId = cfTrans.intProductId 
-       LEFT OUTER JOIN (SELECT intTransactionPriceId, 
-                               intTransactionId, 
-                               strTransactionPriceId, 
-                               dblOriginalAmount, 
-                               dblCalculatedAmount, 
-                               intConcurrencyId 
-                        FROM   dbo.tblCFTransactionPrice 
-                        WHERE  ( strTransactionPriceId = 'Total Amount' )) AS 
-       cfTransPrice 
-                    ON cfTrans.intTransactionId = cfTransPrice.intTransactionId 
-       LEFT OUTER JOIN (SELECT intTransactionPriceId, 
-                               intTransactionId, 
-                               strTransactionPriceId, 
-                               dblOriginalAmount, 
-                               dblCalculatedAmount, 
-                               intConcurrencyId 
-                        FROM   dbo.tblCFTransactionPrice AS 
-                               tblCFTransactionPrice_2 
-                        WHERE  ( strTransactionPriceId = 'Gross Price' )) AS 
-              cfTransGrossPrice 
-                    ON cfTrans.intTransactionId = 
-                       cfTransGrossPrice.intTransactionId 
-       LEFT OUTER JOIN (SELECT intTransactionPriceId, 
-                               intTransactionId, 
-                               strTransactionPriceId, 
-                               dblOriginalAmount, 
-                               dblCalculatedAmount, 
-                               intConcurrencyId 
-                        FROM   dbo.tblCFTransactionPrice AS 
-                               tblCFTransactionPrice_1 
-                        WHERE  ( strTransactionPriceId = 'Net Price' )) AS 
-              cfTransNetPrice 
-                    ON cfTrans.intTransactionId = 
-                       cfTransNetPrice.intTransactionId 
+       --LEFT OUTER JOIN (SELECT intTransactionPriceId, 
+       --                        intTransactionId, 
+       --                        strTransactionPriceId, 
+       --                        dblOriginalAmount, 
+       --                        dblCalculatedAmount, 
+       --                        intConcurrencyId 
+       --                 FROM   dbo.tblCFTransactionPrice 
+       --                 WHERE  ( strTransactionPriceId = 'Total Amount' )) AS 
+       --cfTransPrice 
+       --             ON cfTrans.intTransactionId = cfTransPrice.intTransactionId 
+       --LEFT OUTER JOIN (SELECT intTransactionPriceId, 
+       --                        intTransactionId, 
+       --                        strTransactionPriceId, 
+       --                        dblOriginalAmount, 
+       --                        dblCalculatedAmount, 
+       --                        intConcurrencyId 
+       --                 FROM   dbo.tblCFTransactionPrice AS 
+       --                        tblCFTransactionPrice_2 
+       --                 WHERE  ( strTransactionPriceId = 'Gross Price' )) AS 
+       --       cfTransGrossPrice 
+       --             ON cfTrans.intTransactionId = 
+       --                cfTransGrossPrice.intTransactionId 
+       --LEFT OUTER JOIN (SELECT intTransactionPriceId, 
+       --                        intTransactionId, 
+       --                        strTransactionPriceId, 
+       --                        dblOriginalAmount, 
+       --                        dblCalculatedAmount, 
+       --                        intConcurrencyId 
+       --                 FROM   dbo.tblCFTransactionPrice AS 
+       --                        tblCFTransactionPrice_1 
+       --                 WHERE  ( strTransactionPriceId = 'Net Price' )) AS 
+       --       cfTransNetPrice 
+       --             ON cfTrans.intTransactionId = 
+       --                cfTransNetPrice.intTransactionId 
        LEFT OUTER JOIN (SELECT intTransactionId, 
                                ISNULL(Sum(dblTaxOriginalAmount), 0)   AS 
               dblTaxOriginalAmount, 

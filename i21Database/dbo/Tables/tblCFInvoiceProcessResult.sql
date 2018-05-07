@@ -15,6 +15,7 @@
     [intPaymentId]              INT             NULL,
     [strInvoiceId]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strPaymentId]              NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[dtmInvoiceDate]			DATETIME		NULL,
     CONSTRAINT [PK_tblCFInvoiceProcessResult] PRIMARY KEY CLUSTERED ([intInvoiceProcessResultId] ASC)
 );
 

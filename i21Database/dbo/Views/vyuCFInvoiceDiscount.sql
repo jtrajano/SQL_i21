@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[vyuCFInvoiceDiscount]
 AS
 SELECT   
@@ -38,7 +39,7 @@ strCustomerNumber = (
 		ELSE cfCardAccount.strCustomerNumber
 	END),
 
-ROUND(ISNULL(cfTransPrice.dblCalculatedAmount, 0), 2) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, 
+ROUND(ISNULL(cfTrans.dblCalculatedTotalPrice, 0), 2) AS dblTotalAmount, smTerm.intTermID, smTerm.strTerm, smTerm.strType, smTerm.dblDiscountEP, 
                          smTerm.intBalanceDue, smTerm.intDiscountDay, smTerm.dblAPR, smTerm.strTermCode, smTerm.ysnAllowEFT, smTerm.intDayofMonthDue, smTerm.intDueNextMonth, 
                          smTerm.dtmDiscountDate, smTerm.dtmDueDate, smTerm.ysnActive, smTerm.ysnEnergyTrac, smTerm.intSort, smTerm.intConcurrencyId, 
                           cfTrans.intTransactionId, cfCardAccount.strNetwork, cfTrans.dtmPostedDate AS dtmPostedDate, 
@@ -95,10 +96,10 @@ FROM
                                                          dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId INNER JOIN
                                                          dbo.vyuICGetItemPricing AS iicItemPricing ON iicItemPricing.intItemId = icfItem.intARItemId AND iicItemPricing.intLocationId = iicItemLoc.intLocationId AND 
                                                          iicItemPricing.intItemLocationId = iicItemLoc.intItemLocationId) AS cfSiteItem ON cfTrans.intSiteId = cfSiteItem.intSiteId AND 
-                         cfTrans.intNetworkId = cfSiteItem.intNetworkId AND cfSiteItem.intItemId = cfTrans.intProductId LEFT OUTER JOIN
-                             (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-                                FROM         dbo.tblCFTransactionPrice
-                                WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId 
+                         cfTrans.intNetworkId = cfSiteItem.intNetworkId AND cfSiteItem.intItemId = cfTrans.intProductId --LEFT OUTER JOIN
+                             --(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+                             --   FROM         dbo.tblCFTransactionPrice
+                             --   WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId 
 WHERE     (cfTrans.ysnPosted = 1)
 
 GO
