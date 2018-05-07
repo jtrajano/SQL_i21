@@ -19,6 +19,7 @@ CREATE PROCEDURE [dbo].[uspICUnpostCostAdjustment]
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@AccountCategory_Cost_Adjustment AS NVARCHAR(50) = 'AP Clearing' 
+	,@intTransactionTypeId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -79,6 +80,7 @@ BEGIN
 			,[intSourceTransactionId] 
 			,[intSourceTransactionDetailId] 
 			,[strSourceTransactionId] 
+			,[intFobPointId]
 	)
 	-- AVG and FIFO:
 	SELECT 
@@ -90,7 +92,7 @@ BEGIN
 					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
 								(cbLog.dblQty * cbLog.dblCost) 
 								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
-							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+							ELSE -- WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
 								cbLog.dblValue
 					END 
 			,[intTransactionId] = t.intTransactionId
@@ -102,27 +104,28 @@ BEGIN
 			,[intStorageLocationId] = t.intStorageLocationId
 			,[ysnIsStorage] = 0
 			,[strActualCostId] = NULL 
-			,[intSourceTransactionId] = t.intRelatedTransactionId
-			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
-			,[strSourceTransactionId] = t.strRelatedTransactionId
+			,[intSourceTransactionId] = cbLog.intRelatedTransactionId  --t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = cbLog.intRelatedTransactionDetailId -- COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,[intFobPointId] = t.intFobPointId
 	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
 				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
 			LEFT JOIN tblICInventoryFIFOCostAdjustmentLog cbOriginalCost
 				ON cbOriginalCost.intInventoryFIFOId = cbLog.intInventoryFIFOId
 				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-			LEFT JOIN (
-				tblAPBillDetail bd INNER JOIN tblAPBill b
-					ON bd.intBillId = b.intBillId
-			)
-				ON bd.intBillId = t.intTransactionId
-				AND bd.intBillDetailId = t.intTransactionDetailId
-				AND b.strBillId = t.strTransactionId				
+			--LEFT JOIN (
+			--	tblAPBillDetail bd INNER JOIN tblAPBill b
+			--		ON bd.intBillId = b.intBillId
+			--)
+			--	ON bd.intBillId = t.intTransactionId
+			--	AND bd.intBillDetailId = t.intTransactionDetailId
+			--	AND b.strBillId = t.strTransactionId				
 
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0 
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost, @COST_ADJ_TYPE_Adjust_WIP)
 			AND cbLog.ysnIsUnposted = 0 
 	-- LIFO: 
 	UNION ALL 
@@ -135,7 +138,7 @@ BEGIN
 					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
 								(cbLog.dblQty * cbLog.dblCost) 
 								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
-							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+							ELSE -- WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
 								cbLog.dblValue
 					END 
 			,[intTransactionId] = t.intTransactionId
@@ -147,27 +150,28 @@ BEGIN
 			,[intStorageLocationId] = t.intStorageLocationId
 			,[ysnIsStorage] = 0
 			,[strActualCostId] = NULL 
-			,[intSourceTransactionId] = t.intRelatedTransactionId
-			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
-			,[strSourceTransactionId] = t.strRelatedTransactionId
+			,[intSourceTransactionId] = cbLog.intRelatedTransactionId  --t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = cbLog.intRelatedTransactionDetailId -- COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,[intFobPointId] = t.intFobPointId
 	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
 				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
 			LEFT JOIN tblICInventoryLIFOCostAdjustmentLog cbOriginalCost
 				ON cbOriginalCost.intInventoryLIFOId = cbLog.intInventoryLIFOId
 				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-			LEFT JOIN (
-				tblAPBillDetail bd INNER JOIN tblAPBill b
-					ON bd.intBillId = b.intBillId
-			)
-				ON bd.intBillId = t.intTransactionId
-				AND bd.intBillDetailId = t.intTransactionDetailId
-				AND b.strBillId = t.strTransactionId
+			--LEFT JOIN (
+			--	tblAPBillDetail bd INNER JOIN tblAPBill b
+			--		ON bd.intBillId = b.intBillId
+			--)
+			--	ON bd.intBillId = t.intTransactionId
+			--	AND bd.intBillDetailId = t.intTransactionDetailId
+			--	AND b.strBillId = t.strTransactionId
 
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0 
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost, @COST_ADJ_TYPE_Adjust_WIP)
 			AND cbLog.ysnIsUnposted = 0 
 	-- LOT: 
 	UNION ALL 
@@ -180,7 +184,7 @@ BEGIN
 					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
 								(cbLog.dblQty * cbLog.dblCost) 
 								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
-							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+							ELSE -- WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
 								cbLog.dblValue
 					END 
 			,[intTransactionId] = t.intTransactionId
@@ -192,27 +196,28 @@ BEGIN
 			,[intStorageLocationId] = t.intStorageLocationId
 			,[ysnIsStorage] = 0
 			,[strActualCostId] = NULL 
-			,[intSourceTransactionId] = t.intRelatedTransactionId
-			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
-			,[strSourceTransactionId] = t.strRelatedTransactionId
+			,[intSourceTransactionId] = cbLog.intRelatedTransactionId  --t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = cbLog.intRelatedTransactionDetailId -- COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,[intFobPointId] = t.intFobPointId
 	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
 				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
 			LEFT JOIN tblICInventoryLotCostAdjustmentLog cbOriginalCost
 				ON cbOriginalCost.intInventoryLotId = cbLog.intInventoryLotId
 				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-			LEFT JOIN (
-				tblAPBillDetail bd INNER JOIN tblAPBill b
-					ON bd.intBillId = b.intBillId
-			)
-				ON bd.intBillId = t.intTransactionId
-				AND bd.intBillDetailId = t.intTransactionDetailId
-				AND b.strBillId = t.strTransactionId
+			--LEFT JOIN (
+			--	tblAPBillDetail bd INNER JOIN tblAPBill b
+			--		ON bd.intBillId = b.intBillId
+			--)
+			--	ON bd.intBillId = t.intTransactionId
+			--	AND bd.intBillDetailId = t.intTransactionDetailId
+			--	AND b.strBillId = t.strTransactionId
 
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0 
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost, @COST_ADJ_TYPE_Adjust_WIP)
 			AND cbLog.ysnIsUnposted = 0 
 	UNION ALL 
 	SELECT 
@@ -224,7 +229,7 @@ BEGIN
 					CASE	WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_New_Cost THEN -- {New Value} - {Original Value}								
 								(cbLog.dblQty * cbLog.dblCost) 
 								- (ISNULL(cbLog.dblQty, 0) * ISNULL(cbOriginalCost.dblCost, 0))
-							WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
+							ELSE -- WHEN cbLog.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Value THEN 
 								cbLog.dblValue
 					END 
 			,[intTransactionId] = t.intTransactionId
@@ -236,36 +241,45 @@ BEGIN
 			,[intStorageLocationId] = t.intStorageLocationId
 			,[ysnIsStorage] = 0
 			,[strActualCostId] = NULL 
-			,[intSourceTransactionId] = t.intRelatedTransactionId
-			,[intSourceTransactionDetailId] = COALESCE(bd.intInventoryReceiptItemId, NULL)  
-			,[strSourceTransactionId] = t.strRelatedTransactionId
+			,[intSourceTransactionId] = cbLog.intRelatedTransactionId  --t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = cbLog.intRelatedTransactionDetailId -- COALESCE(bd.intInventoryReceiptItemId, NULL)  
+			,[strSourceTransactionId] = cbLog.strRelatedTransactionId --t.strRelatedTransactionId
+			,[intFobPointId] = t.intFobPointId
 	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
 				ON t.intInventoryTransactionId = cbLog.intInventoryTransactionId
 			LEFT JOIN tblICInventoryActualCostAdjustmentLog cbOriginalCost
 				ON cbOriginalCost.intInventoryActualCostId = cbLog.intInventoryActualCostId
 				AND cbOriginalCost.intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-			LEFT JOIN (
-				tblAPBillDetail bd INNER JOIN tblAPBill b
-					ON bd.intBillId = b.intBillId
-			)
-				ON bd.intBillId = t.intTransactionId
-				AND bd.intBillDetailId = t.intTransactionDetailId
-				AND b.strBillId = t.strTransactionId
+			--LEFT JOIN (
+			--	tblAPBillDetail bd INNER JOIN tblAPBill b
+			--		ON bd.intBillId = b.intBillId
+			--)
+			--	ON bd.intBillId = t.intTransactionId
+			--	AND bd.intBillDetailId = t.intTransactionDetailId
+			--	AND b.strBillId = t.strTransactionId
 
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0 
 			AND t.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost)
+			AND cbLog.intInventoryCostAdjustmentTypeId IN (@COST_ADJ_TYPE_Adjust_Value, @COST_ADJ_TYPE_New_Cost, @COST_ADJ_TYPE_Adjust_WIP)
 			AND cbLog.ysnIsUnposted = 0 
 END 
 
 -- Reverse the cost adjustment by calling the same sp that posted it. 
 IF EXISTS (SELECT TOP 1 1 FROM @ReverseCostAdjustment) 
 BEGIN 
+	DECLARE @TransactionTypeBasedOnTransactionForm AS INT 
+	SELECT	TOP 1 
+			@TransactionTypeBasedOnTransactionForm = ty.intTransactionTypeId
+	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+				ON t.strTransactionForm = ty.strTransactionForm 
+	WHERE	t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+
 	-- Reverse the qty and value. 
-	UPDATE @ReverseCostAdjustment
-	SET dblNewValue = -dblNewValue
+	UPDATE	@ReverseCostAdjustment
+	SET		intTransactionTypeId = ISNULL(@intTransactionTypeId, @TransactionTypeBasedOnTransactionForm) 
 
 	EXEC uspICPostCostAdjustment 
 		@ReverseCostAdjustment
