@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
 SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.intPumpNumber, cfTransaction.strPONumber, cfTransaction.strMiscellaneous,
@@ -33,10 +34,10 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 						 END) AS strCardDescription,
 						
 						 cfNetwork.strNetwork, cfSite.strSiteNumber,cfSite.strTaxState, cfSite.strTaxGroup,
-                         cfSite.strSiteName, cfItem.strProductNumber, cfItem.strItemNo, cfItem.strDescription, ROUND(cfTransPrice.dblCalculatedAmount,2) AS dblCalculatedTotalAmount,
-                         ROUND(cfTransPrice.dblOriginalAmount,2) AS dblOriginalTotalAmount, cfTransGrossPrice.dblCalculatedAmount AS dblCalculatedGrossAmount,
-                         cfTransGrossPrice.dblOriginalAmount AS dblOriginalGrossAmount, cfTransNetPrice.dblCalculatedAmount AS dblCalculatedNetAmount,
-                         cfTransNetPrice.dblOriginalAmount AS dblOriginalNetAmount, cfTransaction.ysnInvalid, cfTransaction.ysnPosted, tblCFTransactionTax_1.dblTaxCalculatedAmount,
+                         cfSite.strSiteName, cfItem.strProductNumber, cfItem.strItemNo, cfItem.strDescription, ROUND(cfTransaction.dblCalculatedTotalPrice,2) AS dblCalculatedTotalAmount,
+                         ROUND(cfTransaction.dblOriginalTotalPrice,2) AS dblOriginalTotalAmount, cfTransaction.dblCalculatedGrossPrice AS dblCalculatedGrossAmount,
+                         cfTransaction.dblOriginalGrossPrice AS dblOriginalGrossAmount, cfTransaction.dblCalculatedNetPrice AS dblCalculatedNetAmount,
+                         cfTransaction.dblOriginalNetPrice AS dblOriginalNetAmount, cfTransaction.ysnInvalid, cfTransaction.ysnPosted, tblCFTransactionTax_1.dblTaxCalculatedAmount,
                          tblCFTransactionTax_1.dblTaxOriginalAmount, ctContracts.strContractNumber, cfTransaction.strPriceMethod, cfTransaction.strPriceBasis, cfTransaction.dblTransferCost,
 						 cfTransaction.dtmPostedDate,
                          
@@ -55,15 +56,10 @@ SELECT   cfVehicle.strVehicleNumber, cfTransaction.intOdometer, cfTransaction.in
 	,dtmTransactionDateOnly = cfTransaction.dtmTransactionDate
 	,dtmTransactionTimeOnly = cfTransaction.dtmTransactionDate
 	,dblTaxDiff = ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0.0) - ISNULL(tblCFTransactionTax_1.dblTaxOriginalAmount,0.0)
-	,dblTotalFET = ISNULL(FETTaxes_1.dblTaxCalculatedAmount, 0) 
-    ,dblTotalSET = ISNULL(SETTaxes_1.dblTaxCalculatedAmount, 0)
-    ,dblTotalSST = ISNULL(SSTTaxes_1.dblTaxCalculatedAmount, 0) 
-    ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)
-	,strItemCategory = iccategory.strCategoryCode           
 FROM dbo.tblCFTransaction AS cfTransaction 
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
-		LEFT JOIN tblEMEntity emEntity 
+		INNER JOIN tblEMEntity emEntity 
 			ON cfNetwork.intCustomerId = emEntity.intEntityId) as cfNetwork  
 	ON cfNetwork.intNetworkId = cfTransaction.intNetworkId
 LEFT OUTER JOIN
@@ -104,54 +100,21 @@ LEFT OUTER JOIN
 		) AS cfCard 
 	ON cfTransaction.intCardId = cfCard.intCardId 
 LEFT OUTER JOIN 
-			(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM         dbo.tblCFTransactionPrice 
-			WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTransaction.intTransactionId = cfTransPrice.intTransactionId LEFT OUTER JOIN
-			(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM         dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
-			WHERE     (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
-			(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM         dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
-			WHERE     (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId LEFT OUTER JOIN
+			--(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM         dbo.tblCFTransactionPrice 
+			--WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTransaction.intTransactionId = cfTransPrice.intTransactionId LEFT OUTER JOIN
+			--(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM         dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
+			--WHERE     (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
+			--(SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM         dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
+			--WHERE     (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId LEFT OUTER JOIN
 			(SELECT   intTransactionId, ISNULL(SUM(dblTaxOriginalAmount), 0) AS dblTaxOriginalAmount, ISNULL(SUM(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
 			FROM         dbo.tblCFTransactionTax AS tblCFTransactionTax 
 			GROUP BY intTransactionId) AS tblCFTransactionTax_1 
 	ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
 LEFT OUTER JOIN dbo.tblCTContractHeader AS ctContracts 
 	ON cfTransaction.intContractId = ctContracts.intContractHeaderId
-LEFT OUTER JOIN (SELECT intTransactionId, 
-					ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount 
-				FROM   dbo.vyuCFTransactionTax AS FETTaxes 
-				WHERE  ( strTaxClass LIKE '%(FET)%' ) 
-				GROUP  BY intTransactionId) AS FETTaxes_1 
-	ON cfTransaction.intTransactionId = FETTaxes_1.intTransactionId 
-LEFT OUTER JOIN (SELECT intTransactionId, 
-					ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
-                FROM   dbo.vyuCFTransactionTax AS SETTaxes 
-                WHERE  ( strTaxClass LIKE '%(SET)%' ) 
-                GROUP  BY intTransactionId) AS SETTaxes_1 
-    ON cfTransaction.intTransactionId = SETTaxes_1.intTransactionId 
-LEFT OUTER JOIN (SELECT intTransactionId, 
-                        ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
-                FROM   dbo.vyuCFTransactionTax AS SSTTaxes 
-                WHERE  ( strTaxClass LIKE '%(SST)%' ) 
-                GROUP  BY intTransactionId) AS SSTTaxes_1 
-	ON cfTransaction.intTransactionId = SSTTaxes_1.intTransactionId 
-LEFT OUTER JOIN (SELECT intTransactionId, 
-                        ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount 
-                FROM   dbo.vyuCFTransactionTax AS LCTaxes 
-                WHERE  ( strTaxClass NOT LIKE '%(SET)%' ) 
-                        AND ( strTaxClass <> 'SET' ) 
-                        AND ( strTaxClass NOT LIKE '%(FET)%' ) 
-                        AND ( strTaxClass <> 'FET' ) 
-                        AND ( strTaxClass NOT LIKE '%(SST)%' ) 
-                        AND ( strTaxClass <> 'SST' ) 
-                GROUP  BY intTransactionId) AS LCTaxes_1 
-    ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 
-LEFT JOIN tblICItem icitem
-	ON cfTransaction.intARItemId = icitem.intItemId
-LEFT JOIN tblICCategory iccategory
-	ON icitem.intCategoryId = iccategory.intCategoryId
 GO
 
 

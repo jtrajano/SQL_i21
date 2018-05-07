@@ -1235,17 +1235,20 @@ BEGIN
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid quantity - ' + Str(@dblQuantity, 16, 8))
 
-			INSERT INTO tblCFTransactionPrice
-			(
-				 intTransactionId
-				,strTransactionPriceId
-				,dblOriginalAmount
-				,dblCalculatedAmount
-			)
-			VALUES 
-			 (@Pk,'Gross Price',@dblOriginalGrossPrice,0.0)
-			,(@Pk,'Net Price',0.0,0.0)
-			,(@Pk,'Total Amount',0.0,0.0)
+			UPDATE tblCFTransaction SET dblOriginalGrossPrice = @dblOriginalGrossPrice WHERE intTransactionId = @Pk
+
+
+			--INSERT INTO tblCFTransactionPrice
+			--(
+			--	 intTransactionId
+			--	,strTransactionPriceId
+			--	,dblOriginalAmount
+			--	,dblCalculatedAmount
+			--)
+			--VALUES 
+			-- (@Pk,'Gross Price',@dblOriginalGrossPrice,0.0)
+			--,(@Pk,'Net Price',0.0,0.0)
+			--,(@Pk,'Total Amount',0.0,0.0)
 
 			RETURN;
 		END
@@ -1612,19 +1615,21 @@ BEGIN
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
-		INSERT INTO tblCFTransactionPrice
-		(
-			 intTransactionId
-			,strTransactionPriceId
-			,dblOriginalAmount
-			,dblCalculatedAmount
-		)
-		SELECT 
-			@Pk
-			,strTransactionPriceId
-			,dblTaxOriginalAmount
-			,dblTaxCalculatedAmount
-		FROM ##tblCFTransactionPriceType
+		--INSERT INTO tblCFTransactionPrice
+		--(
+		--	 intTransactionId
+		--	,strTransactionPriceId
+		--	,dblOriginalAmount
+		--	,dblCalculatedAmount
+		--)
+		--SELECT 
+		--	@Pk
+		--	,strTransactionPriceId
+		--	,dblTaxOriginalAmount
+		--	,dblTaxCalculatedAmount
+		--FROM ##tblCFTransactionPriceType
+
+		-- prices are set on usp recalc--
 		
 
 		print @dblCalcOverfillQuantity

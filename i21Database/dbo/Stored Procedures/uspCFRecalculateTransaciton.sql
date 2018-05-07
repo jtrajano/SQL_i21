@@ -192,6 +192,16 @@ BEGIN
 		,dblGrossTransferCost			NUMERIC(18,6)
 		,dblNetTransferCost				NUMERIC(18,6)
 		,intFreightTermId				INT
+		,dblOriginalTotalPrice			NUMERIC(18,6)
+		,dblCalculatedTotalPrice		NUMERIC(18,6)
+		,dblOriginalGrossPrice			NUMERIC(18,6)
+		,dblCalculatedGrossPrice		NUMERIC(18,6)
+		,dblCalculatedNetPrice			NUMERIC(18,6)
+		,dblOriginalNetPrice			NUMERIC(18,6)
+		,dblCalculatedPumpPrice			NUMERIC(18,6)
+		,dblOriginalPumpPrice			NUMERIC(18,6)
+
+		
 	);
 
 	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
@@ -209,7 +219,7 @@ BEGIN
 		,[strCalculationMethod]			NVARCHAR(MAX)
 	);
 
-	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
+		IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
 	BEGIN
 		DROP TABLE ##tblCFTransactionPriceType
 	END
@@ -218,6 +228,15 @@ BEGIN
 		,[dblTaxOriginalAmount]			NUMERIC(18,6)
 		,[dblTaxCalculatedAmount]		NUMERIC(18,6)
 	);
+
+
+
+
+
+
+
+
+
 
 	END
 
@@ -295,8 +314,8 @@ BEGIN
 		ON cfCard.intAccountId = cfAccount.intAccountId
 		WHERE cfCard.intCardId = @intCardId
 	END
-	ELSE
-	BEGIN
+ELSE
+BEGIN
 		SET @intCustomerId = @CustomerId
 	END
 
@@ -1439,7 +1458,7 @@ BEGIN
 					,@intSiteId
 					,0		--@IsDeliver											 
 				)
-					INSERT INTO @tblCFCalculatedTaxExempt	
+				INSERT	INTO @tblCFCalculatedTaxExempt
 					(
 						 [intTaxGroupId]				
 						,[intTaxCodeId]					
@@ -2579,11 +2598,11 @@ BEGIN
 
 	--select * from @tblCFTransactionTax
 
-	DECLARE @tblTransactionPrice TABLE(
-		 strTransactionPriceId		NVARCHAR(MAX)
-		,dblOriginalAmount			NUMERIC(18,6)
-		,dblCalculatedAmount		NUMERIC(18,6)
-	)
+
+
+
+
+
 
 	IF (@strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
@@ -2599,27 +2618,38 @@ BEGIN
 				SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
 			END
 
-			INSERT INTO @tblTransactionPrice (strTransactionPriceId	
-				,dblOriginalAmount		
-				,dblCalculatedAmount	
-			)
-			VALUES
-			(
-				 'Gross Price'
-				,@dblOriginalPrice
-				,@dblImportFileGrossPrice
-			),
-			(
-				 'Net Price'
-				 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-				 ,ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-				--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-			),
-			(
-				 'Total Amount'
-				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
-			)
+
+			UPDATE tblCFTransaction 
+			SET 
+			 dblCalculatedGrossPrice = @dblImportFileGrossPrice
+			,dblOriginalGrossPrice = @dblOriginalPrice
+			,dblCalculatedNetPrice = ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			,dblOriginalNetPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			,dblCalculatedTotalPrice = ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+			,dblOriginalTotalPrice = ROUND(@dblOriginalPrice * @dblQuantity,2)
+			WHERE intTransactionId = @intTransactionId
+
+
+
+
+
+
+
+
+
+
+			--),
+			--(
+			--	 'Net Price'
+			--	 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			--	 ,ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			--	--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+			--),
+			--(
+			--	 'Total Amount'
+			--	,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			--	,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+			--)
 
 		END
 	ELSE IF @strPriceMethod = 'Network Cost'
@@ -2638,28 +2668,39 @@ BEGIN
 	BEGIN
 	SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
 	END
- 
-	INSERT INTO @tblTransactionPrice (strTransactionPriceId 
-	,dblOriginalAmount 
-	,dblCalculatedAmount 
-	)
-	VALUES
-	(
-	'Gross Price'
-	,@dblNetworkCostGrossPrice
-	,@dblImportFileGrossPrice
-	),
-	(
-	'Net Price'
-	,ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
-	--,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-	,ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-	),
-	(
-	'Total Amount'
-	,ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
-	,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
-	)
+
+
+	UPDATE tblCFTransaction 
+	SET 
+		 dblCalculatedGrossPrice = @dblImportFileGrossPrice
+		,dblOriginalGrossPrice = @dblNetworkCostGrossPrice
+		,dblCalculatedNetPrice = ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+		,dblOriginalNetPrice = ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+		,dblCalculatedTotalPrice = ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+		,dblOriginalTotalPrice = ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
+		WHERE intTransactionId = @intTransactionId
+
+	--INSERT INTO @tblTransactionPrice (strTransactionPriceId 
+	--,dblOriginalAmount 
+	--,dblCalculatedAmount 
+	--)
+	--VALUES
+	--(
+	--'Gross Price'
+	--,@dblNetworkCostGrossPrice
+	--,@dblImportFileGrossPrice
+	--),
+	--(
+	--'Net Price'
+	--,ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+	----,ROUND((((@dblImportFileGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+	--,ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+	--),
+	--(
+	--'Total Amount'
+	--,ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
+	--,ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+	--)
  
 	END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
@@ -2678,28 +2719,41 @@ BEGIN
 		--Calc Gross Price = Round(Index Cost + Profile Rate + Group Adjustment Rate + Round(Calc Taxes / Quantity,6) ,6) + .009 Rounding
 		--Calc Net Price = Round( (Round(Calc Gross Price * Quantity,2) - (Calc Taxes) )/ Quantity,6)
 		
-		INSERT INTO @tblTransactionPrice (
-		 strTransactionPriceId	
-		,dblOriginalAmount		
-		,dblCalculatedAmount	
-		)
-		VALUES
-		(
-			 'Gross Price'
-			,@dblOriginalPrice
-			,@dblLocalIndexCostGrossPrice
-		),
-		(
-			 'Net Price'
-			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-			,Round((Round((@dblLocalIndexCostGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-			--,Round(((@dblLocalIndexCostGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-		),
-		(
-			 'Total Amount'
-			,ROUND(@dblOriginalPrice * @dblQuantity,2)
-			,ROUND((@dblLocalIndexCostGrossPrice * @dblQuantity),2)
-		)
+
+		UPDATE tblCFTransaction 
+		SET 
+			 dblCalculatedGrossPrice = @dblLocalIndexCostGrossPrice
+			,dblOriginalGrossPrice = @dblOriginalPrice
+			,dblCalculatedNetPrice = Round((Round((@dblLocalIndexCostGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			,dblOriginalNetPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			,dblCalculatedTotalPrice = ROUND((@dblLocalIndexCostGrossPrice * @dblQuantity),2)
+			,dblOriginalTotalPrice = ROUND(@dblOriginalPrice * @dblQuantity,2)
+			WHERE intTransactionId = @intTransactionId
+
+
+
+		--INSERT INTO @tblTransactionPrice (
+		-- strTransactionPriceId	
+		--,dblOriginalAmount		
+		--,dblCalculatedAmount	
+		--)
+		--VALUES
+		--(
+		--	 'Gross Price'
+		--	,@dblOriginalPrice
+		--	,@dblLocalIndexCostGrossPrice
+		--),
+		--(
+		--	 'Net Price'
+		--	,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		--	,Round((Round((@dblLocalIndexCostGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		--	--,Round(((@dblLocalIndexCostGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		--),
+		--(
+		--	 'Total Amount'
+		--	,ROUND(@dblOriginalPrice * @dblQuantity,2)
+		--	,ROUND((@dblLocalIndexCostGrossPrice * @dblQuantity),2)
+		--)
 
 	END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index retail' )
@@ -2717,28 +2771,40 @@ BEGIN
 	--	Calc Gross Price = Round(Index Price + Profile Rate + Group Adjustment Rate - Round(Calc Exempt Taxes / Quantity,6) , 6) + .009 Rounding
 		--Calc Net Price = Round( (Round(Calc Gross Price * Quantity,2) - (Calc Taxes) )/ Quantity,6)
 		
-		INSERT INTO @tblTransactionPrice (
-		 strTransactionPriceId	
-		,dblOriginalAmount		
-		,dblCalculatedAmount	
-		)
-		VALUES
-		(
-			 'Gross Price'
-			,@dblOriginalPrice
-			,@dblLocalIndexRetailGrossPrice
-		),
-		(
-			 'Net Price'
-			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-			,Round((Round((@dblLocalIndexRetailGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-			--,Round(((@dblLocalIndexRetailGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-		),
-		(
-			 'Total Amount'
-			,ROUND(@dblOriginalPrice * @dblQuantity,2)
-			,ROUND((@dblLocalIndexRetailGrossPrice * @dblQuantity),2)
-		)
+
+		UPDATE tblCFTransaction 
+		SET 
+			 dblCalculatedGrossPrice = @dblLocalIndexRetailGrossPrice
+			,dblOriginalGrossPrice = @dblOriginalPrice
+			,dblCalculatedNetPrice = Round((Round((@dblLocalIndexRetailGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			,dblOriginalNetPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			,dblCalculatedTotalPrice = ROUND((@dblLocalIndexRetailGrossPrice * @dblQuantity),2)
+			,dblOriginalTotalPrice = ROUND(@dblOriginalPrice * @dblQuantity,2)
+			WHERE intTransactionId = @intTransactionId
+
+
+		--INSERT INTO @tblTransactionPrice (
+		-- strTransactionPriceId	
+		--,dblOriginalAmount		
+		--,dblCalculatedAmount	
+		--)
+		--VALUES
+		--(
+		--	 'Gross Price'
+		--	,@dblOriginalPrice
+		--	,@dblLocalIndexRetailGrossPrice
+		--),
+		--(
+		--	 'Net Price'
+		--	,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		--	,Round((Round((@dblLocalIndexRetailGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		--	--,Round(((@dblLocalIndexRetailGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		--),
+		--(
+		--	 'Total Amount'
+		--	,ROUND(@dblOriginalPrice * @dblQuantity,2)
+		--	,ROUND((@dblLocalIndexRetailGrossPrice * @dblQuantity),2)
+		--)
 
 	END
 	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
@@ -2757,28 +2823,41 @@ BEGIN
 		--Calc Gross Price = Round(Index Cost + Profile Rate + Group Adjustment Rate,6) + .009 Rounding
 		--Calc Net Price = Round( (Round(Calc Gross Price * Quantity,2) - (Calc Taxes) )/ Quantity,6)
 
-		INSERT INTO @tblTransactionPrice (
-		 strTransactionPriceId	
-		,dblOriginalAmount		
-		,dblCalculatedAmount	
-		)
-		VALUES
-		(
-			 'Gross Price'
-			,@dblOriginalPrice
-			,@dblLocalIndexFixedGrossPrice
-		),
-		(
-			 'Net Price'
-			,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-			,Round((Round((@dblLocalIndexFixedGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-			--,Round(((@dblLocalIndexFixedGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-		),
-		(
-			 'Total Amount'
-			,ROUND(@dblOriginalPrice * @dblQuantity,2)
-			,ROUND((@dblLocalIndexFixedGrossPrice * @dblQuantity),2)
-		)
+		UPDATE tblCFTransaction 
+		SET 
+			 dblCalculatedGrossPrice = @dblLocalIndexFixedGrossPrice
+			,dblOriginalGrossPrice = @dblOriginalPrice
+			,dblCalculatedNetPrice = Round((Round((@dblLocalIndexFixedGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+			,dblOriginalNetPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			,dblCalculatedTotalPrice = ROUND((@dblLocalIndexFixedGrossPrice * @dblQuantity),2)
+			,dblOriginalTotalPrice = ROUND(@dblOriginalPrice * @dblQuantity,2)
+			WHERE intTransactionId = @intTransactionId
+
+
+		--INSERT INTO @tblTransactionPrice (
+		-- strTransactionPriceId	
+		--,dblOriginalAmount		
+		--,dblCalculatedAmount	
+		--)
+		--VALUES
+		--(
+		--	 'Gross Price'
+		--	,@dblOriginalPrice
+		--	,@dblLocalIndexFixedGrossPrice
+		--),
+		--(
+		--	 'Net Price'
+		--	,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		--	,Round((Round((@dblLocalIndexFixedGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		--	--,Round(((@dblLocalIndexFixedGrossPrice * @dblQuantity) -  (ISNULL(@totalCalculatedTaxExempt,0) + ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		--),
+		--(
+		--	 'Total Amount'
+		--	,ROUND(@dblOriginalPrice * @dblQuantity,2)
+		--	,ROUND((@dblLocalIndexFixedGrossPrice * @dblQuantity),2)
+		--)
+
+
 	END
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
 	BEGIN
@@ -2797,27 +2876,40 @@ BEGIN
 				SELECT @dblPumpPriceAdjustmentGrossPrice = dbo.fnCFForceRounding(@dblPumpPriceAdjustmentGrossPrice)
 			END
 
-			INSERT INTO @tblTransactionPrice (strTransactionPriceId	
-				,dblOriginalAmount		
-				,dblCalculatedAmount	
-			)
-			VALUES
-			(
-				 'Gross Price'
-				,@dblOriginalPrice
-				,@dblPumpPriceAdjustmentGrossPrice
-			),
-			(
-				 'Net Price'
-				 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-				 ,ROUND(((Round((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-				--,ROUND((((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
-			),
-			(
-				 'Total Amount'
-				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				,ROUND((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2)
-			)
+
+
+			UPDATE tblCFTransaction 
+			SET 
+				 dblCalculatedGrossPrice = @dblPumpPriceAdjustmentGrossPrice
+				,dblOriginalGrossPrice = @dblOriginalPrice
+				,dblCalculatedNetPrice = ROUND(((Round((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+				,dblOriginalNetPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+				,dblCalculatedTotalPrice = ROUND((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2)
+				,dblOriginalTotalPrice =ROUND(@dblOriginalPrice * @dblQuantity,2)
+				WHERE intTransactionId = @intTransactionId
+
+
+			--INSERT INTO @tblTransactionPrice (strTransactionPriceId	
+			--	,dblOriginalAmount		
+			--	,dblCalculatedAmount	
+			--)
+			--VALUES
+			--(
+			--	 'Gross Price'
+			--	,@dblOriginalPrice
+			--	,@dblPumpPriceAdjustmentGrossPrice
+			--),
+			--(
+			--	 'Net Price'
+			--	 ,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			--	 ,ROUND(((Round((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			--	--,ROUND((((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+			--),
+			--(
+			--	 'Total Amount'
+			--	,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			--	,ROUND((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2)
+			--)
 			
 		END
 	END
@@ -2834,31 +2926,44 @@ BEGIN
 				SELECT @dblTransferCostGrossPrice = dbo.fnCFForceRounding(@dblTransferCostGrossPrice)
 			END
 
+			UPDATE tblCFTransaction 
+			SET 
+				 dblCalculatedGrossPrice = @dblTransferCostGrossPrice
+				,dblOriginalGrossPrice = @dblGrossTransferCost
+				,dblCalculatedNetPrice = ROUND(((Round((@dblTransferCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+				,dblOriginalNetPrice =@dblNetTransferCost
+				,dblCalculatedTotalPrice = ROUND((@dblTransferCostGrossPrice * @dblQuantity),2)
+				,dblOriginalTotalPrice =ROUND(@dblGrossTransferCost * @dblQuantity,2)
+				WHERE intTransactionId = @intTransactionId
 
-			INSERT INTO @tblTransactionPrice (
-				 strTransactionPriceId	
-				,dblOriginalAmount		
-				,dblCalculatedAmount	
-			)
-			VALUES
-			(
-				 'Gross Price'
-				,@dblGrossTransferCost
-				,@dblTransferCostGrossPrice
-			),
-			(
-				 'Net Price'
-				,@dblNetTransferCost
-				,ROUND(((Round((@dblTransferCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-				--,ROUND((((@dblTransferCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
+
+			--INSERT INTO @tblTransactionPrice (
+			--	 strTransactionPriceId	
+			--	,dblOriginalAmount		
+			--	,dblCalculatedAmount	
+			--)
+			--VALUES
+			--(
+			--	 'Gross Price'
+			--	,@dblGrossTransferCost
+			--	,@dblTransferCostGrossPrice
+			--	,@dblTransferCostGrossPrice
+			--),
+			--(
+			--	 'Net Price'
+			--	,@dblNetTransferCost
+			--	,ROUND(((Round((@dblTransferCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			--	--,ROUND((((@dblTransferCostGrossPrice * @dblQuantity) - (@totalCalculatedTaxExempt + @totalCalculatedTax) ) / @dblQuantity),6)
 					
 
-			),
-			(
-				 'Total Amount'
-				,ROUND(@dblGrossTransferCost * @dblQuantity,2)
-				,ROUND((@dblTransferCostGrossPrice * @dblQuantity),2)
-			)
+			--),
+			--(
+			--	 'Total Amount'
+			--	,ROUND(@dblGrossTransferCost * @dblQuantity,2)
+			--	,ROUND((@dblTransferCostGrossPrice * @dblQuantity),2)
+			--)
+
+
 		END
 	END
 	ELSE
@@ -2892,35 +2997,50 @@ BEGIN
 		--Calc Net Price = Inventory Price
 		--Calc Gross Price = Calc Net Price + Round(Calc Taxes / Quantity, 6)
 
-			INSERT INTO @tblTransactionPrice (
-			 strTransactionPriceId	
-			,dblOriginalAmount		
-			,dblCalculatedAmount	
-			)
-			VALUES
-			(
-				 'Gross Price'
-				,@dblOriginalPrice
-				,@dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)
-			),
-			(
-				 'Net Price'
-				,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
-				,@dblPrice
-			),
-			--OLD WAY--
+			UPDATE tblCFTransaction 
+			SET 
+				 dblCalculatedGrossPrice = @dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)
+				,dblOriginalGrossPrice = @dblOriginalPrice
+				,dblCalculatedNetPrice = @dblPrice
+				,dblOriginalNetPrice =Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+				,dblCalculatedTotalPrice = ROUND(@dblPrice * @dblQuantity,2) + @totalCalculatedTax
+				,dblOriginalTotalPrice =ROUND(@dblOriginalPrice * @dblQuantity,2)
+				WHERE intTransactionId = @intTransactionId
+
+
+
+
+			--INSERT INTO @tblTransactionPrice (
+			-- strTransactionPriceId	
+			--,dblOriginalAmount		
+			--,dblCalculatedAmount	
+			--)
+			--VALUES
+			--(
+			--	 'Gross Price'
+			--	,@dblOriginalPrice
+			--	,@dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)
+			--),
 			--(
 			--	 'Net Price'
-			--	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			--	,Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)  --@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
 			--	,@dblPrice
 			--),
-			(
-				 'Total Amount'
-				,ROUND(@dblOriginalPrice * @dblQuantity,2)
-				--,ROUND((@dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)) * @dblQuantity,2)
+			----OLD WAY--
+			----(
+			----	 'Net Price'
+			----	,@dblOriginalPrice - (@totalOriginalTax / @dblQuantity)
+			----	,@dblPrice
+			----),
+			--(
+			--	 'Total Amount'
+			--	,ROUND(@dblOriginalPrice * @dblQuantity,2)
+			--	--,ROUND((@dblPrice + Round((@totalCalculatedTax / @dblQuantity) ,6)) * @dblQuantity,2)
 
-				,ROUND(@dblPrice * @dblQuantity,2) + @totalCalculatedTax
-			)
+			--	,ROUND(@dblPrice * @dblQuantity,2) + @totalCalculatedTax
+			--)
+
+
 		END
 	END
 
@@ -2938,10 +3058,11 @@ BEGIN
 	DECLARE @dblInventoryCost	NUMERIC(18,6)
 	DECLARE @dblMarginNetPrice	NUMERIC(18,6)
 
-	
-	SELECT TOP 1 @dblMarginNetPrice = dblCalculatedAmount 
-	FROM @tblTransactionPrice 
-	WHERE strTransactionPriceId = 'Net Price'
+	SELECT TOP 1 @dblMarginNetPrice = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+	--SELECT TOP 1 @dblMarginNetPrice = dblCalculatedAmount 
+	--FROM @tblTransactionPrice 
+	--WHERE strTransactionPriceId = 'Net Price'
 
 
 	IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
@@ -3078,7 +3199,10 @@ BEGIN
 	BEGIN
 
 		DECLARE @dblCalculatedPricing NUMERIC(18,6)
-		SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		--SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		SELECT TOP 1 @dblCalculatedPricing = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+
 		IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
 		BEGIN		
 			SET @ysnInvalid = 1
@@ -3089,7 +3213,9 @@ BEGIN
 
 	
 		DECLARE @dblOriginalPricing NUMERIC(18,6)
-		SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		--SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+
+		SELECT TOP 1 @dblOriginalPricing = dblOriginalNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 		IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
@@ -3240,16 +3366,25 @@ BEGIN
 			--IF()
 
 			DECLARE @dblCalculatedGrossPrice AS NUMERIC(18,6)
-			SELECT TOP 1 @dblCalculatedGrossPrice = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price'
+			--SELECT TOP 1 @dblCalculatedGrossPrice = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price'
+			SELECT TOP 1 @dblCalculatedGrossPrice = dblCalculatedGrossPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 			DECLARE @dblOriginalGrossPrice AS NUMERIC(18,6)
-			SELECT TOP 1 @dblOriginalGrossPrice = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price'
+			--SELECT TOP 1 @dblOriginalGrossPrice = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Gross Price'
+			SELECT TOP 1 @dblCalculatedGrossPrice = dblOriginalGrossPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
-			UPDATE @tblTransactionPrice 
+			--UPDATE @tblTransactionPrice 
+			--SET 
+			--dblCalculatedAmount = ROUND((@dblCalculatedGrossPrice * @dblQuantity),2) 
+			--,dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2)
+			--WHERE strTransactionPriceId = 'Total Amount'
+
+
+			UPDATE tblCFTransaction
 			SET 
-			dblCalculatedAmount = ROUND((@dblCalculatedGrossPrice * @dblQuantity),2) 
-			,dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2)
-			WHERE strTransactionPriceId = 'Total Amount'
+			dblCalculatedTotalPrice = ROUND((@dblCalculatedGrossPrice * @dblQuantity),2) 
+			,dblOriginalTotalPrice = ROUND((@dblOriginalGrossPrice * @dblQuantity),2)
+			WHERE intTransactionId = @intTransactionId
 			
 			--UPDATE @tblTransactionPrice SET dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2) WHERE strTransactionPriceId = 'Total Amount'
 
@@ -3292,20 +3427,23 @@ BEGIN
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 			---------------------------------------------------------------------------
-			DELETE tblCFTransactionPrice WHERE intTransactionId = @intTransactionId
-			INSERT INTO tblCFTransactionPrice
-			(
-			strTransactionPriceId
-			,dblOriginalAmount
-			,dblCalculatedAmount
-			,intTransactionId
-			)
-			SELECT 
-			[strTransactionPriceId]
-			,[dblOriginalAmount]	
-			,[dblCalculatedAmount]
-			,@intTransactionId
-			FROM @tblTransactionPrice
+			--DELETE tblCFTransactionPrice WHERE intTransactionId = @intTransactionId
+
+
+
+			--INSERT INTO tblCFTransactionPrice
+			--(
+			--strTransactionPriceId
+			--,dblOriginalAmount
+			--,dblCalculatedAmount
+			--,intTransactionId
+			--)
+			--SELECT 
+			--[strTransactionPriceId]
+			--,[dblOriginalAmount]	
+			--,[dblCalculatedAmount]
+			--,@intTransactionId
+			--FROM @tblTransactionPrice
 
 			---------------------------------------------------------------------------
 
@@ -3465,21 +3603,34 @@ BEGIN
 				DECLARE @overfillId AS INT
 				SET @overfillId = SCOPE_IDENTITY()
 
-				INSERT INTO tblCFTransactionPrice
-				(
-					intTransactionId
-					,strTransactionPriceId
-					,dblOriginalAmount
-					,dblCalculatedAmount
-				)
-				SELECT 
-					@overfillId
-					,strTransactionPriceId
-					,dblOriginalAmount
-					,dblCalculatedAmount
-				FROM
-				tblCFTransactionPrice
-				WHERE intTransactionId = @intTransactionId
+
+				UPDATE tblCFTransaction 
+				SET 
+				 dblCalculatedGrossPrice   = selTrans.dblCalculatedGrossPrice
+				,dblCalculatedNetPrice	   = selTrans.dblCalculatedNetPrice
+				,dblCalculatedTotalPrice   = selTrans.dblCalculatedTotalPrice
+				,dblOriginalGrossPrice	   = selTrans.dblOriginalGrossPrice
+				,dblOriginalNetPrice	   = selTrans.dblOriginalNetPrice
+				,dblOriginalTotalPrice	   = selTrans.dblOriginalTotalPrice
+				FROM tblCFTransaction AS selTrans
+				WHERE selTrans.intTransactionId = @intTransactionId
+
+
+				--INSERT INTO tblCFTransactionPrice
+				--(
+				--	intTransactionId
+				--	,strTransactionPriceId
+				--	,dblOriginalAmount
+				--	,dblCalculatedAmount
+				--)
+				--SELECT 
+				--	@overfillId
+				--	,strTransactionPriceId
+				--	,dblOriginalAmount
+				--	,dblCalculatedAmount
+				--FROM
+				--tblCFTransactionPrice
+				--WHERE intTransactionId = @intTransactionId
 
 
 				INSERT INTO tblCFTransactionTax
@@ -3531,8 +3682,28 @@ BEGIN
 	ELSE
 	BEGIN
 
-	
-	
+
+	DECLARE @dblOutOriginalTotalPrice		NUMERIC(18,6)
+	DECLARE @dblOutCalculatedTotalPrice		NUMERIC(18,6)
+	DECLARE @dblOutOriginalGrossPrice		NUMERIC(18,6)
+	DECLARE @dblOutCalculatedGrossPrice		NUMERIC(18,6)
+	DECLARE @dblOutCalculatedNetPrice		NUMERIC(18,6)
+	DECLARE @dblOutOriginalNetPrice			NUMERIC(18,6)
+	DECLARE @dblOutCalculatedPumpPrice		NUMERIC(18,6)
+	DECLARE @dblOutOriginalPumpPrice		NUMERIC(18,6)
+
+
+	SELECT TOP 1
+	 @dblOutOriginalTotalPrice		= dblOriginalTotalPrice	
+	,@dblOutCalculatedTotalPrice	= dblCalculatedTotalPrice
+	,@dblOutOriginalGrossPrice		= dblOriginalGrossPrice	
+	,@dblOutCalculatedGrossPrice	= dblCalculatedGrossPrice
+	,@dblOutCalculatedNetPrice		= dblCalculatedNetPrice	
+	,@dblOutOriginalNetPrice		= dblOriginalNetPrice	
+	,@dblOutCalculatedPumpPrice		= dblCalculatedPumpPrice	
+	,@dblOutOriginalPumpPrice		= dblOriginalPumpPrice	
+	FROM tblCFTransaction 
+	WHERE intTransactionId = @intTransactionId
 	
 	---------------------------------------------------
 	--					PRICING OUT					 --
@@ -3580,6 +3751,14 @@ BEGIN
 			,dblGrossTransferCost
 			,dblNetTransferCost
 			,intFreightTermId
+			,dblOriginalTotalPrice	
+			,dblCalculatedTotalPrice
+			,dblOriginalGrossPrice	
+			,dblCalculatedGrossPrice
+			,dblCalculatedNetPrice	
+			,dblOriginalNetPrice	
+			,dblCalculatedPumpPrice	
+			,dblOriginalPumpPrice	
 			)
 			SELECT
 			 @intItemId					 AS intItemId
@@ -3621,6 +3800,14 @@ BEGIN
 			,@dblGrossTransferCost		 AS dblGrossTransferCost
 			,@dblNetTransferCost		 AS dblNetTransferCost
 			,@companyConfigFreightTermId AS intFreightTermId
+			,@dblOutOriginalTotalPrice	 AS dblOriginalTotalPrice	
+			,@dblOutCalculatedTotalPrice AS dblCalculatedTotalPrice
+			,@dblOutOriginalGrossPrice	 AS dblOriginalGrossPrice	
+			,@dblOutCalculatedGrossPrice AS dblCalculatedGrossPrice
+			,@dblOutCalculatedNetPrice	 AS dblCalculatedNetPrice	
+			,@dblOutOriginalNetPrice	 AS dblOriginalNetPrice	
+			,@dblOutCalculatedPumpPrice	 AS dblCalculatedPumpPrice	
+			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice	
 		END
 	ELSE
 		BEGIN
@@ -3664,6 +3851,15 @@ BEGIN
 			,@dblGrossTransferCost		AS dblGrossTransferCost
 			,@dblNetTransferCost		AS dblNetTransferCost
 			,@companyConfigFreightTermId AS intFreightTermId
+			,@dblOutOriginalTotalPrice	 AS dblOriginalTotalPrice	
+			,@dblOutCalculatedTotalPrice AS dblCalculatedTotalPrice
+			,@dblOutOriginalGrossPrice	 AS dblOriginalGrossPrice	
+			,@dblOutCalculatedGrossPrice AS dblCalculatedGrossPrice
+			,@dblOutCalculatedNetPrice	 AS dblCalculatedNetPrice	
+			,@dblOutOriginalNetPrice	 AS dblOriginalNetPrice	
+			,@dblOutCalculatedPumpPrice	 AS dblCalculatedPumpPrice	
+			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice
+
 		END
 	---------------------------------------------------
 	--					PRICING OUT					 --
@@ -3742,18 +3938,42 @@ BEGIN
 		,[dblTaxCalculatedAmount]
 		)
 		SELECT 
+		 'Gross Price'
+		,dblOriginalGrossPrice
+		,dblCalculatedGrossPrice
+		FROM tblCFTransaction
+		WHERE intTransactionId = @intTransactionId
+
+		INSERT INTO ##tblCFTransactionPriceType
+		(
 		 [strTransactionPriceId]
-		,ISNULL([dblOriginalAmount]	,0)
-		,ISNULL([dblCalculatedAmount],0)
-		FROM @tblTransactionPrice
-	END
-	ELSE
-	BEGIN
-		SELECT * FROM @tblTransactionPrice
-	END
+		,[dblTaxOriginalAmount]	
+		,[dblTaxCalculatedAmount]
+		)
+		SELECT 
+		 'Net Price'
+		,dblOriginalNetPrice
+		,dblCalculatedNetPrice
+		FROM tblCFTransaction
+		WHERE intTransactionId = @intTransactionId
+
+		INSERT INTO ##tblCFTransactionPriceType
+		(
+		 [strTransactionPriceId]
+		,[dblTaxOriginalAmount]	
+		,[dblTaxCalculatedAmount]
+		)
+		SELECT 
+		 'Total Amount'
+		,dblOriginalTotalPrice
+		,dblCalculatedTotalPrice
+		FROM tblCFTransaction
+		WHERE intTransactionId = @intTransactionId
+
+		
 	END
 	---------------------------------------------------
 	--					PRICE OUT					 --
 	---------------------------------------------------
-	
+	END 
 	END
