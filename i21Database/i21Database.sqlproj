@@ -6475,6 +6475,7 @@
     <Build Include="dbo\Views\vyuAPYearDIV.sql" />
     <Build Include="dbo\Views\vyuAPYearINT.sql" />
     <Build Include="dbo\Views\vyuPOSGetLoggedIn.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemDataInsertAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
