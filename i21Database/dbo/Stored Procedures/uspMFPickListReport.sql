@@ -88,6 +88,7 @@ Declare @dblAvailableQty numeric(38,20)
 Declare @intPickListDetailId int
 Declare @intBatchCounter INT=1
 Declare @strCustomerMessages nvarchar(max)
+Declare @intCommonUOMId int
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -398,13 +399,24 @@ Begin --Sales Order Pick List
 		Where d.intEntityCustomerId = (Select intEntityCustomerId From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)
 		AND dm.ysnPickList=1 AND dm.strHeaderFooter='Footer'
 
-	Declare @intCommonUOMId int
-	Select TOP 1 @intCommonUOMId=iu.intUnitMeasureId From tblSOSalesOrderDetail sd Join tblICItemUOM iu on sd.intItemId=iu.intItemId
-	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId where sd.intSalesOrderId=@intSalesOrderId
-	group by iu.intUnitMeasureId having count(iu.intUnitMeasureId)=(Select count(1) from tblSOSalesOrderDetail where intSalesOrderId=@intSalesOrderId)
+		Select TOP 1 @intCommonUOMId=iu.intUnitMeasureId From tblSOSalesOrderDetail sd 
+		Join tblICItem i on sd.intItemId=i.intItemId
+		Join tblICItemUOM iu on sd.intItemId=iu.intItemId
+		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId 
+		where sd.intSalesOrderId=@intSalesOrderId AND i.strType NOT IN ('Other Charge','Comment')
+		group by iu.intUnitMeasureId having count(iu.intUnitMeasureId)=(Select count(1) from tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId where a.intSalesOrderId=@intSalesOrderId AND b.strType NOT IN ('Other Charge','Comment'))
 
 	If @intPickListId>0
 		Begin
+			If (Select count(1) from tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId 
+					where a.intSalesOrderId=@intSalesOrderId 
+					AND b.strType NOT IN ('Other Charge','Comment')) = 1 --Exclude Single Item
+				OR 
+				(Select COUNT(distinct c.intUnitMeasureId) From tblMFPickListDetail a Join tblICItem b on a.intItemId=b.intItemId 
+				Join tblICItemUOM c on a.intItemUOMId=c.intItemUOMId
+				Where a.intPickListId=@intPickListId AND b.strType NOT IN ('Other Charge','Comment')) = 1 --Exclude All Items with Same UOM
+			Set @intCommonUOMId=NULL
+
 			INSERT INTO @tblItems
 			SELECT pl.strPickListNo ,  
 					''  AS strBlendItemNoDesc,  
@@ -502,6 +514,15 @@ Begin --Sales Order Pick List
 		End
 	Else
 		Begin
+			If (Select count(1) from tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId 
+					where a.intSalesOrderId=@intSalesOrderId 
+					AND b.strType NOT IN ('Other Charge','Comment')) = 1  --Exclude Single Item
+				OR 
+				(Select COUNT(distinct c.intUnitMeasureId) From tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId 
+				Join tblICItemUOM c on a.intItemUOMId=c.intItemUOMId
+				Where a.intSalesOrderId=@intSalesOrderId AND b.strType NOT IN ('Other Charge','Comment')) = 1 --Exclude All Items Same UOM
+			Set @intCommonUOMId=NULL
+
 			INSERT INTO @tblItems
 			SELECT so.strSalesOrderNumber strPickListNo ,  
 			''  AS strBlendItemNoDesc,  
