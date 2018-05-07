@@ -71,7 +71,7 @@ BEGIN TRY
 			MA.strFutMarketName,
 			MO.strFutureMonth,
 			dbo.fnRemoveTrailingZeroes(PF.[dblLotsFixed]) AS dblLotsFixed,
-			(SELECT TOP 1 dtmFixationDate FROM tblCTPriceFixationDetail WHERE intPriceFixationId = 35) AS dtmFixationDate,
+			(SELECT TOP 1 dtmFixationDate FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId) AS dtmFixationDate,
 			CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) strPeriod,
 			LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 				ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
