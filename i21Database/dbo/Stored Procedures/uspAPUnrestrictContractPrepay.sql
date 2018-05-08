@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUnrestrictContractPrepay]
-	@contractDetail INT
+	@contractDetailId INT
 AS
 
 BEGIN
@@ -17,9 +17,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE A
 		SET A.ysnRestricted = 0
-	FROM tblAPBill A
-	WHERE A.intTransactionType IN (2, 13)
-	AND A.ysnPaid = 0
+	FROM tblAPBillDetail A
+	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+	WHERE B.intTransactionType IN (2, 13)
+	AND B.ysnPaid = 0
 	AND A.intContractDetailId = @contractDetailId
 
 IF @transCount = 0 COMMIT TRANSACTION
