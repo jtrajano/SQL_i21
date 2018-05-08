@@ -17,5 +17,6 @@
     [strSourceType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
 	[intOriginTicketDiscountId] INT NULL,
+	[intConcurrencyId] INT NULL DEFAULT((1)), 
 	CONSTRAINT [PK_tblSCTicketDiscountLVStaging_intTicketDiscountLVStagingId] PRIMARY KEY ([intTicketDiscountLVStagingId])
 )
