@@ -16,7 +16,7 @@ AS		CostingMethods
 USING	(
 		SELECT 
 			[intCostingMethodId] = 1,
-			[strCostingMethod] = 'AVERAGE COST'
+			[strCostingMethod] = 'AVG'
 		UNION ALL
 		SELECT 
 			[intCostingMethodId] = 2,
@@ -28,11 +28,15 @@ USING	(
 		UNION ALL
 		SELECT 
 			[intCostingMethodId] = 4,
-			[strCostingMethod] = 'LOT COST'
+			[strCostingMethod] = 'LOT'
 		UNION ALL
 		SELECT 
 			[intCostingMethodId] = 5,
-			[strCostingMethod] = 'ACTUAL COST'
+			[strCostingMethod] = 'ACTUAL'
+		UNION ALL
+		SELECT 
+			[intCostingMethodId] = 6,
+			[strCostingMethod] = 'CATEGORY'
 
 ) AS HardCodedCostingMethods
 	ON  CostingMethods.intCostingMethodId = HardCodedCostingMethods.intCostingMethodId
