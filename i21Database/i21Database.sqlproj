@@ -6456,7 +6456,8 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
-    <Build Include="dbo\Functions\fnARIsItemTermDiscountExempt.sql" />
+    <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCategory.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
@@ -6484,6 +6485,25 @@
     <Build Include="dbo\Views\vyuSTFuelDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCategory.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspAPUnrestrictContractPrepay.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessLVControlToTicket.sql" />
+    <Build Include="dbo\Views\vyuSCTicketLVSearch.sql" />
+    <Build Include="dbo\Functions\fnConvertEnglishToItalian.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportIdealContractBuyer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCopyHandheldUserMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveHandheldUserMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetHandheldUserMenu.sql" />
+    <Build Include="dbo\Functions\fnARItemTermDiscountExemptDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetItemTermDiscount.sql" />
+    <Build Include="dbo\Functions\fnARGetItemTermDiscountExemption.sql" />
+    <Build Include="dbo\Functions\fnGetDiscountDateBasedOnTerm.sql" />
+    <Build Include="dbo\Tables\tblARIntrCompanyInvoiceStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvoiceStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspARTransferInvoiceStgData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessInvoiceStgData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6657,6 +6677,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
+    <None Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
+    <None Include="dbo\Functions\fnCFGetDefaultComment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

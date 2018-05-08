@@ -457,6 +457,7 @@ BEGIN
 				,intStorageLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,intCategoryId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -489,7 +490,20 @@ BEGIN
 												END
 
 				,dblCost					= 0.00 
-				,dblSalesPrice              = 0.00
+				,dblSalesPrice              = 
+											dbo.fnCalculateCostBetweenUOM (
+												ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 
+												,CASE	WHEN Lot.intLotId IS NULL THEN 
+															ItemUOM.intItemUOMId
+														WHEN Lot.intWeightUOMId IS NULL THEN 
+															Lot.intItemUOMId
+														ELSE
+															Lot.intWeightUOMId
+			 									END
+												,DetailItem.dblUnitPrice
+											)
+
+
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId
@@ -501,6 +515,7 @@ BEGIN
 				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
 				,dblForexRate				= 1 
+				,intCategoryId				= i.intCategoryId 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -767,7 +782,18 @@ BEGIN
 												END
 
 				,dblCost					= 0.00 
-				,dblSalesPrice              = 0.00
+				,dblSalesPrice              = 
+											dbo.fnCalculateCostBetweenUOM (
+												ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 
+												,CASE	WHEN Lot.intLotId IS NULL THEN 
+															ItemUOM.intItemUOMId
+														WHEN Lot.intWeightUOMId IS NULL THEN 
+															Lot.intItemUOMId
+														ELSE
+															Lot.intWeightUOMId
+			 									END
+												,DetailItem.dblUnitPrice
+											)
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
 				,intTransactionId           = Header.intInventoryShipmentId

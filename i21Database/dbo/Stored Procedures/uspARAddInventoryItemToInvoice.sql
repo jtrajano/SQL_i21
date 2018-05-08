@@ -205,6 +205,8 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@CurrencyExchangeRate			NUMERIC(18,6)
 		,@SubCurrencyId					INT
 		,@SubCurrencyRate				NUMERIC(18,6)
+		,@TermDiscountExempt			BIT
+		,@TermDiscountRate				NUMERIC(18,6)
 
 BEGIN TRY
 SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
@@ -223,6 +225,8 @@ EXEC dbo.[uspARGetItemPrice]
 		,@ContractSeq					= @ContractSeq					OUTPUT
 		,@TermDiscount					= @ItemTermDiscount				OUTPUT
 		,@TermDiscountBy				= @ItemTermDiscountBy			OUTPUT
+		,@TermDiscountRate				= @TermDiscountRate				OUTPUT
+		,@TermDiscountExempt			= @TermDiscountExempt			OUTPUT	
 		,@ContractUOMId					= @ContractUOMId				OUTPUT
 		,@PriceUOMId					= @PriceUOMId					OUTPUT
 		,@PriceUOMQuantity				= @PriceUOMQuantity				OUTPUT
@@ -243,7 +247,7 @@ EXEC dbo.[uspARGetItemPrice]
 	--,@PricingLevelId			= NULL
 	--,@AllowQtyToExceedContract	= 0
 	,@InvoiceType				= @InvoiceType
-	,@TermId					= @TermId
+	,@TermId					= @TermId 
 
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN
@@ -307,6 +311,12 @@ BEGIN TRY
 				,[dblDiscount]
 				,[dblItemTermDiscount]
 				,[strItemTermDiscountBy]
+				,[dblItemTermDiscountAmount]
+				,[dblBaseItemTermDiscountAmount]
+				,[dblItemTermDiscountExemption]
+				,[dblBaseItemTermDiscountExemption]
+				,[dblTermDiscountRate]
+				,[ysnTermDiscountExempt]
 				,[dblPrice]
 				,[dblUnitPrice]
 				,[strPricing]
@@ -393,6 +403,28 @@ BEGIN TRY
 				,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 				,[dblItemTermDiscount]				= ISNULL(@ItemTermDiscount, @ZeroDecimal)
 				,[strItemTermDiscountBy]			= @ItemTermDiscountBy
+				,[dblItemTermDiscountAmount]		= [dbo].[fnARGetItemTermDiscount](	@ItemTermDiscountBy
+																						,@ItemTermDiscount
+																						,@ItemQtyShipped
+																						,(CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+																						,1.000000)
+				,[dblBaseItemTermDiscountAmount]	= [dbo].[fnARGetItemTermDiscount](	@ItemTermDiscountBy
+																						,@ItemTermDiscount
+																						,@ItemQtyShipped
+																						,(CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+																						,(CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END))
+				,[dblItemTermDiscountExemption]		= [dbo].[fnARGetItemTermDiscountExemption](	@TermDiscountExempt
+																								,@TermDiscountRate
+																								,@ItemQtyShipped
+																								,(CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+																								,1.000000)
+				,[dblBaseItemTermDiscountExemption] = [dbo].[fnARGetItemTermDiscountExemption](	@TermDiscountExempt
+																								,@TermDiscountRate
+																								,@ItemQtyShipped
+																								,(CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
+																								,(CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END))
+				,[dblTermDiscountRate]				= @TermDiscountRate
+				,[ysnTermDiscountExempt]			= @TermDiscountExempt
 				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[dblUnitPrice]						= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemUnitPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemUnitPrice, @ZeroDecimal) END)
 				,[strPricing]						= @ItemPricing 

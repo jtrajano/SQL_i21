@@ -16,6 +16,7 @@
 [intCompanyId] INT NULL,
 [intBookId] INT NULL,
 [intSubBookId] INT NULL,
+[intWeightClaimRefId] INT NULL, 
 
 CONSTRAINT [PK_tblLGWeightClaim_intWeightClaimId] PRIMARY KEY ([intWeightClaimId]), 
 CONSTRAINT [UK_tblLGWeightClaim_intReferenceNumber] UNIQUE ([strReferenceNumber]),

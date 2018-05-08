@@ -262,6 +262,17 @@ BEGIN
 		,@ysnRecap
 END
 
+-----------------------------------------------------------------------------------------------------------------------------
+-- Unpost the Category costing. 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC dbo.uspICUnpostCategory
+		@strTransactionId
+		,@intTransactionId
+		,@ysnRecap
+END
+
+
 IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
 BEGIN 
 	-------------------------------------------------
@@ -278,6 +289,7 @@ BEGIN
 			,[dblUOMQty]
 			,[dblCost]
 			,[dblValue]
+			,[dblUnitRetail]
 			,[dblSalesPrice]
 			,[intCurrencyId]
 			,[dblExchangeRate]
@@ -301,6 +313,10 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[intCompanyId]
+			,[dblCategoryCostValue]
+			,[dblCategoryRetailValue]
+			,[intCategoryId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -313,6 +329,7 @@ BEGIN
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
 			,[dblValue]								= -ActualTransaction.dblValue
+			,[dblUnitRetail]						= ActualTransaction.dblUnitRetail 
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
@@ -336,7 +353,10 @@ BEGIN
 			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
-
+			,[intCompanyId]							= ActualTransaction.intCompanyId
+			,[dblCategoryCostValue]					= -ActualTransaction.dblCategoryCostValue
+			,[dblCategoryRetailValue]				= -ActualTransaction.dblCategoryRetailValue
+			,[intCategoryId]						= ActualTransaction.intCategoryId 
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
@@ -365,6 +385,7 @@ BEGIN
 		,[dtmCreated] 
 		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
+		,[intCompanyId]
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -386,6 +407,7 @@ BEGIN
 			,[dtmCreated]				= GETDATE()
 			,[intCreatedEntityId]		= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
+			,[intCompanyId]				= ActualTransaction.intCompanyId
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 

@@ -12,7 +12,8 @@ ISNULL([Active],0) + ISNULL([Quarantine],0) + ISNULL([On Hold],0) AS dblOnHandQt
 Reserve.dblReservedQty,
 Reserve.dblAvailableQty,
 intLocationId,
-PivotTable.intItemId
+PivotTable.intItemId,
+PivotTable.strUOM
 FROM
 (
 	SELECT 
@@ -23,7 +24,8 @@ FROM
 	l.intLocationId,
 	l.dblReorderPoint,
 	l.strLocationName,
-	l.intItemId
+	l.intItemId,
+	l.strUOM
 	From
 	(
 	Select 
@@ -35,14 +37,16 @@ FROM
 	i.intItemId,
 	il.dblReorderPoint,
 	v.intLocationId,
-	v.strCompanyLocationName AS strLocationName
+	v.strCompanyLocationName AS strLocationName,
+	um.strUnitMeasure AS strUOM
 	FROM vyuMFInventoryView v 
 	Join tblICItem i on v.intItemId=i.intItemId
 	Join tblICItemUOM iu on i.intItemId=iu.intItemId AND iu.ysnStockUnit=1
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICItemLocation il on i.intItemId=il.intItemId AND v.intLocationId=il.intLocationId
 	Where v.dblQty>0 AND v.dtmExpiryDate>GETDATE()
 	) l
-	Group By l.intLocationId,l.strItemNo,l.strDescription,l.strPrimaryStatus,l.dblReorderPoint,l.strLocationName,l.intItemId
+	Group By l.intLocationId,l.strItemNo,l.strDescription,l.strPrimaryStatus,l.dblReorderPoint,l.strLocationName,l.intItemId,l.strUOM
 ) AS SourceTable  
 PIVOT  
 (  

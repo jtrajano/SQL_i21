@@ -1180,7 +1180,7 @@ BEGIN TRY
 				, @intUpcCode
 				, @strDescription
 				, @dblPriceBetween1
-				, @dblPriceBetween2
+				, @dblPriceBetween2 
 				, 'I.intItemId'
 				, 'IA.intItemAccountId'
 			)
@@ -1190,8 +1190,8 @@ BEGIN TRY
 	 END
 
 
-	 --PRINT '@intNewGLSalesAccount'
-	 -----------------------------------Handle Dynamic Query 34
+	 PRINT '@intNewGLSalesAccount'
+	 ---------------------------------Handle Dynamic Query 34
 	 IF (@intNewGLSalesAccount IS NOT NULL)
 	 BEGIN
 
@@ -1786,7 +1786,6 @@ IF((@strYsnPreview != 'Y') AND (@UpdateCount > 0))
 	 END	  
 END
 
-
 --PRINT 'Update Logic 02'	
 IF((@strYsnPreview != 'Y')
 AND(@UpdateCount > 0))
@@ -1890,48 +1889,48 @@ BEGIN
 			    SET @strAccountCategory = 'Cost of Goods'
 				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
 				BEGIN
-					SET @SqlQuery1 = ' update tblICItemAccount set '  
-
-					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLPurchaseAccount) + '''' 
-
-					SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+					SET @SqlQuery1 = ' UPDATE IA '  
+					SET @SqlQuery1 = @SqlQuery1 + ' SET IA.intAccountId = ''' + LTRIM(@intNewGLPurchaseAccount) + '''' 
+					SET @SqlQuery1 = @SqlQuery1 + ' FROM tblICItemAccount IA ' 
+					SET @SqlQuery1 = @SqlQuery1 + ' JOIN tblICItem I ON IA.intItemId = I.intItemId '
+					SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
 
 					IF (@strCompanyLocationId IS NOT NULL)
 					BEGIN
-	      			  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+	      			  SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 							  (select intItemId from tblICItemLocation where intLocationId IN
 							  (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
    					END
 
 					IF (@strVendorId IS NOT NULL)
 					BEGIN 
-						SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 							  (select intItemId from tblICItemLocation where intVendorId IN
 							   (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
 					END
 
 					IF (@strCategoryId IS NOT NULL)
 					BEGIN
-     					SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN (select intItemId from tblICCategory where intCategoryId IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + ')'
+     					SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN (select intItemId from tblICItem where intCategoryId IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + ')'
 					END
 
 					IF (@Family IS NOT NULL)
 					BEGIN
-  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 							  (select intItemId from tblICItemLocation where intFamilyId IN
 							   (' + CAST(@Family as NVARCHAR) + ')' + ')'
 					END
 
 					IF (@strClassId IS NOT NULL)
 					BEGIN
-  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 						   (select intItemId from tblICItemLocation where intClassId IN
 							(' + CAST(@strClassId as NVARCHAR) + ')' + ')'
 					END
 		    
 					IF (@intUpcCode IS NOT NULL)
 					BEGIN
-					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
+					   SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId  
 							IN (select intItemId from tblICItemUOM where  intItemUOMId IN
 				   			(' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
 					END
@@ -1939,19 +1938,19 @@ BEGIN
 					IF ((@strDescription IS NOT NULL)
 					and (@strDescription != ''))
 		 			BEGIN
-					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and I.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
 					END
 
 					IF (@dblPriceBetween1 IS NOT NULL) 
 					BEGIN
-					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 						   (select intItemId from tblICItemPricing where dblSalePrice >= 
 						   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
 					END 
 		      
 					IF (@dblPriceBetween2 IS NOT NULL) 
 					BEGIN
-						set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						set @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 						   (select intItemId from tblICItemPricing where dblSalePrice <= 
 					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
 					END     
@@ -1961,7 +1960,9 @@ BEGIN
 					SET @SqlQuery1 = @SqlQuery1 + ' and  intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 
 					EXEC (@SqlQuery1)
-					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT) 
+					
+					
 				END 
 			 END
 
@@ -1972,46 +1973,46 @@ BEGIN
 			    SET @strAccountCategory = 'Sales Account'
 				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
 				BEGIN
-					SET @SqlQuery1 = ' update tblICItemAccount set '  
-
-					SET @SqlQuery1 = @SqlQuery1 + ' intAccountId = ''' + LTRIM(@intNewGLSalesAccount) + '''' 
-
-					SET @SqlQuery1 = @SqlQuery1 + ' where 1=1 ' 
+					SET @SqlQuery1 = ' UPDATE IA '  
+					SET @SqlQuery1 = @SqlQuery1 + ' SET IA.intAccountId = ''' + LTRIM(@intNewGLPurchaseAccount) + '''' 
+					SET @SqlQuery1 = @SqlQuery1 + ' FROM tblICItemAccount IA ' 
+					SET @SqlQuery1 = @SqlQuery1 + ' JOIN tblICItem I ON IA.intItemId = I.intItemId '
+					SET @SqlQuery1 = @SqlQuery1 + ' WHERE 1=1 ' 
 
 					IF (@strCompanyLocationId IS NOT NULL)
 					BEGIN
-	      			  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+	      			  SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 							  (select intItemId from tblICItemLocation where intLocationId IN
 							  (' + CAST(@strCompanyLocationId as NVARCHAR) + ')' + ')'
    					END
 
 					IF (@strVendorId IS NOT NULL)
 					BEGIN 
-						SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN (select intItemId from tblICItemLocation where intVendorId IN (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
+						SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN (select intItemId from tblICItemLocation where intVendorId IN (' + CAST(@strVendorId as NVARCHAR) + ')' + ')'
 					END
 
 					IF (@strCategoryId IS NOT NULL)
 					BEGIN
-     					SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN (select intItemId from tblICCategory where intCategoryId IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + ')'
+     					SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN (select intItemId from tblICItem where intCategoryId IN (' + CAST(@strCategoryId as NVARCHAR) + ')' + ')'
 					END
 
 					IF (@Family IS NOT NULL)
 					BEGIN
-  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 							  (select intItemId from tblICItemLocation where intFamilyId IN
 							   (' + CAST(@Family as NVARCHAR) + ')' + ')'
 					END
 
 					IF (@strClassId IS NOT NULL)
 					BEGIN
-  					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+  					   SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 						   (select intItemId from tblICItemLocation where intClassId IN
 							(' + CAST(@strClassId as NVARCHAR) + ')' + ')'
 					END
 		    
 					IF (@intUpcCode IS NOT NULL)
 					BEGIN
-					   SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId  
+					   SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId  
 							IN (select intItemId from tblICItemUOM where  intItemUOMId IN
 				   			(' + CAST(@intUpcCode as NVARCHAR) + ')' + ')'
 					END
@@ -2019,19 +2020,19 @@ BEGIN
 					IF ((@strDescription IS NOT NULL)
 					and (@strDescription != ''))
 		 			BEGIN
-					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and I.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
 					END
 
 					IF (@dblPriceBetween1 IS NOT NULL) 
 					BEGIN
-					  SET @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+					  SET @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 						   (select intItemId from tblICItemPricing where dblSalePrice >= 
 						   ''' + CONVERT(NVARCHAR,(@dblPriceBetween1)) + '''' + ')'
 					END 
 		      
 					IF (@dblPriceBetween2 IS NOT NULL) 
 					BEGIN
-						set @SqlQuery1 = @SqlQuery1 +  ' and tblICItemAccount.intItemId IN 
+						set @SqlQuery1 = @SqlQuery1 +  ' and I.intItemId IN 
 						   (select intItemId from tblICItemPricing where dblSalePrice <= 
 					   ''' + CONVERT(NVARCHAR,(@dblPriceBetween2)) + '''' + ')'
 					END     
@@ -2042,7 +2043,9 @@ BEGIN
 
 					EXEC (@SqlQuery1)
 				
-					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+					--SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT) 
+					
+					    	  
 				END 
 			 END
              
@@ -2132,7 +2135,7 @@ END
 
 
 	--===================================================================================================
-	-- START Audit Log tblICItemLocation
+	-- START Audit Log tblICItemLocation, tblICItem
 	--===================================================================================================
 	IF (@UpdateCount > 0)
 		BEGIN
@@ -2190,7 +2193,7 @@ END
 			WHERE strOldData != strNewData	
 	END
 	--===================================================================================================
-	-- END Audit Log tblICItemLocation
+	-- END Audit Log tblICItemLocation, tblICItem
 	--===================================================================================================
 
 
@@ -2199,130 +2202,130 @@ END
 
 
 
-    --AUDIT LOG
-    --IF (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL)
-	IF(@UpdateCount >= 1 AND @strYsnPreview != 'Y' AND (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL))
-	BEGIN
-			--AUDIT LOG
+ --   --AUDIT LOG
+ --   --IF (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL)
+	--IF(@UpdateCount >= 1 AND @strYsnPreview != 'Y' AND (@strNewCountCode IS NOT NULL OR @intNewCategory IS NOT NULL OR @intNewGLPurchaseAccount IS NOT NULL OR @intNewGLSalesAccount IS NOT NULL))
+	--BEGIN
+	--		--AUDIT LOG
 
-			--use distinct to table Id's
-			INSERT INTO @tblId(intId)
-			SELECT DISTINCT intChildId 
-			FROM @tblTempOne
-			ORDER BY intChildId ASC
+	--		--use distinct to table Id's
+	--		INSERT INTO @tblId(intId)
+	--		SELECT DISTINCT intChildId 
+	--		FROM @tblTempOne
+	--		ORDER BY intChildId ASC
 
-			--==========================================================================================================================================
-			WHILE EXISTS (SELECT TOP (1) 1 FROM @tblId)
-			BEGIN
-				SELECT TOP 1 @intChildId = intId FROM @tblId
+	--		--==========================================================================================================================================
+	--		WHILE EXISTS (SELECT TOP (1) 1 FROM @tblId)
+	--		BEGIN
+	--			SELECT TOP 1 @intChildId = intId FROM @tblId
 
-				--use distinct to table tempOne
-				DELETE FROM @tblTempTwo
-				INSERT INTO @tblTempTwo(strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
-				SELECT DISTINCT strUpc
-								, strItemDescription
-								, strChangeDescription
-								, strOldData
-								, strNewData
-								, intParentId
-								, intChildId 
-				--FROM tblSTMassUpdateReportMaster
-				FROM @tblTempOne
-				WHERE intChildId = @intChildId
-				ORDER BY intChildId ASC
+	--			--use distinct to table tempOne
+	--			DELETE FROM @tblTempTwo
+	--			INSERT INTO @tblTempTwo(strUpc, strItemDescription, strChangeDescription, strOldData, strNewData, intParentId, intChildId)
+	--			SELECT DISTINCT strUpc
+	--							, strItemDescription
+	--							, strChangeDescription
+	--							, strOldData
+	--							, strNewData
+	--							, intParentId
+	--							, intChildId 
+	--			--FROM tblSTMassUpdateReportMaster
+	--			FROM @tblTempOne
+	--			WHERE intChildId = @intChildId
+	--			ORDER BY intChildId ASC
 
-				SET @RowCountMin = 1
-				SELECT @RowCountMax = Count(*) FROM @tblTempTwo
+	--			SET @RowCountMin = 1
+	--			SELECT @RowCountMax = Count(*) FROM @tblTempTwo
 
-					WHILE(@RowCountMin <= @RowCountMax)
-					BEGIN
-						SELECT TOP(1) @strChangeDescription = strChangeDescription, @strOldData = strOldData, @strNewData = strNewData, @intParentId = intParentId from @tblTempTwo
+	--				WHILE(@RowCountMin <= @RowCountMax)
+	--				BEGIN
+	--					SELECT TOP(1) @strChangeDescription = strChangeDescription, @strOldData = strOldData, @strNewData = strNewData, @intParentId = intParentId from @tblTempTwo
 			    
 
 
-						IF(@strChangeDescription = 'Count Code')
-						BEGIN
-							SET @ParentTableAuditLog = @ParentTableAuditLog + '{"change":"strCountCode","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"changeDescription":"' + @strChangeDescription + '","hidden":false},'
-						END
-						ELSE IF(@strChangeDescription = 'Category')
-						BEGIN
-							SET @ParentTableAuditLog = @ParentTableAuditLog + '{"change":"intCategoryId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"changeDescription":"' + @strChangeDescription + '","hidden":false},'
-						END
+	--					IF(@strChangeDescription = 'Count Code')
+	--					BEGIN
+	--						SET @ParentTableAuditLog = @ParentTableAuditLog + '{"change":"strCountCode","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"changeDescription":"' + @strChangeDescription + '","hidden":false},'
+	--					END
+	--					ELSE IF(@strChangeDescription = 'Category')
+	--					BEGIN
+	--						SET @ParentTableAuditLog = @ParentTableAuditLog + '{"change":"intCategoryId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"changeDescription":"' + @strChangeDescription + '","hidden":false},'
+	--					END
 
-						ELSE IF(@strChangeDescription = 'Cost of Goods Sold Account' OR @strChangeDescription = 'Sales Account')
-						BEGIN
-							SET @ChildTableAuditLog = @ChildTableAuditLog + '{"change":"intAccountId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemAccounts","changeDescription":"' + @strChangeDescription + '","hidden":false},'
-						END
-
-
-
-						SET @RowCountMin = @RowCountMin + 1
-						DELETE TOP (1) FROM @tblTempTwo
-					END
+	--					ELSE IF(@strChangeDescription = 'Cost of Goods Sold Account' OR @strChangeDescription = 'Sales Account')
+	--					BEGIN
+	--						SET @ChildTableAuditLog = @ChildTableAuditLog + '{"change":"intAccountId","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemAccounts","changeDescription":"' + @strChangeDescription + '","hidden":false},'
+	--					END
 
 
-				--INSERT to AUDITLOG
-				--=================================================================================================
-				----tblICItem
-				--IF (@ParentTableAuditLog != '')
-				--BEGIN
-				--	--Remove last character comma(,)
-				--	SET @ParentTableAuditLog = left(@ParentTableAuditLog, len(@ParentTableAuditLog)-1)
 
-				--	SET @ParentTableAuditLog = '{"change":"tblICItems","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ParentTableAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Pricing"},'
-				--END
+	--					SET @RowCountMin = @RowCountMin + 1
+	--					DELETE TOP (1) FROM @tblTempTwo
+	--				END
 
 
-				--tblICItemAccount
-				IF (@ChildTableAuditLog != '')
-				BEGIN
-					--Remove last character comma(,)
-					SET @ChildTableAuditLog = left(@ChildTableAuditLog, len(@ChildTableAuditLog)-1)
+	--			--INSERT to AUDITLOG
+	--			--=================================================================================================
+	--			----tblICItem
+	--			--IF (@ParentTableAuditLog != '')
+	--			--BEGIN
+	--			--	--Remove last character comma(,)
+	--			--	SET @ParentTableAuditLog = left(@ParentTableAuditLog, len(@ParentTableAuditLog)-1)
 
-					SET @ChildTableAuditLog = '{"change":"tblICItemPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ChildTableAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"GL Accounts"},'
-				END
-
-
-				SET @JsonStringAuditLog = @ParentTableAuditLog + @ChildTableAuditLog
-
-
-				SELECT @checkComma = CASE WHEN RIGHT(@JsonStringAuditLog, 1) IN (',') THEN 1 ELSE 0 END
-				IF(@checkComma = 1)
-				BEGIN
-					--Remove last character comma(,)
-					SET @JsonStringAuditLog = left(@JsonStringAuditLog, len(@JsonStringAuditLog)-1)
-				END
-
-				SET @JsonStringAuditLog = '{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @JsonStringAuditLog + ']}'
-				INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
-				VALUES(
-						'Updated'
-						, 'Inventory.view.Item'
-						, @intParentId
-						, ''
-						, null
-						, @JsonStringAuditLog
-						, GETUTCDATE()
-						, @currentUserId
-						, 1
-				)
-				--=================================================================================================
-
-				--Clear
-				SET @ParentTableAuditLog = ''
-				SET @ChildTableAuditLog = ''
-
-				DELETE TOP (1) FROM @tblId
-			END
-			--==========================================================================================================================================
+	--			--	SET @ParentTableAuditLog = '{"change":"tblICItems","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ParentTableAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"Pricing"},'
+	--			--END
 
 
-			SELECT @UpdateCount = COUNT(*)
-			FROM 
-			(
-			  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
-			) T1
-	END
+	--			--tblICItemAccount
+	--			IF (@ChildTableAuditLog != '')
+	--			BEGIN
+	--				--Remove last character comma(,)
+	--				SET @ChildTableAuditLog = left(@ChildTableAuditLog, len(@ChildTableAuditLog)-1)
+
+	--				SET @ChildTableAuditLog = '{"change":"tblICItemPricings","children":[{"action":"Updated","change":"Updated - Record: ' + CAST(@intChildId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @ChildTableAuditLog + ']}],"iconCls":"small-tree-grid","changeDescription":"GL Accounts"},'
+	--			END
+
+
+	--			SET @JsonStringAuditLog = @ParentTableAuditLog + @ChildTableAuditLog
+
+
+	--			SELECT @checkComma = CASE WHEN RIGHT(@JsonStringAuditLog, 1) IN (',') THEN 1 ELSE 0 END
+	--			IF(@checkComma = 1)
+	--			BEGIN
+	--				--Remove last character comma(,)
+	--				SET @JsonStringAuditLog = left(@JsonStringAuditLog, len(@JsonStringAuditLog)-1)
+	--			END
+
+	--			SET @JsonStringAuditLog = '{"action":"Updated","change":"Updated - Record: ' + CAST(@intParentId AS NVARCHAR(50)) + '","keyValue":' + CAST(@intParentId AS NVARCHAR(50)) + ',"iconCls":"small-tree-modified","children":[' + @JsonStringAuditLog + ']}'
+	--			INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+	--			VALUES(
+	--					'Updated'
+	--					, 'Inventory.view.Item'
+	--					, @intParentId
+	--					, ''
+	--					, null
+	--					, @JsonStringAuditLog
+	--					, GETUTCDATE()
+	--					, @currentUserId
+	--					, 1
+	--			)
+	--			--=================================================================================================
+
+	--			--Clear
+	--			SET @ParentTableAuditLog = ''
+	--			SET @ChildTableAuditLog = ''
+
+	--			DELETE TOP (1) FROM @tblId
+	--		END
+	--		--==========================================================================================================================================
+
+
+	--		SELECT @UpdateCount = COUNT(*)
+	--		FROM 
+	--		(
+	--		  SELECT DISTINCT intChildId FROM @tblTempOne --tblSTMassUpdateReportMaster
+	--		) T1
+	--END
     
 
 

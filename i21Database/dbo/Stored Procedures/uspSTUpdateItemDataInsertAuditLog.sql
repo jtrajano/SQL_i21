@@ -4,24 +4,13 @@ AS
 BEGIN
 
 DECLARE @JsonStringAuditLog AS NVARCHAR(MAX) = ''
-DECLARE @strJsonRemoveComma AS NVARCHAR(MAX) = ''
-
---===================================================================================================
--- START Audit Log tblICItemLocation
---===================================================================================================
-DECLARE @strCompanyLocation AS NVARCHAR(1000) = ''
-
-DECLARE @strItemLocationAuditLogChildren AS NVARCHAR(MAX) = ''
-DECLARE @strItemLocationFromData AS NVARCHAR(1000) = ''
-DECLARE @strItemLocationToData AS NVARCHAR(1000) = ''
-DECLARE @intItemLocationParentId INT
-DECLARE @intItemLocationChildId AS INT
-DECLARE @strItemLocationChangeColumnName AS NVARCHAR(1000) = ''
-DECLARE @strItemLocationChangeDescription AS NVARCHAR(1000) = ''
-DECLARE @strItemLocationTempJson AS NVARCHAR(MAX) = ''
-DECLARE @strItemLocationChildrenJson AS NVARCHAR(MAX) = ''
-DECLARE @intItemLocationId AS INT
-DECLARE @strItemLocationJsonFormat AS NVARCHAR(MAX) =
+DECLARE @intKeyId AS INT
+DECLARE @intParentId INT
+DECLARE @intChildId AS INT
+DECLARE @strFromData AS NVARCHAR(1000) = ''
+DECLARE @strToData AS NVARCHAR(1000) = ''
+DECLARE @strChangeDescription AS NVARCHAR(1000) = ''
+DECLARE @strJsonFormat AS NVARCHAR(MAX) =
 N'{
 	"change": "{CHANGECOLUMN}",
 	"from": "{FROM}",
@@ -33,6 +22,47 @@ N'{
 	"changeDescription": "{CHANGEDESC}",
 	"hidden": false
 },'
+
+--===================================================================================================
+-- START Declare tblICItemLocation
+--===================================================================================================
+DECLARE @strItemLocationAuditLogChildren AS NVARCHAR(MAX) = ''
+DECLARE @strCompanyLocation AS NVARCHAR(1000) = ''
+DECLARE @strItemLocationChangeColumnName AS NVARCHAR(1000) = ''
+DECLARE @strItemLocationTempJson AS NVARCHAR(MAX) = ''
+DECLARE @strItemLocationChildrenJson AS NVARCHAR(MAX) = ''
+--===================================================================================================
+-- END Declare tblICItemLocation
+--===================================================================================================
+
+
+--===================================================================================================
+-- START Declare tblICItem
+--===================================================================================================
+DECLARE @strItemAuditLogChildren AS NVARCHAR(MAX) = ''
+DECLARE @strItemNo AS NVARCHAR(1000) = ''
+DECLARE @strItemChangeColumnName AS NVARCHAR(1000) = ''
+DECLARE @strItemTempJson AS NVARCHAR(MAX) = ''
+DECLARE @strItemChildrenJson AS NVARCHAR(MAX) = ''
+--===================================================================================================
+-- END Declare tblICItem
+--===================================================================================================
+
+
+
+--===================================================================================================
+-- START Declare tblICItemAccount
+--===================================================================================================
+DECLARE @strItemAccountAuditLogChildren AS NVARCHAR(MAX) = ''
+--DECLARE @strItemNo AS NVARCHAR(1000) = ''
+DECLARE @strItemAccountChangeColumnName AS NVARCHAR(1000) = ''
+DECLARE @strItemAccountTempJson AS NVARCHAR(MAX) = ''
+DECLARE @strItemAccountChildrenJson AS NVARCHAR(MAX) = ''
+--===================================================================================================
+-- END Declare tblICItemAccount
+--===================================================================================================
+
+
 
 DECLARE @tblTemp TABLE 
 (
@@ -53,288 +83,295 @@ FROM #tempAudit
 ORDER BY intParentId ASC
 
 
+
 WHILE EXISTS(SELECT * FROM @tblTemp)
 BEGIN
-	SELECT TOP 1 @intItemLocationParentId = intParentId FROM @tblTemp
-	
+	SELECT TOP 1 @intParentId = intParentId FROM @tblTemp
+	SET @strItemTempJson = ''
+	SET @strItemChildrenJson = ''
 
-	WHILE EXISTS(SELECT * FROM @tblTemp WHERE intParentId = @intItemLocationParentId)
+	WHILE EXISTS(SELECT * FROM @tblTemp WHERE intParentId = @intParentId)
 	BEGIN
-		SELECT TOP 1 @intItemLocationChildId = intChildId FROM @tblTemp
+		SELECT TOP 1 @intChildId = intChildId FROM @tblTemp WHERE intParentId = @intParentId
+		
 		SET @strItemLocationTempJson = ''
 		SET @strItemLocationChildrenJson = ''
+		SET @strItemAccountTempJson = ''
+		SET @strItemAccountChildrenJson = ''
 
-
-		WHILE EXISTS(SELECT * FROM @tblTemp WHERE intChildId = @intItemLocationChildId)
+		WHILE EXISTS(SELECT * FROM @tblTemp WHERE intChildId = @intChildId)
 		BEGIN
-			SELECT TOP 1 @intItemLocationId = intId FROM @tblTemp
+			SELECT TOP 1 @intKeyId = intId FROM @tblTemp WHERE intChildId = @intChildId
 
-			SELECT @strItemLocationFromData = strOldData
-				   , @strItemLocationToData = strNewData 
-				   , @strItemLocationChangeDescription = strChangeDescription
+			SELECT @strFromData = strOldData
+				   , @strToData = strNewData 
+				   , @strChangeDescription = strChangeDescription
 			FROM @tblTemp 
-			WHERE intId = @intItemLocationId
+			WHERE intId = @intKeyId
 
+			--===================================================================================================
+			-- START Audit Log tblICItemLocation
+			--===================================================================================================
 			-- FAMILY
-			IF (@strItemLocationChangeDescription = 'Family')
+			IF (@strChangeDescription = 'Family')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'strFamily')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Family')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- CLASS
-			ELSE IF (@strItemLocationChangeDescription = 'Class')
+			ELSE IF (@strChangeDescription = 'Class')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'strClass')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Class')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Product Code
-			ELSE IF (@strItemLocationChangeDescription = 'Product Code')
+			ELSE IF (@strChangeDescription = 'Product Code')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'strProductCode')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Product Code')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Tax Flag 1
-			ELSE IF (@strItemLocationChangeDescription = 'Tax Flag1')
+			ELSE IF (@strChangeDescription = 'Tax Flag1')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnTaxFlag1')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Tax Flag 1')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Tax Flag 2
-			ELSE IF (@strItemLocationChangeDescription = 'Tax Flag2')
+			ELSE IF (@strChangeDescription = 'Tax Flag2')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnTaxFlag2')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Tax Flag 2')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Tax Flag 3
-			ELSE IF (@strItemLocationChangeDescription = 'Tax Flag3')
+			ELSE IF (@strChangeDescription = 'Tax Flag3')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnTaxFlag3')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Tax Flag 3')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Tax Flag 4
-			ELSE IF (@strItemLocationChangeDescription = 'Tax Flag4')
+			ELSE IF (@strChangeDescription = 'Tax Flag4')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnTaxFlag4')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Tax Flag 4')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Promotional Item
-			ELSE IF (@strItemLocationChangeDescription = 'Promotional Item')
+			ELSE IF (@strChangeDescription = 'Promotional Item')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnPromotionalItem')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Promotional Item')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Deposit Required
-			ELSE IF (@strItemLocationChangeDescription = 'Deposit Required')
+			ELSE IF (@strChangeDescription = 'Deposit Required')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnDepositRequired')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Deposit Required')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Deposit PLU
-			ELSE IF (@strItemLocationChangeDescription = 'Deposit PLU')
+			ELSE IF (@strChangeDescription = 'Deposit PLU')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'intDepositPLUId')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Deposit PLU')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Saleable
-			ELSE IF (@strItemLocationChangeDescription = 'Saleable')
+			ELSE IF (@strChangeDescription = 'Saleable')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnSaleable')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Saleable')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Quantity Required
-			ELSE IF (@strItemLocationChangeDescription = 'Quantity Required')
+			ELSE IF (@strChangeDescription = 'Quantity Required')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnQuantityRequired')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Quantity Required')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Scale Item
-			ELSE IF (@strItemLocationChangeDescription = 'Scale Item')
+			ELSE IF (@strChangeDescription = 'Scale Item')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnScaleItem')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Scale Item')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Food Stampable
-			ELSE IF (@strItemLocationChangeDescription = 'Food Stampable')
+			ELSE IF (@strChangeDescription = 'Food Stampable')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnFoodStampable')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Food Stampable')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Returnable
-			ELSE IF (@strItemLocationChangeDescription = 'Returnable')
+			ELSE IF (@strChangeDescription = 'Returnable')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnReturnable')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Returnable')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Pre Priced
-			ELSE IF (@strItemLocationChangeDescription = 'Pre Priced')
+			ELSE IF (@strChangeDescription = 'Pre Priced')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnPrePriced')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Pre Priced')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Liquor Id Required
-			ELSE IF (@strItemLocationChangeDescription = 'Liquor Id Required')
+			ELSE IF (@strChangeDescription = 'Liquor Id Required')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnIdRequiredLiquor')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'ID Required (Liquor)')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Cigarette Id Required
-			ELSE IF (@strItemLocationChangeDescription = 'Cigarette Id Required')
+			ELSE IF (@strChangeDescription = 'Cigarette Id Required')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnIdRequiredCigarette')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'ID Required (Cigarettes)')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Minimum Age
-			ELSE IF (@strItemLocationChangeDescription = 'Minimum Age')
+			ELSE IF (@strChangeDescription = 'Minimum Age')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'intMinimumAge')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Minimum Age')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Blue Law1
-			ELSE IF (@strItemLocationChangeDescription = 'Blue Law1')
+			ELSE IF (@strChangeDescription = 'Blue Law1')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnApplyBlueLaw1')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Apply Blue Law 1')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Blue Law2
-			ELSE IF (@strItemLocationChangeDescription = 'Blue Law2')
+			ELSE IF (@strChangeDescription = 'Blue Law2')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnApplyBlueLaw2')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Apply Blue Law 2')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Blue Law2
-			ELSE IF (@strItemLocationChangeDescription = 'Blue Law2')
+			ELSE IF (@strChangeDescription = 'Blue Law2')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnApplyBlueLaw2')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Apply Blue Law 2')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
@@ -342,131 +379,186 @@ BEGIN
 
 			--STOCK
 			-- Counted Daily
-			ELSE IF (@strItemLocationChangeDescription = 'Counted Daily')
+			ELSE IF (@strChangeDescription = 'Counted Daily')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnCountedDaily')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Counted Daily')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Counted
-			ELSE IF (@strItemLocationChangeDescription = 'Counted')
+			ELSE IF (@strChangeDescription = 'Counted')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'strCounted')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Counted')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Count By Serial No
-			ELSE IF (@strItemLocationChangeDescription = 'Count By Serial No')
+			ELSE IF (@strChangeDescription = 'Count By Serial No')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'ysnCountBySINo')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Count by Serial Number')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Vendor Minimum Order Qty
-			ELSE IF (@strItemLocationChangeDescription = 'Vendor Minimum Order Qty')
+			ELSE IF (@strChangeDescription = 'Vendor Minimum Order Qty')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'dblMinOrder')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Min Order')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Vendor Suggested Qty
-			ELSE IF (@strItemLocationChangeDescription = 'Vendor Suggested Qty')
+			ELSE IF (@strChangeDescription = 'Vendor Suggested Qty')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'dblSuggestedQty')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Suggested Qty')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Inventory Group
-			ELSE IF (@strItemLocationChangeDescription = 'Inventory Group')
+			ELSE IF (@strChangeDescription = 'Inventory Group')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'intCountGroupId')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Inventory Count Group')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Min Qty On Hand
-			ELSE IF (@strItemLocationChangeDescription = 'Min Qty On Hand')
+			ELSE IF (@strChangeDescription = 'Min Qty On Hand')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'dblReorderPoint')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Reorder Point')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			
 			-- Vendor
-			ELSE IF (@strItemLocationChangeDescription = 'Vendor')
+			ELSE IF (@strChangeDescription = 'Vendor')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'strVendorName')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Vendor')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
 
 			-- Storage Location
-			ELSE IF (@strItemLocationChangeDescription = 'Storage Location')
+			ELSE IF (@strChangeDescription = 'Storage Location')
 			BEGIN
-				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strItemLocationJsonFormat
+				SET @strItemLocationTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
 																	   , '{CHANGECOLUMN}', 'strSubLocationName')
-				                                                       , '{KEYVALUE}', CAST(@intItemLocationChildId AS NVARCHAR(50)))
-																	   , '{FROM}', @strItemLocationFromData)
-																	   , '{TO}', @strItemLocationToData)
+				                                                       , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																	   , '{FROM}', @strFromData)
+																	   , '{TO}', @strToData)
 																	   , '{CHANGEDESC}', 'Storage Location')
 				SET @strItemLocationChildrenJson = @strItemLocationChildrenJson + @strItemLocationTempJson
 			END
+			--===================================================================================================
+			-- END Audit Log tblICItemLocation
+			--===================================================================================================
+
+
+
+			--===================================================================================================
+			-- START Audit Log tblICItem
+			--===================================================================================================
+			-- 'Category'
+			IF (@strChangeDescription = 'Category')
+					BEGIN
+						SET @strItemTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
+																			   , '{CHANGECOLUMN}', 'strCategoryCode')
+																			   , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																			   , '{FROM}', @strFromData)
+																			   , '{TO}', @strToData)
+																			   , '{CHANGEDESC}', 'Category')
+						SET @strItemChildrenJson = @strItemChildrenJson + @strItemTempJson
+					END
+
+				--'Count Code'
+				ELSE IF (@strChangeDescription = 'Count Code')
+					BEGIN
+						SET @strItemTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
+																			   , '{CHANGECOLUMN}', 'strCountCode')
+																			   , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																			   , '{FROM}', @strFromData)
+																			   , '{TO}', @strToData)
+																			   , '{CHANGEDESC}', 'Count Code')
+						SET @strItemChildrenJson = @strItemChildrenJson + @strItemTempJson
+					END
+			--===================================================================================================
+			-- END Audit Log tblICItem
+			--===================================================================================================
 
 
 
 
+			--===================================================================================================
+			-- START Audit Log tblICItemAccount
+			--===================================================================================================
+			-- 'Cost of Goods Sold Account'
+			ELSE IF (@strChangeDescription = 'Cost of Goods Sold Account' OR @strChangeDescription = 'Sales Account')
+					BEGIN
+						SET @strItemAccountTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
+																			   , '{CHANGECOLUMN}', 'strAccountId')
+																			   , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
+																			   , '{FROM}', @strFromData)
+																			   , '{TO}', @strToData)
+																			   , '{CHANGEDESC}', @strChangeDescription)
+						SET @strItemAccountChildrenJson = @strItemAccountChildrenJson + @strItemAccountTempJson
+					END
+			--===================================================================================================
+			-- END Audit Log tblICItem
+			--===================================================================================================
 
 
-			DELETE FROM @tblTemp WHERE intId = @intItemLocationId
+
+
+			DELETE FROM @tblTemp WHERE intId = @intKeyId
 		END
 
 
-		--INSERT TO AUDIT LOG Group by intChildId
+		-- INSERT TO AUDIT LOG Group by intChildId
+		-- tblICItemLocation
 		IF(@strItemLocationChildrenJson != '')
 			BEGIN
 						SET @strCompanyLocation = (SELECT strLocationName FROM tblSMCompanyLocation
 													WHERE intCompanyLocationId = 
 													(
 														SELECT intLocationId FROM tblICItemLocation
-														WHERE intItemLocationId = @intItemLocationChildId
+														WHERE intItemLocationId = @intChildId
 													)
 												   )
 
@@ -482,7 +574,7 @@ BEGIN
 						N'{
 							"action": "Updated",
 							"change": "Updated - Record: ' + @strCompanyLocation + '",
-							"keyValue": ' + CAST(@intItemLocationChildId AS NVARCHAR(50)) + ', 
+							"keyValue": ' + CAST(@intChildId AS NVARCHAR(50)) + ', 
 							"iconCls": "small-tree-modified",
 							"children": [
 							' + @strItemLocationChildrenJson + '
@@ -494,7 +586,7 @@ BEGIN
 						VALUES(
 								'Updated'
 								, 'Inventory.view.ItemLocation'
-								, @intItemLocationChildId
+								, @intChildId
 								, ''
 								, null
 								, @JsonStringAuditLog
@@ -504,10 +596,83 @@ BEGIN
 						)
 			END
 
-		DELETE FROM @tblTemp WHERE intChildId = @intItemLocationChildId
+		
+		IF(@strItemAccountChildrenJson != '')
+			BEGIN
+						SET @strItemNo = ISNULL((SELECT strItemNo FROM tblICItem WHERE intItemId = @intParentId), '')
+
+						SET @strItemAccountChildrenJson = left(@strItemAccountChildrenJson, len(@strItemAccountChildrenJson)-1)
+
+						-- INSERT TO Audit Log
+						SET @JsonStringAuditLog = 
+						N'{
+							"action": "Updated",
+							"change": "Updated - Record: ' + @strItemNo + '",
+							"keyValue": ' + CAST(@intChildId AS NVARCHAR(50)) + ', 
+							"iconCls": "small-tree-modified",
+							"children": [
+							' + @strItemAccountChildrenJson + '
+							]
+						}'
+
+
+						INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+						VALUES(
+								'Updated'
+								, 'Inventory.view.ItemLocation'
+								, @intChildId
+								, ''
+								, null
+								, @JsonStringAuditLog
+								, GETUTCDATE()
+								, @currentUserId
+								, 1
+						)
+			END
+
+
+		DELETE FROM @tblTemp WHERE intChildId = @intChildId
 	END
+
+	
+	
+	-- INSERT AuditLog (tblICItem)
+	-- tblICItem
+	IF(@strItemChildrenJson != '')
+		BEGIN
+				SET @strItemNo = (SELECT strItemNo FROM tblICItem WHERE intItemId = @intParentId)
+
+				SET @strItemChildrenJson = left(@strItemChildrenJson, len(@strItemChildrenJson)-1)
+
+				-- INSERT TO Audit Log
+				SET @JsonStringAuditLog = 
+				N'{
+					"action": "Updated",
+					"change": "Updated - Record: ' + @strItemNo + '",
+					"keyValue": ' + CAST(@intParentId AS NVARCHAR(50)) + ', 
+					"iconCls": "small-tree-modified",
+					"children": [
+					' + @strItemChildrenJson + '
+					]
+				}'
+
+
+				INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+				VALUES(
+						'Updated'
+						, 'Inventory.view.Item'
+						, @intParentId
+						, ''
+						, null
+						, @JsonStringAuditLog
+						, GETUTCDATE()
+						, @currentUserId
+						, 1
+					 )
+			END
+
+
+	DELETE FROM @tblTemp WHERE intParentId = @intParentId
 END
---===================================================================================================
--- END Audit Log tblICItemLocation
---===================================================================================================
+
 END

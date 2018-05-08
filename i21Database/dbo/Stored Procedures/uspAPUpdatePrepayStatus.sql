@@ -33,7 +33,7 @@ OUTER APPLY (
 	INNER JOIN @paymentIds C ON B.intPaymentId = C.intId
 	INNER JOIN tblAPPaymentDetail D ON B.intPaymentId = D.intPaymentId
 	LEFT JOIN tblCMBankTransaction E ON B.strPaymentRecordNum = E.strTransactionId
-	WHERE D.intBillId = A.intBillId AND E.ysnCheckVoid = 0
+	WHERE D.intBillId = A.intBillId AND E.ysnCheckVoid = 0 AND D.dblPayment != 0
 ) payments
 
 IF @transCount = 0 COMMIT TRANSACTION

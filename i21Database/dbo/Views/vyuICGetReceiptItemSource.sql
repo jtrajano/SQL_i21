@@ -219,16 +219,12 @@ SELECT
 			END
 		)
 	, strFieldNo = 
-		CASE Receipt.strReceiptType
-			WHEN 'Purchase Contract' THEN
-				CASE Receipt.intSourceType
-					-- None
-					WHEN 0 THEN ContractFarm.strFieldNumber
-					-- Scale
-					WHEN 1 THEN ScaleFarm.strFieldNumber
-					ELSE NULL 
-				END
-			ELSE NULL
+		CASE Receipt.intSourceType
+			-- None
+			WHEN 0 THEN ContractFarm.strFieldNumber
+			-- Scale
+			WHEN 1 THEN ScaleFarm.strFieldNumber
+			ELSE NULL 
 		END
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt 

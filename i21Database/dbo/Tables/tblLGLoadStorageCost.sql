@@ -9,6 +9,7 @@
 	[dblAmount] NUMERIC(18,6),
 	[intCurrency] INT,
 	[intCostType] INT,
+	[ysnSubCurrency] BIT,
 	[intLoadStorageCostRefId] INT NULL,
 
 	CONSTRAINT [PK_intLoadStorageCostId] PRIMARY KEY ([intLoadStorageCostId]), 

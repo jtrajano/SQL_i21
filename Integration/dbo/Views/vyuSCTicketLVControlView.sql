@@ -39,7 +39,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					WHEN gasct_tare_rev_dt > 1 AND gasct_tare_time > 1 THEN DATEADD(second, gasct_tare_time, convert(datetime, convert(char(8), gasct_tare_rev_dt)))
 					ELSE NULL
 				END ) AS dtmTareDateTime
-				,gasct_tic_comment AS strTicketComment
+				,LTRIM(RTRIM(gasct_comment)) COLLATE Latin1_General_CI_AS AS strTicketComment
 				,(CASE WHEN gasct_disc_schd_no > 0 
 					THEN gasct_disc_schd_no 
 					ELSE NULL
@@ -93,6 +93,14 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,gasct_un_prc AS dblUnitPrice
 				,gasct_gross_un AS dblGrossUnits
 				,gasct_net_un AS dblNetUnits
+				,LTRIM(RTRIM(gasct_tic_comment)) COLLATE Latin1_General_CI_AS AS strDiscountComment
+				,(CASE	
+					WHEN gasct_tic_type IN (''I'',''O'')  THEN 1
+					WHEN gasct_tic_type = (''X'')       THEN 2 
+					WHEN gasct_tic_type = (''M'')       THEN 3
+					WHEN gasct_tic_type = (''T'')       THEN 4
+					ELSE 5
+				END) AS intTicketType
 			from gasctmst
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
@@ -113,28 +121,24 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				INSERT INTO tblSCTicketLVStaging 
 				(
 					[strTicketNumber]
+					,[intTicketType]
+					,[intTicketTypeId]
 					,[strTicketType]
 					,[strInOutFlag]
 					,[dtmTicketDateTime]
 					,[strTicketStatus]
 					,[intEntityId]
-					,[strEntityNo]
 					,[intItemId]
-					,[strItemNo]
 					,[intCommodityId]
-					,[strCommodityCode]
-					,[strCommodityDescription]
 					,[intCompanyLocationId]
-					,[strLocationNumber]
 					,[dblGrossWeight]
 					,[dtmGrossDateTime]
 					,[dblTareWeight]
 					,[dtmTareDateTime]
 					,[strTicketComment]
 					,[intDiscountId]
-					,[strDiscountId]
+					,[intDiscountScheduleId]
 					,[dblFreightRate]
-					,[strHaulerName]
 					,[dblTicketFees]
 					,[ysnFarmerPaysFreight]
 					,[intCurrencyId]
@@ -154,46 +158,42 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,[strDistributionOption]
 					,[strPitNumber]
 					,[intTicketPoolId]
-					,[strTicketPool]
 					,[strSplitNumber]
 					,[intScaleSetupId]
-					,[strStationShortDescription]
 					,[dblGrossUnits]
 					,[dblNetUnits]
 					,[dblUnitPrice]
 					,[dblUnitBasis]
 					,[ysnProcessedData]
 					,[intOriginTicketId]
+					,[dblConvertedUOMQty]
 					,[intItemUOMIdFrom]
 					,[intItemUOMIdTo]
 					,[strItemUOM]
 					,[strCostMethod]
+					,[strDiscountComment]
 					,[strSourceType]
 				)
 				SELECT 
 				LTRIM(RTRIM(SC.strTicketNumber))
+				,SC.intTicketType
+				,SCL.intTicketTypeId
 				,LTRIM(RTRIM(SC.strTicketType))
 				,LTRIM(RTRIM(SC.strInOutFlag))
 				,SC.dtmTicketDateTime
 				,LTRIM(RTRIM(SC.strTicketStatus))
-				,AP.intEntityId
-				,LTRIM(RTRIM(SC.strEntityNo))
+				,EM.intEntityId
 				,IC.intItemId
-				,LTRIM(RTRIM(SC.strItemNo))
 				,ICC.intCommodityId
-				,ICC.strCommodityCode
-				,ICC.strDescription
 				,SM.intCompanyLocationId
-				,LTRIM(RTRIM(SC.strLocationNumber))
 				,SC.dblGrossWeight
 				,SC.dtmGrossDateTime
 				,SC.dblTareWeight
 				,SC.dtmTareDateTime
 				,LTRIM(RTRIM(SC.strTicketComment))
 				,GRDI.intDiscountId
-				,LTRIM(RTRIM(SC.strDiscountId))
+				,GRDS.intDiscountScheduleId
 				,SC.dblFreightRate
-				,LTRIM(RTRIM(SC.strHaulerName))
 				,SC.dblTicketFees
 				,SC.ysnFarmerPaysFreight
 				,SMCR.intCurrencyID
@@ -213,24 +213,24 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,LTRIM(RTRIM(SC.strDistributionOption))
 				,LTRIM(RTRIM(SC.strPitNumber))
 				,SCTP.intTicketPoolId
-				,LTRIM(RTRIM(SC.strTicketPool))
 				,LTRIM(RTRIM(SC.strSplitNumber))
 				,SCS.intScaleSetupId
-				,SC.strStationShortDescription
 				,SC.dblGrossUnits
 				,SC.dblNetUnits
 				,SC.dblUnitPrice
 				,0
 				,0
 				,SC.intTicketId
+				,UOM.dblUnitQty
 				,UOM.intItemUOMId
 				,ICUOM.intItemUOMId
 				,UM.strUnitMeasure
 				,''Per Unit''
+				,SC.strDiscountComment
 				,''LV Control''
 				FROM vyuSCTicketLVControlView SC 
 				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
-				LEFT JOIN tblAPVendor AP ON AP.strVendorId = SC.strEntityNo
+				LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
 				LEFT JOIN tblICItem IC ON IC.strItemNo = SC.strItemNo
 				LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 				LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
@@ -242,8 +242,10 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUOM = 1
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
+				LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
+				LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  CONCAT(ICC.strDescription, '' Discount'')
 
-				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, intTicketFileId, strSourceType, strDiscountChargeType)	
+				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId)	
 				SELECT 
 				DISTINCT 
 					gasct_reading AS dblGradeReading
@@ -251,9 +253,9 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					,gasct_shrk_pct AS dblShrinkPercent
 					,intDiscountScheduleCodeId
 					,intOriginTicketId
-					,intOriginTicketId AS intTicketFileId
 					,''Scale'' AS strSourceType
 					,''Dollar'' strDiscountChargeType 
+					,b.A4GLIdentity
 				FROM (
 						SELECT	
 							gasct_disc_cd_1		gasct_disc_cd,
@@ -347,7 +349,8 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 							FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
 				)b 
 				INNER JOIN tblSCTicketLVStaging k ON	k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
-				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  CONCAT(k.strCommodityDescription, '' Discount'')
+				INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
+				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  CONCAT(ic.strDescription, '' Discount'')
 				INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
 				INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
 				WHERE b.gasct_disc_cd is not null

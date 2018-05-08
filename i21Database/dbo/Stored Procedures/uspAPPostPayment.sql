@@ -42,7 +42,7 @@ CREATE TABLE #tmpPayablePostData (
 );
 
 CREATE TABLE #tmpPayableInvalidData (
-	[strError] [NVARCHAR](100),
+	[strError] [NVARCHAR](1000),
 	[strTransactionType] [NVARCHAR](50),
 	[strTransactionId] [NVARCHAR](50),
 	[intTransactionId] INT

@@ -186,6 +186,9 @@ BEGIN TRY
 		FROM @tblInvoiceDetail
 		WHERE intRecordId > @intMinRecordId
 	END
+	
+	EXEC uspARPopulateInvoiceStg @intInvoiceId = @InvoiceId
+
 END TRY
 
 BEGIN CATCH
