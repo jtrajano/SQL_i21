@@ -25,8 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	,@strBatchId AS NVARCHAR(40)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
-	,@strGLDescription AS NVARCHAR(255) = NULL 
-	
+	,@strGLDescription AS NVARCHAR(255) = NULL 	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -59,6 +58,7 @@ DECLARE @intId AS INT
 		,@dblUnitRetail AS NUMERIC(38, 20)
 		,@intCategoryId INT 
 		,@dblAdjustRetailValue NUMERIC(38, 20)
+		,@intCategoryAdjustmentType AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -117,6 +117,7 @@ SELECT  intId
 		,dblUnitRetail
 		,intCategoryId
 		,dblAdjustRetailValue
+		,intCategoryAdjustmentType
 FROM	@ItemsToPost 
 
 OPEN loopItems;
@@ -146,6 +147,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dblUnitRetail
 	,@intCategoryId
 	,@dblAdjustRetailValue
+	,@intCategoryAdjustmentType
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -307,6 +309,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblAdjustRetailValue
+			,@intCategoryAdjustmentType
 	END
 
 	-- ACTUAL COST 
@@ -455,6 +458,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblAdjustRetailValue
+					,@intCategoryAdjustmentType
 			END
 		END 
 		ELSE 
@@ -615,6 +619,7 @@ BEGIN
 		,@dblUnitRetail
 		,@intCategoryId
 		,@dblAdjustRetailValue
+		,@intCategoryAdjustmentType
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

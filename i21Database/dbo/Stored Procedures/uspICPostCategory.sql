@@ -29,6 +29,7 @@ CREATE PROCEDURE [dbo].[uspICPostCategory]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20) 
 	,@dblAdjustRetailValue AS NUMERIC(38,20)
+	,@intCategoryAdjustmentType AS INT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -44,6 +45,11 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@ACTUALCOST AS INT = 5
 		,@CATEGORY AS INT = 6
 
+DECLARE @AdjustTypeCategorySales AS INT = 1
+		,@AdjustTypeCategorySalesReturn AS INT = 2
+		,@AdjustTypeCategoryMarkupOrMarkDown AS INT = 3
+		,@AdjustTypeCategoryWriteOff AS INT = 4
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
@@ -54,6 +60,7 @@ DECLARE @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35;
 DECLARE  @dblCostValue AS NUMERIC(38,20)
 		,@dblRetailValue AS NUMERIC(38,20)
 		,@dblAverageMargin AS NUMERIC(38,20)
+		,@dblValue AS NUMERIC(38,20)
 
 DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
@@ -127,17 +134,24 @@ END
 IF ISNULL(@dblAdjustRetailValue, 0) <> 0 
 BEGIN 
 	-- Compute the Cost Value 
-	-- Formula: 
-	-- (Retail Value) - ((Retail Value) x (Average Margin))
 	SELECT	@dblCostValue = 
-				ISNULL(@dblAdjustRetailValue, 0)
-				- (
-					ISNULL(@dblAdjustRetailValue, 0) * ISNULL(dblAverageMargin, 0)
-				)
+				CASE 
+					-- Do not compute the cost value if it a Mark Up or Mark Down. 
+					WHEN @intCategoryAdjustmentType IN (@AdjustTypeCategoryMarkupOrMarkDown) THEN 
+						0.00
+					ELSE 			
+					-- Formula: 
+					-- (Retail Value) - ((Retail Value) x (Average Margin))
+						ISNULL(@dblAdjustRetailValue, 0)
+						- (
+							ISNULL(@dblAdjustRetailValue, 0) * ISNULL(dblAverageMargin, 0)
+						)
+				END 
 	FROM	tblICCategoryPricing CategoryPricing 
 	WHERE	CategoryPricing.intCategoryId = @intCategoryId
 			AND CategoryPricing.intItemLocationId = @intItemLocationId
 
+	SET @dblValue = @dblCostValue
 	SET @dblRetailValue = @dblAdjustRetailValue
 END 
 
@@ -153,7 +167,7 @@ BEGIN
 		,@dblQty  = @dblQty
 		,@dblUOMQty = @dblUOMQty
 		,@dblCost = @dblCost
-		,@dblValue = NULL 
+		,@dblValue = @dblValue 
 		,@dblSalesPrice = @dblSalesPrice
 		,@intCurrencyId = @intCurrencyId
 		,@intTransactionId = @intTransactionId
