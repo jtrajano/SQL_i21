@@ -1,8 +1,8 @@
-﻿CREATE PROC uspRKDPRContractDetail
-	@intCommodityId int,
-	@dtmToDate datetime=null
-
+﻿CREATE PROC uspRKDPRContractDetail 
+	@intCommodityId int =null,
+	@dtmToDate datetime= null
 AS
+	set @dtmToDate=convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
 SELECT * FROM (
   SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmHistoryCreated DESC) intRowNum, 
@@ -31,7 +31,7 @@ SELECT * FROM (
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId 
     WHERE intPricingTypeId=1 and dtmHistoryCreated <= @dtmToDate and h.intCommodityId=@intCommodityId
-		  and intContractStatusId  not in(2,3,6)
+		  and intContractStatusId  not in(2,3,6) 
 	) a where a.intRowNum =1 
 
     UNION ALL
@@ -180,12 +180,12 @@ SELECT * FROM (
 		intContractStatusId,
 		e.intEntityId intEntityId
 		,intCurrencyId
-		,CASE WHEN intPricingTypeId = 3 THEN strContractType+'HTA' END AS strType
+		,strContractType + ' ' + strPricingType AS strType
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId
-        WHERE   intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTPriceFixation) and dtmHistoryCreated <= @dtmToDate and h.intCommodityId=@intCommodityId
-		and intContractStatusId  not in(2,3,6)
+        WHERE intPricingTypeId Not In(1,2,3) and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110)<=convert(datetime,@dtmToDate) and h.intCommodityId=@intCommodityId
+		and intContractStatusId  not in(2,3,6) 
 	) a WHERE a.intRowNum =1 

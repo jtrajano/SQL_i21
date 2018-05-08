@@ -209,6 +209,22 @@ intCustomerStorageId int
 ,intItemId  int	 
 ,dtmHistoryDate datetime)
 
+DECLARE @tblGetSalesIntransitWOPickLot TABLE (
+ strTicket nvarchar(100),
+ strContractNumber nvarchar(100)
+,dblShipmentQty	numeric(24,10)
+,intCompanyLocationId int
+,strLocationName nvarchar(100)
+,intContractDetailId int
+,dblInvoiceQty numeric(24,10)
+,dblBalanceToInvoice numeric(24,10)
+,intCommodityId int
+,strItemName nvarchar(100)
+,intUnitMeasureId int
+,intEntityId int
+,strCustomerReference nvarchar(100)
+)
+
 INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
 	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract)
 EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate
@@ -218,6 +234,9 @@ EXEC uspRKGetStorageDetailByDate @intCommodityId, @dtmToDate
 
 INSERT INTO @tblGetStorageOffSiteDetail
 EXEC uspRKGetStorageOffSiteDetail @intCommodityId, @dtmToDate
+
+INSERT INTO @tblGetSalesIntransitWOPickLot
+EXEC uspRKDPRSalesIntransitWOPickLot @intCommodityId, @dtmToDate
 
 IF OBJECT_ID('tempdb..#tempDeliverySheet') IS NOT NULL
 DROP TABLE #tempDeliverySheet
@@ -277,7 +296,7 @@ SELECT * FROM (
 								ELSE isnull(ysnLicensed, 0) END)
 	GROUP BY  [Storage Type], strCommodityCode,strType,strOwnedPhysicalStock, intEntityId,	 intCommodityId,strLocationName,strItemNo,dtmDelivarydate,ysnReceiptedStorage, strTicket,strCustomerReference, intFromCommodityUnitMeasureId,intCompanyLocationId,intStorageScheduleTypeId 
 	
-
+	
 SELECT * into #tempCollateral FROM (
 		SELECT  ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC) intRowNum,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0)) dblTotal,
@@ -309,7 +328,6 @@ SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@i
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
-
 SELECT * into #tempOnHold  FROM (
 	SELECT  ROW_NUMBER() OVER (PARTITION BY t.intTicketId ORDER BY t.dtmTicketHistoryDate DESC) intSeqId,
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
@@ -332,7 +350,7 @@ SELECT * into #tempOnHold  FROM (
 						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
 	AND t.intSeqId =1 
-
+	
 IF ISNULL(@intVendorId,0) = 0
 BEGIN
 
@@ -407,7 +425,7 @@ BEGIN
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
-
+				
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,strType,dblTotal,strLocationName,strItemNo,strTicket,strCustomerReference,strContractNumber,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
 	SELECT 4 AS intSeqId,'Sales In-Transit',@strDescription
 		,'Sales In-Transit' AS [strType]
@@ -415,7 +433,7 @@ BEGIN
 	FROM (
 		SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(i.intUnitMeasureId,@intCommodityUnitMeasureId,isnull(i.dblBalanceToInvoice, 0)) as ReserveQty,
 				i.strLocationName,i.strItemName,strContractNumber,strTicket,strCustomerReference,i.intCompanyLocationId
-				FROM vyuRKGetSalesIntransitWOPickLot i
+				FROM @tblGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 			    AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end	
 				)t WHERE intCompanyLocationId IN (

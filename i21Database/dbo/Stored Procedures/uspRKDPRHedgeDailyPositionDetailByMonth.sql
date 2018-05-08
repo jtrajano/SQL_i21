@@ -6,13 +6,6 @@
 		,@strPositionIncludes NVARCHAR(100) = NULL
 		,@dtmToDate datetime = NULL
 AS
---DECLARE 	 
---	 @intCommodityId nvarchar(max)  ='1,'
---	,@intLocationId int = 0	
---	,@intVendorId int = 0
---	,@strPurchaseSales nvarchar(250) = NULL
---	,@strPositionIncludes nvarchar(100) = 'All storage'
---	,@dtmToDate datetime='2018-04-25T00:00:00'
 
 BEGIN
  
@@ -158,10 +151,10 @@ INSERT INTO @List (strCommodityCode,intCommodityId,intContractHeaderId,strContra
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
-	WHERE intContractTypeId in(1,2) AND intPricingTypeId IN (1,2,3) and CD.intCommodityId =@intCommodityId
+	WHERE intContractTypeId in(1,2) AND  CD.intCommodityId =@intCommodityId	
 	AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
 	 and  CD.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then CD.intEntityId else @intVendorId end 
-
+	 
 INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,strType,strLocationName,strContractEndMonth,strContractEndMonthNearBy,dblTotal,intFromCommodityUnitMeasureId
 					,strAccountNumber,strTranType,intBrokerageAccountId,strInstrumentType,dblNoOfLot)
        SELECT strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge',strLocationName, strFutureMonth,dtmFutureMonthsDate,HedgedQty,intUnitMeasureId

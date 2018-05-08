@@ -6512,6 +6512,7 @@
     <Build Include="dbo\Stored Procedures\uspLGTransferWeightClaimXML.sql" />
     <Build Include="dbo\Stored Procedures\uspLGTransferWeightClaimAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessWeightClaimAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRSalesIntransitWOPickLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
