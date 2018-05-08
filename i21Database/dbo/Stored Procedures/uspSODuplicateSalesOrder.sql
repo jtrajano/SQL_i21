@@ -133,7 +133,7 @@ BEGIN
 			END   
 		   ,CASE WHEN [ysnRecurring] = 1 AND @ForRecurring = 1
 				THEN [strComments]
-				ELSE [strComments] + ' DUP: ' + [strSalesOrderNumber] 
+				ELSE [strComments] --+ ' DUP: ' + [strSalesOrderNumber] 
 			END
 		   ,[strFooterComments]
 		   ,[intShipToLocationId]
