@@ -6500,6 +6500,10 @@
     <Build Include="dbo\Functions\fnARGetItemTermDiscount.sql" />
     <Build Include="dbo\Functions\fnARGetItemTermDiscountExemption.sql" />
     <Build Include="dbo\Functions\fnGetDiscountDateBasedOnTerm.sql" />
+    <Build Include="dbo\Tables\tblARIntrCompanyInvoiceStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvoiceStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspARTransferInvoiceStgData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessInvoiceStgData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
