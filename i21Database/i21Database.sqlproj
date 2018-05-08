@@ -5472,6 +5472,8 @@
     <Build Include="dbo\Stored Procedures\uspMFReassignCustomerLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI940.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReprocessEDI943.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
+    <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
