@@ -1,8 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceProductRecapReport]
 	  @dtmDateFrom			DATETIME = NULL
 	, @dtmDateTo			DATETIME = NULL
+	, @strCustomerName		NVARCHAR(200) = NULL
 	, @strCategoryCode		NVARCHAR(100) = NULL
 	, @strTransactionType	NVARCHAR(100) = NULL
+	, @strFormattingOptions	NVARCHAR(100) = NULL
 	, @intEntityUserId		INT = NULL
 AS
 
@@ -22,9 +24,34 @@ IF @dtmDateTo IS NULL
 
 SET @strCategoryCode = NULLIF(@strCategoryCode, '')
 SET @strTransactionType = NULLIF(@strTransactionType, '')
+SET @strFormattingOptions = NULLIF(@strFormattingOptions, '')
 
 IF @strCategoryCode IS NOT NULL
 	SELECT TOP 1 @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode
+
+IF @strFormattingOptions = 'Product Recap Totals Only'
+	BEGIN
+		DELETE FROM tblARCustomerActivityStagingTable WHERE ISNULL(intEntityUserId, 0) = 0 OR intEntityUserId = @intEntityUserId
+		INSERT INTO tblARCustomerActivityStagingTable (
+			  intEntityCustomerId
+			, intEntityUserId
+			, strCustomerName
+			, strFormattingOptions
+			, ysnPrintRecap
+		)
+		SELECT intEntityCustomerId	= C.intEntityId
+			 , intEntityUserId		= @intEntityUserId
+			 , strCustomerName		= EC.strName
+			 , strFormattingOptions	= @strFormattingOptions
+			 , ysnPrintRecap		= CAST(1 AS BIT)
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+			     , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			WHERE (@strCustomerName IS NULL OR strName = @strCustomerName)
+		) EC ON C.intEntityId = EC.intEntityId
+	END
 
 DELETE FROM tblARProductRecapStagingTable WHERE ISNULL(intEntityUserId, 0) = 0 OR intEntityUserId = @intEntityUserId
 INSERT INTO tblARProductRecapStagingTable (
@@ -40,6 +67,7 @@ INSERT INTO tblARProductRecapStagingTable (
 	, intSortNo	
 	, strDescription
 	, strTransactionType
+	, strFormattingOptions
 	, strType
 	, dblUnits
 	, dblAmounts
@@ -67,6 +95,7 @@ SELECT DISTINCT
 									  END
 	, strDescription				= ABC.strDescription
 	, strTransactionType			= ABC.strTransactionType
+	, strFormattingOptions			= @strFormattingOptions
 	, strType						= ABC.strType
 	, dblUnits						= ABC.dblQtyShipped
 	, dblAmounts					= ABC.dblInvoiceTotal
@@ -86,7 +115,7 @@ FROM
 		 , strTaxCode						= NULL
 	FROM (
 		SELECT intEntityCustomerId		=	ARI.intEntityCustomerId
-			  , intCompanyLocationId	=	ARI.intCompanyLocationId
+			  , intCompanyLocationId	=	CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId ELSE NULL END
 			  , strTransactionType		=	'Items'
 			  , strType					=	NULL
 			  , dblInvoiceTotal			=	SUM(dblLineItemTotal)
@@ -110,7 +139,7 @@ FROM
 		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId
-			   , ARI.intCompanyLocationId
+			   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 			   , ARID.intItemId
 			   , ARID.strItemDescription
 	) Items
@@ -138,10 +167,10 @@ FROM
 		 , strTaxCode					= SMTC.strTaxCode
 	FROM (
 		SELECT intEntityCustomerId		= ARI.intEntityCustomerId
-			 , intCompanyLocationId		= ARI.intCompanyLocationId
+			 , intCompanyLocationId		= CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId ELSE NULL END
 		     , strTransactionType		= 'TaxCodes'
 			 , strType					= NULL
-		     , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARIDT.dblAdjustedTax)) --SUM(ARIDT.dblAdjustedTax)
+		     , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARIDT.dblAdjustedTax))
 			 , intItemId				= NULL
 			 , dblQtyShipped			= 0.000000
 			 , intTaxCodeId				= ARIDT.intTaxCodeId
@@ -184,7 +213,7 @@ FROM
 		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)		
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId
-			   , ARI.intCompanyLocationId
+			   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 			   , ARIDT.intTaxCodeId
 	) TAXES
 	LEFT JOIN (
@@ -198,7 +227,7 @@ FROM
 
 	--- Debit Memo
 	SELECT intEntityCustomerId		= ARI.intEntityCustomerId
-		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , intCompanyLocationId		= CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId ELSE NULL END
 		 , strTransactionType		= ARI.strTransactionType
 		 , strType					= NULL
 		 , dblInvoiceTotal			= SUM(ARI.dblInvoiceSubtotal)
@@ -238,14 +267,14 @@ FROM
 	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	GROUP BY ARI.intEntityCustomerId
-		   , ARI.intCompanyLocationId
+		   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 		   , ARI.strTransactionType
 	 
 	UNION ALL
 
 	--- Overpayment,  Customer Prepayment
 	SELECT intEntityCustomerId		= ARI.intEntityCustomerId		
-		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , intCompanyLocationId		= CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId ELSE NULL END
 		 , strTransactionType		= ARI.strTransactionType
 		 , strType					= NULL
 		 , dblInvoiceTotal			= SUM(ARI.dblInvoiceSubtotal)
@@ -261,14 +290,14 @@ FROM
 	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo		
 	GROUP BY ARI.intEntityCustomerId
-		   , ARI.intCompanyLocationId
+		   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 		   , ARI.strTransactionType	
 		
 	UNION ALL
 
 	--- Payments
 	SELECT intEntityCustomerId		= ARI.intEntityCustomerId
-		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , intCompanyLocationId		= CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId ELSE NULL END
 		 , strTransactionType		= 'Payments'
 		 , strType					= NULL
 		 , dblInvoiceTotal			= SUM(dbo.fnARGetInvoiceAmountMultiplier(ARI.strTransactionType) * (ARI.dblPayment)) --SUM(ARI.dblPayment)
@@ -284,13 +313,13 @@ FROM
 	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	GROUP BY ARI.intEntityCustomerId
-		   , ARI.intCompanyLocationId
+		   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 
 	UNION ALL
 
 	--- Service Charges
 	SELECT intEntityCustomerId		= ARI.intEntityCustomerId
-		 , intCompanyLocationId		= ARI.intCompanyLocationId
+		 , intCompanyLocationId		= CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId ELSE NULL END
 		 , strTransactionType		= ARI.strType
 		 , strType					= ARI.strType
 		 , dblInvoiceTotal			= SUM(ARI.dblInvoiceTotal)
@@ -306,7 +335,7 @@ FROM
 	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo			
 	GROUP BY ARI.intEntityCustomerId
-		   , ARI.intCompanyLocationId
+		   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 		   , ARI.strType
 		
 ) ABC
@@ -322,7 +351,7 @@ LEFT JOIN (
 		 , strLocationNumber
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) LOCATION ON ABC.intCompanyLocationId = LOCATION.intCompanyLocationId
+) [LOCATION] ON ABC.intCompanyLocationId = [LOCATION].intCompanyLocationId
 WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0
 ORDER BY ABC.intCompanyLocationId, intSortNo
 

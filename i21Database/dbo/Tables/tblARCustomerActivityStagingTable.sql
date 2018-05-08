@@ -21,6 +21,7 @@
 	[strTaxGroup]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxCode]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strFormattingOptions]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dtmLastPaymentDate]		DATETIME NULL,
 	[dtmTransactionDate]		DATETIME NULL,
 	[dtmAsOfDate]				DATETIME NULL,
