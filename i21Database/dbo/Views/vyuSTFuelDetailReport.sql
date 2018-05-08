@@ -1,10 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuSTFuelDetailReport]
 	AS 
-SELECT ST.intStoreNo
+SELECT ST.intStoreId
+, ST.intStoreNo
 , ST.strRegion
 , ST.strDistrict
 , ST.strDescription strStoreDescription
+, CAT.intCategoryId
 , CAT.strDescription strCategoryDescription
+, IT.intItemId
 , IT.strItemNo
 , IT.strDescription strItemDescription
 , CH.dtmCheckoutDate

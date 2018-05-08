@@ -1,10 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuSTFuelSummaryReport]
 	AS 
-SELECT ST.intStoreNo
+SELECT ST.intStoreId
+, ST.intStoreNo
 , ST.strRegion
 , ST.strDistrict
 , ST.strDescription strStoreDescription
+, CAT.intCategoryId
 , CAT.strDescription strCategoryDescription
+, IT.intItemId
 , IT.strItemNo
 , IT.strDescription strItemDescription
 , SUM(CPT.dblQuantity) dblQuantity
@@ -16,4 +19,4 @@ INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CPT.intPumpCardCouponId
 INNER JOIN tblICItem IT ON IT.intItemId = IU.intItemId 
 INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
 WHERE CPT.dblAmount > 0	
-GROUP BY ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CAT.strDescription, IT.strItemNo, IT.strDescription
+GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CAT.intCategoryId, CAT.strDescription, IT.intItemId, IT.strItemNo, IT.strDescription
