@@ -6494,6 +6494,9 @@
     <Build Include="dbo\Views\vyuSCTicketLVSearch.sql" />
     <Build Include="dbo\Functions\fnConvertEnglishToItalian.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportIdealContractBuyer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCopyHandheldUserMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveHandheldUserMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetHandheldUserMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
