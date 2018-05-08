@@ -1,0 +1,22 @@
+﻿
+CREATE VIEW [dbo].[vyuAPYearPATR]
+AS
+
+WITH PATR1099 (
+	intYear
+)
+AS
+(
+	SELECT
+	 A.intYear
+FROM vyuAP1099 A
+CROSS JOIN tblSMCompanySetup B
+CROSS JOIN tblAP1099Threshold C
+WHERE A.int1099Form = 4
+)
+SELECT
+	*
+FROM PATR1099 A
+GO
+
+

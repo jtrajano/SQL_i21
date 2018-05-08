@@ -6458,6 +6458,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
     <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCategory.sql" />
+    <Build Include="dbo\Functions\fnARIsItemTermDiscountExempt.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
@@ -6472,6 +6473,19 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostCategory.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Views\vyuSTFuelSummaryReport.sql" />
+    <Build Include="vyuAPYearMISC.sql" />
+    <Build Include="dbo\Views\vyuAPYear1099B.sql" />
+    <Build Include="dbo\Views\vyuAPYearPATR.sql" />
+    <Build Include="dbo\Views\vyuAPYearDIV.sql" />
+    <Build Include="dbo\Views\vyuAPYearINT.sql" />
+    <Build Include="dbo\Views\vyuPOSGetLoggedIn.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemDataInsertAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentUOMChange.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTableShipmentInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSaveShipmentInspection.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryByItemAndStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

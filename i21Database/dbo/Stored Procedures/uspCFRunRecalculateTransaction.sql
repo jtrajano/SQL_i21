@@ -30,10 +30,7 @@ SELECT TOP 1  ---------------CHANGE THIS------------
 ,@intSiteId = intSiteId			
 ,@dtmTransactionDate = dtmTransactionDate	
 ,@dblQuantity = dblQuantity		
-,@dblOriginalPrice = (SELECT dblOriginalAmount 
-FROM tblCFTransactionPrice 
-WHERE intTransactionId = t.intTransactionId 
-AND strTransactionPriceId = 'Gross Price') 
+,@dblOriginalPrice = t.dblOriginalGrossPrice
 ,@strTransactionType = t.strTransactionType	
 ,@intNetworkId = intNetworkId		
 ,@dblTransferCost = dblTransferCost	

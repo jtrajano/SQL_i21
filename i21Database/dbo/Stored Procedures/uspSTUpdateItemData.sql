@@ -266,7 +266,7 @@ BEGIN TRY
 		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
 					'Tax Flag1'
-					, 'CASE WHEN a.ysnTaxFlag1 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN IL.ysnTaxFlag1 = 0 THEN ''No'' ELSE ''Yes'' END'
 					, 'CASE WHEN ' + CAST(@strTaxFlag1ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
@@ -277,13 +277,9 @@ BEGIN TRY
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
-					, 'd.intItemId'
-					, 'a.intItemLocationId' 
+					, 'I.intItemId'
+					, 'IL.intItemLocationId' 
 				)
-
-				----TEST
-				--INSERT INTO TestDatabase.dbo.tblPerson(strFirstName, strLastName)
-				--VALUES(@SqlQuery1, 'Tax Flag1')
 
 			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
@@ -300,7 +296,7 @@ BEGIN TRY
 		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
 					'Tax Flag2'
-					, 'CASE WHEN a.ysnTaxFlag2 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN IL.ysnTaxFlag2 = 0 THEN ''No'' ELSE ''Yes'' END'
 					, 'CASE WHEN ' + CAST(@strTaxFlag2ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
@@ -311,8 +307,8 @@ BEGIN TRY
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
-					, 'd.intItemId'
-					, 'a.intItemLocationId'
+					, 'I.intItemId'
+					, 'IL.intItemLocationId'
 				)
 
 			INSERT @tblTempOne
@@ -330,7 +326,7 @@ BEGIN TRY
 		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
 					'Tax Flag3'
-					, 'CASE WHEN a.ysnTaxFlag3 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN IL.ysnTaxFlag3 = 0 THEN ''No'' ELSE ''Yes'' END'
 					, 'CASE WHEN ' + CAST(@strTaxFlag3ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
@@ -341,8 +337,8 @@ BEGIN TRY
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
-					, 'd.intItemId'
-					, 'a.intItemLocationId'
+					, 'I.intItemId'
+					, 'IL.intItemLocationId'
 				)
 
 			INSERT @tblTempOne
@@ -360,7 +356,7 @@ BEGIN TRY
 		 SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 				(
 					'Tax Flag4'
-					, 'CASE WHEN a.ysnTaxFlag4 = 0 THEN ''No'' ELSE ''Yes'' END'
+					, 'CASE WHEN IL.ysnTaxFlag4 = 0 THEN ''No'' ELSE ''Yes'' END'
 					, 'CASE WHEN ' + CAST(@strTaxFlag4ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 					, @strCompanyLocationId
 					, @strVendorId
@@ -371,8 +367,8 @@ BEGIN TRY
 					, @strDescription
 					, @dblPriceBetween1
 					, @dblPriceBetween2
-					, 'd.intItemId'
-					, 'a.intItemLocationId'
+					, 'I.intItemId'
+					, 'IL.intItemLocationId'
 				)
 
 			INSERT @tblTempOne
@@ -387,7 +383,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Deposit Required'
-				, 'CASE WHEN a.ysnDepositRequired = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnDepositRequired = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strDepositRequiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -398,8 +394,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -417,7 +413,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Deposit PLU'
-				, '(select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId)'
+				, '(select strUpcCode from tblICItemUOM where intItemUOMId = IL.intDepositPLUId)'
 				, 'CAST(''' + CAST(@NewDepositPluId AS NVARCHAR(50)) + ''' AS NVARCHAR(50))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -428,8 +424,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -444,7 +440,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Quantity Required'
-				, 'CASE WHEN a.ysnQuantityRequired = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnQuantityRequired = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strQuantityRequiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -455,8 +451,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -471,7 +467,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Scale Item'
-				, 'CASE WHEN a.ysnScaleItem = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnScaleItem = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strScaleItemysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -482,8 +478,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -498,7 +494,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Food Stampable'
-				, 'CASE WHEN a.ysnFoodStampable = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnFoodStampable = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strFoodStampableysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -509,8 +505,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -525,7 +521,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Returnable'
-				, 'CASE WHEN a.ysnReturnable = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnReturnable = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strReturnableysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -536,8 +532,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -552,7 +548,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Saleable'
-				, 'CASE WHEN a.ysnSaleable = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnSaleable = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strSaleableysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -563,8 +559,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -579,7 +575,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Liquor Id Required'
-				, 'CASE WHEN a.ysnIdRequiredLiquor = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnIdRequiredLiquor = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strID1Requiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -590,8 +586,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -607,7 +603,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Cigarette Id Required'
-				, 'CASE WHEN a.ysnIdRequiredCigarette = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnIdRequiredCigarette = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strID2Requiredysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -618,8 +614,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -635,7 +631,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Promotional Item'
-				, 'CASE WHEN a.ysnPromotionalItem = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnPromotionalItem = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strPromotionalItemysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -646,8 +642,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -663,7 +659,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Pre Priced'
-				, 'CASE WHEN a.ysnPrePriced = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnPrePriced = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strPrePricedysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -674,8 +670,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -691,7 +687,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Blue Law1'
-				, 'CASE WHEN a.ysnApplyBlueLaw1 = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnApplyBlueLaw1 = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strBlueLaw1ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -702,8 +698,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -719,7 +715,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Blue Law2'
-				, 'CASE WHEN a.ysnApplyBlueLaw2 = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnApplyBlueLaw2 = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strBlueLaw2ysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -730,8 +726,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -747,7 +743,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Counted Daily'
-				, 'CASE WHEN a.ysnCountedDaily = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnCountedDaily = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strCountedDailyysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -758,8 +754,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -775,7 +771,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Counted'
-				, 'a.strCounted'
+				, 'IL.strCounted'
 				, 'CAST(''' + CAST(@strCounted AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -786,8 +782,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -803,7 +799,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Count By Serial No'
-				, 'CASE WHEN a.ysnCountBySINo = 0 THEN ''No'' ELSE ''Yes'' END'
+				, 'CASE WHEN IL.ysnCountBySINo = 0 THEN ''No'' ELSE ''Yes'' END'
 				, 'CASE WHEN ' + CAST(@strCountSerialysn AS NVARCHAR(50)) + ' = 0 THEN ''No'' ELSE ''Yes'' END'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -814,8 +810,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -833,7 +829,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Family'
-				, '(SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = a.intFamilyId)'
+				, '(SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = IL.intFamilyId)'
 				, 'CAST(''' + CAST(@FamilyId AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -844,8 +840,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -863,7 +859,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Class'
-				, '(SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = a.intClassId )'
+				, '(SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = IL.intClassId )'
 				, 'CAST(''' + CAST(@strClassIdId AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -874,8 +870,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -893,7 +889,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Product Code'
-				, '( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = a.intProductCodeId )'
+				, '( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = IL.intProductCodeId )'
 				, 'CAST(''' + CAST(@ProductCode AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -904,8 +900,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -923,7 +919,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Vendor'
-				, '( select strName from tblEMEntity where intEntityId = a.intVendorId )'
+				, '( select strName from tblEMEntity where intEntityId = IL.intVendorId )'
 				, 'CAST(''' + CAST(@strVendorIdId AS NVARCHAR(50)) + ''' AS NVARCHAR(50))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -934,8 +930,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -951,7 +947,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Minimum Age'
-				, 'a.intMinimumAge'
+				, 'IL.intMinimumAge'
 				, 'CAST(' + CAST(@intNewMinAge AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -962,8 +958,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -979,7 +975,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Vendor Minimum Order Qty'
-				, 'a.dblMinOrder'
+				, 'IL.dblMinOrder'
 				, 'CAST(' + CAST(@dblNewMinVendorOrderQty AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -990,8 +986,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -1007,7 +1003,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Vendor Suggested Qty'
-				, 'a.dblSuggestedQty'
+				, 'IL.dblSuggestedQty'
 				, 'CAST(' + CAST(@dblNewVendorSuggestedQty AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1018,8 +1014,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -1034,7 +1030,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Min Qty On Hand'
-				, 'a.dblReorderPoint'
+				, 'IL.dblReorderPoint'
 				, 'CAST(' + CAST(@dblNewMinQtyOnHand AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1045,8 +1041,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -1062,7 +1058,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Inventory Group'
-				, '( SELECT strCountGroup FROM tblICCountGroup WHERE intCountGroupId = a.intCountGroupId )'
+				, '( SELECT strCountGroup FROM tblICCountGroup WHERE intCountGroupId = IL.intCountGroupId )'
 				, 'CAST(' + CAST(@intNewInventoryGroup AS NVARCHAR(50)) + ' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1073,8 +1069,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -1090,7 +1086,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Count Code'
-				, 'd.strCountCode'
+				, 'I.strCountCode'
 				, 'CAST(''' + CAST(@strNewCountCode AS NVARCHAR(50)) + ''' AS NVARCHAR(250))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1101,8 +1097,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -1117,7 +1113,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Category'
-				, '(select strCategoryCode from tblICCategory where intCategoryId = d.intCategoryId)'
+				, '(select strCategoryCode from tblICCategory where intCategoryId = I.intCategoryId)'
 				, '(select strCategoryCode from tblICCategory where intCategoryId = ' + CAST(@intNewCategory AS NVARCHAR(50)) + ')'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1128,8 +1124,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'd.intItemId'
+				, 'I.intItemId'
+				, 'I.intItemId'
 			)
 
 		INSERT @tblTempOne
@@ -1145,7 +1141,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Storage Location'
-				, '( select strName from tblICStorageLocation where intStorageLocationId = a.intStorageLocationId )'
+				, '( select strName from tblICStorageLocation where intStorageLocationId = IL.intStorageLocationId )'
 				, '( select strName from tblICStorageLocation where intStorageLocationId =  CAST( ' +  LTRIM(CAST(@intNewBinLocation AS NVARCHAR(50))) +' AS INT))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1156,8 +1152,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'a.intItemLocationId'
+				, 'I.intItemId'
+				, 'IL.intItemLocationId'
 			)
 
 		INSERT @tblTempOne
@@ -1173,7 +1169,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Cost of Goods Sold Account'
-				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+				, '( select strAccountId from tblGLAccount where intAccountId = IA.intAccountId )'
 				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLPurchaseAccount) AS NVARCHAR(50)) +' AS INT))'
 				--, (select strAccountId from tblGLAccount where intAccountId = @intNewGLPurchaseAccount)
 				, @strCompanyLocationId
@@ -1185,8 +1181,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'e.intItemAccountId'
+				, 'I.intItemId'
+				, 'IA.intItemAccountId'
 			)
 
 		INSERT @tblTempOne
@@ -1202,7 +1198,7 @@ BEGIN TRY
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Sales Account'
-				, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+				, '( select strAccountId from tblGLAccount where intAccountId = IA.intAccountId )'
 				, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLSalesAccount) AS NVARCHAR(50)) +' AS INT))'
 				, @strCompanyLocationId
 				, @strVendorId
@@ -1213,8 +1209,8 @@ BEGIN TRY
 				, @strDescription
 				, @dblPriceBetween1
 				, @dblPriceBetween2
-				, 'd.intItemId'
-				, 'e.intItemAccountId'
+				, 'I.intItemId'
+				, 'IA.intItemAccountId'
 			)
 
 		INSERT @tblTempOne
@@ -1230,7 +1226,7 @@ BEGIN TRY
 		--    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 		--	(
 		--		'Variance Account'
-		--		, '( select strAccountId from tblGLAccount where intAccountId = e.intAccountId )'
+		--		, '( select strAccountId from tblGLAccount where intAccountId = IA.intAccountId )'
 		--		, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLVarianceAccount) AS NVARCHAR(50)) +' AS INT))'
 		--		, @strCompanyLocationId
 		--		, @strVendorId
@@ -1241,8 +1237,8 @@ BEGIN TRY
 		--		, @strDescription
 		--		, @dblPriceBetween1
 		--		, @dblPriceBetween2
-		--		, 'd.intItemId'
-		--		, 'e.intItemAccountId'
+		--		, 'I.intItemId'
+		--		, 'IA.intItemAccountId'
 		--	)
 
 		--INSERT @tblTempOne
@@ -2131,7 +2127,76 @@ BEGIN
 			 --END
 	  END
 END
-  
+	
+
+
+
+	--===================================================================================================
+	-- START Audit Log tblICItemLocation
+	--===================================================================================================
+	IF (@UpdateCount > 0)
+		BEGIN
+			IF(OBJECT_ID('tempdb..#tempAudit') Is Not Null)
+			BEGIN
+				DROP TABLE #tempAudit
+			END
+
+			CREATE TABLE #tempAudit (intRowCount INT NOT NULL IDENTITY
+									 , strUpc NVARCHAR(50)
+									 , strLocation NVARCHAR(250)
+									 , strItemDescription NVARCHAR(250)
+									 , strChangeDescription NVARCHAR(100)
+									 , strOldData NVARCHAR(MAX)
+									 , strNewData NVARCHAR(MAX)
+									 , intParentId INT
+									 , intChildId INT)
+
+			INSERT INTO #tempAudit(strUpc
+									, strLocation
+									, strItemDescription
+									, strChangeDescription
+									, strOldData
+									, strNewData
+									, intParentId
+									, intChildId)
+			SELECT DISTINCT strUpc
+								,strLocation
+								, strItemDescription
+								, strChangeDescription
+								, strOldData
+								, strNewData
+								, intParentId
+								, intChildId
+			FROM @tblTempOne
+			WHERE strOldData != strNewData
+			ORDER BY intParentId ASC
+
+			SELECT * FROM #tempAudit
+
+			EXEC uspSTUpdateItemDataInsertAuditLog @currentUserId
+			DROP TABLE #tempAudit
+
+
+			DELETE FROM tblSTMassUpdateReportMaster
+
+			INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
+			SELECT strLocation
+				  , strUpc
+				  , strItemDescription
+				  , strChangeDescription
+				  , strOldData
+				  , strNewData 
+			FROM @tblTempOne
+			WHERE strOldData != strNewData	
+	END
+	--===================================================================================================
+	-- END Audit Log tblICItemLocation
+	--===================================================================================================
+
+
+
+
+
 
 
     --AUDIT LOG

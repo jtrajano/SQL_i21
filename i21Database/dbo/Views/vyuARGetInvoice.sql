@@ -12,7 +12,7 @@ SELECT
     INV.intCompanyLocationId,
     INV.intAccountId,
     INV.intCurrencyId,
-    INV.intTermId,
+    INV.intTermId,	
     INV.intPeriodsToAccrue,
     INV.dtmDate,
     INV.dtmDueDate,
@@ -30,6 +30,10 @@ SELECT
     INV.dblBaseDiscount,
     INV.dblDiscountAvailable,
     INV.dblBaseDiscountAvailable,
+	INV.dblTotalTermDiscount,
+	INV.dblBaseTotalTermDiscount,
+	INV.dblTotalTermDiscountExemption,
+	INV.dblBaseTotalTermDiscountExemption,
     INV.dblInterest,
     INV.dblBaseInterest,
     INV.dblAmountDue,
@@ -87,8 +91,7 @@ SELECT
     INV.dblTotalWeight,
     INV.intEntityContactId,
     INV.intEntityApplicatorId,
-    INV.intDocumentMaintenanceId,
-    INV.dblTotalTermDiscount,
+    INV.intDocumentMaintenanceId,    
     INV.intTruckDriverId,
     INV.intTruckDriverReferenceId,
     INV.intConcurrencyId,
@@ -127,6 +130,7 @@ SELECT
     strShipVia = SHIPVIA.strShipVia,
     strAccountId = ACCT.strAccountId,
 	strTerm = TERM.strTerm,
+	dblTermDiscountRate = TERM.dblDiscountEP,
     strFreightTerm = FTERMS.strFreightTerm,
     strFobPoint = FTERMS.strFobPoint,
     strTruckDriverName = DPER.strName,	
@@ -178,7 +182,7 @@ LEFT JOIN (SELECT intEntityId, strShipVia
 LEFT JOIN (SELECT intAccountId, strAccountId 
 				FROM tblGLAccount WITH ( NOLOCK) ) ACCT
 	ON INV.intAccountId = ACCT.intAccountId
-LEFT JOIN (SELECT intTermID, strTerm 
+LEFT JOIN (SELECT intTermID, strTerm, dblDiscountEP
 			FROM tblSMTerm WITH ( NOLOCK) ) TERM
 	ON INV.intTermId = TERM.intTermID
 LEFT JOIN ( SELECT  intFreightTermId, strFreightTerm,

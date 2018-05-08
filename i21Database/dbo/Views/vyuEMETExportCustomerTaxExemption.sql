@@ -67,6 +67,7 @@ CROSS APPLY
 		,NULL
 		,0
 		,NULL
+		,NULL
 		,EMEL.intWarehouseId
 		,NULL
 		,NULL

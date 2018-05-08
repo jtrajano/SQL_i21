@@ -159,6 +159,7 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_LotMerge
 			, @ADJUSTMENT_TYPE_LotMove
 			, @ADJUSTMENT_TYPE_ItemChange
+			, @ADJUSTMENT_TYPE_UOMChange
 		)
 
 --------------------------------------------------------------------------------------------  
@@ -258,10 +259,10 @@ BEGIN
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentUOMChange
 				@intTransactionId
-				--,@strBatchId  
-				--,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				--,@intEntityUserSecurityId
-				--,@strAdjustmentDescription
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
+				,@strAdjustmentDescription
 	END 
 
 	-----------------------------------
@@ -469,6 +470,7 @@ BEGIN
 		, @ADJUSTMENT_TYPE_LotMerge
 		, @ADJUSTMENT_TYPE_LotMove
 		, @ADJUSTMENT_TYPE_ItemChange
+		, @ADJUSTMENT_TYPE_UOMChange
 	)
 	BEGIN 
 		-- Call the post routine 

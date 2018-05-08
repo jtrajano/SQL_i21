@@ -438,6 +438,18 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
+		IF EXISTS (
+				SELECT *
+				FROM dbo.tblICStockReservation
+				WHERE intLotId = @intLotId
+				)
+		BEGIN
+			UPDATE dbo.tblICStockReservation
+			SET ysnPosted=1
+			WHERE intLotId = @intLotId
+		END
+
+
 	IF @ysnDestinationLotEmptyOut = 1
 		AND (
 			SELECT dblQty
@@ -556,6 +568,7 @@ BEGIN TRY
 			SET intLotId = @intNewLotId
 				,intStorageLocationId = @intNewStorageLocationId
 				,intSubLocationId = @intNewSubLocationId
+				,ysnPosted=0
 			WHERE intLotId = @intLotId
 		END
 

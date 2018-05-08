@@ -3623,19 +3623,19 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse Rate Matrix' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Warehouse Rate Matrix', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Warehouse Rate Matrix', N'Maintenance', N'Screen', N'Logistics.view.WarehouseRateMatrix?showSearch=true', N'small-menu-Maintenance', 0, 0, 0, 1, 8, 1)
+	VALUES (N'Warehouse Rate Matrix', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Warehouse Rate Matrix', N'Maintenance', N'Screen', N'Logistics.view.WarehouseRateMatrix?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.WarehouseRateMatrix?showSearch=true', intSort = 8 WHERE strMenuName = 'Warehouse Rate Matrix' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Insurance Premium Factor' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Insurance Premium Factor', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Insurance Premium Factor', N'Maintenance', N'Screen', N'Logistics.view.InsurancePremiumFactor?showSearch=true', N'small-menu-Create', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Insurance Premium Factor', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Insurance Premium Factor', N'Maintenance', N'Screen', N'Logistics.view.InsurancePremiumFactor?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.InsurancePremiumFactor?showSearch=true', intSort = 9 WHERE strMenuName = 'Insurance Premium Factor' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Shipping Line Service Contract' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Shipping Line Service Contract', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Shipping Line Service Contract', N'Maintenance', N'Screen', N'Logistics.view.ShippingLineServiceContract?showSearch=true', N'small-menu-Create', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Shipping Line Service Contract', N'Logistics', @LogisticsMaintenanceParentMenuId, N'Shipping Line Service Contract', N'Maintenance', N'Screen', N'Logistics.view.ShippingLineServiceContract?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.ShippingLineServiceContract?showSearch=true', intSort = 10 WHERE strMenuName = 'Shipping Line Service Contract' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 
@@ -5009,10 +5009,10 @@ DECLARE @MeterBillingMaintenanceParentMenuId INT
 SELECT @MeterBillingMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Create', N'Meter Billing', @MeterBillingParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intRow], [intSort], [intConcurrencyId]) 
+	VALUES (N'Create', N'Meter Billing', @MeterBillingParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intRow = 1, intSort = 0 WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
 	
 DECLARE @MeterBillingCreateParentMenuId INT
 SELECT @MeterBillingCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
@@ -5063,8 +5063,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Meter
 	VALUES (N'New Meter Readings', N'Meter Billing', @MeterBillingCreateParentMenuId, N'New Meter Readings', N'Create', N'Screen', N'MeterBilling.view.MeterReadings?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'MeterBilling.view.MeterReadings?action=new', intSort = 0 WHERE strMenuName = 'New Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingCreateParentMenuId
-
-/* END of Meter Billing */
 
 /* QUALITY */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality' AND strModuleName = 'Quality' AND intParentMenuID = 0)

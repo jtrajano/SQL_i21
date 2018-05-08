@@ -43,7 +43,10 @@ BEGIN
 			,@ItemCategoryId			INT
 			,@ItemCategory				NVARCHAR(100)
 			,@UOMQuantity				NUMERIC(18,6)
-			,@FunctionalCurrencyId	INT
+			,@FunctionalCurrencyId		INT
+			,@ZeroDecimal				DECIMAL(18,6)
+	
+	SET @ZeroDecimal = 0.000000
 
 
 	SELECT TOP 1 @FunctionalCurrencyId = intDefaultCurrencyId  FROM tblSMCompanyPreference
@@ -69,14 +72,14 @@ BEGIN
 					
 	--Item Promotional Pricing 
 	SELECT TOP 1
-		@Price			= @Quantity *
+		@Price			= @UOMQuantity *
 							(CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ICISP.dblUnitAfterDiscount
 							ELSE
 								(CASE
 									WHEN ICISP.strDiscountBy = 'Amount'
-										THEN ICISP.dblUnitAfterDiscount - ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  ISNULL(ICISP.dblDiscount, 0.00) ELSE 0 END ) 
+										THEN ICISP.dblUnitAfterDiscount - ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  ISNULL(ICISP.dblDiscount, @ZeroDecimal) ELSE @ZeroDecimal END ) 
 									ELSE	
-										ICISP.dblUnitAfterDiscount - ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  (ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) ) ELSE 0 END ) 
+										ICISP.dblUnitAfterDiscount - ( CASE WHEN @Quantity >= ICISP.dblUnit THEN  (ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, @ZeroDecimal)/100.000000) ) ELSE @ZeroDecimal END ) 
 								END)
 							END)
 				 
@@ -85,19 +88,21 @@ BEGIN
 							ELSE
 								(CASE
 									WHEN ICISP.strDiscountBy = 'Amount'
-										THEN ISNULL(ICISP.dblDiscount, 0.00)
+										THEN ISNULL(ICISP.dblDiscount, @ZeroDecimal)
 									ELSE	
-										(ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, 0.00)/100.00) )
+										(ICISP.dblUnitAfterDiscount * (ISNULL(ICISP.dblDiscount, @ZeroDecimal)/100.000000) )
 								END)
 							END) 									
 		,@DiscountBy	= ICISP.strDiscountBy
 		,@PromotionType	= ICISP.strPromotionType
-		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, 0.00)/ISNULL(ICISP.dblUnit,0.00)) * @Quantity,0.00) ELSE 0.000000 END)
+		,@TermDiscount	= (CASE WHEN ICISP.strPromotionType = 'Terms Discount' THEN ISNULL((ISNULL(ICISP.dblDiscount, @ZeroDecimal)/ISNULL(ICISP.dblUnit, @ZeroDecimal)) * @UOMQuantity, @ZeroDecimal) ELSE @ZeroDecimal END)
 		,@Pricing		= 'Inventory Promotional Pricing' + ISNULL('(' + ICISP.strPromotionType + ')','')	
 	FROM
 		tblICItemSpecialPricing ICISP
 	WHERE
-		ICISP.intItemId = @ItemId 
+		ISNULL(ICISP.strPromotionType, '') <> ''
+		AND ICISP.strPromotionType <> 'Terms Discount Exempt'
+		AND ICISP.intItemId = @ItemId 
 		AND ICISP.intItemLocationId = @ItemLocationId 
 		AND ICISP.intItemUnitMeasureId = @ItemUOMId
 		AND ISNULL(ICISP.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
@@ -105,7 +110,7 @@ BEGIN
  	ORDER BY
 		dtmBeginDate DESC
 	
-	IF(ISNULL(@Price,0) <> 0)
+	IF(ISNULL(@Price, @ZeroDecimal) <> @ZeroDecimal)
 		BEGIN
 			IF @PromotionType = 'Terms Discount'
 				BEGIN
@@ -122,7 +127,7 @@ BEGIN
 								 @Type = strType 
 								,@DiscountDay = ISNULL(intDiscountDay, 0)
 								,@DiscountDate = ISNULL(dtmDiscountDate, @TransactionDate) 
-								,@DiscountEP = ISNULL(dblDiscountEP,0)
+								,@DiscountEP = ISNULL(dblDiscountEP, @ZeroDecimal)
 							FROM
 								tblSMTerm
 							WHERE
@@ -132,7 +137,7 @@ BEGIN
 								BEGIN
 									IF (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, 0.00)/ISNULL(@Deviation,0.00)) * @Price * @Quantity,0.00)/100
+											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, @ZeroDecimal)/ISNULL(@Deviation, @ZeroDecimal)) * @Price * @Quantity, @ZeroDecimal)/100.000000
 										END
 								END	
 							ELSE IF (@Type = 'Date Driven')
@@ -145,21 +150,21 @@ BEGIN
 			
 									IF (@TempDiscountDate >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, 0.00)/ISNULL(@Deviation,0.00)) * @Price * @Quantity,0.00)/100
+											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, @ZeroDecimal)/ISNULL(@Deviation, @ZeroDecimal)) * @Price * @Quantity, @ZeroDecimal)/100.000000
 										END		
 								END	
 							ELSE
 								BEGIN
 									IF (@DiscountDate >= @TransactionDate)
 										BEGIN
-											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, 0.00)/ISNULL(@Deviation,0.00)) * @Price * @Quantity,0.00)/100
+											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, @ZeroDecimal)/ISNULL(@Deviation, @ZeroDecimal)) * @Price * @Quantity, @ZeroDecimal)/100.000000
 										END
 								END
 						END					
 				END
 			ELSE
 				BEGIN
-					SET @TermDiscount = 0.000000
+					SET @TermDiscount = @ZeroDecimal
 				END
 
 			SET @intSort = @intSort + 1
@@ -169,7 +174,7 @@ BEGIN
 		END
 	
 	--Item Pricing Level
-	SET @Price = 0
+	SET @Price = @ZeroDecimal
 	IF ISNULL(@PricingLevelId,0) = 0
 		BEGIN
 			SELECT TOP 1 @PricingLevelId = CPL.intCompanyLocationPricingLevelId 
@@ -192,7 +197,7 @@ BEGIN
 				SELECT TOP 1 
 					@Price			= @UOMQuantity * PL.dblUnitPrice
 					,@PriceBasis	= PL.dblUnitPrice		
-					,@Deviation		= 0.00		
+					,@Deviation		= @ZeroDecimal		
 					,@Pricing		= 'Inventory - Pricing Level'		
 				FROM
 					tblICItemPricingLevel PL																														
@@ -209,7 +214,7 @@ BEGIN
 					AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(PL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
 				ORDER BY CAST(ISNULL(PL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
-				IF(ISNULL(@Price,0) <> 0)
+				IF(ISNULL(@Price, @ZeroDecimal) <> @ZeroDecimal)
 					BEGIN
 						SET @intSort = @intSort + 1
 						INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
@@ -219,11 +224,11 @@ BEGIN
 			END	
 	END
 
-	SET @Price = 0
+	SET @Price = @ZeroDecimal
 	SELECT TOP 1 
 		@Price			= @UOMQuantity * ICPL.dblUnitPrice
 		,@PriceBasis	= ICPL.dblUnitPrice		
-		,@Deviation		= 0.00		
+		,@Deviation		= @ZeroDecimal		
 		,@Pricing		= 'Inventory - Pricing Level'		
 	FROM
 		tblICItemPricingLevel ICPL
@@ -250,11 +255,11 @@ BEGIN
 		AND ICPL.intItemLocationId = @ItemLocationId
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId
 		AND ISNULL(ICPL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
-		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = 0 AND ICPL.dblMax = 0))
+		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = @ZeroDecimal AND ICPL.dblMax = @ZeroDecimal))
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(ICPL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
 	ORDER BY CAST(ISNULL(ICPL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
-	IF(ISNULL(@Price,0) <> 0)
+	IF(ISNULL(@Price, @ZeroDecimal) <> @ZeroDecimal)
 		BEGIN
 			SET @intSort = @intSort + 1
 			INSERT @returntable(dblPrice, dblTermDiscount, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)

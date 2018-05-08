@@ -228,6 +228,7 @@ BEGIN
 		WHEN @msgId = 80212 THEN 'Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
 		WHEN @msgId = 80213 THEN 'Sub Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
 		WHEN @msgId = 80214 THEN '%s is not a sub book of %s. You can correct it at Contract Management -> Books.'
+		WHEN @msgId = 80215 THEN 'Cannot change UOM to %s. %s is partially allocated.'
 	END 
 
 	RETURN @msg
