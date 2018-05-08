@@ -6504,6 +6504,14 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateInvoiceStg.sql" />
     <Build Include="dbo\Stored Procedures\uspARTransferInvoiceStgData.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessInvoiceStgData.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompWeightClaimsStg.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompWeightClaimsAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGInterCompanyWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPopulateWeightClaimXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessInterCompanyWeightClaimsXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGTransferWeightClaimXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGTransferWeightClaimAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessWeightClaimAckXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
