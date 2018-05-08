@@ -122,6 +122,7 @@
 [strBatchId]  NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 [strGenerateLoadEquipmentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strGenerateLoadHauler] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[ysnSubCurrency] [bit] NULL,
 [intCompanyId] INT NULL,
 [intBookId] INT NULL,
 [intSubBookId] INT NULL,
