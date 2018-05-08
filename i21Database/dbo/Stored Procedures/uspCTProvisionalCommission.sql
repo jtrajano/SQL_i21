@@ -82,7 +82,7 @@ BEGIN TRY
 	SELECT	@blbFile    AS  blbFile,
 			@strAddress AS  strAddress,
 			@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
-			strContractNumber,
+			CH.strContractNumber,
 			strSellerRef,
 			strSeller,
 			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + isnull(rtrt2.strTranslation,BD.strItemUOM) + ')' AS strQuantity,
