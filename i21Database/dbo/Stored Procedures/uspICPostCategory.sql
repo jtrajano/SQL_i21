@@ -66,8 +66,8 @@ BEGIN
 	RETURN;
 END 
 
--- Update the total cost, total retail, and average margin. 
--- Post the Inventory transaction
+-- If Qty is known. Do it here. 
+-- It will update the Total Cost Value and Total Retail Value using the supplied item cost and retail price. 
 IF @intTransactionTypeId NOT IN (@TransactionType_InventoryReturn) AND @dblAdjustRetailValue IS NULL 
 BEGIN 
 	-- If Adding stocks, compute the cost value and retail value. 
@@ -88,9 +88,12 @@ BEGIN
 
 		-- Get the retail price from the Item Pricing > Sales Price 
 		-- and Compute the cost from the Sales Price. 
+		-- Formula:
+		-- (Retail Price) - ((Retail Price) x (Average Margin))
 		SELECT	@dblUnitRetail = itemPricing.dblSalePrice
 				,@dblCost = 
-					dbo.fnMultiply(
+					itemPricing.dblSalePrice
+					- dbo.fnMultiply(
 						itemPricing.dblSalePrice
 						,@dblAverageMargin
 					)
@@ -117,7 +120,67 @@ BEGIN
 		SET @dblRetailValue = dbo.fnMultiply(@dblQty, @dblUnitRetail) 
 		SET @dblCostValue = dbo.fnMultiply(@dblQty, @dblCost) 				
 	END 
+END 
 
+-- If Qty is unknown and it will only adjust the retail value, then do it here. 
+-- It will compute the cost using the Average Margin. 
+IF ISNULL(@dblAdjustRetailValue, 0) <> 0 
+BEGIN 
+	-- Compute the Cost Value 
+	-- Formula: 
+	-- (Retail Value) - ((Retail Value) x (Average Margin))
+	SELECT	@dblCostValue = 
+				ISNULL(@dblAdjustRetailValue, 0)
+				- (
+					ISNULL(@dblAdjustRetailValue, 0) * ISNULL(dblAverageMargin, 0)
+				)
+	FROM	tblICCategoryPricing CategoryPricing 
+	WHERE	CategoryPricing.intCategoryId = @intCategoryId
+			AND CategoryPricing.intItemLocationId = @intItemLocationId
+
+	SET @dblRetailValue = @dblAdjustRetailValue
+END 
+
+-- Create the Inventory Transaction. 
+BEGIN
+	EXEC [dbo].[uspICPostInventoryTransaction]
+		@intItemId = @intItemId
+		,@intItemLocationId = @intItemLocationId
+		,@intItemUOMId = @intItemUOMId
+		,@intSubLocationId = @intSubLocationId
+		,@intStorageLocationId = @intStorageLocationId
+		,@dtmDate = @dtmDate
+		,@dblQty  = @dblQty
+		,@dblUOMQty = @dblUOMQty
+		,@dblCost = @dblCost
+		,@dblValue = NULL 
+		,@dblSalesPrice = @dblSalesPrice
+		,@intCurrencyId = @intCurrencyId
+		,@intTransactionId = @intTransactionId
+		,@intTransactionDetailId = @intTransactionDetailId
+		,@strTransactionId = @strTransactionId
+		,@strBatchId = @strBatchId
+		,@intTransactionTypeId = @intTransactionTypeId
+		,@intLotId = NULL 
+		,@intRelatedInventoryTransactionId = NULL 
+		,@intRelatedTransactionId = NULL 
+		,@strRelatedTransactionId = NULL 
+		,@strTransactionForm = @strTransactionForm
+		,@intEntityUserSecurityId = @intEntityUserSecurityId
+		,@intCostingMethod = @CATEGORY
+		,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+		,@intForexRateTypeId = @intForexRateTypeId
+		,@dblForexRate = @dblForexRate
+		,@dblUnitRetail = @dblUnitRetail
+		,@dblCategoryCostValue = @dblCostValue
+		,@dblCategoryRetailValue = @dblRetailValue 
+END 
+
+-- Update the Category Pricing
+-- 1. Update the Total Cost Value
+-- 2. Update the Total Retail Value
+-- 3. Update the Average Margin
+BEGIN 
 	MERGE	
 	INTO	dbo.tblICCategoryPricing 
 	WITH	(HOLDLOCK) 
@@ -138,8 +201,8 @@ BEGIN
 				,dblTotalRetailValue = ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) 
 				,dblAverageMargin = 
 					CASE 
-						WHEN @dblQty < 1 THEN 
-							CategoryPricing.dblAverageMargin 
+						--WHEN @dblQty < 1 THEN 
+						--	CategoryPricing.dblAverageMargin 
 						WHEN ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblRetailValue, 0) <> 0 THEN 
 							dbo.fnDivide(
 								(
@@ -185,94 +248,4 @@ BEGIN
 			,1--,[intConcurrencyId]
 		)
 	;
-
-	EXEC [dbo].[uspICPostInventoryTransaction]
-			@intItemId = @intItemId
-			,@intItemLocationId = @intItemLocationId
-			,@intItemUOMId = @intItemUOMId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId
-			,@dtmDate = @dtmDate
-			,@dblQty  = @dblQty
-			,@dblUOMQty = @dblUOMQty
-			,@dblCost = @dblCost
-			,@dblValue = NULL 
-			,@dblSalesPrice = @dblSalesPrice
-			,@intCurrencyId = @intCurrencyId
-			,@intTransactionId = @intTransactionId
-			,@intTransactionDetailId = @intTransactionDetailId
-			,@strTransactionId = @strTransactionId
-			,@strBatchId = @strBatchId
-			,@intTransactionTypeId = @intTransactionTypeId
-			,@intLotId = NULL 
-			,@intRelatedInventoryTransactionId = NULL 
-			,@intRelatedTransactionId = NULL 
-			,@strRelatedTransactionId = NULL 
-			,@strTransactionForm = @strTransactionForm
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@intCostingMethod = @CATEGORY
-			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			,@intForexRateTypeId = @intForexRateTypeId
-			,@dblForexRate = @dblForexRate
-			,@dblUnitRetail = @dblUnitRetail
-			,@dblCategoryCostValue = @dblCostValue
-			,@dblCategoryRetailValue = @dblRetailValue 
-END 
-
--- Adjust the retail value. 
--- Recalculate the Average Margin. 
--- Post the Inventory transaction
-IF ISNULL(@dblAdjustRetailValue, 0) <> 0 
-BEGIN 
-	UPDATE	CategoryPricing
-	SET		dblTotalRetailValue = ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblAdjustRetailValue, 0) 
-			,dblAverageMargin = 
-				CASE 
-					WHEN ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblAdjustRetailValue, 0) <> 0 THEN 
-						dbo.fnDivide(
-							(
-								(ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblAdjustRetailValue, 0))
-								- (ISNULL(dblTotalCostValue, 0) + ISNULL(@dblCostValue, 0))
-							)
-							, (ISNULL(dblTotalRetailValue, 0) + ISNULL(@dblAdjustRetailValue, 0))
-						)						
-					ELSE 
-						0
-				END
-	FROM	tblICCategoryPricing CategoryPricing 
-	WHERE	@intTransactionTypeId NOT IN (@TransactionType_InventoryReceipt, @TransactionType_InventoryReturn)
-			AND CategoryPricing.intCategoryId = @intCategoryId
-			AND CategoryPricing.intItemLocationId = @intItemLocationId
-
-	EXEC [dbo].[uspICPostInventoryTransaction]
-			@intItemId = @intItemId
-			,@intItemLocationId = @intItemLocationId
-			,@intItemUOMId = @intItemUOMId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId
-			,@dtmDate = @dtmDate
-			,@dblQty  = @dblQty
-			,@dblUOMQty = @dblUOMQty
-			,@dblCost = @dblCost
-			,@dblValue = NULL 
-			,@dblSalesPrice = @dblSalesPrice
-			,@intCurrencyId = @intCurrencyId
-			,@intTransactionId = @intTransactionId
-			,@intTransactionDetailId = @intTransactionDetailId
-			,@strTransactionId = @strTransactionId
-			,@strBatchId = @strBatchId
-			,@intTransactionTypeId = @intTransactionTypeId
-			,@intLotId = NULL 
-			,@intRelatedInventoryTransactionId = NULL 
-			,@intRelatedTransactionId = NULL 
-			,@strRelatedTransactionId = NULL 
-			,@strTransactionForm = @strTransactionForm
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
-			,@intCostingMethod = @CATEGORY
-			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
-			,@intForexRateTypeId = @intForexRateTypeId
-			,@dblForexRate = @dblForexRate
-			,@dblUnitRetail = @dblUnitRetail
-			,@dblCategoryCostValue = NULL
-			,@dblCategoryRetailValue = @dblAdjustRetailValue 
 END 
