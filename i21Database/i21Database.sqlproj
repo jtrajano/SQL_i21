@@ -6489,6 +6489,7 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostCategory.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Stored Procedures\uspAPUnrestrictContractPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
