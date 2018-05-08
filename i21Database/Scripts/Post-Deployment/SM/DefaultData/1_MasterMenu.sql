@@ -5009,10 +5009,10 @@ DECLARE @MeterBillingMaintenanceParentMenuId INT
 SELECT @MeterBillingMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Create', N'Meter Billing', @MeterBillingParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intRow], [intSort], [intConcurrencyId]) 
+	VALUES (N'Create', N'Meter Billing', @MeterBillingParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intRow = 1, intSort = 0 WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
 	
 DECLARE @MeterBillingCreateParentMenuId INT
 SELECT @MeterBillingCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingParentMenuId
@@ -5063,8 +5063,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Meter
 	VALUES (N'New Meter Readings', N'Meter Billing', @MeterBillingCreateParentMenuId, N'New Meter Readings', N'Create', N'Screen', N'MeterBilling.view.MeterReadings?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'MeterBilling.view.MeterReadings?action=new', intSort = 0 WHERE strMenuName = 'New Meter Readings' AND strModuleName = 'Meter Billing' AND intParentMenuID = @MeterBillingCreateParentMenuId
-
-/* END of Meter Billing */
 
 /* QUALITY */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality' AND strModuleName = 'Quality' AND intParentMenuID = 0)
