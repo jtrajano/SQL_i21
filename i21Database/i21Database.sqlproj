@@ -6481,6 +6481,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateTableShipmentInspection.sql" />
     <Build Include="dbo\Stored Procedures\uspICSaveShipmentInspection.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryByItemAndStatus.sql" />
+    <Build Include="dbo\Views\vyuSTFuelDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
