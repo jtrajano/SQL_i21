@@ -85,8 +85,8 @@ BEGIN TRY
 			strContractNumber,
 			strSellerRef,
 			strSeller,
-			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + BD.strItemUOM + ')' AS strQuantity,
-			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + strRateUOM AS strRate,
+			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + isnull(rtrt2.strTranslation,BD.strItemUOM) + ')' AS strQuantity,
+			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + isnull(rtrt2.strTranslation,BD.strRateUOM) AS strRate,
 			ISNULL(IG.strCountry,OG.strCountry)	AS	strOrigin,
 			strCurrency,
 			dblReqstdAmount
@@ -98,6 +98,14 @@ BEGIN TRY
 	JOIN	tblSMCountry			IG	ON	IG.intCountryID				=	IC.intCountryId			LEFT
 	JOIN	tblICCommodityAttribute EO	ON	EO.intCommodityAttributeId	=	IM.intOriginId			LEFT
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	EO.intCountryID	
+		
+	left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
+	left join tblEMEntity				rte on rte.intEntityId = ch.intEntityId
+	
+	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = CM.intUnitMeasureId
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId
+
 	WHERE	intBrkgCommnId		=	  @intBrkgCommnId			
 
 
