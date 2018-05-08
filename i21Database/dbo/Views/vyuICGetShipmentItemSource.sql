@@ -118,7 +118,14 @@ SELECT
 			END
 		),
 	dblCost = ItemPricing.dblLastCost,
-	strFieldNo = CASE Shipment.intOrderType WHEN 1 THEN CASE Shipment.intSourceType WHEN 0 THEN Farm.strFarmFieldNumber ELSE NULL END ELSE NULL END
+	strFieldNo = 
+		CASE Shipment.intSourceType
+			-- None
+			WHEN 0 THEN ContractFarm.strFieldNumber
+			-- Scale
+			WHEN 1 THEN ScaleFarm.strFieldNumber
+			ELSE NULL 
+		END
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 
@@ -138,8 +145,6 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 			AND Shipment.intOrderType = 1
 			
 		LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
-		LEFT JOIN tblEMEntityLocation Farm ON Farm.intEntityId = ContractDetail.intFarmFieldId
-		AND Farm.strLocationType = 'Farm'
 		--LEFT JOIN vyuTRGetLoadReceipt TransportView
 		--	ON TransportView.intLoadReceiptId = ShipmentItem.intSourceId
 		--	AND Shipment.intSourceType = 3
@@ -147,7 +152,9 @@ FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Sh
 		LEFT JOIN tblSCTicket ScaleView
 			ON ScaleView.intTicketId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 1
-
+		LEFT JOIN tblEMEntityFarm ContractFarm ON ContractFarm.intFarmFieldId = ContractDetail.intFarmFieldId
+		LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ShipmentItem.intSourceId
+		LEFT JOIN tblEMEntityFarm ScaleFarm ON ScaleFarm.intFarmFieldId = ticket.intFarmFieldId
 		LEFT JOIN tblSCDeliverySheet DeliverySheetView
 			ON DeliverySheetView.intDeliverySheetId = ShipmentItem.intSourceId
 			AND Shipment.intSourceType = 4
