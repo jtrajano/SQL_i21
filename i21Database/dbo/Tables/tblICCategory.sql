@@ -55,6 +55,7 @@ Type the overview for the table here.
 		[dtmDateModified] DATETIME NULL,
 		[intCreatedByUserId] INT NULL,
 		[intModifiedByUserId] INT NULL,
+		[ysnRetailValuation] BIT NULL DEFAULT((0)),		
 		CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
 		CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
 		--CONSTRAINT [FK_tblICCategory_tblICLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblICLineOfBusiness]([intLineOfBusinessId]), 
