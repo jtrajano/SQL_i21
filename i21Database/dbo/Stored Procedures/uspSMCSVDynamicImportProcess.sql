@@ -102,11 +102,11 @@ BEGIN
 		
 		IF @requiredValue = ''
 		BEGIN
-			select @command =  (REPLACE(@command, '@' + B.strColumnName + '@' , D.sv ))
+			select @command =  (REPLACE(@command, '@' + B.strColumnName + '@' , ISNULL(D.sv, '') ))
 				from tblSMCSVDynamicImportParameter B
-					join @Header C
+					left join @Header C
 						on B.strDisplayName = C.sv
-					join @Value D
+					left join @Value D
 						on D.id = C.id	
 				WHERE B.intCSVDynamicImportId = @ImportId	
 
