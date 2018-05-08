@@ -45,7 +45,7 @@ CREATE TABLE #tmpPostBillData (
 );
 
 CREATE TABLE #tmpInvalidBillData (
-	[strError] [NVARCHAR](200),
+	[strError] [NVARCHAR](1000),
 	[strTransactionType] [NVARCHAR](50),
 	[strTransactionId] [NVARCHAR](50),
 	[intTransactionId] INT,
