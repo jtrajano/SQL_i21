@@ -29,7 +29,7 @@ DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 
 CREATE TABLE #tmpPrepayInvalidData (
-	[strError] [NVARCHAR](100),
+	[strError] [NVARCHAR](1000),
 	[strTransactionType] [NVARCHAR](50),
 	[strTransactionId] [NVARCHAR](50),
 	[intTransactionId] INT
