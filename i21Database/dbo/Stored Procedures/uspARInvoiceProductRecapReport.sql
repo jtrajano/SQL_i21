@@ -24,7 +24,7 @@ IF @dtmDateTo IS NULL
 
 SET @strCategoryCode = NULLIF(@strCategoryCode, '')
 SET @strTransactionType = NULLIF(@strTransactionType, '')
-SET @strFormattingOptions = NULLIF(@strFormattingOptions, '')
+SET @strFormattingOptions = ISNULL(@strFormattingOptions, 'Original')
 
 IF @strCategoryCode IS NOT NULL
 	SELECT TOP 1 @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode
