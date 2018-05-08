@@ -6307,6 +6307,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
+    <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

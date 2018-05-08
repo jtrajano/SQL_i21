@@ -1,35 +1,65 @@
-﻿CREATE PROCEDURE uspMFProcessEDI944
+﻿CREATE PROCEDURE uspMFProcessEDI944 (@strReceiptNumber NVARCHAR(50) = '')
 AS
 BEGIN
 	DECLARE @tblMFOrderNo TABLE (
 		intInventoryReceiptId INT
 		,strOrderNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @intCustomerId INT
 		,@strType NVARCHAR(1)
 		,@strOrderStatus NVARCHAR(2)
 		,@strName NVARCHAR(50)
+		,@strOrderNo NVARCHAR(50)
+		,@strShipmentId NVARCHAR(50)
+		,@dtmDate DATETIME
+		,@strError NVARCHAR(MAX)
 
-	INSERT INTO @tblMFOrderNo (
-		intInventoryReceiptId
-		,strOrderNo
-		)
-	SELECT TOP 1 IR.intInventoryReceiptId
-		,IR.strWarehouseRefNo
-	FROM tblICInventoryReceipt IR
-	WHERE ysnPosted = 1
-		AND EXISTS (
-			SELECT *
-			FROM tblMFEDI943Archive EDI943
-			WHERE EDI943.strDepositorOrderNumber = IR.strWarehouseRefNo
+	IF @strReceiptNumber = ''
+	BEGIN
+		INSERT INTO @tblMFOrderNo (
+			intInventoryReceiptId
+			,strOrderNo
+			,strReceiptNumber
 			)
-		AND NOT EXISTS (
-			SELECT *
-			FROM tblMFEDI944 EDI944
-			WHERE EDI944.ysnStatus = 1
-				AND EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
+		SELECT TOP 1 IR.intInventoryReceiptId
+			,IR.strWarehouseRefNo
+			,IR.strReceiptNumber
+		FROM tblICInventoryReceipt IR
+		WHERE ysnPosted = 1
+			AND EXISTS (
+				SELECT *
+				FROM tblMFEDI943Archive EDI943
+				WHERE EDI943.strDepositorOrderNumber = IR.strWarehouseRefNo
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFEDI944 EDI944
+				WHERE EDI944.ysnStatus = 1
+					AND EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
+				)
+		ORDER BY IR.intInventoryReceiptId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFOrderNo (
+			intInventoryReceiptId
+			,strOrderNo
+			,strReceiptNumber
 			)
-	ORDER BY IR.intInventoryReceiptId
+		SELECT TOP 1 IR.intInventoryReceiptId
+			,IR.strWarehouseRefNo
+			,IR.strReceiptNumber
+		FROM tblICInventoryReceipt IR
+		WHERE ysnPosted = 1
+			AND EXISTS (
+				SELECT *
+				FROM tblMFEDI943Archive EDI943
+				WHERE EDI943.strDepositorOrderNumber = IR.strWarehouseRefNo
+				)
+			AND IR.strReceiptNumber = @strReceiptNumber
+		ORDER BY IR.intInventoryReceiptId
+	END
 
 	IF NOT EXISTS (
 			SELECT *
@@ -81,6 +111,15 @@ BEGIN
 		SELECT @strName = ''
 	END
 
+	SELECT @strOrderNo = strOrderNo
+	FROM @tblMFOrderNo
+
+	SELECT TOP 1 @strShipmentId = strShipmentId
+		,@dtmDate = dtmDate
+	FROM tblMFEDI943Archive
+	WHERE strDepositorOrderNumber = @strOrderNo
+	ORDER BY intEDI943Id DESC
+
 	INSERT INTO @tblMFEDI944 (
 		intRecordId
 		,strTransactionId
@@ -104,8 +143,8 @@ BEGIN
 		,IR.dtmReceiptDate AS dtmDate
 		,IR.strReceiptNumber strWarehouseReceiptNumber
 		,IR.strWarehouseRefNo strDepositorOrderNumber
-		,EDI.strShipmentId AS strShipmentId
-		,EDI.dtmDate AS dtmShippedDate
+		,IsNULL(EDI.strShipmentId, @strShipmentId) AS strShipmentId
+		,IsNULL(EDI.dtmDate, @dtmDate) AS dtmShippedDate
 		,I.strItemNo
 		,I.strDescription
 		,SUM(CASE 
@@ -113,7 +152,11 @@ BEGIN
 					THEN IsNULL(IRL.dblGrossWeight, 0) - IsNULL(IRL.dblTareWeight, 0)
 				ELSE IRL.dblQuantity
 				END) dblReceived
-		,EDI.strUOM
+		,IsNULL(EDI.strUOM, (
+				SELECT TOP 1 Arc.strUOM
+				FROM tblMFEDI943Archive Arc
+				WHERE Arc.strVendorItemNumber = I.strItemNo
+				)) AS strUOM
 		,IRL.strParentLotNumber
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
@@ -145,6 +188,62 @@ BEGIN
 		,IRL.strParentLotNumber
 		,IRI.intInventoryReceiptItemId
 	ORDER BY IRI.intInventoryReceiptItemId
+
+	IF EXISTS (
+			SELECT *
+			FROM @tblMFEDI944 EDI
+			WHERE strUOM IS NULL
+			)
+	BEGIN
+		INSERT INTO tblMFEDI944Error (
+			strTransactionId
+			,strCustomerId
+			,strType
+			,dtmDate
+			,strWarehouseReceiptNumber
+			,strDepositorOrderNumber
+			,strShipmentId
+			,dtmShippedDate
+			,dblTotalReceivedQty
+			,strItemNo
+			,strDescription
+			,dblReceived
+			,strUOM
+			,strParentLotNumber
+			,ysnNotify
+			,ysnSentEMail
+			)
+		SELECT strTransactionId
+			,strCustomerId
+			,strType
+			,rtrim(Convert(CHAR, dtmDate, 101)) AS dtmDate
+			,strWarehouseReceiptNumber
+			,strDepositorOrderNumber
+			,strShipmentId
+			,rtrim(Convert(CHAR, dtmShippedDate, 101)) AS dtmShippedDate
+			,[dbo].[fnRemoveTrailingZeroes](SUM(dblReceived) OVER (PARTITION BY strWarehouseReceiptNumber)) dblTotalReceivedQty
+			,strItemNo
+			,strDescription
+			,[dbo].[fnRemoveTrailingZeroes](dblReceived) AS dblReceived
+			,strUOM
+			,strParentLotNumber
+			,1,0
+		FROM @tblMFEDI944
+		ORDER BY intRecordId
+
+		SELECT @strReceiptNumber = strReceiptNumber
+		FROM @tblMFOrderNo
+
+		SELECT @strError = 'UOM is missing for the inventory receipt # ' + @strReceiptNumber
+
+		RAISERROR (
+				@strError
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT strTransactionId
 		,strCustomerId
