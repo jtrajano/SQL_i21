@@ -34,6 +34,7 @@ BEGIN
 	DECLARE @strItemNo AS NVARCHAR(50)
 	DECLARE @strLotNumber AS NVARCHAR(50)
 	DECLARE @intLotId AS INT 
+	DECLARE @strUnitMeasure AS NVARCHAR(50)
 
 	BEGIN 
 		SELECT TOP 1 
@@ -53,6 +54,41 @@ BEGIN
 			RETURN -1
 		END
 
+	END
+
+	
+	------------------------------------------------------------------------------
+	-- Check if the lot change is full.
+	------------------------------------------------------------------------------
+	BEGIN 
+
+		-- Check if the lot change is full.
+		BEGIN 
+			SELECT	TOP 1 
+					@strUnitMeasure = iUOM.strUnitMeasure 
+					,@strLotNumber = Lot.strLotNumber
+			FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+						ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+					INNER JOIN tblICLot Lot
+						ON Lot.intLotId = Detail.intLotId
+					INNER JOIN tblICInventoryLot LotTrans
+						ON LotTrans.intLotId = Detail.intLotId
+						AND LotTrans.intSubLocationId = Lot.intSubLocationId
+						AND LotTrans.intStorageLocationId = Lot.intStorageLocationId
+					INNER JOIN (
+						tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
+							ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
+					)	ON ItemUOM.intItemUOMId = Detail.intNewItemUOMId
+			WHERE Header.intInventoryAdjustmentId = @intTransactionId 
+				AND LotTrans.dblStockOut > 0
+
+			IF @strLotNumber IS NOT NULL 
+			BEGIN 
+				-- 'Cannot change UOM to {New UOM} . {Lot Number} is partially allocated.'
+				EXEC uspICRaiseError 80215, @strUnitMeasure, @strLotNumber;
+				RETURN -1; 			 
+			END 
+		END 
 	END
 --------------------------------------------------------------------------------
 -- REDUCE THE SOURCE LOT NUMBER
@@ -121,7 +157,14 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= dbo.fnCalculateQtyBetweenUOM(Detail.intNewItemUOMId, Detail.intItemUOMId, Detail.dblNewQuantity) * -1
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Detail.dblCost
+			,dblCost				= ISNULL(
+											Detail.dblCost
+													,dbo.fnCalculateCostBetweenUOM( 
+														dbo.fnGetItemStockUOM(Detail.intItemId)
+														,Detail.intItemUOMId
+														,ItemPricing.dblLastCost
+													)
+										)	
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1

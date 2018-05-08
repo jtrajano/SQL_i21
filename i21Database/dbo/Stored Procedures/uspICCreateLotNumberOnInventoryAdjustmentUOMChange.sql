@@ -23,49 +23,6 @@ CREATE TABLE #GeneratedLotItems (
 	,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
-------------------------------------------------------------------------------
--- Validation 
-------------------------------------------------------------------------------
-BEGIN 
-	DECLARE @strItemNo AS NVARCHAR(50)
-	DECLARE @strUnitMeasure AS NVARCHAR(50)
-	DECLARE @intItemId AS INT
-	DECLARE @OpenReceiveQty AS NUMERIC(38,20)
-	DECLARE @LotQty AS NUMERIC(38,20)
-	DECLARE @OpenReceiveQtyInItemUOM AS NUMERIC(38,20)
-	DECLARE @LotQtyInItemUOM AS NUMERIC(38,20)
-	DECLARE @strLotNumber AS NVARCHAR(50)
-
-	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
-	DECLARE @FormattedLotQty AS NVARCHAR(50)
-	DECLARE @FormattedDifference AS NVARCHAR(50)
-
-	-- Check if the lot change is full.
-	BEGIN 
-		SELECT	TOP 1 
-				@strUnitMeasure = iUOM.strUnitMeasure 
-				,@strLotNumber = Lot.strLotNumber
-		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
-					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
-				INNER JOIN tblICLot Lot
-					ON Lot.intLotId = Detail.intLotId
-				INNER JOIN tblICInventoryLot LotTrans
-					ON LotTrans.intLotId = Detail.intLotId
-				INNER JOIN (
-					tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
-						ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
-				)	ON ItemUOM.intItemUOMId = Detail.intNewItemUOMId
-		WHERE	LotTrans.dblStockOut <> 0
-			AND Header.intInventoryAdjustmentId = @intTransactionId 
-
-		IF @strLotNumber IS NOT NULL 
-		BEGIN 
-			-- 'Cannot change UOM to {New UOM} . {Lot Number} is partially allocated.'
-			EXEC uspICRaiseError 80215, @strUnitMeasure, @strLotNumber;
-			RETURN -1; 			 
-		END 
-	END 
-END
 
 -- Get the list of item that needs lot numbers
 BEGIN 
