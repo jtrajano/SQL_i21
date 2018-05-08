@@ -117,7 +117,7 @@ SELECT  intId
 		,dblUnitRetail
 		,intCategoryId
 		,dblAdjustRetailValue
-FROM	@ItemsToPost
+FROM	@ItemsToPost 
 
 OPEN loopItems;
 
