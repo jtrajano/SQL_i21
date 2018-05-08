@@ -35,7 +35,7 @@ BEGIN
 	
 	DECLARE @HeaderValue NVARCHAR(MAX)
 	SELECT 
-		@HeaderValue = strData 
+		@HeaderValue = strData  + ','
 		FROM tblSMCSVDynamicImportLogDetail 
 			WHERE intCSVDynamicImportLogId = @LogId and intSort = 0
 
@@ -43,7 +43,7 @@ BEGIN
 
 	INSERT INTO @ImportData(strData, intSort, intLinkedId)
 	SELECT 
-		strData
+		ISNULL(strData, '') + ','
 		,intSort
 		,intCSVDynamicImportLogDetailId
 		FROM tblSMCSVDynamicImportLogDetail 
@@ -95,19 +95,20 @@ BEGIN
 					on B.strDisplayName = C.sv
 				join @Value D
 					on D.id = C.id
-		where B.ysnRequired = 1 and D.sv = ''
+		where B.ysnRequired = 1 and D.sv = '' and B.intCSVDynamicImportId = @ImportId
 	
 
 		--SELECT @requiredValue
 		
 		IF @requiredValue = ''
 		BEGIN
-			select @command =  (REPLACE(@command, '@' + B.strColumnName + '@' , D.sv ))
+			select @command =  (REPLACE(@command, '@' + B.strColumnName + '@' , ISNULL(D.sv, '') ))
 				from tblSMCSVDynamicImportParameter B
-					join @Header C
+					left join @Header C
 						on B.strDisplayName = C.sv
-					join @Value D
-						on D.id = C.id		
+					left join @Value D
+						on D.id = C.id	
+				WHERE B.intCSVDynamicImportId = @ImportId	
 
 			SET @ResultMessage = 'Success'		
 			DECLARE @TransactionId NVARCHAR(100)
