@@ -23,6 +23,7 @@
 [intInvoiceId] INT NULL,
 [dblFranchise] NUMERIC(18, 6) NULL,
 [dblSeqPriceConversionFactoryWeightUOM] NUMERIC(18, 6) NULL,
+[intWeightClaimDetailRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGWeightClaimDetail] PRIMARY KEY ([intWeightClaimDetailId]), 
 CONSTRAINT [FK_tblLGWeightClaimDetail_tblLGWeightClaim_intWeightClaimId] FOREIGN KEY ([intWeightClaimId]) REFERENCES [tblLGWeightClaim]([intWeightClaimId]) ON DELETE CASCADE,
