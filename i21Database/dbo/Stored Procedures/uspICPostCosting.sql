@@ -67,6 +67,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
+		,@CATEGORY AS INT = 6
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_VARIANCE AS INT = 1
