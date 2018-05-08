@@ -6492,6 +6492,8 @@
     <Build Include="dbo\Stored Procedures\uspAPUnrestrictContractPrepay.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessLVControlToTicket.sql" />
     <Build Include="dbo\Views\vyuSCTicketLVSearch.sql" />
+    <Build Include="dbo\Functions\fnConvertEnglishToItalian.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportIdealContractBuyer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
