@@ -32,6 +32,15 @@ BEGIN TRY
 		,@intPhysicalItemUOMId INT
 		,@strPrefillCountedQty NVARCHAR(50)
 		,@strMultipleMachinesShareCommonStagingLocation NVARCHAR(50)
+		,@intUnitMeasureId INT
+		,@dblProducedQty NUMERIC(38, 20)
+		,@dblStagedQty NUMERIC(38, 20)
+		,@strProducedQtyNeedsToMatchWithStagedQty NVARCHAR(50)
+		,@intUnitMeasureId2 INT
+		,@intItemId2 INT
+		,@strItemNo NVARCHAR(50)
+		,@strUnitMeasure NVARCHAR(50)
+		,@strError NVARCHAR(MAX)
 	DECLARE @tblMFProcessCycleCount TABLE (
 		intItemId INT
 		,intMachineId INT
@@ -428,6 +437,115 @@ BEGIN TRY
 				)
 
 		RETURN
+	END
+
+	SELECT @strProducedQtyNeedsToMatchWithStagedQty = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 110
+
+	IF @strProducedQtyNeedsToMatchWithStagedQty = 'True'
+	BEGIN
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemId = @intItemId
+			AND ysnStockUnit  = 1
+
+		IF EXISTS (
+				SELECT 1
+				FROM tblMFWorkOrderProducedLot WP
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = WP.intItemId
+					AND IU.intUnitMeasureId = @intUnitMeasureId
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND ysnProductionReversed = 0
+					AND IU.intUnitMeasureId IS NULL
+				)
+		BEGIN
+			SELECT @intItemId2 = WP.intItemId
+			FROM tblMFWorkOrderProducedLot WP
+			LEFT JOIN tblICItemUOM IU ON IU.intItemId = WP.intItemId
+				AND IU.intUnitMeasureId = @intUnitMeasureId
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND ysnProductionReversed = 0
+				AND IU.intUnitMeasureId IS NULL
+
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intItemId2
+
+			SELECT @strUnitMeasure = strUnitMeasure
+			FROM tblICUnitMeasure
+			WHERE intUnitMeasureId = @intUnitMeasureId
+
+			SELECT @strError = 'Unit of measure ' + @strUnitMeasure + ' is not configured for the item ' + @strItemNo
+
+			RAISERROR (
+					@strError
+					,16
+					,1
+					)
+		END
+
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderInputLot IP
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = IP.intItemId
+					AND IU.intUnitMeasureId = @intUnitMeasureId
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND ysnConsumptionReversed = 0
+					AND IU.intUnitMeasureId IS NULL
+				)
+		BEGIN
+			SELECT @intItemId2 = IP.intItemId
+			FROM tblMFWorkOrderInputLot IP
+			LEFT JOIN tblICItemUOM IU ON IU.intItemId = IP.intItemId
+				AND IU.intUnitMeasureId = @intUnitMeasureId
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND ysnConsumptionReversed = 0
+				AND IU.intUnitMeasureId IS NULL
+
+			SELECT @strItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intItemId2
+
+			SELECT @strUnitMeasure = strUnitMeasure
+			FROM tblICUnitMeasure
+			WHERE intUnitMeasureId = @intUnitMeasureId
+
+			SELECT @strError = 'Unit of measure ' + @strUnitMeasure + ' is not configured for the item ' + @strItemNo
+
+			RAISERROR (
+					@strError
+					,16
+					,1
+					)
+		END
+
+		SELECT @dblProducedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IU.intItemUOMId, WP.dblQuantity))
+		FROM tblMFWorkOrderProducedLot WP
+		JOIN tblICItemUOM IU ON IU.intItemId = WP.intItemId
+			AND IU.intUnitMeasureId = @intUnitMeasureId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		SELECT @dblStagedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(IP.intItemUOMId, IU.intItemUOMId, IP.dblQuantity))
+		FROM tblMFWorkOrderInputLot IP
+		JOIN tblICItemUOM IU ON IU.intItemId = IP.intItemId
+			AND IU.intUnitMeasureId = @intUnitMeasureId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnConsumptionReversed = 0
+
+		IF @dblStagedQty > @dblProducedQty
+		BEGIN
+			RAISERROR (
+					'Produced Qty cannot be less than the Staged Qty.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
 	END
 
 	DECLARE @tblICItem TABLE (
@@ -1575,7 +1693,10 @@ BEGIN TRY
 		UPDATE tblMFProductionSummary
 		SET dblOpeningQuantity = dblOpeningQuantity - (dblInputQuantity - dblConsumedQuantity)
 		WHERE intWorkOrderId = @intWorkOrderId
-			AND intItemTypeId in ( 1,3)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
 	END
 
 	--COMMIT TRANSACTION
