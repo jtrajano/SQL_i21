@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceProductRecapReport]
-	  @dtmDateFrom		DATETIME = NULL
-	, @dtmDateTo		DATETIME = NULL
-	, @intEntityUserId	INT = NULL
+	  @dtmDateFrom			DATETIME = NULL
+	, @dtmDateTo			DATETIME = NULL
+	, @strCategoryCode		NVARCHAR(100) = NULL
+	, @strTransactionType	NVARCHAR(100) = NULL
+	, @intEntityUserId		INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -10,11 +12,19 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @intCategoryId INT
+
 IF @dtmDateFrom IS NULL
     SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
 IF @dtmDateTo IS NULL
     SET @dtmDateTo = GETDATE()
+
+SET @strCategoryCode = NULLIF(@strCategoryCode, '')
+SET @strTransactionType = NULLIF(@strTransactionType, '')
+
+IF @strCategoryCode IS NOT NULL
+	SELECT TOP 1 @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode
 
 DELETE FROM tblARProductRecapStagingTable WHERE ISNULL(intEntityUserId, 0) = 0 OR intEntityUserId = @intEntityUserId
 INSERT INTO tblARProductRecapStagingTable (
@@ -97,6 +107,7 @@ FROM
 			WHERE ID.intInvoiceId = ARI.intInvoiceId
 		) ARID
 		WHERE ARI.ysnPosted = 1
+		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId
 			   , ARI.intCompanyLocationId
@@ -108,6 +119,7 @@ FROM
 			 , strItemNo
 			 , strDescription
 		FROM dbo.tblICItem WITH (NOLOCK)
+		WHERE (@intCategoryId IS NULL OR intCategoryId = @intCategoryId)
 	) ICI ON Items.intItemId = ICI.intItemId
 	
 	UNION ALL
@@ -137,10 +149,17 @@ FROM
 		INNER JOIN (
 			SELECT intInvoiceId
 				 , intInvoiceDetailId
-				 , intItemId
+				 , ID.intItemId
 				 , dblQtyShipped
 				 , intTaxGroupId	
-			FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+			LEFT JOIN (
+				SELECT intItemId
+					 , strItemNo
+					 , strDescription
+				FROM dbo.tblICItem WITH (NOLOCK)
+				WHERE (@intCategoryId IS NULL OR intCategoryId = @intCategoryId)
+			) ICI ON ID.intItemId = ICI.intItemId
 		) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
 		INNER JOIN (
 			SELECT ART.intInvoiceDetailId
@@ -161,7 +180,8 @@ FROM
 		WHERE ARI.ysnPosted = 1
 		  AND ARI.strType NOT IN ('Service Charge')
 		  AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
-		  AND ARIDT.intTaxCodeId IS NOT NULL		
+		  AND ARIDT.intTaxCodeId IS NOT NULL
+		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)		
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY ARI.intEntityCustomerId
 			   , ARI.intCompanyLocationId
@@ -192,10 +212,17 @@ FROM
 	INNER JOIN (
 		SELECT intInvoiceId
 			 , intInvoiceDetailId
-			 , intItemId
+			 , ID.intItemId
 			 , dblQtyShipped
 			 , intTaxGroupId	
-		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		LEFT JOIN (
+			SELECT intItemId
+					, strItemNo
+					, strDescription
+			FROM dbo.tblICItem WITH (NOLOCK)
+			WHERE (@intCategoryId IS NULL OR intCategoryId = @intCategoryId)
+		) ICI ON ID.intItemId = ICI.intItemId
 	) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
 	LEFT JOIN (
 		SELECT intInvoiceDetailId
@@ -208,6 +235,7 @@ FROM
 	WHERE ARI.ysnPosted = 1
 	  AND ARI.strType NOT IN ('Service Charge')
 	  AND ARI.strTransactionType IN ('Debit Memo')
+	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
@@ -230,6 +258,7 @@ FROM
 	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Overpayment', 'Customer Prepayment')
+	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo		
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
@@ -252,6 +281,7 @@ FROM
 	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 	WHERE ARI.ysnPosted = 1
 	  AND ARI.strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Debit Memo')
+	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId
@@ -273,6 +303,7 @@ FROM
 	FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 	WHERE ARI.ysnPosted = 1
 	  AND ARI.strType IN ('Service Charge')
+	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo			
 	GROUP BY ARI.intEntityCustomerId
 		   , ARI.intCompanyLocationId

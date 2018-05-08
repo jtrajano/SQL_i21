@@ -5563,7 +5563,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailData.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCustomeActivityReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerActivityReport.sql" />
     <None Include="Scripts\Post-Deployment\MF\7_ProcessAttributeDefaultValue.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLetter.sql" />
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
