@@ -6482,6 +6482,8 @@
     <Build Include="dbo\Stored Procedures\uspICSaveShipmentInspection.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryByItemAndStatus.sql" />
     <Build Include="dbo\Views\vyuSTFuelDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
+    <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

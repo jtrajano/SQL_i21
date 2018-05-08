@@ -5,7 +5,7 @@ SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Work Order #]
 	,W.strReferenceNo AS [Job #]
-	,PL.strParentLotNumber AS [Production Lot]
+	,WP.strParentLotNumber AS [Production Lot]
 	,L.strLotNumber [Pallet No]
 	,SUM(WP.dblPhysicalCount) AS [Quantity]
 	,IUM.strUnitMeasure AS [Quantity UOM]
@@ -31,7 +31,7 @@ GROUP BY W.dtmPlannedDate
 	,I.strDescription
 	,W.strWorkOrderNo
 	,W.strReferenceNo
-	,PL.strParentLotNumber
+	,WP.strParentLotNumber
 	,L.strLotNumber
 	,IUM.strUnitMeasure
 	,UM.strUnitMeasure
