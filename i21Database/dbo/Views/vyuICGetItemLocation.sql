@@ -19,9 +19,7 @@ SELECT ItemLocation.intItemLocationId
 	, strVendorName = Vendor.strName
 	, ItemLocation.strDescription
 	, ItemLocation.intCostingMethod
-	, strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
-								WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
-								WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END)
+	, strCostingMethod = CostingMethod.strCostingMethod
 	, ItemLocation.intAllowNegativeInventory
 	, strAllowNegativeInventory = (CASE WHEN intAllowNegativeInventory = 1 THEN 'Yes'
 								WHEN intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
@@ -116,3 +114,4 @@ FROM tblICItemLocation ItemLocation
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.[intEntityId] = ItemLocation.intShipViaId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = ItemLocation.intCountGroupId
 	LEFT JOIN tblSTRadiantItemTypeCode ItemTypeCode ON ItemTypeCode.intRadiantItemTypeCodeId = ItemLocation.intItemTypeCode
+	LEFT JOIN tblICCostingMethod CostingMethod ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod
