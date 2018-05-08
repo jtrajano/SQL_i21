@@ -6490,6 +6490,8 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspAPUnrestrictContractPrepay.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessLVControlToTicket.sql" />
+    <Build Include="dbo\Views\vyuSCTicketLVSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
