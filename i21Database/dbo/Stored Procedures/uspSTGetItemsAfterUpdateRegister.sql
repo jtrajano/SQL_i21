@@ -38,43 +38,44 @@ BEGIN TRY
 	--Insert to table1
 	INSERT INTO @tablePricebookFileOne
 	SELECT
-		DISTINCT CAST(strRecordNo as int) [intItemId]
-		, strActionType
-		, dtmDate
-	FROM dbo.tblSMAuditLog
-	WHERE strTransactionType = 'Inventory.view.Item'
-	AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0 
-				  OR CHARINDEX('strStatus', strJsonData) > 0 OR CHARINDEX('dblSalePrice', strJsonData) > 0  
-				  OR CHARINDEX('strCategoryCode', strJsonData) > 0 OR CHARINDEX('dtmBeginDate', strJsonData) > 0  
-				  OR CHARINDEX('dtmEndDate', strJsonData) > 0 OR CHARINDEX('strDescription', strJsonData) > 0  
-				  OR CHARINDEX('intItemTypeCode', strJsonData) > 0 OR CHARINDEX('intItemTypeSubCode', strJsonData) > 0              
-				  OR CHARINDEX('strRegProdCode', strJsonData) > 0 OR CHARINDEX('ysnCarWash', strJsonData) > 0  
-				  OR CHARINDEX('ysnFoodStampable', strJsonData) > 0 OR CHARINDEX('ysnIdRequiredLiquor', strJsonData) > 0  
-				  OR CHARINDEX('ysnIdRequiredCigarette', strJsonData) > 0 OR CHARINDEX('ysnOpenPricePLU', strJsonData) > 0  
-				  OR CHARINDEX('dblUnitQty', strJsonData) > 0 OR CHARINDEX('strUpcCode', strJsonData) > 0               
-				  OR CHARINDEX('ysnTaxFlag1', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag2', strJsonData) > 0  
-				  OR CHARINDEX('ysnTaxFlag3', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag4', strJsonData) > 0  
-				  OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0  
-				  OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0
-				  OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0  
-				  OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0 
-				  OR CHARINDEX('Created', strJsonData) > 0
-
-				  OR CHARINDEX('dblStandardCost',strJsonData) > 0
-				  OR CHARINDEX('intCategoryId',strJsonData) > 0 )
+		DISTINCT I.intItemId
+		, CASE
+			WHEN I.dtmDateCreated IS NOT NULL AND I.dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Created'
+			WHEN I.dtmDateModified IS NOT NULL AND I.dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Updated'
+		  END AS strActionType
+		, CASE
+			WHEN I.dtmDateCreated IS NOT NULL AND I.dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN I.dtmDateCreated
+			WHEN I.dtmDateModified IS NOT NULL AND I.dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN I.dtmDateModified
+		 END AS dtmDate
+	FROM tblICItem I
+	WHERE I.dtmDateCreated IS NOT NULL
+	OR I.dtmDateModified IS NOT NULL
+	--SELECT
+	--	DISTINCT CAST(strRecordNo as int) [intItemId]
+	--	, strActionType
+	--	, dtmDate
+	--FROM dbo.tblSMAuditLog
+	--WHERE strTransactionType = 'Inventory.view.Item'
+	--AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0 
+	--			  OR CHARINDEX('strStatus', strJsonData) > 0 OR CHARINDEX('dblSalePrice', strJsonData) > 0  
+	--			  OR CHARINDEX('strCategoryCode', strJsonData) > 0 OR CHARINDEX('dtmBeginDate', strJsonData) > 0  
+	--			  OR CHARINDEX('dtmEndDate', strJsonData) > 0 OR CHARINDEX('strDescription', strJsonData) > 0  
+	--			  OR CHARINDEX('intItemTypeCode', strJsonData) > 0 OR CHARINDEX('intItemTypeSubCode', strJsonData) > 0              
+	--			  OR CHARINDEX('strRegProdCode', strJsonData) > 0 OR CHARINDEX('ysnCarWash', strJsonData) > 0  
+	--			  OR CHARINDEX('ysnFoodStampable', strJsonData) > 0 OR CHARINDEX('ysnIdRequiredLiquor', strJsonData) > 0  
+	--			  OR CHARINDEX('ysnIdRequiredCigarette', strJsonData) > 0 OR CHARINDEX('ysnOpenPricePLU', strJsonData) > 0  
+	--			  OR CHARINDEX('dblUnitQty', strJsonData) > 0 OR CHARINDEX('strUpcCode', strJsonData) > 0               
+	--			  OR CHARINDEX('ysnTaxFlag1', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag2', strJsonData) > 0  
+	--			  OR CHARINDEX('ysnTaxFlag3', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag4', strJsonData) > 0  
+	--			  OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0  
+	--			  OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0
+	--			  OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0  
+	--			  OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0 
+	--			  OR CHARINDEX('Created', strJsonData) > 0
+	--			  OR CHARINDEX('dblStandardCost',strJsonData) > 0
+	--			  OR CHARINDEX('intCategoryId',strJsonData) > 0 )	
+	--AND dtmDate BETWEEN DATEADD(HOUR,-8,(@dtmBeginningChangeDate)) AND DATEADD(HOUR,-8,(@dtmEndingChangeDate))
 	
-	AND dtmDate BETWEEN DATEADD(HOUR,-8,(@dtmBeginningChangeDate)) AND DATEADD(HOUR,-8,(@dtmEndingChangeDate))
-	--AND dtmDate BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
-
-	----Insert to table2
-	--INSERT INTO @tablePricebookFileTwo
-	--SELECT t1.intItemId, t1.strActionType, t1.dtmDate
-	--	FROM(
-	--		SELECT *,
-	--			rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
-	--		FROM @tablePricebookFileOne as t
-	--)t1
-	--WHERE rn = 1
 
 
 	--PricebookFile @StoreId @Register, @Category, @BeginingChangeDate, @EndingChangeDate, @ExportEntirePricebookFile
