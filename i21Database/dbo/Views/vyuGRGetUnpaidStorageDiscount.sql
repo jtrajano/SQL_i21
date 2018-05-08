@@ -39,6 +39,7 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
 	WHEN QM.strCalcMethod=3 THEN SC.dblGrossUnits-(CS.dblOriginalBalance-CS.dblOpenBalance)
   END
  *ISNULL(SCTicketSplit.dblSplitPercent/100.0,1)*(ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) AS dblDiscountTotal  
+ ,CS.intStorageTypeId
 FROM tblGRCustomerStorage CS
 JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId    
 JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
