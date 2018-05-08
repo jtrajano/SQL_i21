@@ -116,50 +116,7 @@ BEGIN
 				BEGIN
 					IF @DiscountBy = 'Terms Rate'
 						BEGIN
-							DECLARE @Type NVARCHAR(100)
-							DECLARE @DiscountDay INT, @DayMonthDue INT, @DueNextMonth INT
-							DECLARE @DiscountEP NUMERIC(18,6)
-							DECLARE @DiscountDate DATETIME
-							DECLARE @InvoiceDiscountTotal NUMERIC(18,6)
-
-
-							SELECT 
-								 @Type = strType 
-								,@DiscountDay = ISNULL(intDiscountDay, 0)
-								,@DiscountDate = ISNULL(dtmDiscountDate, @TransactionDate) 
-								,@DiscountEP = ISNULL(dblDiscountEP, @ZeroDecimal)
-							FROM
-								tblSMTerm
-							WHERE
-								intTermID = @TermId
-
-							IF (@Type = 'Standard')
-								BEGIN
-									IF (DATEADD(DAY,@DiscountDay,@TransactionDate) >= @TransactionDate)
-										BEGIN
-											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, @ZeroDecimal)/ISNULL(@Deviation, @ZeroDecimal)) * @Price * @Quantity, @ZeroDecimal)/100.000000
-										END
-								END	
-							ELSE IF (@Type = 'Date Driven')
-								BEGIN
-									DECLARE @TransactionMonth int, @TransactionDay int, @TransactionYear int
-									SELECT @TransactionMonth = DATEPART(MONTH,@TransactionDate), @TransactionDay = DATEPART(DAY,@TransactionDate) ,@TransactionYear = DATEPART(YEAR,@TransactionDate)
-		
-									DECLARE @TempDiscountDate datetime
-									Set @TempDiscountDate = CONVERT(datetime, (CAST(@TransactionMonth AS nvarchar(10)) + '/' + CAST(@DiscountDay AS nvarchar(10)) + '/' + CAST(@TransactionYear AS nvarchar(10))), 101)
-			
-									IF (@TempDiscountDate >= @TransactionDate)
-										BEGIN
-											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, @ZeroDecimal)/ISNULL(@Deviation, @ZeroDecimal)) * @Price * @Quantity, @ZeroDecimal)/100.000000
-										END		
-								END	
-							ELSE
-								BEGIN
-									IF (@DiscountDate >= @TransactionDate)
-										BEGIN
-											SET @TermDiscount = ISNULL((ISNULL(@DiscountEP, @ZeroDecimal)/ISNULL(@Deviation, @ZeroDecimal)) * @Price * @Quantity, @ZeroDecimal)/100.000000
-										END
-								END
+							SET @TermDiscount =[dbo].[fnGetDiscountBasedOnTerm](GETDATE(), @TransactionDate, @TermId, (@Price * @Quantity))																	
 						END					
 				END
 			ELSE

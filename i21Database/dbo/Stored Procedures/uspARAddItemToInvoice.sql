@@ -282,6 +282,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@CurrencyExchangeRate			NUMERIC(18,6)
 				,@SubCurrencyId					INT
 				,@SubCurrencyRate				NUMERIC(18,6)
+				,@TermDiscountExempt			BIT
+				,@TermDiscountRate				NUMERIC(18,6)
 
 		BEGIN TRY
 		SELECT 
@@ -318,6 +320,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 			,@ContractSeq					= @ContractSeq					OUTPUT			
 			,@TermDiscount					= @ItemTermDiscount				OUTPUT
 			,@TermDiscountBy				= @ItemTermDiscountBy			OUTPUT
+			,@TermDiscountRate				= @TermDiscountRate				OUTPUT
+			,@TermDiscountExempt			= @TermDiscountExempt			OUTPUT	
 			,@ContractUOMId					= @ContractUOMId				OUTPUT
 			,@PriceUOMId					= @PriceUOMId					OUTPUT
 			,@PriceUOMQuantity				= @PriceUOMQuantity				OUTPUT
@@ -387,6 +391,12 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblDiscount]
 				,[dblItemTermDiscount]
 				,[strItemTermDiscountBy]
+				,[dblItemTermDiscountAmount]
+				,[dblBaseItemTermDiscountAmount]
+				,[dblItemTermDiscountExemption]
+				,[dblBaseItemTermDiscountExemption]
+				,[dblTermDiscountRate]
+				,[ysnTermDiscountExempt]
 				,[dblLicenseAmount]
 				,[dblPrice]
 				,[dblUnitPrice]
@@ -442,6 +452,28 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDiscount
 				,@ItemTermDiscount
 				,@ItemTermDiscountBy
+				,[dbo].[fnARGetItemTermDiscount](	@ItemTermDiscountBy
+													,@ItemTermDiscount
+													,@ItemQtyShipped
+													,@ItemPrice
+													,1.000000)
+				,[dbo].[fnARGetItemTermDiscount](	@ItemTermDiscountBy
+													,@ItemTermDiscount
+													,@ItemQtyShipped
+													,@ItemPrice
+													,(CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END))
+				,[dbo].[fnARGetItemTermDiscountExemption](	@TermDiscountExempt
+															,@TermDiscountRate
+															,@ItemQtyShipped
+															,@ItemPrice
+															,1.000000)
+				,[dbo].[fnARGetItemTermDiscountExemption](	@TermDiscountExempt
+															,@TermDiscountRate
+															,@ItemQtyShipped
+															,@ItemPrice
+															,(CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END))
+				,@TermDiscountRate
+				,@TermDiscountExempt
 				,@ItemLicenseAmount
 				,@ItemPrice
 				,@ItemUnitPrice

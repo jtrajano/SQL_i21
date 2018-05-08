@@ -6456,7 +6456,6 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
-    <Build Include="dbo\Functions\fnARIsItemTermDiscountExempt.sql" />
     <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCategory.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
@@ -6497,6 +6496,10 @@
     <Build Include="dbo\Stored Procedures\uspMFCopyHandheldUserMenu.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveHandheldUserMenu.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetHandheldUserMenu.sql" />
+    <Build Include="dbo\Functions\fnARItemTermDiscountExemptDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetItemTermDiscount.sql" />
+    <Build Include="dbo\Functions\fnARGetItemTermDiscountExemption.sql" />
+    <Build Include="dbo\Functions\fnGetDiscountDateBasedOnTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

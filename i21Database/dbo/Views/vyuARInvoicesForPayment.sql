@@ -57,10 +57,7 @@ SELECT
 	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
 	,[dtmDiscountDate]			= CASE WHEN ISNULL(ARIFP.dblDiscountAvailable, 0) = 0
 										  THEN NULL
-										  ELSE CASE WHEN ISNULL(intDiscountDay, 0) = 0 OR ISNULL(intDiscountDay, 0) > DATEDIFF(DAY, DATEADD(DAY, 1-DAY(ARIFP.dtmDate), ARIFP.dtmDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(ARIFP.dtmDate), ARIFP.dtmDate)))
-													THEN DATEADD(DAY, 1, ARIFP.dtmDate)
-											   ELSE DATEADD(DAY, intDiscountDay, ARIFP.dtmDate)
-										  END
+										  ELSE [dbo].[fnGetDiscountDateBasedOnTerm](ARIFP.[dtmDate], SMT.[intTermID], GETDATE())
 								  END
 	,ysnACHActive					=  ISNULL(ysnACHActive, 0)
 	,dblInvoiceDiscountAvailable
