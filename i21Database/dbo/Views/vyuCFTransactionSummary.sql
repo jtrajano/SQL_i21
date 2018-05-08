@@ -60,7 +60,7 @@ END) AS strName
 ,ROUND(ISNULL(cfTransaction.dblCalculatedTotalPrice,0),2) AS dblSalesAmount
 
 ,(CASE  
-		WHEN strTransactionType='Local/Network'
+		WHEN cfTransaction.strTransactionType='Local/Network'
 		THEN 
 			ROUND(ISNULL(cfTransaction.dblInventoryCost,0)* ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) ,2)
 		ELSE
@@ -68,7 +68,12 @@ END) AS strName
 
 END) AS dblCost
 
-
+,strCustomerInvoiceNumber = arinvoice.strInvoiceNumber
+,strInvoiceReportNumber = cfTransaction.strInvoiceReportNumber
+,strSiteState = cfSite.strTaxState
+,dtmARInvoiceDate = arinvoice.dtmDate
+,cfSite.strSiteType
+,ysnInvoiced = CAST((CASE WHEN ISNULL(cfTransaction.strInvoiceReportNumber,'') = '' THEN 0 ELSE 1 END) AS BIT)
 FROM         dbo.tblCFTransaction AS cfTransaction 
 			INNER JOIN tblCFSite cfSite
 			on cfSite.intSiteId = cfTransaction.intSiteId
@@ -144,6 +149,9 @@ FROM         dbo.tblCFTransaction AS cfTransaction
                 GROUP BY intTransactionId) 
 			AS tblCFTransactionTax_1 
 			ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
+LEFT JOIN tblARInvoice arinvoice
+	ON cfTransaction.intInvoiceId = arinvoice.intInvoiceId
+
 
 			--WHERE ISNULL(cfTransaction.ysnPosted,0) = 1
 
