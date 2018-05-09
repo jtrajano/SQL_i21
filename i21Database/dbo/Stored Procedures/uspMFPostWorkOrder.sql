@@ -1143,11 +1143,11 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
 
-	DELETE T
-	FROM dbo.tblMFTask T
-	JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
-	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
-	WHERE SW.intWorkOrderId = @intWorkOrderId
+	--DELETE T
+	--FROM dbo.tblMFTask T
+	--JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+	--JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
+	--WHERE SW.intWorkOrderId = @intWorkOrderId
 
 	UPDATE OH
 	SET intOrderStatusId = 10
