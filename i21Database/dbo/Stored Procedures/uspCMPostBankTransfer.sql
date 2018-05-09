@@ -491,7 +491,7 @@ FROM #tmpGLDetail
 				,strCountry					= ''
 				,dblAmount					= A.dblAmount * ISNULL(A.dblRate,1)
 				,dblAmountForeign			= CASE WHEN ISNULL(A.dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(A.dblRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -535,7 +535,7 @@ FROM #tmpGLDetail
 				,strCountry					= ''
 				,dblAmount					= A.dblAmount * ISNULL(A.dblHistoricRate,1)
 				,dblAmountForeign			= CASE WHEN ISNULL(A.dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(A.dblHistoricRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
