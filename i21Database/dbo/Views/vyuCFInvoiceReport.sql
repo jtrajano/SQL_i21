@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
@@ -306,8 +303,8 @@ INNER JOIN dbo.tblSMTaxCode AS smTCd
 ON cfTT.intTaxCodeId = smTCd.intTaxCodeId 
 INNER JOIN dbo.tblSMTaxClass AS smTCl 
 ON smTCd.intTaxClassId = smTCl.intTaxClassId 
-WHERE  ( smTCl.strTaxClass LIKE '%(SST)%' ) 
-AND ( smTCl.strTaxClass LIKE '%State Sales Tax%' ) 
+WHERE  ( smTCl.strTaxClass = 'SST' ) 
+--AND ( smTCl.strTaxClass LIKE '%State Sales Tax%' ) 
 AND ( cfTT.intTransactionId = cfTrans.intTransactionId ) 
 GROUP  BY cfTT.intTransactionId) / cfTrans.dblQuantity         AS dblTotalSST, 
 (SELECT ISNULL(Sum(cfTT.dblTaxCalculatedAmount), 0) AS dblTaxExceptSST 
@@ -316,9 +313,9 @@ INNER JOIN dbo.tblSMTaxCode AS smTCd
 ON cfTT.intTaxCodeId = smTCd.intTaxCodeId 
 INNER JOIN dbo.tblSMTaxClass AS smTCl 
 ON smTCd.intTaxClassId = smTCl.intTaxClassId 
-WHERE  ( smTCl.strTaxClass NOT LIKE '%(SST)%' ) 
-AND ( smTCl.strTaxClass NOT LIKE '%State Sales Tax%' ) 
-AND ( smTCl.strTaxClass <> 'SST' ) 
+WHERE  ( smTCl.strTaxClass != 'SST' ) 
+--AND ( smTCl.strTaxClass NOT LIKE '%State Sales Tax%' ) 
+--AND ( smTCl.strTaxClass <> 'SST' ) 
 AND ( cfTT.intTransactionId = cfTrans.intTransactionId ) 
 GROUP  BY cfTT.intTransactionId) / cfTrans.dblQuantity         AS 
        dblTaxExceptSST, 

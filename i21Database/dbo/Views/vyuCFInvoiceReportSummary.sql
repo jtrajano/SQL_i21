@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReportSummary]
 AS
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
                            WHEN 'Foreign Sale' THEN cfSiteItem.intCustomerId 
@@ -284,7 +281,7 @@ FROM   dbo.vyuCFInvoice AS arInv
                                dblTaxRate 
                         FROM   dbo.vyuCFTransactionTax AS FETTaxes 
                         WHERE  ( strTaxClass LIKE '%(FET)%' ) 
-                               AND ( strTaxClass LIKE '%Federal Excise Tax%' ) 
+                               --AND ( strTaxClass LIKE '%Federal Excise Tax%' ) 
                         GROUP  BY intTransactionId) AS FETTaxes_1 
                     ON cfTrans.intTransactionId = FETTaxes_1.intTransactionId 
        LEFT OUTER JOIN (SELECT intTransactionId, 
@@ -296,7 +293,7 @@ FROM   dbo.vyuCFInvoice AS arInv
                                dblTaxRate 
                         FROM   dbo.vyuCFTransactionTax AS SETTaxes 
                         WHERE  ( strTaxClass LIKE '%(SET)%' ) 
-                               AND ( strTaxClass LIKE '%State Excise Tax%' ) 
+                               --AND ( strTaxClass LIKE '%State Excise Tax%' ) 
                         GROUP  BY intTransactionId) AS SETTaxes_1 
                     ON cfTrans.intTransactionId = SETTaxes_1.intTransactionId 
        LEFT OUTER JOIN (SELECT intTransactionId, 
@@ -308,7 +305,7 @@ FROM   dbo.vyuCFInvoice AS arInv
                                dblTaxRate 
                         FROM   dbo.vyuCFTransactionTax AS SSTTaxes 
                         WHERE  ( strTaxClass LIKE '%(SST)%' ) 
-                               AND ( strTaxClass LIKE '%State Sales Tax%' ) 
+                               --AND ( strTaxClass LIKE '%State Sales Tax%' ) 
                         GROUP  BY intTransactionId) AS SSTTaxes_1 
                     ON cfTrans.intTransactionId = SSTTaxes_1.intTransactionId 
        LEFT OUTER JOIN (SELECT intTransactionId, 
@@ -320,14 +317,13 @@ FROM   dbo.vyuCFInvoice AS arInv
                                dblTaxRate 
                         FROM   dbo.vyuCFTransactionTax AS LCTaxes 
                         WHERE  ( strTaxClass NOT LIKE '%(SET)%' ) 
-                               AND ( strTaxClass NOT LIKE '%State Excise Tax%' ) 
+                               --AND ( strTaxClass NOT LIKE '%State Excise Tax%' ) 
                                AND ( strTaxClass <> 'SET' ) 
                                AND ( strTaxClass NOT LIKE '%(FET)%' ) 
-                               AND ( strTaxClass NOT LIKE '%Federal Excise Tax%' 
-                                   ) 
+                               --AND ( strTaxClass NOT LIKE '%Federal Excise Tax%' ) 
                                AND ( strTaxClass <> 'FET' ) 
                                AND ( strTaxClass NOT LIKE '%(SST)%' ) 
-                               AND ( strTaxClass NOT LIKE '%State Sales Tax%' ) 
+                               --AND ( strTaxClass NOT LIKE '%State Sales Tax%' ) 
                                AND ( strTaxClass <> 'SST' ) 
                         GROUP  BY intTransactionId) AS LCTaxes_1 
                     ON cfTrans.intTransactionId = LCTaxes_1.intTransactionId 
