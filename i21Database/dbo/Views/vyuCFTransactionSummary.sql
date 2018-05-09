@@ -74,6 +74,7 @@ END) AS dblCost
 ,dtmARInvoiceDate = arinvoice.dtmDate
 ,cfSite.strSiteType
 ,ysnInvoiced = CAST((CASE WHEN ISNULL(cfTransaction.strInvoiceReportNumber,'') = '' THEN 0 ELSE 1 END) AS BIT)
+,strSiteNumberName = cfSite.strSiteNumber + ' - ' + cfSite.strSiteName
 FROM         dbo.tblCFTransaction AS cfTransaction 
 			INNER JOIN tblCFSite cfSite
 			on cfSite.intSiteId = cfTransaction.intSiteId
