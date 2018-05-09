@@ -273,10 +273,6 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
-
-			,[dblDebitForeign]
-			,[dblCreditForeign]
-
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -302,17 +298,13 @@ BEGIN
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.dblAmount * ISNULL(A.dblRate,1) 
-
-			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= A.dblAmount
-
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= ISNULL(A.dblRate,1)
+			,[dblExchangeRate]		= 1-- ISNULL(A.dblRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -340,19 +332,13 @@ BEGIN
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				=  A.dblAmount * ISNULL(A.dblHistoricRate, 1) -- 0.8 --ISNULL( A.dblHistoricRate,1) -- ISNULL(A.dblHistoricRate,1) * A.dblAmount 
 			,[dblCredit]			= 0
-
-			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= 0
-
-
-
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate, 1)
+			,[dblExchangeRate]		= 1 --ISNULL(A.dblHistoricRate, 1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -471,6 +457,7 @@ FROM #tmpGLDetail
 			,strState
 			,strCountry
 			,dblAmount
+			,dblAmountForeign
 			,strAmountInWords
 			,strMemo
 			,strReferenceNo
@@ -493,7 +480,7 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
 				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdFrom)
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(A.dblRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -502,7 +489,8 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount
+				,dblAmount					= A.dblAmount * ISNULL(A.dblRate,1)
+				,dblAmountForeign			= CASE WHEN ISNULL(A.dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
 				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
@@ -536,7 +524,7 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
 				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(A.dblHistoricRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -545,7 +533,8 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount
+				,dblAmount					= A.dblAmount * ISNULL(A.dblHistoricRate,1)
+				,dblAmountForeign			= CASE WHEN ISNULL(A.dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
 				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
