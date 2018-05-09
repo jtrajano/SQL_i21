@@ -104,11 +104,11 @@ BEGIN TRY
 	
 	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = BD.intItemReportUOMId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
 	
 	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = BD.intRateUOMId
-	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = rte.intLanguageId and rtrt3.intTransactionId = rtt3.intTransactionId
+	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = rte.intLanguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'UOM'
 
 	WHERE	intBrkgCommnId		=	  @intBrkgCommnId			
 
