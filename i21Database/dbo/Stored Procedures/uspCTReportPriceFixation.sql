@@ -203,31 +203,31 @@ BEGIN TRY
 
 	inner join tblSMScreen				rts on rts.strNamespace = 'Inventory.view.Item'
 	left join tblSMTransaction			rtt on rtt.intScreenId = rts.intScreenId and rtt.intRecordId = IM.intItemId
-	left join tblSMReportTranslation	rtrt on rtrt.intLanguageId = rte.intLanguageId and rtrt.intTransactionId = rtt.intTransactionId
+	left join tblSMReportTranslation	rtrt on rtrt.intLanguageId = rte.intLanguageId and rtrt.intTransactionId = rtt.intTransactionId and rtrt.strFieldName = 'Description'
 	
 	inner join tblSMScreen				rts1 on rts1.strNamespace = 'RiskManagement.view.FuturesTradingMonths'
 	left join tblSMTransaction			rtt1 on rtt1.intScreenId = rts1.intScreenId and rtt1.intRecordId = MO.intFutureMonthId
-	left join tblSMReportTranslation	rtrt1 on rtrt1.intLanguageId = rte.intLanguageId and rtrt1.intTransactionId = rtt1.intTransactionId
+	left join tblSMReportTranslation	rtrt1 on rtrt1.intLanguageId = rte.intLanguageId and rtrt1.intTransactionId = rtt1.intTransactionId and rtrt1.strFieldName = 'Future Trading Month'
 	
 	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = UM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
 	
 	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = CM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = rte.intLanguageId and rtrt3.intTransactionId = rtt3.intTransactionId
+	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = rte.intLanguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'UOM'
 	
 	inner join tblSMScreen				rts4 on rts4.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = U7.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = rte.intLanguageId and rtrt4.intTransactionId = rtt4.intTransactionId
+	left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = rte.intLanguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'UOM'
 	
 	inner join tblSMScreen				rts5 on rts5.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = FM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = rte.intLanguageId and rtrt5.intTransactionId = rtt5.intTransactionId
+	left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = rte.intLanguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'UOM'
 	
 	inner join tblSMScreen				rts6 on rts6.strNamespace = 'RiskManagement.view.FuturesMarket'
 	left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = MA.intFutureMarketId
-	left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = rte.intLanguageId and rtrt6.intTransactionId = rtt6.intTransactionId
+	left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = rte.intLanguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Market Name'
 
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	

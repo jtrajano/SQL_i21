@@ -53,11 +53,11 @@ BEGIN TRY
 
 	inner join tblSMScreen				rts on rts.strNamespace = 'RiskManagement.view.FuturesMarket'
 	left join tblSMTransaction			rtt on rtt.intScreenId = rts.intScreenId and rtt.intRecordId = MA.intFutureMarketId
-	left join tblSMReportTranslation	rtrt on rtrt.intLanguageId = rte.intLanguageId and rtrt.intTransactionId = rtt.intTransactionId
+	left join tblSMReportTranslation	rtrt on rtrt.intLanguageId = rte.intLanguageId and rtrt.intTransactionId = rtt.intTransactionId and rtrt.strFieldName = 'Market Name'
 	
 	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = CM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
 			
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
