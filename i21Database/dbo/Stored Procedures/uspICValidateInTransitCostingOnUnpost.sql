@@ -121,25 +121,25 @@ BEGIN
 	RETURN -1
 END 
 
--- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
-BEGIN 
-	SELECT TOP 1 
-			@strItemNo = Item.strItemNo
-			,@strRelatedTransactionId = InvTrans.strTransactionId
-	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
-				ON InvTrans.intItemId = Item.intItemId
-	WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
-			AND InvTrans.strRelatedTransactionId = @strTransactionId
-			AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-			AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
-			AND ISNULL(@ysnRecap, 0) = 0
+---- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
+--BEGIN 
+--	SELECT TOP 1 
+--			@strItemNo = Item.strItemNo
+--			,@strRelatedTransactionId = InvTrans.strTransactionId
+--	FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
+--				ON InvTrans.intItemId = Item.intItemId
+--	WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
+--			AND InvTrans.strRelatedTransactionId = @strTransactionId
+--			AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+--			AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
+--			AND ISNULL(@ysnRecap, 0) = 0
 
-	IF @strRelatedTransactionId IS NOT NULL 
-	BEGIN 
-		-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
-		EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
-		RETURN -1
-	END 
-END 
+--	IF @strRelatedTransactionId IS NOT NULL 
+--	BEGIN 
+--		-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
+--		EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
+--		RETURN -1
+--	END 
+--END 
 
 GO
