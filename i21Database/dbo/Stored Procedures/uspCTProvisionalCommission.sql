@@ -82,11 +82,11 @@ BEGIN TRY
 	SELECT	@blbFile    AS  blbFile,
 			@strAddress AS  strAddress,
 			@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
-			CH.strContractNumber,
+			ch.strContractNumber,
 			strSellerRef,
 			strSeller,
 			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + isnull(rtrt2.strTranslation,BD.strItemUOM) + ')' AS strQuantity,
-			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + isnull(rtrt2.strTranslation,BD.strRateUOM) AS strRate,
+			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + isnull(rtrt3.strTranslation,BD.strRateUOM) AS strRate,
 			ISNULL(IG.strCountry,OG.strCountry)	AS	strOrigin,
 			strCurrency,
 			dblReqstdAmount
@@ -103,8 +103,12 @@ BEGIN TRY
 	left join tblEMEntity				rte on rte.intEntityId = ch.intEntityId
 	
 	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
-	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = CM.intUnitMeasureId
+	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = BD.intItemReportUOMId
 	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId
+	
+	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = BD.intRateUOMId
+	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = rte.intLanguageId and rtrt3.intTransactionId = rtt3.intTransactionId
 
 	WHERE	intBrkgCommnId		=	  @intBrkgCommnId			
 

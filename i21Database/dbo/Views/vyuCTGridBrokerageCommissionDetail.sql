@@ -23,7 +23,8 @@ AS
 			CST.intVendorId AS intCostEntityId,
 			CST.strUOM AS strRateUOM,
 			CST.dblRate,
-			dbo.fnRemoveTrailingZeroes(CST.dblRate) + ' ' +CST.strCurrency + '/' + CST.strUOM AS strRateUnit,	   
+			dbo.fnRemoveTrailingZeroes(CST.dblRate) + ' ' +CST.strCurrency + '/' + CST.strUOM AS strRateUnit,
+			CST.intUOMId AS intRateUOMId,	   
 		  
 			SEQ.strSequenceNumber,
 			SEQ.dtmContractDate,
@@ -33,6 +34,7 @@ AS
 			SEQ.dtmEndDate,
 			SEQ.dblQuantity,
 			SEQ.strItemUOM,
+			SEQ.intItemReportUOMId,
 			SEQ.strPricingType,
 
 			HDR.strCustomerContract	AS	strSellerRef,

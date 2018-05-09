@@ -6,6 +6,7 @@ AS
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,
 				UM.strUnitMeasure strUOM, 
+				UM.intUnitMeasureId AS intUOMId,
 				EY.strName strVendorName, 
 				CD.intContractHeaderId, 
 				IU.intUnitMeasureId, 
