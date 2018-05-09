@@ -211,6 +211,9 @@ SELECT
     [dblOldCost]                        = NULL,
     [dblNetWeight]                      = 0,
     [dblWeightLoss]                     = 0,
+    [dblBasis]                          = basisAdvance.dblUnitBasis,
+    [dblFutures]                        = basisAdvance.dblFuturesPrice,
+    [dblPrepayPercentage]               = basisAdvance.dblPercentage,
     [intUnitOfMeasureId]                = receiptItem.intUnitMeasureId,
     [intCostUOMId]                      = receiptItem.intUnitMeasureId, --receiptItem.intCostUOMId,
     [intWeightUOMId]                    = NULL, --receiptItem.intWeightUOMId,
@@ -260,7 +263,10 @@ WHEN NOT MATCHED THEN
         ,[dblContractCost]
         ,[dblOldCost]                       
         ,[dblNetWeight]                     
-        ,[dblWeightLoss]                    
+        ,[dblWeightLoss]
+        ,[dblBasis]
+        ,[dblFutures]
+        ,[dblPrepayPercentage]
         ,[intUnitOfMeasureId]               
         ,[intCostUOMId]                     
         ,[intWeightUOMId]                   
@@ -296,7 +302,10 @@ WHEN NOT MATCHED THEN
         ,[dblContractCost]                     
         ,[dblOldCost]                       
         ,[dblNetWeight]                     
-        ,[dblWeightLoss]                    
+        ,[dblWeightLoss]     
+        ,[dblBasis]
+        ,[dblFutures]
+        ,[dblPrepayPercentage]               
         ,[intUnitOfMeasureId]               
         ,[intCostUOMId]                     
         ,[intWeightUOMId]                   
