@@ -334,7 +334,7 @@ FROM (
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
-		,isnull(ysnSubCurrency,0) ysnSubCurrency
+		,isnull(c.ysnSubCurrency,0) ysnSubCurrency
 	FROM tblLGAllocationDetail AD
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId AND intSContractDetailId = @intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -365,7 +365,7 @@ FROM (
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
-		,isnull(ysnSubCurrency,0)  ysnSubCurrency
+		,isnull(c.ysnSubCurrency,0)  ysnSubCurrency
 	FROM tblLGAllocationDetail AD
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = @intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -395,6 +395,7 @@ UNION
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
+		,isnull(c.ysnSubCurrency,0) ysnSubCurrency
 	FROM tblLGLoad AD
 	JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId and  CD.intContractDetailId= @intSContractDetailId
@@ -425,6 +426,7 @@ UNION
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
+		,isnull(c.ysnSubCurrency,0) ysnSubCurrency
 	FROM tblLGLoad AD
 		JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId 
 		join tblLGLoadDetailLot LDL on LDL.intLoadDetailId=LD.intLoadDetailId
