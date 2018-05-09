@@ -12,6 +12,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @intReturnValue AS INT = 0; 
+
 DECLARE @intItemId AS INT
 		,@dtmRebuildDate AS DATETIME = GETDATE() 
 		,@intFobPointId AS INT 
@@ -350,64 +352,62 @@ BEGIN
 	END 
 
 	-- Intialize #tmpICInventoryTransaction
-	SELECT	id = CAST(0 AS INT) 
-			,id2 = CAST(0 AS INT) 
-			,intSortByQty = CAST(0 AS INT)
-			,intItemId
-			,intItemLocationId
-			,intInTransitSourceLocationId
-			,intItemUOMId
-			,intSubLocationId
-			,intStorageLocationId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblValue
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,strTransactionId
-			,intTransactionDetailId
-			,strBatchId
-			,intTransactionTypeId
-			,intLotId
-			,ysnIsUnposted
-			,intRelatedInventoryTransactionId
-			,intRelatedTransactionId
-			,strRelatedTransactionId
-			,strTransactionForm
-			,intCostingMethod
-			,dtmCreated
-			,strDescription
-			,intCreatedUserId
-			,intCreatedEntityId
-			,intConcurrencyId 
-			,intForexRateTypeId
-			,dblForexRate
-			,strActualCostId
-	INTO	#tmpICInventoryTransaction
-	FROM	#tmpUnOrderedICTransaction
-	WHERE	1 = 0 
+	CREATE TABLE #tmpICInventoryTransaction (
+		id INT, 
+		id2 INT, 
+		intSortByQty INT,
+		[intItemId] INT NOT NULL,
+		[intItemLocationId] INT NOT NULL,
+		[intInTransitSourceLocationId] INT NULL, 
+		[intItemUOMId] INT NULL,
+		[intSubLocationId] INT NULL,
+		[intStorageLocationId] INT NULL,
+		[dtmDate] DATETIME NOT NULL, 
+		[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+		[dblValue] NUMERIC(38, 20) NULL, 
+		[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[intCurrencyId] INT NULL,
+		[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL, -- OBSOLETE, use dblForexRate instead. 
+		[intTransactionId] INT NOT NULL, 
+		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intTransactionDetailId] INT NULL, 
+		[strBatchId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intTransactionTypeId] INT NOT NULL, 
+		[intLotId] INT NULL, 
+		[ysnIsUnposted] BIT NULL,
+		[intRelatedInventoryTransactionId] INT NULL,
+		[intRelatedTransactionId] INT NULL,
+		[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+		[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
+		[intCostingMethod] INT NULL, 		
+		[dtmCreated] DATETIME NULL, 
+		[strDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 
+		[intCreatedUserId] INT NULL, 
+		[intCreatedEntityId] INT NULL, 
+		[intConcurrencyId] INT NOT NULL DEFAULT 1, 			
+		[intForexRateTypeId] INT NULL,
+		[dblForexRate] NUMERIC(38, 20) NOT NULL DEFAULT 1, 
+		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	)
 
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
 		--PRINT 'Rebuilding stock as periodic.'
-		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
-			ON dbo.#tmpICInventoryTransaction(dtmDate ASC, strBatchId ASC);
-
-		--EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Periodic] ON dbo.#tmpICInventoryTransaction([dtmDate] ASC, [intSortByQty] ASC, [id] ASC);') 
+		CREATE CLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
+			ON #tmpICInventoryTransaction(dtmDate ASC, id ASC, intSortByQty ASC);
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				,id2 = intInventoryTransactionId
 				,intSortByQty = 
 					CASE 
-						WHEN dblQty > 0 AND strTransactionForm <> 'Invoice' THEN 1 
+						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 1 
 						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 3
-						ELSE 4
+						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
+						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 4
+						ELSE 5
 					END  
 				,intItemId
 				,intItemLocationId
@@ -455,16 +455,12 @@ BEGIN
 				ELSE 4
 			END 
 			ASC 
-
-		--ORDER BY DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC, CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC , intInventoryTransactionId ASC
 	END
 	ELSE 
 	BEGIN 
 		--PRINT 'Rebuilding stock as perpetual.'
-		CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
-			ON dbo.#tmpICInventoryTransaction(strBatchId ASC);
-
-		--EXEC ('CREATE CLUSTERED INDEX [IDX_tmpICInventoryTransaction_Perpetual] ON dbo.#tmpICInventoryTransaction([id] ASC, [id2] ASC);') 
+		CREATE CLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
+			ON #tmpICInventoryTransaction(id2 ASC, id ASC);
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
@@ -506,11 +502,8 @@ BEGIN
 				,strActualCostId
 		FROM	#tmpUnOrderedICTransaction
 		ORDER BY 
-			--CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
 			intInventoryTransactionId ASC 
-		--ORDER BY CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC
 	END
-
 END
 
 -- Delete the inventory transaction record if it falls within the date range. 
@@ -649,15 +642,32 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
-		SELECT	TOP 1 
-				@strBatchId = strBatchId
-				,@intEntityUserSecurityId = intCreatedUserId
-				,@strTransactionForm = strTransactionForm
-				,@strTransactionId = strTransactionId
-				,@intTransactionId = intTransactionId
-				,@dblQty = dblQty 
-				,@intTransactionTypeId = intTransactionTypeId
-		FROM	#tmpICInventoryTransaction
+		IF ISNULL(@isPeriodic, 0) = 1
+		BEGIN 
+			SELECT	TOP 1 
+					@strBatchId = strBatchId
+					,@intEntityUserSecurityId = intCreatedUserId
+					,@strTransactionForm = strTransactionForm
+					,@strTransactionId = strTransactionId
+					,@intTransactionId = intTransactionId
+					,@dblQty = dblQty 
+					,@intTransactionTypeId = intTransactionTypeId
+			FROM	#tmpICInventoryTransaction
+			ORDER BY dtmDate ASC, id ASC, intSortByQty ASC
+		END 
+		ELSE 
+		BEGIN 
+			SELECT	TOP 1 
+					@strBatchId = strBatchId
+					,@intEntityUserSecurityId = intCreatedUserId
+					,@strTransactionForm = strTransactionForm
+					,@strTransactionId = strTransactionId
+					,@intTransactionId = intTransactionId
+					,@dblQty = dblQty 
+					,@intTransactionTypeId = intTransactionTypeId
+			FROM	#tmpICInventoryTransaction
+			ORDER BY id2 ASC, id ASC
+		END 
 
 		-- Run the post routine. 
 		BEGIN 
@@ -2004,7 +2014,9 @@ BEGIN
 						INNER JOIN tblICInventoryTransaction t
 							ON t.intTransactionId = si.intInventoryShipmentId
 							AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+							AND t.strTransactionId = t.strTransactionId
 							AND t.ysnIsUnposted = 0 
+							AND t.dblQty > 0 
 				WHERE	t.intFobPointId = @FOB_DESTINATION
 						AND i.strInvoiceNumber = @strTransactionId
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
@@ -2749,11 +2761,21 @@ END
 --		@dtmRebuildDate
 --END
 
---COMMIT TRANSACTION 
-GOTO _EXIT
+GOTO _CLEAN_UP
 
 _EXIT_WITH_ERROR: 
-RETURN -1; 
---ROLLBACK TRANSACTION 
+BEGIN 
+	SET @intReturnValue = -1; 
+	GOTO _CLEAN_UP
+END
 
-_EXIT: 
+_CLEAN_UP: 
+BEGIN 
+	IF OBJECT_ID('tempdb..#tmpICInventoryTransaction') IS NOT NULL  
+		DROP TABLE #tmpICInventoryTransaction
+
+	IF OBJECT_ID('tempdb..#tmpUnOrderedICTransaction') IS NOT NULL  
+		DROP TABLE #tmpUnOrderedICTransaction
+END 
+
+RETURN @intReturnValue; 
