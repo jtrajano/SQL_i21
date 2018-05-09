@@ -225,13 +225,27 @@ USING
 		,[dblUnitQuantity]						= ISNULL(IE.[dblContractPriceUOMQty], 1.000000)
 		,[dblItemWeight]						= IE.[dblItemWeight]
 		,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
-		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
+		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)				
 		,[dblItemTermDiscount]					= ISNULL(IE.[dblItemTermDiscount], @ZeroDecimal)
 		,[strItemTermDiscountBy]				= IE.[strItemTermDiscountBy]
-		,[dblPrice]								= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END)
-		,[dblBasePrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
-		,[dblUnitPrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblUnitPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblUnitPrice], @ZeroDecimal) END)
-		,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblUnitPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblUnitPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+		,[dblItemTermDiscountAmount]			= [dbo].[fnARGetItemTermDiscount](	IE.[strItemTermDiscountBy]
+																					,IE.[dblItemTermDiscount]
+																					,IE.[dblQtyShipped]
+																					,(CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],@ZeroDecimal) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END)
+																					,1.000000)
+		,[dblBaseItemTermDiscountAmount]		 = [dbo].[fnARGetItemTermDiscount](	IE.[strItemTermDiscountBy]
+																					,IE.[dblItemTermDiscount]
+																					,IE.[dblQtyShipped]
+																					,(CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],0) <> 0) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END)
+																					,(CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END))
+		,[dblItemTermDiscountExemption]			= @ZeroDecimal
+		,[dblBaseItemTermDiscountExemption]		= @ZeroDecimal
+		,[dblTermDiscountRate]					= @ZeroDecimal
+		,[ysnTermDiscountExempt]				= 0
+		,[dblPrice]								= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],@ZeroDecimal) <> @ZeroDecimal) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1.000000) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END)
+		,[dblBasePrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],@ZeroDecimal) <> @ZeroDecimal) THEN ISNULL(IE.[dblPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1.000000) ELSE ISNULL(IE.[dblPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END)
+		,[dblUnitPrice]							= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],@ZeroDecimal) <> @ZeroDecimal) THEN ISNULL(IE.[dblUnitPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1.000000) ELSE ISNULL(IE.[dblUnitPrice], @ZeroDecimal) END)
+		,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(IE.[dblSubCurrencyRate],@ZeroDecimal) <> @ZeroDecimal) THEN ISNULL(IE.[dblUnitPrice], @ZeroDecimal) * ISNULL(IE.[dblSubCurrencyRate], 1.000000) ELSE ISNULL(IE.[dblUnitPrice], @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END)
 		,[strPricing]							= CASE WHEN ISNULL(IE.[strPricing],'') = '' AND RTRIM(LTRIM(ISNULL(IE.[strSourceTransaction],''))) <> '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END
 		,[dblTotalTax]							= @ZeroDecimal
 		,[dblBaseTotalTax]						= @ZeroDecimal
@@ -239,9 +253,9 @@ USING
 		,[dblBaseTotal]							= @ZeroDecimal
 		,[intCurrencyExchangeRateTypeId]		= IE.[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]			= IE.[intCurrencyExchangeRateId]
-		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END
+		,[dblCurrencyExchangeRate]				= CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END
 		,[intSubCurrencyId]						= ISNULL(IE.[intSubCurrencyId], IE.[intCurrencyId])
-		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IE.[intSubCurrencyId], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblSubCurrencyRate], 1) END
+		,[dblSubCurrencyRate]					= CASE WHEN ISNULL(IE.[intSubCurrencyId], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblSubCurrencyRate], 1.000000) END
 		,[ysnRestricted]						= ISNULL(IE.[ysnRestricted], 0)
 		,[ysnBlended]							= ISNULL(IE.[ysnBlended], 0)
 		,[intAccountId]							= NULL
@@ -255,9 +269,9 @@ USING
 		,[strFrequency]							= IE.[strFrequency]
 		,[dtmMaintenanceDate]					= IE.[dtmMaintenanceDate]
 		,[dblMaintenanceAmount]					= IE.[dblMaintenanceAmount]
-		,[dblBaseMaintenanceAmount]				= IE.[dblMaintenanceAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+		,[dblBaseMaintenanceAmount]				= IE.[dblMaintenanceAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END)
 		,[dblLicenseAmount]						= IE.[dblLicenseAmount]
-		,[dblBaseLicenseAmount]					= IE.[dblLicenseAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+		,[dblBaseLicenseAmount]					= IE.[dblLicenseAmount] * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END)
 		,[intTaxGroupId]						= IE.[intTaxGroupId]
 		,[intStorageLocationId]					= IE.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]		= IE.[intCompanyLocationSubLocationId]
@@ -346,6 +360,12 @@ INSERT(
 	,[dblDiscount]
 	,[dblItemTermDiscount]
 	,[strItemTermDiscountBy]
+	,[dblItemTermDiscountAmount]
+	,[dblBaseItemTermDiscountAmount]
+	,[dblItemTermDiscountExemption]
+	,[dblBaseItemTermDiscountExemption]
+	,[dblTermDiscountRate]
+	,[ysnTermDiscountExempt]
 	,[dblPrice]
 	,[dblBasePrice]
 	,[dblUnitPrice]
@@ -448,6 +468,12 @@ VALUES(
 	,[dblDiscount]
 	,[dblItemTermDiscount]
 	,[strItemTermDiscountBy]
+	,[dblItemTermDiscountAmount]
+	,[dblBaseItemTermDiscountAmount]
+	,[dblItemTermDiscountExemption]
+	,[dblBaseItemTermDiscountExemption]
+	,[dblTermDiscountRate]
+	,[ysnTermDiscountExempt]
 	,[dblPrice]
 	,[dblBasePrice]
 	,[dblUnitPrice]

@@ -45,28 +45,50 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	 [dblQtyOrdered]			= ISNULL([dblQtyOrdered], @ZeroDecimal)
-	,[dblQtyShipped]			= ISNULL([dblQtyShipped], @ZeroDecimal)
-	,[dblDiscount]				= ISNULL([dblDiscount], @ZeroDecimal)
-	,[dblItemWeight]			= ISNULL([dblItemWeight], 1.00)
-	,[dblShipmentGrossWt]		= ISNULL([dblShipmentGrossWt], @ZeroDecimal)
-	,[dblShipmentTareWt]		= ISNULL([dblShipmentTareWt], @ZeroDecimal)
-	,[dblShipmentNetWt]			= ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal)		
-	,[dblPrice]					= ISNULL([dblPrice], @ZeroDecimal)
-	,[dblBasePrice]				= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
-	,[dblUnitPrice] 			= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
-	,[dblBaseUnitPrice]			= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
-	,[intPriceUOMId]			= CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([intPriceUOMId], [intItemWeightUOMId]) ELSE ISNULL([intPriceUOMId], [intItemUOMId]) END
-	,[dblUnitQuantity]			= CASE WHEN (ISNULL([dblUnitQuantity],0) <> @ZeroDecimal) THEN [dblUnitQuantity] ELSE (CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL([dblQtyShipped], @ZeroDecimal) END) END
-	,[dblTotalTax]				= ISNULL([dblTotalTax], @ZeroDecimal)
-	,[dblBaseTotalTax]			= ISNULL([dblBaseTotalTax], @ZeroDecimal)
-	,[dblTotal]					= ISNULL([dblTotal], @ZeroDecimal)
-	,[dblBaseTotal]				= ISNULL([dblBaseTotal], @ZeroDecimal)
-	,[dblItemTermDiscount]		= ISNULL([dblItemTermDiscount], @ZeroDecimal)
-	,[strItemTermDiscountBy]	= ISNULL([strItemTermDiscountBy], 'Amount') 
-	,[intSubCurrencyId]			= ISNULL([intSubCurrencyId], @CurrencyId)
-	,[dblSubCurrencyRate]		= CASE WHEN ISNULL([dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblSubCurrencyRate] END
-	,[dblCurrencyExchangeRate] 	= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END
+	 [dblQtyOrdered]					= ISNULL([dblQtyOrdered], @ZeroDecimal)
+	,[dblQtyShipped]					= ISNULL([dblQtyShipped], @ZeroDecimal)
+	,[dblDiscount]						= ISNULL([dblDiscount], @ZeroDecimal)
+	,[dblItemWeight]					= ISNULL([dblItemWeight], 1.00)
+	,[dblShipmentGrossWt]				= ISNULL([dblShipmentGrossWt], @ZeroDecimal)
+	,[dblShipmentTareWt]				= ISNULL([dblShipmentTareWt], @ZeroDecimal)
+	,[dblShipmentNetWt]					= ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal)		
+	,[dblPrice]							= ISNULL([dblPrice], @ZeroDecimal)
+	,[dblBasePrice]						= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,[dblUnitPrice] 					= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
+	,[dblBaseUnitPrice]					= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,[intPriceUOMId]					= CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([intPriceUOMId], [intItemWeightUOMId]) ELSE ISNULL([intPriceUOMId], [intItemUOMId]) END
+	,[dblUnitQuantity]					= CASE WHEN (ISNULL([dblUnitQuantity],@ZeroDecimal) <> @ZeroDecimal) THEN [dblUnitQuantity] ELSE (CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL([dblQtyShipped], @ZeroDecimal) END) END
+	,[dblTotalTax]						= ISNULL([dblTotalTax], @ZeroDecimal)
+	,[dblBaseTotalTax]					= ISNULL([dblBaseTotalTax], @ZeroDecimal)
+	,[dblTotal]							= ISNULL([dblTotal], @ZeroDecimal)
+	,[dblBaseTotal]						= ISNULL([dblBaseTotal], @ZeroDecimal)
+	,[dblItemTermDiscount]				= ISNULL([dblItemTermDiscount], @ZeroDecimal)
+	,[strItemTermDiscountBy]			= ISNULL([strItemTermDiscountBy], 'Amount')
+	,[dblItemTermDiscountAmount]		= [dbo].[fnARGetItemTermDiscount](	ISNULL([strItemTermDiscountBy], 'Amount')
+																				,[dblItemTermDiscount]
+																				,[dblQtyShipped]
+																				,[dblPrice]
+																				,1.000000)
+	,[dblBaseItemTermDiscountAmount]	= [dbo].[fnARGetItemTermDiscount](	ISNULL([strItemTermDiscountBy], 'Amount')
+																				,[dblItemTermDiscount]
+																				,[dblQtyShipped]
+																				,[dblPrice]
+																				,(CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END))
+	,[dblItemTermDiscountExemption]		= [dbo].[fnARGetItemTermDiscountExemption](	[ysnTermDiscountExempt]
+																					,[dblTermDiscountRate]
+																					,[dblQtyShipped]
+																					,[dblPrice]
+																					,1.000000)
+	,[dblBaseItemTermDiscountExemption]	= [dbo].[fnARGetItemTermDiscountExemption](	[ysnTermDiscountExempt]
+																					,[dblTermDiscountRate]
+																					,[dblQtyShipped]
+																					,[dblPrice]
+																					,(CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END))
+	,[dblTermDiscountRate]				= ISNULL([dblTermDiscountRate], @ZeroDecimal)
+	,[ysnTermDiscountExempt]			= ISNULL([ysnTermDiscountExempt], 0)
+	,[intSubCurrencyId]					= ISNULL([intSubCurrencyId], @CurrencyId)
+	,[dblSubCurrencyRate]				= CASE WHEN ISNULL([dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblSubCurrencyRate] END
+	,[dblCurrencyExchangeRate] 			= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
@@ -74,28 +96,31 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [dblInvoiceSubtotal]		= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
-	,[dblBaseInvoiceSubtotal]	= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
-	,[dblShipping]				= ISNULL([dblShipping], @ZeroDecimal)
-	,[dblBaseShipping]			= ISNULL([dblBaseShipping], @ZeroDecimal)
-	,[dblTax]					= ISNULL([dblTax], @ZeroDecimal)
-	,[dblBaseTax]				= ISNULL([dblBaseTax], @ZeroDecimal)
-	,[dblInvoiceTotal]			= ISNULL([dblInvoiceTotal], @ZeroDecimal)
-	,[dblBaseInvoiceTotal]		= ISNULL([dblBaseInvoiceTotal], @ZeroDecimal)
-	,[dblDiscount]				= ISNULL([dblDiscount], @ZeroDecimal)
-	,[dblBaseDiscount]			= ISNULL([dblBaseDiscount], @ZeroDecimal)
-	,[dblAmountDue]				= ISNULL([dblAmountDue], @ZeroDecimal)
-	,[dblBaseAmountDue]			= ISNULL([dblBaseAmountDue], @ZeroDecimal)
-	,[dblPayment]				= ISNULL([dblPayment], @ZeroDecimal)
-	,[dblBasePayment]			= ISNULL([dblBasePayment], @ZeroDecimal)
-	,[dblDiscountAvailable]		= ISNULL([dblDiscountAvailable], @ZeroDecimal)
-	,[dblBaseDiscountAvailable]	= ISNULL([dblBaseDiscountAvailable], @ZeroDecimal)
-	,[dblTotalTermDiscount]		= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
-	,[dblInterest]				= ISNULL([dblInterest], @ZeroDecimal)
-	,[dblBaseInterest]			= ISNULL([dblBaseInterest], @ZeroDecimal)
-	,[dblProvisionalAmount]		= ISNULL([dblProvisionalAmount], @ZeroDecimal)
-	,[dblBaseProvisionalAmount]	= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
-	,[dblSplitPercent] 			= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
+	 [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+	,[dblBaseInvoiceSubtotal]				= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
+	,[dblShipping]							= ISNULL([dblShipping], @ZeroDecimal)
+	,[dblBaseShipping]						= ISNULL([dblBaseShipping], @ZeroDecimal)
+	,[dblTax]								= ISNULL([dblTax], @ZeroDecimal)
+	,[dblBaseTax]							= ISNULL([dblBaseTax], @ZeroDecimal)
+	,[dblInvoiceTotal]						= ISNULL([dblInvoiceTotal], @ZeroDecimal)
+	,[dblBaseInvoiceTotal]					= ISNULL([dblBaseInvoiceTotal], @ZeroDecimal)
+	,[dblDiscount]							= ISNULL([dblDiscount], @ZeroDecimal)
+	,[dblBaseDiscount]						= ISNULL([dblBaseDiscount], @ZeroDecimal)
+	,[dblAmountDue]							= ISNULL([dblAmountDue], @ZeroDecimal)
+	,[dblBaseAmountDue]						= ISNULL([dblBaseAmountDue], @ZeroDecimal)
+	,[dblPayment]							= ISNULL([dblPayment], @ZeroDecimal)
+	,[dblBasePayment]						= ISNULL([dblBasePayment], @ZeroDecimal)
+	,[dblDiscountAvailable]					= ISNULL([dblDiscountAvailable], @ZeroDecimal)
+	,[dblBaseDiscountAvailable]				= ISNULL([dblBaseDiscountAvailable], @ZeroDecimal)
+	,[dblTotalTermDiscount]					= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
+	,[dblBaseTotalTermDiscount]				= ISNULL([dblBaseTotalTermDiscount], @ZeroDecimal)
+	,[dblTotalTermDiscountExemption]		= ISNULL([dblTotalTermDiscountExemption], @ZeroDecimal)
+	,[dblBaseTotalTermDiscountExemption]	= ISNULL([dblBaseTotalTermDiscountExemption], @ZeroDecimal)
+	,[dblInterest]							= ISNULL([dblInterest], @ZeroDecimal)
+	,[dblBaseInterest]						= ISNULL([dblBaseInterest], @ZeroDecimal)
+	,[dblProvisionalAmount]					= ISNULL([dblProvisionalAmount], @ZeroDecimal)
+	,[dblBaseProvisionalAmount]				= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
+	,[dblSplitPercent] 						= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 
@@ -105,29 +130,20 @@ WHERE
 	UPDATE
 		tblARInvoice
 	SET
-		  [dblDiscountAvailable]		= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
-		 ,[dblBaseDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountTotal], @ZeroDecimal)
-		 ,[dblTotalTermDiscount]		= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
+		 [dblDiscountAvailable]					= ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal)
+		,[dblBaseDiscountAvailable]				= ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
+		,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
+		,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
+		,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
+		,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
 	FROM
 		(
 			SELECT 
-				 SUM(
-					CASE WHEN [strItemTermDiscountBy] = 'Percent'
-						THEN
-							[dbo].fnRoundBanker(([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000), [dbo].[fnARGetDefaultDecimal]())
-						ELSE
-							[dbo].fnRoundBanker([dblItemTermDiscount], [dbo].[fnARGetDefaultDecimal]())
-					END
-					)	AS [dblItemTermDiscountTotal]
-				,SUM(
-					CASE WHEN [strItemTermDiscountBy] = 'Percent'
-						THEN
-							[dbo].fnRoundBanker((([dblQtyShipped] * [dblPrice]) * ([dblItemTermDiscount]/100.000000)) * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
-						ELSE
-							[dbo].fnRoundBanker([dblItemTermDiscount] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
-					END
-					)	AS [dblBaseItemTermDiscountTotal]
-				,[intInvoiceId]
+				 [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
+				,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
+				,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
+				,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
+				,[intInvoiceId]						= [intInvoiceId]
 			FROM
 				tblARInvoiceDetail
 			WHERE

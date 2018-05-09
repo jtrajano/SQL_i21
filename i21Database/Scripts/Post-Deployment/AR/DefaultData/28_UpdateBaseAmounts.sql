@@ -189,6 +189,27 @@ SET
 	,[dblBaseSalesOrderTotal]		= [dblSalesOrderTotal]
 WHERE
 	[intSalesOrderId] IN (SELECT DISTINCT [intSalesOrderId] FROM @SOIds)
+
+
+--Invoice Detail [dblBaseItemTermDiscountAmount]
+
+UPDATE
+	tblARInvoiceDetail
+SET
+	 [dblItemTermDiscountAmount]		= [dbo].[fnARGetItemTermDiscount](	[strItemTermDiscountBy]
+																			,[dblItemTermDiscount]
+																			,[dblQtyShipped]
+																			,[dblPrice]
+																			,1.000000)
+	,[dblBaseItemTermDiscountAmount]	= [dbo].[fnARGetItemTermDiscount](	[strItemTermDiscountBy]
+																			,[dblItemTermDiscount]
+																			,[dblQtyShipped]
+																			,[dblPrice]
+																			,(CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END))
+WHERE
+	ISNULL([dblItemTermDiscountAmount], 0.000000) <> ISNULL([dblBaseItemTermDiscountAmount], 0.000000)
+	AND ISNULL([dblBaseItemTermDiscountAmount], 0.000000) = 0.000000
+	AND ISNULL([strItemTermDiscountBy], '') <> ''
 			
 GO
 print('/*******************  END Update Update Base Amounts for Multi-Currency  *******************/')
