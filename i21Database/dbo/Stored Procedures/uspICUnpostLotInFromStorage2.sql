@@ -41,26 +41,26 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5
 
--- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
-DECLARE @strItemNo AS NVARCHAR(50)
-		,@strRelatedTransactionId AS NVARCHAR(50)
+---- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
+--DECLARE @strItemNo AS NVARCHAR(50)
+--		,@strRelatedTransactionId AS NVARCHAR(50)
 
-SELECT TOP 1 
-		@strItemNo = Item.strItemNo
-		,@strRelatedTransactionId = InvTrans.strTransactionId
-FROM	dbo.tblICInventoryTransactionStorage InvTrans INNER JOIN dbo.tblICItem Item
-			ON InvTrans.intItemId = Item.intItemId
-WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
-		AND InvTrans.strRelatedTransactionId = @strTransactionId
-		AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
-		AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
+--SELECT TOP 1 
+--		@strItemNo = Item.strItemNo
+--		,@strRelatedTransactionId = InvTrans.strTransactionId
+--FROM	dbo.tblICInventoryTransactionStorage InvTrans INNER JOIN dbo.tblICItem Item
+--			ON InvTrans.intItemId = Item.intItemId
+--WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
+--		AND InvTrans.strRelatedTransactionId = @strTransactionId
+--		AND InvTrans.intTransactionTypeId = @INV_TRANS_TYPE_Cost_Adjustment
+--		AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
 
-IF @strRelatedTransactionId IS NOT NULL 
-BEGIN 
-	-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
-	EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
-	RETURN -1;
-END 
+--IF @strRelatedTransactionId IS NOT NULL 
+--BEGIN 
+--	-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
+--	EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
+--	RETURN -1;
+--END 
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
