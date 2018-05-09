@@ -15,6 +15,7 @@
 	, @strCustomerIds				AS NVARCHAR(MAX)	= NULL
 	, @ysnEmailOnly					AS BIT				= NULL
 	, @ysnIncludeWriteOffPayment    AS BIT 				= 1
+	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
 AS
 
@@ -34,6 +35,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @ysnActiveCustomersLocal			AS BIT				= 0
 	  , @ysnIncludeWriteOffPaymentLocal		AS BIT				= 1
 	  , @ysnPrintFromCFLocal				AS BIT				= 0
+	  , @ysnReprintInvoiceLocal				AS BIT				= 1
 	  , @strCustomerNumberLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
@@ -161,6 +163,7 @@ SET @ysnPrintOnlyPastDueLocal			= ISNULL(@ysnPrintOnlyPastDue, 0)
 SET @ysnActiveCustomersLocal			= ISNULL(@ysnActiveCustomers, 0)
 SET @ysnIncludeWriteOffPaymentLocal		= ISNULL(@ysnIncludeWriteOffPayment, 1)
 SET @ysnPrintFromCFLocal				= ISNULL(@ysnPrintFromCF, 0)
+SET @ysnReprintInvoiceLocal				= ISNULL(@ysnReprintInvoice, 1)
 SET @strCustomerNumberLocal				= NULLIF(@strCustomerNumber, '')
 SET @strAccountStatusCodeLocal			= NULLIF(@strAccountStatusCode, '')
 SET @strLocationNameLocal				= NULLIF(@strLocationName, '')
@@ -714,16 +717,19 @@ IF @ysnPrintFromCFLocal = 1
 			GROUP BY intEntityCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
 
-		UPDATE AGINGREPORT
-		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFee, 0)
-		  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR + ISNULL(CF.dblTotalFee, 0)
-		FROM @temp_aging_table AGINGREPORT
-		INNER JOIN (
-			SELECT intCustomerId
-				 , dblTotalFee = SUM(dblFeeTotalAmount)
-			FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
-			GROUP BY intCustomerId
-		) CF ON AGINGREPORT.intEntityCustomerId = CF.intCustomerId
+		IF @ysnReprintInvoiceLocal = 0
+			BEGIN
+				UPDATE AGINGREPORT
+				SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFee, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR + ISNULL(CF.dblTotalFee, 0)
+				FROM @temp_aging_table AGINGREPORT
+				INNER JOIN (
+					SELECT intCustomerId
+						 , dblTotalFee = SUM(dblFeeTotalAmount)
+					FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
+					GROUP BY intCustomerId
+				) CF ON AGINGREPORT.intEntityCustomerId = CF.intCustomerId
+			END
 	END
 ELSE 
 	BEGIN
