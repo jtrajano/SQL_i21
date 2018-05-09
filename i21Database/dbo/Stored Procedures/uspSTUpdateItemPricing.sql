@@ -322,22 +322,25 @@ SELECT @UpdateCount = COUNT(DISTINCT intParentId) FROM @tblTempOne WHERE strOldD
      OR (@RetailPrice IS NOT NULL))
 		 BEGIN
 
-				 set @SQL1 = ' update tblICItemPricing set '
+				 SET @SQL1 = ' UPDATE tblICItemPricing SET '
 
-				 if (@StandardCost IS NOT NULL)
+				 IF (@StandardCost IS NOT NULL)
 				 BEGIN
-					set @SQL1 = @SQL1 + 'dblStandardCost = ''' + LTRIM(@StandardCost) + ''''
+					SET @SQL1 = @SQL1 + ' dblStandardCost = ''' + LTRIM(@StandardCost) + ''''
 				 END
 
-				 if (@RetailPrice IS NOT NULL)  
+				 IF (@RetailPrice IS NOT NULL)  
 				 BEGIN
-				   if (@StandardCost IS NOT NULL)
-					  set @SQL1 = @SQL1 + ' , dblSalePrice = ''' + LTRIM(@RetailPrice) + ''''
-				   else
-					  set @SQL1 = @SQL1 + ' dblSalePrice = ''' + LTRIM(@RetailPrice) + '''' 
+				   IF (@StandardCost IS NOT NULL)
+					  SET @SQL1 = @SQL1 + ' , dblSalePrice = ''' + LTRIM(@RetailPrice) + ''''
+				   ELSE
+					  SET @SQL1 = @SQL1 + ' dblSalePrice = ''' + LTRIM(@RetailPrice) + '''' 
 				 END
 
-				 set @SQL1 = @SQL1 + ' where 1=1 ' 
+				 --Update dtmDateModified, intModifiedByUserId
+				 SET @SQL1 = @SQL1 + ' , dtmDateModified = ''' + CAST(GETUTCDATE() AS NVARCHAR(50)) + ''' , intModifiedByUserId = ' + CAST(@currentUserId AS NVARCHAR(50)) + ''
+
+				 SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
 	    
 			   if (@Location IS NOT NULL AND @Location != '')
 				  BEGIN 
@@ -430,31 +433,34 @@ SELECT @UpdateCount = COUNT(DISTINCT intParentId) FROM @tblTempOne WHERE strOldD
 	  OR (@SalesStartDate IS NOT NULL)
 	  OR (@SalesEndDate IS NOT NULL))
 	  BEGIN
-	       set @SQL1 = ' update tblICItemSpecialPricing set '
+	       SET @SQL1 = ' UPDATE tblICItemSpecialPricing SET '
 
-		   if (@SalesPrice IS NOT NULL)
+		   IF (@SalesPrice IS NOT NULL)
            BEGIN
-             set @SQL1 = @SQL1 + 'dblUnitAfterDiscount = ''' + LTRIM(@SalesPrice) + ''''
+             SET @SQL1 = @SQL1 + 'dblUnitAfterDiscount = ''' + LTRIM(@SalesPrice) + ''''
 	       END
 
-		   if (@SalesStartDate IS NOT NULL)  
-          BEGIN
-              if (@SalesPrice IS NOT NULL)
-                  set @SQL1 = @SQL1 + ' , dtmBeginDate = ''' + LTRIM(@SalesStartDate) + ''''
-             else
-                set @SQL1 = @SQL1 + ' dtmBeginDate = ''' + LTRIM(@SalesStartDate) + '''' 
+		   IF (@SalesStartDate IS NOT NULL)  
+           BEGIN
+              IF (@SalesPrice IS NOT NULL)
+                  SET @SQL1 = @SQL1 + ' , dtmBeginDate = ''' + LTRIM(@SalesStartDate) + ''''
+             ELSE
+                SET @SQL1 = @SQL1 + ' dtmBeginDate = ''' + LTRIM(@SalesStartDate) + '''' 
 	       END
 
-		   if (@SalesEndDate IS NOT NULL)  
-          BEGIN
-              if ((@SalesPrice IS NOT NULL)
+		   IF (@SalesEndDate IS NOT NULL)  
+           BEGIN
+              IF ((@SalesPrice IS NOT NULL)
 			   OR (@SalesStartDate IS NOT NULL))
-                  set @SQL1 = @SQL1 + ' , dtmEndDate = ''' + LTRIM(@SalesEndDate) + ''''
-             else
-                  set @SQL1 = @SQL1 + ' dtmEndDate = ''' + LTRIM(@SalesEndDate) + '''' 
+                  SET @SQL1 = @SQL1 + ' , dtmEndDate = ''' + LTRIM(@SalesEndDate) + ''''
+              ELSE
+                  SET @SQL1 = @SQL1 + ' dtmEndDate = ''' + LTRIM(@SalesEndDate) + '''' 
 	       END
 
-		   set @SQL1 = @SQL1 + ' where 1=1 ' 
+		   --Update dtmDateModified, intModifiedByUserId
+		   SET @SQL1 = @SQL1 + ' , dtmDateModified = ''' + CAST(GETUTCDATE() AS NVARCHAR(50)) + ''' , intModifiedByUserId = ' + CAST(@currentUserId AS NVARCHAR(50)) + ''
+
+		   SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
 
 		   if (@Location IS NOT NULL AND @Location != '')
 	          BEGIN 
@@ -610,15 +616,18 @@ SELECT @UpdateCount = COUNT(DISTINCT intParentId) FROM @tblTempOne WHERE strOldD
 
 		DELETE FROM tblSTMassUpdateReportMaster
 
-		INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData)
+		INSERT INTO tblSTMassUpdateReportMaster(strLocationName, UpcCode, ItemDescription, ChangeDescription, OldData, NewData, ParentId, ChildId)
 		SELECT strLocation
 			  , strUpc
 			  , strItemDescription
 			  , strChangeDescription
 			  , strOldData
-			  , strNewData 
+			  , strNewData
+			  , intParentId
+			  , intChildId 
 		FROM @tblTempOne
 		WHERE strOldData != strNewData
+
 
 		--OLD
 		--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount		    

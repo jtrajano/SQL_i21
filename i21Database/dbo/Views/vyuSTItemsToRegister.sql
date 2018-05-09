@@ -9,24 +9,31 @@ AS
 -- 5. Pricing
 -- 6. Special Pricing
 
-SELECT DISTINCT I.dtmDateModified
-, I.intItemId
-, EM.intEntityId
-, URN.ysnClick
-, SMUS.intCompanyLocationId
+SELECT DISTINCT 
+    x.dtmDateModified
+	, x.dtmDateCreated
+	, I.intItemId
+	, EM.intEntityId
+	, URN.ysnClick
+	, SMUS.intCompanyLocationId
 FROM dbo.tblICItem AS I 
 INNER JOIN dbo.tblICCategory AS Cat ON Cat.intCategoryId = I.intCategoryId 
 INNER JOIN 
 (
-
-	SELECT DISTINCT I.intItemId
-                  , I.dtmDateModified
-				  , I.dtmDateCreated
-				  , I.intCreatedByUserId
-				  , I.intModifiedByUserId 
-	FROM tblICItem I
-	JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
+	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItem
+	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
+	 UNION
+	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItemLocation
+	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
+	 UNION
+	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItemPricing
+	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
+	 UNION
+	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItemSpecialPricing
+	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
+	 UNION
+	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItemAccount
+	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
 
 ) AS x ON x.intItemId = I.intItemId 
 INNER JOIN dbo.tblICItemLocation AS IL ON IL.intItemId = I.intItemId 
@@ -42,7 +49,6 @@ INNER JOIN dbo.tblSMUserSecurity AS SMUS ON SMUS.intCompanyLocationId = IL.intLo
 INNER JOIN dbo.tblEMEntity AS EM ON EM.intEntityId = SMUS.intEntityId 
 LEFT OUTER JOIN dbo.tblSTUpdateRegisterNotification AS URN ON URN.intEntityId = EM.intEntityId
 WHERE (I.ysnFuelItem = 0) 
---AND I.dtmDateModified BETWEEN '2015-10-26 16:55:27.023' AND GETDATE()
 AND 
 (
 	x.dtmDateModified BETWEEN ISNULL
@@ -53,21 +59,16 @@ AND
 			WHERE intStoreId = ST.intStoreId
 			ORDER BY intUpdateRegisterHistoryId DESC
 		),
-		DATEADD
 		(
-			HOUR, + 8,
-			--IF dtmDateModified is NULL get date from Auditog
-			(
-				SELECT TOP (1) dtmDate
-				FROM dbo.tblSMAuditLog
-				WHERE strTransactionType = 'Inventory.view.Item'
-				OR strTransactionType = 'Inventory.view.ItemLocation'
-				ORDER BY dtmDate ASC
-			)
+			SELECT TOP (1) dtmDate
+			FROM dbo.tblSMAuditLog
+			WHERE strTransactionType = 'Inventory.view.Item'
+			OR strTransactionType = 'Inventory.view.ItemLocation'
+			ORDER BY dtmDate ASC
 		)
 	)
 	-- Between current date
-	AND GETDATE()
+	AND GETUTCDATE()
 )
 OR 
 (
@@ -79,19 +80,14 @@ OR
 			WHERE intStoreId = ST.intStoreId
 			ORDER BY intUpdateRegisterHistoryId DESC
 		),
-		DATEADD
 		(
-			HOUR, + 8,
-			--IF dtmDateModified is NULL get date from Auditog
-			(
-				SELECT TOP (1) dtmDate
-				FROM dbo.tblSMAuditLog
-				WHERE strTransactionType = 'Inventory.view.Item'
-				OR strTransactionType = 'Inventory.view.ItemLocation'
-				ORDER BY dtmDate ASC
-			)
+			SELECT TOP (1) dtmDate
+			FROM dbo.tblSMAuditLog
+			WHERE strTransactionType = 'Inventory.view.Item'
+			OR strTransactionType = 'Inventory.view.ItemLocation'
+			ORDER BY dtmDate ASC
 		)
 	)
 	-- Between current date
-	AND GETDATE()
+	AND GETUTCDATE()
 )

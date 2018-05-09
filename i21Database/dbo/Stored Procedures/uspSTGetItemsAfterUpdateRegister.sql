@@ -37,19 +37,17 @@ BEGIN TRY
 
 	--Insert to table1
 	INSERT INTO @tablePricebookFileOne
-	SELECT
-		DISTINCT I.intItemId
-		, CASE
-			WHEN I.dtmDateCreated IS NOT NULL AND I.dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Created'
-			WHEN I.dtmDateModified IS NOT NULL AND I.dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Updated'
-		  END AS strActionType
-		, CASE
-			WHEN I.dtmDateCreated IS NOT NULL AND I.dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN I.dtmDateCreated
-			WHEN I.dtmDateModified IS NOT NULL AND I.dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN I.dtmDateModified
-		 END AS dtmDate
-	FROM tblICItem I
-	WHERE I.dtmDateCreated IS NOT NULL
-	OR I.dtmDateModified IS NOT NULL
+	SELECT DISTINCT intItemId
+					, CASE
+							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Created' ELSE 'Updated'
+					  END AS strActionType
+					, CASE
+							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN dtmDateCreated ELSE dtmDateModified
+					  END AS dtmDate
+	FROM vyuSTItemsToRegister
+	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
+	OR dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
+	 
 	--SELECT
 	--	DISTINCT CAST(strRecordNo as int) [intItemId]
 	--	, strActionType
@@ -72,10 +70,24 @@ BEGIN TRY
 	--			  OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0  
 	--			  OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0 
 	--			  OR CHARINDEX('Created', strJsonData) > 0
+
 	--			  OR CHARINDEX('dblStandardCost',strJsonData) > 0
-	--			  OR CHARINDEX('intCategoryId',strJsonData) > 0 )	
-	--AND dtmDate BETWEEN DATEADD(HOUR,-8,(@dtmBeginningChangeDate)) AND DATEADD(HOUR,-8,(@dtmEndingChangeDate))
+	--			  OR CHARINDEX('intCategoryId',strJsonData) > 0 )
 	
+	--AND dtmDate BETWEEN DATEADD(HOUR,-8,(@dtmBeginningChangeDate)) AND DATEADD(HOUR,-8,(@dtmEndingChangeDate))
+
+
+
+
+	----Insert to table2
+	--INSERT INTO @tablePricebookFileTwo
+	--SELECT t1.intItemId, t1.strActionType, t1.dtmDate
+	--	FROM(
+	--		SELECT *,
+	--			rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+	--		FROM @tablePricebookFileOne as t
+	--)t1
+	--WHERE rn = 1
 
 
 	--PricebookFile @StoreId @Register, @Category, @BeginingChangeDate, @EndingChangeDate, @ExportEntirePricebookFile
