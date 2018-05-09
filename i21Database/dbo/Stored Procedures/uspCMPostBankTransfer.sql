@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspCMPostBankTransfer
+﻿CREATE PROCEDURE [dbo].[uspCMPostBankTransfer]
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
@@ -30,6 +29,10 @@ CREATE TABLE #tmpGLDetail (
 	,[intAccountId] [int] NULL
 	,[dblDebit] [numeric](18, 6) NULL
 	,[dblCredit] [numeric](18, 6) NULL
+
+	,[dblDebitForeign] [numeric](18, 6) NULL
+	,[dblCreditForeign] [numeric](18, 6) NULL
+
 	,[dblDebitUnit] [numeric](18, 6) NULL
 	,[dblCreditUnit] [numeric](18, 6) NULL
 	,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
@@ -76,7 +79,8 @@ DECLARE
 	,@ysnBankAccountIdInactive AS BIT
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
-	
+	,@dblRate DECIMAL (18,6)
+	,@dblHistoricRate DECIMAL (18,6)
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
 	,@GLEntries AS RecapTableType
@@ -97,6 +101,8 @@ SELECT	TOP 1
 		,@intBankAccountIdFrom = intBankAccountIdFrom
 		,@intBankAccountIdTo = intBankAccountIdTo
 		,@intCreatedEntityId = intEntityId
+		,@dblRate = dblRate
+		,@dblHistoricRate = dblHistoricRate
 FROM	[dbo].tblCMBankTransfer 
 WHERE	strTransactionId = @strTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback	
@@ -267,6 +273,10 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+
+			,[dblDebitForeign]
+			,[dblCreditForeign]
+
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -291,14 +301,18 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblAmount
+			,[dblCredit]			= A.dblAmount * ISNULL(A.dblRate,1) 
+
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= A.dblAmount
+
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= ISNULL(A.dblRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -316,6 +330,7 @@ BEGIN
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	
+	
 	-- 2. DEBIT SIdE (TARGET OF THE FUND)
 	UNION ALL 
 	SELECT	[strTransactionId]		= @strTransactionId
@@ -323,15 +338,21 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= A.dblAmount
+			,[dblDebit]				=  A.dblAmount * ISNULL(A.dblHistoricRate, 1) -- 0.8 --ISNULL( A.dblHistoricRate,1) -- ISNULL(A.dblHistoricRate,1) * A.dblAmount 
 			,[dblCredit]			= 0
+
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= 0
+
+
+
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate, 1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -348,6 +369,9 @@ BEGIN
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 	WHERE	A.strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
+
+	if(@dblRate <> @dblHistoricRate)
+		EXEC [uspCMInsertGainLossBankTransfer] 
 	
 END
 ELSE IF @ysnPost = 0

@@ -20,6 +20,8 @@
 	[ysnRecurring]             BIT             DEFAULT 0 NOT NULL,
 	[ysnDelete]				   BIT             NULL,
 	[dtmDateDeleted]		   DATETIME		   NULL,
+	[dblRate]                  DECIMAL (18, 6) DEFAULT 1 NULL,
+	[dblHistoricRate]          DECIMAL (18, 6) DEFAULT 1 NULL,
     [intConcurrencyId]         INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),

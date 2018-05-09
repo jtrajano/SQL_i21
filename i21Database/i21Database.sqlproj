@@ -6516,6 +6516,8 @@
     <Build Include="dbo\Views\vyuARTransactionSummary.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckBasisInfo.sql" />
     <Build Include="dbo\Views\vyuICGetLocationBins.sql" />
+    <Build Include="dbo\Functions\fnCMGetBankAccountHistoricRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMInsertGainLossBankTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
