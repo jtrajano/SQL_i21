@@ -241,7 +241,7 @@ SET
 	,[dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
 	,[dblAmountDue]			= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
 									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo'
+										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblProvisionalAmount, @ZeroDecimal) > 0
 												THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) - (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
 												ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal)) - ISNULL(dblProvisionalAmount, @ZeroDecimal)
 										END
@@ -249,7 +249,7 @@ SET
 								  END
 	,[dblBaseAmountDue]		= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
 									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo'
+										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblProvisionalAmount, @ZeroDecimal) > 0
 												THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
 												ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal)) - ISNULL(dblBaseProvisionalAmount, @ZeroDecimal)
 										END
