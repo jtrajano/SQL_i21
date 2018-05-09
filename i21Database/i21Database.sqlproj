@@ -6514,6 +6514,7 @@
     <Build Include="dbo\Stored Procedures\uspLGProcessWeightClaimAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRSalesIntransitWOPickLot.sql" />
     <Build Include="dbo\Views\vyuARTransactionSummary.sql" />
+    <Build Include="dbo\Views\vyuICGetLocationBins.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
