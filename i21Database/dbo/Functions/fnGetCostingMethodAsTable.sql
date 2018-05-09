@@ -13,7 +13,7 @@ RETURN (
 			CostingMethod =  COALESCE(ItemLevel.intCostingMethod, ItemLocation.intCostingMethod, Category.intCostingMethod)
 	FROM	(
 				SELECT	intCostingMethod =  
-							CASE	WHEN Item.strLotTracking IN ('Yes - Manual', 'Yes - Serial Number','Yes - Manual/Serial Number') THEN (SELECT intCostingMethodId FROM tblICCostingMethod WHERE strCostingMethod = 'LOT COST')
+							CASE	WHEN Item.strLotTracking IN ('Yes - Manual', 'Yes - Serial Number','Yes - Manual/Serial Number') THEN 4
 									ELSE NULL 
 							END,
 						intCategoryId
