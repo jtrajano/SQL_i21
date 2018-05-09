@@ -10,6 +10,7 @@ SELECT ST.intStoreId
 , IT.intItemId
 , IT.strItemNo
 , IT.strDescription strItemDescription
+, CH.dtmCheckoutDate
 , SUM(CPT.dblQuantity) dblQuantity
 , SUM(CPT.dblAmount) dblAmount
 , SUM(CPT.dblAmount) / SUM(CPT.dblQuantity) dblPrice
@@ -19,4 +20,4 @@ INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CPT.intPumpCardCouponId
 INNER JOIN tblICItem IT ON IT.intItemId = IU.intItemId 
 INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
 WHERE CPT.dblAmount > 0	
-GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CAT.intCategoryId, CAT.strDescription, IT.intItemId, IT.strItemNo, IT.strDescription
+GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CAT.intCategoryId, CAT.strDescription, IT.intItemId, IT.strItemNo, IT.strDescription, CH.dtmCheckoutDate
