@@ -6518,6 +6518,9 @@
     <Build Include="dbo\Views\vyuICGetLocationBins.sql" />
     <Build Include="dbo\Functions\fnCMGetBankAccountHistoricRate.sql" />
     <Build Include="dbo\Stored Procedures\uspCMInsertGainLossBankTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryByTraderSub.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryByTrader.sql" />
+    <Build Include="dbo\Views\vyuRKPositionReportContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
