@@ -3,6 +3,7 @@
 AS
 BEGIN
 
+DECLARE @intAccountCategoryId INT
 DECLARE @JsonStringAuditLog AS NVARCHAR(MAX) = ''
 DECLARE @intKeyId AS INT
 DECLARE @intParentId INT
@@ -21,6 +22,37 @@ N'{
 	"keyValue": {KEYVALUE},
 	"changeDescription": "{CHANGEDESC}",
 	"hidden": false
+},'
+
+DECLARE @strJsonFormatItemAccounts AS NVARCHAR(MAX) =
+N'{
+    "action": "Updated",
+    "change": "Updated - Record: {TO}",
+    "keyValue": {KEYVALUE},
+    "iconCls": "small-tree-modified",
+    "children": [
+         {
+             "change": "{CHANGECOLUMN}",
+             "from": "{FROM}",
+             "to": "{TO}",
+             "leaf": true,
+             "iconCls": "small-gear",
+             "isField": true,
+             "keyValue": {KEYVALUE},
+             "associationKey": "tblICItemAccounts",
+             "changeDescription": "Account Id",
+             "hidden": false
+          }
+    ]
+},'
+
+DECLARE @strJsonFormatCreateNewItemAccounts AS NVARCHAR(MAX) =
+N'{
+	"action": "Created",
+    "change": "Created - Record: {ACCOUNTID}",
+    "keyValue": {CREATEDID},
+    "iconCls": "small-new-plus",
+    "leaf": true
 },'
 
 --===================================================================================================
@@ -49,15 +81,20 @@ DECLARE @strItemChildrenJson AS NVARCHAR(MAX) = ''
 --===================================================================================================
 
 
-
 --===================================================================================================
 -- START Declare tblICItemAccount
 --===================================================================================================
+--UPDATE
 DECLARE @strItemAccountAuditLogChildren AS NVARCHAR(MAX) = ''
---DECLARE @strItemNo AS NVARCHAR(1000) = ''
 DECLARE @strItemAccountChangeColumnName AS NVARCHAR(1000) = ''
 DECLARE @strItemAccountTempJson AS NVARCHAR(MAX) = ''
 DECLARE @strItemAccountChildrenJson AS NVARCHAR(MAX) = ''
+
+--CREATE NEW
+DECLARE @strNewItemAccountAuditLogChildren AS NVARCHAR(MAX) = ''
+DECLARE @strNewItemAccountChangeColumnName AS NVARCHAR(1000) = ''
+DECLARE @strNewItemAccountTempJson AS NVARCHAR(MAX) = ''
+DECLARE @strNewItemAccountChildrenJson AS NVARCHAR(MAX) = ''
 --===================================================================================================
 -- END Declare tblICItemAccount
 --===================================================================================================
@@ -89,6 +126,9 @@ BEGIN
 	SELECT TOP 1 @intParentId = intParentId FROM @tblTemp
 	SET @strItemTempJson = ''
 	SET @strItemChildrenJson = ''
+	
+	SET @strItemAccountTempJson = ''
+		SET @strItemAccountChildrenJson = ''
 
 	WHILE EXISTS(SELECT * FROM @tblTemp WHERE intParentId = @intParentId)
 	BEGIN
@@ -96,8 +136,7 @@ BEGIN
 		
 		SET @strItemLocationTempJson = ''
 		SET @strItemLocationChildrenJson = ''
-		SET @strItemAccountTempJson = ''
-		SET @strItemAccountChildrenJson = ''
+		
 
 		WHILE EXISTS(SELECT * FROM @tblTemp WHERE intChildId = @intChildId)
 		BEGIN
@@ -531,7 +570,7 @@ BEGIN
 			-- 'Cost of Goods Sold Account'
 			ELSE IF (@strChangeDescription = 'Cost of Goods Sold Account' OR @strChangeDescription = 'Sales Account')
 					BEGIN
-						SET @strItemAccountTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormat
+						SET @strItemAccountTempJson = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@strJsonFormatItemAccounts
 																			   , '{CHANGECOLUMN}', 'strAccountId')
 																			   , '{KEYVALUE}', CAST(@intChildId AS NVARCHAR(50)))
 																			   , '{FROM}', @strFromData)
@@ -539,8 +578,33 @@ BEGIN
 																			   , '{CHANGEDESC}', @strChangeDescription)
 						SET @strItemAccountChildrenJson = @strItemAccountChildrenJson + @strItemAccountTempJson
 					END
+
+			ELSE IF (@strChangeDescription = 'Add New Cost of Goods Sold Account')
+					BEGIN
+						
+						IF EXISTS(SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cost of Goods')
+							BEGIN
+									SET @intAccountCategoryId =  (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cost of Goods')
+									SET @strNewItemAccountTempJson = REPLACE(REPLACE(@strJsonFormatCreateNewItemAccounts
+																						   , '{ACCOUNTID}', @strToData)
+																						   , '{CREATEDID}', (SELECT intItemAccountId FROM tblICItemAccount WHERE intItemId = @intParentId AND intAccountCategoryId = @intAccountCategoryId))
+									SET @strNewItemAccountChildrenJson = @strNewItemAccountChildrenJson + @strNewItemAccountTempJson
+							END
+						
+					END
+			ELSE IF (@strChangeDescription = 'Add New Sales Account')
+					BEGIN
+						IF EXISTS(SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Sales Account')
+							BEGIN
+									SET @intAccountCategoryId =  (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Sales Account')
+									SET @strNewItemAccountTempJson = REPLACE(REPLACE(@strJsonFormatCreateNewItemAccounts
+																						   , '{ACCOUNTID}', @strToData)
+																						   , '{CREATEDID}', (SELECT intItemAccountId FROM tblICItemAccount WHERE intItemId = @intParentId AND intAccountCategoryId = @intAccountCategoryId))
+									SET @strNewItemAccountChildrenJson = @strNewItemAccountChildrenJson + @strNewItemAccountTempJson
+							END
+					END
 			--===================================================================================================
-			-- END Audit Log tblICItem
+			-- END Audit Log tblICItemAccount
 			--===================================================================================================
 
 
@@ -596,22 +660,29 @@ BEGIN
 						)
 			END
 
-		
-		IF(@strItemAccountChildrenJson != '')
+
+		IF(@strNewItemAccountChildrenJson != '')
 			BEGIN
 						SET @strItemNo = ISNULL((SELECT strItemNo FROM tblICItem WHERE intItemId = @intParentId), '')
 
-						SET @strItemAccountChildrenJson = left(@strItemAccountChildrenJson, len(@strItemAccountChildrenJson)-1)
+						SET @strNewItemAccountChildrenJson = left(@strNewItemAccountChildrenJson, len(@strNewItemAccountChildrenJson)-1)
 
 						-- INSERT TO Audit Log
 						SET @JsonStringAuditLog = 
 						N'{
 							"action": "Updated",
 							"change": "Updated - Record: ' + @strItemNo + '",
-							"keyValue": ' + CAST(@intChildId AS NVARCHAR(50)) + ', 
+							"keyValue": ' + CAST(@intParentId AS NVARCHAR(50)) + ',
 							"iconCls": "small-tree-modified",
 							"children": [
-							' + @strItemAccountChildrenJson + '
+								{
+									"change": "tblICItemAccounts",
+									"children": [
+										' + @strNewItemAccountChildrenJson + '
+									],
+									"iconCls": "small-tree-grid",
+									"changeDescription": "GL Accounts can be set up for Category instead of every item. Only accounts specific to the item is required to be set up here. GL accounts setup in Item overrides Category."
+								}
 							]
 						}'
 
@@ -619,8 +690,8 @@ BEGIN
 						INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
 						VALUES(
 								'Updated'
-								, 'Inventory.view.ItemLocation'
-								, @intChildId
+								, 'Inventory.view.Item'
+								, @intParentId
 								, ''
 								, null
 								, @JsonStringAuditLog
@@ -629,6 +700,7 @@ BEGIN
 								, 1
 						)
 			END
+
 
 
 		DELETE FROM @tblTemp WHERE intChildId = @intChildId
@@ -670,6 +742,42 @@ BEGIN
 						, 1
 					 )
 			END
+	
+
+	IF(@strItemAccountChildrenJson != '')
+			BEGIN
+						SET @strItemNo = ISNULL((SELECT strItemNo FROM tblICItem WHERE intItemId = @intParentId), '')
+
+						SET @strItemAccountChildrenJson = left(@strItemAccountChildrenJson, len(@strItemAccountChildrenJson)-1)
+
+						-- INSERT TO Audit Log
+						SET @JsonStringAuditLog = 
+						N'{
+							"action": "Updated",
+							"change": "Updated - Record: ' + @strItemNo + '",
+							"keyValue": ' + CAST(@intParentId AS NVARCHAR(50)) + ',
+							"iconCls": "small-tree-modified",
+							"children": [
+								' + @strItemAccountChildrenJson + '
+							]
+						}'
+
+
+						INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+						VALUES(
+								'Updated'
+								, 'Inventory.view.Item'
+								, @intParentId
+								, ''
+								, null
+								, @JsonStringAuditLog
+								, GETUTCDATE()
+								, @currentUserId
+								, 1
+						)
+			END
+
+
 
 
 	DELETE FROM @tblTemp WHERE intParentId = @intParentId
