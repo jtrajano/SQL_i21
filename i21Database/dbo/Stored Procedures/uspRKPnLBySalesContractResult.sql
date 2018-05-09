@@ -441,6 +441,7 @@ UNION
 		LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
 		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
 		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId			
 	WHERE intSContractDetailId = @intSContractDetailId
 	) t
