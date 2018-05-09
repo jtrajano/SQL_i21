@@ -265,7 +265,7 @@ SET
 								  END
 	,[dblBaseAmountDue]		= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
 									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblProvisionalAmount, @ZeroDecimal) > 0
+										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) > 0
 												THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
 												ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal)) - ISNULL(dblBaseProvisionalAmount, @ZeroDecimal)
 										END
