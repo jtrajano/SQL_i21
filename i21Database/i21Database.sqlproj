@@ -6521,6 +6521,8 @@
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryByTraderSub.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryByTrader.sql" />
     <Build Include="dbo\Views\vyuRKPositionReportContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDailyAverage.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
