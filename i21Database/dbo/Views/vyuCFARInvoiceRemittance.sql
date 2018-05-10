@@ -1,6 +1,4 @@
-﻿
-
-CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
+﻿CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
 AS
 
 
@@ -21,6 +19,11 @@ FROM
 ,strCFEmailDistributionOption			AS strEmailDistributionOption	
 ,strCustomerNumber						AS strCustomerNumber	
 ,intEntityUserId	
+, CASE 
+			WHEN (ISNULL(strCFEmail,'') != '') AND (strCFEmailDistributionOption like '%CF Invoice%') THEN CAST(1 AS BIT)
+			ELSE CAST(0 AS BIT)
+			END
+			AS ysnEmail
 FROM            dbo.tblARCustomerStatementStagingTable 
 GROUP BY 
 intEntityCustomerId, 
@@ -48,3 +51,6 @@ from
 tblARCustomerStatementStagingTable
 group by intEntityCustomerId) as tbl2
 ON tbl2.intEntityCustomerId = tbl1.intCustomerId
+GO
+
+
