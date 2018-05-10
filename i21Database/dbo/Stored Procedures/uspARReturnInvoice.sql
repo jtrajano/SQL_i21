@@ -193,7 +193,7 @@ BEGIN TRY
 		,[ysnForgiven]							= ARI.[ysnForgiven]
 		,[ysnCalculated]						= ARI.[ysnCalculated]
 		,[ysnSplitted]							= ARI.[ysnSplitted]
-		,[ysnImpactInventory]					= ARI.[ysnImpactInventory]
+		,[ysnImpactInventory]					= 1 --ARI.[ysnImpactInventory]
 		,[intPaymentId]							= ARI.[intPaymentId]
 		,[intSplitId]							= ARI.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ARI.[intLoadDistributionHeaderId]
