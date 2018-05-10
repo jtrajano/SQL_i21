@@ -46,14 +46,20 @@ BEGIN
 	BEGIN 
 		SELECT TOP 1 
 				@intItemId = Detail.intItemId			
-		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+		FROM	(SELECT Detail.intItemId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 				LEFT JOIN dbo.tblICItemUOM ItemUOM
 					ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
-		WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-				AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL 
+				WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+					AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL
+				UNION ALL
+				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
+					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId) IS NULL
+				) Detail
 	
 		IF @intItemId IS NOT NULL 
 		BEGIN
@@ -65,6 +71,7 @@ BEGIN
 			EXEC uspICRaiseError 80039, @strItemNo;
 			RETURN -1
 		END
+
 
 	END
 
@@ -373,7 +380,7 @@ BEGIN
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
 										,Detail.intItemUOMId
-										,ItemPricing.dblLastCost
+										,ISNULL(Detail.dblCost, ItemPricing.dblLastCost)
 									)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -445,7 +452,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= SourceTransaction.dblQty * -1
 			,dblUOMQty				= NewItemUOM.dblUnitQty
-			,dblCost				= SourceTransaction.dblCost
+			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+										dbo.fnGetItemStockUOM(Detail.intNewItemId)
+										,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
+										,Detail.dblNewCost
+									)
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -488,7 +499,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= SourceTransaction.dblQty * -1
 			,dblUOMQty				= NewItemUOM.dblUnitQty
-			,dblCost				= SourceTransaction.dblCost
+			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -568,7 +579,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= SourceTransaction.dblQty * -1
 			,dblUOMQty				= NewItemUOM.dblUnitQty
-			,dblCost				= SourceTransaction.dblCost
+			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -611,7 +622,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= SourceTransaction.dblQty * -1
 			,dblUOMQty				= NewItemUOM.dblUnitQty
-			,dblCost				= SourceTransaction.dblCost
+			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+										dbo.fnGetItemStockUOM(Detail.intNewItemId)
+										,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
+										,Detail.dblNewCost
+									)
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
