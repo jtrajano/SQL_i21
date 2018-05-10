@@ -22,6 +22,7 @@ SELECT
 	,HW.[intHours]
 	,HW.[dblRate]					AS "dblPrice"
 	,HW.[intHours] * HW.[dblRate]	AS "dblTotal"
+	,EML.[intWarehouseId] 			AS "intEntityWarehouseId"
 FROM
 	tblHDJobCode JC
 INNER JOIN 
