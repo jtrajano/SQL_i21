@@ -379,7 +379,7 @@ END
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId
 	
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 
 	UPDATE	SC
 	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber

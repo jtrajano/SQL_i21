@@ -500,7 +500,7 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 		
 	UPDATE	SC
 	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
@@ -568,7 +568,6 @@ BEGIN TRY
         CLOSE lotCursor;
         DEALLOCATE lotCursor;
     END
-
 
 	-- VOUCHER INTEGRATION
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
