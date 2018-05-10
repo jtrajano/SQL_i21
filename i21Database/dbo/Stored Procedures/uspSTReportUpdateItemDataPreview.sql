@@ -1348,8 +1348,8 @@ BEGIN TRY
 	 --PRINT '@intNewGLPurchaseAccount'
 	 -----------------------------------Handle Dynamic Query 33
 	 IF (@intNewGLPurchaseAccount IS NOT NULL)
-		BEGIN
-			--, '''( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLPurchaseAccount) +' AS INT))'''
+	 BEGIN
+	 --, '''( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@intNewGLPurchaseAccount) +' AS INT))'''
 		    SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
 			(
 				'Cost of Goods Sold Account'
@@ -1369,40 +1369,40 @@ BEGIN TRY
 				, 'IA.intItemAccountId'
 			)
 
+		INSERT @tblTempOne
+		EXEC (@SqlQuery1) 
+
+		-- =====================================================================================================
+		-- START Check if 'Cost of Goods Exist on selected Item records
+		INSERT @tblTempItemGLAccount
+		EXEC (@SqlQuery1) 
+
+		IF NOT EXISTS(SELECT * FROM @tblTempItemGLAccount WHERE strChangeDescription = 'Cost of Goods Sold Account')
+		BEGIN
+			SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
+				(
+					'Add New Cost of Goods Sold Account'
+					, ''''''
+					, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLPurchaseAccount) AS NVARCHAR(50)) +' AS INT))'
+					, @strCompanyLocationId
+					, @strVendorId
+					, @strCategoryId
+					, @Family
+					, @strClassId
+					, @intUpcCode
+					, @strDescription
+					, @dblPriceBetween1
+					, @dblPriceBetween2
+					, 'I.intItemId'
+					, 'IA.intItemAccountId'
+				)
+
+			-- Insert here for getting intItemId's
 			INSERT @tblTempOne
 			EXEC (@SqlQuery1) 
-
-			-- =====================================================================================================
-			-- START Check if 'Cost of Goods Exist on selected Item records
-			INSERT @tblTempItemGLAccount
-			EXEC (@SqlQuery1) 
-
-			IF NOT EXISTS(SELECT * FROM @tblTempItemGLAccount WHERE strChangeDescription = 'Cost of Goods Sold Account')
-			BEGIN
-				SET @SqlQuery1 = dbo.fnSTDynamicQueryItemData
-					(
-						'Add New Cost of Goods Sold Account'
-						, ''''''
-						, '( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  CAST(LTRIM(@intNewGLPurchaseAccount) AS NVARCHAR(50)) +' AS INT))'
-						, @strCompanyLocationId
-						, @strVendorId
-						, @strCategoryId
-						, @Family
-						, @strClassId
-						, @intUpcCode
-						, @strDescription
-						, @dblPriceBetween1
-						, @dblPriceBetween2
-						, 'I.intItemId'
-						, 'IA.intItemAccountId'
-					)
-
-				-- Insert here for getting intItemId's
-				INSERT @tblTempOne
-				EXEC (@SqlQuery1) 
-			END
-			-- END Check if 'Cost of Goods Exist on selected Item records
-			-- =====================================================================================================
+		END
+		-- END Check if 'Cost of Goods Exist on selected Item records
+		-- =====================================================================================================
 		
 	 END
 
@@ -2582,7 +2582,7 @@ BEGIN
 		  , strOldData
 		  , strNewData
    FROM @tblTempOne
-   ORDER BY strLocation, strItemDescription, strChangeDescription
+   ORDER BY strItemDescription, strChangeDescription
 
 
    --DELETE FROM @tblTempOne

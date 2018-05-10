@@ -378,6 +378,8 @@ BEGIN
 					BEGIN
 						UPDATE dbo.tblICItemLocation
 						SET intVendorId = @intEntityVendorId
+						, dtmDateModified = GETUTCDATE() 
+						, intModifiedByUserId = @intEntityId
 						FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 							 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 							 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -425,6 +427,8 @@ BEGIN
 			BEGIN
 				UPDATE dbo.tblICItemLocation
 				SET strDescription = @PosDescription
+				, dtmDateModified = GETUTCDATE() 
+				, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -474,6 +478,8 @@ BEGIN
 				BEGIN
 					UPDATE dbo.tblICItemLocation
 					SET intFamilyId = @FamilyId
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
 					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -547,6 +553,8 @@ BEGIN
 				BEGIN
 					UPDATE dbo.tblICItemLocation
 					SET intClassId = @ClassId
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
 					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -669,6 +677,8 @@ BEGIN
 			BEGIN
 				UPDATE dbo.tblICItem
 				SET strDescription = @strDescription
+				, dtmDateModified = GETUTCDATE() 
+				, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -701,7 +711,9 @@ BEGIN
 			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Category')
 			BEGIN
 				UPDATE dbo.tblICItem
-				SET intCategoryId = @intCategoryId
+					SET intCategoryId = @intCategoryId
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -743,7 +755,9 @@ BEGIN
 			BEGIN
 
 				UPDATE dbo.tblICItemPricing
-						SET dblSalePrice = @dblSalePrice
+					SET dblSalePrice = @dblSalePrice
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing IP				JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId				JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId				JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId				JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId				WHERE intItemPricingId = @intItemPricingId
 
 				 --GET OLD and NEW data
@@ -763,6 +777,8 @@ BEGIN
 
 				UPDATE dbo.tblICItemPricing
 						SET dblLastCost = @dblLastCost
+						, dtmDateModified = GETUTCDATE() 
+						, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing IP				JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId				JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId				JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId				JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId				WHERE intItemPricingId = @intItemPricingId
 
 				 --GET OLD and NEW data
@@ -791,8 +807,8 @@ BEGIN
 				IF(@ItemVendorProductChangeType = 'Added Vendor Item')
 				BEGIN
 
-					 INSERT INTO tblICItemVendorXref (intItemId,intItemLocationId,intVendorId,strVendorProduct)
-					 VALUES(@intItemId,@intItemLocationId,@intEntityVendorId,@strVendorProduct)
+					 INSERT INTO tblICItemVendorXref (intItemId, intItemLocationId, intVendorId, strVendorProduct, dtmDateCreated, intCreatedByUserId)
+					 VALUES(@intItemId, @intItemLocationId, @intEntityVendorId, @strVendorProduct, GETUTCDATE(), @intEntityId)
 					 
 					 -- SET new @intItemVendorXrefId
 					 SELECT TOP 1 @intItemVendorXrefId = intItemVendorXrefId FROM tblICItemVendorXref
@@ -814,7 +830,9 @@ BEGIN
 				ELSE IF(@ItemVendorProductChangeType = 'Updated Vendor Item')
 				BEGIN
 					UPDATE dbo.tblICItemVendorXref
-					SET strVendorProduct = @strVendorProduct
+						SET strVendorProduct = @strVendorProduct
+						, dtmDateModified = GETUTCDATE() 
+						, intModifiedByUserId = @intEntityId
 					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
