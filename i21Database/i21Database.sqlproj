@@ -6322,6 +6322,7 @@
     <Build Include="dbo\Tables\tblCFTransactionTaxType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
