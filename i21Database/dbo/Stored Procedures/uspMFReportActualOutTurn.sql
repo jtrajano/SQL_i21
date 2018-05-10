@@ -5,6 +5,12 @@ DECLARE @strProcessName NVARCHAR(50)
 	,@strWeightUOM NVARCHAR(50)
 	,@xmlDocumentId INT
 	,@strProcessToDate NVARCHAR(50)
+DECLARE @strCompanyName NVARCHAR(100)
+	,@strCompanyAddress NVARCHAR(100)
+	,@strCity NVARCHAR(25)
+	,@strState NVARCHAR(50)
+	,@strZip NVARCHAR(12)
+	,@strCountry NVARCHAR(25)
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL
@@ -19,6 +25,47 @@ DECLARE @temp_xml_table TABLE (
 	,[endgroup] NVARCHAR(50)
 	,[datatype] NVARCHAR(50)
 	)
+
+SELECT TOP 1 @strCompanyName = strCompanyName
+	,@strCompanyAddress = strAddress
+	,@strCity = strCity
+	,@strState = strState
+	,@strZip = strZip
+	,@strCountry = strCountry
+FROM tblSMCompanySetup
+
+IF ISNULL(@xmlParam, '') = ''
+BEGIN
+	SELECT '' AS strWorkOrderNo
+		,'' AS dtmPlannedDate
+		,'' AS strProcessName
+		,'' AS strLocationName
+		,'' AS strAddress
+		,'' AS strCity
+		,'' AS strZipPostalCode
+		,'' AS strStateProvince
+		,'' AS strCountry
+		,'' AS strLocationWithAddress
+		,'' AS dtmIssueDate
+		,'' AS strIssueItemNo
+		,'' AS strIssueDescription
+		,'' AS strIssueBatchNumber
+		,'' AS dblIssueQty
+		,'' AS strIssueUOM
+		,'' AS dtmReceiptDate
+		,'' AS strReceiptItemNo
+		,'' AS strReceiptDescription
+		,'' AS strReceiptBatchNumber
+		,'' AS dblReceiptQty
+		,'' AS strReceiptUOM
+		,@strCompanyName AS strCompanyName
+		,@strCompanyAddress AS strCompanyAddress
+		,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+		,@strCountry AS strCompanyCountry
+		,NULL AS intWorkOrderId
+
+	RETURN
+END
 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT
 	,@xmlParam
@@ -64,7 +111,7 @@ SELECT @intUnitMeasureId = intUnitMeasureId
 FROM tblICUnitMeasure
 WHERE strUnitMeasure = @strWeightUOM
 
-SELECT Row_Number() OVER (
+SELECT ROW_NUMBER() OVER (
 		PARTITION BY W.intWorkOrderId ORDER BY W.intWorkOrderId
 		) AS intId
 	,W.intWorkOrderId
@@ -133,20 +180,20 @@ JOIN tblICLot L ON L.intLotId = WP.intLotId
 JOIN tblICItemUOM IU ON IU.intItemId = WP.intItemId
 	AND IU.intUnitMeasureId = @intUnitMeasureId
 LEFT JOIN tblICItem I ON I.intItemId = L.intItemId
-WHERE MP.strProcessName = IsNULL(@strProcessName, MP.strProcessName)
+WHERE MP.strProcessName = ISNULL(@strProcessName, MP.strProcessName)
 	AND W.dtmPlannedDate BETWEEN @strProcessDate
 		AND @strProcessToDate
 
-SELECT IsNULL(S.strWorkOrderNo, R.strWorkOrderNo) AS strWorkOrderNo
-	,IsNULL(S.dtmPlannedDate, R.dtmPlannedDate) AS dtmPlannedDate
-	,IsNULL(S.strProcessName, R.strProcessName) AS strProcessName
-	,IsNULL(S.strLocationName, R.strLocationName) AS strLocationName
-	,IsNULL(S.strAddress, R.strAddress) AS strAddress
-	,IsNULL(S.strCity, R.strCity) AS strCity
-	,IsNULL(S.strZipPostalCode, R.strZipPostalCode) AS strZipPostalCode
-	,IsNULL(S.strStateProvince, R.strStateProvince) AS strStateProvince
-	,IsNULL(S.strCountry, R.strCountry) AS strCountry
-	,IsNULL(S.strLocationName, R.strLocationName) + IsNULL(S.strAddress, R.strAddress) + IsNULL(S.strCity, R.strCity) + IsNULL(S.strZipPostalCode, R.strZipPostalCode) + IsNULL(S.strStateProvince, R.strStateProvince) + IsNULL(S.strCountry, R.strCountry) AS strLocationWithAddress
+SELECT ISNULL(S.strWorkOrderNo, R.strWorkOrderNo) AS strWorkOrderNo
+	,ISNULL(S.dtmPlannedDate, R.dtmPlannedDate) AS dtmPlannedDate
+	,ISNULL(S.strProcessName, R.strProcessName) AS strProcessName
+	,ISNULL(S.strLocationName, R.strLocationName) AS strLocationName
+	,ISNULL(S.strAddress, R.strAddress) AS strAddress
+	,ISNULL(S.strCity, R.strCity) AS strCity
+	,ISNULL(S.strZipPostalCode, R.strZipPostalCode) AS strZipPostalCode
+	,ISNULL(S.strStateProvince, R.strStateProvince) AS strStateProvince
+	,ISNULL(S.strCountry, R.strCountry) AS strCountry
+	,ISNULL(S.strLocationName, R.strLocationName) + ISNULL(S.strAddress, R.strAddress) + ISNULL(S.strCity, R.strCity) + ISNULL(S.strZipPostalCode, R.strZipPostalCode) + ISNULL(S.strStateProvince, R.strStateProvince) + ISNULL(S.strCountry, R.strCountry) AS strLocationWithAddress
 	,S.dtmOrderDate AS dtmIssueDate
 	,S.strItemNo AS strIssueItemNo
 	,S.strDescription AS strIssueDescription
@@ -159,7 +206,12 @@ SELECT IsNULL(S.strWorkOrderNo, R.strWorkOrderNo) AS strWorkOrderNo
 	,R.strParentLotNumber AS strReceiptBatchNumber
 	,R.dblQty AS dblReceiptQty
 	,R.strWeightUOM AS strReceiptUOM
+	,@strCompanyName AS strCompanyName
+	,@strCompanyAddress AS strCompanyAddress
+	,@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip
+	,@strCountry AS strCompanyCountry
+	,ISNULL(S.intWorkOrderId, R.intWorkOrderId) AS intWorkOrderId
 FROM #IssueDetail S
 FULL JOIN #ReceiveDetail R ON S.intId = R.intId
 	AND R.intWorkOrderId = S.intWorkOrderId
-ORDER BY IsNULL(S.intWorkOrderId, R.intWorkOrderId)
+ORDER BY ISNULL(S.intWorkOrderId, R.intWorkOrderId)
