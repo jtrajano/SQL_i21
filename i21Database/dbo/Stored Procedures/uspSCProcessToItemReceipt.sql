@@ -507,7 +507,7 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 		
 	UPDATE	SC
 	SET		SC.intLotId = ICLot.intLotId
@@ -687,105 +687,6 @@ BEGIN TRY
 			,@success = @success OUTPUT
 		END
 	END
-
-	/*
-	IF OBJECT_ID (N'tempdb.dbo.#tmpItemReceiptIds') IS NOT NULL
-        DROP TABLE #tmpItemReceiptIds
-
-	CREATE TABLE #tmpItemReceiptIds (
-		[intEntityVendorId] INT
-		,[intInventoryReceiptChargeId] INT
-		,[dblQtyReceived] NUMERIC(38,20)
-		,[dblCost] NUMERIC(38,20) 
-		,[intTaxGroupId] INT
-		UNIQUE ([intInventoryReceiptChargeId])
-	);
-	INSERT INTO #tmpItemReceiptIds([intEntityVendorId],[intInventoryReceiptChargeId],[dblQtyReceived],[dblCost],[intTaxGroupId]) 
-	SELECT rc.intEntityVendorId
-			,rc.intInventoryReceiptChargeId
-			,CASE 
-				WHEN rc.strCostMethod = 'Amount' THEN rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
-				ELSE dbo.fnSCFreightCalculation(tmp.dblQtyReceived, @dblNetUnits, @dblGrossUnits,null) 
-			END
-			,CASE 
-				WHEN rc.strCostMethod = 'Amount' THEN  rc.dblAmount
-				ELSE rc.dblRate
-			END
-			,rc.intTaxGroupId
-	FROM	#tmpReceiptItem tmp 
-			INNER JOIN tblICInventoryReceiptCharge rc ON rc.intInventoryReceiptId = tmp.intInventoryReceiptId AND rc.strChargesLink = tmp.strChargesLink
-	WHERE	tmp.ysnPosted = 1
-			AND tmp.intInventoryReceiptId = @InventoryReceiptId
-			AND rc.ysnAccrue = 1 
-			AND rc.intEntityVendorId != tmp.intEntityVendorId
-			AND tmp.intOwnershipType = 1
-
-	DECLARE ListThirdPartyVendor CURSOR LOCAL FAST_FORWARD
-	FOR
-	SELECT [intEntityVendorId],[intInventoryReceiptChargeId],[dblQtyReceived],[dblCost],[intTaxGroupId]
-	FROM #tmpItemReceiptIds;
-		
-	OPEN ListThirdPartyVendor;
-
-	-- Initial fetch attempt
-	FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId, @intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId;
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		INSERT INTO @thirdPartyVoucher (
-			[intInventoryReceiptChargeId]
-			,[dblQtyReceived]
-			,[dblCost]
-			,[intTaxGroupId]
-		)
-		VALUES(@intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId)
-
-		SELECT @total = COUNT(*) FROM @thirdPartyVoucher;
-		IF (@total > 0)
-		BEGIN
-			SELECT @intShipFrom = intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @intHaulerId AND ysnDefaultLocation = 1;
-			EXEC [dbo].[uspAPCreateBillData]
-			@userId = @intUserId
-			,@vendorId = @intHaulerId
-			,@type = 1
-			,@voucherDetailReceiptCharge = @thirdPartyVoucher
-			,@shipTo = @intLocationId
-			,@shipFrom = @intShipFrom
-			,@vendorOrderNumber = @vendorOrderNumber
-			,@voucherDate = @voucherDate
-			,@currencyId = @intCurrencyId
-			,@billId = @intBillId OUTPUT
-
-			IF ISNULL(@intBillId , 0) != 0
-			BEGIN
-				SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
-
-				EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
-				@type = N'AccountsPayable.view.Voucher',
-				@transactionEntityId = @intHaulerId,
-				@currentUserEntityId = @intUserId,
-				@locationId = @intLocationId,
-				@amount = @dblTotal,
-				@requireApproval = @requireApproval OUTPUT
-
-				IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
-				BEGIN
-					EXEC [dbo].[uspAPPostBill]
-					@post = 1
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @intBillId
-					,@userId = @intUserId
-					,@success = @success OUTPUT
-				END
-			END
-			DELETE FROM @thirdPartyVoucher
-		END
-		FETCH NEXT FROM ListThirdPartyVendor INTO @intHaulerId,@intInventoryReceiptChargeId, @dblQtyReceived, @dblInventoryReceiptCost, @intTaxId;
-	END
-
-	CLOSE ListThirdPartyVendor;
-	DEALLOCATE ListThirdPartyVendor;
-	*/
 _Exit:
 
 END TRY
