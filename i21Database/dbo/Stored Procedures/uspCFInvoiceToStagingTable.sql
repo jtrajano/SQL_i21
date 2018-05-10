@@ -434,6 +434,7 @@ BEGIN TRY
 			, @ysnPrintFromCF = 1
 			, @strCustomerNumber = @strCustomerNumber		
 			,@intEntityUserId = @intEntityUserId
+			,@ysnReprintInvoice = @ysnReprintInvoice
 
 
 		--SELECT '1',* FROM tblARCustomerStatementStagingTable
