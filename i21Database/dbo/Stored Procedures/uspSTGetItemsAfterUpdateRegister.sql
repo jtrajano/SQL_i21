@@ -384,10 +384,14 @@ BEGIN TRY
 	--WHERE ysnClick = 0
 	-- =============================================================================================
 
+	-- Convert to UTC
+	DECLARE @dtmEndingChangeDateUTC AS DATETIME
+	SET @dtmEndingChangeDateUTC = DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), @dtmEndingChangeDate)
+
 
 	-- Insert to tblSTUpdateRegisterHistory
 	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate)
-    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDate, @dtmEndingChangeDate, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDate)
+    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDate, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDate)
 
 
 	-- Send query to server side 

@@ -60,7 +60,8 @@ AS BEGIN
 						   + '                          AND IP.intItemLocationId = IL.intItemLocationId' + CHAR(13)
 						   + ' JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId ' + CHAR(13)
 
-		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 AND UOM.ysnStockUnit = CAST(1 AS BIT) ' 
+		   --SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 AND UOM.ysnStockUnit = CAST(1 AS BIT) ' 
+		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 ' 
 
 		   IF ((@strCompanyLocationId != '') AND (@strCompanyLocationId IS NOT NULL))
 		   BEGIN 
