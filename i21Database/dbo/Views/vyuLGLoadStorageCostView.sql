@@ -24,6 +24,8 @@ SELECT L.intLoadId,
 	   C.strCurrency,
 	   LSC.intCurrency,
 	   LSC.dblPrice,
+	   LSC.intPriceCurrencyId,
+	   PC.strCurrency AS strPriceCurrency, 
 	   LSC.dblAmount,
 	   LSC.intPriceUOMId,
 	   UM.strUnitMeasure AS strUOM,
@@ -44,4 +46,5 @@ JOIN tblLGLoadStorageCost LSC ON LSC.intLoadDetailLotId = LDL.intLoadDetailLotId
 LEFT JOIN tblICItemUOM PIU ON PIU.intItemUOMId = LSC.intPriceUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = PIU.intUnitMeasureId
 LEFT JOIN tblSMCurrency C ON C.intCurrencyID = LSC.intCurrency
+LEFT JOIN tblSMCurrency PC ON PC.intCurrencyID = LSC.intPriceCurrencyId
 LEFT JOIN vyuCTCostType CT ON CT.intItemId = LSC.intCostType
