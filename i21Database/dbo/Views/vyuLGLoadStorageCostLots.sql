@@ -22,7 +22,13 @@ SELECT L.intLoadId,
 	   WUM.strUnitMeasure AS strWeightUnitMeasure,
 	   LSC.intLoadStorageCostId,
 	   C.strCurrency,
-	   CT.strItemNo AS strCostType
+	   CT.strItemNo AS strCostType,
+	   ISNULL(CD.intCurrencyId,L.intCurrencyId) AS intSeqCurrency,
+	   ISNULL(CC.strCurrency,LC.strCurrency) AS strSeqCurrency,
+	   ISNULL(CC.ysnSubCurrency,LC.ysnSubCurrency) AS ysnSeqSubCurrency,
+	   L.intCurrencyId AS intLoadCurrency,
+	   LC.strCurrency AS strLoadCurrency
+
 
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -37,4 +43,6 @@ JOIN tblICItemUOM WU ON WU.intItemUOMId = LOT.intWeightUOMId
 JOIN tblICUnitMeasure WUM ON WU.intUnitMeasureId = WUM.intUnitMeasureId
 LEFT JOIN tblLGLoadStorageCost LSC ON LSC.intLoadId = L.intLoadId
 LEFT JOIN tblSMCurrency C ON C.intCurrencyID = LSC.intCurrency
+LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = CD.intCurrencyId
+LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
 LEFT JOIN vyuCTCostType CT ON CT.intItemId = LSC.intCostType
