@@ -22,6 +22,8 @@
 	,@Deviation					NUMERIC(18,6)	= NULL OUTPUT
 	,@TermDiscount				NUMERIC(18,6)	= NULL OUTPUT
 	,@TermDiscountBy			NVARCHAR(50)	= NULL OUTPUT
+	,@TermDiscountRate			NUMERIC(18,6)	= NULL OUTPUT
+	,@TermDiscountExempt		BIT             = 0    OUTPUT	
 	,@OriginalQuantity			NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly		BIT				= 0
 	,@ItemPricingOnly			BIT				= 0
@@ -71,6 +73,8 @@ AS
 		,@PricingType					= strPricingType
 		,@TermIdOut						= intTermId
 		,@TermDiscountBy				= strTermDiscountBy
+		,@TermDiscountRate				= dblTermDiscountRate
+		,@TermDiscountExempt			= ysnTermDiscountExempt
 		,@CurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId
         ,@CurrencyExchangeRateType      = strCurrencyExchangeRateType
         ,@CurrencyExchangeRate          = dblCurrencyExchangeRate

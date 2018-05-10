@@ -234,6 +234,7 @@ BEGIN
 			,intProducerId
 			,strCertificateId
 			,strTrackingNumber
+			,strWarehouseRefNo
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -286,6 +287,7 @@ BEGIN
 			,intProducerId			= ItemLot.intProducerId
 			,strCertificateId		= ItemLot.strCertificateId
 			,strTrackingNumber		= ItemLot.strTrackingNumber
+			,strWarehouseRefNo		= ItemLot.strWarehouseRefNo
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

@@ -6,12 +6,12 @@ SELECT storageLocation.intStorageLocationId, stockUOM.intItemId, companyLocation
 	, item.strItemNo, item.strDescription strItemDescription
 	, storageLocation.dblEffectiveDepth, storageLocation.dblPackFactor, storageLocation.dblUnitPerFoot
 	, CAST(SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) AS NUMERIC(16, 8)) dblStock
-	, CAST(storageLocation.dblEffectiveDepth * storageLocation.dblPackFactor * storageLocation.dblUnitPerFoot AS NUMERIC(16, 8)) dblCapacity
-	, CAST(dbo.fnMaxNumeric(storageLocation.dblEffectiveDepth * storageLocation.dblPackFactor * storageLocation.dblUnitPerFoot - dbo.fnMaxNumeric(summary.dblStock, 0), 0) AS NUMERIC(16, 8)) dblAvailable
+	, CAST(storageLocation.dblEffectiveDepth * storageLocation.dblUnitPerFoot AS NUMERIC(16, 8)) dblCapacity
+	, dblAvailable = CAST(dbo.fnMaxNumeric(storageLocation.dblEffectiveDepth * storageLocation.dblUnitPerFoot -  CASE WHEN mrc.dblAirSpaceReading IS NULL THEN dbo.fnMaxNumeric(summary.dblStock, 0) ELSE CAST(((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) END, 0) AS NUMERIC(16, 8))
 	, commodity.strCommodityCode
 	, CAST(ISNULL(mrc.dblAirSpaceReading, 0) AS NUMERIC(16, 8)) dblAirSpaceReading
-	, CAST(((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot * storageLocation.dblPackFactor) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblPhysicalReading
-	, CAST(SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) - ((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot * storageLocation.dblPackFactor) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblStockVariance,
+	, CAST(((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblPhysicalReading
+	, CAST(SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) - ((storageLocation.dblEffectiveDepth - ISNULL(mrc.dblAirSpaceReading, 0)) * storageLocation.dblUnitPerFoot) + storageLocation.dblResidualUnit AS NUMERIC(16, 8)) dblStockVariance,
 	grd.strDiscountId strDiscountCode, grd.strDiscountDescription, smr.dtmDate [dtmReadingDate]
 FROM tblICItemStockUOM stockUOM
 	INNER JOIN tblICItem item ON item.intItemId = stockUOM.intItemId
@@ -20,12 +20,13 @@ FROM tblICItemStockUOM stockUOM
 	INNER JOIN tblICStorageLocation storageLocation ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId
 	INNER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = storageLocation.intLocationId
 	INNER JOIN (
-		SELECT storageLocation.intStorageLocationId,
+		SELECT storageLocation.intStorageLocationId, storageLocation.intItemId,
 			SUM(stockUOM.dblOnHand + stockUOM.dblUnitStorage) dblStock
 		FROM tblICItemStockUOM stockUOM
 			INNER JOIN tblICStorageLocation storageLocation ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId
-		GROUP BY storageLocation.intStorageLocationId
-	) summary ON summary.intStorageLocationId = storageLocation.intStorageLocationId
+				AND storageLocation.intItemId = stockUOM.intItemId
+		GROUP BY storageLocation.intStorageLocationId, storageLocation.intItemId
+	) summary ON summary.intStorageLocationId = storageLocation.intStorageLocationId AND summary.intItemId = item.intItemId
 	LEFT OUTER JOIN tblICCommodity commodity ON commodity.intCommodityId = item.intCommodityId
 	LEFT OUTER JOIN tblICStorageMeasurementReadingConversion mrc ON mrc.intCommodityId = commodity.intCommodityId
 		AND mrc.intStorageLocationId = storageLocation.intStorageLocationId

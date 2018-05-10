@@ -334,7 +334,7 @@ FROM (
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
-		,isnull(ysnSubCurrency,0) ysnSubCurrency
+		,isnull(c.ysnSubCurrency,0) ysnSubCurrency
 	FROM tblLGAllocationDetail AD
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId AND intSContractDetailId = @intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -365,7 +365,7 @@ FROM (
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
-		,isnull(ysnSubCurrency,0)  ysnSubCurrency
+		,isnull(c.ysnSubCurrency,0)  ysnSubCurrency
 	FROM tblLGAllocationDetail AD
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = @intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -395,7 +395,7 @@ UNION
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
-		,isnull(ysnSubCurrency,0)  ysnSubCurrency
+		,isnull(c.ysnSubCurrency,0) ysnSubCurrency
 	FROM tblLGLoad AD
 	JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId and  CD.intContractDetailId= @intSContractDetailId
@@ -426,7 +426,7 @@ UNION
 		,t.intFutureMonthId
 		,dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId, t.intFutureMonthId, @dtmToDate) dtmLatestSettlementPrice
 		,m.dblContractSize
-		,isnull(ysnSubCurrency,0)  ysnSubCurrency
+		,isnull(c.ysnSubCurrency,0) ysnSubCurrency
 	FROM tblLGLoad AD
 		JOIN tblLGLoadDetail LD on AD.intLoadId=LD.intLoadId 
 		join tblLGLoadDetailLot LDL on LDL.intLoadDetailId=LD.intLoadDetailId
@@ -441,6 +441,7 @@ UNION
 		LEFT JOIN tblRKAssignFuturesToContractSummary cs on cs.intContractDetailId=CD.intContractDetailId
 		LEFT JOIN tblRKFutOptTransaction t on t.intFutOptTransactionId=cs.intFutOptTransactionId
 		LEFT JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=m.intCurrencyId
 		LEFT JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=t.intFutureMonthId			
 	WHERE intSContractDetailId = @intSContractDetailId
 	) t

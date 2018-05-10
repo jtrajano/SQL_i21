@@ -80,6 +80,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strStatementFooterComment]	NVARCHAR(MAX)	
 	,[strCompanyName]				NVARCHAR(MAX)
 	,[strCompanyAddress]			NVARCHAR(MAX)
+	,[strTicketNumbers]				NVARCHAR(MAX)
 	,[ysnStatementCreditLimit]		BIT
 )
 
@@ -246,8 +247,10 @@ IF @ysnEmailOnly IS NOT NULL
 
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName, @intEntityUserId = @intEntityUserId
  
-SET @query = 'SELECT * FROM
-(SELECT I.strInvoiceNumber AS strReferenceNumber
+SET @query = CAST('' AS NVARCHAR(MAX)) + '
+SELECT * 
+FROM (
+	SELECT strReferenceNumber = I.strInvoiceNumber
 		, strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
 		, I.intEntityCustomerId
 		, dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
@@ -274,14 +277,22 @@ SET @query = 'SELECT * FROM
 		, C.dblCreditLimit
 		, strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
 		, strStatementFooterComment = dbo.fnARGetDefaultComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
-		, strCompanyName = (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-		, strCompanyAddress = (SELECT TOP 1 dbo.[fnARFormatCustomerAddress]('''', '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', 0) FROM tblSMCompanySetup)
+		, strCompanyName	= COMPANY.strCompanyName
+		, strCompanyAddress = COMPANY.strCompanyAddress
+		, strTicketNumbers	= SC.strTicketNumber
 		, C.ysnStatementCreditLimit
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
-		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
+		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId
+		LEFT JOIN tblSCTicket SC ON ID.intTicketId = SC.intTicketId
+	) ON I.intInvoiceId = ID.intInvoiceId	
 	INNER JOIN (vyuARCustomerSearch C INNER JOIN #CUSTOMERS CC ON C.intEntityCustomerId = CC.intEntityCustomerId) ON I.intEntityCustomerId = C.intEntityCustomerId
-	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID	
+	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID
+	OUTER APPLY (
+		SELECT TOP 1 strCompanyName
+				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
+		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+	) COMPANY
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
@@ -338,6 +349,7 @@ SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 	 , strCompanyAddress			= STATEMENTREPORT.strCompanyAddress
 	 , dtmAsOfDate					= @dtmDateTo
 	 , ysnStatementCreditLimit		= STATEMENTREPORT.ysnStatementCreditLimit
+	 , strTicketNumbers				= STATEMENTREPORT.strTicketNumbers
 FROM @temp_statement_table AS STATEMENTREPORT
 INNER JOIN tblARCustomerAgingStagingTable AS AGINGREPORT 
 ON STATEMENTREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId

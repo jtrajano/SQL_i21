@@ -76,27 +76,33 @@ BEGIN
 	DECLARE @Tab_UpdatedItems TABLE(intItemId int)
 
 	INSERT INTO @Tab_UpdatedItems
-	Select DISTINCT CAST(strRecordNo as int) [intItemId] From dbo.tblSMAuditLog Where strTransactionType = 'Inventory.view.Item'
-	AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0  
-		OR CHARINDEX('strStatus', strJsonData) > 0 OR CHARINDEX('dblSalePrice', strJsonData) > 0   
-		OR CHARINDEX('strCategoryCode', strJsonData) > 0 OR CHARINDEX('dtmBeginDate', strJsonData) > 0   
-		OR CHARINDEX('dtmEndDate', strJsonData) > 0 OR CHARINDEX('strDescription', strJsonData) > 0   
-		OR CHARINDEX('intItemTypeCode', strJsonData) > 0 OR CHARINDEX('intItemTypeSubCode', strJsonData) > 0 		 
-		OR CHARINDEX('strRegProdCode', strJsonData) > 0 OR CHARINDEX('ysnCarWash', strJsonData) > 0   
-		OR CHARINDEX('ysnFoodStampable', strJsonData) > 0 OR CHARINDEX('ysnIdRequiredLiquor', strJsonData) > 0   
-		OR CHARINDEX('ysnIdRequiredCigarette', strJsonData) > 0 OR CHARINDEX('ysnOpenPricePLU', strJsonData) > 0   
-		OR CHARINDEX('dblUnitQty', strJsonData) > 0 OR CHARINDEX('strUpcCode', strJsonData) > 0 		
-		OR CHARINDEX('ysnTaxFlag1', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag2', strJsonData) > 0   
-		OR CHARINDEX('ysnTaxFlag3', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag4', strJsonData) > 0   
-		OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0   
-		OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
-		OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
-		OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  
-		
-		OR CHARINDEX('dblStandardCost',strJsonData) > 0
-		OR CHARINDEX('intCategoryId',strJsonData) > 0 )
+	SELECT DISTINCT I.intItemId
+	FROM tblICItem I
+	JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
+	WHERE I.dtmDateModified BETWEEN @BeginingChangeDate AND @EndingChangeDate
+	OR I.dtmDateCreated BETWEEN @BeginingChangeDate AND @EndingChangeDate
 
-	AND dtmDate BETWEEN DATEADD(HOUR,-8,(@BeginingChangeDate)) AND DATEADD(HOUR,-8,(@EndingChangeDate)) -- Should adjust to audit log format UTCDATE 8hours late
+	--Select DISTINCT CAST(strRecordNo as int) [intItemId] 
+	--From dbo.tblSMAuditLog Where strTransactionType = 'Inventory.view.Item'
+	--AND ( CHARINDEX('strItemNo', strJsonData) > 0  OR CHARINDEX('strUnitMeasure', strJsonData) > 0  
+	--	OR CHARINDEX('strStatus', strJsonData) > 0 OR CHARINDEX('dblSalePrice', strJsonData) > 0   
+	--	OR CHARINDEX('strCategoryCode', strJsonData) > 0 OR CHARINDEX('dtmBeginDate', strJsonData) > 0   
+	--	OR CHARINDEX('dtmEndDate', strJsonData) > 0 OR CHARINDEX('strDescription', strJsonData) > 0   
+	--	OR CHARINDEX('intItemTypeCode', strJsonData) > 0 OR CHARINDEX('intItemTypeSubCode', strJsonData) > 0 		 
+	--	OR CHARINDEX('strRegProdCode', strJsonData) > 0 OR CHARINDEX('ysnCarWash', strJsonData) > 0   
+	--	OR CHARINDEX('ysnFoodStampable', strJsonData) > 0 OR CHARINDEX('ysnIdRequiredLiquor', strJsonData) > 0   
+	--	OR CHARINDEX('ysnIdRequiredCigarette', strJsonData) > 0 OR CHARINDEX('ysnOpenPricePLU', strJsonData) > 0   
+	--	OR CHARINDEX('dblUnitQty', strJsonData) > 0 OR CHARINDEX('strUpcCode', strJsonData) > 0 		
+	--	OR CHARINDEX('ysnTaxFlag1', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag2', strJsonData) > 0   
+	--	OR CHARINDEX('ysnTaxFlag3', strJsonData) > 0 OR CHARINDEX('ysnTaxFlag4', strJsonData) > 0   
+	--	OR CHARINDEX('ysnApplyBlueLaw1', strJsonData) > 0 OR CHARINDEX('ysnApplyBlueLaw2', strJsonData) > 0   
+	--	OR CHARINDEX('ysnPromotionalItem', strJsonData) > 0 OR CHARINDEX('ysnQuantityRequired', strJsonData) > 0 
+	--	OR CHARINDEX('strLongUPCCode', strJsonData) > 0 OR CHARINDEX('ysnSaleable', strJsonData) > 0   
+	--	OR CHARINDEX('ysnReturnable', strJsonData) > 0 OR CHARINDEX('intDepositPLUId', strJsonData) > 0  
+	--	OR CHARINDEX('dblStandardCost',strJsonData) > 0
+	--	OR CHARINDEX('intCategoryId',strJsonData) > 0 )
+	--AND dtmDate BETWEEN DATEADD(HOUR,-8,(@BeginingChangeDate)) AND DATEADD(HOUR,-8,(@EndingChangeDate)) -- Should adjust to audit log format UTCDATE 8hours late
 
 
     --Insert data into Procebook staging table	

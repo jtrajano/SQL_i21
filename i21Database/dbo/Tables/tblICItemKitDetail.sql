@@ -20,7 +20,11 @@ Type the overview for the table here.
 		[dblPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnSelected] INT NULL, 
 		[inSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICItemKitDetail] PRIMARY KEY ([intItemKitDetailId]), 
 		CONSTRAINT [FK_tblICItemKitDetail_tblICItemKit] FOREIGN KEY ([intItemKitId]) REFERENCES [tblICItemKit]([intItemKitId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemKitDetail_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])

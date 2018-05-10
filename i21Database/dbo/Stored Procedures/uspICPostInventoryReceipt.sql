@@ -321,6 +321,20 @@ BEGIN
 			GOTO With_Rollback_Exit; 
 		END 
 	END
+
+	-- Update Warehouse Ref# for line items and lots
+	UPDATE ri
+	SET ri.strWarehouseRefNo = r.strWarehouseRefNo
+	FROM tblICInventoryReceiptItem ri
+		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	WHERE r.intInventoryReceiptId = @intTransactionId
+
+	UPDATE lot
+	SET lot.strWarehouseRefNo = ri.strWarehouseRefNo
+	FROM tblICInventoryReceiptItemLot lot 
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	WHERE r.intInventoryReceiptId = @intTransactionId
 	
 	/*
 		Check if receipt items and lots have gross/net UOM and have gross qty and net qty when the items have Lot Weights Required enabled in Item setup.
@@ -480,6 +494,8 @@ BEGIN
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,intCategoryId
+				,dblUnitRetail
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -639,6 +655,21 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
+				,intCategoryId = i.intCategoryId
+				,dblUnitRetail = 
+					dbo.fnCalculateReceiptUnitCost(
+						DetailItem.intItemId
+						,DetailItem.intUnitMeasureId		
+						,DetailItem.intCostUOMId
+						,DetailItem.intWeightUOMId
+						,DetailItem.dblUnitRetail
+						,DetailItem.dblNet
+						,DetailItemLot.intLotId
+						,DetailItemLot.intItemUnitMeasureId
+						,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
+						,NULL--DetailItem.ysnSubCurrency
+						,NULL--Header.intSubCurrencyCents
+					)
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -963,6 +994,8 @@ BEGIN
 					,intInTransitSourceLocationId
 					,intForexRateTypeId
 					,dblForexRate
+					,intCategoryId
+					,dblUnitRetail
 			)
 			SELECT 
 					intItemId  
@@ -986,6 +1019,8 @@ BEGIN
 					,intInTransitSourceLocationId
 					,intForexRateTypeId
 					,dblForexRate
+					,intCategoryId
+					,dblUnitRetail
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 			

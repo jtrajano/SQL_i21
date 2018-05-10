@@ -426,7 +426,7 @@ BEGIN TRY
 		,@intUserId = @intUserId
 
 	IF @dblProduceQty > 0
-		--AND @strInstantConsumption = 'False'
+		
 	BEGIN
 		DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
@@ -605,8 +605,20 @@ BEGIN TRY
 			,@userId INT
 			,@intWorkOrderProducedLotId INT
 			,@dblOtherCost NUMERIC(18, 6)
+		DECLARE @strCostingByCoEfficient NVARCHAR(50)
 
-		IF @strInstantConsumption = 'False'
+		SELECT @strCostingByCoEfficient = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 111
+
+		IF @strCostingByCoEfficient IS NULL
+		BEGIN
+			SELECT @strCostingByCoEfficient = 'False'
+		END
+
+		IF @strCostingByCoEfficient = 'False'
 		BEGIN
 			SELECT @dblOtherCost = 0
 
@@ -653,6 +665,16 @@ BEGIN TRY
 							AND RI.intWorkOrderId = @intWorkOrderId
 						)
 					AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
+			END
+
+				SELECT @dblOtherCharges = SUM(dblOtherCharges)
+			FROM tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND ysnProductionReversed = 0
+
+			IF @dblOtherCharges IS NOT NULL
+			BEGIN
+				SELECT @dblOtherCost = abs(@dblOtherCost) + @dblOtherCharges
 			END
 
 			SET @dblNewCost = ABS(@dblNewCost) + ISNULL(@dblOtherCost, 0)
@@ -855,6 +877,7 @@ BEGIN TRY
 				AND intItemTypeId NOT IN (
 					1
 					,3
+					,5
 					)
 
 			UPDATE PS
@@ -905,7 +928,11 @@ BEGIN TRY
 					AND I.ysnSellableItem = 1
 
 				UPDATE PS
-				SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / (PS.dblMarketRate + @dblFirstGradeDiff)
+				SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / CASE 
+						WHEN (PS.dblMarketRate + @dblFirstGradeDiff) = 0
+							THEN 1
+						ELSE (PS.dblMarketRate + @dblFirstGradeDiff)
+						END
 				FROM @tblMFProductionSummary PS
 				JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
 				WHERE PS.dblCoEfficient IS NULL
@@ -925,7 +952,11 @@ BEGIN TRY
 			FROM @tblMFProductionSummary
 
 			UPDATE @tblMFProductionSummary
-			SET dblStandardUnitRate = abs(@dblInputCost) / @dblCoEfficientApplied
+			SET dblStandardUnitRate = abs(@dblInputCost) / CASE 
+					WHEN @dblCoEfficientApplied = 0
+						THEN 1
+					ELSE @dblCoEfficientApplied
+					END
 				,dblDirectCost = abs(@dblInputCost)
 
 			UPDATE @tblMFProductionSummary
@@ -990,7 +1021,7 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = PS.dblProductionUnitRate * PL.dblQuantity
+				,[dblNewCost] = PS.dblProductionUnitRate * PL.dblQuantity - ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
 				,[intCurrencyId] = (
 					SELECT TOP 1 intDefaultReportingCurrencyId
 					FROM tblSMCompanyPreference
@@ -1112,11 +1143,11 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 	END
 
-	DELETE T
-	FROM dbo.tblMFTask T
-	JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
-	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
-	WHERE SW.intWorkOrderId = @intWorkOrderId
+	--DELETE T
+	--FROM dbo.tblMFTask T
+	--JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+	--JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
+	--WHERE SW.intWorkOrderId = @intWorkOrderId
 
 	UPDATE OH
 	SET intOrderStatusId = 10

@@ -37,6 +37,8 @@
 	[dblRate] DECIMAL(18, 6) NOT NULL DEFAULT 1,  
 	[dblTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblActual] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblBasis] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblFutures] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblDifference] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblPrepayPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightUnitQty] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

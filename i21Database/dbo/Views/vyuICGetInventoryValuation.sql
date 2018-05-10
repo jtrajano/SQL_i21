@@ -16,8 +16,49 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,t.intStorageLocationId
 		,strStorageLocationName		= strgLoc.strName
 		,dtmDate					= dbo.fnRemoveTimeOnDate(t.dtmDate)
+		,strSourceType				= CASE
+											WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
+												CASE
+													WHEN receipt.intSourceType = 1 THEN 'Scale'
+													WHEN receipt.intSourceType = 2 THEN 'Inbound Shipment'
+													WHEN receipt.intSourceType = 3 THEN 'Transport'
+													WHEN receipt.intSourceType = 4 THEN 'Settle Storage'
+													WHEN receipt.intSourceType = 5 THEN 'Delivery Sheet'
+													ELSE ''
+												END
+											WHEN shipment.intInventoryShipmentId IS NOT NULL THEN
+												CASE
+													WHEN shipment.intSourceType = 1 THEN 'Scale'
+													WHEN shipment.intSourceType = 2 THEN 'Inbound Shipment'
+													WHEN shipment.intSourceType = 3 THEN 'Pick Lot'
+													WHEN shipment.intSourceType = 4 THEN 'Delivery Sheet'
+													ELSE ''
+												END
+											ELSE ''
+										END
+		,strSourceNumber			= CASE 
+										WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
+											CASE	
+												WHEN receipt.intSourceType = 1 THEN ScaleView.strTicketNumber -- Scale
+												WHEN receipt.intSourceType = 2 THEN LogisticsView.strLoadNumber -- Inbound Shipment
+												WHEN receipt.intSourceType = 3 THEN LoadHeader.strTransaction -- Transport
+												WHEN receipt.intSourceType = 4 THEN SettleStorage.strStorageTicketNumber -- Settle Storage
+												WHEN receipt.intSourceType = 5 THEN DeliverySheet.strDeliverySheetNumber -- Delivery Sheet
+												ELSE ''
+											END
+										WHEN shipment.intInventoryShipmentId IS NOT NULL THEN
+											CASE	
+												WHEN shipment.intSourceType = 1 THEN ScaleView.strTicketNumber -- Scale
+												WHEN shipment.intSourceType = 2 THEN LogisticsView.strLoadNumber -- Inbound Shipment
+												WHEN shipment.intSourceType = 3 THEN PickLot.strPickLotNumber -- Pick Lot
+												WHEN shipment.intSourceType = 4 THEN DeliverySheet.strDeliverySheetNumber -- Delivery Sheet
+												ELSE ''
+											END
+										ELSE
+											''
+										END
 		,strTransactionType			= (CASE WHEN ty.strName = 'Invoice' THEN invoice.strTransactionType ELSE ty.strName END)
-		,t.strTransactionForm
+		,t.strTransactionForm		
 		,t.strTransactionId
 		,dblBeginningQtyBalance		= CAST(0 AS NUMERIC(38, 20)) 
 		,dblQuantity				= ISNULL(t.dblQty, 0)
@@ -92,10 +133,19 @@ FROM 	tblICItem i
 			ON receipt.intInventoryReceiptId = t.intTransactionId
 			AND receipt.strReceiptNumber = t.strTransactionId
 			AND ty.intTransactionTypeId IN (4, 42)
+		LEFT JOIN tblICInventoryReceiptItem receiptItem
+			ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
+			AND receiptItem.intInventoryReceiptItemId = t.intTransactionDetailId
+
 		LEFT JOIN tblICInventoryShipment shipment 
 			ON shipment.intInventoryShipmentId = t.intTransactionId
 			AND shipment.strShipmentNumber = t.strTransactionId
 			AND ty.intTransactionTypeId = 5
+		LEFT JOIN tblICInventoryShipmentItem shipmentItem
+			ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
+			AND shipmentItem.intInventoryShipmentItemId = t.intTransactionDetailId
+			AND shipmentItem.intItemId = i.intItemId
+
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
@@ -109,6 +159,7 @@ FROM 	tblICItem i
 					ld.intVendorEntityId
 					,ld.intCustomerEntityId
 					,l.strBLNumber
+					,l.strLoadNumber
 			FROM	tblLGLoad l INNER JOIN tblLGLoadDetail ld
 						ON l.intLoadId = ld.intLoadId
 			WHERE	l.strLoadNumber = t.strTransactionId
@@ -131,7 +182,51 @@ FROM 	tblICItem i
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
 				, settleStorage.intEntityId
-			)  
+			)
+
+		LEFT JOIN tblSCTicket ScaleView
+			ON ScaleView.intTicketId = CASE 
+											WHEN receiptItem.intInventoryReceiptId IS NOT NULL THEN receiptItem.intSourceId
+											WHEN shipmentItem.intInventoryShipmentId IS NOT NULL THEN shipmentItem.intSourceId
+											ELSE NULL
+										END
+			AND (receipt.intSourceType = 1 OR shipment.intSourceType = 1)
+
+		LEFT JOIN vyuLGLoadContainerLookup LogisticsView
+			ON LogisticsView.intLoadDetailId = CASE 
+												WHEN receiptItem.intInventoryReceiptId IS NOT NULL THEN receiptItem.intSourceId
+												WHEN shipmentItem.intInventoryShipmentId IS NOT NULL THEN shipmentItem.intSourceId
+												ELSE NULL
+											END
+			AND LogisticsView.intLoadContainerId = receiptItem.intContainerId
+			AND (receipt.intSourceType = 2 OR shipment.intSourceType = 2)
+		
+		LEFT JOIN (
+			tblTRLoadReceipt LoadReceipt INNER JOIN tblTRLoadHeader LoadHeader
+				ON LoadHeader.intLoadHeaderId = LoadReceipt.intLoadHeaderId
+		)	ON LoadReceipt.intLoadReceiptId = receiptItem.intSourceId
+			AND receipt.intSourceType = 3
+		
+		LEFT JOIN tblLGPickLotHeader PickLot
+			ON PickLot.intPickLotHeaderId = shipmentItem.intSourceId
+			AND shipment.intSourceType = 3		
+
+
+		LEFT JOIN tblGRCustomerStorage SettleStorage
+			ON SettleStorage.intCustomerStorageId = CASE 
+														WHEN receiptItem.intInventoryReceiptId IS NOT NULL THEN receiptItem.intSourceId
+														ELSE NULL
+													END
+			AND receipt.intSourceType = 4
+
+		LEFT JOIN tblSCDeliverySheet DeliverySheet
+			ON DeliverySheet.intDeliverySheetId =  CASE 
+														WHEN receiptItem.intInventoryReceiptId IS NOT NULL THEN receiptItem.intSourceId
+														WHEN shipmentItem.intInventoryShipmentId IS NOT NULL THEN shipmentItem.intSourceId
+														ELSE NULL
+													END
+			AND (receipt.intSourceType = 5 OR shipment.intSourceType = 4)
+
 WHERE	i.strType NOT IN (
 			'Other Charge'
 			,'Non-Inventory'

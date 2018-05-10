@@ -1,6 +1,4 @@
-﻿
-
-CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 SELECT intCustomerId = ( CASE cfTrans.strTransactionType 
@@ -271,19 +269,19 @@ cfSiteItem.strProductNumber,
 cfSiteItem.strItemNo, 
 cfSiteItem.strShortName                                         AS 
        strDescription, 
-Round(cfTransPrice.dblCalculatedAmount, 2)                      AS 
+Round(cfTrans.dblCalculatedTotalPrice, 2)                      AS 
        dblCalculatedTotalAmount, 
-cfTransPrice.dblOriginalAmount                                  AS 
+cfTrans.dblOriginalTotalPrice                                  AS 
        dblOriginalTotalAmount, 
-cfTransGrossPrice.dblCalculatedAmount                           AS 
+cfTrans.dblCalculatedGrossPrice                           AS 
        dblCalculatedGrossAmount, 
-cfTransGrossPrice.dblOriginalAmount                             AS 
+cfTrans.dblOriginalGrossPrice                             AS 
        dblOriginalGrossAmount, 
-cfTransNetPrice.dblCalculatedAmount                             AS 
+cfTrans.dblCalculatedNetPrice                             AS 
        dblCalculatedNetAmount, 
-cfTransNetPrice.dblOriginalAmount                               AS 
+cfTrans.dblOriginalNetPrice                               AS 
        dblOriginalNetAmount, 
-cfTransNetPrice.dblCalculatedAmount - cfSiteItem.dblAverageCost AS dblMargin, 
+cfTrans.dblCalculatedNetPrice - cfSiteItem.dblAverageCost AS dblMargin, 
 cfTrans.ysnInvalid, 
 cfTrans.ysnPosted, 
 cfVehicle.strVehicleNumber                                      AS 
@@ -305,8 +303,8 @@ INNER JOIN dbo.tblSMTaxCode AS smTCd
 ON cfTT.intTaxCodeId = smTCd.intTaxCodeId 
 INNER JOIN dbo.tblSMTaxClass AS smTCl 
 ON smTCd.intTaxClassId = smTCl.intTaxClassId 
-WHERE  ( smTCl.strTaxClass LIKE '%(SST)%' ) 
-AND ( smTCl.strTaxClass LIKE '%State Sales Tax%' ) 
+WHERE  ( smTCl.strTaxClass = 'SST' ) 
+--AND ( smTCl.strTaxClass LIKE '%State Sales Tax%' ) 
 AND ( cfTT.intTransactionId = cfTrans.intTransactionId ) 
 GROUP  BY cfTT.intTransactionId) / cfTrans.dblQuantity         AS dblTotalSST, 
 (SELECT ISNULL(Sum(cfTT.dblTaxCalculatedAmount), 0) AS dblTaxExceptSST 
@@ -315,9 +313,9 @@ INNER JOIN dbo.tblSMTaxCode AS smTCd
 ON cfTT.intTaxCodeId = smTCd.intTaxCodeId 
 INNER JOIN dbo.tblSMTaxClass AS smTCl 
 ON smTCd.intTaxClassId = smTCl.intTaxClassId 
-WHERE  ( smTCl.strTaxClass NOT LIKE '%(SST)%' ) 
-AND ( smTCl.strTaxClass NOT LIKE '%State Sales Tax%' ) 
-AND ( smTCl.strTaxClass <> 'SST' ) 
+WHERE  ( smTCl.strTaxClass != 'SST' ) 
+--AND ( smTCl.strTaxClass NOT LIKE '%State Sales Tax%' ) 
+--AND ( smTCl.strTaxClass <> 'SST' ) 
 AND ( cfTT.intTransactionId = cfTrans.intTransactionId ) 
 GROUP  BY cfTT.intTransactionId) / cfTrans.dblQuantity         AS 
        dblTaxExceptSST, 
@@ -552,36 +550,36 @@ FROM   dbo.vyuCFInvoice AS arInv
                ON cfTrans.intSiteId = cfSiteItem.intSiteId 
                   AND cfTrans.intNetworkId = cfSiteItem.intNetworkId 
                   AND cfSiteItem.intItemId = cfTrans.intProductId 
-       CROSS APPLY (SELECT intTransactionPriceId, 
-                           intTransactionId, 
-                           strTransactionPriceId, 
-                           dblOriginalAmount, 
-                           dblCalculatedAmount, 
-                           intConcurrencyId 
-                    FROM   dbo.tblCFTransactionPrice 
-                    WHERE  ( strTransactionPriceId = 'Total Amount' ) 
-                           AND cfTrans.intTransactionId = intTransactionId) AS 
-       cfTransPrice 
-       CROSS APPLY (SELECT intTransactionPriceId, 
-                           intTransactionId, 
-                           strTransactionPriceId, 
-                           dblOriginalAmount, 
-                           dblCalculatedAmount, 
-                           intConcurrencyId 
-                    FROM   dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2 
-                    WHERE  ( strTransactionPriceId = 'Gross Price' ) 
-                           AND cfTrans.intTransactionId = intTransactionId) AS 
-                                cfTransGrossPrice 
-       CROSS APPLY (SELECT intTransactionPriceId, 
-                           intTransactionId, 
-                           strTransactionPriceId, 
-                           dblOriginalAmount, 
-                           dblCalculatedAmount, 
-                           intConcurrencyId 
-                    FROM   dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1 
-                    WHERE  ( strTransactionPriceId = 'Net Price' ) 
-                           AND cfTrans.intTransactionId = intTransactionId) AS 
-                                                              cfTransNetPrice 
+       --CROSS APPLY (SELECT intTransactionPriceId, 
+       --                    intTransactionId, 
+       --                    strTransactionPriceId, 
+       --                    dblOriginalAmount, 
+       --                    dblCalculatedAmount, 
+       --                    intConcurrencyId 
+       --             FROM   dbo.tblCFTransactionPrice 
+       --             WHERE  ( strTransactionPriceId = 'Total Amount' ) 
+       --                    AND cfTrans.intTransactionId = intTransactionId) AS 
+       --cfTransPrice 
+       --CROSS APPLY (SELECT intTransactionPriceId, 
+       --                    intTransactionId, 
+       --                    strTransactionPriceId, 
+       --                    dblOriginalAmount, 
+       --                    dblCalculatedAmount, 
+       --                    intConcurrencyId 
+       --             FROM   dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2 
+       --             WHERE  ( strTransactionPriceId = 'Gross Price' ) 
+       --                    AND cfTrans.intTransactionId = intTransactionId) AS 
+       --                         cfTransGrossPrice 
+       --CROSS APPLY (SELECT intTransactionPriceId, 
+       --                    intTransactionId, 
+       --                    strTransactionPriceId, 
+       --                    dblOriginalAmount, 
+       --                    dblCalculatedAmount, 
+       --                    intConcurrencyId 
+       --             FROM   dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1 
+       --             WHERE  ( strTransactionPriceId = 'Net Price' ) 
+       --                    AND cfTrans.intTransactionId = intTransactionId) AS 
+       --                                                       cfTransNetPrice 
        LEFT OUTER JOIN dbo.tblCFDepartment AS cfAccntDep 
                     ON cfAccntDep.intDepartmentId = 
                        cfCardAccount.intDepartmentId

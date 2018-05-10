@@ -1,10 +1,11 @@
 ﻿
 
+
 CREATE VIEW [dbo].[vyuCFBatchPostTransactions]
 AS
 SELECT   cfNetwork.ysnPostForeignSales,cfTrans.strTransactionType as strTransType, cfTrans.dtmTransactionDate, cfTrans.strTransactionId, 'Card Fueling' AS strTransactionType, cfTrans.ysnPosted, 
                          'Network: ' + cfNetwork.strNetwork + ' ,Site: ' + cfSiteItem.strSiteName + ' ,Quantity: ' + CAST(cfTrans.dblQuantity AS nvarchar) AS strDescription, 
-                         cfTransPrice.dblCalculatedAmount AS dblAmount, cfTrans.intTransactionId,
+                         cfTrans.dblCalculatedTotalPrice AS dblAmount, cfTrans.intTransactionId,
                              (SELECT   TOP (1) intEntityId
                                 FROM         dbo.tblEMEntity) AS intEntityId
 FROM         dbo.tblCFTransaction AS cfTrans 
@@ -30,10 +31,12 @@ LEFT OUTER JOIN
                                                          dbo.tblCFItem AS icfItem ON icfSite.intSiteId = icfItem.intSiteId OR icfNetwork.intNetworkId = icfItem.intNetworkId INNER JOIN
                                                          dbo.tblICItem AS iicItem ON icfItem.intARItemId = iicItem.intItemId INNER JOIN
                                                          dbo.tblICItemLocation AS iicItemLoc ON iicItemLoc.intLocationId = icfSite.intARLocationId AND iicItemLoc.intItemId = icfItem.intARItemId) AS cfSiteItem ON 
-                         cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId AND cfSiteItem.intItemId = cfTrans.intProductId INNER JOIN
+                         cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId AND cfSiteItem.intItemId = cfTrans.intProductId 
+						 INNER JOIN
                              (SELECT   intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
                                 FROM         dbo.tblCFTransactionPrice
-                                WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId LEFT OUTER JOIN
+                                WHERE     (strTransactionPriceId = 'Total Amount')) AS cfTransPrice ON cfTrans.intTransactionId = cfTransPrice.intTransactionId
+								 LEFT OUTER JOIN
                          dbo.vyuCTContractDetailView AS ctContracts ON cfTrans.intContractId = ctContracts.intContractDetailId
 WHERE     (cfTrans.ysnPosted IS NULL OR
                          cfTrans.ysnPosted <> 1) AND (cfTrans.ysnInvalid IS NULL OR

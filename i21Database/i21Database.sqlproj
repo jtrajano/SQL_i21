@@ -5563,7 +5563,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadDetailData.sql" />
     <Build Include="dbo\Stored Procedures\uspTRDuplicateTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadContractDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCustomeActivityReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerActivityReport.sql" />
     <None Include="Scripts\Post-Deployment\MF\7_ProcessAttributeDefaultValue.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLetter.sql" />
     <Build Include="dbo\Views\vyuARPaymentMethodForReceivePayments.sql" />
@@ -6456,6 +6456,8 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
+    <Build Include="dbo\Tables\tblICCategoryPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCategory.sql" />
     <Build Include="dbo\Views\vyuICBlendReport.sql" />
     <Build Include="dbo\Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
@@ -6465,6 +6467,71 @@
     <None Include="Scripts\Post-Deployment\MF\MAS500 Recipe Import.sql" />
     <Build Include="dbo\Views\vyuICItemLite.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="dbo\Functions\fnSTDynamicQueryInventoryMass.sql" />
+    <Build Include="dbo\Views\vyuSTFuelSummaryReport.sql" />
+    <Build Include="vyuAPYearMISC.sql" />
+    <Build Include="dbo\Views\vyuAPYear1099B.sql" />
+    <Build Include="dbo\Views\vyuAPYearPATR.sql" />
+    <Build Include="dbo\Views\vyuAPYearDIV.sql" />
+    <Build Include="dbo\Views\vyuAPYearINT.sql" />
+    <Build Include="dbo\Views\vyuPOSGetLoggedIn.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemDataInsertAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentUOMChange.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateTableShipmentInspection.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSaveShipmentInspection.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryByItemAndStatus.sql" />
+    <Build Include="dbo\Views\vyuSTFuelDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
+    <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCategory.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspAPUnrestrictContractPrepay.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessLVControlToTicket.sql" />
+    <Build Include="dbo\Views\vyuSCTicketLVSearch.sql" />
+    <Build Include="dbo\Functions\fnConvertEnglishToItalian.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportIdealContractBuyer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCopyHandheldUserMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveHandheldUserMenu.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetHandheldUserMenu.sql" />
+    <Build Include="dbo\Functions\fnARItemTermDiscountExemptDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetItemTermDiscount.sql" />
+    <Build Include="dbo\Functions\fnARGetItemTermDiscountExemption.sql" />
+    <Build Include="dbo\Functions\fnGetDiscountDateBasedOnTerm.sql" />
+    <Build Include="dbo\Tables\tblARIntrCompanyInvoiceStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateInvoiceStg.sql" />
+    <Build Include="dbo\Stored Procedures\uspARTransferInvoiceStgData.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessInvoiceStgData.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompWeightClaimsStg.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompWeightClaimsAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGInterCompanyWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPopulateWeightClaimXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessInterCompanyWeightClaimsXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGTransferWeightClaimXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGTransferWeightClaimAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessWeightClaimAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRSalesIntransitWOPickLot.sql" />
+    <Build Include="dbo\Views\vyuARTransactionSummary.sql" />
+    <Build Include="dbo\Views\vyuAPRptCheckBasisInfo.sql" />
+    <Build Include="dbo\Views\vyuICGetLocationBins.sql" />
+    <Build Include="dbo\Functions\fnCMGetBankAccountHistoricRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMInsertGainLossBankTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryByTraderSub.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiryByTrader.sql" />
+    <Build Include="dbo\Views\vyuRKPositionReportContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDailyAverage.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportActualOutTurn.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationTable.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationConfigurationTable.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\35_ReplicationTable.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentSummaryReport.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentDetailReport.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateVoucherInvoiceForPartialPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6509,6 +6576,7 @@
     <None Include="Scripts\Post-Deployment\EM\011_FixEntityLocationNullTerms.sql" />
     <None Include="i21Database2014.publish.publish.xml" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPaymentOverflow.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorBasisAdvance.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="i21Database_1.publish.xml" />
@@ -6638,6 +6706,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
+    <None Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
+    <None Include="dbo\Functions\fnCFGetDefaultComment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

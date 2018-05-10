@@ -20,6 +20,7 @@ BEGIN
 		DECLARE @accountId				INT = 0
 		DECLARE @executedLine			INT = 0 
 		DECLARE @ysnAddPayment			BIT = 0
+		DECLARE @dtmInvoiceDate			DATETIME
 		--------------------------------------
 
 		------------TEMPORARY TABLE-------------
@@ -89,6 +90,14 @@ BEGIN
 			@accountId = intGLAccountId
 		FROM tblCFCompanyPreference
 		--------------------------------------
+
+		SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate
+		FROM tblCFInvoiceStagingTable cfTrans
+		LEFT OUTER JOIN tblARInvoice I
+		ON cfTrans.intInvoiceId = I.intInvoiceId
+		WHERE ISNULL(I.intInvoiceId,0) != 0
+		AND strUserId = @username
+	
 	
 		-------------INVOICE LIST-------------
 		SET @executedLine = 3
@@ -477,6 +486,7 @@ BEGIN
 				,intCustomerId
 				--,strInvoiceReportNumber
 				,dblPayment
+				,dtmInvoiceDate
 			)
 			SELECT
 			 @strPaymentNumber
@@ -486,6 +496,7 @@ BEGIN
 			,@intEntityCustomerId
 			--,''
 			,@dblAmountPaid
+			,@dtmInvoiceDate
 
 			SET @executedLine = 11
 			DELETE FROM #tblCFPaymentResult 

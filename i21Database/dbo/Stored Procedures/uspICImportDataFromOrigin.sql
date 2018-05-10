@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspICImportDataFromOrigin]
 	@strLineOfBusiness VARCHAR(50),
 	@strType VARCHAR(600),
-	@intEntityUserSecurityId INT = 0
-
+	@intEntityUserSecurityId INT = 0,
+	@options OriginImportOptions READONLY
 AS
 
 IF @strLineOfBusiness IS NULL OR LTRIM(RTRIM(@strLineOfBusiness)) = ''
@@ -24,6 +24,12 @@ SET @strType = SUBSTRING(@strType, 0, CHARINDEX(':', @strType))
 DECLARE @strStates NVARCHAR(600)
 SET @strStates = SUBSTRING(@strRawType, CHARINDEX(':', @strRawType)+1, LEN(@strRawType))
 
+DECLARE @Checking BIT
+DECLARE @StartDate DATETIME
+DECLARE @EndDate DATETIME
+DECLARE @Total INT
+DECLARE @Location NVARCHAR(100)
+
 IF @strLineOfBusiness = 'Petro' 
 BEGIN
 	IF		@strType = 'UOM'				EXEC dbo.uspICDCUomMigrationPt
@@ -42,9 +48,13 @@ BEGIN
 			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 		END
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationPt
-	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryPt NULL, NULL, @intEntityUserSecurityId
+	ELSE IF @strType = 'Balance'			
+	BEGIN
+		SELECT @Location = Value FROM @options WHERE Name = 'adjLoc'
+		SELECT @StartDate = Value FROM @options WHERE Name = 'adjdt'
+		EXEC dbo.uspICDCBeginInventoryPt @Location, @StartDate, @intEntityUserSecurityId
+	END
 	ELSE IF @strType = 'RecipeFormula'		EXEC dbo.uspICDCRecipeFormulaMigrationPt @intEntityUserSecurityId	
-
 END
 ELSE IF @strLineOfBusiness = 'Ag'
 BEGIN
@@ -64,7 +74,12 @@ BEGIN
 			ALTER INDEX [AK_tblICItemUOM_strLongUPCCode] ON [dbo].[tblICItemUOM] REBUILD PARTITION = ALL WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 		END
 	ELSE IF @strType = 'ItemGLAccts'		EXEC dbo.uspICDCItmGLAcctsMigrationAg
-	ELSE IF @strType = 'Balance'			EXEC dbo.uspICDCBeginInventoryAg NULL, NULL, @intEntityUserSecurityId
+	ELSE IF @strType = 'Balance'			
+	BEGIN
+		SELECT @Location = Value FROM @options WHERE Name = 'adjLoc'
+		SELECT @StartDate = Value FROM @options WHERE Name = 'adjdt'
+		EXEC dbo.uspICDCBeginInventoryAg @Location, @StartDate, @intEntityUserSecurityId
+	END
 END
 ELSE IF @strLineOfBusiness = 'Grain'
 BEGIN
@@ -89,9 +104,16 @@ BEGIN
 	--ELSE IF @strType = 'AdditionalGLAccts'	EXEC dbo.uspICDCCatExtraGLAccounts
 END
 
+IF @strType = 'Receipts'
+BEGIN
+	SELECT @Checking = CASE Value WHEN 'True' THEN 1 ELSE 0 END FROM @options WHERE Name = 'checking'
+	SELECT @StartDate = Value FROM @options WHERE Name = 'startDate'
+	SELECT @EndDate = Value FROM @options WHERE Name = 'endDate'
+	EXEC dbo.uspICImportInventoryReceipts @Checking, @intEntityUserSecurityId, @Total OUTPUT, @StartDate, @EndDate 	
+END
+
 UPDATE tblICCompanyPreference
 SET strOriginLastTask = @strStates,
 	strOriginLineOfBusiness = @strLineOfBusiness
 
 _Exit:
-GO

@@ -1174,11 +1174,70 @@ GO
 GO
 IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Update' AND [strType] = N'Register')
 	BEGIN
+		DECLARE @sqlQuery AS NVARCHAR(MAX) = 
+		N'Select DISTINCT intItemId FROM vyuSTItemsToRegister
+		WHERE ysnClick = 0 AND intEntityId = {0}
+		AND (dtmDateModified BETWEEN 
+		ISNULL
+		(
+			(
+				SELECT TOP (1) dtmEndingChangeDate
+				FROM dbo.tblSTUpdateRegisterHistory     
+				WHERE intStoreId = 
+				(
+					SELECT TOP (1) intStoreId FROM tblSTStore
+					WHERE intCompanyLocationId = 
+					(
+						SELECT TOP (1) intCompanyLocationId 
+						FROM tblSMUserSecurity 
+						WHERE intEntityId = {0}
+					)
+				)
+				ORDER BY intUpdateRegisterHistoryId DESC
+			),
+			(
+				SELECT TOP (1) dtmDate
+				FROM dbo.tblSMAuditLog
+				WHERE strTransactionType = ''Inventory.view.Item''
+				OR strTransactionType = ''Inventory.view.ItemLocation''
+				ORDER BY dtmDate ASC
+			)
+		)
+		AND GETUTCDATE())
+		OR (dtmDateCreated BETWEEN 
+		ISNULL
+		(
+			(
+				SELECT TOP (1) dtmEndingChangeDate
+				FROM dbo.tblSTUpdateRegisterHistory     
+				WHERE intStoreId = 
+				(
+					SELECT TOP (1) intStoreId FROM tblSTStore
+					WHERE intCompanyLocationId = 
+					(
+						SELECT TOP (1) intCompanyLocationId 
+						FROM tblSMUserSecurity 
+						WHERE intEntityId = {0}
+					)
+				)
+				ORDER BY intUpdateRegisterHistoryId DESC
+			),
+			(
+				SELECT TOP (1) dtmDate
+				FROM dbo.tblSMAuditLog
+				WHERE strTransactionType = ''Inventory.view.Item''
+				OR strTransactionType = ''Inventory.view.ItemLocation''
+				ORDER BY dtmDate ASC
+			)
+		)
+		AND GETUTCDATE())'
+
 		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
 		SELECT	[strReminder]		=        N'Update',
 				[strType]			=        N'Register',
 				[strMessage]		=        N'{0} Item(s) {2} needed to be sent to the register.',
-				[strQuery]			=        N'SELECT DISTINCT intItemId FROM vyuSTItemsToRegister WHERE ysnClick = 0 AND intEntityId = {0}',
+				[strQuery]			=        @sqlQuery,
+				--[strQuery]			=        N'SELECT DISTINCT intItemId FROM vyuSTItemsToRegister WHERE ysnClick = 0 AND intEntityId = {0}',
 				[strNamespace]		=        N'Store.view.UpdateRegister',
 				[intSort]			=        1
 	END
@@ -1186,7 +1245,7 @@ ELSE
 	BEGIN
 		UPDATE [tblSMReminderList]
 		SET [strMessage]  =     N'{0} Item(s) {2} needed to be sent to the register.',
-			[strQuery]	  =     N'SELECT DISTINCT intItemId FROM vyuSTItemsToRegister WHERE ysnClick = 0 AND intEntityId = {0}',
+			[strQuery]	  =     @sqlQuery,,
 		    [strNamespace]	=   N'Store.view.UpdateRegister'
 		WHERE [strReminder] = N'Update' AND [strType] = N'Register'
 	END

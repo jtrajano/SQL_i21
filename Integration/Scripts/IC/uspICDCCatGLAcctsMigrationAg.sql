@@ -150,7 +150,6 @@ INSERT INTO tblICCategoryAccount (
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = cgl.agcgl_pend_ap 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE coa.strExternalId = cgl.agcgl_pend_ap
-	and cat.strInventoryType in ('Inventory', 'Finished Good', 'Raw Material')
 )
 ------------------------------------------------------
 --import gl accounts for 'Other Charge' category

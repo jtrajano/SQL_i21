@@ -47,7 +47,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
-			dblMargin = ISNULL(cfTransNetPrice.dblCalculatedAmount,0) - ISNULL(arSalesAnalysisReport.dblUnitCost,0),
+			dblMargin = ISNULL(cfTransaction.dblCalculatedNetPrice,0) - ISNULL(arSalesAnalysisReport.dblUnitCost,0),
 			dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0),
 			dblTransferCost = ISNULL(cfTransaction.dblTransferCost,0)
 			FROM tblCFTransaction AS cfTransaction
@@ -55,20 +55,20 @@ BEGIN
 			ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
 			INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
 			ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId 
-			LEFT OUTER JOIN
-			(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
-			WHERE        (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
-			(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
-			WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
-			WHERE cfTransaction.intTransactionId = @intTransactionId
+			--LEFT OUTER JOIN
+			--(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
+			--WHERE        (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
+			--(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
+			--WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
+			--WHERE cfTransaction.intTransactionId = @intTransactionId
 		END
 		ELSE
 		BEGIN
 			INSERT INTO @returntable
 			SELECT 
-			dblMargin = ISNULL(cfTransNetPrice.dblCalculatedAmount,0) - ISNULL(cfItem.dblAverageCost,0),
+			dblMargin = ISNULL(cfTransaction.dblCalculatedNetPrice,0) - ISNULL(cfItem.dblAverageCost,0),
 			dblInventoryCost = ISNULL(cfItem.dblAverageCost,0),
 			dblTransferCost = ISNULL(cfTransaction.dblTransferCost,0)
 			FROM tblCFTransaction AS cfTransaction INNER JOIN 
@@ -78,14 +78,14 @@ BEGIN
 			dbo.tblICItem AS iciItem ON cfiItem.intARItemId = iciItem.intItemId LEFT OUTER JOIN
 			dbo.tblICItemLocation AS iciItemLocation ON cfiItem.intARItemId = iciItemLocation.intItemId AND iciItemLocation.intLocationId = cfiSite.intARLocationId LEFT OUTER JOIN
 			dbo.vyuICGetItemPricing AS iciItemPricing ON cfiItem.intARItemId = iciItemPricing.intItemId AND iciItemLocation.intLocationId = iciItemPricing.intLocationId AND 
-			iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId) AS cfItem ON cfTransaction.intProductId = cfItem.intItemId  LEFT OUTER JOIN
-			(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
-			WHERE        (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
-			(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-			FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
-			WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
-			WHERE cfTransaction.intTransactionId = @intTransactionId
+			iciItemLocation.intItemLocationId = iciItemPricing.intItemLocationId) AS cfItem ON cfTransaction.intProductId = cfItem.intItemId  --LEFT OUTER JOIN
+			--(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
+			--WHERE        (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
+			--(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+			--FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
+			--WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
+			--WHERE cfTransaction.intTransactionId = @intTransactionId
 		END
 
 	END
@@ -93,18 +93,18 @@ BEGIN
 	BEGIN
 		INSERT INTO @returntable
 		SELECT
-		dblMargin = (ISNULL(cfTransGrossPrice.dblCalculatedAmount,0) - ISNULL(cfTransaction.dblTransferCost,0)) +
+		dblMargin = (ISNULL(cfTransaction.dblCalculatedGrossPrice,0) - ISNULL(cfTransaction.dblTransferCost,0)) +
 			((ISNULL(cfTotalTax.dblTaxOriginalAmount,0)/ISNULL(cfTransaction.dblQuantity,0) - ISNULL(cfTotalTax.dblTaxCalculatedAmount,0)/ISNULL(cfTransaction.dblQuantity,0))),
 		dblTransferCost = ISNULL(cfTransaction.dblTransferCost,0) ,
 		dblInventoryCost = 0
 		FROM tblCFTransaction AS cfTransaction LEFT OUTER JOIN
-		(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-		FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
-		WHERE        (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
-		(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
-		FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
-		WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
-		LEFT OUTER JOIN 
+		--(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+		--FROM     dbo.tblCFTransactionPrice AS tblCFTransactionPrice_2
+		--WHERE        (strTransactionPriceId = 'Gross Price')) AS cfTransGrossPrice ON cfTransaction.intTransactionId = cfTransGrossPrice.intTransactionId LEFT OUTER JOIN
+		--(SELECT        intTransactionPriceId, intTransactionId, strTransactionPriceId, dblOriginalAmount, dblCalculatedAmount, intConcurrencyId
+		--FROM            dbo.tblCFTransactionPrice AS tblCFTransactionPrice_1
+		--WHERE        (strTransactionPriceId = 'Net Price')) AS cfTransNetPrice ON cfTransaction.intTransactionId = cfTransNetPrice.intTransactionId
+		--LEFT OUTER JOIN 
 		(SELECT intTransactionId ,SUM(dblTaxCalculatedAmount) AS dblTaxCalculatedAmount ,SUM(dblTaxOriginalAmount) AS dblTaxOriginalAmount  FROM tblCFTransactionTax group by intTransactionId) AS cfTotalTax ON cfTotalTax.intTransactionId = cfTransaction.intTransactionId
 		WHERE cfTransaction.intTransactionId = @intTransactionId
 	END

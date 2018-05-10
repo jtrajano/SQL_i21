@@ -229,6 +229,8 @@ CREATE TABLE #Pricing(
 	,[dblUnitPrice]						NUMERIC(18,6)
 	,[dblTermDiscount]					NUMERIC(18,6)
 	,[strTermDiscountBy]				NVARCHAR(50)
+	,[dblTermDiscountRate]				NUMERIC(18,6)
+	,[ysnTermDiscountExempt]			BIT
 	,[strPricing]						NVARCHAR(250)
 	,[intCurrencyExchangeRateTypeId]	INT
 	,[intCurrencyExchangeRateId]		INT
@@ -264,6 +266,8 @@ BEGIN TRY
 		,[dblUnitPrice]
 		,[dblTermDiscount]
 		,[strTermDiscountBy]
+		,[dblTermDiscountRate]
+		,[ysnTermDiscountExempt]
 		,[strPricing]
 		,[intCurrencyExchangeRateTypeId]
 		,[strCurrencyExchangeRateType]
@@ -296,6 +300,8 @@ BEGIN TRY
 		,[dblUnitPrice]						= IP.[dblUnitPrice]
 		,[dblTermDiscount]					= IP.[dblTermDiscount]
 		,[strTermDiscountBy]				= IP.[strTermDiscountBy]
+		,[dblTermDiscountRate]				= IP.[dblTermDiscountRate] 
+		,[ysnTermDiscountExempt]			= IP.[ysnTermDiscountExempt]
 		,[strPricing]						= IP.[strPricing]
 		,[intCurrencyExchangeRateTypeId]	= IP.[intCurrencyExchangeRateTypeId]
 		,[strCurrencyExchangeRateType]		= IP.[strCurrencyExchangeRateType]
@@ -386,6 +392,28 @@ USING
 		,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
 		,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
 		,[strItemTermDiscountBy]				= ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
+		,[dblItemTermDiscountAmount]			= [dbo].[fnARGetItemTermDiscount](	ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
+																					,ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount])
+																					,IE.[dblQtyShipped]
+																					,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																					,1.000000)
+		,[dblBaseItemTermDiscountAmount]		 = [dbo].[fnARGetItemTermDiscount](	ISNULL(IP.[strTermDiscountBy], IE.[strItemTermDiscountBy])
+																					,ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount])
+																					,IE.[dblQtyShipped]
+																					,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																					,(CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END))
+		,[dblItemTermDiscountExemption]			= [dbo].[fnARGetItemTermDiscountExemption](	IP.[ysnTermDiscountExempt]
+																							,IP.[dblTermDiscountRate]
+																							,IE.[dblQtyShipped]
+																							,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																							,1.000000)
+		,[dblBaseItemTermDiscountExemption]		= [dbo].[fnARGetItemTermDiscountExemption](	IP.[ysnTermDiscountExempt]
+																							,IP.[dblTermDiscountRate]
+																							,IE.[dblQtyShipped]
+																							,(CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
+																							,(CASE WHEN ISNULL(IP.[dblCurrencyExchangeRate], 0.000000) <> @ZeroDecimal THEN IP.[dblCurrencyExchangeRate] ELSE (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1.000000 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1.000000) END) END))
+		,[dblTermDiscountRate]					= ISNULL(IP.[dblTermDiscountRate], @ZeroDecimal)
+		,[ysnTermDiscountExempt]				= ISNULL(IP.[ysnTermDiscountExempt], 0)
 		,[dblPrice]								= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END)
 		,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
 		,[dblUnitPrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END)
@@ -509,6 +537,8 @@ USING
 			,[dblUnitPrice]
 			,[dblTermDiscount]
 			,[strTermDiscountBy]
+			,[ysnTermDiscountExempt]
+			,[dblTermDiscountRate]
 			,[strPricing]
 			,[intSubCurrencyId]
 			,[dblSubCurrencyRate]
@@ -566,6 +596,12 @@ INSERT(
 	,[dblDiscount]
 	,[dblItemTermDiscount]
 	,[strItemTermDiscountBy]
+	,[dblItemTermDiscountAmount]
+	,[dblBaseItemTermDiscountAmount]
+	,[dblItemTermDiscountExemption]
+	,[dblBaseItemTermDiscountExemption]
+	,[dblTermDiscountRate]
+	,[ysnTermDiscountExempt]
 	,[dblPrice]
 	,[dblBasePrice]
 	,[dblUnitPrice]
@@ -668,6 +704,12 @@ VALUES(
 	,[dblDiscount]
 	,[dblItemTermDiscount]
 	,[strItemTermDiscountBy]
+	,[dblItemTermDiscountAmount]
+	,[dblBaseItemTermDiscountAmount]
+	,[dblItemTermDiscountExemption]
+	,[dblBaseItemTermDiscountExemption]
+	,[dblTermDiscountRate]
+	,[ysnTermDiscountExempt]
 	,[dblPrice]
 	,[dblBasePrice]
 	,[dblUnitPrice]

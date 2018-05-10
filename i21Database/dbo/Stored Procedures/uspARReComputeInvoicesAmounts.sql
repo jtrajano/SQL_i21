@@ -29,34 +29,54 @@ INNER JOIN
 INNER JOIN
 	@InvoiceIds IID
 		ON ARID.[intInvoiceId] = IID.[intHeaderId]
---WHERE 
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
 	
 	
 UPDATE ARID
 SET
-	 ARID.[dblQtyOrdered]			= ISNULL(ARID.[dblQtyOrdered], @ZeroDecimal)
-	,ARID.[dblQtyShipped]			= ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
-	,ARID.[dblDiscount]				= ISNULL(ARID.[dblDiscount], @ZeroDecimal)
-	,ARID.[dblItemWeight]			= ISNULL(ARID.[dblItemWeight], 1.00)
-	,ARID.[dblShipmentGrossWt]		= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal)
-	,ARID.[dblShipmentTareWt]		= ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
-	,ARID.[dblShipmentNetWt]		= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
-	,ARID.[dblPrice]				= ISNULL(ARID.[dblPrice], @ZeroDecimal)
-	,ARID.[dblBasePrice]			= ISNULL(ISNULL(ARID.[dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
-	,ARID.[dblUnitPrice] 			= ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal)
-	,ARID.[dblBaseUnitPrice]		= ISNULL(ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
-	,ARID.[intPriceUOMId]			= CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) THEN ISNULL(ARID.[intPriceUOMId], ARID.[intItemWeightUOMId]) ELSE ISNULL(ARID.[intPriceUOMId], ARID.[intItemUOMId]) END
-	,ARID.[dblUnitQuantity]			= CASE WHEN (ISNULL(ARID.[dblUnitQuantity],0) <> @ZeroDecimal) THEN ARID.[dblUnitQuantity] ELSE (CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) THEN ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL(ARID.[dblQtyShipped], @ZeroDecimal) END) END
-	,ARID.[dblTotalTax]				= ISNULL(ARID.[dblTotalTax], @ZeroDecimal)
-	,ARID.[dblBaseTotalTax]			= ISNULL(ARID.[dblBaseTotalTax], @ZeroDecimal)
-	,ARID.[dblTotal]				= ISNULL(ARID.[dblTotal], @ZeroDecimal)
-	,ARID.[dblBaseTotal]			= ISNULL(ARID.[dblBaseTotal], @ZeroDecimal)
-	,ARID.[dblItemTermDiscount]		= ISNULL(ARID.[dblItemTermDiscount], @ZeroDecimal)
-	,ARID.[strItemTermDiscountBy]	= ISNULL(ARID.[strItemTermDiscountBy], 'Amount') 
-	,ARID.[intSubCurrencyId]		= ISNULL(ARID.[intSubCurrencyId], ARI.[intCurrencyId])
-	,ARID.[dblSubCurrencyRate]		= CASE WHEN ISNULL(ARID.[dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblSubCurrencyRate] END
-	,ARID.[dblCurrencyExchangeRate]	= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE ARID.[dblCurrencyExchangeRate] END
+	 ARID.[dblQtyOrdered]					= ISNULL(ARID.[dblQtyOrdered], @ZeroDecimal)
+	,ARID.[dblQtyShipped]					= ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
+	,ARID.[dblDiscount]						= ISNULL(ARID.[dblDiscount], @ZeroDecimal)
+	,ARID.[dblItemWeight]					= ISNULL(ARID.[dblItemWeight], 1.000000)
+	,ARID.[dblShipmentGrossWt]				= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal)
+	,ARID.[dblShipmentTareWt]				= ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
+	,ARID.[dblShipmentNetWt]				= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
+	,ARID.[dblPrice]						= ISNULL(ARID.[dblPrice], @ZeroDecimal)
+	,ARID.[dblBasePrice]					= ISNULL(ISNULL(ARID.[dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,ARID.[dblUnitPrice] 					= ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal)
+	,ARID.[dblBaseUnitPrice]				= ISNULL(ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.00000 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,ARID.[intPriceUOMId]					= CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) THEN ISNULL(ARID.[intPriceUOMId], ARID.[intItemWeightUOMId]) ELSE ISNULL(ARID.[intPriceUOMId], ARID.[intItemUOMId]) END
+	,ARID.[dblUnitQuantity]					= CASE WHEN (ISNULL(ARID.[dblUnitQuantity],@ZeroDecimal) <> @ZeroDecimal) THEN ARID.[dblUnitQuantity] ELSE (CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) THEN ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL(ARID.[dblQtyShipped], @ZeroDecimal) END) END
+	,ARID.[dblTotalTax]						= ISNULL(ARID.[dblTotalTax], @ZeroDecimal)
+	,ARID.[dblBaseTotalTax]					= ISNULL(ARID.[dblBaseTotalTax], @ZeroDecimal)
+	,ARID.[dblTotal]						= ISNULL(ARID.[dblTotal], @ZeroDecimal)
+	,ARID.[dblBaseTotal]					= ISNULL(ARID.[dblBaseTotal], @ZeroDecimal)
+	,ARID.[dblItemTermDiscount]				= ISNULL(ARID.[dblItemTermDiscount], @ZeroDecimal)
+	,ARID.[strItemTermDiscountBy]			= ISNULL(ARID.[strItemTermDiscountBy], 'Amount')
+	,ARID.[dblItemTermDiscountAmount]		= [dbo].[fnARGetItemTermDiscount](	ISNULL(ARID.[strItemTermDiscountBy], 'Amount')
+																				,ARID.[dblItemTermDiscount]
+																				,ARID.[dblQtyShipped]
+																				,ARID.[dblPrice]
+																				,1.000000)
+	,ARID.[dblBaseItemTermDiscountAmount]	= [dbo].[fnARGetItemTermDiscount](	ISNULL(ARID.[strItemTermDiscountBy], 'Amount')
+																				,ARID.[dblItemTermDiscount]
+																				,ARID.[dblQtyShipped]
+																				,ARID.[dblPrice]
+																				,(CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END))
+	,ARID.[dblItemTermDiscountExemption]	= [dbo].[fnARGetItemTermDiscountExemption](	ARID.[ysnTermDiscountExempt]
+																						,ARID.[dblTermDiscountRate]
+																						,ARID.[dblQtyShipped]
+																						,ARID.[dblPrice]
+																						,1.000000)
+	,ARID.[dblBaseItemTermDiscountExemption] = [dbo].[fnARGetItemTermDiscountExemption](	ARID.[ysnTermDiscountExempt]
+																						,ARID.[dblTermDiscountRate]
+																						,ARID.[dblQtyShipped]
+																						,ARID.[dblPrice]
+																						,(CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END))
+	,ARID.[dblTermDiscountRate]				= ISNULL(ARID.[dblTermDiscountRate], @ZeroDecimal)
+	,ARID.[ysnTermDiscountExempt]			= ISNULL(ARID.[ysnTermDiscountExempt], 0)
+	,ARID.[intSubCurrencyId]				= ISNULL(ARID.[intSubCurrencyId], ARI.[intCurrencyId])
+	,ARID.[dblSubCurrencyRate]				= CASE WHEN ISNULL(ARID.[dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblSubCurrencyRate] END
+	,ARID.[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
@@ -65,66 +85,58 @@ INNER JOIN
 INNER JOIN
 	@InvoiceIds IID
 		ON ARID.[intInvoiceId] = IID.[intHeaderId]
---WHERE
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
 	
 	
 UPDATE
 	tblARInvoice
 SET
-	 [dblInvoiceSubtotal]		= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
-	,[dblBaseInvoiceSubtotal]	= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
-	,[dblShipping]				= ISNULL([dblShipping], @ZeroDecimal)
-	,[dblBaseShipping]			= ISNULL([dblBaseShipping], @ZeroDecimal)
-	,[dblTax]					= ISNULL([dblTax], @ZeroDecimal)
-	,[dblBaseTax]				= ISNULL([dblBaseTax], @ZeroDecimal)
-	,[dblInvoiceTotal]			= ISNULL([dblInvoiceTotal], @ZeroDecimal)
-	,[dblBaseInvoiceTotal]		= ISNULL([dblBaseInvoiceTotal], @ZeroDecimal)
-	,[dblDiscount]				= ISNULL([dblDiscount], @ZeroDecimal)
-	,[dblBaseDiscount]			= ISNULL([dblBaseDiscount], @ZeroDecimal)
-	,[dblAmountDue]				= ISNULL([dblAmountDue], @ZeroDecimal)
-	,[dblBaseAmountDue]			= ISNULL([dblBaseAmountDue], @ZeroDecimal)
-	,[dblPayment]				= ISNULL([dblPayment], @ZeroDecimal)
-	,[dblBasePayment]			= ISNULL([dblBasePayment], @ZeroDecimal)
-	,[dblDiscountAvailable]		= ISNULL([dblDiscountAvailable], @ZeroDecimal)
-	,[dblBaseDiscountAvailable]	= ISNULL([dblBaseDiscountAvailable], @ZeroDecimal)
-	,[dblTotalTermDiscount]		= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
-	,[dblInterest]				= ISNULL([dblInterest], @ZeroDecimal)
-	,[dblBaseInterest]			= ISNULL([dblBaseInterest], @ZeroDecimal)
-	,[dblProvisionalAmount]		= ISNULL([dblProvisionalAmount], @ZeroDecimal)
-	,[dblBaseProvisionalAmount]	= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
-	,[dblSplitPercent] 			= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
+	 [dblInvoiceSubtotal]					= ISNULL([dblInvoiceSubtotal], @ZeroDecimal)
+	,[dblBaseInvoiceSubtotal]				= ISNULL([dblBaseInvoiceSubtotal], @ZeroDecimal)
+	,[dblShipping]							= ISNULL([dblShipping], @ZeroDecimal)
+	,[dblBaseShipping]						= ISNULL([dblBaseShipping], @ZeroDecimal)
+	,[dblTax]								= ISNULL([dblTax], @ZeroDecimal)
+	,[dblBaseTax]							= ISNULL([dblBaseTax], @ZeroDecimal)
+	,[dblInvoiceTotal]						= ISNULL([dblInvoiceTotal], @ZeroDecimal)
+	,[dblBaseInvoiceTotal]					= ISNULL([dblBaseInvoiceTotal], @ZeroDecimal)
+	,[dblDiscount]							= ISNULL([dblDiscount], @ZeroDecimal)
+	,[dblBaseDiscount]						= ISNULL([dblBaseDiscount], @ZeroDecimal)
+	,[dblAmountDue]							= ISNULL([dblAmountDue], @ZeroDecimal)
+	,[dblBaseAmountDue]						= ISNULL([dblBaseAmountDue], @ZeroDecimal)
+	,[dblPayment]							= ISNULL([dblPayment], @ZeroDecimal)
+	,[dblBasePayment]						= ISNULL([dblBasePayment], @ZeroDecimal)
+	,[dblDiscountAvailable]					= ISNULL([dblDiscountAvailable], @ZeroDecimal)
+	,[dblBaseDiscountAvailable]				= ISNULL([dblBaseDiscountAvailable], @ZeroDecimal)	
+	,[dblTotalTermDiscount]					= ISNULL([dblTotalTermDiscount], @ZeroDecimal)
+	,[dblBaseTotalTermDiscount]				= ISNULL([dblBaseTotalTermDiscount], @ZeroDecimal)
+	,[dblTotalTermDiscountExemption]		= ISNULL([dblTotalTermDiscountExemption], @ZeroDecimal)
+	,[dblBaseTotalTermDiscountExemption]	= ISNULL([dblBaseTotalTermDiscountExemption], @ZeroDecimal)
+	,[dblInterest]							= ISNULL([dblInterest], @ZeroDecimal)
+	,[dblBaseInterest]						= ISNULL([dblBaseInterest], @ZeroDecimal)
+	,[dblProvisionalAmount]					= ISNULL([dblProvisionalAmount], @ZeroDecimal)
+	,[dblBaseProvisionalAmount]				= ISNULL([dblBaseProvisionalAmount], @ZeroDecimal)
+	,[dblSplitPercent] 						= CASE WHEN ISNULL([ysnSplitted],0) = 0 OR [intSplitId] IS NULL THEN 1 ELSE ISNULL([dblSplitPercent],1) END
 WHERE
 	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = [intInvoiceId])
 
 
 UPDATE ARI
 SET
-	  [dblDiscountAvailable]		= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
-	 ,[dblBaseDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountTotal], @ZeroDecimal)
-	 ,[dblTotalTermDiscount]		= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
+	 [dblDiscountAvailable]					= ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal)
+	,[dblBaseDiscountAvailable]				= ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
+	,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
+	,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
+	,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
+	,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
 FROM
 	tblARInvoice ARI
 LEFT OUTER JOIN
 	(
 	SELECT 
-		SUM(
-		CASE WHEN [strItemTermDiscountBy] = 'Percent'
-			THEN
-				[dbo].fnRoundBanker((ISNULL([dblQtyShipped], @ZeroDecimal) * ISNULL([dblPrice], @ZeroDecimal)) * (ISNULL([dblItemTermDiscount], @ZeroDecimal)/100.000000), [dbo].[fnARGetDefaultDecimal]())
-			ELSE
-				[dbo].fnRoundBanker(ISNULL([dblItemTermDiscount], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
-		END
-		)	AS [dblItemTermDiscountTotal]
-		,SUM(
-		CASE WHEN [strItemTermDiscountBy] = 'Percent'
-			THEN
-				[dbo].fnRoundBanker(((ISNULL([dblQtyShipped], @ZeroDecimal) * ISNULL([dblPrice], @ZeroDecimal)) * (ISNULL([dblItemTermDiscount], @ZeroDecimal)/100.000000)) * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
-			ELSE
-				[dbo].fnRoundBanker(ISNULL([dblItemTermDiscount], @ZeroDecimal) * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
-		END
-		)	AS [dblBaseItemTermDiscountTotal]
-		,[intInvoiceId]
+		 [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
+		,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
+		,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
+		,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
+		,[intInvoiceId]						= [intInvoiceId]
 	FROM
 		tblARInvoiceDetail
 	GROUP BY
@@ -136,8 +148,7 @@ LEFT OUTER JOIN
 INNER JOIN
 	@InvoiceIds IID
 		ON ARI.[intInvoiceId] = IID.[intHeaderId]
---WHERE
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId])
+
 
 
 UPDATE ARID
@@ -163,8 +174,6 @@ INNER JOIN
 	@InvoiceIds IID
 		ON ARID.[intInvoiceId] = IID.[intHeaderId]
 		AND ISNULL(IID.[ysnUpdateAvailableDiscountOnly],0) = 0
---WHERE
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 
 UPDATE
 	ARID
@@ -189,8 +198,6 @@ LEFT OUTER JOIN
 INNER JOIN
 	@InvoiceIds IID
 		ON ARID.[intInvoiceId] = IID.[intHeaderId]
---WHERE
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId])
 
 UPDATE
 	ARID
@@ -228,9 +235,6 @@ LEFT OUTER JOIN
 INNER JOIN
 	@InvoiceIds IID
 		ON ARI.[intInvoiceId] = IID.[intHeaderId]
---WHERE
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
-	
 	
 UPDATE ARI	
 SET
@@ -257,7 +261,5 @@ FROM
 INNER JOIN
 	@InvoiceIds IID
 		ON ARI.[intInvoiceId] = IID.[intHeaderId]
---WHERE
---	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARI.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 
 END

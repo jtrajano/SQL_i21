@@ -6,7 +6,8 @@
 		,@strPositionIncludes NVARCHAR(100) = NULL
 		,@dtmToDate datetime = NULL
 AS
-
+-- drop table #invQty
+-- drop table #tempCollateral
 IF isnull(@strPurchaseSales,'') <> ''
 BEGIN
 	if @strPurchaseSales='Purchase'
@@ -159,11 +160,14 @@ INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId
 	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract)
 EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate
 
+
 DECLARE @tblGetOpenFutureByDate TABLE (
 		intFutOptTransactionId int, 
 		intOpenContract  int)
 INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract)
 EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
+
+
 
 DECLARE @tblGetStorageDetailByDate TABLE (
 		intRowNum int, 
@@ -245,7 +249,7 @@ BEGIN
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((cd.dblBalance),0)) AS dblTotal
 	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId 
 	FROM @tblGetOpenContractDetail cd
-	WHERE cd.intContractTypeId in(1,2) AND cd.intPricingTypeId IN (1,2,3) and 
+	WHERE cd.intContractTypeId in(1,2) and
 		cd.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 	AND cd.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN cd.intCompanyLocationId ELSE @intLocationId END)t
 		WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -352,7 +356,7 @@ BEGIN
 				SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(cd.dblBalance,0)) dblBalance,intCompanyLocationId
 				FROM @tblGetOpenContractDetail cd
 				WHERE intContractTypeId = 1 and intPricingTypeId IN (1,3) AND cd.intCommodityId  = @intCommodityId 
-				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
+				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end 
 				)t	WHERE  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
@@ -429,7 +433,9 @@ BEGIN
 			), 0) AS dblCollatralSales			
 
 		,(SELECT sum(SlsBasisDeliveries) FROM
-			( SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((ri.dblQuantity),0)) AS SlsBasisDeliveries  
+			( SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,
+										isnull((SELECT TOP 1 dblQty FROM tblICInventoryShipment sh
+										 WHERE sh.strShipmentNumber=it.strTransactionId),0)) AS SlsBasisDeliveries  
 		  FROM tblICInventoryTransaction it
 		  join tblICInventoryShipment r on r.strShipmentNumber=it.strTransactionId  
 		  INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId  
@@ -516,7 +522,6 @@ BEGIN
 SELECT @strDescription,
 		'Basis Risk' [strType],'Physical'
 		,isnull(CompanyTitled, 0) AS dblTotal,
-
 		@intCommodityUnitMeasureId,@intCommodityId,null strContractNumber,isnull(CompanyTitled, 0) CompanyTitled,isnull(OpenPurchasesQty, 0) OpenPurchasesQty,-isnull(OpenSalesQty, 0)
 	FROM (
               SELECT 
@@ -565,6 +570,7 @@ SELECT @strDescription,
 					FROM @tblGetOpenContractDetail cd
 					WHERE intContractTypeId = 2 and intPricingTypeId IN (1,2) AND cd.intCommodityId  = @intCommodityId 
 					AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end
+	
 					)t WHERE intCompanyLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 

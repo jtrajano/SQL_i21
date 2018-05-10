@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
-@intUniqueId Int
+@intUniqueId BIGINT
 , @intEntityId Int
 , @intCategoryId int
 , @intItemVendorXrefId INT
@@ -23,6 +23,7 @@ BEGIN
 		DECLARE @intItemId int
 		DECLARE @intItemLocationId int
 		DECLARE @intItemPricingId int
+		DECLARE @strCompanyLocation AS NVARCHAR(150)
 
 		SELECT 
 		@intItemUOMId = intItemUOMId
@@ -98,106 +99,27 @@ BEGIN
 
 		   DECLARE @SqlQuery1 as NVARCHAR(MAX)
 
-		   ----intCategoryId
-			IF (@intCategoryId IS NOT NULL AND @intCategoryId <> 0)
-			BEGIN
-		
-				DECLARE @strCategoryCode NVARCHAR(100)
-				SELECT @strCategoryCode = strCategoryCode FROM tblICCategory WHERE intCategoryId = @intCategoryId
 
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Category'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj8.strCategoryCode, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + @strCategoryCode + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+		   --@intEntityVendorId
+		   IF (@intEntityVendorId IS NOT NULL AND @intEntityVendorId <> 0)
+			BEGIN
+	
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+						(
+							'Entity Vendor Id'
+							, 'ISNULL(EM.intEntityId, '''')'
+							, 'CAST(' + CAST(@intEntityVendorId AS NVARCHAR(100)) + ' AS NVARCHAR(50))'
+							, @intItemUOMId
+							, @intItemId
+							, @intItemLocationId
+							, @intItemPricingId
+						)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
 			END
 
-			--strDescription
-			IF (@strDescription != '' AND @strDescription != 'null')
-			BEGIN
-		
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Description'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj7.strDescription, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + @strDescription + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
-
-				INSERT @tblTemp
-				EXEC (@SqlQuery1)
-			END
-
-			--PosDescription
-			IF (@PosDescription != '' AND @PosDescription != 'null')
-			BEGIN
-		
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Pos Description'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj2.strDescription, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + @PosDescription + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
-
-				INSERT @tblTemp
-				EXEC (@SqlQuery1)
-			END
-
-			--@intEntityVendorId
+			--@Vendor Name
 			IF (@intEntityVendorId IS NOT NULL AND @intEntityVendorId <> 0)
 			BEGIN
 		
@@ -206,33 +128,86 @@ BEGIN
 		
 				SELECT @strVendorId = strVendorId FROM tblAPVendor WHERE intEntityId = @intEntityVendorId
 
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Vendor'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj11.strName, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + @strVendorName + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+						(
+							'Vendor Name'
+							, 'ISNULL(EM.strName, '''')'
+							, '''' + @strVendorName + ''''
+							, @intItemUOMId
+							, @intItemId
+							, @intItemLocationId
+							, @intItemPricingId
+						)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
 			END
+
+
+		   ----intCategoryId
+			IF (@intCategoryId IS NOT NULL AND @intCategoryId <> 0)
+			BEGIN
+		
+				DECLARE @strCategoryCode NVARCHAR(100)
+				SELECT @strCategoryCode = strCategoryCode FROM tblICCategory WHERE intCategoryId = @intCategoryId
+
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+						(
+							'Category'
+							, 'ISNULL(Cat.strCategoryCode, '''')'
+							, '''' + @strCategoryCode + ''''
+							, @intItemUOMId
+							, @intItemId
+							, @intItemLocationId
+							, @intItemPricingId
+						)
+
+				INSERT @tblTemp
+				EXEC (@SqlQuery1)
+			END
+
+
+			--strDescription
+			IF (@strDescription != '' AND @strDescription != 'null')
+			BEGIN
+
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+						(
+							'Description'
+							, 'ISNULL(I.strDescription, '''')'
+							, '''' + @strDescription + ''''
+							, @intItemUOMId
+							, @intItemId
+							, @intItemLocationId
+							, @intItemPricingId
+						)
+
+				INSERT @tblTemp
+				EXEC (@SqlQuery1)
+			END
+
+
+			--PosDescription
+			IF (@PosDescription != '' AND @PosDescription != 'null')
+			BEGIN
+				
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+						(
+							'Pos Description'
+							, 'ISNULL(IL.strDescription, '''')'
+							, '''' + @PosDescription + ''''
+							, @intItemUOMId
+							, @intItemId
+							, @intItemLocationId
+							, @intItemPricingId
+						)
+
+				INSERT @tblTemp
+				EXEC (@SqlQuery1)
+			END
+
+			
+			
 
 
 			--@intItemVendorXrefId
@@ -259,29 +234,17 @@ BEGIN
 
 				 IF(@ItemVendorProductChangeType != '' AND @ItemVendorProductChangeType IS NOT NULL)
 				 BEGIN
-					SET @SqlQuery1 = 'SELECT' + CHAR(13)
-											+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-											+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-											+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-											+ ', ''' + @ItemVendorProductChangeType + ''' AS strChangeDescription' + CHAR(13)
-											+ ', ISNULL(adj10.strVendorProduct, '''') AS strOldData' + CHAR(13)
-											+ ', ''' + @strVendorProduct + ''' AS strNewData' + CHAR(13)
-								  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-									  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-								  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-								  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-								  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-								  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-								  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+					
+					SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+						(
+							@ItemVendorProductChangeType
+							, 'ISNULL(VendorXref.strVendorProduct, '''')'
+							, '''' + @strVendorProduct + ''''
+							, @intItemUOMId
+							, @intItemId
+							, @intItemLocationId
+							, @intItemPricingId
+						)
 
 					INSERT @tblTemp
 					EXEC (@SqlQuery1)
@@ -292,20 +255,17 @@ BEGIN
 			--dblSalePrice
 			IF (@dblSalePrice IS NOT NULL)
 			BEGIN
-		
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-								+ ' CL.strLocationName AS strLocation' + CHAR(13)
-								+ ', UOM.strUpcCode AS strUpc' + CHAR(13)
-								+ ', I.strDescription AS strItemDescription' + CHAR(13)
-								+ ', ''Sale Price'' AS strChangeDescription' + CHAR(13)
-								+ ', CAST(IP.dblSalePrice AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) AS strOldData' + CHAR(13)
-								+ ', CAST(' + CAST(@dblSalePrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-					  + ' FROM dbo.tblICItemPricing IP' + CHAR(13)
-					  + ' JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId' + CHAR(13)
-					  + ' JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId' + CHAR(13)
-					  + ' JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId' + CHAR(13)
-					  + ' JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId' + CHAR(13)
-					  + ' WHERE intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+								(
+									'Sale Price'
+									, 'CAST(IP.dblSalePrice AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+									, 'CAST(' + CAST(@dblSalePrice AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+									, @intItemUOMId
+									, @intItemId
+									, @intItemLocationId
+									, @intItemPricingId
+								)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
@@ -314,20 +274,17 @@ BEGIN
 			--dblLastCost
 			IF (@dblLastCost IS NOT NULL)
 			BEGIN
-		
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-								+ ' CL.strLocationName AS strLocation' + CHAR(13)
-								+ ', UOM.strUpcCode AS strUpc' + CHAR(13)
-								+ ', I.strDescription AS strItemDescription' + CHAR(13)
-								+ ', ''Last Cost'' AS strChangeDescription' + CHAR(13)
-								+ ', CAST(IP.dblLastCost AS DECIMAL(18, ' + @CompanyCurrencyDecimal + ')) AS strOldData' + CHAR(13)
-								+ ', CAST(' + CAST(@dblLastCost AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))' + CHAR(13)
-					  + ' FROM dbo.tblICItemPricing IP' + CHAR(13)
-					  + ' JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId' + CHAR(13)
-					  + ' JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId' + CHAR(13)
-					  + ' JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId' + CHAR(13)
-					  + ' JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId' + CHAR(13)
-					  + ' WHERE intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+				
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+								(
+									'Last Cost'
+									, 'CAST(IP.dblLastCost AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+									, 'CAST(' + CAST(@dblLastCost AS NVARCHAR(250)) + ' AS DECIMAL(18, ' + @CompanyCurrencyDecimal + '))'
+									, @intItemUOMId
+									, @intItemId
+									, @intItemLocationId
+									, @intItemPricingId
+								)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
@@ -336,30 +293,17 @@ BEGIN
 			--strVendorId, 
 			IF (@strVendorId != '')
 			BEGIN
-		
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Vendor Id'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj9.strVendorId, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + CAST(@strVendorId AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+				
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+								(
+									'Vendor Id'
+									, 'ISNULL(Vendor.strVendorId, '''')'
+									, '''' + @strVendorId + ''''
+									, @intItemUOMId
+									, @intItemId
+									, @intItemLocationId
+									, @intItemPricingId
+								)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
@@ -371,30 +315,17 @@ BEGIN
 		
 				DECLARE @strFamily NVARCHAR(50)
 				SELECT @strFamily = strSubcategoryId FROM tblSTSubcategory WHERE strSubcategoryType = 'F' AND intSubcategoryId = @FamilyId
-
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Family'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj3.strSubcategoryId, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + CAST(@strFamily AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+				
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+								(
+									'Family'
+									, 'ISNULL(SubCatF.strSubcategoryId, '''')'
+									, '''' + @strFamily + ''''
+									, @intItemUOMId
+									, @intItemId
+									, @intItemLocationId
+									, @intItemPricingId
+								)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
@@ -406,43 +337,339 @@ BEGIN
 		
 				DECLARE @strClass NVARCHAR(50)
 				SELECT @strClass = strSubcategoryId FROM tblSTSubcategory WHERE strSubcategoryType = 'C' AND intSubcategoryId = @ClassId
-
-				SET @SqlQuery1 = 'SELECT' + CHAR(13)
-										+ ' adj5.strLocationName AS strLocation' + CHAR(13)
-										+ ', adj6.strUpcCode AS strUpc' + CHAR(13)
-										+ ', adj7.strDescription AS strItemDescription' + CHAR(13)
-										+ ', ''Class'' AS strChangeDescription' + CHAR(13)
-										+ ', ISNULL(adj4.strSubcategoryId, '''') AS strOldData' + CHAR(13)
-										+ ', ''' + CAST(@strClass AS NVARCHAR(50)) + ''' AS strNewData' + CHAR(13)
-							  + ' FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId LEFT OUTER JOIN' + CHAR(13)
-								  + ' dbo.tblEMEntity AS adj11 ON adj11.intEntityId = adj2.intVendorId' + CHAR(13)
-							  --+ ' WHERE adj5.intCompanyLocationId = ' + CAST(@intCompanyLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' WHERE adj6.intItemUOMId = ' + CAST(@intItemUOMId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj7.intItemId = ' + CAST(@intItemId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj2.intItemLocationId = ' + CAST(@intItemLocationId as NVARCHAR(50)) + '' + CHAR(13)
-							  + ' AND adj1.intItemPricingId = ' + CAST(@intItemPricingId as NVARCHAR(50)) + '' + CHAR(13)
+				
+				SET @SqlQuery1 = dbo.fnSTDynamicQueryInventoryMass
+								(
+									'Class'
+									, 'ISNULL(SubCatC.strSubcategoryId, '''')'
+									, '''' + @strClass + ''''
+									, @intItemUOMId
+									, @intItemId
+									, @intItemLocationId
+									, @intItemPricingId
+								)
 
 				INSERT @tblTemp
 				EXEC (@SqlQuery1)
 			END
 
-			--Remove data
+
+
+			--Remove
 			DELETE FROM @tblTemp WHERE strOldData = strNewData
 
 
 
 
+			--===================================================================================================
+			-- Start Table tblICItemLocation
+			--===================================================================================================
+
+			DECLARE @strItemLocationAuditLogChildren AS NVARCHAR(MAX) = ''
+			DECLARE @strFromData AS NVARCHAR(1000) = ''
+			DECLARE @strToData AS NVARCHAR(1000) = ''
+			DECLARE @strChangeColumnName AS NVARCHAR(1000) = ''
+			DECLARE @strChangeDescription AS NVARCHAR(1000) = ''
+
+			--intVendorId
+			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Entity Vendor Id')
+			BEGIN
+				IF(@intEntityVendorId IS NOT NULL AND @intEntityVendorId <> 0)
+					BEGIN
+						UPDATE dbo.tblICItemLocation
+						SET intVendorId = @intEntityVendorId
+						, dtmDateModified = GETUTCDATE() 
+						, intModifiedByUserId = @intEntityId
+						FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+							 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+							 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+							 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+							 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+							 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+							 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+							 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+							 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+							 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+						 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+						 WHERE adj6.intItemUOMId = @intItemUOMId
+						 AND adj7.intItemId = @intItemId
+						 AND adj2.intItemLocationId = @intItemLocationId
+						 AND adj1.intItemPricingId = @intItemPricingId
+
+						  --GET OLD and NEW data
+						 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor Name'
+
+						 --AutoLog for InventoryMass	 				 
+						 SET @children = @children + '{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 
 
+						 -- SET Auditlog for table tblICItemLocation
+						 SELECT @strFromData = strOldData
+								, @strToData = strNewData 
+						 FROM @tblTemp WHERE strChangeDescription = 'Vendor Name'
+						 SET @strItemLocationAuditLogChildren = @strItemLocationAuditLogChildren +
+						 N'{
+							"change": "strVendorName",
+							"from": "' + @strFromData + '",
+							"to": "' + @strToData + '",
+							"leaf": true,
+							"iconCls": "small-gear",
+							"isField": true,
+							"keyValue": ' + CAST(@intItemLocationId AS NVARCHAR(50)) + ',
+							"changeDescription": "Vendor",
+							"hidden": false
+						 },'
+					END
+			END
+
+			--@PosDescription
+			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Pos Description')
+			BEGIN
+				UPDATE dbo.tblICItemLocation
+				SET strDescription = @PosDescription
+				, dtmDateModified = GETUTCDATE() 
+				, intModifiedByUserId = @intEntityId
+				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+					 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+					 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+					 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+					 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+				 WHERE adj6.intItemUOMId = @intItemUOMId
+				 AND adj7.intItemId = @intItemId
+				 AND adj2.intItemLocationId = @intItemLocationId
+				 AND adj1.intItemPricingId = @intItemPricingId
+
+				 --GET OLD and NEW data
+				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
+
+				 --AutoLog for InventoryMass
+				 SET @children = @children + '{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
+
+				 -- SET Auditlog for table tblICItemLocation
+				 SELECT @strFromData = strOldData
+						 , @strToData = strNewData 
+				 FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
+				 SET @strItemLocationAuditLogChildren = @strItemLocationAuditLogChildren +
+				 N'
+				 {
+					"change": "strDescription",
+					"from": "' + @strFromData + '",
+					"to": "' + @strToData + '",
+					"leaf": true,
+					"iconCls": "small-gear",
+					"isField": true,
+					"keyValue": ' + CAST(@intItemLocationId AS NVARCHAR(50)) + ',
+					"changeDescription": "Description",
+					"hidden": false
+				 },'
+			END
+
+			--FamilyId
+			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Family')
+			BEGIN
+				IF(@FamilyId IS NOT NULL AND @FamilyId <> 0)
+				BEGIN
+					UPDATE dbo.tblICItemLocation
+					SET intFamilyId = @FamilyId
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
+					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+					 WHERE adj6.intItemUOMId = @intItemUOMId
+					 AND adj7.intItemId = @intItemId
+					 AND adj2.intItemLocationId = @intItemLocationId
+					 AND adj1.intItemPricingId = @intItemPricingId
+				END
+		
+
+				--Family
+				IF(@Family <> '' AND @FamilyId IS NOT NULL AND @FamilyId <> 0)
+				BEGIN
+					UPDATE dbo.tblSTSubcategory
+					SET strSubcategoryId = @Family
+					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+						 --dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+					 WHERE adj6.intItemUOMId = @intItemUOMId
+					 AND adj7.intItemId = @intItemId
+					 AND adj2.intItemLocationId = @intItemLocationId
+					 AND adj1.intItemPricingId = @intItemPricingId
+					 AND strSubcategoryType = 'F'
+					 AND intSubcategoryId = @FamilyId
+				END
+
+				--Constract child
+				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Family'
+				 SET @children = @children + '{"change":"Family","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
+
+				 -- SET Auditlog for table tblICItemLocation
+				 SELECT @strFromData = strOldData
+						 , @strToData = strNewData 
+				 FROM @tblTemp WHERE strChangeDescription = 'Family'
+				 SET @strItemLocationAuditLogChildren = @strItemLocationAuditLogChildren +
+				 N'
+				 {
+					"change": "strFamily",
+					"from": "' + @strFromData + '",
+					"to": "' + @strToData + '",
+					"leaf": true,
+					"iconCls": "small-gear",
+					"isField": true,
+					"keyValue": ' + CAST(@intItemLocationId AS NVARCHAR(50)) + ',
+					"changeDescription": "Family",
+					"hidden": false
+				 },'
+			END
+
+			--ClassId
+			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Class')
+			BEGIN
+				IF(@ClassId IS NOT NULL AND @ClassId <> 0)
+				BEGIN
+					UPDATE dbo.tblICItemLocation
+					SET intClassId = @ClassId
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
+					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+					 WHERE adj6.intItemUOMId = @intItemUOMId
+					 AND adj7.intItemId = @intItemId
+					 AND adj2.intItemLocationId = @intItemLocationId
+					 AND adj1.intItemPricingId = @intItemPricingId
+				END
+		
+
+				 --Class
+				IF(@Class <> '' AND @ClassId IS NOT NULL AND @ClassId <> 0)
+				BEGIN
+					UPDATE dbo.tblSTSubcategory
+					SET strSubcategoryId = @Class
+					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+						 --dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+					 WHERE adj6.intItemUOMId = @intItemUOMId
+					 AND adj7.intItemId = @intItemId
+					 AND adj2.intItemLocationId = @intItemLocationId
+					 AND adj1.intItemPricingId = @intItemPricingId
+					 AND strSubcategoryType = 'C'
+					 AND intSubcategoryId = @ClassId
+				END
+
+				--Constract child
+				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Class'
+				 SET @children = @children + '{"change":"Class","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+
+
+				-- SET Auditlog for table tblICItemLocation
+				 SELECT @strFromData = strOldData
+						 , @strToData = strNewData 
+				 FROM @tblTemp WHERE strChangeDescription = 'Class'
+				 SET @strItemLocationAuditLogChildren = @strItemLocationAuditLogChildren +
+				 N'
+				 {
+					"change": "strClass",
+					"from": "' + @strFromData + '",
+					"to": "' + @strToData + '",
+					"leaf": true,
+					"iconCls": "small-gear",
+					"isField": true,
+					"keyValue": ' + CAST(@intItemLocationId AS NVARCHAR(50)) + ',
+					"changeDescription": "Class",
+					"hidden": false
+				 },'
+			END
+
+
+			IF(@strItemLocationAuditLogChildren != '')
+				BEGIN
+					SET @strCompanyLocation = (SELECT strLocationName FROM tblSMCompanyLocation
+												WHERE intCompanyLocationId = (
+													SELECT intLocationId FROM tblICItemLocation
+													WHERE intItemLocationId = @intItemLocationId
+												)
+											   )
+
+					SET @strItemLocationAuditLogChildren = left(@strItemLocationAuditLogChildren, len(@strItemLocationAuditLogChildren)-1)
+
+					-- INSERT TO Audit Log
+					SET @JsonStringAuditLog = 
+					N'{
+						"action": "Updated",
+						"change": "Updated - Record: ' + @strCompanyLocation + '",
+						"keyValue": ' + CAST(@intItemLocationId AS NVARCHAR(50)) + ',
+						"iconCls": "small-tree-modified",
+						"children": [
+						' + @strItemLocationAuditLogChildren + '
+						]
+					}'
+
+					INSERT INTO tblSMAuditLog(strActionType, strTransactionType, strRecordNo, strDescription, strRoute, strJsonData, dtmDate, intEntityId, intConcurrencyId)
+					VALUES(
+							'Updated'
+							, 'Inventory.view.ItemLocation'
+							, @intItemLocationId
+							, ''
+							, null
+							, @JsonStringAuditLog
+							, GETUTCDATE()
+							, @intEntityId
+							, 1
+					)
+				END
+			
+
+			--===================================================================================================
+			-- End Table tblICItemLocation
+			--===================================================================================================
+
+
+
+
+			--===================================================================================================
+			-- Start Table tblICItem
+			--===================================================================================================
 
 
 			--strDescription
@@ -450,6 +677,8 @@ BEGIN
 			BEGIN
 				UPDATE dbo.tblICItem
 				SET strDescription = @strDescription
+				, dtmDateModified = GETUTCDATE() 
+				, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -475,13 +704,16 @@ BEGIN
 				 --Custom AuditLog Constract child
 				 SET @children = @children + '{"change":"Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 			END
-		
+			
+
 
 			--intCategoryId
 			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Category')
 			BEGIN
 				UPDATE dbo.tblICItem
-				SET intCategoryId = @intCategoryId
+					SET intCategoryId = @intCategoryId
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
 				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -507,71 +739,66 @@ BEGIN
 				 --AutoLog for InventoryMass	 
 				 SET @children = @children + '{"change":"Category","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 			END
+			--===================================================================================================
+			-- Start Table tblICItem
+			--===================================================================================================
 
+			 
+		
 
-			 --@PosDescription
-			 IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Pos Description')
+			
+			--===================================================================================================
+			-- Start Table tblICItemPricing
+			--===================================================================================================
+			--dblSalePrice
+			 IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Sale Price')
 			BEGIN
-				UPDATE dbo.tblICItemLocation
-				SET strDescription = @PosDescription
-				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-					 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-					 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-					 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-					 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 WHERE adj6.intItemUOMId = @intItemUOMId
-				 AND adj7.intItemId = @intItemId
-				 AND adj2.intItemLocationId = @intItemLocationId
-				 AND adj1.intItemPricingId = @intItemPricingId
+
+				UPDATE dbo.tblICItemPricing
+					SET dblSalePrice = @dblSalePrice
+					, dtmDateModified = GETUTCDATE() 
+					, intModifiedByUserId = @intEntityId
+				FROM dbo.tblICItemPricing IP				JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId				JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId				JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId				JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId				WHERE intItemPricingId = @intItemPricingId
 
 				 --GET OLD and NEW data
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Pos Description'
+				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Sale Price'
+			 
+			     --AuditLog for corresponding module
+				 SET @ChildTablePricingAuditLog = @ChildTablePricingAuditLog + '{"change":"dblSalePrice","from":"' + @oldData + '","to":"' + @newData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intItemPricingId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"Retail Price","hidden":false},'
 
+				 --Custom AuditLog Constract child
+				 SET @children = @children + '{"change":"Sale Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 
-				 --AutoLog for InventoryMass
-				 SET @children = @children + '{"change":"Pos Description","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 			END
-		
 
-			--intVendorId
-			 IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Vendor')
+			--dblLastCost
+			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Last Cost')
 			BEGIN
-				IF(@intEntityVendorId IS NOT NULL AND @intEntityVendorId <> 0)
-				BEGIN
-				UPDATE dbo.tblICItemLocation
-				SET intVendorId = @intEntityVendorId
-				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-					 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-					 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-					 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-					 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 WHERE adj6.intItemUOMId = @intItemUOMId
-				 AND adj7.intItemId = @intItemId
-				 AND adj2.intItemLocationId = @intItemLocationId
-				 AND adj1.intItemPricingId = @intItemPricingId
 
-				  --GET OLD and NEW data
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor'
+				UPDATE dbo.tblICItemPricing
+						SET dblLastCost = @dblLastCost
+						, dtmDateModified = GETUTCDATE() 
+						, intModifiedByUserId = @intEntityId
+				FROM dbo.tblICItemPricing IP				JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId				JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId				JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId				JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId				WHERE intItemPricingId = @intItemPricingId
 
-				 --AutoLog for InventoryMass	 				 
-				 SET @children = @children + '{"change":"Vendor","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+				 --GET OLD and NEW data
+				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Last Cost'
+			 
+			     --AuditLog for corresponding module
+				 SET @ChildTablePricingAuditLog = @ChildTablePricingAuditLog + '{"change":"dblLastCost","from":"' + @oldData + '","to":"' + @newData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intItemPricingId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"Last Cost","hidden":false},'
+				 
+				 --Custom AuditLog Constract child
+				 SET @children = @children + '{"change":"Last Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 
-				END
 			END
-		
+			--===================================================================================================
+			-- Start Table tblICItemPricing
+			--===================================================================================================
 
+
+
+
+			-- Table tblICItemVendorXref
 			--@intItemVendorXrefId
 			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Updated Vendor Item' OR strChangeDescription = 'Added Vendor Item')
 			BEGIN
@@ -580,8 +807,8 @@ BEGIN
 				IF(@ItemVendorProductChangeType = 'Added Vendor Item')
 				BEGIN
 
-					 INSERT INTO tblICItemVendorXref (intItemId,intItemLocationId,intVendorId,strVendorProduct)
-					 VALUES(@intItemId,@intItemLocationId,@intEntityVendorId,@strVendorProduct)
+					 INSERT INTO tblICItemVendorXref (intItemId, intItemLocationId, intVendorId, strVendorProduct, dtmDateCreated, intCreatedByUserId)
+					 VALUES(@intItemId, @intItemLocationId, @intEntityVendorId, @strVendorProduct, GETUTCDATE(), @intEntityId)
 					 
 					 -- SET new @intItemVendorXrefId
 					 SELECT TOP 1 @intItemVendorXrefId = intItemVendorXrefId FROM tblICItemVendorXref
@@ -603,7 +830,9 @@ BEGIN
 				ELSE IF(@ItemVendorProductChangeType = 'Updated Vendor Item')
 				BEGIN
 					UPDATE dbo.tblICItemVendorXref
-					SET strVendorProduct = @strVendorProduct
+						SET strVendorProduct = @strVendorProduct
+						, dtmDateModified = GETUTCDATE() 
+						, intModifiedByUserId = @intEntityId
 					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
 						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
 						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
@@ -633,47 +862,40 @@ BEGIN
 			END
 
 
-			--dblSalePrice
-			 IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Sale Price')
+			-- Table tblAPVendor
+			--strVendorId
+			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Vendor Id')
 			BEGIN
+				UPDATE dbo.tblAPVendor
+				SET strVendorId = @strVendorId
+				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
+					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
+					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
+					 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
+					 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
+					 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
+					 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
+					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
+					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
+					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
+				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
+				 WHERE adj6.intItemUOMId = @intItemUOMId
+				 AND adj7.intItemId = @intItemId
+				 AND adj2.intItemLocationId = @intItemLocationId
+				 AND adj1.intItemPricingId = @intItemPricingId
 
-				UPDATE dbo.tblICItemPricing
-						SET dblSalePrice = @dblSalePrice
-				FROM dbo.tblICItemPricing IP				JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId				JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId				JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId				JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId				WHERE intItemPricingId = @intItemPricingId
-
-				 --GET OLD and NEW data
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Sale Price'
-			 
-			     --AuditLog for corresponding module
-				 SET @ChildTablePricingAuditLog = @ChildTablePricingAuditLog + '{"change":"dblSalePrice","from":"' + @oldData + '","to":"' + @newData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intItemPricingId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"Retail Price","hidden":false},'
-
-				 --Custom AuditLog Constract child
-				 SET @children = @children + '{"change":"Sale Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
+				 --Constract child
+				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor Id'
+				 SET @children = @children + '{"change":"Vendor Id","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
 
 			END
 		
 
-			--dblLastCost
-			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Last Cost')
-			BEGIN
+			
 
-				UPDATE dbo.tblICItemPricing
-						SET dblLastCost = @dblLastCost
-				FROM dbo.tblICItemPricing IP				JOIN dbo.tblICItem I ON IP.intItemId = I.intItemId				JOIN dbo.tblICItemUOM UOM ON I.intItemId = UOM.intItemUOMId				JOIN dbo.tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId				JOIN dbo.tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId				WHERE intItemPricingId = @intItemPricingId
 
-				 --GET OLD and NEW data
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Last Cost'
-			 
-			     --AuditLog for corresponding module
-				 SET @ChildTablePricingAuditLog = @ChildTablePricingAuditLog + '{"change":"dblLastCost","from":"' + @oldData + '","to":"' + @newData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intItemPricingId AS NVARCHAR(50)) + ',"associationKey":"tblICItemPricings","changeDescription":"Last Cost","hidden":false},'
-				 
-				 --Custom AuditLog Constract child
-				 SET @children = @children + '{"change":"Last Price","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
-
-			END
-		
 			--============================================================================================================================================
-			--AuditLog for 'Item' Screen
+			--START AuditLog for 'Item' Screen
 
 			IF (@ParentTableAuditLog != '' OR @ChildTablePricingAuditLog != '' OR @ChildTableVendorXrefsAuditLog != '')
 			BEGIN
@@ -729,148 +951,12 @@ BEGIN
 							, 1
 					)
 			END
+			--END AuditLog for 'Item' Screen
 			--============================================================================================================================================
 
 
 
-			--strVendorId
-			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Vendor Id')
-			BEGIN
-				UPDATE dbo.tblAPVendor
-				SET strVendorId = @strVendorId
-				FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-					 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-					 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-					 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-					 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-					 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-					 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-					 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-					 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-					 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-				 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-				 WHERE adj6.intItemUOMId = @intItemUOMId
-				 AND adj7.intItemId = @intItemId
-				 AND adj2.intItemLocationId = @intItemLocationId
-				 AND adj1.intItemPricingId = @intItemPricingId
-
-				 --Constract child
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Vendor Id'
-				 SET @children = @children + '{"change":"Vendor Id","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
-
-			END
-		
-
-			--FamilyId
-			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Family')
-			BEGIN
-				IF(@FamilyId IS NOT NULL AND @FamilyId <> 0)
-				BEGIN
-					UPDATE dbo.tblICItemLocation
-					SET intFamilyId = @FamilyId
-					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-					 WHERE adj6.intItemUOMId = @intItemUOMId
-					 AND adj7.intItemId = @intItemId
-					 AND adj2.intItemLocationId = @intItemLocationId
-					 AND adj1.intItemPricingId = @intItemPricingId
-				END
-		
-
-				--Family
-				IF(@Family <> '' AND @FamilyId IS NOT NULL AND @FamilyId <> 0)
-				BEGIN
-					UPDATE dbo.tblSTSubcategory
-					SET strSubcategoryId = @Family
-					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-						 --dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-					 WHERE adj6.intItemUOMId = @intItemUOMId
-					 AND adj7.intItemId = @intItemId
-					 AND adj2.intItemLocationId = @intItemLocationId
-					 AND adj1.intItemPricingId = @intItemPricingId
-					 AND strSubcategoryType = 'F'
-					 AND intSubcategoryId = @FamilyId
-				END
-
-				--Constract child
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Family'
-				 SET @children = @children + '{"change":"Family","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
-
-			END
-		
-
-			--ClassId
-			IF EXISTS (SELECT * FROM @tblTemp WHERE strChangeDescription = 'Class')
-			BEGIN
-				IF(@ClassId IS NOT NULL AND @ClassId <> 0)
-				BEGIN
-					UPDATE dbo.tblICItemLocation
-					SET intClassId = @ClassId
-					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-						 dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-					 WHERE adj6.intItemUOMId = @intItemUOMId
-					 AND adj7.intItemId = @intItemId
-					 AND adj2.intItemLocationId = @intItemLocationId
-					 AND adj1.intItemPricingId = @intItemPricingId
-				END
-		
-
-				 --Class
-				IF(@Class <> '' AND @ClassId IS NOT NULL AND @ClassId <> 0)
-				BEGIN
-					UPDATE dbo.tblSTSubcategory
-					SET strSubcategoryId = @Class
-					FROM dbo.tblICItemPricing AS adj1 LEFT OUTER JOIN
-						 dbo.tblICItemLocation AS adj2 ON adj1.intItemId = adj2.intItemId AND adj2.intItemLocationId IS NOT NULL LEFT OUTER JOIN
-						 --dbo.tblSTSubcategory AS adj3 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSTSubcategory AS adj4 ON adj2.intClassId = adj4.intSubcategoryId LEFT OUTER JOIN
-						 dbo.tblSMCompanyLocation AS adj5 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT OUTER JOIN
-						 dbo.tblICItemUOM AS adj6 ON adj1.intItemId = adj6.intItemId LEFT OUTER JOIN
-						 dbo.tblICItem AS adj7 ON adj1.intItemId = adj7.intItemId LEFT OUTER JOIN
-						 dbo.tblICCategory AS adj8 ON adj7.intCategoryId = adj8.intCategoryId LEFT OUTER JOIN
-						 dbo.tblAPVendor AS adj9 ON adj2.intVendorId = adj9.[intEntityId] LEFT OUTER JOIN
-						 dbo.tblICItemVendorXref AS adj10 ON adj2.intItemLocationId = adj10.intItemLocationId
-					 --WHERE adj5.intCompanyLocationId = @intCompanyLocationId
-					 WHERE adj6.intItemUOMId = @intItemUOMId
-					 AND adj7.intItemId = @intItemId
-					 AND adj2.intItemLocationId = @intItemLocationId
-					 AND adj1.intItemPricingId = @intItemPricingId
-					 AND strSubcategoryType = 'C'
-					 AND intSubcategoryId = @ClassId
-				END
-
-				--Constract child
-				 SELECT @oldData = strOldData, @newData = strNewData FROM @tblTemp WHERE strChangeDescription = 'Class'
-				 SET @children = @children + '{"change":"Class","iconCls":"small-gear","from":"' + @oldData + '","to":"' + @newData + '","leaf":true},'
-
-			END
+			
 		
 
 			--CHECK if temTable has record

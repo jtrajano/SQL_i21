@@ -17,7 +17,7 @@ DECLARE @tblCommissions TABLE (
 	, ysnPayables			BIT
 	, dblTotalAmount		NUMERIC(18, 6)
 )
-DECLARE @intAPClearingAccountId		INT = (SELECT TOP 1 intAPClearingAccountId FROM dbo.tblARCompanyPreference)
+--DECLARE @intAPClearingAccountId		INT = (SELECT TOP 1 intAPClearingAccountId FROM dbo.tblARCompanyPreference)
 DECLARE @intDefaultCurrencyId		INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 
 INSERT INTO @tblCommissions (
@@ -52,11 +52,11 @@ IF ISNULL(@intUserId, 0) = 0
 		RETURN;
 	END
 
-IF ISNULL(@intAPClearingAccountId, 0) = 0
-	BEGIN
-		RAISERROR('AP Clearing Account was not set in Company Configuration.', 16, 1)
-		RETURN;
-	END
+--IF ISNULL(@intAPClearingAccountId, 0) = 0
+--	BEGIN
+--		RAISERROR('AP Clearing Account was not set in Company Configuration.', 16, 1)
+--		RETURN;
+--	END
 
 IF ISNULL(@intDefaultCurrencyId, 0) = 0
 	BEGIN
@@ -100,7 +100,7 @@ ELSE
 					, [intTaxGroupId]
 					, [intInvoiceId]
 				)
-				SELECT [intAccountId]		= @intAPClearingAccountId
+				SELECT [intAccountId]		= NULL
 					 , [intItemId]			= NULL
 					 , [strMiscDescription] = @strCommissionNumber
 					 , [dblQtyReceived]		= 1.00

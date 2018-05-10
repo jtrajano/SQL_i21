@@ -17,6 +17,10 @@
     ,[intConcurrencyId] INT NULL DEFAULT ((0))
 	,[ysnPosted] BIT NULL DEFAULT((0))
 	,[intCompanyId] INT NULL
+    ,[dtmDateCreated] DATETIME NULL
+    ,[dtmDateModified] DATETIME NULL
+    ,[intCreatedByUserId] INT NULL
+    ,[intModifiedByUserId] INT NULL
     ,CONSTRAINT [PK_tblICStockReservation] PRIMARY KEY ([intStockReservationId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 	,CONSTRAINT [FK_tblICStockReservation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])

@@ -18,3 +18,48 @@ SET tblCFTransaction.intForDeleteTransId = CAST(REPLACE(strTransactionId,'CFDT-'
 
 
 UPDATE tblCFCompanyPreference set strEnvelopeType = '#10 Envelope' WHERE ISNULL(strEnvelopeType,'') = ''
+
+
+--CF-1124
+
+UPDATE tblCFTransaction
+SET
+dblCalculatedGrossPrice		= dblCalculatedAmount
+,dblOriginalGrossPrice		= dblOriginalAmount
+FROM tblCFTransactionPrice as price
+WHERE price.intTransactionId = tblCFTransaction.intTransactionId
+AND price.strTransactionPriceId = 'Gross Price'
+
+
+UPDATE tblCFTransaction
+SET
+dblCalculatedNetPrice		= dblCalculatedAmount
+,dblOriginalNetPrice		= dblOriginalAmount
+FROM tblCFTransactionPrice as price
+WHERE price.intTransactionId = tblCFTransaction.intTransactionId
+AND price.strTransactionPriceId = 'Net Price'
+
+
+UPDATE tblCFTransaction
+SET
+dblCalculatedTotalPrice		= dblCalculatedAmount
+,dblOriginalTotalPrice		= dblOriginalAmount
+FROM tblCFTransactionPrice as price
+WHERE price.intTransactionId = tblCFTransaction.intTransactionId
+AND price.strTransactionPriceId = 'Total Amount'
+
+UPDATE tblCFTransaction
+SET
+dblCalculatedTotalTax		= (SELECT 
+SUM(ISNULL(dblTaxCalculatedAmount,0))
+FROM tblCFTransactionTax as tax
+WHERE tax.intTransactionId = tblCFTransaction.intTransactionId
+GROUP BY tax.intTransactionId)
+,dblOriginalTotalTax		= (SELECT 
+SUM(ISNULL(dblTaxOriginalAmount,0))
+FROM tblCFTransactionTax as tax
+WHERE tax.intTransactionId = tblCFTransaction.intTransactionId
+GROUP BY tax.intTransactionId)
+
+
+--CF-1124

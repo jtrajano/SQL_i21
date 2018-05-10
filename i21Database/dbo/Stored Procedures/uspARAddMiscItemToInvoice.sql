@@ -185,7 +185,13 @@ BEGIN TRY
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
 		,[dblItemTermDiscount]
-		,[strItemTermDiscountBy])
+		,[strItemTermDiscountBy]
+		,[dblItemTermDiscountAmount]
+		,[dblBaseItemTermDiscountAmount]
+		,[dblItemTermDiscountExemption]
+		,[dblBaseItemTermDiscountExemption]
+		,[dblTermDiscountRate]
+		,[ysnTermDiscountExempt])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -254,8 +260,14 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]			= @ItemStorageScheduleTypeId
 		,[intDestinationGradeId]			= @ItemDestinationGradeId
 		,[intDestinationWeightId]			= @ItemDestinationWeightId
-		,[dblItemTermDiscount]				= @ItemTermDiscount
-		,[strItemTermDiscountBy]			= @ItemTermDiscountBy
+		,[dblItemTermDiscount]				= @ZeroDecimal
+		,[strItemTermDiscountBy]			= ''
+		,[dblItemTermDiscountAmount]		= @ZeroDecimal
+		,[dblBaseItemTermDiscountAmount]	= @ZeroDecimal
+		,[dblItemTermDiscountExemption]		= @ZeroDecimal
+		,[dblBaseItemTermDiscountExemption]	= @ZeroDecimal
+		,[dblTermDiscountRate]				= @ZeroDecimal
+		,[ysnTermDiscountExempt]			= 0
 			
 END TRY
 BEGIN CATCH

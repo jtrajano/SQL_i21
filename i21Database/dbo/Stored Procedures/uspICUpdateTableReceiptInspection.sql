@@ -25,6 +25,7 @@ BEGIN
 			,intPropertyId INT
 			,strPropertyValue NVARCHAR(10)
 			,intSequenceNo INT
+			,strComment NVARCHAR(200)
 		)
 	END
 
@@ -37,6 +38,7 @@ BEGIN
 				,intPropertyId
 				,strPropertyValue
 				,intSequenceNo
+				,strComment
 			)
 			EXEC dbo.uspQMInspectionGetResult
 					@intControlPointId
@@ -51,6 +53,7 @@ BEGIN
 				,intPropertyId
 				,strPropertyValue
 				,intSequenceNo
+				,strComment
 			)
 			EXEC dbo.uspQMInspectionGetResult
 					@intControlPointId
@@ -66,6 +69,7 @@ BEGIN
 		,[intSort]
 		,[intConcurrencyId]
 		,[strPropertyName]
+		,[strComment]
 	)
 	SELECT
 		@ReceiptId
@@ -74,5 +78,6 @@ BEGIN
 		,1
 		,1
 		,tmpResult.strPropertyName
+		,tmpResult.strComment
 	FROM #tmpGetQMInspectionResult tmpResult
 END

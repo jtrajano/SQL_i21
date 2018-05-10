@@ -16,6 +16,10 @@
 	[intSourceTransactionTypeId] INT NULL, 
 	[intCompanyId] INT NULL, 
 	[dtmCreated] DATETIME NULL DEFAULT (GETDATE()),
+	[dtmDateCreated] DATETIME NULL,
+	[dtmDateModified] DATETIME NULL,
+	[intCreatedByUserId] INT NULL,
+	[intModifiedByUserId] INT NULL,
     CONSTRAINT [PK_tblICInventoryAdjustment] PRIMARY KEY ([intInventoryAdjustmentId]), 
     CONSTRAINT [AK_tblICInventoryAdjustment_strAdjustmentNo] UNIQUE ([strAdjustmentNo]), 
     CONSTRAINT [FK_tblICInventoryAdjustment_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 

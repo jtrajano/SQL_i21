@@ -40,6 +40,8 @@
     [dblOriginalNetPrice]        NUMERIC (18, 6) NULL,
     [dblCalculatedPumpPrice]     NUMERIC (18, 6) NULL,
     [dblOriginalPumpPrice]       NUMERIC (18, 6) NULL,
+    [dblCalculatedTotalTax]		 NUMERIC (18, 6) NULL,
+	[dblOriginalTotalTax]		 NUMERIC (18, 6) NULL,
     [intSalesPersonId]           INT             NULL,
     [ysnInvalid]                 BIT             NULL,
     [ysnCreditCardUsed]          BIT             NULL,

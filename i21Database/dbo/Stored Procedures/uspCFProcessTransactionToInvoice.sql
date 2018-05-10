@@ -210,7 +210,7 @@ INSERT INTO @EntriesForInvoice(
 )
 SELECT
 	 [strTransactionType]					= (case
-												when (cfTrans.dblQuantity < 0 OR cfTransPrice.dblCalculatedAmount < 0)  then 'Credit Memo'
+												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
 											  end)
 	,[strSourceTransaction]					= 'CF Tran'
@@ -262,7 +262,7 @@ SELECT
 	,[dblQtyOrdered]						= ABS(cfTrans.dblQuantity)
 	,[dblQtyShipped]						= ABS(cfTrans.dblQuantity)
 	,[dblDiscount]							= 0
-	,[dblPrice]								= ABS(cfTransPrice.dblCalculatedAmount)
+	,[dblPrice]								= ABS(cfTrans.dblCalculatedNetPrice)
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= ''
     ,[strFrequency]							= ''
@@ -345,11 +345,11 @@ INNER JOIN (SELECT  icfSite.*
 			AS cfSiteItem
 ON (cfTrans.intSiteId = cfSiteItem.intSiteId AND cfTrans.intNetworkId = cfSiteItem.intNetworkId)
 AND cfSiteItem.intItemId = cfTrans.intProductId
-INNER JOIN (SELECT * 
-			FROM tblCFTransactionPrice
-			WHERE strTransactionPriceId = 'Net Price')
-			AS cfTransPrice
-ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
+--INNER JOIN (SELECT * 
+--			FROM tblCFTransactionPrice
+--			WHERE strTransactionPriceId = 'Net Price')
+--			AS cfTransPrice
+--ON 	cfTrans.intTransactionId = cfTransPrice.intTransactionId
 --LEFT JOIN vyuCTContractDetailView ctContracts
 --ON cfTrans.intContractId = ctContracts.intContractHeaderId AND cfTrans.intContractDetailId =  ctContracts.intContractDetailId
 LEFT OUTER JOIN

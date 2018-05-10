@@ -113,7 +113,7 @@ DECLARE
 	,@intProducerId				AS INT
 	,@strCertificateId			AS NVARCHAR(50)
 	,@strTrackingNumber			AS NVARCHAR(255) 
-
+	,@strWarehouseRefNo			AS NVARCHAR(255)
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 		,@intEntityProducerId AS INT 
@@ -212,6 +212,7 @@ SELECT  intId
 		,intProducerId
 		,strCertificateId
 		,strTrackingNumber
+		,strWarehouseRefNo
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -272,6 +273,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intProducerId
 		,@strCertificateId
 		,@strTrackingNumber
+		,@strWarehouseRefNo
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -670,6 +672,7 @@ BEGIN
 						,intUnitPallet = @intUnitPallet
 						,intBookId = @intBookId
 						,intSubBookId = @intSubBookId 
+						,strWarehouseRefNo = @strWarehouseRefNo
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -771,6 +774,7 @@ BEGIN
 				,intSubLocationId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
 				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
 				,intItemOwnerId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemOwnerId ELSE LotMaster.intItemOwnerId END
+				,strWarehouseRefNo		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.strWarehouseRefNo ELSE LotMaster.strWarehouseRefNo END
 
 				-- The following fields are always updated if it has the same: 
 				-- 1. Quantity UOM
@@ -974,6 +978,7 @@ BEGIN
 				,intProducerId
 				,strCertificateId
 				,strTrackingNumber
+				,strWarehouseRefNo
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -1029,6 +1034,7 @@ BEGIN
 				,@intProducerId
 				,@strCertificateId
 				,@strTrackingNumber
+				,@strWarehouseRefNo
 			)
 		;
 	
@@ -1223,6 +1229,7 @@ BEGIN
 		,@intProducerId
 		,@strCertificateId
 		,@strTrackingNumber
+		,@strWarehouseRefNo
 	;
 END
 

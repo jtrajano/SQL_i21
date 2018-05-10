@@ -47,7 +47,7 @@ DECLARE @totalInvalid					INT = 0
 DECLARE @ErrorMerssage					NVARCHAR(MAX)
 
 SELECT TOP 1 @intCommissionExpenseAccountId = intCommissionExpenseAccountId
-		   , @intAPClearingAccountId		= intAPClearingAccountId
+		   , @intAPClearingAccountId		= NULL
 FROM dbo.tblARCompanyPreference
 
 SET @post		= ISNULL(@post, 0)

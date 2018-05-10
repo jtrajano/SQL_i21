@@ -20,7 +20,11 @@ Type the overview for the table here.
 		[dblRatio] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblPercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnYearValidationRequired] BIT NULL DEFAULT ((0)), 
-		[intSort] INT NULL, 
+		[intSort] INT NULL,
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemSubstitutionDetail] PRIMARY KEY ([intItemSubstitutionDetailId]), 
 		CONSTRAINT [FK_tblICItemSubstitutionDetail_tblICItem] FOREIGN KEY ([intSubstituteItemId]) REFERENCES [tblICItem]([intItemId]) 

@@ -18,6 +18,10 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICRinFeedStockUOM] PRIMARY KEY ([intRinFeedStockUOMId]), 
 		CONSTRAINT [FK_tblICRinFeedStockUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 	)

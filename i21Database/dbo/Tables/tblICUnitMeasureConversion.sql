@@ -17,7 +17,11 @@ Type the overview for the table here.
 		[intStockUnitMeasureId] INT NOT NULL, 
 		[dblConversionToStock] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[dtmDateCreated] DATETIME NULL,
+        [dtmDateModified] DATETIME NULL,
+        [intCreatedByUserId] INT NULL,
+        [intModifiedByUserId] INT NULL, 
 		CONSTRAINT [PK_tblICUnitMeasureConversion] PRIMARY KEY ([intUnitMeasureConversionId]), 
 		CONSTRAINT [FK_tblICUnitMeasureConversion_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) ON DELETE CASCADE,
 		CONSTRAINT [FK_tblICUnitMeasureConversion_StockUnitMeasure] FOREIGN KEY ([intStockUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 

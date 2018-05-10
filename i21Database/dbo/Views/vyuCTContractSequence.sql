@@ -17,7 +17,7 @@ AS
 
 			--Detail Join
 			IM.strItemNo,			PT.strPricingType,		IM.strDescription			AS	strItemDescription,
-			FM.strFutMarketName,							QM.strUnitMeasure			AS	strItemUOM,
+			FM.strFutMarketName,							QM.strUnitMeasure			AS	strItemUOM, QM.intUnitMeasureId AS intItemReportUOMId,
 			CL.strLocationName,		IM.strShortName,		PM.strUnitMeasure			AS	strPriceUOM,			
 			CU.intMainCurrencyId,	CU.strCurrency,			PU.intUnitMeasureId			AS	intPriceUnitMeasureId,
 			CY.strCurrency			AS	strMainCurrency,	WM.strUnitMeasure			AS	strNetWeightUOM,

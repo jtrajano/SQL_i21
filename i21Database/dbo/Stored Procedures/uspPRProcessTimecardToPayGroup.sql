@@ -27,6 +27,7 @@ SELECT
 	T.intEntityEmployeeId
 	,T.intEmployeeEarningId
 	,T.intEmployeeDepartmentId
+	,T.intWorkersCompensationId
 	,dblRegularHours =  CASE WHEN (SUM(T.dblHours) > ISNULL(E.dblDefaultHours, 0) AND ISNULL(E.dblDefaultHours, 0) > 0)
 							THEN ISNULL(E.dblDefaultHours, 0)
 						ELSE 
@@ -53,10 +54,12 @@ GROUP BY
 	T.intEntityEmployeeId
 	,T.intEmployeeEarningId
 	,T.intEmployeeDepartmentId
+	,T.intWorkersCompensationId
 	,E.dblDefaultHours
 
 DECLARE @intEmployeeEarningId INT
 DECLARE @intEmployeeDepartmentId INT
+DECLARE @intWorkersCompensationId INT
 DECLARE @intEntityEmployeeId INT
 DECLARE @intPayGroupDetailId INT
 
@@ -68,6 +71,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		SELECT TOP 1 
 			@intEmployeeEarningId	  = intEmployeeEarningId
 			,@intEmployeeDepartmentId = intEmployeeDepartmentId
+			,@intWorkersCompensationId = intWorkersCompensationId
 			,@intEntityEmployeeId = intEntityEmployeeId
 		FROM #tmpTimecard
 
@@ -75,6 +79,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		DELETE FROM tblPRPayGroupDetail
 		WHERE (intEmployeeEarningId = @intEmployeeEarningId OR strCalculationType IN ('Overtime', 'Shift Differential'))
 			AND intDepartmentId = @intEmployeeDepartmentId
+			AND intWorkersCompensationId = @intWorkersCompensationId
 			AND intEntityEmployeeId = @intEntityEmployeeId
 			AND dtmDateFrom >= CAST(FLOOR(CAST(@dtmBegin AS FLOAT)) AS DATETIME) 
 			AND dtmDateFrom <= CAST(FLOOR(CAST(@dtmEnd AS FLOAT)) AS DATETIME)
@@ -104,7 +109,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,TC.intEmployeeEarningId
 			,EE.intTypeEarningId
 			,TC.intEmployeeDepartmentId
-			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) THEN EMP.intWorkersCompensationId ELSE NULL END
+			,CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) THEN TC.intWorkersCompensationId ELSE NULL END
 			,EE.strCalculationType
 			,TC.dblRegularHours
 			,TC.dblRegularHours
@@ -125,6 +130,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				AND EE.intEntityEmployeeId = EL.intEntityEmployeeId
 		WHERE TC.intEmployeeEarningId = @intEmployeeEarningId
 		  AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
+		  AND TC.intWorkersCompensationId = @intWorkersCompensationId
 		  AND TC.intEntityEmployeeId = @intEntityEmployeeId
 		  AND EE.strCalculationType IN ('Hourly Rate', 'Fixed Amount', 'Salary')
 
@@ -138,6 +144,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,intEmployeeEarningId
 			,intTypeEarningId
 			,intDepartmentId
+			,intWorkersCompensationId
 			,strCalculationType
 			,dblDefaultHours
 			,dblHoursToProcess
@@ -154,6 +161,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,EL.intEmployeeEarningId
 			,EL.intTypeEarningId
 			,TCE.intEmployeeDepartmentId
+			,TCE.intWorkersCompensationId
 			,EL.strCalculationType
 			,TCE.dblOvertimeHours
 			,TCE.dblOvertimeHours
@@ -165,7 +173,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,1
 			,1
 		FROM tblPREmployeeEarning EL 
-			INNER JOIN (SELECT EE.*, TC.dblRegularHours, TC.dblOvertimeHours, TC.intEmployeeDepartmentId 
+			INNER JOIN (SELECT EE.*, TC.dblRegularHours, TC.dblOvertimeHours, TC.intEmployeeDepartmentId, TC.intWorkersCompensationId
 						FROM #tmpTimecard TC INNER JOIN tblPREmployeeEarning EE 
 						ON TC.intEmployeeEarningId = EE.intEmployeeEarningId) TCE
 			ON EL.intEmployeeEarningLinkId = TCE.intTypeEarningId
@@ -173,6 +181,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		WHERE TCE.intEmployeeDepartmentId = @intEmployeeDepartmentId
 		  AND TCE.dblOvertimeHours > 0
 		  AND TCE.intEntityEmployeeId = @intEntityEmployeeId
+		  AND TCE.intWorkersCompensationId = @intWorkersCompensationId
 		  AND EL.strCalculationType IN ('Overtime')
 
 		/* Insert Shift Differential Hours To Pay Group Detail */
@@ -182,6 +191,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,intEmployeeEarningId
 			,intTypeEarningId
 			,intDepartmentId
+			,intWorkersCompensationId
 			,strCalculationType
 			,dblDefaultHours
 			,dblHoursToProcess
@@ -197,6 +207,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 			,EL.intEmployeeEarningId
 			,EL.intTypeEarningId
 			,SD.intEmployeeDepartmentId
+			,SD.intWorkersCompensationId
 			,EL.strCalculationType
 			,0
 			,0
@@ -229,7 +240,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 					FROM
 					(SELECT
 						TC.intTimecardId, TC.dtmDate, TC.intEntityEmployeeId, TC.intEmployeeEarningId, EE.intTypeEarningId,
-						TC.intEmployeeDepartmentId,	DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
+						TC.intEmployeeDepartmentId,	TC.intWorkersCompensationId, DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
 						,dtmShiftStart = DATEADD(HH, DATEPART(HH, dtmStart), DATEADD(MI, DATEPART(MI, dtmStart), DATEADD(SS, DATEPART(SS, dtmStart), DATEADD(MS, DATEPART(MS, dtmStart), dtmDate))))
 						,dtmShiftEnd = CASE WHEN (dtmStart > dtmEnd) THEN
 												DATEADD(HH, DATEPART(HH, dtmEnd), DATEADD(MI, DATEPART(MI, dtmEnd), DATEADD(SS, DATEPART(SS, dtmEnd), DATEADD(MS, DATEPART(MS, dtmEnd), DATEADD(DD, 1, dtmDate)))))
@@ -246,7 +257,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 											* DS.dblRate
 										END)
 					FROM 
-						(SELECT intTimecardId, intEntityEmployeeId, intEmployeeEarningId, intEmployeeDepartmentId, dtmDate
+						(SELECT intTimecardId, intEntityEmployeeId, intEmployeeEarningId, intEmployeeDepartmentId, intWorkersCompensationId, dtmDate
 							,dtmTimeIn = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeIn)
 							,dtmTimeOut = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeOut) 
 						FROM tblPRTimecard
@@ -281,7 +292,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 						FROM
 						(SELECT
 							TC.intTimecardId, TC.dtmDate, TC.intEntityEmployeeId, TC.intEmployeeEarningId, EE.intTypeEarningId,
-							TC.intEmployeeDepartmentId,	DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
+							TC.intEmployeeDepartmentId,	TC.intWorkersCompensationId, DS.intShiftNo, TC.dtmTimeIn, TC.dtmTimeOut, D.strDifferentialPay
 							,dtmShiftStart = DATEADD(HH, DATEPART(HH, dtmStart), DATEADD(MI, DATEPART(MI, dtmStart), DATEADD(SS, DATEPART(SS, dtmStart), DATEADD(MS, DATEPART(MS, dtmStart), dtmDate))))
 							,dtmShiftEnd = CASE WHEN (dtmStart > dtmEnd) THEN
 												DATEADD(HH, DATEPART(HH, dtmEnd), DATEADD(MI, DATEPART(MI, dtmEnd), DATEADD(SS, DATEPART(SS, dtmEnd), DATEADD(MS, DATEPART(MS, dtmEnd), DATEADD(DD, 1, dtmDate)))))
@@ -298,7 +309,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 												* DS.dblRate
 											END)
 						FROM 
-							(SELECT intTimecardId, intEntityEmployeeId, intEmployeeEarningId, intEmployeeDepartmentId, dtmDate
+							(SELECT intTimecardId, intEntityEmployeeId, intEmployeeEarningId, intEmployeeDepartmentId, intWorkersCompensationId, dtmDate
 								,dtmTimeIn = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeIn)
 								,dtmTimeOut = DATEADD(MI, DATEDIFF(MI, GETUTCDATE(), GETDATE()), dtmTimeOut) 
 							FROM tblPRTimecard
@@ -344,6 +355,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				,EL.intEmployeeEarningId
 				,EL.intTypeEarningId
 				,SD.intEmployeeDepartmentId
+				,SD.intWorkersCompensationId
 				,EL.strCalculationType
 
 		/* Update Processed Timecards */
@@ -375,6 +387,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				,TC.dtmDate
 				,TC.intEmployeeEarningId
 				,TC.intEmployeeDepartmentId
+				,TC.intWorkersCompensationId
 				,TC.dtmTimeIn
 				,TC.dtmTimeOut
 				,TC.ysnApproved
@@ -399,6 +412,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				AND TC.dblHours > 0
 				AND TC.intEmployeeEarningId = @intEmployeeEarningId
 				AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
+				AND TC.intWorkersCompensationId = @intWorkersCompensationId
 				AND CAST(FLOOR(CAST(TC.dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,TC.dtmDate) AS FLOAT)) AS DATETIME)
 				AND CAST(FLOOR(CAST(TC.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,TC.dtmDate) AS FLOAT)) AS DATETIME)
 			GROUP BY 
@@ -407,6 +421,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				,TC.dtmDate
 				,TC.intEmployeeEarningId
 				,TC.intEmployeeDepartmentId
+				,TC.intWorkersCompensationId
 				,TC.dblHours
 				,TC.dtmTimeIn
 				,TC.dtmTimeOut
@@ -420,6 +435,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		WHERE intEmployeeEarningId = @intEmployeeEarningId
 			AND intEmployeeDepartmentId = @intEmployeeDepartmentId 
 			AND intEntityEmployeeId = @intEntityEmployeeId
+			AND intWorkersCompensationId = @intWorkersCompensationId
 	END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTimecard')) DROP TABLE #tmpTimecard

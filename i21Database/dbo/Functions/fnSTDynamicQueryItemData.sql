@@ -24,36 +24,46 @@ AS BEGIN
 
     DECLARE @strGeneratedSql VARCHAR(MAX)
 
-    SET @strGeneratedSql =  ' SELECT' + CHAR(13)
-								   + ' c.strLocationName' + CHAR(13)
-								   + '	, b.strUpcCode' + CHAR(13)
-								   + '	, d.strDescription' + CHAR(13)
+	--a. = IL
+	--b. = UOM
+	--c. = CL
+	--d = I
+	--e = IA
+
+    SET @strGeneratedSql =  ' SELECT DISTINCT' + CHAR(13)
+								   + ' CL.strLocationName' + CHAR(13)
+								   --+ '	, UOM.strUpcCode' + CHAR(13)
+								   + '  , CASE ' + CHAR(13)
+								   + '		WHEN UOM.strUpcCode IS NOT NULL OR UOM.strUpcCode != '''' THEN UOM.strUpcCode ' + CHAR(13)
+								   + '		WHEN UOM.strLongUPCCode IS NOT NULL OR UOM.strLongUPCCode != '''' THEN UOM.strLongUPCCode ' + CHAR(13)
+								   + '    END AS strUpcCode ' + CHAR(13)
+								   + '	, I.strDescription' + CHAR(13)
 								   + '	,''' + @strChangeDescription + '''' + CHAR(13)
 								   + '	,' + @strOldData + '' + CHAR(13)
 								   + '	,' + @strNewData + '' + CHAR(13)
 								   + '	,' + @strParentId + '' + CHAR(13)
 								   + '	,' + @strChildId + '' + CHAR(13)
-						   + ' FROM tblICItemLocation a' + CHAR(13)
-						   + ' JOIN tblICItemUOM b ON a.intItemId = b.intItemId' + CHAR(13)
-						   + ' JOIN tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId' + CHAR(13)
-						   + ' JOIN tblICItem d ON a.intItemId = d.intItemId' + CHAR(13)
-						   + ' LEFT JOIN tblICItemAccount e ON a.intItemId = e.intItemId ' + CHAR(13) --Will use left join, not all items has GL Account
+						   + ' FROM tblICItemLocation IL' + CHAR(13)
+						   + ' JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId' + CHAR(13)
+						   + ' JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId' + CHAR(13)
+						   + ' JOIN tblICItem I ON IL.intItemId = I.intItemId' + CHAR(13)
+						   + ' LEFT JOIN tblICItemAccount IA ON IL.intItemId = IA.intItemId ' + CHAR(13) --Will use left join, not all items has GL Account
 
-		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 ' 
+		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 AND UOM.ysnStockUnit = CAST(1 AS BIT) ' 
 
 		   IF (@strCompanyLocationId <> '')
 		   BEGIN 
-				SET @strGeneratedSql = @strGeneratedSql + ' and c.intCompanyLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
+				SET @strGeneratedSql = @strGeneratedSql + ' and CL.intCompanyLocationId IN (' + CAST(@strCompanyLocationId as NVARCHAR(MAX)) + ')'
 		   END
 		 
 		   IF (@strVendorId <> '')
 		   BEGIN 
-			   SET @strGeneratedSql = @strGeneratedSql + ' and a.intVendorId IN (' + CAST(@strVendorId as NVARCHAR(MAX)) + ')'
+			   SET @strGeneratedSql = @strGeneratedSql + ' and IL.intVendorId IN (' + CAST(@strVendorId as NVARCHAR(MAX)) + ')'
 		   END
 
 		   IF (@strCategoryId <> '')
 		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and a.intItemId  
+				SET @strGeneratedSql = @strGeneratedSql +  ' and IL.intItemId  
 				IN (select intItemId from tblICItem where intCategoryId IN
 				(select intCategoryId from tblICCategory where intCategoryId 
 				IN (' + CAST(@strCategoryId as NVARCHAR(MAX)) + ')' + '))'
@@ -61,34 +71,34 @@ AS BEGIN
 
 		   IF (@strFamilyId <> '')
 		   BEGIN
-				 SET @strGeneratedSql = @strGeneratedSql + ' and  a.intFamilyId IN (' + CAST(@strFamilyId as NVARCHAR(MAX)) + ')'
+				 SET @strGeneratedSql = @strGeneratedSql + ' and  IL.intFamilyId IN (' + CAST(@strFamilyId as NVARCHAR(MAX)) + ')'
 		   END
 
 		   IF (@strClassId <> '')
 		   BEGIN
-				 SET @strGeneratedSql = @strGeneratedSql + ' and  a.intClassId IN (' + CAST(@strClassId as NVARCHAR(MAX)) + ')'
+				 SET @strGeneratedSql = @strGeneratedSql + ' and  IL.intClassId IN (' + CAST(@strClassId as NVARCHAR(MAX)) + ')'
 		   END
 	    
 		   IF (@intUpcCode IS NOT NULL)
 		   BEGIN
-			   SET @strGeneratedSql = @strGeneratedSql + ' and b.intItemUOMId IN (' + CAST(@intUpcCode as NVARCHAR(250)) + ')'
+			   SET @strGeneratedSql = @strGeneratedSql + ' and UOM.intItemUOMId IN (' + CAST(@intUpcCode as NVARCHAR(250)) + ')'
 		   END
 
 		   IF ((@strDescription != '') AND (@strDescription IS NOT NULL))
 		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and  d.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
+				SET @strGeneratedSql = @strGeneratedSql +  ' and  I.strDescription like ''%' + LTRIM(@strDescription) + '%'' '
 		   END
 
 		   IF (@dblPriceBetween1 IS NOT NULL) 
 		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and a.intItemId IN 
+				SET @strGeneratedSql = @strGeneratedSql +  ' and IL.intItemId IN 
 			    (select intItemId from tblICItemPricing where dblSalePrice >= 
 				''' + CONVERT(NVARCHAR(250),(@dblPriceBetween1)) + '''' + ')'
 		   END 
 	      
 		   IF (@dblPriceBetween2 IS NOT NULL) 
 		   BEGIN
-				SET @strGeneratedSql = @strGeneratedSql +  ' and a.intItemId IN 
+				SET @strGeneratedSql = @strGeneratedSql +  ' and IL.intItemId IN 
 			    (select intItemId from tblICItemPricing where dblSalePrice <= 
 				''' + CONVERT(NVARCHAR(250),(@dblPriceBetween2)) + '''' + ')'
 		   END
@@ -100,10 +110,10 @@ AS BEGIN
 				SET @strAccountCategory = 'Cost of Goods'
 				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
 				BEGIN
-					--SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 30 '
+					--SET @strGeneratedSql = @strGeneratedSql +  ' and IA.intAccountCategoryId = 30 '
 
 					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-					SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
+					SET @strGeneratedSql = @strGeneratedSql +  ' and IA.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 				END 
 		   END
 		   ELSE IF(@strChangeDescription = 'Sales Account')
@@ -111,10 +121,10 @@ AS BEGIN
 				SET @strAccountCategory = 'Sales Account'
 				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
 				BEGIN
-					--SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 33 '
+					--SET @strGeneratedSql = @strGeneratedSql +  ' and IA.intAccountCategoryId = 33 '
 
 					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-					SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
+					SET @strGeneratedSql = @strGeneratedSql +  ' and IA.intAccountCategoryId = ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ' '
 				END 
 		   END
 		   ELSE IF(@strChangeDescription = 'Add New Cost of Goods Sold Account')
@@ -123,7 +133,7 @@ AS BEGIN
 				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
 				BEGIN
 					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-					SET @strGeneratedSql = @strGeneratedSql +  ' and (e.intAccountCategoryId IS NULL OR e.intAccountCategoryId != ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ') '
+					SET @strGeneratedSql = @strGeneratedSql +  ' and (IA.intAccountCategoryId IS NULL OR IA.intAccountCategoryId != ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ') '
 				END 
 		   END
 		   ELSE IF(@strChangeDescription = 'Add New Sales Account')
@@ -132,13 +142,13 @@ AS BEGIN
 				IF EXISTS(SELECT * FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory)
 				BEGIN
 					SELECT @intAccountCategoryId = intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
-					SET @strGeneratedSql = @strGeneratedSql +  ' and (e.intAccountCategoryId IS NULL OR e.intAccountCategoryId != ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ') '
+					SET @strGeneratedSql = @strGeneratedSql +  ' and (IA.intAccountCategoryId IS NULL OR IA.intAccountCategoryId != ' + CAST(@intAccountCategoryId AS NVARCHAR(50)) + ') '
 				END 
 		   END
 		   --For now Variance account will be remove
 		  -- ELSE IF(@strChangeDescription = 'Variance Account')
 		  -- BEGIN
-				--SET @strGeneratedSql = @strGeneratedSql +  ' and e.intAccountCategoryId = 40 ' 
+				--SET @strGeneratedSql = @strGeneratedSql +  ' and IA.intAccountCategoryId = 40 ' 
 		  -- END
 
     RETURN @strGeneratedSql

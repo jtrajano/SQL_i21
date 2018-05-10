@@ -65,7 +65,7 @@ DECLARE @NewlyCreatedInvoices TABLE(intInvoiceId INT)
 
 INSERT INTO @NewInvoices
 SELECT DISTINCT V.intEntityId
-			  , ISNULL(@CompanyLocationId, V.intCompanyLocationId)
+			  , ISNULL(V.intEntityWarehouseId, ISNULL(@CompanyLocationId,V.intCompanyLocationId))
 			  , MAX(V.intCurrencyId)
 			  , MAX(V.intCurrencyExchangeRateTypeId)
 			  , MAX(V.dblCurrencyExchangeRate)
@@ -74,7 +74,7 @@ SELECT DISTINCT V.intEntityId
 FROM vyuARBillableHoursForImport V
 INNER JOIN @TicketHoursWorked HW ON V.intTicketId = HW.intTicketId
 INNER JOIN tblARCustomer C ON V.intEntityId = C.intEntityId
-GROUP BY V.intEntityId, ISNULL(@CompanyLocationId, V.intCompanyLocationId)
+GROUP BY V.intEntityId, ISNULL(V.intEntityWarehouseId, ISNULL(@CompanyLocationId,V.intCompanyLocationId))
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 	BEGIN

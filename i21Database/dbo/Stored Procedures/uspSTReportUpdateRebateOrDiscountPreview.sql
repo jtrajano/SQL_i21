@@ -581,7 +581,7 @@ BEGIN TRY
 			 
 			 
 			 
-			 --AUDIT LOG
+	--AUDIT LOG
 	--use distinct to table Id's
 	INSERT INTO @tblId(intId)
 	SELECT DISTINCT intChildId 
@@ -629,19 +629,19 @@ BEGIN TRY
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblDiscount","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Accumlated Amount')
+				ELSE IF(@strChangeDescription = 'Accumulated Amount')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblAccumulatedAmount","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Accumlated Quantity')
+				ELSE IF(@strChangeDescription = 'Accumulated Quantity')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblAccumulatedQty","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Discoount through amount')
+				ELSE IF(@strChangeDescription = 'Discount through amount')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblDiscountThruAmount","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
-				ELSE IF(@strChangeDescription = 'Discoount through quantity')
+				ELSE IF(@strChangeDescription = 'Discount through quantity')
 				BEGIN
 					SET @ItemSpecialPricingAuditLog = @ItemSpecialPricingAuditLog + '{"change":"dblDiscountThruQty","from":"' + @strOldData + '","to":"' + @strNewData + '","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' + CAST(@intChildId AS NVARCHAR(50)) + ',"associationKey":"tblICItemSpecialPricings","changeDescription":"' + @strChangeDescription + '","hidden":false},'
 				END
@@ -713,7 +713,7 @@ BEGIN TRY
 
 	DELETE FROM @tblTempOne WHERE strOldData = strNewData
 
-   select @strCompanyName as CompanyName
+   SELECT DISTINCT @strCompanyName as CompanyName
 		  , LEFT(DATENAME(DW,GETDATE()),10) + ' ' + DATENAME(MONTH, SYSDATETIME())+ ' ' + RIGHT('0' + DATENAME(DAY, SYSDATETIME()), 2) + ', ' + DATENAME(YEAR, SYSDATETIME()) as DateToday
 		  , RIGHT('0' + LTRIM(STUFF(RIGHT(CONVERT(CHAR(26), CURRENT_TIMESTAMP, 109), 14),9, 4, ' ')),11) as TimeToday
 		  , strLocation
@@ -722,7 +722,8 @@ BEGIN TRY
 		  , strChangeDescription
 		  , strOldData
 		  , strNewData
-   from @tblTempOne
+   FROM @tblTempOne
+   ORDER BY strItemDescription, strChangeDescription ASC
     
    DELETE FROM @tblTempOne
 END TRY

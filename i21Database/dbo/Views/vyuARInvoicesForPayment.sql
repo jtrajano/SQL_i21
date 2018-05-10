@@ -57,10 +57,7 @@ SELECT
 	,[dblCurrencyExchangeRate]			= DFR.[dblCurrencyExchangeRate]
 	,[dtmDiscountDate]			= CASE WHEN ISNULL(ARIFP.dblDiscountAvailable, 0) = 0
 										  THEN NULL
-										  ELSE CASE WHEN ISNULL(intDiscountDay, 0) = 0 OR ISNULL(intDiscountDay, 0) > DATEDIFF(DAY, DATEADD(DAY, 1-DAY(ARIFP.dtmDate), ARIFP.dtmDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(ARIFP.dtmDate), ARIFP.dtmDate)))
-													THEN DATEADD(DAY, 1, ARIFP.dtmDate)
-											   ELSE DATEADD(DAY, intDiscountDay, ARIFP.dtmDate)
-										  END
+										  ELSE [dbo].[fnGetDiscountDateBasedOnTerm](ARIFP.[dtmDate], SMT.[intTermID], GETDATE())
 								  END
 	,ysnACHActive					=  ISNULL(ysnACHActive, 0)
 	,dblInvoiceDiscountAvailable
@@ -186,6 +183,7 @@ FROM
 		WHERE
 			[ysnPosted] = 1
 			AND ysnCancelled = 0
+			AND ysnExcludeFromPayment = 0
 			AND strTransactionType != 'Credit Note'
 			AND ((ARI.strType = 'Service Charge' AND ARI.ysnForgiven = 0) OR ((ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 1) OR (ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 0)))
 			AND NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1)
