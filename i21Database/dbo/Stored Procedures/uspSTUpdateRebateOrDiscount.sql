@@ -358,28 +358,28 @@ AND(@UpdateCount > 0))
 
 	      IF (@PromotionType = 'Vendor Rebate')
 	      BEGIN
-	           set @SQL1 = ' update tblICItemSpecialPricing set '    
+	           SET @SQL1 = ' UPDATE tblICItemSpecialPricing SET '    
 	  
 	           IF (@BeginDate IS NOT NULL)
 	           BEGIN
-	                 set @SQL1 = @SQL1 + ' dtmBeginDate = ''' + LTRIM(@BeginDate) + '''' 
+	                 SET @SQL1 = @SQL1 + ' dtmBeginDate = ''' + LTRIM(@BeginDate) + '''' 
 	           END
 
 	           IF (@EndDate IS NOT NULL)
 	           BEGIN
    	              IF (@BeginDate IS NOT NULL)
-                    set @SQL1 = @SQL1 + ' , dtmEndDate = ''' + LTRIM(@EndDate) + ''''
-                  else
-                     set @SQL1 = @SQL1 + ' dtmEndDate = ''' + LTRIM(@EndDate) + '''' 
+                    SET @SQL1 = @SQL1 + ' , dtmEndDate = ''' + LTRIM(@EndDate) + ''''
+                  ELSE
+                     SET @SQL1 = @SQL1 + ' dtmEndDate = ''' + LTRIM(@EndDate) + '''' 
 	           END
 
 	           IF (@RebateAmount IS NOT NULL)
 	           BEGIN
 	               IF ((@BeginDate IS NOT NULL)
 		           OR (@EndDate IS NOT NULL))
-                       set @SQL1 = @SQL1 + ' , dblDiscount = ''' + LTRIM(@RebateAmount) + ''''
-                   else
-                       set @SQL1 = @SQL1 + ' dblDiscount = ''' + LTRIM(@RebateAmount) + '''' 
+                       SET @SQL1 = @SQL1 + ' , dblDiscount = ''' + LTRIM(@RebateAmount) + ''''
+                   ELSE
+                       SET @SQL1 = @SQL1 + ' dblDiscount = ''' + LTRIM(@RebateAmount) + '''' 
 	           END
 
 	           IF (@AccumAmount IS NOT NULL)
@@ -387,9 +387,9 @@ AND(@UpdateCount > 0))
 	              IF ((@BeginDate IS NOT NULL)
 		          OR (@EndDate IS NOT NULL)
 		          OR (@RebateAmount IS NOT NULL))
-                      set @SQL1 = @SQL1 + ' , dblAccumulatedAmount = ''' + LTRIM(@AccumAmount) + ''''
-                  else
-                      set @SQL1 = @SQL1 + ' dblAccumulatedAmount = ''' + LTRIM(@AccumAmount) + '''' 
+                      SET @SQL1 = @SQL1 + ' , dblAccumulatedAmount = ''' + LTRIM(@AccumAmount) + ''''
+                  ELSE
+                      SET @SQL1 = @SQL1 + ' dblAccumulatedAmount = ''' + LTRIM(@AccumAmount) + '''' 
 	           END
 
 	           IF (@AccumlatedQty IS NOT NULL)
@@ -398,36 +398,38 @@ AND(@UpdateCount > 0))
 		          OR (@EndDate IS NOT NULL)
 		          OR (@RebateAmount IS NOT NULL)
 		          OR (@AccumAmount IS NOT NULL))
-                      set @SQL1 = @SQL1 + ' , dblAccumulatedQty = ''' + LTRIM(@AccumlatedQty) + ''''
-                  else
-                     set @SQL1 = @SQL1 + ' dblAccumulatedQty = ''' + LTRIM(@AccumlatedQty) + '''' 
+                      SET @SQL1 = @SQL1 + ' , dblAccumulatedQty = ''' + LTRIM(@AccumlatedQty) + ''''
+                  ELSE
+                      SET @SQL1 = @SQL1 + ' dblAccumulatedQty = ''' + LTRIM(@AccumlatedQty) + '''' 
 	           END
           END
 
+
+
 		  IF (@PromotionType = 'Vendor Discount')
 	      BEGIN
-	          set @SQL1 = ' update tblICItemSpecialPricing set '    
+	           SET @SQL1 = ' UPDATE tblICItemSpecialPricing SET '    
 	  
 	           IF (@BeginDate IS NOT NULL)
 	           BEGIN
-	             set @SQL1 = @SQL1 + ' dtmBeginDate = ''' + LTRIM(@BeginDate) + '''' 
+	             SET @SQL1 = @SQL1 + ' dtmBeginDate = ''' + LTRIM(@BeginDate) + '''' 
 	           END
 
 	           IF (@EndDate IS NOT NULL)
 	           BEGIN
    	              IF (@BeginDate IS NOT NULL)
-                     set @SQL1 = @SQL1 + ' , dtmEndDate = ''' + LTRIM(@EndDate) + ''''
-                  else
-                     set @SQL1 = @SQL1 + ' dtmEndDate = ''' + LTRIM(@EndDate) + '''' 
+                     SET @SQL1 = @SQL1 + ' , dtmEndDate = ''' + LTRIM(@EndDate) + ''''
+                  ELSE
+                     SET @SQL1 = @SQL1 + ' dtmEndDate = ''' + LTRIM(@EndDate) + '''' 
 	           END
 
 	           IF (@DiscAmountUnit IS NOT NULL)
 	           BEGIN
 	              IF ((@BeginDate IS NOT NULL)
 		          OR (@EndDate IS NOT NULL))
-                      set @SQL1 = @SQL1 + ' , dblDiscount = ''' + LTRIM(@DiscAmountUnit) + ''''
-                  else
-                      set @SQL1 = @SQL1 + ' dblDiscount = ''' + LTRIM(@DiscAmountUnit) + '''' 
+                      SET @SQL1 = @SQL1 + ' , dblDiscount = ''' + LTRIM(@DiscAmountUnit) + ''''
+                  ELSE
+                      SET @SQL1 = @SQL1 + ' dblDiscount = ''' + LTRIM(@DiscAmountUnit) + '''' 
 	           END
 
 	           IF (@DiscThroughAmount IS NOT NULL)
@@ -435,9 +437,9 @@ AND(@UpdateCount > 0))
 	              IF ((@BeginDate IS NOT NULL)
 		          OR (@EndDate IS NOT NULL)
 		          OR (@DiscAmountUnit IS NOT NULL))
-                      set @SQL1 = @SQL1 + ' , dblDiscountThruAmount = ''' + LTRIM(@DiscThroughAmount) + ''''
-                  else
-                      set @SQL1 = @SQL1 + ' dblDiscountThruAmount = ''' + LTRIM(@DiscThroughAmount) + '''' 
+                      SET @SQL1 = @SQL1 + ' , dblDiscountThruAmount = ''' + LTRIM(@DiscThroughAmount) + ''''
+                  ELSE
+                      SET @SQL1 = @SQL1 + ' dblDiscountThruAmount = ''' + LTRIM(@DiscThroughAmount) + '''' 
 	           END
 
 	           IF (@DiscThroughQty IS NOT NULL)
@@ -446,17 +448,20 @@ AND(@UpdateCount > 0))
 		          OR (@EndDate IS NOT NULL)
 		          OR (@DiscAmountUnit IS NOT NULL)
 		          OR (@DiscThroughAmount IS NOT NULL))
-                     set @SQL1 = @SQL1 + ' , dblDiscountThruQty = ''' + LTRIM(@DiscThroughQty) + ''''
-                  else
-                     set @SQL1 = @SQL1 + ' dblDiscountThruQty = ''' + LTRIM(@DiscThroughQty) + '''' 
+                     SET @SQL1 = @SQL1 + ' , dblDiscountThruQty = ''' + LTRIM(@DiscThroughQty) + ''''
+                  ELSE
+                     SET @SQL1 = @SQL1 + ' dblDiscountThruQty = ''' + LTRIM(@DiscThroughQty) + '''' 
 	           END
-        END
+          END
 
-		set @SQL1 = @SQL1 + ' where 1=1 ' 
+		  
+		  --Update dtmDateModified, intModifiedByUserId
+		  SET @SQL1 = @SQL1 + ' , dtmDateModified = ''' + CAST(GETUTCDATE() AS NVARCHAR(50)) + ''' , intModifiedByUserId = ' + CAST(@currentUserId AS NVARCHAR(50)) + ''
+		  SET @SQL1 = @SQL1 + ' WHERE 1=1 ' 
 
-		IF (@Location IS NOT NULL)
+		  IF (@Location IS NOT NULL)
 		    BEGIN 
-		         set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
+		         SET @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 		         IN (select intItemLocationId from tblICItemLocation where intLocationId
 		         IN (select intLocationId from tblICItemLocation where intLocationId
 		   	     IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
@@ -464,7 +469,7 @@ AND(@UpdateCount > 0))
 
 	     IF (@Vendor IS NOT NULL)
 		     BEGIN 
-		           set @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
+		           SET @SQL1 = @SQL1 +  ' and  tblICItemSpecialPricing.intItemLocationId
 		           IN (select intItemLocationId from tblICItemLocation where intVendorId
 		           IN (select intEntityId from tblEMEntity where intEntityId 
 			       IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
@@ -472,7 +477,7 @@ AND(@UpdateCount > 0))
 
 	     IF (@Category IS NOT NULL)
 		      BEGIN
-     	             set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemId  
+     	             SET @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemId  
 		              IN (select intItemId from tblICItem where intCategoryId IN
 			          (select intCategoryId from tblICCategory where intCategoryId
 			          IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
@@ -480,7 +485,7 @@ AND(@UpdateCount > 0))
 
 		 IF (@Family IS NOT NULL)
 		     BEGIN
-  			        set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+  			        SET @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
 			        (select intItemLocationId from tblICItemLocation where intFamilyId IN
 			        (select intFamilyId from tblICItemLocation where intFamilyId 
 			        IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
@@ -488,7 +493,7 @@ AND(@UpdateCount > 0))
 
 		 IF (@Class IS NOT NULL)
 		     BEGIN
-		            set @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
+		            SET @SQL1 = @SQL1 +  ' and tblICItemSpecialPricing.intItemLocationId IN 
 		           (select intItemLocationId from tblICItemLocation where intClassId IN
 		 	       (select intClassId from tblICItemLocation where intClassId 
 			        IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
@@ -496,18 +501,24 @@ AND(@UpdateCount > 0))
 
          IF (@PromotionType = 'Vendor Rebate')
 		     BEGIN
-                 set @SQL1 = @SQL1 + ' and  strPromotionType = ''Rebate''' 
+                 SET @SQL1 = @SQL1 + ' and  strPromotionType = ''Rebate''' 
 			 END
               
          IF (@PromotionType = 'Vendor Discount')
 		     BEGIN
-                 set @SQL1 = @SQL1 + ' and  strPromotionType = ''Vendor Discount''' 
+                 SET @SQL1 = @SQL1 + ' and  strPromotionType = ''Vendor Discount''' 
 			 END
 
+
+		 --execute generated script
 		 EXEC (@SQL1)
 	     SELECT  @UpdateCount = (@@ROWCOUNT)   
 END
      
+
+
+
+
     --AUDIT LOG
 	--use distinct to table Id's
 	INSERT INTO @tblId(intId)

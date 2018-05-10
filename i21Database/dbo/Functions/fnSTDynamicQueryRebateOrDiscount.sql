@@ -22,9 +22,27 @@ AS BEGIN
 
 
 
-    SET @strGeneratedSql =  ' SELECT' + CHAR(13)
+    --SET @strGeneratedSql =  ' SELECT' + CHAR(13)
+				--				   + ' CL.strLocationName' + CHAR(13)
+				--				   --+ '	, UOM.strUpcCode' + CHAR(13)
+				--				   + '  , CASE ' + CHAR(13)
+				--				   + '		WHEN UOM.strUpcCode IS NOT NULL OR UOM.strUpcCode != '''' THEN UOM.strUpcCode ' + CHAR(13)
+				--				   + '		WHEN UOM.strLongUPCCode IS NOT NULL OR UOM.strLongUPCCode != '''' THEN UOM.strLongUPCCode ' + CHAR(13)
+				--				   + '    END AS strUpcCode ' + CHAR(13)
+				--				   + '	, I.strDescription' + CHAR(13)
+				--				   + '	,''' + @strChangeDescription + '''' + CHAR(13)
+				--				   + '	,' + @strOldData + '' + CHAR(13)
+				--				   + '	,' + @strNewData + '' + CHAR(13)
+				--				   + '	,' + @strParentId + '' + CHAR(13)
+				--				   + '	,' + @strChildId + '' + CHAR(13)
+				--		   + ' FROM tblICItemSpecialPricing IP' + CHAR(13)
+				--		   + ' JOIN tblICItemUOM UOM ON IP.intItemUnitMeasureId = UOM.intItemUOMId' + CHAR(13)
+				--		   + ' JOIN tblICItem I ON IP.intItemId = I.intItemId' + CHAR(13)
+				--		   + ' JOIN tblICItemLocation IL ON IP.intItemId = IL.intItemId' + CHAR(13)
+				--		   + ' JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId ' + CHAR(13)
+
+	 SET @strGeneratedSql =  ' SELECT' + CHAR(13)
 								   + ' CL.strLocationName' + CHAR(13)
-								   --+ '	, UOM.strUpcCode' + CHAR(13)
 								   + '  , CASE ' + CHAR(13)
 								   + '		WHEN UOM.strUpcCode IS NOT NULL OR UOM.strUpcCode != '''' THEN UOM.strUpcCode ' + CHAR(13)
 								   + '		WHEN UOM.strLongUPCCode IS NOT NULL OR UOM.strLongUPCCode != '''' THEN UOM.strLongUPCCode ' + CHAR(13)
@@ -36,10 +54,12 @@ AS BEGIN
 								   + '	,' + @strParentId + '' + CHAR(13)
 								   + '	,' + @strChildId + '' + CHAR(13)
 						   + ' FROM tblICItemSpecialPricing IP' + CHAR(13)
-						   + ' JOIN tblICItemUOM UOM ON IP.intItemUnitMeasureId = UOM.intItemUOMId' + CHAR(13)
 						   + ' JOIN tblICItem I ON IP.intItemId = I.intItemId' + CHAR(13)
-						   + ' JOIN tblICItemLocation IL ON IP.intItemId = IL.intItemId' + CHAR(13)
-						   + ' JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId ' + CHAR(13)
+						   + ' JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId ' + CHAR(13)
+						   + '                      AND IP.intItemUnitMeasureId = UOM.intItemUOMId ' + CHAR(13)
+						   + ' JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId  ' + CHAR(13)
+						   + ' JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId   ' + CHAR(13)
+
 
 		   SET @strGeneratedSql = @strGeneratedSql + ' WHERE 1=1 ' 
 
