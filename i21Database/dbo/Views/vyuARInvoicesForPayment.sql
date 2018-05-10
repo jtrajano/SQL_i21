@@ -186,6 +186,7 @@ FROM
 		WHERE
 			[ysnPosted] = 1
 			AND ysnCancelled = 0
+			AND ysnExcludeFromPayment = 0
 			AND strTransactionType != 'Credit Note'
 			AND ((ARI.strType = 'Service Charge' AND ARI.ysnForgiven = 0) OR ((ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 1) OR (ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 0)))
 			AND NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1)

@@ -115,36 +115,36 @@ BEGIN
 	RETURN -1
 END 
 
--- Do not allow unpost if it has cost adjustments. 
-BEGIN 
-	SET @strRelatedTransactionId = NULL 
-	SELECT TOP 1 
-			@strItemNo = i.strItemNo
-			,@strRelatedTransactionId = t.strTransactionId
-	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICItem i
-				ON t.intItemId = i.intItemId
-	WHERE	t.intRelatedTransactionId = @intTransactionId
-			AND t.strRelatedTransactionId = @strTransactionId
-			AND t.intTransactionTypeId IN (
-				@INV_TRANS_TYPE_Cost_Adjustment
-				,@INV_TRANS_TYPE_Revalue_Consume
-				,@INV_TRANS_TYPE_Revalue_Produce
-				,@INV_TRANS_TYPE_Revalue_Transfer
-				,@INV_TRANS_TYPE_Revalue_Item_Change
-				,@INV_TRANS_TYPE_Revalue_Split_Lot
-				,@INV_TRANS_TYPE_Revalue_Lot_Merge
-				,@INV_TRANS_TYPE_Revalue_Lot_Move
-				,@INV_TRANS_TYPE_Revalue_Shipment			
-			)
-			AND ISNULL(t.ysnIsUnposted, 0) = 0 
-			AND ISNULL(@ysnRecap, 0) = 0
+---- Do not allow unpost if it has cost adjustments. 
+--BEGIN 
+--	SET @strRelatedTransactionId = NULL 
+--	SELECT TOP 1 
+--			@strItemNo = i.strItemNo
+--			,@strRelatedTransactionId = t.strTransactionId
+--	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICItem i
+--				ON t.intItemId = i.intItemId
+--	WHERE	t.intRelatedTransactionId = @intTransactionId
+--			AND t.strRelatedTransactionId = @strTransactionId
+--			AND t.intTransactionTypeId IN (
+--				@INV_TRANS_TYPE_Cost_Adjustment
+--				,@INV_TRANS_TYPE_Revalue_Consume
+--				,@INV_TRANS_TYPE_Revalue_Produce
+--				,@INV_TRANS_TYPE_Revalue_Transfer
+--				,@INV_TRANS_TYPE_Revalue_Item_Change
+--				,@INV_TRANS_TYPE_Revalue_Split_Lot
+--				,@INV_TRANS_TYPE_Revalue_Lot_Merge
+--				,@INV_TRANS_TYPE_Revalue_Lot_Move
+--				,@INV_TRANS_TYPE_Revalue_Shipment			
+--			)
+--			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+--			AND ISNULL(@ysnRecap, 0) = 0
 
-	IF @strRelatedTransactionId IS NOT NULL 
-	BEGIN 
-		-- 'Unable to unpost because {Item} has a cost adjustment in {Cost Adj Transaction}. Post it first before you can unpost this transaction.'
-		EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
-		RETURN -1
-	END 
-END 
+--	IF @strRelatedTransactionId IS NOT NULL 
+--	BEGIN 
+--		-- 'Unable to unpost because {Item} has a cost adjustment in {Cost Adj Transaction}. Post it first before you can unpost this transaction.'
+--		EXEC uspICRaiseError 80063, @strItemNo, @strRelatedTransactionId;  
+--		RETURN -1
+--	END 
+--END 
 
 GO

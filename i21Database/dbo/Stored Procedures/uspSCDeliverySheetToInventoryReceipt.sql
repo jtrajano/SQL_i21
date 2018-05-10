@@ -340,7 +340,7 @@ END
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intEntityId;
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 	SELECT @dblNetUnits = SUM(dblQty) FROM @ItemsForItemReceipt
 	EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
 
