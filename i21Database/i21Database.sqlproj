@@ -6524,6 +6524,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDailyAverage.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportActualOutTurn.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
