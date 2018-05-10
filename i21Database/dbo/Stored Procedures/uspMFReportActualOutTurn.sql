@@ -46,12 +46,14 @@ BEGIN
 		,'' AS strStateProvince
 		,'' AS strCountry
 		,'' AS strLocationWithAddress
+		,'' As strIssueNo
 		,'' AS dtmIssueDate
 		,'' AS strIssueItemNo
 		,'' AS strIssueDescription
 		,'' AS strIssueBatchNumber
 		,'' AS dblIssueQty
 		,'' AS strIssueUOM
+		,'' AS strReceiptNo
 		,'' AS dtmReceiptDate
 		,'' AS strReceiptItemNo
 		,'' AS strReceiptDescription
@@ -194,12 +196,14 @@ SELECT ISNULL(S.strWorkOrderNo, R.strWorkOrderNo) AS strWorkOrderNo
 	,ISNULL(S.strStateProvince, R.strStateProvince) AS strStateProvince
 	,ISNULL(S.strCountry, R.strCountry) AS strCountry
 	,ISNULL(S.strLocationName, R.strLocationName) + ISNULL(S.strAddress, R.strAddress) + ISNULL(S.strCity, R.strCity) + ISNULL(S.strZipPostalCode, R.strZipPostalCode) + ISNULL(S.strStateProvince, R.strStateProvince) + ISNULL(S.strCountry, R.strCountry) AS strLocationWithAddress
+	,S.strOrderNo as strIssueNo
 	,S.dtmOrderDate AS dtmIssueDate
 	,S.strItemNo AS strIssueItemNo
 	,S.strDescription AS strIssueDescription
 	,S.strLotNumber AS strIssueBatchNumber
 	,S.dblQty AS dblIssueQty
 	,S.strWeightUOM AS strIssueUOM
+	,R.strLotNumber As strReceiptNo
 	,R.dtmProductionDate AS dtmReceiptDate
 	,R.strItemNo AS strReceiptItemNo
 	,R.strDescription AS strReceiptDescription
