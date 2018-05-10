@@ -708,18 +708,18 @@ IF @ForDelete = 1
 BEGIN
 	EXEC uspQMInspectionDeleteResult @intProductValueId, @intProductTypeId
 END
-ELSE
-BEGIN
-	DECLARE @intControlPointId AS INT = 3
-	DECLARE @QualityInspectionTable QualityInspectionTable
+--ELSE
+--BEGIN
+--	DECLARE @intControlPointId AS INT = 3
+--	DECLARE @QualityInspectionTable QualityInspectionTable
  
-	INSERT INTO @QualityInspectionTable (intPropertyId,strPropertyName,strPropertyValue,strComment)
-	SELECT iri.intQAPropertyId, iri.strPropertyName,'true / false', iri.strComment
-	FROM tblICInventoryReceiptInspection iri
-	WHERE iri.intInventoryReceiptId = @ReceiptId
+--	INSERT INTO @QualityInspectionTable (intPropertyId,strPropertyName,strPropertyValue,strComment)
+--	SELECT iri.intQAPropertyId, iri.strPropertyName,'true / false', iri.strComment
+--	FROM tblICInventoryReceiptInspection iri
+--	WHERE iri.intInventoryReceiptId = @ReceiptId
  
-	EXEC uspQMInspectionSaveResult @intControlPointId, @intProductTypeId, @intProductValueId, @UserId, @QualityInspectionTable	
-END
+--	EXEC uspQMInspectionSaveResult @intControlPointId, @intProductTypeId, @intProductValueId, @UserId, @QualityInspectionTable	
+--END
 
 -- Delete the data snapshot. 
 DELETE	FROM tblICTransactionDetailLog 
