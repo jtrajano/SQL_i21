@@ -62,9 +62,10 @@ WHERE
 
 UPDATE ARI	
 SET
-	 ARI.[dblProvisionalAmount]	= PRO.[dblPayment]
-	,ARI.[dblBaseProvisionalAmount]	= PRO.[dblBasePayment]
-	,ARI.[strTransactionType]	= CASE WHEN PRO.[dblPayment] > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
+	 ARI.[dblProvisionalAmount]		= CASE WHEN ISNULL(PRO.[ysnExcludeFromPayment],0) = 0 THEN PRO.[dblPayment] ELSE PRO.[dblInvoiceTotal] END
+	,ARI.[dblBaseProvisionalAmount]	= CASE WHEN ISNULL(PRO.[ysnExcludeFromPayment],0) = 0 THEN PRO.[dblBasePayment] ELSE PRO.[dblBaseInvoiceTotal] END
+	,ARI.[strTransactionType]		= CASE WHEN (CASE WHEN ISNULL(PRO.[ysnExcludeFromPayment],0) = 0 THEN PRO.[dblPayment] ELSE PRO.[dblInvoiceTotal] END) > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
+	,ARI.[ysnExcludeFromPayment]	= PRO.[ysnExcludeFromPayment]
 FROM
 	tblARInvoice ARI
 INNER JOIN

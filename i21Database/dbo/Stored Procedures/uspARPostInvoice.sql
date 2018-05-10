@@ -78,6 +78,7 @@ DECLARE @UserEntityID				INT
 		,@AllowOtherUserToPost		BIT
 		,@DefaultCurrencyId			INT
 		,@HasImpactForProvisional   BIT
+		,@ExcludeInvoiceFromPayment BIT
 		,@InitTranCount				INT
 		,@CurrentTranCount			INT
 		,@Savepoint					NVARCHAR(32)
@@ -100,9 +101,11 @@ SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPre
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
 
-SELECT TOP 1 @DiscountAccountId = intDiscountAccountId 
-		   , @DeferredRevenueAccountId = intDeferredRevenueAccountId
-		   , @HasImpactForProvisional = ISNULL(ysnImpactForProvisional,0)
+SELECT TOP 1
+	@DiscountAccountId			= intDiscountAccountId 
+	,@DeferredRevenueAccountId	= intDeferredRevenueAccountId
+	,@HasImpactForProvisional	= ISNULL(ysnImpactForProvisional,0)
+	,@ExcludeInvoiceFromPayment	= ISNULL(ysnExcludePaymentInFinalInvoice,0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
@@ -3700,11 +3703,12 @@ IF @recap = 0
 						,ARI.dblPayment					= ISNULL(dblPayment, @ZeroDecimal)
 						,ARI.dblBasePayment				= ISNULL(dblBasePayment, @ZeroDecimal)
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+						,ARI.ysnExcludeFromPayment		= 0
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 					FROM
 						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
 					INNER JOIN
-						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, strTransactionType, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, dblInvoiceTotal, dblBaseInvoiceTotal, dtmDate 
+						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, strTransactionType, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, dblInvoiceTotal, dblBaseInvoiceTotal, dtmDate, ysnExcludeFromPayment
 						 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
 
 					--Insert Successfully unposted transactions.
@@ -3813,11 +3817,12 @@ IF @recap = 0
 						,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 						,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+						,ARI.ysnExcludeFromPayment		= @ExcludeInvoiceFromPayment
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
 					FROM
 						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
 					INNER JOIN
-						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblInvoiceTotal, dblBaseInvoiceTotal, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, strTransactionType, dtmDate 
+						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblInvoiceTotal, dblBaseInvoiceTotal, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, strTransactionType, dtmDate, ysnExcludeFromPayment
 						 FROM dbo.tblARInvoice WITH (NOLOCK))  ARI ON PID.intInvoiceId = ARI.intInvoiceId
 
 					UPDATE ARPD
@@ -4017,7 +4022,7 @@ IF @post = 0
 
 		UPDATE ARI
 		SET
-			ARI.ysnPosted				= 0
+			 ARI.ysnPosted				= 0
 			,ARI.ysnPaid				= 0
 			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash', 'Cash Refund' ) THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 			,ARI.dblDiscount			= @ZeroDecimal
@@ -4025,11 +4030,12 @@ IF @post = 0
 			,ARI.dblInterest			= @ZeroDecimal
 			,ARI.dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
 			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.ysnExcludeFromPayment	= 0
 			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1
 		FROM
 			(SELECT intInvoiceId FROM @PostInvoiceData) PID
 		INNER JOIN
-			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate,intConcurrencyId,
+			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate, ysnExcludeFromPayment, intConcurrencyId,
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
 				ON PID.intInvoiceId = ARI.intInvoiceId 		
@@ -4061,11 +4067,12 @@ ELSE
 			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
 			,ARI.dblInterest			= @ZeroDecimal			
 			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.ysnExcludeFromPayment	= @ExcludeInvoiceFromPayment
 			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1	
 		FROM
 			(SELECT intInvoiceId FROM @PostInvoiceData) PID
 		INNER JOIN
-			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate,intConcurrencyId,
+			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate, ysnExcludeFromPayment, intConcurrencyId,
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
 				ON PID.intInvoiceId = ARI.intInvoiceId 	
