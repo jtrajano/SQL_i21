@@ -70,7 +70,7 @@ BEGIN
           ,'' strFutureMonth  
           ,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo  
           ,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
           ,strCurrency  
           ,'' strPricingType  
           ,strContractInventory  
@@ -84,7 +84,7 @@ BEGIN
           ,intFutureMarketId  
           ,NULL intFutureMonthId  
           ,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
           ,intCurrencyId  
           ,NULL intPricingTypeId  
            ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
@@ -103,7 +103,7 @@ BEGIN
           ,'' strFutureMonth  
           ,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo  
           ,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
           ,strCurrency  
           ,'' strPricingType  
           ,strContractInventory  
@@ -117,7 +117,7 @@ BEGIN
           ,intFutureMarketId  
           ,NULL intFutureMonthId  
           ,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
           ,intCurrencyId  
           ,NULL intPricingTypeId  
            ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
@@ -155,7 +155,7 @@ BEGIN
           ,'' strFutureMonth  
           ,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo  
           ,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
           ,strCurrency  
           ,'' strPricingType  
           ,strContractInventory  
@@ -169,7 +169,7 @@ BEGIN
           ,intFutureMarketId  
           ,NULL intFutureMonthId  
           ,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
           ,intCurrencyId  
           ,NULL intPricingTypeId  
           ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
@@ -188,7 +188,7 @@ BEGIN
           ,'' strFutureMonth  
           ,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo  
           ,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode  
           ,strCurrency  
           ,'' strPricingType  
           ,strContractInventory  
@@ -202,7 +202,7 @@ BEGIN
           ,intFutureMarketId  
           ,NULL intFutureMonthId  
           ,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId  
-          ,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
+          ,CASE WHEN @strEvaluationByZone='Market Zone' THEN intMarketZoneId else NULL end as intMarketZoneId  
           ,intCurrencyId  
           ,NULL intPricingTypeId  
           ,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId  
