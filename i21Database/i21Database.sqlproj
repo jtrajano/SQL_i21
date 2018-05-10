@@ -6524,6 +6524,9 @@
     <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDailyAverage.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetPositionAnalysisReportDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportActualOutTurn.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationTable.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationConfigurationTable.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\35_ReplicationTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
