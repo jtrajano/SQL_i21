@@ -29,6 +29,8 @@ SELECT
 	,HW.[dblCurrencyRate]				AS "dblCurrencyExchangeRate"
 	,HW.[intCurrencyId]					AS "intSubCurrencyId"
 	,HW.[dblCurrencyRate]				AS "dblSubCurrencyRate"
+	,EML.[intWarehouseId] 				AS "intEntityWarehouseId"
+
 FROM
 	tblHDTicketHoursWorked HW
 INNER JOIN 
