@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Analysis Report' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Risk Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Store' AND strModuleName = 'Store' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4409,6 +4409,15 @@ ELSE
 DECLARE @StoreMaintenanceParentMenuId INT
 SELECT @StoreMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Reports', N'Store', @StoreParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2 WHERE strMenuName = 'Reports' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+
+DECLARE @StoreReportParentMenuId INT
+SELECT @StoreReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Store' AND intParentMenuID = @StoreParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */
 UPDATE tblSMMasterMenu SET intParentMenuID = @StoreActivitiesParentMenuId WHERE intParentMenuID =  @StoreParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @StoreMaintenanceParentMenuId WHERE intParentMenuID =  @StoreParentMenuId AND strCategory = 'Maintenance'
@@ -4516,6 +4525,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Subcatego
 	VALUES (N'Subcategories', N'Store', @StoreMaintenanceParentMenuId, N'Subcategories', N'Maintenance', N'Screen', N'Store.view.SubCategory', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Store.view.SubCategory' WHERE strMenuName = 'Subcategories' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Summary' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Fuel Summary', N'Store', @StoreReportParentMenuId, N'Fuel Summary', N'Report', N'Screen', N'Store.view.FuelSummaryReport', N'small-menu-report', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.FuelSummaryReport' WHERE strMenuName = 'Fuel Summary' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId
 
 /* START DELETE */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Promotion Sales ' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
