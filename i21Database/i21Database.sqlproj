@@ -6313,6 +6313,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
