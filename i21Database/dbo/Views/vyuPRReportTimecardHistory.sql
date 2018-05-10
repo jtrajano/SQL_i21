@@ -7,6 +7,7 @@ SELECT DISTINCT
 	,EM.strName
 	,TE.strEarning
 	,DP.strDepartment
+	,WC.strWCCode
 	,TC.dtmDateIn
 	,dtmTimeIn = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), TC.dtmTimeIn)
 	,TC.dtmDateOut
@@ -84,3 +85,5 @@ FROM
 		ON EE.intTypeEarningId = TE.intTypeEarningId
 	LEFT JOIN tblPRDepartment DP 
 		ON DP.intDepartmentId = TC.intEmployeeDepartmentId
+	LEFT JOIN tblPRWorkersCompensation WC 
+		ON WC.intWorkersCompensationId = TC.intWorkersCompensationId
