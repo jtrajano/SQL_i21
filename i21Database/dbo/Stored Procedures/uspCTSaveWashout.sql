@@ -63,8 +63,10 @@ BEGIN TRY
 		SELECT	@intContractTypeId	=   CASE WHEN intContractTypeId = 1 THEN 2 ELSE 1 END ,
 				@strContractNumber	=   strContractNumber
 		FROM	tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
+		
+		SELECT	@strNumber = CASE WHEN @intContractTypeId = 2 THEN 'SaleContract' ELSE 'PurchaseContract' END 
 
-		EXEC	uspCTGetStartingNumber 'SaleContract', @strNumber OUTPUT
+		EXEC	uspCTGetStartingNumber @strNumber, @strNumber OUTPUT
 
 		SET @strXML = '<root>'
 		SET @strXML +=		'<toUpdate>' 
