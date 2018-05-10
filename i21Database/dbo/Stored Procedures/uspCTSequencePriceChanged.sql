@@ -83,7 +83,7 @@ BEGIN TRY
 			EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
 		END
 	END
-
+	/*
 	IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
@@ -252,7 +252,7 @@ BEGIN TRY
 			SELECT	@intInventoryShipmentId = MIN(intInventoryShipmentId) FROM #tblShipment WHERE intInventoryShipmentId > @intInventoryShipmentId
 		END
 	END
-	
+	*/
 
 END TRY
 

@@ -6531,6 +6531,7 @@
     <Build Include="dbo\Views\vyuSTDepartmentSummaryReport.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateVoucherInvoiceForPartialPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
