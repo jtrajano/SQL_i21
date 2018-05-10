@@ -14,7 +14,7 @@ BEGIN
 	-- Declare variables 
 	DECLARE @intUserId AS INT
 			,@intControlPointId AS INT = 3
-			,@intProductTypeId AS INT = 3
+			,@intProductTypeId AS INT = 4
 			,@tmpQualityInspectionTable QualityInspectionTable
 
 	-- Add value for UserId
