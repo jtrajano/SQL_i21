@@ -279,8 +279,8 @@ SELECT
 	,[dblDiscount]							= ARSI.[dblDiscount] 
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-	,[dblPrice]								= ARSI.[dblPrice]
-	,[dblUnitPrice]							= ARSI.[dblUnitPrice] 
+	,[dblPrice]								= ARSI.[dblUnitPrice]
+	,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice] 
 	,[strPricing]							= ARSI.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
