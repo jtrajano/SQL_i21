@@ -450,7 +450,12 @@ BEGIN TRY
 							 FROM tblARInvoice AR
 							 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 							 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
-										   
+						
+						UPDATE CS
+						SET CS.dtmLastStorageAccrueDate = @StorageChargeDate
+						FROM tblGRCustomerStorage CS
+						JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
+						WHERE SH.strType ='Generated Storage Invoice' AND SH.intInvoiceId = CONVERT(INT,@CreatedIvoices)					   
 						
 				END
 				ELSE
