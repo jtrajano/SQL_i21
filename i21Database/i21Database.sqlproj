@@ -6543,6 +6543,7 @@
     <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentOpeningInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentOpeningInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateWeightClaims.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
