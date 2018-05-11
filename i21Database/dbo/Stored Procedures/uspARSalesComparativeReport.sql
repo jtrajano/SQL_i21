@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspARSalesComparativeReport]
+﻿CREATE PROCEDURE [dbo].[uspARSalesComparativeReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 IF LTRIM(RTRIM(@xmlParam)) = ''
