@@ -16,9 +16,19 @@ SELECT DISTINCT
 	, EM.intEntityId
 	, URN.ysnClick
 	, SMUS.intCompanyLocationId
-FROM dbo.tblICItem AS I 
-INNER JOIN dbo.tblICCategory AS Cat ON Cat.intCategoryId = I.intCategoryId 
-INNER JOIN 
+FROM tblICItem AS I
+JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
+JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
+JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+				   AND IL.intLocationId = ST.intCompanyLocationId
+JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
+JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
+JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId
+JOIN tblICItemPricing Prc ON Prc.intItemLocationId = IL.intItemLocationId
+JOIN tblICItemSpecialPricing SplPrc ON SplPrc.intItemId = I.intItemId
+JOIN 
 (
 	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItem
 	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
@@ -34,21 +44,11 @@ INNER JOIN
 	 UNION
 	 SELECT intItemId, dtmDateModified, dtmDateCreated FROM tblICItemAccount
 	 WHERE dtmDateModified IS NOT NULL OR dtmDateCreated IS NOT NULL
-
 ) AS x ON x.intItemId = I.intItemId 
-INNER JOIN dbo.tblICItemLocation AS IL ON IL.intItemId = I.intItemId 
-LEFT OUTER JOIN dbo.tblSTSubcategoryRegProd AS SubCat ON SubCat.intRegProdId = IL.intProductCodeId 
-INNER JOIN dbo.tblSTStore AS ST ON ST.intCompanyLocationId = IL.intLocationId --ST.intStoreId = SubCat.intStoreId 
-INNER JOIN dbo.tblSMCompanyLocation AS L ON L.intCompanyLocationId = IL.intLocationId 
-INNER JOIN dbo.tblICItemUOM AS IUOM ON IUOM.intItemId = I.intItemId 
-INNER JOIN dbo.tblICUnitMeasure AS IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-INNER JOIN dbo.tblSTRegister AS R ON R.intStoreId = ST.intStoreId 
-INNER JOIN dbo.tblICItemPricing AS Prc ON Prc.intItemLocationId = IL.intItemLocationId 
-INNER JOIN dbo.tblICItemSpecialPricing AS SplPrc ON SplPrc.intItemId = I.intItemId 
-INNER JOIN dbo.tblSMUserSecurity AS SMUS ON SMUS.intCompanyLocationId = IL.intLocationId 
-INNER JOIN dbo.tblEMEntity AS EM ON EM.intEntityId = SMUS.intEntityId 
+JOIN dbo.tblSMUserSecurity AS SMUS ON SMUS.intCompanyLocationId = IL.intLocationId 
+JOIN dbo.tblEMEntity AS EM ON EM.intEntityId = SMUS.intEntityId 
 LEFT OUTER JOIN dbo.tblSTUpdateRegisterNotification AS URN ON URN.intEntityId = EM.intEntityId
-WHERE (I.ysnFuelItem = 0) 
+WHERE (I.ysnFuelItem = 0)
 --AND 
 --(
 --	x.dtmDateModified BETWEEN ISNULL

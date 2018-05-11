@@ -246,7 +246,7 @@ BEGIN
 					   ,ITM1.intItemId
 					   ,NULL
 					   ,FRMI.agfml_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
-					   ,0
+					   ,FRMI.agfml_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
 					   ,UOM.intItemUOMId
 					   ,(SELECT intRecipeItemTypeId FROM tblMFRecipeItemType WHERE strName = ''INPUT'')
 					   ,''''
@@ -256,7 +256,9 @@ BEGIN
 					   ,FRMI.agfml_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
-					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+					   ,CASE WHEN ITM.strType = ''Other Charge'' THEN 
+							(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+							ELSE 1 END
 					   ,0  --[ysnYearValidationRequired]
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]
@@ -343,7 +345,9 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 					   ,RCPI.agrcp_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
-					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+					   ,CASE WHEN ITM.strType = ''Other Charge'' THEN 
+							(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+							ELSE 1 END
 					   ,0  --[ysnYearValidationRequired]
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]
@@ -529,7 +533,7 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 					   ,ITM1.intItemId
 					   ,NULL
 					   ,FRMI.ptfrm_ingr_qty_'+CAST(@cnt AS NVARCHAR)+'
-					   ,0
+					   ,FRMI.ptfrm_ingr_qty_'+CAST(@cnt AS NVARCHAR)+'
 					   ,UOM.intItemUOMId
 					   ,(SELECT intRecipeItemTypeId FROM tblMFRecipeItemType WHERE strName = ''INPUT'')
 					   ,''''
@@ -539,7 +543,9 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 					   ,FRMI.ptfrm_ingr_qty_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
-					   ,(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+					   ,CASE WHEN ITM.strType = ''Other Charge'' THEN 
+							(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
+							ELSE 1 END
 					   ,0  --[ysnYearValidationRequired]
 					   ,0  --[ysnMinorIngredient]
 					   ,0  --[ysnOutputItemMandatory]

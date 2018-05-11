@@ -197,6 +197,7 @@ BEGIN TRANSACTION
 
 			SET @strTagRelaceXML = NULL
 			SET @strLoad = REPLACE(@strLoad, 'intLoadId>', 'intLoadRefId>')
+			SET @strLoad = REPLACE(@strLoad, 'intCompanyId>', 'CompanyId>')
 			SET @strTagRelaceXML = '<root>
 											<tags>
 												<toFind>&lt;strLoadNumber&gt;' + LTRIM(@strLoadNumber) + '&lt;/strLoadNumber&gt;</toFind>

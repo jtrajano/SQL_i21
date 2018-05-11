@@ -1805,7 +1805,7 @@ SELECT
 	,[intForexRateTypeId]
 	,[dblForexRate]
 FROM
-	[dbo].[fnARGetItemsForCosting](@Invoices, @Post)
+	[dbo].[fnARGetItemsForCosting](@Invoices, @Post, 1)
 
 INSERT INTO @returntable(
 	 [intInvoiceId]

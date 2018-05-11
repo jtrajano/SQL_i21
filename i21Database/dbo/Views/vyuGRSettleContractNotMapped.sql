@@ -28,5 +28,5 @@ SELECT
 ,intContractStatusId   = V.intContractStatusId
 FROM tblGRSettleStorage S
 JOIN tblGRSettleContract T ON T.intSettleStorageId=S.intSettleStorageId
-JOIN vyuGRGetContracts V ON V.intContractDetailId=T.intContractDetailId  
+JOIN vyuGRGetSettleContracts V ON V.intContractDetailId=T.intContractDetailId  
 

@@ -70,7 +70,7 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	IF @strLanguage ='English'
+	IF ISNULL(@strLanguage,'English') ='English'
 	BEGIN
 			SELECT
 				 blbHeaderLogo				= dbo.fnSMGetCompanyLogo('Header')
@@ -107,7 +107,7 @@ BEGIN TRY
 				,lblSample			        =  'Sample'
 				,strSample			        =  '-'
 				,lblQuantity			    =  'Quantity'
-				,strQuantity			    =  LTRIM(CH.dblQuantity)+''+UOM.strUnitMeasure+' net-( '+ CD.intNumberOfContainers+' Container)'
+				,strQuantity			    =  LTRIM(CH.dblQuantity)+''+UOM.strUnitMeasure+' net-( '+ LTRIM(CD.intNumberOfContainers)+' Container)'
 				,lblShipment			    =  'Shipment'
 				,strShipment			    =  DATENAME(MONTH, CD.dtmStartDate) +'('+ RIGHT(YEAR(CD.dtmStartDate), 2)+')'
 				,lblPrice			        =  'Price'
@@ -128,7 +128,7 @@ BEGIN TRY
 
 			FROM	     tblCTContractHeader					CH 
 			JOIN	     vyuCTEntity							EV				ON	EV.intEntityId				  = CH.intEntityId        AND EV.strEntityType ='Vendor'			
-			JOIN	     vyuCTEntity							EC				ON	EC.intEntityId				  = CH.intCounterPartyId  AND EV.strEntityType ='Customer'
+			JOIN	     vyuCTEntity							EC				ON	EC.intEntityId				  = CH.intCounterPartyId  AND EC.strEntityType ='Customer'
 			JOIN         tblCTContractDetail					CD				ON  CD.intContractHeaderId		  = CH.intContractHeaderId
 			JOIN         tblICUnitMeasure						UOM				ON  UOM.intUnitMeasureId		  = CH.intCommodityUOMId
 			LEFT JOIN	tblCTAssociation						AN				ON	AN.intAssociationId			  =	CH.intAssociationId
@@ -188,7 +188,7 @@ BEGIN TRY
 				,lblSample			        =  dbo.fnConvertEnglishToItalian('Sample')
 				,strSample			        =  '-'
 				,lblQuantity			    =  dbo.fnConvertEnglishToItalian('Quantity')
-				,strQuantity			    =  LTRIM(CH.dblQuantity)+''+dbo.fnConvertEnglishToItalian(UOM.strUnitMeasure)+' '+dbo.fnConvertEnglishToItalian('net')+'-( '+ CD.intNumberOfContainers+' Container)'
+				,strQuantity			    =  LTRIM(CH.dblQuantity)+''+dbo.fnConvertEnglishToItalian(UOM.strUnitMeasure)+' '+dbo.fnConvertEnglishToItalian('net')+'-( '+ LTRIM(CD.intNumberOfContainers)+' Container)'
 				,lblShipment			    =  dbo.fnConvertEnglishToItalian('Shipment')
 				,strShipment			    =  dbo.fnConvertEnglishToItalian(DATENAME(MONTH, CD.dtmStartDate)) +'('+ RIGHT(YEAR(CD.dtmStartDate), 2)+')'
 				,lblPrice			        =  dbo.fnConvertEnglishToItalian('Price')
@@ -209,7 +209,7 @@ BEGIN TRY
 
 			FROM	     tblCTContractHeader					CH 
 			JOIN	     vyuCTEntity							EV				ON	EV.intEntityId				  = CH.intEntityId        AND EV.strEntityType ='Vendor'			
-			JOIN	     vyuCTEntity							EC				ON	EC.intEntityId				  = CH.intCounterPartyId  AND EV.strEntityType ='Customer'
+			JOIN	     vyuCTEntity							EC				ON	EC.intEntityId				  = CH.intCounterPartyId  AND EC.strEntityType ='Customer'
 			JOIN         tblCTContractDetail					CD				ON  CD.intContractHeaderId		  = CH.intContractHeaderId
 			JOIN         tblICUnitMeasure						UOM				ON  UOM.intUnitMeasureId		  = CH.intCommodityUOMId
 			LEFT JOIN	tblCTAssociation						AN				ON	AN.intAssociationId			  =	CH.intAssociationId

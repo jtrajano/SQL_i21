@@ -328,7 +328,8 @@ INSERT INTO [dbo].[tblRKM2MInquiryBasisDetail]
            ,[intContractTypeId]
            ,[dblCashOrFuture]
            ,[dblBasisOrDiscount]
-           ,[intUnitMeasureId])
+           ,[intUnitMeasureId]
+		   ,[intM2MBasisDetailId])
      SELECT 
            @intM2MInquiryId
            ,1
@@ -347,6 +348,7 @@ INSERT INTO [dbo].[tblRKM2MInquiryBasisDetail]
            ,dblCashOrFuture
            ,dblBasisOrDiscount
            ,intUnitMeasureId
+		   ,intM2MBasisDetailId
 		FROM @#tempInquiryBasisDetail
 
 	--================================================================

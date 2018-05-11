@@ -130,7 +130,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	SET @query1 = '
+	SET @queryHeader = N'
 	--=============================
 	-- Filtered By Creation Date
 	--=============================
@@ -153,7 +153,8 @@ BEGIN
 	,( ((SUM(dblOutrightPhysicalQty) * SUM(dblOutrightPhysicalPrice)) +  (SUM(dblFutureTradeQty) * SUM(dblFutureTradePrice))  +  (SUM(dblPriceFixationQty) * SUM(dblPriceFixationPrice))) / (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty)) ) AS dblAveragePrice
 
 	FROM (
-
+	'
+	SET @query1 = N'
 	--=========================================
 	-- Outright Physicals AND Price Fixations
 	--=========================================
@@ -188,7 +189,8 @@ BEGIN
 	LEFT JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
 	WHERE 
 	CH.intPricingTypeId = 1 --Priced
-
+	'
+	SET @query2 = N'
 	--===================
 	-- Future Trades
 	--===================
@@ -223,7 +225,7 @@ BEGIN
 	,intCommodityId
 	,intCurrencyId '
 
-	EXEC(@query1)
+	EXEC(@queryHeader + @query1 + @query2)
 END
 
 

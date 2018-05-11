@@ -194,6 +194,14 @@ USING	(
 		SELECT id = 46
 				,name = 'Outbound Shipment'
 				,form = 'Outbound Shipment'
+		UNION ALL
+		SELECT id = 47
+				,name = 'Inventory Adjustment - Opening Inventory'
+				,form = 'Inventory Adjustment'
+		UNION ALL
+		SELECT id = 48
+				,name = 'Inventory Adjustment - Change Lot Weight'
+				,form = 'Inventory Adjustment'
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

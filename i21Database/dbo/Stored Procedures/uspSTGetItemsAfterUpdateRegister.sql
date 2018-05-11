@@ -20,6 +20,17 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX);
 
+	-- =============================================================================================
+	-- CONVERT DATE's to UTC
+	-- =============================================================================================
+	DECLARE @dtmBeginningChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBeginningChangeDate)
+	DECLARE @dtmEndingChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmEndingChangeDate)
+	DECLARE @dtmBuildFileThruEndingDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBuildFileThruEndingDate)
+	-- =============================================================================================
+	-- END CONVERT DATE's to UTC
+	-- =============================================================================================
+
+
 	DECLARE @tableGetItems TABLE(
 									strActionType NVARCHAR(3)
 									, strUpcCode NVARCHAR(20)
@@ -39,15 +50,22 @@ BEGIN TRY
 	INSERT INTO @tablePricebookFileOne
 	SELECT DISTINCT intItemId
 					, CASE
-							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Created' ELSE 'Updated'
+							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC THEN 'Created' ELSE 'Updated'
 					  END AS strActionType
 					, CASE
-							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN dtmDateCreated ELSE dtmDateModified
+							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC THEN dtmDateCreated ELSE dtmDateModified
 					  END AS dtmDate
 	FROM vyuSTItemsToRegister
-	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
-	OR dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
-	 
+	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	OR dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	AND intCompanyLocationId = 
+	(
+		SELECT TOP (1) intCompanyLocationId 
+		FROM tblSTStore
+		WHERE intStoreId = @intStoreId
+	)
+
+
 	--SELECT
 	--	DISTINCT CAST(strRecordNo as int) [intItemId]
 	--	, strActionType
@@ -113,7 +131,7 @@ BEGIN TRY
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 						--, IUOM.strUpcCode AS strUpcCode
 						, IUOM.strLongUPCCode AS strUpcCode
-						, I.strDescription AS strDescription
+						, 'Pricebook File - ' + I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
 						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -126,6 +144,7 @@ BEGIN TRY
 							   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 							   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 							   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+												  AND IL.intLocationId = ST.intCompanyLocationId
 							   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 							   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
 							   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -160,7 +179,7 @@ BEGIN TRY
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 						--, IUOM.strUpcCode AS strUpcCode
 						, IUOM.strLongUPCCode AS strUpcCode
-						, I.strDescription AS strDescription
+						, 'Pricebook File - ' + I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
 						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -173,6 +192,7 @@ BEGIN TRY
 							   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 							   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 							   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+											      AND IL.intLocationId = ST.intCompanyLocationId
 							   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 							   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
 							   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -228,7 +248,7 @@ BEGIN TRY
 							--PIL.strPromoItemListDescription
 							--, IUOM.strUpcCode AS strUpcCode
 							, IUOM.strLongUPCCode AS strUpcCode
-							, I.strDescription AS strDescription
+							, 'Promotion Item - ' + I.strDescription AS strDescription
 							, Prc.dblSalePrice AS dblSalePrice
 							, IL.ysnTaxFlag1 AS ysnSalesTaxed
 							, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -282,7 +302,7 @@ BEGIN TRY
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 									-- , IUOM.strUpcCode AS strUpcCode
 									, IUOM.strLongUPCCode AS strUpcCode
-									, I.strDescription AS strDescription
+									, 'Promotion Sales - ' + I.strDescription AS strDescription
 									, Prc.dblSalePrice AS dblSalePrice
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
 									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -336,7 +356,7 @@ BEGIN TRY
 								CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 								--, IUOM.strUpcCode AS strUpcCode
 								, IUOM.strLongUPCCode AS strUpcCode
-								, I.strDescription AS strDescription
+								, 'Promotion Sales - ' + I.strDescription AS strDescription
 								, Prc.dblSalePrice AS dblSalePrice
 								, IL.ysnTaxFlag1 AS ysnSalesTaxed
 								, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -349,6 +369,7 @@ BEGIN TRY
 									   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 									   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 									   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+														  AND IL.intLocationId = ST.intCompanyLocationId
 									   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 									   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
 									   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -384,18 +405,14 @@ BEGIN TRY
 	--WHERE ysnClick = 0
 	-- =============================================================================================
 
-	-- Convert to UTC
-	DECLARE @dtmEndingChangeDateUTC AS DATETIME
-	SET @dtmEndingChangeDateUTC = DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), @dtmEndingChangeDate)
-
 
 	-- Insert to tblSTUpdateRegisterHistory
 	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate)
-    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDate, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDate)
+    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDateUTC, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDateUTC)
 
 
 	-- Send query to server side 
-	SELECT strActionType
+	SELECT DISTINCT strActionType
 		, strUpcCode
 		, strDescription
 		, dblSalePrice
@@ -404,11 +421,11 @@ BEGIN TRY
 		, ysnIdRequiredCigarette
 		, strRegProdCode 
 	FROM @tableGetItems
-	ORDER BY intItemId ASC
+	--ORDER BY intItemId ASC
 
 END TRY
 
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      
 	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
-END CATCH
+END CATCH 

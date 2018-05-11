@@ -46,6 +46,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
 		,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 		,@ADJUSTMENT_TYPE_LotOwnerChange AS INT = 9
+		,@ADJUSTMENT_TYPE_OpeningInventory AS INT = 10
 		,@ADJUSTMENT_TYPE_ChangeLotWeight AS INT = 11
 
 -- Read the transaction info   
@@ -160,6 +161,7 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_LotMove
 			, @ADJUSTMENT_TYPE_ItemChange
 			, @ADJUSTMENT_TYPE_UOMChange
+			, @ADJUSTMENT_TYPE_OpeningInventory
 		)
 
 --------------------------------------------------------------------------------------------  
@@ -380,6 +382,37 @@ BEGIN
 	END 
 	
 	-----------------------------------
+	--  Call Opening Inventory 
+	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_OpeningInventory
+	BEGIN 
+		INSERT INTO @ItemsForAdjust (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId   
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  	
+		EXEC	dbo.uspICPostInventoryAdjustmentOpeningInventory
+				@intTransactionId
+				,@strBatchId  
+				,@intEntityUserSecurityId
+	END 
+
+	-----------------------------------
 	--  Call Change Lot Weight
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
@@ -471,6 +504,7 @@ BEGIN
 		, @ADJUSTMENT_TYPE_LotMove
 		, @ADJUSTMENT_TYPE_ItemChange
 		, @ADJUSTMENT_TYPE_UOMChange
+		, @ADJUSTMENT_TYPE_OpeningInventory
 	)
 	BEGIN 
 		-- Call the post routine 

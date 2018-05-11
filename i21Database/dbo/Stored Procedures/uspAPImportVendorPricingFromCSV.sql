@@ -33,16 +33,23 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,[strEndDate] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 	)
 
-	SET @sql = 'BULK INSERT #tmpVendorPricing
-	FROM ''' + @csvFile + 
-	'''WITH
-	(
-	FIELDTERMINATOR = '','',
-	FIRSTROW = 2,
-	ROWTERMINATOR = ''0x0a''
-	)'
+	BEGIN TRY
 
-	EXEC(@sql);
+		SET @sql = 'BULK INSERT #tmpVendorPricing
+		FROM ''' + @csvFile + 
+		'''WITH
+		(
+		FIELDTERMINATOR = '','',
+		FIRSTROW = 2,
+		ROWTERMINATOR = ''0x0a''
+		)'
+
+		EXEC(@sql);
+
+	END TRY
+	BEGIN CATCH
+		RAISERROR('Invalid csv format.', 16, 1);
+	END CATCH
 
 	INSERT INTO tblAPVendorPricing(
 		[intEntityVendorId]

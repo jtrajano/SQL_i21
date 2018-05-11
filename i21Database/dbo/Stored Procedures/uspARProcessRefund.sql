@@ -770,54 +770,84 @@ WHERE
 		BEGIN TRY
 		--DECLARE @APClearingAccountId AS INT
 		--SELECT TOP 1 @APClearingAccountId = ISNULL(intAPClearingAccountId,intARAccountId) FROM tblARCompanyPreference
-		DECLARE @VoucherDetailNonInventory AS VoucherDetailNonInventory
-		DECLARE @voucherPODetails AS VoucherPODetail
-        DELETE FROM @VoucherDetailNonInventory
+		--DECLARE @VoucherDetailNonInventory AS VoucherDetailNonInventory
+		DECLARE @PaymentDetailStaging AS PaymentDetailStaging
+        DELETE FROM @PaymentDetailStaging
 		DECLARE @intEntityVendorId as INT
 		DECLARE @intShiptoId AS INT
 		DECLARE @strInvoiceNumber as NVARCHAR(MAX)
 		SELECT @intEntityVendorId = intEntityCustomerId,@intShiptoId = intCompanyLocationId,@strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId
+		DECLARE @bankAccountId as INT
 
-        INSERT INTO @VoucherDetailNonInventory
-            ([intAccountId]
-            ,[intItemId]
-            ,[strMiscDescription]
-            ,[dblQtyReceived]
-            ,[dblDiscount]
-            ,[dblCost]
-            ,[intTaxGroupId]
-			,[intInvoiceId])
+		SELECT TOP 1 @bankAccountId = L.intCashAccount FROM tblARInvoice I
+		LEFT JOIN tblSMCompanyLocation L
+			ON I.intCompanyLocationId = L.intCompanyLocationId
+		WHERE intInvoiceId = @intNewInvoiceId
+
+        INSERT INTO @PaymentDetailStaging
+            (   [intBillId]     ,
+				[intInvoiceId]	,
+				[intAccountId]  ,
+				[dblDiscount]   ,
+				[dblAmountDue]  ,
+				[dblPayment]    ,
+				[dblInterest]   ,
+				[dblTotal]		,	
+				[dblWithheld])
 		SELECT
-             [intAccountId]         = NULL
-            ,[intItemId]            = NULL
-            ,[strMiscDescription]   = 'Cash Refund'
-            ,[dblQtyReceived]       = 1.000000
-            ,[dblDiscount]          = @ZeroDecimal
-            ,[dblCost]              = dblInvoiceTotal
-            ,[intTaxGroupId]        = NULL
-			,[intInvoiceId]         = intInvoiceId
+             [intBillId]        = NULL
+            ,[intInvoiceId]     = intInvoiceId
+			,[intAccountId]     = @bankAccountId
+            ,[dblDiscount]      = 0
+            ,[dblAmountDue]     = dblAmountDue
+            ,[dblPayment]       = dblPayment
+			,[dblInterest]      = 0
+			,[dblTotal]         = dblInvoiceTotal
+			,[dblWithheld]		= 0
 		FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId
 		/*END CREATE VOUCHER */
 		/* POST VOUCHER */
-		DECLARE @BillId as INT
-		DECLARE @DateNow AS DATETIME = GETDATE()
-        EXEC [dbo].[uspAPCreateBillData]
-             @userId                = @userId
-            ,@vendorId              = @intEntityVendorId
-			,@voucherPODetails		= @voucherPODetails
-            ,@type                  = 1
-            ,@voucherNonInvDetails  = @VoucherDetailNonInventory
-            ,@voucherDate           = @DateNow
-			,@shipTo				= @intShiptoId
-			,@vendorOrderNumber		= @strInvoiceNumber
-			,@billId                = @BillId OUTPUT
+		-- DECLARE @BillId as INT
+		-- DECLARE @DateNow AS DATETIME = GETDATE()
+        -- EXEC [dbo].[uspAPCreateBillData]
+        --      @userId                = @userId
+        --     ,@vendorId              = @intEntityVendorId
+		-- 	,@voucherPODetails		= @voucherPODetails
+        --     ,@type                  = 1
+        --     ,@voucherNonInvDetails  = @VoucherDetailNonInventory
+        --     ,@voucherDate           = @DateNow
+		-- 	,@shipTo				= @intShiptoId
+		-- 	,@vendorOrderNumber		= @strInvoiceNumber
+		-- 	,@billId                = @BillId OUTPUT
 		
-		IF(ISNULL(@BillId,0) > 0)
-		BEGIN
-			DECLARE @strBillno as NVARCHAR(MAX)
-			SET @strBillno = CAST(@BillId as NVARCHAR(MAX))
-			EXEC [dbo].[uspAPPostBill]@post=1,@recap=0,@param=@strBillno,@userId=@userId
+		-- IF(ISNULL(@BillId,0) > 0)
+		-- BEGIN
+		-- 	DECLARE @strBillno as NVARCHAR(MAX)
+		-- 	SET @strBillno = CAST(@BillId as NVARCHAR(MAX))
+		-- 	EXEC [dbo].[uspAPPostBill]@post=1,@recap=0,@param=@strBillno,@userId=@userId
 
+		-- 	UPDATE tblARInvoice
+		-- 	SET ysnRefundProcessed = 1
+		-- 	WHERE intInvoiceId in(SELECT intInvoiceId FROM @PostInvoiceData)
+
+		-- 	SET @_ERR =  'Refund successfully processed!';
+		-- 	IF LEN(ISNULL(@_ERR,'')) > 0
+		-- 		BEGIN
+		-- 			SELECT @_ERR
+		-- 			GOTO InvalidDataPost
+		-- 		END
+
+		-- END
+
+		/*
+			INSERT create pay voucher here!*/
+
+		DECLARE @PayVoucherDetailId as INT
+
+			-- DECLARE @strBillno as NVARCHAR(MAX)
+			-- SET @strBillno = CAST(@BillId as NVARCHAR(MAX))
+			-- EXEC [dbo].[uspAPPostBill]@post=1,@recap=0,@param=@strBillno,@userId=@userId
+			EXEC [dbo].[uspAPCreatePaymentData] @userId = @userId,@paymentDetail = @PaymentDetailStaging,@createdPaymentId = @PayVoucherDetailId
 			UPDATE tblARInvoice
 			SET ysnRefundProcessed = 1
 			WHERE intInvoiceId in(SELECT intInvoiceId FROM @PostInvoiceData)
@@ -829,7 +859,7 @@ WHERE
 					GOTO InvalidDataPost
 				END
 
-		END
+
 		/*END POST VOUCHER*/
 
 

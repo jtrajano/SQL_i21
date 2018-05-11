@@ -81,7 +81,8 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@createVoucher AS BIT
 		,@postVoucher AS BIT
 		,@intLotType INT
-		,@intLotId INT;
+		,@intLotId INT
+		,@intContractDetailId INT;
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -521,6 +522,23 @@ BEGIN TRY
 	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 	WHERE SC.intTicketId = @intTicketId
 
+	SELECT @intContractDetailId = MIN(ri.intLineNo)
+	FROM tblICInventoryReceipt r 
+	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
+ 
+	WHILE ISNULL(@intContractDetailId,0) > 0
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId = 2)
+		BEGIN
+		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+		END
+		SELECT @intContractDetailId = MIN(ri.intLineNo)
+		FROM tblICInventoryReceipt r 
+		JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+	END
+
 	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
     IF @intLotType != 0
     BEGIN
@@ -531,8 +549,8 @@ BEGIN TRY
             ,strComment
         )
         SELECT 
-            strPropertyName = IC.strItemNo
-            ,strPropertyValue = QM.dblDiscountAmount
+            strPropertyName = IC.strShortName
+            ,strPropertyValue = QM.dblGradeReading
             ,strComment = QM.strShrinkWhat 
         FROM tblQMTicketDiscount QM 
         INNER JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId

@@ -95,6 +95,7 @@ BEGIN TRY
 					EXEC uspCTGetStartingNumber 'SaleContract',@strNewContractNumber OUTPUT
 					
 					SET @strHeaderXML = REPLACE(@strHeaderXML,@strContractNumber,@strNewContractNumber)
+					SET @strHeaderXML = REPLACE(@strHeaderXML, 'intCompanyId>', 'CompanyId>')
 
 					EXEC uspCTInsertINTOTableFromXML 'tblCTContractHeader',@strHeaderXML,@NewContractHeaderId OUTPUT
 
