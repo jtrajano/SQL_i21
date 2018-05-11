@@ -47,7 +47,6 @@
     [dblGrossUnits] NUMERIC(38, 20) NULL, 
 	[dblShrink] NUMERIC(38, 20) NULL,
     [dblNetUnits] NUMERIC(38, 20) NULL, 
-    [strItemNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strItemUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intCustomerId] INT NULL, 
     [intSplitId] INT NULL, 
@@ -165,9 +164,9 @@
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
 	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
-	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder],
 	CONSTRAINT [FK_tblSCTicket_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
-	CONSTRAINT [FK_tblSCTicket_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
+	CONSTRAINT [FK_tblSCTicket_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId]),
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]
 )
 
 GO
@@ -467,15 +466,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'dblNetUnits'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Item Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicket',
-    @level2type = N'COLUMN',
-    @level2name = N'strItemNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Split Number',

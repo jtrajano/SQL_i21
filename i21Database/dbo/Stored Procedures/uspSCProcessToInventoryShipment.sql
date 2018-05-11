@@ -125,7 +125,8 @@ BEGIN TRY
 				intContractDetailId,
 				dblUnitsDistributed,
 				dblUnitsRemaining,
-				dblCost)
+				dblCost,
+				intCurrencyId)
 				EXEC dbo.uspCTUpdationFromTicketDistribution 
 				 @intTicketId
 				,@intEntityId
@@ -315,7 +316,8 @@ BEGIN TRY
 					intContractDetailId,
 					dblUnitsDistributed,
 					dblUnitsRemaining,
-					dblCost)
+					dblCost,
+					intCurrencyId)
 					EXEC dbo.uspCTUpdationFromTicketDistribution 
 					@intTicketId
 					,@intEntityId
@@ -407,7 +409,8 @@ BEGIN TRY
 					intContractDetailId,
 					dblUnitsDistributed,
 					dblUnitsRemaining,
-					dblCost)
+					dblCost,
+					intCurrencyId)
 					EXEC dbo.uspCTUpdationFromTicketDistribution 
 						@intTicketId
 						,@intEntityId

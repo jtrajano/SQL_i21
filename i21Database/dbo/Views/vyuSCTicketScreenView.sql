@@ -46,7 +46,6 @@
 	,SCT.intTareUserId
 	,SCT.dblGrossUnits
 	,SCT.dblNetUnits
-	,SCT.strItemNumber
 	,SCT.strItemUOM
 	,SCT.intCustomerId
 	,SCT.intSplitId
@@ -132,7 +131,6 @@
     ,SCT.intSalesOrderId
 	,SCT.ysnReadyToTransfer
 	,SCT.ysnDestinationWeightGradePost
-
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
@@ -214,7 +212,7 @@
 	,SCT.intConcurrencyId
 	,SCT.strOfflineGuid
 	,SO.strSalesOrderNumber
-	,SMC.strLocationName as strSOCompanyLocation
+	,(CASE WHEN SO.intCompanyLocationId > 0 THEN SMC.strLocationName ELSE '' END) AS strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
