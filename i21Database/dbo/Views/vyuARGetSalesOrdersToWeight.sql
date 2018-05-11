@@ -6,36 +6,13 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , intCurrencyId			= SO.intCurrencyId
 	 , intFreightTermId			= SO.intFreightTermId
 	 , intShipToLocationId		= SO.intShipToLocationId
-	 , intItemId				= NULL
-	 , intItemUOMId				= NULL
-	 , intSalesOrderDetailId	= NULL
-	 , intContractHeaderId		= NULL
-	 , intContractDetailId		= NULL
-	 , intSubLocationId			= NULL
-	 , intStorageLocationId		= NULL
-	 , intCommodityId			= NULL
-	 , intCategoryId			= NULL
+	 , intCommodityId			= DETAILS.intCommodityId
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
 	 , strLocationName			= LOCATIONS.strLocationName
 	 , strCurrency				= CURRENCY.strCurrency
-	 , strItemNo				= NULL
-	 , strDescription			= NULL
-	 , strLotTracking			= NULL
-	 , strUnitMeasure			= NULL
-	 , strCommodityCode			= NULL
-	 , strCategoryCode			= NULL
-	 , strSubLocationName		= NULL
-	 , strStorageLocationName   = NULL
-	 , strContractNumber		= NULL
-	 , intContractSeq			= NULL
-	 , dblQtyOrdered			= NULL
-	 , dblQtyShipped			= NULL
-	 , dblQtyAllocated			= NULL
-	 , dblPrice					= NULL
-	 , dblDiscount				= NULL
-	 , dblTotal					= NULL
+	 , strCommodityCode			= DETAILS.strCommodityCode
 	 , dtmDate					= SO.dtmDate
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
@@ -60,15 +37,23 @@ INNER JOIN (
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) CURRENCY ON SO.intCurrencyId = CURRENCY.intCurrencyID
 CROSS APPLY (
-	SELECT intSalesOrderId
+	SELECT TOP 1 intSalesOrderId
+		 , ITEM.intCommodityId
+		 , SOD.intItemId
+		 , COMM.strCommodityCode
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intItemId
+			 , intCommodityId
 		FROM dbo.tblICItem WITH (NOLOCK)
 		WHERE ysnUseWeighScales = 1
 	) ITEM ON SOD.intItemId = ITEM.intItemId
+	LEFT JOIN (
+		SELECT intCommodityId
+			 , strCommodityCode
+		FROM dbo.tblICCommodity WITH (NOLOCK)
+	) COMM ON ITEM.intCommodityId = COMM.intCommodityId
 	WHERE SOD.intSalesOrderId = SO.intSalesOrderId
-	GROUP BY SOD.intSalesOrderId
 ) DETAILS
 WHERE SO.strOrderStatus NOT IN ('Closed', 'Short Closed', 'Cancelled')
 	  AND SO.strTransactionType = 'Order'
