@@ -133,7 +133,10 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblSCScaleSetup.strWeightDescription,
 	tblEMEntitySplit.strSplitNumber,
 	tblSCTicketPool.strTicketPool, tblGRDiscountId.strDiscountId,
-	tblICStorageLocation.strDescription,
+	(CASE
+		WHEN SC.intSalesOrderId > 0 THEN SOD.strStorageLocation
+		ELSE tblICStorageLocation.strDescription
+	END) AS strDescription,
 	tblGRStorageScheduleRule.strScheduleId,
 	tblICInventoryReceipt.intInventoryReceiptId,
 	tblICInventoryReceipt.strReceiptNumber,
@@ -156,7 +159,11 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SCMatch.strStationShortDescription AS strScaleMatchTicket,
 	SCMatch.strTicketNumber AS strMatchTicketNumber,
 	SCMatch.strLocationName AS strMatchLocation,
-	IC.strItemNo AS strItemNumber
+	(CASE
+		WHEN SC.intSalesOrderId > 0 THEN SOD.strItemNumber
+		ELSE IC.strItemNo
+	END) AS strItemNumber,
+	SO.strSalesOrderNumber
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -189,3 +196,17 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		INNER JOIN tblSMCompanyLocation SMCompany on SMCompany.intCompanyLocationId = SCSM.intLocationId
 		WHERE intTicketId = SC.intMatchTicketId
   ) SCMatch
+  LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
+  OUTER APPLY(
+	SELECT 
+		strSalesOrderNumber,
+		strItemNumber = STUFF(( SELECT ', ' + strItemDescription FROM tblSOSalesOrderDetail WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
+		strStorageLocation = STUFF(( SELECT ', ' + ICS.strDescription FROM tblSOSalesOrderDetail SOD
+			LEFT JOIN tblICStorageLocation ICS on ICS.intStorageLocationId = SOD.intStorageLocationId
+			WHERE SOD.intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
+	FROM tblSOSalesOrderDetail AS x
+	INNER JOIN tblICItem IC ON IC.intItemId = x.intItemId
+	WHERE x.intSalesOrderId = SC.intSalesOrderId
+	AND IC.ysnUseWeighScales = 1
+	GROUP BY intSalesOrderId
+  ) SOD

@@ -79,7 +79,7 @@ BEGIN TRY
 					END
 				END
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
-				FROM tblICInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+				FROM vyuICGetInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 			END
 		END
 
@@ -129,7 +129,7 @@ BEGIN TRY
 				
 					DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 					FOR
-					SELECT intInventoryReceiptId,  strReceiptNumber
+					SELECT intInventoryReceiptId,  strReceiptNumber, ysnPosted
 					FROM #tmpItemReceiptIds
 
 					OPEN intListCursor;
@@ -191,7 +191,7 @@ BEGIN TRY
 						EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 						EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 
-						FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
+						FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId, @ysnIRPosted;
 					END
 					CLOSE intListCursor  
 					DEALLOCATE intListCursor 
@@ -206,7 +206,7 @@ BEGIN TRY
 							RAISERROR('Unable to un-distribute ticket, match ticket already completed', 11, 1);
 							RETURN;
 						END
-
+						
 						SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intTicketId
 						SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 						IF @ysnPosted = 1
@@ -262,11 +262,11 @@ BEGIN TRY
 			BEGIN
 				IF ISNULL(@ysnTransfer ,0) = 1
 				BEGIN
-					SELECT @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
-					LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SCT.intSalesOrderId
-					LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderId = SCT.intSalesOrderId
-					LEFT JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-					LEFT JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
+					SELECT TOP 1 @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
+					INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SCT.intSalesOrderId 
+					INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderId = SO.intSalesOrderId 
+					INNER JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+					INNER JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
 					WHERE SCT.intTicketId = @intTicketId
 
 					IF @ysnPosted = 1
