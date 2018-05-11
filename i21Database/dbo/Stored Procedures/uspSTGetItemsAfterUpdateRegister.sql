@@ -58,7 +58,12 @@ BEGIN TRY
 	FROM vyuSTItemsToRegister
 	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 	OR dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-	 
+	AND intCompanyLocationId = 
+	(
+		SELECT TOP (1) intCompanyLocationId 
+		FROM tblSTStore
+		WHERE intStoreId = @intStoreId
+	)
 
 
 	--SELECT
@@ -126,7 +131,7 @@ BEGIN TRY
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 						--, IUOM.strUpcCode AS strUpcCode
 						, IUOM.strLongUPCCode AS strUpcCode
-						, I.strDescription AS strDescription
+						, 'Pricebook File - ' + I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
 						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -139,6 +144,7 @@ BEGIN TRY
 							   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 							   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 							   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+												  AND IL.intLocationId = ST.intCompanyLocationId
 							   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 							   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
 							   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -173,7 +179,7 @@ BEGIN TRY
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 						--, IUOM.strUpcCode AS strUpcCode
 						, IUOM.strLongUPCCode AS strUpcCode
-						, I.strDescription AS strDescription
+						, 'Pricebook File - ' + I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
 						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -186,6 +192,7 @@ BEGIN TRY
 							   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 							   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 							   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+											      AND IL.intLocationId = ST.intCompanyLocationId
 							   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 							   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
 							   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -241,7 +248,7 @@ BEGIN TRY
 							--PIL.strPromoItemListDescription
 							--, IUOM.strUpcCode AS strUpcCode
 							, IUOM.strLongUPCCode AS strUpcCode
-							, I.strDescription AS strDescription
+							, 'Promotion Item - ' + I.strDescription AS strDescription
 							, Prc.dblSalePrice AS dblSalePrice
 							, IL.ysnTaxFlag1 AS ysnSalesTaxed
 							, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -295,7 +302,7 @@ BEGIN TRY
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 									-- , IUOM.strUpcCode AS strUpcCode
 									, IUOM.strLongUPCCode AS strUpcCode
-									, I.strDescription AS strDescription
+									, 'Promotion Sales - ' + I.strDescription AS strDescription
 									, Prc.dblSalePrice AS dblSalePrice
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
 									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -349,7 +356,7 @@ BEGIN TRY
 								CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 								--, IUOM.strUpcCode AS strUpcCode
 								, IUOM.strLongUPCCode AS strUpcCode
-								, I.strDescription AS strDescription
+								, 'Promotion Sales - ' + I.strDescription AS strDescription
 								, Prc.dblSalePrice AS dblSalePrice
 								, IL.ysnTaxFlag1 AS ysnSalesTaxed
 								, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -362,6 +369,7 @@ BEGIN TRY
 									   JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 									   LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 									   JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+														  AND IL.intLocationId = ST.intCompanyLocationId
 									   JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 									   JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId
 									   JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -404,7 +412,7 @@ BEGIN TRY
 
 
 	-- Send query to server side 
-	SELECT strActionType
+	SELECT DISTINCT strActionType
 		, strUpcCode
 		, strDescription
 		, dblSalePrice
@@ -413,11 +421,11 @@ BEGIN TRY
 		, ysnIdRequiredCigarette
 		, strRegProdCode 
 	FROM @tableGetItems
-	ORDER BY intItemId ASC
+	--ORDER BY intItemId ASC
 
 END TRY
 
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      
 	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
-END CATCH
+END CATCH 

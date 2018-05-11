@@ -99,6 +99,12 @@ BEGIN
 	FROM vyuSTItemsToRegister ITR
 	WHERE ITR.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 	OR ITR.dtmDateCreated BETWEEN @dtmEndingChangeDateUTC AND @dtmEndingChangeDateUTC
+	AND intCompanyLocationId = 
+	(
+		SELECT TOP (1) intCompanyLocationId 
+		FROM tblSTStore
+		WHERE intStoreId = @StoreLocation
+	)
 
 	--INSERT INTO @Tab_UpdatedItems
 	--SELECT DISTINCT I.intItemId
@@ -224,6 +230,7 @@ BEGIN
 		JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 		LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 		JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+							  AND IL.intLocationId = ST.intCompanyLocationId
 		JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 		JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
 		JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
@@ -335,6 +342,7 @@ BEGIN
 		JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
 		LEFT JOIN tblSTSubcategoryRegProd SubCat ON SubCat.intRegProdId = IL.intProductCodeId
 		JOIN tblSTStore ST ON ST.intStoreId = SubCat.intStoreId
+						   AND IL.intLocationId = ST.intCompanyLocationId
 		JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
 		JOIN tblICItemUOM IUOM ON IUOM.intItemId = I.intItemId 
 		JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
