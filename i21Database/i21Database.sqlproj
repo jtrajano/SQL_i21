@@ -6538,6 +6538,8 @@
     <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentData.sql" />
     <Build Include="dbo\User Defined Types\PaymentDetailStaging.sql" />
+    <Build Include="dbo\Tables\tblICRetailValuation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPopulateRetailValuation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

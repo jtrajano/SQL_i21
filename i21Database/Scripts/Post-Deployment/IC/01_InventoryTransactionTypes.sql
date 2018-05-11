@@ -194,6 +194,14 @@ USING	(
 		SELECT id = 46
 				,name = 'Outbound Shipment'
 				,form = 'Outbound Shipment'
+		UNION ALL
+		SELECT id = 47
+				,name = 'Retail Mark Ups/Downs'
+				,form = NULL 
+		UNION ALL
+		SELECT id = 48
+				,name = 'Retail Write Offs'
+				,form = NULL 
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
