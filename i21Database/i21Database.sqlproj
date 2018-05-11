@@ -6310,6 +6310,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
