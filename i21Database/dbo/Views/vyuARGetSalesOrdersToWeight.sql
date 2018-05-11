@@ -12,7 +12,8 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
 	 , strLocationName			= LOCATIONS.strLocationName
 	 , strCurrency				= CURRENCY.strCurrency
-	 , strCommodityCode			= DETAILS.strCommodityCode
+	 , strCommodityCode			= COMM.strCommodityCode
+	 , dblTotalQtyOrdered		= DETAILS.dblTotalQtyOrdered
 	 , dtmDate					= SO.dtmDate
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
@@ -37,23 +38,23 @@ INNER JOIN (
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) CURRENCY ON SO.intCurrencyId = CURRENCY.intCurrencyID
 CROSS APPLY (
-	SELECT TOP 1 intSalesOrderId
-		 , ITEM.intCommodityId
-		 , SOD.intItemId
-		 , COMM.strCommodityCode
+	SELECT intSalesOrderId
+		 , intCommodityId			= MAX(ITEM.intCommodityId)		 
+		 , dblTotalQtyOrdered		= SUM(ISNULL(dblQtyOrdered, 0))
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intItemId
 			 , intCommodityId
 		FROM dbo.tblICItem WITH (NOLOCK)
 		WHERE ysnUseWeighScales = 1
-	) ITEM ON SOD.intItemId = ITEM.intItemId
-	LEFT JOIN (
-		SELECT intCommodityId
-			 , strCommodityCode
-		FROM dbo.tblICCommodity WITH (NOLOCK)
-	) COMM ON ITEM.intCommodityId = COMM.intCommodityId
+	) ITEM ON SOD.intItemId = ITEM.intItemId	
 	WHERE SOD.intSalesOrderId = SO.intSalesOrderId
+	GROUP BY SOD.intSalesOrderId
 ) DETAILS
+LEFT JOIN (
+	SELECT intCommodityId
+		 , strCommodityCode
+	FROM dbo.tblICCommodity WITH (NOLOCK)
+) COMM ON DETAILS.intCommodityId = COMM.intCommodityId
 WHERE SO.strOrderStatus NOT IN ('Closed', 'Short Closed', 'Cancelled')
 	  AND SO.strTransactionType = 'Order'
