@@ -47,7 +47,6 @@
     [dblGrossUnits] NUMERIC(38, 20) NULL, 
 	[dblShrink] NUMERIC(38, 20) NULL,
     [dblNetUnits] NUMERIC(38, 20) NULL, 
-    [strItemNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strItemUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intCustomerId] INT NULL, 
     [intSplitId] INT NULL, 
@@ -133,7 +132,7 @@
     [ysnDeliverySheetPost] BIT NOT NULL DEFAULT 0, 
     [intLotId] INT NULL, 
     [strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
-	[intSalesOrderDetailId] INT NULL, 
+	[intSalesOrderId] INT NULL, 
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
@@ -161,7 +160,7 @@
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
 	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
-	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [tblSOSalesOrderDetail]
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]
 )
 
 GO
@@ -461,15 +460,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'dblNetUnits'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Item Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicket',
-    @level2type = N'COLUMN',
-    @level2name = N'strItemNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Split Number',
