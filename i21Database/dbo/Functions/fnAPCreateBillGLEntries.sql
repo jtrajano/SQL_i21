@@ -180,7 +180,9 @@ BEGIN
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
-					dblUnits = CASE WHEN item.intItemId IS NULL THEN R.dblQtyReceived ELSE
+					dblUnits = CASE WHEN item.intItemId IS NULL THEN R.dblQtyReceived 
+									WHEN R.intInventoryReceiptChargeId > 0 THEN 0
+									ELSE
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId 
 									END, 
@@ -622,7 +624,7 @@ BEGIN
 											* CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1) 
 														ELSE 1 END AS DECIMAL(18,2)),
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
+		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
