@@ -80,6 +80,17 @@
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
     CONSTRAINT [UC_UTransactionId] UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_ysnPosted_dtmTransactionDate_intProductId] ON [dbo].[tblCFTransaction]
+(
+	[ysnPosted] ASC,
+	[dtmTransactionDate] ASC,
+	[intProductId] ASC
+)
+GO
+
+
 
 
 

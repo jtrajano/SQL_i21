@@ -34,3 +34,13 @@ GO
 CREATE NONCLUSTERED INDEX [tblCFTransactionTax_intTaxCodeId]
     ON [dbo].[tblCFTransactionTax]([intTaxCodeId] ASC);
 
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCFTransactionTax_intTransactionId_intTransactionTaxId_intTaxCodeId] ON [dbo].[tblCFTransactionTax]
+(
+	[intTransactionId] ASC,
+	[intTransactionTaxId] ASC,
+	[intTaxCodeId] ASC
+)
+INCLUDE ( 	[dblTaxOriginalAmount],[dblTaxCalculatedAmount]) 
+
+GO
