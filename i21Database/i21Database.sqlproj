@@ -6315,6 +6315,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
