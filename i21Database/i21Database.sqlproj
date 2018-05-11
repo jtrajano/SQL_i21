@@ -6536,6 +6536,8 @@
     <Build Include="dbo\Views\vyuICGetRetailValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesComparativeReport.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentData.sql" />
+    <Build Include="dbo\User Defined Types\PaymentDetailStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
