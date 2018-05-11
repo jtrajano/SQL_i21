@@ -3129,7 +3129,7 @@ IF @post = 1
 				,[intForexRateTypeId]
 				,[dblForexRate]
 			FROM 
-				[fnARGetItemsForCosting](@PostInvoiceData, @post)
+				[fnARGetItemsForCosting](@PostInvoiceData, @post, 0)
 			
 		END TRY
 		BEGIN CATCH

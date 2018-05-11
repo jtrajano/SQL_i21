@@ -1344,7 +1344,7 @@ IF @Post = 1
 				,[intForexRateTypeId]
 				,[dblForexRate]
 			FROM 
-				[fnARGetItemsForCosting](@PostInvoiceData, @Post)	
+				[fnARGetItemsForCosting](@PostInvoiceData, @Post, 0)	
 				
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 			BEGIN				
