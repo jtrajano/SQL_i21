@@ -6540,6 +6540,7 @@
     <Build Include="dbo\User Defined Types\PaymentDetailStaging.sql" />
     <Build Include="dbo\Tables\tblICRetailValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateRetailValuation.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
