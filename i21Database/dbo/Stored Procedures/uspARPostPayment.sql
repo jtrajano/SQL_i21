@@ -1188,7 +1188,7 @@ SET @batchIdUsed = @batchId
 				INSERT INTO
 					@ARReceivableInvalidData
 				SELECT 
-					'You cannot unpost payment with created Bank Deposit.'
+					A.strRecordNumber + ' is currently attached to Bank Deposit # : ' + T.strTransactionId
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -1205,6 +1205,8 @@ SET @batchIdUsed = @batchId
 				INNER JOIN
 					tblCMBankTransactionDetail TD
 						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				INNER JOIN tblCMBankTransaction T
+					ON T.intTransactionId = TD.intTransactionId
 				WHERE 
 					B.strSourceSystem = 'AR'
 
