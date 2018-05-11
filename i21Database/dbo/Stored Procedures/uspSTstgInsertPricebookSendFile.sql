@@ -97,8 +97,8 @@ BEGIN
 	INSERT INTO @Tab_UpdatedItems
 	SELECT DISTINCT ITR.intItemId
 	FROM vyuSTItemsToRegister ITR
-	WHERE ITR.dtmDateModified BETWEEN @dtmBeginingChangeDateUTC AND @dtmEndingChangeDateUTC
-	OR ITR.dtmDateCreated BETWEEN @dtmBeginingChangeDateUTC AND @dtmEndingChangeDateUTC
+	WHERE ITR.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	OR ITR.dtmDateCreated BETWEEN @dtmEndingChangeDateUTC AND @dtmEndingChangeDateUTC
 
 	--INSERT INTO @Tab_UpdatedItems
 	--SELECT DISTINCT I.intItemId
