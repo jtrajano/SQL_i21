@@ -9,8 +9,10 @@ CREATE TABLE [dbo].[tblCTWeightGrade]
     [ysnGrade] BIT NULL, 
     [dblFranchise] NUMERIC(18, 6) NULL, 
     [ysnSample] BIT NULL, 
+	intAccountId INT,
 	CONSTRAINT [PK_tblCTWeightGrade_intWeightGradeId] PRIMARY KEY CLUSTERED ([intWeightGradeId] ASC), 	
-	CONSTRAINT [UQ_tblCTWeightGrade_strWeightGradeDesc] UNIQUE ([strWeightGradeDesc])
+	CONSTRAINT [UQ_tblCTWeightGrade_strWeightGradeDesc] UNIQUE ([strWeightGradeDesc]),
+	CONSTRAINT [FK_tblCTWeightGrade_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 )
 
 
