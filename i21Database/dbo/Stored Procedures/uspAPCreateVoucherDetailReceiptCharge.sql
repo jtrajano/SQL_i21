@@ -91,7 +91,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTax]						=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
-																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 ELSE A.dblTax END ) END),0), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 
+																	 		WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 0 THEN -A.dblTax --negate, inventory receipt will bring postive tax
+																	 		ELSE A.dblTax END ) END),0),
 											--(CASE WHEN A.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
 		[dblForexRate]					=	ISNULL(A.dblForexRate,1),
 		[intForexRateTypeId]			=   A.intForexRateTypeId,
@@ -175,8 +177,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strCalculationMethod]	=	A.strCalculationMethod, 
 		[dblRate]				=	A.dblRate, 
 		[intAccountId]			=	A.intTaxAccountId, 
-		[dblTax]				=	CAST((ISNULL(A.dblTax,0) * D.dblTotal) / B.dblAmount AS DECIMAL(18,2)),
-		[dblAdjustedTax]		=	CAST((ISNULL(A.dblTax,0) * D.dblTotal) / B.dblAmount AS DECIMAL(18,2)),-- ISNULL(NULLIF(A.dblAdjustedTax,0), A.dblTax),
+		[dblTax]				=	CAST(ABS((ISNULL(A.dblTax,0) * D.dblTotal) / B.dblAmount) AS DECIMAL(18,2)) --make all positive first
+										* (CASE WHEN A.ysnCheckoffTax = 1 OR B.ysnPrice = 1 THEN -1 
+											WHEN A.ysnCheckoffTax = 1 AND B.ysnPrice = 1 THEN 1
+											ELSE 1 END), --check off and price down should be negative
+		[dblAdjustedTax]		=	CAST(ABS((ISNULL(A.dblTax,0) * D.dblTotal) / B.dblAmount) AS DECIMAL(18,2))
+										* (CASE WHEN A.ysnCheckoffTax = 1 OR B.ysnPrice = 1 THEN -1 
+											WHEN A.ysnCheckoffTax = 1 AND B.ysnPrice = 1 THEN 1
+											ELSE 1 END), --check off and price down should be negative
 		[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
 		[ysnSeparateOnBill]		=	0, 
 		[ysnCheckOffTax]		=	A.ysnCheckoffTax
@@ -187,6 +195,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		ON A.intInventoryReceiptChargeId = E.intInventoryReceiptChargeId AND 
 		D.intBillDetailId = E.intBillDetailId
 
+	--recalculate tax if partial
 	UPDATE voucherDetails
 		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
 		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
