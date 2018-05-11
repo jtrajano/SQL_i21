@@ -18,7 +18,7 @@ DECLARE @voucherVendor INT;
 DECLARE @receiptItems AS TABLE (
 	[intInventoryReceiptType]		INT				NOT NULL,
 	[intInventoryReceiptItemId]		INT				NOT NULL,
-	[intScaleTicketId]				INT				NOT NULL,
+	[intScaleTicketId]				INT				NULL,
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
     [dblCost]						DECIMAL(38, 20)	NULL, 
 	[dblCostUnitQty]				DECIMAL(38, 20)	NULL, 
