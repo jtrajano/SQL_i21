@@ -340,7 +340,7 @@ BEGIN
                 @str1099Form	= '''',
                 @str1099Type	= '''',
                 @strFederalTaxId	= ssvnd_fed_tax_id,
-                @dtmW9Signed	= CASE WHEN ssvnd_w9_signed_rev_dt = 0 THEN NULL ELSE CONVERT(DATE, CAST(ssvnd_w9_signed_rev_dt AS CHAR(12)), 112) END,
+                @dtmW9Signed	= CASE WHEN ssvnd_w9_signed_rev_dt = 0 OR ISDATE(ssvnd_w9_signed_rev_dt) = 0 THEN NULL ELSE CONVERT(DATE, CAST(ssvnd_w9_signed_rev_dt AS CHAR(12)), 112) END,
 
                 --Contacts
                 @strTitle = '''',
