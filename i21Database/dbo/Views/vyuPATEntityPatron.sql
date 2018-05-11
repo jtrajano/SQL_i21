@@ -10,11 +10,13 @@ SELECT	A.intEntityId,
 		C.dtmDeceasedDate,
 		C.dtmLastActivityDate,
 		C.dtmMembershipDate,
-		B.ysnWithholding,
+		ysnWithholding = ISNULL(B.ysnWithholding, 0),
+		ysnCustomer = CAST(A.Customer AS BIT),
+		ysnVendor = CAST(A.Vendor AS BIT),
 		C.intConcurrencyId AS intCustomerConcurrencyId,
 		B.intConcurrencyId AS intVendorConcurrencyId
 FROM vyuEMEntityType A
-JOIN tblAPVendor B
+LEFT JOIN tblAPVendor B
 	ON A.intEntityId = B.intEntityId
 JOIN tblARCustomer C
 	ON A.intEntityId = C.intEntityId
@@ -30,4 +32,4 @@ LEFT OUTER JOIN (
 	FROM tblEMEntityLocation
 	WHERE ysnDefaultLocation = 1
 ) Loc ON Loc.intEntityId = D.intEntityId
-WHERE A.Customer = 1 AND A.Vendor = 1
+WHERE A.Customer = 1
