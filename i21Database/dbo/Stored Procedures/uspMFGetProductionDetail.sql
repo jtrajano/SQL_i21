@@ -186,6 +186,7 @@ BEGIN
 		,PL.strParentLotNumber
 		,L1.strLotNumber AS strSpecialPalletId
 		,LS.strBackColor
+		,W.ysnReleased
 		,CV.strColumn1
 		,CV.strColumn2
 		,CV.strColumn3
