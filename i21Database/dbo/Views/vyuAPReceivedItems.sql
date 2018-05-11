@@ -1290,9 +1290,9 @@ FROM
 	  ,[intCurrencyExchangeRateTypeId]			= ID.intCurrencyExchangeRateTypeId	
 	  ,[ysnSubCurrency]							= 0	
 	  ,[intSubCurrencyCents]					= 0
-	  ,[intAccountId]							= APC.intAPClearingAccountId
-	  ,[strAccountId]							= APC.strAccountId	
-	  ,[strAccountDesc]							= APC.strDescription	
+	  ,[intAccountId]							= GLA.[intAccountId]
+	  ,[strAccountId]							= GLA.strAccountId	
+	  ,[strAccountDesc]							= GLA.strDescription	
 	  ,[strName]								= E.strName
 	  ,[strVendorId]							= CAST(I.intEntityCustomerId AS VARCHAR)
 	  ,[strShipVia]								= NULL
@@ -1347,7 +1347,11 @@ FROM
 	LEFT JOIN tblARInvoice SourceInvoice
 		ON SourceInvoice.intInvoiceId = I.intSourceId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = ID.intCurrencyExchangeRateId
-	CROSS APPLY(SELECT TOP 1 intAPClearingAccountId, strAccountId, strDescription FROM tblARCompanyPreference ACP INNER JOIN tblGLAccount GL ON ACP.intAPClearingAccountId = GL.intAccountId) APC
+	--CROSS APPLY(SELECT TOP 1 intAPClearingAccountId, strAccountId, strDescription FROM tblARCompanyPreference ACP INNER JOIN tblGLAccount GL ON ACP.intAPClearingAccountId = GL.intAccountId) APC
+	LEFT OUTER JOIN tblSMCompanyLocation SMCL
+		ON I.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+	LEFT OUTER JOIN tblGLAccount GLA
+		ON SMCL.[intAPAccount] = GLA.[intAccountId] 		
 	LEFT JOIN (tblAPVendor V INNER JOIN tblEMEntity E ON V.intEntityId = E.intEntityId)
 		ON I.intEntityCustomerId = V.intEntityId
 	LEFT JOIN tblSMCurrency CY	

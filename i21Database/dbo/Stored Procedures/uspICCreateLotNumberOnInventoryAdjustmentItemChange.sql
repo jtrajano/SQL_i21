@@ -138,7 +138,7 @@ BEGIN
 			,[intItemId]				= Detail.intNewItemId
 			,[intItemLocationId]		= NewItemLocation.intItemLocationId
 			,[intItemUOMId]				= NewItemUOM.intItemUOMId
-			,[strLotNumber]				= SourceLot.strLotNumber
+			,[strLotNumber]				= Detail.strNewLotNumber
 			,[intSubLocationId]			= SourceLot.intSubLocationId
 			,[intStorageLocationId]		= SourceLot.intStorageLocationId
 			,[dblQty]					= 1 --SourceLot.dblQty

@@ -49,45 +49,45 @@ INNER JOIN dbo.tblSMUserSecurity AS SMUS ON SMUS.intCompanyLocationId = IL.intLo
 INNER JOIN dbo.tblEMEntity AS EM ON EM.intEntityId = SMUS.intEntityId 
 LEFT OUTER JOIN dbo.tblSTUpdateRegisterNotification AS URN ON URN.intEntityId = EM.intEntityId
 WHERE (I.ysnFuelItem = 0) 
-AND 
-(
-	x.dtmDateModified BETWEEN ISNULL
-	(
-		(
-			SELECT TOP (1) dtmEndingChangeDate
-			FROM dbo.tblSTUpdateRegisterHistory     
-			WHERE intStoreId = ST.intStoreId
-			ORDER BY intUpdateRegisterHistoryId DESC
-		),
-		(
-			SELECT TOP (1) dtmDate
-			FROM dbo.tblSMAuditLog
-			WHERE strTransactionType = 'Inventory.view.Item'
-			OR strTransactionType = 'Inventory.view.ItemLocation'
-			ORDER BY dtmDate ASC
-		)
-	)
-	-- Between current date
-	AND GETUTCDATE()
-)
-OR 
-(
-	x.dtmDateCreated BETWEEN ISNULL
-	(
-		(
-			SELECT TOP (1) dtmEndingChangeDate
-			FROM dbo.tblSTUpdateRegisterHistory     
-			WHERE intStoreId = ST.intStoreId
-			ORDER BY intUpdateRegisterHistoryId DESC
-		),
-		(
-			SELECT TOP (1) dtmDate
-			FROM dbo.tblSMAuditLog
-			WHERE strTransactionType = 'Inventory.view.Item'
-			OR strTransactionType = 'Inventory.view.ItemLocation'
-			ORDER BY dtmDate ASC
-		)
-	)
-	-- Between current date
-	AND GETUTCDATE()
-)
+--AND 
+--(
+--	x.dtmDateModified BETWEEN ISNULL
+--	(
+--		(
+--			SELECT TOP (1) dtmEndingChangeDate
+--			FROM dbo.tblSTUpdateRegisterHistory     
+--			WHERE intStoreId = ST.intStoreId
+--			ORDER BY intUpdateRegisterHistoryId DESC
+--		),
+--		(
+--			SELECT TOP (1) dtmDate
+--			FROM dbo.tblSMAuditLog
+--			WHERE strTransactionType = 'Inventory.view.Item'
+--			OR strTransactionType = 'Inventory.view.ItemLocation'
+--			ORDER BY dtmDate ASC
+--		)
+--	)
+--	-- Between current date
+--	AND GETUTCDATE()
+--)
+--OR 
+--(
+--	x.dtmDateCreated BETWEEN ISNULL
+--	(
+--		(
+--			SELECT TOP (1) dtmEndingChangeDate
+--			FROM dbo.tblSTUpdateRegisterHistory     
+--			WHERE intStoreId = ST.intStoreId
+--			ORDER BY intUpdateRegisterHistoryId DESC
+--		),
+--		(
+--			SELECT TOP (1) dtmDate
+--			FROM dbo.tblSMAuditLog
+--			WHERE strTransactionType = 'Inventory.view.Item'
+--			OR strTransactionType = 'Inventory.view.ItemLocation'
+--			ORDER BY dtmDate ASC
+--		)
+--	)
+--	-- Between current date
+--	AND GETUTCDATE()
+--)

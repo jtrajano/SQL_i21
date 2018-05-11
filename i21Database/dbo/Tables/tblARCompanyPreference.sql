@@ -6,7 +6,6 @@
 	[intWriteOffAccountId]			INT NULL,
 	[intInterestIncomeAccountId]	INT NULL,
 	[intDeferredRevenueAccountId]	INT NULL,
-	[intAPClearingAccountId]		INT NULL,
 	[intCommissionExpenseAccountId]	INT NULL,
 	[intServiceChargeAccountId]		INT NULL,
 	[intServiceChargeTermId]		INT NULL,
@@ -18,6 +17,7 @@
 	[intConversionAccountId]		INT NULL,
 	[ysnLineItemAccountUpdate]		BIT NULL DEFAULT 0,
 	[ysnImpactForProvisional]		BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnImpactForProvisional] DEFAULT ((0)),
+	[ysnExcludePaymentInFinalInvoice]    BIT    NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnExcludePaymentInFinalInvoice] DEFAULT ((0)),
 	[ysnAutoApplyPrepaids]			BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAutoApplyPrepaids] DEFAULT ((0)),
 	[ysnChargeonCharge]				BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnChargeonCharge] DEFAULT ((1)),
 	[ysnPrintInvoicePaymentDetail]  BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPrintInvoicePaymentDetail] DEFAULT ((0)),
@@ -30,6 +30,5 @@
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intDeferredRevenueAccountId] FOREIGN KEY ([intDeferredRevenueAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intServiceChargeAccountId] FOREIGN KEY ([intServiceChargeAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intConversionAccountId] FOREIGN KEY ([intConversionAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblARCompanyPreference_tblGLAccount_intAPClearingAccountId] FOREIGN KEY ([intAPClearingAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblARCompanyPreference_tblSMTerm_intServiceChargeTermId] FOREIGN KEY ([intServiceChargeTermId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 )

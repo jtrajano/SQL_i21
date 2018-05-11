@@ -768,8 +768,8 @@ WHERE
 
 		/* CREATE VOUCHER */
 		BEGIN TRY
-		DECLARE @APClearingAccountId AS INT
-		SELECT TOP 1 @APClearingAccountId = ISNULL(intAPClearingAccountId,intARAccountId) FROM tblARCompanyPreference
+		--DECLARE @APClearingAccountId AS INT
+		--SELECT TOP 1 @APClearingAccountId = ISNULL(intAPClearingAccountId,intARAccountId) FROM tblARCompanyPreference
 		DECLARE @VoucherDetailNonInventory AS VoucherDetailNonInventory
 		DECLARE @voucherPODetails AS VoucherPODetail
         DELETE FROM @VoucherDetailNonInventory
@@ -788,7 +788,7 @@ WHERE
             ,[intTaxGroupId]
 			,[intInvoiceId])
 		SELECT
-             [intAccountId]         = @APClearingAccountId
+             [intAccountId]         = NULL
             ,[intItemId]            = NULL
             ,[strMiscDescription]   = 'Cash Refund'
             ,[dblQtyReceived]       = 1.000000

@@ -11,6 +11,16 @@
 AS
 BEGIN
 
+	-- =============================================================================================
+	-- CONVERT DATE's to UTC
+	-- =============================================================================================
+	DECLARE @dtmBeginningChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@BeginingChangeDate)
+	DECLARE @dtmEndingChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@EndingChangeDate)
+	-- =============================================================================================
+	-- END CONVERT DATE's to UTC
+	-- =============================================================================================
+
+
 	-- =========================================================================================================
 	-- Check if register has intImportFileHeaderId
 	DECLARE @strRegister nvarchar(200)
@@ -75,13 +85,28 @@ BEGIN
 	-- Use table to get the list of items modified during change date range
 	DECLARE @Tab_UpdatedItems TABLE(intItemId int)
 
+
+
+	-- Convert to UTC
+	--DECLARE @dtmBeginingChangeDateUTC AS DATETIME
+	--DECLARE @dtmEndingChangeDateUTC AS DATETIME
+	--SET @dtmBeginingChangeDateUTC = DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), @BeginingChangeDate)
+	--SET @dtmEndingChangeDateUTC = DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), @EndingChangeDate)
+
+
 	INSERT INTO @Tab_UpdatedItems
-	SELECT DISTINCT I.intItemId
-	FROM tblICItem I
-	JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-	WHERE I.dtmDateModified BETWEEN @BeginingChangeDate AND @EndingChangeDate
-	OR I.dtmDateCreated BETWEEN @BeginingChangeDate AND @EndingChangeDate
+	SELECT DISTINCT ITR.intItemId
+	FROM vyuSTItemsToRegister ITR
+	WHERE ITR.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	OR ITR.dtmDateCreated BETWEEN @dtmEndingChangeDateUTC AND @dtmEndingChangeDateUTC
+
+	--INSERT INTO @Tab_UpdatedItems
+	--SELECT DISTINCT I.intItemId
+	--FROM tblICItem I
+	--JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+	--JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
+	--WHERE I.dtmDateModified BETWEEN @BeginingChangeDate AND @EndingChangeDate
+	--OR I.dtmDateCreated BETWEEN @BeginingChangeDate AND @EndingChangeDate
 
 	--Select DISTINCT CAST(strRecordNo as int) [intItemId] 
 	--From dbo.tblSMAuditLog Where strTransactionType = 'Inventory.view.Item'
@@ -103,6 +128,10 @@ BEGIN
 	--	OR CHARINDEX('dblStandardCost',strJsonData) > 0
 	--	OR CHARINDEX('intCategoryId',strJsonData) > 0 )
 	--AND dtmDate BETWEEN DATEADD(HOUR,-8,(@BeginingChangeDate)) AND DATEADD(HOUR,-8,(@EndingChangeDate)) -- Should adjust to audit log format UTCDATE 8hours late
+
+
+
+
 
 
     --Insert data into Procebook staging table	

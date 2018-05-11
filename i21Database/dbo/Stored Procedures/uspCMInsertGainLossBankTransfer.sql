@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCMInsertGainlLossBankTransfer]
+﻿CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
 AS
 BEGIN
 	SET NOCOUNT ON;

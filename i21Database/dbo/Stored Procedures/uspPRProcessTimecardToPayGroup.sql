@@ -130,6 +130,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				AND EE.intEntityEmployeeId = EL.intEntityEmployeeId
 		WHERE TC.intEmployeeEarningId = @intEmployeeEarningId
 		  AND TC.intEmployeeDepartmentId = @intEmployeeDepartmentId
+		  AND TC.intWorkersCompensationId = @intWorkersCompensationId
 		  AND TC.intEntityEmployeeId = @intEntityEmployeeId
 		  AND EE.strCalculationType IN ('Hourly Rate', 'Fixed Amount', 'Salary')
 
@@ -180,6 +181,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		WHERE TCE.intEmployeeDepartmentId = @intEmployeeDepartmentId
 		  AND TCE.dblOvertimeHours > 0
 		  AND TCE.intEntityEmployeeId = @intEntityEmployeeId
+		  AND TCE.intWorkersCompensationId = @intWorkersCompensationId
 		  AND EL.strCalculationType IN ('Overtime')
 
 		/* Insert Shift Differential Hours To Pay Group Detail */
@@ -353,6 +355,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 				,EL.intEmployeeEarningId
 				,EL.intTypeEarningId
 				,SD.intEmployeeDepartmentId
+				,SD.intWorkersCompensationId
 				,EL.strCalculationType
 
 		/* Update Processed Timecards */
@@ -432,6 +435,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
 		WHERE intEmployeeEarningId = @intEmployeeEarningId
 			AND intEmployeeDepartmentId = @intEmployeeDepartmentId 
 			AND intEntityEmployeeId = @intEntityEmployeeId
+			AND intWorkersCompensationId = @intWorkersCompensationId
 	END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTimecard')) DROP TABLE #tmpTimecard

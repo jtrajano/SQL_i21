@@ -13,7 +13,7 @@ SELECT
 	,intPaycheckId
 	,dtmPayDate
 	,dblHours = SUM(dblHours)
-	,dblRegularEarnings = SUM(ISNULL([Hourly Rate], 0) + ISNULL([Salary], 0))
+	,dblRegularEarnings = SUM(ISNULL([Hourly Rate], 0) + ISNULL([Salary], 0) + ISNULL([Shift Differential], 0))
 	,dblOvertime = SUM(ISNULL([Overtime], 0))
 	,dblWCTotal = SUM(dblWCTotal)
 FROM
@@ -46,7 +46,7 @@ FROM
 					 END
 	FROM 
 		(SELECT * FROM vyuPRPaycheckEarning 
-			WHERE intWorkersCompensationId IS NOT NULL AND strCalculationType IN ('Hourly Rate', 'Salary', 'Overtime')) PE
+			WHERE intWorkersCompensationId IS NOT NULL AND strCalculationType IN ('Hourly Rate', 'Salary', 'Overtime', 'Shift Differential')) PE
 		INNER JOIN tblPREmployeeEarning EE ON EE.intEmployeeEarningId = PE.intEmployeeEarningId
 		INNER JOIN tblPREmployee EMP ON PE.intEntityEmployeeId = EMP.intEntityId
 		INNER JOIN tblEMEntity ENT ON EMP.intEntityId = ENT.intEntityId
@@ -55,7 +55,7 @@ FROM
 	PIVOT
 	(
 		SUM(dblTotal)
-		FOR strCalculationType IN ([Hourly Rate], [Salary], [Overtime])
+		FOR strCalculationType IN ([Hourly Rate], [Salary], [Overtime], [Shift Differential])
 	) AS pvtTotal
 GROUP BY 
 	strWCCode

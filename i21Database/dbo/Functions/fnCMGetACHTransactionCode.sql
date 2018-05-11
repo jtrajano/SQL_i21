@@ -9,7 +9,7 @@ BEGIN
 DECLARE @Code NVARCHAR(1)
 
 	-- Add the T-SQL statements to compute the return value here;with result as (
-;with result as (
+;with r as (
 select trns.strTransactionId, CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) = 1 THEN '7' ELSE '2' END Code from tblARInvoice invoice join 
 tblARPaymentDetail paymentdetail on paymentdetail.intInvoiceId = invoice.intInvoiceId
 join tblAPPayment payment on payment.intPaymentId = paymentdetail.intPaymentId
@@ -21,7 +21,7 @@ from tblAPBill bill join tblAPBillDetail billdetail on bill.intBillId = billdeta
 join tblAPPaymentDetail paymentdetail on paymentdetail.intBillId = billdetail.intBillId
 join tblAPPayment payment on payment.intPaymentId = paymentdetail.intPaymentId
 join tblCMBankTransaction trns on trns.strTransactionId = payment.strPaymentRecordNum
-)select @Code =Code from result
+)select @Code =Code from r
 WHERE strTransactionId = @strTransactionId
 
 	-- Return the result of the function

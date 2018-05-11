@@ -20,6 +20,17 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX);
 
+	-- =============================================================================================
+	-- CONVERT DATE's to UTC
+	-- =============================================================================================
+	DECLARE @dtmBeginningChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBeginningChangeDate)
+	DECLARE @dtmEndingChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmEndingChangeDate)
+	DECLARE @dtmBuildFileThruEndingDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBuildFileThruEndingDate)
+	-- =============================================================================================
+	-- END CONVERT DATE's to UTC
+	-- =============================================================================================
+
+
 	DECLARE @tableGetItems TABLE(
 									strActionType NVARCHAR(3)
 									, strUpcCode NVARCHAR(20)
@@ -39,15 +50,17 @@ BEGIN TRY
 	INSERT INTO @tablePricebookFileOne
 	SELECT DISTINCT intItemId
 					, CASE
-							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN 'Created' ELSE 'Updated'
+							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC THEN 'Created' ELSE 'Updated'
 					  END AS strActionType
 					, CASE
-							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate THEN dtmDateCreated ELSE dtmDateModified
+							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC THEN dtmDateCreated ELSE dtmDateModified
 					  END AS dtmDate
 	FROM vyuSTItemsToRegister
-	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
-	OR dtmDateCreated BETWEEN @dtmBeginningChangeDate AND @dtmEndingChangeDate
+	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	OR dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 	 
+
+
 	--SELECT
 	--	DISTINCT CAST(strRecordNo as int) [intItemId]
 	--	, strActionType
@@ -387,7 +400,7 @@ BEGIN TRY
 
 	-- Insert to tblSTUpdateRegisterHistory
 	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate)
-    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDate, @dtmEndingChangeDate, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDate)
+    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDateUTC, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDateUTC)
 
 
 	-- Send query to server side 

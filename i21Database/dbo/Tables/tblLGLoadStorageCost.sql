@@ -5,6 +5,7 @@
 	[intLoadId] INT NOT NULL,
 	[intLoadDetailLotId] INT NOT NULL,
 	[dblPrice] NUMERIC(18,6),
+	[intPriceCurrencyId] INT,
 	[intPriceUOMId] INT,
 	[dblAmount] NUMERIC(18,6),
 	[intCurrency] INT,

@@ -79,6 +79,7 @@ DECLARE @UserEntityID				INT
 		,@AllowOtherUserToPost		BIT
 		,@DefaultCurrencyId			INT
 		,@HasImpactForProvisional   BIT
+		,@ExcludeInvoiceFromPayment BIT
 		,@InitTranCount				INT
 		,@CurrentTranCount			INT
 		,@Savepoint					NVARCHAR(32)
@@ -101,9 +102,11 @@ SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPre
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
 
-SELECT TOP 1 @DiscountAccountId = intDiscountAccountId 
-		   , @DeferredRevenueAccountId = intDeferredRevenueAccountId
-		   , @HasImpactForProvisional = ISNULL(ysnImpactForProvisional,0)
+SELECT TOP 1
+	@DiscountAccountId			= intDiscountAccountId 
+	,@DeferredRevenueAccountId	= intDeferredRevenueAccountId
+	,@HasImpactForProvisional	= ISNULL(ysnImpactForProvisional,0)
+	,@ExcludeInvoiceFromPayment	= ISNULL(ysnExcludePaymentInFinalInvoice,0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
@@ -1642,7 +1645,7 @@ IF @post = 1
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																									SELECT
-																										SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
+																										SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ISNULL(ICIS.intStockUOMId, ARID.intItemUOMId), ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
 																									FROM
 																										(SELECT intInvoiceId, intItemId, intItemUOMId, dblQtyShipped 
 																										 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
@@ -1671,7 +1674,7 @@ IF @post = 1
 																							ELSE 
 																								(
 																								SELECT
-																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
+																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ISNULL(ICIS.intStockUOMId, ARID.intItemUOMId), ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
 																								FROM
 																									(SELECT intInvoiceId, intItemId, intItemUOMId, dblQtyShipped 
 																									 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
@@ -1999,7 +2002,7 @@ IF @post = 1
 			SELECT
 				 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 				,strBatchID					= @batchIdUsed
-				,intAccountId				= CASE WHEN ARPAC.strTransactionType IN('Customer Prepayment','Credit Memo') THEN CPref.intAPClearingAccountId ELSE ARPAC.intAccountId END
+				,intAccountId				= CASE WHEN ARPAC.strTransactionType IN('Customer Prepayment','Credit Memo') THEN SMCL.intAPAccount ELSE ARPAC.intAccountId END
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Cash Refund') THEN  ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
 				,dblDebitUnit				= @ZeroDecimal 
@@ -2035,7 +2038,7 @@ IF @post = 1
 				 INNER JOIN tblARInvoice I
 				 ON I.intInvoiceId = PPC.intPrepaymentId) ARPAC
 			INNER JOIN
-				(SELECT [intInvoiceId],intAccountId, strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue
+				(SELECT [intInvoiceId],intAccountId, strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue, intCompanyLocationId
 				 FROM tblARInvoice WITH (NOLOCK) ) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND  ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal				 
 			--INNER JOIN
 			--	(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)  WHERE strTransactionType NOT IN ('Credit Memo', 'Credit Note')) ARI1 
@@ -2044,7 +2047,9 @@ IF @post = 1
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
-			CROSS APPLY (SELECT TOP 1 * FROM tblARCompanyPreference) CPref
+			--CROSS APPLY (SELECT TOP 1 * FROM tblARCompanyPreference) CPref
+			LEFT OUTER JOIN
+				(SELECT [intCompanyLocationId], intAPAccount FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL ON SMCL.[intCompanyLocationId] = A.intCompanyLocationId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 			--*/		
@@ -2056,8 +2061,8 @@ IF @post = 1
 				,intAccountId				= B.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2147,8 +2152,8 @@ IF @post = 1
 																													
 																										 END)
 											  ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2286,8 +2291,8 @@ IF @post = 1
 																													END)
 																										 END)
 											  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END				
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2422,8 +2427,8 @@ IF @post = 1
 																													END)
 																												END) 
 											  ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2533,8 +2538,8 @@ IF @post = 1
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2612,8 +2617,8 @@ IF @post = 1
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -4080,11 +4085,12 @@ IF @recap = 0
 						,ARI.dblPayment					= CASE WHEN ARI.strTransactionType = 'Cash' OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN @ZeroDecimal ELSE ISNULL(dblPayment, @ZeroDecimal) END
 						,ARI.dblBasePayment				= CASE WHEN ARI.strTransactionType = 'Cash' OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN @ZeroDecimal ELSE ISNULL(dblBasePayment, @ZeroDecimal) END
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+						,ARI.ysnExcludeFromPayment		= 0
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 					FROM
 						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
 					INNER JOIN
-						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, strTransactionType, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, dblInvoiceTotal, dblBaseInvoiceTotal, dtmDate 
+						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, strTransactionType, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, dblInvoiceTotal, dblBaseInvoiceTotal, dtmDate, ysnExcludeFromPayment
 						 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
 					CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1) PPC
 					--Insert Successfully unposted transactions.
@@ -4220,11 +4226,12 @@ IF @recap = 0
 						,ARI.dblPayment					= (CASE WHEN ARI.strTransactionType IN ('Cash') OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 						,ARI.dblBasePayment				= (CASE WHEN ARI.strTransactionType IN ('Cash') OR (ARI.strTransactionType = 'Cash Refund' AND PPC.PPC > 0) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END)
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+						,ARI.ysnExcludeFromPayment		= @ExcludeInvoiceFromPayment
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
 					FROM
 						(SELECT intInvoiceId FROM @PostInvoiceData ) PID
 					INNER JOIN
-						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblInvoiceTotal, dblBaseInvoiceTotal, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, strTransactionType, dtmDate 
+						(SELECT intInvoiceId, ysnPosted, ysnPaid, dblInvoiceTotal, dblBaseInvoiceTotal, dblAmountDue, dblBaseAmountDue, dblDiscount, dblBaseDiscount, dblDiscountAvailable, dblBaseDiscountAvailable, dblInterest, dblBaseInterest, dblPayment, dblBasePayment, dtmPostDate, intConcurrencyId, intSourceId, intOriginalInvoiceId, dblProvisionalAmount, dblBaseProvisionalAmount, strTransactionType, dtmDate, ysnExcludeFromPayment
 						 FROM dbo.tblARInvoice WITH (NOLOCK))  ARI ON PID.intInvoiceId = ARI.intInvoiceId
 					CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1) PPC
 
@@ -4519,7 +4526,7 @@ IF @post = 0
 
 		UPDATE ARI
 		SET
-			ARI.ysnPosted				= 0
+			 ARI.ysnPosted				= 0
 			,ARI.ysnPaid				= 0
 			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
 			,ARI.dblDiscount			= @ZeroDecimal
@@ -4527,11 +4534,12 @@ IF @post = 0
 			,ARI.dblInterest			= @ZeroDecimal
 			,ARI.dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
 			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.ysnExcludeFromPayment	= 0
 			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1
 		FROM
 			(SELECT intInvoiceId FROM @PostInvoiceData) PID
 		INNER JOIN
-			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate,intConcurrencyId,
+			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate, ysnExcludeFromPayment, intConcurrencyId,
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
 				ON PID.intInvoiceId = ARI.intInvoiceId 		
@@ -4563,11 +4571,12 @@ ELSE
 			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
 			,ARI.dblInterest			= @ZeroDecimal			
 			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
+			,ARI.ysnExcludeFromPayment	= @ExcludeInvoiceFromPayment
 			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1	
 		FROM
 			(SELECT intInvoiceId FROM @PostInvoiceData) PID
 		INNER JOIN
-			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate,intConcurrencyId,
+			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate, ysnExcludeFromPayment, intConcurrencyId,
 				dblInvoiceTotal, strTransactionType, dtmDate
 			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
 

@@ -116,6 +116,7 @@ BEGIN TRY
 					EXEC uspCTGetStartingNumber 'Price Contract',@strNewPriceContractNo OUTPUT
 					
 					SET @strPriceContractXML= REPLACE(@strPriceContractXML,@strPriceContractNo,@strNewPriceContractNo)
+					SET @strPriceContractXML= REPLACE(@strPriceContractXML,'intCompanyId>', 'CompanyId>')
 
 					EXEC uspCTInsertINTOTableFromXML 'tblCTPriceContract',@strPriceContractXML,@NewPriceContractId OUTPUT
 					

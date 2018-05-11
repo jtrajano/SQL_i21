@@ -92,6 +92,7 @@ BEGIN TRY
 
 			SET @strTagRelaceXML = NULL
 			SET @strWeightClaim = REPLACE(@strWeightClaim, 'intWeightClaimId>', 'intWeightClaimRefId>')
+			SET @strWeightClaim = REPLACE(@strWeightClaim, 'intCompanyId>', 'CompanyId>')
 			SET @strTagRelaceXML = '<root>
 										<tags>
 											<toFind>&lt;strReferenceNumber&gt;' + LTRIM(@strWeightClaimNumber) + '&lt;/strReferenceNumber&gt;</toFind>
