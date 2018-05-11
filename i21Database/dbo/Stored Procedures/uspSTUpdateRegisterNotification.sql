@@ -27,10 +27,112 @@ DECLARE @tblTempEntity TABLE(intId INT NOT NULL IDENTITY, intEntityId INT)
 -- Table to handle filtered intEntityId
 DECLARE @tblTempFilteredEntity TABLE(intId INT NOT NULL IDENTITY, intEntityId INT)
 
--- Insert Non filtered Entity Id
-INSERT @tblTempEntity
-SELECT DISTINCT ITR.intEntityId
-FROM vyuSTItemsToRegister ITR
+
+
+
+-- ######## Insert Non filtered Entity Id
+-- IF has location id's
+IF(@strLocationIds IS NOT NULL AND @strLocationIds <> '')
+	BEGIN
+		INSERT @tblTempEntity
+		SELECT DISTINCT ITR.intEntityId
+		FROM vyuSTItemsToRegister ITR
+		WHERE (dtmDateModified BETWEEN     
+		ISNULL    
+		(     
+			(      
+				SELECT TOP (1) dtmEndingChangeDate      
+				FROM dbo.tblSTUpdateRegisterHistory           
+				WHERE intStoreId =       
+				(       
+					SELECT TOP (1) intStoreId FROM tblSTStore       
+					WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))     
+				)      
+				ORDER BY intUpdateRegisterHistoryId DESC     
+			),     
+			(      
+				SELECT TOP (1) dtmDate      
+				FROM dbo.tblSMAuditLog      
+				WHERE strTransactionType = 'Inventory.view.Item'      
+				OR strTransactionType = 'Inventory.view.ItemLocation'      
+				ORDER BY dtmDate ASC     
+			)    
+		)    
+		AND GETUTCDATE())    
+		OR 
+		(
+			dtmDateCreated BETWEEN     
+			ISNULL    
+			(     
+				(      
+					SELECT TOP (1) dtmEndingChangeDate      
+					FROM dbo.tblSTUpdateRegisterHistory           
+					WHERE intStoreId =       
+					(       
+						SELECT TOP (1) intStoreId FROM tblSTStore       
+						WHERE intCompanyLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strLocationIds))       
+					)      
+					ORDER BY intUpdateRegisterHistoryId DESC     
+				),     
+				(      
+					SELECT TOP (1) dtmDate      
+					FROM dbo.tblSMAuditLog      
+					WHERE strTransactionType = 'Inventory.view.Item'      
+					OR strTransactionType = 'Inventory.view.ItemLocation'      
+					ORDER BY dtmDate ASC     
+				)    
+			)    
+			AND GETUTCDATE()
+		)
+	END
+ELSE
+	BEGIN
+		INSERT @tblTempEntity
+		SELECT DISTINCT ITR.intEntityId
+		FROM vyuSTItemsToRegister ITR
+		WHERE (dtmDateModified BETWEEN     
+		ISNULL    
+		(     
+			(      
+				SELECT TOP (1) dtmEndingChangeDate      
+				FROM dbo.tblSTUpdateRegisterHistory                 
+				ORDER BY intUpdateRegisterHistoryId DESC     
+			),     
+			(      
+				SELECT TOP (1) dtmDate      
+				FROM dbo.tblSMAuditLog      
+				WHERE strTransactionType = 'Inventory.view.Item'      
+				OR strTransactionType = 'Inventory.view.ItemLocation'      
+				ORDER BY dtmDate ASC     
+			)    
+		)    
+		AND GETUTCDATE())    
+		OR 
+		(
+			dtmDateCreated BETWEEN     
+			ISNULL    
+			(     
+				(      
+					SELECT TOP (1) dtmEndingChangeDate      
+					FROM dbo.tblSTUpdateRegisterHistory                
+					ORDER BY intUpdateRegisterHistoryId DESC     
+				),     
+				(      
+					SELECT TOP (1) dtmDate      
+					FROM dbo.tblSMAuditLog      
+					WHERE strTransactionType = 'Inventory.view.Item'      
+					OR strTransactionType = 'Inventory.view.ItemLocation'      
+					ORDER BY dtmDate ASC     
+				)    
+			)    
+			AND GETUTCDATE()
+		)
+	END
+
+
+
+
+
 
 IF(@strLocationIds != '' AND @strLocationIds IS NOT NULL)
 	BEGIN
@@ -105,5 +207,3 @@ IF EXISTS(SELECT * FROM @tblTempFilteredEntity)
 			END
 		END
 	END
-
-

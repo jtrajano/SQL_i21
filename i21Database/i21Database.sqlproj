@@ -6532,6 +6532,7 @@
     <Build Include="dbo\Views\vyuSTDepartmentDetailReport.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryByParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucherInvoiceForPartialPricing.sql" />
+    <Build Include="dbo\Functions\fnSTConvertDateToUTC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
