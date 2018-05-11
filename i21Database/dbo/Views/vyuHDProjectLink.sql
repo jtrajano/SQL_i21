@@ -11,6 +11,7 @@
 			,strCustomerProjectManager = l.strName
 			,strCustomerLeadershipSponsor = m.strName
 			,strTargetVersion = n.strVersionNo
+			,intTicketProductId = (select top 1 o.intProductId from tblARCustomerProductVersion o where o.intCustomerId = a.intCustomerId)
 		from
 			tblHDProject a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -22,3 +23,4 @@
 			left join tblEMEntity l on l.intEntityId = a.intCustomerProjectManager
 			left join tblEMEntity m on m.intEntityId = a.intCustomerLeadershipSponsor
 			left join tblHDVersion n on n.intVersionId = a.intTargetVersionId
+			
