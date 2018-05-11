@@ -6535,6 +6535,7 @@
     <Build Include="dbo\Functions\fnSTConvertDateToUTC.sql" />
     <Build Include="dbo\Views\vyuICGetRetailValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesComparativeReport.sql" />
+    <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
