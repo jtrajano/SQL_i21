@@ -300,7 +300,7 @@ BEGIN TRY
 							WHERE CD.intContractHeaderId = @intContractHeaderId
 	 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
-			,strCaption								= TP.strContractType + ' '+@rtContract+':- ' + CH.strContractNumber
+			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
 			,strAtlasDeclaration					= @rtWeConfirmHaving			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' '+@rtBoughtFrom+' '   ELSE ' '+@rtSoldTo+' ' END + @rtYouAsFollows + ':'
 			,strPurchaseOrder						= TP.strContractType + ' '+@rtOrder+':- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
