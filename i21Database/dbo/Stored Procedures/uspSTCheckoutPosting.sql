@@ -1822,35 +1822,38 @@ BEGIN
 
 				-- SELECT * FROM @EntriesForInvoice
 
-				BEGIN TRY
-					EXEC [dbo].[uspARProcessInvoices]
-								@InvoiceEntries	 = @EntriesForInvoice
-								--,@LineItemTaxEntries = NULL
-								,@UserId			 = @intCurrentUserId
-		 						,@GroupingOption	 = 11
-								,@RaiseError		 = 1
-								,@ErrorMessage		 = @ErrorMessage OUTPUT
-								,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-				END TRY
-
-				BEGIN CATCH
-					SET @ErrorMessage = ERROR_MESSAGE()
-				END CATCH
-
-
-
-				IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
+				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
-						SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
-						SET @ysnUpdateCheckoutStatus = 1
-						SET @strStatusMsg = 'Success'
-						SET @ysnInvoiceStatus = 1
-					END
-				ELSE
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @ErrorMessage
-					END
+						BEGIN TRY
+							EXEC [dbo].[uspARProcessInvoices]
+										@InvoiceEntries	 = @EntriesForInvoice
+										--,@LineItemTaxEntries = NULL
+										,@UserId			 = @intCurrentUserId
+		 								,@GroupingOption	 = 11
+										,@RaiseError		 = 1
+										,@ErrorMessage		 = @ErrorMessage OUTPUT
+										,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+						END TRY
+
+						BEGIN CATCH
+							SET @ErrorMessage = ERROR_MESSAGE()
+						END CATCH
+
+
+
+						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
+							BEGIN
+								SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
+								SET @ysnUpdateCheckoutStatus = 1
+								SET @strStatusMsg = 'Success'
+								SET @ysnInvoiceStatus = 1
+							END
+						ELSE
+							BEGIN
+								SET @ysnUpdateCheckoutStatus = 0
+								SET @strStatusMsg = @ErrorMessage
+							END
+							END
 				----------------------------------------------------------------------
 				---------------------------- END POST --------------------------------
 				----------------------------------------------------------------------
