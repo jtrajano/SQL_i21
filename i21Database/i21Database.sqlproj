@@ -6547,6 +6547,7 @@
     <Build Include="dbo\Functions\fnCTGetTranslatedExpression.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturn.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetGRNIntakeComparison.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
