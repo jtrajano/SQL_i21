@@ -6544,6 +6544,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentOpeningInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentOpeningInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspLGCreateWeightClaims.sql" />
+    <Build Include="dbo\Functions\fnCTGetTranslatedExpression.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
