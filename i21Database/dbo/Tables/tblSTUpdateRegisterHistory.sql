@@ -16,4 +16,7 @@
 	[intBeginningPromoSalesId] [int] NULL,
 	[intEndingPromoSalesId] [int] NULL,
 	[dtmBuildFileThruEndingDate] [datetime] NULL, 
-	)
+	[intUpdatedByUserId] [int] NULL,
+	CONSTRAINT [PK_tblSTUpdateRegisterHistory] PRIMARY KEY CLUSTERED ([intUpdateRegisterHistoryId] ASC),
+    CONSTRAINT [FK_tblSTUpdateRegisterHistory_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]) ON DELETE CASCADE,
+)

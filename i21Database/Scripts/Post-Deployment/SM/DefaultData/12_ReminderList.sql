@@ -1175,62 +1175,70 @@ GO
 IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Update' AND [strType] = N'Register')
 	BEGIN
 		DECLARE @sqlQuery AS NVARCHAR(MAX) = 
-		N'Select DISTINCT intItemId FROM vyuSTItemsToRegister
-		WHERE ysnClick = 0 AND intEntityId = {0}
-		AND (dtmDateModified BETWEEN 
-		ISNULL
+		N'Select DISTINCT intItemId FROM vyuSTItemsToRegister    
+		WHERE ysnClick = 0 AND intEntityId = {0}   
+		AND 
 		(
 			(
-				SELECT TOP (1) dtmEndingChangeDate
-				FROM dbo.tblSTUpdateRegisterHistory     
-				WHERE intStoreId = 
-				(
-					SELECT TOP (1) intStoreId FROM tblSTStore
-					WHERE intCompanyLocationId = 
-					(
-						SELECT TOP (1) intCompanyLocationId 
-						FROM tblSMUserSecurity 
-						WHERE intEntityId = {0}
-					)
-				)
-				ORDER BY intUpdateRegisterHistoryId DESC
-			),
-			(
-				SELECT TOP (1) dtmDate
-				FROM dbo.tblSMAuditLog
-				WHERE strTransactionType = ''Inventory.view.Item''
-				OR strTransactionType = ''Inventory.view.ItemLocation''
-				ORDER BY dtmDate ASC
+				dtmDateModified BETWEEN     
+				ISNULL    
+				(     
+					(      
+						SELECT TOP (1) dtmEndingChangeDate      
+						FROM dbo.tblSTUpdateRegisterHistory           
+						WHERE intStoreId =       
+						(       
+							SELECT TOP (1) intStoreId FROM tblSTStore       
+							WHERE intCompanyLocationId =        
+							(        
+								SELECT TOP (1) intCompanyLocationId         
+								FROM tblSMUserSecurity         
+								WHERE intEntityId = {0}      
+							)      
+						)      
+						ORDER BY intUpdateRegisterHistoryId DESC     
+					),     
+					(      
+						SELECT TOP (1) dtmDate      
+						FROM dbo.tblSMAuditLog      
+						WHERE strTransactionType = ''Inventory.view.Item''      
+						OR strTransactionType = ''Inventory.view.ItemLocation''      
+						ORDER BY dtmDate ASC     
+					)    
+				)    
+				AND GETUTCDATE()   
 			)
-		)
-		AND GETUTCDATE())
-		OR (dtmDateCreated BETWEEN 
-		ISNULL
-		(
+		OR 
 			(
-				SELECT TOP (1) dtmEndingChangeDate
-				FROM dbo.tblSTUpdateRegisterHistory     
-				WHERE intStoreId = 
-				(
-					SELECT TOP (1) intStoreId FROM tblSTStore
-					WHERE intCompanyLocationId = 
-					(
-						SELECT TOP (1) intCompanyLocationId 
-						FROM tblSMUserSecurity 
-						WHERE intEntityId = {0}
-					)
-				)
-				ORDER BY intUpdateRegisterHistoryId DESC
-			),
-			(
-				SELECT TOP (1) dtmDate
-				FROM dbo.tblSMAuditLog
-				WHERE strTransactionType = ''Inventory.view.Item''
-				OR strTransactionType = ''Inventory.view.ItemLocation''
-				ORDER BY dtmDate ASC
+				dtmDateCreated BETWEEN     
+				ISNULL    
+				(     
+					(      
+						SELECT TOP (1) dtmEndingChangeDate      
+						FROM dbo.tblSTUpdateRegisterHistory           
+						WHERE intStoreId =       
+						(       
+							SELECT TOP (1) intStoreId FROM tblSTStore       
+							WHERE intCompanyLocationId =       
+							(        
+								SELECT TOP (1) intCompanyLocationId         
+								FROM tblSMUserSecurity        
+								 WHERE intEntityId = {0}       
+							)      
+						)      
+						ORDER BY intUpdateRegisterHistoryId DESC     
+					),     
+					(      
+						SELECT TOP (1) dtmDate      
+						FROM dbo.tblSMAuditLog      
+						WHERE strTransactionType = ''Inventory.view.Item''    
+						OR strTransactionType = ''Inventory.view.ItemLocation''      
+						ORDER BY dtmDate ASC     
+					)    
+				)    
+				AND GETUTCDATE()
 			)
-		)
-		AND GETUTCDATE())'
+		)'
 
 		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
 		SELECT	[strReminder]		=        N'Update',
@@ -1244,62 +1252,70 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'U
 ELSE
 	BEGIN
 		SET @sqlQuery = 
-		N'Select DISTINCT intItemId FROM vyuSTItemsToRegister
-		WHERE ysnClick = 0 AND intEntityId = {0}
-		AND (dtmDateModified BETWEEN 
-		ISNULL
+		N'Select DISTINCT intItemId FROM vyuSTItemsToRegister    
+		WHERE ysnClick = 0 AND intEntityId = {0}   
+		AND 
 		(
 			(
-				SELECT TOP (1) dtmEndingChangeDate
-				FROM dbo.tblSTUpdateRegisterHistory     
-				WHERE intStoreId = 
-				(
-					SELECT TOP (1) intStoreId FROM tblSTStore
-					WHERE intCompanyLocationId = 
-					(
-						SELECT TOP (1) intCompanyLocationId 
-						FROM tblSMUserSecurity 
-						WHERE intEntityId = {0}
-					)
-				)
-				ORDER BY intUpdateRegisterHistoryId DESC
-			),
-			(
-				SELECT TOP (1) dtmDate
-				FROM dbo.tblSMAuditLog
-				WHERE strTransactionType = ''Inventory.view.Item''
-				OR strTransactionType = ''Inventory.view.ItemLocation''
-				ORDER BY dtmDate ASC
+				dtmDateModified BETWEEN     
+				ISNULL    
+				(     
+					(      
+						SELECT TOP (1) dtmEndingChangeDate      
+						FROM dbo.tblSTUpdateRegisterHistory           
+						WHERE intStoreId =       
+						(       
+							SELECT TOP (1) intStoreId FROM tblSTStore       
+							WHERE intCompanyLocationId =        
+							(        
+								SELECT TOP (1) intCompanyLocationId         
+								FROM tblSMUserSecurity         
+								WHERE intEntityId = {0}      
+							)      
+						)      
+						ORDER BY intUpdateRegisterHistoryId DESC     
+					),     
+					(      
+						SELECT TOP (1) dtmDate      
+						FROM dbo.tblSMAuditLog      
+						WHERE strTransactionType = ''Inventory.view.Item''      
+						OR strTransactionType = ''Inventory.view.ItemLocation''      
+						ORDER BY dtmDate ASC     
+					)    
+				)    
+				AND GETUTCDATE()   
 			)
-		)
-		AND GETUTCDATE())
-		OR (dtmDateCreated BETWEEN 
-		ISNULL
-		(
+		OR 
 			(
-				SELECT TOP (1) dtmEndingChangeDate
-				FROM dbo.tblSTUpdateRegisterHistory     
-				WHERE intStoreId = 
-				(
-					SELECT TOP (1) intStoreId FROM tblSTStore
-					WHERE intCompanyLocationId = 
-					(
-						SELECT TOP (1) intCompanyLocationId 
-						FROM tblSMUserSecurity 
-						WHERE intEntityId = {0}
-					)
-				)
-				ORDER BY intUpdateRegisterHistoryId DESC
-			),
-			(
-				SELECT TOP (1) dtmDate
-				FROM dbo.tblSMAuditLog
-				WHERE strTransactionType = ''Inventory.view.Item''
-				OR strTransactionType = ''Inventory.view.ItemLocation''
-				ORDER BY dtmDate ASC
+				dtmDateCreated BETWEEN     
+				ISNULL    
+				(     
+					(      
+						SELECT TOP (1) dtmEndingChangeDate      
+						FROM dbo.tblSTUpdateRegisterHistory           
+						WHERE intStoreId =       
+						(       
+							SELECT TOP (1) intStoreId FROM tblSTStore       
+							WHERE intCompanyLocationId =       
+							(        
+								SELECT TOP (1) intCompanyLocationId         
+								FROM tblSMUserSecurity        
+								 WHERE intEntityId = {0}       
+							)      
+						)      
+						ORDER BY intUpdateRegisterHistoryId DESC     
+					),     
+					(      
+						SELECT TOP (1) dtmDate      
+						FROM dbo.tblSMAuditLog      
+						WHERE strTransactionType = ''Inventory.view.Item''    
+						OR strTransactionType = ''Inventory.view.ItemLocation''      
+						ORDER BY dtmDate ASC     
+					)    
+				)    
+				AND GETUTCDATE()
 			)
-		)
-		AND GETUTCDATE())'
+		)'
 
 		UPDATE [tblSMReminderList]
 		SET [strMessage]  =     N'{0} Item(s) {2} needed to be sent to the register.',
