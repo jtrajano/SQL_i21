@@ -15,6 +15,7 @@ DECLARE @billId INT;
 DECLARE @billRecordNumber NVARCHAR(50);
 DECLARE @voucherIds AS Id;
 
+DECLARE @functionalCurrency INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference);
 DECLARE @rateType INT;
 DECLARE @rate DECIMAL(18,6);
 
@@ -192,8 +193,8 @@ SELECT
     -- [intInventoryReceiptItemId]         = receiptItem.intInventoryReceiptItemId,
     [dblQtyOrdered]                     = receiptItem.dblOpenReceive,
     [dblQtyReceived]                    = receiptItem.dblOpenReceive,
-    [dblRate]                           = @rate,
-    [intCurrencyExchangeRateTypeId]     = @rateType,
+    [dblRate]                           = CASE WHEN @functionalCurrency != basisAdvance.intCurrencyId THEN @rate ELSE 1 END,
+    [intCurrencyExchangeRateTypeId]     = CASE WHEN @functionalCurrency != basisAdvance.intCurrencyId THEN @rateType ELSE 1 END,
     [ysnSubCurrency]                    = receiptItem.ysnSubCurrency,
     [intTaxGroupId]                     = receiptItem.intTaxGroupId,
     [intAccountId]                      = loc.intAPAccount,
