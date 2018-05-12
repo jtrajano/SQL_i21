@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Trend Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Receivable'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Processing Actual Outturn' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Manufacturing'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3963,6 +3963,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ingredien
 	VALUES (N'Ingredient Demand Summary', N'Manufacturing', @ManufacturingReportParentMenuId, N'Ingredient Demand Summary', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Manufacturing&report=NetBlendKilos&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Reporting.view.ReportManager?group=Manufacturing&report=NetBlendKilos&direct=true&showCriteria=true' WHERE strMenuName = 'Ingredient Demand Summary' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Processing Actual Outturn' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Processing Actual Outturn', N'Manufacturing', @ManufacturingReportParentMenuId, N'Processing Actual Outturn', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Manufacturing&report=ActualOutTurnReport&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 2, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Reporting.view.ReportManager?group=Manufacturing&report=ActualOutTurnReport&direct=true&showCriteria=true' WHERE strMenuName = 'Processing Actual Outturn' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId
 
 /* Start of Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Process Production Produce' AND strModuleName = 'Manufacturing'
