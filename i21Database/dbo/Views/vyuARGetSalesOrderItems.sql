@@ -39,6 +39,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strVFDDocumentNumber		= SODETAIL.strVFDDocumentNumber
 	 , strType					= ITEM.strType
 	 , strBundleType			= ITEM.strBundleType
+	 , strLotTracking			= ITEM.strLotTracking
 	 , intContractSeq			= CONTRACTS.intContractSeq
 	 , strContractNumber		= CONTRACTS.strContractNumber
 	 , strItemNo				= ITEM.strItemNo
