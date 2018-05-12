@@ -53,7 +53,8 @@ AS
 			NM.strCommodityAttributeId,
 			NM.intEntityDefaultLocationId,
 			NM.strEntityDefaultLocation,
-			NM.intPositionNoOfDays
+			NM.intPositionNoOfDays,
+			NM.strMarketMainCurrency
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
