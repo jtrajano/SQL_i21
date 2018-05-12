@@ -6548,6 +6548,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturn.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetGRNIntakeComparison.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
