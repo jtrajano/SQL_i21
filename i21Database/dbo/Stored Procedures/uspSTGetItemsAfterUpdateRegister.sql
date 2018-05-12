@@ -58,14 +58,20 @@ BEGIN TRY
 							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC THEN dtmDateCreated ELSE dtmDateModified
 					  END AS dtmDate
 	FROM vyuSTItemsToRegister
-	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-	OR dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	WHERE 
+	(
+		dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+		OR 
+		dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	)
 	AND intCompanyLocationId = 
 	(
 		SELECT TOP (1) intCompanyLocationId 
 		FROM tblSTStore
 		WHERE intStoreId = @intStoreId
 	)
+
+
 
 
 	--SELECT
