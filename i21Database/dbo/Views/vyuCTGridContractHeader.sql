@@ -56,7 +56,8 @@ AS
 			NM.intPositionNoOfDays,
 			CH.intNoOfLoad - (SELECT SUM(dblBalance) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dblLoadsDelivered,
 			NM.strBook,
-			NM.strSubBook
+			NM.strSubBook,
+			NM.strMarketMainCurrency
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
