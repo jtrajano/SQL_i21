@@ -41,7 +41,10 @@ BEGIN TRY
 			@intContractDetailId INT,
 			@TotalAtlasLots		 INT,
 			@strSequenceHistoryId	     NVARCHAR(MAX),
-			@strDetailAmendedColumns	 NVARCHAR(MAX)	
+			@strDetailAmendedColumns	 NVARCHAR(MAX),
+			@intLaguageId			INT,
+			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
+			@strMonthLabelName		NVARCHAR(50) = 'Month'
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -86,6 +89,10 @@ BEGIN TRY
 	SELECT	@strSequenceHistoryId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strSequenceHistoryId'
+	
+	SELECT	@intLaguageId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intLaguageId'
 
 	INSERT INTO @tblSequenceHistoryId
 	(
@@ -227,6 +234,61 @@ BEGIN TRY
 
 	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
 	IF ISNULL(@ysnPrinted,0) = 0 SELECT @strAmendedColumns = ''
+
+	/*Declared variables for translating expression*/
+	declare @rtContract nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Contract'), 'Contract');
+	declare @rtWeConfirmHaving nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'We confirm having'), 'We confirm having');
+	declare @rtBoughtFrom nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'bought from'), 'bought from');
+	declare @rtSoldTo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'sold to'), 'sold to');
+	declare @rtYouAsFollows nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'you as follows'), 'you as follows');
+	declare @rtOrder nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Order'), 'Order');
+	declare @rtStrAssociation1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'The contract has been closed on the conditions of the'), 'The contract has been closed on the conditions of the');
+	declare @rtStrAssociation2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'latest edition'), 'latest edition');
+	declare @rtTo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'to'), 'to');
+	declare @rtStrQaulityAndInspection1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Quality as per approved sample'), 'Quality as per approved sample');
+	declare @rtStrQaulityAndInspection2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'and subject to consignment conforming to'), 'and subject to consignment conforming to');
+	declare @rtStrQaulityAndInspection3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'standard quality criteria'), 'standard quality criteria');
+	declare @rtStrArbitration1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Rules of arbitration of'), 'Rules of arbitration of');
+	declare @rtStrArbitration2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'as per latest edition for quality and principle'), 'as per latest edition for quality and principle');
+	declare @rtStrArbitration3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Place of jurisdiction is'), 'Place of jurisdiction is');
+	declare @rtFLOID nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'FLO ID'), 'FLO ID');
+	declare @rtStrInsuranceBy nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'To be covered by'), 'To be covered by');
+	declare @rtLocation nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Location'), 'Location');
+	declare @rtDocumentsRequired nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Documents Required'), 'Documents Required');
+	declare @rtContract2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Contract'), 'Contract');
+	declare @rtNotesRemarks nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Notes/Remarks'), 'Notes/Remarks');
+	declare @rtPriceBasis nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Price Basis'), 'Price Basis');
+	declare @rtOthers nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Others'), 'Others');
+	declare @rtCondition nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Condition'), 'Condition');
+	declare @rtProducer nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Producer'), 'Producer');
+	declare @rtShipper nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipper'), 'Shipper');
+	declare @rtPosition nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Position'), 'Position');
+	declare @rtCropYear nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Crop Year'), 'Crop Year');
+	declare @rtWeighing nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Weighing'), 'Weighing');
+	declare @rtPaymentTerms nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Payment Terms'), 'Payment Terms');
+	declare @rtApprovalterm nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Approval term'), 'Approval term');
+	declare @rtInsurance nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Insurance'), 'Insurance');
+	declare @rtConditions nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Conditions'), 'Conditions');
+	declare @rtStrCondition1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'The contract has been closed on the conditions of the'), 'The contract has been closed on the conditions of the');
+	declare @rtStrCondition2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'latest edition and the particular conditions mentioned below'), 'latest edition and the particular conditions mentioned below');
+	declare @rtStrCondition3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Subject - Contract Amendment as of'), 'Subject - Contract Amendment as of');
+	declare @rtStrCondition4 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'The field/s highlighted in bold have been amended'), 'The field/s highlighted in bold have been amended');
+	declare @rtArbitration nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Arbitration'), 'Arbitration');
+	declare @rtPricing nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Pricing'), 'Pricing');
+	declare @rtCall nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Call'), 'Call');
+	declare @rtBuyerRefNo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Ref No'), 'Buyer Ref No');
+	declare @rtSellerRefNo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Ref No'), 'Seller Ref No');
+	declare @rtLotssOf nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'lots(s) of'), 'lots(s) of');
+	declare @rtFutures nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'futures'), 'futures');
+	declare @rtMinus nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'minus'), 'minus');
+	declare @rtPlus nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'plus'), 'plus');
+	declare @rtStrPricing1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'price fixation in'), 'price fixation in');
+	declare @rtStrPricing2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'option, before first notice day. (Number of Lots to be fixed'), 'option, before first notice day. (Number of Lots to be fixed');
+	declare @rtConfirmationOf nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Confirmation of'), 'Confirmation of');
+	declare @rtStrGABAssociation1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'We confirm having bought today, at the conditions'), 'We confirm having bought today, at the conditions');
+	declare @rtStrGABAssociation2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'latest edition'), 'latest edition');
+	
+	
 	
 	SELECT @TotalAtlasLots= CASE 
 								 WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize) < 1 THEN 1
@@ -238,12 +300,12 @@ BEGIN TRY
 							WHERE CD.intContractHeaderId = @intContractHeaderId
 	 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
-			,strCaption								= TP.strContractType + ' Contract:- ' + CH.strContractNumber
-			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' Contract' 
-			,strAtlasDeclaration					= 'We confirm having'			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' bought from '   ELSE ' sold to ' END + 'you as follows:'
-			,strPurchaseOrder						= TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
+			,strCaption								= TP.strContractType + ' '+@rtContract+':- ' + CH.strContractNumber
+			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' '  + @rtContract
+			,strAtlasDeclaration					= @rtWeConfirmHaving			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' '+@rtBoughtFrom+' '   ELSE ' '+@rtSoldTo+' ' END + @rtYouAsFollows + ':'
+			,strPurchaseOrder						= TP.strContractType + ' '+@rtOrder+':- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
 			,dtmContractDate						= CH.dtmContractDate
-			,strAssociation							= 'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.'
+			,strAssociation							= @rtStrAssociation1 + ' '+ isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrAssociation2+'.'
 			,strBuyerRefNo							= CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strSellerRefNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strContractNumber						= CH.strContractNumber
@@ -258,15 +320,15 @@ BEGIN TRY
 			,strShipper								= SQ.strShipper
 			,srtDestinationPoint					= SQ.srtDestinationPoint + ' :' 
 			,strDestinationPointName				= SQ.strDestinationPointName
-			,strLoadingAndDestinationPointName		= SQ.strLoadingPointName + ' to ' + SQ.strDestinationPointName
-			,strWeight								= W1.strWeightGradeDesc 
-			,strTerm							    = TM.strTerm
-			,strGrade								= W2.strWeightGradeDesc
-			,strQaulityAndInspection				= 'Quality as per approved sample ' + ' - ' + W2.strWeightGradeDesc + ' and subject to consignment conforming to ' + @strCompanyName + '''s standard quality criteria.'
+			,strLoadingAndDestinationPointName		= SQ.strLoadingPointName + ' '+@rtTo+' ' + SQ.strDestinationPointName
+			,strWeight								= isnull(rtrt4.strTranslation,W1.strWeightGradeDesc) 
+			,strTerm							    = isnull(rtrt7.strTranslation,TM.strTerm)
+			,strGrade								= isnull(rtrt3.strTranslation,W2.strWeightGradeDesc)
+			,strQaulityAndInspection				= @rtStrQaulityAndInspection1 + ' ' + ' - ' + isnull(rtrt3.strTranslation,W2.strWeightGradeDesc) + ' '+@rtStrQaulityAndInspection2+' ' + @strCompanyName + '''s '+@rtStrQaulityAndInspection3+'.'
 			,strContractDocuments					= @strContractDocuments
-			,strArbitration							= 'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle. ' 
+			,strArbitration							= @rtStrArbitration1 + ' '+ isnull(rtrt.strTranslation,AN.strComment) + '  '+@rtStrArbitration2+'. ' 
 														+ CHAR(13)+CHAR(10) +
-														'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry
+														@rtStrArbitration3 + ' ' + AB.strState +', '+ isnull(rtrt8.strTranslation,RY.strCountry)
 
 			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
 														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
@@ -279,46 +341,46 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +
 														CASE WHEN @ysnFairtrade = 1 THEN
-															ISNULL( CHAR(13)+CHAR(10) +'FLO ID: '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
+															ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 														ELSE '' END
 			
 			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 			,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 			,dblQuantity						    = CH.dblQuantity
 			,strCurrency						    = SQ.strCurrency
-			,strInsuranceBy						    = 'To be covered by ' + IB.strInsuranceBy			
+			,strInsuranceBy						    = @rtStrInsuranceBy + ' ' + IB.strInsuranceBy			
 			,strPrintableRemarks				    = CH.strPrintableRemarks			
-			,strArbitrationComment				    = AN.strComment	
+			,strArbitrationComment				    = isnull(rtrt.strTranslation,AN.strComment)	
 			,blbHeaderLogo						    = dbo.fnSMGetCompanyLogo('Header')
 			,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 			,strProducer							= PR.strName
 			,strPosition							= PO.strPosition
 			,strContractConditions				    = @strContractConditions
-			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN 'Location :'					ELSE NULL END
-			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
-			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Contract :'					ELSE NULL END
-			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
-			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Price Basis :'					ELSE NULL END
-			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
-			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Condition :'					ELSE NULL END
-			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Producer :'					ELSE NULL END
-			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Shipper :'						ELSE NULL END
+			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN @rtLocation + ' :'					ELSE NULL END
+			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN @rtDocumentsRequired + ' :'			ELSE NULL END
+			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN @rtContract2 + ' :'					ELSE NULL END
+			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks + ' :'				ELSE NULL END
+			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
+			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers + ' :'						ELSE NULL END
+			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtCondition + ' :'					ELSE NULL END
+			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtProducer + ' :'					ELSE NULL END
+			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtShipper + ' :'						ELSE NULL END
 			,lblLoadingPoint						= CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>''     THEN SQ.srtLoadingPoint + ' :'		ELSE NULL END
-			,lblPosition							= CASE WHEN ISNULL(PO.strPosition,'') <>''		       THEN 'Position :'					ELSE NULL END
-			,lblCropYear							= CASE WHEN ISNULL(CY.strCropYear,'') <>''			   THEN 'Crop Year :'				    ELSE NULL END
-			,lblShipper								= CASE WHEN ISNULL(SQ.strShipper,'') <>''			   THEN 'Shipper :'					    ELSE NULL END 
+			,lblPosition							= CASE WHEN ISNULL(PO.strPosition,'') <>''		       THEN @rtPosition + ' :'					ELSE NULL END
+			,lblCropYear							= CASE WHEN ISNULL(CY.strCropYear,'') <>''			   THEN @rtCropYear +' :'				    ELSE NULL END
+			,lblShipper								= CASE WHEN ISNULL(SQ.strShipper,'') <>''			   THEN @rtShipper + ' :'					    ELSE NULL END 
 			,lblDestinationPoint					= CASE WHEN ISNULL(SQ.strDestinationPointName,'') <>'' THEN SQ.srtDestinationPoint + ' :'   ELSE NULL END
-			,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN 'Weighing :'					ELSE NULL END
-			,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN 'Payment Terms :'				ELSE NULL END
-			,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN 'Approval term :'				ELSE NULL END
-			,lblInsurance							= CASE WHEN ISNULL(IB.strInsuranceBy,'') <>''		   THEN 'Insurance:'					ELSE NULL END
-			,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN 'Conditions:'					ELSE NULL END
+			,lblWeighing						    = CASE WHEN ISNULL(W1.strWeightGradeDesc,'') <>''	   THEN @rtWeighing + ' :'					ELSE NULL END
+			,lblTerm								= CASE WHEN ISNULL(TM.strTerm,'') <>''				   THEN @rtPaymentTerms + ' :'				ELSE NULL END
+			,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN @rtApprovalterm + ' :'				ELSE NULL END
+			,lblInsurance							= CASE WHEN ISNULL(IB.strInsuranceBy,'') <>''		   THEN @rtInsurance + ':'					ELSE NULL END
+			,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN @rtConditions + ':'					ELSE NULL END
 			,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
 			,strContractText						= ISNULL(TX.strText,'') 
 	        ,strCondition							=	CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
-																'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition and the particular conditions mentioned below.' 
+																@rtStrCondition1 + ' '+ isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+@rtStrCondition2+' .' 
 														ELSE
-																'Subject - Contract Amendment as of '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + 'The field/s highlighted in bold have been amended.'
+																@rtStrCondition3 + ' '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + @rtStrCondition4 + '.'
 														END
 			
 			,strPositionWithPackDesc			    = PO.strPosition +ISNULL(' ('+CASE WHEN SQ.strPackingDescription = '' THEN NULL ELSE SQ.strPackingDescription END+') ','')
@@ -330,32 +392,32 @@ BEGIN TRY
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
 			,strAmendedColumns						= @strAmendedColumns
-			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN 'Arbitration:'  ELSE NULL END
-			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN 'Pricing :'		ELSE NULL END
-			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s Call ('+SQ.strFutMarketName+')' 
-			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Buyer Ref No. :'  ELSE NULL END
-			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  'Seller Ref No. :' ELSE NULL END
-			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalAtlasLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
+			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
+			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN @rtPricing + ' :'		ELSE NULL END
+			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s '+@rtCall+' ('+SQ.strFutMarketName+')' 
+			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtBuyerRefNo + '. :'  ELSE NULL END
+			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtSellerRefNo + '. :' ELSE NULL END
+			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s '+@rtCall+' vs '+LTRIM(@TotalAtlasLots)+' '+@rtLotssOf+' '+SQ.strFutMarketName + ' ' + @rtFutures ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
 													  ELSE 
-													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s Call ('+SQ.strFutMarketName+')'
+													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s '+@rtCall+' ('+SQ.strFutMarketName+')'
 													  	  ELSE NULL END
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
-		    ,strINCOTermWithWeight					=	CB.strContractBasis + ISNULL(', ' + W1.strWeightGradeDesc,'')
-			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + UM.strUnitMeasure
+		    ,strINCOTermWithWeight					=	CB.strContractBasis + ISNULL(', ' + isnull(rtrt4.strTranslation,W1.strWeightGradeDesc),'')
+			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure)
 			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
 			,strStartAndEndDate						=	SQ.strStartAndEndDate
 			,strNoOfContainerAndType				=	SQ.strNoOfContainerAndType
 			,strFutureMonthYear						=	SQ.strFutureMonthYear
 			,strPricing								=	SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear +
-														CASE WHEN SQ.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END +  
+														CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +  
 														LTRIM(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
-														' price fixation in ' + SQ.strBuyerSeller + 
-														'''s option, before first notice day. (Number of Lots to be fixed:'+LTRIM(dblLotsToFix)+').'
-			,strGABHeader							=	'Confirmation of ' + TP.strContractType + ' ' + CH.strContractNumber		
-			,strGABAssociation						=	'We confirm having bought today, at the conditions ' + AN.strComment + ' ('+AN.strName+')'+' latest edition.'
-			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + CONVERT(NVARCHAR(20),GETDATE(),106)
+														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
+														'''s '+@rtStrPricing2+':'+LTRIM(dblLotsToFix)+').'
+			,strGABHeader							=	@rtConfirmationOf + ' ' + TP.strContractType + ' ' + CH.strContractNumber		
+			,strGABAssociation						=	@rtStrGABAssociation1 + ' ' + isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
+			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + FORMAT(GETDATE(), 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(getdate(), 'MMM')), FORMAT(getdate(), 'MMM')) + ' ' + FORMAT(GETDATE(), 'yyyy')
 			,strCompanyName							=	@strCompanyName
 
 	FROM	tblCTContractHeader			CH
@@ -393,21 +455,23 @@ BEGIN TRY
 							TT.strName								AS	strShipper,
 							CY.strCurrency,
 							CD.strFixationBy,
-							MA.strFutMarketName,
+							strFutMarketName = isnull(rtrt6.strTranslation,MA.strFutMarketName),
 							CD.strPackingDescription				AS strPackingDescription,
 							CL.strContractCompanyName				AS strContractCompanyName,
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
 							CD.strERPPONumber,
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
 							IM.strDescription + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
-							CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
+							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
+							FORMAT(CD.dtmStartDate, 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(CD.dtmStartDate, 'MMM')), FORMAT(CD.dtmStartDate, 'MMM')) + ' ' + FORMAT(CD.dtmStartDate, 'yyyy') + ' - ' + FORMAT(CD.dtmEndDate, 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(CD.dtmEndDate, 'MMM')), FORMAT(CD.dtmEndDate, 'MMM')) + ' ' + FORMAT(CD.dtmEndDate, 'yyyy') AS strStartAndEndDate,
 							LTRIM(CD.intNumberOfContainers) + ' x ' + CT.strContainerType AS strNoOfContainerAndType,
-							DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
+							--DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
+							isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,MO.dtmFutureMonthsDate)), DATENAME(mm,MO.dtmFutureMonthsDate)) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
 							CD.dblBasis,
 							CD.strBuyerSeller,
 							ISNULL(PF.dblTotalLots - ISNULL(PF.dblLotsFixed,0), 0) AS dblLotsToFix,
 							CD.intPricingTypeId,
-							CY.strCurrency + '-' + UM.strUnitMeasure AS	strPriceCurrencyAndUOM
+							CY.strCurrency + '-' + isnull(rtrt5.strTranslation,UM.strUnitMeasure) AS	strPriceCurrencyAndUOM
 
 				FROM		tblCTContractDetail		CD
 				JOIN		tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
@@ -422,9 +486,48 @@ BEGIN TRY
 				JOIN		tblCTPriceFixation		PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
 				JOIN		tblICItemUOM			IU	ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
 				JOIN		tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
+	
+				left join tblSMScreen				rts5 on rts5.strNamespace = 'Inventory.view.InventoryUOM'
+				left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = UM.intUnitMeasureId
+				left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'UOM'
+	
+				left join tblSMScreen				rts6 on rts6.strNamespace = 'Inventory.view.InventoryUOM'
+				left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = MA.intFutureMarketId
+				left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Market Name'
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
+														
+	left join tblSMScreen				rts on rts.strNamespace = 'ContractManagement.view.Associations'
+	left join tblSMTransaction			rtt on rtt.intScreenId = rts.intScreenId and rtt.intRecordId = AN.intAssociationId
+	left join tblSMReportTranslation	rtrt on rtrt.intLanguageId = @intLaguageId and rtrt.intTransactionId = rtt.intTransactionId and rtrt.strFieldName = 'Printable Contract Text'
+	
+	left join tblSMScreen				rts1 on rts1.strNamespace = 'ContractManagement.view.Associations'
+	left join tblSMTransaction			rtt1 on rtt1.intScreenId = rts1.intScreenId and rtt1.intRecordId = AN.intAssociationId
+	left join tblSMReportTranslation	rtrt1 on rtrt1.intLanguageId = @intLaguageId and rtrt1.intTransactionId = rtt1.intTransactionId and rtrt1.strFieldName = 'Name'
+	
+	left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = UM.intUnitMeasureId
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+	
+	left join tblSMScreen				rts3 on rts3.strNamespace = 'ContractManagement.view.WeightGrades'
+	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = W2.intWeightGradeId
+	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Name'
+	
+	left join tblSMScreen				rts4 on rts4.strNamespace = 'ContractManagement.view.WeightGrades'
+	left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = W1.intWeightGradeId
+	left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Name'
+	
+	left join tblSMScreen				rts7 on rts7.strNamespace = 'i21.view.Term'
+	left join tblSMTransaction			rtt7 on rtt7.intScreenId = rts7.intScreenId and rtt7.intRecordId = TM.intTermID
+	left join tblSMReportTranslation	rtrt7 on rtrt7.intLanguageId = @intLaguageId and rtrt7.intTransactionId = rtt7.intTransactionId and rtrt7.strFieldName = 'Terms'
+	
+	left join tblSMScreen				rts8 on rts8.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = RY.intCountryID
+	left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
+
+	
+
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
