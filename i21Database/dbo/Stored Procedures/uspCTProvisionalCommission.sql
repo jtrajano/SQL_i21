@@ -105,7 +105,8 @@ BEGIN TRY
 	JOIN	tblICItemContract		IC	ON	IC.intItemContractId		=	CD.intItemContractId	LEFT
 	JOIN	tblSMCountry			IG	ON	IG.intCountryID				=	IC.intCountryId			LEFT
 	JOIN	tblICCommodityAttribute EO	ON	EO.intCommodityAttributeId	=	IM.intOriginId			LEFT
-	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	EO.intCountryID	
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	EO.intCountryID			LEFT
+	JOIN	tblCTContractHeader		ch	ON ch.intContractHeaderId		=	CD.intContractHeaderId
 	
 	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = BD.intItemReportUOMId
