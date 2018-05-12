@@ -16,6 +16,7 @@ SELECT DISTINCT
 	, EM.intEntityId
 	, URN.ysnClick
 	, SMUS.intCompanyLocationId
+	, ST.intStoreId
 FROM tblICItem AS I
 JOIN tblICCategory Cat ON Cat.intCategoryId = I.intCategoryId
 JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId

@@ -14,6 +14,7 @@
 	, @intBeginningPromoSalesId INT
 	, @intEndingPromoSalesId INT
 	, @dtmBuildFileThruEndingDate DATETIME
+	, @intCurrentUserId INT
 AS
 
 BEGIN TRY
@@ -29,6 +30,7 @@ BEGIN TRY
 	-- =============================================================================================
 	-- END CONVERT DATE's to UTC
 	-- =============================================================================================
+
 
 
 	DECLARE @tableGetItems TABLE(
@@ -56,14 +58,20 @@ BEGIN TRY
 							WHEN dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC THEN dtmDateCreated ELSE dtmDateModified
 					  END AS dtmDate
 	FROM vyuSTItemsToRegister
-	WHERE dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-	OR dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	WHERE 
+	(
+		dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+		OR 
+		dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	)
 	AND intCompanyLocationId = 
 	(
 		SELECT TOP (1) intCompanyLocationId 
 		FROM tblSTStore
 		WHERE intStoreId = @intStoreId
 	)
+
+
 
 
 	--SELECT
@@ -131,7 +139,7 @@ BEGIN TRY
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 						--, IUOM.strUpcCode AS strUpcCode
 						, IUOM.strLongUPCCode AS strUpcCode
-						, 'Pricebook File - ' + I.strDescription AS strDescription
+						, I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
 						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -179,7 +187,7 @@ BEGIN TRY
 						CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 						--, IUOM.strUpcCode AS strUpcCode
 						, IUOM.strLongUPCCode AS strUpcCode
-						, 'Pricebook File - ' + I.strDescription AS strDescription
+						, I.strDescription AS strDescription
 						, Prc.dblSalePrice AS dblSalePrice
 						, IL.ysnTaxFlag1 AS ysnSalesTaxed
 						, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -248,7 +256,7 @@ BEGIN TRY
 							--PIL.strPromoItemListDescription
 							--, IUOM.strUpcCode AS strUpcCode
 							, IUOM.strLongUPCCode AS strUpcCode
-							, 'Promotion Item - ' + I.strDescription AS strDescription
+							, I.strDescription AS strDescription
 							, Prc.dblSalePrice AS dblSalePrice
 							, IL.ysnTaxFlag1 AS ysnSalesTaxed
 							, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -302,7 +310,7 @@ BEGIN TRY
 									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 									-- , IUOM.strUpcCode AS strUpcCode
 									, IUOM.strLongUPCCode AS strUpcCode
-									, 'Promotion Sales - ' + I.strDescription AS strDescription
+									, I.strDescription AS strDescription
 									, Prc.dblSalePrice AS dblSalePrice
 									, IL.ysnTaxFlag1 AS ysnSalesTaxed
 									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -356,7 +364,7 @@ BEGIN TRY
 								CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
 								--, IUOM.strUpcCode AS strUpcCode
 								, IUOM.strLongUPCCode AS strUpcCode
-								, 'Promotion Sales - ' + I.strDescription AS strDescription
+								, I.strDescription AS strDescription
 								, Prc.dblSalePrice AS dblSalePrice
 								, IL.ysnTaxFlag1 AS ysnSalesTaxed
 								, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
@@ -407,8 +415,8 @@ BEGIN TRY
 
 
 	-- Insert to tblSTUpdateRegisterHistory
-	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate)
-    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDateUTC, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDateUTC)
+	INSERT INTO tblSTUpdateRegisterHistory (intStoreId, intRegisterId, ysnPricebookFile, ysnPromotionItemList, ysnPromotionSalesList, dtmBeginningChangeDate, dtmEndingChangeDate, strCategoryCode, ysnExportEntirePricebookFile, intBeginningPromoItemListId, intEndingPromoItemListId, strPromoCode, intBeginningPromoSalesId, intEndingPromoSalesId, dtmBuildFileThruEndingDate, intUpdatedByUserId)
+    VALUES (@intStoreId, @intRegisterId, @ysnPricebookFile, @ysnPromotionItemList, @ysnPromotionSalesList, @dtmBeginningChangeDateUTC, @dtmEndingChangeDateUTC, @strCategoryCode, @ysnExportEntirePricebookFile, @intBeginningPromoItemListId, @intEndingPromoItemListId, @strPromoCode, @intBeginningPromoSalesId, @intEndingPromoSalesId, @dtmBuildFileThruEndingDateUTC, @intCurrentUserId)
 
 
 	-- Send query to server side 

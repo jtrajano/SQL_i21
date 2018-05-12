@@ -139,7 +139,6 @@ BEGIN
 				IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)	
 					BEGIN																																																																																																																																																																																									BEGIN
 						INSERT INTO @EntriesForInvoice(
-						--INSERT INTO CopierDB.dbo.InvoiceIntegrationStagingTable(
 										 [strSourceTransaction]
 										,[strTransactionType]
 										,[strType]
@@ -270,7 +269,7 @@ BEGIN
 										,[ysnInventory]				= 1
 										,[strItemDescription]		= I.strDescription
 										,[intOrderUOMId]			= UOM.intItemUOMId
-										,[dblQtyOrdered]			= CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
+										,[dblQtyOrdered]			= 0 -- CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[intItemUOMId]				= UOM.intItemUOMId
 										,[dblQtyShipped]			= CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
@@ -360,7 +359,6 @@ BEGIN
 				IF EXISTS(SELECT * FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId AND dblTotalSales > 0)
 					BEGIN																																																																																																																																																																																						BEGIN
 							INSERT INTO @EntriesForInvoice(
-							--INSERT INTO CopierDB.dbo.InvoiceIntegrationStagingTable(
 											 [strSourceTransaction]
 											,[strTransactionType]
 											,[strType]
@@ -491,7 +489,7 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= IM.intQtySold
+											,[dblQtyOrdered]			= 0 -- IM.intQtySold
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= IM.intQtySold
 											,[dblDiscount]				= 0
@@ -694,21 +692,22 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= CASE 
-																			WHEN 
-																				(
-																					CAST((DT.dblTotalSalesAmount - (
-																														SELECT SUM(dblTotalSales)
-																														FROM tblSTCheckoutItemMovements IM
-																														JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																														JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																														JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																														WHERE intCheckoutId = @intCheckoutId
-																														AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
-																										           )
-																				) > 1 THEN 1
-																			ELSE -1
-																		  END
+											,[dblQtyOrdered]			= 0
+											--,[dblQtyOrdered]			= CASE 
+											--								WHEN 
+											--									(
+											--										CAST((DT.dblTotalSalesAmount - (
+											--																			SELECT SUM(dblTotalSales)
+											--																			FROM tblSTCheckoutItemMovements IM
+											--																			JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+											--																			JOIN tblICItem I ON UOM.intItemId = I.intItemId
+											--																			JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+											--																			WHERE intCheckoutId = @intCheckoutId
+											--																			AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
+											--															           )
+											--									) > 1 THEN 1
+											--								ELSE -1
+											--							  END
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= CASE 
 																			WHEN 
@@ -934,7 +933,7 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= 1
+											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
@@ -1138,7 +1137,7 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= 1
+											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
@@ -1342,7 +1341,7 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= -1
+											,[dblQtyOrdered]			= 0 -- -1
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= -1
 											,[dblDiscount]				= 0
@@ -1546,7 +1545,7 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= 1
+											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
@@ -1750,7 +1749,7 @@ BEGIN
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
 											,[intOrderUOMId]			= UOM.intItemUOMId
-											,[dblQtyOrdered]			= 1
+											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
@@ -1823,35 +1822,38 @@ BEGIN
 
 				-- SELECT * FROM @EntriesForInvoice
 
-				BEGIN TRY
-					EXEC [dbo].[uspARProcessInvoices]
-								@InvoiceEntries	 = @EntriesForInvoice
-								--,@LineItemTaxEntries = NULL
-								,@UserId			 = @intCurrentUserId
-		 						,@GroupingOption	 = 11
-								,@RaiseError		 = 1
-								,@ErrorMessage		 = @ErrorMessage OUTPUT
-								,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-				END TRY
-
-				BEGIN CATCH
-					SET @ErrorMessage = ERROR_MESSAGE()
-				END CATCH
-
-
-
-				IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
+				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
-						SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
-						SET @ysnUpdateCheckoutStatus = 1
-						SET @strStatusMsg = 'Success'
-						SET @ysnInvoiceStatus = 1
-					END
-				ELSE
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + @ErrorMessage
-					END
+						BEGIN TRY
+							EXEC [dbo].[uspARProcessInvoices]
+										@InvoiceEntries	 = @EntriesForInvoice
+										--,@LineItemTaxEntries = NULL
+										,@UserId			 = @intCurrentUserId
+		 								,@GroupingOption	 = 11
+										,@RaiseError		 = 1
+										,@ErrorMessage		 = @ErrorMessage OUTPUT
+										,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+						END TRY
+
+						BEGIN CATCH
+							SET @ErrorMessage = ERROR_MESSAGE()
+						END CATCH
+
+
+
+						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
+							BEGIN
+								SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
+								SET @ysnUpdateCheckoutStatus = 1
+								SET @strStatusMsg = 'Success'
+								SET @ysnInvoiceStatus = 1
+							END
+						ELSE
+							BEGIN
+								SET @ysnUpdateCheckoutStatus = 0
+								SET @strStatusMsg = @ErrorMessage
+							END
+							END
 				----------------------------------------------------------------------
 				---------------------------- END POST --------------------------------
 				----------------------------------------------------------------------
