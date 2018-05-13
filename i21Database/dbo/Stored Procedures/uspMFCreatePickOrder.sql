@@ -56,6 +56,7 @@ BEGIN TRY
 		,@strReferernceNo NVARCHAR(50)
 		,@ysnGenerateTaskOnCreatePickOrder BIT
 		,@strInventoryTracking NVARCHAR(50)
+		,@intStorageLocationId int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -377,6 +378,7 @@ BEGIN TRY
 			,strLineItemNote
 			,intStagingLocationId
 			,strInventoryTracking
+			,intStorageLocationId
 			)
 		SELECT @intOrderHeaderId
 			,ri.intItemId
@@ -463,6 +465,7 @@ BEGIN TRY
 				ELSE NULL
 				END
 			,I.strInventoryTracking
+			,ri.intStorageLocationId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.ysnActive = 1
@@ -485,7 +488,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId = 1
+			AND ri.intConsumptionMethodId in (1,2)
 		--,2
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
@@ -613,6 +616,7 @@ BEGIN TRY
 			,intStagingLocationId
 			,dblSurplusQtyInStageLocation
 			,strInventoryTracking
+			,intStorageLocationId
 			)
 		SELECT intOrderHeaderId
 			,intItemId
@@ -631,6 +635,7 @@ BEGIN TRY
 			,intStagingLocationId
 			,dblSurplusQtyInStageLocation
 			,strInventoryTracking
+			,intStorageLocationId
 		FROM @OrderDetail
 
 		SELECT @dblMinQtyCanBeProduced = - 1
@@ -646,6 +651,7 @@ BEGIN TRY
 				,@intItemUOMId = NULL
 				,@intStagingLocationId = NULL
 				,@strInventoryTracking = NULL
+				,@intStorageLocationId =NULL
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
@@ -653,6 +659,7 @@ BEGIN TRY
 				,@intItemUOMId = intItemUOMId
 				,@intStagingLocationId = intStagingLocationId
 				,@strInventoryTracking = strInventoryTracking
+				,@intStorageLocationId=intStorageLocationId
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
@@ -834,6 +841,7 @@ BEGIN TRY
 							,intSanitizationOrderDetailsId
 							,strLineItemNote
 							,intStagingLocationId
+							,intStorageLocationId
 							)
 						SELECT @intOrderHeaderId
 							,intItemId
@@ -856,6 +864,7 @@ BEGIN TRY
 							,NULL
 							,''
 							,@intStagingLocationId
+							,@intStorageLocationId
 						FROM tblICItem
 						WHERE intItemId = @intSubstituteItemId
 
@@ -881,6 +890,7 @@ BEGIN TRY
 							,intSanitizationOrderDetailsId
 							,strLineItemNote
 							,intStagingLocationId
+							,intStorageLocationId
 							)
 						SELECT @intOrderHeaderId
 							,intItemId
@@ -903,6 +913,7 @@ BEGIN TRY
 							,NULL
 							,''
 							,@intStagingLocationId
+							,@intStorageLocationId
 						FROM tblICItem
 						WHERE intItemId = @intSubstituteItemId
 
