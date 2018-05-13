@@ -496,6 +496,7 @@ BEGIN TRY
 			,I.intLayerPerPallet
 			,C.intCategoryId
 			,I.strInventoryTracking
+			,ri.intStorageLocationId
 
 		IF NOT EXISTS (
 				SELECT *
