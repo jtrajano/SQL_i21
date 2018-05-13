@@ -9,16 +9,19 @@ DECLARE @tblMFLot TABLE (
 	intLotId INT
 	,intItemId INT
 	,dblQty NUMERIC(38, 20)
+	,intItemUOMId int
 	)
 
 INSERT INTO @tblMFLot (
 	intLotId
 	,intItemId
 	,dblQty
+	,intItemUOMId
 	)
 SELECT OM.intLotId
 	,T.intItemId
 	,T.dblQty
+	,T.intItemUOMId
 FROM tblMFWorkOrder W
 JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
@@ -28,17 +31,19 @@ JOIN tblMFTask T ON T.intLotId = L.intLotId
 	AND T.intOrderHeaderId = OM.intOrderHeaderId
 WHERE W.intWorkOrderId = @intWorkOrderId
 
-SELECT intItemId
-	,SUM(dblQty) AS dblQty
+SELECT L.intItemId
+	,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId,IU.intItemUOMId,dblQty)) AS dblQty
 INTO #StageQty
-FROM @tblMFLot
-GROUP BY intItemId
+FROM @tblMFLot L
+JOIN tblICItemUOM IU on IU.intItemId=L.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+GROUP BY L.intItemId
 
 SELECT I.intItemId
-	,SUM(dblQuantity) AS dblQuantity
+	,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IU.intItemUOMId,WP.dblQuantity)) AS dblQuantity
 INTO #tblMFWorkOrderProducedLot
 FROM tblMFWorkOrderProducedLot WP
 JOIN tblICItem I ON I.intItemId = WP.intItemId
+JOIN tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 WHERE WP.intWorkOrderId = @intWorkOrderId
 	AND ysnProductionReversed = 0
 GROUP BY I.intItemId
