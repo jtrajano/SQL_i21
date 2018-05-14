@@ -3,6 +3,7 @@
 	[intId] INT NOT NULL IDENTITY, 
 	[intCategoryId] INT NOT NULL,
 	[intCategoryLocationId] INT NULL,
+	[intLocationId] INT NULL,
 	[intRegisterDepartmentId] INT NULL,
 	[strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 	[strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

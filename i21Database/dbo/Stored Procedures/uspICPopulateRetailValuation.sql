@@ -19,6 +19,7 @@ END
 INSERT INTO tblICRetailValuation (
 		intCategoryId
 		,intCategoryLocationId
+		,intLocationId
 		,intRegisterDepartmentId
 		,strLocationName
 		,strCategoryCode	
@@ -38,6 +39,7 @@ INSERT INTO tblICRetailValuation (
 )
 SELECT	category.intCategoryId
 		,categoryLocation.intCategoryLocationId
+		,intLocationId = categoryLocation.intLocationId 
 		,categoryLocation.intRegisterDepartmentId
 		,companyLocation.strLocationName
 		,category.strCategoryCode	
@@ -48,8 +50,8 @@ SELECT	category.intCategoryId
 		,dblMarkUpsDowns			= CAST(0 AS NUMERIC(18, 6))
 		,dblWriteOffs				= CAST(0 AS NUMERIC(18, 6))
 		,dblEndingRetail			= CAST(0 AS NUMERIC(18, 6)) 
-		,dblGrossMarginPct			= categoryLocation.dblTargetGrossProfit 
-		,dblTargetGrossMarginPct	= CAST(0 AS NUMERIC(18, 6)) 
+		,dblGrossMarginPct			= CAST(0 AS NUMERIC(18, 6)) 
+		,dblTargetGrossMarginPct	= categoryLocation.dblTargetGrossProfit 
 		,dblEndingCost				= CAST(0 AS NUMERIC(18, 6)) 
 		,dtmDateFrom				= @dtmDateFrom
 		,dtmDateTo					= @dtmDateTo
@@ -70,7 +72,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICItemLocation il 
 						ON t.intItemLocationId = il.intItemLocationId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND dbo.fnDateLessThan(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
 		) transactions
 		
@@ -86,7 +88,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICInventoryTransactionType ty
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND ty.strName = 'Inventory Receipt'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
@@ -104,7 +106,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICInventoryTransactionType ty
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND ty.strName = 'Invoice'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
@@ -122,7 +124,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICInventoryTransactionType ty
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND ty.strName = 'Retail Mark Ups/Downs'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
@@ -140,7 +142,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICInventoryTransactionType ty
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND ty.strName = 'Retail Write Offs'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
@@ -158,7 +160,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICInventoryTransactionType ty
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
@@ -174,7 +176,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					INNER JOIN tblICInventoryTransactionType ty
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
-					AND il.intLocationId = rv.intCategoryLocationId		
+					AND il.intLocationId = rv.intLocationId		
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
@@ -187,4 +189,5 @@ SET		rv.dblGrossMarginPct =
 						/ ISNULL(dblEndingRetail, 0)
 					ELSE 0
 				END 
+				* 100
 FROM	tblICRetailValuation rv
