@@ -2493,6 +2493,7 @@ IF @recap = 0
 					GOTO Do_Rollback
 				END
 			END
+
 			
 			DECLARE @InvalidGLEntries AS TABLE
 				(strTransactionId	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

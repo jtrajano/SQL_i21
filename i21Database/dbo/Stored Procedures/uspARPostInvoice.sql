@@ -19,6 +19,7 @@
 	,@raiseError		AS BIT				= 0
 AS
   
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
