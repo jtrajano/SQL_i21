@@ -3,6 +3,7 @@ AS
 
 SELECT	intCategoryId
 		,intCategoryLocationId
+		,intRegisterDepartmentId
 		,strLocationName
 		,strCategoryCode	
 		,strCategoryDescription

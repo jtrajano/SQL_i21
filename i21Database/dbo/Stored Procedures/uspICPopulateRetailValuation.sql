@@ -19,6 +19,7 @@ END
 INSERT INTO tblICRetailValuation (
 		intCategoryId
 		,intCategoryLocationId
+		,intRegisterDepartmentId
 		,strLocationName
 		,strCategoryCode	
 		,strCategoryDescription
@@ -37,6 +38,7 @@ INSERT INTO tblICRetailValuation (
 )
 SELECT	category.intCategoryId
 		,categoryLocation.intCategoryLocationId
+		,categoryLocation.intRegisterDepartmentId
 		,companyLocation.strLocationName
 		,category.strCategoryCode	
 		,strCategoryDescription		= category.strDescription	
