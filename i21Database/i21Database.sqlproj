@@ -6551,6 +6551,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnDetail.sql" />
     <Build Include="dbo\Views\vyuSTPaymentOptionSummaryReport.sql" />
     <Build Include="dbo\Views\vyuSTPaymentOptionDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
