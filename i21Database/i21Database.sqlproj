@@ -6552,6 +6552,7 @@
     <Build Include="dbo\Views\vyuSTPaymentOptionSummaryReport.sql" />
     <Build Include="dbo\Views\vyuSTPaymentOptionDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRPreCrushPositionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
