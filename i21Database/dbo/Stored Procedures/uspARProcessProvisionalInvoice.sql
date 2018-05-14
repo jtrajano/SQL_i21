@@ -176,6 +176,8 @@ BEGIN TRY
 		,[dblCurrencyExchangeRate]
 		,[intSubCurrencyId] 
 		,[dblSubCurrencyRate]
+		,[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]
 	)
 	SELECT
 		 [strTransactionType]				= 'Invoice'
@@ -270,6 +272,8 @@ BEGIN TRY
 		,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
 		,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
 		,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
+		,[intStorageLocationId]				= ARID.[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 	FROM
 		vyuARShippedItemDetail ARSID
 	INNER JOIN
@@ -382,6 +386,8 @@ SELECT
 		,[dblCurrencyExchangeRate]			= ISI.[dblForexRate]
 		,[intSubCurrencyId]					= ARID.[intSubCurrencyId]
 		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
+		,[intStorageLocationId]				= ARID.[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
