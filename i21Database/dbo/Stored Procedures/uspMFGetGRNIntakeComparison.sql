@@ -17,6 +17,11 @@ INTO #GRN
 FROM @tblMFLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
+	AND P.intDataTypeId IN (
+		1
+		,2
+		)
+	AND ISNUMERIC(TR.strPropertyValue) = 1
 JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 	AND S.intProductTypeId = 6
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
@@ -29,6 +34,11 @@ INTO #IP
 FROM @tblMFLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
+	AND P.intDataTypeId IN (
+		1
+		,2
+		)
+	AND ISNUMERIC(TR.strPropertyValue) = 1
 JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 	AND S.intProductTypeId = 6
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
@@ -36,9 +46,9 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 
 SELECT G.intPropertyId
 	,G.strPropertyName
-	,AVG(G.strPropertyValue) AS [Estimated Output %]
-	,AVG(I.strPropertyValue) AS [Issue to Mill %]
-	,AVG(I.strPropertyValue) - AVG(G.strPropertyValue) [% Variance]
+	,AVG(G.strPropertyValue) AS dblEstimatedOutput
+	,AVG(I.strPropertyValue) AS dblIssuetoMill
+	,(AVG(I.strPropertyValue) - AVG(G.strPropertyValue)) AS dblVariance
 FROM #GRN G
 LEFT JOIN #IP I ON I.intPropertyId = G.intPropertyId
 GROUP BY G.intPropertyId

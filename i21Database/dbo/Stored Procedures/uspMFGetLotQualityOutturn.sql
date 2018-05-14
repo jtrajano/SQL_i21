@@ -122,7 +122,7 @@ BEGIN TRY
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
 	SET @strColumnsList = 'TransactionType,intSampleId,strSampleNumber,intNoOfDaysInStorage,intLotId,strLotNumber'
-	SET @strColumnsList = ',intItemId,strDescription,strItemNo,dblQty,strQtyUOM,dblWeight,strWeightUOM,intTotalCount'
+	SET @strColumnsList = @strColumnsList + ',intItemId,strDescription,strItemNo,dblQty,strQtyUOM,dblWeight,strWeightUOM,intTotalCount'
 	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT intTotalCount   
 	,Case When intControlPointId=6 then ''GRN'' Else ''IP'' End TransactionType

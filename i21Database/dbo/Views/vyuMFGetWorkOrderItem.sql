@@ -5,5 +5,6 @@ SELECT W.intWorkOrderId
 	,W.intItemId
 	,I.strItemNo
 	,I.strDescription
+	,W.intLocationId
 FROM tblMFWorkOrder W
 JOIN tblICItem I ON I.intItemId = W.intItemId
