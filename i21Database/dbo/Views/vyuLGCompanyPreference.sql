@@ -120,7 +120,7 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 1
 			THEN 'Shipping Advice Report Format - 1'
 		WHEN 2
-			THEN ''
+			THEN 'Shipping Advice Report Format - 2'
 		END strShippingAdviceReportFormat
 	,CP.intInsuranceLetterReportFormat
 	,CASE CP.intInsuranceLetterReportFormat
