@@ -17,4 +17,5 @@ SELECT	intCategoryId
 		,dblEndingCost
 		,dtmDateFrom
 		,dtmDateTo
+		,dtmDate = dtmDateFrom
 FROM 	tblICRetailValuation 
