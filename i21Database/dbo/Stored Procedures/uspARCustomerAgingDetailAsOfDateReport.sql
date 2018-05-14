@@ -260,6 +260,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strCompanyName
 		, strCompanyAddress
 		, strAgingType
+		, dblTotalCustomerAR
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
@@ -297,6 +298,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= COMPANY.strCompanyName
 	 , strCompanyAddress	= COMPANY.strCompanyAddress
 	 , strAgingType			= 'Detail'
+	 , dblTotalCustomerAR   = CUSTAR.dblARBalance
 FROM
 (SELECT strInvoiceNumber	= A.strInvoiceNumber
      , strRecordNumber		= B.strRecordNumber
