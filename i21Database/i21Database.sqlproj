@@ -6554,6 +6554,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRPreCrushPositionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingAdviceReport.sql" />
     <Build Include="dbo\Views\vyuMFInventoryViewAsonDateByItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetUnRealizedPNL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
