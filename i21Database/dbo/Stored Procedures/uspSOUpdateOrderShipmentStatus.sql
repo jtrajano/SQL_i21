@@ -8,8 +8,6 @@
 AS
 BEGIN
 
-if @intSalesOrderDetailId is null
-	return;
 DECLARE @tblSOToUpdate			Id
 DECLARE	@strOrderStatus			NVARCHAR(50) = 'Open'	  
 	  , @dblTotalQtyOrdered		NUMERIC(18,6) = 0.000000
@@ -173,8 +171,9 @@ ELSE IF @strTransactionType = 'Inventory'
 	END
 ELSE
 	BEGIN
-		INSERT INTO @tblSOToUpdate
-		SELECT @intSalesOrderId
+		IF @intSalesOrderId IS NOT NULL
+			INSERT INTO @tblSOToUpdate
+			SELECT @intSalesOrderId
 	END
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
