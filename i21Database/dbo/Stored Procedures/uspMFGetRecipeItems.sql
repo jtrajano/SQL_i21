@@ -115,8 +115,8 @@ Left Join vyuCTContractDetailView cv on sd.intContractDetailId=cv.intContractDet
 Where ri.intRecipeId=@intRecipeId AND ri.intRecipeItemTypeId=1 AND i.strType <> 'Other Charge'
 UNION
 Select ri.intRecipeId,ri.intRecipeItemId,ri.intItemId,i.strItemNo,i.strDescription AS strItemDescription,i.strType AS strItemType,
-@dblQuantity/@dblRecipeQty dblQuantity,
-@dblQuantity/@dblRecipeQty dblCalculatedQuantity,
+1.0 dblQuantity,
+1.0 dblCalculatedQuantity,
 iu.intItemUOMId, 
 um.strUnitMeasure strUOM,
 ri.intMarginById,mg.strName AS strMarginBy,ISNULL(ri.dblMargin,0) AS dblMargin,
@@ -129,8 +129,8 @@ Else ISNULL(ip.dblStandardCost,0) End
 'Item' strCostSource,
 0.0 AS dblRetailPrice,
 1.0 AS dblUnitQty,
-@dblQuantity/@dblRecipeQty AS dblCalculatedLowerTolerance,
-@dblQuantity/@dblRecipeQty AS dblCalculatedUpperTolerance,
+1.0 AS dblCalculatedLowerTolerance,
+1.0 AS dblCalculatedUpperTolerance,
 ri.dblLowerTolerance,ri.dblUpperTolerance,
 0 intCommentTypeId,'' strCommentType,
 null intContractHeaderId,null intContractDetailId,null strContractNumber,null intContractSeq,null strSequenceNumber,
