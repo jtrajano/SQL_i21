@@ -6549,6 +6549,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturn.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetGRNIntakeComparison.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnDetail.sql" />
+    <Build Include="dbo\Views\vyuSTPaymentOptionSummaryReport.sql" />
+    <Build Include="dbo\Views\vyuSTPaymentOptionDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
