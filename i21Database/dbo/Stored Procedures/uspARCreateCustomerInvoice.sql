@@ -716,8 +716,9 @@ BEGIN TRY
 			[intInvoiceId] = @NewId
 			AND ISNULL([intSourceId],0) <> 0
 	END
-
-	EXEC [dbo].[uspARReComputeInvoiceTaxes] @NewId
+	
+	if @RecomputeTax = 1 or @ItemTaxGroupId is not null
+		EXEC [dbo].[uspARReComputeInvoiceTaxes] @NewId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
