@@ -147,6 +147,7 @@ SELECT
     strItemType = ITMNO.strType,
     strRequired = ITMNO.strRequired,
     strBundleType = ITMNO.strBundleType,
+	strLotTracking = ITMNO.strLotTracking,
     dblOriginalLicenseAmount = CASE WHEN ITM.strType =  'Software' THEN dblSalePrice ELSE 0 END,
     dblOriginalMaintenanceAmount =  CASE WHEN ITM.strType = 'Software' THEN
 										CASE WHEN ITM.strMaintenanceCalculationMethod = 'Percentage' THEN 
