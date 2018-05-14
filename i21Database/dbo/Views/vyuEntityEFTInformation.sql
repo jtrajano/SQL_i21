@@ -12,7 +12,7 @@ select
 	strAccountNumber = '**********' + RIGHT(dbo.fnAESDecryptASym(strAccountNumber), 4),
 	strAccountType,
 	strAccountClassification,
-	strEFTType,
+	strEFTType = REPLACE(strEFTType, ',', ', '),
 	dtmEffectiveDate,
 	ysnPrintNotifications,
 	ysnActive,
