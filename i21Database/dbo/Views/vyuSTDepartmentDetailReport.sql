@@ -15,7 +15,6 @@ SELECT ST.intStoreId
 , CDT.dblTotalSalesAmount
 FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId 
 INNER JOIN tblSTCheckoutDepartmetTotals CDT ON CDT.intCheckoutId = CH.intCheckoutId 
-INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CDT.intItemId 
-INNER JOIN tblICItem IT ON IT.intItemId = IU.intItemId 
+INNER JOIN tblICItem IT ON IT.intItemId = CDT.intItemId 
 INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
 WHERE CDT.dblTotalSalesAmount > 0
