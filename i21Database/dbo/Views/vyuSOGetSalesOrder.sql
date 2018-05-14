@@ -110,7 +110,9 @@ SELECT
 	strOpportunityName = OPUR.strName,
     strLineOfBusiness = SB.strLineOfBusiness,
 	intCreditStopDays = CUS.intCreditStopDays,
-	strCreditCode = CUS.strCreditCode
+	strCreditCode = CUS.strCreditCode,
+
+    ysnProspect = CTYPE.Prospect
 
 	FROM tblSOSalesOrder SO
 		JOIN ( SELECT	intEntityId,			strCustomerNumber,
@@ -120,6 +122,9 @@ SELECT
 						intCreditStopDays,		strCreditCode
 			FROM vyuARCustomerSearch WITH (NOLOCK) ) CUS
 				ON CUS.intEntityId = SO.intEntityCustomerId 
+        LEFT JOIN ( SELECT intEntityId,		Customer,       Prospect
+			FROM vyuEMEntityType  WITH (NOLOCK)) CTYPE
+                ON SO.intEntityCustomerId = CTYPE.intEntityId
 		LEFT JOIN ( SELECT intEntityId,		strName
 			FROM tblEMEntity  WITH (NOLOCK)) CON
 				ON CON.intEntityId = SO.intEntityContactId
