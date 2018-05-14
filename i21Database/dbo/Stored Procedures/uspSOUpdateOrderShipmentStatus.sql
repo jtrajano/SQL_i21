@@ -8,6 +8,8 @@
 AS
 BEGIN
 
+if @intSalesOrderDetailId is null
+	return;
 DECLARE @tblSOToUpdate			Id
 DECLARE	@strOrderStatus			NVARCHAR(50) = 'Open'	  
 	  , @dblTotalQtyOrdered		NUMERIC(18,6) = 0.000000
