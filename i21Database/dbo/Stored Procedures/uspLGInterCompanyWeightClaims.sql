@@ -84,6 +84,20 @@ BEGIN TRY
 			END	
 		END
 	END
+	
+	IF @strWeightClaimTransactionType = 'Drop-Ship Weight Claims'
+	BEGIN
+		IF EXISTS (
+			SELECT 1
+			FROM tblSMInterCompanyTransactionConfiguration CTC
+			JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId
+			JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId
+			WHERE CTTF.strTransactionType = 'Outbound Weight Claims' AND CTTT.strTransactionType = 'Inbound Weight Claims' AND intFromCompanyId = intToCompanyId
+			)
+		BEGIN
+			EXEC uspLGCreateWeightClaims @intWeightClaimId = @intWeightClaimId
+		END
+	END
 
 END TRY
 

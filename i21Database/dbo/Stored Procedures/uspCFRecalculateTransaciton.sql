@@ -531,7 +531,7 @@ BEGIN
 	--				TAX COMPUTATION					 --
 	---------------------------------------------------
 	
-	DECLARE @tblCFOriginalTax				TABLE
+	DECLARE @tblCFOriginalTax						TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -561,7 +561,7 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	DECLARE @tblCFCalculatedTax				TABLE
+	DECLARE @tblCFCalculatedTax						TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
 		,[intInvoiceDetailId]				INT
@@ -591,7 +591,6 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
-	
 	DECLARE @tblCFCalculatedTaxExempt				TABLE
 	(
 		 [intTransactionDetailTaxId]		INT
@@ -622,159 +621,221 @@ BEGIN
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
 	)
+	DECLARE @tblCFRemoteOriginalTax					TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+	DECLARE @tblCFRemoteCalculatedTax				TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+	DECLARE @tblCFTransactionTax					TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnTaxOnly]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+	DECLARE @tblCFBackoutTax						TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+	DECLARE @tblCFRemoteTax							TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnTaxOnly]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
+	DECLARE @tblCFTransactionTaxZeroQuantity		TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnTaxOnly]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+		,[dblTotalCalculatedTaxZeroQty]		NUMERIC(18,6)
+	)
+	DECLARE @tblCFCalculatedTaxExemptZeroQuantity	TABLE
+	(
+		 [intTransactionDetailTaxId]		INT
+		,[intInvoiceDetailId]				INT
+		,[intTransactionDetailId]  			INT
+		,[intTaxGroupMasterId]				INT
+		,[intTaxGroupId]					INT
+		,[intTaxCodeId]						INT
+		,[intTaxClassId]					INT
+		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+		,[strCalculationMethod]				NVARCHAR(MAX)
+		,[dblRate]							NUMERIC(18,6)
+		,[dblTax]							NUMERIC(18,6)
+		,[dblAdjustedTax]					NUMERIC(18,6)
+		,[dblExemptionPercent]				NUMERIC(18,6)
+		,[intSalesTaxAccountId]    			INT
+		,[intTaxAccountId]    				INT
+		,[ysnSeparateOnInvoice]				BIT
+		,[ysnCheckoffTax]					BIT
+		,[strTaxCode]						NVARCHAR(MAX)
+		,[ysnTaxExempt]						BIT		
+		,[ysnInvalidSetup]					BIT
+		,[strTaxGroup]						NVARCHAR(MAX)
+		,[ysnInvalid]						BIT
+		,[strReason]						NVARCHAR(MAX)
+		,[strNotes]							NVARCHAR(MAX)
+		,[strTaxExemptReason]				NVARCHAR(MAX)
+		,[dblCalculatedTax]					NUMERIC(18,6)
+		,[dblOriginalTax]					NUMERIC(18,6)
+	)
 
-	DECLARE @tblCFRemoteOriginalTax			TABLE
-	(
-		 [intTransactionDetailTaxId]		INT
-		,[intInvoiceDetailId]				INT
-		,[intTransactionDetailId]  			INT
-		,[intTaxGroupMasterId]				INT
-		,[intTaxGroupId]					INT
-		,[intTaxCodeId]						INT
-		,[intTaxClassId]					INT
-		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
-		,[strCalculationMethod]				NVARCHAR(MAX)
-		,[dblRate]							NUMERIC(18,6)
-		,[dblTax]							NUMERIC(18,6)
-		,[dblAdjustedTax]					NUMERIC(18,6)
-		,[dblExemptionPercent]				NUMERIC(18,6)
-		,[intSalesTaxAccountId]    			INT
-		,[intTaxAccountId]    				INT
-		,[ysnSeparateOnInvoice]				BIT
-		,[ysnCheckoffTax]					BIT
-		,[strTaxCode]						NVARCHAR(MAX)
-		,[ysnTaxExempt]						BIT		
-		,[ysnInvalidSetup]					BIT
-		,[strTaxGroup]						NVARCHAR(MAX)
-		,[ysnInvalid]						BIT
-		,[strReason]						NVARCHAR(MAX)
-		,[strNotes]							NVARCHAR(MAX)
-		,[strTaxExemptReason]				NVARCHAR(MAX)
-		,[dblCalculatedTax]					NUMERIC(18,6)
-		,[dblOriginalTax]					NUMERIC(18,6)
-	)
-	DECLARE @tblCFRemoteCalculatedTax		TABLE
-	(
-		 [intTransactionDetailTaxId]		INT
-		,[intInvoiceDetailId]				INT
-		,[intTransactionDetailId]  			INT
-		,[intTaxGroupMasterId]				INT
-		,[intTaxGroupId]					INT
-		,[intTaxCodeId]						INT
-		,[intTaxClassId]					INT
-		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
-		,[strCalculationMethod]				NVARCHAR(MAX)
-		,[dblRate]							NUMERIC(18,6)
-		,[dblTax]							NUMERIC(18,6)
-		,[dblAdjustedTax]					NUMERIC(18,6)
-		,[dblExemptionPercent]				NUMERIC(18,6)
-		,[intSalesTaxAccountId]    			INT
-		,[intTaxAccountId]    				INT
-		,[ysnSeparateOnInvoice]				BIT
-		,[ysnCheckoffTax]					BIT
-		,[strTaxCode]						NVARCHAR(MAX)
-		,[ysnTaxExempt]						BIT		
-		,[ysnInvalidSetup]					BIT
-		,[strTaxGroup]						NVARCHAR(MAX)
-		,[ysnInvalid]						BIT
-		,[strReason]						NVARCHAR(MAX)
-		,[strNotes]							NVARCHAR(MAX)
-		,[strTaxExemptReason]				NVARCHAR(MAX)
-		,[dblCalculatedTax]					NUMERIC(18,6)
-		,[dblOriginalTax]					NUMERIC(18,6)
-	)
-	DECLARE @tblCFTransactionTax			TABLE
-	(
-		 [intTransactionDetailTaxId]		INT
-		,[intInvoiceDetailId]				INT
-		,[intTransactionDetailId]  			INT
-		,[intTaxGroupMasterId]				INT
-		,[intTaxGroupId]					INT
-		,[intTaxCodeId]						INT
-		,[intTaxClassId]					INT
-		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
-		,[strCalculationMethod]				NVARCHAR(MAX)
-		,[dblRate]							NUMERIC(18,6)
-		,[dblTax]							NUMERIC(18,6)
-		,[dblAdjustedTax]					NUMERIC(18,6)
-		,[dblExemptionPercent]				NUMERIC(18,6)
-		,[intSalesTaxAccountId]    			INT
-		,[intTaxAccountId]    				INT
-		,[ysnSeparateOnInvoice]				BIT
-		,[ysnCheckoffTax]					BIT
-		,[strTaxCode]						NVARCHAR(MAX)
-		,[ysnTaxExempt]						BIT		
-		,[ysnTaxOnly]						BIT		
-		,[ysnInvalidSetup]					BIT
-		,[strTaxGroup]						NVARCHAR(MAX)
-		,[ysnInvalid]						BIT
-		,[strReason]						NVARCHAR(MAX)
-		,[strNotes]							NVARCHAR(MAX)
-		,[strTaxExemptReason]				NVARCHAR(MAX)
-		,[dblCalculatedTax]					NUMERIC(18,6)
-		,[dblOriginalTax]					NUMERIC(18,6)
-	)
-	DECLARE @tblCFBackoutTax				TABLE
-	(
-		 [intTransactionDetailTaxId]		INT
-		,[intInvoiceDetailId]				INT
-		,[intTransactionDetailId]  			INT
-		,[intTaxGroupMasterId]				INT
-		,[intTaxGroupId]					INT
-		,[intTaxCodeId]						INT
-		,[intTaxClassId]					INT
-		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
-		,[strCalculationMethod]				NVARCHAR(MAX)
-		,[dblRate]							NUMERIC(18,6)
-		,[dblTax]							NUMERIC(18,6)
-		,[dblAdjustedTax]					NUMERIC(18,6)
-		,[dblExemptionPercent]				NUMERIC(18,6)
-		,[intSalesTaxAccountId]    			INT
-		,[intTaxAccountId]    				INT
-		,[ysnSeparateOnInvoice]				BIT
-		,[ysnCheckoffTax]					BIT
-		,[strTaxCode]						NVARCHAR(MAX)
-		,[ysnTaxExempt]						BIT		
-		,[ysnInvalidSetup]					BIT
-		,[strTaxGroup]						NVARCHAR(MAX)
-		,[ysnInvalid]						BIT
-		,[strReason]						NVARCHAR(MAX)
-		,[strNotes]							NVARCHAR(MAX)
-		,[strTaxExemptReason]				NVARCHAR(MAX)
-		,[dblCalculatedTax]					NUMERIC(18,6)
-		,[dblOriginalTax]					NUMERIC(18,6)
-	)
-	DECLARE @tblCFRemoteTax					TABLE
-	(
-		 [intTransactionDetailTaxId]		INT
-		,[intInvoiceDetailId]				INT
-		,[intTransactionDetailId]  			INT
-		,[intTaxGroupMasterId]				INT
-		,[intTaxGroupId]					INT
-		,[intTaxCodeId]						INT
-		,[intTaxClassId]					INT
-		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
-		,[strCalculationMethod]				NVARCHAR(MAX)
-		,[dblRate]							NUMERIC(18,6)
-		,[dblTax]							NUMERIC(18,6)
-		,[dblAdjustedTax]					NUMERIC(18,6)
-		,[dblExemptionPercent]				NUMERIC(18,6)
-		,[intSalesTaxAccountId]    			INT
-		,[intTaxAccountId]    				INT
-		,[ysnSeparateOnInvoice]				BIT
-		,[ysnCheckoffTax]					BIT
-		,[strTaxCode]						NVARCHAR(MAX)
-		,[ysnTaxExempt]						BIT		
-		,[ysnTaxOnly]						BIT		
-		,[ysnInvalidSetup]					BIT
-		,[strTaxGroup]						NVARCHAR(MAX)
-		,[ysnInvalid]						BIT
-		,[strReason]						NVARCHAR(MAX)
-		,[strNotes]							NVARCHAR(MAX)
-		,[strTaxExemptReason]				NVARCHAR(MAX)
-		,[dblCalculatedTax]					NUMERIC(18,6)
-		,[dblOriginalTax]					NUMERIC(18,6)
-	)
 	DECLARE @LineItemTaxDetailStagingTable LineItemTaxDetailStagingTable
 
 
@@ -2573,6 +2634,149 @@ BEGIN
 	DECLARE @totalOriginalTax					NUMERIC(18,6) = 0
 	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6) = 0
 
+	INSERT INTO @tblCFTransactionTaxZeroQuantity
+	(
+	 [intTransactionDetailTaxId]
+	,[intInvoiceDetailId]		
+	,[intTransactionDetailId]  	
+	,[intTaxGroupMasterId]		
+	,[intTaxGroupId]			
+	,[intTaxCodeId]				
+	,[intTaxClassId]			
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[dblTax]					
+	,[dblAdjustedTax]			
+	,[dblExemptionPercent]		
+	,[intSalesTaxAccountId]    	
+	,[intTaxAccountId]    		
+	,[ysnSeparateOnInvoice]		
+	,[ysnCheckoffTax]			
+	,[strTaxCode]				
+	,[ysnTaxExempt]				
+	,[ysnTaxOnly]				
+	,[ysnInvalidSetup]			
+	,[strTaxGroup]				
+	,[ysnInvalid]				
+	,[strReason]				
+	,[strNotes]					
+	,[strTaxExemptReason]		
+	,[dblOriginalTax]			
+	,[dblCalculatedTax]		
+	,[dblTotalCalculatedTaxZeroQty]	
+	)
+	SELECT
+	[intTransactionDetailTaxId]
+	,[intInvoiceDetailId]		
+	,[intTransactionDetailId]  	
+	,[intTaxGroupMasterId]		
+	,[intTaxGroupId]			
+	,[intTaxCodeId]				
+	,[intTaxClassId]			
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[dblTax]					
+	,[dblAdjustedTax]			
+	,[dblExemptionPercent]		
+	,[intSalesTaxAccountId]    	
+	,[intTaxAccountId]    		
+	,[ysnSeparateOnInvoice]		
+	,[ysnCheckoffTax]			
+	,[strTaxCode]				
+	,[ysnTaxExempt]				
+	,[ysnTaxOnly]				
+	,[ysnInvalidSetup]			
+	,[strTaxGroup]				
+	,[ysnInvalid]				
+	,[strReason]				
+	,[strNotes]					
+	,[strTaxExemptReason]		
+	,[dblOriginalTax]
+	,(CASE 
+		WHEN UPPER([strCalculationMethod]) = 'UNIT'
+		THEN
+		ROUND(dblRate * 100000,2)
+		ELSE
+		dblCalculatedTax
+	END) AS dblCalculatedTax,
+	(CASE 
+		WHEN UPPER([strCalculationMethod]) = 'UNIT'
+		THEN
+		ROUND(dblRate * 100000,2) / 100000
+		ELSE
+		ROUND(dblCalculatedTax,2) / @dblQuantity
+	END) AS dblCalculatedTax
+	FROM @tblCFTransactionTax
+
+
+	INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity
+	(
+	 [intTransactionDetailTaxId]
+	,[intInvoiceDetailId]		
+	,[intTransactionDetailId]  	
+	,[intTaxGroupMasterId]		
+	,[intTaxGroupId]			
+	,[intTaxCodeId]				
+	,[intTaxClassId]			
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[dblAdjustedTax]			
+	,[dblExemptionPercent]		
+	,[intSalesTaxAccountId]    	
+	,[intTaxAccountId]    		
+	,[ysnSeparateOnInvoice]		
+	,[ysnCheckoffTax]			
+	,[strTaxCode]				
+	,[ysnTaxExempt]				
+	,[ysnInvalidSetup]			
+	,[strTaxGroup]				
+	,[ysnInvalid]				
+	,[strReason]				
+	,[strNotes]					
+	,[strTaxExemptReason]		
+	,[dblCalculatedTax]			
+	,[dblOriginalTax]					
+	,[dblTax]			
+	)
+	SELECT
+	 [intTransactionDetailTaxId]
+	,[intInvoiceDetailId]		
+	,[intTransactionDetailId]  	
+	,[intTaxGroupMasterId]		
+	,[intTaxGroupId]			
+	,[intTaxCodeId]				
+	,[intTaxClassId]			
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[dblAdjustedTax]			
+	,[dblExemptionPercent]		
+	,[intSalesTaxAccountId]    	
+	,[intTaxAccountId]    		
+	,[ysnSeparateOnInvoice]		
+	,[ysnCheckoffTax]			
+	,[strTaxCode]				
+	,[ysnTaxExempt]				
+	,[ysnInvalidSetup]			
+	,[strTaxGroup]				
+	,[ysnInvalid]				
+	,[strReason]				
+	,[strNotes]					
+	,[strTaxExemptReason]		
+	,[dblCalculatedTax]			
+	,[dblOriginalTax]	
+	,(CASE 
+		WHEN UPPER([strCalculationMethod]) = 'UNIT'
+		THEN
+		ROUND(dblRate * 100000,2) / 100000
+		ELSE
+		ROUND(dblTax,2) / @dblQuantity
+	END) AS dblCalculatedTax
+	FROM @tblCFCalculatedTaxExempt
+
 	SELECT 
 	 @totalCalculatedTax = ISNULL(SUM(dblCalculatedTax),0)
 	,@totalOriginalTax = ISNULL(SUM(dblOriginalTax),0)
@@ -2588,6 +2792,31 @@ BEGIN
 	ON cft.intTaxClassId = cftx.intTaxClassId
 	WHERE cft.ysnTaxExempt = 1 AND 
 	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
+
+	-------------------ZERO QTY TAX CALC------------------------
+	DECLARE @totalCalculatedTaxZeroQty			AS NUMERIC(18,6)
+	DECLARE @totalCalculatedTaxExemptZeroQty	AS NUMERIC(18,6)
+
+
+	SELECT 
+	 @totalCalculatedTaxZeroQty = ISNULL(SUM([dblTotalCalculatedTaxZeroQty]),0)
+	FROM 
+	@tblCFTransactionTaxZeroQuantity
+	WHERE ISNULL(ysnInvalidSetup,0) = 0
+
+	--SELECT '@tblCFTransactionTaxZeroQuantity' , * from @tblCFTransactionTaxZeroQuantity
+
+	SELECT 
+	 @totalCalculatedTaxExemptZeroQty = ISNULL(SUM(cftx.dblTax),0)
+	FROM
+	@tblCFTransactionTaxZeroQuantity as cft
+	INNER JOIN @tblCFCalculatedTaxExemptZeroQuantity as cftx
+	ON cft.intTaxClassId = cftx.intTaxClassId
+	WHERE cft.ysnTaxExempt = 1 AND 
+	ISNULL(cft.ysnInvalidSetup,0) = 0
+
+	--SELECT '@tblCFCalculatedTaxExemptZeroQuantity' , * from @tblCFCalculatedTaxExemptZeroQuantity
+	-------------------ZERO QTY TAX CALC------------------------
 	
 
 	SET @dblGrossTransferCost = ISNULL(@dblTransferCost,0)
@@ -2615,13 +2844,17 @@ BEGIN
 			DECLARE @dblImportFileGrossPrice NUMERIC(18,6)
 			SET @dblImportFileGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 
+			DECLARE @dblImportFileGrossPriceZeroQty NUMERIC(18,6)
+			SET @dblImportFileGrossPriceZeroQty =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTaxZeroQty,0)),6),6)
+
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
 				SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
+				SELECT @dblImportFileGrossPriceZeroQty = dbo.fnCFForceRounding(@dblImportFileGrossPriceZeroQty)
 			END
 
 
-			SET @dblCalculatedGrossPrice	 = @dblImportFileGrossPrice
+			SET @dblCalculatedGrossPrice	 = @dblImportFileGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 = @dblOriginalPrice
 			SET @dblCalculatedNetPrice		 = ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
@@ -2630,8 +2863,7 @@ BEGIN
 
 		END
 	ELSE IF @strPriceMethod = 'Network Cost'
-	BEGIN
-
+		BEGIN
 		DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
 		SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
 		SET @dblImportFileGrossPrice = @dblNetworkCostGrossPrice --ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
@@ -2655,12 +2887,16 @@ BEGIN
 		DECLARE @dblLocalIndexCostGrossPrice NUMERIC(18,6)
 		SET @dblLocalIndexCostGrossPrice = Round((@dblAdjustmentWithIndex + ROUND((@totalCalculatedTax / @dblQuantity),6)),6)
 
+		DECLARE @dblLocalIndexCostGrossPriceZeroQty NUMERIC(18,6)
+		SET @dblLocalIndexCostGrossPriceZeroQty = Round((@dblAdjustmentWithIndex + ROUND((@totalCalculatedTaxZeroQty),6)),6)
+
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
 			SELECT @dblLocalIndexCostGrossPrice = dbo.fnCFForceRounding(@dblLocalIndexCostGrossPrice)
+			SELECT @dblLocalIndexCostGrossPriceZeroQty = dbo.fnCFForceRounding(@dblLocalIndexCostGrossPriceZeroQty)
 		END
 
-		SET @dblCalculatedGrossPrice	 = 	 @dblLocalIndexCostGrossPrice
+		SET @dblCalculatedGrossPrice	 = 	 @dblLocalIndexCostGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
 		SET @dblCalculatedNetPrice		 = 	 Round((Round((@dblLocalIndexCostGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		SET @dblOriginalNetPrice		 = 	 Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
@@ -2675,13 +2911,17 @@ BEGIN
 		DECLARE @dblLocalIndexRetailGrossPrice NUMERIC(18,6)
 		SET @dblLocalIndexRetailGrossPrice = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6)),6)
 
+		DECLARE @dblLocalIndexRetailGrossPriceZeroQty NUMERIC(18,6)
+		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQty),6)),6)
+
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
 			SELECT @dblLocalIndexRetailGrossPrice = dbo.fnCFForceRounding(@dblLocalIndexRetailGrossPrice)
+			SELECT @dblLocalIndexRetailGrossPriceZeroQty = dbo.fnCFForceRounding(@dblLocalIndexRetailGrossPriceZeroQty)
 		END
 
 		
-		SET @dblCalculatedGrossPrice	 =	  @dblLocalIndexRetailGrossPrice
+		SET @dblCalculatedGrossPrice	 =	  @dblLocalIndexRetailGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 =	  @dblOriginalPrice
 		SET @dblCalculatedNetPrice		 =	  Round((Round((@dblLocalIndexRetailGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		SET @dblOriginalNetPrice		 =	  Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
@@ -2712,23 +2952,24 @@ BEGIN
 
 	END
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
-	BEGIN
+		BEGIN
 		IF (@strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
 		BEGIN
 
 			DECLARE @dblPumpPriceAdjustmentGrossPrice NUMERIC(18,6)
-			--SET @dblPumpPriceAdjustmentGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
-
 			SET @dblPumpPriceAdjustmentGrossPrice = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6)),6)
-			--Calc Gross Price = Round(Orig Gross Price + Profile Rate + Group Adjustment Rate - Round(Calc Exempt Taxes / Quantity,6) , 6) + .009 Rounding
+
+			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
+			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQty),6)),6)
 
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
 				SELECT @dblPumpPriceAdjustmentGrossPrice = dbo.fnCFForceRounding(@dblPumpPriceAdjustmentGrossPrice)
+				SELECT @dblPumpPriceAdjustmentGrossPriceZeroQty = dbo.fnCFForceRounding(@dblPumpPriceAdjustmentGrossPriceZeroQty)
 			END
 
-			SET @dblCalculatedGrossPrice	 =	   @dblPumpPriceAdjustmentGrossPrice
+			SET @dblCalculatedGrossPrice	 =	   @dblPumpPriceAdjustmentGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
 			SET @dblCalculatedNetPrice		 =	   ROUND(((Round((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 =	   Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
@@ -2738,19 +2979,24 @@ BEGIN
 		END
 	END
 	ELSE IF (CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 )
-	BEGIN
+		BEGIN
 		IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
 		BEGIN
 			
 			DECLARE @dblTransferCostGrossPrice NUMERIC(18,6)
 			SET @dblTransferCostGrossPrice = ROUND(ISNULL(@dblNetTransferCost,0) + ISNULL(@dblAdjustments,0) + Round((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6) , 6)
 
+			DECLARE @dblTransferCostGrossPriceZeroQty NUMERIC(18,6)
+			SET @dblTransferCostGrossPriceZeroQty = ROUND(ISNULL(@dblNetTransferCost,0) + ISNULL(@dblAdjustments,0) + Round((ISNULL(@totalCalculatedTaxZeroQty,0)),6) , 6)
+
+
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
 				SELECT @dblTransferCostGrossPrice = dbo.fnCFForceRounding(@dblTransferCostGrossPrice)
+				SELECT @dblTransferCostGrossPriceZeroQty = dbo.fnCFForceRounding(@dblTransferCostGrossPriceZeroQty)
 			END
 
-			SET @dblCalculatedGrossPrice	 =	   @dblTransferCostGrossPrice
+			SET @dblCalculatedGrossPrice	 =	   @dblTransferCostGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 =	   @dblGrossTransferCost
 			SET @dblCalculatedNetPrice		 =	   ROUND(((Round((@dblTransferCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 =	   @dblNetTransferCost

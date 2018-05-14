@@ -64,6 +64,29 @@ LEFT JOIN (
 
 SET @strErrorMessage = NULL
 
+--MDG this is not a good approach but for now this will consolidate the error message per license
+insert into #ITEMSTOVALIDATE
+( intItemId, intLicenseTypeId, intEntityCustomerId, strItemNo, strCode, strDescription, ysnRequiredForApplication, ysnRequiredForPurchase, dtmBeginDate, dtmEndDate)
+select e.intItemId, -9, -999, e.strItemNo,
+stuff((
+			select ', ' + coalesce(ltrim(rtrim(f.strCode)), '') 
+				from #ITEMSTOVALIDATE f
+						where f.strItemNo= e.strItemNo
+for xml path('') ), 1, 1, '') as strCode
+, ''
+, 1
+, 1
+, null
+, null
+
+from #ITEMSTOVALIDATE e 
+	where isnull(e.intEntityCustomerId,0) = 0
+
+delete from  #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) = 0
+update #ITEMSTOVALIDATE set intEntityCustomerId = null where intEntityCustomerId = -999
+
+
+
 WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 	BEGIN
 		DECLARE @intItemId					INT = NULL
@@ -88,15 +111,15 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 
 		--Validate if Customer has Active License
 		IF ISNULL(@intCustomerId, 0) = 0
-			SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is required for item ' + @strItemNo + CHAR(13)
+			SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is required for item ' + @strItemNo + '<br>'
 		ELSE
 			BEGIN
 				--Validate if Customer's License is 
 				IF (@dtmDate NOT BETWEEN @dtmDateFrom AND @dtmDateTo)
-					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is already expired for item ' + @strItemNo + CHAR(13)
+					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is already expired for item ' + @strItemNo + '<br>'
 
 				IF (@ysnRequiredForApplication = 1 AND ISNULL(@intEntityApplicatorId, 0) = 0)
-					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + 'Applicator is required for ' + @strCode + ' License in item ' + @strItemNo + CHAR(13)
+					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + 'Applicator is required for ' + @strCode + ' License in item ' + @strItemNo + '<br>'
 			END
 
 		DELETE FROM #ITEMSTOVALIDATE WHERE intItemId = @intItemId AND intLicenseTypeId = @intLicenseTypeId

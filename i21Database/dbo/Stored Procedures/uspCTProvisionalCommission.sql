@@ -17,7 +17,10 @@ BEGIN TRY
 			 @strCity				NVARCHAR(50),
 			 @strAddress			NVARCHAR(MAX),
 			 @intVendorId			INT,
-			 @blbFile				VARBINARY(MAX)
+			 @blbFile				VARBINARY(MAX),
+			@intLaguageId			INT,
+			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
+			@strMonthLabelName		NVARCHAR(50) = 'Month'
 			
     IF  LTRIM(RTRIM(@xmlParam)) = ''   
 	   SET @xmlParam = NULL   
@@ -55,6 +58,10 @@ BEGIN TRY
 	SELECT	@intBrkgCommnId =	  [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname]	   =	  'intBrkgCommnId' 
+    
+	SELECT	@intLaguageId =	  [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname]	   =	  'intLaguageId' 
 
 	SELECT	@blbFile		=	  B.blbFile 
 	FROM	tblSMAttachment	A 
@@ -81,7 +88,8 @@ BEGIN TRY
 
 	SELECT	@blbFile    AS  blbFile,
 			@strAddress AS  strAddress,
-			@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
+			--@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
+			@strCity + ', ' + FORMAT(GETDATE(), 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(getdate(), 'MMM')),FORMAT(getdate(), 'MMM')) + ' ' + FORMAT(GETDATE(), 'yyyy') AS strCity,
 			ch.strContractNumber,
 			strSellerRef,
 			strSeller,
@@ -97,18 +105,16 @@ BEGIN TRY
 	JOIN	tblICItemContract		IC	ON	IC.intItemContractId		=	CD.intItemContractId	LEFT
 	JOIN	tblSMCountry			IG	ON	IG.intCountryID				=	IC.intCountryId			LEFT
 	JOIN	tblICCommodityAttribute EO	ON	EO.intCommodityAttributeId	=	IM.intOriginId			LEFT
-	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	EO.intCountryID	
-		
-	left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
-	left join tblEMEntity				rte on rte.intEntityId = ch.intEntityId
+	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	EO.intCountryID			LEFT
+	JOIN	tblCTContractHeader		ch	ON ch.intContractHeaderId		=	CD.intContractHeaderId
 	
 	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = BD.intItemReportUOMId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = rte.intLanguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
 	
 	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = BD.intRateUOMId
-	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = rte.intLanguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'UOM'
 
 	WHERE	intBrkgCommnId		=	  @intBrkgCommnId			
 

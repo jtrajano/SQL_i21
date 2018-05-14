@@ -55,6 +55,21 @@ INSERT INTO tblICBackupDetailLot(
 	, [dtmDateCreated]			
 	, [intCreatedUserId]			
 	, [intCreatedEntityId]
+	, [ysnLockedInventory]
+	, [intItemOwnerId]
+	, [strContainerNo]
+	, [strCondition]
+	, [intSeasonCropYear]
+	, [intCompanyId]
+	, [intBookId]
+	, [intSubBookId]
+	, [strCertificate]
+	, [intProducerId]
+	, [strCertificateId]
+	, [strTrackingNumber]
+    , [dtmDateModified]
+    , [intCreatedByUserId]
+    , [intModifiedByUserId]
 )
 SELECT
 	  intBackupId					= @intBackupId
@@ -101,6 +116,21 @@ SELECT
 	, dtmDateCreated				= lot.dtmDateCreated				
 	, intCreatedUserId				= lot.intCreatedUserId			
 	, intCreatedEntityId			= lot.intCreatedEntityId
+	, [ysnLockedInventory]			= lot.[ysnLockedInventory]
+	, [intItemOwnerId]				= lot.[intItemOwnerId]
+	, [strContainerNo]				= lot.[strContainerNo]
+	, [strCondition]				= lot.[strCondition]
+	, [intSeasonCropYear]			= lot.[intSeasonCropYear]
+	, [intCompanyId]				= lot.[intCompanyId]
+	, [intBookId]					= lot.[intBookId]
+	, [intSubBookId]				= lot.[intSubBookId]
+	, [strCertificate]				= lot.[strCertificate]
+	, [intProducerId]				= lot.[intProducerId]
+	, [strCertificateId]			= lot.[strCertificateId]
+	, [strTrackingNumber]			= lot.[strTrackingNumber]
+    , [dtmDateModified]				= lot.[dtmDateModified]
+    , [intCreatedByUserId]			= lot.[intCreatedByUserId]
+    , [intModifiedByUserId]			= lot.[intModifiedByUserId]
 FROM tblICLot lot
 
 INSERT INTO tblICBackupDetailInventoryTransaction(
@@ -136,44 +166,62 @@ INSERT INTO tblICBackupDetailInventoryTransaction(
 	, strDescription
 	, intFobPointId
 	, ysnNoGLPosting
+	, intForexRateTypeId
+	, dblForexRate
+	, strActualCostId
+	, dblUnitRetail
+	, dblCategoryCostValue
+	, dblCategoryRetailValue
+	, intCategoryId
+	, intCompanyId
 	, intCreatedUserId
-	, intCreatedEntityId)
+	, intCreatedEntityId
+	
+)
 SELECT
 	  intBackupId						= @intBackupId
-	, intIdentityId						= tr.intInventoryTransactionId
-	, intItemId							= tr.intItemId							
-	, intItemLocationId					= tr.intItemLocationId					
-	, intItemUOMId						= tr.intItemUOMId						
-	, intSubLocationId					= tr.intSubLocationId					
-	, intStorageLocationId				= tr.intStorageLocationId				
-	, dtmDate							= tr.dtmDate							
-	, dblQty							= tr.dblQty							
-	, dblUOMQty							= tr.dblUOMQty							
-	, dblCost							= tr.dblCost							
-	, dblValue							= tr.dblValue							
-	, dblSalesPrice						= tr.dblSalesPrice						
-	, intCurrencyId						= tr.intCurrencyId						
-	, dblExchangeRate					= tr.dblExchangeRate					
-	, intTransactionId					= tr.intTransactionId					
-	, strTransactionId					= tr.strTransactionId					
-	, intTransactionDetailId			= tr.intTransactionDetailId			
-	, strBatchId						= tr.strBatchId						
-	, intTransactionTypeId				= tr.intTransactionTypeId				
-	, intLotId							= tr.intLotId							
-	, ysnIsUnposted						= tr.ysnIsUnposted						
-	, intRelatedInventoryTransactionId	= tr.intRelatedInventoryTransactionId	
-	, intRelatedTransactionId			= tr.intRelatedTransactionId			
-	, strRelatedTransactionId			= tr.strRelatedTransactionId			
-	, strTransactionForm				= tr.strTransactionForm				
-	, intCostingMethod					= tr.intCostingMethod					
-	, intInTransitSourceLocationId		= tr.intInTransitSourceLocationId		
-	, dtmCreated						= tr.dtmCreated						
-	, strDescription					= tr.strDescription					
-	, intFobPointId						= tr.intFobPointId						
-	, ysnNoGLPosting					= tr.ysnNoGLPosting					
-	, intCreatedUserId					= tr.intCreatedUserId					
-	, intCreatedEntityId				= tr.intCreatedEntityId				
-FROM tblICInventoryTransaction tr
+	, intIdentityId						= t.intInventoryTransactionId
+	, intItemId							= t.intItemId							
+	, intItemLocationId					= t.intItemLocationId					
+	, intItemUOMId						= t.intItemUOMId						
+	, intSubLocationId					= t.intSubLocationId					
+	, intStorageLocationId				= t.intStorageLocationId				
+	, dtmDate							= t.dtmDate							
+	, dblQty							= t.dblQty							
+	, dblUOMQty							= t.dblUOMQty							
+	, dblCost							= t.dblCost							
+	, dblValue							= t.dblValue							
+	, dblSalesPrice						= t.dblSalesPrice						
+	, intCurrencyId						= t.intCurrencyId						
+	, dblExchangeRate					= t.dblExchangeRate					
+	, intTransactionId					= t.intTransactionId					
+	, strTransactionId					= t.strTransactionId					
+	, intTransactionDetailId			= t.intTransactionDetailId			
+	, strBatchId						= t.strBatchId						
+	, intTransactionTypeId				= t.intTransactionTypeId				
+	, intLotId							= t.intLotId							
+	, ysnIsUnposted						= t.ysnIsUnposted						
+	, intRelatedInventoryTransactionId	= t.intRelatedInventoryTransactionId	
+	, intRelatedTransactionId			= t.intRelatedTransactionId			
+	, strRelatedTransactionId			= t.strRelatedTransactionId			
+	, strTransactionForm				= t.strTransactionForm				
+	, intCostingMethod					= t.intCostingMethod					
+	, intInTransitSourceLocationId		= t.intInTransitSourceLocationId		
+	, dtmCreated						= t.dtmCreated						
+	, strDescription					= t.strDescription					
+	, intFobPointId						= t.intFobPointId						
+	, ysnNoGLPosting					= t.ysnNoGLPosting		
+	, intForexRateTypeId				= t.intForexRateTypeId		
+	, dblForexRate						= t.dblForexRate		
+	, strActualCostId					= t.strActualCostId		
+	, dblUnitRetail						= t.dblUnitRetail		
+	, dblCategoryCostValue				= t.dblCategoryCostValue		
+	, dblCategoryRetailValue			= t.dblCategoryRetailValue		
+	, intCategoryId						= t.ysnNoGLPosting		
+	, intCompanyId						= t.intCompanyId						
+	, intCreatedUserId					= t.intCreatedUserId					
+	, intCreatedEntityId				= t.intCreatedEntityId				
+FROM tblICInventoryTransaction t
 
 INSERT INTO tblICBackupDetailTransactionDetailLog(
 	  intBackupId
@@ -190,7 +238,8 @@ INSERT INTO tblICBackupDetailTransactionDetailLog(
 	, intItemUOMId
 	, dblQuantity
 	, ysnLoad
-	, intLoadReceive)
+	, intLoadReceive
+)
 SELECT
       intBackupId				= @intBackupId
 	, intIdentityId				= t.intTransactionDetailLogId			
@@ -237,10 +286,14 @@ INSERT INTO tblICBackupDetailInventoryTransactionStorage(
 	, intRelatedInventoryTransactionId	
 	, intRelatedTransactionId			
 	, strRelatedTransactionId			
-	, intCostingMethod					
+	, intCostingMethod			
+	, intForexRateTypeId
+	, dblForexRate
+	, intCompanyId
 	, dtmCreated						
 	, intCreatedUserId					
-	, intCreatedEntityId)
+	, intCreatedEntityId
+)
 SELECT
 	  intBackupId						= @intBackupId
 	, intIdentityId						= t.intInventoryTransactionStorageId
@@ -269,7 +322,10 @@ SELECT
 	, intRelatedInventoryTransactionId	= t.intRelatedInventoryTransactionId	
 	, intRelatedTransactionId			= t.intRelatedTransactionId			
 	, strRelatedTransactionId			= t.strRelatedTransactionId			
-	, intCostingMethod					= t.intCostingMethod					
+	, intCostingMethod					= t.intCostingMethod	
+	, intForexRateTypeId				= t.intForexRateTypeId	
+	, dblForexRate						= t.dblForexRate	
+	, intCompanyId						= t.intCompanyId	
 	, dtmCreated						= t.dtmCreated						
 	, intCreatedUserId					= t.intCreatedUserId					
 	, intCreatedEntityId				= t.intCreatedEntityId

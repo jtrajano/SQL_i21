@@ -48,6 +48,10 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , dtmDate					= SO.dtmDate
 	 , ysnBlended				= SODETAIL.ysnBlended
 	 , intTaxGroupId			= SODETAIL.intTaxGroupId
+	 , strSubCurrency				= CURRENCY.strCurrency
+	 , strStorageLocation		= STOLOC.strName
+	 , strSubLocationName		= SUBLOC.strSubLocationName
+	 , intStorageLocationId		=  SODETAIL.intStorageLocationId
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -83,6 +87,7 @@ INNER JOIN (
 		 , strVFDDocumentNumber
 		 , ysnBlended
 		 , intTaxGroupId
+		 , intStorageLocationId
 	FROM dbo.tblSOSalesOrderDetail WITH (NOLOCK)
 	WHERE dblQtyShipped < dblQtyOrdered
 	 AND (ISNULL(intItemId, 0) <> 0 OR ISNULL(strItemDescription, '') <> '') 
@@ -144,6 +149,20 @@ LEFT JOIN (
 	) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 ) CONTRACTS ON SODETAIL.intContractHeaderId = CONTRACTS.intContractHeaderId
 	       AND SODETAIL.intContractDetailId = CONTRACTS.intContractDetailId
+
+LEFT OUTER JOIN (
+	SELECT intCurrencyID
+		 , intCent
+		 , strCurrency
+	FROM dbo.tblSMCurrency WITH (NOLOCK)
+) CURRENCY ON SODETAIL.intSubCurrencyId = CURRENCY.intCurrencyID
+
+LEFT JOIN ( SELECT intStorageLocationId, strName FROM tblICStorageLocation WITH (NOLOCK) ) STOLOC
+	ON STOLOC.intStorageLocationId = SODETAIL.intStorageLocationId
+
+LEFT JOIN ( SELECT intCompanyLocationSubLocationId,  strSubLocationName FROM tblSMCompanyLocationSubLocation WITH (NOLOCK) ) SUBLOC
+	ON SUBLOC.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId
+
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
   AND (SODETAIL.intItemId IS NOT NULL OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))

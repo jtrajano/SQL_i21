@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	@dtmStartDate AS DATETIME 
+	,@strCategoryCode AS NVARCHAR(50) = NULL 
 	,@strItemNo AS NVARCHAR(50) = NULL 
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
@@ -15,16 +16,25 @@ SET ANSI_WARNINGS OFF
 DECLARE @intReturnValue AS INT = 0; 
 
 DECLARE @intItemId AS INT
+		,@intCategoryId AS INT 
 		,@dtmRebuildDate AS DATETIME = GETDATE() 
 		,@intFobPointId AS INT 
 
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
+SELECT @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode 
 
 IF @intItemId IS NULL AND @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'Item id is invalid or missing.'
 	EXEC uspICRaiseError 80001;
-	RETURN -1; 
+	RETURN -80001; 
+END
+
+IF @intCategoryId IS NULL AND @strCategoryCode IS NOT NULL 
+BEGIN 
+	-- 'Category Code is invalid or missing.'
+	EXEC uspICRaiseError 80216;
+	RETURN -80216; 
 END
 
 -- 'Unable to find an open fiscal year period to match the transaction date.'
@@ -100,8 +110,10 @@ BEGIN
 						AND LotCostBucket.intInventoryLotId = LotOut.intInventoryLotId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
-	FROM	dbo.tblICInventoryLot LotCostBucket			
+	FROM	dbo.tblICInventoryLot LotCostBucket INNER JOIN tblICItem i
+				ON LotCostBucket.intItemId = i.intItemId
 	WHERE	LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId)
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	FIFOCostBucket
 	SET		dblStockOut = dblStockOut - (
@@ -115,8 +127,10 @@ BEGIN
 						AND FIFOCostBucket.intInventoryFIFOId = FIFOOut.intInventoryFIFOId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
-	FROM	dbo.tblICInventoryFIFO FIFOCostBucket
+	FROM	dbo.tblICInventoryFIFO FIFOCostBucket INNER JOIN tblICItem i
+				ON FIFOCostBucket.intItemId = i.intItemId
 	WHERE	FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId)
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	LIFOCostBucket
 	SET		dblStockOut = dblStockOut - (
@@ -130,8 +144,10 @@ BEGIN
 						AND LIFOCostBucket.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
-	FROM	dbo.tblICInventoryLIFO LIFOCostBucket
+	FROM	dbo.tblICInventoryLIFO LIFOCostBucket INNER JOIN tblICItem i
+				ON LIFOCostBucket.intItemId = i.intItemId
 	WHERE	LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId)
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	ActualCostBucket
 	SET		dblStockOut = dblStockOut - (
@@ -145,8 +161,10 @@ BEGIN
 						AND ActualCostBucket.intInventoryActualCostId = ActualCostOut.intInventoryActualCostId
 						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
-	FROM	dbo.tblICInventoryActualCost ActualCostBucket
+	FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN tblICItem i
+				ON ActualCostBucket.intItemId = i.intItemId
 	WHERE	ActualCostBucket.intItemId = ISNULL(@intItemId, ActualCostBucket.intItemId)
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 -- If stock is received within the date range, then remove also the "out" stock records. 
@@ -154,38 +172,50 @@ BEGIN
 	DELETE	LotOut
 	FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryLot LotCostBucket
 				ON LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId
+			INNER JOIN tblICItem i
+				ON LotCostBucket.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(				
 				CASE WHEN @isPeriodic = 0 THEN LotCostBucket.dtmCreated ELSE LotCostBucket.dtmDate END
 				, @dtmStartDate
 			) = 1
 			AND LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	DELETE	FIFOOut
 	FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryFIFO FIFOCostBucket
 				ON FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId
+			INNER JOIN tblICItem i
+				ON FIFOCostBucket.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN FIFOCostBucket.dtmCreated ELSE FIFOCostBucket.dtmDate END
 				, @dtmStartDate
 			) = 1
 			AND FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	DELETE	LIFOOut
 	FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryLIFO LIFOCostBucket
 				ON LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId
+			INNER JOIN tblICItem i
+				ON LIFOCostBucket.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN LIFOCostBucket.dtmCreated ELSE LIFOCostBucket.dtmDate END
 				, @dtmStartDate
 				) = 1
 			AND LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	DELETE	ActualCostOut
 	FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryActualCost ActualCostCostBucket
 				ON ActualCostOut.intInventoryActualCostId = ActualCostCostBucket.intInventoryActualCostId
+			INNER JOIN tblICItem i
+				ON ActualCostCostBucket.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN ActualCostCostBucket.dtmCreated ELSE ActualCostCostBucket.dtmDate END
 				, @dtmStartDate
 			) = 1
 			AND ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 -- Restore the original costs
@@ -196,12 +226,15 @@ BEGIN
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
 			INNER JOIN dbo.tblICInventoryLot CostBucket
 				ON CostBucket.intInventoryLotId = CostAdjustment.intInventoryLotId
+			INNER JOIN tblICItem i
+				ON CostBucket.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate
 			) = 1
 			AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			AND CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 -- Clear the cost adjustments
@@ -209,69 +242,93 @@ BEGIN
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+			INNER JOIN tblICItem i
+				ON InvTrans.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+			AND InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+			INNER JOIN tblICItem i
+				ON InvTrans.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+			AND InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+			INNER JOIN tblICItem i
+				ON InvTrans.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+			AND InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryActualCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
 				ON CostAdjustment.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+			INNER JOIN tblICItem i
+				ON InvTrans.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+			AND InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 -- Remove the cost buckets if it is posted within the date range. 
 BEGIN 
-	DELETE	FROM tblICInventoryLot 
+	DELETE	cb
+	FROM	tblICInventoryLot cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 	
-	DELETE	FROM tblICInventoryFIFO 
+	DELETE	cb
+	FROM	tblICInventoryFIFO cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	DELETE	FROM tblICInventoryLIFO 
+	DELETE	cb
+	FROM	tblICInventoryLIFO cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	DELETE	FROM tblICInventoryActualCost 
+	DELETE	cb
+	FROM	tblICInventoryActualCost cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 -- Clear the G/L entries 
@@ -280,11 +337,14 @@ BEGIN
 	FROM	dbo.tblGLDetail GLDetail INNER JOIN tblICInventoryTransaction InvTrans
 				ON  GLDetail.strTransactionId = InvTrans.strTransactionId
 				AND GLDetail.intJournalLineNo = InvTrans.intInventoryTransactionId
+			INNER JOIN tblICItem i
+				ON InvTrans.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
+			AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 -- Create the temp table. 
@@ -314,7 +374,9 @@ BEGIN
 
 	SELECT	t.* 
 	INTO	#tmpUnOrderedICTransaction
-	FROM	tblICInventoryTransaction t LEFT JOIN tblICInventoryTransactionType ty
+	FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+				ON t.intItemId = i.intItemId
+			LEFT JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId
 	WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
 						WHEN ISNULL(dblQty, 0) <> 0 THEN 1
@@ -325,7 +387,8 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	-- Backup the created dates. 
 	BEGIN 
@@ -338,7 +401,8 @@ BEGIN
 				t.strBatchId 
 				,t.dtmCreated
 		INTO	tblICInventoryTransaction_BackupCreatedDate
-		FROM	tblICInventoryTransaction t 
+		FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+					ON t.intItemId = i.intItemId
 				CROSS APPLY (
 					SELECT	TOP 1 *
 					FROM	tblICInventoryTransaction 
@@ -349,6 +413,7 @@ BEGIN
 					, @dtmStartDate
 				) = 1
 				AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 	END 
 
 	-- Intialize #tmpICInventoryTransaction
@@ -390,6 +455,10 @@ BEGIN
 		[intForexRateTypeId] INT NULL,
 		[dblForexRate] NUMERIC(38, 20) NOT NULL DEFAULT 1, 
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intCategoryId] INT NULL,
+		[dblUnitRetail] NUMERIC(38, 20) NULL,
+		[dblCategoryCostValue] NUMERIC(38, 20) NULL, 
+		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 	)
 
 	IF ISNULL(@isPeriodic, 0) = 1
@@ -443,6 +512,10 @@ BEGIN
 				,intForexRateTypeId
 				,dblForexRate 
 				,strActualCostId
+				,intCategoryId
+				,dblUnitRetail
+				,dblCategoryCostValue
+				,dblCategoryRetailValue
 		FROM	#tmpUnOrderedICTransaction
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC
@@ -500,6 +573,10 @@ BEGIN
 				,intForexRateTypeId
 				,dblForexRate 
 				,strActualCostId
+				,intCategoryId
+				,dblUnitRetail
+				,dblCategoryCostValue
+				,dblCategoryRetailValue
 		FROM	#tmpUnOrderedICTransaction
 		ORDER BY 
 			intInventoryTransactionId ASC 
@@ -508,19 +585,25 @@ END
 
 -- Delete the inventory transaction record if it falls within the date range. 
 BEGIN 
-	DELETE	FROM tblICInventoryTransaction 
+	DELETE	t
+	FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
+				ON t.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	DELETE	FROM tblICInventoryLotTransaction 
+	DELETE	t
+	FROM	tblICInventoryLotTransaction t INNER JOIN tblICItem i 
+				ON t.intItemId = i.intItemId
 	WHERE	dbo.fnDateGreaterThanEquals(
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 --------------------------------------------------------------------
@@ -534,13 +617,16 @@ END
 -- Retroactively compute the lot Qty and Weight. 
 --------------------------------------------------------------------
 BEGIN 
-	UPDATE	dbo.tblICLot
-	SET		dblQty = 0
-			,dblWeight = 0 
-	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
+	UPDATE	l
+	SET		l.dblQty = 0
+			,l.dblWeight = 0 
+	FROM	tblICLot l INNER JOIN tblICItem i
+				ON l.intItemId = i.intItemId
+	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	UpdateLot
-	SET		dblQty = (
+	SET		UpdateLot.dblQty = (
 				SELECT	ISNULL(
 							SUM (
 								dbo.fnCalculateQtyBetweenUOM(
@@ -554,12 +640,17 @@ BEGIN
 							ON InvTrans.intLotId = Lot.intLotId 
 				WHERE	Lot.intLotId = UpdateLot.intLotId			
 			)
-	FROM	dbo.tblICLot UpdateLot 
-	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
+	FROM	tblICLot UpdateLot INNER JOIN tblICItem i
+				ON UpdateLot.intItemId = i.intItemId
+	WHERE	UpdateLot.intItemId = ISNULL(@intItemId, UpdateLot.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	UPDATE	dbo.tblICLot
-	SET		dblWeight = dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblWeightPerQty, 0)) 	
-	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
+	UPDATE	l
+	SET		l.dblWeight = dbo.fnMultiply(ISNULL(l.dblQty, 0), ISNULL(l.dblWeightPerQty, 0)) 	
+	FROM	tblICLot l INNER JOIN tblICItem i
+				ON l.intItemId = i.intItemId
+	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
 ------------------------------------------------------------------------------
@@ -576,8 +667,10 @@ BEGIN
 						AND InvTrans.dblQty > 0 
 				ORDER BY InvTrans.dtmDate DESC 
 			)
-	FROM	tblICItemPricing ItemPricing
-	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
+	FROM	tblICItemPricing ItemPricing INNER JOIN tblICItem i
+				ON ItemPricing.intItemId = i.intItemId
+	WHERE	ItemPricing.intItemId = ISNULL(@intItemId, ItemPricing.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	tblICItemPricing 
 	SET		dblLastCost = ISNULL(dblLastCost, 0.00) 
@@ -593,20 +686,57 @@ BEGIN
 						AND InvTrans.dblQty > 0 
 				ORDER BY InvTrans.dtmDate DESC 
 			)
-	FROM	tblICLot Lot
-	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
+	FROM	tblICLot Lot INNER JOIN tblICItem i
+				ON Lot.intItemId = i.intItemId
+	WHERE	Lot.intItemId = ISNULL(@intItemId, Lot.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	tblICLot 
 	SET		dblLastCost = ISNULL(dblLastCost, 0.00) 
 
 	UPDATE	ItemPricing
-	SET		dblAverageCost = ISNULL(
-				dbo.fnRecalculateAverageCost(intItemId, intItemLocationId)
-				, dblLastCost
+	SET		ItemPricing.dblAverageCost = ISNULL(
+				dbo.fnRecalculateAverageCost(ItemPricing.intItemId, ItemPricing.intItemLocationId)
+				, ItemPricing.dblLastCost
 			) 
-			, ysnIsPendingUpdate = 1 
-	FROM	dbo.tblICItemPricing ItemPricing 
-	WHERE	intItemId = ISNULL(@intItemId, intItemId) 
+			, ItemPricing.ysnIsPendingUpdate = 1 
+	FROM	dbo.tblICItemPricing ItemPricing INNER JOIN tblICItem i
+				ON ItemPricing.intItemId = i.intItemId
+	WHERE	ItemPricing.intItemId = ISNULL(@intItemId, ItemPricing.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+END 
+
+------------------------------------------------------------------------------
+-- Retroactively compute the total category cost, retail, and average GM.
+------------------------------------------------------------------------------
+BEGIN 
+	UPDATE	CategoryPricing 
+	SET		dblTotalCostValue = ISNULL(T.costTotal, 0) 
+			,dblTotalRetailValue = ISNULL(T.retailTotal, 0) 
+			,dblAverageMargin = 
+					CASE 
+						WHEN ISNULL(T.retailTotal, 0) <> 0 THEN 
+							dbo.fnDivide(
+								(
+									ISNULL(T.retailTotal, 0)
+									- ISNULL(T.costTotal, 0) 
+								)
+								, ISNULL(T.retailTotal, 0)
+							)						
+						ELSE 
+							0.00
+					END
+	FROM	tblICCategory Category INNER JOIN tblICCategoryPricing CategoryPricing 
+				ON Category.intCategoryId = CategoryPricing.intCategoryId			
+			OUTER APPLY (
+				SELECT	costTotal = SUM(ISNULL(t.dblCategoryCostValue, 0)) 
+						,retailTotal = SUM(ISNULL(t.dblCategoryRetailValue, 0)) 
+				FROM	dbo.tblICInventoryTransaction t
+				WHERE	t.intCategoryId = CategoryPricing.intCategoryId
+						AND t.intItemLocationId = CategoryPricing.intItemLocationId
+			) T
+	WHERE	Category.ysnRetailValuation = 1
+			AND ISNULL(CategoryPricing.intCategoryId, 0) = COALESCE(@intCategoryId, CategoryPricing.intCategoryId, 0) 
 END 
 
 -- Execute the repost stored procedure
@@ -626,6 +756,9 @@ BEGIN
 			,@dblQty AS NUMERIC(38, 20)
 			,@intTransactionTypeId AS INT
 			,@strTransactionType AS NVARCHAR(50) 
+			,@dblUnitRetail NUMERIC(38, 20)
+			,@dblCategoryCostValue NUMERIC(38, 20)
+			,@dblCategoryRetailValue NUMERIC(38, 20)
 
 	DECLARE @AVERAGECOST AS INT = 1
 			,@FIFO AS INT = 2
@@ -652,6 +785,9 @@ BEGIN
 					,@intTransactionId = intTransactionId
 					,@dblQty = dblQty 
 					,@intTransactionTypeId = intTransactionTypeId
+					,@dblUnitRetail = dblUnitRetail
+					,@dblCategoryCostValue = dblCategoryCostValue
+					,@dblCategoryRetailValue = dblCategoryRetailValue
 			FROM	#tmpICInventoryTransaction
 			ORDER BY dtmDate ASC, id ASC, intSortByQty ASC
 		END 
@@ -665,6 +801,9 @@ BEGIN
 					,@intTransactionId = intTransactionId
 					,@dblQty = dblQty 
 					,@intTransactionTypeId = intTransactionTypeId
+					,@dblUnitRetail = dblUnitRetail
+					,@dblCategoryCostValue = dblCategoryCostValue
+					,@dblCategoryRetailValue = dblCategoryRetailValue
 			FROM	#tmpICInventoryTransaction
 			ORDER BY id2 ASC, id ASC
 		END 
@@ -2102,6 +2241,8 @@ BEGIN
 						,strActualCostId 
 						,intForexRateTypeId
 						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -2147,7 +2288,7 @@ BEGIN
 																				dbo.fnCalculateCostBetweenUOM(ISNULL(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId), ReceiptItem.intWeightUOMId, ReceiptItem.dblUnitCost) 
 																				, ISNULL(ReceiptItem.dblNet, 0)
 																			)
-																			,ISNULL(AggregrateItemLots.dblTotalWeight, 1) 
+																			,ISNULL(AggregrateItemLots.dblTotalNet, 1) 
 																		)
 															END 
 
@@ -2202,7 +2343,21 @@ BEGIN
 						,RebuildInvTrans.strActualCostId
 						,RebuildInvTrans.intForexRateTypeId
 						,RebuildInvTrans.dblForexRate
-
+						,intCategoryId = RebuildInvTrans.intCategoryId
+						,dblUnitRetail = 
+							dbo.fnCalculateReceiptUnitCost(
+								ReceiptItem.intItemId
+								,ReceiptItem.intUnitMeasureId		
+								,ReceiptItem.intCostUOMId
+								,ReceiptItem.intWeightUOMId
+								,ReceiptItem.dblUnitRetail
+								,ReceiptItem.dblNet
+								,ReceiptItemLot.intLotId
+								,ReceiptItemLot.intItemUnitMeasureId
+								,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
+								,NULL--DetailItem.ysnSubCurrency
+								,NULL--Header.intSubCurrencyCents
+							)
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt
@@ -2216,7 +2371,7 @@ BEGIN
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
 						OUTER APPLY (
-							SELECT  dblTotalWeight = SUM(
+							SELECT  dblTotalNet = SUM(
 										CASE	WHEN  ISNULL(ril.dblGrossWeight, 0) - ISNULL(ril.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
 													ISNULL(dbo.fnCalculateQtyBetweenUOM(ril.intItemUnitMeasureId, ri.intWeightUOMId, ril.dblQuantity), 0) 
 												ELSE 
@@ -2365,74 +2520,6 @@ BEGIN
 						GOTO _EXIT_WITH_ERROR
 					END 				
 				END
-
-				---- Rebuild the GL Entries on Other Charges involved in the Inventory Cost. 
-				--BEGIN 
-				--	-- Delete the GL Detail related to the other charges. 
-				--	DELETE  gd 
-				--	FROM	tblGLDetail gd INNER JOIN (
-				--				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-				--					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-				--			)
-				--				ON 
-				--				gd.strTransactionId = r.strReceiptNumber
-				--				AND gd.intTransactionId = r.intInventoryReceiptId
-				--				AND gd.intJournalLineNo = ri.intInventoryReceiptItemId
-				--	WHERE	gd.strBatchId = @strBatchId
-				--			AND gd.strTransactionId = @strTransactionId
-				--			AND ri.intItemId = ISNULL(@intItemId, ri.intItemId)				
-							
-				--	DECLARE @ItemWithOtherCharge AS INT = ISNULL(@intItemId, -1)							
-
-				--	-- Re-create the other charge GL entries. 
-				--	INSERT INTO @GLEntries (
-				--				[dtmDate] 
-				--				,[strBatchId]
-				--				,[intAccountId]
-				--				,[dblDebit]
-				--				,[dblCredit]
-				--				,[dblDebitUnit]
-				--				,[dblCreditUnit]
-				--				,[strDescription]
-				--				,[strCode]
-				--				,[strReference]
-				--				,[intCurrencyId]
-				--				,[dblExchangeRate]
-				--				,[dtmDateEntered]
-				--				,[dtmTransactionDate]
-				--				,[strJournalLineDescription]
-				--				,[intJournalLineNo]
-				--				,[ysnIsUnposted]
-				--				,[intUserId]
-				--				,[intEntityId]
-				--				,[strTransactionId]
-				--				,[intTransactionId]
-				--				,[strTransactionType]
-				--				,[strTransactionForm]
-				--				,[strModuleName]
-				--				,[intConcurrencyId]
-				--				,[dblDebitForeign]	
-				--				,[dblDebitReport]	
-				--				,[dblCreditForeign]	
-				--				,[dblCreditReport]	
-				--				,[dblReportingRate]	
-				--				,[dblForeignRate]
-				--				,[strRateType]
-				--			)	
-				--	EXEC @intReturnId = dbo.uspICPostInventoryReceiptOtherCharges 
-				--		@intTransactionId
-				--		,@strBatchId
-				--		,@intEntityUserSecurityId
-				--		,@intTransactionTypeId
-				--		,1
-				--		,@ItemWithOtherCharge  -- This is only used when rebuilding the stocks. 	
-				
-				--	IF @intReturnId <> 0 
-				--	BEGIN 
-				--		--PRINT 'Error found in uspICPostInventoryReceiptOtherCharges'
-				--		GOTO _EXIT_WITH_ERROR
-				--	END 	
-				--END 
 			END 									
 								
 			ELSE 
@@ -2488,6 +2575,10 @@ BEGIN
 						,strActualCostId 
 						,intForexRateTypeId
 						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
+						,dblAdjustRetailValue
+						,intCategoryAdjustmentType
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -2540,6 +2631,10 @@ BEGIN
 						,RebuildInvTrans.strActualCostId
 						,RebuildInvTrans.intForexRateTypeId
 						,RebuildInvTrans.dblForexRate
+						,intCategoryId = RebuildInvTrans.intCategoryId 
+						,dblUnitRetail = RebuildInvTrans.dblUnitRetail
+						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
+						,intCategoryAdjustmentType = RebuildInvTrans.intTransactionTypeId
 
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 

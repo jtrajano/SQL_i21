@@ -40,6 +40,29 @@ IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrder
 	END
 ELSE
 	BEGIN
+		DECLARE @EntityCustomerId INT
+		DECLARE @TermsId INT
+
+		select @EntityCustomerId = intEntityCustomerId,
+			@TermsId = intTermId
+			from tblSOSalesOrder with(nolock) where intSalesOrderId = @SalesOrderId
+
+		if exists(select top 1 1 from tblEMEntityType with(nolock) where intEntityId = @EntityCustomerId and strType = 'Prospect')
+			and not exists(select top 1 1 from tblEMEntityType with(nolock) where intEntityId = @EntityCustomerId and strType = 'Customer')
+		BEGIN
+			update tblEMEntityType 
+				set strType = 'Customer'
+					where intEntityId = @EntityCustomerId and strType = 'Prospect'
+						and not exists ( select top 1 1 
+											from tblEMEntityType 
+												where intEntityId = @EntityCustomerId 
+													and strType ='Customer')
+
+			update tblARCustomer set intTermsId = @TermsId where intEntityId = @EntityCustomerId
+		END
+
+
+
 		--INSERT TO INVOICE
 		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, NULL, 0, @NewInvoiceId OUTPUT
 		

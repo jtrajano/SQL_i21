@@ -6463,7 +6463,6 @@
     <Build Include="dbo\Stored Procedures\uspGLInsertImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetDailyStockPosition.sql" />
     <Build Include="dbo\Tables\tblSCTicketDiscountLVStaging.sql" />
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\34_ReplicationConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\MF\MAS500 Recipe Import.sql" />
     <Build Include="dbo\Views\vyuICItemLite.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceDetails.sql" />
@@ -6526,7 +6525,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportActualOutTurn.sql" />
     <Build Include="dbo\Tables\tblSMReplicationTable.sql" />
     <Build Include="dbo\Tables\tblSMReplicationConfigurationTable.sql" />
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\35_ReplicationTable.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\34_ReplicationTable.sql" />
     <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentSummaryReport.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentDetailReport.sql" />
@@ -6544,6 +6543,17 @@
     <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentOpeningInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentOpeningInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGCreateWeightClaims.sql" />
+    <Build Include="dbo\Functions\fnCTGetTranslatedExpression.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnColumns.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturn.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetGRNIntakeComparison.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLotQualityOutturnDetail.sql" />
+    <Build Include="dbo\Views\vyuSTPaymentOptionSummaryReport.sql" />
+    <Build Include="dbo\Views\vyuSTPaymentOptionDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRPreCrushPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetShippingAdviceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

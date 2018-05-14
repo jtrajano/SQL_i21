@@ -3962,7 +3962,7 @@ IF @recap = 1
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE A.[dblExchangeRate] END
+			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1) END
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]
@@ -3983,7 +3983,7 @@ IF @recap = 1
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) CreditUnit
 		OUTER APPLY (
-			SELECT SMCERT.strCurrencyExchangeRateType
+			SELECT SMCERT.strCurrencyExchangeRateType,dblBaseInvoiceTotal,dblInvoiceTotal
 			FROM dbo.tblARInvoice I
 			OUTER APPLY (
 				SELECT TOP 1 intCurrencyExchangeRateTypeId

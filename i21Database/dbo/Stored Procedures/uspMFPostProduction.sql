@@ -205,7 +205,7 @@ BEGIN
 		,SUM((
 				CASE 
 						WHEN intCostDriverId = 2
-							THEN  ISNULL(RI.dblCostRate, 0)
+							THEN  ISNULL(P.dblStandardCost, 0)
 						ELSE ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblCostRate, 0)
 						END
 				) / R.dblQuantity)

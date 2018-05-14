@@ -12,7 +12,9 @@ FROM
 	vyuGLAccountView 
 WHERE 
 	intAccountId IN (SELECT 
-						intSalesAccountId  
+						intSalesAccountId = case when strType = 'Other Charge'  then intOtherChargeIncomeAccountId  
+											when strType = 'Non-Inventory' or strType = 'Service' then intGeneralAccountId  											
+											else intSalesAccountId end
 					   FROM 
 						vyuARGetItemAccount
 					   WHERE 

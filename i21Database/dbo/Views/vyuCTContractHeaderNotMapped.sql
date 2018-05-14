@@ -68,7 +68,8 @@ AS
 						EL.strLocationName			AS	strEntityDefaultLocation,
 						PO.intNoOfDays				AS	intPositionNoOfDays,
 						BK.strBook,
-						SB.strSubBook
+						SB.strSubBook,
+						MR.strCurrency				AS	strMarketMainCurrency
 
 				FROM	tblCTContractHeader					CH	
 				
@@ -110,6 +111,7 @@ AS
 				JOIN	tblICUnitMeasure					U6	ON	U6.intUnitMeasureId					=		MA.intUnitMeasureId					LEFT
 				
 				JOIN	tblSMCurrency						CR	ON	CR.intCurrencyID					=		MA.intCurrencyId					LEFT
+				JOIN	tblSMCurrency						MR	ON	MR.intCurrencyID					=		CR.intMainCurrencyId				LEFT
 				JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
 				JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId					LEFT
 				JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT

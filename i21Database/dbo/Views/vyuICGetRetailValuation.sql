@@ -3,6 +3,7 @@ AS
 
 SELECT	intCategoryId
 		,intCategoryLocationId
+		,intRegisterDepartmentId
 		,strLocationName
 		,strCategoryCode	
 		,strCategoryDescription
@@ -17,4 +18,5 @@ SELECT	intCategoryId
 		,dblEndingCost
 		,dtmDateFrom
 		,dtmDateTo
+		,dtmDate = dtmDateFrom
 FROM 	tblICRetailValuation 
