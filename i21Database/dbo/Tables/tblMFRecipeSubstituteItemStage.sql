@@ -10,7 +10,7 @@
     [strMaxSubstituteRatio] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT 100,
 	[dtmCreated] [datetime] NULL DEFAULT GetDate(),
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intRowNo] INT Default 0,
 	CONSTRAINT [PK_tblMFRecipeSubstituteItemStage_intRecipeSubstituteItemStageId] PRIMARY KEY ([intRecipeSubstituteItemStageId]),
 )

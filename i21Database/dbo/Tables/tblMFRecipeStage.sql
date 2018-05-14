@@ -19,7 +19,7 @@
 	[strOneLinePrint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmCreated] [datetime] NULL DEFAULT GetDate(),
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intRowNo] INT Default 0,
 	CONSTRAINT [PK_tblMFRecipeStage_intRecipeStageId] PRIMARY KEY ([intRecipeStageId]), 
 )
