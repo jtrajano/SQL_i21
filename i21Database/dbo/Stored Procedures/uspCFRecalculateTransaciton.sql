@@ -3062,7 +3062,32 @@ BEGIN
 	BEGIN
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 	END
-	ELSE
+	ELSE IF (@strTransactionType = 'Foreign Sale')
+	BEGIN
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
+		IF(ISNULL(@dblInventoryCost,0) = 0)
+		BEGIN
+			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@dblInventoryCost,0)
+		END
+		ELSE
+		BEGIN
+			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@TransferCost,0)
+		END
+
+
+	END
+
 	BEGIN
 		--SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
 		--FROM tblCFTransaction AS cfTransaction
@@ -3080,14 +3105,15 @@ BEGIN
 
 		IF(ISNULL(@dblInventoryCost,0) = 0)
 		BEGIN
-			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@dblInventoryCost,0)
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
 		END
 		ELSE
 		BEGIN
-			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@TransferCost,0)
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@TransferCost,0)
 		END
-		
+
 	END
+
 
 
 	---------------------------------------------------
