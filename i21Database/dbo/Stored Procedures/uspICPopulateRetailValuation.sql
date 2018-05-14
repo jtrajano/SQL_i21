@@ -87,7 +87,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					AND il.intLocationId = rv.intCategoryLocationId		
 					AND ty.strName = 'Inventory Receipt'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
-					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, 0)) = 1
+					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
 -- Populate the sales total
@@ -105,7 +105,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					AND il.intLocationId = rv.intCategoryLocationId		
 					AND ty.strName = 'Invoice'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
-					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, 0)) = 1
+					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 		
 -- Populate the mark ups/downs
@@ -123,7 +123,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					AND il.intLocationId = rv.intCategoryLocationId		
 					AND ty.strName = 'Retail Mark Ups/Downs'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
-					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, 0)) = 1
+					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
 -- Populate the write offs
@@ -141,7 +141,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 					AND il.intLocationId = rv.intCategoryLocationId		
 					AND ty.strName = 'Retail Write Offs'
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
-					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, 0)) = 1
+					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
 -- Populate the ending retail
@@ -157,7 +157,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
 					AND il.intLocationId = rv.intCategoryLocationId		
-					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, 0)) = 1
+					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
 -- Populate the ending cost 
@@ -173,7 +173,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
 					AND il.intLocationId = rv.intCategoryLocationId		
-					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, 0)) = 1
+					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions
 
 -- Update the Gross Margin %
