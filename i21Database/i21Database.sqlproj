@@ -6553,6 +6553,7 @@
     <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRPreCrushPositionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingAdviceReport.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryViewAsonDateByItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
