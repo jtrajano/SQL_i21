@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	@dtmStartDate AS DATETIME 
+	,@strCategoryCode AS NVARCHAR(50) = NULL 
 	,@strItemNo AS NVARCHAR(50) = NULL 
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
