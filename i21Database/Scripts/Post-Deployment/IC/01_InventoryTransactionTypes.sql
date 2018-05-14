@@ -202,6 +202,18 @@ USING	(
 		SELECT id = 48
 				,name = 'Inventory Adjustment - Change Lot Weight'
 				,form = 'Inventory Adjustment'
+		UNION ALL
+		SELECT id = 49
+				,name = 'Retail Mark Ups/Downs'
+				,form = NULL 
+		UNION ALL
+		SELECT id = 50
+				,name = 'Retail Write Offs'
+				,form = NULL 
+		UNION ALL
+		SELECT id = 51
+				,name = 'Sales Return'
+				,form = NULL 
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id

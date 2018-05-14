@@ -45,7 +45,22 @@
 	[dtmDateCreated]			DATETIME NULL,
 	[intCreatedUserId]			INT NULL,
 	[intCreatedEntityId]		INT NULL,
+
+	[ysnLockedInventory]		BIT NULL DEFAULT(0),
+	[intItemOwnerId]			INT NULL,
+	[strContainerNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 		
+	[strCondition]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+	[intSeasonCropYear]			INT NULL,
 	[intCompanyId]				INT NULL, 
+	[intBookId]					INT NULL,
+	[intSubBookId]				INT NULL,
+	[strCertificate]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+	[intProducerId]				INT	NULL,
+	[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
+	[strTrackingNumber]			NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
+    [dtmDateModified]			DATETIME NULL,
+    [intCreatedByUserId]		INT NULL,
+    [intModifiedByUserId]		INT NULL,
 	CONSTRAINT [PK_tblICBackupDetailLot] PRIMARY KEY CLUSTERED ([intBackupDetailId] ASC),
 	CONSTRAINT [FK_tblICBackupDetailLot_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])
 )
