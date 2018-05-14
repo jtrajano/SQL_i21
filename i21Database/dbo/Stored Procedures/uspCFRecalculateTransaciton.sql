@@ -3054,7 +3054,7 @@ BEGIN
 	SELECT TOP 1 @dblMarginNetPrice = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 	--SELECT TOP 1 @dblMarginNetPrice = dblCalculatedAmount 
-	--FROM @tblTransactionPrice 
+	--FROM @tblTransactionPrice  
 	--WHERE strTransactionPriceId = 'Net Price'
 
 
@@ -3062,7 +3062,32 @@ BEGIN
 	BEGIN
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 	END
-	ELSE
+	ELSE IF (@strTransactionType = 'Foreign Sale')
+	BEGIN
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
+		IF(ISNULL(@dblInventoryCost,0) = 0)
+		BEGIN
+			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@dblInventoryCost,0)
+		END
+		ELSE
+		BEGIN
+			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@TransferCost,0)
+		END
+
+
+	END
+
 	BEGIN
 		--SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
 		--FROM tblCFTransaction AS cfTransaction
@@ -3078,8 +3103,17 @@ BEGIN
 		WHERE intItemId = @intItemId
 		AND intLocationId = @intLocationId
 
-		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
+		IF(ISNULL(@dblInventoryCost,0) = 0)
+		BEGIN
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
+		END
+		ELSE
+		BEGIN
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@TransferCost,0)
+		END
+
 	END
+
 
 
 	---------------------------------------------------
@@ -3686,6 +3720,94 @@ BEGIN
 	DECLARE @dblOutOriginalPumpPrice		NUMERIC(18,6)
 
 
+
+	
+	
+	---------------------------------------------------
+	--					INDEX PRICING				 --
+	---------------------------------------------------
+	IF((@intPriceIndexId > 0 AND @intPriceIndexId IS NOT NULL) 
+	AND (@strPriceIndexId IS NOT NULL) 
+	AND (@dblPriceIndexRate <=0 OR @dblPriceIndexRate IS NULL)
+	AND (ISNULL(@ysnCaptiveSite,0) = 0))
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'No index price found.')
+	END
+	---------------------------------------------------
+	--					INDEX PRICING				 --
+	---------------------------------------------------
+
+
+	---------------------------------------------------
+	--					PRICE OUT					 --
+	---------------------------------------------------
+	IF(@IsImporting = 1)
+	BEGIN
+		INSERT INTO ##tblCFTransactionPriceType
+		(
+			[strTransactionPriceId]
+			,[dblTaxOriginalAmount]	
+			,[dblTaxCalculatedAmount]
+		)
+		SELECT 
+			'Gross Price'
+			,@dblOriginalGrossPrice
+			,@dblCalculatedGrossPrice
+
+		INSERT INTO ##tblCFTransactionPriceType
+		(
+			[strTransactionPriceId]
+			,[dblTaxOriginalAmount]	
+			,[dblTaxCalculatedAmount]
+		)
+		SELECT 
+			'Net Price'
+			,@dblOriginalNetPrice
+			,@dblCalculatedNetPrice
+
+		INSERT INTO ##tblCFTransactionPriceType
+		(
+			[strTransactionPriceId]
+			,[dblTaxOriginalAmount]	
+			,[dblTaxCalculatedAmount]
+		)
+		SELECT 
+			'Total Amount'
+			,@dblOriginalTotalPrice
+			,@dblCalculatedTotalPrice
+	
+			
+		UPDATE tblCFTransaction 
+		SET 
+		dblCalculatedGrossPrice			=  @dblCalculatedGrossPrice
+		,dblOriginalGrossPrice			=  @dblOriginalGrossPrice	
+		,dblCalculatedNetPrice			=  @dblCalculatedNetPrice	
+		,dblOriginalNetPrice			=  @dblOriginalNetPrice	
+		,dblCalculatedTotalPrice		=  @dblCalculatedTotalPrice
+		,dblOriginalTotalPrice			=  @dblOriginalTotalPrice	
+		WHERE intTransactionId			=  @intTransactionId
+
+	END
+	ELSE
+	BEGIN
+			
+		UPDATE tblCFTransaction 
+		SET 
+		dblCalculatedGrossPrice			=  @dblCalculatedGrossPrice
+		,dblOriginalGrossPrice			=  @dblOriginalGrossPrice	
+		,dblCalculatedNetPrice			=  @dblCalculatedNetPrice	
+		,dblOriginalNetPrice			=  @dblOriginalNetPrice	
+		,dblCalculatedTotalPrice		=  @dblCalculatedTotalPrice
+		,dblOriginalTotalPrice			=  @dblOriginalTotalPrice	
+		WHERE intTransactionId			=  @intTransactionId
+	END
+
+	---------------------------------------------------
+	--					PRICE OUT					 --
+	---------------------------------------------------
+
+	
 	SELECT TOP 1
 	 @dblOutOriginalTotalPrice		= dblOriginalTotalPrice	
 	,@dblOutCalculatedTotalPrice	= dblCalculatedTotalPrice
@@ -3858,7 +3980,6 @@ BEGIN
 	--					PRICING OUT					 --
 	---------------------------------------------------
 
-
 	---------------------------------------------------
 	--					TAXES OUT					 --
 	---------------------------------------------------
@@ -3913,89 +4034,6 @@ BEGIN
 	--					TAXES OUT					 --
 	---------------------------------------------------
 
-	
-	---------------------------------------------------
-	--					INDEX PRICING				 --
-	---------------------------------------------------
-	IF((@intPriceIndexId > 0 AND @intPriceIndexId IS NOT NULL) 
-	AND (@strPriceIndexId IS NOT NULL) 
-	AND (@dblPriceIndexRate <=0 OR @dblPriceIndexRate IS NULL)
-	AND (ISNULL(@ysnCaptiveSite,0) = 0))
-	BEGIN
-		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'No index price found.')
-	END
-	---------------------------------------------------
-	--					INDEX PRICING				 --
-	---------------------------------------------------
 
-
-	---------------------------------------------------
-	--					PRICE OUT					 --
-	---------------------------------------------------
-	IF(@IsImporting = 1)
-	BEGIN
-		INSERT INTO ##tblCFTransactionPriceType
-		(
-			[strTransactionPriceId]
-			,[dblTaxOriginalAmount]	
-			,[dblTaxCalculatedAmount]
-		)
-		SELECT 
-			'Gross Price'
-			,@dblOriginalGrossPrice
-			,@dblCalculatedGrossPrice
-
-		INSERT INTO ##tblCFTransactionPriceType
-		(
-			[strTransactionPriceId]
-			,[dblTaxOriginalAmount]	
-			,[dblTaxCalculatedAmount]
-		)
-		SELECT 
-			'Net Price'
-			,@dblOriginalNetPrice
-			,@dblCalculatedNetPrice
-
-		INSERT INTO ##tblCFTransactionPriceType
-		(
-			[strTransactionPriceId]
-			,[dblTaxOriginalAmount]	
-			,[dblTaxCalculatedAmount]
-		)
-		SELECT 
-			'Total Amount'
-			,@dblOriginalTotalPrice
-			,@dblCalculatedTotalPrice
-	
-			
-		UPDATE tblCFTransaction 
-		SET 
-		dblCalculatedGrossPrice			=  @dblCalculatedGrossPrice
-		,dblOriginalGrossPrice			=  @dblOriginalGrossPrice	
-		,dblCalculatedNetPrice			=  @dblCalculatedNetPrice	
-		,dblOriginalNetPrice			=  @dblOriginalNetPrice	
-		,dblCalculatedTotalPrice		=  @dblCalculatedTotalPrice
-		,dblOriginalTotalPrice			=  @dblOriginalTotalPrice	
-		WHERE intTransactionId			=  @intTransactionId
-
-	END
-	ELSE
-	BEGIN
-			
-		UPDATE tblCFTransaction 
-		SET 
-		dblCalculatedGrossPrice			=  @dblCalculatedGrossPrice
-		,dblOriginalGrossPrice			=  @dblOriginalGrossPrice	
-		,dblCalculatedNetPrice			=  @dblCalculatedNetPrice	
-		,dblOriginalNetPrice			=  @dblOriginalNetPrice	
-		,dblCalculatedTotalPrice		=  @dblCalculatedTotalPrice
-		,dblOriginalTotalPrice			=  @dblOriginalTotalPrice	
-		WHERE intTransactionId			=  @intTransactionId
-	END
-
-	---------------------------------------------------
-	--					PRICE OUT					 --
-	---------------------------------------------------
 	END 
 	END

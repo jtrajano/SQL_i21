@@ -38,13 +38,14 @@ BEGIN
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
-	INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId AND T.intTicketTypeId = 6
+	INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 	LEFT JOIN tblSMFreightTerms ft
 		ON I.intFreightTermId = ft.intFreightTermId
 	LEFT JOIN tblICFobPoint fp
 		ON fp.strFobPoint = ft.strFobPoint
 	WHERE ID.intInvoiceId = @TransactionId
-	AND ISNULL(ID.intInventoryShipmentItemId, 0) <> 0 
+	  AND (T.intTicketTypeId = 9 OR (T.intTicketTypeId = 6 AND T.strInOutFlag = 'O'))
+	  AND ISNULL(ID.intInventoryShipmentItemId, 0) <> 0 
 					
 	UPDATE @ItemsToIncreaseInTransitDirect
 	SET dblQty = CASE WHEN @Negate = 0 THEN dblQty ELSE -dblQty END

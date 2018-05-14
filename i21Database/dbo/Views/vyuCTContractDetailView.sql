@@ -52,6 +52,7 @@ AS
 												ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))			AS	dblAvailableQtyInItemStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0))			AS	dblBalanceInItemStockUOM,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblQuantity,0))		AS	dblQuantityInItemStockUOM,
+			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblQuantityPerLoad,0))	AS	dblQtyPerLoadInItemStockUOM,
 			CASE	WHEN	CH.ysnLoad = 1
 					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
 					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												

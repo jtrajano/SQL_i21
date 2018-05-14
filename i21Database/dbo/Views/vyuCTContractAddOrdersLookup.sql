@@ -85,6 +85,7 @@ SELECT	  CD.intContractDetailId
 		, CD.intCurrencyId
 		, Terms.intFreightTermId
 		, Terms.strFreightTerm
+		,CD.dblQuantityPerLoad
 
 FROM	tblCTContractDetail CD	
 	CROSS APPLY tblCTCompanyPreference CP
