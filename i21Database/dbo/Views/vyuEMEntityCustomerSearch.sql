@@ -51,6 +51,7 @@ SELECT DISTINCT
 	, intTermsId			= CUSTOMER.intTermsId
 	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds
 	, ysnProspect			= entityType.Prospect
+	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
