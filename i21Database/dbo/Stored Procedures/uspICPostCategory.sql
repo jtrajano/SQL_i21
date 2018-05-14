@@ -47,8 +47,29 @@ DECLARE @AVERAGECOST AS INT = 1
 
 DECLARE @AdjustTypeCategorySales AS INT = 1
 		,@AdjustTypeCategorySalesReturn AS INT = 2
-		,@AdjustTypeCategoryMarkupOrMarkDown AS INT = 3
-		,@AdjustTypeCategoryWriteOff AS INT = 4
+		,@AdjustTypeCategoryMarkupOrMarkDown AS INT --= 3
+		,@AdjustTypeCategoryWriteOff AS INT --= 4
+
+SELECT	TOP 1 @AdjustTypeCategorySales = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Invoice'
+
+SELECT	TOP 1 @AdjustTypeCategorySalesReturn = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Sales Return'
+
+SELECT	TOP 1 @AdjustTypeCategorySalesReturn = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Inventory Return'
+
+SELECT	TOP 1 @AdjustTypeCategoryMarkupOrMarkDown = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Retail Mark Ups/Downs'
+
+SELECT	TOP 1 @AdjustTypeCategoryWriteOff = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Retail Write Offs'
+
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;

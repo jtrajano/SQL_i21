@@ -34,7 +34,10 @@ DECLARE @intId AS INT
 		,@strActualCostId AS NVARCHAR(50)
 		,@intForexRateTypeId AS INT
 		,@dblForexRate NUMERIC(38, 20)
-
+		,@dblUnitRetail AS NUMERIC(38, 20)
+		,@intCategoryId INT 
+		,@dblAdjustRetailValue NUMERIC(38, 20)
+		,@intCategoryAdjustmentType AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)		
@@ -45,7 +48,8 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
-		
+		,@CATEGORY AS INT = 6
+				
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_VARIANCE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
@@ -77,7 +81,6 @@ SELECT  intId
 		,dblCost
 		,dblSalesPrice
 		,intCurrencyId
-		--,dblExchangeRate
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -88,6 +91,10 @@ SELECT  intId
 		,strActualCostId
 		,intForexRateTypeId
 		,dblForexRate 
+		,dblUnitRetail
+		,intCategoryId
+		,dblAdjustRetailValue
+		,intCategoryAdjustmentType
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -104,7 +111,6 @@ FETCH NEXT FROM loopItems INTO
 	,@dblCost
 	,@dblSalesPrice
 	,@intCurrencyId
-	--,@dblExchangeRate
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -114,7 +120,12 @@ FETCH NEXT FROM loopItems INTO
 	,@intStorageLocationId
 	,@strActualCostId
 	,@intForexRateTypeId
-	,@dblForexRate;
+	,@dblForexRate
+	,@dblUnitRetail
+	,@intCategoryId
+	,@dblAdjustRetailValue
+	,@intCategoryAdjustmentType
+;
 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -155,7 +166,6 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -182,7 +192,6 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -209,7 +218,6 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -237,7 +245,6 @@ BEGIN
 			,@dblCost
 			,@dblSalesPrice
 			,@intCurrencyId
-			--,@dblExchangeRate
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -247,6 +254,36 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId 
 			,@dblForexRate;
+	END
+
+	-- CATEGORY 
+	IF (@CostingMethod = @CATEGORY AND @strActualCostId IS NULL)
+	BEGIN 
+		EXEC dbo.uspICPostCategory
+			@intCategoryId
+			,@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@dtmDate
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblUnitRetail
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@strTransactionForm
+			,@intEntityUserSecurityId
+			,@intForexRateTypeId
+			,@dblForexRate
+			,@dblAdjustRetailValue
+			,@intCategoryAdjustmentType
 	END
 
 	-- ACTUAL COST 
@@ -282,7 +319,6 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
@@ -308,7 +344,6 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
@@ -334,7 +369,6 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
@@ -361,7 +395,6 @@ BEGIN
 					,@dblCost
 					,@dblSalesPrice
 					,@intCurrencyId
-					--,@dblExchangeRate
 					,@intTransactionId
 					,@intTransactionDetailId
 					,@strTransactionId
@@ -372,6 +405,35 @@ BEGIN
 					,@intForexRateTypeId 
 					,@dblForexRate;
 			END 
+
+			ELSE IF @intCostingMethod = @CATEGORY
+			BEGIN 
+				EXEC dbo.uspICPostCategory
+					@intCategoryId
+					,@intItemId
+					,@intItemLocationId
+					,@intItemUOMId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@dtmDate
+					,@dblQty
+					,@dblUOMQty
+					,@dblCost
+					,@dblUnitRetail
+					,@dblSalesPrice
+					,@intCurrencyId
+					,@intTransactionId
+					,@intTransactionDetailId
+					,@strTransactionId
+					,@strBatchId
+					,@intTransactionTypeId
+					,@strTransactionForm
+					,@intEntityUserSecurityId
+					,@intForexRateTypeId
+					,@dblForexRate
+					,@dblAdjustRetailValue
+					,@intCategoryAdjustmentType
+			END
 		END 
 		ELSE 
 		BEGIN 
@@ -388,7 +450,6 @@ BEGIN
 				,@dblCost 
 				,@dblSalesPrice 
 				,@intCurrencyId 
-				--,@dblExchangeRate 
 				,@intTransactionId 
 				,@intTransactionDetailId 
 				,@strTransactionId 
@@ -438,7 +499,7 @@ BEGIN
 		-- If matched, update the average cost, last cost, and standard cost
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
+			SET		dblAverageCost = CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost) ELSE ItemPricing.dblAverageCost END 
 					,dblLastCost = CASE WHEN StockToUpdate.Qty > 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblLastCost END 
 					,dblStandardCost = 
 									CASE WHEN StockToUpdate.Qty > 0 THEN 
@@ -477,7 +538,7 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
-				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost)
+				,CASE WHEN @strActualCostId IS NULL THEN dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost) ELSE 0 END 
 				,StockToUpdate.Cost
 				,StockToUpdate.Cost
 				,1
@@ -518,7 +579,6 @@ BEGIN
 		,@dblCost
 		,@dblSalesPrice
 		,@intCurrencyId
-		--,@dblExchangeRate
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -528,7 +588,12 @@ BEGIN
 		,@intStorageLocationId
 		,@strActualCostId
 		,@intForexRateTypeId
-		,@dblForexRate;
+		,@dblForexRate
+		,@dblUnitRetail
+		,@intCategoryId
+		,@dblAdjustRetailValue
+		,@intCategoryAdjustmentType
+	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
@@ -720,8 +785,8 @@ BEGIN
 	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
 				on i2p.intItemId = i.intItemId
 				AND i2p.intItemLocationId = i.intItemLocationId			
-	WHERE	--dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
-			ROUND(i.dblUnitOnHand, 6) = 0 
+	WHERE	ROUND(i.dblUnitOnHand, 6) = 0 
+			AND dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @CATEGORY
 
 	SELECT	TOP 1 
 			@intInventoryTransactionId	= intInventoryTransactionId
