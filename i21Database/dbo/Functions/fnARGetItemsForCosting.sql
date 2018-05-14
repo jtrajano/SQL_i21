@@ -85,7 +85,11 @@ SELECT
 	,[intItemLocationId]		= IST.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ARI.[dtmShipDate]
-	,[dblQty]					= (ARID.[dblQtyShipped] * (CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @Post = 0 THEN -1 ELSE 1 END
+	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
+								   END
+								* (CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN @Post = 0 THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ItemUOM.dblUnitQty
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
@@ -120,9 +124,9 @@ SELECT
 	,[intTransactionDetailId]	= ARID.[intInvoiceDetailId]
 	,[strTransactionId]			= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]		= CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN @CREDIT_MEMO_INVOICE_TYPE ELSE @INVENTORY_INVOICE_TYPE END
-	,[intLotId]					= ARID.[intLotId]
-	,[intSubLocationId]			= ARID.[intCompanyLocationSubLocationId]
-	,[intStorageLocationId]		= ARID.[intStorageLocationId]
+	,[intLotId]					= ISNULL(ARIDL.[intLotId], ARID.[intLotId])
+	,[intSubLocationId]			= ISNULL(LOT.[intSubLocationId], ARID.[intCompanyLocationSubLocationId])
+	,[intStorageLocationId]		= ISNULL(LOT.[intStorageLocationId], ARID.[intStorageLocationId])
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARI.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARI.[intLoadDistributionHeaderId],0) <> 0) THEN ARI.[strActualCostId] ELSE NULL END
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
@@ -144,6 +148,12 @@ INNER JOIN
 INNER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ItemUOM 
 		ON ItemUOM.[intItemUOMId] = ARID.[intItemUOMId]
+LEFT OUTER JOIN
+	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
+		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+LEFT OUTER JOIN
+	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
 	(SELECT [intItemId], [intLocationId], [intItemLocationId], [strType], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK)) IST
 		ON ARID.[intItemId] = IST.[intItemId]
