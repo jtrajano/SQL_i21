@@ -6,37 +6,37 @@ AS
 SELECT 
 	intOrderId = A.intDispatchID
 	,A.strOrderNumber
+	,strOrderStatus = A.strWillCallStatus
 	,A.dtmRequestedDate
 	,strCustomerNumber = D.strEntityNo
 	,D.intEntityId
-	,intSiteId = B.intSiteID
-	,B.intSiteNumber
-	,E.intItemId
-	,E.strItemNo
-	,M.intItemUOMId
-	,dblQuantity = CASE WHEN ISNULL(A.dblMinimumQuantity,0) = 0 THEN A.dblQuantity ELSE A.dblMinimumQuantity END
-	,F.intContractDetailId
-	,G.strContractNumber
-	,F.intContractSeq
-	,A.dblPrice
-	,intTermId = H.intTermID
-	,strTermId = H.strTerm
-	,A.strComments
 	,intUserId = A.intUserID
 	,strUser = I.strUserName
+	,intSiteId = B.intSiteID
+	,B.intSiteNumber
+	,B.strDescription as strSiteName
+	,E.intItemId
+	,E.strItemNo
+	,E.strDescription as strItemDescription
+	,M.intItemUOMId
+	,dblQuantity = CASE WHEN ISNULL(A.dblMinimumQuantity,0) = 0 THEN A.dblQuantity ELSE A.dblMinimumQuantity END
+	,A.dblPrice
+	,F.intContractSeq
+	,F.intContractDetailId
+	,G.strContractNumber		
+	,intTermId = H.intTermID
+	,strTermId = H.strTerm
+	,A.strComments	
 	,intDriverId = A.intDriverID
-	,strDriver = J.strEntityNo
-	,strOrderStatus = A.strWillCallStatus
+	,strDriver = J.strEntityNo	
 	,intRouteId = K.intRouteId
 	,K.strRouteNumber
 	,intStopNumber = L.intSequence
-	,B.intTaxStateID
-	,B.strDescription as strSiteName
-	,N.intShipToId
-	,O.intFreightTermId
+	,B.intTaxStateID	
+	,N.intShipToId	
 	,B.strLocation
 	,B.intLocationId
-	,E.strDescription as strItemDescription
+	,O.intFreightTermId
 	,Q.strSerialNumber
 	,Q.dblTankCapacity
 	,intConcurrencyId = A.intConcurrencyId
