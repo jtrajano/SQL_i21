@@ -3,7 +3,15 @@ GO
 IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDiscountCalculationOption = 'Net Weight')
 BEGIN
 	INSERT INTO tblGRDiscountCalculationOption
-	SELECT 1,'Net Weight',1	
+	SELECT 1,'Net Weight','1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. Y = x * shrink factors tagged as wet<br />3. y * factors tagged as net',1    ,3
+
+END
+ELSE
+BEGIN
+	UPDATE tblGRDiscountCalculationOption
+	SET strDescription = '1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. Y = x * shrink factors tagged as wet<br />3. y * factors tagged as net'
+		, intOrderById = 3
+	WHERE strDiscountCalculationOption = 'Net Weight' 
 END
 GO
 
@@ -11,7 +19,14 @@ GO
 IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDiscountCalculationOption = 'Wet Weight')
 BEGIN
 	INSERT INTO tblGRDiscountCalculationOption
-	SELECT 2,'Wet Weight',1	
+	SELECT 2,'Wet Weight','1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. x * shrink factors tagged as wet',1    ,2
+END
+ELSE
+BEGIN
+	UPDATE tblGRDiscountCalculationOption
+	SET strDescription = '1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. x * shrink factors tagged as wet'
+		, intOrderById = 2
+	WHERE strDiscountCalculationOption = 'Wet Weight' 
 END
 GO
 
@@ -19,7 +34,14 @@ GO
 IF NOT EXISTS(SELECT * FROM tblGRDiscountCalculationOption WHERE strDiscountCalculationOption = 'Gross Weight')
 BEGIN
 	INSERT INTO tblGRDiscountCalculationOption
-	SELECT 3,'Gross Weight',1	
+	SELECT 3,'Gross Weight','(loaded vehicle scale weight - tare) * shrink factor',1    ,1
+END
+ELSE
+BEGIN
+	UPDATE tblGRDiscountCalculationOption
+	SET strDescription = '(loaded vehicle scale weight - tare) * shrink factor'
+		, intOrderById = 1
+	WHERE strDiscountCalculationOption = 'Gross Weight' 
 END
 GO
 
@@ -28,7 +50,14 @@ GO
 IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Net Weight')
 BEGIN
 	INSERT INTO tblGRShrinkCalculationOption
-	SELECT 1,'Net Weight',1	
+	SELECT 1,'Net Weight','1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. Y = x * shrink factors tagged as wet<br />3. y * factors tagged as net',1    ,3
+END
+ELSE
+BEGIN
+	UPDATE tblGRDiscountCalculationOption
+	SET strDescription = '1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. Y = x * shrink factors tagged as wet<br />3. y * factors tagged as net'
+		, intOrderById = 3
+	WHERE strDiscountCalculationOption = 'Net Weight' 
 END
 GO
 
@@ -36,9 +65,17 @@ GO
 IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Wet Weight')
 BEGIN
 	INSERT INTO tblGRShrinkCalculationOption
-	SELECT 2,'Wet Weight',1	
+	SELECT 2,'Wet Weight','1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. x * shrink factors tagged as wet',1    ,2
+END
+ELSE
+BEGIN
+	UPDATE tblGRDiscountCalculationOption
+	SET strDescription = '1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. x * shrink factors tagged as wet'
+		, intOrderById = 2
+	WHERE strDiscountCalculationOption = 'Wet Weight' 
 END
 GO
+
 IF EXISTS(SELECT 1 FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Price Shrink')
 BEGIN
 	UPDATE tblGRShrinkCalculationOption SET strShrinkCalculationOption = 'Gross Weight' WHERE strShrinkCalculationOption = 'Price Shrink'	
@@ -47,7 +84,15 @@ GO
 IF NOT EXISTS(SELECT * FROM tblGRShrinkCalculationOption WHERE strShrinkCalculationOption = 'Gross Weight')
 BEGIN
 	INSERT INTO tblGRShrinkCalculationOption
-	SELECT 3,'Gross Weight',1	
+	SELECT 3,'Gross Weight','(loaded vehicle scale weight - tare) * shrink factor',1    ,1
+
+END
+ELSE
+BEGIN
+	UPDATE tblGRDiscountCalculationOption
+	SET strDescription = '(loaded vehicle scale weight - tare) * shrink factor'
+		, intOrderById = 1
+	WHERE strDiscountCalculationOption = 'Gross Weight' 
 END
 GO
 IF EXISTS(SELECT intUnitMeasureId FROM tblSCScaleSetup)
@@ -312,3 +357,4 @@ BEGIN
 	PRINT 'End checking intEntityId'
 END
 GO
+
