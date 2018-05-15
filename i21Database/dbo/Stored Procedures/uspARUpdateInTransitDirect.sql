@@ -44,8 +44,8 @@ BEGIN
 	LEFT JOIN tblICFobPoint fp
 		ON fp.strFobPoint = ft.strFobPoint
 	WHERE ID.intInvoiceId = @TransactionId
-	  AND (T.intTicketTypeId = 9 OR (T.intTicketTypeId = 6 AND T.strInOutFlag = 'O'))
-	  AND ISNULL(ID.intInventoryShipmentItemId, 0) <> 0 
+	  AND (T.intTicketTypeId = 9 OR (T.intTicketType = 6 AND T.strInOutFlag = 'O'))
+	  AND ISNULL(ID.intTicketId, 0) <> 0 
 					
 	UPDATE @ItemsToIncreaseInTransitDirect
 	SET dblQty = CASE WHEN @Negate = 0 THEN dblQty ELSE -dblQty END
