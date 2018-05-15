@@ -15,32 +15,30 @@ SELECT P.intPropertyId
 	,Convert(NUMERIC(38, 20), TR.strPropertyValue) AS strPropertyValue
 INTO #GRN
 FROM @tblMFLot L
-JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
+JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId and TR.intProductTypeId = 6
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 	AND P.intDataTypeId IN (
 		1
 		,2
 		)
 	AND ISNUMERIC(TR.strPropertyValue) = 1
-JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-	AND S.intProductTypeId = 6
+JOIN tblQMSample S ON S.intSampleId =TR.intSampleId 
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-	AND ST.intControlPointId = 6
+	AND ST.intControlPointId in(5,6)
 
 SELECT P.intPropertyId
 	,P.strPropertyName
 	,Convert(NUMERIC(38, 20), TR.strPropertyValue) AS strPropertyValue
 INTO #IP
 FROM @tblMFLot L
-JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
+JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId and TR.intProductTypeId = 6
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 	AND P.intDataTypeId IN (
 		1
 		,2
 		)
 	AND ISNUMERIC(TR.strPropertyValue) = 1
-JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-	AND S.intProductTypeId = 6
+JOIN tblQMSample S ON S.intSampleId =TR.intSampleId 
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND ST.intControlPointId = 9
 

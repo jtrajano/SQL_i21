@@ -40,7 +40,7 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 			AND S.intProductTypeId = 6
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-		AND ST.intControlPointId in (6,9)
+		AND ST.intControlPointId in (5,6,9)
 		JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 		JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
@@ -107,7 +107,7 @@ BEGIN TRY
 		JOIN tblICUnitMeasure AS U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 			AND S.intProductTypeId = 6
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  AND ST.intControlPointId in (6,9)
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  AND ST.intControlPointId in (5,6,9)
 		'
 
 	IF (LEN(@strFilterCriteria) > 0)
@@ -125,7 +125,7 @@ BEGIN TRY
 	SET @strColumnsList = @strColumnsList + ',intItemId,strDescription,strItemNo,dblQty,strQtyUOM,dblWeight,strWeightUOM,intTotalCount'
 	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT intTotalCount   
-	,Case When intControlPointId=6 then ''GRN'' Else ''IP'' End TransactionType
+	,Case When intControlPointId IN (5,6) then ''GRN'' Else ''IP'' End TransactionType
 	,intSampleId
 	,strSampleNumber
 	,intNoOfDaysInStorage
