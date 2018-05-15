@@ -24,6 +24,8 @@ SELECT L.intLoadId
 			THEN 'Picked Lots'
 		WHEN 6
 			THEN 'Pick Lots'
+		WHEN 7
+			THEN 'Pick Lots w/o Contract'
 		END COLLATE Latin1_General_CI_AS
 	,strType = CASE L.intPurchaseSale
 		WHEN 1

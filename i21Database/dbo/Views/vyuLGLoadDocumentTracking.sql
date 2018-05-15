@@ -42,6 +42,8 @@ SELECT CH.strContractNumber
 			THEN 'Picked Lots'
 		WHEN LOAD.intSourceType = 6
 			THEN 'Pick Lots'
+		WHEN LOAD.intSourceType = 7
+			THEN 'Pick Lots w/o Contract'
 		END
 	,strTransportationMode = CASE 
 		WHEN intTransportationMode = 1
