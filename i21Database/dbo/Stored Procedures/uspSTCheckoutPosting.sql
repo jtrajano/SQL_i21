@@ -286,9 +286,25 @@ BEGIN
 																								, 1
 																								, ST.intTaxGroupId
 																								, ST.intCompanyLocationId
-																								, EL.intEntityLocationId
+																								, NULL -- EL.intEntityLocationId
 																								, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 																						  )) AS DECIMAL(18,6))
+										--,[dblPrice]					= (CPT.dblAmount -
+										--							  (
+										--									CAST((SELECT SUM(dblAdjustedTax) 
+										--												  FROM [dbo].[fnGetItemTaxComputationForCustomer]
+										--												  (
+										--														I.intItemId
+										--														, ST.intCheckoutCustomerId
+										--														, GETDATE()
+										--														, CPT.dblPrice
+										--														, CPT.dblQuantity
+										--														, ST.intTaxGroupId
+										--														, ST.intCompanyLocationId
+										--														, EL.intEntityLocationId
+										--														, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+										--												  )) AS DECIMAL(18,6))
+										--								)) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -319,7 +335,7 @@ BEGIN
 										,[ysnLeaseBilling]			= NULL
 										,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 										,[strImportFormat]			= 'Not Familiar'
-										,[dblCOGSAmount]			= IP.dblSalePrice
+										,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 										,[intTempDetailIdForTaxes]  = I.intItemId
 										,[intConversionAccountId]	= NULL -- not sure
 										,[intCurrencyExchangeRateTypeId]	= NULL
@@ -336,7 +352,7 @@ BEGIN
 													AND IL.intItemLocationId = IP.intItemLocationId
 							JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 												AND CH.intStoreId = ST.intStoreId
-							JOIN dbo.tblEMEntityLocation EL ON ST.intCheckoutCustomerId = EL.intEntityId
+							--JOIN dbo.tblEMEntityLocation EL ON ST.intCheckoutCustomerId = EL.intEntityId
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
 							AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -523,7 +539,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
@@ -763,7 +779,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
@@ -967,7 +983,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 -- IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
@@ -992,7 +1008,7 @@ BEGIN
 				ELSE 
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Department Totals'
+						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Sales Tax Totals'
 					END
 				----------------------------------------------------------------------
 				---------------------- END SALES TAX TOTALS --------------------------
@@ -1171,7 +1187,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 -- IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
@@ -1196,7 +1212,7 @@ BEGIN
 				ELSE 
 					BEGIN
 						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Department Totals'
+						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Payment Options'
 					END
 				----------------------------------------------------------------------
 				----------------------- END PAYMENT OPTIONS --------------------------
@@ -1375,7 +1391,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
@@ -1579,7 +1595,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
@@ -1783,7 +1799,7 @@ BEGIN
 											,[ysnLeaseBilling]			= NULL
 											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 											,[strImportFormat]			= 'Not Familiar'
-											,[dblCOGSAmount]			= IP.dblSalePrice
+											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
 											,[intTempDetailIdForTaxes]  = I.intItemId
 											,[intConversionAccountId]	= NULL -- not sure
 											,[intCurrencyExchangeRateTypeId]	= NULL
