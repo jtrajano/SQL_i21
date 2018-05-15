@@ -57,7 +57,7 @@ BEGIN
 	UPDATE tblGRDiscountCalculationOption
 	SET strDescription = '1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. Y = x * shrink factors tagged as wet<br />3. y * factors tagged as net'
 		, intOrderById = 3
-	WHERE strDiscountCalculationOption = 'Net Weight' 
+	WHERE strShrinkCalculationOption = 'Net Weight' 
 END
 GO
 
@@ -72,7 +72,7 @@ BEGIN
 	UPDATE tblGRDiscountCalculationOption
 	SET strDescription = '1. X = (loaded vehicle scale weight - tare) * shrink factor tagged as gross<br />2. x * shrink factors tagged as wet'
 		, intOrderById = 2
-	WHERE strDiscountCalculationOption = 'Wet Weight' 
+	WHERE strShrinkCalculationOption = 'Wet Weight' 
 END
 GO
 
@@ -92,7 +92,7 @@ BEGIN
 	UPDATE tblGRDiscountCalculationOption
 	SET strDescription = '(loaded vehicle scale weight - tare) * shrink factor'
 		, intOrderById = 1
-	WHERE strDiscountCalculationOption = 'Gross Weight' 
+	WHERE strShrinkCalculationOption = 'Gross Weight' 
 END
 GO
 IF EXISTS(SELECT intUnitMeasureId FROM tblSCScaleSetup)
