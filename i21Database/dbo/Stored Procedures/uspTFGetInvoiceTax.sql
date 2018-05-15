@@ -608,7 +608,7 @@ BEGIN TRY
 				, NULL AS strInvoiceNumber
 				, NULL AS strPONumber
 				, tblTRLoadReceipt.strBillOfLading AS strBOLNumber
-				, tblTRLoadHeader.dtmLoadDateTime AS dtmDate
+				, CASE WHEN tblTRLoadHeader.dtmLoadDateTime IS NULL THEN tblICInventoryTransfer.dtmTransferDate ELSE tblTRLoadHeader.dtmLoadDateTime END AS dtmDate
 				, tblSMCompanyLocation.strCity AS strDestinationCity
 				, NULL AS strDestinationCounty
 				, tblSMCompanyLocation.strStateProvince AS strDestinationState
