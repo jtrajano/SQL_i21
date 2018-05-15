@@ -1642,6 +1642,7 @@ IF @post = 1
 					)
 				AND A.intSourceId = 2 
 				AND A.intOriginalInvoiceId IS NOT NULL
+				AND A.dblProvisionalAmount > 0
 
 
 			/*UNION ALL
