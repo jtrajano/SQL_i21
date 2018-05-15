@@ -1626,7 +1626,7 @@ IF @post = 1
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''
 			FROM
-				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, strTransactionType, intCurrencyId, dtmDate, dtmPostDate, strComments, dblAmountDue, intAccountId, intPeriodsToAccrue, dblBaseAmountDue, intSourceId, intOriginalInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal
+				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, strTransactionType, intCurrencyId, dtmDate, dtmPostDate, strComments, dblAmountDue, intAccountId, intPeriodsToAccrue, dblBaseAmountDue, intSourceId, intOriginalInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal, dblProvisionalAmount
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
 				(SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH (NOLOCK)) C
