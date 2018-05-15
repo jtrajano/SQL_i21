@@ -35,11 +35,6 @@ BEGIN TRY
 	IF	@strReceiptType NOT IN ('Purchase Contract','Purchase Order', 'Inventory Return')
 		RETURN
 
-	SELECT	@ysnLoad = ysnLoad 
-	FROM	tblCTContractHeader CH
-	JOIN	tblCTContractDetail	CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-	WHERE	intContractDetailId	=	@intContractDetailId
-
 	DECLARE @tblToProcess TABLE
 	(
 		intUniqueId					INT IDENTITY,
@@ -47,23 +42,28 @@ BEGIN TRY
 		intContractDetailId			INT,
 		intItemUOMId				INT,
 		dblQty						NUMERIC(18,6),
-		intContainerId				INT
+		intContainerId				INT,
+		ysnLoad						BIT
 	)
 
 	IF @strReceiptType IN ('Purchase Contract','Inventory Return')
 	BEGIN
-		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty, intContainerId)
-		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END, intContainerId
-		FROM	@ItemsFromInventoryReceipt IR
+		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty, intContainerId, ysnLoad)
+		SELECT 	intInventoryReceiptDetailId,intLineNo,IR.intItemUOMId,CASE WHEN CH.ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END, intContainerId, CH.ysnLoad
+		FROM	@ItemsFromInventoryReceipt	IR
+		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	IR.intLineNo
+		JOIN	tblCTContractHeader			CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 		WHERE	ISNULL(intLineNo,0) > 0
 	END
 	ELSE IF(@strReceiptType = 'Purchase Order')
 	BEGIN
 		SELECT	@ysnPO = 1
-		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
-		SELECT 	IR.intInventoryReceiptDetailId,PO.intContractDetailId,IR.intItemUOMId,CASE WHEN @ysnLoad=1 THEN IR.intLoadReceive ELSE IR.dblQty END
+		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty, ysnLoad)
+		SELECT 	IR.intInventoryReceiptDetailId,PO.intContractDetailId,IR.intItemUOMId,CASE WHEN CH.ysnLoad=1 THEN IR.intLoadReceive ELSE IR.dblQty END, CH.ysnLoad
 		FROM	@ItemsFromInventoryReceipt	IR
 		JOIN	tblPOPurchaseDetail			PO	ON	PO.intPurchaseDetailId	=	IR.intLineNo
+		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	PO.intContractDetailId
+		JOIN	tblCTContractHeader			CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 		WHERE	PO.intContractDetailId		IS	NOT NULL
 	END
 
@@ -81,7 +81,8 @@ BEGIN TRY
 				@intFromItemUOMId				=	intItemUOMId,
 				@dblQty							=	dblQty,
 				@intInventoryReceiptDetailId	=	intInventoryReceiptDetailId, 
-				@intContainerId					=	intContainerId
+				@intContainerId					=	intContainerId,
+				@ysnLoad						=	ysnLoad
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
