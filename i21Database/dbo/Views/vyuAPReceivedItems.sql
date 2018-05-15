@@ -609,7 +609,7 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
@@ -620,12 +620,9 @@ FROM
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			
-																			ROUND (CD.dblQuantity * dbo.fnCalculateQtyBetweenUOM(
-																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
-																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)), 2)
+																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -650,16 +647,16 @@ FROM
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
-		,[intUnitMeasureId]							=	CC.intUnitMeasureId
+		,[intUnitMeasureId]							=	CD.intItemUOMId
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
-		,[intCostUOMId]								=	CC.intItemUOMId
+		,[intCostUOMId]								=	CostUOM.intItemUOMId
 		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
-		,[dblUnitQty]								=	1
+		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -696,6 +693,8 @@ FROM
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
 													RC.intChargeId			=	CC.intItemId
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intItemUOMId
+	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
+												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
@@ -723,7 +722,7 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
@@ -733,12 +732,9 @@ FROM
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																			(CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
-																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
-																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)))
+																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -763,16 +759,16 @@ FROM
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
-		,[intUnitMeasureId]							=	CC.intUnitMeasureId
+		,[intUnitMeasureId]							=	CD.intItemUOMId
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
-		,[intCostUOMId]								=	CC.intItemUOMId
+		,[intCostUOMId]								=	CostUOM.intItemUOMId
 		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
-		,[dblUnitQty]								=	1
+		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -810,6 +806,8 @@ FROM
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
 													RC.intChargeId			=	CC.intItemId
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intItemUOMId
+	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
+												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
@@ -837,7 +835,7 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
@@ -848,12 +846,9 @@ FROM
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			
-																			ROUND (CD.dblQuantity * dbo.fnCalculateQtyBetweenUOM(
-																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
-																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)), 2)
+																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -878,16 +873,16 @@ FROM
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
-		,[intUnitMeasureId]							=	CC.intUnitMeasureId
+		,[intUnitMeasureId]							=	CD.intItemUOMId
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
-		,[intCostUOMId]								=	CC.intItemUOMId
+		,[intCostUOMId]								=	CostUOM.intItemUOMId
 		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
-		,[dblUnitQty]								=	1
+		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -924,6 +919,8 @@ FROM
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
 													RC.intChargeId			=	CC.intItemId
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intItemUOMId
+	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
+												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
@@ -953,7 +950,7 @@ FROM
 		,[dblOrderQty]								=	1
 		,[dblPOOpenReceive]							=	0
 		,[dblOpenReceive]							=	1
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblQuantityBilled]						=	0
 		,[intLineNo]								=	CD.intContractDetailId
 		,[intInventoryReceiptItemId]				=	NULL
@@ -963,12 +960,9 @@ FROM
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																			(CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
-																			  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
-																			, CD.intItemUOMId
-																			, ISNULL(CC.dblRate,0)))
+																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+														END,0)
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -993,16 +987,16 @@ FROM
 		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intShipmentId]							=	0     
 		,[intShipmentContractQtyId]					=	NULL
-		,[intUnitMeasureId]							=	CC.intUnitMeasureId
+		,[intUnitMeasureId]							=	CD.intItemUOMId
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
-		,[intCostUOMId]								=	CC.intItemUOMId
+		,[intCostUOMId]								=	CostUOM.intItemUOMId
 		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
-		,[dblUnitQty]								=	1
+		,[dblCostUnitQty]							=	CostUOM.dblUnitQty
+		,[dblUnitQty]								=	ItemUOM.dblUnitQty
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
@@ -1040,6 +1034,8 @@ FROM
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
 													RC.intChargeId			=	CC.intItemId
 	LEFT JOIN	tblICItemUOM			ItemUOM ON	ItemUOM.intItemUOMId	=	CD.intItemUOMId
+	LEFT JOIN	tblICItemUOM			CostUOM ON	CostUOM.intItemId		=	CD.intItemId
+												AND	CostUOM.intUnitMeasureId	=	CC.intUnitMeasureId		
 	LEFT JOIN	tblICUnitMeasure			UOM ON	UOM.intUnitMeasureId	=	ItemUOM.intUnitMeasureId
 	LEFT JOIN	tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CC.intCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId
