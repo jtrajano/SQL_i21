@@ -104,7 +104,7 @@ BEGIN
 																							THEN CAST((Details.dblTotal / A.dblTotal) AS DECIMAL(18,2)) * ISNULL(A.dblPayment,0) * -1 
 																							ELSE CAST((Details.dblTotal / A.dblTotal) AS DECIMAL(18,2)) * ISNULL(A.dblPayment,0) END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	Details.dblUnits,--ISNULL(units.dblTotalUnits,0),
+		[dblCreditUnit]					=	ISNULL(Details.dblUnits,0),--ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -180,8 +180,7 @@ BEGIN
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
-					dblUnits = CASE WHEN item.intItemId IS NULL THEN R.dblQtyReceived 
-									WHEN R.intInventoryReceiptChargeId > 0 THEN 0
+					dblUnits = CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 THEN 0
 									ELSE
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId 
