@@ -160,6 +160,7 @@ INNER JOIN (
 	FROM @tblCustomers
 ) C ON P.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
+	AND ysnProcessedToNSF = 0
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
 --#INVOICETOTALPREPAYMENTS
