@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKGetGLAccountDetail
 AS
 
-SELECT strAccountId strAccountId, intAccountId, strDescription, strAccountType
+SELECT distinct strAccountId strAccountId, intAccountId, strDescription, strAccountType,strAccountCategory
 FROM vyuGLAccountDetail 
-WHERE strAccountCategory = 'General'
+WHERE strAccountCategory in('Mark to Market P&L','Mark to Market Offset')
