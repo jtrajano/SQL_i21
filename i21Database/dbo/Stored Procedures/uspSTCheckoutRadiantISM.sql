@@ -37,7 +37,8 @@ BEGIN
 	, IL.intVendorId
 	, ISNULL(CAST(Chk.SalesQuantity as int),0)
 	, ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
-	, ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
+	--, ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0)
+	, ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) --Need to add another column for discount
 	, P.dblStandardCost
 	, 1
 	from #tempCheckoutInsert Chk
