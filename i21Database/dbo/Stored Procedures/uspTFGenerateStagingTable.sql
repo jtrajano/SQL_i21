@@ -78,9 +78,21 @@ BEGIN TRY
 		-- FOR EDI
 		IF(@strTaxAuthorityCode = 'IN' AND @IsEdi = 1)
 		BEGIN
-			SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
-			SET @SPRunString = @SP + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
-			EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;  
+			SET @SP = NULL
+			IF(@FormCode = 'MF-360')
+			BEGIN
+				SET @SP = 'uspTFGenerateMF360'
+			END
+			ELSE IF (@FormCode = 'SF-900')
+			BEGIN
+				SET @SP = 'uspTFGenerateSF900'
+			END
+			IF(@SP IS NOT NULL)
+			BEGIN
+				SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
+				SET @SPRunString = @SP + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
+				EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;
+			END
 		END
 
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
@@ -112,9 +124,8 @@ BEGIN TRY
 
 		SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'
 		SET @SPRunString = @SP + ' @Guid = @Guid, @FormCodeParam = @FormCodeParam, @ScheduleCodeParam = @ScheduleCodeParam, @Refresh = @Refresh'
-		
 		EXECUTE sp_executesql @SPRunString, @ParamDefinition, @Guid = @Guid, @FormCodeParam = @FormCode, @ScheduleCodeParam = @ScheduleCode, @Refresh = 1;  
-
+	
 		DELETE FROM #tmpMain WHERE intReportingComponentId = @RCId
 
 	END
