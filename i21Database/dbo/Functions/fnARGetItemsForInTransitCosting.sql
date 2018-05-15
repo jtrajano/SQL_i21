@@ -107,7 +107,7 @@ INNER JOIN (SELECT [intItemId], [intItemLocationId], [intItemUOMId], [intTransac
 	FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
 		ON ICIT.[intTransactionId] = ICISI.[intInventoryShipmentId] AND ICIT.[intTransactionDetailId] = ICISI.[intInventoryShipmentItemId] AND [ysnIsUnposted] = 0			 
 WHERE
-	ICIT.[intFobPointId] = @FOB_DESTINATION
+	ICIT.[intFobPointId] IS NOT NULL 
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND (
 			(ARI.[strType] <> 'Provisional' AND (ARI.[intOriginalInvoiceId] IS NULL OR ARI.[intSourceId] <> 2))
@@ -170,7 +170,7 @@ LEFT OUTER JOIN
 	(SELECT [intInventoryShipmentId], [intInventoryShipmentItemId] FROM tblICInventoryShipmentItem WITH (NOLOCK)) ICISI
 		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]	
 WHERE
-	ICIT.[intFobPointId] = @FOB_DESTINATION
+	ICIT.[intFobPointId] IS NOT NULL 
 	AND ISNULL(LGL.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICISI.[intInventoryShipmentItemId], 0) = 0
 

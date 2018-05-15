@@ -28,7 +28,7 @@ SAVE TRAN @TransactionName
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 
-DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
+DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = NULL --'Cost of Goods'
 		,@OWNERSHIP_TYPE_OWN AS INT = 1
 		,@OWNERSHIP_TYPE_STORAGE AS INT = 2
 		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
@@ -81,9 +81,9 @@ BEGIN
 				ON fp.strFobPoint = ft.strFobPoint
 	WHERE	strShipmentNumber = @strTransactionId  
 
-	-- Initialize the account to counter inventory 
-	SELECT	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
-	WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
+	---- Initialize the account to counter inventory 
+	--SELECT	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
+	--WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
 END  
 
 --------------------------------------------------------------------------------------------  
@@ -678,7 +678,7 @@ BEGIN
 			WHERE	t.strTransactionId = @strTransactionId
 					AND t.ysnIsUnposted = 0 
 					AND t.strBatchId = @strBatchId
-					AND @intFobPointId = @FOB_DESTINATION
+					--AND @intFobPointId = @FOB_DESTINATION
 					AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
