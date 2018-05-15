@@ -236,6 +236,7 @@ BEGIN TRY
 
 				IF ISNULL(@intBillId,0) > 0
 				BEGIN
+					UPDATE tblAPBillDetail SET intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 					EXEC [dbo].[uspAPPostBill]
 					@post = 1
 					,@recap = 0
@@ -264,7 +265,7 @@ BEGIN TRY
 					,intLotId = SC.intLotId
 					,intSubLocationId = SC.intSubLocationId
 					,intStorageLocationId = SC.intStorageLocationId
-					,dblQty = CASE WHEN @strInOutFlag = 'I' THEN SC.dblNetUnits ELSE (SC.dblNetUnits * -1) END
+					,dblQty = SC.dblNetUnits
 					,intTransactionId = 1
 					,strTransactionId = SC.strTicketNumber
 					,intTransactionTypeId = 1
@@ -382,9 +383,6 @@ BEGIN TRY
 					@raiseError			= 1
 			END
 		END
-
-		
-
 END TRY
 BEGIN CATCH
 	SELECT 

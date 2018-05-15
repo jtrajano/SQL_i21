@@ -392,9 +392,9 @@ END
  
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId = 2)
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
 		END
 		SELECT @intContractDetailId = MIN(ri.intLineNo)
 		FROM tblICInventoryReceipt r 
