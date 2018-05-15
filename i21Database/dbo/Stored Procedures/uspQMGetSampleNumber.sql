@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspQMGetSampleNumber @intProductTypeId INT
 	,@intProductValueId INT
 	,@intUserRoleID INT = 0
+	,@ysnSampleBasedOnControlPoint BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -21,9 +22,13 @@ DECLARE @strSampleId NVARCHAR(MAX)
 	,@strLotAlias NVARCHAR(50)
 	,@intItemId INT
 	,@intLotId INT
+	,@intPreProductionControlPointId INT
 
 SELECT TOP 1 @ysnEnableSampleTypeByUserRole = ISNULL(ysnEnableSampleTypeByUserRole, 0)
 FROM tblQMCompanyPreference
+
+SELECT TOP 1 @intPreProductionControlPointId = intPreProductionControlPointId
+FROM tblMFCompanyPreference
 
 IF @intProductTypeId = 6 -- Take all samples from the multiple Lot ID
 BEGIN
@@ -211,7 +216,10 @@ BEGIN
 		FROM tblQMSample S
 		JOIN tblQMSampleTypeUserRole SU ON SU.intSampleTypeId = S.intSampleTypeId
 			AND SU.intUserRoleID = @intUserRoleID
+		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+		JOIN tblQMControlPoint C ON C.intControlPointId = ST.intControlPointId
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L
@@ -224,7 +232,10 @@ BEGIN
 	BEGIN
 		SELECT @strSampleId = COALESCE(@strSampleId + '|^|', '') + CONVERT(NVARCHAR, S.intSampleId)
 		FROM tblQMSample S
+		JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
+		JOIN tblQMControlPoint C ON C.intControlPointId = ST.intControlPointId
 		WHERE S.intProductTypeId = @intProductTypeId
+			AND C.intControlPointId = (CASE WHEN @intPreProductionControlPointId IS NOT NULL AND @ysnSampleBasedOnControlPoint = 1 THEN @intPreProductionControlPointId ELSE C.intControlPointId END)
 			AND EXISTS (
 				SELECT *
 				FROM @tblMFFinalLot L

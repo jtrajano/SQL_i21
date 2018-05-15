@@ -233,7 +233,7 @@ BEGIN TRY
 		,''
 		,@intProductTypeId
 		,@intLotId
-		,1
+		,3
 		,@intItemId
 		,NULL
 		,NULL

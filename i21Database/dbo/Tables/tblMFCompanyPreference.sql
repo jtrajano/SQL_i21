@@ -55,7 +55,6 @@
 	ysnProducedQtyByUnitCount Bit NULL CONSTRAINT [DF_tblMFCompanyPreference_ysnProducedQtyByUnitCount] DEFAULT 1,
 	intDamagedStatusId int,
 	intIRParentLotNumberPatternId int,
-
 	ysnAllowMoveAssignedTask BIT,
 	intAllowablePickDayRange INT,
 	ysnGTINCaseCodeMandatory BIT,
@@ -66,6 +65,8 @@
 	ysnLifeTimeByEndOfMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLifeTimeByEndOfMonth] DEFAULT 0,
 	ysnSendEDIOnRepost Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnSendEDIOnRepost] DEFAULT 1,
 	ysnGenerateTaskOnCreatePickOrder Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnGenerateTaskOnCreatePickOrder] DEFAULT 0,
-	ysnLotSnapshotByFiscalMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLotSnapshotByFiscalMonth] DEFAULT 1
+	ysnLotSnapshotByFiscalMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLotSnapshotByFiscalMonth] DEFAULT 1,
+	intPreProductionControlPointId INT,
+
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
