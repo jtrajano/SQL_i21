@@ -27,6 +27,7 @@ BEGIN TRY
 		,@dblSplitAndPickWeight NUMERIC(18, 6)
 		,@dblWeightPerQty NUMERIC(18, 6)
 		,@dtmDate datetime
+		,@intDefaultConsumptionLocationId int
 
 		Select @dtmDate=GETDATE()
 
@@ -38,6 +39,7 @@ BEGIN TRY
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
 	SELECT @intToStorageLocationId = IsNULL(intStagingLocationId, @intToStorageLocationId)
+		,@intDefaultConsumptionLocationId=intStorageLocationId
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intItemId = @intItemId
@@ -83,18 +85,18 @@ BEGIN TRY
 		0
 		,@strTaskNo
 		,2
-		,CASE 
+		,Case When @intDefaultConsumptionLocationId is null Then (CASE 
 			WHEN @intAssigneeId > 0
 				THEN 2
 			ELSE 1
-			END
+			END) Else 4 End
 		,@intAssigneeId
 		,@intOrderHeaderId
 		,@intOrderDetailId
 		,2
 		,ISNULL(@dtmReleaseDate, @dtmDate)
 		,@intFromStorageLocationId
-		,@intToStorageLocationId
+		,IsNULL(@intDefaultConsumptionLocationId,@intToStorageLocationId)
 		,@intItemId
 		,@intLotId
 		,CASE 

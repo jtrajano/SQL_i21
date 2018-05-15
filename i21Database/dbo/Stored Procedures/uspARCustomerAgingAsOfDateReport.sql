@@ -133,6 +133,10 @@ IF ISNULL(@strCompanyLocationLocal, '') <> ''
 		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName = @strCompanyLocationLocal)
 	END
 
+IF 1=0 BEGIN
+    SET FMTONLY OFF
+END
+
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#ARPOSTEDPAYMENT') IS NOT NULL)
 BEGIN

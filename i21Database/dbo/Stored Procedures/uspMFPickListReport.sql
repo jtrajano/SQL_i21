@@ -88,6 +88,7 @@ Declare @dblAvailableQty numeric(38,20)
 Declare @intPickListDetailId int
 Declare @intBatchCounter INT=1
 Declare @strCustomerMessages nvarchar(max)
+Declare @ysnShowRunningWeight bit=0
 
 	DECLARE @strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -400,6 +401,17 @@ Begin --Sales Order Pick List
 
 	If @intPickListId>0
 		Begin
+			If (Select count(1) from tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId 
+					where a.intSalesOrderId=@intSalesOrderId 
+					AND b.strType NOT IN ('Other Charge','Comment')) = 1 --Exclude Single Item
+				OR 
+				(Select COUNT(distinct c.intUnitMeasureId) From tblMFPickListDetail a Join tblICItem b on a.intItemId=b.intItemId 
+				Join tblICItemUOM c on a.intItemUOMId=c.intItemUOMId
+				Where a.intPickListId=@intPickListId AND b.strType NOT IN ('Other Charge','Comment')) = 1 --Exclude All Items with Same UOM
+			Begin
+				Set @ysnShowRunningWeight=1
+			End
+
 			INSERT INTO @tblItems
 			SELECT pl.strPickListNo ,  
 					''  AS strBlendItemNoDesc,  
@@ -416,7 +428,7 @@ Begin --Sales Order Pick List
 					'' strParentLotNumber,
 					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) AS dblReqQty,
 					dbo.fnRemoveTrailingZeroes(@dblTotalPickQty) + ' ' + @strUOM AS dblTotalPickQty,
-					pld.dblQuantity AS dblQuantity,
+					pld.dblQuantity,
 					CASE WHEN ISNULL(pld.intLotId,0)>0 THEN (dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0))
 					- ((dbo.fnICConvertUOMtoStockUnit(pld.intItemId,pld.intItemUOMId,pld.dblQuantity) * ISNULL(l.dblLastCost,0) * ISNULL(sd.dblDiscount,0.0))/100)
 					Else (pld.dblQuantity * ISNULL(sd.dblPrice,0.0)) - ((pld.dblQuantity * ISNULL(sd.dblPrice,0.0) * ISNULL(sd.dblDiscount,0.0))/100) END AS dblCost,
@@ -497,6 +509,17 @@ Begin --Sales Order Pick List
 		End
 	Else
 		Begin
+			If (Select count(1) from tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId 
+					where a.intSalesOrderId=@intSalesOrderId 
+					AND b.strType NOT IN ('Other Charge','Comment')) = 1  --Exclude Single Item
+				OR 
+				(Select COUNT(distinct c.intUnitMeasureId) From tblSOSalesOrderDetail a Join tblICItem b on a.intItemId=b.intItemId 
+				Join tblICItemUOM c on a.intItemUOMId=c.intItemUOMId
+				Where a.intSalesOrderId=@intSalesOrderId AND b.strType NOT IN ('Other Charge','Comment')) = 1 --Exclude All Items Same UOM
+			Begin
+				Set @ysnShowRunningWeight=1
+			End
+
 			INSERT INTO @tblItems
 			SELECT so.strSalesOrderNumber strPickListNo ,  
 			''  AS strBlendItemNoDesc,  
@@ -946,5 +969,5 @@ Begin --Sales Order Pick List
 		End
 	End
 
-	Select * from @tblItems Order By intBatchId,intSalesOrderDetailId
+	Select *,@ysnShowRunningWeight AS ysnShowRunningWeight from @tblItems Order By intBatchId,intSalesOrderDetailId
 End

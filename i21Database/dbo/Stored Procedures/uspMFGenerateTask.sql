@@ -61,6 +61,7 @@ BEGIN TRY
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
 		,@intOwnershipType INT
+		,@intDefaultConsumptionLocationId int
 
 	SELECT @ysnPickByQty = 1
 
@@ -191,6 +192,7 @@ BEGIN TRY
 			,intUnitPerPallet INT
 			,strInventoryTracking NVARCHAR(50)
 			,intOwnershipType INT
+			,intStorageLocationId int
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -232,6 +234,7 @@ BEGIN TRY
 			,intUnitPerPallet
 			,strInventoryTracking
 			,intOwnershipType
+			,intStorageLocationId
 			)
 		SELECT DISTINCT oh.intOrderHeaderId
 			,oli.intOrderDetailId
@@ -268,6 +271,7 @@ BEGIN TRY
 			,IsNULL(i.intUnitPerLayer * i.intLayerPerPallet, 0)
 			,i.strInventoryTracking
 			,oli.intOwnershipType
+			,oli.intStorageLocationId
 		FROM tblMFOrderHeader oh
 		JOIN tblMFOrderDetail oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
 		JOIN tblICItem i ON i.intItemId = oli.intItemId
@@ -317,6 +321,8 @@ BEGIN TRY
 
 			SELECT @intOwnershipType = NULL
 
+			Select @intDefaultConsumptionLocationId=NULL
+
 			DELETE
 			FROM @tblLot
 
@@ -334,6 +340,7 @@ BEGIN TRY
 				,@intUnitPerPallet2 = intUnitPerPallet
 				,@strInventoryTracking = strInventoryTracking
 				,@intOwnershipType = intOwnershipType
+				,@intDefaultConsumptionLocationId=intStorageLocationId
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -473,6 +480,7 @@ BEGIN TRY
 				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 				WHERE S.intItemId = @intItemId
 					AND S.dblOnHand > 0
+					AND IsNULL(S.intStorageLocationId,0)= (Case When S.intStorageLocationId is not null and @intDefaultConsumptionLocationId is not null then @intDefaultConsumptionLocationId else IsNULL(S.intStorageLocationId,0) end)
 				GROUP BY S.intItemId
 					,S.dblOnHand
 					,S.intItemUOMId
@@ -606,6 +614,7 @@ BEGIN TRY
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
+					AND IsNULL(L.intStorageLocationId,0)= (Case When L.intStorageLocationId is not null and @intDefaultConsumptionLocationId is not null then @intDefaultConsumptionLocationId else IsNULL(L.intStorageLocationId,0) end)
 					AND L.intItemId = @intItemId
 					AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
@@ -830,6 +839,7 @@ BEGIN TRY
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
+					AND IsNULL(L.intStorageLocationId,0)= (Case When L.intStorageLocationId is not null and @intDefaultConsumptionLocationId is not null then @intDefaultConsumptionLocationId else IsNULL(L.intStorageLocationId,0) end)
 					AND L.intItemId = @intItemId
 					AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
