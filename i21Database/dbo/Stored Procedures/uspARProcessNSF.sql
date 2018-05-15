@@ -86,12 +86,14 @@ WHERE NSF.ysnProcessed = 0
 
 IF NOT EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS)
 	BEGIN
+		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
 		RAISERROR('There are no Payments to process to NSF.', 16, 1) 
 		RETURN 0;
 	END
 
 IF ISNULL(@intUserId, 0) = 0
 	BEGIN
+		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
 		RAISERROR('User Id is required when processing to NSF.', 16, 1) 
 		RETURN 0;
 	END
@@ -298,4 +300,4 @@ EXEC dbo.uspSMAuditLog
 		,@actionType		= 'Processed NSF'
 		,@changeDescription	= ''			
 		,@fromValue			= ''			
-		,@toValue			= ''		
+		,@toValue			= ''
