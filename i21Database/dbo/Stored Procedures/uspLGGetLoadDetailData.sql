@@ -45,6 +45,10 @@ BEGIN
 		,Item.intCommodityId
 		,strExternalShipmentNumber
 		,B.strBillId
+		,PCU.strCurrency AS strPriceCurrency
+		,FXCU.strCurrency AS strForexCurrency
+		,ERT.strCurrencyExchangeRateType AS strForexRateType
+		,PUM.strUnitMeasure AS strPriceUOM
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							LOAD			ON		LOAD.intLoadId = LoadDetail.intLoadId AND LOAD.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
@@ -62,6 +66,11 @@ BEGIN
 	LEFT JOIN tblEMEntity						CEN				ON		CEN.intEntityId = LoadDetail.intCustomerEntityId
 	LEFT JOIN tblEMEntityLocation				CEL				ON		CEL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
 	LEFT JOIN tblICItem							Item			ON		Item.intItemId = LoadDetail.intItemId
+	LEFT JOIN tblSMCurrency						PCU				ON		PCU.intCurrencyID = LoadDetail.intPriceCurrencyId
+	LEFT JOIN tblSMCurrency						FXCU			ON		FXCU.intCurrencyID = LoadDetail.intForexCurrencyId
+	LEFT JOIN tblSMCurrencyExchangeRateType		ERT				ON		ERT.intCurrencyExchangeRateTypeId = LoadDetail.intForexRateTypeId
+	LEFT JOIN tblICItemUOM						PIM				ON		PIM.intItemUOMId = LoadDetail.intPriceUOMId
+	LEFT JOIN tblICUnitMeasure					PUM				ON		PIM.intUnitMeasureId = PUM.intUnitMeasureId
 	LEFT JOIN tblICCommodity					Commodity		ON		Commodity.intCommodityId = Item.intCommodityId
 	LEFT JOIN tblICItemUOM						ItemUOM			ON		ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 	LEFT JOIN tblICUnitMeasure					UOM				ON		UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId

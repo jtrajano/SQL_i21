@@ -17,13 +17,13 @@ SELECT CD.intContractDetailId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
-	,EY.strEntityName
+	,E.strName strEntityName
 	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) AS strStartDate
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
-	,EY.intDefaultLocationId
+	,E.intDefaultLocationId
 	,ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
@@ -93,18 +93,19 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
+	,AD.dblSeqPrice
+	,PT.strPricingType
+	,AD.intSeqCurrencyId 
+	,AD.strSeqCurrency
+	,AD.intSeqPriceUOMId
+	,AD.strSeqPriceUOM
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
-	AND EY.strEntityType = (
-		CASE 
-			WHEN CH.intContractTypeId = 1
-				THEN 'Vendor'
-			ELSE 'Customer'
-			END
-		)
+JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -170,13 +171,13 @@ SELECT CD.intContractDetailId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
-	,EY.strEntityName
+	,E.strName strEntityName
 	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) AS strStartDate
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
-	,EY.intDefaultLocationId
+	,E.intDefaultLocationId
 	,ISNULL(CD.dblShippingInstructionQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
@@ -248,12 +249,19 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
+	,AD.dblSeqPrice
+	,PT.strPricingType
+	,AD.intSeqCurrencyId 
+	,AD.strSeqCurrency
+	,AD.intSeqPriceUOMId
+	,AD.strSeqPriceUOM
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
-	AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -317,11 +325,11 @@ GROUP BY CD.intContractDetailId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
-	,EY.strEntityName
+	,E.strName
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
-	,EY.intDefaultLocationId
+	,E.intDefaultLocationId
 	,CH.strCustomerContract
 	,CD.intContractStatusId
 	,CH.ysnUnlimitedQuantity
@@ -363,3 +371,9 @@ GROUP BY CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
+	,AD.dblSeqPrice
+	,PT.strPricingType
+	,AD.intSeqCurrencyId 
+	,AD.strSeqCurrency
+	,AD.intSeqPriceUOMId
+	,AD.strSeqPriceUOM

@@ -187,7 +187,8 @@ BEGIN TRY
 		WHERE intRecordId > @intMinRecordId
 	END
 	
-	EXEC uspARPopulateInvoiceStg @intInvoiceId = @InvoiceId
+	IF (ISNULL(@Post,0) =  1)
+		EXEC uspARPopulateInvoiceStg @intInvoiceId = @InvoiceId
 
 END TRY
 
