@@ -106,6 +106,8 @@ BEGIN TRY
 		UPDATE	tblCTWashout SET intWashoutHeaderId = @intWashoutHeaderId, intWashoutDetailId = @intWashoutDetailId WHERE intWashoutId = @intWashoutId
 	END
 
+	UPDATE tblCTContractDetail SET intContractStatusId = 3 WHERE intContractDetailId IN (@intSourceDetailId, @intWashoutDetailId)
+
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
 	   INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost)
