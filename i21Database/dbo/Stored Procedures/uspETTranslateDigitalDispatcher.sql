@@ -112,6 +112,7 @@ BEGIN
 			SELECT TOP 1 @intSiteId = B.intSiteID
 						,@intSiteItemTaxId = intTaxStateID	
 						,@dblSiteProductPrice = dblPrice
+						,@intSiteProductId = intProduct
 			FROM tblTMCustomer A
 					INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
 					LEFT JOIN tblTMDispatch C ON B.intSiteID = C.intSiteID
@@ -130,6 +131,7 @@ BEGIN
 		
 			--Get Item id
 			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+			SET @intItemId = ISNULL(@intItemId,0)
 			--Item Mismatch Checking...
 			IF ISNULL(@intSiteProductId,0) <> ISNULL(@intItemId,0)
 					BEGIN
@@ -393,12 +395,12 @@ BEGIN
 					,null AS dtmDate				
 					,0 AS intLineItem			
 					,'' AS strFileName			
-					,strMessage  AS strStatus				
-					,ysnSuccess AS ysnSuccessful			
-					,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId
-					,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType
-					FROM tblARInvoiceIntegrationLogDetail  
-					LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId
+					,S.strMessage  +  STUFF((SELECT ',' + CAST(T2.strWarning AS VARCHAR(100))  FROM @WarningTableLog T2 WHERE S.intId = T2.intLineItem FOR XML PATH('')),1,1,'') AS strStatus				
+					,S.ysnSuccess AS ysnSuccessful			
+					,ISNULL(S.intInvoiceId,0) AS intInvoiceId
+					,S.strTransactionType AS strTransactionType
+					FROM tblARInvoiceIntegrationLogDetail  S
+					LEFT JOIN tblARInvoice ON S.intInvoiceId = tblARInvoice.intInvoiceId
 					WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )
 					UNION
 					SELECT 		NULL AS strCustomerNumber		
@@ -407,12 +409,13 @@ BEGIN
 							,null AS dtmDate				
 							,0 AS intLineItem			
 							,'' AS strFileName			
-							,strMessage  AS strStatus				
-							,ysnSuccess AS ysnSuccessful			
+							,F.strMessage  +  STUFF((SELECT ',' + CAST(T2.strWarning AS VARCHAR(100))  FROM @WarningTableLog T2 WHERE F.intId = T2.intLineItem FOR XML PATH('')),1,1,'') AS strStatus				
+							,F.ysnSuccess AS ysnSuccessful			
 							,ISNULL(intInvoiceId,0) AS intInvoiceId
 							,strTransactionType AS strTransactionType
-					FROM tblARInvoiceIntegrationLogDetail 
+					FROM tblARInvoiceIntegrationLogDetail F
 					WHERE ysnHeader = 1 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId
+					
 					) ResultTableLog
 	--SELECT * FROM @ResultTableLog
 
