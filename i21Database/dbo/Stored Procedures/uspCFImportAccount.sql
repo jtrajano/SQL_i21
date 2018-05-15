@@ -372,6 +372,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 											when RTRIM(LTRIM(cfact_print_site_addr)) = 'N' then 'None'
 											when RTRIM(LTRIM(cfact_print_site_addr)) = 'R' then 'Remote'
 											when RTRIM(LTRIM(cfact_print_site_addr)) = 'A' then 'All'
+											when RTRIM(LTRIM(cfact_print_site_addr)) = 'Z' then 'Network + State/City'
 											else NULL
 										end),
 					@dtmLastBillingCycleDate = (case
