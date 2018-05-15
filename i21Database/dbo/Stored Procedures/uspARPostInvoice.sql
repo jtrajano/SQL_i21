@@ -3726,7 +3726,11 @@ IF @recap = 0
 																		 THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal))
 																		 ELSE (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal)
 																	END
-															   ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
+															    ELSE 
+																	CASE WHEN (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) = ISNULL(ARI.dblBasePayment, @ZeroDecimal))
+																			THEN ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+																			ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+																		END
 														  END
 						,ARI.dblBaseAmountDue			= CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 															   THEN 
@@ -3734,7 +3738,11 @@ IF @recap = 0
 																		 THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
 																		 ELSE (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal)
 																	END
-															   ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+															    ELSE 
+																	CASE WHEN (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) = ISNULL(ARI.dblBasePayment, @ZeroDecimal))
+																			THEN ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+																			ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
+																		END
 														  END												
 						,ARI.dblDiscount				= @ZeroDecimal
 						,ARI.dblBaseDiscount			= @ZeroDecimal
@@ -3742,8 +3750,8 @@ IF @recap = 0
 						,ARI.dblBaseDiscountAvailable	= ISNULL(ARI.dblBaseDiscountAvailable, @ZeroDecimal)
 						,ARI.dblInterest				= @ZeroDecimal
 						,ARI.dblBaseInterest			= @ZeroDecimal
-						,ARI.dblPayment					= ISNULL(dblPayment, @ZeroDecimal)
-						,ARI.dblBasePayment				= ISNULL(dblBasePayment, @ZeroDecimal)
+						,ARI.dblPayment					= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(dblPayment, @ZeroDecimal) END
+						,ARI.dblBasePayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(dblBasePayment, @ZeroDecimal) END
 						,ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 						,ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 					FROM
