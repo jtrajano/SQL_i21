@@ -3,7 +3,8 @@
 	@intUserId INT,
 	@intEntityId INT,
 	@strInOutFlag NVARCHAR(2),
-	@ysnTransfer BIT = NULL
+	@ysnTransfer BIT = NULL,
+	@ysnDirectShip BIT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON

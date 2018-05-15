@@ -18,8 +18,8 @@ DECLARE @ErrorState INT;
 
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		,@intInvoiceId AS INT
-		,@CreatedIvoices AS NVARCHAR(MAX)
-		,@UpdatedIvoices AS NVARCHAR(MAX);
+		,@CreatedInvoices AS NVARCHAR(MAX)
+		,@UpdatedInvoices AS NVARCHAR(MAX);
 
 BEGIN TRY
 	IF @ysnPost = 1
@@ -184,8 +184,8 @@ BEGIN TRY
 				,@GroupingOption = 11
 				,@RaiseError = 1
 				,@ErrorMessage = @ErrorMessage OUTPUT
-				,@CreatedIvoices = @CreatedIvoices OUTPUT
-				,@UpdatedIvoices = @UpdatedIvoices OUTPUT
+				,@CreatedIvoices = @CreatedInvoices OUTPUT
+				,@UpdatedIvoices = @UpdatedInvoices OUTPUT
 		END
 	ELSE
 		BEGIN
