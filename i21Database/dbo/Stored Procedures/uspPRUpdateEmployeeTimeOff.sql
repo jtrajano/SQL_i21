@@ -21,6 +21,7 @@ BEGIN
 		,dblRateFactor
 		,strAwardPeriod
 		,dtmDateHired
+		,ysnForReset = CAST(0 AS BIT)
 	INTO #tmpEmployees
 	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
 		ON E.intEntityId = T.intEntityEmployeeId
@@ -61,6 +62,12 @@ BEGIN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
 							 ELSE NULL 
 						END
+	
+	--Calculate if Time Off is Scheduled for Reset
+	UPDATE #tmpEmployees
+	SET ysnForReset = CASE WHEN ((strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward)
+								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))) THEN 1 
+							ELSE 0 END
 
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
@@ -107,36 +114,27 @@ BEGIN
 
 		--Reset Adjustments, Move Earned to Carryover
 		UPDATE EOT
-			SET dblHoursUsed = CASE WHEN (T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward) THEN 0
-									WHEN (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
-									ELSE EOT.dblHoursUsed END
-				,dblHoursCarryover = CASE WHEN (T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward) THEN 
-											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed) < dblMaxCarryover) 
-												THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed)
-												ELSE dblMaxCarryover END
-										  WHEN (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN
-											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed) < dblMaxCarryover) 
-											THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - YTD.dblHoursUsed)
+			SET dblHoursUsed = CASE WHEN (T.ysnForReset = 1) THEN 0 ELSE EOT.dblHoursUsed END
+				,dblHoursCarryover = CASE WHEN (T.ysnForReset = 1) THEN 
+											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < dblMaxCarryover) 
+												THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))
 											ELSE dblMaxCarryover END
 									ELSE dblHoursCarryover END
-				,dblHoursEarned = CASE WHEN (T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward) THEN 0
-									WHEN (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(T.dtmLastAward)) THEN 0
+				,dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN 0
 									ELSE dblHoursEarned END
 		FROM 
 			tblPREmployeeTimeOff EOT
 			INNER JOIN #tmpEmployees T
 				ON EOT.intEntityEmployeeId = T.intEntityId
-			LEFT JOIN vyuPREmployeeTimeOffUsedYTD YTD
+			LEFT JOIN (SELECT * FROM vyuPREmployeeTimeOffUsedYTD WHERE intTypeTimeOffId = @intTypeTimeOffId) YTD
 				ON T.intEntityId = YTD.intEntityEmployeeId
+				AND YTD.intTypeTimeOffId = @intTypeTimeOffId
+				AND YTD.intYear = YEAR(T.dtmLastAward)
 		WHERE T.[intEntityId] = @intEmployeeId
-			AND EOT.intEntityEmployeeId = @intEmployeeId
 			AND EOT.intTypeTimeOffId = @intTypeTimeOffId
-			AND YTD.intTypeTimeOffId = @intTypeTimeOffId
-			AND YTD.intYear = YEAR(T.dtmLastAward)
 
 		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END
 
 END
 GO
-

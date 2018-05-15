@@ -32,6 +32,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyOrdered]					,
 		[dblQtyReceived]				,
 		[dblCost]						,
+		[intCostUOMId]					,
 		[int1099Form]					,
 		[int1099Category]				,
 		[intLineNo]						
@@ -50,6 +51,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]				=	A.dblQtyReceived,
 		[dblCost]						=	A.dblCost,
+		[intCostUOMId]					=	A.intCostUOMId,
 		[int1099Form]					=	(CASE WHEN E.str1099Form = '1099-MISC' THEN 1
 													WHEN E.str1099Form = '1099-INT' THEN 2
 													WHEN E.str1099Form = '1099-B' THEN 3

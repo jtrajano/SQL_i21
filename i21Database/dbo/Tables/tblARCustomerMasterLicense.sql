@@ -11,4 +11,5 @@
 	[intConcurrencyId]				INT NOT NULL DEFAULT(0),
     CONSTRAINT [FK_tblARCustomerMasterLicense_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblARCustomerMasterLicense_tblSMLicenseType] FOREIGN KEY ([intLicenseTypeId]) REFERENCES [dbo].[tblSMLicenseType] ([intLicenseTypeId]),
+	CONSTRAINT [UNQ_ARMasterLicense] UNIQUE (intEntityCustomerId,intLicenseTypeId)
 )
