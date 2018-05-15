@@ -66,7 +66,7 @@ AS
 			SELECT E.intEntityId, C.intServiceChargeId, C.intTermsId, E.ysnActive
 			FROM tblARCustomer C
 			INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
-			WHERE ISNULL(C.intServiceChargeId, 0) <> 0
+			WHERE ISNULL(C.intServiceChargeId, 0) <> 0  and (C.ysnActive = 1 or (C.ysnActive = 0 and C.dblARBalance <> 0))
 		END
 	ELSE
 		BEGIN
@@ -78,7 +78,7 @@ AS
 				 SELECT intID 
 				 FROM fnGetRowsFromDelimitedValues(@customerIds)
 			) SELECTED ON C.intEntityId = SELECTED.intID
-			WHERE ISNULL(intServiceChargeId, 0) <> 0
+			WHERE ISNULL(intServiceChargeId, 0) <> 0 and (C.ysnActive = 1 or (C.ysnActive = 0 and C.dblARBalance <> 0))
 		END
 
 	--GET SELECTED STATUS CODES
