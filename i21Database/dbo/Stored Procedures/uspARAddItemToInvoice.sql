@@ -442,8 +442,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDescription
 				,@ItemDocumentNumber
 				,@ItemOrderUOMId
-				,@ItemPriceUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
+				,@ItemPriceUOMId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
 				,@ItemQtyOrdered
