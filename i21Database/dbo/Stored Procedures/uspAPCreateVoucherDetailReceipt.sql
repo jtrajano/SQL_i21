@@ -67,7 +67,9 @@ CREATE TABLE #tempBillDetail (
     [int1099Category] 				INT NOT NULL DEFAULT 0 , 
 	[intLoadDetailId]    			INT             NULL,
 	[dbl1099] 						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[strBillOfLading] 				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	[strBillOfLading] 				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intScaleTicketId]				INT             NULL,
+	[intLocationId]					INT             NULL
 )
 
 -- CREATE TABLE #tempBillDetailTax (
@@ -211,7 +213,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId]
 		)
 		SELECT 
 			[intBillId]						=	@voucherId,
@@ -279,7 +283,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE 0
 												END,
 			[int1099Category]				=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
-			[strBillOfLading]				= 	A.strBillOfLading
+			[strBillOfLading]				= 	A.strBillOfLading,
+			[intScaleTicketId]				=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
+			[intLocationId]					=	A.intLocationId
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -342,7 +348,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Form],
 			[int1099Category],
 			[intLoadDetailId],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -418,7 +426,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
-			[strBillOfLading]			= 	A.strBillOfLading
+			[strBillOfLading]			= 	A.strBillOfLading,
+			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
+			[intLocationId]				=	A.intLocationId
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -637,7 +647,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Form],
 			[int1099Category],
 			[intLoadDetailId],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -719,7 +731,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
-			[strBillOfLading]			= 	A.strBillOfLading
+			[strBillOfLading]			= 	A.strBillOfLading,
+			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
+			[intLocationId]				=	A.intLocationId
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -785,7 +799,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Category],
 		[intLoadDetailId],
 		[dbl1099],
-		[strBillOfLading]
+		[strBillOfLading],
+		[intScaleTicketId],
+		[intLocationId]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptItemId INTO @detailCreated(intBillDetailId, intInventoryReceiptItemId)
 	SELECT
@@ -823,7 +839,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Category],
 		[intLoadDetailId],
 		[dbl1099],
-		[strBillOfLading]
+		[strBillOfLading],
+		[intScaleTicketId],
+		[intLocationId]
 	FROM #tempBillDetail
 
 	--ADD TAXES
