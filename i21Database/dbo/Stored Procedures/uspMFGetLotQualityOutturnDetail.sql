@@ -1,11 +1,28 @@
 ﻿CREATE PROCEDURE uspMFGetLotQualityOutturnDetail (
 	@intWorkOrderId INT
 	,@intUnitMeasureId INT
+	,@intCurrencyId int
 	)
 AS
 DECLARE @dtmCurrentDateTime DATETIME
+	,@ysnSubCurrency BIT
+	,@intSubCurrency INT
 
 SELECT @dtmCurrentDateTime = Getdate()
+
+SELECT @ysnSubCurrency = ysnSubCurrency
+FROM tblSMCurrency
+WHERE intCurrencyID = @intCurrencyId
+
+IF @ysnSubCurrency = 1
+BEGIN
+	SELECT @intSubCurrency = 100
+END
+ELSE
+BEGIN
+	SELECT @intSubCurrency = 1
+END
+
 
 DECLARE @tblMFLot TABLE (
 	intLotId INT
@@ -13,6 +30,12 @@ DECLARE @tblMFLot TABLE (
 	,dblQty NUMERIC(38, 20)
 	,intItemUOMId INT
 	)
+
+DECLARE @tblMFFinalLot TABLE (
+	intLotId INT
+	,strLotNumber NVARCHAR(50) collate Latin1_General_CI_AS
+	)
+
 
 INSERT INTO @tblMFLot (
 	intLotId
@@ -22,8 +45,8 @@ INSERT INTO @tblMFLot (
 	)
 SELECT OM.intLotId
 	,T.intItemId
-	,T.dblQty
-	,T.intItemUOMId
+	,T.dblWeight
+	,T.intWeightUOMId
 FROM tblMFWorkOrder W
 JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
@@ -32,6 +55,34 @@ JOIN tblICLot L ON L.intLotId = OM.intLotId
 JOIN tblMFTask T ON T.intLotId = L.intLotId
 	AND T.intOrderHeaderId = OM.intOrderHeaderId
 WHERE W.intWorkOrderId = @intWorkOrderId
+
+INSERT INTO @tblMFLot (
+	intLotId
+	,intItemId
+	,dblQty
+	,intItemUOMId
+	)
+SELECT WI.intLotId
+	,WI.intItemId
+	,WI.dblQuantity
+	,WI.intItemUOMId
+FROM tblMFWorkOrderInputLot WI
+WHERE WI.intWorkOrderId = @intWorkOrderId
+	AND WI.ysnConsumptionReversed = 0
+
+	INSERT INTO @tblMFFinalLot (
+	intLotId
+	,strLotNumber
+	)
+SELECT L.intLotId
+	,L.strLotNumber
+FROM tblICLot L
+WHERE L.strLotNumber IN (
+		SELECT L2.strLotNumber
+		FROM @tblMFLot L1
+		JOIN tblICLot L2 ON L1.intLotId = L2.intLotId
+		)
+
 
 SELECT L.intItemId
 	,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, dblQty)) AS dblQty
@@ -62,14 +113,14 @@ SELECT intItemId
 INTO #tblMFFinalWorkOrderProducedLot
 FROM #tblMFWorkOrderProducedLot WP
 
-SELECT P.intPropertyId
+SELECT Distinct P.intPropertyId
 	,P.strPropertyName
 	,Convert(NUMERIC(38, 20), TR.strPropertyValue) AS strPropertyValue
 	,Convert(INT, NULL) AS intItemId
 	,Convert(NUMERIC(38, 20), NULL) AS dblExchangePrice
 INTO #GRN
 FROM @tblMFLot L
-JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
+JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId and TR.intProductTypeId=6
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 	AND P.intDataTypeId IN (
 		1
@@ -77,10 +128,18 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 		)
 	AND ISNUMERIC(TR.strPropertyValue) = 1
 JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-	AND S.intProductTypeId = 6
+	AND S.intProductTypeId =6
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND ST.intControlPointId = 9
-
+	AND S.intSampleId IN (
+		SELECT Max(S1.intSampleId)
+		FROM tblQMSample S1
+		JOIN tblQMSampleType ST1 ON S1.intSampleTypeId = ST1.intSampleTypeId
+		WHERE S1.intSampleStatusId = 3
+			AND S1.strLotNumber = S.strLotNumber
+			AND S1.intProductTypeId = 6
+			AND ST1.intControlPointId = ST.intControlPointId
+		)
 UPDATE #GRN
 SET intItemId = I.intItemId
 	,dblExchangePrice = IsNULL(dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
@@ -90,7 +149,7 @@ SET intItemId = I.intItemId
 					AND dtmSpotDate <= @dtmCurrentDateTime
 					AND intFutureMarketId = C.intFutureMarketId
 				ORDER BY 1 DESC
-				), @dtmCurrentDateTime), 0)
+				), @dtmCurrentDateTime), 0) / @intSubCurrency
 FROM #GRN G
 JOIN tblICItem I ON I.strItemNo = G.strPropertyName
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId

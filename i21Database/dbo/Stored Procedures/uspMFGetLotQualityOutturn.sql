@@ -4,7 +4,7 @@
 	,@strSortField NVARCHAR(MAX) = 'intSampleId'
 	,@strSortDirection NVARCHAR(5) = 'DESC'
 	,@intWorkOrderId INT = 0
-	,@strWeightUOM NVARCHAR(50) = '0'
+	,@strWeightUOM NVARCHAR(50) = 'LB'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -19,28 +19,44 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@SQL NVARCHAR(MAX)
 		,@strColumnsList NVARCHAR(MAX)
+		,@intUnitMeasureId INT
+
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICUnitMeasure
+	WHERE strUnitMeasure = @strWeightUOM
 
 	SET @SQL = 'Declare @tblMFLot Table(intLotId int)
+		Declare @tblMFFinalLot Table(intLotId int,strLotNumber nvarchar(50)  collate Latin1_General_CI_AS)
 		Insert into @tblMFLot (intLotId)
 		SELECT OM.intLotId
 		FROM tblMFWorkOrder W
 		JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 		JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
 		JOIN tblMFOrderManifest OM ON OM.intOrderHeaderId = SW.intOrderHeaderId
-		Where W.intWorkOrderId=' + Ltrim(@intWorkOrderId)
-	SET @SQL = @SQL + ' SELECT @PropList = Stuff((  
+		Where W.intWorkOrderId=' + Ltrim(@intWorkOrderId) + '
+		UNION 
+		Select WI.intLotId
+		From tblMFWorkOrderInputLot WI
+		Where WI.intWorkOrderId=' + Ltrim(@intWorkOrderId) + ' and WI.ysnConsumptionReversed =0
+		Insert into @tblMFFinalLot (intLotId,strLotNumber) 
+		Select L.intLotId,L.strLotNumber 
+		from tblICLot L 
+		Where L.strLotNumber in (Select L2.strLotNumber from @tblMFLot L1 JOIN tblICLot L2 on L1.intLotId=L2.intLotId)'
+	SET @SQL = @SQL + 
+		' SELECT @PropList = Stuff((  
     SELECT ''],['' + strPropertyName  
     FROM (  
 		SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName  
 		FROM tblICLot AS L
-		JOIN @tblMFLot AS L1 on L1.intLotId=L.intLotId
+		JOIN @tblMFFinalLot AS L1 on L1.intLotId=L.intLotId
 		JOIN tblICItem AS I ON I.intItemId = L.intItemId  
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-			AND S.intProductTypeId = 6
+			AND S.intProductTypeId = 6 
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
 		AND ST.intControlPointId in (5,6,9)
+		and S.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 JOIN tblQMSampleType ST1 on S1.intSampleTypeId=ST1.intSampleTypeId Where S1.intSampleStatusId =3 and S1.strLotNumber=L1.strLotNumber AND S1.intProductTypeId = 6 and ST1.intControlPointId=ST.intControlPointId )
 		JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
 		JOIN tblQMTest AS T ON T.intTestId = TR.intTestId
@@ -70,15 +86,23 @@ BEGIN TRY
 		DROP TABLE #LotQuality
 
 	SET @SQL = 'Declare @tblMFLot Table(intLotId int)
+		Declare @tblMFFinalLot Table(intLotId int,strLotNumber nvarchar(50) collate Latin1_General_CI_AS)
 		Insert into @tblMFLot (intLotId)
 		SELECT OM.intLotId
 		FROM tblMFWorkOrder W
 		JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 		JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
 		JOIN tblMFOrderManifest OM ON OM.intOrderHeaderId = SW.intOrderHeaderId
-		Where W.intWorkOrderId=' + Ltrim(@intWorkOrderId)
-	SET @SQL = @SQL + 
-		' SELECT *
+		Where W.intWorkOrderId=' + Ltrim(@intWorkOrderId) + '
+		UNION 
+		Select WI.intLotId
+		From tblMFWorkOrderInputLot WI
+		Where WI.intWorkOrderId=' + Ltrim(@intWorkOrderId) + ' and WI.ysnConsumptionReversed =0
+		Insert into @tblMFFinalLot (intLotId,strLotNumber) 
+		Select L.intLotId,L.strLotNumber 
+		from tblICLot L 
+		Where L.strLotNumber in (Select L2.strLotNumber from @tblMFLot L1 JOIN tblICLot L2 on L1.intLotId=L2.intLotId)'
+	SET @SQL = @SQL + ' SELECT *
 	INTO #LotQuality
 	FROM (
 		SELECT DENSE_RANK() OVER (
@@ -91,23 +115,24 @@ BEGIN TRY
 			,L.strLotNumber
 			,S.intSampleId
 			,S.strSampleNumber
+			,S.dtmSampleReceivedDate
 			,L.dblQty AS dblQty
 			,U.strUnitMeasure AS strQtyUOM
-			,ISNULL(L.dblWeight,L.dblQty) AS dblWeight
-			,U1.strUnitMeasure AS strWeightUOM
+			,dbo.fnMFConvertQuantityToTargetItemUOM(ISNULL(L.intWeightUOMId,L.intItemUOMId), IU1.intItemUOMId, ISNULL(L.dblWeight,L.dblQty)) AS dblWeight
+			,''' + @strWeightUOM + 
+		''' AS strWeightUOM
 			,DateDiff(d,L.dtmDateCreated,GETDATE()) As intNoOfDaysInStorage
 			,ST.intControlPointId
 			,COUNT(*) OVER () AS intTotalCount
 		FROM tblICLot AS L 
-		JOIN @tblMFLot L1 on L.intLotId=L1.intLotId
+		JOIN @tblMFFinalLot L1 on L.intLotId=L1.intLotId
 		JOIN tblICItem AS I ON I.intItemId = L.intItemId  
 		JOIN tblICItemUOM AS IU ON IU.intItemUOMId = L.intItemUOMId
 		JOIN tblICUnitMeasure AS U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblICItemUOM AS IU1 ON IU1.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
-		JOIN tblICUnitMeasure AS U1 ON U1.intUnitMeasureId = IU1.intUnitMeasureId
+		JOIN tblICItemUOM AS IU1 ON IU1.intItemId = L.intItemId and IU1.intUnitMeasureId=' + Ltrim(@intUnitMeasureId) + '
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
-			AND S.intProductTypeId = 6
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  AND ST.intControlPointId in (5,6,9)
+		and S.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 JOIN tblQMSampleType ST1 on S1.intSampleTypeId=ST1.intSampleTypeId Where S1.intSampleStatusId =3 and S1.strLotNumber=L1.strLotNumber AND S1.intProductTypeId = 6 and ST1.intControlPointId=ST.intControlPointId )
 		'
 
 	IF (LEN(@strFilterCriteria) > 0)
@@ -121,13 +146,14 @@ BEGIN TRY
 	SET @SQL = @SQL + ') t '
 	SET @SQL = @SQL + '	WHERE intRankNo > ' + @strStart + '
 			AND intRankNo <= ' + @strStart + '+' + @strLimit
-	SET @strColumnsList = 'TransactionType,intSampleId,strSampleNumber,intNoOfDaysInStorage,intLotId,strLotNumber'
+	SET @strColumnsList = 'TransactionType,intSampleId,strSampleNumber,dtmSampleReceivedDate,intNoOfDaysInStorage,intLotId,strLotNumber'
 	SET @strColumnsList = @strColumnsList + ',intItemId,strDescription,strItemNo,dblQty,strQtyUOM,dblWeight,strWeightUOM,intTotalCount'
 	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT intTotalCount   
 	,Case When intControlPointId IN (5,6) then ''GRN'' Else ''IP'' End TransactionType
 	,intSampleId
 	,strSampleNumber
+	,dtmSampleReceivedDate
 	,intNoOfDaysInStorage
 	,intLotId  
 	,strLotNumber
@@ -143,6 +169,7 @@ BEGIN TRY
 		SELECT intTotalCount   
 			,CQ.intSampleId
 			,strSampleNumber
+			,dtmSampleReceivedDate
 			,intNoOfDaysInStorage
 			,intLotId  
 			,strLotNumber
