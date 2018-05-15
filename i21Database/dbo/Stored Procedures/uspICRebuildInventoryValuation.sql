@@ -1715,7 +1715,7 @@ BEGIN
 				WHERE	s.strShipmentNumber = @strTransactionId  		
 
 				SELECT	@strAccountToCounterInventory = NULL 
-				WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
+				--WHERE	ISNULL(@intFobPointId, @FOB_ORIGIN) = @FOB_DESTINATION 
 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -1890,7 +1890,7 @@ BEGIN
 				WHERE	t.strTransactionId = @strTransactionId
 						AND t.ysnIsUnposted = 0 
 						AND t.strBatchId = @strBatchId
-						AND @intFobPointId = @FOB_DESTINATION
+						--AND @intFobPointId = @FOB_DESTINATION
 						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
 
@@ -2156,8 +2156,8 @@ BEGIN
 							AND t.strTransactionId = t.strTransactionId
 							AND t.ysnIsUnposted = 0 
 							AND t.dblQty > 0 
-				WHERE	t.intFobPointId = @FOB_DESTINATION
-						AND i.strInvoiceNumber = @strTransactionId
+				WHERE	--t.intFobPointId = @FOB_DESTINATION
+						i.strInvoiceNumber = @strTransactionId
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 
 				EXEC dbo.uspICRepostInTransitCosting

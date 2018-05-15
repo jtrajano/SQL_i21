@@ -371,7 +371,7 @@ BEGIN
 																, DEFAULT
 																, DEFAULT
 														)
-				,[intFobPointId]						= @FOB_DESTINATION 
+				,[intFobPointId]						= @intFobPointId -- @FOB_DESTINATION 
 				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
 				,[intForexRateTypeId]					= @intForexRateTypeId
 				,[dblForexRate]							= @dblForexRate

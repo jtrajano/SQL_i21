@@ -60,7 +60,9 @@ USING (
 					WHERE	iUOM.intItemId = ob.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
-		WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+		WHERE	--ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+				ob.intFOBPointId IS NOT NULL
+				AND ob.intFOBPointId IN (@FOB_ORIGIN, @FOB_DESTINATION)  
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 ) AS Source_Query  
@@ -113,7 +115,10 @@ USING (
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
 		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
-				AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
+				--AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
+				AND ob.intFOBPointId IS NOT NULL
+				AND ob.intFOBPointId IN (@FOB_ORIGIN, @FOB_DESTINATION)  --ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, ob.intItemUOMId
@@ -136,7 +141,9 @@ USING (
 					WHERE	iUOM.intItemId = ob.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
-		WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+		WHERE	--ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
+				ob.intFOBPointId IS NOT NULL
+				AND ob.intFOBPointId IN (@FOB_ORIGIN, @FOB_DESTINATION)  --ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, StockUOM.intItemUOMId
