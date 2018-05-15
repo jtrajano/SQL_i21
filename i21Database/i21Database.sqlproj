@@ -6558,6 +6558,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetUnRealizedPNL.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetRealizedPNL.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessGrainStorageAndDiscounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessDirectShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
