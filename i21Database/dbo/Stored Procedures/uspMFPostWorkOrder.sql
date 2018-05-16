@@ -426,7 +426,6 @@ BEGIN TRY
 		,@intUserId = @intUserId
 
 	IF @dblProduceQty > 0
-		
 	BEGIN
 		DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
@@ -667,7 +666,7 @@ BEGIN TRY
 					AND intWorkOrderProducedLotId > @intWorkOrderProducedLotId
 			END
 
-				SELECT @dblOtherCharges = SUM(dblOtherCharges)
+			SELECT @dblOtherCharges = SUM(dblOtherCharges)
 			FROM tblMFWorkOrderProducedLot
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND ysnProductionReversed = 0
@@ -881,69 +880,75 @@ BEGIN TRY
 					)
 
 			UPDATE PS
-			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
+			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice((
+							SELECT TOP 1 CM.intFutureMarketId
+							FROM tblICCommodityAttribute CA
+							JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+								AND CA.strType = 'ProductType'
+							WHERE CA.intCommodityAttributeId = I.intProductTypeId
+							), (
 							SELECT TOP 1 intFutureMonthId
 							FROM tblRKFuturesMonth
 							WHERE ysnExpired = 0
 								AND dtmSpotDate <= @dtmCurrentDateTime
 								AND intFutureMarketId = C.intFutureMarketId
 							ORDER BY 1 DESC
-							), @dtmCurrentDateTime), 0)
+							), @dtmCurrentDateTime), dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
+							SELECT TOP 1 intFutureMonthId
+							FROM tblRKFuturesMonth
+							WHERE ysnExpired = 0
+								AND dtmSpotDate <= @dtmCurrentDateTime
+								AND intFutureMarketId = C.intFutureMarketId
+							ORDER BY 1 DESC
+							), @dtmCurrentDateTime))
 			FROM @tblMFProductionSummary PS
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 
+			DECLARE @intM2MBasisId INT
+
+			SELECT @intM2MBasisId = intM2MBasisId
+			FROM tblRKM2MBasis
+			WHERE dtmM2MBasisDate = @dtmCurrentDateTime
+
+			IF @intM2MBasisId IS NULL
+				SELECT TOP 1 @intM2MBasisId = intM2MBasisId
+				FROM tblRKM2MBasis
+				WHERE dtmM2MBasisDate <= @dtmCurrentDateTime
+				ORDER BY intM2MBasisId DESC
+
 			UPDATE PS
-			SET dblGradeDiff = GD.dblGradeDiff
+			SET dblGradeDiff = IsNULL(BD.dblBasisOrDiscount, 0)
 			FROM @tblMFProductionSummary PS
-			JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
+			LEFT JOIN tblRKM2MBasisDetail BD ON BD.intItemId = PS.intItemId
+				AND BD.intM2MBasisId = @intM2MBasisId
 
 			--Calculate co efficient
-			IF EXISTS (
-					SELECT *
-					FROM @tblMFProductionSummary PS
-					JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
-					WHERE GD.dblCoEfficient IS NULL
-					)
-			BEGIN
-				SELECT @intProductionSummaryId = min(intProductionSummaryId)
-				FROM @tblMFProductionSummary
+			SELECT @intProductionSummaryId = min(intProductionSummaryId)
+			FROM @tblMFProductionSummary
 
-				UPDATE @tblMFProductionSummary
-				SET dblCoEfficient = 1
-				WHERE intProductionSummaryId = @intProductionSummaryId
+			UPDATE @tblMFProductionSummary
+			SET dblCoEfficient = 1
+			WHERE intProductionSummaryId = @intProductionSummaryId
 
-				SELECT @intFirstGradeItemId = intItemId
-				FROM @tblMFProductionSummary
-				WHERE intProductionSummaryId = @intProductionSummaryId
+			SELECT @intFirstGradeItemId = intItemId
+				,@dblFirstGradeDiff = dblGradeDiff
+			FROM @tblMFProductionSummary
+			WHERE intProductionSummaryId = @intProductionSummaryId
 
-				SELECT @dblFirstGradeDiff = dblGradeDiff
-				FROM tblMFItemGradeDiff
-				WHERE intItemId = @intFirstGradeItemId
+			UPDATE PS
+			SET dblCoEfficient = 0
+			FROM @tblMFProductionSummary PS
+			WHERE dblGradeDiff = 0
 
-				UPDATE PS
-				SET dblCoEfficient = 0
-				FROM @tblMFProductionSummary PS
-				JOIN tblICItem I ON I.intItemId = PS.intItemId
-					AND I.ysnSellableItem = 1
-
-				UPDATE PS
-				SET dblCoEfficient = (PS.dblMarketRate + GD.dblGradeDiff) / CASE 
-						WHEN (PS.dblMarketRate + @dblFirstGradeDiff) = 0
-							THEN 1
-						ELSE (PS.dblMarketRate + @dblFirstGradeDiff)
-						END
-				FROM @tblMFProductionSummary PS
-				JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
-				WHERE PS.dblCoEfficient IS NULL
-			END
-			ELSE
-			BEGIN
-				UPDATE PS
-				SET dblCoEfficient = GD.dblCoEfficient
-				FROM @tblMFProductionSummary PS
-				JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
-			END
+			UPDATE PS
+			SET dblCoEfficient = (PS.dblMarketRate + PS.dblGradeDiff) / CASE 
+					WHEN (PS.dblMarketRate + @dblFirstGradeDiff) = 0
+						THEN 1
+					ELSE (PS.dblMarketRate + @dblFirstGradeDiff)
+					END
+			FROM @tblMFProductionSummary PS
+			WHERE dblCoEfficient IS NULL
 
 			UPDATE @tblMFProductionSummary
 			SET dblCoEfficientApplied = dblOutputQuantity * dblCoEfficient
@@ -1148,7 +1153,6 @@ BEGIN TRY
 	--JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
 	--JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
 	--WHERE SW.intWorkOrderId = @intWorkOrderId
-
 	UPDATE OH
 	SET intOrderStatusId = 10
 	FROM dbo.tblMFOrderHeader OH
