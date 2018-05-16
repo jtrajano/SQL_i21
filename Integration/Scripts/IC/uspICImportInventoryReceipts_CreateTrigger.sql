@@ -17,7 +17,7 @@ EXEC ('
 	FOR INSERT
 	AS
 
-	DECLARE @inserted TABLE(intInventoryReceiptId INT)
+	DECLARE @inserted TABLE(intInventoryReceiptId INT, intLocationId INT)
 	DECLARE @count INT = 0
 	DECLARE @intInventoryReceiptId INT
 	DECLARE @ReceiptNumber NVARCHAR(50)
@@ -26,7 +26,7 @@ EXEC ('
 	DECLARE @intLocationId INT 
 
 	INSERT INTO @inserted
-	SELECT intInventoryReceiptId FROM INSERTED ORDER BY intInventoryReceiptId
+	SELECT intInventoryReceiptId, intLocationId FROM INSERTED ORDER BY intInventoryReceiptId
 	WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 	BEGIN
 		SET @intStartingNumberId = 23	
