@@ -8,6 +8,7 @@
     [intCompanyLocationId] INT             NOT NULL,
     [intStoreId]           INT             NULL,
     [ysnLoggedIn]          BIT             NULL,
+	[intPOSLogOriginId]    INT             NULL,
     [intConcurrencyId]     INT             NOT NULL,
     CONSTRAINT [PK_tblARPOSLog] PRIMARY KEY CLUSTERED ([intPOSLogId] ASC)
 );
