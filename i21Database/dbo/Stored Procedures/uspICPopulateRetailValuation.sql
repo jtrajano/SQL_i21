@@ -66,7 +66,11 @@ WHERE	category.ysnRetailValuation = 1
 UPDATE	rv
 SET		rv.dblBeginningRetail = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryRetailValue, 0))
+			SELECT	total = 
+					SUM (
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 
@@ -80,7 +84,10 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 UPDATE	rv
 SET		rv.dblReceipts = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryRetailValue, 0))
+			SELECT	total = SUM(
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 
@@ -98,7 +105,10 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 UPDATE	rv
 SET		rv.dblSales = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryRetailValue, 0))
+			SELECT	total = SUM(
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 
@@ -116,7 +126,10 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 UPDATE	rv
 SET		rv.dblMarkUpsDowns = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryRetailValue, 0))
+			SELECT	total = SUM(
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 
@@ -134,7 +147,10 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 UPDATE	rv
 SET		rv.dblWriteOffs = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryRetailValue, 0))
+			SELECT	total = SUM(
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 
@@ -152,7 +168,10 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 UPDATE	rv
 SET		rv.dblEndingRetail = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryRetailValue, 0))
+			SELECT	total = SUM(
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 
@@ -168,7 +187,10 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 UPDATE	rv
 SET		rv.dblEndingCost = transactions.total 
 FROM	tblICRetailValuation rv OUTER APPLY (
-			SELECT	total = SUM(ISNULL(t.dblCategoryCostValue, 0))
+			SELECT	total = SUM(
+						ISNULL(t.dblCategoryRetailValue, 0)
+						+ ( ISNULL(t.dblQty, 0) * ISNULL(t.dblUnitRetail, 0)) 
+					)
 			FROM	tblICInventoryTransaction t INNER JOIN tblICItem i 
 						ON t.intItemId = i.intItemId
 					INNER JOIN tblICItemLocation il 

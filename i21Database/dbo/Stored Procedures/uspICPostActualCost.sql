@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCost]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
+	,@dblUnitRetail NUMERIC(38, 20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -146,6 +147,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate						
 					,@strActualCostId = @strActualCostId
+					,@dblUnitRetail = @dblUnitRetail
 			
 			-- Insert the record the the Actual-out table
 			INSERT INTO dbo.tblICInventoryActualCostOut (
@@ -204,6 +206,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate				
 				,@strActualCostId = @strActualCostId		
+				,@dblUnitRetail = @dblUnitRetail
 
 		-- Repeat call on uspICIncreaseStockInActual until @dblAddQty is completely distributed to the negative cost Actual buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -274,6 +277,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strActualCostId = @strActualCostId
+							,@dblUnitRetail = @dblUnitRetail
 				END 
 			END
 			

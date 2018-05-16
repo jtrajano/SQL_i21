@@ -24,7 +24,7 @@ CREATE PROCEDURE [dbo].[uspICPostFIFO]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
-
+	,@dblUnitRetail NUMERIC(38, 20)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -144,6 +144,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@dblUnitRetail = @dblUnitRetail
 			
 			-- Insert the record the the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
@@ -201,7 +202,7 @@ BEGIN
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 			
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
-
+				,@dblUnitRetail = @dblUnitRetail
 
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
@@ -270,6 +271,7 @@ BEGIN
 							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
+							,@dblUnitRetail = @dblUnitRetail
 				END 
 			END
 			
