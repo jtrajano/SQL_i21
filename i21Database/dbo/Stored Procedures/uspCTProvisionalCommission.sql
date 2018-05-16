@@ -79,8 +79,13 @@ BEGIN TRY
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,CH.strEntityCountry))) END,'')
 	FROM	vyuCTEntity CH
+	left join tblSMCountry				rtc9 on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(CH.strEntityCountry)))
+	left join tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
+	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
+
 	WHERE	intEntityId =   @intVendorId
 
 	SELECT	@strCity    =   CASE WHEN LTRIM(RTRIM(strCity)) = '' THEN NULL ELSE LTRIM(RTRIM(strCity)) END
@@ -95,7 +100,7 @@ BEGIN TRY
 			strSeller,
 			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + isnull(rtrt2.strTranslation,BD.strItemUOM) + ')' AS strQuantity,
 			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + isnull(rtrt3.strTranslation,BD.strRateUOM) AS strRate,
-			ISNULL(IG.strCountry,OG.strCountry)	AS	strOrigin,
+			ISNULL(isnull(rtrt4.strTranslation,IG.strCountry),isnull(rtrt5.strTranslation,OG.strCountry))	AS	strOrigin,
 			strCurrency,
 			dblReqstdAmount
 
@@ -115,6 +120,14 @@ BEGIN TRY
 	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.InventoryUOM'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = BD.intRateUOMId
 	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'UOM'
+	
+	left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = IG.intCountryID
+	left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
+	
+	left join tblSMScreen				rts5 on rts5.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = OG.intCountryID
+	left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
 
 	WHERE	intBrkgCommnId		=	  @intBrkgCommnId			
 
