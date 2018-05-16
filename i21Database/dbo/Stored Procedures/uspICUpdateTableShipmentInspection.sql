@@ -13,7 +13,7 @@ BEGIN
 
 	-- Declare variables 
 	DECLARE @intControlPointId INT = 3  -- 3 / 8 (Inspection / Shipping)
-		    ,@intProductTypeId AS INT = 3 -- 3 (Shipment)
+		    ,@intProductTypeId AS INT = 4 -- 3 (Shipment)
 
 	-- Clear values of tblICInventoryShipmentInspection
 	DELETE FROM tblICInventoryShipmentInspection where intInventoryShipmentId = @ShipmentId OR intInventoryShipmentId=NULL
@@ -30,7 +30,7 @@ BEGIN
 	END
 
 	-- Insert values for #tmpGetQMInspectionResult
-	IF EXISTS (SELECT 1 FROM dbo.tblQMTestResult where intProductTypeId = 3 AND intProductValueId = @ShipmentId)
+	IF EXISTS (SELECT 1 FROM dbo.tblQMTestResult where intProductTypeId = 4 AND intProductValueId = @ShipmentId)
 		--Do this if Shipment Number is a valid Shipment Id
 		BEGIN
 			INSERT INTO #tmpGetQMInspectionResult (
@@ -58,7 +58,6 @@ BEGIN
 			EXEC dbo.uspQMInspectionGetResult
 					@intControlPointId
 					,@intProductTypeId 
-					,0
 		END
 
 	-- Insert values for tblICInventoryShipmentInspection
