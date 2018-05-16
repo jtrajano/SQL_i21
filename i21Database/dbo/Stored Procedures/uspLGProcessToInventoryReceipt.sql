@@ -117,6 +117,8 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT strReceiptType = 'Direct'
 				,intEntityVendorId = LD.intVendorEntityId
@@ -152,6 +154,8 @@ BEGIN TRY
 				,dblForexRate = NULL
 				,ISNULL(LC.intLoadContainerId, - 1)
 				,L.intFreightTermId
+				,L.intBookId
+				,L.intSubBookId
 			FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
@@ -216,6 +220,8 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT strReceiptType = 'Direct'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -251,6 +257,8 @@ BEGIN TRY
 				,dblForexRate = NULL
 				,- 1 --
 				,L.intFreightTermId
+				,L.intBookId
+				,L.intSubBookId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
