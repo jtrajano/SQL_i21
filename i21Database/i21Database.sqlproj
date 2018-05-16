@@ -6561,6 +6561,10 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessDirectShipment.sql" />
     <Build Include="dbo\Tables\tblMBILOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceDetail.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\35_Control.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\36_Control_Persmission.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCascadeControlPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCascadeScreenPermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
