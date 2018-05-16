@@ -2,7 +2,7 @@
 	 @intLoadId INT
 	,@ysnCancel BIT
 	,@intEntityUserSecurityId INT
-	,@intShipmentType INT
+	,@intShipmentType INT = NULL
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
@@ -21,7 +21,8 @@ BEGIN TRY
 								 ,intContractDetailId INT
 								 ,dblLoadDetailQuantity NUMERIC(18, 6))
 
-	SELECT @intPurchaseSale = intPurchaseSale
+	SELECT @intPurchaseSale = intPurchaseSale,
+		   @intShipmentType = ISNULL(@intShipmentType,intShipmentType)
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
