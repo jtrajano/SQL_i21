@@ -70,8 +70,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\34_ReplicationTable.sql
 :r .\SM\1810_Reset_Hours_Terms.sql
 :r .\SM\1810_tblSMCompanyGridlayout_DeleteDuplicateRecords.sql
-:r .\SM\35_Control.sql
-:r .\SM\36_Control_Persmission.sql
+:r .\SM\DefaultData\35_Control.sql
+:r .\SM\DefaultData\36_Control_Persmission.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
