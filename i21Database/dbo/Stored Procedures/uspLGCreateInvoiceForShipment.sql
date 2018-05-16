@@ -159,8 +159,8 @@ DECLARE
 		,@OriginalInvoiceId			= NULL
 	FROM [tblLGLoad] L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
 	WHERE L.intLoadId = @intLoadId
 
