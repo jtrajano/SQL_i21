@@ -174,7 +174,9 @@ BEGIN
 			,@strTransactionForm
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId 
-			,@dblForexRate;
+			,@dblForexRate
+			,@dblUnitRetail
+			;
 	END
 
 	-- FIFO 
@@ -200,7 +202,9 @@ BEGIN
 			,@strTransactionForm
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId 
-			,@dblForexRate;
+			,@dblForexRate
+			,@dblUnitRetail
+			;
 	END
 
 	-- LIFO 
@@ -226,7 +230,9 @@ BEGIN
 			,@strTransactionForm
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId 
-			,@dblForexRate;
+			,@dblForexRate
+			,@dblUnitRetail
+			;
 	END
 
 	-- LOT 
@@ -253,7 +259,9 @@ BEGIN
 			,@strTransactionForm
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId 
-			,@dblForexRate;
+			,@dblForexRate
+			,@dblUnitRetail
+			;
 	END
 
 	-- CATEGORY 
@@ -327,7 +335,9 @@ BEGIN
 					,@strTransactionForm
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId 
-					,@dblForexRate;
+					,@dblForexRate
+					,@dblUnitRetail
+					;
 			END 
 
 			ELSE IF @intCostingMethod = @FIFO
@@ -352,7 +362,9 @@ BEGIN
 					,@strTransactionForm
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId 
-					,@dblForexRate;
+					,@dblForexRate
+					,@dblUnitRetail
+					;
 			END 
 
 			ELSE IF @intCostingMethod = @LIFO
@@ -377,7 +389,9 @@ BEGIN
 					,@strTransactionForm
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId 
-					,@dblForexRate;
+					,@dblForexRate
+					,@dblUnitRetail
+					;
 			END 
 
 			ELSE IF @intCostingMethod = @LOTCOST
@@ -403,7 +417,9 @@ BEGIN
 					,@strTransactionForm
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId 
-					,@dblForexRate;
+					,@dblForexRate
+					,@dblUnitRetail
+					;
 			END 
 
 			ELSE IF @intCostingMethod = @CATEGORY
@@ -458,7 +474,9 @@ BEGIN
 				,@strTransactionForm 
 				,@intEntityUserSecurityId 
 				,@intForexRateTypeId 
-				,@dblForexRate;
+				,@dblForexRate
+				,@dblUnitRetail
+				;
 		END 
 	END
 
