@@ -126,7 +126,7 @@ AS
 			ISNULL(WU.dblUnitQty,1)	AS dblWeightUnitQty,
 			ISNULL(IU.dblUnitQty,1)	AS dblUnitQty,
 			RT.strCurrencyExchangeRateType,		RT.strDescription	AS strCurrencyExchangeRateTypeDesc,
-			
+			CP.ysnRequireProducerQty,
 
 			--Header Detail
 
