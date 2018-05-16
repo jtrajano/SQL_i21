@@ -90,7 +90,7 @@ reopenCalls as
 billedhours as
 (
 	select
-		intEntityId = a.intCreatedUserEntityId
+		intEntityId = a.intAssignedToEntity
 		,intTotalBilledHours = sum(isnull(b.intHours,0))
 		,dblTotalBillableAmount = sum(isnull(b.intHours,0)*isnull(b.dblRate,0))
 	from
@@ -102,7 +102,7 @@ billedhours as
 		and b.intTicketId = a.intTicketId
 		and b.ysnBillable = convert(bit,1)
 	group by
-		a.intCreatedUserEntityId
+		a.intAssignedToEntity
 ),
 rating as
 (
