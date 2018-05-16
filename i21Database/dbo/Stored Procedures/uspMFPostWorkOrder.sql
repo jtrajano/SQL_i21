@@ -883,7 +883,7 @@ BEGIN TRY
 					)
 
 			UPDATE PS
-			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice((
+			SET dblMarketRate = IsNULL(IsNULL(dbo.fnRKGetLatestClosingPrice((
 							SELECT TOP 1 CM.intFutureMarketId
 							FROM tblICCommodityAttribute CA
 							JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
@@ -903,7 +903,7 @@ BEGIN TRY
 								AND dtmSpotDate <= @dtmCurrentDateTime
 								AND intFutureMarketId = C.intFutureMarketId
 							ORDER BY 1 DESC
-							), @dtmCurrentDateTime))
+							), @dtmCurrentDateTime)),0)
 			FROM @tblMFProductionSummary PS
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
@@ -931,7 +931,7 @@ BEGIN TRY
 
 			UPDATE @tblMFProductionSummary
 			SET dblCoEfficient = 0
-			WHERE ysnZeroCost  = 0
+			WHERE ysnZeroCost  = 1
 
 			UPDATE PS
 			SET dblCoEfficient = (PS.dblMarketRate + PS.dblGradeDiff) / CASE 
@@ -940,7 +940,7 @@ BEGIN TRY
 					ELSE (PS.dblMarketRate + @dblFirstGradeDiff)
 					END
 			FROM @tblMFProductionSummary PS
-			WHERE dblCoEfficient IS NULL
+			WHERE dblCoEfficient IS NULL 
 
 			UPDATE @tblMFProductionSummary
 			SET dblCoEfficientApplied = dblOutputQuantity * dblCoEfficient
@@ -972,6 +972,7 @@ BEGIN TRY
 				,dblCoEfficientApplied = PS.dblCoEfficientApplied
 				,dblStandardUnitRate = PS.dblStandardUnitRate
 				,dblProductionUnitRate = PS.dblProductionUnitRate
+				,ysnZeroCost =PS.ysnZeroCost 
 			FROM @tblMFProductionSummary PS
 			JOIN tblMFProductionSummary PS1 ON PS.intProductionSummaryId = PS1.intProductionSummaryId
 

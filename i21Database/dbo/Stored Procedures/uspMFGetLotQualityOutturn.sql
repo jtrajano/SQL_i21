@@ -150,7 +150,7 @@ BEGIN TRY
 	SET @strColumnsList = @strColumnsList + ',intItemId,strDescription,strItemNo,dblQty,strQtyUOM,dblWeight,strWeightUOM,intTotalCount'
 	SET @strColumnsList = @strColumnsList + ',' + REPLACE(REPLACE(@str, '[', ''), ']', '')
 	SET @SQL = @SQL + ' SELECT intTotalCount   
-	,Case When intControlPointId IN (5,6) then ''GRN'' Else ''IP'' End TransactionType
+	,Case When intControlPointId IN (5,9) then ''GRN'' Else ''IP'' End TransactionType
 	,intSampleId
 	,strSampleNumber
 	,dtmSampleReceivedDate
