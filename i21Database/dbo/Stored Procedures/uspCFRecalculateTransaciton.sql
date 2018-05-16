@@ -147,73 +147,79 @@ BEGIN
 	IF(@IsImporting = 1)
 	BEGIN
 
-	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPricingType') = 1)
-	BEGIN
-		DROP TABLE ##tblCFTransactionPricingType
-	END
-		CREATE TABLE ##tblCFTransactionPricingType (
-		 intItemId						INT
-		,intProductId					INT
-		,strProductNumber				NVARCHAR(MAX)
-		,strItemId						NVARCHAR(MAX)
-		,intCustomerId					INT
-		,intLocationId					INT
-		,dblQuantity					NUMERIC(18,6)
-		,intItemUOMId					INT
-		,dtmTransactionDate				DATETIME
-		,strTransactionType				NVARCHAR(MAX)
-		,intNetworkId					INT
-		,intSiteId						INT
-		,dblTransferCost				NUMERIC(18,6)
-		,dblInventoryCost				NUMERIC(18,6)
-		,dblOriginalPrice				NUMERIC(18,6)
-		,dblPrice						NUMERIC(18,6)
-		,strPriceMethod					NVARCHAR(MAX)
-		,dblAvailableQuantity			NUMERIC(18,6)
-		,intContractHeaderId			INT
-		,intContractDetailId			INT
-		,strContractNumber				NVARCHAR(MAX)
-		,intContractSeq					INT
-		,strPriceBasis					NVARCHAR(MAX)
-		,intPriceProfileId				INT
-		,intPriceIndexId 				INT
-		,intSiteGroupId 				INT
-		,strPriceProfileId				NVARCHAR(MAX)
-		,strPriceIndexId				NVARCHAR(MAX)
-		,strSiteGroup					NVARCHAR(MAX)
-		,dblPriceProfileRate			NUMERIC(18,6)
-		,dblPriceIndexRate				NUMERIC(18,6)
-		,dtmPriceIndexDate				DATETIME
-		,dblMargin						NUMERIC(18,6)
-		,dblAdjustmentRate				NUMERIC(18,6)
-		,ysnDuplicate					BIT
-		,ysnInvalid						BIT
-		,dblGrossTransferCost			NUMERIC(18,6)
-		,dblNetTransferCost				NUMERIC(18,6)
-		,intFreightTermId				INT
-	);
+	--IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPricingType') = 1)
+	--BEGIN
+	--	DROP TABLE ##tblCFTransactionPricingType
+	--END
+	--	CREATE TABLE ##tblCFTransactionPricingType (
+	--	 intItemId						INT
+	--	,intProductId					INT
+	--	,strProductNumber				NVARCHAR(MAX)
+	--	,strItemId						NVARCHAR(MAX)
+	--	,intCustomerId					INT
+	--	,intLocationId					INT
+	--	,dblQuantity					NUMERIC(18,6)
+	--	,intItemUOMId					INT
+	--	,dtmTransactionDate				DATETIME
+	--	,strTransactionType				NVARCHAR(MAX)
+	--	,intNetworkId					INT
+	--	,intSiteId						INT
+	--	,dblTransferCost				NUMERIC(18,6)
+	--	,dblInventoryCost				NUMERIC(18,6)
+	--	,dblOriginalPrice				NUMERIC(18,6)
+	--	,dblPrice						NUMERIC(18,6)
+	--	,strPriceMethod					NVARCHAR(MAX)
+	--	,dblAvailableQuantity			NUMERIC(18,6)
+	--	,intContractHeaderId			INT
+	--	,intContractDetailId			INT
+	--	,strContractNumber				NVARCHAR(MAX)
+	--	,intContractSeq					INT
+	--	,strPriceBasis					NVARCHAR(MAX)
+	--	,intPriceProfileId				INT
+	--	,intPriceIndexId 				INT
+	--	,intSiteGroupId 				INT
+	--	,strPriceProfileId				NVARCHAR(MAX)
+	--	,strPriceIndexId				NVARCHAR(MAX)
+	--	,strSiteGroup					NVARCHAR(MAX)
+	--	,dblPriceProfileRate			NUMERIC(18,6)
+	--	,dblPriceIndexRate				NUMERIC(18,6)
+	--	,dtmPriceIndexDate				DATETIME
+	--	,dblMargin						NUMERIC(18,6)
+	--	,dblAdjustmentRate				NUMERIC(18,6)
+	--	,ysnDuplicate					BIT
+	--	,ysnInvalid						BIT
+	--	,dblGrossTransferCost			NUMERIC(18,6)
+	--	,dblNetTransferCost				NUMERIC(18,6)
+	--	,intFreightTermId				INT
+	--);
 
-	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
-	BEGIN
-		DROP TABLE ##tblCFTransactionTaxType
-	END
-		CREATE TABLE ##tblCFTransactionTaxType (
-		 [dblTaxCalculatedAmount]		NUMERIC(18,6)
-		,[dblTaxOriginalAmount]			NUMERIC(18,6)
-		,[intTaxCodeId]					INT
-		,[dblTaxRate]					NUMERIC(18,6)
-		,[strTaxCode]					NVARCHAR(MAX)
-	);
+	DELETE FROM tblCFTransactionPricingType
 
-	IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
-	BEGIN
-		DROP TABLE ##tblCFTransactionPriceType
-	END
-		CREATE TABLE ##tblCFTransactionPriceType (
-		 [strTransactionPriceId]		NVARCHAR(MAX)
-		,[dblTaxOriginalAmount]			NUMERIC(18,6)
-		,[dblTaxCalculatedAmount]		NUMERIC(18,6)
-	);
+	--IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
+	--BEGIN
+	--	DROP TABLE ##tblCFTransactionTaxType
+	--END
+	--	CREATE TABLE ##tblCFTransactionTaxType (
+	--	 [dblTaxCalculatedAmount]		NUMERIC(18,6)
+	--	,[dblTaxOriginalAmount]			NUMERIC(18,6)
+	--	,[intTaxCodeId]					INT
+	--	,[dblTaxRate]					NUMERIC(18,6)
+	--	,[strTaxCode]					NVARCHAR(MAX)
+	--);
+
+	DELETE FROM tblCFTransactionTaxType
+
+	--IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
+	--BEGIN
+	--	DROP TABLE ##tblCFTransactionPriceType
+	--END
+	--	CREATE TABLE ##tblCFTransactionPriceType (
+	--	 [strTransactionPriceId]		NVARCHAR(MAX)
+	--	,[dblTaxOriginalAmount]			NUMERIC(18,6)
+	--	,[dblTaxCalculatedAmount]		NUMERIC(18,6)
+	--);
+
+	DELETE FROM tblCFTransactionPriceType
 
 	END
 
@@ -3532,7 +3538,7 @@ BEGIN
 	---------------------------------------------------
 	IF(@IsImporting = 1)
 		BEGIN
-			INSERT INTO ##tblCFTransactionPricingType
+			INSERT INTO tblCFTransactionPricingType
 			(
 			 intItemId
 			,intProductId		
@@ -3668,7 +3674,7 @@ BEGIN
 	---------------------------------------------------
 	IF(@IsImporting = 1)
 		BEGIN
-			INSERT INTO ##tblCFTransactionTaxType
+			INSERT INTO tblCFTransactionTaxType
 			(
 			 dblTaxCalculatedAmount
 			,dblTaxOriginalAmount
@@ -3722,7 +3728,7 @@ BEGIN
 	---------------------------------------------------
 	IF(@IsImporting = 1)
 	BEGIN
-		INSERT INTO ##tblCFTransactionPriceType
+		INSERT INTO tblCFTransactionPriceType
 		(
 		 [strTransactionPriceId]
 		,[dblTaxOriginalAmount]	

@@ -6311,6 +6311,9 @@
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
     <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
+    <Build Include="dbo\Tables\tblCFTransactionTaxType.sql" />
+    <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
+    <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
