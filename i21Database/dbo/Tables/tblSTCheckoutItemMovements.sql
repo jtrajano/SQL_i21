@@ -7,6 +7,7 @@
     [intVendorId] INT NULL, 
     [intQtySold] INT NULL, 
     [dblCurrentPrice] DECIMAL(18, 6) NULL, 
+	[dblDiscountAmount] DECIMAL(18, 6) NULL, 
     [dblTotalSales] DECIMAL(18, 6) NULL,  
     [dblItemStandardCost] DECIMAL(18, 6) NULL, 
     [intConcurrencyId] INT NULL, 
