@@ -25,7 +25,10 @@ BEGIN
 			@strInstoreTo				NVARCHAR(MAX),
 			@strReleaseOrderText		NVARCHAR(MAX),
 			@strWarehouseEntityName		NVARCHAR(MAX),
-			@strShippingLineName		NVARCHAR(MAX)
+			@strShippingLineName		NVARCHAR(MAX),
+			@intLaguageId			INT,
+			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
+			@strMonthLabelName		NVARCHAR(50) = 'Month'
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -80,18 +83,26 @@ BEGIN
 	
 	SELECT	@strInstoreTo = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'strInstoreTo' 
+	WHERE	[fieldname] = 'strInstoreTo'  
+	
+	SELECT	@intLaguageId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intLaguageId' 
 
-	SELECT TOP 1 @strCompanyName = strCompanyName
-				,@strCompanyAddress = strAddress
-				,@strContactName = strContactName
-				,@strCounty = strCounty
-				,@strCity = strCity
-				,@strState = strState
-				,@strZip = strZip
-				,@strCountry = strCountry
-				,@strPhone = strPhone
+	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
+				,@strCompanyAddress = tblSMCompanySetup.strAddress
+				,@strContactName = tblSMCompanySetup.strContactName
+				,@strCounty = tblSMCompanySetup.strCounty
+				,@strCity = tblSMCompanySetup.strCity
+				,@strState = tblSMCompanySetup.strState
+				,@strZip = tblSMCompanySetup.strZip
+				,@strCountry = isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry)
+				,@strPhone = tblSMCompanySetup.strPhone
 	FROM tblSMCompanySetup
+	left join tblSMCountry				rtc9 on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
+	left join tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
+	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
 	SELECT @strFullName = E.strName,
 		   @strUserEmailId = ETC.strEmail,
@@ -118,8 +129,13 @@ BEGIN
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
+	/*Declared variables for translating expression*/
+	declare @strShipmentWeightInfo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment in'), 'Shipment in');
+	declare @strReleaseOrderText1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Attn'), 'Attn');
+	declare @strReleaseOrderText2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Please release the cargo in favour of'), 'Please release the cargo in favour of');
 
-	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the cargo in favour of ' + @strWarehouseEntityName
+
+	SELECT @strReleaseOrderText = @strReleaseOrderText1 + ' '+ ISNULL(@strShippingLineName,'') +' : '+@strReleaseOrderText2+' ' + @strWarehouseEntityName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
@@ -261,11 +277,11 @@ BEGIN
 				CH.strCustomerContract,
 				L.strBLNumber,
 				I.strItemNo,
-				I.strDescription AS strItemDescription,
+				isnull(rtrt3.strTranslation,I.strDescription) AS strItemDescription,
 				CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo,
 				(SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId) dblLoadWeight,
 				UM.strUnitMeasure strLoadWeightUOM,
-				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + WUM.strUnitMeasure + ' ' + '(Shipment in ' + WUM.strUnitMeasure +')' AS strShipmentWeightInfo,
+				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) + ' ' + '(Shipment in ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) +')' AS strShipmentWeightInfo,
 				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + UM.strUnitMeasure AS strShipmentQtyInfo,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
@@ -314,6 +330,15 @@ BEGIN
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		CROSS APPLY tblLGCompanyPreference CP
+	
+		left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+		left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = WUM.intUnitMeasureId
+		left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+	
+		left join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.Item'
+		left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = I.intItemId
+		left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Description'
+
 		WHERE L.strLoadNumber = @strTrackingNumber
 	END
 END
