@@ -176,7 +176,7 @@ BEGIN TRY
 				AND Trans.uniqTransactionGuid = @Guid
 				AND Trans.intProductCodeId IN (@lpgId, @cngId)
 				AND Trans.intReportingComponentId IN (SELECT intReportingComponentId FROM vyuTFGetReportingComponent
-													WHERE strTaxAuthorityCode = 'PA'
+													WHERE strTaxAuthorityCode = @TaxAuthorityCode
 														AND strFormCode = 'Gas-1252')
 			
 			UPDATE tblTFTransaction

@@ -689,16 +689,7 @@ BEGIN TRY
 						OR (TaxCodeCategory.intTaxCodeId IS NULL AND tblTFReportingComponentCriteria.strCriteria = '= 0') -- FOR NO TAX CODE MAPPED TO MFT CATEGORY
 					)
 		) tblTransactions
-
-		-- NC Special Requirement for GAS-1252 Form - Propane Type
-		UPDATE @tmpInvoiceTransaction SET dblQtyShipped = dblQtyShipped/1.353, dblGross = dblGross/1.353, dblNet = dblNet/1.353, dblBillQty = dblBillQty/1.353
-		WHERE strFormCode = 'Gas-1252' AND strType = 'Propane' 
-
-		-- NC Special Requirement for GAS-1252 Form - CNG Type
-		UPDATE @tmpInvoiceTransaction SET dblQtyShipped = dblQtyShipped/123.57, dblGross = dblGross/123.57, dblNet = dblNet/123.57, dblBillQty = dblBillQty/123.57  
-		WHERE strFormCode = 'Gas-1252' AND strType = 'CNG' 
-
-		
+	
 		IF (@ReportingComponentId <> '')
 		BEGIN
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
