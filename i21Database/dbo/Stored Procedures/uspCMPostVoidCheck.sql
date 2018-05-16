@@ -19,6 +19,14 @@ SET ANSI_WARNINGS OFF
 --=====================================================================================================================================
 -- 	DECLARATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @ysnReconciled BIT
+
+IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransaction WHERE strTransactionId = REPLACE(@strTransactionId,'V','') AND  dtmDateReconciled IS NOT NULL)
+BEGIN
+	RAISERROR('Voiding not allowed on a reconciled transaction', 11, 1)
+	--IF @@TRANCOUNT > 0 ROLLBACK
+	RETURN
+END
 
 -- Start the transaction 
 BEGIN TRANSACTION
