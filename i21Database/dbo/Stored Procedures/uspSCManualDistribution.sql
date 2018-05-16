@@ -489,7 +489,8 @@ END
 		FROM tblICInventoryReceipt r 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
-		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1
+		LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
+		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 AND CTP.intPriceFixationId IS NULL
 		-- Assemble the voucher items 
 		BEGIN 
 			INSERT INTO @voucherItems (
