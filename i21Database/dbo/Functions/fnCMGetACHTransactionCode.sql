@@ -12,7 +12,7 @@ DECLARE @Code NVARCHAR(1)
 ;with r as (
 select trns.strTransactionId, CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) = 1 THEN '7' ELSE '2' END Code from tblARInvoice invoice join 
 tblARPaymentDetail paymentdetail on paymentdetail.intInvoiceId = invoice.intInvoiceId
-join tblAPPayment payment on payment.intPaymentId = paymentdetail.intPaymentId
+join tblARPayment payment on payment.intPaymentId = paymentdetail.intPaymentId
 join tblCMUndepositedFund uf on uf.intSourceTransactionId  = payment.intPaymentId
 join tblCMBankTransaction trns on trns.intTransactionId = uf.intBankDepositId
 union
