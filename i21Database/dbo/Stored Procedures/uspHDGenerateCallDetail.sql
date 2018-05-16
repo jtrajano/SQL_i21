@@ -109,7 +109,7 @@ rating as
 	select
 		intEntityId = a.intAssignedToEntity
 		,intCallsRated = count(isnull(a.intFeedbackWithRepresentativeId,0))
-		,dblAverageRating = sum(isnull(a.intFeedbackWithRepresentativeId,0)) / count(isnull(a.intFeedbackWithRepresentativeId,0))
+		,dblAverageRating = isnull(convert(numeric(18,6),sum(isnull(a.intFeedbackWithRepresentativeId,0.00))) / count(convert(numeric(18,6),isnull(a.intFeedbackWithRepresentativeId,0.00))),0.00)
 	from
 		tblHDTicket a
 	where
@@ -172,7 +172,7 @@ select distinct
 		,intTotalBilledHours = isnull((select intTotalBilledHours from billedhours where intEntityId = b.intEntityId),0)
 		,dblTotalBillableAmount = isnull((select dblTotalBillableAmount from billedhours where intEntityId = b.intEntityId),0)
 		,intCallsRated = isnull((select intCallsRated from rating where intEntityId = b.intEntityId),0)
-		,dblAverageRating = isnull((select dblAverageRating from rating where intEntityId = b.intEntityId),0)
+		,dblAverageRating = isnull((select isnull(dblAverageRating,0.00) from rating where intEntityId = b.intEntityId),0.00)
 		,intDaysOutstanding = isnull((select intDaysOutstanding from daysoutstanding where intEntityId = b.intEntityId),0)
 		,intConcurrencyId = 1
 from
