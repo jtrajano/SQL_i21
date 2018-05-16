@@ -29,8 +29,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,[strUnitMeasure] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[strPrice] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 		,[strCurrency] NVARCHAR (40)   COLLATE Latin1_General_CI_AS NULL
-		,[strBeginDate] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-		,[strEndDate] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		,[strBeginDate] CHAR(12) COLLATE Latin1_General_CI_AS NULL
+		,[strEndDate] CHAR(12) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	BEGIN TRY
@@ -66,8 +66,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,loc.intEntityLocationId
 		,itemData.intItemId
 		,itemUOM.intUnitMeasureId
-		,CONVERT(DATETIME, pricing.strBeginDate, 101)
-		,CONVERT(DATETIME, pricing.strEndDate, 101)
+		,CONVERT(DATETIME2, pricing.strBeginDate, 101)
+		,CONVERT(DATETIME2, dbo.fnTrimX(pricing.strEndDate), 101)
+		-- ,CONVERT(DATETIME, pricing.strBeginDate, 101)
+		-- ,CONVERT(DATETIME, pricing.strEndDate, 101)
 		,CAST(pricing.strPrice AS DECIMAL(38,30))
 		,cur.intCurrencyID
 	FROM #tmpVendorPricing pricing
