@@ -1841,6 +1841,10 @@ BEGIN
 				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
 						BEGIN TRY
+							
+							-- Filter dblPrice should not be 0 and null
+							DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 AND dblPrice IS NULL
+
 							EXEC [dbo].[uspARProcessInvoices]
 										@InvoiceEntries	 = @EntriesForInvoice
 										--,@LineItemTaxEntries = NULL
