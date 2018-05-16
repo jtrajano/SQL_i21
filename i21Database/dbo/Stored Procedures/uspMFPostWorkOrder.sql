@@ -837,6 +837,7 @@ BEGIN TRY
 				,dblCoEfficientApplied NUMERIC(38, 20)
 				,dblStandardUnitRate NUMERIC(38, 20)
 				,dblProductionUnitRate NUMERIC(38, 20)
+				,ysnZeroCost BIT
 				)
 
 			INSERT INTO @tblMFProductionSummary (
@@ -855,6 +856,7 @@ BEGIN TRY
 				,dblCoEfficientApplied
 				,dblStandardUnitRate
 				,dblProductionUnitRate
+				,ysnZeroCost
 				)
 			SELECT intProductionSummaryId
 				,intItemId
@@ -871,6 +873,7 @@ BEGIN TRY
 				,dblCoEfficientApplied
 				,dblStandardUnitRate
 				,dblProductionUnitRate
+				,ysnZeroCost
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intItemTypeId NOT IN (
@@ -904,24 +907,14 @@ BEGIN TRY
 			FROM @tblMFProductionSummary PS
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-
-			DECLARE @intM2MBasisId INT
-
-			SELECT @intM2MBasisId = intM2MBasisId
-			FROM tblRKM2MBasis
-			WHERE dtmM2MBasisDate = @dtmCurrentDateTime
-
-			IF @intM2MBasisId IS NULL
-				SELECT TOP 1 @intM2MBasisId = intM2MBasisId
-				FROM tblRKM2MBasis
-				WHERE dtmM2MBasisDate <= @dtmCurrentDateTime
-				ORDER BY intM2MBasisId DESC
-
-			UPDATE PS
-			SET dblGradeDiff = IsNULL(BD.dblBasisOrDiscount, 0)
-			FROM @tblMFProductionSummary PS
-			LEFT JOIN tblRKM2MBasisDetail BD ON BD.intItemId = PS.intItemId
-				AND BD.intM2MBasisId = @intM2MBasisId
+			
+			If exists(Select *from @tblMFProductionSummary Where dblGradeDiff is null)
+			Begin
+				UPDATE PS
+				SET dblGradeDiff = IsNULL(GD.dblGradeDiff, 0),ysnZeroCost =IsNULL(GD.ysnZeroCost,0)
+				FROM @tblMFProductionSummary PS
+				Left JOIN tblMFItemGradeDiff GD on GD.intItemId=PS.intItemId
+			End
 
 			--Calculate co efficient
 			SELECT @intProductionSummaryId = min(intProductionSummaryId)
@@ -936,10 +929,9 @@ BEGIN TRY
 			FROM @tblMFProductionSummary
 			WHERE intProductionSummaryId = @intProductionSummaryId
 
-			UPDATE PS
+			UPDATE @tblMFProductionSummary
 			SET dblCoEfficient = 0
-			FROM @tblMFProductionSummary PS
-			WHERE dblGradeDiff = 0
+			WHERE ysnZeroCost  = 0
 
 			UPDATE PS
 			SET dblCoEfficient = (PS.dblMarketRate + PS.dblGradeDiff) / CASE 

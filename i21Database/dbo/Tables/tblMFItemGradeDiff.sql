@@ -1,8 +1,8 @@
 ﻿CREATE TABLE tblMFItemGradeDiff (
 	intGradeDiffId INT identity(1, 1) CONSTRAINT PK_tblMFItemGradeDiff_intGradeDiffId PRIMARY KEY
-	,intItemId INT
+	,intItemId INT CONSTRAINT UQ_tblMFItemGradeDiff_intItemId UNIQUE
 	,dblGradeDiff Numeric(18,6)
-	,dblCoEfficient Numeric(38,20)
+	,ysnZeroCost BIT CONSTRAINT DF_tblMFItemGradeDiff_ysnZeroCost DEFAULT 0
 	,intCreatedUserId INT 
 	,dtmCreated DATETIME CONSTRAINT DF_tblMFItemGradeDiff_dtmCreated DEFAULT GetDate()
 	,intLastModifiedUserId INT 	

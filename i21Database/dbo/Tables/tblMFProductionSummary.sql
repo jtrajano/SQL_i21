@@ -36,6 +36,7 @@
 	,dblStandardUnitRate Numeric(38,20)
 	,dblProductionUnitRate Numeric(38,20)
 	,dblCost Numeric(38,20)
+	,ysnZeroCost BIT
     ,CONSTRAINT PK_tblMFProductionSummary_intProductionSummaryId PRIMARY KEY (intProductionSummaryId)
 	,CONSTRAINT FK_tblMFProductionSummary_tblMFWorkOrder_intWorkOrderId FOREIGN KEY (intWorkOrderId) REFERENCES dbo.tblMFWorkOrder(intWorkOrderId) ON DELETE CASCADE
 	,CONSTRAINT FK_tblMFProductionSummary_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES dbo.tblICItem(intItemId)

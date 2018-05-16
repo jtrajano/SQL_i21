@@ -112,7 +112,7 @@ FROM #tblMFWorkOrderProducedLot WP
 SELECT DISTINCT P.intPropertyId
 	,P.strPropertyName
 	,Convert(NUMERIC(38, 20), TR.strPropertyValue) AS strPropertyValue
-	,Convert(INT, NULL) AS intItemId
+	,P.intItemId 
 	,Convert(NUMERIC(38, 20), NULL) AS dblExchangePrice
 INTO #GRN
 FROM @tblMFFinalLot L
@@ -162,7 +162,7 @@ SET intItemId = I.intItemId
 				ORDER BY 1 DESC
 				), @dtmCurrentDateTime)) / @intSubCurrency
 FROM #GRN G
-JOIN tblICItem I ON I.strItemNo = G.strPropertyName
+JOIN tblICItem I ON I.intItemId = G.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 
 SELECT intPropertyId
