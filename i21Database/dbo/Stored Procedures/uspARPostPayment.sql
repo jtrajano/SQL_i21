@@ -1684,7 +1684,7 @@ IF @post = 1
 			tblARPayment A		
 		INNER JOIN
 			tblARPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId	 
+				ON A.intPaymentId = B.intPaymentId and B.dblBasePayment <> 0
 		INNER JOIN
 			tblSMPaymentMethod PM
 				ON A.intPaymentMethodId = PM.intPaymentMethodID
