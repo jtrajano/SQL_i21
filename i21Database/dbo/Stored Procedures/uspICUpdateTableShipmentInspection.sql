@@ -57,7 +57,8 @@ BEGIN
 			)
 			EXEC dbo.uspQMInspectionGetResult
 					@intControlPointId
-					,@intProductTypeId 
+					,@intProductTypeId
+					,0
 		END
 
 	-- Insert values for tblICInventoryShipmentInspection
