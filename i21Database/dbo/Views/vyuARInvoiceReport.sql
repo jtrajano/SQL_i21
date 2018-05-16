@@ -42,7 +42,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotalTax, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotalTax, 0) END
 								  ELSE NULL END
-	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) END
+	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblProvisionalAmount, 0)  END
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
@@ -266,7 +266,7 @@ OUTER APPLY (
 ) VFDDRUGITEM
 OUTER APPLY (
 	SELECT TOP 1 strProvisionalDescription = 'Less Payment Received: Provisional Invoice No. ' + ISNULL(strInvoiceNumber, '') + ' dated ' + CONVERT(VARCHAR(10), dtmDate, 110)
-			   , dblProvisionalTotal	   = dblInvoiceTotal	    
+			   , dblProvisionalTotal	   = dblPayment	    
 	FROM dbo.tblARInvoice WITH (NOLOCK)
 	WHERE strType = 'Provisional'
 	  AND ysnProcessed = 1
