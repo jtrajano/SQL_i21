@@ -53,9 +53,8 @@ BEGIN
 					CASE 
 						WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
 							CASE 
-								--WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblTax 
-								WHEN ReceiptCharge.ysnPrice = 1 THEN ReceiptCharge.dblTax 
-								WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblTax 
+								WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblTax 
+								WHEN ReceiptCharge.ysnAccrue = 1 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblTax 
 								ELSE 0.00
 							END 
 						ELSE
