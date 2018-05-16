@@ -131,6 +131,8 @@ BEGIN
 				,strItemType
 				,intItemUOMId
 				,dblQuantity
+				,ysnLoad
+				,intLoadReceive
 			)
 			SELECT 'Inventory Shipment',
 				ShipmentItem.intInventoryShipmentId, 
@@ -143,9 +145,12 @@ BEGIN
 				ShipmentItem.intItemId,
 				ShipmentItem.strItemType,
 				ShipmentItem.intItemUOMId,
-				ShipmentItem.dblQuantity
+				ShipmentItem.dblQuantity,
+				ShipmentItemSource.ysnLoad,
+				ShipmentItem.intLoadShipped
 			FROM tblICInventoryShipmentItem ShipmentItem
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+				LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 			WHERE
 				ShipmentItem.intInventoryShipmentId = @TransactionId 
 				AND ShipmentItem.intChildItemLinkId IS NULL 
@@ -163,9 +168,12 @@ BEGIN
 				ItemBundle.intItemId,
 				ShipmentItem.strItemType,
 				ItemBundleUOM.intItemUOMId,
-				ShipmentItem.dblQuantity
+				ShipmentItem.dblQuantity,
+				ShipmentItemSource.ysnLoad,
+				ShipmentItem.intLoadShipped
 			FROM tblICInventoryShipmentItem ShipmentItem
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+				LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 				INNER JOIN tblICItemBundle ItemBundle ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId AND ItemBundle.intBundleItemId = ShipmentItem.intItemId
 				INNER JOIN tblICItem ItemBundleDetail ON ItemBundleDetail.intItemId = ItemBundle.intItemId
 				LEFT JOIN tblICItemUOM ItemBundleUOM ON ItemBundleUOM.intItemUOMId = [dbo].[fnGetMatchingItemUOMId](ItemBundle.intItemId, ShipmentItem.intItemUOMId)
