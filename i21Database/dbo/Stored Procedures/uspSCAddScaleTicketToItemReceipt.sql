@@ -1230,7 +1230,10 @@ BEGIN
 		,[intStorageLocationId] = RE.intStorageLocationId
 		,[intCurrencyId]		= RE.intCurrencyId
 		,[intItemUnitMeasureId] = RE.intItemUOMId
-		,[dblQuantity]			= RE.dblQty
+		,[dblQuantity]			= CASE 
+									WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblQty
+									ELSE RE.dblQty
+								END
 		,[dblGrossWeight]		= CASE
 									WHEN IC.ysnLotWeightsRequired = 1 THEN 
 										CASE 
