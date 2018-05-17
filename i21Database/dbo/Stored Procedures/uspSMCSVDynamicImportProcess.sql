@@ -15,12 +15,12 @@ BEGIN
 	DECLARE @Header  table
 	(
 		id int, 
-		sv nvarchar(100) COLLATE Latin1_General_CI_AS
+		sv nvarchar(max) COLLATE Latin1_General_CI_AS
 	)
 	DECLARE @Value  table
 	(
 		id int, 
-		sv nvarchar(100) COLLATE Latin1_General_CI_AS
+		sv nvarchar(max) COLLATE Latin1_General_CI_AS
 	)
 
 	DECLARE @ImportData TABLE
@@ -84,8 +84,18 @@ BEGIN
 	
 		INSERT INTO @Value(id, sv)
 		SELECT RecordKey, Record  
-			FROM dbo.fnCFSplitString(@CurrentValue, ',')
-	
+			FROM dbo.fnCFSplitString(@CurrentValue, '"')
+
+		UPDATE @Value  SET sv = REPLACE(sv,',','-^-') 
+			where sv not like '%,' and sv not like ',%'
+
+		declare @NewLine as nvarchar(max)
+		select  @NewLine = COALESCE(ISNULL(@NewLine, ''),',') + sv from @Value
+		
+		DELETE FROM @Value
+		INSERT INTO @Value(id, sv)
+		SELECT RecordKey, Record  
+			FROM dbo.fnCFSplitString(@NewLine, ',')
 
 	 
 		select 
@@ -102,7 +112,7 @@ BEGIN
 		
 		IF @requiredValue = ''
 		BEGIN
-			select @command =  (REPLACE(@command, '@' + B.strColumnName + '@' , ISNULL(D.sv, '') ))
+			select @command =  (REPLACE(@command, '@' + B.strColumnName + '@' , REPLACE(ISNULL(D.sv, ''), '-^-', ',')  ))
 				from tblSMCSVDynamicImportParameter B
 					left join @Header C
 						on B.strDisplayName = C.sv

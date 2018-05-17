@@ -16,7 +16,8 @@ END
 UPDATE tblSMCSVDynamicImport SET
 	strName = 'Contact Import',
 	strCommand = '
-	DECLARE @EntityId INT
+	DECLARE @EntityId 			INT
+	DECLARE @EntityLocationId 	INT
 
 		--	phone
 		--mobile
@@ -36,6 +37,9 @@ UPDATE tblSMCSVDynamicImport SET
 	DECLARE @Rank			INT
 	DECLARE @PortalStr		NVARCHAR(100)
 	DECLARE @PortalBit		BIT
+	DECLARE @Phone			NVARCHAR(100)
+	DECLARE @Mobile			NVARCHAR(100)
+	DECLARE @LocationName	NVARCHAR(100)
 
 	SET @ValidationMessage	= ''''
 	SET @ContactMethod		= ''@contactMethod@''
@@ -45,6 +49,9 @@ UPDATE tblSMCSVDynamicImport SET
 	SET @Rank				= 1
 	SET @PortalStr			= LOWER(''@portal@'')
 	SET @PortalBit			= 0
+	SET @Phone				= ''@phone@''
+	SET @Mobile				= ''@mobile@''
+	SET @LocationName		= ''@locname@''
 
 	DECLARE @EmailDistribution NVARCHAR(MAX)
 	DECLARE @EmailDistributionList NVARCHAR(MAX)
@@ -59,14 +66,14 @@ UPDATE tblSMCSVDynamicImport SET
 	select @EmailDistributionInvalid = COALESCE(@EmailDistributionInvalid + '','', '''') + RTRIM(LTRIM(a.Item))
 		from dbo.fnSplitString(@EmailDistribution, '','') a
 			left join dbo.fnSplitString(@EmailDistributionList, '','') b
-			on a.Item = b.Item
+			on ltrim(rtrim(a.Item)) = b.Item
 			where b.Item is null
 
 
 	select @EmailDistributionValid = COALESCE(@EmailDistributionValid + '','', '''') + RTRIM(LTRIM(a.Item))
 		from dbo.fnSplitString(@EmailDistribution, '','') a
 			left join dbo.fnSplitString(@EmailDistributionList, '','') b
-			on a.Item = b.Item
+			on ltrim(rtrim(a.Item)) = b.Item
 			where b.Item is not null
 
 	SET @EmailDistributionInvalid	= ISNULL(@EmailDistributionInvalid, '''')
@@ -87,22 +94,41 @@ UPDATE tblSMCSVDynamicImport SET
 	BEGIN
 		SET @ActiveBit = 1
 	END
+	ELSE IF lower(@ActiveStr) NOT IN (''1'', ''0'', ''yes'', ''no'', ''true'', ''false'')
+	BEGIN
+		SET @ValidationMessage = @ValidationMessage + '',Active ['' + @ActiveStr + ''] should only be (0, 1, Yes, No, True, False)''
+	END
 
 	IF @PortalStr = ''1'' OR @PortalStr = ''yes'' OR @PortalStr = ''true''
 	BEGIN
 		SET @PortalBit = 1
+	END
+	ELSE IF lower(@PortalStr) NOT IN (''1'', ''0'', ''yes'', ''no'', ''true'', ''false'')
+	BEGIN
+		SET @ValidationMessage = @ValidationMessage + '',Portal Access ['' + @PortalStr + ''] should only be (0, 1, Yes, No, True, False)''
 	END
 
 	IF ISNUMERIC(@RankStr) = 1
 	BEGIN
 		SET @Rank = @RankStr
 	END
+	ELSE
+	BEGIN
+		SET @ValidationMessage = @ValidationMessage + '',Rank ['' + @RankStr + ''] should be a number''
+	END
+
 
 
 	SELECT @EntityId = intEntityId
 		FROM tblEMEntity
 			where strEntityNo = ''@entityCustomerId@''
 
+	SET @EntityLocationId = null
+	IF ISNULL(@EntityId, 0) > 0 and @LocationName <> ''''
+	BEGIN
+		SELECT TOP  1 @EntityLocationId = intEntityLocationId FROM tblEMEntityLocation where intEntityId = @EntityId and rtrim(ltrim(lower(@LocationName))) = rtrim(ltrim(lower(strLocationName)))
+
+	END
 
 	DECLARE @RoleId INT
 
@@ -124,9 +150,20 @@ UPDATE tblSMCSVDynamicImport SET
 
 		SET @NewEntityId = @@IDENTITY
 
-		INSERT INTO tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess)
-		SELECT  @EntityId, @NewEntityId, 0
+		INSERT INTO tblEMEntityToContact(intEntityId, intEntityContactId, ysnPortalAccess, intEntityLocationId)
+		SELECT  @EntityId, @NewEntityId, 0, @EntityLocationId
 
+		if @Phone <> ''''
+		BEGIN
+			insert into tblEMEntityPhoneNumber(intEntityId, strPhone)
+			select @NewEntityId, @Phone
+		END
+
+		if @Mobile <> ''''
+		BEGIN
+			insert into tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
+			select @NewEntityId, @Mobile, null
+		END
 
 		IF @PortalBit = 1
 		BEGIN
