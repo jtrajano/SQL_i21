@@ -17,7 +17,7 @@ SELECT strTransactionType = 'Load Schedule'
 	,strShipmentNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,intLoadId = L.intLoadId
 	,intLoadDetailId = LD.intLoadDetailId
-	,intLotId = NULL
+	,intLotId = LDL.intLotId
 	,strLoadNumber = L.strLoadNumber
 	,intRecipeItemId = NULL
 	,intContractHeaderId = CH.intContractHeaderId
@@ -121,12 +121,13 @@ JOIN (
 LEFT JOIN (
 	SELECT intLoadDetailId
 		,intWeightUOMId
+		,intLotId
 		,dblGross = SUM(dblGross)
 		,dblTare = SUM(dblTare)
 		,dblNet = SUM(dblNet)
 	FROM dbo.tblLGLoadDetailLot WITH (NOLOCK)
 	GROUP BY intLoadDetailId
-		,intWeightUOMId
+		,intLotId, intWeightUOMId
 	) LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 INNER JOIN (
 	SELECT [intItemId]

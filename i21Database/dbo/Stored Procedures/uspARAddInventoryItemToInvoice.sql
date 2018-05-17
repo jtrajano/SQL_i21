@@ -529,6 +529,44 @@ END CATCH
 	
 DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()
+
+
+IF(@ItemLoadDetailId IS NOT NULL AND @ItemLotId IS NOT NULL)
+BEGIN
+	INSERT INTO tblARInvoiceDetailLot
+		([intInvoiceDetailId]
+		,[intLotId]
+		,[dblQuantityShipped]
+		,[dblGrossWeight]
+		,[dblTareWeight]
+		,[dblWeightPerQty]
+		,[strWarehouseCargoNumber]
+		,[intSort]
+		,[dtmDateCreated]
+		,[dtmDateModified]
+		,[intCreatedByUserId]
+		,[intModifiedByUserId]
+		,[intConcurrencyId])
+	SELECT
+		 [intInvoiceDetailId]		= @NewId
+		,[intLotId]					= [intLotId] 
+		,[dblQuantityShipped]		= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ISNULL([intItemUOMId], [intWeightUOMId]), [dblNet]	)
+		,[dblGrossWeight]			= [dblGross] 
+		,[dblTareWeight]			= [dblTare] 
+		,[dblWeightPerQty]			= [dblNet]
+		,[strWarehouseCargoNumber]	= [strWarehouseCargoNumber]
+		,[intSort]					= 1
+		,[dtmDateCreated]			= GETDATE()
+		,[dtmDateModified]			= GETDATE()
+		,[intCreatedByUserId]		= NULL
+		,[intModifiedByUserId]		= NULL
+		,[intConcurrencyId]			= 1
+	FROM
+		vyuLGLoadDetailLotsView
+	WHERE
+		intLoadDetailId = @ItemLoadDetailId 
+		AND intLotId = @ItemLotId	
+END
 		
 BEGIN TRY
  	IF @RecomputeTax = 1
