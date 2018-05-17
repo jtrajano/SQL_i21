@@ -44,6 +44,8 @@ SELECT
 		,[intSourceId]					= ShipmentItem.intSourceId
 		,[intLineNo]					= ISNULL(ShipmentItem.intLineNo, 0)
 		,[intStorageScheduleTypeId]		= ShipmentItem.intStorageScheduleTypeId
+		,[ysnLoad]						= ContractView.ysnLoad
+		,[intLoadShipped]				= ShipmentItem.intLoadShipped
 FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -57,4 +59,8 @@ FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentIt
 			ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 		LEFT JOIN dbo.tblICLot Lot
 			ON Lot.intLotId = ShipmentItemLot.intLotId
+		LEFT JOIN vyuCTCompactContractDetailView ContractView 
+			ON ContractView.intContractDetailId = ShipmentItem.intLineNo
+			AND ContractView.intContractHeaderId = ShipmentItem.intOrderId
+			AND Shipment.intOrderType = 1
 WHERE	Shipment.intInventoryShipmentId = @intShipmentId

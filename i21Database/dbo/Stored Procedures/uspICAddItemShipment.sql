@@ -471,6 +471,7 @@ INSERT INTO @ShipmentEntries(
 		, dblForexRate
 		, strChargesLink
 		, intPriceUOMId
+		, intLoadShipped
 )
 SELECT 
 		intOrderType
@@ -524,6 +525,7 @@ SELECT
 		, dblForexRate
 		, strChargesLink
 		, intPriceUOMId
+		, intLoadShipped
 FROM @Items
 
 -- 2. Charges
@@ -872,6 +874,7 @@ INSERT INTO tblICInventoryShipmentItem(
 	, strChargesLink
 	, intConcurrencyId
 	, intPriceUOMId
+	, intLoadShipped
 	, dblLineTotal
 )
 SELECT 
@@ -900,6 +903,7 @@ SELECT
 	, strChargesLink
 	, intConcurrencyId = 1
 	, intPriceUOMId = ISNULL(se.intPriceUOMId, se.intItemUOMId) 
+	, se.intLoadShipped
 	, dblLineTotal = 
 		ROUND(
 			se.dblQuantity

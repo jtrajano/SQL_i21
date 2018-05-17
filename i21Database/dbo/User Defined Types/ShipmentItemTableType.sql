@@ -36,4 +36,6 @@ CREATE TYPE [dbo].[ShipmentItemTableType] AS TABLE
 	,[intSourceId] INT NULL									-- Link id to Scale. Optional.
 	,[intLineNo] INT NOT NULL DEFAULT ((1))					-- Link id to the detail id of the PO detail or Contract detail. Default to zero. Optional. 
 	,[intStorageScheduleTypeId] INT NULL					-- Storage Schedule Id from Grain. 
+	,[ysnLoad] BIT NULL DEFAULT((0))						-- Flag that determines if Load Contract
+	,[intLoadShipped] INT NULL DEFAULT((0))					-- Load Shipped Qty. For Load Contracts
 )
