@@ -8,7 +8,7 @@ FROM
 	SELECT	PF.intPriceFixationId,
 			CD.intContractDetailId,
 			CD.intContractSeq,
-			PF.[dblLotsFixed]/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(QM.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
+			PF.[dblLotsFixed]/CH.dblQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(QM.intCommodityUnitMeasureId,CH.intCommodityUOMId ,CD.dblQuantity) dblFixedLots,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblFutures) dblFutures,
 			PF.dblRollArb,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblBasis) dblBasis,
@@ -23,10 +23,11 @@ FROM
 								END
 							) 
 				FROM	tblCTContractCost			CC 
-				JOIN	vyuCTContractDetailView		DL	ON	DL.intContractDetailId	=	CC.intContractDetailId	
+				JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId	=	CC.intContractDetailId	
+				JOIN	tblCTContractHeader		HR	ON	HR.intContractHeaderId	=	DL.intContractHeaderId	
 				JOIN	tblCTPriceFixation			PX	ON	PX.intContractHeaderId	=	DL.intContractHeaderId		
 				JOIN	tblICItemUOM				TU	ON	TU.intItemUOMId			=	DL.intItemUOMId
-				JOIN	tblICCommodityUnitMeasure	YM	ON	YM.intCommodityId		=	DL.intCommodityId		AND 
+				JOIN	tblICCommodityUnitMeasure	YM	ON	YM.intCommodityId		=	HR.intCommodityId		AND 
 															YM.intUnitMeasureId		=	TU.intUnitMeasureId		LEFT	
 				JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId			=	CC.intItemUOMId			LEFT
 				JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityId		=	CD.intCommodityId		AND 
@@ -37,7 +38,8 @@ FROM
 			PF.intFinalPriceUOMId
 			
 	FROM	tblCTPriceFixation			PF
-	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId
+	JOIN	vyuCTContractSequence		CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId
+	JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId			=	CD.intPriceItemUOMId
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId		AND 
 												CU.intUnitMeasureId		=	IM.intUnitMeasureId

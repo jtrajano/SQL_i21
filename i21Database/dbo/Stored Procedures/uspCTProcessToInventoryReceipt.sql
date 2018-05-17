@@ -68,7 +68,8 @@ AS
 				strSourceScreenName,
 				ysnSubCurrency,
 				intForexRateTypeId,
-				dblForexRate
+				dblForexRate,
+				intFreightTermId
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -79,7 +80,7 @@ AS
 				intItemUOMId				=	CD.intItemUOMId,
 				intContractHeaderId			=	CD.intContractHeaderId,
 				intContractDetailId			=	CD.intContractDetailId,
-				dtmDate						=	CD.dtmStartDate,
+				dtmDate						=	GETDATE(),
 				intShipViaId				=	CD.intShipViaId,
 				dblQty						=	ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0),
 				intGrossNetUOMId			=	ISNULL(CD.intNetWeightUOMId,0),	
@@ -100,7 +101,8 @@ AS
 				strSourceScreenName			=	'Contract',
 				ysnSubCurrency				=	SubCurrency.ysnSubCurrency,
 				intForexRateTypeId			=	CD.intRateTypeId,
-				dblForexRate				=	CD.dblRate
+				dblForexRate				=	CD.dblRate,
+				intFreightTermId			=	CD.intFreightTermId
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
