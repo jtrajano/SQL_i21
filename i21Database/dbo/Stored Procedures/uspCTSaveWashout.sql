@@ -121,7 +121,8 @@ BEGIN TRY
 		UPDATE	tblCTWashout SET intWashoutHeaderId = @intWashoutHeaderId, intWashoutDetailId = @intWashoutDetailId WHERE intWashoutId = @intWashoutId
 	END
 
-	UPDATE tblCTContractDetail SET intContractStatusId = 3 WHERE intContractDetailId IN (@intSourceDetailId, @intWashoutDetailId)
+	SELECT	@ErrMsg = LTRIM(@intSourceDetailId)+','+LTRIM(@intWashoutDetailId)
+	EXEC	[uspCTChangeContractStatus] @ErrMsg, 3, @intCreatedById
 
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
