@@ -129,6 +129,11 @@ BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 			END
+			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+			END
 			ELSE
 			BEGIN
 				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
@@ -141,6 +146,11 @@ BEGIN
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+			END
+			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 			END
 			ELSE
 			BEGIN
@@ -155,6 +165,11 @@ BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 			END
+			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+			END
 			ELSE
 			BEGIN
 				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
@@ -167,6 +182,11 @@ BEGIN
 			BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+			END
+			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 			END
 			ELSE
 			BEGIN
@@ -181,6 +201,11 @@ BEGIN
 				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
 			END
+			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+			BEGIN
+				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+			END
 			ELSE
 			BEGIN
 				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
@@ -188,6 +213,8 @@ BEGIN
 			END
 		END
 		
+
+
 
 		SET @From = ''
 		SET @To = ''
@@ -240,6 +267,12 @@ BEGIN
 		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
 
 
+		DECLARE @ysnIncludePrintedTransaction AS BIT
+		SELECT TOP 1
+				 @ysnIncludePrintedTransaction = [from]
+			FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
+
+
 		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
 		BEGIN
 			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
@@ -249,7 +282,7 @@ BEGIN
 				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
 			END
 		END
-		ELSE
+		ELSE IF(ISNULL(@ysnIncludePrintedTransaction,0) = 0)
 		BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' ( ISNULL(strInvoiceReportNumber,'''') = '''')'
