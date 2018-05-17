@@ -1215,6 +1215,7 @@ BEGIN
 			,[dblCost]
 			,[intEntityVendorId]
 			,[dtmManufacturedDate]
+			,[dtmExpiryDate]
 			,[strBillOfLadding]
 			,[strCertificate]
 			,[intProducerId]
@@ -1265,6 +1266,7 @@ BEGIN
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
 			,[dtmManufacturedDate]	= RE.dtmDate
+			,[dtmExpiryDate]		= dbo.fnICCalculateExpiryDate(RE.intItemId, NULL , RE.dtmDate)
 			,[strBillOfLadding]		= ''
 			,[strCertificate]		= ICC.strCertificationName
 			,[intProducerId]		= CTC.intProducerId
@@ -1299,6 +1301,7 @@ BEGIN
 			,[dblCost]
 			,[intEntityVendorId]
 			,[dtmManufacturedDate]
+			,[dtmExpiryDate]
 			,[strBillOfLadding]
 			,[intSourceType]
 		)
@@ -1326,7 +1329,7 @@ BEGIN
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
 			,[dtmManufacturedDate]	= RE.dtmDate
-			,[[dtmExpiryDate]]		= dbo.fnICCalculateExpiryDate(RE.intItemUOMId, NULL , RE.dtmDate)
+			,[dtmExpiryDate]		= dbo.fnICCalculateExpiryDate(RE.intItemId, NULL , RE.dtmDate)
 			,[strBillOfLadding]		= ''
 			,[intSourceType]		= RE.intSourceType
 		FROM @ReceiptStagingTable RE 
