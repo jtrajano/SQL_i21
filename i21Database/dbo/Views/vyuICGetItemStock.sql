@@ -12,6 +12,7 @@ SELECT
 	Item.strInventoryTracking,
 	Item.strStatus,
 	ItemLocation.intLocationId,
+	ItemLocation.ysnStorageUnitRequired,
 	ItemLocation.intItemLocationId,
 	ItemLocation.intSubLocationId,
 	Item.intCategoryId,

@@ -73,6 +73,7 @@ SELECT
 	,dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0.00)
 	,dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0.00)
 	,dblNearingReorderBy = CAST(ISNULL(ItemStock.dblUnitOnHand, 0.00) - ISNULL(ItemLocation.dblReorderPoint, 0.00) AS NUMERIC(38, 7))
+	,ItemLocation.ysnStorageUnitRequired
 FROM	
 	tblICItem Item 
 	LEFT JOIN (

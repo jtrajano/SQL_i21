@@ -76,6 +76,9 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strFieldNo
 	, Receipt.strBook
 	, Receipt.strSubBook
+	, ItemLocation.ysnStorageUnitRequired
+	, ItemLocation.intLocationId
+	, intShipToLocationId = Receipt.intLocationId
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -92,3 +95,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = ReceiptItem.intDiscountSchedule
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId
 	LEFT JOIN tblICStorageUnitType StorageUnitType ON StorageUnitType.intStorageUnitTypeId = StorageLocation.intStorageUnitTypeId
+	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ReceiptItem.intItemId = ItemLocation.intItemId

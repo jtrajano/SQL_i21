@@ -18,6 +18,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strWeightUOM = WeightUOM.strUnitMeasure
 		, intWeightUnitMeasureId = WeightUOM.intUnitMeasureId
 		, intWeightUOMId = ReceiptItem.intWeightUOMId
+		, ItemLocation.ysnStorageUnitRequired
 		, dblItemUOMConvFactor = ISNULL(ItemUOM.dblUnitQty, 0)
 		, dblWeightUOMConvFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0)
 		, dblGrossMargin = (
@@ -191,6 +192,8 @@ SELECT	ReceiptItem.intInventoryReceiptId
 						0
 			END
 		)
+		, ItemLocation.intLocationId
+		, intShipToLocationId = Receipt.intLocationId
 		, strContainer = LogisticsView.strContainerNumber
 		, ContractView.ysnLoad
 		, ContractView.dblAvailableQty
@@ -237,6 +240,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
 		LEFT JOIN tblICStorageLocation StorageLocation 
 			ON StorageLocation.intStorageLocationId = ReceiptItem.intStorageLocationId
+		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ItemLocation.intItemId = Item.intItemId
 		LEFT JOIN tblICItemUOM ItemUOM 
 			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 			AND ItemUOM.intItemId = ReceiptItem.intItemId

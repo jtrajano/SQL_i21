@@ -70,6 +70,7 @@ DECLARE @Source TABLE([intItemId] [int] NOT NULL,
 	[ysnCountedDaily] [bit] NULL DEFAULT ((0)),
 	[ysnLockedInventory] [bit] NULL DEFAULT ((0)),
 	[strStorageUnitNo] [nvarchar](100) NULL,
+	[ysnStorageUnitRequired] BIT NULL DEFAULT ((1)),
 	[intSort] [int] NULL)
 
 INSERT INTO @Source(intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
@@ -77,13 +78,13 @@ INSERT INTO @Source(intItemId, intLocationId, intVendorId, strDescription, intCo
 , ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 , ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 , ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-, ysnLockedInventory, strStorageUnitNo, intSort)
+, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort)
 SELECT intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
 , intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 , ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 , ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 , ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-, ysnLockedInventory, strStorageUnitNo, intSort
+, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort
 FROM tblICItemLocation
 WHERE intItemId = @intSourceItemId
 
@@ -148,6 +149,7 @@ SET
       ,[ysnCountedDaily] = s.ysnCountedDaily
       ,[ysnLockedInventory] = s.ysnLockedInventory
 	  ,[strStorageUnitNo] = s.strStorageUnitNo
+	  ,[ysnStorageUnitRequired] = s.ysnStorageUnitRequired
       ,[intSort] = s.intSort
 FROM tblICItemLocation d
 	INNER JOIN @Source s 
@@ -220,6 +222,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[ysnCountedDaily] [bit] NULL DEFAULT ((0)),
 	[ysnLockedInventory] [bit] NULL DEFAULT ((0)),
 	[strStorageUnitNo] [nvarchar](100) NULL,
+	[ysnStorageUnitRequired] BIT NULL DEFAULT ((1)),
 	[intSort] [int] NULL)
 
 DECLARE cur CURSOR
@@ -238,14 +241,14 @@ BEGIN
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-		, ysnLockedInventory, strStorageUnitNo, intSort)
+		, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort)
 	SELECT
 		  @intItemId, s.intLocationId, s.intVendorId, s.strDescription, s.intCostingMethod, s.intAllowNegativeInventory, s.intSubLocationId, s.intStorageLocationId, s.intIssueUOMId, s.intReceiveUOMId, s.intFamilyId
 		, s.intClassId, s.intProductCodeId, s.intFuelTankId, s.strPassportFuelId1, s.strPassportFuelId2, s.strPassportFuelId3, s.ysnTaxFlag1, s.ysnTaxFlag2, s.ysnTaxFlag3, s.ysnTaxFlag4, s.ysnPromotionalItem, s.intMixMatchId
 		, s.ysnDepositRequired, s.intDepositPLUId, s.intBottleDepositNo, s.ysnSaleable, s.ysnQuantityRequired, s.ysnScaleItem, s.ysnFoodStampable, s.ysnReturnable, s.ysnPrePriced, s.ysnOpenPricePLU, s.ysnLinkedItem, s.strVendorCategory
 		, s.ysnCountBySINo, s.strSerialNoBegin, s.strSerialNoEnd, s.ysnIdRequiredLiquor, s.ysnIdRequiredCigarette, s.intMinimumAge, s.ysnApplyBlueLaw1, s.ysnApplyBlueLaw2, s.ysnCarWash, s.intItemTypeCode, s.intItemTypeSubCode
 		, s.ysnAutoCalculateFreight, s.intFreightMethodId, s.dblFreightRate, s.intShipViaId, s.intNegativeInventory, s.dblReorderPoint, s.dblMinOrder, s.dblSuggestedQty, s.dblLeadTime, s.strCounted, s.intCountGroupId, s.ysnCountedDaily
-		, s.ysnLockedInventory, s.strStorageUnitNo, s.intSort
+		, s.ysnLockedInventory, s.strStorageUnitNo, s.ysnStorageUnitRequired, s.intSort
 	FROM @Source s
 		LEFT OUTER JOIN tblICItemLocation d ON d.intLocationId = s.intLocationId
 			AND d.intItemId = @intItemId
@@ -262,13 +265,13 @@ INSERT INTO tblICItemLocation(intItemId, intLocationId, intVendorId, strDescript
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-	, ysnLockedInventory, strStorageUnitNo, intSort)
+	, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort)
 SELECT intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
 	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-	, ysnLockedInventory, strStorageUnitNo, intSort
+	, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort
 FROM @New
 
 -- Add the audit logs
