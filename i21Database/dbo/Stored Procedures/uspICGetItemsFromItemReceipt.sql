@@ -38,6 +38,7 @@ SELECT
 		,[intOrderId]					= ReceiptItem.intOrderId
 		,[intSourceId]					= ReceiptItem.intSourceId
 		,[intLineNo]					= ISNULL(ReceiptItem.intLineNo, 0)
+		,[ysnLoad]						= ISNULL(ContractView.ysnLoad, 0)
 		,[intLoadReceive]				= ISNULL(ReceiptItem.intLoadReceive, 0) 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -53,6 +54,9 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		LEFT JOIN dbo.tblICItemUOM LotItemtUOM
 			ON LotItemtUOM.intItemUOMId = ItemLot.intItemUnitMeasureId
 		LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+		LEFT JOIN vyuCTCompactContractDetailView ContractView
+			ON ContractView.intContractDetailId = ReceiptItem.intLineNo
+				AND Receipt.strReceiptType = 'Purchase Contract'
 WHERE	Receipt.intInventoryReceiptId = @intReceiptId		
 		AND 1 = CASE WHEN ISNULL(ReceiptItem.strItemType,'') <> '' AND Item.strType = 'Bundle' THEN 1
 					WHEN  ISNULL(ReceiptItem.strItemType,'') <> '' THEN 0

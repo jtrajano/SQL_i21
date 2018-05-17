@@ -34,5 +34,6 @@ CREATE TYPE [dbo].[ReceiptItemTableType] AS TABLE
 	,[intOrderId] INT NULL									-- Link id to PO or Contract. Ex: if Receipt type is "Purchase Order", this field links to the PO table. Optional.
 	,[intSourceId] INT NULL									-- Link id to Scale. Optional.
 	,[intLineNo] INT NOT NULL DEFAULT ((1))					-- Link id to the detail id of the PO detail or Contract detail. Default to zero. Optional. 
-	,[intLoadReceive] INT NULL DEFAULT ((0))				-- Load Receive Qty
+	,[ysnLoad] BIT NULL DEFAULT((0))						-- Flag that determines if Load Contract
+	,[intLoadReceive] INT NULL DEFAULT ((0))				-- Load Receive Qty. For Load Contracts
 )

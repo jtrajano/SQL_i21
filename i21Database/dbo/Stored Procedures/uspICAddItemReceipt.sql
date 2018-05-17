@@ -812,6 +812,7 @@ BEGIN
 				,dblForexRate 
 				,intContainerId 
 				,strChargesLink
+				,intLoadReceive
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -888,6 +889,7 @@ BEGIN
 				,dblForexRate			= CASE WHEN RawData.intCurrencyId <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate)  ELSE NULL END 
 				,intContainerId			= RawData.intContainerId 
 				,strChargesLink			= RawData.strChargesLink
+				,intLoadReceive			= RawData.intLoadReceive
 
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 

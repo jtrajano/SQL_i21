@@ -61,6 +61,7 @@ BEGIN
 		,[intOrderId] 
 		,[intSourceId] 
 		,[intLineNo] 
+		,[ysnLoad]
 		,[intLoadReceive]
 	)
 	EXEC dbo.uspICGetItemsFromItemReceipt
