@@ -141,6 +141,7 @@ SELECT
 	strTonnageTaxUOM = TonnageUOM.strUnitMeasure,
 	Item.intModuleId,
 	m.strModule,
+	Item.ysn1099Box3,
 	Item.ysnUseWeighScales,
 	Item.ysnLotWeightsRequired	
 FROM	

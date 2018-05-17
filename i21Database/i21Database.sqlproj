@@ -6566,6 +6566,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCascadeControlPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCascadeScreenPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSLogEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItem1099Box3.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

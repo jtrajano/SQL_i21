@@ -32,6 +32,7 @@ Type the overview for the table here.
 		[intScheduleStoreId] INT NULL,
 		[intScheduleDiscountId] INT NULL,
 		[intScaleAutoDistId] INT NULL,
+		[ysn1099Box3] BIT NULL DEFAULT((0)),
 		[ysnAllowLoadContracts] BIT NULL, 
 		[dblMaxUnder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMaxOver] NUMERIC(18, 6) NULL DEFAULT ((0)), 
