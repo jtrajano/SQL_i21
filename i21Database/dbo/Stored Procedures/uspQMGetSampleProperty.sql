@@ -523,6 +523,7 @@ BEGIN
 			,PP.strFormulaParser
 			,0 AS intPropertyValidityPeriodId
 			,'' AS strConditionalResult
+			,PRTI.strItemNo AS strPropertyItemNo
 		FROM dbo.tblQMProduct AS PRD
 		JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
 		JOIN dbo.tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
@@ -539,6 +540,7 @@ BEGIN
 		JOIN dbo.tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
 		LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = PPV.intUnitMeasureId
 		LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
+		LEFT JOIN tblICItem PRTI ON PRTI.intItemId = PRT.intItemId
 		WHERE PRD.intProductId = @intProductId
 			AND PC.intSampleTypeId = @intSampleTypeId
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
@@ -587,6 +589,7 @@ BEGIN
 			,PP.strFormulaParser
 			,0 AS intPropertyValidityPeriodId
 			,'' AS strConditionalResult
+			,PRTI.strItemNo AS strPropertyItemNo
 		FROM dbo.tblQMProduct AS PRD
 		JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
 		JOIN dbo.tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
@@ -603,6 +606,7 @@ BEGIN
 		JOIN dbo.tblQMProductPropertyValidityPeriod AS PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
 		LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = PPV.intUnitMeasureId
 		LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
+		LEFT JOIN tblICItem PRTI ON PRTI.intItemId = PRT.intItemId
 		WHERE PRD.intProductId = @intProductId
 			AND PC.intSampleTypeId = @intSampleTypeId
 			AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)

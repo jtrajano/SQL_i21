@@ -58,7 +58,8 @@ BEGIN
 		,PRT.intListId
 		,L.strListName
 		,TR.strIsMandatory
-		,PRT.intItemId AS intPropertyItemId
+		,TR.intPropertyItemId
+		,PRTI.strItemNo AS strPropertyItemNo
 	FROM dbo.tblQMTestResult AS TR
 	JOIN dbo.tblQMProperty AS PRT ON PRT.intPropertyId = TR.intPropertyId
 	JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
@@ -66,6 +67,7 @@ BEGIN
 		AND PP.intPropertyId = TR.intPropertyId
 	LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = TR.intUnitMeasureId
 	LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
+	LEFT JOIN tblICItem PRTI ON PRTI.intItemId = TR.intPropertyItemId
 	WHERE TR.intSampleId = @intSampleId
 		AND TR.intProductTypeId = @intProductTypeId
 		AND TR.intProductValueId = @intProductValueId

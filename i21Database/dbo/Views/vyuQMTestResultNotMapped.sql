@@ -13,6 +13,7 @@ SELECT TR.intTestResultId
 	,P.intListId
 	,'' AS strListItemName
 	--,LI.strListItemName
+	,PRTI.strItemNo AS strPropertyItemNo
 FROM tblQMTestResult TR
 JOIN tblQMTest T ON T.intTestId = TR.intTestId
 JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
@@ -20,3 +21,4 @@ LEFT JOIN tblQMList L ON L.intListId = P.intListId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = TR.intUnitMeasureId
 LEFT JOIN tblQMProperty P1 ON P1.intPropertyId = TR.intParentPropertyId
 --LEFT JOIN tblQMListItem LI ON LI.intListItemId = TR.intListItemId
+LEFT JOIN tblICItem PRTI ON PRTI.intItemId = TR.intPropertyItemId

@@ -69,6 +69,7 @@ BEGIN
 		,DT.MainPropertyId AS intParentPropertyId
 		,DT.strConditionalResult
 		,PV.intPropertyValidityPeriodId
+		,PRTI.strItemNo AS strPropertyItemNo
 	FROM (
 		SELECT PP.intPropertyId AS MainPropertyId
 			,CPP.intOnFailurePropertyId
@@ -119,6 +120,7 @@ BEGIN
 	JOIN dbo.tblQMPropertyValidityPeriod AS PV ON PV.intPropertyId = PRT.intPropertyId
 	LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = PV.intUnitMeasureId
 	LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
+	LEFT JOIN tblICItem PRTI ON PRTI.intItemId = PRT.intItemId
 	WHERE PRD.intProductId = @intProductId
 		AND @intValidDate BETWEEN DATEPART(dy, PV.dtmValidFrom)
 			AND DATEPART(dy, PV.dtmValidTo)
