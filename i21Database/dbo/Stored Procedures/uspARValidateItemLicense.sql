@@ -33,6 +33,9 @@ SELECT intItemId					= I.intItemId
 	 , ysnRequiredForPurchase		= LT.ysnRequiredForPurchase
 	 , dtmBeginDate					= CML.dtmBeginDate
 	 , dtmEndDate					= CML.dtmEndDate
+	 , expflag						= NULL
+	 , appflag						= null
+	 , uq							= newid()
 INTO #ITEMSTOVALIDATE
 FROM dbo.tblICItem I WITH (NOLOCK)
 INNER JOIN (
@@ -63,18 +66,17 @@ LEFT JOIN (
 ) CML ON IL.intLicenseTypeId = CML.intLicenseTypeId
 
 SET @strErrorMessage = NULL
-
 --MDG this is not a good approach but for now this will consolidate the error message per license
 insert into #ITEMSTOVALIDATE
 ( intItemId, intLicenseTypeId, intEntityCustomerId, strItemNo, strCode, strDescription, ysnRequiredForApplication, ysnRequiredForPurchase, dtmBeginDate, dtmEndDate)
-select e.intItemId, -9, -999, e.strItemNo,
+select distinct e.intItemId, -9, -999, e.strItemNo,
 stuff((
 			select ', ' + coalesce(ltrim(rtrim(f.strCode)), '') 
 				from #ITEMSTOVALIDATE f
 						where f.strItemNo= e.strItemNo  AND isnull(intEntityCustomerId,0) = 0
 for xml path('') ), 1, 1, '') as strCode
 , ''
-, 1
+, 0
 , 1
 , null
 , null
@@ -88,10 +90,55 @@ if ((select count(intItemId) from #ITEMSTOVALIDATE where isnull(intEntityCustome
 BEGIN
 	set @Tense = 'are'
 END
-delete from  #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) = 0
+
+
+delete from  #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) = 0 --and not ( (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1 )
+
 update #ITEMSTOVALIDATE set intEntityCustomerId = null where intEntityCustomerId = -999
 
+--this will get all expired
+insert into #ITEMSTOVALIDATE
+( intItemId, intLicenseTypeId, intEntityCustomerId, strItemNo, strCode, strDescription, ysnRequiredForApplication, ysnRequiredForPurchase, dtmBeginDate, dtmEndDate, expflag)
+select distinct e.intItemId, -9, intEntityCustomerId, e.strItemNo,
+stuff((
+			select ', ' + coalesce(ltrim(rtrim(f.strCode)), '') 
+				from #ITEMSTOVALIDATE f
+						where f.strItemNo= e.strItemNo  and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate )-- and ysnRequiredForApplication = 0
+for xml path('') ), 1, 1, '') as strCode
+, ''
+, 0
+, 1
+, dateadd(day,-15, @dtmDate)
+, dateadd(day,-10, @dtmDate)
+,1
+from #ITEMSTOVALIDATE e 
+	where isnull(e.intEntityCustomerId,0) > 0 and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate )-- and ysnRequiredForApplication = 0
 
+delete from #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) > 0 and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and expflag is null and ysnRequiredForApplication = 0
+
+
+--this will get all applicator
+insert into #ITEMSTOVALIDATE
+( intItemId, intLicenseTypeId, intEntityCustomerId, strItemNo, strCode, strDescription, ysnRequiredForApplication, ysnRequiredForPurchase, dtmBeginDate, dtmEndDate, appflag)
+select distinct e.intItemId, -9, intEntityCustomerId, e.strItemNo,
+stuff((
+			select ', ' + coalesce(ltrim(rtrim(f.strCode)), '') 
+				from #ITEMSTOVALIDATE f
+						where f.strItemNo= e.strItemNo  and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1
+for xml path('') ), 1, 1, '') as strCode
+, ''
+, 1
+, 1
+, dateadd(day,-15, @dtmDate)
+, dateadd(day,-10, @dtmDate)
+, 1
+from #ITEMSTOVALIDATE e 
+	where isnull(e.intEntityCustomerId,0) > 0 and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1
+
+delete from #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) > 0 and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and appflag is null and ysnRequiredForApplication = 1
+
+
+update #ITEMSTOVALIDATE  set uq = newId()
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 	BEGIN
@@ -103,7 +150,9 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 			  , @dtmDateFrom				DATETIME = NULL
 			  , @dtmDateTo					DATETIME = NULL
 			  , @ysnRequiredForApplication	BIT = NULL
-			  
+			  , @uq							uniqueidentifier = null	  
+			  , @exp						bit = null
+			  , @app						bit = null
 		SELECT TOP 1 @intItemId					= intItemId
 			       , @intLicenseTypeId			= intLicenseTypeId
 				   , @intCustomerId				= intEntityCustomerId
@@ -112,6 +161,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 				   , @dtmDateFrom				= ISNULL(dtmBeginDate, '01/01/1900')
 				   , @dtmDateTo					= ISNULL(dtmEndDate, '12/30/2999')
 				   , @ysnRequiredForApplication = ISNULL(ysnRequiredForApplication, 0)
+				   , @uq						= uq
+				   , @exp						= expflag
+				   , @app						= appflag
+
 		FROM #ITEMSTOVALIDATE 		
 		ORDER BY intItemId
 
@@ -120,13 +173,14 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 			SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License ' + @Tense + ' required for item ' + @strItemNo + '<br>'
 		ELSE
 			BEGIN
-				--Validate if Customer's License is 
-				IF (@dtmDate NOT BETWEEN @dtmDateFrom AND @dtmDateTo)
-					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is already expired for item ' + @strItemNo + '<br>'
-
-				IF (@ysnRequiredForApplication = 1 AND ISNULL(@intEntityApplicatorId, 0) = 0)
+				--Validate if Customer's License is 				
+				IF (@dtmDate NOT BETWEEN @dtmDateFrom AND @dtmDateTo)  and @exp = 1
+				begin
+					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License ' + (CASE WHEN CHARINDEX(',' , @strCode ) > 0 THEN 'are' ELSE 'is ' END ) + ' already expired for item ' + @strItemNo + '<br>'
+				end 
+				ELSE IF (@ysnRequiredForApplication = 1 AND ISNULL(@intEntityApplicatorId, 0) = 0)  and @app = 1
 					SET @strErrorMessage = ISNULL(@strErrorMessage, '') + 'Applicator is required for ' + @strCode + ' License in item ' + @strItemNo + '<br>'
 			END
 
-		DELETE FROM #ITEMSTOVALIDATE WHERE intItemId = @intItemId AND intLicenseTypeId = @intLicenseTypeId
+		DELETE FROM #ITEMSTOVALIDATE WHERE uq = @uq --intItemId = @intItemId AND intLicenseTypeId = @intLicenseTypeId
 	END
