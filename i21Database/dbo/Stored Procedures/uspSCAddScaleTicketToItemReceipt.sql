@@ -38,7 +38,8 @@ DECLARE @intScaleStationId AS INT
 		,@splitDistribution AS NVARCHAR(40)
 		,@ticketStatus AS NVARCHAR(10)
 		,@intContractCostId AS INT
-		,@currencyDecimal AS INT;
+		,@currencyDecimal AS INT
+		,@ysnRequireProducerQty AS BIT;
 		
 BEGIN 
 	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
@@ -1193,80 +1194,83 @@ SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 IF @intLotType != 0
 BEGIN 
 	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
-	INSERT INTO @ReceiptItemLotStagingTable(
-		[strReceiptType]
-		,[intItemId]
-		,[intLotId]
-		,[strLotNumber]
-		,[intLocationId]
-		,[intShipFromId]
-		,[intShipViaId]	
-		,[intSubLocationId]
-		,[intStorageLocationId] 
-		,[intCurrencyId]
-		,[intItemUnitMeasureId]
-		,[dblQuantity]
-		,[dblGrossWeight]
-		,[dblTareWeight]
-		,[dblCost]
-		,[intEntityVendorId]
-		,[dtmManufacturedDate]
-		,[strBillOfLadding]
-		,[strCertificate]
-		,[intProducerId]
-		,[strCertificateId]
-		,[strTrackingNumber]
-		,[intSourceType]
-	)
-	SELECT 
-		[strReceiptType]		= RE.strReceiptType
-		,[intItemId]			= RE.intItemId
-		,[intLotId]				= RE.intLotId
-		,[strLotNumber]			= SC.strLotNumber
-		,[intLocationId]		= RE.intLocationId
-		,[intShipFromId]		= RE.intShipFromId
-		,[intShipViaId]			= RE.intShipViaId
-		,[intSubLocationId]		= RE.intSubLocationId
-		,[intStorageLocationId] = RE.intStorageLocationId
-		,[intCurrencyId]		= RE.intCurrencyId
-		,[intItemUnitMeasureId] = RE.intItemUOMId
-		,[dblQuantity]			= CASE 
-									WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblQty
-									ELSE RE.dblQty
-								END
-		,[dblGrossWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN 
-										CASE 
-											WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblGrossUnits),@currencyDecimal)
-											ELSE ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits),@currencyDecimal)
-										END
-									ELSE 
-										CASE 
-											WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblGrossUnits,@currencyDecimal)
-											ELSE 0
-										END
-								END
-		,[dblTareWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN 
-										CASE 
-											WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblShrink),@currencyDecimal)
-											ELSE ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink),@currencyDecimal)
-										END
-									ELSE 
-										CASE 
-											WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblShrink,@currencyDecimal)
-											ELSE 0
-										END
-								END
-		,[dblCost]				= RE.dblCost
-		,[intEntityVendorId]	= RE.intEntityVendorId
-		,[dtmManufacturedDate]	= RE.dtmDate
-		,[strBillOfLadding]		= ''
-		,[strCertificate]		= ICC.strCertificationName
-		,[intProducerId]		= CTC.intProducerId
-		,[strCertificateId]		= CTC.strCertificationId
-		,[strTrackingNumber]	= CTC.strTrackingNumber
-		,[intSourceType]		= RE.intSourceType
+	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
+	IF ISNULL(@ysnRequireProducerQty, 0) = 1
+	BEGIN
+		INSERT INTO @ReceiptItemLotStagingTable(
+			[strReceiptType]
+			,[intItemId]
+			,[intLotId]
+			,[strLotNumber]
+			,[intLocationId]
+			,[intShipFromId]
+			,[intShipViaId]	
+			,[intSubLocationId]
+			,[intStorageLocationId] 
+			,[intCurrencyId]
+			,[intItemUnitMeasureId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[dblCost]
+			,[intEntityVendorId]
+			,[dtmManufacturedDate]
+			,[strBillOfLadding]
+			,[strCertificate]
+			,[intProducerId]
+			,[strCertificateId]
+			,[strTrackingNumber]
+			,[intSourceType]
+		)
+		SELECT 
+			[strReceiptType]		= RE.strReceiptType
+			,[intItemId]			= RE.intItemId
+			,[intLotId]				= RE.intLotId
+			,[strLotNumber]			= SC.strLotNumber
+			,[intLocationId]		= RE.intLocationId
+			,[intShipFromId]		= RE.intShipFromId
+			,[intShipViaId]			= RE.intShipViaId
+			,[intSubLocationId]		= RE.intSubLocationId
+			,[intStorageLocationId] = RE.intStorageLocationId
+			,[intCurrencyId]		= RE.intCurrencyId
+			,[intItemUnitMeasureId] = RE.intItemUOMId
+			,[dblQuantity]			= CASE 
+										WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblQty
+										ELSE RE.dblQty
+									END
+			,[dblGrossWeight]		= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 THEN 
+											CASE 
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblGrossUnits),@currencyDecimal)
+												ELSE ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits),@currencyDecimal)
+											END
+										ELSE 
+											CASE 
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblGrossUnits,@currencyDecimal)
+												ELSE 0
+											END
+									END
+			,[dblTareWeight]		= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 THEN 
+											CASE 
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblShrink),@currencyDecimal)
+												ELSE ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink),@currencyDecimal)
+											END
+										ELSE 
+											CASE 
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblShrink,@currencyDecimal)
+												ELSE 0
+											END
+									END
+			,[dblCost]				= RE.dblCost
+			,[intEntityVendorId]	= RE.intEntityVendorId
+			,[dtmManufacturedDate]	= RE.dtmDate
+			,[strBillOfLadding]		= ''
+			,[strCertificate]		= ICC.strCertificationName
+			,[intProducerId]		= CTC.intProducerId
+			,[strCertificateId]		= CTC.strCertificationId
+			,[strTrackingNumber]	= CTC.strTrackingNumber
+			,[intSourceType]		= RE.intSourceType
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
@@ -1274,6 +1278,61 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = RE.intContractDetailId
 		LEFT JOIN tblCTContractCertification CTC ON CTC.intContractDetailId = RE.intContractDetailId
 		LEFT JOIN tblICCertification ICC ON ICC.intCertificationId = CTC.intCertificationId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @ReceiptItemLotStagingTable(
+			[strReceiptType]
+			,[intItemId]
+			,[intLotId]
+			,[strLotNumber]
+			,[intLocationId]
+			,[intShipFromId]
+			,[intShipViaId]	
+			,[intSubLocationId]
+			,[intStorageLocationId] 
+			,[intCurrencyId]
+			,[intItemUnitMeasureId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[dblCost]
+			,[intEntityVendorId]
+			,[dtmManufacturedDate]
+			,[strBillOfLadding]
+			,[intSourceType]
+		)
+		SELECT 
+			[strReceiptType]		= RE.strReceiptType
+			,[intItemId]			= RE.intItemId
+			,[intLotId]				= RE.intLotId
+			,[strLotNumber]			= SC.strLotNumber
+			,[intLocationId]		= RE.intLocationId
+			,[intShipFromId]		= RE.intShipFromId
+			,[intShipViaId]			= RE.intShipViaId
+			,[intSubLocationId]		= RE.intSubLocationId
+			,[intStorageLocationId] = RE.intStorageLocationId
+			,[intCurrencyId]		= RE.intCurrencyId
+			,[intItemUnitMeasureId] = RE.intItemUOMId
+			,[dblQuantity]			= RE.dblQty
+			,[dblGrossWeight]		= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits),@currencyDecimal)
+										ELSE 0
+									END
+			,[dblTareWeight]		= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink),@currencyDecimal)
+										ELSE 0
+									END
+			,[dblCost]				= RE.dblCost
+			,[intEntityVendorId]	= RE.intEntityVendorId
+			,[dtmManufacturedDate]	= RE.dtmDate
+			,[strBillOfLadding]		= ''
+			,[intSourceType]		= RE.intSourceType
+		FROM @ReceiptStagingTable RE 
+		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
+		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+		INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
+	END
 END
 
 EXEC dbo.uspICAddItemReceipt 
