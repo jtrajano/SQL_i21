@@ -22,7 +22,8 @@ BEGIN TRY
 				@intOrderType					INT,
 				@dblSchQuantityToUpdate			NUMERIC(18,6),
 				@intSourceType					INT,
-				@ysnPO							BIT
+				@ysnPO							BIT,
+				@ysnLoad						BIT
 
 	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType FROM @ItemsFromInventoryShipment
 
@@ -35,13 +36,14 @@ BEGIN TRY
 		intInventoryShipmentItemId	INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
-		dblQty						NUMERIC(18,6)	
+		dblQty						NUMERIC(18,6),
+		ysnLoad						BIT
 	)
 
 	IF(@intOrderType = 1)
 	BEGIN
-		INSERT	INTO @tblToProcess (intInventoryShipmentItemId,intContractDetailId,intItemUOMId,dblQty)
-		SELECT 	intInventoryShipmentItemId,intLineNo,intItemUOMId,dblQty
+		INSERT	INTO @tblToProcess (intInventoryShipmentItemId,intContractDetailId,intItemUOMId,dblQty, ysnLoad)
+		SELECT 	intInventoryShipmentItemId,intLineNo,intItemUOMId,CASE WHEN ysnLoad = 1 THEN intLoadShipped ELSE dblQty END, ysnLoad
 		FROM	@ItemsFromInventoryShipment
 		WHERE	ISNULL(intLineNo,0) > 0
 	END
@@ -53,12 +55,14 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
 				@dblQty							=	NULL,
-				@intInventoryShipmentItemId		=	NULL
+				@intInventoryShipmentItemId		=	NULL,
+				@ysnLoad						=	NULL
 
 		SELECT	@intContractDetailId			=	intContractDetailId,
 				@intFromItemUOMId				=	intItemUOMId,
 				@dblQty							=	dblQty * -1,
-				@intInventoryShipmentItemId		=	intInventoryShipmentItemId
+				@intInventoryShipmentItemId		=	intInventoryShipmentItemId,
+				@ysnLoad						=	ysnLoad
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
@@ -69,7 +73,7 @@ BEGIN TRY
 
 		SELECT @intToItemUOMId	=	intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
-		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+		SELECT @dblConvertedQty =	CASE WHEN @ysnLoad = 1 THEN @dblQty ELSE dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty) END
 
 		IF ISNULL(@dblConvertedQty,0) = 0
 		BEGIN
