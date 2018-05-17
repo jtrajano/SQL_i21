@@ -120,34 +120,83 @@ BEGIN
 			,@Fieldname = [fieldname]
 		FROM @temp_params WHERE [fieldname] = @strField
 		IF (UPPER(@Condition) = 'BETWEEN')
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-			' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-		END
-		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-			' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
-		END
-		ELSE IF (UPPER(@Condition) = 'IN')
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-			' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
-		END
-		ELSE IF (UPPER(@Condition) = 'GREATER THAN')
-		BEGIN
 			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+				IF(@Fieldname NOT IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+				BEGIN
+					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+				END
+				ELSE
+				BEGIN
+					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+					
+				END
 			END
-		END
-		ELSE IF (UPPER(@Condition) = 'LESS THAN')
-		BEGIN
+			ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
 			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+			
+
+				IF(@Fieldname NOT IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+				BEGIN
+						SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+						' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+				END
+				ELSE
+				BEGIN
+						SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+						' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' = ' + '''' + @From + '''' + ' )'
+				END
+
 			END
-		END
+			ELSE IF (UPPER(@Condition) = 'IN')
+			BEGIN
+				
+				IF(@Fieldname NOT IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+				BEGIN
+					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+
+				END
+				ELSE
+				BEGIN
+					SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+
+				END
+			END
+			ELSE IF (UPPER(@Condition) = 'GREATER THAN')
+			BEGIN
+				BEGIN
+					
+					IF(@Fieldname NOT IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+					BEGIN
+						SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+						' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
+					END
+					ELSE
+					BEGIN
+						SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+						' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' >= ' + '''' + @From + '''' + ' )'
+					END
+				END
+			END
+			ELSE IF (UPPER(@Condition) = 'LESS THAN')
+			BEGIN
+				BEGIN
+					
+					IF(@Fieldname NOT IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
+					BEGIN
+						SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+						' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
+					END
+					ELSE
+					BEGIN
+						SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+						' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' <= ' + '''' + @To + '''' + ' )'
+					END
+				END
+			END
 
 		SET @From = ''
 		SET @To = ''
@@ -198,6 +247,18 @@ BEGIN
 		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
 
 
+
+		IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL
+			BEGIN
+				DROP TABLE #tblCFTempInvoiceReportSummary
+			END
+
+		DECLARE @ysnIncludePrintedTransaction AS BIT
+		SELECT TOP 1
+				 @ysnIncludePrintedTransaction = [from]
+			FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
+			
+					
 		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
 		BEGIN
 			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strUpdateInvoiceReportNumber IS NOT NULL AND strUpdateInvoiceReportNumber != '''' )'
@@ -206,19 +267,12 @@ BEGIN
 				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' + 
 				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
 			END
-		END
-		ELSE
+		END 
+		ELSE IF(ISNULL(@ysnIncludePrintedTransaction,0) = 0)
 		BEGIN
 			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 				' ( ISNULL(strUpdateInvoiceReportNumber,'''') = '''')'
 		END
-
-		IF OBJECT_ID('tempdb..#tblCFTempInvoiceReportSummary') IS NOT NULL
-			BEGIN
-				DROP TABLE #tblCFTempInvoiceReportSummary
-			END
-
-		select @whereClause
 
 		SELECT * INTO #tblCFTempInvoiceReportSummary FROM vyuCFInvoiceReportSummary
 
