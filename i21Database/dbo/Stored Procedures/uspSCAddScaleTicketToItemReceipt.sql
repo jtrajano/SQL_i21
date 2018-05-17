@@ -1326,6 +1326,7 @@ BEGIN
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
 			,[dtmManufacturedDate]	= RE.dtmDate
+			,[[dtmExpiryDate]]		= dbo.fnICCalculateExpiryDate(RE.intItemUOMId, NULL , RE.dtmDate)
 			,[strBillOfLadding]		= ''
 			,[intSourceType]		= RE.intSourceType
 		FROM @ReceiptStagingTable RE 
