@@ -883,39 +883,39 @@ BEGIN TRY
 					)
 
 			UPDATE PS
-			SET dblMarketRate = IsNULL(IsNULL(dbo.fnRKGetLatestClosingPrice((
-							SELECT TOP 1 CM.intFutureMarketId
-							FROM tblICCommodityAttribute CA
-							JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-								AND CA.strType = 'ProductType'
-							WHERE CA.intCommodityAttributeId = I.intProductTypeId
-							), (
+			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
+								SELECT TOP 1 CM.intFutureMarketId
+								FROM tblICCommodityAttribute CA
+								JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+									AND CA.strType = 'ProductType'
+								WHERE CA.intCommodityAttributeId = I.intProductTypeId
+								), C.intFutureMarketId), (
 							SELECT TOP 1 intFutureMonthId
 							FROM tblRKFuturesMonth
 							WHERE ysnExpired = 0
 								AND dtmSpotDate <= @dtmCurrentDateTime
-								AND intFutureMarketId = C.intFutureMarketId
+								AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
+										SELECT TOP 1 CM.intFutureMarketId
+										FROM tblICCommodityAttribute CA
+										JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+											AND CA.strType = 'ProductType'
+										WHERE CA.intCommodityAttributeId = I.intProductTypeId
+										))
 							ORDER BY 1 DESC
-							), @dtmCurrentDateTime), dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
-							SELECT TOP 1 intFutureMonthId
-							FROM tblRKFuturesMonth
-							WHERE ysnExpired = 0
-								AND dtmSpotDate <= @dtmCurrentDateTime
-								AND intFutureMarketId = C.intFutureMarketId
-							ORDER BY 1 DESC
-							), @dtmCurrentDateTime)),0)
+							), @dtmCurrentDateTime), 0)
 			FROM @tblMFProductionSummary PS
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-			
+
 			--If exists(Select *from @tblMFProductionSummary Where dblGradeDiff is null)
 			--Begin
-				UPDATE PS
-				SET dblGradeDiff = IsNULL(GD.dblGradeDiff, 0),ysnZeroCost =IsNULL(GD.ysnZeroCost,0)
-				FROM @tblMFProductionSummary PS
-				Left JOIN tblMFItemGradeDiff GD on GD.intItemId=PS.intItemId
-			--End
+			UPDATE PS
+			SET dblGradeDiff = IsNULL(GD.dblGradeDiff, 0)
+				,ysnZeroCost = IsNULL(GD.ysnZeroCost, 0)
+			FROM @tblMFProductionSummary PS
+			LEFT JOIN tblMFItemGradeDiff GD ON GD.intItemId = PS.intItemId
 
+			--End
 			--Calculate co efficient
 			SELECT @intProductionSummaryId = min(intProductionSummaryId)
 			FROM @tblMFProductionSummary
@@ -931,7 +931,7 @@ BEGIN TRY
 
 			UPDATE @tblMFProductionSummary
 			SET dblCoEfficient = 0
-			WHERE ysnZeroCost  = 1
+			WHERE ysnZeroCost = 1
 
 			UPDATE PS
 			SET dblCoEfficient = (PS.dblMarketRate + PS.dblGradeDiff) / CASE 
@@ -940,7 +940,7 @@ BEGIN TRY
 					ELSE (PS.dblMarketRate + @dblFirstGradeDiff)
 					END
 			FROM @tblMFProductionSummary PS
-			WHERE dblCoEfficient IS NULL 
+			WHERE dblCoEfficient IS NULL
 
 			UPDATE @tblMFProductionSummary
 			SET dblCoEfficientApplied = dblOutputQuantity * dblCoEfficient
@@ -972,8 +972,8 @@ BEGIN TRY
 				,dblCoEfficientApplied = PS.dblCoEfficientApplied
 				,dblStandardUnitRate = PS.dblStandardUnitRate
 				,dblProductionUnitRate = PS.dblProductionUnitRate
-				,ysnZeroCost =PS.ysnZeroCost 
-				,dblCost =PS.dblProductionUnitRate*PS.dblOutputQuantity 
+				,ysnZeroCost = PS.ysnZeroCost
+				,dblCost = PS.dblProductionUnitRate * PS.dblOutputQuantity
 			FROM @tblMFProductionSummary PS
 			JOIN tblMFProductionSummary PS1 ON PS.intProductionSummaryId = PS1.intProductionSummaryId
 
@@ -1020,7 +1020,7 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = PS.dblProductionUnitRate * PL.dblQuantity - ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0))
+				,[dblNewCost] = (PS.dblProductionUnitRate * PL.dblQuantity) - (IsNULL(PL.dblOtherCharges,0)+ ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
 				,[intCurrencyId] = (
 					SELECT TOP 1 intDefaultReportingCurrencyId
 					FROM tblSMCompanyPreference

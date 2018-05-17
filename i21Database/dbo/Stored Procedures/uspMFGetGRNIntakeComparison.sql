@@ -18,7 +18,7 @@ INSERT INTO @tblMFLot (intLotId)
 SELECT WI.intLotId
 FROM tblMFWorkOrderInputLot WI
 WHERE WI.intWorkOrderId = @intWorkOrderId
-and ysnConsumptionReversed =0
+	AND ysnConsumptionReversed = 0
 
 INSERT INTO @tblMFFinalLot (
 	intLotId
@@ -37,16 +37,19 @@ DECLARE @tblMFGRN TABLE (
 	intPropertyId INT
 	,strPropertyName NVARCHAR(50) collate Latin1_General_CI_AS
 	,strPropertyValue NUMERIC(38, 20)
+	,intSequenceNo INT
 	)
 
 INSERT INTO @tblMFGRN (
 	intPropertyId
 	,strPropertyName
 	,strPropertyValue
+	,intSequenceNo
 	)
 SELECT P.intPropertyId
 	,P.strPropertyName
-	,TR.strPropertyValue AS strPropertyValue
+		,SUM(TR.strPropertyValue*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
+	,TR.intSequenceNo
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 	AND TR.intProductTypeId = 6
@@ -68,15 +71,22 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 			AND S1.intProductTypeId = 6
 			AND ST1.intControlPointId = ST.intControlPointId
 		)
+Group by 
+	P.intPropertyId
+	,P.strPropertyName
+	,TR.intSequenceNo
+
 
 INSERT INTO @tblMFGRN (
 	intPropertyId
 	,strPropertyName
 	,strPropertyValue
+	,intSequenceNo
 	)
 SELECT P.intPropertyId
 	,P.strPropertyName
-	,TR.strPropertyValue AS strPropertyValue
+	,SUM(TR.strPropertyValue*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
+	,TR.intSequenceNo
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 	AND TR.intProductTypeId = 6
@@ -99,6 +109,11 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 			AND ST1.intControlPointId = ST.intControlPointId
 		)
 
+Group by 
+	P.intPropertyId
+	,P.strPropertyName
+	,TR.intSequenceNo
+
 DECLARE @tblMFIP TABLE (
 	intPropertyId INT
 	,strPropertyName NVARCHAR(50) collate Latin1_General_CI_AS
@@ -112,7 +127,7 @@ INSERT INTO @tblMFIP (
 	)
 SELECT P.intPropertyId
 	,P.strPropertyName
-	,Convert(NUMERIC(38, 20), TR.strPropertyValue) AS strPropertyValue
+	,SUM(TR.strPropertyValue*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 	AND ISNUMERIC(TR.strPropertyValue) = 1
@@ -134,13 +149,17 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 			AND S1.intProductTypeId = 6
 			AND ST1.intControlPointId = ST.intControlPointId
 		)
+Group by 
+	P.intPropertyId
+	,P.strPropertyName
+	,TR.intSequenceNo
+
 
 SELECT G.intPropertyId
 	,G.strPropertyName
-	,AVG(G.strPropertyValue) AS dblEstimatedOutput
-	,AVG(I.strPropertyValue) AS dblIssuetoMill
-	,(AVG(I.strPropertyValue) - AVG(G.strPropertyValue)) AS dblVariance
+	,G.strPropertyValue AS dblEstimatedOutput
+	,I.strPropertyValue AS dblIssuetoMill
+	,I.strPropertyValue - G.strPropertyValue AS dblVariance
 FROM @tblMFGRN G
 LEFT JOIN @tblMFIP I ON I.intPropertyId = G.intPropertyId
-GROUP BY G.intPropertyId
-	,G.strPropertyName
+ORDER BY G.intSequenceNo

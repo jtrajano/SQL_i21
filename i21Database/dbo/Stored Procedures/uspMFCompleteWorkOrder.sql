@@ -723,14 +723,9 @@ BEGIN TRY
 		BEGIN
 			DECLARE @intRecipeId INT
 				,@intRecipeItemId INT
-				,@ysnZeroCost BIT
 				,@intRecipeItemUOMId INT
 				,@intUnitMeasureId INT
 				,@intInputItemUOMId2 INT
-
-			SELECT @ysnZeroCost = ysnZeroCost
-			FROM tblMFItemGradeDiff
-			WHERE intItemId = @intItemId
 
 			SELECT @intRecipeId = intRecipeId
 				,@intRecipeItemUOMId = intItemUOMId
@@ -812,11 +807,7 @@ BEGIN TRY
 				,intReferenceRecipeId = NULL
 				,ysnOutputItemMandatory = 0
 				,dblScrap = 0
-				,ysnConsumptionRequired = CASE 
-					WHEN @ysnZeroCost = 1
-						THEN 0
-					ELSE 1
-					END
+				,ysnConsumptionRequired = 1
 				,[dblCostAllocationPercentage] = NULL
 				,intMarginById = NULL
 				,dblMargin = NULL

@@ -33,13 +33,13 @@ BEGIN TRY
 		SET @SQL = @SQL + 'SELECT @PropList = Stuff((  
 	SELECT ''] INT,['' + strPropertyName  
     FROM (  
-     SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName  
+     SELECT DISTINCT P.strPropertyName + '' - '' + T.strTestName AS strPropertyName,T.strTestName,TR.intSequenceNo  
 	FROM dbo.tblQMTestResult AS TR
   JOIN @tblMFFinalLot AS L ON L.intLotId = TR.intProductValueId AND TR.intProductTypeId = 6 and TR.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 Where S1.intSampleStatusId =3 and S1.strLotNumber=L.strLotNumber AND S1.intProductTypeId = 6 )' 
   SET @SQL = @SQL + ' JOIN dbo.tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
   JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
      ) t  
-    ORDER BY ''],['' + strTestName,strPropertyName  
+    ORDER BY t.intSequenceNo
     FOR XML Path('''')  
 	), 1, 6, '''') + ''] INT'''
 

@@ -114,6 +114,7 @@ SELECT P.intPropertyId
 	,AVG(Convert(NUMERIC(38, 20), TR.strPropertyValue)) AS strPropertyValue
 	,P.intItemId
 	,Convert(NUMERIC(38, 20), NULL) AS dblExchangePrice
+	,TR.intSequenceNo
 INTO #GRN
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
@@ -146,40 +147,42 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 GROUP BY P.intPropertyId
 	,P.strPropertyName
 	,P.intItemId
+	,TR.intSequenceNo 
 
 INSERT INTO #GRN (
 	intPropertyId
 	,strPropertyName
 	,intItemId
+	,intSequenceNo 
 	)
 SELECT DISTINCT 0
 	,''
 	,intItemId
+	,-1
 FROM #StageQty
 
 UPDATE #GRN
 SET intItemId = I.intItemId
-	,dblExchangePrice = IsNULL(IsNULL(dbo.fnRKGetLatestClosingPrice((
+	,dblExchangePrice = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
 					SELECT TOP 1 CM.intFutureMarketId
 					FROM tblICCommodityAttribute CA
 					JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
 						AND CA.strType = 'ProductType'
 					WHERE CA.intCommodityAttributeId = I.intProductTypeId
-					), (
-					SELECT TOP 1 intFutureMonthId
-					FROM tblRKFuturesMonth
-					WHERE ysnExpired = 0
-						AND dtmSpotDate <= @dtmCurrentDateTime
-						AND intFutureMarketId = C.intFutureMarketId
-					ORDER BY 1 DESC
-					), @dtmCurrentDateTime), dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
-					SELECT TOP 1 intFutureMonthId
-					FROM tblRKFuturesMonth
-					WHERE ysnExpired = 0
-						AND dtmSpotDate <= @dtmCurrentDateTime
-						AND intFutureMarketId = C.intFutureMarketId
-					ORDER BY 1 DESC
-					), @dtmCurrentDateTime)), 0) / @intSubCurrency
+					), C.intFutureMarketId), (
+				SELECT TOP 1 intFutureMonthId
+				FROM tblRKFuturesMonth
+				WHERE ysnExpired = 0
+					AND dtmSpotDate <= @dtmCurrentDateTime
+					AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
+							SELECT TOP 1 CM.intFutureMarketId
+							FROM tblICCommodityAttribute CA
+							JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+								AND CA.strType = 'ProductType'
+							WHERE CA.intCommodityAttributeId = I.intProductTypeId
+							))
+				ORDER BY 1 DESC
+				), @dtmCurrentDateTime), 0) / @intSubCurrency
 FROM #GRN G
 JOIN tblICItem I ON I.intItemId = G.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
@@ -225,10 +228,11 @@ SELECT intPropertyId
 		) AS dblVariance
 	,dblExchangePrice AS dblMarketPrice
 	,dblGradeDiff AS dblMarketDifferential
-	,(WP.dblQuantity * PS.dblGradeDiff * dblExchangePrice) AS dblMTMPL
+	,(dblExchangePrice+PS.dblGradeDiff)*WP.dblQuantity AS dblMTMPL
 FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
 LEFT JOIN #StageQty S ON S.intItemId = G.intItemId
 LEFT JOIN #tblMFFinalWorkOrderProducedLot AS WP ON WP.intItemId = G.intItemId
 LEFT JOIN tblMFProductionSummary PS ON PS.intItemId = G.intItemId
 	AND PS.intWorkOrderId = @intWorkOrderId
+ORDER BY G.intSequenceNo
