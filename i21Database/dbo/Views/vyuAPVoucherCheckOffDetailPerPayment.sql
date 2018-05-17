@@ -83,7 +83,7 @@ SELECT
 								LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 								INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 								INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
-								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
+								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 								INNER JOIN dbo.tblAPAppliedPrepaidAndDebit APD ON APD.intBillId = APB.intBillId
 								INNER JOIN dbo.tblAPBill APB2 ON APD.intTransactionId = APB2.intBillId                              
 					OUTER APPLY(
@@ -230,7 +230,7 @@ SELECT
 								LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 								INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 								INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
-								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
+								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 					OUTER APPLY(
 								SELECT TOP 1 
 											 B1.dtmDatePaid,

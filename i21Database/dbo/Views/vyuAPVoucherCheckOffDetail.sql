@@ -48,7 +48,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
-			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
+			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
@@ -128,7 +128,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
-			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = SC.intDeliverySheetId
+			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
