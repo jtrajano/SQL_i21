@@ -1729,28 +1729,8 @@ IF @post = 1
 				(SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH (NOLOCK)) C
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
-				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
-			-- LEFT OUTER JOIN
-			-- 	(
-			-- 	--Credit Memo Prepaids
-			-- 	SELECT
-			-- 		 [dblAppliedCMAmount]		= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
-			-- 		,[dblBaseAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblBaseAppliedInvoiceDetailAmount],@ZeroDecimal))
-			-- 		,[intInvoiceId]				= A.[intInvoiceId] 
-			-- 	FROM
-			-- 		(SELECT [intInvoiceId], [intPrepaymentId], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount] FROM tblARPrepaidAndCredit WITH (NOLOCK)
-			-- 		 WHERE ISNULL([ysnApplied],0) = 1 AND [dblAppliedInvoiceDetailAmount] <> @ZeroDecimal) ARPAC
-			-- 	INNER JOIN
-			-- 		(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) A
-			-- 			ON ARPAC.[intInvoiceId] = A.[intInvoiceId] 						
-			-- 	INNER JOIN
-			-- 		(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
-			-- 			ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]	
-			-- 	GROUP BY
-			-- 		A.[intInvoiceId]
-			-- 	) CM
-			-- 		ON A.[intInvoiceId] = CM.[intInvoiceId]
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId				
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1759,7 +1739,7 @@ IF @post = 1
 						EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN (SELECT intItemId, strType FROM tblICItem) ICI ON ARID.intItemId = ICI.intItemId AND ICI.strType <> 'Comment' WHERE ARID.intInvoiceId  = A.[intInvoiceId])
 					)
 				AND NOT(A.intSourceId = 2 AND A.intOriginalInvoiceId IS NOT NULL)
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 
 			UNION ALL
 			--DEBIT Amount Due - Final Invoice
@@ -1804,7 +1784,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1813,7 +1793,7 @@ IF @post = 1
 						EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN (SELECT intItemId, strType FROM tblICItem) ICI ON ARID.intItemId = ICI.intItemId AND ICI.strType <> 'Comment' WHERE ARID.intInvoiceId  = A.[intInvoiceId])
 					)
 				AND A.intSourceId = 2 
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 				AND A.intOriginalInvoiceId IS NOT NULL
 
 			UNION ALL
@@ -1859,7 +1839,7 @@ IF @post = 1
 					ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData )	P ON A.intInvoiceId = P.intInvoiceId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (
@@ -1869,7 +1849,7 @@ IF @post = 1
 					)
 				AND A.intSourceId = 2 
 				AND A.intOriginalInvoiceId IS NOT NULL
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 
 
 			UNION ALL
@@ -1916,9 +1896,6 @@ IF @post = 1
 				(SELECT [intInvoiceId],intAccountId, strInvoiceNumber, dtmDate, dtmPostDate, strTransactionType, intCurrencyId, [intEntityCustomerId], strComments, intPeriodsToAccrue
 				 FROM tblARInvoice WITH (NOLOCK)) A
 					ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
-			--INNER JOIN
-			--	(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId, strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1
-			--		ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]				 
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
@@ -1972,29 +1949,11 @@ IF @post = 1
 			INNER JOIN
 				(SELECT intCompanyLocationId, intUndepositedFundsId FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL
 					ON A.intCompanyLocationId = SMCL.intCompanyLocationId
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
-			/*LEFT OUTER JOIN
-				(
-				--Credit Memo Prepaids
-				SELECT
-					 [dblAppliedCMAmount]		= SUM(ISNULL(ARPAC.[dblAppliedInvoiceDetailAmount],@ZeroDecimal))
-					,[dblBaseAppliedCMAmount]	= SUM(ISNULL(ARPAC.[dblBaseAppliedInvoiceDetailAmount],@ZeroDecimal))
-					,[intInvoiceId]				= A.[intInvoiceId] 
-				FROM
-					(SELECT [intInvoiceId], [intPrepaymentId], [dblAppliedInvoiceDetailAmount], [dblBaseAppliedInvoiceDetailAmount], [ysnApplied] FROM tblARPrepaidAndCredit WITH (NOLOCK)) ARPAC
-				INNER JOIN
-					(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK)) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal						  
-				INNER JOIN
-					(SELECT [intInvoiceId], strTransactionType FROM tblARInvoice WITH (NOLOCK) WHERE strTransactionType IN ('Credit Memo', 'Credit Note')) ARI1 
-						ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId]
-				GROUP BY
-					A.[intInvoiceId]
-				) CM
-					ON A.[intInvoiceId] = CM.[intInvoiceId] */
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (A.dblPayment - ISNULL(@ZeroDecimal, @ZeroDecimal)) <> @ZeroDecimal
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 			
 			--/*
 			UNION ALL
@@ -2040,19 +1999,15 @@ IF @post = 1
 			INNER JOIN
 				(SELECT [intInvoiceId],intAccountId, strInvoiceNumber, dtmPostDate, dtmDate, [intEntityCustomerId], strTransactionType, intCurrencyId, strComments, intPeriodsToAccrue, intCompanyLocationId
 				 FROM tblARInvoice WITH (NOLOCK) ) A ON ARPAC.[intInvoiceId] = A.[intInvoiceId] AND  ISNULL(ARPAC.[ysnApplied],0) = 1 AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal				 
-			--INNER JOIN
-			--	(SELECT [intInvoiceId], [strInvoiceNumber], intAccountId FROM tblARInvoice WITH (NOLOCK)  WHERE strTransactionType NOT IN ('Credit Memo', 'Credit Note')) ARI1 
-			--		ON ARPAC.[intPrepaymentId] = ARI1.[intInvoiceId] 
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
 			INNER JOIN 
 				(SELECT intInvoiceId FROM @PostInvoiceData) P ON A.intInvoiceId = P.intInvoiceId
-			--CROSS APPLY (SELECT TOP 1 * FROM tblARCompanyPreference) CPref
 			LEFT OUTER JOIN
 				(SELECT [intCompanyLocationId], intAPAccount FROM tblSMCompanyLocation WITH (NOLOCK)) SMCL ON SMCL.[intCompanyLocationId] = A.intCompanyLocationId
 			WHERE
 				ISNULL(A.intPeriodsToAccrue,0) <= 1
-			--*/		
+			
 			--CREDIT MISC
 			UNION ALL 
 			SELECT
@@ -2110,15 +2065,14 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
-				--B.dblTotal <> @ZeroDecimal AND 
 				((B.intItemId IS NULL OR B.intItemId = 0)
 					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))))
 				AND (A.strTransactionType <> 'Debit Memo' OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')))
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND (B.dblTotal <> 0 OR B.dblQtyShipped <> 0)
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 
 			--CREDIT Software -- License
 			UNION ALL 
@@ -2251,14 +2205,14 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC					
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC					
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND (ISNULL(A.intPeriodsToAccrue,0) <= 1 OR ( ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0))
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 
 			--DEBIT Software -- License
 			UNION ALL 
@@ -2391,14 +2345,15 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC	
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC	
 			WHERE
 				B.dblLicenseAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'License Only')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND (ISNULL(A.intPeriodsToAccrue,0) > 1 AND ISNULL(@accrueLicense,0) = 0)
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
+
 			--CREDIT Software -- Maintenance
 			UNION ALL 
 			SELECT
@@ -2520,14 +2475,14 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC						
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC						
 			WHERE
 				B.dblMaintenanceAmount <> @ZeroDecimal
 				AND B.strMaintenanceType IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 				AND ISNULL(I.strType,'') = 'Software'
 				AND A.strTransactionType <> 'Debit Memo'
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 
 			--CREDIT SALES
 			---asdasd
@@ -2597,7 +2552,7 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE			 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND ISNULL(I.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
@@ -2608,7 +2563,8 @@ IF @post = 1
                     OR
                         (B.dblQtyShipped = @ZeroDecimal AND A.dblInvoiceTotal = @ZeroDecimal)
                     )
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
+
 			--CREDIT SALES - Debit Memo
 			UNION ALL 
 			SELECT			
@@ -2674,14 +2630,15 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON B.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId 
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				B.dblQtyShipped <> @ZeroDecimal  
 				AND A.strTransactionType = 'Debit Memo'
 				AND A.strType NOT IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
 				AND ISNULL(I.strType,'') <> 'Comment'
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
+
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
@@ -2729,10 +2686,10 @@ IF @post = 1
 			INNER JOIN 
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P
 					ON A.intInvoiceId = P.intInvoiceId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				A.dblShipping <> @ZeroDecimal		
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 				
 		UNION ALL 
 			--CREDIT Tax
@@ -2824,11 +2781,11 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC
 			WHERE
 				DT.dblAdjustedTax <> @ZeroDecimal
 				AND ISNULL(A.intPeriodsToAccrue,0) <= 1
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 
 				
 			UNION ALL 
 			--DEBIT Discount
@@ -2890,184 +2847,11 @@ IF @post = 1
 						tblSMCurrencyExchangeRateType
 				)	SMCERT
 					ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-			CROSS APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC			
+			OUTER APPLY (SELECT COUNT(intPrepaidAndCreditId) PPC FROM tblARPrepaidAndCredit WHERE intInvoiceId = A.intInvoiceId AND ysnApplied = 1) PPC			
 			WHERE
 				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
-				AND (A.strTransactionType = 'Cash Refund' AND PPC.PPC = 0)
+				AND ((A.strTransactionType = 'Cash Refund' AND ISNULL(PPC.PPC, 0) = 0) OR A.strTransactionType <> 'Cash Refund') 			
 			
-			--UNION ALL 
-			----DEBIT COGS - Inbound Shipment
-			--SELECT			
-			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-			--	,strBatchID					= @batchIdUsed
-			--	,intAccountId				= IST.intCOGSAccountId
-			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END
-			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END								
-			--	,strDescription				= A.strComments
-			--	,strCode					= @CODE
-			--	,strReference				= C.strCustomerNumber
-			--	,intCurrencyId				= A.intCurrencyId 
-			--	,dblExchangeRate			= D.dblCurrencyExchangeRate
-			--	,dtmDateEntered				= @PostDate
-			--	,dtmTransactionDate			= A.dtmDate
-			--	,strJournalLineDescription	= D.strItemDescription
-			--	,intJournalLineNo			= D.intInvoiceDetailId
-			--	,ysnIsUnposted				= 0
-			--	,intUserId					= @userId
-			--	,intEntityId				= @UserEntityID				
-			--	,strTransactionId			= A.strInvoiceNumber
-			--	,intTransactionId			= A.intInvoiceId
-			--	,strTransactionType			= A.strTransactionType
-			--	,strTransactionForm			= @SCREEN_NAME
-			--	,strModuleName				= @MODULE_NAME
-			--	,intConcurrencyId			= 1
-			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-			--	,[dblReportingRate]			= D.dblCurrencyExchangeRate
-			--	,[dblForeignRate]			= D.dblCurrencyExchangeRate
-			--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
-			--FROM
-			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, dblQtyShipped, intItemUOMId, strItemDescription, intLoadDetailId, dblTotal,
-			--			intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate, dblBasePrice
-			--	 FROM tblARInvoiceDetail WITH (NOLOCK)) D
-			--INNER JOIN			
-			--	(SELECT intInvoiceId, dtmDate, dtmPostDate, intEntityCustomerId, intCurrencyId, strComments, strTransactionType, strInvoiceNumber, intCompanyLocationId, intPeriodsToAccrue
-			--		FROM tblARInvoice WITH (NOLOCK)) A 
-			--		ON D.intInvoiceId = A.intInvoiceId AND ISNULL(intPeriodsToAccrue,0) <= 1				 
-			--INNER JOIN
-			--	(SELECT intItemUOMId FROM tblICItemUOM) ItemUOM 
-			--		ON ItemUOM.intItemUOMId = D.intItemUOMId
-			--LEFT OUTER JOIN
-			--	(SELECT intItemId, intLocationId, intCOGSAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
-			--		ON D.intItemId = IST.intItemId 
-			--		AND A.intCompanyLocationId = IST.intLocationId 
-			--INNER JOIN
-			--	(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-			--		ON A.intEntityCustomerId = C.[intEntityId]					
-			--INNER JOIN 
-			--	(SELECT intInvoiceId FROM @PostInvoiceData)	P
-			--		ON A.intInvoiceId = P.intInvoiceId				
-			--INNER JOIN
-			--	(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
-			--		ON 	D.intLoadDetailId = ISD.intLoadDetailId
-			--INNER JOIN
-			--	(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
-			--		ON ISD.intLoadId = ISH.intLoadId
-			--INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-			--		ON ICIT.[intTransactionId] = ISH.[intLoadId] 
-			--		AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
-			--		AND ICIT.[strTransactionId] = ISH.strLoadNumber 
-			--		AND ICIT.[ysnIsUnposted] = 0	  
-			--LEFT OUTER JOIN
-			--	(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
-			--		ON D.intItemId = ICIS.intItemId 
-			--		AND A.intCompanyLocationId = ICIS.intLocationId
-			--LEFT OUTER JOIN
-			--	(
-			--		SELECT
-			--			intCurrencyExchangeRateTypeId 
-			--			,strCurrencyExchangeRateType 
-			--		FROM
-			--			tblSMCurrencyExchangeRateType
-			--	)	SMCERT
-			--		ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId	
-			--WHERE
-			--	D.dblTotal <> @ZeroDecimal
-			--	AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
-			--	AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-			--	AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-			--	AND A.strTransactionType <> 'Debit Memo'
-				
-			--UNION ALL 
-			----CREDIT Inventory In-Transit - Inbound Shipment
-			--SELECT			
-			--	 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
-			--	,strBatchID					= @batchIdUsed
-			--	,intAccountId				= IST.intInventoryInTransitAccountId
-			--	,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-			--	,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-			--	,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] END
-			--	,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] ELSE 0 END								
-			--	,strDescription				= A.strComments
-			--	,strCode					= @CODE
-			--	,strReference				= C.strCustomerNumber
-			--	,intCurrencyId				= A.intCurrencyId 
-			--	,dblExchangeRate			= 1
-			--	,dtmDateEntered				= @PostDate
-			--	,dtmTransactionDate			= A.dtmDate
-			--	,strJournalLineDescription	= D.strItemDescription
-			--	,intJournalLineNo			= D.intInvoiceDetailId
-			--	,ysnIsUnposted				= 0
-			--	,intUserId					= @userId
-			--	,intEntityId				= @UserEntityID				
-			--	,strTransactionId			= A.strInvoiceNumber
-			--	,intTransactionId			= A.intInvoiceId
-			--	,strTransactionType			= A.strTransactionType
-			--	,strTransactionForm			= @SCREEN_NAME
-			--	,strModuleName				= @MODULE_NAME
-			--	,intConcurrencyId			= 1
-			--	,[dblDebitForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-			--	,[dblDebitReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) END
-			--	,[dblCreditForeign]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-			--	,[dblCreditReport]			= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (ABS(ICIT.[dblQty]) * ICIT.[dblUOMQty] * ICIT.[dblCost]) ELSE 0 END
-			--	,[dblReportingRate]			= D.dblCurrencyExchangeRate
-			--	,[dblForeignRate]			= D.dblCurrencyExchangeRate
-			--	,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
-			--FROM
-			--	(SELECT intInvoiceId, intInvoiceDetailId, intItemId, strItemDescription, dblQtyShipped,  intItemUOMId, intLoadDetailId, dblTotal,
-			--			intCurrencyExchangeRateTypeId, dblPrice, dblCurrencyExchangeRate
-			--	 FROM tblARInvoiceDetail WITH (NOLOCK)) D
-			--INNER JOIN			
-			--	(SELECT intInvoiceId, strInvoiceNumber, strTransactionType, strComments, intCurrencyId, dtmDate, dtmPostDate, intCompanyLocationId, intEntityCustomerId, intPeriodsToAccrue
-			--	 FROM tblARInvoice WITH (NOLOCK)) A 
-			--		ON D.intInvoiceId = A.intInvoiceId AND ISNULL(intPeriodsToAccrue,0) <= 1			  
-			--INNER JOIN
-			--	(SELECT intItemUOMId FROM tblICItemUOM) ItemUOM 
-			--		ON ItemUOM.intItemUOMId = D.intItemUOMId
-			--LEFT OUTER JOIN
-			--	(SELECT intItemId, intLocationId, intInventoryInTransitAccountId, strType FROM vyuARGetItemAccount WITH (NOLOCK)) IST
-			--		ON D.intItemId = IST.intItemId 
-			--		AND A.intCompanyLocationId = IST.intLocationId 
-			--INNER JOIN
-			--	(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
-			--		ON A.intEntityCustomerId = C.[intEntityId]					
-			--INNER JOIN 
-			--	(SELECT intInvoiceId FROM @PostInvoiceData)	P
-			--		ON A.intInvoiceId = P.intInvoiceId				
-			--INNER JOIN
-			--	(SELECT intLoadId, intLoadDetailId FROM tblLGLoadDetail WITH (NOLOCK)) ISD
-			--		ON 	D.intLoadDetailId = ISD.intLoadDetailId
-			--INNER JOIN
-			--	(SELECT intLoadId, strLoadNumber FROM tblLGLoad WITH (NOLOCK)) ISH
-			--		ON ISD.intLoadId = ISH.intLoadId
-			--INNER JOIN (SELECT [intItemId], [intTransactionId], [dblQty], [intTransactionDetailId], [dblUOMQty], [dblCost], [strTransactionId], [ysnIsUnposted] FROM tblICInventoryTransaction WITH (NOLOCK)) ICIT
-			--		ON ICIT.[intTransactionId] = ISH.[intLoadId] 
-			--		AND ICIT.[intTransactionDetailId] = ISD.[intLoadDetailId] 
-			--		AND ICIT.[strTransactionId] = ISH.strLoadNumber 
-			--		AND ICIT.[ysnIsUnposted] = 0		
-			--LEFT OUTER JOIN
-			--	(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
-			--		ON D.intItemId = ICIS.intItemId 
-			--		AND A.intCompanyLocationId = ICIS.intLocationId
-			--LEFT OUTER JOIN
-			--	(
-			--		SELECT
-			--			intCurrencyExchangeRateTypeId 
-			--			,strCurrencyExchangeRateType 
-			--		FROM
-			--			tblSMCurrencyExchangeRateType
-			--	)	SMCERT
-			--		ON D.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
-			--WHERE
-			--	D.dblTotal <> @ZeroDecimal
-			--	AND D.intLoadDetailId IS NOT NULL AND D.intLoadDetailId <> 0				
-			--	AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-			--	AND ISNULL(IST.strType,'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle')
-			--	AND A.strTransactionType <> 'Debit Memo'
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
