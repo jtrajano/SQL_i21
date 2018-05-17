@@ -423,6 +423,10 @@ BEGIN TRY
 				CASE P.intDataTypeId
 					WHEN 4
 						THEN LOWER(QPV.strPropertyValue)
+					WHEN 1
+						THEN dbo.fnRemoveTrailingZeroes(QPV.strPropertyValue)
+					WHEN 2
+						THEN dbo.fnRemoveTrailingZeroes(QPV.strPropertyValue)
 					ELSE QPV.strPropertyValue
 					END
 				)
@@ -438,6 +442,7 @@ BEGIN TRY
 		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 		JOIN @QualityPropertyValueTable QPV ON LOWER(QPV.strPropertyName) = LOWER(P.strPropertyName)
 		WHERE TR.intSampleId = @intSampleId
+			AND ISNULL(QPV.strPropertyValue, '') <> ''
 
 		-- Setting correct date format
 		UPDATE tblQMTestResult
