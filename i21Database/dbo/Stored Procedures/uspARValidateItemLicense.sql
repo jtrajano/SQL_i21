@@ -71,7 +71,7 @@ select e.intItemId, -9, -999, e.strItemNo,
 stuff((
 			select ', ' + coalesce(ltrim(rtrim(f.strCode)), '') 
 				from #ITEMSTOVALIDATE f
-						where f.strItemNo= e.strItemNo
+						where f.strItemNo= e.strItemNo  AND isnull(intEntityCustomerId,0) = 0
 for xml path('') ), 1, 1, '') as strCode
 , ''
 , 1
@@ -82,6 +82,12 @@ for xml path('') ), 1, 1, '') as strCode
 from #ITEMSTOVALIDATE e 
 	where isnull(e.intEntityCustomerId,0) = 0
 
+declare @Tense NVARCHAR(10)
+set @Tense = 'is'
+if ((select count(intItemId) from #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) = 0) > 1 )
+BEGIN
+	set @Tense = 'are'
+END
 delete from  #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) = 0
 update #ITEMSTOVALIDATE set intEntityCustomerId = null where intEntityCustomerId = -999
 
@@ -111,7 +117,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #ITEMSTOVALIDATE)
 
 		--Validate if Customer has Active License
 		IF ISNULL(@intCustomerId, 0) = 0
-			SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License is required for item ' + @strItemNo + '<br>'
+			SET @strErrorMessage = ISNULL(@strErrorMessage, '') + @strCode + ' License ' + @Tense + ' required for item ' + @strItemNo + '<br>'
 		ELSE
 			BEGIN
 				--Validate if Customer's License is 
