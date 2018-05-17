@@ -35,5 +35,5 @@ CREATE TYPE [dbo].[ReceiptItemTableType] AS TABLE
 	,[intSourceId] INT NULL									-- Link id to Scale. Optional.
 	,[intLineNo] INT NOT NULL DEFAULT ((1))					-- Link id to the detail id of the PO detail or Contract detail. Default to zero. Optional. 
 	,[ysnLoad] BIT NULL DEFAULT((0))						-- Flag that determines if Load Contract
-	,[intLoadReceive] INT NULL DEFAULT ((0))				-- Load Receive Qty. For Load Contracts
+	,[intLoadReceive] INT NULL								-- Load Receive Qty. For Load Contracts
 )

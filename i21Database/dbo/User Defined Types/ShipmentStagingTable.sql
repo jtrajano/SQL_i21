@@ -44,7 +44,7 @@
 	intForexRateTypeId INT NULL,
 	dblForexRate NUMERIC(38, 20) NULL, 
 
-	intLoadShipped INT NULL DEFAULT((0)),
+	intLoadShipped INT NULL,
 
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,
