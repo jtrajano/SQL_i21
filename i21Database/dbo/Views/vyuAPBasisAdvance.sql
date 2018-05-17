@@ -57,6 +57,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,futureMonth.intFutureMonthId
         ,futureMonth.strFutureMonth
         ,ISNULL(basisCommodity.dblPercentage,0.00) AS dblPercentage
+        ,exchangeRates.dblRate AS dblExchangeRate
     FROM tblSCTicket ticket
     INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
         ON ticket.intEntityId = vendor.intEntityId
@@ -145,6 +146,26 @@ SELECT TOP 100 PERCENT * FROM (
         WHERE voucherDetail.intContractDetailId = ctd.intContractDetailId
         AND voucher.intTransactionType = 1
     ) pricedSequence
+    OUTER APPLY (
+		SELECT TOP 1
+			exchangeRateDetail.dblRate
+		FROM tblSMCurrencyExchangeRate exchangeRate
+		INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
+        OUTER APPLY (
+            SELECT TOP 1
+			    intAccountsPayableRateTypeId
+		    FROM tblSMMultiCurrency
+        ) rateType
+        OUTER APPLY (
+            SELECT TOP 1 
+                intDefaultCurrencyId 
+            FROM tblSMCompanyPreference
+        ) mainCurrency
+		WHERE exchangeRateDetail.intRateTypeId = rateType.intAccountsPayableRateTypeId
+		AND exchangeRate.intFromCurrencyId = ctd.intCurrencyId AND exchangeRate.intToCurrencyId = mainCurrency.intDefaultCurrencyId
+		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
+    ) exchangeRates
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
