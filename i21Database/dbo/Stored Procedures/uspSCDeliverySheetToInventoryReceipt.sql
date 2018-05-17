@@ -430,8 +430,8 @@ END
 					,[dblQtyReceived] = rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0)
 					,[dblCost] = 
 						CASE 
-							WHEN rc.strCostMethod = 'Amount' THEN rc.dblRate
-							ELSE rc.dblAmount
+							WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount
+							ELSE rc.dblRate
 						END 
 					,[intTaxGroupId] = rc.intTaxGroupId
 			FROM	#tmpReceiptItem tmp 
