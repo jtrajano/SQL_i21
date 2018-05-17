@@ -30,7 +30,8 @@ SET intModuleId =
     )
 WHERE strAccountCategory IN ( 'AR Account', 'Unrealized Gain or Loss Accounts Payable', 'Sales Tax Account',
                               'Cost of Goods', 'Sales Account', 'Sales Discount', 'Unrealized Gain or Loss Offset AR',
-                              'Unrealized Gain or Loss Accounts Receivable', 'Maintenance Sales'
+                              'Unrealized Gain or Loss Accounts Receivable', 'Maintenance Sales','Deferred Revenue',
+							  'Sales Discount'
                             );
 
 UPDATE dbo.tblGLAccountCategory
