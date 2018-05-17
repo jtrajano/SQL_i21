@@ -185,4 +185,53 @@ where
 order by
 		strName
 
+	exec('IF EXISTS(select * FROM sys.views where name = ''vyuHDCallDetail'') begin drop view vyuHDCallDetail; end');
+	exec('
+	create view vyuHDCallDetail as
+	select
+		intCallDetailId = convert(int,row_number() over (order by strName))
+		,intEntityId
+		,strName
+		,strFirstName
+		,intClosedCalls
+		,intOpenCalls
+		,intTotalCalls
+		,intReopenCalls
+		,intStartDate
+		,intEndDate
+		,strFilterKey
+		,intRequestedByEntityId
+		,intCreatedDate
+		,intTotalBilledHours
+		,dblTotalBillableAmount
+		,intCallsRated
+		,dblAverageRating
+		,intDaysOutstanding
+		,intConcurrencyId
+	from
+	(
+		select distinct
+			intEntityId
+			,strName
+			,strFirstName
+			,intClosedCalls
+			,intOpenCalls
+			,intTotalCalls
+			,intReopenCalls
+			,intStartDate
+			,intEndDate
+			,strFilterKey
+			,intRequestedByEntityId
+			,intCreatedDate
+			,intTotalBilledHours
+			,dblTotalBillableAmount
+			,intCallsRated
+			,dblAverageRating
+			,intDaysOutstanding
+			,intConcurrencyId
+		from 
+			tblHDCallDetail
+	) as r
+	');
+
 END
