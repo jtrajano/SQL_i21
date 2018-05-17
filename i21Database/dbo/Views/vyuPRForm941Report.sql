@@ -4,6 +4,7 @@ AS
 SELECT DISTINCT      
  intYear =					ISNULL(intYear, 0)          
  ,intQuarter =				ISNULL(intQuarter, 0)
+ ,strTradeName =			ISNULL(strTradeName, '')
  ,intEmployees =			/* box1 */ 
 							ISNULL(intEmployees, 0)
  ,dblAdjustedGross =		/* box2 */ 
@@ -117,3 +118,5 @@ SELECT DISTINCT
  ,dblPaymentCents
 FROM
 tblPRForm941
+
+GO
