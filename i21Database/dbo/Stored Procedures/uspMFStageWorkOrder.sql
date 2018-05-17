@@ -407,6 +407,10 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
+	DECLARE @intRecipeItemUOMId2 INT
+		,@intUnitMeasureId INT
+		,@intInputItemUOMId2 INT
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFWorkOrderRecipeItem RI
@@ -419,8 +423,18 @@ BEGIN TRY
 			)
 	BEGIN
 		SELECT @intRecipeId = intRecipeId
+			,@intRecipeItemUOMId2 = intItemUOMId
 		FROM tblMFWorkOrderRecipe
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intRecipeItemUOMId2
+
+		SELECT @intInputItemUOMId2 = intItemUOMId
+		FROM tblICItemUOM
+		WHERE intItemId = @intInputItemId
+			AND intUnitMeasureId = @intUnitMeasureId
 
 		IF NOT EXISTS (
 				SELECT *
@@ -478,7 +492,7 @@ BEGIN TRY
 				,intItemId = @intInputItemId
 				,dblQuantity = 1
 				,dblCalculatedQuantity = 1
-				,[intItemUOMId] = @intInputWeightUOMId
+				,[intItemUOMId] = @intInputItemUOMId2
 				,intRecipeItemTypeId = 1
 				,strItemGroupName = ''
 				,dblUpperTolerance = 100
@@ -556,7 +570,7 @@ BEGIN TRY
 				,intItemId = @intItemId2
 				,intSubstituteItemId = @intInputItemId
 				,dblQuantity = 1
-				,intItemUOMId = @intInputWeightUOMId
+				,intItemUOMId = @intInputItemUOMId2
 				,dblSubstituteRatio = 1
 				,dblMaxSubstituteRatio = 100
 				,dblCalculatedUpperTolerance = 2

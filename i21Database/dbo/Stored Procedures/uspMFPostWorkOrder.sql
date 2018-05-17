@@ -908,13 +908,13 @@ BEGIN TRY
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 			
-			If exists(Select *from @tblMFProductionSummary Where dblGradeDiff is null)
-			Begin
+			--If exists(Select *from @tblMFProductionSummary Where dblGradeDiff is null)
+			--Begin
 				UPDATE PS
 				SET dblGradeDiff = IsNULL(GD.dblGradeDiff, 0),ysnZeroCost =IsNULL(GD.ysnZeroCost,0)
 				FROM @tblMFProductionSummary PS
 				Left JOIN tblMFItemGradeDiff GD on GD.intItemId=PS.intItemId
-			End
+			--End
 
 			--Calculate co efficient
 			SELECT @intProductionSummaryId = min(intProductionSummaryId)
@@ -973,6 +973,7 @@ BEGIN TRY
 				,dblStandardUnitRate = PS.dblStandardUnitRate
 				,dblProductionUnitRate = PS.dblProductionUnitRate
 				,ysnZeroCost =PS.ysnZeroCost 
+				,dblCost =PS.dblProductionUnitRate*PS.dblOutputQuantity 
 			FROM @tblMFProductionSummary PS
 			JOIN tblMFProductionSummary PS1 ON PS.intProductionSummaryId = PS1.intProductionSummaryId
 

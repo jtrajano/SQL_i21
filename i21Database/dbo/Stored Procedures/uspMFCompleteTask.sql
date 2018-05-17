@@ -759,13 +759,14 @@ BEGIN TRY
 			,@intRecipeItemUOMId INT
 			,@intUnitMeasureId INT
 			,@intInputItemUOMId INT
-			,@intManufacturingCellId int
+			,@intManufacturingCellId INT
 
 		SELECT @intWorkOrderId = intWorkOrderId
 		FROM tblMFStageWorkOrder
 		WHERE intOrderHeaderId = @intOrderHeaderId
 
-		SELECT @intRecipeTypeId = intRecipeTypeId,@intManufacturingCellId=intManufacturingCellId
+		SELECT @intRecipeTypeId = intRecipeTypeId
+			,@intManufacturingCellId = intManufacturingCellId
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
