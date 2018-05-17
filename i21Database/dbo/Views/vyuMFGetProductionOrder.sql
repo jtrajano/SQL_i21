@@ -34,12 +34,19 @@ SELECT IsNULL(BR.intBlendRequirementId, 0) AS intBlendRequirementId
 			ORDER BY W.intWorkOrderId DESC
 			)) AS intRecordId
 	,SW1.strComments AS strScheduleComments
-	,W.intPickListId 
+	,W.intPickListId
 	,CL.strLocationName
 	,PL.strPickListNo
-	,WS1.strName as strPickListStatus
+	,WS1.strName AS strPickListStatus
+	,Convert(BIT,IsNULL((
+		SELECT Case When strAttributeValue='True' then 1 else 0 end
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = W.intManufacturingProcessId
+			AND intLocationId = W.intLocationId
+			AND intAttributeId = 112
+		),0)) AS ysnAllowMultiplePickList
 FROM dbo.tblMFWorkOrder W
-JOIN dbo.tblSMCompanyLocation CL on CL.intCompanyLocationId =W.intLocationId 
+JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 INNER JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 INNER JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 INNER JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
@@ -52,7 +59,7 @@ LEFT JOIN dbo.tblMFScheduleWorkOrder SW1 ON SW1.intScheduleWorkOrderId = SWD.int
 LEFT JOIN dbo.tblMFSchedule S1 ON S1.intScheduleId = SW1.intScheduleId
 	AND S1.ysnStandard = 1
 LEFT JOIN tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
-LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IsNULL(SWD.intPlannedShiftId,W.intPlannedShiftId)
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IsNULL(SWD.intPlannedShiftId, W.intPlannedShiftId)
 LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 	AND SW.dtmPlannedDate = ISNULL(CD.dtmCalendarDate, W.dtmPlannedDate)
 	AND CASE 
@@ -63,8 +70,8 @@ LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 LEFT JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
 LEFT JOIN dbo.tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 LEFT JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId
-Left JOIN dbo.tblMFPickList PL on PL.intPickListId=W.intPickListId
-Left JOIN dbo.tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intKitStatusId
+LEFT JOIN dbo.tblMFPickList PL ON PL.intPickListId = W.intPickListId
+LEFT JOIN dbo.tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intKitStatusId
 WHERE W.intStatusId IN (
 		9
 		,10
