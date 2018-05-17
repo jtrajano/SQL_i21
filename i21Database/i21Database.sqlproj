@@ -6565,6 +6565,7 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\36_Control_Persmission.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCascadeControlPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCascadeScreenPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSLogEndOfDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
