@@ -160,6 +160,7 @@ Type the overview for the table here.
 		[ysnBasisContract] BIT NULL, 
 		[intM2MComputationId] INT NULL DEFAULT ((1)),
 		[intTonnageTaxUOMId] INT NULL, 
+		[ysn1099Box3] BIT NULL DEFAULT((0)),
 		[ysnUseWeighScales] BIT NULL,
 		[ysnLotWeightsRequired] BIT NULL DEFAULT((1)),
 		[ysnBillable] BIT NULL DEFAULT((1)),

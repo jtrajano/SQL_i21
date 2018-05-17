@@ -42,6 +42,10 @@ strSocialSecurity = ISNULL((
 		tblPRPaycheck PayCheck  INNER JOIN
 		tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.[intEntityId]
 		WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
+),''),
+strAccountClassification = ISNULL((
+		SELECT TOP 1 strAccountClassification FROM [tblEMEntityEFTInformation] EFTInfo 
+		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),'')
 FROM tblCMBankTransaction
  --dbo.fnIsDepositEntry(strLink) = 0

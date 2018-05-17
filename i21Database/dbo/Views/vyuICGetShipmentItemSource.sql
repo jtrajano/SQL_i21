@@ -32,7 +32,7 @@ SELECT
 			CASE WHEN Shipment.intOrderType = 1
 				THEN (
 					CASE WHEN Shipment.intSourceType = 0 -- None
-						THEN ContractView.strItemUOM
+						THEN CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END
 					WHEN Shipment.intSourceType = 1 -- Scale
 						THEN NULL
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
@@ -125,7 +125,11 @@ SELECT
 			-- Scale
 			WHEN 1 THEN ScaleFarm.strFieldNumber
 			ELSE NULL 
-		END
+		END,
+	ContractView.ysnLoad,
+	ContractView.intNoOfLoad,
+	ContractView.dblBalance,
+	ContractView.dblQuantityPerLoad
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 

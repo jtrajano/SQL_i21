@@ -87,6 +87,8 @@ SELECT	intInventoryShipmentId = intTransactionId
 		,intItemId
 		,intItemUOMId
 		,dblQuantity
+		,ysnLoad
+		,intLoadShipped = intLoadReceive
 INTO	#tmpLogShipmentItems
 FROM	tblICTransactionDetailLog
 WHERE	intTransactionId = @ShipmentId
@@ -104,9 +106,12 @@ SELECT	ShipmentItem.intInventoryShipmentId
 		,ShipmentItem.intItemUOMId
 		,ShipmentItem.dblQuantity
 		--,ShipmentItem.strItemType
+		,ShipmentItemSource.ysnLoad
+		,ShipmentItem.intLoadShipped
 INTO	#tmpShipmentItems
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 WHERE	ShipmentItem.intInventoryShipmentId = @ShipmentId 
 		AND (ShipmentItem.strItemType IS NULL OR ShipmentItem.strItemType != 'Option')
 UNION ALL
@@ -122,8 +127,12 @@ SELECT	ShipmentItem.intInventoryShipmentId
 		,ItemBundleUOM.intItemUOMId
 		,ShipmentItem.dblQuantity
 		--,ShipmentItem.strItemType
+		,ShipmentItemSource.ysnLoad
+		,ShipmentItem.intLoadShipped
 FROM	tblICInventoryShipmentItem ShipmentItem LEFT JOIN tblICInventoryShipment Shipment 
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource
+			ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 		INNER JOIN tblICItemBundle ItemBundle 
 			ON ItemBundle.intItemBundleId = ShipmentItem.intParentItemLinkId 
 			AND ShipmentItem.intItemId = ItemBundle.intBundleItemId
@@ -160,7 +169,8 @@ BEGIN
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblQuantity ELSE (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity) END))
+			,CASE WHEN ISNULL(currentSnapshot.ysnLoad,0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblQuantity ELSE (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity) END))
+				ELSE (CASE WHEN @ForDelete = 1 THEN currentSnapshot.intLoadShipped ELSE (currentSnapshot.intLoadShipped - previousSnapshot.intLoadShipped) END) END 
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
 				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
 				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
@@ -169,14 +179,15 @@ BEGIN
 	WHERE	currentSnapshot.intLineNo IS NOT NULL
 			AND currentSnapshot.intLineNo = previousSnapshot.intLineNo
 			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
-			AND (currentSnapshot.intItemUOMId <> previousSnapshot.intItemUOMId OR currentSnapshot.dblQuantity <> previousSnapshot.dblQuantity)
+			AND (currentSnapshot.intItemUOMId <> previousSnapshot.intItemUOMId OR currentSnapshot.dblQuantity <> previousSnapshot.dblQuantity OR currentSnapshot.intLoadShipped <> previousSnapshot.intLoadShipped)
 
 	--New Contract Selected
 	UNION ALL 
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblQuantity)
+			,CASE WHEN ISNULL(currentSnapshot.ysnLoad, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblQuantity)
+				ELSE currentSnapshot.intLoadShipped END
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
 				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
 				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
@@ -192,7 +203,8 @@ BEGIN
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+			,CASE WHEN ISNULL(previousSnapshot.ysnLoad, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+				ELSE previousSnapshot.intLoadShipped * -1 END
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
 				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
 				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
@@ -207,7 +219,8 @@ BEGIN
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+			,CASE WHEN ISNULL(previousSnapshot.ysnLoad, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+				ELSE previousSnapshot.intLoadShipped * -1 END
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
 				ON previousSnapshot.intInventoryShipmentId = currentSnapshot.intInventoryShipmentId
 				AND previousSnapshot.intInventoryShipmentItemId = currentSnapshot.intInventoryShipmentItemId
@@ -221,7 +234,8 @@ BEGIN
 	SELECT	previousSnapshot.intInventoryShipmentItemId
 			,previousSnapshot.intLineNo
 			,previousSnapshot.intItemUOMId
-			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+			,CASE WHEN ISNULL(previousSnapshot.ysnLoad, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, ContractDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
+				ELSE previousSnapshot.intLoadShipped * -1 END
 	FROM	#tmpLogShipmentItems previousSnapshot INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = previousSnapshot.intLineNo
 			--INNER JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = previousSnapshot.intInventoryShipmentItemId
@@ -234,7 +248,8 @@ BEGIN
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,currentSnapshot.intLineNo
 			,currentSnapshot.intItemUOMId
-			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblQuantity)
+			,CASE WHEN ISNULL(currentSnapshot.ysnLoad, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, ContractDetail.intItemUOMId, currentSnapshot.dblQuantity)
+				ELSE currentSnapshot.intLoadShipped END
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN tblCTContractDetail ContractDetail
 				ON ContractDetail.intContractDetailId = currentSnapshot.intLineNo
 	WHERE	currentSnapshot.intLineNo IS NOT NULL

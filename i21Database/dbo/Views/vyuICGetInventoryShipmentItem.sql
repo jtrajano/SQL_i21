@@ -49,6 +49,11 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, dblQtyToShip = ISNULL(ShipmentItem.dblQuantity, 0)
 	, dblPrice = ISNULL(ShipmentItem.dblUnitPrice, 0)
 	, dblLineTotal = ISNULL(ShipmentItem.dblQuantity, 0) * ISNULL(ShipmentItem.dblUnitPrice, 0)
+	, ShipmentItemSource.ysnLoad
+	, ShipmentItemSource.intNoOfLoad
+	, ShipmentItemSource.dblBalance
+	, ShipmentItem.intLoadShipped
+	, ShipmentItemSource.dblQuantityPerLoad
 	, ShipmentItem.intGradeId
 	, strGrade = Grade.strDescription
 	, ShipmentItem.intDiscountSchedule

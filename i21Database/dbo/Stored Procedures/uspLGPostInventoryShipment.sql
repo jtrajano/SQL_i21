@@ -1085,9 +1085,9 @@ SELECT LD.intItemId
 		SELECT TOP (1) intItemLocationId
 		FROM tblICItemLocation
 		WHERE intItemId = LD.intItemId
-			AND intLocationId = CT.intCompanyLocationId
+			AND intLocationId = ISNULL(CT.intCompanyLocationId,LD.intSCompanyLocationId)
 		)
-	,CT.intItemUOMId
+	,ISNULL(CT.intItemUOMId,LD.intItemUOMId)
 	,LDL.intLotId
 	,LW.intSubLocationId
 	,LOT.intStorageLocationId

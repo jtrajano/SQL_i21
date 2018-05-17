@@ -145,6 +145,10 @@ BEGIN TRY
 			,intSCompanyLocationId
 			,intSContractDetailId
 			,intWeightItemUOMId
+			,strPriceStatus
+			,intPriceCurrencyId
+			,intPriceUOMId
+			,dblUnitPrice
 			)
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
@@ -160,11 +164,17 @@ BEGIN TRY
 			,CD.intCompanyLocationId
 			,CD.intContractDetailId
 			,@intWeightItemUOMId
+			,PT.strPricingType
+			,A.intSeqCurrencyId
+			,A.intSeqPriceUOMId
+			,A.dblSeqPrice
 		FROM tblLGAllocationDetail AD
 		JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 		JOIN tblLGPickLotDetail PLD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
 		JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
+		JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) A
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
 			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
 

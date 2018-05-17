@@ -526,8 +526,23 @@ BEGIN
 				@raiseError = 1,
 				@bankAccountId = NULL
 
-
-
+		UPDATE posLog
+			SET dblEndingBalance = ISNULL(posLog.dblEndingBalance,0) + posPayment.dblAmount
+		FROM tblARPOSLog AS posLog
+		INNER JOIN (
+			SELECT
+				intPOSLogId,
+				intPOSId
+			FROM tblARPOS
+		) pos ON pos.intPOSLogId = posLog.intPOSLogId
+		INNER JOIN(
+			SELECT
+				intPOSId,
+				dblAmount,
+				strPaymentMethod
+			FROM tblARPOSPayment
+		) posPayment ON posPayment.intPOSId = pos.intPOSId
+		WHERE posPayment.intPOSId = @intPOSId AND posPayment.strPaymentMethod = 'Cash'
 
 		DELETE FROM #tmpPOSPayments WHERE intPOSPaymentId = @intPOSPaymentId
 

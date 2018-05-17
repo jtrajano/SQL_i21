@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetLotQualityOutturnDetail (
 	@intWorkOrderId INT
 	,@intUnitMeasureId INT
-	,@intCurrencyId INT
+	,@intCurrencyId INT = 0
 	)
 AS
 DECLARE @dtmCurrentDateTime DATETIME
@@ -109,16 +109,19 @@ SELECT intItemId
 INTO #tblMFFinalWorkOrderProducedLot
 FROM #tblMFWorkOrderProducedLot WP
 
-SELECT DISTINCT P.intPropertyId
+SELECT P.intPropertyId
 	,P.strPropertyName
-	,Convert(NUMERIC(38, 20), TR.strPropertyValue) AS strPropertyValue
-	,Convert(INT, NULL) AS intItemId
+	,AVG(Convert(NUMERIC(38, 20), TR.strPropertyValue)) AS strPropertyValue
+	,P.intItemId
 	,Convert(NUMERIC(38, 20), NULL) AS dblExchangePrice
 INTO #GRN
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 	AND TR.intProductTypeId = 6
-	AND TR.intControlPointId = 9
+	AND TR.intControlPointId IN (
+		5
+		,9
+		)
 JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 	AND P.intDataTypeId IN (
 		1
@@ -127,7 +130,10 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 	AND ISNUMERIC(TR.strPropertyValue) = 1
 JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-	AND ST.intControlPointId = 9
+	AND ST.intControlPointId IN (
+		5
+		,9
+		)
 	AND S.intSampleId IN (
 		SELECT Max(S1.intSampleId)
 		FROM tblQMSample S1
@@ -137,32 +143,45 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 			AND S1.intProductTypeId = 6
 			AND ST1.intControlPointId = ST.intControlPointId
 		)
+GROUP BY P.intPropertyId
+	,P.strPropertyName
+	,P.intItemId
+
+INSERT INTO #GRN (
+	intPropertyId
+	,strPropertyName
+	,intItemId
+	)
+SELECT DISTINCT 0
+	,''
+	,intItemId
+FROM #StageQty
 
 UPDATE #GRN
 SET intItemId = I.intItemId
-	,dblExchangePrice = IsNULL(dbo.fnRKGetLatestClosingPrice((
-				SELECT TOP 1 CM.intFutureMarketId
-				FROM tblICCommodityAttribute CA
-				JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-					AND CA.strType = 'ProductType'
-				WHERE CA.intCommodityAttributeId = I.intProductTypeId
-				), (
-				SELECT TOP 1 intFutureMonthId
-				FROM tblRKFuturesMonth
-				WHERE ysnExpired = 0
-					AND dtmSpotDate <= @dtmCurrentDateTime
-					AND intFutureMarketId = C.intFutureMarketId
-				ORDER BY 1 DESC
-				), @dtmCurrentDateTime), dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
-				SELECT TOP 1 intFutureMonthId
-				FROM tblRKFuturesMonth
-				WHERE ysnExpired = 0
-					AND dtmSpotDate <= @dtmCurrentDateTime
-					AND intFutureMarketId = C.intFutureMarketId
-				ORDER BY 1 DESC
-				), @dtmCurrentDateTime)) / @intSubCurrency
+	,dblExchangePrice = IsNULL(IsNULL(dbo.fnRKGetLatestClosingPrice((
+					SELECT TOP 1 CM.intFutureMarketId
+					FROM tblICCommodityAttribute CA
+					JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+						AND CA.strType = 'ProductType'
+					WHERE CA.intCommodityAttributeId = I.intProductTypeId
+					), (
+					SELECT TOP 1 intFutureMonthId
+					FROM tblRKFuturesMonth
+					WHERE ysnExpired = 0
+						AND dtmSpotDate <= @dtmCurrentDateTime
+						AND intFutureMarketId = C.intFutureMarketId
+					ORDER BY 1 DESC
+					), @dtmCurrentDateTime), dbo.fnRKGetLatestClosingPrice(C.intFutureMarketId, (
+					SELECT TOP 1 intFutureMonthId
+					FROM tblRKFuturesMonth
+					WHERE ysnExpired = 0
+						AND dtmSpotDate <= @dtmCurrentDateTime
+						AND intFutureMarketId = C.intFutureMarketId
+					ORDER BY 1 DESC
+					), @dtmCurrentDateTime)), 0) / @intSubCurrency
 FROM #GRN G
-JOIN tblICItem I ON I.strItemNo = G.strPropertyName
+JOIN tblICItem I ON I.intItemId = G.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 
 SELECT intPropertyId
@@ -211,4 +230,5 @@ FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
 LEFT JOIN #StageQty S ON S.intItemId = G.intItemId
 LEFT JOIN #tblMFFinalWorkOrderProducedLot AS WP ON WP.intItemId = G.intItemId
-LEFT JOIN tblMFProductionSummary PS ON PS.intItemId = G.intItemId and PS.intWorkOrderId =@intWorkOrderId 
+LEFT JOIN tblMFProductionSummary PS ON PS.intItemId = G.intItemId
+	AND PS.intWorkOrderId = @intWorkOrderId

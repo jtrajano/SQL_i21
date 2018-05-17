@@ -737,19 +737,19 @@ BEGIN
 																														WHERE intCheckoutId = @intCheckoutId
 																														AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
 																										           )
-																				) > 1 THEN 1
+																				) >= 1 THEN 1
 																			ELSE -1
 																		  END
 											,[dblDiscount]				= 0
-											,[dblPrice]					= CAST((DT.dblTotalSalesAmount - (
-																											SELECT SUM(dblTotalSales)
-																											FROM tblSTCheckoutItemMovements IM
-																											JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																											JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																											JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																											WHERE intCheckoutId = @intCheckoutId
-																											AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
-																										 )
+											,[dblPrice]					= ABS(CAST((DT.dblTotalSalesAmount - (
+																												SELECT SUM(dblTotalSales)
+																												FROM tblSTCheckoutItemMovements IM
+																												JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																												JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																												JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																												WHERE intCheckoutId = @intCheckoutId
+																												AND CATT.intCategoryId = DT.intCategoryId
+																											 )) AS NUMERIC(18, 6)))
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1841,6 +1841,12 @@ BEGIN
 				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
 						BEGIN TRY
+							
+							-- Filter dblPrice should not be 0 and null
+							DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
+
+							
+
 							EXEC [dbo].[uspARProcessInvoices]
 										@InvoiceEntries	 = @EntriesForInvoice
 										--,@LineItemTaxEntries = NULL

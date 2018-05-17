@@ -57,6 +57,7 @@ BEGIN TRY
 		,@ysnGenerateTaskOnCreatePickOrder BIT
 		,@strInventoryTracking NVARCHAR(50)
 		,@intStorageLocationId int
+		,@intRecipeTypeId int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -249,7 +250,7 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	SELECT @strReferernceNo = strWorkOrderNo
+	SELECT @strReferernceNo = strWorkOrderNo,@intRecipeTypeId=intRecipeTypeId 
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
 			SELECT intWorkOrderId
@@ -501,7 +502,7 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM @OrderDetail
-				)
+				) and @intRecipeTypeId<>3
 		BEGIN
 			RAISERROR (
 					'There is no input item to create a pick list. Please check the recipe input item set up.'

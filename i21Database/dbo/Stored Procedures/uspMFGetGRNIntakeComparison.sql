@@ -88,7 +88,7 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 		)
 JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-	AND ST.intControlPointId = 6
+	AND ST.intControlPointId = 9
 	AND TR.intSampleId IN (
 		SELECT Max(S1.intSampleId)
 		FROM tblQMSample S1
@@ -124,7 +124,7 @@ JOIN tblQMProperty AS P ON TR.intPropertyId = P.intPropertyId
 		)
 JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
 JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-	AND ST.intControlPointId = 9
+	AND ST.intControlPointId = 6
 	AND TR.intSampleId IN (
 		SELECT Max(S1.intSampleId)
 		FROM tblQMSample S1

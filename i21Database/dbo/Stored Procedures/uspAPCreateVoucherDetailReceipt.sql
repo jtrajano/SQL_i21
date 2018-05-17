@@ -18,7 +18,6 @@ DECLARE @voucherVendor INT;
 DECLARE @receiptItems AS TABLE (
 	[intInventoryReceiptType]		INT				NOT NULL,
 	[intInventoryReceiptItemId]		INT				NOT NULL,
-	[intScaleTicketId]				INT				NULL,
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
     [dblCost]						DECIMAL(38, 20)	NULL, 
 	[dblCostUnitQty]				DECIMAL(38, 20)	NULL, 
@@ -35,7 +34,6 @@ CREATE TABLE #tempBillDetail (
     [intItemId]    					INT             NULL,
 	[intInventoryReceiptItemId]    	INT             NULL,
 	[intInventoryReceiptChargeId]   INT             NULL,
-	[intScaleTicketId]				INT             NULL,
 	[intPurchaseDetailId]    		INT             NULL,
 	[dblQtyOrdered] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblQtyReceived] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
@@ -67,7 +65,9 @@ CREATE TABLE #tempBillDetail (
     [int1099Category] 				INT NOT NULL DEFAULT 0 , 
 	[intLoadDetailId]    			INT             NULL,
 	[dbl1099] 						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[strBillOfLading] 				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	[strBillOfLading] 				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intScaleTicketId]				INT             NULL,
+	[intLocationId]					INT             NULL
 )
 
 -- CREATE TABLE #tempBillDetailTax (
@@ -99,7 +99,6 @@ INSERT INTO @receiptItems
 SELECT 
 	[intInventoryReceiptType]		=	A.intInventoryReceiptType,
 	[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
-	[intScaleTicketId]				=	D.intTicketId,
 	[dblQtyReceived]				=	(CASE WHEN A.dblQtyReceived IS NULL OR
 														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
 												THEN B.dblOpenReceive - B.dblBillQty
@@ -181,7 +180,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBillId],
 			[intItemId],
 			[intInventoryReceiptItemId],
-			[intScaleTicketId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
 			[dblRate],
@@ -205,13 +203,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId]
 		)
 		SELECT 
 			[intBillId]						=	@voucherId,
 			[intItemId]						=	B.intItemId,
 			[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId,
-			[intScaleTicketId]				=	SD.intTicketId,
 			[dblQtyOrdered]					=	voucherDetailReceipt.dblQtyReceived,
 			[dblQtyReceived]				=	voucherDetailReceipt.dblQtyReceived,
 			[dblRate]						=	ISNULL(B.dblForexRate,1),
@@ -274,7 +273,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 												ELSE 0
 												END,
 			[int1099Category]				=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
-			[strBillOfLading]				= 	A.strBillOfLading
+			[strBillOfLading]				= 	A.strBillOfLading,
+			[intScaleTicketId]				=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
+			[intLocationId]					=	A.intLocationId
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -309,7 +310,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBillId],
 			[intItemId],
 			[intInventoryReceiptItemId],
-			[intScaleTicketId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
 			[dblRate],
@@ -339,13 +339,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Form],
 			[int1099Category],
 			[intLoadDetailId],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
 			[intItemId]					=	B.intItemId,
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-			[intScaleTicketId]			=	SD.intTicketId,
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
@@ -416,7 +417,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
-			[strBillOfLading]			= 	A.strBillOfLading
+			[strBillOfLading]			= 	A.strBillOfLading,
+			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
+			[intLocationId]				=	A.intLocationId
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -456,7 +459,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intItemId],
 			[intInventoryReceiptItemId],
 			[intPurchaseDetailId],
-			[intScaleTicketId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
 			[dblRate],
@@ -492,7 +494,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBillId]					=	@voucherId,
 			[intItemId]					=	B.intItemId,
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-			[intScaleTicketId]			=	NULL,
 			[intPODetailId]				=	(CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END),
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
@@ -609,7 +610,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBillId],
 			[intItemId],
 			[intInventoryReceiptItemId],
-			[intScaleTicketId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
 			[dblRate],
@@ -639,13 +639,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Form],
 			[int1099Category],
 			[intLoadDetailId],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
 			[intItemId]					=	B.intItemId,
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-			[intScaleTicketId]			=	SD.intTicketId,
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
@@ -722,7 +723,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 											END,
 			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
-			[strBillOfLading]			= 	A.strBillOfLading
+			[strBillOfLading]			= 	A.strBillOfLading,
+			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
+			[intLocationId]				=	A.intLocationId
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -760,7 +763,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptItemId],
 		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
-		[intScaleTicketId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[dblRate],
@@ -790,7 +792,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Category],
 		[intLoadDetailId],
 		[dbl1099],
-		[strBillOfLading]
+		[strBillOfLading],
+		[intScaleTicketId],
+		[intLocationId]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptItemId INTO @detailCreated(intBillDetailId, intInventoryReceiptItemId)
 	SELECT
@@ -799,7 +803,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptItemId],
 		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
-		[intScaleTicketId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[dblRate],
@@ -829,7 +832,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Category],
 		[intLoadDetailId],
 		[dbl1099],
-		[strBillOfLading]
+		[strBillOfLading],
+		[intScaleTicketId],
+		[intLocationId]
 	FROM #tempBillDetail
 
 	--ADD TAXES

@@ -62,6 +62,7 @@ SELECT
 	, strHazmatMessage			= HazMat.strDescription
 	, strMaterialPackUOM	= ManufacturingPackingUOM.strUnitMeasure
 	, Item.intMaterialPackTypeId
+	, Item.ysn1099Box3
 	, Item.ysnBillable
 	, Item.ysnSupported
 	, Item.ysnDisplayInHelpdesk

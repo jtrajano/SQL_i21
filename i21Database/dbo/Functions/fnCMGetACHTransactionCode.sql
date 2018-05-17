@@ -21,6 +21,9 @@ from tblAPBill bill join tblAPBillDetail billdetail on bill.intBillId = billdeta
 join tblAPPaymentDetail paymentdetail on paymentdetail.intBillId = billdetail.intBillId
 join tblAPPayment payment on payment.intPaymentId = paymentdetail.intPaymentId
 join tblCMBankTransaction trns on trns.strTransactionId = payment.strPaymentRecordNum
+union
+select trns.strTransactionId,'2' Code from tblPRPaycheck pchk  
+join tblCMBankTransaction trns on trns.strTransactionId = pchk.strPaycheckId
 )select @Code =Code from r
 WHERE strTransactionId = @strTransactionId
 

@@ -32,6 +32,7 @@ BEGIN TRY
 			,@intCreatedById		INT
 			,@type					INT
 			,@intCompanyLocationId	INT 
+			,@intLoadId				INT
 			,@voucherNonInvDetails	VoucherDetailNonInventory
 			,@InvoiceEntries		InvoiceIntegrationStagingTable	
 			,@LineItemTaxEntries	LineItemTaxDetailStagingTable
@@ -57,6 +58,20 @@ BEGIN TRY
 			@intCompanyLocationId	=	intCompanyLocationId 
 	FROM	vyuCTContractSequence 
 	WHERE   intContractDetailId = @intSourceDetailId
+
+	SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))
+	
+	WHILE	ISNULL(@intLoadId,0) > 0
+	BEGIN
+		EXEC	uspLGCancelLoadSchedule	@intLoadId, 1, @intCreatedById
+		SELECT	@intLoadId = MIN(intLoadId) FROM tblLGLoadDetail WHERE (intPContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0)) OR intSContractDetailId IN (@intSourceDetailId,ISNULL(@intWashoutDetailId,0))) AND intLoadId > @intLoadId
+	END
+	
+	EXEC uspAPUnrestrictContractPrepay  @intSourceDetailId
+	IF ISNULL(@intWashoutDetailId,0) > 0
+	BEGIN
+		EXEC uspAPUnrestrictContractPrepay  @intWashoutDetailId
+	END
 
 	IF @ysnNewContract = 1
 	BEGIN

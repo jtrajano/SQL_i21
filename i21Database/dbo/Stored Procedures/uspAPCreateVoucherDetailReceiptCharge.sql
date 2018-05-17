@@ -46,7 +46,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptItemId],
 		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
-		[intScaleTicketId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[dblTax],
@@ -76,7 +75,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intCurrencyId],
 		[intStorageLocationId],
 		[int1099Form],
-		[int1099Category]
+		[int1099Category],
+		[intScaleTicketId],
+		[intLocationId]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptChargeId INTO @detailCreated(intBillDetailId, intInventoryReceiptChargeId)
 	SELECT DISTINCT
@@ -85,7 +86,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
-		[intScaleTicketId]				=	SC.intTicketId,
 		[dblQtyOrdered]					=	A.dblOrderQty,
 		[dblQtyReceived]				=	A.dblOrderQty, --ISNULL(charges.dblQtyReceived, A.dblQuantityToBill),
 		[dblTax]						=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
@@ -125,7 +125,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intCurrencyId]					=	ISNULL(A.intCurrencyId,0),
 		[intStorageLocationId]			=	NULL,
 		[int1099Form]					=	0,
-		[int1099Category]				=	0       
+		[int1099Category]				=	0,
+		[intScaleTicketId]				=	CASE WHEN IR.intSourceType = 1 THEN A.intScaleTicketId ELSE NULL END,
+		[intLocationId]					=	IR.intLocationId
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN @voucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
@@ -136,12 +138,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		ON  (F.intFromCurrencyId = @defaultCurrency AND F.intToCurrencyId = A.intCurrencyId) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G 
 		ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = @currentDateFilter
-	OUTER APPLY
-	(
-		SELECT TOP 1 intTicketId FROM vyuSCGetScaleDistribution SD
-		INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = SD.intInventoryReceiptItemId
-		WHERE IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-	)  SC
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT

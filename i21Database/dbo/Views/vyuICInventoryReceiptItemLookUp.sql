@@ -92,7 +92,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strOrderUOM =  (
 				CASE	WHEN Receipt.strReceiptType = 'Purchase Contract' THEN (
 							CASE	WHEN Receipt.intSourceType = 0 THEN -- None
-										ContractView.strItemUOM
+										CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END
 									WHEN Receipt.intSourceType = 1 THEN -- Scale
 										NULL
 									WHEN Receipt.intSourceType = 2 THEN -- Inbound Shipment
@@ -197,6 +197,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, strContainer = LogisticsView.strContainerNumber
 		, ContractView.ysnLoad
 		, ContractView.dblAvailableQty
+		, ContractView.dblQuantityPerLoad
 		, dblFranchise = ISNULL(LogisticsView.dblFranchise, 0.00)
 		, dblContainerWeightPerQty = ISNULL(LogisticsView.dblContainerWeightPerQty, 0.00)
 		, ContractView.strPricingType
@@ -306,6 +307,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					,intNoOfLoad
 					,dblDetailQuantity
 					,intLoadReceived
+					,dblQuantityPerLoad
 					,dblBalance
 					,dblAvailableQty
 					,strPricingType

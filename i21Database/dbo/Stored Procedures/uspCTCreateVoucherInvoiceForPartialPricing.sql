@@ -361,6 +361,8 @@ BEGIN TRY
 
 						SELECT  @ysnInvoicePosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
 
+						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
+
 						IF ISNULL(@ysnInvoicePosted,0) = 1
 						BEGIN
 							EXEC	uspARPostInvoice
@@ -370,189 +372,7 @@ BEGIN TRY
 									,@raiseError		= 1
 						END
 
-						INSERT INTO @InvoiceEntries
-						(
-								strTransactionType,				strType,						intSourceId,					intInvoiceId,
-								intEntityCustomerId,			intCompanyLocationId,			intAccountId,					intCurrencyId,
-								intTermId,						intPeriodsToAccrue,				dtmDate,						dtmDueDate,
-								dtmShipDate,					dtmPostDate,					intEntitySalespersonId,			intFreightTermId,
-								intShipViaId,					intPaymentMethodId,				strInvoiceOriginId,				strPONumber,
-								strBOLNumber,					/*strDeliverPickup,*/			strComments,					intShipToLocationId,
-								intBillToLocationId,			ysnForgiven,					ysnCalculated,					ysnSplitted,
-								intPaymentId,					intSplitId,						intLoadDistributionHeaderId,	strActualCostId,
-								intShipmentId,					intTransactionId,				intMeterReadingId,				intContractHeaderId,
-								intLoadId,						intOriginalInvoiceId,			intEntityId,					intTruckDriverId,	
-								strSourceTransaction,			strSourceId,					intTruckDriverReferenceId,		ysnUpdateAvailableDiscount,
-
-								intInvoiceDetailId,				intItemId,						intPrepayTypeId,				dblPrepayRate
-								,strDocumentNumber,				strItemDescription,				intOrderUOMId,					dblQtyOrdered
-								,intItemUOMId,					dblQtyShipped,					dblDiscount,					dblItemTermDiscount
-								,strItemTermDiscountBy,			dblItemWeight,					intItemWeightUOMId,				dblPrice
-								,dblUnitPrice,					strPricing,						strVFDDocumentNumber,			strMaintenanceType
-								,strFrequency,					dtmMaintenanceDate,				dblMaintenanceAmount,			dblLicenseAmount
-								,intTaxGroupId,					intStorageLocationId,			intCompanyLocationSubLocationId,intSCInvoiceId
-								,strSCInvoiceNumber,			intSCBudgetId,					strSCBudgetDescription,			intInventoryShipmentItemId
-								,intInventoryShipmentChargeId,	strShipmentNumber,				intRecipeItemId,				intRecipeId
-								,intSubLocationId,				intCostTypeId,					intMarginById,					intCommentTypeId
-								,dblMargin,						dblRecipeQuantity,				intSalesOrderDetailId,			strSalesOrderNumber
-								,intContractDetailId,			intShipmentPurchaseSalesContractId,dblShipmentGrossWt,			dblShipmentTareWt
-								,dblShipmentNetWt,				intTicketId,					intTicketHoursWorkedId,			intCustomerStorageId
-								,intSiteDetailId,				intLoadDetailId,				intLotId,						intOriginalInvoiceDetailId
-								,intSiteId,						strBillingBy,					dblPercentFull,					dblNewMeterReading
-								,dblPreviousMeterReading,		dblConversionFactor,			intPerformerId,					ysnLeaseBilling
-								,ysnVirtualMeterReading,		intCurrencyExchangeRateTypeId,	intCurrencyExchangeRateId,		dblCurrencyExchangeRate
-								,intSubCurrencyId,				dblSubCurrencyRate,ysnBlended,	intConversionAccountId,			intSalesAccountId
-								,intStorageScheduleTypeId,		intDestinationGradeId,			intDestinationWeightId
-						)
-
-						SELECT	TOP 1 
-								IV.strTransactionType,
-								IV.strType,
-								@intInventoryShipmentId,
-								IV.intInvoiceId,
-								IV.intEntityCustomerId,
-								IV.intCompanyLocationId,
-								IV.intAccountId,
-								IV.intCurrencyId,
-								IV.intTermId,
-								IV.intPeriodsToAccrue,
-								IV.dtmDate,
-								IV.dtmDueDate,
-								IV.dtmShipDate,
-								IV.dtmPostDate,
-								IV.intEntitySalespersonId,
-								IV.intFreightTermId,
-								IV.intShipViaId,
-								IV.intPaymentMethodId,
-								IV.strInvoiceOriginId,
-								--ysnUseOriginIdAsInvoiceNumber,
-								IV.strPONumber,
-								IV.strBOLNumber,
-								--IV.strDeliverPickup,
-								IV.strComments,
-								IV.intShipToLocationId,
-								IV.intBillToLocationId,
-								--ysnTemplate,
-								IV.ysnForgiven,
-								IV.ysnCalculated,
-								IV.ysnSplitted,
-								IV.intPaymentId,
-								IV.intSplitId,
-								IV.intLoadDistributionHeaderId,
-								IV.strActualCostId,
-								IV.intShipmentId,
-								IV.intTransactionId,
-								IV.intMeterReadingId,
-								IV.intContractHeaderId,
-								IV.intLoadId,
-								IV.intOriginalInvoiceId,
-								IV.intEntityId,
-								IV.intTruckDriverId,
-								'Inventory Shipment',
-								@strShipmentNumber,
-								IV.intTruckDriverReferenceId,
-								0
-								--ysnResetDetails,
-								--ysnRecap,
-								--ysnPost,
-
-								,NULL --ID.intInvoiceDetailId
-								,ID.intItemId
-								,ID.intPrepayTypeId
-								,ID.dblPrepayRate
-								--,ID.ysnInventory
-								,ID.strDocumentNumber
-								,ID.strItemDescription
-								,ID.intOrderUOMId
-								,ID.dblQtyOrdered
-								,ID.intItemUOMId
-								,@dblQtyToInvoice
-								,ID.dblDiscount
-								,ID.dblItemTermDiscount
-								,ID.strItemTermDiscountBy
-								,ID.dblItemWeight
-								,ID.intItemWeightUOMId
-								,@dblFinalPrice
-								,ID.dblUnitPrice
-								,ID.strPricing
-								,ID.strVFDDocumentNumber
-								--,ID.ysnRefreshPrice
-								,ID.strMaintenanceType
-								,ID.strFrequency
-								,ID.dtmMaintenanceDate
-								,ID.dblMaintenanceAmount
-								,ID.dblLicenseAmount
-								,ID.intTaxGroupId
-								,ID.intStorageLocationId
-								,ID.intCompanyLocationSubLocationId
-								--,ID.ysnRecomputeTax
-								,ID.intSCInvoiceId
-								,ID.strSCInvoiceNumber
-								,ID.intSCBudgetId
-								,ID.strSCBudgetDescription
-								,ID.intInventoryShipmentItemId
-								,ID.intInventoryShipmentChargeId
-								,ID.strShipmentNumber
-								,ID.intRecipeItemId
-								,ID.intRecipeId
-								,ID.intSubLocationId
-								,ID.intCostTypeId
-								,ID.intMarginById
-								,ID.intCommentTypeId
-								,ID.dblMargin
-								,ID.dblRecipeQuantity
-								,ID.intSalesOrderDetailId
-								,ID.strSalesOrderNumber
-								,ID.intContractDetailId
-								,ID.intShipmentPurchaseSalesContractId
-								,ID.dblShipmentGrossWt
-								,ID.dblShipmentTareWt
-								,ID.dblShipmentNetWt
-								,ID.intTicketId
-								,ID.intTicketHoursWorkedId
-								,ID.intCustomerStorageId
-								,ID.intSiteDetailId
-								,ID.intLoadDetailId
-								,ID.intLotId
-								,ID.intOriginalInvoiceDetailId
-								,ID.intSiteId
-								,ID.strBillingBy
-								,ID.dblPercentFull
-								,ID.dblNewMeterReading
-								,ID.dblPreviousMeterReading
-								,ID.dblConversionFactor
-								,ID.intPerformerId
-								,ID.ysnLeaseBilling
-								,ID.ysnVirtualMeterReading
-								--,ID.ysnClearDetailTaxes
-								--,ID.intTempDetailIdForTaxes
-								,ID.intCurrencyExchangeRateTypeId
-								,ID.intCurrencyExchangeRateId
-								,ID.dblCurrencyExchangeRate
-								,ID.intSubCurrencyId
-								,ID.dblSubCurrencyRate
-								,ID.ysnBlended
-								--,ID.strImportFormat
-								--,ID.dblCOGSAmount
-								,ID.intConversionAccountId
-								,ID.intSalesAccountId
-								,ID.intStorageScheduleTypeId
-								,ID.intDestinationGradeId
-								,ID.intDestinationWeightId
-
-						FROM	tblARInvoice		IV
-						JOIN	tblARInvoiceDetail	ID	ON	ID.intInvoiceId	=	IV.intInvoiceId
-						WHERE	IV.intInvoiceId	=	@intInvoiceId
-				    
-						EXEC [dbo].[uspARProcessInvoices]
-								@InvoiceEntries			=	@InvoiceEntries
-							   ,@LineItemTaxEntries		=	@LineItemTaxEntries
-							   ,@UserId					=	@intUserId
-							   ,@GroupingOption			=	8
-							   ,@RaiseError				=	1
-							   ,@ErrorMessage			=	@ErrorMessage	OUTPUT
-							   ,@CreatedIvoices			=	@CreatedIvoices OUTPUT
-							   ,@UpdatedIvoices			=	@UpdatedIvoices OUTPUT
+						EXEC	[uspCTCreateInvoiceDetail] @intInvoiceDetailId, @intInventoryShipmentId, @dblQtyToInvoice, @dblFinalPrice, @intUserId
 
 						IF ISNULL(@ysnInvoicePosted,0) = 1
 						BEGIN
@@ -649,6 +469,7 @@ BEGIN TRY
 				END
 			END
 		END
+
 	   SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
     END
 

@@ -24,11 +24,17 @@ FROM (
 		, intItemId					= ContractView.intItemId
 		, strItemNo					= ContractView.strItemNo
 		, strItemDescription		= ContractView.strItemDescription
-		, dblQtyToReceive			= ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance)
-		, intLoadToReceive			= ContractView.intNoOfLoad - ContractView.intLoadReceived
+		, dblQtyToReceive			= CASE WHEN ContractView.ysnLoad = 1 THEN dbo.fnMultiply((ContractView.intNoOfLoad - ContractView.intLoadReceived), ContractView.dblQuantityPerLoad)
+											ELSE ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance) END
+		, ysnLoad					= CAST(ContractView.ysnLoad AS BIT)
+		, dblAvailableQty			= ContractView.dblAvailableQty
+		, intNoOfLoad				= ContractView.intNoOfLoad
+		, intLoadReceive			= CASE WHEN ContractView.ysnLoad = 1 THEN ContractView.intLoadReceived ELSE CAST(0 AS INT) END
+		, dblQuantityPerLoad		= ISNULL(ContractView.dblQuantityPerLoad, 0)
 		, dblUnitCost				= ContractView.dblSeqPrice
 		, dblTax					= CAST(0 AS NUMERIC(18, 6))
-		, dblLineTotal				= CAST((ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance)) * ContractView.dblSeqPrice AS NUMERIC(18, 6))
+		, dblLineTotal				= CAST(CASE WHEN ContractView.ysnLoad = 1 THEN ((ContractView.intNoOfLoad - ContractView.intLoadReceived) * dbo.fnDivide(ContractView.dblDetailQuantity, ContractView.intNoOfLoad))* ContractView.dblSeqPrice
+											ELSE (ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance)) * ContractView.dblSeqPrice END AS NUMERIC(18, 6))
 		--, strLotTracking			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLotTracking ELSE ContractView.strLotTracking END 
 		--, intCommodityId			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.intCommodityId ELSE ContractView.intCommodityId END
 		, strLotTracking			= ContractView.strLotTracking
@@ -39,9 +45,9 @@ FROM (
 		, strSubLocationName		= ContractView.strSubLocationName
 		, intStorageLocationId		= ContractView.intStorageLocationId
 		, strStorageLocationName	= ContractView.strStorageLocationName
-		, intOrderUOMId				= ItemUOM.intItemUOMId
-		, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
-		, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
+		, intOrderUOMId				= CASE WHEN ContractView.ysnLoad = 1 THEN NULL ELSE ItemUOM.intItemUOMId END
+		, strOrderUOM				= CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ItemUnitMeasure.strUnitMeasure END
+		, dblOrderUOMConvFactor		= CASE WHEN ContractView.ysnLoad = 1 THEN 1 ELSE ItemUOM.dblUnitQty END
 		--, intItemUOMId				= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItemUOM.intItemUOMId ELSE ItemUOM.intItemUOMId END 
 		, intItemUOMId				= ItemUOM.intItemUOMId
 		, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
@@ -67,8 +73,6 @@ FROM (
 		--, strLifeTimeType			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLifeTimeType ELSE ContractView.strLifeTimeType END
 		, intLifeTime				= ContractView.intLifeTime
 		, strLifeTimeType			= ContractView.strLifeTimeType
-		, ysnLoad					= CAST(0 AS BIT)
-		, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
 		, strBOL					= CAST(NULL AS NVARCHAR(50))
 		, dblFranchise				= CAST(NULL AS NUMERIC(18, 6))
 		, dblContainerWeightPerQty	= CAST(NULL AS NUMERIC(18, 6))

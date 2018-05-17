@@ -18,8 +18,8 @@ SET intModuleId =
         SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Purchasing'
     )
 WHERE strAccountCategory IN ( 'AP Account', 'Unrealized Gain or Loss Accounts Payable', 'AP Clearing',
-                              'Purchase Tax Account', 'Vendor Prepayments', 'Customer Prepayments',
-                              'Other Charge Expense', 'Other Charge Income', 'Unrealized Gain or Loss Offset AP',
+                              'Purchase Tax Account', 'Vendor Prepayments','Other Charge Expense', 
+							  'Other Charge Income', 'Unrealized Gain or Loss Offset AP',
                               'Realized Gain or Loss Payables', 'Realized Gain or Loss Receivables'
                             );
 
@@ -30,7 +30,8 @@ SET intModuleId =
     )
 WHERE strAccountCategory IN ( 'AR Account', 'Unrealized Gain or Loss Accounts Payable', 'Sales Tax Account',
                               'Cost of Goods', 'Sales Account', 'Sales Discount', 'Unrealized Gain or Loss Offset AR',
-                              'Unrealized Gain or Loss Accounts Receivable', 'Maintenance Sales'
+                              'Unrealized Gain or Loss Accounts Receivable', 'Maintenance Sales','Deferred Revenue',
+							  'Sales Discount','Customer Prepayments'
                             );
 
 UPDATE dbo.tblGLAccountCategory

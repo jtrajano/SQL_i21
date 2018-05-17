@@ -31,6 +31,7 @@ SELECT
 	,U1.strUnitMeasure AS strPItemUOM
 	,IM.strItemNo AS strPItemNo
 	,IM.strDescription AS strPItemDescription
+	,PTP.strDescription AS strPProductType
 	,PCT.dblQuantity AS dblPDetailQuantity
 	,PCH.dtmContractDate AS dtmPContractDate
 	,PCT.dblBalance AS dblPBalance
@@ -62,6 +63,7 @@ SELECT
 	,U3.strUnitMeasure as strSItemUOM
 	,SIM.strItemNo as strSItemNo
 	,SIM.strDescription as strSItemDescription
+	,PTS.strDescription AS strSProductType
 	,SCT.dblQuantity as dblSDetailQuantity
 	,SCH.dtmContractDate as dtmSContractDate
 	,SCT.dblBalance as dblSBalance
@@ -101,6 +103,8 @@ SELECT
 	,BO.strBook
 	,ALH.intSubBookId
 	,SB.strSubBook
+	,dbo.fnRKGetLatestClosingPrice(PCT.intFutureMarketId, PCT.intFutureMonthId, GETDATE()) AS dblPLatestClosingPrice
+	,dbo.fnRKGetLatestClosingPrice(SCT.intFutureMarketId, SCT.intFutureMonthId, GETDATE()) AS dblSLatestClosingPrice
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
@@ -112,6 +116,8 @@ LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHe
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = PCT.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItem IM ON IM.intItemId = PCT.intItemId
+LEFT JOIN tblICCommodityAttribute PTP ON PTP.intCommodityAttributeId = IM.intProductTypeId
+		AND PTP.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute PCA ON PCA.intCommodityAttributeId = IM.intOriginId
 LEFT JOIN tblSMCountry PCO ON PCO.intCountryID = PCA.intCountryID
 LEFT JOIN tblCTContractBasis PCB ON PCB.intContractBasisId = PCH.intContractBasisId
@@ -129,6 +135,8 @@ LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHe
 LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
 LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = SIU.intUnitMeasureId
 LEFT JOIN tblICItem SIM ON SIM.intItemId = SCT.intItemId
+LEFT JOIN tblICCommodityAttribute PTS ON PTS.intCommodityAttributeId = SIM.intProductTypeId
+		AND PTS.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SIM.intOriginId
 LEFT JOIN tblSMCountry SCO ON SCO.intCountryID = SCA.intCountryID
 LEFT JOIN tblCTContractBasis SCB ON SCB.intContractBasisId = SCH.intContractBasisId

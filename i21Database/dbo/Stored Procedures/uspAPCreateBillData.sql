@@ -42,12 +42,19 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @startingRecordId INT;
+DECLARE @APAccount INT;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
 	IF NOT EXISTS(SELECT 1 FROM tblAPVendor WHERE [intEntityId] = @vendorId)
 	BEGIN
 		RAISERROR('Vendor does not exists.', 16, 1);
+	END
+
+	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
+	IF @APAccount IS NULL OR @APAccount <= 0
+	BEGIN
+		RAISERROR('Please setup default AP Account.', 16, 1);
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
@@ -86,6 +93,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	EXEC uspSMGetStartingNumber @startingRecordId, @billRecordNumber OUTPUT
 
+	
 	SELECT 
 		[intTermsId]			=	A.[intTermsId],
 		[dtmDueDate]			=	A.[dtmDueDate],

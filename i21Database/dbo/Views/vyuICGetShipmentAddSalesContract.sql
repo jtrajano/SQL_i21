@@ -24,7 +24,7 @@ SELECT	strOrderType = 'Sales Contract'
 		, intStorageLocationId
 		, strStorageLocationName = strStorageLocationName
 		, intOrderUOMId = ContractView.intItemUOMId
-		, strOrderUOM = strItemUOM
+		, strOrderUOM = CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END
 		, dblOrderUOMConvFactor = dblItemUOMCF
 		, ContractView.intItemUOMId
 		, strItemUOM = ContractView.strItemUOM
@@ -32,21 +32,29 @@ SELECT	strOrderType = 'Sales Contract'
 		, intWeightUOMId = ContractView.intNetWeightUOMId
 		, strWeightUOM = weightUOM.strUnitMeasure
 		, dblWeightItemUOMConv = dblItemUOMCF
-		, dblQtyOrdered = CASE WHEN ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
+		, dblQtyOrdered = CASE WHEN ContractView.ysnLoad = 1 THEN intNoOfLoad ELSE dblDetailQuantity END
 		, dblQtyAllocated = CAST(ISNULL(dblAllocatedQty, 0) AS NUMERIC(18, 6))
-		, dblQtyShipped = CAST(0 AS NUMERIC(18, 6))
+		, dblQtyShipped = CASE WHEN ContractView.ysnLoad = 1 THEN  dbo.fnMultiply(ContractView.intLoadReceived, ContractView.dblQuantityPerLoad)
+					ELSE ContractView.dblDetailQuantity - ContractView.dblBalance END--CAST(0 AS NUMERIC(18, 6))
 		, dblUnitPrice = ISNULL(dblPricePerUnit, 0)
 		, dblDiscount = CAST(0 AS NUMERIC(18, 6))
 		, dblTotal = CAST(0 AS NUMERIC(18, 6))
-		, dblQtyToShip = ISNULL(dblAvailableQty, 0)
+		, dblQtyToShip = CASE WHEN ContractView.ysnLoad = 1 THEN dbo.fnMultiply(ContractView.dblAvailableQty, ContractView.dblQuantityPerLoad)
+					ELSE ISNULL(dblAvailableQty, 0) END
 		, dblPrice = ISNULL(dblSeqPrice, 0)
-		, dblLineTotal = ISNULL(dblDetailQuantity, 0) * ISNULL(dblPricePerUnit, 0)
+		, dblLineTotal = CASE WHEN ContractView.ysnLoad = 1 THEN dbo.fnMultiply(ContractView.dblAvailableQty, ContractView.dblQuantityPerLoad) 
+						ELSE ISNULL(ContractView.dblAvailableQty, 0) END * ISNULL(dblPricePerUnit, 0)
 		, intGradeId = NULL
 		, strGrade = NULL
 		, strDestinationGrades = ContractView.strGrade
 		, intDestinationGradeId = ContractView.intGradeId
 		, strDestinationWeights = ContractView.strWeight
 		, intDestinationWeightId = ContractView.intWeightId
+		, ysnLoad = ContractView.ysnLoad
+		, dblAvailableQty = ContractView.dblAvailableQty
+		, intNoOfLoad = ContractView.intNoOfLoad
+		, intLoadShipped = ISNULL(ContractView.intNoOfLoad - ContractView.intLoadReceived, 0)
+		, dblQuantityPerLoad = ISNULL(ContractView.dblQuantityPerLoad, 0)
 		, intCurrencyId = ContractView.intCurrencyId
 		, intForexRateTypeId = ContractView.intRateTypeId
 		, strForexRateType = ContractView.strCurrencyExchangeRateType

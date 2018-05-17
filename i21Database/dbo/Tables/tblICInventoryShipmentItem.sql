@@ -22,6 +22,7 @@ Type the overview for the table here.
 		[intStorageLocationId] INT NULL,
 		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblQuantity] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
+		[intLoadShipped] INT NULL DEFAULT ((0)), 
 		[intItemUOMId] INT NOT NULL, 
 		[intCurrencyId] INT NULL,
 		[intWeightUOMId] INT NULL,
