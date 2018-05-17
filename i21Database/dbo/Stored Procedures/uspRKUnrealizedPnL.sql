@@ -58,11 +58,11 @@ SELECT  intFutOptTransactionId,
 	  
 	   ISNULL((SELECT SUM(dblMatchQty) from tblRKMatchFuturesPSDetail psd 
 				JOIN tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
-				WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId 
+				WHERE psd.intLFutOptTransactionId=ot.intFutOptTransactionId AND h.strType = 'Realize' 
 					  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= @dtmToDate),0) as MatchLong,  
 	   ISNULL((SELECT sum(dblMatchQty) from tblRKMatchFuturesPSDetail psd
 			   JOIN tblRKMatchFuturesPSHeader h on psd.intMatchFuturesPSHeaderId=h.intMatchFuturesPSHeaderId
-			  WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId
+			  WHERE psd.intSFutOptTransactionId=ot.intFutOptTransactionId AND h.strType = 'Realize' 
 			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= @dtmToDate),0) as MatchShort,            
 		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency            
 		,IsNull(dbo.fnRKGetVariationMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0)*fm.dblContractSize dblVariationMargin1
