@@ -57,6 +57,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@ysnAllowBlankGLEntries AS BIT = 1
 		,@strCurrencyId AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
+		,@strForexRateType AS NVARCHAR(50)
 
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -288,7 +289,7 @@ BEGIN
 		END 
 	END 
 
-	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+	-- Check if the transaction is using a foreign currency and it has a missing forex rate type. 
 	BEGIN 		
 		SELECT @strItemNo = NULL
 				,@intItemId = NULL 
@@ -310,14 +311,51 @@ BEGIN
 				LEFT JOIN tblSMCurrency fc
 					ON fc.intCurrencyID = @intFunctionalCurrencyId
 		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND ReceiptItem.intForexRateTypeId IS NULL 
+				AND Receipt.intCurrencyId IS NOT NULL 
+				AND Receipt.intCurrencyId <> @intFunctionalCurrencyId
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- {Transaction Id} is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency.
+			EXEC uspICRaiseError 80217, @strTransactionId;
+			GOTO With_Rollback_Exit; 
+		END 
+	END
+
+	-- Check if the transaction is using a foreign currency and it has a missing forex rate. 
+	BEGIN 		
+		SELECT @strItemNo = NULL
+				,@intItemId = NULL 
+				,@strCurrencyId = NULL 
+				,@strFunctionalCurrencyId = NULL 
+
+		SELECT TOP 1 
+				@strTransactionId = Receipt.strReceiptNumber 
+				,@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strCurrencyId = c.strCurrency
+				,@strFunctionalCurrencyId = fc.strCurrency
+				,@strForexRateType = ForexRateType.strCurrencyExchangeRateType 
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId				
+				INNER JOIN dbo.tblICItem Item
+					ON Item.intItemId = ReceiptItem.intItemId
+				LEFT JOIN tblSMCurrency c
+					ON c.intCurrencyID =  Receipt.intCurrencyId
+				LEFT JOIN tblSMCurrency fc
+					ON fc.intCurrencyID = @intFunctionalCurrencyId
+				LEFT JOIN tblSMCurrencyExchangeRateType ForexRateType
+					ON ForexRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
 				AND ISNULL(ReceiptItem.dblForexRate, 0) = 0 
 				AND Receipt.intCurrencyId IS NOT NULL 
 				AND Receipt.intCurrencyId <> @intFunctionalCurrencyId
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
-			-- '{Transaction Id} is using a foreign currency. Please check if {Item No} has a forex rate. You may also need to review the Currency Exchange Rates and check if there is a valid forex rate from {Foreign Currency} to {Functional Currency}.'
-			EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId;
+			-- {Transaction Id} is using a foreign currency. {Item No} is missing a forex rate. Please review the Currency Exchange Rates and check if {Foreign Currency} to {Functional Currency} for {Rate Type} has a valid effective date and forex rate.
+			EXEC uspICRaiseError 80162, @strTransactionId, @strItemNo, @strCurrencyId, @strFunctionalCurrencyId, @strForexRateType;
 			GOTO With_Rollback_Exit; 
 		END 
 	END
@@ -499,7 +537,7 @@ BEGIN
 							)
 
 				,dtmDate = Header.dtmReceiptDate  
-				,dblQty =						
+				,dblQty =
 							-- New Hierarchy:
 							-- 1. If there is a Gross/Net UOM, use the Net Qty. 
 								-- 2.1. If it is not a Lot, use the item's Net Qty. 
@@ -535,7 +573,7 @@ BEGIN
 												-- When item is a LOT, receive it by the Lot Qty. 
 												ELSE 
 													ISNULL(DetailItemLot.dblQuantity, 0)
-										END 								
+										END
 
 							END 
 
@@ -1418,8 +1456,8 @@ BEGIN
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 										END
-									)							
-							END							
+									)
+							END
 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
