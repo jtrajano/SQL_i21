@@ -132,7 +132,7 @@ SELECT
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 FROM 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblPrice], [intCompanyLocationSubLocationId], [intStorageLocationId], [intItemUOMId], [intLoadDetailId], [dblTotal], [ysnBlended],
-			[dblQtyShipped], [intInventoryShipmentItemId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId]
+			[dblQtyShipped], [intInventoryShipmentItemId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId], [intTicketId]
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
@@ -161,6 +161,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARI.[intLoadId]
+LEFT OUTER JOIN 
+	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
+		ON ARID.intTicketId = T.intTicketId
 WHERE				
 	((ISNULL(ARI.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], IST.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARI.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
@@ -171,6 +174,7 @@ WHERE
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	AND ((@ForValidation = 1 AND ISNULL(IST.[strType],'') <> 'Finished Good') OR (@ForValidation = 0))
+	AND (((ISNULL(T.[intTicketTypeId], 0) = 9 OR (ISNULL(T.[intTicketType], 0) = 6 AND ISNULL(T.[strInOutFlag], '') = 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)
 
 UNION ALL
