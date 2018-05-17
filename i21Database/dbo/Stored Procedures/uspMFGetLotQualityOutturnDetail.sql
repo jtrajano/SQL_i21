@@ -147,18 +147,18 @@ JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
 GROUP BY P.intPropertyId
 	,P.strPropertyName
 	,P.intItemId
-	,TR.intSequenceNo 
+	,TR.intSequenceNo
 
 INSERT INTO #GRN (
 	intPropertyId
 	,strPropertyName
 	,intItemId
-	,intSequenceNo 
+	,intSequenceNo
 	)
 SELECT DISTINCT 0
 	,''
 	,intItemId
-	,-1
+	,- 1
 FROM #StageQty
 
 UPDATE #GRN
@@ -194,41 +194,56 @@ SELECT intPropertyId
 	,S.dblQty AS dblInputWeight
 	,WP.dblQuantity AS dblOutputWeight
 	,strActualOutput AS dblActualOutput
-	,CASE 
-		WHEN Sum(CASE 
-					WHEN dblCoEfficient = 0
-						THEN 0
-					ELSE [strActualOutput]
-					END) OVER () = 0
-			THEN 0
-		ELSE (
-				[strActualOutput] / Sum(CASE 
-						WHEN dblCoEfficient = 0
-							THEN 0
-						ELSE [strActualOutput]
-						END) OVER ()
-				) * 100
-		END AS dblCleanGradeOutput
 	,(
 		CASE 
-			WHEN Sum(CASE 
-						WHEN dblCoEfficient = 0
-							THEN 0
-						ELSE [strActualOutput]
-						END) OVER () = 0
-				THEN 0
+			WHEN dblCoEfficient = 0
+				THEN NULL
 			ELSE (
-					[strActualOutput] / Sum(CASE 
-							WHEN dblCoEfficient = 0
-								THEN 0
-							ELSE [strActualOutput]
-							END) OVER ()
-					) * 100
-			END - strPropertyValue
+					CASE 
+						WHEN Sum(CASE 
+									WHEN dblCoEfficient = 0
+										THEN 0
+									ELSE [strActualOutput]
+									END) OVER () = 0
+							THEN 0
+						ELSE (
+								[strActualOutput] / Sum(CASE 
+										WHEN dblCoEfficient = 0
+											THEN 0
+										ELSE [strActualOutput]
+										END) OVER ()
+								) * 100
+						END
+					)
+			END
+		) AS dblCleanGradeOutput
+	,((
+		CASE 
+			WHEN dblCoEfficient = 0
+				THEN NULL
+			ELSE (
+					CASE 
+						WHEN Sum(CASE 
+									WHEN dblCoEfficient = 0
+										THEN 0
+									ELSE [strActualOutput]
+									END) OVER () = 0
+							THEN 0
+						ELSE (
+								[strActualOutput] / Sum(CASE 
+										WHEN dblCoEfficient = 0
+											THEN 0
+										ELSE [strActualOutput]
+										END) OVER ()
+								) * 100
+						END
+					)
+			END
+		) - strPropertyValue
 		) AS dblVariance
 	,dblExchangePrice AS dblMarketPrice
 	,dblGradeDiff AS dblMarketDifferential
-	,(dblExchangePrice+PS.dblGradeDiff)*WP.dblQuantity AS dblMTMPL
+	,(dblExchangePrice + PS.dblGradeDiff) * WP.dblQuantity AS dblMTMPL
 FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
 LEFT JOIN #StageQty S ON S.intItemId = G.intItemId
