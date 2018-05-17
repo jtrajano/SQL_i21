@@ -271,12 +271,12 @@ BEGIN
 										,[intOrderUOMId]			= UOM.intItemUOMId
 										,[dblQtyOrdered]			= 0 -- CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[intItemUOMId]				= UOM.intItemUOMId
-										,[dblQtyShipped]			= CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
+										,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0) --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
 
 										-- Should remove tax to calculate Net Price --CPT.dblPrice
 										-- ,[dblPrice]				    = CPT.dblPrice --(Select dblPrice From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
-										,[dblPrice]					= CPT.dblPrice - CAST((SELECT SUM(dblAdjustedTax) 
+										,[dblPrice]					= ISNULL(CPT.dblPrice, 0) - ISNULL(CAST((SELECT SUM(dblAdjustedTax) 
 																						  FROM [dbo].[fnGetItemTaxComputationForCustomer]
 																						  (
 																								I.intItemId
@@ -288,7 +288,7 @@ BEGIN
 																								, ST.intCompanyLocationId
 																								, NULL -- EL.intEntityLocationId
 																								, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-																						  )) AS DECIMAL(18,6))
+																						  )) AS DECIMAL(18,6)), 0)
 										--,[dblPrice]					= (CPT.dblAmount -
 										--							  (
 										--									CAST((SELECT SUM(dblAdjustedTax) 
@@ -507,9 +507,14 @@ BEGIN
 											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- IM.intQtySold
 											,[intItemUOMId]				= UOM.intItemUOMId
-											,[dblQtyShipped]			= IM.intQtySold
-											,[dblDiscount]				= 0
-											,[dblPrice]					= IM.dblTotalSales / IM.intQtySold --IM.dblCurrentPrice
+											,[dblQtyShipped]			= ISNULL(IM.intQtySold, 0)
+											,[dblDiscount]				= CASE
+																				WHEN ISNULL(IM.dblDiscountAmount, 0) > 0 THEN 
+																				    -- (8 / 88) * 100
+																					(ISNULL(IM.dblDiscountAmount, 0) / (ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0))) * 100 --((((ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0)) / ISNULL(IM.intQtySold, 0)) * ISNULL(IM.intQtySold, 0)) * ISNULL(IM.dblDiscountAmount, 0) / 100)
+																				ELSE 0
+																		  END
+											,[dblPrice]					= (ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0)) / ISNULL(IM.intQtySold, 0) -- ISNULL(IM.dblCurrentPrice, 0) --
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -728,28 +733,30 @@ BEGIN
 											,[dblQtyShipped]			= CASE 
 																			WHEN 
 																				(
-																					CAST((DT.dblTotalSalesAmount - (
-																														SELECT SUM(dblTotalSales)
-																														FROM tblSTCheckoutItemMovements IM
-																														JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																														JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																														JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																														WHERE intCheckoutId = @intCheckoutId
-																														AND CATT.intCategoryId = DT.intCategoryId)) AS NUMERIC(18, 6)
-																										           )
+																					CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																																	SELECT SUM(dblTotalSales)
+																																	FROM tblSTCheckoutItemMovements IM
+																																	JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																	JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																	JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																	WHERE intCheckoutId = @intCheckoutId
+																																	AND CATT.intCategoryId = DT.intCategoryId
+																															   ),0)
+																						) AS NUMERIC(18, 6))
 																				) >= 1 THEN 1
 																			ELSE -1
 																		  END
 											,[dblDiscount]				= 0
-											,[dblPrice]					= ABS(CAST((DT.dblTotalSalesAmount - (
-																												SELECT SUM(dblTotalSales)
-																												FROM tblSTCheckoutItemMovements IM
-																												JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																												JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																												JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																												WHERE intCheckoutId = @intCheckoutId
-																												AND CATT.intCategoryId = DT.intCategoryId
-																											 )) AS NUMERIC(18, 6)))
+											,[dblPrice]					= ABS(CAST((ISNULL(DT.dblTotalSalesAmount, 0) - ISNULL((
+																															SELECT SUM(dblTotalSales)
+																															FROM tblSTCheckoutItemMovements IM
+																															JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																															JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																															JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																															WHERE intCheckoutId = @intCheckoutId
+																															AND CATT.intCategoryId = DT.intCategoryId
+																														 ), 0)
+																					) AS NUMERIC(18, 6)))
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -953,7 +960,7 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
-											,[dblPrice]					= STT.dblTotalTax
+											,[dblPrice]					= ISNULL(STT.dblTotalTax, 0)
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1157,7 +1164,7 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
-											,[dblPrice]					= CPO.dblAmount
+											,[dblPrice]					= ISNULL(CPO.dblAmount, 0)
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1361,7 +1368,7 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= -1
 											,[dblDiscount]				= 0
-											,[dblPrice]					= CC.dblAmount
+											,[dblPrice]					= ISNULL(CC.dblAmount,0)
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1565,7 +1572,7 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
-											,[dblPrice]					= CP.dblAmount
+											,[dblPrice]					= ISNULL(CP.dblAmount, 0)
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1769,7 +1776,7 @@ BEGIN
 											,[intItemUOMId]				= UOM.intItemUOMId
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
-											,[dblPrice]					= CH.dblCashOverShort
+											,[dblPrice]					= ISNULL(CH.dblCashOverShort,0)
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -2014,7 +2021,7 @@ BEGIN
 															,[intItemUOMId]				= UOM.intItemUOMId
 															,[dblQtyShipped]			= -1
 															,[dblDiscount]				= 0
-															,[dblPrice]					= CC.dblAmount
+															,[dblPrice]					= ISNULL(CC.dblAmount, 0)
 															,[ysnRefreshPrice]			= 0
 															,[strMaintenanceType]		= NULL
 															,[strFrequency]				= NULL
