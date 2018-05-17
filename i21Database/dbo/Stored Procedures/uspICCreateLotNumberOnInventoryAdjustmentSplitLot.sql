@@ -117,6 +117,7 @@ BEGIN
 			,[intProducerId]
 			,[strCertificateId]
 			,[strTrackingNumber]
+			,[intSeasonCropYear]
 	)
 	SELECT	[intLotId]					= TargetLot.intLotId 
 			,[intItemId]				= Detail.intItemId
@@ -244,6 +245,7 @@ BEGIN
 			,[intProducerId]			= SourceLot.intProducerId
 			,[strCertificateId]			= SourceLot.strCertificateId
 			,[strTrackingNumber]		= SourceLot.strTrackingNumber 
+			,[intSeasonCropYear]		= SourceLot.intSeasonCropYear
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
