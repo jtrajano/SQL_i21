@@ -57,9 +57,9 @@ SELECT
 								,APBD.dblQtyReceived
 								,C.strCommodityCode 
 								,strItem = IE.strItemNo 
-								,intTicketId
-								,SC.strTicketNumber
-								,SS.strDeliverySheetNumber
+								,SC.intTicketId
+								,ISNULL(SC.strTicketNumber,ISNULL(SS.strDeliverySheetNumber, CS.strStorageTicketNumber)) AS strTicketNumber
+								,(CASE WHEN APBD.intCustomerStorageId > 0 THEN CS.strStorageTicketNumber ELSE SS.strDeliverySheetNumber END) AS strDeliverySheetNumber
 								,APB.strVendorOrderNumber
 								,APB.dtmBillDate
 								,APBD.dblTotal 
@@ -84,6 +84,7 @@ SELECT
 								INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 								INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
 								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
+								LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
 								INNER JOIN dbo.tblAPAppliedPrepaidAndDebit APD ON APD.intBillId = APB.intBillId
 								INNER JOIN dbo.tblAPBill APB2 ON APD.intTransactionId = APB2.intBillId                              
 					OUTER APPLY(
@@ -204,9 +205,9 @@ SELECT
 								,APBD.dblQtyReceived
 								,C.strCommodityCode 
 								,strItem = IE.strItemNo 
-								,intTicketId
-								,SC.strTicketNumber
-								,SS.strDeliverySheetNumber
+								,SC.intTicketId
+								,ISNULL(SC.strTicketNumber,ISNULL(SS.strDeliverySheetNumber, CS.strStorageTicketNumber)) AS strTicketNumber
+								,(CASE WHEN APBD.intCustomerStorageId > 0 THEN CS.strStorageTicketNumber ELSE SS.strDeliverySheetNumber END) AS strDeliverySheetNumber
 								,APB.strVendorOrderNumber
 								,APB.dtmBillDate
 								,APBD.dblTotal 
@@ -231,6 +232,7 @@ SELECT
 								INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 								INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
 								LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
+								LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
 					OUTER APPLY(
 								SELECT TOP 1 
 											 B1.dtmDatePaid,

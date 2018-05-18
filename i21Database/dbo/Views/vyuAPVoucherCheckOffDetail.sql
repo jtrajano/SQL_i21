@@ -22,9 +22,9 @@ SELECT	DISTINCT
 			,APBD.dblQtyReceived
 			,C.strCommodityCode 
 			,strItem = IE.strItemNo 
-			,intTicketId
-			,SC.strTicketNumber
-			,SS.strDeliverySheetNumber
+			,SC.intTicketId
+			,ISNULL(SC.strTicketNumber,ISNULL(SS.strDeliverySheetNumber, CS.strStorageTicketNumber)) AS strTicketNumber
+			,(CASE WHEN APBD.intCustomerStorageId > 0 THEN CS.strStorageTicketNumber ELSE SS.strDeliverySheetNumber END) AS strDeliverySheetNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,APBD.dblTotal 
@@ -49,6 +49,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
+			LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
@@ -102,9 +103,9 @@ SELECT	DISTINCT
 			,APBD.dblQtyReceived
 			,C.strCommodityCode 
 			,strItem = IE.strItemNo 
-			,intTicketId
-			,SC.strTicketNumber
-			,SS.strDeliverySheetNumber
+			,SC.intTicketId
+			,ISNULL(SC.strTicketNumber,ISNULL(SS.strDeliverySheetNumber, CS.strStorageTicketNumber)) AS strTicketNumber
+			,(CASE WHEN APBD.intCustomerStorageId > 0 THEN CS.strStorageTicketNumber ELSE SS.strDeliverySheetNumber END) AS strDeliverySheetNumber
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,APBD.dblTotal 
@@ -129,6 +130,7 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
 			LEFT JOIN dbo.tblSCTicket SC ON IRE.intSourceId = SC.intTicketId
 			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
+			LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
