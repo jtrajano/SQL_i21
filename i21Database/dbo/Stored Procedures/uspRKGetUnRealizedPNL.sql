@@ -131,6 +131,7 @@ BEGIN TRY
 		,strPricingType							NVARCHAR(100)
 		,strPricingStatus						NVARCHAR(100)
 		,dblMarketDifferential					NUMERIC(24, 10)
+		,dblNetM2MPrice							NUMERIC(24, 10)
 		,dblSettlementPrice						NUMERIC(24, 10)
 		,strCompanyName							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	) 
@@ -282,8 +283,8 @@ BEGIN TRY
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BASISUOM.intUnitMeasureId
 		,strBasisUOM								= BUOM.strUnitMeasure
-		,dblFutures									= CD.dblFutures
-		,dblCashPrice								= CD.dblCashPrice
+		,dblFutures									= ISNULL(CD.dblFutures,0)
+		,dblCashPrice								= ISNULL(CD.dblCashPrice,0)
 		,intPriceUOMId								= CD.intPriceItemUOMId
 		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId
 		,strContractPriceUOM						= PUOM.strUnitMeasure
@@ -308,13 +309,13 @@ BEGIN TRY
 		,strPriceTerms								= NULL
 		,dblContractDifferential					= CD.dblBasis
 		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
-		,dblFuturesPrice							= CD.dblFutures
+		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
 		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
 		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((CD.[dblNoOfLots] -PF.dblLotsFixed),0) ELSE 0 END
 		,dblContractInvoiceValue					= NULL
-		,dblSecondaryCosts							= NULL
+		,dblSecondaryCosts							= 0
 		,dblCOGSOrNetSaleValue						= NULL
 		,dblInvoicePrice							= NULL
 		,dblInvoicePaymentPrice						= NULL
@@ -446,8 +447,8 @@ BEGIN TRY
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
 		,strBasisUOM								= BUOM.strUnitMeasure
-		,dblFutures									= CD.dblFutures
-		,dblCashPrice								= CD.dblCashPrice
+		,dblFutures									= ISNULL(CD.dblFutures,0)
+		,dblCashPrice								= ISNULL(CD.dblCashPrice,0)
 		,intPriceUOMId								= CD.intPriceItemUOMId
 		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId
 		,strContractPriceUOM						= PUOM.strUnitMeasure
@@ -472,13 +473,13 @@ BEGIN TRY
 		,strPriceTerms								= NULL
 		,dblContractDifferential					= CD.dblBasis
 		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
-		,dblFuturesPrice							= CD.dblFutures
+		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
 		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
 		,strFixationDetails							= NULL
 		,dblFixedLots								= ISNULL(PF.dblLotsFixed,0)
 		,dblUnFixedLots								= ISNULL((PF.dblTotalLots -PF.dblLotsFixed),0)
 		,dblContractInvoiceValue					= NULL
-		,dblSecondaryCosts							= NULL
+		,dblSecondaryCosts							= 0
 		,dblCOGSOrNetSaleValue						= NULL
 		,dblInvoicePrice							= NULL
 		,dblInvoicePaymentPrice						= NULL
@@ -612,8 +613,8 @@ BEGIN TRY
 		,intBasisUOMId								= CD.intBasisUOMId
 		,intBasisUnitMeasureId						= BUOM.intUnitMeasureId
 		,strBasisUOM								= BUOM.strUnitMeasure
-		,dblFutures									= CD.dblFutures
-		,dblCashPrice								= CD.dblCashPrice
+		,dblFutures									= ISNULL(CD.dblFutures,0)
+		,dblCashPrice								= ISNULL(CD.dblCashPrice,0)
 		,intPriceUOMId								= CD.intPriceItemUOMId
 		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId
 		,strContractPriceUOM						= PUOM.strUnitMeasure
@@ -638,7 +639,7 @@ BEGIN TRY
 		,strPriceTerms								= NULL
 		,dblContractDifferential					= CD.dblBasis
 		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
-		,dblFuturesPrice							= CD.dblFutures
+		,dblFuturesPrice							= ISNULL(CD.dblFutures,0)
 		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
 		,strFixationDetails							= NULL
 		,dblFixedLots								= ISNULL(PF.dblLotsFixed,0)
@@ -744,7 +745,7 @@ BEGIN TRY
 	INSERT INTO @tblContractCost(intContractDetailId,dblTotalCost)
 	SELECT  
 			 intContractDetailId = CC.intContractDetailId
-			,dblTotalCost        = SUM(CASE WHEN CC.strCostStatus ='Close' THEN ISNULL(CC.dblActualAmount,0) ELSE ISNULL(CC.dblActualAmount,0)+ISNULL(CC.dblAccruedAmount,0) END)
+			,dblTotalCost        = SUM(CASE WHEN CC.strCostStatus ='Closed' THEN ISNULL(CC.dblActualAmount,0) ELSE ISNULL(CC.dblActualAmount,0) + ISNULL(CC.dblAccruedAmount,0) END)
 	FROM tblCTContractCost CC
 	JOIN @tblUnRealizedPNL RealizedPNL ON RealizedPNL.intContractDetailId = CC.intContractDetailId
 	GROUP BY CC.intContractDetailId
@@ -753,7 +754,7 @@ BEGIN TRY
 	  SELECT 
 	     intFutureMarketId  = SettlementPrice.intFutureMarketId
 		,intFutureMonthId	= MarketMap.intFutureMonthId
-		,dblSettlementPrice	= MarketMap.dblLastSettle
+		,dblSettlementPrice	= ISNULL(MarketMap.dblLastSettle,0)
 		FROM tblRKFutSettlementPriceMarketMap MarketMap
 		JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
 		WHERE SettlementPrice.intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -763,10 +764,10 @@ BEGIN TRY
 	SELECT 
 	     intFutureMarketId  = SettlementPrice.intFutureMarketId
 		,intFutureMonthId	= MarketMap.intFutureMonthId
-		,dblSettlementPrice	= MarketMap.dblLastSettle
+		,dblSettlementPrice	= ISNULL(MarketMap.dblLastSettle,0)
 		FROM tblRKFutSettlementPriceMarketMap MarketMap
 		JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
-		WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice)
+		WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId <> @intFutureSettlementPriceId)
 
 	-----------------------------------------------------SecondaryCosts Updation--------------------------------------------
 	---Contract
@@ -786,26 +787,42 @@ BEGIN TRY
 											  WHEN ISNULL(CD.dblCashPrice,0.0)= 0.0 THEN
 													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
 													*(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intBasisUnitMeasureId,CD.intFutureMarketUnitMeasureId, CD.dblBasis)+
-													  SP.dblSettlementPrice)
+													  ISNULL(SP.dblSettlementPrice,0))
 													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
 								  END
-   ,CD.dblSettlementPrice = SP.dblSettlementPrice        
+   ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
 	FROM @tblUnRealizedPNL CD
 	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
 	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
 	-----------------------------------------------------Net Market Updation--------------------------------------------	
-	UPDATE CD
-	SET CD.dblNetMarketValue	=  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)*SP.dblSettlementPrice
-							  	   + BasisDetail.dblBasisOrDiscount  --Market Differential
-       ,CD.dblMarketDifferential = BasisDetail.dblBasisOrDiscount
-	FROM @tblUnRealizedPNL CD
-	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
-	JOIN tblRKM2MBasisDetail BasisDetail ON BasisDetail.intFutureMarketId = CD.intFutureMarketId AND BasisDetail.intItemId = CD.intItemId
-	AND  BasisDetail.strPeriodTo = RIGHT(CONVERT(VARCHAR(11),CD.dtmEndDate,106),8)
+		 UPDATE @tblUnRealizedPNL 
+		 SET  
+		 dblMarketDifferential = ISNULL(dblMarketDifferential,0)
+		,dblNetMarketValue     = ISNULL(dblNetMarketValue,0)
+		,dblNetM2MPrice		   = ISNULL(dblNetM2MPrice,0)
+
+		UPDATE CD
+	    SET  CD.dblMarketDifferential   = ISNULL(BasisDetail.dblBasisOrDiscount,0)
+		FROM @tblUnRealizedPNL CD	
+		JOIN tblRKM2MBasisDetail BasisDetail ON BasisDetail.intFutureMarketId = CD.intFutureMarketId AND BasisDetail.intItemId = CD.intItemId 
+		AND BasisDetail.strPeriodTo = RIGHT(CONVERT(VARCHAR(11),CD.dtmEndDate,106),8)
+
+		UPDATE CD
+		SET CD.dblNetMarketValue	=  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+										* ( ISNULL(CD.dblSettlementPrice,0) +  ISNULL(CD.dblMarketDifferential,0))
+										/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+
+		   ,CD.dblNetM2MPrice		   = ISNULL(CD.dblSettlementPrice,0) + ISNULL(CD.dblMarketDifferential,0)
+		FROM @tblUnRealizedPNL CD	
+		JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
 	----------------------------------------------------------------------------------------------------------------------------		
 	UPDATE @tblUnRealizedPNL 
-	SET  dblCOGSOrNetSaleValue = (ISNULL(dblContractInvoiceValue,0)+ ISNULL(dblSecondaryCosts,0))* CASE WHEN intContractTypeId =1 THEN 1 ELSE -1 END
-	
+	SET  dblCOGSOrNetSaleValue = (
+								   ISNULL(dblContractInvoiceValue,0) 
+								 + ISNULL(dblSecondaryCosts,0) * (CASE WHEN intContractTypeId = 1 THEN 1 ELSE -1 END)
+								 ) *
+								 CASE WHEN intContractTypeId =1 THEN 1 ELSE -1 END
+
 	UPDATE @tblUnRealizedPNL 
 	SET  dblProfitOrLossValue =  CASE 
 										WHEN intContractTypeId = 1 THEN (ISNULL(dblNetMarketValue,0) - ISNULL(dblCOGSOrNetSaleValue,0))
@@ -870,6 +887,7 @@ BEGIN TRY
 	  ,dblCOGSOrNetSaleValue
 	  ,dblSettlementPrice
 	  ,dblMarketDifferential
+	  ,dblNetM2MPrice
 	  ,dblNetMarketValue
 	  ,dblProfitOrLossValue		
 	  ,dblInvoicePrice				
@@ -900,8 +918,7 @@ END TRY
   
 BEGIN CATCH  
  
- IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
  SET @ErrMsg = ERROR_MESSAGE()  
- RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')    
-
+ RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
+     
 END CATCH
