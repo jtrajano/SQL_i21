@@ -40,6 +40,7 @@ BEGIN TRY
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompWeightClaimsStg
 	WHERE strFeedStatus IS NULL
+		AND strRowState = 'Added'
 
 	WHILE ISNULL(@intId, 0) > 0
 	BEGIN
@@ -327,6 +328,7 @@ BEGIN TRY
 		SELECT @intId = MIN(intId)
 		FROM tblLGIntrCompWeightClaimsStg
 		WHERE strFeedStatus IS NULL
+			AND strRowState = 'Added'
 			AND intId > @intId
 	END
 END TRY

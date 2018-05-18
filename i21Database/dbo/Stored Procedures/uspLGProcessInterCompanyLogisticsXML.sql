@@ -118,6 +118,7 @@ BEGIN TRANSACTION
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
+		AND strRowState = 'Added'
 
 	WHILE @intId > 0
 	BEGIN
@@ -865,6 +866,7 @@ BEGIN TRANSACTION
 		SELECT @intId = MIN(intId)
 		FROM tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
+			AND strRowState = 'Added'
 			AND strFeedStatus IS NULL
 	END
 
