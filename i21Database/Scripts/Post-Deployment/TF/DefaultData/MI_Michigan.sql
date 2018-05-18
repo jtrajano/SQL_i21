@@ -2435,24 +2435,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '4004', strScheduleCode = '7B', strType = 'Other', strState = 'MI', strStatus = 'Include', intMasterId = 22311
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '4004', strScheduleCode = '7B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22308
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '5494', strScheduleCode = 'LPG', strType = 'Propane', strState = 'MI', strStatus = 'Include', intMasterId = 22401
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Gasoline', strState = 'MI', strStatus = 'Include', intMasterId = 22772
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Aviation Gas', strState = 'MI', strStatus = 'Include', intMasterId = 22773
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Jet Fuel', strState = 'MI', strStatus = 'Include', intMasterId = 22774
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22775
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22776
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Other', strState = 'MI', strStatus = 'Include', intMasterId = 22777
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Gasoline', strState = 'MI', strStatus = 'Include', intMasterId = 22778
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Ethanol Blends (E70 - E99)', strState = 'MI', strStatus = 'Include', intMasterId = 22779
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22780
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Undyed Biodiesel (B05 or higher)', strState = 'MI', strStatus = 'Include', intMasterId = 22781
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22782
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Aviation', strState = 'MI', strStatus = 'Include', intMasterId = 22783
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Gasoline', strState = 'MI', strStatus = 'Include', intMasterId = 22784
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Ethanol Blends (E70 - E99)', strState = 'MI', strStatus = 'Include', intMasterId = 22785
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22786
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Undyed Biodiesel (B05 or higher)', strState = 'MI', strStatus = 'Include', intMasterId = 22787
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22788
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Aviation', strState = 'MI', strStatus = 'Include', intMasterId = 22789
+	
 
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId
@@ -2487,6 +2470,25 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11A', strType = 'Undyed Biodiesel (B05 or higher)', strState = 'MI', strStatus = 'Include', intMasterId = 22783
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11A', strType = 'Aviation', strState = 'MI', strStatus = 'Include', intMasterId = 22784
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11A', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 22785
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Gasoline', strState = 'MI', strStatus = 'Exclude', intMasterId = 22786
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Aviation Gas', strState = 'MI', strStatus = 'Exclude', intMasterId = 22787
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Jet Fuel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22788
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22789
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22790
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3724', strScheduleCode = '11B', strType = 'Other', strState = 'MI', strStatus = 'Exclude', intMasterId = 22791
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Gasoline', strState = 'MI', strStatus = 'Exclude', intMasterId = 22792
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Ethanol Blends (E70 - E99)', strState = 'MI', strStatus = 'Exclude', intMasterId = 22793
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22794
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Undyed Biodiesel (B05 or higher)', strState = 'MI', strStatus = 'Exclude', intMasterId = 22795
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22796
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3978', strScheduleCode = '11B', strType = 'Aviation', strState = 'MI', strStatus = 'Exclude', intMasterId = 22797
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Gasoline', strState = 'MI', strStatus = 'Exclude', intMasterId = 22798
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Ethanol Blends (E70 - E99)', strState = 'MI', strStatus = 'Exclude', intMasterId = 22799
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Undyed Diesel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22800
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Undyed Biodiesel (B05 or higher)', strState = 'MI', strStatus = 'Exclude', intMasterId = 22801
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Dyed Diesel', strState = 'MI', strStatus = 'Exclude', intMasterId = 22802
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = '3992', strScheduleCode = '11B', strType = 'Aviation', strState = 'MI', strStatus = 'Exclude', intMasterId = 22803
+	
 
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
