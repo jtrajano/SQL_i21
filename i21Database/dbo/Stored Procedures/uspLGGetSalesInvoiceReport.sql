@@ -13,6 +13,7 @@ BEGIN
 		,@strCity NVARCHAR(25)
 		,@strState NVARCHAR(50)
 		,@strZip NVARCHAR(12)
+		,@strPaymentInfo NVARCHAR(MAX)
 		,@strCountry NVARCHAR(25)
 		,@strPhone NVARCHAR(50)
 		,@intLaguageId INT
@@ -101,6 +102,17 @@ BEGIN
 		AND rtrt9.intTransactionId = rtt9.intTransactionId
 		AND rtrt9.strFieldName = 'Country'
 
+	SELECT @strPaymentInfo = STUFF((
+				SELECT CHAR(13) + CHAR(10) + PAY.strPaymentInfo
+				FROM tblSMPayment PAY
+				WHERE PAY.intTransactionId = I.intInvoiceId
+					AND PAY.strScreen = 'AccountsReceivable.view.Invoice'
+				FOR XML PATH('')
+					,TYPE
+				).value('.', 'varchar(max)'), 1, 2, '')
+	FROM tblARInvoice I
+	WHERE I.intInvoiceId = @intInvoiceId
+
 	SELECT Inv.intInvoiceId
 		,intSerialNo = ROW_NUMBER() OVER (
 			ORDER BY InvDet.intInvoiceDetailId
@@ -162,6 +174,7 @@ BEGIN
 		,@strContractDocuments strDocument
 		,@strContractConditions strCondition
 		,Inv.dtmDate AS dtmInvoiceDate
+		,@strPaymentInfo strInvoicePaymentInformation
 	FROM tblARInvoice Inv
 	JOIN tblEMEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
