@@ -53,6 +53,8 @@ SELECT
 	,cfTransaction.dblOriginalGrossPrice AS dblOriginalGrossAmount
 	,cfTransaction.dblCalculatedNetPrice AS dblCalculatedNetAmount
 	,cfTransaction.dblOriginalNetPrice AS dblOriginalNetAmount
+	,cfTransaction.dblCalculatedTotalTax AS dblTaxCalculatedAmount
+	,cfTransaction.dblOriginalTotalTax AS dblTaxOriginalAmount
 	,cfTransaction.ysnInvalid
 	,cfTransaction.ysnPosted
 	,cfTransaction.dblCalculatedTotalTax
