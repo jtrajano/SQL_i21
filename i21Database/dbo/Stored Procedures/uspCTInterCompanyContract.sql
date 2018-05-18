@@ -31,16 +31,19 @@ BEGIN TRY
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
 		WHERE TT.strTransactionType ='Purchase Contract'
 		
-		IF @strInsert = 'Insert'
+		IF EXISTS(SELECT 1 FROM tblCTContractHeader CH JOIN tblCTBookVsEntity BVE ON BVE.intBookId = CH.intBookId AND BVE.intEntityId = CH.intEntityId WHERE CH.intContractHeaderId = @ContractHeaderId)
 		BEGIN
-			IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @ContractHeaderId AND intConcurrencyId =1)
-			BEGIN
-			      EXEC uspCTContractPopulateStgXML @ContractHeaderId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Added'
-			END
-			ELSE IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @ContractHeaderId AND intConcurrencyId > 1)
-			BEGIN
-			      EXEC uspCTContractPopulateStgXML @ContractHeaderId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Modified'
-			END
+				IF @strInsert = 'Insert'
+				BEGIN
+					IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @ContractHeaderId AND intConcurrencyId =1)
+					BEGIN
+						  EXEC uspCTContractPopulateStgXML @ContractHeaderId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Added'
+					END
+					ELSE IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @ContractHeaderId AND intConcurrencyId > 1)
+					BEGIN
+						  EXEC uspCTContractPopulateStgXML @ContractHeaderId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Modified'
+					END
+				END
 		END	
 	END
 

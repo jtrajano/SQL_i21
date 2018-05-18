@@ -31,11 +31,13 @@ BEGIN
 			BEGIN TRY
 					EXEC	uspCTContractApproved @recordId,@intApprovalId,NULL,1
 					
-					IF @strToTransactionType ='Sales Contract' AND @strInsert='Insert on Approval'
+					IF EXISTS(SELECT 1 FROM tblCTContractHeader CH JOIN tblCTBookVsEntity BVE ON BVE.intBookId = CH.intBookId AND BVE.intEntityId = CH.intEntityId WHERE CH.intContractHeaderId = @recordId)
 					BEGIN
-						EXEC uspCTContractPopulateStgXML @recordId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Added'	
+							IF @strToTransactionType ='Sales Contract' AND @strInsert='Insert on Approval'
+							BEGIN
+								EXEC uspCTContractPopulateStgXML @recordId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Added'	
+							END
 					END
-
 			END TRY
 			BEGIN CATCH
 			END CATCH
