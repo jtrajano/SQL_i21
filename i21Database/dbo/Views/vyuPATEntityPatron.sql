@@ -5,7 +5,14 @@ SELECT	A.intEntityId,
 		D.strEntityNo,
 		strEntityAddress = [dbo].[fnARFormatCustomerAddress](NULL, NULL, NULL, Loc.strAddress, Loc.strCity, Loc.strState, Loc.strZipCode, Loc.strCountry, NULL, NULL),
 		strAccountStatus = [dbo].[fnARGetCustomerAccountStatusCodes](A.intEntityId),
-		C.strStockStatus,
+		strStockStatus = ISNULL(C.strStockStatus,''),
+		ysnStockStatusQualified = CASE 
+									WHEN Patronage.strRefund = 'V' AND C.strStockStatus = 'Voting' THEN 1
+									WHEN Patronage.strRefund = 'S' AND (C.strStockStatus = 'Voting' OR C.strStockStatus = 'Non-Voting') THEN 1
+									WHEN Patronage.strRefund = 'A' AND ISNULL(C.strStockStatus,'') != '' THEN 1
+								ELSE
+									CAST(0 AS BIT)
+								END,
 		C.dtmBirthDate,
 		C.dtmDeceasedDate,
 		C.dtmLastActivityDate,
