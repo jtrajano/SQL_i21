@@ -1564,6 +1564,7 @@ BEGIN
 						FROM	@LotEntries ItemLot LEFT JOIN tblICLot l
 									ON ItemLot.intLotId = l.intLotId
 						WHERE	l.intLotId IS NULL 
+								AND ItemLot.intLotId IS NOT NULL 
 
 						IF @valueLotRecordLotId > 0
 						BEGIN
@@ -1583,7 +1584,7 @@ BEGIN
 						FROM	@LotEntries ItemLot LEFT JOIN tblICLot l
 									ON ItemLot.strLotNumber = l.strLotNumber
 									AND ItemLot.intLotId = l.intLotId
-						WHERE	ItemLot.strLotNumber IS NULL 
+						WHERE	ItemLot.strLotNumber IS NOT NULL 
 								AND l.strLotNumber IS NULL 
 
 						IF @valueLotRecordItemId > 0
