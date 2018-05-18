@@ -52,6 +52,22 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@intTaskId INT
 		,@intOrderDirectionId INT
+		,@intRecipeTypeId INT
+		,@intItemId2 INT
+		,@intRecipeSubstituteItemId INT
+		,@intRecipeId INT
+		,@intRecipeItemId INT
+		,@intWorkOrderId INT
+		,@intRecipeItemUOMId INT
+		,@intUnitMeasureId INT
+		,@intInputItemUOMId INT
+		,@intManufacturingCellId INT
+		,@dtmPlannedDate DATETIME
+		,@intPlannedShiftId INT
+		,@intStageLocationId INT
+		,@dtmBusinessDate DATETIME
+		,@intBusinessShiftId INT
+		,@intManufacturingProcessId INT
 
 	IF @strTaskId = ''
 		SELECT @strTaskId = NULL
@@ -183,6 +199,98 @@ BEGIN TRY
 			FROM tblMFTask
 			WHERE intOrderHeaderId = @intOrderHeaderId
 				AND intTaskStateId <> 4
+		END
+	END
+
+	IF @strOrderType = 'WO PROD STAGING'
+	BEGIN
+		SELECT @intWorkOrderId = intWorkOrderId
+		FROM tblMFStageWorkOrder
+		WHERE intOrderHeaderId = @intOrderHeaderId
+
+		SELECT @intRecipeTypeId = intRecipeTypeId
+			,@intManufacturingCellId = intManufacturingCellId
+			,@intManufacturingProcessId = intManufacturingProcessId
+			,@dtmPlannedDate = dtmPlannedDate
+			,@intPlannedShiftId = intPlannedShiftId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @intStageLocationId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intManufacturingProcessId = @intManufacturingProcessId
+			AND intLocationId = @intLocationId
+			AND intAttributeId = 75
+
+		IF EXISTS (
+				SELECT *
+				FROM tblMFTask T
+				JOIN @tblTasks T1 ON T1.intTaskId = T.intTaskId
+				WHERE T.intToStorageLocationId = @intStageLocationId
+				)
+		BEGIN
+			SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
+
+			SELECT @intBusinessShiftId = intShiftId
+			FROM dbo.tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND @dtmDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+					AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+			INSERT INTO dbo.tblMFWorkOrderInputLot (
+				intWorkOrderId
+				,intItemId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,dblIssuedQuantity
+				,intItemIssuedUOMId
+				,intSequenceNo
+				,dtmProductionDate
+				,intShiftId
+				,intStorageLocationId
+				,intMachineId
+				,ysnConsumptionReversed
+				,intContainerId
+				,strReferenceNo
+				,dtmActualInputDateTime
+				,dtmBusinessDate
+				,intBusinessShiftId
+				,dtmCreated
+				,intCreatedUserId
+				,dtmLastModified
+				,intLastModifiedUserId
+				,dblEnteredQty
+				,intEnteredItemUOMId
+				,intDestinationLotId
+				)
+			SELECT @intWorkOrderId
+				,intItemId
+				,intLotId
+				,dblWeight
+				,intWeightUOMId
+				,dblQty
+				,intItemUOMId
+				,1
+				,@dtmPlannedDate
+				,@intPlannedShiftId
+				,intFromStorageLocationId
+				,NULL
+				,0
+				,NULL
+				,NULL
+				,@dtmDate
+				,@dtmBusinessDate
+				,@intBusinessShiftId
+				,@dtmDate
+				,@intUserId
+				,@dtmDate
+				,@intUserId
+				,dblQty
+				,intItemUOMId
+				,intToStorageLocationId
+			FROM tblMFTask T
+			JOIN @tblTasks T1 ON T1.intTaskId = T.intTaskId
 		END
 	END
 
@@ -750,26 +858,6 @@ BEGIN TRY
 
 	IF @strOrderType <> 'INVENTORY SHIPMENT STAGING'
 	BEGIN
-		DECLARE @intRecipeTypeId INT
-			,@intItemId2 INT
-			,@intRecipeSubstituteItemId INT
-			,@intRecipeId INT
-			,@intRecipeItemId INT
-			,@intWorkOrderId INT
-			,@intRecipeItemUOMId INT
-			,@intUnitMeasureId INT
-			,@intInputItemUOMId INT
-			,@intManufacturingCellId INT
-
-		SELECT @intWorkOrderId = intWorkOrderId
-		FROM tblMFStageWorkOrder
-		WHERE intOrderHeaderId = @intOrderHeaderId
-
-		SELECT @intRecipeTypeId = intRecipeTypeId
-			,@intManufacturingCellId = intManufacturingCellId
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
-
 		IF @intRecipeTypeId = 3
 		BEGIN
 			IF NOT EXISTS (
