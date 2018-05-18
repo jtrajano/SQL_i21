@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetRealizedPNL]
-	 @inBookId		   INT	
-	,@intCurrencyId    INT 
+	 @inBookId		   INT = 0	
+	,@intCurrencyId    INT = 0
 	
 AS
 BEGIN TRY
@@ -12,7 +12,8 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 	 (
 		 intRealizedPNL                         INT IDENTITY(1,1)
 		,intContractTypeId						INT
-		,intContractDetailId					INT		
+		,intContractDetailId					INT	
+		,intBookId								INT
 		,strBook								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strSubBook								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intCommodityId							INT
@@ -88,6 +89,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		(
 			 intContractTypeId
 			,intContractDetailId
+			,intBookId
 			,strBook						
 			,strSubBook						
 			,intCommodityId					
@@ -161,6 +163,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		 SELECT
 		 intContractTypeId							= CH.intContractTypeId 
 		,intContractDetailId						= CD.intContractDetailId
+		,intBookId									= Book.intBookId
 		,strBook									= Book.strBook
 		,strSubBook									= SubBook.strSubBook
 		,intCommodityId								= Commodity.intCommodityId
@@ -236,7 +239,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strFixedBy									= CD.strFixationBy
 		,strPricingType								= PT.strPricingType
 		,strInvoiceStatus							= NULL
-		,dblNetFuturesValue							= NetFutures.dblTotalNetFutures
+		,dblNetFuturesValue							= NULL
 		,dblRealizedFuturesPNLValue					= NULL
 		,dblNetPNLValue								= NULL
 		,dblFXValue									= NULL
@@ -300,46 +303,26 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		LEFT JOIN tblICItemUOM					ShipUOM			 ON ShipUOM.intItemUOMId		     = InvoiceDetail.intItemUOMId
 		LEFT JOIN tblICItemUOM					OrderUOM		 ON OrderUOM.intItemUOMId		     = InvoiceDetail.intOrderUOMId
 		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = OrderUOM.intUnitMeasureId
-		LEFT JOIN tblICItemUOM					BillUOM		 ON BillUOM.intItemUOMId		     = BillDetail.intUnitOfMeasureId
+		LEFT JOIN tblICItemUOM					BillUOM			 ON BillUOM.intItemUOMId		     = BillDetail.intUnitOfMeasureId
 		LEFT JOIN	tblSMCity					CT				 ON	CT.intCityId					=	CH.intINCOLocationTypeId	
 		LEFT JOIN	tblSMCompanyLocationSubLocation		SL		 ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId
 		LEFT JOIN	tblSMCountry				CO				 ON	CO.intCountryID					=	CT.intCountryId
 		LEFT JOIN (SELECT  
-					 intContractDetailId 
-					,intItemId
-					,SUM(dblTotal) dblTotal
-					FROM tblAPBillDetail 
-					GROUP BY intContractDetailId,intItemId
-		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId 
-				AND   BillCost.intItemId     <> CD.intItemId
-		LEFT JOIN
-		(
-			SELECT Summary.intContractDetailId
-			,SUM((
-					Summary.intHedgedLots * Market.dblContractSize * FutOpt.dblPrice / CASE 
-						WHEN Currency.ysnSubCurrency = 1
-							THEN Currency.intCent
-						ELSE 1
-						END
-					) * (
-					CASE 
-						WHEN FutOpt.strBuySell = 'Sell'
-							THEN - 1
-						ELSE 1
-						END
-					)) AS dblTotalNetFutures
-		FROM tblRKAssignFuturesToContractSummary Summary
-		JOIN tblRKFutOptTransaction FutOpt ON FutOpt.intFutOptTransactionId = Summary.intFutOptTransactionId
-		JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = FutOpt.intFutureMarketId
-		JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Market.intCurrencyId
-		GROUP BY Summary.intContractDetailId
-		) NetFutures ON NetFutures.intContractDetailId = CD.intContractDetailId
+					  BillDetail.intContractDetailId
+					,SUM( BillDetail.dblTotal) dblTotal
+					FROM tblAPBillDetail BillDetail
+					JOIN tblICItem Item ON Item.intItemId = BillDetail.intItemId
+					WHERE Item.strType='Other Charge'
+					GROUP BY intContractDetailId
+		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
+		WHERE Book.intBookId = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  Book.intBookId END
 	
 	UNION
 	
 		 SELECT 
 		  intContractTypeId							= CH.intContractTypeId 
 		,intContractDetailId						= CD.intContractDetailId
+		,intBookId									= Book.intBookId
 		,strBook									= Book.strBook
 		,strSubBook									= SubBook.strSubBook
 		,intCommodityId								= Commodity.intCommodityId
@@ -411,7 +394,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strFixedBy									= CD.strFixationBy
 		,strPricingType								= PT.strPricingType
 		,strInvoiceStatus							= NULL
-		,dblNetFuturesValue							= NetFutures.dblTotalNetFutures
+		,dblNetFuturesValue							= NULL
 		,dblRealizedFuturesPNLValue					= NULL
 		,dblNetPNLValue								= NULL
 		,dblFXValue									= NULL
@@ -476,63 +459,109 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		LEFT JOIN	tblSMCompanyLocationSubLocation		SL		 ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId
 		LEFT JOIN	tblSMCountry				CO				 ON	CO.intCountryID					=	CT.intCountryId
 		LEFT JOIN (SELECT  
-					 intContractDetailId 
-					,intItemId
-					,SUM(dblTotal) dblTotal
-					FROM tblAPBillDetail 
-					GROUP BY intContractDetailId,intItemId
-		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId 
-				AND   BillCost.intItemId     <> CD.intItemId
-		LEFT JOIN
-		(
-			SELECT Summary.intContractDetailId
-			,SUM((
-					Summary.intHedgedLots * Market.dblContractSize * FutOpt.dblPrice / CASE 
-						WHEN Currency.ysnSubCurrency = 1
-							THEN Currency.intCent
-						ELSE 1
-						END
-					) * (
-					CASE 
-						WHEN FutOpt.strBuySell = 'Sell'
-							THEN - 1
-						ELSE 1
-						END
-					)) AS dblTotalNetFutures
-		FROM tblRKAssignFuturesToContractSummary Summary
-		JOIN tblRKFutOptTransaction FutOpt ON FutOpt.intFutOptTransactionId = Summary.intFutOptTransactionId
-		JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = FutOpt.intFutureMarketId
-		JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Market.intCurrencyId
-		GROUP BY Summary.intContractDetailId
-		) NetFutures ON NetFutures.intContractDetailId = CD.intContractDetailId
+					  BillDetail.intContractDetailId
+					,SUM( BillDetail.dblTotal) dblTotal
+					FROM tblAPBillDetail BillDetail
+					JOIN tblICItem Item ON Item.intItemId = BillDetail.intItemId
+					WHERE Item.strType='Other Charge'
+					GROUP BY intContractDetailId
+		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
+
+		WHERE Book.intBookId = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  Book.intBookId END
 
 		-----------------------------------------------------dblCOGSOrNetSaleValue Updation--------------------------------------------
 		
-		UPDATE @tblRealizedPNL SET dblCOGSOrNetSaleValue = (ISNULL(dblContractInvoiceValue,0) + ISNULL(dblCOGSOrNetSaleValue,0) + ISNULL(dblNetFuturesValue,0)) *
+		UPDATE @tblRealizedPNL SET dblCOGSOrNetSaleValue = (
+															  ISNULL(dblContractInvoiceValue,0) 
+															+ ISNULL(dblSecondaryCosts,0) * (CASE WHEN intContractTypeId = 1 THEN 1 ELSE -1 END)
+															) *
 														   CASE WHEN intContractTypeId =1 THEN 1 ELSE -1 END
 
+		UPDATE  g 
+		SET dblNetFuturesValue = (CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END) 
+								 * t.dblContractSize 
+								 *CASE WHEN g.intContractTypeId=1 THEN t.dblWeightedValue ELSE t1.dblWeightedValue END
+
+			,dblFixedLots =     CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END
+		FROM @tblRealizedPNL g
+		JOIN @tblRealizedPNL gp on gp.strAllocationRefNo = g.strAllocationRefNo AND gp.intContractTypeId = 1
+		JOIN @tblRealizedPNL gs on gs.strAllocationRefNo = g.strAllocationRefNo AND gs.intContractTypeId = 2
+		JOIN (
+			SELECT Summary.intContractDetailId,Market.dblContractSize
+				,SUM(Summary.intHedgedLots) intHedgedLots
+				,(SUM(Summary.intHedgedLots*FutOpt.dblPrice)/SUM(Summary.intHedgedLots))
+				/(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END
+				* CASE WHEN FutOpt.strBuySell = 'Sell' THEN - 1 ELSE 1 END )  dblWeightedValue
+				FROM tblRKAssignFuturesToContractSummary Summary
+				JOIN tblRKFutOptTransaction FutOpt ON FutOpt.intFutOptTransactionId = Summary.intFutOptTransactionId
+				JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = FutOpt.intFutureMarketId
+				JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Market.intCurrencyId
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = Summary.intContractDetailId
+				GROUP BY Summary.intContractDetailId,Market.dblContractSize,ysnSubCurrency,Currency.intCent,FutOpt.strBuySell
+		)t on t.intContractDetailId = gp.intContractDetailId
+		JOIN (
+			SELECT Summary.intContractDetailId,Market.dblContractSize
+				,SUM(Summary.intHedgedLots) intHedgedLots
+				,(SUM(Summary.intHedgedLots*FutOpt.dblPrice)/SUM(Summary.intHedgedLots))
+				/(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END
+				 * CASE WHEN FutOpt.strBuySell = 'Sell' THEN - 1 ELSE 1 END ) dblWeightedValue
+				FROM tblRKAssignFuturesToContractSummary Summary
+				JOIN tblRKFutOptTransaction FutOpt ON FutOpt.intFutOptTransactionId = Summary.intFutOptTransactionId
+				JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = FutOpt.intFutureMarketId
+				JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Market.intCurrencyId
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = Summary.intContractDetailId
+				GROUP BY Summary.intContractDetailId,Market.dblContractSize,ysnSubCurrency,Currency.intCent,FutOpt.strBuySell
+		)t1 on t1.intContractDetailId = gs.intContractDetailId
+
 		UPDATE tblRealized 
-		SET tblRealized.dblRealizedPNLValue = - t.dblCOGSOrNetSaleValue
+		SET  tblRealized.dblRealizedPNLValue = t.dblCOGSOrNetSaleValue * 
+													CASE 
+														 WHEN t.dblCOGSOrNetSaleValue > 0 THEN CASE WHEN intContractTypeId = 2 THEN 1  ELSE 0 END
+														 WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
+													 END
+											 
+		    ,tblRealized.dblRealizedFuturesPNLValue = t.dblNetFuturesValue *
+													 CASE 
+														 WHEN t.dblNetFuturesValue > 0 THEN CASE WHEN intContractTypeId = 1 THEN 1  ELSE 0 END
+														 WHEN t.dblNetFuturesValue <= 0 THEN CASE WHEN intContractTypeId = 2 THEN 1 ELSE 0 END
+													 END
 		FROM @tblRealizedPNL tblRealized
 		JOIN (
 				SELECT 
-				strAllocationRefNo
-				,SUM(dblCOGSOrNetSaleValue) dblCOGSOrNetSaleValue 
+				 strAllocationRefNo
+				,SUM(dblCOGSOrNetSaleValue) * -1 dblCOGSOrNetSaleValue 
+				,SUM(dblNetFuturesValue) dblNetFuturesValue 
 				FROM  @tblRealizedPNL
 				GROUP BY strAllocationRefNo
 			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo
 
-		SELECT strAllocationRefNo,dblCOGSOrNetSaleValue,dblRealizedPNLValue,* FROM @tblRealizedPNL --order by strAllocationRefNo, intContractTypeId
+		UPDATE tblRealized 
+		SET  tblRealized.dblNetPNLValue = (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) * 
+													CASE 
+														 WHEN (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) > 0 THEN CASE WHEN intContractTypeId = 2 THEN 1  ELSE 0 END
+														 WHEN (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
+													 END
+		FROM @tblRealizedPNL tblRealized
+		JOIN (
+				SELECT 
+				 strAllocationRefNo
+				,SUM(dblRealizedPNLValue) dblRealizedPNLValue 
+				,SUM(dblRealizedFuturesPNLValue) dblRealizedFuturesPNLValue 
+				FROM  @tblRealizedPNL
+				GROUP BY strAllocationRefNo
+			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo
+
+		--UPDATE @tblRealizedPNL 
+		--SET dblNetPNLValue = ISNULL(dblRealizedPNLValue,0)+ ISNULL(dblRealizedFuturesPNLValue,0)
+
+		SELECT * FROM @tblRealizedPNL ORDER BY strAllocationRefNo, intContractTypeId
 
 					  
 END TRY  
   
 BEGIN CATCH  
- 
- IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION  
  SET @ErrMsg = ERROR_MESSAGE()  
  RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')    
-
 END CATCH
 		
 		
