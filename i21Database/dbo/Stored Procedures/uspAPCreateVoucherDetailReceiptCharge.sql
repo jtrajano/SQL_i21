@@ -124,20 +124,40 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblUnitQty]					=	1,
 		[intCurrencyId]					=	ISNULL(A.intCurrencyId,0),
 		[intStorageLocationId]			=	NULL,
-		[int1099Form]					=	0,
-		[int1099Category]				=	0,
+		[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+														AND A.intItemId > 0
+														AND item.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN 4
+													WHEN entity.str1099Form = '1099-MISC' THEN 1
+													WHEN entity.str1099Form = '1099-INT' THEN 2
+													WHEN entity.str1099Form = '1099-B' THEN 3
+											ELSE 0
+											END,
+		[int1099Category]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+													AND A.intItemId > 0
+													AND item.ysn1099Box3 = 1
+													AND patron.ysnStockStatusQualified = 1 
+													THEN 3
+										ELSE
+											ISNULL(H.int1099CategoryId,0)
+										END,
 		[intScaleTicketId]				=	CASE WHEN IR.intSourceType = 1 THEN A.intScaleTicketId ELSE NULL END,
 		[intLocationId]					=	IR.intLocationId
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN @voucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
-	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
+	INNER JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
+	INNER JOIN tblEMEntity entity ON A.intEntityVendorId = entity.intEntityId
+	INNER JOIN tblICItem item ON A.intItemId = item.intItemId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND A.intItemId = D.intItemId
 	LEFT JOIN tblSMCurrencyExchangeRate F 
 		ON  (F.intFromCurrencyId = @defaultCurrency AND F.intToCurrencyId = A.intCurrencyId) 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G 
 		ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = @currentDateFilter
+	LEFT JOIN vyuPATEntityPatron patron ON IR.intEntityVendorId = patron.intEntityId
+	LEFT JOIN tblAP1099Category H ON entity.str1099Type = H.strCategory
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT

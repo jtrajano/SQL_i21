@@ -24,7 +24,9 @@ DECLARE @receiptItems AS TABLE (
 	[dblTotal]						DECIMAL(18, 6)	NULL, 
 	[dblNetWeight]					DECIMAL(18, 6)	NULL, 
 	[intCostUOMId]					INT NULL,
-    [intTaxGroupId]					INT NULL
+    [intTaxGroupId]					INT NULL,
+	[int1099Form] 					INT NULL DEFAULT 0 , 
+    [int1099Category] 				INT NULL DEFAULT 0 
 );
 DECLARE @detailCreated AS TABLE(intBillDetailId INT, intInventoryReceiptItemId INT)
 DECLARE @error NVARCHAR(200);
@@ -135,18 +137,39 @@ SELECT
 	[intCostUOMId]					=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
 											THEN contractDetail.intPriceItemUOMId
 											ELSE B.intCostUOMId END,
-	[intTaxGroupId]					=	A.intTaxGroupId
+	[intTaxGroupId]					=	A.intTaxGroupId,
+	[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+													AND B.intItemId > 0
+													AND item.ysn1099Box3 = 1
+													AND patron.ysnStockStatusQualified = 1 
+													THEN 4
+												WHEN entity.str1099Form = '1099-MISC' THEN 1
+												WHEN entity.str1099Form = '1099-INT' THEN 2
+												WHEN entity.str1099Form = '1099-B' THEN 3
+										ELSE 0
+										END,
+	[int1099Category]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+												AND B.intItemId > 0
+												AND item.ysn1099Box3 = 1
+												AND patron.ysnStockStatusQualified = 1 
+												THEN 3
+									ELSE
+										ISNULL(F.int1099CategoryId,0)
+									END
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
+INNER JOIN tblEMEntity entity ON C.[intEntityId] = entity.intEntityId
+INNER JOIN tblICItem item ON B.intItemId = item.intItemId
 LEFT JOIN vyuSCGetScaleDistribution D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+LEFT JOIN vyuPATEntityPatron patron ON C.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
 				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
 				ON contractHeader.intContractHeaderId = B.intOrderId 
 				AND contractDetail.intContractDetailId = B.intLineNo
 LEFT JOIN tblICItemUOM ContractItemCostUOM ON ContractItemCostUOM.intItemUOMId = contractDetail.intPriceItemUOMId
-
+LEFT JOIN tblAP1099Category F ON entity.str1099Type = F.strCategory
 WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
 
 -- --update quantity and cost to use
@@ -267,12 +290,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intCurrencyId]					=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 												ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]			=   B.intStorageLocationId,
-			[int1099Form]					=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
-														WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
-														WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
-												ELSE 0
-												END,
-			[int1099Category]				=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
+			[int1099Form]					=	voucherDetailReceipt.int1099Form,
+			[int1099Category]				=	voucherDetailReceipt.int1099Category,
 			[strBillOfLading]				= 	A.strBillOfLading,
 			[intScaleTicketId]				=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
 			[intLocationId]					=	A.intLocationId
@@ -410,12 +429,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
-			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
-													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
-													WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
-											ELSE 0
-											END,
-			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
+			[int1099Form]				=	voucherDetailReceipt.int1099Form,
+			[int1099Category]			=	voucherDetailReceipt.int1099Category,
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
 			[strBillOfLading]			= 	A.strBillOfLading,
 			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
@@ -558,12 +573,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
-			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
-													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
-													WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
-											ELSE 0
-											END,
-			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
+			[int1099Form]				=	voucherDetailReceipt.int1099Form,
+			[int1099Category]			=	voucherDetailReceipt.int1099Category,
 			[intLoadDetailId]			=	B.intSourceId,
 			[strBillOfLading]			= 	A.strBillOfLading
 		FROM tblICInventoryReceipt A
@@ -593,6 +604,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.intEntityId = D2.intEntityId) ON D1.intEntityId = A.intEntityVendorId
 		LEFT JOIN tblCTWeightGrade W ON E.intWeightId = W.intWeightGradeId
 		LEFT JOIN tblLGLoadContainer loads ON loads.intLoadContainerId = B.intContainerId
+		LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 		OUTER APPLY (
 			SELECT
 				PODetails.intContractDetailId
@@ -716,12 +728,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
 			[intStorageLocationId]		=   B.intStorageLocationId,
-			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
-													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
-													WHEN (SELECT CHARINDEX('B', D2.str1099Form)) > 0 THEN 3 
-											ELSE 0
-											END,
-			[int1099Category]			=	ISNULL((SELECT TOP 1 int1099CategoryId FROM tblAP1099Category WHERE strCategory = D2.str1099Type),0),
+			[int1099Form]				=	voucherDetailReceipt.int1099Form,
+			[int1099Category]			=	voucherDetailReceipt.int1099Category,
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
 			[strBillOfLading]			= 	A.strBillOfLading,
 			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,

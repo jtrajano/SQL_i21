@@ -53,20 +53,32 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyReceived]				=	dbo.fnAPValidatePODetailQtyToReceive(A.intPurchaseDetailId, ISNULL(A.dblQtyReceived,1)),
 		[dblDiscount]					=	ISNULL(A.[dblDiscount],0),
 		[dblCost]						=	ISNULL(A.[dblCost],B.dblCost),
-		[int1099Form]					=	(CASE WHEN E.str1099Form = '1099-MISC' THEN 1
+		[int1099Form]					=	(CASE 	WHEN G.intEntityId IS NOT NULL 
+														AND B.intItemId > 0
+														AND item.ysn1099Box3 = 1
+														AND G.ysnStockStatusQualified = 1 
+														THEN 4
+													WHEN E.str1099Form = '1099-MISC' THEN 1
 													WHEN E.str1099Form = '1099-INT' THEN 2
 													WHEN E.str1099Form = '1099-B' THEN 3
 												ELSE 0 END),
-		[int1099Category]				=	F.int1099CategoryId,
+		[int1099Category]				=	CASE 	WHEN G.intEntityId IS NOT NULL 
+														AND B.intItemId > 0
+														AND item.ysn1099Box3 = 1
+														AND G.ysnStockStatusQualified = 1 
+														THEN 3
+											ELSE F.int1099CategoryId END,
 		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
 		[intTaxGroupId]					=	A.[intTaxGroupId]					
 	FROM @voucherPODetails A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
 	INNER JOIN tblPOPurchase C ON B.intPurchaseId = C.intPurchaseId
+	LEFT JOIN tblICItem item ON B.intItemId = item.intItemId
 	LEFT JOIN tblICItemLocation B2 ON B.intItemId = B2.intItemId AND B2.intLocationId = C.intShipToId
 	INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
+	LEFT JOIN vyuPATEntityPatron G ON C.intEntityVendorId = G.intEntityId
 	WHERE B.dblQtyOrdered != B.dblQtyReceived --EXCLUDE FULLY BILLED PURCHASE DETAIL ITEM
 
 	EXEC [uspAPUpdateVoucherDetailTax] @detailCreated

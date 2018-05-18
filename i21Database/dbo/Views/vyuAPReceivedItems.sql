@@ -69,8 +69,16 @@ FROM
 		,[intCostCurrencyId]		=	tblReceived.intCostCurrencyId		 
 		,[strCostCurrency]			=	tblReceived.strCostCurrency
 		,[strVendorLocation]		=	tblReceived.strVendorLocation
-		,[str1099Form]				=	D2.str1099Form			 
-		,[str1099Type]				=	D2.str1099Type
+		,[str1099Form]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+														AND tblReceived.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN '1099 PATR'
+												ELSE D2.str1099Form	END
+		,[str1099Type]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+														AND tblReceived.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN 'Per-unit retain allocations'
+													ELSE D2.str1099Type END
 		,[intStorageLocationId]		=	tblReceived.intStorageLocationId		 
 		,[strStorageLocationName]	=	tblReceived.strStorageLocationName
 	
@@ -136,9 +144,11 @@ FROM
 				,strReceiptLocation = (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A1.intLocationId)
 				,B1.intTaxGroupId
 				,TG.strTaxGroup
+				,item.ysn1099Box3
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
+				LEFT JOIN tblICItem item ON B1.intItemId = item.intItemId
 				--INNER JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intInventoryReceiptItemId = B1.intInventoryReceiptItemId
 				LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B1.intWeightUOMId
 				LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
@@ -196,12 +206,14 @@ FROM
 				,B1.dblForexRate
 				,RT.strCurrencyExchangeRateType
 				,TG.strTaxGroup
+				,item.ysn1099Box3
 		) as tblReceived
 		--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 		LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityId]
 		LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
+		LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 		LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
 				ON G1.intEntityId = D1.[intEntityId] AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
 		OUTER APPLY (
@@ -389,8 +401,16 @@ FROM
 									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 									END
 	,[strVendorLocation]		=	EL.strLocationName
-	,[str1099Form]				=	D2.str1099Form			 
-	,[str1099Type]				=	D2.str1099Type
+		,[str1099Form]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+														AND C.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN '1099 PATR'
+												ELSE D2.str1099Form	END
+		,[str1099Type]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+														AND C.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN 'Per-unit retain allocations'
+													ELSE D2.str1099Type END
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
 	,[dblNetShippedWeight]		=	ISNULL(CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN Loads.dblNet ELSE B.dblGross END,0)
@@ -441,6 +461,7 @@ FROM
 	LEFT JOIN dbo.tblCTWeightGrade J ON CH.intWeightId = J.intWeightGradeId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 	LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
+	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
