@@ -41,7 +41,18 @@ SELECT
 	,intAssignedLots as intAssignedLots
 	,b.strBankName
 	,ba.strBankAccountNo
-	,CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail) OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)) AND intFutOptTransactionId = ft.intFutOptTransactionId),0) AS BIT) ysnLocked
+	,CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
+				WHERE 
+				(intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail) 
+				OR 
+				intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
+				OR
+				intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS) 
+				OR 
+				intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
+				) 
+				AND 
+				intFutOptTransactionId = ft.intFutOptTransactionId),0)AS BIT) as ysnLocked
 FROM [tblRKFutOptTransaction] AS ft
 LEFT OUTER JOIN [dbo].[vyuRKGetAssignedLots] AS al ON ft.[intFutOptTransactionId] = al.[intFutOptTransactionId]
 LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
