@@ -6674,6 +6674,8 @@
     <Build Include="dbo\Tables\tblMBILOrderTaxCode.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILBuildOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentChangeLotWeight.sql" />
+    <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
+    <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
