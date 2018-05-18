@@ -133,7 +133,7 @@ END
 		UPDATE tblAPBillDetail SET intCurrencyId = [dbo].[fnSMGetDefaultCurrency]('FUNCTIONAL') WHERE intBillId = @intCreatedBillId;
 		IF(@qualified = 0)
 		BEGIN
-			UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 1, dbl1099 = ROUND(@dblEquityPay, 2) WHERE intBillId = @intCreatedBillId;
+			UPDATE tblAPBillDetail SET int1099Form = 4, int1099Category= 5, dbl1099 = ROUND(@dblEquityPay, 2) WHERE intBillId = @intCreatedBillId;
 		END
 		UPDATE tblPATEquityPaySummary SET intBillId = @intCreatedBillId WHERE intEquityPaySummaryId = @intEquityPaySummaryId;
 
