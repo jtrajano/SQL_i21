@@ -1701,7 +1701,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -1755,7 +1755,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -1777,7 +1777,7 @@ IF @post = 1
 				,[dblForeignRate]			= @ZeroDecimal
 				,[strRateType]				= ''
 			FROM
-				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, strTransactionType, intCurrencyId, dtmDate, dtmPostDate, strComments, dblAmountDue, intAccountId, intPeriodsToAccrue, dblBaseAmountDue, intSourceId, intOriginalInvoiceId
+				(SELECT intInvoiceId, strInvoiceNumber, intEntityCustomerId, strTransactionType, intCurrencyId, dtmDate, dtmPostDate, strComments, dblAmountDue, intAccountId, intPeriodsToAccrue, dblBaseAmountDue, intSourceId, intOriginalInvoiceId, dblBaseInvoiceTotal,dblInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
 				(SELECT [intEntityId], [strCustomerNumber] FROM tblARCustomer WITH (NOLOCK)) C
@@ -1810,7 +1810,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Provisional Amount'
@@ -1918,7 +1918,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -1940,7 +1940,7 @@ IF @post = 1
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''	  			
 			FROM
-				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, strTransactionType, dblPayment, strComments, intCurrencyId, intPeriodsToAccrue, dblBasePayment
+				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, strTransactionType, dblPayment, strComments, intCurrencyId, intPeriodsToAccrue, dblBasePayment, dblBaseInvoiceTotal,dblInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C ON A.[intEntityCustomerId] = C.[intEntityId]
@@ -2022,7 +2022,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(B.dblCurrencyExchangeRate,1) 
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
@@ -2112,7 +2112,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(B.dblCurrencyExchangeRate,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
@@ -2251,7 +2251,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(B.dblCurrencyExchangeRate,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
@@ -2388,7 +2388,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(B.dblCurrencyExchangeRate,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
@@ -2499,7 +2499,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(B.dblCurrencyExchangeRate,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
@@ -2579,7 +2579,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(B.dblCurrencyExchangeRate,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= B.strItemDescription 
@@ -2653,7 +2653,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -2675,7 +2675,7 @@ IF @post = 1
 				,[dblForeignRate]			= 0
 				,[strRateType]				= ''
 			FROM
-				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, dblShipping, strTransactionType, strComments, intCurrencyId, dblBaseShipping
+				(SELECT intInvoiceId, strInvoiceNumber, [intEntityCustomerId], intCompanyLocationId, dtmPostDate, dtmDate, dblShipping, strTransactionType, strComments, intCurrencyId, dblBaseShipping,dblBaseInvoiceTotal,dblInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 			LEFT JOIN 
 				(SELECT [intEntityId], strCustomerNumber FROM tblARCustomer WITH (NOLOCK)) C
@@ -2713,7 +2713,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
+				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -2757,7 +2757,7 @@ IF @post = 1
 				(SELECT intInvoiceId, intInvoiceDetailId, intCurrencyExchangeRateTypeId FROM tblARInvoiceDetail WITH (NOLOCK)) D
 					ON DT.intInvoiceDetailId = D.intInvoiceDetailId
 			INNER JOIN			
-				(SELECT intInvoiceId, dtmPostDate, dtmDate, intEntityCustomerId, strComments, strTransactionType, intCurrencyId, strInvoiceNumber, intPeriodsToAccrue, intCompanyLocationId
+				(SELECT intInvoiceId, dtmPostDate, dtmDate, intEntityCustomerId, strComments, strTransactionType, intCurrencyId, strInvoiceNumber, intPeriodsToAccrue, intCompanyLocationId,dblBaseInvoiceTotal,dblInvoiceTotal
 				 FROM tblARInvoice WITH (NOLOCK)) A 
 					ON D.intInvoiceId = A.intInvoiceId
 			INNER JOIN

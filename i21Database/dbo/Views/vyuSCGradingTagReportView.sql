@@ -34,7 +34,6 @@
 	tblSCTicket.intTareUserId,
 	tblSCTicket.dblGrossUnits,
 	tblSCTicket.dblNetUnits,
-	tblSCTicket.strItemNumber,
 	tblSCTicket.strItemUOM,
 	tblSCTicket.intCustomerId,
 	tblSCTicket.intSplitId,

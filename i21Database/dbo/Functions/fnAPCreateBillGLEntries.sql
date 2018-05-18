@@ -663,7 +663,7 @@ BEGIN
 		[strComments]					=	E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
-		[dblSourceUnitDebit]			=	ISNULL(units.dblTotalUnits,0),
+		[dblSourceUnitDebit]			=	0,
 		[intCommodityId]				=	A.intCommodityId,
 		[intSourceLocationId]			=	A.intStoreLocationId,
 		[strSourceDocumentId]			=	A.strVendorOrderNumber

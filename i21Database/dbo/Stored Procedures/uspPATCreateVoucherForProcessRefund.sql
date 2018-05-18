@@ -151,6 +151,9 @@ BEGIN
 			(@intAPClearingGLAccount, 0, 'Patronage Refund', 1, 0, ROUND(@dblCashRefund, 2), NULL),
 			(@intServiceFeeIncomeId, 0, 'Service Fee', 1, 0, (@dblServiceFee * -1), NULL)
 		
+		-- DELETE SERVICE FEE IF COST IS 0
+		DELETE FROM @voucherDetailNonInventory
+		WHERE [strMiscDescription] = N'Service Fee' AND @dblServiceFee = 0;
 
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId	= @intUserId

@@ -108,8 +108,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		AND (ARCC.[intItemUOMId] = @ItemUOMId OR ARCC.[intPriceItemUOMId] = @ItemUOMId OR @ItemUOMId IS NULL)
 		AND ARCC.[intItemId] = @ItemId
 		AND (
-			(
-				(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARCC.[intItemUOMId], ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), @OriginalQuantity),ISNULL(@OriginalQuantity, @ZeroDecimal)) + ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(ARCC.[intPriceItemUOMId], ARCC.[intItemUOMId]), ARCC.[intItemUOMId], @Quantity),ISNULL(@Quantity, @ZeroDecimal))) 
+				(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(@ItemUOMId, ARCC.[intItemUOMId]), ISNULL(ARCC.[intOrderUOMId], ARCC.[intItemUOMId]), @OriginalQuantity),ISNULL(@OriginalQuantity, @ZeroDecimal)) + ARCC.[dblAvailableQty]) >= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ISNULL(@ItemUOMId, ARCC.[intItemUOMId]), ISNULL(ARCC.[intOrderUOMId], ARCC.[intItemUOMId]), @Quantity),ISNULL(@Quantity, @ZeroDecimal))
 				OR ARCC.[ysnUnlimitedQuantity] = 1 
 				OR ISNULL(@AllowQtyToExceed,0) = 1
 			)

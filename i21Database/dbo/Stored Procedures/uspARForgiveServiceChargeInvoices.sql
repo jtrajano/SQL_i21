@@ -172,7 +172,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				, ysnRevalued
 			)
 			SELECT intCompanyId					= GL.intCompanyId
-				, dtmDate						= GL.dtmDate
+				, dtmDate						=  ISNULL(SCI.dtmForgiveDate, GETDATE())
 				, strBatchId					= @strBatchId
 				, intAccountId					= GL.intAccountId
 				, dblDebit						= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END

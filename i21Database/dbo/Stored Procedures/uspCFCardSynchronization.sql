@@ -30,11 +30,107 @@ BEGIN
 	DECLARE @intSycnType			INT
 	DECLARE @strAction				NVARCHAR(MAX)	 =	 ''
 	DECLARE @dtmImportDate			DATETIME
+	DECLARE @ysnIsVehicleNumeric	BIT 
 
 	
 
 	--VALIDATE ACCOUNT--
+	---VALIDATE ACCOUNT---
 
+	--DECLARE @intAccountId AS INT = 0
+	DECLARE @strErrorRecordId NVARCHAR(MAX) = ''
+	DECLARE @tblCFNumericAccount TABLE(
+			intAccountId				int
+			,strAccountNumber			nvarchar(MAX)
+	)
+
+	DECLARE @tblCFCharAccount TABLE(
+			intAccountId				int
+			,strAccountNumber			nvarchar(MAX)
+	)
+
+	IF(ISNULL(@strAccountNumber,'') != '')
+	BEGIN
+		IF(ISNUMERIC(@strAccountNumber) = 1)
+		BEGIN
+			INSERT INTO @tblCFNumericAccount(
+				 intAccountId		
+				,strAccountNumber	
+			)
+			SELECT 
+				 intAccountId			
+				,strCustomerNumber	
+			FROM vyuCFAccountCustomer 
+			WHERE strCustomerNumber not like '%[^0-9]%' and strCustomerNumber != ''
+
+			SET @intAccountId =
+			(SELECT TOP 1 intAccountId
+			FROM @tblCFNumericAccount
+			WHERE CAST(strAccountNumber AS BIGINT) = CAST(@strAccountNumber AS BIGINT))
+				
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblCFCharAccount(
+				intAccountId		
+				,strAccountNumber	
+			)
+				SELECT 
+				 intAccountId			
+				,strCustomerNumber	
+			FROM vyuCFAccountCustomer 
+		    WHERE strCustomerNumber like '%[^0-9]%' and strCustomerNumber != ''
+
+			SET @intAccountId =
+			(SELECT TOP 1 intAccountId
+			FROM @tblCFCharAccount
+			WHERE strAccountNumber = @strAccountNumber)
+
+		END
+	END
+	ELSE
+	BEGIN 
+		print 'Invalid account number'
+		INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strCardNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+
+			)
+			SELECT 
+				 @strAccountNumber
+				,@strCardNumber
+			,'Invalid account number' as strMessage
+			,@strErrorRecordId
+			,@dtmImportDate
+
+		RETURN
+	END
+
+	IF(ISNULL(@intAccountId,0) = 0)
+	BEGIN
+		print 'Cannot account number'
+		INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strCardNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+
+			)
+			SELECT 
+				 @strAccountNumber
+				,@strCardNumber
+			,'Cannot account number ' + @strAccountNumber as strMessage
+			,@strErrorRecordId
+			,@dtmImportDate
+
+		RETURN
+	END
 
 	--VALIDATE TYPE--
 	IF(ISNULL(@strCardType,'') != '')
@@ -55,12 +151,15 @@ BEGIN
 			INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
 				 @strAccountNumber
+				,@strCardNumber
 				,'Invalid card type' as strMessage
 				,''
 				,@dtmImportDate
@@ -72,15 +171,18 @@ BEGIN
 	BEGIN
 		print 'invalid card type'
 
-		INSERT INTO tblCFCSULog
+	INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
 				 @strAccountNumber
+				,@strCardNumber
 				,'Invalid card type' as strMessage
 				,''
 				,@dtmImportDate
@@ -90,12 +192,12 @@ BEGIN
 	--VALIDATE TYPE--
 
 
-	DECLARE @strErrorRecordId NVARCHAR(MAX) = ''
+	
 	IF(@intSycnType = 1)
 	BEGIN
 	--CHECK IF CARD EXIST--
 		SET @strErrorRecordId = 'card - ' + @strCardNumber
-		IF((SELECT COUNT(*) FROM tblCFCard where strCardNumber = @strCardNumber) = 0)
+		IF((SELECT COUNT(*) FROM tblCFCard where strCardNumber = @strCardNumber AND intAccountId = @intAccountId) = 0)
 		BEGIN
 			SET @strAction = 'addcard'
 		END
@@ -107,9 +209,73 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		DECLARE @tblCFNumericVehicle TABLE(
+		 intVehicleId				int
+		,strVehicleNumber			nvarchar(MAX)
+		,intAccountId				int
+		)
+
+		DECLARE @tblCFCharVehicle TABLE(
+			 intVehicleId				int
+			,strVehicleNumber			nvarchar(MAX)
+			,intAccountId				int
+		)
+
+		DECLARE @intVehicleId INT
+	
+		IF(@strVehicleNumber IS NOT NULL)
+		BEGIN
+
+			IF(ISNUMERIC(@strVehicleNumber) = 1)
+			BEGIN
+
+				--INT VEHICLE NUMBER--
+				INSERT INTO @tblCFNumericVehicle(
+						intVehicleId			
+					,strVehicleNumber
+					,intAccountId
+				)	
+				SELECT 
+						intVehicleId			
+					,strVehicleNumber	
+					,intAccountId		
+				FROM tblCFVehicle 
+				WHERE strVehicleNumber not like '%[^0-9]%' and strVehicleNumber != ''
+				AND intAccountId = @intAccountId
+
+				SET @intVehicleId =
+				(SELECT TOP 1 intVehicleId
+				FROM @tblCFNumericVehicle
+				WHERE CAST(strVehicleNumber AS BIGINT) = CAST(@strVehicleNumber AS BIGINT))
+
+
+			END
+			ELSE
+			BEGIN
+					--CHAR VEHICLE NUMBER--
+					INSERT INTO @tblCFCharVehicle(
+						 intVehicleId			
+						,strVehicleNumber
+						,intAccountId
+					)	
+					SELECT 
+						 intVehicleId			
+						,strVehicleNumber	
+						,intAccountId		
+					FROM tblCFVehicle WHERE strVehicleNumber like '%[^0-9]%' and strVehicleNumber != ''
+					AND intAccountId = @intAccountId
+
+					SET @intVehicleId =
+					(SELECT TOP 1 intVehicleId
+					FROM @tblCFNumericVehicle
+					WHERE strVehicleNumber = @strVehicleNumber)
+
+				END
+		END
+		
 	--CHECK IF VEHICLE EXIST--
 		SET @strErrorRecordId = 'vehicle - ' + @strVehicleNumber
-		IF((SELECT COUNT(*) FROM tblCFVehicle where strVehicleNumber = @strVehicleNumber) = 0)
+		IF(ISNULL(@intVehicleId,0) = 0)
 		BEGIN
 			SET @strAction = 'addvehicle'
 		END
@@ -142,14 +308,17 @@ BEGIN
 			BEGIN
 				print 'Invalid card status'
 				INSERT INTO tblCFCSULog
-				(
-					 strAccountNumber
-					,strMessage
-					,strRecordId
-					,dtmUpdateDate
-				)
-				SELECT 
-					 @strAccountNumber
+			(
+				 strAccountNumber
+				,strCardNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+
+			)
+			SELECT 
+				 @strAccountNumber
+				,@strCardNumber
 					,'Invalid card status' as strMessage
 					,@strErrorRecordId
 					,@dtmImportDate
@@ -159,15 +328,18 @@ BEGIN
 		ELSE
 		BEGIN
 			print 'Invalid card status'
-			INSERT INTO tblCFCSULog
+		INSERT INTO tblCFCSULog
 			(
-					strAccountNumber
+				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
-					@strAccountNumber
+				 @strAccountNumber
+				,@strCardNumber
 				,'Invalid card status' as strMessage
 				,@strErrorRecordId
 				,@dtmImportDate
@@ -227,19 +399,24 @@ BEGIN
 		ELSE
 		BEGIN 
 			print 'Invalid product auth'
-			INSERT INTO tblCFCSULog
+		INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
 				 @strAccountNumber
+				,@strCardNumber
 				,'Invalid product auth' as strMessage
 				,@strErrorRecordId
 				,@dtmImportDate
-			RETURN
+
+			SET @intProductAuthCode = NULL
+			--RETURN
 		END
 		IF(ISNULL(@intProductAuthCode,0) = 0)
 		BEGIN
@@ -247,16 +424,21 @@ BEGIN
 			INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
 				 @strAccountNumber
+				,@strCardNumber
 				,'Cannot find product auth ' + @strProductAuthCode as strMessage
 				,@strErrorRecordId
 				,@dtmImportDate
-			RETURN
+
+			SET @intProductAuthCode = NULL
+			--RETURN
 		END
 
 
@@ -279,12 +461,15 @@ BEGIN
 			INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
 				 @strAccountNumber
+				,@strCardNumber
 				,'Invalid expiration date' as strMessage
 				,@strErrorRecordId
 				,@dtmImportDate
@@ -298,12 +483,15 @@ BEGIN
 			INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
+				,strCardNumber
 				,strMessage
 				,strRecordId
 				,dtmUpdateDate
+
 			)
 			SELECT 
 				 @strAccountNumber
+				,@strCardNumber
 				,'Participant id not match' as strMessage
 				,@strErrorRecordId
 				,@dtmImportDate
@@ -320,57 +508,6 @@ BEGIN
 	SET @dtmImportDate = Convert(varchar(30),@strImportDate,102)
 	
 	---------------------DEFAULTS---------------------
-
-
-
-	--VALIDATE ACCOUNT--
-	IF(ISNULL(@strAccountNumber,'') != '')
-	BEGIN
-		SELECT TOP 1 @intAccountId = intAccountId FROM vyuCFAccountCustomer WHERE strCustomerNumber = @strAccountNumber
-	END
-	ELSE
-	BEGIN
-		print 'Invalid account number'
-		INSERT INTO tblCFCSULog
-		(
-			 strAccountNumber
-			,strMessage
-			,strRecordId
-			,dtmUpdateDate
-		)
-		SELECT 
-			 @strAccountNumber
-			,'Invalid account number' as strMessage
-			,@strErrorRecordId
-			,@dtmImportDate
-		RETURN
-	END
-
-
-	IF(ISNULL(@intAccountId,0) = 0)
-	BEGIN
-		SELECT TOP 1 @intAccountId = intAccountId FROM tblCFNetworkAccount WHERE strNetworkAccountId = @strAccountNumber
-	END
-
-
-	IF(ISNULL(@intAccountId,0) = 0)
-	BEGIN
-		print 'Invalid account number'
-		INSERT INTO tblCFCSULog
-		(
-			 strAccountNumber
-			,strMessage
-			,strRecordId
-			,dtmUpdateDate
-		)
-		SELECT 
-			 @strAccountNumber
-			,'Invalid account number' as strMessage
-			,@strErrorRecordId
-			,@dtmImportDate
-		RETURN
-	END
-
 
 	IF(@strAction = 'addcard')
 	BEGIN
@@ -516,6 +653,7 @@ BEGIN
 				,dtmUpdateDate
 				,strUserName
 				,strRecord
+				,strAccountNumber
 			)
 			SELECT 
 				 @strSessionId
@@ -533,6 +671,7 @@ BEGIN
 							WHEN strTableName = 'tblCFVehicle'
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
+				,@strAccountNumber
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -648,6 +787,7 @@ BEGIN
 				,strComment
 			FROM tblCFCard 
 			WHERE strCardNumber = @strCardNumber
+			AND intAccountId = @intAccountId
 
 			DELETE FROM tblCFTempCSUAuditLog
 
@@ -686,6 +826,7 @@ BEGIN
 				,dtmUpdateDate
 				,strUserName
 				,strRecord
+				,strAccountNumber
 			)
 			SELECT 
 				 @strSessionId
@@ -703,6 +844,7 @@ BEGIN
 							WHEN strTableName = 'tblCFVehicle'
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
+				,@strAccountNumber
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -812,6 +954,7 @@ BEGIN
 				,dtmUpdateDate
 				,strUserName
 				,strRecord
+				,strAccountNumber
 			)
 			SELECT 
 				 @strSessionId
@@ -829,6 +972,7 @@ BEGIN
 							WHEN strTableName = 'tblCFVehicle'
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
+				,@strAccountNumber
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -909,19 +1053,22 @@ BEGIN
 				,ysnActive
 				,intDepartmentId
 			FROM tblCFVehicle 
-			WHERE strVehicleNumber = @strVehicleNumber
+			WHERE intVehicleId = @intVehicleId
+			AND intAccountId = @intAccountId
+
+		--SELECT * FROM tblCFTempCSUVehicle
 
 		DELETE FROM tblCFTempCSUAuditLog
 
 		UPDATE tblCFTempCSUVehicle SET 
 		 strVehicleNumber		= @strVehicleNumber
-		,strVehicleDescription	= @strVehicleDescription
-		WHERE strVehicleNumber = @strVehicleNumber
+		,strVehicleDescription	= @strLabel
+		WHERE intVehicleId = @intVehicleId
 
 		UPDATE tblCFVehicle SET 
 		 strVehicleNumber		= @strVehicleNumber
-		,strVehicleDescription	= @strVehicleDescription
-		WHERE strVehicleNumber = @strVehicleNumber
+		,strVehicleDescription	= @strLabel
+		WHERE intVehicleId = @intVehicleId
 
 		INSERT INTO tblCFCSUAuditLog
 		(
@@ -935,6 +1082,7 @@ BEGIN
 			,dtmUpdateDate
 			,strUserName
 			,strRecord
+			,strAccountNumber
 		)
 		SELECT 
 			@strSessionId
@@ -952,6 +1100,7 @@ BEGIN
 							WHEN strTableName = 'tblCFVehicle'
 							THEN (SELECT TOP 1 strVehicleNumber FROM tblCFVehicle WHERE intVehicleId = intPK)
 						END
+			,@strAccountNumber
 		FROM 
 		tblCFTempCSUAuditLog
 
@@ -965,14 +1114,18 @@ BEGIN
 
 	BEGIN CATCH
 
-	INSERT INTO tblCFCSULog(
-		 strAccountNumber
-		,strMessage
-		,strRecordId
-		,dtmUpdateDate
-	)
-	SELECT 
-		@strAccountNumber
+	INSERT INTO tblCFCSULog
+			(
+				 strAccountNumber
+				,strCardNumber
+				,strMessage
+				,strRecordId
+				,dtmUpdateDate
+
+			)
+			SELECT 
+				 @strAccountNumber
+				,@strCardNumber
 		,ERROR_MESSAGE()
 		,''
 		,@dtmImportDate

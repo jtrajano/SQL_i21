@@ -7,30 +7,16 @@
 	, @intNewInvoiceId	INT = NULL OUTPUT
 AS
 BEGIN
-	DECLARE @intScaleItem			INT = NULL
-		  , @intStockUOMId			INT = NULL
-		  , @intItemUOMId			INT = NULL
-		  , @intSalesOrderDetailId	INT = NULL
-		  , @dblTotalTreatment		NUMERIC(18, 6) = 0
+	DECLARE @dblTotalOrderedQty		NUMERIC(18, 6) = 0
 
-	SELECT TOP 1 @intScaleItem			= SOD.intItemId
-			   , @intStockUOMId			= I.intUnitMeasureId
-			   , @intItemUOMId			= SOD.intItemUOMId
-			   , @intSalesOrderDetailId = SOD.intSalesOrderDetailId
+	SELECT @dblTotalOrderedQty = SUM(ISNULL(SOD.dblQtyOrdered, 0))
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT I.intItemId
-			 , IUOM.intUnitMeasureId
 		FROM dbo.tblICItem I WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intItemId
-				 , intUnitMeasureId
-			FROM dbo.tblICItemUOM WITH (NOLOCK)
-			WHERE ysnStockUnit = 1
-		) IUOM ON I.intItemId = IUOM.intItemId
 		WHERE I.ysnUseWeighScales = 1
 	) I ON SOD.intItemId = I.intItemId
-	WHERE intSalesOrderId = @intSalesOrderId
+	WHERE intSalesOrderId = @intSalesOrderId 
 
 	IF ISNULL(@intSalesOrderId, 0) = 0
 		BEGIN
@@ -56,21 +42,11 @@ BEGIN
 			RETURN;
 		END
 
-	IF ISNULL(@intScaleItem, 0) = 0
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId AND I.ysnUseWeighScales = 1 WHERE intSalesOrderId = @intSalesOrderId)
 		BEGIN
 			RAISERROR('Sales Order doesn''t have scale item.', 16, 1)
 			RETURN;
 		END
-
-	SELECT @dblTotalTreatment = ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, SOD.intItemUOMId, SUM(dblQtyOrdered)), 0)
-	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intItemId
-		FROM dbo.tblICItem WITH (NOLOCK)
-		WHERE ysnUseWeighScales = 0
-	) ITEM ON SOD.intItemId = ITEM.intItemId
-	WHERE SOD.intSalesOrderId = @intSalesOrderId
-	GROUP BY SOD.intItemUOMId
 
 	EXEC dbo.uspSOProcessToInvoice @SalesOrderId = @intSalesOrderId
 								 , @UserId = @intUserId
@@ -82,30 +58,58 @@ BEGIN
 			RETURN;
 		END	
 	ELSE
-		BEGIN
-			DECLARE @ItemUOMId AS INT, @QtyShipped AS NUMERIC(18, 6), @ContractDetailId AS INT, @ItemPrice NUMERIC(18,6)	= 0.000000	
+		BEGIN			
+			UPDATE ID 
+			SET ID.dblQtyShipped		= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
+											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
+											WHEN ISNULL(ADDON.intParentItemId, 0) <> 0 AND ITEM.ysnUseWeighScales = 0 THEN dbo.fnRoundBanker(ID.dblQtyOrdered * (ADDON.dblParentQtyOrdered / @dblTotalOrderedQty), 2) --FOR ADD ON ITEMS
+											ELSE ID.dblQtyShipped --REGULAR ITEMS
+										END
+				, ID.intItemUOMId		= @intScaleUOMId
+				, ID.intTicketId		= @intTicketId
+			FROM tblARInvoiceDetail ID
+			INNER JOIN (
+				SELECT intInvoiceId
+						, intCompanyLocationId
+				FROM dbo.tblARInvoice
+			) INVOICE ON ID.intInvoiceId = INVOICE.intInvoiceId
+			INNER JOIN (
+				SELECT intItemId
+						, ysnUseWeighScales	= ISNULL(ysnUseWeighScales, 0)
+				FROM dbo.tblICItem
+			) ITEM ON ID.intItemId = ITEM.intItemId
+			LEFT JOIN (
+				SELECT intParentItemId		= AO.intItemId
+						, intComponentItemId	= AO.intComponentItemId
+						, intCompanyLocationId	= AO.intCompanyLocationId
+						, dblParentQtyOrdered  = ISNULL(ADDONPARENT.dblQtyOrdered, 0)
+				FROM vyuARGetAddOnItems AO
+				CROSS APPLY (
+					SELECT TOP 1 dblQtyOrdered
+					FROM tblARInvoiceDetail
+					WHERE intInvoiceDetailId = @intNewInvoiceId
+						AND intItemId = AO.intItemId
+				) ADDONPARENT
+			) ADDON ON ADDON.intCompanyLocationId = INVOICE.intCompanyLocationId
+					AND ADDON.intComponentItemId = ID.intItemId
+			WHERE ID.intInvoiceId = @intNewInvoiceId
 
-			SELECT TOP 1
-				 @ItemUOMId			= intItemUOMId
-				,@QtyShipped		= dblQtyShipped
-				,@ContractDetailId	= intContractDetailId 
-				,@ItemPrice			= dblPrice
-			FROM
-				tblARInvoiceDetail
-			WHERE
-				intSalesOrderDetailId = @intSalesOrderDetailId
-				AND intInvoiceId = @intNewInvoiceId
-				
+			IF(OBJECT_ID('tempdb..#CONTRACTLINEITEMS') IS NOT NULL)
+			BEGIN
+				DROP TABLE #CONTRACTLINEITEMS
+			END
 
-			IF ISNULL(@ContractDetailId, 0) <> 0 AND (@dblNetWeight - @dblTotalTreatment) > ISNULL(dbo.fnCalculateQtyBetweenUOM(@ItemUOMId, @intScaleUOMId, @QtyShipped), 0)
+			--CONTRACTS EXCEEDED TO AVAILABLE
+			SELECT ID.intInvoiceDetailId
+			INTO #CONTRACTLINEITEMS
+			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+			INNER JOIN dbo.tblICItem I ON ID.intItemId = I.intItemId AND I.ysnUseWeighScales = 1
+			WHERE ID.intInvoiceId = @intNewInvoiceId
+			  AND ISNULL(ID.intContractDetailId, 0) <> 0
+			  AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0)
+			
+			WHILE EXISTS(SELECT TOP 1 NULL FROM #CONTRACTLINEITEMS)
 				BEGIN
-					UPDATE tblARInvoiceDetail
-					SET dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(@ItemUOMId, @intScaleUOMId, dblQtyShipped), 0)
-						, intItemUOMId = @intScaleUOMId
-						, intTicketId = @intTicketId
-					WHERE intSalesOrderDetailId = @intSalesOrderDetailId
-						AND intInvoiceId = @intNewInvoiceId
-
 					DECLARE @ItemId						INT
 						,@ItemPrepayTypeId				INT
 						,@ItemPrepayRate				NUMERIC(18,6)
@@ -123,6 +127,7 @@ BEGIN
 						,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 						,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
 						,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
+						,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 						,@ItemPricing					NVARCHAR(250)	= NULL
 						,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 						,@RefreshPrice					BIT				= 0
@@ -186,15 +191,18 @@ BEGIN
 						,@ItemStorageScheduleTypeId		INT				= NULL
 						,@ItemDestinationGradeId		INT				= NULL
 						,@ItemDestinationWeightId		INT				= NULL
+						,@intInvoiceDetailId			INT				= NULL
+
+					SELECT TOP 1 @intInvoiceDetailId = intInvoiceDetailId FROM #CONTRACTLINEITEMS ORDER BY intInvoiceDetailId
 
 					SELECT TOP 1
-						 @ItemId						= intItemId
+							@ItemId						= intItemId
 						,@ItemPrepayTypeId				= intPrepayTypeId
 						,@ItemPrepayRate				= dblPrepayRate
 						,@ItemIsBlended					= ysnBlended
 						,@ItemDocumentNumber			= strDocumentNumber
 						,@ItemDescription				= strItemDescription
-						,@ItemQtyShipped				= (@dblNetWeight - @dblTotalTreatment) - ISNULL(dbo.fnCalculateQtyBetweenUOM(@ItemUOMId, @intScaleUOMId, @QtyShipped), 0)
+						,@ItemQtyShipped				= dbo.fnRoundBanker(@dblNetWeight * (dblQtyOrdered / @dblTotalOrderedQty), 2) - ISNULL(dbo.fnCalculateQtyBetweenUOM(intItemUOMId, @intScaleUOMId, dblQtyShipped), 0)
 						,@ItemOrderUOMId				= NULL
 						,@ItemPriceUOMId				= intPriceUOMId
 						,@ItemQtyOrdered				= 0.00000000
@@ -203,6 +211,7 @@ BEGIN
 						,@ItemTermDiscount				= dblItemTermDiscount
 						,@ItemTermDiscountBy			= strItemTermDiscountBy
 						,@ItemUnitPrice					= dblUnitPrice
+						,@ItemPrice						= dblPrice
 						,@ItemPricing					= strPricing
 						,@ItemVFDDocumentNumber			= strVFDDocumentNumber
 						,@ItemMaintenanceType			= strMaintenanceType
@@ -261,13 +270,10 @@ BEGIN
 						,@ItemStorageScheduleTypeId		= intStorageScheduleTypeId
 						,@ItemDestinationGradeId		= intDestinationGradeId
 						,@ItemDestinationWeightId		= intDestinationWeightId
-					FROM
-						tblARInvoiceDetail
-					WHERE
-						intSalesOrderDetailId = @intSalesOrderDetailId
-						AND intInvoiceId = @intNewInvoiceId
-
-
+					FROM tblARInvoiceDetail
+					WHERE intInvoiceDetailId = @intInvoiceDetailId
+					  AND intInvoiceId = @intNewInvoiceId
+				
 					EXEC [uspARAddItemToInvoice]
 						 @InvoiceId						= @intNewInvoiceId
 						,@ItemId						= @ItemId
@@ -351,17 +357,9 @@ BEGIN
 						,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 						,@ItemDestinationGradeId		= @ItemDestinationGradeId
 						,@ItemDestinationWeightId		= @ItemDestinationWeightId
+
+					DELETE FROM #CONTRACTLINEITEMS WHERE intInvoiceDetailId = @intInvoiceDetailId
 				END
-			ELSE
-				BEGIN
-					UPDATE tblARInvoiceDetail
-					SET dblQtyShipped = @dblNetWeight - @dblTotalTreatment
-						, intItemUOMId = @intScaleUOMId
-						, intTicketId = @intTicketId
-					WHERE intSalesOrderDetailId = @intSalesOrderDetailId
-						AND intInvoiceId = @intNewInvoiceId
-				END
-			
 
 			EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intNewInvoiceId, @UserId = @intUserId
 			EXEC dbo.uspARReComputeInvoiceTaxes @intNewInvoiceId

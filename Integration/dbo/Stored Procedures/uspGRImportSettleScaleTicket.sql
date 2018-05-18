@@ -69,7 +69,6 @@ BEGIN
 	,intTareUserId
 	,dblGrossUnits
 	,dblNetUnits
-	,strItemNumber
 	,strItemUOM
 	,intCustomerId
 	,strDistributionOption
@@ -155,7 +154,6 @@ BEGIN
 	,intTareUserId			   = NULL
 	,dblGrossUnits			   = gastl_no_un
 	,dblNetUnits			   = gastl_no_un
-	,strItemNumber			   = IM.strItemNo
 	,strItemUOM				   = UM.strUnitMeasure
 	,intCustomerId			   = t.intEntityId
 	,strDistributionOption	   = CASE 
