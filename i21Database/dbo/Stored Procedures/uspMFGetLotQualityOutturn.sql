@@ -86,7 +86,7 @@ BEGIN TRY
 		DROP TABLE #LotQuality
 SET @SQL='Declare @tblMFTask table(strLotNumber nvarchar(50) collate Latin1_General_CI_AS,dblQty decimal(38,20),intItemUOMId int,dblWeight decimal(38,20),intWeightUOMId int)
 Insert into @tblMFTask
-SELECT L.strLotNumber 
+SELECT Distinct L.strLotNumber 
 			,T.dblQty 
 			,T.intItemUOMId 
 			,T.dblWeight
@@ -121,7 +121,7 @@ WHERE W.intWorkOrderId ='+ ltrim(@intWorkOrderId)
 	SET @SQL = @SQL + ' SELECT *
 	INTO #LotQuality
 	FROM (
-		SELECT DENSE_RANK() OVER (
+		SELECT Distinct DENSE_RANK() OVER (
 				ORDER BY S.intSampleId DESC
 				) intRankNo  
 			,I.intItemId
@@ -132,9 +132,9 @@ WHERE W.intWorkOrderId ='+ ltrim(@intWorkOrderId)
 			,S.intSampleId
 			,S.strSampleNumber
 			,S.dtmSampleReceivedDate
-			,Case When L.dblQty =0 Then T.dblQty else L.dblQty End AS dblQty
+			,Case When T.dblQty is not null Then T.dblQty else L.dblQty End AS dblQty
 			,U.strUnitMeasure AS strQtyUOM
-			,dbo.fnMFConvertQuantityToTargetItemUOM(ISNULL(L.intWeightUOMId,L.intItemUOMId), IU1.intItemUOMId, Case When L.dblQty=0 Then ISNULL(T.dblWeight,T.dblQty) else ISNULL(L.dblWeight,L.dblQty) End) AS dblWeight
+			,dbo.fnMFConvertQuantityToTargetItemUOM(ISNULL(L.intWeightUOMId,L.intItemUOMId), IU1.intItemUOMId, Case When T.dblQty is not null Then ISNULL(T.dblWeight,T.dblQty) else ISNULL(L.dblWeight,L.dblQty) End) AS dblWeight
 			,''' + @strWeightUOM + 
 		''' AS strWeightUOM
 			,DateDiff(d,L.dtmDateCreated,GETDATE()) As intNoOfDaysInStorage

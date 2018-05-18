@@ -218,4 +218,4 @@ SELECT ISNULL(S.strWorkOrderNo, R.strWorkOrderNo) AS strWorkOrderNo
 FROM #IssueDetail S
 FULL JOIN #ReceiveDetail R ON S.intId = R.intId
 	AND R.intWorkOrderId = S.intWorkOrderId
-ORDER BY ISNULL(S.intWorkOrderId, R.intWorkOrderId)
+ORDER BY ISNULL(S.intWorkOrderId, R.intWorkOrderId),IsNULL(S.intId,99999)

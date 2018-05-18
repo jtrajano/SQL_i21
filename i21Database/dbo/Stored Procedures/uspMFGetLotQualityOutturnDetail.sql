@@ -241,9 +241,9 @@ SELECT intPropertyId
 			END
 		) - strPropertyValue
 		) AS dblVariance
-	,dblExchangePrice AS dblMarketPrice
-	,dblGradeDiff AS dblMarketDifferential
-	,(dblExchangePrice + PS.dblGradeDiff) * WP.dblQuantity AS dblMTMPL
+	,dblExchangePrice/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1)) AS dblMarketPrice
+	,dblGradeDiff/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1)) AS dblMarketDifferential
+	,(dblExchangePrice/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1)) + dblGradeDiff/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1))) * WP.dblQuantity AS dblMTMPL
 FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
 LEFT JOIN #StageQty S ON S.intItemId = G.intItemId
