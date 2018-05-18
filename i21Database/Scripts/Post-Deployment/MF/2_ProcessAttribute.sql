@@ -2405,3 +2405,27 @@ BEGIN
         ,0
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 114
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+		,ysnMultiSelect
+		,strSQL
+        )
+    SELECT 114
+        ,'Label - No. of Copies'
+        ,2
+        ,1
+		,0
+		,NULL
+END
+GO
+
