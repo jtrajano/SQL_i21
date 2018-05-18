@@ -10,17 +10,20 @@ AS
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE @ErrorMessage			NVARCHAR(4000)
-	DECLARE @ErrorSeverity			INT
-	DECLARE @ErrorState				INT
-	DECLARE @InventoryReceiptId		INT
-	DECLARE @ErrMsg					NVARCHAR(MAX)
-	DECLARE	@intInventoryReceiptId	INT
+	DECLARE @ErrorMessage			NVARCHAR(4000),
+			@ErrorSeverity			INT,
+			@ErrorState				INT,
+			@InventoryReceiptId		INT,
+			@ErrMsg					NVARCHAR(MAX),
+			@intInventoryReceiptId	INT,
+			@ysnRequireProducerQty	BIT,
 
-	DECLARE @ReceiptStagingTable	ReceiptStagingTable,
-			@OtherCharges			ReceiptOtherChargesTableType
-
+			@ReceiptStagingTable		ReceiptStagingTable,
+			@OtherCharges				ReceiptOtherChargesTableType,
+			@ReceiptItemLotStagingTable	ReceiptItemLotStagingTable
 	
+	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
+
 	IF EXISTS (SELECT 1 FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId AND dblAvailableQty <= 0) 
 	BEGIN 
 		RAISERROR('No quantity is available to process.',16,1)
@@ -69,7 +72,9 @@ AS
 				ysnSubCurrency,
 				intForexRateTypeId,
 				dblForexRate,
-				intFreightTermId
+				intFreightTermId,
+				intBookId,
+				intSubBookId
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -106,7 +111,9 @@ AS
 				ysnSubCurrency				=	SY.ysnSubCurrency,
 				intForexRateTypeId			=	CD.intRateTypeId,
 				dblForexRate				=	CD.dblRate,
-				intFreightTermId			=	CD.intFreightTermId
+				intFreightTermId			=	CD.intFreightTermId,
+				intBookId					=	CD.intBookId,
+				intSubBookId				=	CD.intSubBookId
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -177,12 +184,91 @@ AS
 		WHERE	CC.intContractDetailId	=	@intContractDetailId
 		AND		ISNULL(CC.ysnBasis,0) <> 1
 
+		
+
+		IF ISNULL(@ysnRequireProducerQty, 0) = 1
+		BEGIN
+			INSERT INTO @ReceiptItemLotStagingTable
+			(
+				[strReceiptType]
+				,[intItemId]
+				,[intLotId]
+				,[strLotNumber]
+				,[intLocationId]
+				,[intShipFromId]
+				,[intShipViaId]	
+				,[intSubLocationId]
+				,[intStorageLocationId] 
+				,[intCurrencyId]
+				,[intItemUnitMeasureId]
+				,[dblQuantity]
+				,[dblGrossWeight]
+				,[dblTareWeight]
+				,[dblCost]
+				,[intEntityVendorId]
+				,[dtmManufacturedDate]
+				,[dtmExpiryDate]
+				,[strBillOfLadding]
+				,[strCertificate]
+				,[intProducerId]
+				,[strCertificateId]
+				,[strTrackingNumber]
+				,[intSourceType]
+			)
+
+			SELECT	 [strReceiptType]		=   'Purchase Contract'
+					,[intItemId]			=   CD.intItemId
+					,[intLotId]				=   NULL
+					,[strLotNumber]			=   NULL
+					,[intLocationId]		=   CD.intCompanyLocationId
+					,[intShipFromId]		=   CASE	WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = CH.intEntityId), 0) > 0
+														THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = CH.intEntityId)
+														ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = CH.intEntityId AND ysnDefaultLocation = 1)
+												END
+					,[intShipViaId]			=   CD.intShipViaId
+					,[intSubLocationId]		=   CD.intSubLocationId
+					,[intStorageLocationId]	=   CD.intStorageLocationId
+					,[intCurrencyId]		=   ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+					,[intItemUnitMeasureId]	=   CD.intItemUOMId
+					,[dblQuantity]			=   CC.dblQuantity
+					,[dblGrossWeight]		=   CC.dblQuantity
+					,[dblTareWeight]		=   0
+					,[dblCost]				=   CASE	WHEN	CD.intPricingTypeId = 2 
+														THEN	(
+																	SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CD.intBasisUOMId,CD.dblBasis),0)),0) 
+																	FROM dbo.fnRKGetFutureAndBasisPrice (1,CH.intCommodityId,right(convert(varchar, CD.dtmEndDate, 106),8),2,CD.intFutureMarketId,CD.intFutureMonthId,NULL,NULL,0 ,CD.intItemId)
+																	LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = CD.intItemId
+																)
+														ELSE	AD.dblSeqPrice
+												END
+					,[intEntityVendorId]	=   CH.intEntityId
+					,[dtmManufacturedDate]	=   GETDATE()
+					,[dtmExpiryDate]		=   dbo.fnICCalculateExpiryDate(CD.intItemId, NULL , GETDATE())
+					,[strBillOfLadding]		=   ''
+					,[strCertificate]		=   CF.strCertificationName
+					,[intProducerId]		=   CC.intProducerId
+					,[strCertificateId]		=   CC.strCertificationId
+					,[strTrackingNumber]	=   CC.strTrackingNumber
+					,[intSourceType]		=   0
+
+			FROM	tblCTContractDetail			CD 
+			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
+													AND	CD.intContractDetailId	=	@intContractDetailId
+	 CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)AD
+		   
+		   JOIN		tblICItem					IC  ON  IC.intItemId			=	CD.intItemId
+		   JOIN		tblCTContractCertification  CC  ON  CC.intContractDetailId	=	CD.intContractDetailId
+		   JOIN		tblICCertification		    CF  ON  CF.intCertificationId	=	CC.intCertificationId
+	 LEFT  JOIN		tblSMCurrency				SC	ON	SC.intCurrencyID		=	AD.intSeqCurrencyId
+
+		END
+
 		IF NOT EXISTS(SELECT * FROM  @ReceiptStagingTable)
 		BEGIN
 			RETURN
 		END
 
-		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId;
+		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable;
 		
 		IF EXISTS(SELECT * FROM #tmpAddItemReceiptResult)
 		BEGIN
