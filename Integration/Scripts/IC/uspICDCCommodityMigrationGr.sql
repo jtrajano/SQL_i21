@@ -150,7 +150,7 @@ select I.intItemId, CM.intUnitMeasureId, 1 dblUnitQty, 0 ysnStockUnit,1 AllowPur
 from tblICCommodityUnitMeasure CM
 join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
-where I.strCostType = 'Discount'
+where I.strCostType = 'Discount' AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = CM.intUnitMeasureId)
 
 
 ---================================STEP 12=============================================
@@ -201,7 +201,7 @@ select I.intItemId, CM.intUnitMeasureId, 1 dblUnitQty, 0 ysnStockUnit,1 AllowPur
 from tblICCommodityUnitMeasure CM
 join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
-where I.strCostType = 'Freight'	
+where I.strCostType = 'Freight'	AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = CM.intUnitMeasureId)
 
 ---=====================================STEP 16=============================================
 --Add locations for discount items

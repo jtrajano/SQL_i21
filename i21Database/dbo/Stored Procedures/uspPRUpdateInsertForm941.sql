@@ -13,6 +13,7 @@ BEGIN
 		INSERT INTO tblPRForm941(
 			intYear
 			,intQuarter
+			,strTradeName
 			,intEmployees
 			,dblAdjustedGross
 			,dblFIT
@@ -63,6 +64,7 @@ BEGIN
 		SELECT DISTINCT
 			intYear = @intYear
 			,intQuarter = @intQuarter
+			,strTradeName = ISNULL((SELECT TOP 1 strTradeName FROM tblPRForm941 WHERE strTradeName IS NOT NULL), '')
 			,intEmployees = ISNULL(PCHK.intEmployees, 0)
 			,dblAdjustedGross = CASE WHEN (ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0)) <= 0 THEN 0 ELSE ISNULL(TXBLFIT.dblTotal, 0) - ISNULL(PRTXFIT.dblTotal, 0) END
 			,dblFIT = ISNULL(FIT.dblTotal, 0)

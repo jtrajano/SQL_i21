@@ -304,7 +304,7 @@ BEGIN
 					,@intTypeEarningId = intTypeEarningId
 		FROM #tmpEarningAmount
 
-		WHILE (@dblFullAmount > 0)
+		WHILE (@dblFullAmount <> 0)
 		BEGIN
 			SELECT TOP 1 @intTmpEarningId = intTmpEarningId FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
 

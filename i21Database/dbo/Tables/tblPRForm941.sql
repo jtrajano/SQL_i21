@@ -3,6 +3,7 @@
 	[intForm941Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intYear] INT NULL, 
     [intQuarter] INT NULL, 
+	[strTradeName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intEmployees] INT NULL DEFAULT ((0)), 
     [dblAdjustedGross] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFIT] NUMERIC(18, 6) NULL DEFAULT ((0)), 

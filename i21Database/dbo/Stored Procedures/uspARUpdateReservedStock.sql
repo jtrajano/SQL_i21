@@ -48,7 +48,7 @@ BEGIN
 		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
-		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) ARI
+		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
 		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
@@ -60,6 +60,7 @@ BEGIN
 	WHERE [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
 		AND ARI.[intInvoiceId] = @InvoiceId
 		AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
+		AND ARI.strType NOT IN ('Transport Delivery')
 		AND ARID.[intInventoryShipmentItemId] IS NULL
 		AND ARID.[intLoadDetailId] IS NULL
 		AND ARID.[intLotId] IS NULL
