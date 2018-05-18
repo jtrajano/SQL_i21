@@ -6568,6 +6568,7 @@
     <Build Include="dbo\Stored Procedures\uspARPOSLogEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItem1099Box3.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetYearToDate.sql" />
+    <Build Include="dbo\Views\vyuICItemStockDetailLookup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
