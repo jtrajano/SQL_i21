@@ -100,7 +100,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							dblSubCurrencyRate		    NUMERIC(18,6),
 							intCurrencyExchangeRateTypeId	INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
-							intSalesOrderId				INT NULL)
+							intSalesOrderId				INT NULL,
+							intStorageLocationId		INT NULL)
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -150,7 +151,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							dblSubCurrencyRate			NUMERIC(18,6),
 							intCurrencyExchangeRateTypeId	INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
-							intSalesOrderId				INT NULL)
+							intSalesOrderId				INT NULL,
+							intStorageLocationId		INT NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -213,6 +215,7 @@ SELECT intItemId					= SI.intItemId
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SI.intSalesOrderId
+	 , intStorageLocationId			= SOD.intStorageLocationId
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -274,6 +277,7 @@ SELECT intItemId					= SOD.intItemId
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= NULL
+	 , intStorageLocationId			= SOD.intStorageLocationId
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -329,6 +333,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SO.intSalesOrderId
+	 , intStorageLocationId			= SOD.intStorageLocationId
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
@@ -387,6 +392,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , intCurrencyExchangeRateTypeId = ARSI.intCurrencyExchangeRateTypeId
 	 , dblCurrencyExchangeRate		= ARSI.dblCurrencyExchangeRate
 	 , intSalesOrderId				= ARSI.intSalesOrderId
+	 , intStorageLocationId			= ARSI.intStorageLocationId
 FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -749,7 +755,9 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[intSubCurrencyId]
 					,[dblSubCurrencyRate]
 					,[intCurrencyExchangeRateTypeId]
-					,[dblCurrencyExchangeRate])
+					,[dblCurrencyExchangeRate]
+					,[intSubLocationId]
+					,[intStorageLocationId])
 				SELECT 	
 					 @SoftwareInvoiceId			--[intInvoiceId]
 					,[intItemId]				--[intItemId]
@@ -792,6 +800,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 					,[dblSubCurrencyRate]
 					,[intCurrencyExchangeRateTypeId]
 					,[dblCurrencyExchangeRate]
+					,[intSubLocationId]
+					,[intStorageLocationId]
 				FROM
 					tblSOSalesOrderDetail
 				WHERE
@@ -1252,11 +1262,15 @@ BEGIN
 
 	UPDATE tblARInvoiceDetail SET intItemWeightUOMId = CopySO.intItemWeightUOMId, dblItemWeight = CopySO.dblItemWeight, dblOriginalItemWeight = CopySO.dblOriginalItemWeight,
 		dblItemTermDiscount = CopySO.dblItemTermDiscount, intStorageScheduleTypeId = CopySO.intStorageScheduleTypeId
+		,intSubLocationId = CopySO.intSubLocationId
+		,intStorageLocationId = CopySO.intStorageLocationId
+		
+					
 	FROM(
 		SELECT SO.intSalesOrderId, SO.strSalesOrderNumber, SO.dblTotalWeight, SOD.intItemId, SOD.intItemUOMId,  SOD.intItemWeightUOMId, SOD.dblItemWeight, SOD.dblOriginalItemWeight,
-			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId
+			SOD.dblItemTermDiscount, SOD.intStorageScheduleTypeId, intSubLocationId , intStorageLocationId
 		FROM tblSOSalesOrder SO 
-		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId
+		INNER JOIN (SELECT intSalesOrderId, intItemWeightUOMId, dblItemWeight, dblOriginalItemWeight, intItemId, intItemUOMId, dblItemTermDiscount, intStorageScheduleTypeId,intSubLocationId , intStorageLocationId
 					FROM tblSOSalesOrderDetail) SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
 		LEFT JOIN (SELECT strDocumentNumber FROM tblARInvoiceDetail) ID ON SO.strSalesOrderNumber = ID.strDocumentNumber
 		WHERE strSalesOrderNumber = @SalesOrderNumber
