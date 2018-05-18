@@ -22,6 +22,18 @@ INTO #tmpDepartments
 FROM @xmlDepartments.nodes('/A') AS X(T) 
 WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 
+--Clean-up Routine for Timecards with zero hours
+UPDATE tblPRTimecard SET
+dblHours = ROUND(ISNULL(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) / 60.000000, 0), 2)
+WHERE ysnApproved = 1
+	AND intPaycheckId IS NULL
+	AND intPayGroupDetailId IS NULL
+	AND dblHours = 0
+	AND ROUND(ISNULL(DATEDIFF(MI, dtmTimeIn, dtmTimeOut) / 60.000000, 0), 2) > 0
+	AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
+	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)
+
 /* Insert Timecards to Temp Table for iteration */
 SELECT 
 	T.intEntityEmployeeId
