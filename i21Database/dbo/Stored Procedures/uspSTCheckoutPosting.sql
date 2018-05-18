@@ -243,7 +243,7 @@ BEGIN
 										,[dtmPostDate]				= GETDATE()
 										,[intEntitySalespersonId]	= NULL
 										,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-										,[intShipViaId]				= @intShipViaId
+										,[intShipViaId]				= NULL --@intShipViaId
 										,[intPaymentMethodId]		= NULL
 										,[strInvoiceOriginId]		= NULL -- not sure
 										,[strPONumber]				= NULL -- not sure
@@ -479,7 +479,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
@@ -687,7 +687,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
@@ -930,7 +930,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
@@ -1134,7 +1134,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
@@ -1338,7 +1338,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
@@ -1542,7 +1542,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
@@ -1746,7 +1746,7 @@ BEGIN
 											,[dtmPostDate]				= GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= @intShipViaId
+											,[intShipViaId]				= NULL --@intShipViaId
 											,[intPaymentMethodId]		= NULL
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
