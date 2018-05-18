@@ -185,14 +185,14 @@ IF(ISNULL(@Post,0)) = 1
 			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 			,[intItemId]			= I.[intItemId]
 			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'UOM is required for item ' + ARID.[strItemDescription] + '.'
+			,[strPostingError]		= 'UOM is required for item ' + ISNULL(NULLIF(ARID.[strItemDescription], ''), IST.[strItemNo]) + '.'
 		FROM 
 			@Invoices I	
 		INNER JOIN
 			(SELECT [intInvoiceId], [intItemId], [strItemDescription], [intItemUOMId], [intInventoryShipmentItemId], [intSalesOrderDetailId], [intLoadDetailId] FROM dbo.tblARInvoiceDetail WITH (NOLOCK)) ARID
 				ON I.[intInvoiceId] = ARID.[intInvoiceId]
 		LEFT OUTER JOIN
-			(SELECT [intItemId], [intLocationId], [strType] FROM dbo.vyuICGetItemStock WITH (NOLOCK)) IST
+			(SELECT [intItemId], [intLocationId], [strType], [strItemNo] FROM dbo.vyuICGetItemStock WITH (NOLOCK)) IST
 				ON ARID.[intItemId] = IST.[intItemId] 
 				AND I.[intCompanyLocationId] = IST.[intLocationId]		 
 		WHERE
