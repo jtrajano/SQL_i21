@@ -14,7 +14,24 @@ SELECT	A.intEntityId,
 		ysnCustomer = CAST(A.Customer AS BIT),
 		ysnVendor = CAST(A.Vendor AS BIT),
 		C.intConcurrencyId AS intCustomerConcurrencyId,
-		B.intConcurrencyId AS intVendorConcurrencyId
+		B.intConcurrencyId AS intVendorConcurrencyId,
+		
+		--Patronage Setup Preferences
+		Patronage.strRefund,
+		strRefundDescription = CASE 
+					WHEN Patronage.strRefund = 'A' THEN 'All Patrons' 
+					WHEN Patronage.strRefund = 'S' THEN 'Stockholders' 
+					WHEN Patronage.strRefund = 'V' THEN 'Voting Only' 
+				END,
+		Patronage.dblMinimumRefund,
+		Patronage.dblServiceFee,
+		Patronage.dblCutoffAmount,
+		Patronage.strCutoffTo,
+		Patronage.strPayOnGrain,
+		Patronage.strPrintCheck,
+		Patronage.dblMinimumDividends,
+		Patronage.ysnProRatedDividends,
+		Patronage.dtmCutoffDate
 FROM vyuEMEntityType A
 LEFT JOIN tblAPVendor B
 	ON A.intEntityId = B.intEntityId
@@ -32,4 +49,5 @@ LEFT OUTER JOIN (
 	FROM tblEMEntityLocation
 	WHERE ysnDefaultLocation = 1
 ) Loc ON Loc.intEntityId = D.intEntityId
+CROSS JOIN tblPATCompanyPreference Patronage
 WHERE A.Customer = 1
