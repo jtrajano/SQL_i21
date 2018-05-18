@@ -54,6 +54,7 @@ BEGIN TRY
 		,dtmLastUpdateOn
 		,dblSurplusQtyInStageLocation
 		,intOwnershipType
+		,intStorageLocationId
 		)
 	SELECT 1
 		,intOrderHeaderId
@@ -80,6 +81,7 @@ BEGIN TRY
 		,GETDATE()
 		,dblSurplusQtyInStageLocation
 		,intOwnershipType
+		,intStorageLocationId
 	FROM @OrderDetailInformation
 
 	SELECT @intOrderDetailId = SCOPE_IDENTITY()

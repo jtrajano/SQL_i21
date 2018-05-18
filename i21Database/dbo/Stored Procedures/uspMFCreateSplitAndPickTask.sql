@@ -25,6 +25,7 @@ BEGIN TRY
 	, @dblSplitAndPickQty NUMERIC(18,6)
 	, @dblWeightPerQty NUMERIC(18,6)
 	, @strErrMsg NVARCHAR(MAX)
+			,@intDefaultConsumptionLocationId int
 
 	SELECT @strTaskNo = strOrderNo, 
 	       @intToStorageLocationId = intStagingLocationId
@@ -33,6 +34,7 @@ BEGIN TRY
 
 	SELECT 
 		  @intToStorageLocationId = IsNULL(intStagingLocationId,@intToStorageLocationId)
+		  ,@intDefaultConsumptionLocationId=intStorageLocationId
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 	and intItemId=@intItemId
@@ -79,9 +81,11 @@ BEGIN TRY
 		(0
 		,@strTaskNo
 		,@intTaskTypeId
-		,CASE WHEN @intAssigneeId > 0 
-			THEN 2
-		 ELSE 1 END
+		,Case When @intDefaultConsumptionLocationId is null Then (CASE 
+			WHEN @intAssigneeId > 0
+				THEN 2
+			ELSE 1
+			END) Else 4 End
 		,@intOrderHeaderId
 		,@intOrderDetailId
 		,NULL
@@ -90,7 +94,7 @@ BEGIN TRY
 		,2
 		,ISNULL(@dtmReleaseDate, GETDATE())
 		,@intFromStorageLocationId
-		,@intToStorageLocationId
+		,IsNULL(@intDefaultConsumptionLocationId,@intToStorageLocationId)
 		,@intItemId
 		,@intLotId
 		,Case When @intWeightUOMId is NULL Then @dblSplitAndPickQty Else @dblSplitAndPickQty End

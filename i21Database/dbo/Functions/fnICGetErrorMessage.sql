@@ -175,7 +175,7 @@ BEGIN
 		WHEN @msgId = 80159 THEN 'Item: %s, Qty: %s, Cost: %s'
 		WHEN @msgId = 80160 THEN 'Transaction not saved. Stocks for %s will have an over-return.'
 		WHEN @msgId = 80161 THEN 'Return no longer allowed. All of the stocks are returned.'
-		WHEN @msgId = 80162 THEN 'The transaction is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency'
+		WHEN @msgId = 80162 THEN '%s is using a foreign currency. %s is missing a forex rate. Please review the Currency Exchange Rates and check if %s to %s for %s has a valid effective date and forex rate.'
 		WHEN @msgId = 80163 THEN '%s is set as %s type and that type is not allowed for Shipment.'
 		WHEN @msgId = 80164 THEN 'There are no receipt items to process.'
 		WHEN @msgId = 80165 THEN 'No line of business specified.'
@@ -223,6 +223,14 @@ BEGIN
 		WHEN @msgId = 80207 THEN 'Lot type of %s is different from %s. Items should have the same lot types.'
 		WHEN @msgId = 80208 THEN 'Unable to post lot %s. Only active lots are allowed to be shipped.'
 		WHEN @msgId = 80209 THEN 'Ownership of %s is %s. Cannot add %s inventory to it'
+		WHEN @msgId = 80210 THEN 'Invalid Producer. %s is not configured as a Producer type. Please check the Entity setup.'
+		WHEN @msgId = 80211 THEN 'Certificate %s is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
+		WHEN @msgId = 80212 THEN 'Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
+		WHEN @msgId = 80213 THEN 'Sub Book id is invalid or missing. Please create or fix it at Contract Management -> Books.'
+		WHEN @msgId = 80214 THEN '%s is not a sub book of %s. You can correct it at Contract Management -> Books.'
+		WHEN @msgId = 80215 THEN 'Cannot change UOM to %s. %s is partially allocated.'
+		WHEN @msgId = 80216 THEN 'Category Code is invalid or missing.'
+		WHEN @msgId = 80217 THEN '%s is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency.'
 	END 
 
 	RETURN @msg

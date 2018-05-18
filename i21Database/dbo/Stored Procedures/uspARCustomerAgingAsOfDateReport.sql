@@ -133,6 +133,10 @@ IF ISNULL(@strCompanyLocationLocal, '') <> ''
 		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName = @strCompanyLocationLocal)
 	END
 
+IF 1=0 BEGIN
+    SET FMTONLY OFF
+END
+
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#ARPOSTEDPAYMENT') IS NOT NULL)
 BEGIN
@@ -167,6 +171,7 @@ INNER JOIN (
 	FROM @tblCustomers
 ) C ON P.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
+	AND ysnProcessedToNSF = 0
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF (@ysnIncludeWriteOffPaymentLocal = 1)

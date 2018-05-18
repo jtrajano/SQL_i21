@@ -23,4 +23,5 @@
 	,dblSurplusQtyInStageLocation NUMERIC(18, 6)
 	,intOwnershipType INT
 	,strInventoryTracking NVARCHAR(50)
+	,intStorageLocationId int
 	)

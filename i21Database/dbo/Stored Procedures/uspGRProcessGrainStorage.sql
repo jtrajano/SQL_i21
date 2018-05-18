@@ -247,7 +247,7 @@ BEGIN TRY
 
 			SELECT @intItemUOMId=intItemUOMId FROM tblICItemUOM WHERE intItemId=@ItemId AND intUnitMeasureId=@intCommodityStockUOMId
 
-			SELECT @intTicketId=intTicketId FROM tblGRCustomerStorage WHERE intCustomerStorageId=@intCustomerStorageId
+			--SELECT @intTicketId=intTicketId FROM tblGRCustomerStorage WHERE intCustomerStorageId=@intCustomerStorageId
 			
 			UPDATE BD 
 			SET BD.intOriginalUnitMeasureId=CS.intUnitMeasureId 
@@ -397,7 +397,7 @@ BEGIN TRY
 					,[intContractHeaderId] = NULL
 					,[intContractDetailId] = NULL
 					,[intShipmentPurchaseSalesContractId] = NULL
-					,[intTicketId] = @intTicketId
+					,[intTicketId] = CS.intTicketId --@intTicketId
 					,[intTicketHoursWorkedId] = NULL
 					,[intSiteId] = NULL
 					,[strBillingBy] = ''
@@ -409,7 +409,8 @@ BEGIN TRY
 					,[ysnLeaseBilling] = NULL
 					,[ysnVirtualMeterReading] = NULL
 					,[intCustomerStorageId]=BD.intCustomerStorageId
-					FROM @BillDiscounts BD 					
+					FROM @BillDiscounts BD
+					LEFT JOIN tblGRCustomerStorage CS ON BD.intCustomerStorageId =CS.intCustomerStorageId
 					WHERE BD.intEntityId = @EntityId AND BD.intCompanyLocationId=@LocationId AND BD.intItemId = @ItemId
 
 				EXEC [dbo].[uspARProcessInvoices] 
@@ -449,7 +450,12 @@ BEGIN TRY
 							 FROM tblARInvoice AR
 							 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 							 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
-										   
+						
+						UPDATE CS
+						SET CS.dtmLastStorageAccrueDate = @StorageChargeDate
+						FROM tblGRCustomerStorage CS
+						JOIN tblGRStorageHistory SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
+						WHERE SH.strType ='Generated Storage Invoice' AND SH.intInvoiceId = CONVERT(INT,@CreatedIvoices)					   
 						
 				END
 				ELSE

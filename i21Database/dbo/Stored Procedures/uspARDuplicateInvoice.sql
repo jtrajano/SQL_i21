@@ -565,7 +565,7 @@ BEGIN TRY
 		,[intPriceUOMId]				= ARID.[intPriceUOMId] 
 		,[dblQtyShipped]				= CASE	WHEN (ISNULL(SOSOD.intSalesOrderDetailId,0) = 0 AND ISNULL(ICISI.intInventoryShipmentItemId,0) = 0) OR @IsCancel = 1
 													THEN ARID.[dblQtyShipped]
-												WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) <> 0
+												WHEN ISNULL(SOSOD.intSalesOrderDetailId,0) <> 0 AND @ForRecurring = 0
 													THEN dbo.fnCalculateQtyBetweenUOM(SOSOD.intItemUOMId, ARID.intItemUOMId, (dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped) - SOSOD.dblQtyShipped))
 												WHEN ISNULL(ICISI.intInventoryShipmentItemId,0) <> 0
 													THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ARID.intItemUOMId, (dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped) - ICISI.dblQuantity))

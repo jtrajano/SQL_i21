@@ -171,8 +171,9 @@ ELSE IF @strTransactionType = 'Inventory'
 	END
 ELSE
 	BEGIN
-		INSERT INTO @tblSOToUpdate
-		SELECT @intSalesOrderId
+		IF @intSalesOrderId IS NOT NULL
+			INSERT INTO @tblSOToUpdate
+			SELECT @intSalesOrderId
 	END
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)

@@ -106,7 +106,9 @@ SELECT
     strCode = DOC.strCode,
     strTitle = DOC.strTitle,
 	strOpportunityName = OPUR.strName,
-    strLineOfBusiness = SB.strLineOfBusiness
+    strLineOfBusiness = SB.strLineOfBusiness,
+
+    ysnProspect = CTYPE.Prospect
 
 	FROM tblSOSalesOrder SO
 		JOIN ( SELECT	intEntityId,			strCustomerNumber,
@@ -115,6 +117,9 @@ SELECT
 						ysnPORequired,			intEntityLineOfBusinessIds
 			FROM vyuARCustomerSearch WITH (NOLOCK) ) CUS
 				ON CUS.intEntityId = SO.intEntityCustomerId 
+        LEFT JOIN ( SELECT intEntityId,		Customer,       Prospect
+			FROM vyuEMEntityType  WITH (NOLOCK)) CTYPE
+                ON SO.intEntityCustomerId = CTYPE.intEntityId
 		LEFT JOIN ( SELECT intEntityId,		strName
 			FROM tblEMEntity  WITH (NOLOCK)) CON
 				ON CON.intEntityId = SO.intEntityContactId

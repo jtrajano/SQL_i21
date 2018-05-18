@@ -20,13 +20,13 @@ BEGIN
 	IF(@Checking = 0)
 	BEGIN
 	
-		SELECT @BankCount = COUNT(*) FROM ssbnkmst  BNK WHERE BNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS NOT IN 
-		(SELECT strBankName COLLATE SQL_Latin1_General_CP1_CS_AS FROM tblCMBank)
+		SELECT @BankCount = COUNT(*) FROM (SELECT DISTINCT ssbnk_name FROM ssbnkmst
+			) Q
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''))) COLLATE Latin1_General_CI_AS)
 		
 		IF @BankCount <> 0 
 		BEGIN
-			RAISERROR('Some of the Origin Banks are not imported.',16,1)
-			RETURN
+			EXEC uspCMImportBanksFromOrigin
 		END		
  	
 		INSERT INTO [dbo].[tblEMEntityEFTInformation]

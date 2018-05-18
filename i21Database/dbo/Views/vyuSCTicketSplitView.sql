@@ -41,7 +41,6 @@
        tblSCTicket.dblGrossUnits,
        tblSCTicket.dblNetUnits,
 	   (tblSCTicket.dblGrossWeight - tblSCTicket.dblTareWeight) AS dblNetWeight,
-       tblSCTicket.strItemNumber,
        tblSCTicket.strItemUOM,
        tblSCTicket.intCustomerId,
        tblSCTicket.intSplitId,
@@ -137,7 +136,8 @@
 		END) AS strSplitEntityDistribution,
 	   tblSCTicketSplit.dblSplitPercent,
 	   ((tblSCTicket.dblNetUnits * tblSCTicketSplit.dblSplitPercent) / 100) as dblSplitUnit,
-	   tblICItem.strDescription as strItemDescription
+	   tblICItem.strDescription as strItemDescription,
+	   tblICItem.strItemNo AS strItemNumber
   from tblSCTicketSplit tblSCTicketSplit
 	left join tblSCTicket tblSCTicket on tblSCTicketSplit.intTicketId = tblSCTicket.intTicketId
 	left join tblICItem tblICItem on tblICItem.intItemId = tblSCTicket.intItemId
@@ -155,4 +155,3 @@
 	left join tblICInventoryReceipt tblICInventoryReceipt on  tblICInventoryReceipt.intInventoryReceiptId = tblSCTicket.intInventoryReceiptId
 	left join tblICInventoryShipment tblICInventoryShipment on  tblICInventoryShipment.intInventoryShipmentId = tblSCTicket.intInventoryShipmentId
 	left join tblEMEntityFarm tblEMEntityFarm on tblEMEntityFarm.intFarmFieldId = tblSCTicket.intFarmFieldId
-
