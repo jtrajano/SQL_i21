@@ -75,8 +75,10 @@ GO
 GO
 	PRINT('Started updating old account id in tblGLAccount')
 GO
-	--update strOldAccountId column in tblGLAccount
-	EXEC dbo.uspGLUpdateOldAccountId
+	DECLARE @intDefaultAccountSystemId INT
+	SELECT TOP 1 @intDefaultAccountSystemId =intDefaultVisibleOldAccountSystemId FROM tblGLCompanyPreferenceOption 
+	IF @intDefaultAccountSystemId IS NOT NULL 
+		EXEC dbo.uspGLUpdateOldAccountId @intDefaultAccountSystemId
 GO
 	PRINT('Finished updating old account id in tblGLAccount')
 GO
