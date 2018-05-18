@@ -161,32 +161,31 @@ SELECT DISTINCT 0
 	,- 1
 FROM #StageQty
 
-UPDATE #GRN
-SET intItemId = I.intItemId
-	,dblExchangePrice = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
-					SELECT TOP 1 CM.intFutureMarketId
-					FROM tblICCommodityAttribute CA
-					JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-						AND CA.strType = 'ProductType'
-					WHERE CA.intCommodityAttributeId = I.intProductTypeId
-					), C.intFutureMarketId), (
-				SELECT TOP 1 intFutureMonthId
-				FROM tblRKFuturesMonth
-				WHERE ysnExpired = 0
-					AND dtmSpotDate <= @dtmCurrentDateTime
-					AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
-							SELECT TOP 1 CM.intFutureMarketId
-							FROM tblICCommodityAttribute CA
-							JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-								AND CA.strType = 'ProductType'
-							WHERE CA.intCommodityAttributeId = I.intProductTypeId
-							))
-				ORDER BY 1 DESC
-				), @dtmCurrentDateTime), 0) / @intSubCurrency
-FROM #GRN G
-JOIN tblICItem I ON I.intItemId = G.intItemId
-JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-
+--UPDATE #GRN
+--SET intItemId = I.intItemId
+--	,dblExchangePrice = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
+--					SELECT TOP 1 CM.intFutureMarketId
+--					FROM tblICCommodityAttribute CA
+--					JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+--						AND CA.strType = 'ProductType'
+--					WHERE CA.intCommodityAttributeId = I.intProductTypeId
+--					), C.intFutureMarketId), (
+--				SELECT TOP 1 intFutureMonthId
+--				FROM tblRKFuturesMonth
+--				WHERE ysnExpired = 0
+--					AND dtmSpotDate <= @dtmCurrentDateTime
+--					AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
+--							SELECT TOP 1 CM.intFutureMarketId
+--							FROM tblICCommodityAttribute CA
+--							JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+--								AND CA.strType = 'ProductType'
+--							WHERE CA.intCommodityAttributeId = I.intProductTypeId
+--							))
+--				ORDER BY 1 DESC
+--				), @dtmCurrentDateTime), 0) / @intSubCurrency
+--FROM #GRN G
+--JOIN tblICItem I ON I.intItemId = G.intItemId
+--JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
 SELECT intPropertyId
 	,strPropertyName
 	,strPropertyValue AS dblEstimatedOutput
@@ -217,33 +216,42 @@ SELECT intPropertyId
 					)
 			END
 		) AS dblCleanGradeOutput
-	,((
-		CASE 
-			WHEN dblCoEfficient = 0
-				THEN NULL
-			ELSE (
-					CASE 
-						WHEN Sum(CASE 
-									WHEN dblCoEfficient = 0
-										THEN 0
-									ELSE [strActualOutput]
-									END) OVER () = 0
-							THEN 0
-						ELSE (
-								[strActualOutput] / Sum(CASE 
+	,(
+		(
+			CASE 
+				WHEN dblCoEfficient = 0
+					THEN NULL
+				ELSE (
+						CASE 
+							WHEN Sum(CASE 
 										WHEN dblCoEfficient = 0
 											THEN 0
 										ELSE [strActualOutput]
-										END) OVER ()
-								) * 100
-						END
-					)
-			END
-		) - strPropertyValue
+										END) OVER () = 0
+								THEN 0
+							ELSE (
+									[strActualOutput] / Sum(CASE 
+											WHEN dblCoEfficient = 0
+												THEN 0
+											ELSE [strActualOutput]
+											END) OVER ()
+									) * 100
+							END
+						)
+				END
+			) - strPropertyValue
 		) AS dblVariance
-	,dblExchangePrice/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1)) AS dblMarketPrice
-	,dblGradeDiff/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1)) AS dblMarketDifferential
-	,(dblExchangePrice/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1)) + dblGradeDiff/(dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1,@intUnitMeasureId , 1))) * WP.dblQuantity AS dblMTMPL
+	,CASE 
+		WHEN PS.ysnZeroCost = 1
+			THEN NULL
+		ELSE (PS.dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1, @intUnitMeasureId, 1))
+		END AS dblMarketPrice
+	,dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1, @intUnitMeasureId, 1)) AS dblMarketDifferential
+	,CASE 
+		WHEN PS.ysnZeroCost = 1
+			THEN NULL
+		ELSE ((dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1, @intUnitMeasureId, 1)) + dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, 1, @intUnitMeasureId, 1))) * WP.dblQuantity
+		END AS dblMTMPL
 FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
 LEFT JOIN #StageQty S ON S.intItemId = G.intItemId
