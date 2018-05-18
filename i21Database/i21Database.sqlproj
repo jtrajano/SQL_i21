@@ -6569,6 +6569,8 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateItem1099Box3.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetYearToDate.sql" />
     <Build Include="dbo\Views\vyuICItemStockDetailLookup.sql" />
+    <Build Include="dbo\Views\vyuSTTranslogHeader.sql" />
+    <Build Include="dbo\Views\vyuSTTranslogDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
