@@ -480,6 +480,7 @@ BEGIN
 				END
 			)
 		AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
+		AND L.intLotId NOT IN (Select IsNULL(T.intLotId,0) from tblMFTask Where intOrderHeaderId=@intOrderHeaderId)
 	GROUP BY L.intLotId
 		,L.intItemId
 		,L.dblQty
