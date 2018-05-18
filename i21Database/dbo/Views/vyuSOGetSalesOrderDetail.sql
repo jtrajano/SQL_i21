@@ -10,6 +10,7 @@ SELECT
         SO.strItemDescription,
         SO.strComments,
         SO.intItemUOMId,
+		SO.intPriceUOMId,
         SO.dblQtyShipped,
         SO.dblQtyOrdered,
         SO.dblQtyAllocated,
@@ -19,6 +20,8 @@ SELECT
         SO.strItemTermDiscountBy,
         SO.dblPrice,
         SO.dblBasePrice,
+		SO.dblUnitPrice,
+        SO.dblBaseUnitPrice,
         SO.strPricing,
         SO.dblTotalTax,
         SO.dblBaseTotalTax,
@@ -72,6 +75,7 @@ SELECT
         strItemNo = ITMNO.strItemNo,
         strBundleType = ITMNO.strBundleType,
         strUnitMeasure = ITMUOM.strUnitMeasure,
+		strPriceUnitMeasure = ITMPUOM.strUnitMeasure,
         intUnitMeasureId = ITMUOM.intUnitMeasureId,
 
         strWeightUnitMeasure = ITMWUOM.strUnitMeasure,
@@ -134,6 +138,10 @@ SELECT
 								intUnitMeasureId
 			FROM vyuARItemUOM WITH(NOLOCK)) ITMUOM
 		ON SO.intItemUOMId = ITMUOM.intItemUOMId
+
+		LEFT JOIN ( SELECT		intItemUOMId,		strUnitMeasure 
+			FROM vyuARItemWUOM  WITH(NOLOCK)) ITMPUOM
+		ON SO.intPriceUOMId = ITMPUOM.intItemUOMId
 		
 		LEFT JOIN ( SELECT		intItemWeightUOMId,		strUnitMeasure 
 			FROM vyuARItemWUOM  WITH(NOLOCK)) ITMWUOM
