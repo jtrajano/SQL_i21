@@ -6571,6 +6571,9 @@
     <Build Include="dbo\Views\vyuICItemStockDetailLookup.sql" />
     <Build Include="dbo\Views\vyuSTTranslogHeader.sql" />
     <Build Include="dbo\Views\vyuSTTranslogDetails.sql" />
+    <Build Include="dbo\Tables\tblCFUsageExceptionAlertStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateUsageExceptionAlert.sql" />
+    <Build Include="dbo\Views\vyuCFUsageExceptionAlertTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

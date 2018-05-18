@@ -134,6 +134,7 @@ LEFT OUTER JOIN (SELECT
 					,cfiCard.strCardNumber
 					,cfiCard.strCardDescription 
 					,PRG.strPriceGroup
+					
 				 FROM dbo.tblCFAccount AS cfiAccount 
 				 INNER JOIN dbo.tblCFCard AS cfiCard 
 					ON cfiCard.intAccountId = cfiAccount.intAccountId 

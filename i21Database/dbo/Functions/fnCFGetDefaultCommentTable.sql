@@ -11,17 +11,19 @@
 RETURNS @returntable TABLE
 (
 	strDefaultComment NVARCHAR(MAX) NULL,
-	intDocumentMaintenanceId INT NULL
+	intDocumentMaintenanceId INT NULL,
+	blbMessage VARBINARY(MAX) NULL
 )
 AS
 BEGIN
 	DECLARE @strDefaultComment NVARCHAR(MAX) = NULL
 	DECLARE @intDocumentMaintenanceId INT = NULL
+	dECLARE @blbMessage VARBINARY(MAX) = NULL
 
 	IF (@strTransactionType = '' OR @strTransactionType IS  NULL)
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -31,9 +33,11 @@ BEGIN
 	--1. Filter by Transaction, Location, Customer, Type
 	SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 			,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+			,@blbMessage = blbMessage
 		FROM [tblSMDocumentMaintenance] A
 		INNER JOIN (SELECT intDocumentMaintenanceId
 						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+						 , blbMessage
 					FROM tblSMDocumentMaintenanceMessage
 					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -46,9 +50,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 			,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+			,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -58,8 +64,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -68,9 +74,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 					,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+					,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -80,8 +88,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -90,9 +98,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -102,8 +112,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -112,9 +122,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage--strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -124,8 +136,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -134,9 +146,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -146,8 +160,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -156,9 +170,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -168,8 +184,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -178,9 +194,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -190,8 +208,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -200,9 +218,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL AND A.intDocumentMaintenanceId = @DocumentMaintenanceId
@@ -212,8 +232,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 END
@@ -223,9 +243,11 @@ BEGIN
 	--1. Filter by Transaction, Location, Customer, Type
 	SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 			,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+			,@blbMessage = blbMessage
 		FROM [tblSMDocumentMaintenance] A
 		INNER JOIN (SELECT intDocumentMaintenanceId
 						 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+						 , blbMessage
 					FROM tblSMDocumentMaintenanceMessage
 					WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 		WHERE [strSource] = @strTransactionType
@@ -241,9 +263,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -255,8 +279,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -265,9 +289,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -280,8 +306,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -290,9 +316,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -304,8 +332,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -314,9 +342,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage--strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -329,8 +359,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -339,9 +369,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -353,8 +385,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -363,9 +395,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -378,8 +412,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -388,9 +422,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] = @strTransactionType
@@ -402,8 +438,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
@@ -412,9 +448,11 @@ BEGIN
 		BEGIN
 			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
 				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
+				,@blbMessage = blbMessage
 				FROM [tblSMDocumentMaintenance] A
 				INNER JOIN (SELECT intDocumentMaintenanceId
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
+								 , blbMessage
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
 				WHERE [strSource] IS NULL
@@ -424,15 +462,15 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
 	IF @strDefaultComment IS NOT NULL	
 	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
+		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId,blbMessage)
+		VALUES( @strDefaultComment, @intDocumentMaintenanceId,@blbMessage)
 		RETURN
 	END
 
