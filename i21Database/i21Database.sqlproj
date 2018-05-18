@@ -6577,6 +6577,7 @@
     <Build Include="dbo\Tables\tblCFTransactionTaxType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
