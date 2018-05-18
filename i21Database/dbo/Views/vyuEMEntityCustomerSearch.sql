@@ -20,7 +20,7 @@ SELECT DISTINCT
 	, strEmail				= entityContact.strEmail
 	, strContactName		= entityContact.strName
 	, intEntityContactId	= entityContact.intEntityId
-	, strLineOfBusiness		= LOB.strLineOfBusiness
+	, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(CUSTOMER.intEntityId) --LOB.strLineOfBusiness
 	, strClass				= entityClass.strClass
 	, ysnHasBudgetSetup		= ISNULL(BUDGET.ysnHasBudgetSetup, CAST(0 AS BIT))
 	, intPaymentMethodId	= CUSTOMER.intPaymentMethodId
@@ -79,8 +79,8 @@ LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.in
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
 LEFT JOIN vyuEMEntityType entityType ON CUSTOMER.intEntityId = entityType.intEntityId
 LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON CUSTOMER.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
-LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON CUSTOMER.intEntityId = entityLOB.intEntityId
-LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
+--LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON CUSTOMER.intEntityId = entityLOB.intEntityId
+--LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
@@ -121,5 +121,5 @@ LEFT JOIN (
 	vyuARCustomerInquiry 
 ) CI
 on CI.intEntityCustomerId = CUSTOMER.intEntityId
-WHERE entityType.Customer = 1 OR entityType.Prospect = 1
+WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO

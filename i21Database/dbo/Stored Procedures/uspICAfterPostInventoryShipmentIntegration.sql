@@ -75,7 +75,8 @@ BEGIN
 
 	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
 	UPDATE @ItemsFromInventoryShipment
-	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
+	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END,
+		intLoadShipped = CASE WHEN ysnLoad = 1 THEN intLoadShipped * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END ELSE NULL END
 END
 
 -- Get the Order-type and Source-type from tblICInventoryShipment
