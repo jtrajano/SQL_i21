@@ -41,6 +41,7 @@ SELECT
 	,intAssignedLots as intAssignedLots
 	,b.strBankName
 	,ba.strBankAccountNo
+	,ISNULL(ft.intNoOfContract - GOC.intOpenContract,0) as intUsedContract
 	,CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
 				WHERE 
 				(intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail) 
@@ -75,3 +76,6 @@ LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyEx
 LEFT OUTER JOIN [dbo].[tblRKAssignFuturesToContractSummary] AS cs ON cs.[intFutOptAssignedId] = ft.[intFutOptTransactionId]
 LEFT OUTER JOIN [dbo].[tblCTContractHeader] AS ch ON ch.[intContractHeaderId] = cs.[intContractHeaderId]
 LEFT OUTER JOIN [dbo].[tblCTContractDetail] AS cd ON cd.[intContractDetailId] = cs.[intContractDetailId]
+LEFT JOIN (
+	select intFutOptTransactionId, max(intOpenContract) as intOpenContract from vyuRKGetOpenContract group by intFutOptTransactionId
+) GOC ON ft.intFutOptTransactionId = GOC.intFutOptTransactionId
