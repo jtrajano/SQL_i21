@@ -9,7 +9,8 @@
 	@strAccountStatusCode	NVARCHAR(100) = NULL,
 	@ysnInclude120Days		BIT = 0,
 	@strCustomerIds			NVARCHAR(MAX) = NULL,
-	@intEntityUserId		INT = NULL
+	@intEntityUserId		INT = NULL,
+	@ysnPaidInvoice			BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -193,6 +194,7 @@ INNER JOIN (
 	FROM @tblCustomers
 ) C ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
+	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND ysnCancelled = 0
 	AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND I.intAccountId IN (

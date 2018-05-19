@@ -45,11 +45,12 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
               AND ysnActive = 1
             FOR XML PATH ('')
         ) C (intEntityId)
-
-        EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @dtmAsOfDate
+		
+        EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @dtmAsOfDate													  
                                                       , @ysnInclude120Days = 1
                                                       , @strCustomerIds = @strCustomerIds
                                                       , @intEntityUserId = @intEntityUserId
+													  , @ysnPaidInvoice = 0
 
 		DELETE AGING
 		FROM tblARCustomerAgingStagingTable AGING
