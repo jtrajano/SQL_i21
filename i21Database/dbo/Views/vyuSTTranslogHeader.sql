@@ -1,6 +1,7 @@
 ﻿CREATE VIEW dbo.vyuSTTranslogHeader
 AS
-SELECT  CAST(TRR.intCheckoutId AS NVARCHAR(MAX)) + '0' + CAST(TRR.intTermMsgSN AS NVARCHAR(MAX)) AS strUniqueId
+SELECT ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId 
+      , CAST(TRR.intCheckoutId AS NVARCHAR(MAX)) + '0' + CAST(TRR.intTermMsgSN AS NVARCHAR(MAX)) AS strUniqueId
       , TRR.intTermMsgSN
 	  , TRR.intStoreId
 	  , TRR.intCheckoutId
