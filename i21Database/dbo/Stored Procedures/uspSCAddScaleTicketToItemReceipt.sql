@@ -1228,11 +1228,11 @@ BEGIN
 		,[intItemUnitMeasureId] = RE.intItemUOMId
 		,[dblQuantity]			= RE.dblQty
 		,[dblGrossWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits),@currencyDecimal)
+									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
 									ELSE 0
 								END
 		,[dblTareWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink),@currencyDecimal)
+									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
 									ELSE 0
 								END
 		,[dblCost]				= RE.dblCost
