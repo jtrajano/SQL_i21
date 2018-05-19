@@ -1531,15 +1531,26 @@ UPDATE tblSMCSVDynamicImport SET
 
 		IF (@IsValid = 1)
 		BEGIN
-
-			INSERT INTO tblARCustomerMasterLicense(
-				intEntityCustomerId, 	intLicenseTypeId,
-				dtmBeginDate, 			dtmEndDate,
-				strComment, 			ysnAcvite)
-			SELECT
-				@EntityId,				@LicenseCodeId,
-				@BeginDate,				@EndDate,
-				@Comments,				@Active
+			if not exists(select top 1 1 
+							from tblARCustomerMasterLicense 
+								where intEntityCustomerId = @EntityId and 
+									intLicenseTypeId = @LicenseCodeId
+							)
+			begin
+				INSERT INTO tblARCustomerMasterLicense(
+					intEntityCustomerId, 	intLicenseTypeId,
+					dtmBeginDate, 			dtmEndDate,
+					strComment, 			ysnAcvite)
+				SELECT
+					@EntityId,				@LicenseCodeId,
+					@BeginDate,				@EndDate,
+					@Comments,				@Active				
+			end
+			else
+			begin
+				RAISERROR(''Customer and License Code combination already exists.'', 16, 1);
+			end
+			
 		END
 
 	END
