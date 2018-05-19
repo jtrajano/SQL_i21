@@ -4,8 +4,6 @@
 	@intLocationId INT,
 	@dtmScaleDate DATETIME,
 	@intUserId INT,
-	@intWeight INT,
-	@intGrade INT,
 	@strInOutFlag NVARCHAR(5),
 	@intMatchTicketId INT = 0,
 	@strTicketType NVARCHAR(10) = '',
@@ -26,10 +24,14 @@ DECLARE @ErrMsg NVARCHAR(MAX);
 DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@strWhereFinalizedWeight NVARCHAR(20)
 		,@strWhereFinalizedGrade NVARCHAR(20)
+		,@strWhereFinalizedMatchWeight NVARCHAR(20)
+		,@strWhereFinalizedMatchGrade NVARCHAR(20)
 		,@intMatchTicketEntityId INT
 		,@intMatchTicketLocationId INT
 		,@intContractDetailId INT
 		,@dblContractUnits NUMERIC(38, 20)
+		,@intMatchContractDetailId INT
+		,@dblMatchContractUnits NUMERIC(38, 20)
 		,@intTicketItemUOMId INT;
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
@@ -38,40 +40,47 @@ BEGIN TRY
 		BEGIN
 			SELECT @strWhereFinalizedWeight = strWeightFinalized
 				, @strWhereFinalizedGrade = strGradeFinalized
+				, @intContractDetailId = intContractId
 				, @intTicketItemUOMId = intItemUOMIdTo
 				, @dblContractUnits = dblNetUnits
 			FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
-			UPDATE	MatchTicket SET
-				MatchTicket.dblGrossWeight = SC.dblGrossWeight
-				,MatchTicket.dblGrossWeight1 = SC.dblGrossWeight1
-				,MatchTicket.dblGrossWeight2 = SC.dblGrossWeight2
-				,MatchTicket.dblTareWeight = SC.dblTareWeight
-				,MatchTicket.dblTareWeight1 = SC.dblTareWeight1
-				,MatchTicket.dblTareWeight2 = SC.dblTareWeight2
-				,MatchTicket.dblGrossUnits = SC.dblGrossUnits
-				,MatchTicket.dblShrink = SC.dblShrink
-				,MatchTicket.dblNetUnits = SC.dblNetUnits
-				FROM dbo.tblSCTicket SC 
-				OUTER APPLY(
-					SELECT dblGrossWeight
-					,dblGrossWeight1
-					,dblGrossWeight2
-					,dblTareWeight
-					,dblTareWeight1
-					,dblTareWeight2
-					,dblGrossUnits
-					,dblShrink
-					,dblNetUnits 
-					FROM tblSCTicket where intTicketId = SC.intMatchTicketId
-				) MatchTicket
-			WHERE SC.intTicketId = @intTicketId
+			SELECT @strWhereFinalizedMatchWeight = strWeightFinalized
+				, @strWhereFinalizedMatchGrade = strGradeFinalized
+				, @intMatchTicketEntityId = intEntityId
+				, @intMatchTicketLocationId = intProcessingLocationId
+				, @dtmScaleDate = dtmTicketDateTime 
+				, @intMatchContractDetailId = intContractId
+				, @dblMatchContractUnits = dblNetUnits
+			FROM vyuSCTicketScreenView where intTicketId = @intMatchTicketId 
 
-			IF ISNULL(@intContractDetailId,0) != 0
-				EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-
-			IF ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
+			IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination' AND ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
 			BEGIN
+				UPDATE	MatchTicket SET
+					MatchTicket.dblGrossWeight = SC.dblGrossWeight
+					,MatchTicket.dblGrossWeight1 = SC.dblGrossWeight1
+					,MatchTicket.dblGrossWeight2 = SC.dblGrossWeight2
+					,MatchTicket.dblTareWeight = SC.dblTareWeight
+					,MatchTicket.dblTareWeight1 = SC.dblTareWeight1
+					,MatchTicket.dblTareWeight2 = SC.dblTareWeight2
+					,MatchTicket.dblGrossUnits = SC.dblGrossUnits
+					,MatchTicket.dblShrink = SC.dblShrink
+					,MatchTicket.dblNetUnits = SC.dblNetUnits
+					FROM dbo.tblSCTicket SC 
+					OUTER APPLY(
+						SELECT dblGrossWeight
+						,dblGrossWeight1
+						,dblGrossWeight2
+						,dblTareWeight
+						,dblTareWeight1
+						,dblTareWeight2
+						,dblGrossUnits
+						,dblShrink
+						,dblNetUnits 
+						FROM tblSCTicket where intTicketId = SC.intMatchTicketId
+					) MatchTicket
+				WHERE SC.intTicketId = @intTicketId
+
 				UPDATE	MatchDiscount SET
 					MatchDiscount.dblShrinkPercent = QM.dblShrinkPercent
 					,MatchDiscount.dblDiscountAmount = QM.dblDiscountAmount
@@ -84,20 +93,17 @@ BEGIN TRY
 						where intTicketId = SC.intMatchTicketId AND strSourceType = 'Scale'
 					) MatchDiscount
 				WHERE SC.intTicketId = @intTicketId
+
+				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
+
+				IF ISNULL(@intContractDetailId,0) != 0
+					EXEC uspCTUpdateScheduleQuantityUsingUOM @intMatchContractDetailId, @dblMatchContractUnits, @intUserId, @intMatchTicketId, 'Scale', @intTicketItemUOMId
 			END
 
-			SELECT @intMatchTicketEntityId = intEntityId
-				, @intMatchTicketLocationId = intProcessingLocationId
-				, @dtmScaleDate = dtmTicketDateTime 
-				, @intContractDetailId = intContractId
-				, @dblContractUnits = dblNetUnits
-			FROM tblSCTicket where intTicketId = @intMatchTicketId 
-
-			IF ISNULL(@intContractDetailId,0) != 0
-				EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractUnits, @intUserId, @intMatchTicketId, 'Scale', @intTicketItemUOMId
-
-			EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
-			EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
+			BEGIN
+				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+			END
 		END
 		--ELSE
 		--BEGIN
@@ -106,13 +112,19 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @strWhereFinalizedWeight = strWhereFinalized FROM tblCTWeightGrade WHERE intWeightGradeId = @intWeight
-		SELECT @strWhereFinalizedGrade = strWhereFinalized FROM tblCTWeightGrade WHERE intWeightGradeId = @intGrade
+		SELECT @strWhereFinalizedWeight = strWeightFinalized
+			,@strWhereFinalizedGrade = strGradeFinalized
+			,@intContractDetailId = intContractId
+			,@intTicketItemUOMId = intItemUOMIdTo
+			,@dblContractUnits = dblNetUnits
+		FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
 		IF @strInOutFlag = 'I'
 		BEGIN
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
 			BEGIN
+				IF ISNULL(@intContractDetailId,0) != 0
+					EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId
 			END
 			INSERT INTO @ItemsToIncreaseInTransitDirect(
@@ -149,6 +161,8 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
 			BEGIN
+				IF ISNULL(@intContractDetailId,0) != 0
+					EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 			END
 		END

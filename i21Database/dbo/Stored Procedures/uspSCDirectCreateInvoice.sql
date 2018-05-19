@@ -379,7 +379,6 @@ BEGIN TRY
 			@transType			= N'all',
 			@accrueLicense		= 0,
 			@raiseError			= 1
-		SELECT @invoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId GROUP BY intInvoiceId
 	END
 END TRY
 BEGIN CATCH

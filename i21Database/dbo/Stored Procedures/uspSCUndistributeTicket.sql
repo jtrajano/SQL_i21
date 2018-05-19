@@ -179,7 +179,7 @@ BEGIN TRY
 						END
 						IF ISNULL(@intBillId, 0) > 0
 							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
-						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = 3095
+						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 

@@ -227,7 +227,13 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SC.intEntityId AND ysnDefaultLocation = 1
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-		WHERE SC.intTicketId = @intTicketId
+		LEFT JOIN (
+		SELECT intContractHeaderId
+			,intContractDetailId
+			,intPricingTypeId
+			FROM tblCTContractDetail 
+		) CNT ON CNT.intContractDetailId = SC.intContractId
+		WHERE SC.intTicketId = @intTicketId AND QM.dblDiscountAmount != 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6)
 				
 		SELECT @recCount = COUNT(*) FROM @voucherDetailDirectInventory;
 		IF ISNULL(@recCount,0) > 0
