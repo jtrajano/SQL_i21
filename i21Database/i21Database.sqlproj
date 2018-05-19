@@ -6583,6 +6583,9 @@
     <Build Include="dbo\Stored Procedures\uspSCReverseDestinationWeightGrade.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailDirectInventory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailDirectInventory.sql" />
+    <Build Include="dbo\Views\vyuAP1099Detail.sql" />
+    <Build Include="dbo\Tables\tblAP1099PATRCategory.sql" />
+    <Build Include="dbo\Tables\tblAP1099DIVCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6759,6 +6762,8 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
     <None Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
     <None Include="dbo\Functions\fnCFGetDefaultComment.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099PATR.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099DIV.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
