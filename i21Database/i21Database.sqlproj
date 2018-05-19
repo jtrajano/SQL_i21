@@ -6581,6 +6581,8 @@
     <Build Include="dbo\Stored Procedures\uspSCDirectCreateInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDirectCreateVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseDestinationWeightGrade.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailDirectInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailDirectInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

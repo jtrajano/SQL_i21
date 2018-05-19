@@ -99,7 +99,7 @@ END
 IF (@billBatchId IS NOT NULL)
 BEGIN
 	INSERT INTO #tmpPostBillData
-	SELECT B.intBillId FROM tblAPBillBatch A
+	SELECT B.intBillId FROM tblAPBillBatch A WITH (ROWLOCK, HOLDLOCK)
 			LEFT JOIN tblAPBill B	
 				ON A.intBillBatchId = B.intBillBatchId
 	WHERE A.intBillBatchId = @billBatchId

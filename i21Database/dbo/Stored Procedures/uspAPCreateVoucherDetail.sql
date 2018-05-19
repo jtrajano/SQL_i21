@@ -8,7 +8,8 @@
 	@voucherDetailCC AS VoucherDetailCC READONLY,
 	@voucherDetailStorage AS VoucherDetailStorage READONLY,
 	@voucherDetailLoadNonInv AS VoucherDetailLoadNonInv READONLY,
-	@voucherDetailClaim AS VoucherDetailClaim READONLY
+	@voucherDetailClaim AS VoucherDetailClaim READONLY,
+	@voucherDetailDirect AS VoucherDetailDirectInventory READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -65,6 +66,11 @@ IF @transCount = 0 BEGIN TRANSACTION
 	IF EXISTS(SELECT 1 FROM @voucherDetailClaim)
 	BEGIN
 		EXEC uspAPCreateVoucherDetailClaim  @billId, @voucherDetailClaim
+	END 
+
+	IF EXISTS(SELECT 1 FROM @voucherDetailDirect)
+	BEGIN
+		EXEC uspAPCreateVoucherDetailDirectInventory  @billId, @voucherDetailDirect
 	END 
 
 IF @transCount = 0 COMMIT TRANSACTION
