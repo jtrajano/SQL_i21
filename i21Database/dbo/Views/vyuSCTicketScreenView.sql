@@ -129,7 +129,7 @@
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     ,SCT.intLotId
     ,SCT.strLotNumber
-    ,SCT.intSalesOrderDetailId
+    ,SCT.intSalesOrderId
 	,SCT.ysnReadyToTransfer
 	,SCT.ysnDestinationWeightGradePost
 
@@ -216,7 +216,6 @@
 	,SO.strSalesOrderNumber
 	,SMC.strLocationName as strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
-	,SO.intSalesOrderId
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -283,6 +282,5 @@
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId AND LGD.intTicketId = SCT.intTicketId
-	LEFT JOIN tblSOSalesOrderDetail SOD on SOD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
-	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SOD.intSalesOrderId
+	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	

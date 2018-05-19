@@ -131,7 +131,7 @@
     [ysnDeliverySheetPost] BIT NOT NULL DEFAULT 0, 
     [intLotId] INT NULL, 
     [strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
-	[intSalesOrderDetailId] INT NULL, 
+	[intSalesOrderId] INT NULL, 
 	[intTicketLVStagingId] INT NULL, 
 	[intBillId] INT NULL,
 	[intInvoiceId] INT NULL,
@@ -164,7 +164,7 @@
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
 	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
-	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [tblSOSalesOrderDetail],
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder],
 	CONSTRAINT [FK_tblSCTicket_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 	CONSTRAINT [FK_tblSCTicket_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
 )

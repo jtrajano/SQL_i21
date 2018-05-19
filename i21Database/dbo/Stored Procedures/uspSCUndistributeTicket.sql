@@ -221,7 +221,9 @@ BEGIN TRY
 				IF ISNULL(@ysnTransfer ,0) = 1
 				BEGIN
 					SELECT @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
-					LEFT JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
+					LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SCT.intSalesOrderId
+					LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderId = SCT.intSalesOrderId
+					LEFT JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 					LEFT JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
 					WHERE SCT.intTicketId = @intTicketId
 
