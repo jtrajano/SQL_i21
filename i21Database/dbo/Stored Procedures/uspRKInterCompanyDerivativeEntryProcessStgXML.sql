@@ -58,6 +58,8 @@ WHERE strFeedStatus IS NULL
 			--===============
 			-- HEADER
 			--===============
+			SET @strHeaderXML = REPLACE(@strHeaderXML, 'intCompanyId>', 'CompanyId>')
+
 			EXEC uspCTInsertINTOTableFromXML 'tblRKFutOptTransactionHeader',@strHeaderXML,@NewHeaderId OUTPUT
 
 			UPDATE tblRKFutOptTransactionHeader
