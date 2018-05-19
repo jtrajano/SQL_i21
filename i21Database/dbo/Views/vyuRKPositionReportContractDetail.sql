@@ -62,7 +62,7 @@ WITH Pricing AS
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId
 	join tblRKFutureMarket fm on CDT.intFutureMarketId=fm.intFutureMarketId
 	join tblRKFuturesMonth mo on mo.intFutureMonthId=CDT.intFutureMonthId
-	JOIN tblCTBook b on b.intBookId=case when isnull(CDT.intBookId,0)=0 then (SELECT DISTINCT b.intBookId from tblCTBookVsEntity e
+	LEFT JOIN tblCTBook b on b.intBookId=case when isnull(CDT.intBookId,0)=0 then (SELECT DISTINCT b.intBookId from tblCTBookVsEntity e
 																	join tblCTContractHeader ch on ch.intEntityId=e.intEntityId
 																	join tblCTBook b on b.intBookId=ch.intBookId) else CDT.intBookId end
 	LEFT JOIN tblSMMultiCompany comp on comp.intMultiCompanyId=ch.intCompanyId
@@ -71,7 +71,7 @@ WITH Pricing AS
 	
 	LEFT JOIN tblICCommodityAttribute pty on IM.intProductTypeId=pty.intCommodityAttributeId and pty.strType='ProductType'
 	LEFT JOIN tblICCommodityProductLine ptl on IM.intProductLineId=ptl.intCommodityProductLineId 
-    WHERE   CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0  
+   WHERE   CDT.dblQuantity >   isnull(CDT.dblInvoicedQty,0) and isnull(CDT.dblBalance,0) > 0  
     GROUP BY c.strCommodityCode,
 						c.intCommodityId,
 						ch.intContractHeaderId,
@@ -95,7 +95,7 @@ WITH Pricing AS
 		fm.intUnitMeasureId,dtmFutureMonthsDate,ysnExpired,strSymbol,dblContractSize,intItemUOMId,CDT.dblNoOfLots,dblYield,ch.intCommodityId,PFX.dblLotsFixed
 		, ysnDeltaHedge,CA.strDescription,IM.strDescription,intMultiCompanyId,strCompanyName,CDT.dtmStartDate,dtmEndDate)
 
-
+ 
 	SELECT * FROM (
     SELECT   strCommodityCode,
 		intCommodityId,
@@ -162,14 +162,6 @@ WITH Pricing AS
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
-	--JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
-	--													1 = (
-	--														CASE 
-	--															WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
-	--															WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
-	--															ELSE 0
-	--														END
-	--													) 
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
@@ -212,14 +204,6 @@ WITH Pricing AS
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
-	--JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
-	--													1 = (
-	--														CASE 
-	--															WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
-	--															WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
-	--															ELSE 0
-	--														END
-	--													) 
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
@@ -262,14 +246,6 @@ WITH Pricing AS
     FROM    tblCTContractDetail CDT
     JOIN    Pricing     PRC ON CDT.intContractDetailId = PRC.intContractDetailId and CDT.intPricingTypeId IN (2)
 	JOIN tblCTContractHeader ch on ch.intContractHeaderId=CDT.intContractHeaderId AND CDT.intContractStatusId  not in(2,3,6)
-	--JOIN	vyuCTEntity							EY	ON	EY.intEntityId						=		ch.intEntityId			AND														
-	--													1 = (
-	--														CASE 
-	--															WHEN ch.intContractTypeId = 1 AND EY.strEntityType = 'Vendor' THEN 1 
-	--															WHEN ch.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
-	--															ELSE 0
-	--														END
-	--													) 
 	JOIN	tblICItem			 IM	ON	IM.intItemId				=	CDT.intItemId
 	JOIN tblICCommodity c on ch.intCommodityId=c.intCommodityId
 	JOIN tblCTPricingType pt on pt.intPricingTypeId=CDT.intPricingTypeId
@@ -335,14 +311,13 @@ WITH Pricing AS
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=ch.intCommodityId AND CDT.intUnitMeasureId=ium.intUnitMeasureId 
 	JOIN tblRKFutureMarket fm on fm.intFutureMarketId=CDT.intFutureMarketId
 	join tblRKFuturesMonth mo on mo.intFutureMonthId=CDT.intFutureMonthId
-	JOIN tblCTBook b on b.intBookId=case when isnull(CDT.intBookId,0)=0 then (SELECT DISTINCT b.intBookId from tblCTBookVsEntity e
+	LEFT JOIN tblCTBook b on b.intBookId=case when isnull(CDT.intBookId,0)=0 then (SELECT DISTINCT b.intBookId from tblCTBookVsEntity e
 																	join tblCTContractHeader ch on ch.intEntityId=e.intEntityId
 																	join tblCTBook b on b.intBookId=ch.intBookId) else CDT.intBookId end	
 	LEFT JOIN tblSMMultiCompany comp on comp.intMultiCompanyId=ch.intCompanyId
 	LEFT JOIN tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId	
 	LEFT JOIN tblICCommodityAttribute pty on IM.intProductTypeId=pty.intCommodityAttributeId and pty.strType='ProductType'
 	LEFT JOIN tblICCommodityProductLine ptl on IM.intProductLineId=ptl.intCommodityProductLineId 
-    WHERE   CDT.intContractDetailId NOT IN (SELECT distinct intContractDetailId FROM Pricing)  
-	and dblBalance > 0
-
-) t 
+    WHERE   CDT.intContractDetailId not in(select intContractDetailId from Pricing)
+	and dblBalance <> 0
+) t  

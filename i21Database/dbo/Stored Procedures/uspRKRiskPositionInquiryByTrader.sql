@@ -13,7 +13,6 @@
 		@intCompanyId int
 AS  
 
-
 DECLARE @Commodity AS TABLE 
 (
 intCommodityIdentity int IDENTITY(1,1) PRIMARY KEY , 
@@ -94,6 +93,7 @@ declare @intFCommodityId int= null
 declare @intFMarketId int= null
 declare @intFMonthId int= null
 
+
 SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity where intCommodityIdentity is not null
 WHILE @mRowNumber >0
 BEGIN
@@ -117,10 +117,10 @@ SELECT @intUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where 
 	
 END
 
-INSERT INTO @List( intSumRowNum,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
+INSERT INTO @List( intSumRowNum, strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod)
-exec uspRKRiskPositionInquiryByTraderSub 
+EXEC uspRKRiskPositionInquiryByTraderSub 
         @intCommodityId  = @intFCommodityId,  
         @intCompanyLocationId  = @intCompanyLocationId,  
         @intFutureMarketId  = @intFMarketId,  
@@ -143,7 +143,8 @@ insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,
 SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strProductLine ='PTBF Buy' order by strFutureMonth,intRowNumber
+FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strTranType not in ('PTBF Buy','PTBF Sell')
+ order by strFutureMonth,intRowNumber
 
 insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
@@ -151,7 +152,17 @@ insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,
 SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strProductLine ='PTBF Sell' order by strFutureMonth,intRowNumber
+FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strTranType='PTBF Buy'
+ order by strFutureMonth,intRowNumber
+
+ insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
+		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
+		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod)
+SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
+		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
+		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
+FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strTranType='PTBF Sell'
+ order by strFutureMonth,intRowNumber
 
 insert into @FinalList ( intSumRowNum,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
@@ -160,7 +171,6 @@ SELECT 	 intRowNumber,strFutMarketName,strBook ,strProductType ,strProductLine ,
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
 FROM @List where strFutureMonth in ('Total UP','Total P')  order by strFutureMonth,intRowNumber
-
 insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod)
@@ -183,6 +193,5 @@ SELECT 	 intRowNumber,strFutMarketName,strBook ,strProductType ,strProductLine ,
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
 FROM @List where strFutureMonth='Delta Total'  order by strFutureMonth,intRowNumber
 
-select * from 	@FinalList order by  intRowNumber,strFutMarketName,strCompanyName
-
-		
+select * from 	@FinalList 
+order by  intRowNumber,strFutMarketName,strCompanyName
