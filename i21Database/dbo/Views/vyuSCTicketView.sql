@@ -116,8 +116,6 @@
        ,SCT.intDriverEntityId
        ,SCT.intStorageScheduleId
        ,SCT.dblNetWeightDestination
-       ,SCT.ysnUseDestinationWeight
-       ,SCT.ysnUseDestinationGrades
        ,SCT.ysnHasGeneratedTicketNumber
        ,SCT.intInventoryTransferId
        ,SCT.dblShrink

@@ -97,8 +97,6 @@
        tblSCTicket.intStorageScheduleId,
        tblSCTicket.intConcurrencyId,
        tblSCTicket.dblNetWeightDestination,
-       tblSCTicket.ysnUseDestinationWeight,
-       tblSCTicket.ysnUseDestinationGrades,
        tblSCTicket.ysnHasGeneratedTicketNumber,
        tblSCTicket.intInventoryTransferId,
        tblSCTicket.dblShrink,

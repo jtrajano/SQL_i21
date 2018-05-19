@@ -112,8 +112,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.intStorageScheduleId,
 	SC.intConcurrencyId,
 	SC.dblNetWeightDestination,
-	SC.ysnUseDestinationWeight,
-	SC.ysnUseDestinationGrades,
 	SC.ysnHasGeneratedTicketNumber,
 	SC.intInventoryTransferId,
 	SC.dblShrink,

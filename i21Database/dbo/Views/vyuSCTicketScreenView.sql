@@ -104,8 +104,6 @@
 	,SCT.intDriverEntityId
 	,SCT.intStorageScheduleId
 	,SCT.dblNetWeightDestination
-	,SCT.ysnUseDestinationWeight
-	,SCT.ysnUseDestinationGrades
 	,SCT.ysnHasGeneratedTicketNumber
 	,SCT.dblShrink
 	,SCT.dblScheduleQty
@@ -133,6 +131,7 @@
     ,SCT.strLotNumber
     ,SCT.intSalesOrderDetailId
 	,SCT.ysnReadyToTransfer
+	,SCT.ysnDestinationWeightGradePost
 
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
@@ -201,7 +200,9 @@
 	,CT.intContractHeaderId
 	,EMShipVia.strHaulerName
 	,CTGrade.strWeightGradeDesc AS strGradeOrigDes
+	,CTGrade.strWhereFinalized AS strGradeFinalized
 	,CTWeight.strWeightGradeDesc AS strWeightOrigDes
+	,CTWeight.strWhereFinalized AS strWeightFinalized
 	,CTCost.intItemUOMId AS intContractItemUOMId
 
 	,(CASE 

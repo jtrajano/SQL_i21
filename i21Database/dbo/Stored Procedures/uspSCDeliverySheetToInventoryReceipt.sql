@@ -478,7 +478,7 @@ END
 			@type = N'AccountsPayable.view.Voucher',
 			@transactionEntityId = @intEntityId,
 			@currentUserEntityId = @intUserId,
-			@locationId = @intLocationId,
+			@locationId = @intShipTo,
 			@amount = @dblTotal,
 			@requireApproval = @requireApproval OUTPUT
 

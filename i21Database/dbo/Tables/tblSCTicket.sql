@@ -108,8 +108,6 @@
 	[intStorageScheduleId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT((1)),  
 	[dblNetWeightDestination] NUMERIC(38, 20) NULL, 
-    [ysnUseDestinationWeight] BIT NULL, 
-    [ysnUseDestinationGrades] BIT NULL, 
     [ysnHasGeneratedTicketNumber] BIT NULL, 
     [intInventoryTransferId] INT NULL, 
     [intInventoryReceiptId] INT NULL, 
@@ -135,6 +133,9 @@
     [strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intSalesOrderDetailId] INT NULL, 
 	[intTicketLVStagingId] INT NULL, 
+	[intBillId] INT NULL,
+	[intInvoiceId] INT NULL,
+	[ysnDestinationWeightGradePost] BIT NOT NULL DEFAULT 0, 
 	[strSourceType] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
@@ -163,7 +164,9 @@
 	CONSTRAINT [FK_tblSCTicket_tblICCommodityAttribute_intCommodityAttributeId] FOREIGN KEY (intCommodityAttributeId) REFERENCES [tblICCommodityAttribute](intCommodityAttributeId),
 	CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber_strOfflineGuid] UNIQUE ([strOfflineGuid],[intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICLot_intLotId] FOREIGN KEY (intLotId) REFERENCES [tblICLot](intLotId),
-	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [tblSOSalesOrderDetail]
+	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [tblSOSalesOrderDetail],
+	CONSTRAINT [FK_tblSCTicket_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
+	CONSTRAINT [FK_tblSCTicket_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
 )
 
 GO
