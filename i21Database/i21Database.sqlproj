@@ -6578,6 +6578,9 @@
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDirectCreateInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDirectCreateVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseDestinationWeightGrade.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
