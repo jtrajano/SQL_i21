@@ -18,7 +18,7 @@ DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
 DECLARE @ErrMsg NVARCHAR(MAX);
 DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
-		,@voucherDetailNonInventory AS VoucherDetailNonInventory
+		,@voucherDetailDirectInventory AS VoucherDetailDirectInventory
 		,@invoiceIntegrationStagingTable AS InvoiceIntegrationStagingTable
 		,@InTransitTableType AS InTransitTableType
 		,@intBillId INT
@@ -38,7 +38,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 BEGIN TRY
 		SELECT @vendorOrderNumber = 'TKT-'+strTicketNumber FROM tblSCTicket WHERE intTicketId = @intTicketId
 		--FOR LINE ITEM
-		INSERT INTO @voucherDetailNonInventory(
+		INSERT INTO @voucherDetailDirectInventory(
 			[intAccountId],
 			[intItemId],
 			[strMiscDescription],
@@ -46,7 +46,8 @@ BEGIN TRY
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
-			[intInvoiceId]
+			[intInvoiceId],
+			[intScaleTicketId]
 		)
 		SELECT 
 			intAccountId = NULL
@@ -83,6 +84,7 @@ BEGIN TRY
 						END
 			,intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 			,intInvoiceId = null
+			,intScaleTicketId = SC.intTicketId
 		FROM tblSCTicket SC 
 		INNER JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId
 		LEFT JOIN (
@@ -115,7 +117,7 @@ BEGIN TRY
 		WHERE SC.intTicketId = @intTicketId
 				
 		--FOR FREIGHT CHARGES
-		INSERT INTO @voucherDetailNonInventory(
+		INSERT INTO @voucherDetailDirectInventory(
 			[intAccountId],
 			[intItemId],
 			[strMiscDescription],
@@ -123,7 +125,8 @@ BEGIN TRY
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
-			[intInvoiceId]
+			[intInvoiceId],
+			[intScaleTicketId]
 		)
 		SELECT 
 			intAccountId = NULL
@@ -138,6 +141,7 @@ BEGIN TRY
 			,dblCost = CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblFreightRate ELSE SC.dblFreightRate * -1 END
 			,intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,IC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 			,intInvoiceId = null
+			,intScaleTicketId = SC.intTicketId
 		FROM tblSCTicket SC
 		INNER JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SC.intEntityId AND ysnDefaultLocation = 1
@@ -145,7 +149,7 @@ BEGIN TRY
 		WHERE SC.intTicketId = @intTicketId AND SC.dblFreightRate != 0
 				
 		--FOR FEE CHARGES
-		INSERT INTO @voucherDetailNonInventory(
+		INSERT INTO @voucherDetailDirectInventory(
 			[intAccountId],
 			[intItemId],
 			[strMiscDescription],
@@ -153,7 +157,8 @@ BEGIN TRY
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
-			[intInvoiceId]
+			[intInvoiceId],
+			[intScaleTicketId]
 		)
 		SELECT 
 			intAccountId = NULL
@@ -169,6 +174,7 @@ BEGIN TRY
 			,dblCost =  CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblTicketFees ELSE SC.dblTicketFees * -1 END
 			,intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,IC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 			,intInvoiceId = null
+			,intScaleTicketId = SC.intTicketId
 		FROM tblSCTicket SC
 		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SC.intEntityId AND ysnDefaultLocation = 1
@@ -176,7 +182,7 @@ BEGIN TRY
 		WHERE SC.intTicketId = @intTicketId AND SC.dblTicketFees > 0
 
 		--FOR DISCOUNT
-		INSERT INTO @voucherDetailNonInventory(
+		INSERT INTO @voucherDetailDirectInventory(
 			[intAccountId],
 			[intItemId],
 			[strMiscDescription],
@@ -184,7 +190,8 @@ BEGIN TRY
 			[dblDiscount], 
 			[dblCost], 
 			[intTaxGroupId],
-			[intInvoiceId]
+			[intInvoiceId],
+			[intScaleTicketId]
 		)
 		SELECT 
 			intAccountId = NULL
@@ -214,6 +221,7 @@ BEGIN TRY
 						END
 			,intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,IC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 			,intInvoiceId = null
+			,intScaleTicketId = SC.intTicketId
 		FROM tblSCTicket SC 
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intTicketId
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SC.intEntityId AND ysnDefaultLocation = 1
@@ -221,14 +229,14 @@ BEGIN TRY
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 		WHERE SC.intTicketId = @intTicketId
 				
-		SELECT @recCount = COUNT(*) FROM @voucherDetailNonInventory;
+		SELECT @recCount = COUNT(*) FROM @voucherDetailDirectInventory;
 		IF ISNULL(@recCount,0) > 0
 		BEGIN
 			EXEC [dbo].[uspAPCreateBillData] 
 				@userId = @intUserId
 				,@vendorId = @intEntityId
 				,@type = 1
-				,@voucherNonInvDetails = @voucherDetailNonInventory
+				,@voucherDetailDirect = @voucherDetailDirectInventory
 				,@shipTo = @intLocationId
 				,@vendorOrderNumber = @vendorOrderNumber
 				,@voucherDate = @dtmScaleDate
