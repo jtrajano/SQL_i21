@@ -89,7 +89,8 @@ BEGIN
 		UPDATE @Value  SET sv = REPLACE(sv,',','-^-') 
 			where sv not like '%,' and sv not like ',%'
 
-		declare @NewLine as nvarchar(max)
+		declare @NewLine as nvarchar(max)		
+		set @NewLine = ''
 		select  @NewLine = COALESCE(ISNULL(@NewLine, ''),',') + sv from @Value
 		
 		DELETE FROM @Value
