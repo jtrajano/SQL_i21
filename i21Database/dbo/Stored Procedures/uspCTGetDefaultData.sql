@@ -10,7 +10,10 @@
 	@intStorageLocationId	INT = NULL,
 	@intItemContractId		INT = NULL,
 	@intEntityId			INT = NULL,
-	@intContractTypeId		INT = NULL
+	@intContractTypeId		INT = NULL,
+	@intCurrencyId			INT = NULL,
+	@intRateTypeId			INT = NULL,
+	@intInvoiceCurrencyId	INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -31,7 +34,10 @@ BEGIN
 			@intCommodityId			= CASE WHEN @intCommodityId= 0 THEN NULL ELSE @intCommodityId END,
 			@intStorageLocationId	= CASE WHEN @intStorageLocationId= 0 THEN NULL ELSE @intStorageLocationId END,
 			@intItemContractId		= CASE WHEN @intItemContractId= 0 THEN NULL ELSE @intItemContractId END,
-			@intEntityId			= CASE WHEN @intEntityId= 0 THEN NULL ELSE @intEntityId END
+			@intEntityId			= CASE WHEN @intEntityId= 0 THEN NULL ELSE @intEntityId END,
+			@intCurrencyId			= CASE WHEN @intCurrencyId= 0 THEN NULL ELSE @intCurrencyId END,
+			@intRateTypeId			= CASE WHEN @intRateTypeId= 0 THEN NULL ELSE @intRateTypeId END,
+			@intInvoiceCurrencyId	= CASE WHEN @intInvoiceCurrencyId= 0 THEN NULL ELSE @intInvoiceCurrencyId END
 
 	DECLARE @intVendorId INT, @strCity NVARCHAR(100),@intCityId INT, @ysnPort BIT, @ysnRegion BIT
 
@@ -204,6 +210,21 @@ BEGIN
 		ISNULL(	dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
 		AND ysnExpired <> 1
 		ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) ASC
+	END
+
+	IF @strType = 'FX'
+	BEGIN
+		SELECT @intCurrencyId = ISNULL(intMainCurrencyId,intCurrencyID) FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
+		IF @intCurrencyId <> @intInvoiceCurrencyId
+		BEGIN
+			SELECT	intCurrencyExchangeRateId ,
+					FC.strCurrency +'/' + TC.strCurrency strExchangeRate,
+					(SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			FROM	tblSMCurrencyExchangeRate ER
+			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
+			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			WHERE	intToCurrencyId = @intInvoiceCurrencyId AND intFromCurrencyId = @intCurrencyId
+		END
 	END
 
 END
