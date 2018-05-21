@@ -120,7 +120,7 @@ DECLARE
 		,@AmountDue					= @ZeroDecimal
 		,@Payment					= @ZeroDecimal
 		,@EntitySalespersonId		= ARC.[intSalespersonId]
-		,@FreightTermId				= CD.intFreightTermId
+		,@FreightTermId				= L.intFreightTermId
 		,@ShipViaId					= CD.intShipViaId
 		,@PaymentMethodId			= NULL
 		,@InvoiceOriginId			= NULL
