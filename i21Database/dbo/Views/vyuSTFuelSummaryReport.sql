@@ -14,7 +14,6 @@ SELECT ST.intStoreId
 , Inv.ysnPosted
 , SUM(CPT.dblQuantity) dblQuantity
 , SUM(CPT.dblAmount) dblAmount
-, SUM(CPT.dblAmount) / SUM(CPT.dblQuantity) dblPrice
 FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId 
 LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId = CH.intInvoiceId
 INNER JOIN tblSTCheckoutPumpTotals CPT ON CPT.intCheckoutId = CH.intCheckoutId 
