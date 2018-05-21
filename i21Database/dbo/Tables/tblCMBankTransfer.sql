@@ -22,6 +22,7 @@
 	[ysnDelete]				   BIT             NULL,
 	[dtmDateDeleted]		   DATETIME		   NULL,
 	[dblRate]                  DECIMAL (18, 6) DEFAULT 1 NULL,
+	[intCurrencyExchangeRateTypeId] INT	NULL,
 	[dblHistoricRate]          DECIMAL (18, 6) DEFAULT 1 NULL,
     [intConcurrencyId]         INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
