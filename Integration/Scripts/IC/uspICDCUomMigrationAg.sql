@@ -29,13 +29,13 @@ IF NOT EXISTS (select distinct upper(rtrim(agitm_un_desc)) UnitMeasure
 from agitmmst where upper(rtrim(agitm_un_desc)) = 'LB')
 INSERT INTO [dbo].[tblICUnitMeasure] ([strUnitMeasure]) VALUES ('LB')
 
---import all packing description with pack per unit greater than 1. These are pack units and have a different stock unit.
+--import all packing description with pack per unit not equal to 1. These are pack units and have a different stock unit.
 --concatenate unit desc with pack per unit to make a unique uom
 insert into tblICUnitMeasure (strUnitMeasure)
-select distinct upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) UnitMeasure
+select distinct upper(rtrim(agitm_pak_desc)) UnitMeasure
 from agitmmst
-left join tblICUnitMeasure I on I.strUnitMeasure = upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS
-where agitm_un_per_pak > 1 and I.strUnitMeasure is null
+left join tblICUnitMeasure I on I.strUnitMeasure = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+where agitm_un_per_pak not in (1,0) and I.strUnitMeasure is null
 
 --update the unit type for the imported uoms
 update tblICUnitMeasure set strUnitType = 
@@ -43,25 +43,25 @@ case
 when upper(strUnitMeasure) in ('BUSHEL','BUSHELS','BU', 'GAL', 'OZ', 'GA', 'QT') then 'Volume'
 --when upper(strUnitMeasure) in ('BAG', 'BX') then 'Packed' 
 when upper(strUnitMeasure) = 'EA' then 'Quantity'
-when upper(strUnitMeasure) in ('TN', 'TON', 'KG', 'LB') then 'Weight'
+when upper(strUnitMeasure) in ('TN', 'TON', 'KG', 'LB', 'LBS') then 'Weight'
 when upper(strUnitMeasure) = 'FT' then 'Length'
 else 'Quantity'
 End 
 
 --update the unit type for the imported uoms with pack per unit greater than 1
-update tblICUnitMeasure set strUnitType = 'Quantity'
-where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS in  
-(select upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) 
-COLLATE SQL_Latin1_General_CP1_CS_AS
-from agitmmst where agitm_un_per_pak > 1) 
+--update tblICUnitMeasure set strUnitType = 'Quantity'
+--where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS in  
+--(select upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) 
+--COLLATE SQL_Latin1_General_CP1_CS_AS
+--from agitmmst where agitm_un_per_pak > 1) 
 
 --insert conversion factors for units with pack per unit > 1
 insert into tblICUnitMeasureConversion (intUnitMeasureId, intStockUnitMeasureId, dblConversionToStock, intSort, intConcurrencyId)
-select intUnitMeasureId, 
+select distinct intUnitMeasureId, 
 (select top 1 intUnitMeasureId from tblICUnitMeasure U where U.strUnitMeasure = upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS) intToUnit,
 agitm_un_per_pak, 0,1
-from tblICUnitMeasure U join agitmmst I on U.strUnitMeasure = upper(rtrim(agitm_un_desc))+' '+SUBSTRING(cast(agitm_un_per_pak as varchar(15)), 0, CHARINDEX('.', agitm_un_per_pak)) COLLATE SQL_Latin1_General_CP1_CS_AS
-where agitm_un_per_pak > 1
+from tblICUnitMeasure U join agitmmst I on U.strUnitMeasure = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+where agitm_un_per_pak not in (1,0)
 
 GO
 
