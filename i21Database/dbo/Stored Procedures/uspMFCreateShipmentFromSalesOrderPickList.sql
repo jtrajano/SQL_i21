@@ -3,14 +3,17 @@
 	@intUserId int,
 	@intInventoryShipmentId int=0 OUT
 AS
-	
-Begin Try
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+DECLARE @InitTranCount AS INT
+DECLARE @Savepoint as VARCHAR(MAX)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('uspMFCreateShipmentFromSalesOrderPickList' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 Declare @ErrMsg nvarchar(max)
 Declare @intMinPickListDetail INT
@@ -41,7 +44,10 @@ DECLARE @tblInputItem TABLE (
 
 	If Exists (Select 1 From tblICInventoryShipment sh Join tblICInventoryShipmentItem sd on sh.intInventoryShipmentId=sd.intInventoryShipmentId 
 		Where sh.intOrderType=2 AND sd.intOrderId=@intSalesOrderId)
-		RaisError('Shipment is already created for the sales order.',16,1)
+		BEGIN
+			RaisError('Shipment is already created for the sales order.',16,1)
+			RETURN;
+		END
 
 	If (Select ISNULL(intFreightTermId,0) From tblSOSalesOrder Where intSalesOrderId=@intSalesOrderId)=0
 		RaisError('Please enter freight term in Sales Order before shipping.',16,1)
@@ -76,7 +82,8 @@ Begin
 	Select @intMinSalesOrderItem=MIN(intRowNo) From @tblInputItem Where intRowNo>@intMinSalesOrderItem
 End
 
-Begin Tran
+BEGIN TRY
+BEGIN TRANSACTION
 	--Create Shipment Header and Line	
 	Exec uspSOProcessToItemShipment @intSalesOrderId,@intUserId,0,@intInventoryShipmentId OUT
 
@@ -101,12 +108,23 @@ Begin Tran
 
 	--Reserve against shipment
 	EXEC uspICReserveStockForInventoryShipment @intInventoryShipmentId
-Commit Tran
+COMMIT TRANSACTION
 
 End Try
 BEGIN CATCH  
- IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
- SET @ErrMsg = ERROR_MESSAGE()  
- RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
+ --IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION      
+ --SET @ErrMsg = ERROR_MESSAGE()  
+ --RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
+IF @InitTranCount = 0
+	IF (XACT_STATE()) <> 0
+		ROLLBACK TRANSACTION 
+	ELSE
+	IF (XACT_STATE()) <> 0
+		ROLLBACK TRANSACTION @Savepoint
+	ELSE
+		ROLLBACK TRANSACTION
+
+	SET @ErrMsg = ERROR_MESSAGE()  
+	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT') 
   
 END CATCH  
