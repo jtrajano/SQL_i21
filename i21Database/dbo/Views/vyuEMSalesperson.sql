@@ -32,6 +32,8 @@ select
 from tblEMEntity a
 	join tblARSalesperson b on
 		a.intEntityId = b.[intEntityId]
+	join vyuEMEntityType ab
+		on ab.intEntityId = a.intEntityId and ab.Salesperson = 1
 	left join [tblEMEntityToContact] c
 		on a.intEntityId = c.intEntityId	
 			and c.ysnDefaultContact = 1
