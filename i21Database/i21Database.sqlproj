@@ -6591,6 +6591,7 @@
     <Build Include="dbo\Views\vyuSTCustomerPaymentReport.sql" />
     <Build Include="dbo\Views\vyuSTCustomerChargeReport.sql" />
     <Build Include="dbo\Views\vyuSTDepositReport.sql" />
+    <Build Include="dbo\Views\vyuLGUnAllocatedInventory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
