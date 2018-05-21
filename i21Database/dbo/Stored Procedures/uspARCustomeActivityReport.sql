@@ -380,6 +380,6 @@ IF @ysnPrintRecap = 1
 
 SELECT * FROM tblARCustomerActivityStagingTable 
 WHERE intEntityUserId = @intEntityUserId 
-AND (CASE WHEN ISNULL(@strInvoiceNumber,'') != '' THEN CASE WHEN strTransactionNumber LIKE '%'+@strInvoiceNumber+'%' THEN 1 ELSE 0 END ELSE 1 END) = 1
-AND (CASE WHEN ISNULL(@strRecordNumber,'') != '' THEN CASE WHEN strTransactionNumber LIKE '%'+@strRecordNumber+'%' THEN 1 ELSE 0 END ELSE 1 END) = 1
+AND (CASE WHEN ISNULL(@strInvoiceNumber,'') != '' THEN CASE WHEN strTransactionNumber = @strInvoiceNumber THEN 1 ELSE 0 END ELSE 1 END) = 1
+AND (CASE WHEN ISNULL(@strRecordNumber,'') != '' THEN CASE WHEN strTransactionNumber = @strRecordNumber THEN 1 ELSE 0 END ELSE 1 END) = 1
 ORDER BY dtmTransactionDate
