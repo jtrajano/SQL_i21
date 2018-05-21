@@ -83,6 +83,8 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dblFXValue							    NUMERIC(24, 10)
 		,dblFXConvertedValue				    NUMERIC(24, 10)
 		,strSalesReturnAdjustment				NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intCompanyId							INT
+		,strCompany								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	    )  
 
 		INSERT INTO @tblRealizedPNL
@@ -158,7 +160,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 			,dblNetPNLValue					
 			,dblFXValue						
 			,dblFXConvertedValue			
-			,strSalesReturnAdjustment		
+			,strSalesReturnAdjustment
+			,intCompanyId	
+			,strCompany				
 		)
 		 SELECT
 		 intContractTypeId							= CH.intContractTypeId 
@@ -244,7 +248,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dblNetPNLValue								= NULL
 		,dblFXValue									= NULL
 		,dblFXConvertedValue						= NULL
-		,strSalesReturnAdjustment					= NULL	
+		,strSalesReturnAdjustment					= NULL
+		,intCompanyId								= Company.intMultiCompanyId
+		,strCompany									= Company.strCompanyName
 
 		FROM tblARInvoiceDetail InvoiceDetail
 		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId
@@ -399,7 +405,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dblNetPNLValue								= NULL
 		,dblFXValue									= NULL
 		,dblFXConvertedValue						= NULL
-		,strSalesReturnAdjustment					= NULL	
+		,strSalesReturnAdjustment					= NULL
+		,intCompanyId								= Company.intMultiCompanyId
+		,strCompany									= Company.strCompanyName	
 
 		FROM tblARInvoiceDetail InvoiceDetail
 		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId

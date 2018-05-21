@@ -6592,6 +6592,7 @@
     <Build Include="dbo\Views\vyuSTCustomerChargeReport.sql" />
     <Build Include="dbo\Views\vyuSTDepositReport.sql" />
     <Build Include="dbo\Views\vyuLGUnAllocatedInventory.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConsolidatedPNL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
