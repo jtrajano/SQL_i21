@@ -423,7 +423,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intDestinationGradeId]
 				,[intDestinationWeightId]
 				,[intSalesAccountId]
-				,[intTicketId])
+				,[intTicketId]
+				,[intTicketHoursWorkedId])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -479,6 +480,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemDestinationWeightId
 				,@ItemSalesAccountId
 				,@ItemTicketId
+				,@ItemTicketHoursWorkedId
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
