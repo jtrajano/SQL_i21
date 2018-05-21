@@ -29,6 +29,14 @@ BEGIN TRY
 	  	 intContractDetailId	 INT
 	  	,dblTotalCost		     NUMERIC(24, 10)
 	  )
+	  
+	  DECLARE @tblFutureMonthByMarket TABLE 
+	  (
+	  	  Row_Num			  INT
+		 ,intFutureMarketId	  INT
+	  	 ,intFutureMonthId	  NUMERIC(24, 10)
+	  )
+	  
 
 	 DECLARE @tblUnRealizedPNL AS TABLE 
 	 (
@@ -135,6 +143,21 @@ BEGIN TRY
 		,intCompanyId							INT
 		,strCompanyName							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	) 
+
+	   ;WITH CTE
+		AS (
+		SELECT Row_Number() OVER (
+							PARTITION BY intFutureMarketId ORDER BY intFutureMonthId DESC
+						) AS Row_Num
+		,intFutureMarketId
+		,intFutureMonthId
+		FROM tblRKFuturesMonth 
+		WHERE ysnExpired = 0
+		AND  dtmSpotDate <= GETDATE()  
+		)
+		
+		INSERT INTO @tblFutureMonthByMarket(Row_Num,intFutureMarketId,intFutureMonthId)
+		SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE WHERE Row_Num = 1
 
 	INSERT INTO @tblUnRealizedPNL
 	(
@@ -412,7 +435,7 @@ BEGIN TRY
 	UNION
 	---InTransit-----
 		SELECT 
-		 strType									= 'Unrealized'									
+		 strType									= CASE WHEN ISNULL(Invoice.strType,'')='Provisional' THEN 'Realized Not Fixed' ELSE 'Unrealized' END									
 		,intContractTypeId							= CH.intContractTypeId
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
@@ -536,6 +559,8 @@ BEGIN TRY
 		JOIN tblICItem							Item			 ON  Item.intItemId					 = CD.intItemId
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN tblARInvoiceDetail			InvoiceDetail    ON InvoiceDetail.intLoadDetailId    = LD.intLoadDetailId
+		LEFT JOIN tblARInvoice				    Invoice			 ON Invoice.intInvoiceId			 = InvoiceDetail.intInvoiceId
 		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
 																	AND	CA.strType					 = 'Origin'
@@ -547,7 +572,7 @@ BEGIN TRY
 		LEFT JOIN tblCTBookVsEntity				BVE				 ON BVE.intBookId					 = Book.intBookId	AND BVE.intEntityId = CH.intEntityId
 		LEFT JOIN tblCTCropYear					CropYear		 ON CropYear.intCropYearId			 = CH.intCropYearId	
 		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId 
-		LEFT JOIN tblLGAllocationDetail			AD				 ON CD.intContractDetailId			 = CASE WHEN CH.intContractTypeId=1 THEN AD.intPContractDetailId ELSE AD.intSContractDetailId END           
+		LEFT JOIN tblLGAllocationDetail			AD				 ON AD.intAllocationDetailId		 = LD.intAllocationDetailId
 		LEFT JOIN tblSMCurrency					BCY				 ON	BCY.intCurrencyID				 = CD.intBasisCurrencyId
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
@@ -696,7 +721,7 @@ BEGIN TRY
 				LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 				LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 				LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
-				WHERE Lot.dblQty > 0.0
+				WHERE Lot.dblQty > 0.0 AND ISNULL(Lot.ysnProduced,0) <> 1
 				GROUP BY CTDetail.intContractDetailId
 		) l -- 1.purchase 2.outbound
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId	= l.intContractDetailId
@@ -759,6 +784,140 @@ BEGIN TRY
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN CH.intCompanyId
 										ELSE @intCompanyId
 								  END
+	  -------------------Inventory (FG)---------------------
+       UNION
+	   
+	   SELECT 
+		 strType									= 'Unrealized'									
+		,intContractTypeId							= 1
+		,intContractHeaderId						= NULL
+		,strContractType							= 'Purchase'
+		,strContractNumber							= NULL
+		,intContractBasisId							= NULL
+		,intTransactionType							=  4
+		,strTransaction								= '4.Inventory(FG)'
+		,strTransactionType							= 'Inventory (FG)'       														 
+		,intContractDetailId						= NULL
+		,intCurrencyId								= Market.intCurrencyId	
+		,intFutureMarketId							= Market.intFutureMarketId
+		,strFutureMarket							= Market.strFutMarketName
+		,intFutureMarketUOMId						= NULL
+		,intFutureMarketUnitMeasureId				= Market.intUnitMeasureId
+		,strFutureMarketUOM							= MarketUOM.strUnitMeasure
+		,intMarketCurrencyId						= Market.intCurrencyId
+		,intFutureMonthId							= FMonth.intFutureMonthId
+		,strFutureMonth								= FMonth.strFutureMonth
+		,intItemId									= Lot.intItemId
+		,intBookId									= NULL
+		,strBook									= NULL
+		,strSubBook									= NULL
+		,intCommodityId								= Commodity.intCommodityId
+		,strCommodity								= Commodity.strDescription
+		,dtmReceiptDate								= NULL		
+		,dtmContractDate							= NULL
+		,strContract								= NULL
+		,intContractSeq								= NULL
+		,strEntityName								= NULL
+		,strInternalCompany							= NULL
+		,dblQuantity								= Lot.dblQty
+		,intQuantityUOMId							= ItemStockUOM.intItemUOMId
+		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
+		,strQuantityUOM								= IUM.strUnitMeasure
+		,dblWeight									= Lot.dblQty
+		,intWeightUOMId								= ItemStockUOM.intItemUOMId
+		,intWeightUnitMeasureId						= IUM.intUnitMeasureId
+		,strWeightUOM								= IUM.strUnitMeasure
+		,dblBasis									= 0
+		,intBasisUOMId								= NULL
+		,intBasisUnitMeasureId						= NULL
+		,strBasisUOM								= NULL
+		,dblFutures									= 0
+		,dblCashPrice								= dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,Market.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,(Lot.dblLastCost / Lot.dblQty)) * (CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END)
+		,intPriceUOMId								= NULL
+		,intPriceUnitMeasureId						= Market.intUnitMeasureId
+		,strContractPriceUOM						= MarketUOM.strUnitMeasure
+		,intOriginId								= Item.intOriginId
+		,strOrigin									= OG.strCountry
+		,strItemDescription							= Item.strDescription
+		,strCropYear								= NULL --Lot table Crop year
+		,strProductionLine							= CPL.strDescription
+		,strCertification							= NULL
+		,strTerms									= NULL
+		,strPosition								= 'Spot'
+		,dtmStartDate								= NULL
+		,dtmEndDate									= NULL
+		,strBLNumber								= NULL
+		,dtmBLDate									= NULL
+		,strAllocationRefNo							= NULL
+		,strAllocationStatus						= NULL
+		,strPriceTerms								= NULL
+		,dblContractDifferential					= NULL
+		,strContractDifferentialUOM					= NULL
+		,dblFuturesPrice							= NULL
+		,strFuturesPriceUOM							= NULL
+		,strFixationDetails							= NULL
+		,dblFixedLots								= NULL
+		,dblUnFixedLots								= NULL
+		,dblContractInvoiceValue					= NULL
+		,dblSecondaryCosts							= NULL
+		,dblCOGSOrNetSaleValue						= NULL
+		,dblInvoicePrice							= NULL
+		,dblInvoicePaymentPrice						= NULL
+		,strInvoicePriceUOM							= NULL
+		,dblInvoiceValue							= NULL
+		,strInvoiceCurrency							= NULL
+		,dblNetMarketValue							= NULL
+		,dtmRealizedDate							= NULL
+		,dblRealizedQty								= NULL
+		,dblProfitOrLossValue						= NULL
+		,dblPAndLinMarketUOM						= NULL
+		,dblPAndLChangeinMarketUOM					= NULL
+		,strMarketCurrencyUOM						= NULL
+		,strTrader									= NULL 
+		,strFixedBy									= NULL
+		,strInvoiceStatus							= NULL
+		,strWarehouse								= NULL
+		,strCPAddress								= NULL
+		,strCPCountry								= NULL
+		,strCPRefNo									= NULL
+		,intContractStatusId						= NULL
+		,intPricingTypeId							= NULL
+		,strPricingType								= NULL
+		,strPricingStatus							= NULL
+		,intCompanyId								= Lot.intCompanyId
+		,strCompanyName								= Company.strCompanyName
+		
+
+		FROM tblICItem							Item
+		JOIN (
+				SELECT L.intItemId,L.intCompanyId
+				,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId,LotUOM.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,L.dblQty)) dblQty 
+				,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId,LotUOM.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,L.dblQty) * ISNULL(L.dblLastCost,0)) dblLastCost 
+				FROM tblICLot L
+				JOIN tblICItemUOM ItemStockUOM ON ItemStockUOM.intItemId =  L.intItemId AND ItemStockUOM.ysnStockUnit = 1  
+				JOIN tblICItemUOM LotUOM ON LotUOM.intItemUOMId =  L.intItemUOMId
+				WHERE L.dblQty >0 AND  L.ysnProduced = 1
+				GROUP BY L.intItemId,L.intCompanyId
+			 ) Lot  ON  Item.intItemId = Lot.intItemId
+		JOIN tblICItemUOM ItemStockUOM ON ItemStockUOM.intItemId =  Item.intItemId AND ItemStockUOM.ysnStockUnit = 1
+		LEFT JOIN tblICUnitMeasure				IUM				 ON	IUM.intUnitMeasureId			 = ItemStockUOM.intUnitMeasureId
+		JOIN tblICCommodity						Commodity		 ON Commodity.intCommodityId		 = Item.intCommodityId
+		JOIN tblICCommodityAttribute			CA1				 ON CA1.intCommodityAttributeId		 = Item.intProductTypeId
+		AND	CA1.strType						 = 'ProductType'
+		JOIN tblRKCommodityMarketMapping		MarketMapping	 ON  MarketMapping.strCommodityAttributeId = CA1.intCommodityAttributeId 
+		AND MarketMapping.intCommodityId = CA1.intCommodityId
+		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = MarketMapping.intFutureMarketId
+		JOIN tblSMCurrency						FCY				 ON	FCY.intCurrencyID				 = Market.intCurrencyId
+		JOIN tblICUnitMeasure					MarketUOM		 ON	 MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
+		JOIN @tblFutureMonthByMarket			CTE												 ON CTE.intFutureMarketId = Market.intFutureMarketId 
+		JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CTE.intFutureMonthId 
+												AND Market.intFutureMarketId = FMonth.intFutureMarketId AND CTE.intFutureMarketId =FMonth.intFutureMarketId
+		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId
+		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
+																	AND	CA.strType					 = 'Origin'
+        LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 =	CA.intCountryID	
+		LEFT JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = Lot.intCompanyId
+
 
 	INSERT INTO @tblContractCost(intContractDetailId,dblTotalCost)
 	SELECT  

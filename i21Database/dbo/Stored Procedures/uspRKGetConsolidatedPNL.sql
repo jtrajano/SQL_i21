@@ -505,7 +505,7 @@ BEGIN TRY
 		UNION
 		 SELECT 
 				 strPNL			 = 'PNL'
-				,strType		 = 'UnRealized'
+				,strType		 = 'Unrealized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook				
 				,intCompanyId	 = intCompanyId
@@ -524,7 +524,7 @@ BEGIN TRY
 		UNION
 		SELECT 
 				 strPNL			 = 'PNL'
-				,strType		 = 'UnRealized'
+				,strType		 = 'Unrealized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook
 				,intCompanyId	 = intCompanyId
