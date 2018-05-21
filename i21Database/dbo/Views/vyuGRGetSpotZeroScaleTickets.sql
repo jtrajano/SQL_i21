@@ -27,3 +27,4 @@ ISNULL(SC.dblUnitPrice,0) = 0
 AND ISNULL(SC.dblUnitBasis,0) = 0
 AND SC.intStorageScheduleTypeId = -3
 AND SC.strTicketStatus = 'C'
+AND SC.intTicketId NOT IN (SELECT intTicketId FROM tblGRUnPricedSpotTicket)
