@@ -98,28 +98,29 @@ OPEN intListCursor;
 								EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
 							END
 							BEGIN
-								INSERT INTO [dbo].[tblSCTicketCost]
-										([intTicketId]
-										,[intConcurrencyId]
-										,[intItemId]
-										,[intEntityVendorId]
-										,[strCostMethod]
-										,[dblRate]
-										,[intItemUOMId]
-										,[ysnAccrue]
-										,[ysnMTM]
-										,[ysnPrice])
-							SELECT	@intTicketId,
-									1, 
-									LD.intItemId,
-									LD.intVendorId,
-									LD.strCostMethod,
-									LD.dblRate,
-									LD.intItemUOMId,
-									LD.ysnAccrue,
-									LD.ysnMTM,
-									LD.ysnPrice
-							FROM	tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
+								INSERT INTO [dbo].[tblSCTicketCost](
+									[intTicketId]
+									,[intConcurrencyId]
+									,[intItemId]
+									,[intEntityVendorId]
+									,[strCostMethod]
+									,[dblRate]
+									,[intItemUOMId]
+									,[ysnAccrue]
+									,[ysnMTM]
+									,[ysnPrice]
+								)
+								SELECT	@intTicketId,
+										1, 
+										LD.intItemId,
+										LD.intVendorId,
+										LD.strCostMethod,
+										LD.dblRate,
+										LD.intItemUOMId,
+										LD.ysnAccrue,
+										LD.ysnMTM,
+										LD.ysnPrice
+								FROM tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
 							END
 							IF @strDistributionOption = 'CNT'
 								BEGIN
@@ -144,7 +145,7 @@ OPEN intListCursor;
 											CC.ysnAccrue,
 											CC.ysnMTM,
 											CC.ysnPrice
-									FROM	tblCTContractCost CC WHERE CC.intContractDetailId = @intLoopContractId
+									FROM tblCTContractCost CC WHERE CC.intContractDetailId = @intLoopContractId AND CC.ysnBasis = 0
 								END
 							IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 							BEGIN
