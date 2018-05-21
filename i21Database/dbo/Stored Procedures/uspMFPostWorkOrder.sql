@@ -903,9 +903,60 @@ BEGIN TRY
 										))
 							ORDER BY 1 DESC
 							), @dtmCurrentDateTime), 0)
+				,intMarketRatePerUnitId = IsNULL((
+						SELECT TOP 1 FM.intUnitMeasureId
+						FROM tblICCommodityAttribute CA
+						JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+							AND CA.strType = 'ProductType'
+						JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CM.intFutureMarketId
+						WHERE CA.intCommodityAttributeId = I.intProductTypeId
+						), FM1.intUnitMeasureId)
 			FROM @tblMFProductionSummary PS
 			JOIN tblICItem I ON I.intItemId = PS.intItemId
 			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+			LEFT JOIN tblRKFutureMarket FM1 ON FM1.intFutureMarketId = C.intFutureMarketId
+
+			UPDATE PS
+			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
+								SELECT TOP 1 CM.intFutureMarketId
+								FROM tblICCommodityAttribute CA
+								JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+									AND CA.strType = 'ProductType'
+								WHERE CA.intCommodityAttributeId = I.intProductTypeId
+								), C.intFutureMarketId), (
+							SELECT TOP 1 intFutureMonthId
+							FROM tblRKFuturesMonth
+							WHERE ysnExpired = 0
+								AND dtmSpotDate <= @dtmCurrentDateTime
+								AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
+										SELECT TOP 1 CM.intFutureMarketId
+										FROM tblICCommodityAttribute CA
+										JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+											AND CA.strType = 'ProductType'
+										WHERE CA.intCommodityAttributeId = I.intProductTypeId
+										))
+							ORDER BY 1 DESC
+							), @dtmCurrentDateTime), 0)
+				,dblGradeDiff = IsNULL(GD.dblGradeDiff, 0)
+				,dblCoEfficient = 0
+				,intMarketRatePerUnitId = IsNULL((
+						SELECT TOP 1 FM.intUnitMeasureId
+						FROM tblICCommodityAttribute CA
+						JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+							AND CA.strType = 'ProductType'
+						JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CM.intFutureMarketId
+						WHERE CA.intCommodityAttributeId = I.intProductTypeId
+						), FM1.intUnitMeasureId)
+			FROM tblMFProductionSummary PS
+			JOIN tblICItem I ON I.intItemId = PS.intItemId
+				AND PS.intWorkOrderId = @intWorkOrderId
+				AND PS.intItemTypeId IN (
+					1
+					,3
+					)
+			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+			LEFT JOIN tblMFItemGradeDiff GD ON GD.intItemId = I.intItemId
+			LEFT JOIN tblRKFutureMarket FM1 ON FM1.intFutureMarketId = C.intFutureMarketId
 
 			--If exists(Select *from @tblMFProductionSummary Where dblGradeDiff is null)
 			--Begin
@@ -1020,7 +1071,7 @@ BEGIN TRY
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId
-				,[dblNewCost] = (PS.dblProductionUnitRate * PL.dblQuantity) - (IsNULL(PL.dblOtherCharges,0)+ ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
+				,[dblNewCost] = (PS.dblProductionUnitRate * PL.dblQuantity) - (IsNULL(PL.dblOtherCharges, 0) + ABS(ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](PL.intBatchId, PL.strBatchId), 0)))
 				,[intCurrencyId] = (
 					SELECT TOP 1 intDefaultReportingCurrencyId
 					FROM tblSMCompanyPreference
