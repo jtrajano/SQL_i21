@@ -11,7 +11,7 @@ BEGIN
 	--DECLARE @intEntityId INT
 
 	--SET @intNetworkId = 1
-	--SET  @strGUID = '1f117110-bdee-4cc8-9eea-98cef0ec7647'
+	--SET  @strGUID = 'a30fe1a0-a715-468b-8a1d-7ed748a357a6'
 	--SET @intEntityId = 1
 
 	---clear Import Log
@@ -203,6 +203,16 @@ BEGIN
 			WHERE intNetworkId = @intNetworkId	
 	) C ON A.strSiteNumber COLLATE Latin1_General_CI_AS = C.strSiteNumber COLLATE Latin1_General_CI_AS
 
+	------UPDATE Existing
+	UPDATE tblCFNetworkCost
+	SET dblTransferCost = A.dblTransferCost
+		,dblTaxesPerUnit = A.dblTaxesPerUnit
+	FROM  #tmpNoSiteItemIssue A
+	WHERE tblCFNetworkCost.dtmDate = A.dtmDate 
+		AND  tblCFNetworkCost.intSiteId =  A.intSiteId 
+		AND  tblCFNetworkCost.intItemId = A.intItemId
+		AND  tblCFNetworkCost.intNetworkId = @intNetworkId
+	
 
 
 	---Insert records into tblCFNetworkCost
@@ -229,17 +239,7 @@ BEGIN
 						AND intItemId = A.intItemId)
 
 	
-	------UPDATE Existing
-	UPDATE tblCFNetworkCost
-	SET dblTransferCost = A.dblTransferCost
-		,dblTaxesPerUnit = A.dblTaxesPerUnit
-	FROM #tmpNoSiteItemIssue A
-	WHERE EXISTS(SELECT TOP 1 1 
-					 FROM tblCFNetworkCost 
-					 WHERE dtmDate = A.dtmDate 
-						AND intSiteId =  A.intSiteId 
-						AND intItemId = A.intItemId
-						AND intNetworkId = @intNetworkId)
+	
 
 	------------------------------------------------------------------------------------
 	------------END No Validation Issues on Site and product------------------------
