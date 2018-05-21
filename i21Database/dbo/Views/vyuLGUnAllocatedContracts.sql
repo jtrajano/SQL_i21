@@ -61,7 +61,7 @@ FROM (
 		,CD.intSubBookId
 		,SB.strSubBook
 		,CASE 
-			WHEN ISNULL(PF.[dblTotalLots], 0) - ISNULL([dblLotsFixed], 0) = 0
+			WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL([dblLotsFixed], 0) = 0
 				THEN 'Fully Priced'
 			WHEN ISNULL([dblLotsFixed], 0) = 0
 				THEN 'Unpriced'
@@ -181,5 +181,6 @@ FROM (
 		,WUM.strUnitMeasure 
 		,CD.intFutureMarketId
 		,CD.intFutureMonthId
+		,CD.dblNoOfLots
 	) tbl
 WHERE dblUnAllocatedQty > 0
