@@ -705,7 +705,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 75
 			,[strTransactionType]	= N'WarehouseBOLNo'
-			,[strPrefix]			= N'BOL-'
+			,[strPrefix]			= N'PK-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Warehouse'
 			,[ysnEnable]			= 1
@@ -1367,6 +1367,13 @@ GO
 		SET [strPrefix] = 'REP-'
 		WHERE strTransactionType = N'Report Messages'
 	END  
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'WarehouseBOLNo' and [strPrefix]='BOL-')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'PK-'
+		WHERE strTransactionType = N'WarehouseBOLNo' and [strPrefix]='BOL-'
+	END
 GO
 	PRINT N'BEGIN RENAME S'
 

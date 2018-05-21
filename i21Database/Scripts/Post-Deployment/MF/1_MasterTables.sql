@@ -3423,3 +3423,56 @@ UPDATE tblMFCompanyPreference
 SET ysnLotSnapshotByFiscalMonth =1
 Where ysnLotSnapshotByFiscalMonth IS NULL
 Go
+DECLARE @strPatternName NVARCHAR(50)
+	,@strDescription NVARCHAR(100)
+	,@intPatternCode INT
+	,@intPatternId INT
+
+SELECT @strPatternName = N'Transaction Batch Id'
+	,@strDescription = N'Transaction Batch Id'
+	,@intPatternCode = 33
+
+INSERT dbo.tblMFPattern (
+	strPatternName
+	,strDescription
+	,intPatternCode
+	)
+SELECT strPatternName = @strPatternName
+	,strDescription = @strDescription
+	,strPatternCode = @intPatternCode
+WHERE NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFPattern
+		WHERE intPatternCode = @intPatternCode
+		)
+
+SELECT @intPatternId = intPatternId
+FROM dbo.tblMFPattern
+WHERE intPatternCode = @intPatternCode
+
+INSERT dbo.tblMFPatternDetail (
+	intPatternId
+	,strSubPatternName
+	,intSubPatternTypeId
+	,intSubPatternSize
+	,strSubPatternTypeDetail
+	,strSubPatternFormat
+	,intOrdinalPosition
+	,ysnPaddingZero
+	)
+SELECT intPatternId = @intPatternId
+	,strSubPatternName = 'Sequence'
+	,intSubPatternTypeId = 6
+	,intSubPatternSize = 2
+	,strSubPatternTypeDetail = ''
+	,strSubPatternFormat = ''
+	,intOrdinalPosition = 2
+	,ysnPaddingZero=0
+WHERE NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFPatternDetail
+		WHERE intPatternId = @intPatternId
+			AND strSubPatternName = 'Sequence'
+		)
+
+	Go
