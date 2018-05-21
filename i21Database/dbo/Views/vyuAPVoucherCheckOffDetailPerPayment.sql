@@ -50,7 +50,7 @@ SELECT
 								,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 								,TC.strTaxCode
 								,TC.strDescription AS strTaxCodeDesc
-								,TC.strCounty
+								,EL.strCounty
 								,APBDT.strCalculationMethod
 								,APBDT.dblRate AS dblTaxRate
 								,APBDT.dblTax AS dblTaxAmount
@@ -75,7 +75,7 @@ SELECT
 								INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 								INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 								INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
-								LEFT JOIN dbo.tblEMEntityLocation EL ON (EL.intEntityId = E.intEntityId) AND (EL.intEntityLocationId = APB.intShipFromId)  AND ysnDefaultLocation  =1 
+								LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intShipFromId
 								INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
 								LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 								LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
@@ -198,7 +198,7 @@ SELECT
 								,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 								,TC.strTaxCode
 								,TC.strDescription AS strTaxCodeDesc
-								,TC.strCounty
+								,EL.strCounty
 								,APBDT.strCalculationMethod
 								,APBDT.dblRate AS dblTaxRate
 								,APBDT.dblTax AS dblTaxAmount
@@ -223,7 +223,7 @@ SELECT
 								INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 								INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 								INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
-								LEFT JOIN dbo.tblEMEntityLocation EL ON (EL.intEntityId = E.intEntityId) AND (EL.intEntityLocationId = APB.intShipFromId)  AND ysnDefaultLocation  =1 
+								LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = APB.intShipFromId
 								INNER JOIN dbo.tblICItem IE ON IE.intItemId = APBD.intItemId
 								LEFT JOIN dbo.tblICInventoryReceiptItem IRE ON APBD.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 								LEFT JOIN dbo.tblICInventoryReceipt IR ON IRE.intInventoryReceiptId = IR.intInventoryReceiptId 
