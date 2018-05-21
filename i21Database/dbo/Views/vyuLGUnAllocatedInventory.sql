@@ -92,6 +92,7 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = IM.intProductTypeId
 	AND PT.strType = 'ProductType'
 LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
+WHERE L.intShipmentType = 1
 GROUP BY CH.strContractNumber
 	,CD.intContractSeq
 	,CO.strCountry
