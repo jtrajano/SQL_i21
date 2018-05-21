@@ -115,7 +115,7 @@ BEGIN TRY
 
 	SELECT @strUnitMeasure = UM.strUnitMeasure
 	FROM tblICLot l
-	JOIN tblICItemUOM U ON U.intItemUOMId = l.intWeightUOMId
+	JOIN tblICItemUOM U ON U.intItemUOMId = IsNULL(l.intWeightUOMId,l.intItemUOMId)
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = U.intUnitMeasureId
 	WHERE intLotId = @intLotId
 
