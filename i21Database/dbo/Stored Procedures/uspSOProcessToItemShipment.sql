@@ -58,30 +58,14 @@ IF @Unship = 1
 			BEGIN
 				-- Delete shipment and decrease Item Stock Reservation
 				BEGIN
-					DECLARE @InventoryShipment Id
 					DECLARE @intInventoryShipmentId INT
-
-					INSERT INTO @InventoryShipment
-					SELECT DISTINCT ISH.intInventoryShipmentId
+					SELECT DISTINCT TOP 1 @intInventoryShipmentId = ISH.intInventoryShipmentId
 					FROM tblICInventoryShipmentItem ISHI
 						INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 					WHERE intOrderId = @SalesOrderId
 					
-					DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-					FOR
-						SELECT * FROM @InventoryShipment
-					OPEN c;
-					FETCH NEXT FROM c INTO @intInventoryShipmentId
-
-					WHILE @@FETCH_STATUS = 0 
-					BEGIN
-						EXEC dbo.uspICUnshipInventoryItem @intInventoryShipmentId, @UserId
-						EXEC dbo.uspSOUpdateOrderShipmentStatus @intInventoryShipmentId, 'Inventory', 1
-
-						FETCH NEXT FROM c INTO @intInventoryShipmentId
-					END
-					CLOSE c;
-					DEALLOCATE c;
+					EXEC dbo.uspICUnshipInventoryItem @intInventoryShipmentId, @UserId
+					EXEC dbo.uspSOUpdateOrderShipmentStatus @intInventoryShipmentId, 'Inventory', 1
 				END
 			
 				UPDATE tblSOSalesOrder SET ysnShipped = 0 WHERE intSalesOrderId = @SalesOrderId
