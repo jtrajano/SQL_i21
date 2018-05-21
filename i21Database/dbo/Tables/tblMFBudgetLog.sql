@@ -11,6 +11,7 @@
     [dblNewValue] NUMERIC(18, 6) NULL,
 	[intLastModifiedUserId] INT NULL,
 	[dtmLastModified] [datetime] NULL ,
-	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFBudgetLog_intConcurrencyId] DEFAULT 0
+	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFBudgetLog_intConcurrencyId] DEFAULT 0,
+	intCompanyId INT NULL,
 	CONSTRAINT [PK_tblMFBudgetLog_intBudgetLogId] PRIMARY KEY ([intBudgetLogId])	 
 )

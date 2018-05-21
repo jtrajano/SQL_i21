@@ -11,6 +11,7 @@
 	,intCreatedUserId INT NOT NULL
 	,dtmLastModified DATETIME NOT NULL
 	,intLastModifiedUserId INT NOT NULL
+	,intCompanyId INT NULL
 	,CONSTRAINT PK_tblMFSchedule_intScheduleId PRIMARY KEY (intScheduleId)
 	,CONSTRAINT UQ_tblMFSchedule_intScheduleNo_intLocationId UNIQUE (
 		strScheduleNo

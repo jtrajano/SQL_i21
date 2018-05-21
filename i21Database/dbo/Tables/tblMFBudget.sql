@@ -27,6 +27,7 @@
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL ,	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFBudget_intConcurrencyId] DEFAULT 0,
+	intCompanyId INT NULL,
 	CONSTRAINT [PK_tblMFBudget_intBudgetId] PRIMARY KEY ([intBudgetId]),
 	CONSTRAINT [FK_tblMFBudget_tblSMCompanyLocation_intCompanyLocationId_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblMFBudget_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

@@ -5,6 +5,7 @@
 	,intOwnerId INT NOT NULL
 	,dtmFromDate DATETIME NOT NULL
 	,dtmToDate DATETIME
+	,intCompanyId INT NULL
 	,CONSTRAINT PK_tblMFItemOwnerDetail PRIMARY KEY (intItemOwnerDetailId)
 	,CONSTRAINT FK_tblMFItemOwnerDetail_tblICLot FOREIGN KEY (intLotId) REFERENCES tblICLot(intLotId)
 	,CONSTRAINT FK_tblMFItemOwnerDetail_tblICItem FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)

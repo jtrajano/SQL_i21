@@ -13,6 +13,7 @@
 	[dtmLastModified] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFKitPickListHeader_intConcurrencyId] DEFAULT 0, 
+	intCompanyId INT NULL,
 	CONSTRAINT [PK_tblMFPickList_intPickListId] PRIMARY KEY (intPickListId),
 	CONSTRAINT [UQ_tblMFPickList_strPickListNo] UNIQUE ([strPickListNo]),
 	CONSTRAINT [FK_tblMFPickList_tblMFWorkOrderStatus_intKitStatusId] FOREIGN KEY ([intKitStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]),

@@ -17,6 +17,7 @@
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblMFBlendDemand_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFBlendDemand_intConcurrencyId] DEFAULT 0,
+	intCompanyId INT NULL,
 	CONSTRAINT [PK_tblMFBlendDemand_intBlendDemandId] PRIMARY KEY (intBlendDemandId), 
 	CONSTRAINT [FK_tblMFBlendDemand_tblSMCompanyLocation_intCompanyLocationId_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblMFBlendDemand_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

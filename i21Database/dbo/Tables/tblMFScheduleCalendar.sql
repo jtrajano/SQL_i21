@@ -11,6 +11,7 @@
 	,dtmLastModified DATETIME NOT NULL
 	,intLastModifiedUserId INT NOT NULL
 	,intConcurrencyId INT
+	,intCompanyId INT NULL
 	,CONSTRAINT PK_tblMFScheduleCalendar_intCalendarId PRIMARY KEY (intCalendarId)
 	,CONSTRAINT UQ_tblMFScheduleCalendar_strName_intManufacturingCellId_intLocationId UNIQUE (
 		strName

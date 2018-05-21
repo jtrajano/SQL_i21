@@ -18,4 +18,5 @@
 	,dblfcst3 NUMERIC(18, 6)
 	,dblTotalProd NUMERIC(18, 6)
 	,dblReorderPoint NUMERIC(18, 6)
+	,intCompanyId INT NULL
 	)

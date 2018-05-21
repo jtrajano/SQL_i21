@@ -1,4 +1,5 @@
 ﻿Create table tblMFLotTareWeight
 (
-	intInventoryReceiptId int
+	intInventoryReceiptId int,
+	intCompanyId INT NULL
 )

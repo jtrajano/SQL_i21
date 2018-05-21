@@ -30,7 +30,7 @@
 	dtmCreated datetime NULL CONSTRAINT DF_tblMFShiftActivity_dtmCreated DEFAULT GetDate(),
 	intLastModifiedUserId int NULL,
 	dtmLastModified datetime NULL CONSTRAINT DF_tblMFShiftActivity_dtmLastModified DEFAULT GetDate(),
-		
+	intCompanyId INT NULL,
 	CONSTRAINT PK_tblMFShiftActivity PRIMARY KEY (intShiftActivityId), 
 	CONSTRAINT AK_tblMFShiftActivity_intManufacturingCellId_dtmShiftDate_intShiftId UNIQUE (
 		intManufacturingCellId,

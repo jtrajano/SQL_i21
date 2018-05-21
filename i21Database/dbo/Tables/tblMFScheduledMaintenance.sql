@@ -12,6 +12,7 @@
 	,dtmLastModified DATETIME NOT NULL
 	,intLastModifiedUserId INT NOT NULL
 	,intConcurrencyId INT
+	,intCompanyId INT NULL
 	,CONSTRAINT PK_tblMFScheduledMaintenance_intScheduledMaintenanceId PRIMARY KEY (intScheduledMaintenanceId)
 	,CONSTRAINT [FK_tblMFScheduledMaintenance_tblMFManufacturingCellId_intManufacturingCellId] FOREIGN KEY (intManufacturingCellId) REFERENCES tblMFManufacturingCell(intManufacturingCellId)
 	)

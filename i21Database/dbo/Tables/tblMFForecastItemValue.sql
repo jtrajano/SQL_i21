@@ -22,6 +22,7 @@
 	,dtmLastModified DATETIME NOT NULL
 	,intLastModifiedUserId INT NOT NULL
 	,intConcurrencyId INT
+	,intCompanyId INT NULL
 	,CONSTRAINT PK_tblMFForecastValue_intForecastItemValueId PRIMARY KEY (intForecastItemValueId)
 	,CONSTRAINT FK_tblMFForecastItemValue_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFForecastItemValue_tblMFForecastItemType_intForecastItemTypeId FOREIGN KEY (intForecastItemTypeId) REFERENCES tblMFForecastItemType(intForecastItemTypeId)

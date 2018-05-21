@@ -15,6 +15,7 @@
 		,[intLastUpdateById] INT NULL
 		,[dtmLastUpdateOn] DATETIME DEFAULT GETDATE() NOT NULL
 		,intLocationId	int
+		,intCompanyId INT NULL
 		,CONSTRAINT [PK_tblMFOrderHeader_intOrderHeaderId] PRIMARY KEY ([intOrderHeaderId])
 		,CONSTRAINT [FK_tblMFOrderHeader_tblMFOrderStatus_intOrderStatusId] FOREIGN KEY ([intOrderStatusId]) REFERENCES [tblMFOrderStatus]([intOrderStatusId])
 		,CONSTRAINT [FK_tblMFOrderHeader_tblMFOrderType_intOrderTypeId] FOREIGN KEY ([intOrderTypeId]) REFERENCES [tblMFOrderType]([intOrderTypeId])
