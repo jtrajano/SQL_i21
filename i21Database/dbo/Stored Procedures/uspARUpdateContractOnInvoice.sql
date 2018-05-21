@@ -301,8 +301,20 @@ BEGIN TRY
 		END
 
 		SET @dblQty = ISNULL(@dblQty,0)
+
+		DECLARE @intTicketTypeId	INT = NULL
+			  , @intTicketType		INT = NULL
+			  , @strInOutFlag		NVARCHAR(MAX) = NULL
+
+		IF ISNULL(@intTicketId, 0) <> 0
+			BEGIN
+				SELECT @intTicketTypeId = intTicketTypeId
+					 , @intTicketType	= intTicketType
+					 , @strInOutFlag	= strInOutFlag
+				FROM tblSCTicket WHERE intTicketId = @intTicketId
+			END		
 		
-		IF ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intInventoryShipmentItemId, 0) = 0
+		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND ISNULL(@intInventoryShipmentItemId, 0) = 0
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
