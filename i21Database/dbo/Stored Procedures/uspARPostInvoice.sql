@@ -181,6 +181,7 @@ IF (@param IS NOT NULL)
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				,[intSalesOrderId]
 				,[dblQuantity]
 				,[dblMaxQuantity]
 				,[strOptionType]
@@ -231,6 +232,7 @@ IF (@param IS NOT NULL)
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
+				,[intSalesOrderId]				= ARI.[intSalesOrderId]
 				,[dblQuantity]					= @ZeroDecimal
 				,[dblMaxQuantity]				= @ZeroDecimal
 				,[strOptionType]				= NULL
@@ -288,6 +290,7 @@ IF (@param IS NOT NULL)
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				,[intSalesOrderId]
 				,[dblQuantity]
 				,[dblMaxQuantity]
 				,[strOptionType]
@@ -338,6 +341,7 @@ IF (@param IS NOT NULL)
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
+				,[intSalesOrderId]				= ARI.[intSalesOrderId]
 				,[dblQuantity]					= @ZeroDecimal
 				,[dblMaxQuantity]				= @ZeroDecimal
 				,[strOptionType]				= NULL
@@ -397,6 +401,7 @@ IF(@beginDate IS NOT NULL)
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				,[intSalesOrderId]
 				,[dblQuantity]
 				,[dblMaxQuantity]
 				,[strOptionType]
@@ -447,6 +452,7 @@ IF(@beginDate IS NOT NULL)
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
+				,[intSalesOrderId]				= ARI.[intSalesOrderId]
 				,[dblQuantity]					= @ZeroDecimal
 				,[dblMaxQuantity]				= @ZeroDecimal
 				,[strOptionType]				= NULL
@@ -506,6 +512,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[intStorageScheduleTypeId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				,[intSalesOrderId]
 				,[dblQuantity]
 				,[dblMaxQuantity]
 				,[strOptionType]
@@ -556,6 +563,7 @@ IF(@beginTransaction IS NOT NULL)
 				,[intStorageScheduleTypeId]		= NULL
 				,[intSubLocationId]				= NULL
 				,[intStorageLocationId]			= NULL
+				,[intSalesOrderId]				= ARI.[intSalesOrderId]
 				,[dblQuantity]					= @ZeroDecimal
 				,[dblMaxQuantity]				= @ZeroDecimal
 				,[strOptionType]				= NULL
