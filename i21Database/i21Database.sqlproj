@@ -6587,6 +6587,10 @@
     <Build Include="dbo\Tables\tblAP1099PATRCategory.sql" />
     <Build Include="dbo\Tables\tblAP1099DIVCategory.sql" />
     <Build Include="dbo\Tables\tblLGFreightRateMatrix.sql" />
+	<Build Include="dbo\Views\vyuSTSalesTaxReport.sql" />
+    <Build Include="dbo\Views\vyuSTCustomerPaymentReport.sql" />
+    <Build Include="dbo\Views\vyuSTCustomerChargeReport.sql" />
+    <Build Include="dbo\Views\vyuSTDepositReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

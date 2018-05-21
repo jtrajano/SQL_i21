@@ -11,11 +11,12 @@ SELECT ST.intStoreId
 , IT.strItemNo
 , IT.strDescription strItemDescription
 , CH.dtmCheckoutDate
-, CH.ysnPosted
+, Inv.ysnPosted
 , CPT.dblQuantity
 , CPT.dblAmount
 , CPT.dblPrice 
-FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId 
+FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId
+LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId = CH.intInvoiceId
 INNER JOIN tblSTCheckoutPumpTotals CPT ON CPT.intCheckoutId = CH.intCheckoutId 
 INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CPT.intPumpCardCouponId 
 INNER JOIN tblICItem IT ON IT.intItemId = IU.intItemId 
