@@ -717,6 +717,7 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+					AND dbo.fnGetItemLotType(DetailItem.intItemId) IN (1,2,3)
 				OUTER APPLY (
 					SELECT  dblTotalNet = SUM(
 								CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
@@ -800,7 +801,20 @@ BEGIN
 					,t.[intItemLocationId] 
 					,iu.intItemUOMId 
 					,r.[dtmReceiptDate] 
-					,dblQty = -ri.dblOpenReceive  
+					,dblQty = 
+						CASE		
+							-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
+							WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
+								-dbo.fnCalculateQtyBetweenUOM(
+									ri.intWeightUOMId
+									, ri.intUnitMeasureId
+									, ri.dblNet
+								)
+
+							-- If Gross/Net UOM is missing, then get the item/lot qty. 
+							ELSE 
+								-ri.dblOpenReceive  
+						END							
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
@@ -922,7 +936,20 @@ BEGIN
 					,t.[intItemLocationId] 
 					,iu.intItemUOMId 
 					,r.[dtmReceiptDate] 
-					,dblQty = -ri.dblOpenReceive  
+					,dblQty = 
+						CASE		
+							-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
+							WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
+								-dbo.fnCalculateQtyBetweenUOM(
+									ri.intWeightUOMId
+									, ri.intUnitMeasureId
+									, ri.dblNet
+								)
+
+							-- If Gross/Net UOM is missing, then get the item/lot qty. 
+							ELSE 
+								-ri.dblOpenReceive  
+						END
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
