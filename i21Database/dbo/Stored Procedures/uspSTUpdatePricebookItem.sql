@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
-@intUniqueId BIGINT
+@strUniqueId NVARCHAR(1000)
 , @intEntityId Int
 , @intCategoryId int
 , @intItemVendorXrefId INT
@@ -30,7 +30,7 @@ BEGIN
 		, @intItemId = intItemId
 		, @intItemLocationId = intItemLocationId
 		, @intItemPricingId = intItemPricingId
-		FROM vyuSTPricebookMaster WHERE intUniqueId = @intUniqueId
+		FROM vyuSTPricebookMaster WHERE strUniqueId = @strUniqueId
 
 
 
@@ -986,9 +986,9 @@ BEGIN
 				VALUES(
 						'Updated'
 						, 'Store.view.InventoryMassMaintenance'
-						, @intUniqueId
+						, @strUniqueId
 						, ''
-						, '#/ST/InventoryMassMaintenance/SearchInventoryMassMaintenance?action=edit&filters%5B0%5D%5Bcolumn%5D=intUniqueId&filters%5B0%5D%5Bvalue%5D=' + CAST(@intUniqueId AS NVARCHAR(50)) + '&activeTab=Audit%20Log&searchTab=InventoryMassMaintenance&searchCommand=SearchInventoryMassMaintenance'
+						, '#/ST/InventoryMassMaintenance/SearchInventoryMassMaintenance?action=edit&filters%5B0%5D%5Bcolumn%5D=intUniqueId&filters%5B0%5D%5Bvalue%5D=' + @strUniqueId + '&activeTab=Audit%20Log&searchTab=InventoryMassMaintenance&searchCommand=SearchInventoryMassMaintenance'
 						, '{"action":"Updated","change":"Updated - Record: 1158","iconCls":"small-tree-modified","children":[' + @children + ']}'
 						, GETUTCDATE()
 						, @intEntityId
