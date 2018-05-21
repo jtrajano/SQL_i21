@@ -293,7 +293,7 @@ BEGIN
 						,strTable = ''tblTMWorkOrder''
 						,intRecordId = intWorkOrderID
 					FROM tblTMWorkOrder A
-					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpSalesPersonTable WHERE intOriginId = A.intWorkOrderID)
+					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpSalesPersonTable WHERE intOriginId = A.intPerformerID)
 						AND A.intWorkOrderID IS NOT NULL
 
 					------------------------------------------------------------
