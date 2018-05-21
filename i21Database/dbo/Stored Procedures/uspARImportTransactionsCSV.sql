@@ -94,6 +94,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@ysnAllowNegativeStock			BIT				= 0
 			,@intStockUnit					INT				= NULL
 			,@intCostingMethod				INT				= NULL
+			,@ysnOrigin						BIT				= 0
 
 		IF @IsTank = 1
 			BEGIN
@@ -296,7 +297,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.strTaxGroup) ELSE 0 END
 					,@AmountDue						= CASE WHEN D.strTransactionType <> 'Sales Order' THEN ISNULL(D.dblAmountDue, @ZeroDecimal) ELSE @ZeroDecimal END
 					,@TaxAmount						= ISNULL(D.dblTax, @ZeroDecimal)
-					,@Total							= ISNULL(D.dblTotal, @ZeroDecimal)			
+					,@Total							= ISNULL(D.dblTotal, @ZeroDecimal)
+					,@ysnOrigin						= D.ysnOrigin			
 				FROM
 					[tblARImportLogDetail] D
 				INNER JOIN
@@ -308,7 +310,9 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 
 		IF @TransactionType <> 'Sales Order'
 			BEGIN
-				SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strInvoiceNumber + '). ' FROM tblARInvoice WHERE RTRIM(LTRIM(ISNULL(strInvoiceOriginId,''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL(strInvoiceOriginId,'')))) > 0
+				SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@OriginId,''))) + ' was already imported! (' + strInvoiceNumber + '). ' FROM tblARInvoice WHERE RTRIM(LTRIM(ISNULL(strInvoiceOriginId,''))) = RTRIM(LTRIM(ISNULL(@OriginId,''))) 
+				AND @EntityCustomerId = intEntityCustomerId  AND @CompanyLocationId	= intCompanyLocationId 
+				AND @Date = dtmDate AND @TransactionType = strTransactionType AND LEN(RTRIM(LTRIM(ISNULL(strInvoiceOriginId,'')))) > 0
 			END
 		ELSE
 			BEGIN
@@ -425,6 +429,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intEntityId]
 							,[ysnResetDetails]
 							,[ysnPost]
+							,[ysnImportedFromOrigin]
+							,[ysnImportedAsPosted]
 							,[intInvoiceDetailId]
 							,[intItemId]
 							,[ysnInventory]
@@ -511,6 +517,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intEntityId]				= @EntityId
 							,[ysnResetDetails]			= 1
 							,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
+							,[ysnImportedFromOrigin]	= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
+							,[ysnImportedAsPosted]		= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
 							,[intInvoiceDetailId]		= NULL
 							,[intItemId]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST THEN @ItemId ELSE NULL END
 							,[ysnInventory]				= CASE WHEN @IsTank = 1 OR @ImportFormat = @IMPORTFORMAT_CARQUEST AND ISNULL(@ItemId, 0) > 0 THEN 

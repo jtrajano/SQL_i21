@@ -27,7 +27,9 @@
 	,@Comment						NVARCHAR(500)	= ''			
 	,@ShipToLocationId				INT				= NULL
 	,@BillToLocationId				INT				= NULL
-	,@Posted						BIT				= 0			
+	,@Posted						BIT				= 0	
+	,@ImportedFromOrigin 			BIT				= 0
+	,@ImportedAsPosted				BIT				= 0
 	,@Template						BIT				= 0			
 	,@Forgiven						BIT				= 0			
 	,@Calculated					BIT				= 0			
@@ -408,6 +410,8 @@ BEGIN TRY
 		,[strBillToCountry]
 		,[strImportFormat]
 		,[ysnPosted]
+		,[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]
 		,[ysnPaid]
 		,[ysnRecurring]
 		,[ysnForgiven]
@@ -481,7 +485,13 @@ BEGIN TRY
 		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
 		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
 		,[strImportFormat]				= @ImportFormat
-		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') THEN @Posted ELSE 0 END)
+		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') 
+													THEN @Posted 
+												WHEN (@TransactionType IN ('Invoice') AND @ImportedFromOrigin = 1) 
+													THEN  1 
+												ELSE 0 END)
+		,[ysnImportedFromOrigin]		= @ImportedFromOrigin
+		,[ysnImportedAsPosted]			= @ImportedAsPosted
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 

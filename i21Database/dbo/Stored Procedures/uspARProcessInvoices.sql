@@ -206,6 +206,8 @@ DECLARE  @Id									INT
 		,@ResetDetails							BIT
 		,@Recap									BIT
 		,@Post									BIT
+		,@ImportedFromOrigin						BIT
+		,@ImportedAsPosted						BIT
 		,@UpdateAvailableDiscount				BIT
 		,@ImportFormat							NVARCHAR(50)
 
@@ -370,6 +372,8 @@ BEGIN
 		,@ResetDetails					= [ysnResetDetails]
 		,@Recap							= [ysnRecap]
 		,@Post							= [ysnPost]
+		,@ImportedFromOrigin 			= [ysnImportedFromOrigin]
+		,@ImportedAsPosted				= [ysnImportedAsPosted]
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ImportFormat					= [strImportFormat]
 
@@ -572,6 +576,9 @@ BEGIN
 			,@ShipDate						= @ShipDate
 			,@CalculatedDate				= @CalculatedDate
 			,@PostDate						= @PostDate
+			,@Posted						= @Post					
+			,@ImportedFromOrigin			= @ImportedFromOrigin 	
+			,@ImportedAsPosted   			= @ImportedAsPosted		
 			,@TransactionType				= @TransactionType
 			,@Type							= @Type
 			,@NewInvoiceId					= @NewInvoiceId			OUTPUT 
@@ -2266,15 +2273,19 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		[intInvoiceId]
+		EFP.[intInvoiceId]
 	FROM
-		#EntriesForProcessing
+		#EntriesForProcessing EFP
+	INNER JOIN
+		@InvoiceEntries IE
+			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
 	WHERE
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL([intInvoiceId],0) <> 0
-		AND ISNULL([ysnPost],0) = 1
-		AND ISNULL([ysnRecap],0) <> 1	
+		AND ISNULL(EFP.[intInvoiceId],0) <> 0
+		AND ISNULL(IE.[ysnPost],0) = 1
+		AND ISNULL(IE.[ysnImportedFromOrigin],0) = 0
+		AND ISNULL(EFP.[ysnRecap],0) <> 1	
 		
 	SELECT 
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
@@ -2498,7 +2509,45 @@ BEGIN CATCH
 	RETURN 0;
 END CATCH
 
+--Create Payment records for the Prepayments and the Overpayment imported from ORIGIN 
+BEGIN TRY
+IF OBJECT_ID('tempdb..#TempPrepaymentEntries') IS NOT NULL DROP TABLE #TempPrepaymentEntries	
+SELECT EFP.* INTO #TempPrepaymentEntries FROM #EntriesForProcessing EFP JOIN tblARInvoice I ON I.intInvoiceId = EFP.intInvoiceId
+				WHERE ISNULL(I.ysnImportedFromOrigin,0) = 1 AND ISNULL(I.ysnImportedAsPosted,0) = 1 
+				AND I.strTransactionType = 'Customer Prepayment' OR I.strTransactionType = 'Overpayment' AND I.intPaymentId IS NULL
 
+WHILE EXISTS(SELECT intInvoiceId  FROM #TempPrepaymentEntries)
+BEGIN 
+	DECLARE @PrePayInvoiceId INT , @PrepayPaymentId INT 
+		SELECT TOP 1 @PrePayInvoiceId =EFP.intInvoiceId FROM #TempPrepaymentEntries EFP 
+
+		EXEC [dbo].[uspARProcessPaymentFromInvoice]
+			 @InvoiceId		= @PrePayInvoiceId 
+			,@EntityId		= @UserId
+			,@RaiseError	= 0
+			,@PaymentId		= @PrepayPaymentId OUTPUT
+
+		DELETE FROM #TempPrepaymentEntries WHERE intInvoiceId = @PrePayInvoiceId
+		
+		UPDATE tblARPayment SET ysnImportedFromOrigin = 1, ysnImportedAsPosted = 1,ysnPosted = 1 WHERE intPaymentId = @PrepayPaymentId
+END
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 
 
 DECLARE @CreateIds VARCHAR(MAX)

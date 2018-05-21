@@ -41,6 +41,7 @@
 	[ysnSuccess]				BIT           NULL,
 	[ysnImported]				BIT           NULL,
 	[ysnRecap]					BIT           NULL,
+	[ysnOrigin]					BIT           NULL,
     [intConcurrencyId]			INT           NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblARImportLogDetail_intImportLogDetailId] PRIMARY KEY CLUSTERED ([intImportLogDetailId] ASC), 
     CONSTRAINT [FK_tblARImportLogDetail_tblARImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblARImportLog]([intImportLogId]) ON DELETE CASCADE
