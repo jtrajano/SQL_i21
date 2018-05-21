@@ -288,8 +288,16 @@ FROM
 	,[intCostCurrencyId]		=	ISNULL(A.intCurrencyId,0)
 	,[strCostCurrency]			=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 	,[strVendorLocation]		=	EL.strLocationName
-	,[str1099Form]				=	D2.str1099Form			 
-	,[str1099Type]				=	D2.str1099Type
+	,[str1099Form]				=	CASE WHEN patron.intEntityId IS NOT NULL 
+														AND C.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN '1099 PATR'
+												ELSE D2.str1099Form	END
+	,[str1099Type]				=	CASE WHEN patron.intEntityId IS NOT NULL 
+														AND C.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN 'Per-unit retain allocations'
+													ELSE D2.str1099Type END
 	,[intStorageLocationId]		=	loc.intStorageLocationId	 
 	,[strStorageLocationName]	=	(SELECT TOP 1 strName FROM dbo.tblICStorageLocation WHERE intStorageLocationId =loc.intStorageLocationId)
 	,[dblNetShippedWeight]		=	0.00
@@ -315,6 +323,7 @@ FROM
 		LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 		LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 		LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
+		LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 		OUTER APPLY
 		(
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
@@ -401,16 +410,16 @@ FROM
 									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 									END
 	,[strVendorLocation]		=	EL.strLocationName
-		,[str1099Form]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
-														AND C.ysn1099Box3 = 1
-														AND patron.ysnStockStatusQualified = 1 
-														THEN '1099 PATR'
-												ELSE D2.str1099Form	END
-		,[str1099Type]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
-														AND C.ysn1099Box3 = 1
-														AND patron.ysnStockStatusQualified = 1 
-														THEN 'Per-unit retain allocations'
-													ELSE D2.str1099Type END
+	,[str1099Form]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+													AND C.ysn1099Box3 = 1
+													AND patron.ysnStockStatusQualified = 1 
+													THEN '1099 PATR'
+											ELSE D2.str1099Form	END
+	,[str1099Type]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+													AND C.ysn1099Box3 = 1
+													AND patron.ysnStockStatusQualified = 1 
+													THEN 'Per-unit retain allocations'
+												ELSE D2.str1099Type END
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
 	,[dblNetShippedWeight]		=	ISNULL(CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN Loads.dblNet ELSE B.dblGross END,0)
@@ -565,8 +574,16 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(A.intCurrencyId,0)		
 		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)	
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -591,6 +608,8 @@ FROM
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
 		 AND ItemLoc.intLocationId = A.intLocationId
+	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
+	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -689,8 +708,16 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
 		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type 
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -708,6 +735,8 @@ FROM
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 													AND	CC.ysnAccrue		=	1
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
+	INNER JOIN	tblICItem item ON item.intItemId = CC.intItemId 
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -722,7 +751,7 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0 AND CC.ysnPrice = 1
 	UNION ALL
@@ -801,8 +830,16 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
 		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type 
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -821,6 +858,8 @@ FROM
 												AND	CC.ysnPrice				=	1
 												AND CD.intPricingTypeId		IN	(1,6)
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	INNER JOIN	tblICItem item ON item.intItemId = CC.intItemId 
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -835,7 +874,7 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
 	UNION ALL
@@ -915,8 +954,16 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
 		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type 
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -934,6 +981,8 @@ FROM
 	JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
 													AND	CC.ysnAccrue		=	1
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	INNER JOIN	tblICItem item ON item.intItemId = CC.intItemId 
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -948,7 +997,7 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0 
 	AND CC.strCostStatus = 'Open'
@@ -1029,8 +1078,16 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
 		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type 
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -1049,6 +1106,8 @@ FROM
 												AND	CC.ysnPrice				=	1
 												AND CD.intPricingTypeId		IN	(1,6)
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	INNER JOIN	tblICItem item ON item.intItemId = CC.intItemId 
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
@@ -1063,7 +1122,7 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
+	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
 	AND ysnBilled = 0
 	
@@ -1130,8 +1189,16 @@ FROM
 		,[intCostCurrencyId]						=	A.intContractCurrencyId
 		,[strCostCurrency]							=	A.strCurrency
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type 
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -1146,6 +1213,8 @@ FROM
 		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM vyuLGLoadPurchaseContracts A
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.intVendorEntityId = D1.[intEntityId]  
+	LEFT JOIN	tblICItem item ON item.intItemId = A.intItemId 
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -1153,7 +1222,7 @@ FROM
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
+	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intItemId
 	WHERE A.intLoadDetailId NOT IN 
 		(SELECT IsNull(BD.intLoadDetailId, 0) 
 			FROM tblAPBillDetail BD 
@@ -1230,8 +1299,16 @@ FROM
 		,[intCostCurrencyId]						=	ISNULL(A.intCurrencyId,0)		
 		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)	
 		,[strVendorLocation]						=	NULL
-		,[str1099Form]								=	D2.str1099Form			 
-		,[str1099Type]								=	D2.str1099Type
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND I.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND I.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
 		,[intStorageLocationId]						=	NULL
 		,[strStorageLocationName]					=	NULL
 		,[dblNetShippedWeight]						=	0.00
@@ -1261,6 +1338,7 @@ FROM
 	LEFT JOIN tblSMTaxClass C ON B.intTaxClassId = C.intTaxClassId 
 	LEFT JOIN tblSMTaxCode D ON D.intTaxClassId = C.intTaxClassId 
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
+	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intItemId
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
 																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, NULL, 0, NULL) Taxes
