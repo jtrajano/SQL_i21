@@ -67,7 +67,9 @@
 ,@TaxValue9							NUMERIC(18,6)	= 0.000000
 ,@TaxValue10						NUMERIC(18,6)	= 0.000000
 ,@CustomerId						INT				= 0
-
+,@intCardTypeId						INT				= 0
+,@ysnDualCard						BIT				= 0
+	
 AS
 
 BEGIN
@@ -3940,7 +3942,25 @@ BEGIN
 	BEGIN
 		SET @ysnInvalid = 1
 	END
-	IF(@intVehicleId = 0 OR @intVehicleId IS NULL)
+	------------------------------------------------------
+	-------------- Start get card type/ dual card
+	------------------------------------------------------
+	
+	SELECT TOP 1 
+		@intCardTypeId =  intCardTypeId
+	FROM tblCFCard
+	WHERE intCardId = @intCardId
+
+
+	SELECT TOP 1
+		@ysnDualCard = ysnDualCard
+	FROM tblCFCardType
+	WHERE intCardTypeId = @intCardTypeId
+	------------------------------------------------------
+	-------------- End get card type/ dual card
+	------------------------------------------------------
+
+	IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND (@ysnDualCard = 1 OR (@intCardTypeId = 0 OR @intCardTypeId IS NULL)))
 	BEGIN
 		SET @intVehicleId = NULL
 		IF(@ysnVehicleRequire = 1)
