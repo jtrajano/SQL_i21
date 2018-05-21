@@ -164,8 +164,8 @@ BEGIN TRY
 	SELECT
 		 [strTransactionType]					= 'Credit Memo'
 		,[strType]								= ARI.[strType]
-		,[strSourceTransaction]					= 'Invoice'
-		,[intSourceId]							= ARI.[intInvoiceId] 
+		,[strSourceTransaction]					= 'Direct'--'Invoice'
+		,[intSourceId]							= NULL--ARI.[intInvoiceId] 
 		,[strSourceId]							= ARI.[strInvoiceNumber]
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= ARI.[intEntityCustomerId]
@@ -203,7 +203,7 @@ BEGIN TRY
 		,[intMeterReadingId]					= ARI.[intMeterReadingId]
 		,[intContractHeaderId]					= ARI.[intContractHeaderId]
 		,[intLoadId]							= ARI.[intLoadId]
-		,[intOriginalInvoiceId]					= ARI.[intInvoiceId]
+		,[intOriginalInvoiceId]					= NULL--ARI.[intInvoiceId]
 		,[intEntityId]							= @UserId
 		,[intTruckDriverId]						= ARI.[intTruckDriverId]
 		,[intTruckDriverReferenceId]			= ARI.[intTruckDriverReferenceId]
@@ -364,7 +364,7 @@ EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries		= @EntriesForInvoice
 	,@LineItemTaxEntries	= @LineItemTaxes
 	,@UserId				= @UserId
-	,@GroupingOption		= 11
+	,@GroupingOption		= 1--11
 	,@RaiseError			= @RaiseError
 	,@ErrorMessage			= @CurrentErrorMessage	OUTPUT
 	,@CreatedIvoices		= @CreatedIvoices		OUTPUT
