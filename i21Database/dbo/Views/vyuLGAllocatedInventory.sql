@@ -17,50 +17,50 @@ SELECT ALD.intAllocationDetailId
 	,ALD.strComments
 	-- Purchase Contract Details
 	,ALD.intPContractDetailId
-	,ALD.dblPAllocatedQty AS ALLOCATED_QTY
+	,ALD.dblPAllocatedQty AS dblPAllocatedQty
 	,ALD.intPUnitMeasureId
 	,PCH.strContractNumber AS strPurchaseContractNumber
 	,PCT.intContractSeq AS intPContractSeq
-	,PO_NUMBER = Cast(PCH.strContractNumber AS VARCHAR(100)) + '/' + Cast(PCT.intContractSeq AS VARCHAR(100)) -- PO_NUMBER
-	,U1.strUnitMeasure AS PO_QTY_UOM
-	,IM.strItemNo AS PO_ITEM_NAME
-	,IM.strDescription AS PO_ITEM_DESC
-	,PCT.dblQuantity AS PO_ORIGINAL_QTY
+	,strPONumber = Cast(PCH.strContractNumber AS VARCHAR(100)) + '/' + Cast(PCT.intContractSeq AS VARCHAR(100)) -- PONUMBER
+	,U1.strUnitMeasure AS strPOQtyUOM
+	,IM.strItemNo AS strPOItemName
+	,IM.strDescription AS strPOItemDescription
+	,PCT.dblQuantity AS strPOOriginalQty
 	,PCH.dtmContractDate AS dtmPContractDate
 	,PCT.dblBalance AS dblPBalance
-	,PCT.dblBasis AS PO_DIFFERENTIAL
-	,PCT.dblCashPrice AS PO_PRICE
-	,PCT.dblFutures AS PO_FUTURES_PRICE
-	,PCT.dtmStartDate AS PO_SHIPPERIOD_FROM
-	,PCT.dtmEndDate AS PO_SHIPPERIOD_TO
-	,PCB.strContractBasis AS PO_CONTRACT_TERM
+	,PCT.dblBasis AS dblPODifferential
+	,PCT.dblCashPrice AS dblPOPrice
+	,PCT.dblFutures AS dblPOFutures
+	,PCT.dtmStartDate AS dtmPOShippedFrom
+	,PCT.dtmEndDate AS dtmPOShippedTo
+	,PCB.strContractBasis AS strPOContractTerm
 	,PCS.strContractStatus AS strPContractStatus
-	,PEY.strName AS SELLER_NAME
+	,PEY.strName AS strSellerName
 	,PCT.strFixationBy AS strPFixationBy
 	,PFM.strFutMarketName AS strPFutMarketName
-	,PMO.strFutureMonth AS PO_TERMINAL_MONTH
-	,U2.strUnitMeasure AS PO_PRICE_UOM
+	,PMO.strFutureMonth AS strPOTerminalMonth
+	,U2.strUnitMeasure AS strPOPriceUOM
 	,PCT.dblNoOfLots AS dblPNoOfLots
-	,PCT.dblTotalCost AS PO_VALUE
+	,PCT.dblTotalCost AS dblPOValue
 	---- Sales Contract Details
 	,SCH.strContractNumber AS strSalesContractNumber
 	,SCT.intContractSeq AS intSContractSeq
-	,SO_NUMBER = Cast(SCH.strContractNumber AS VARCHAR(100)) + '/' + Cast(SCT.intContractSeq AS VARCHAR(100)) -- SO_NUMBER
-	,U3.strUnitMeasure AS SO_QTY_UOM
+	,strSONumber = Cast(SCH.strContractNumber AS VARCHAR(100)) + '/' + Cast(SCT.intContractSeq AS VARCHAR(100)) -- SONUMBER
+	,U3.strUnitMeasure AS strSOQtyUOM
 	,SIM.strItemNo AS strSItemNo
 	,SIM.strDescription AS strSItemDescription
-	,SCT.dblQuantity AS SO_ORIGINAL_QTY
-	,SCT.dblBasis AS SO_DIFFERENTIAL
-	,SCT.dblCashPrice AS SO_PRICE
-	,SCT.dblFutures AS SO_FUTURES_PRICE
-	,SCT.dtmStartDate AS SO_SHIPPERIOD_FROM
-	,SCT.dtmEndDate AS SO_SHIPPERIOD_TO
-	,SCB.strContractBasis AS SO_CONTRACT_TERM
-	,SEY.strName AS BUYER_NAME
-	,SCT.dblTotalCost AS SO_VALUE
+	,SCT.dblQuantity AS dblSOOriginalQty
+	,SCT.dblBasis AS dblSODifferential
+	,SCT.dblCashPrice AS dblSOPrice
+	,SCT.dblFutures AS dblSOFuturePrice
+	,SCT.dtmStartDate AS dtmSOShippedFrom
+	,SCT.dtmEndDate AS dtmSOShippedTo
+	,SCB.strContractBasis AS strSOContractTerm
+	,SEY.strName AS strBuyerName
+	,SCT.dblTotalCost AS dblSOValue
 	,SFM.strFutMarketName AS strSFutMarketName
-	,SMO.strFutureMonth AS SO_TERMINAL_MONTH
-	,U2.strUnitMeasure AS SO_PRICE_UOM
+	,SMO.strFutureMonth AS strSOTerminalMonth
+	,U2.strUnitMeasure AS strSOPriceUOM
 	,SCT.dblNoOfLots AS dblSNoOfLots
 	,ysnDelivered = CONVERT(BIT, CASE 
 			WHEN (
@@ -92,7 +92,7 @@ SELECT ALD.intAllocationDetailId
 					)
 				AND L.intShipmentType = 1
 			), 0)
-	,BALANCE_BAGS = ALD.dblSAllocatedQty - IsNull((
+	,dblBalanceBags = ALD.dblSAllocatedQty - IsNull((
 			SELECT SUM(LD.dblQuantity)
 			FROM tblLGLoadDetail LD
 			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -103,21 +103,21 @@ SELECT ALD.intAllocationDetailId
 					,3
 					)
 				AND L.intShipmentType = 1
-			), 0) --BALANCE_BAGS
-	,PCO.strCountry AS PO_ORIGIN_NAME
+			), 0) 
+	,PCO.strCountry AS strPOOriginName
 	,SCO.strCountry AS strSOrigin
-	,LC.strContainerNumber AS CONTAINER_NO
+	,LC.strContainerNumber AS strContainerNumber
 	,LOAD.strLoadNumber
 	,LOAD.intShipmentStatus
-	,LOAD.dtmETAPOD AS ETA
-	,LOAD.dtmETSPOL AS ETD
-	,LW.dtmLastFreeDate AS FREE_TIME
-	,LOAD.strComments AS COMMENTS_FIELD
-	,LOAD.strBLNumber AS BL_NO
-	,IR.dtmReceiptDate AS DATE_IN_WAREHOUSE
-	,PDP.strCity AS PO_DESTINATION
-	,SDP.strCity AS SO_DESTINATION
-	,SHIPMENT_STATUS = CASE LOAD.intShipmentStatus
+	,LOAD.dtmETAPOD AS dtmETAPOD
+	,LOAD.dtmETSPOL AS dtmETSPOL
+	,LW.dtmLastFreeDate AS dtmLastFreeDate
+	,LOAD.strComments AS strLoadComments
+	,LOAD.strBLNumber AS strBLNumber
+	,IR.dtmReceiptDate AS dtmDateInWarehouse
+	,PDP.strCity AS strPODestination
+	,SDP.strCity AS strSODestination
+	,strShipmentStatus = CASE LOAD.intShipmentStatus
 		WHEN 1
 			THEN 'Scheduled'
 		WHEN 2
@@ -142,7 +142,7 @@ SELECT ALD.intAllocationDetailId
 			THEN 'Invoiced'
 		ELSE ''
 		END --Position:
-	,STA.strContractStatus AS PRICE_FIX_STATUS
+	,STA.strContractStatus AS strContractStatus
 	,CASE 
 		WHEN ISNULL(PCT.dblInvoicedQty, 0) = 0
 			THEN 'Not Invoiced'
@@ -156,15 +156,15 @@ SELECT ALD.intAllocationDetailId
 		WHEN ISNULL(LOAD.ysnPosted, 0) = 1
 			THEN 'True'
 		ELSE 'False'
-		END AS INVENTORIZED
-	,ISNULL(LOT.dblQty, 0) STOCK_QTY
-	,ISNULL(LOT.dblWeight, 0) PO_NET_WEIGHT
+		END AS strInventorized
+	,ISNULL(LOT.dblQty, 0) dblStockQty
+	,ISNULL(LOT.dblWeight, 0) dblPONetWeight
 	,dbo.fnCTConvertQtyToTargetItemUOM(LOT.intItemUOMId, (
 			SELECT intItemUOMId
 			FROM tblICItemUOM
 			WHERE intItemId = LOT.intItemId
 				AND intUnitMeasureId = 9
-			), 1) * ISNULL(LOT.dblQty, 0) PO_NET_WEIGHT_LB
+			), 1) * ISNULL(LOT.dblQty, 0) dblPONetWeightLB
 	,DO.strLoadNumber strDeliveryOrderNumber
 	,CLSL.strSubLocationName AS strWarehouse
 FROM tblLGAllocationDetail ALD
