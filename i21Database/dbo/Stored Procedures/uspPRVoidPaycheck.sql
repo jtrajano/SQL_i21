@@ -76,9 +76,10 @@ BEGIN
 
 	--Check if Paycheck has Payables created, if so, create Debit Memos for those
 	DECLARE @intPaycheckId INT
+	DECLARE @intEmployeeId INT
 	DECLARE @intPaycheckIds NVARCHAR(MAX)
 	DECLARE @strVoidTransactionId NVARCHAR(100)
-	SELECT TOP 1 @intPaycheckId = intPaycheckId FROM tblPRPaycheck WHERE strPaycheckId = @strTransactionId
+	SELECT TOP 1 @intPaycheckId = intPaycheckId, @intEmployeeId = intEntityEmployeeId FROM tblPRPaycheck WHERE strPaycheckId = @strTransactionId
 
 	IF (EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckTax WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL)
 		OR EXISTS(SELECT TOP 1 1 FROM tblPRPaycheckDeduction WHERE intPaycheckId = @intPaycheckId AND intBillId IS NOT NULL))
@@ -97,6 +98,16 @@ BEGIN
 	WHERE strPaycheckId = @strTransactionId
 	AND ysnPosted = 1 AND ysnPrinted = 1 AND ysnVoid = 0
 
+	/* Update the Employee Earned Hours */
+	DECLARE @intTypeTimeOffId INT
+	SELECT DISTINCT intTypeTimeOffId INTO #tmpEmployeeTimeOffHours FROM tblPREmployeeTimeOff WHERE intEntityEmployeeId = @intEmployeeId
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEmployeeTimeOffHours)
+	BEGIN
+		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOffHours
+		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId, @intPaycheckId
+		DELETE FROM #tmpEmployeeTimeOffHours WHERE intTypeTimeOffId = @intTypeTimeOffId
+	END
+
 	SET @isVoidSuccessful = 1
 
 	EXEC uspSMAuditLog 'Payroll.view.Paycheck', @intPaycheckId, @intUserId, 'Voided', '', '', ''
@@ -105,3 +116,4 @@ END
 -- Clean-up routines:
 Void_Exit:
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCMBankTransaction')) DROP TABLE #tmpCMBankTransaction
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeTimeOffHours')) DROP TABLE #tmpEmployeeTimeOffHours
