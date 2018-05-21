@@ -6595,6 +6595,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetConsolidatedPNL.sql" />
     <Build Include="dbo\Views\vyuLGAllocatedInventory.sql" />
     <Build Include="dbo\Tables\tblLGInsuranceCalculator.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
