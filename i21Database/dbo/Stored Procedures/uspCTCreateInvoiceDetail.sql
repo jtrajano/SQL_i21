@@ -178,6 +178,9 @@ BEGIN TRY
 		WHERE	intInvoiceDetailId = @intInvoiceDetailId
 
 
+		EXEC [uspARInsertTransactionDetail] @InvoiceId
+
+
 		EXEC	[uspARAddItemToInvoice]
 				 @InvoiceId                             = @InvoiceId
 				,@ItemId                                = @ItemId

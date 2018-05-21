@@ -79,6 +79,8 @@ IF @ysnPosted = 1
 		RETURN;
 	END
 
+EXEC [uspARInsertTransactionDetail] @intInvoiceId
+
 UPDATE tblARInvoiceDetail
 SET dblQtyShipped = CASE WHEN @dblQtyShipped IS NOT NULL THEN @dblQtyShipped ELSE dblQtyShipped END
   , dblPrice	  = CASE WHEN @dblPrice IS NOT NULL THEN @dblPrice ELSE dblPrice END
