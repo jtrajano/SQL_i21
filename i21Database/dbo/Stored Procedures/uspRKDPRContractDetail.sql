@@ -198,6 +198,7 @@ SELECT * FROM (
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId
-        WHERE intPricingTypeId Not In(1,2) and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110)<=convert(datetime,@dtmToDate) and h.intCommodityId=@intCommodityId
+        WHERE  intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTPriceFixation) and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110)
+				<=convert(datetime,@dtmToDate) and h.intCommodityId=@intCommodityId
 		and intContractStatusId  not in(2,3,6) 
 	) a WHERE a.intRowNum =1 
