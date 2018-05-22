@@ -6597,6 +6597,7 @@
     <Build Include="dbo\Tables\tblLGInsuranceCalculator.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
