@@ -71,10 +71,6 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
 	
-	SELECT @strLanguage = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'strLanguage'
-	
 	SELECT @intContractHeaderId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intContractHeaderId'
