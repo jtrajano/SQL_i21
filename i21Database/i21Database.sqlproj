@@ -6598,6 +6598,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemPromotionalPricingForCStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
