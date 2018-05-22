@@ -31,7 +31,7 @@
 	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
 	,@ItemTaxGroupId				INT				= NULL
 	,@ItemStorageLocationId			INT				= NULL
-	,@ItemCompanyLocationSubLocationId	INT				= NULL
+	,@ItemCompanyLocationSubLocationId	INT			= NULL
 	,@RecomputeTax					BIT				= 1
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL

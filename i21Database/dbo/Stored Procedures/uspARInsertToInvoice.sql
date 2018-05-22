@@ -53,106 +53,108 @@ DECLARE @EntityCustomerId		INT,
 		@intLineOfBusinessId	INT,
 		@intSalesOrderId		INT
 
-DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT, 
-							ysnIsInventory				BIT,
-							ysnBlended					BIT,
-							strItemDescription			NVARCHAR(100),
-							intItemUOMId				INT,
-							intPriceUOMId				INT,
-							intContractHeaderId			INT,
-							intContractDetailId			INT,
-							dblQtyOrdered				NUMERIC(18,6),
-							dblQtyRemaining				NUMERIC(18,6),
-							dblLicenseAmount			NUMERIC(18,6),
-							dblMaintenanceAmount		NUMERIC(18,6),
-							dblDiscount					NUMERIC(18,6),
-							dblItemTermDiscount			NUMERIC(18,6),
-							strItemTermDiscountBy		NVARCHAR(50),
-							dblPrice					NUMERIC(18,6),
-							dblBasePrice				NUMERIC(18,6),
-							dblUnitPrice				NUMERIC(18,6),
-							dblBaseUnitPrice			NUMERIC(18,6),
-							dblUnitQuantity				NUMERIC(18,6),
-							strPricing					NVARCHAR(250),
-							strVFDDocumentNumber		NVARCHAR(100),
-							intTaxGroupId				INT,
-							intSalesOrderDetailId		INT,
-							intInventoryShipmentItemId	INT,
-							intRecipeItemId				INT,
-							intRecipeId					INT,
-							intSubLocationId			INT,
-							intCostTypeId				INT,
-							intMarginById				INT,
-							intCommentTypeId			INT,
-							dblMargin					NUMERIC(18,6),
-							dblRecipeQuantity			NUMERIC(18,6),
-							strMaintenanceType			NVARCHAR(100),
-							strFrequency				NVARCHAR(100),
-							dtmMaintenanceDate			DATETIME,
-							strItemType					NVARCHAR(100),
-							strSalesOrderNumber			NVARCHAR(100),
-							strShipmentNumber			NVARCHAR(100),
-							dblContractBalance			NUMERIC(18,6),
-							dblContractAvailable		NUMERIC(18,6),
-							intEntityContactId			INT,
-							intStorageScheduleTypeId	INT,
-							intSubCurrencyId			INT,
-							dblSubCurrencyRate		    NUMERIC(18,6),
+DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT, 
+							ysnIsInventory					BIT,
+							ysnBlended						BIT,
+							strItemDescription				NVARCHAR(100),
+							intItemUOMId					INT,
+							intPriceUOMId					INT,
+							intContractHeaderId				INT,
+							intContractDetailId				INT,
+							dblQtyOrdered					NUMERIC(18,6),
+							dblQtyRemaining					NUMERIC(18,6),
+							dblLicenseAmount				NUMERIC(18,6),
+							dblMaintenanceAmount			NUMERIC(18,6),
+							dblDiscount						NUMERIC(18,6),
+							dblItemTermDiscount				NUMERIC(18,6),
+							strItemTermDiscountBy			NVARCHAR(50),
+							dblPrice						NUMERIC(18,6),
+							dblBasePrice					NUMERIC(18,6),
+							dblUnitPrice					NUMERIC(18,6),
+							dblBaseUnitPrice				NUMERIC(18,6),
+							dblUnitQuantity					NUMERIC(18,6),
+							strPricing						NVARCHAR(250),
+							strVFDDocumentNumber			NVARCHAR(100),
+							intTaxGroupId					INT,
+							intSalesOrderDetailId			INT,
+							intInventoryShipmentItemId		INT,
+							intRecipeItemId					INT,
+							intRecipeId						INT,
+							intSubLocationId				INT,
+							intCostTypeId					INT,
+							intMarginById					INT,
+							intCommentTypeId				INT,
+							dblMargin						NUMERIC(18,6),
+							dblRecipeQuantity				NUMERIC(18,6),
+							strMaintenanceType				NVARCHAR(100),
+							strFrequency					NVARCHAR(100),
+							dtmMaintenanceDate				DATETIME,
+							strItemType						NVARCHAR(100),
+							strSalesOrderNumber				NVARCHAR(100),
+							strShipmentNumber				NVARCHAR(100),
+							dblContractBalance				NUMERIC(18,6),
+							dblContractAvailable			NUMERIC(18,6),
+							intEntityContactId				INT,
+							intStorageScheduleTypeId		INT,
+							intSubCurrencyId				INT,
+							dblSubCurrencyRate				NUMERIC(18,6),
 							intCurrencyExchangeRateTypeId	INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
-							intSalesOrderId				INT NULL,
-							intStorageLocationId		INT NULL)
+							intSalesOrderId					INT NULL,
+							intStorageLocationId			INT NULL,
+							intCompanyLocationSubLocationId	INT NULL)
 
-DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
-							intItemId					INT, 
-							ysnIsInventory				BIT,
-							ysnBlended					BIT,
-							strItemDescription			NVARCHAR(100),
-							intItemUOMId				INT,
-							intPriceUOMId				INT,
-							intContractHeaderId			INT,
-							intContractDetailId			INT,
-							dblQtyOrdered				NUMERIC(18,6),
-							dblQtyRemaining				NUMERIC(18,6),
-							dblLicenseAmount			NUMERIC(18,6),
-							dblMaintenanceAmount		NUMERIC(18,6),
-							dblDiscount					NUMERIC(18,6),
-							dblItemTermDiscount			NUMERIC(18,6),
-							strItemTermDiscountBy		NVARCHAR(50),
-							dblPrice					NUMERIC(18,6),
-							dblBasePrice				NUMERIC(18,6),
-							dblUnitPrice				NUMERIC(18,6),
-							dblBaseUnitPrice			NUMERIC(18,6),
-							dblUnitQuantity				NUMERIC(18,6),
-							strPricing					NVARCHAR(250),
-							strVFDDocumentNumber		NVARCHAR(100),
-							intTaxGroupId				INT,
-							intSalesOrderDetailId		INT,
-							intInventoryShipmentItemId	INT,
-							intRecipeItemId				INT,
-							intRecipeId					INT,
-							intSubLocationId			INT,
-							intCostTypeId				INT,
-							intMarginById				INT,
-							intCommentTypeId			INT,
-							dblMargin					NUMERIC(18,6),
-							dblRecipeQuantity			NUMERIC(18,6),
-							strMaintenanceType			NVARCHAR(100),
-							strFrequency				NVARCHAR(100),
-							dtmMaintenanceDate			DATETIME,
-							strItemType					NVARCHAR(100),
-							strSalesOrderNumber			NVARCHAR(100),
-							strShipmentNumber			NVARCHAR(100),
-							dblContractBalance			NUMERIC(18,6),
-							dblContractAvailable		NUMERIC(18,6),
-							intEntityContactId			INT,
-							intStorageScheduleTypeId	INT,
-							intSubCurrencyId			INT,
-							dblSubCurrencyRate			NUMERIC(18,6),
+DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
+							intItemId						INT, 
+							ysnIsInventory					BIT,
+							ysnBlended						BIT,
+							strItemDescription				NVARCHAR(100),
+							intItemUOMId					INT,
+							intPriceUOMId					INT,
+							intContractHeaderId				INT,
+							intContractDetailId				INT,
+							dblQtyOrdered					NUMERIC(18,6),
+							dblQtyRemaining					NUMERIC(18,6),
+							dblLicenseAmount				NUMERIC(18,6),
+							dblMaintenanceAmount			NUMERIC(18,6),
+							dblDiscount						NUMERIC(18,6),
+							dblItemTermDiscount				NUMERIC(18,6),
+							strItemTermDiscountBy			NVARCHAR(50),
+							dblPrice						NUMERIC(18,6),
+							dblBasePrice					NUMERIC(18,6),
+							dblUnitPrice					NUMERIC(18,6),
+							dblBaseUnitPrice				NUMERIC(18,6),
+							dblUnitQuantity					NUMERIC(18,6),
+							strPricing						NVARCHAR(250),
+							strVFDDocumentNumber			NVARCHAR(100),
+							intTaxGroupId					INT,
+							intSalesOrderDetailId			INT,
+							intInventoryShipmentItemId		INT,
+							intRecipeItemId					INT,
+							intRecipeId						INT,
+							intSubLocationId				INT,
+							intCostTypeId					INT,
+							intMarginById					INT,
+							intCommentTypeId				INT,
+							dblMargin						NUMERIC(18,6),
+							dblRecipeQuantity				NUMERIC(18,6),
+							strMaintenanceType				NVARCHAR(100),
+							strFrequency					NVARCHAR(100),
+							dtmMaintenanceDate				DATETIME,
+							strItemType						NVARCHAR(100),
+							strSalesOrderNumber				NVARCHAR(100),
+							strShipmentNumber				NVARCHAR(100),
+							dblContractBalance				NUMERIC(18,6),
+							dblContractAvailable			NUMERIC(18,6),
+							intEntityContactId				INT,
+							intStorageScheduleTypeId		INT,
+							intSubCurrencyId				INT,
+							dblSubCurrencyRate				NUMERIC(18,6),
 							intCurrencyExchangeRateTypeId	INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
-							intSalesOrderId				INT NULL,
-							intStorageLocationId		INT NULL)
+							intSalesOrderId					INT NULL,
+							intStorageLocationId			INT NULL,
+							intCompanyLocationSubLocationId	INT NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -167,55 +169,56 @@ SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
 --GET ITEMS FROM SALES ORDER
 INSERT INTO @tblItemsToInvoiceUnsorted
-SELECT intItemId					= SI.intItemId
-	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(SI.intItemId)
-	 , ysnBlended					= SOD.ysnBlended
-	 , strItemDescription			= SI.strItemDescription
-	 , intItemUOMId					= SI.intItemUOMId
-	 , intPriceUOMId				= SOD.intPriceUOMId
-	 , intContractHeaderId			= SOD.intContractHeaderId
-	 , intContractDetailId			= SOD.intContractDetailId
-	 , dblQtyOrdered				= SI.dblQtyOrdered
-	 , dblQtyRemaining				= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
-	 , dblLicenseAmount				= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
-	 , dblMaintenanceAmount			= CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
-	 , dblDiscount					= SI.dblDiscount
-	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
-	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
-	 , dblPrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
-	 , dblBasePrice					= CASE WHEN I.strType = 'Software' THEN SOD.dblBaseLicenseAmount ELSE SI.dblPrice END
-	 , dblUnitPrice					= SOD.dblUnitPrice
-	 , dblBaseUnitPrice				= SOD.dblBaseUnitPrice
-	 , dblUnitQuantity				= SOD.dblUnitQuantity
-	 , strPricing					= SOD.strPricing 
-	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
-	 , intTaxGroupId				= SI.intTaxGroupId
-	 , intSalesOrderDetailId		= SI.intSalesOrderDetailId
-	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= SOD.intRecipeItemId
-	 , intRecipeId					= SOD.intRecipeId
-	 , intSubLocationId				= SOD.intSubLocationId
-	 , intCostTypeId				= SOD.intCostTypeId
-	 , intMarginById				= SOD.intMarginById
-	 , intCommentTypeId				= SOD.intCommentTypeId
-	 , dblMargin					= SOD.dblMargin
-	 , dblRecipeQuantity			= SOD.dblRecipeQuantity
-	 , strMaintenanceType			= SOD.strMaintenanceType
-	 , strFrequency					= SOD.strFrequency
-	 , dtmMaintenanceDate			= SOD.dtmMaintenanceDate
-	 , strItemType					= I.strType
-	 , strSalesOrderNumber			= SI.strSalesOrderNumber
-	 , strShipmentNumber			= NULL
-	 , dblContractBalance			= SOD.dblContractBalance
-	 , dblContractAvailable			= SOD.dblContractAvailable
-	 , intEntityContactId			= SO.intEntityContactId
-	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
-	 , intSubCurrencyId				= SOD.intSubCurrencyId
-	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
-	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
-	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
-	 , intSalesOrderId				= SI.intSalesOrderId
-	 , intStorageLocationId			= SOD.intStorageLocationId
+SELECT intItemId						= SI.intItemId
+	 , ysnIsInventory					= dbo.fnIsStockTrackingItem(SI.intItemId)
+	 , ysnBlended						= SOD.ysnBlended
+	 , strItemDescription				= SI.strItemDescription
+	 , intItemUOMId						= SI.intItemUOMId
+	 , intPriceUOMId					= SOD.intPriceUOMId
+	 , intContractHeaderId				= SOD.intContractHeaderId
+	 , intContractDetailId				= SOD.intContractDetailId
+	 , dblQtyOrdered					= SI.dblQtyOrdered
+	 , dblQtyRemaining					= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
+	 , dblLicenseAmount					= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , dblMaintenanceAmount				= CASE WHEN I.strType = 'Software' THEN SOD.dblMaintenanceAmount ELSE @dblZeroAmount END
+	 , dblDiscount						= SI.dblDiscount
+	 , dblItemTermDiscount				= SOD.dblItemTermDiscount
+	 , strItemTermDiscountBy			= SOD.strItemTermDiscountBy
+	 , dblPrice							= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
+	 , dblBasePrice						= CASE WHEN I.strType = 'Software' THEN SOD.dblBaseLicenseAmount ELSE SI.dblPrice END
+	 , dblUnitPrice						= SOD.dblUnitPrice
+	 , dblBaseUnitPrice					= SOD.dblBaseUnitPrice
+	 , dblUnitQuantity					= SOD.dblUnitQuantity
+	 , strPricing						= SOD.strPricing 
+	 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
+	 , intTaxGroupId					= SI.intTaxGroupId
+	 , intSalesOrderDetailId			= SI.intSalesOrderDetailId
+	 , intInventoryShipmentItemId		= NULL
+	 , intRecipeItemId					= SOD.intRecipeItemId
+	 , intRecipeId						= SOD.intRecipeId
+	 , intSubLocationId					= SOD.intSubLocationId
+	 , intCostTypeId					= SOD.intCostTypeId
+	 , intMarginById					= SOD.intMarginById
+	 , intCommentTypeId					= SOD.intCommentTypeId
+	 , dblMargin						= SOD.dblMargin
+	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
+	 , strMaintenanceType				= SOD.strMaintenanceType
+	 , strFrequency						= SOD.strFrequency
+	 , dtmMaintenanceDate				= SOD.dtmMaintenanceDate
+	 , strItemType						= I.strType
+	 , strSalesOrderNumber				= SI.strSalesOrderNumber
+	 , strShipmentNumber				= NULL
+	 , dblContractBalance				= SOD.dblContractBalance
+	 , dblContractAvailable				= SOD.dblContractAvailable
+	 , intEntityContactId				= SO.intEntityContactId
+	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId					= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+	 , intCurrencyExchangeRateTypeId	 = SOD.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+	 , intSalesOrderId					= SI.intSalesOrderId
+	 , intStorageLocationId				= SOD.intStorageLocationId
+	 , intCompanyLocationSubLocationId	= SOD.intSubLocationId
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -228,55 +231,56 @@ WHERE SO.intSalesOrderId = @SalesOrderId
 
 --GET COMMENT ITEMS FROM SALES ORDER
 INSERT INTO @tblItemsToInvoiceUnsorted
-SELECT intItemId					= SOD.intItemId
-	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(SOD.intItemId)
-	 , ysnBlended					= SOD.ysnBlended
-	 , strItemDescription			= SOD.strItemDescription
-	 , intItemUOMId					= NULL
-	 , intPriceUOMId				= NULL
-	 , intContractHeaderId			= SOD.intContractHeaderId
-	 , intContractDetailId			= SOD.intContractDetailId
-	 , dblQtyOrdered				= 0
-	 , dblQtyRemaining				= 0
-	 , dblLicenseAmount				= 0
-	 , dblMaintenanceAmount			= 0
-	 , dblDiscount					= 0
-	 , dblItemTermDiscount			= 0
-	 , strItemTermDiscountBy		= 0
-	 , dblPrice						= 0
-	 , dblBasePrice					= 0
-	 , dblUnitPrice					= SOD.dblUnitPrice
-	 , dblBaseUnitPrice				= SOD.dblBaseUnitPrice
-	 , dblUnitQuantity				= SOD.dblUnitQuantity
-	 , strPricing					= SOD.strPricing 
-	 , strVFDDocumentNumber		    = NULL
-	 , intTaxGroupId				= NULL
-	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
-	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= SOD.intRecipeItemId
-	 , intRecipeId					= SOD.intRecipeId
-	 , intSubLocationId				= SOD.intSubLocationId
-	 , intCostTypeId				= SOD.intCostTypeId
-	 , intMarginById				= SOD.intMarginById
-	 , intCommentTypeId				= SOD.intCommentTypeId
-	 , dblMargin					= SOD.dblMargin
-	 , dblRecipeQuantity			= SOD.dblRecipeQuantity
-	 , strMaintenanceType			= NULL
-	 , strFrequency					= NULL
-	 , dtmMaintenanceDate			= NULL
-	 , strItemType					= 'Comment'
-	 , strSalesOrderNumber			= NULL
-	 , strShipmentNumber			= NULL 
-	 , dblContractBalance			= SOD.dblContractBalance
-	 , dblContractAvailable			= SOD.dblContractAvailable
-	 , intEntityContactId			= SO.intEntityContactId
-	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
-	 , intSubCurrencyId				= SOD.intSubCurrencyId
-	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
-	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
-	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
-	 , intSalesOrderId				= NULL
-	 , intStorageLocationId			= SOD.intStorageLocationId
+SELECT intItemId						= SOD.intItemId
+	 , ysnIsInventory					= dbo.fnIsStockTrackingItem(SOD.intItemId)
+	 , ysnBlended						= SOD.ysnBlended
+	 , strItemDescription				= SOD.strItemDescription
+	 , intItemUOMId						= NULL
+	 , intPriceUOMId					= NULL
+	 , intContractHeaderId				= SOD.intContractHeaderId
+	 , intContractDetailId				= SOD.intContractDetailId
+	 , dblQtyOrdered					= 0
+	 , dblQtyRemaining					= 0
+	 , dblLicenseAmount					= 0
+	 , dblMaintenanceAmount				= 0
+	 , dblDiscount						= 0
+	 , dblItemTermDiscount				= 0
+	 , strItemTermDiscountBy			= 0
+	 , dblPrice							= 0
+	 , dblBasePrice						= 0
+	 , dblUnitPrice						= SOD.dblUnitPrice
+	 , dblBaseUnitPrice					= SOD.dblBaseUnitPrice
+	 , dblUnitQuantity					= SOD.dblUnitQuantity
+	 , strPricing						= SOD.strPricing 
+	 , strVFDDocumentNumber				= NULL
+	 , intTaxGroupId					= NULL
+	 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
+	 , intInventoryShipmentItemId		= NULL
+	 , intRecipeItemId					= SOD.intRecipeItemId
+	 , intRecipeId						= SOD.intRecipeId
+	 , intSubLocationId					= SOD.intSubLocationId
+	 , intCostTypeId					= SOD.intCostTypeId
+	 , intMarginById					= SOD.intMarginById
+	 , intCommentTypeId					= SOD.intCommentTypeId
+	 , dblMargin						= SOD.dblMargin
+	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
+	 , strMaintenanceType				= NULL
+	 , strFrequency						= NULL
+	 , dtmMaintenanceDate				= NULL
+	 , strItemType						= 'Comment'
+	 , strSalesOrderNumber				= NULL
+	 , strShipmentNumber				= NULL 
+	 , dblContractBalance				= SOD.dblContractBalance
+	 , dblContractAvailable				= SOD.dblContractAvailable
+	 , intEntityContactId				= SO.intEntityContactId
+	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId					= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+	 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+	 , intSalesOrderId					= NULL
+	 , intStorageLocationId				= NULL
+	 , intCompanyLocationSubLocationId	= NULL
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -284,55 +288,56 @@ AND ISNULL(intCommentTypeId, 0) <> 0
 
 --GET ITEMS FROM POSTED SHIPMENT
 INSERT INTO @tblItemsToInvoiceUnsorted
-SELECT intItemId					= ICSI.intItemId
-	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(ICSI.intItemId)
-	 , ysnBlended					= SOD.ysnBlended
-	 , strItemDescription			= SOD.strItemDescription
-	 , intItemUOMId					= ICSI.intItemUOMId
-	 , intPriceUOMId				= ICSI.intPriceUOMId
-	 , intContractHeaderId			= SOD.intContractHeaderId
-	 , intContractDetailId			= SOD.intContractDetailId
-	 , dblQtyOrdered				= SOD.dblQtyOrdered
-	 , dblQtyRemaining				= ICSI.dblQuantity
-	 , dblLicenseAmount				= @dblZeroAmount
-	 , dblMaintenanceAmount			= @dblZeroAmount
-	 , dblDiscount					= SOD.dblDiscount
-	 , dblItemTermDiscount			= SOD.dblItemTermDiscount
-	 , strItemTermDiscountBy		= SOD.strItemTermDiscountBy
-	 , dblPrice						= ICSI.dblUnitPrice
-	 , dblBasePrice					= ICSI.dblUnitPrice
-	 , dblUnitPrice					= SOD.dblUnitPrice
-	 , dblBaseUnitPrice				= SOD.dblBaseUnitPrice
-	 , dblUnitQuantity				= SOD.dblUnitQuantity
-	 , strPricing					= SOD.strPricing 
-	 , strVFDDocumentNumber		    = SOD.strVFDDocumentNumber
-	 , intTaxGroupId				= SOD.intTaxGroupId
-	 , intSalesOrderDetailId		= SOD.intSalesOrderDetailId
-	 , intInventoryShipmentItemId	= ICSI.intInventoryShipmentItemId
-	 , intRecipeItemId				= SOD.intRecipeItemId
-	 , intRecipeId					= SOD.intRecipeId
-	 , intSubLocationId				= SOD.intSubLocationId
-	 , intCostTypeId				= SOD.intCostTypeId
-	 , intMarginById				= SOD.intMarginById
-	 , intCommentTypeId				= SOD.intCommentTypeId
-	 , dblMargin					= SOD.dblMargin
-	 , dblRecipeQuantity			= SOD.dblRecipeQuantity
-	 , strMaintenanceType			= SOD.strMaintenanceType
-	 , strFrequency					= SOD.strFrequency
-	 , dtmMaintenanceDate			= SOD.dtmMaintenanceDate
-	 , strItemType					= ICI.strType
-	 , strSalesOrderNumber			= SO.strSalesOrderNumber
-	 , strShipmentNumber			= ICS.strShipmentNumber
-	 , dblContractBalance			= SOD.dblContractBalance
-	 , dblContractAvailable			= SOD.dblContractAvailable
-	 , intEntityContactId			= SO.intEntityContactId
-	 , intStorageScheduleTypeId		= SOD.intStorageScheduleTypeId
-	 , intSubCurrencyId				= SOD.intSubCurrencyId
-	 , dblSubCurrencyRate			= SOD.dblSubCurrencyRate
-	 , intCurrencyExchangeRateTypeId = SOD.intCurrencyExchangeRateTypeId
-	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
-	 , intSalesOrderId				= SO.intSalesOrderId
-	 , intStorageLocationId			= SOD.intStorageLocationId
+SELECT intItemId						= ICSI.intItemId
+	 , ysnIsInventory					= dbo.fnIsStockTrackingItem(ICSI.intItemId)
+	 , ysnBlended						= SOD.ysnBlended
+	 , strItemDescription				= SOD.strItemDescription
+	 , intItemUOMId						= ICSI.intItemUOMId
+	 , intPriceUOMId					= ICSI.intPriceUOMId
+	 , intContractHeaderId				= SOD.intContractHeaderId
+	 , intContractDetailId				= SOD.intContractDetailId
+	 , dblQtyOrdered					= SOD.dblQtyOrdered
+	 , dblQtyRemaining					= ICSI.dblQuantity
+	 , dblLicenseAmount					= @dblZeroAmount
+	 , dblMaintenanceAmount				= @dblZeroAmount
+	 , dblDiscount						= SOD.dblDiscount
+	 , dblItemTermDiscount				= SOD.dblItemTermDiscount
+	 , strItemTermDiscountBy			= SOD.strItemTermDiscountBy
+	 , dblPrice							= ICSI.dblUnitPrice
+	 , dblBasePrice						= ICSI.dblUnitPrice
+	 , dblUnitPrice						= SOD.dblUnitPrice
+	 , dblBaseUnitPrice					= SOD.dblBaseUnitPrice
+	 , dblUnitQuantity					= SOD.dblUnitQuantity
+	 , strPricing						= SOD.strPricing 
+	 , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
+	 , intTaxGroupId					= SOD.intTaxGroupId
+	 , intSalesOrderDetailId			= SOD.intSalesOrderDetailId
+	 , intInventoryShipmentItemId		= ICSI.intInventoryShipmentItemId
+	 , intRecipeItemId					= SOD.intRecipeItemId
+	 , intRecipeId						= SOD.intRecipeId
+	 , intSubLocationId					= SOD.intSubLocationId
+	 , intCostTypeId					= SOD.intCostTypeId
+	 , intMarginById					= SOD.intMarginById
+	 , intCommentTypeId					= SOD.intCommentTypeId
+	 , dblMargin						= SOD.dblMargin
+	 , dblRecipeQuantity				= SOD.dblRecipeQuantity
+	 , strMaintenanceType				= SOD.strMaintenanceType
+	 , strFrequency						= SOD.strFrequency
+	 , dtmMaintenanceDate				= SOD.dtmMaintenanceDate
+	 , strItemType						= ICI.strType
+	 , strSalesOrderNumber				= SO.strSalesOrderNumber
+	 , strShipmentNumber				= ICS.strShipmentNumber
+	 , dblContractBalance				= SOD.dblContractBalance
+	 , dblContractAvailable				= SOD.dblContractAvailable
+	 , intEntityContactId				= SO.intEntityContactId
+	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
+	 , intSubCurrencyId					= SOD.intSubCurrencyId
+	 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
+	 , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+	 , intSalesOrderId					= SO.intSalesOrderId
+	 , intStorageLocationId				= SOD.intStorageLocationId
+	 , intCompanyLocationSubLocationId	= SOD.intSubLocationId
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
@@ -343,55 +348,56 @@ AND ICS.ysnPosted = 1
 
 --GET ITEMS FROM Manufacturing - Other Charges
 INSERT INTO @tblItemsToInvoiceUnsorted
-SELECT intItemId					= ARSI.intItemId
-	 , ysnIsInventory				= dbo.fnIsStockTrackingItem(ARSI.intItemId)
-	 , ysnBlended					= ARSI.ysnBlended
-	 , strItemDescription			= ARSI.strItemDescription
-	 , intItemUOMId					= ARSI.intItemUOMId
-	 , intPriceUOMId				= ARSI.intPriceUOMId
-	 , intContractHeaderId			= ARSI.intContractHeaderId
-	 , intContractDetailId			= ARSI.intContractDetailId
-	 , dblQtyOrdered				= 0
-	 , dblQtyRemaining				= ARSI.dblQtyRemaining
-	 , dblLicenseAmount				= 0  
-	 , dblMaintenanceAmount			= 0 
-	 , dblDiscount					= ARSI.dblDiscount
-	 , dblItemTermDiscount			= 0
-	 , strItemTermDiscountBy		= NULL
-	 , dblPrice						= ARSI.dblPrice 
-	 , dblBasePrice					= ARSI.dblPrice 
-	 , dblUnitPrice					= ARSI.dblUnitPrice
-	 , dblBaseUnitPrice				= ARSI.dblBaseUnitPrice
-	 , dblUnitQuantity				= ARSI.dblUnitQuantity
-	 , strPricing					= ARSI.strPricing
-	 , strVFDDocumentNumber		    = ARSI.strVFDDocumentNumber
-	 , intTaxGroupId				= NULL
-	 , intSalesOrderDetailId		= ARSI.intSalesOrderDetailId
-	 , intInventoryShipmentItemId	= NULL
-	 , intRecipeItemId				= ARSI.intRecipeItemId
-	 , intRecipeId					= ARSI.intRecipeId
-	 , intSubLocationId				= NULL
-	 , intCostTypeId				= NULL
-	 , intMarginById				= NULL
-	 , intCommentTypeId				= NULL
-	 , dblMargin					= NULL
-	 , dblRecipeQuantity			= NULL
-	 , strMaintenanceType			= ''
-	 , strFrequency					= NULL
-	 , dtmMaintenanceDate			= NULL
-	 , strItemType					= I.strType
-	 , strSalesOrderNumber			= ARSI.strSalesOrderNumber
-	 , strShipmentNumber			= ''
-	 , dblContractBalance			= 0
-	 , dblContractAvailable			= 0
-	 , intEntityCustomerId			= NULL
-	 , intStorageScheduleTypeId		= ARSI.intStorageScheduleTypeId
-	 , intSubCurrencyId				= NULL
-	 , dblSubCurrencyRate			= 1
-	 , intCurrencyExchangeRateTypeId = ARSI.intCurrencyExchangeRateTypeId
-	 , dblCurrencyExchangeRate		= ARSI.dblCurrencyExchangeRate
-	 , intSalesOrderId				= ARSI.intSalesOrderId
-	 , intStorageLocationId			= ARSI.intStorageLocationId
+SELECT intItemId						= ARSI.intItemId
+	 , ysnIsInventory					= dbo.fnIsStockTrackingItem(ARSI.intItemId)
+	 , ysnBlended						= ARSI.ysnBlended
+	 , strItemDescription				= ARSI.strItemDescription
+	 , intItemUOMId						= ARSI.intItemUOMId
+	 , intPriceUOMId					= ARSI.intPriceUOMId
+	 , intContractHeaderId				= ARSI.intContractHeaderId
+	 , intContractDetailId				= ARSI.intContractDetailId
+	 , dblQtyOrdered					= 0
+	 , dblQtyRemaining					= ARSI.dblQtyRemaining
+	 , dblLicenseAmount					= 0  
+	 , dblMaintenanceAmount				= 0 
+	 , dblDiscount						= ARSI.dblDiscount
+	 , dblItemTermDiscount				= 0
+	 , strItemTermDiscountBy			= NULL
+	 , dblPrice							= ARSI.dblPrice 
+	 , dblBasePrice						= ARSI.dblPrice 
+	 , dblUnitPrice						= ARSI.dblUnitPrice
+	 , dblBaseUnitPrice					= ARSI.dblBaseUnitPrice
+	 , dblUnitQuantity					= ARSI.dblUnitQuantity
+	 , strPricing						= ARSI.strPricing
+	 , strVFDDocumentNumber				= ARSI.strVFDDocumentNumber
+	 , intTaxGroupId					= NULL
+	 , intSalesOrderDetailId			= ARSI.intSalesOrderDetailId
+	 , intInventoryShipmentItemId		= NULL
+	 , intRecipeItemId					= ARSI.intRecipeItemId
+	 , intRecipeId						= ARSI.intRecipeId
+	 , intSubLocationId					= NULL
+	 , intCostTypeId					= NULL
+	 , intMarginById					= NULL
+	 , intCommentTypeId					= NULL
+	 , dblMargin						= NULL
+	 , dblRecipeQuantity				= NULL
+	 , strMaintenanceType				= ''
+	 , strFrequency						= NULL
+	 , dtmMaintenanceDate				= NULL
+	 , strItemType						= I.strType
+	 , strSalesOrderNumber				= ARSI.strSalesOrderNumber
+	 , strShipmentNumber				= ''
+	 , dblContractBalance				= 0
+	 , dblContractAvailable				= 0
+	 , intEntityCustomerId				= NULL
+	 , intStorageScheduleTypeId			= ARSI.intStorageScheduleTypeId
+	 , intSubCurrencyId					= NULL
+	 , dblSubCurrencyRate				= 1
+	 , intCurrencyExchangeRateTypeId	= ARSI.intCurrencyExchangeRateTypeId
+	 , dblCurrencyExchangeRate			= ARSI.dblCurrencyExchangeRate
+	 , intSalesOrderId					= ARSI.intSalesOrderId
+	 , intStorageLocationId				= ARSI.intStorageLocationId
+	 , intCompanyLocationSubLocationId	= ARSI.intSubLocationId
 FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -532,7 +538,6 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 				DECLARE @dtmSOMaintenanceDate			DATETIME = NULL,
 				        @intAccrualPeriod				INT = NULL,
 						@intNewSoftwareInvoiceId		INT = NULL,
-
 						@intNewSoftwareItemId			INT = NULL,
 						@intNewSoftwareUOMId			INT = NULL,
 						@strNewSoftwareItemDescription	NVARCHAR(500) = NULL,
@@ -873,142 +878,145 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 		--INSERT TO INVOICE DETAIL
 		WHILE EXISTS(SELECT NULL FROM @tblItemsToInvoice)
 			BEGIN
-				DECLARE @intItemToInvoiceId		INT,
-						@ItemId					INT,
-						@ItemIsInventory		BIT,
-						@ItemIsBlended			BIT,
-						@NewDetailId			INT,
-						@ItemDescription		NVARCHAR(100),
-						@OrderUOMId				INT,
-						@PriceUOMId				INT,
-						@ItemUOMId				INT,
-						@ItemContractHeaderId	INT,
-						@ItemContractDetailId	INT,
-						@ItemQtyOrdered			NUMERIC(18,6),
-						@ItemQtyShipped			NUMERIC(18,6),
-						@ItemDiscount			NUMERIC(18,6),
-						@ItemTermDiscount		NUMERIC(18,6),
-						@ItemTermDiscountBy		NVARCHAR(50),
-						@ItemLicenseAmount		NUMERIC(18,6),
-						@ItemPrice				NUMERIC(18,6),
-						@ItemPricing			NVARCHAR(250),
-						@ItemVFDDocumentNumber	NVARCHAR(100),
-						@ItemTaxGroupId			INT,		
-						@ItemSalesOrderDetailId	INT,
-						@ItemShipmentDetailId	INT,
-						@ItemRecipeItemId		INT,
-						@ItemSalesOrderNumber	NVARCHAR(100),
-						@ItemShipmentNumber		NVARCHAR(100),
-						@ItemMaintenanceType	NVARCHAR(100),
-						@ItemFrequency			NVARCHAR(100),
-						@ItemMaintenanceDate	DATETIME,
-						@ItemRecipeId			INT,
-						@ItemSublocationId		INT,
-						@ItemCostTypeId			INT,
-						@ItemMarginById			INT,
-						@ItemCommentTypeId		INT,
-						@ItemMargin				NUMERIC(18,6),
-						@ItemRecipeQty			NUMERIC(18,6),
-						@ContractBalance		NUMERIC(18,6),
-						@ContractAvailable		NUMERIC(18,6),
-						@ItemSubCurrencyId		INT,
-						@ItemSubCurrencyRate	NUMERIC(18,6),
+				DECLARE @intItemToInvoiceId					INT,
+						@ItemId								INT,
+						@ItemIsInventory					BIT,
+						@ItemIsBlended						BIT,
+						@NewDetailId						INT,
+						@ItemDescription					NVARCHAR(100),
+						@OrderUOMId							INT,
+						@PriceUOMId							INT,
+						@ItemUOMId							INT,
+						@ItemContractHeaderId				INT,
+						@ItemContractDetailId				INT,
+						@ItemQtyOrdered						NUMERIC(18,6),
+						@ItemQtyShipped						NUMERIC(18,6),
+						@ItemDiscount						NUMERIC(18,6),
+						@ItemTermDiscount					NUMERIC(18,6),
+						@ItemTermDiscountBy					NVARCHAR(50),
+						@ItemLicenseAmount					NUMERIC(18,6),
+						@ItemPrice							NUMERIC(18,6),
+						@ItemPricing						NVARCHAR(250),
+						@ItemVFDDocumentNumber				NVARCHAR(100),
+						@ItemTaxGroupId						INT,		
+						@ItemSalesOrderDetailId				INT,
+						@ItemShipmentDetailId				INT,
+						@ItemRecipeItemId					INT,
+						@ItemSalesOrderNumber				NVARCHAR(100),
+						@ItemShipmentNumber					NVARCHAR(100),
+						@ItemMaintenanceType				NVARCHAR(100),
+						@ItemFrequency						NVARCHAR(100),
+						@ItemMaintenanceDate				DATETIME,
+						@ItemRecipeId						INT,
+						@ItemCostTypeId						INT,
+						@ItemMarginById						INT,
+						@ItemCommentTypeId					INT,
+						@ItemMargin							NUMERIC(18,6),
+						@ItemRecipeQty						NUMERIC(18,6),
+						@ContractBalance					NUMERIC(18,6),
+						@ContractAvailable					NUMERIC(18,6),
+						@ItemSubCurrencyId					INT,
+						@ItemSubCurrencyRate				NUMERIC(18,6),
 						@ItemCurrencyExchangeRateTypeId		INT,
-						@ItemCurrencyExchangeRate	NUMERIC(18, 6)					
+						@ItemCurrencyExchangeRate			NUMERIC(18, 6),
+						@ItemCompanyLocationSubLocationId	INT,
+						@ItemStorageLocationId				INT
 
 				SELECT TOP 1
-						@intItemToInvoiceId		= intItemToInvoiceId,
-						@ItemId					= intItemId,
-						@ItemIsInventory		= ysnIsInventory,
-						@ItemIsBlended			= ysnBlended,
-						@ItemDescription		= strItemDescription,
-						@OrderUOMId				= intItemUOMId,
-						@PriceUOMId				= intPriceUOMId,
-						@ItemUOMId				= intItemUOMId,
-						@ItemContractHeaderId	= intContractHeaderId,
-						@ItemContractDetailId	= intContractDetailId,
-						@ItemQtyOrdered			= dblQtyOrdered,
-						@ItemQtyShipped			= dblQtyRemaining,
-						@ItemDiscount			= dblDiscount,
-						@ItemTermDiscount		= dblItemTermDiscount,
-						@ItemTermDiscountBy		= strItemTermDiscountBy,
-						@ItemLicenseAmount      = dblLicenseAmount,
-						@ItemPrice				= dblPrice,
-						@ItemPricing			= strPricing,
-						@ItemVFDDocumentNumber  = strVFDDocumentNumber,
-						@ItemTaxGroupId			= intTaxGroupId,
-						@ItemSalesOrderDetailId	= intSalesOrderDetailId,						
-						@ItemShipmentDetailId	= intInventoryShipmentItemId,
-						@ItemRecipeItemId		= intRecipeItemId,
-						@ItemRecipeId			= intRecipeId,
-						@ItemSublocationId		= intSubLocationId,
-						@ItemCostTypeId			= intCostTypeId,
-						@ItemMarginById			= intMarginById,
-						@ItemCommentTypeId		= intCommentTypeId,
-						@ItemMargin				= dblMargin,
-						@ItemRecipeQty			= dblRecipeQuantity,
-						@ItemSalesOrderNumber	= ISNULL(NULLIF(strShipmentNumber, ''), strSalesOrderNumber),
-						@ItemShipmentNumber		= strShipmentNumber,
-						@ItemMaintenanceType	= strMaintenanceType,
-						@ItemFrequency			= strFrequency,
-						@ItemMaintenanceDate	= dtmMaintenanceDate,
-						@ContractBalance		= dblContractBalance,
-						@ContractAvailable		= dblContractAvailable,	
-						@EntityContactId		= intEntityContactId,	
-						@StorageScheduleTypeId	= intStorageScheduleTypeId,
-						@ItemSubCurrencyId		= intSubCurrencyId,
-						@ItemSubCurrencyRate	= dblSubCurrencyRate,
-						@ItemCurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId,
-						@ItemCurrencyExchangeRate	=dblCurrencyExchangeRate
+						@intItemToInvoiceId					= intItemToInvoiceId,
+						@ItemId								= intItemId,
+						@ItemIsInventory					= ysnIsInventory,
+						@ItemIsBlended						= ysnBlended,
+						@ItemDescription					= strItemDescription,
+						@OrderUOMId							= intItemUOMId,
+						@PriceUOMId							= intPriceUOMId,
+						@ItemUOMId							= intItemUOMId,
+						@ItemContractHeaderId				= intContractHeaderId,
+						@ItemContractDetailId				= intContractDetailId,
+						@ItemQtyOrdered						= dblQtyOrdered,
+						@ItemQtyShipped						= dblQtyRemaining,
+						@ItemDiscount						= dblDiscount,
+						@ItemTermDiscount					= dblItemTermDiscount,
+						@ItemTermDiscountBy					= strItemTermDiscountBy,
+						@ItemLicenseAmount					= dblLicenseAmount,
+						@ItemPrice							= dblPrice,
+						@ItemPricing						= strPricing,
+						@ItemVFDDocumentNumber				= strVFDDocumentNumber,
+						@ItemTaxGroupId						= intTaxGroupId,
+						@ItemSalesOrderDetailId				= intSalesOrderDetailId,						
+						@ItemShipmentDetailId				= intInventoryShipmentItemId,
+						@ItemRecipeItemId					= intRecipeItemId,
+						@ItemRecipeId						= intRecipeId,						
+						@ItemCostTypeId						= intCostTypeId,
+						@ItemMarginById						= intMarginById,
+						@ItemCommentTypeId					= intCommentTypeId,
+						@ItemMargin							= dblMargin,
+						@ItemRecipeQty						= dblRecipeQuantity,
+						@ItemSalesOrderNumber				= ISNULL(NULLIF(strShipmentNumber, ''), strSalesOrderNumber),
+						@ItemShipmentNumber					= strShipmentNumber,
+						@ItemMaintenanceType				= strMaintenanceType,
+						@ItemFrequency						= strFrequency,
+						@ItemMaintenanceDate				= dtmMaintenanceDate,
+						@ContractBalance					= dblContractBalance,
+						@ContractAvailable					= dblContractAvailable,	
+						@EntityContactId					= intEntityContactId,	
+						@StorageScheduleTypeId				= intStorageScheduleTypeId,
+						@ItemSubCurrencyId					= intSubCurrencyId,
+						@ItemSubCurrencyRate				= dblSubCurrencyRate,
+						@ItemCurrencyExchangeRateTypeId		= intCurrencyExchangeRateTypeId,
+						@ItemCurrencyExchangeRate			= dblCurrencyExchangeRate,
+						@ItemStorageLocationId				= intSubLocationId,
+						@ItemCompanyLocationSubLocationId	= intCompanyLocationSubLocationId
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
-							 @InvoiceId						= @NewInvoiceId	
-							,@ItemId						= @ItemId
-							,@ItemIsInventory				= @ItemIsInventory
-							,@ItemIsBlended					= @ItemIsBlended
-							,@NewInvoiceDetailId			= @NewDetailId			OUTPUT 
-							,@ErrorMessage					= @CurrentErrorMessage	OUTPUT
-							,@RaiseError					= @RaiseError
-							,@ItemDescription				= @ItemDescription
-							,@ItemDocumentNumber			= @ItemSalesOrderNumber
-							,@ItemOrderUOMId				= @OrderUOMId
-							,@ItemPriceUOMId				= @PriceUOMId
-							,@ItemUOMId						= @ItemUOMId
-							,@ItemContractHeaderId			= @ItemContractHeaderId
-							,@ItemContractDetailId		    = @ItemContractDetailId
-							,@ItemQtyOrdered				= @ItemQtyOrdered
-							,@ItemQtyShipped				= @ItemQtyShipped
-							,@ItemDiscount					= @ItemDiscount
-							,@ItemTermDiscount				= @ItemTermDiscount
-							,@ItemTermDiscountBy			= @ItemTermDiscountBy
-							,@ItemLicenseAmount				= @ItemLicenseAmount
-							,@ItemPrice						= @ItemPrice
-							,@ItemPricing					= @ItemPricing
-							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
-							,@RefreshPrice					= 0
-							,@ItemTaxGroupId				= @ItemTaxGroupId
-							,@RecomputeTax					= 0
-							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId							
-							,@ItemInventoryShipmentItemId	= @ItemShipmentDetailId
-							,@ItemRecipeItemId				= @ItemRecipeItemId
-							,@ItemRecipeId					= @ItemRecipeId
-							,@ItemSublocationId				= @ItemSublocationId
-							,@ItemCostTypeId				= @ItemCostTypeId
-							,@ItemMarginById				= @ItemMarginById
-							,@ItemCommentTypeId				= @ItemCommentTypeId
-							,@ItemMargin					= @ItemMargin
-							,@ItemRecipeQty					= @ItemRecipeQty
-							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
-							,@ItemShipmentNumber			= @ItemShipmentNumber
-							,@EntitySalespersonId			= @EntitySalespersonId
-							,@ItemMaintenanceType			= @ItemMaintenanceType
-							,@ItemFrequency					= @ItemFrequency
-							,@ItemMaintenanceDate			= @ItemMaintenanceDate
-							,@ItemSubCurrencyId				= @ItemSubCurrencyId
-							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
+							 @InvoiceId							= @NewInvoiceId	
+							,@ItemId							= @ItemId
+							,@ItemIsInventory					= @ItemIsInventory
+							,@ItemIsBlended						= @ItemIsBlended
+							,@NewInvoiceDetailId				= @NewDetailId			OUTPUT 
+							,@ErrorMessage						= @CurrentErrorMessage	OUTPUT
+							,@RaiseError						= @RaiseError
+							,@ItemDescription					= @ItemDescription
+							,@ItemDocumentNumber				= @ItemSalesOrderNumber
+							,@ItemOrderUOMId					= @OrderUOMId
+							,@ItemPriceUOMId					= @PriceUOMId
+							,@ItemUOMId							= @ItemUOMId
+							,@ItemContractHeaderId				= @ItemContractHeaderId
+							,@ItemContractDetailId				= @ItemContractDetailId
+							,@ItemQtyOrdered					= @ItemQtyOrdered
+							,@ItemQtyShipped					= @ItemQtyShipped
+							,@ItemDiscount						= @ItemDiscount
+							,@ItemTermDiscount					= @ItemTermDiscount
+							,@ItemTermDiscountBy				= @ItemTermDiscountBy
+							,@ItemLicenseAmount					= @ItemLicenseAmount
+							,@ItemPrice							= @ItemPrice
+							,@ItemPricing						= @ItemPricing
+							,@ItemVFDDocumentNumber				= @ItemVFDDocumentNumber
+							,@RefreshPrice						= 0
+							,@ItemTaxGroupId					= @ItemTaxGroupId
+							,@RecomputeTax						= 0
+							,@ItemSalesOrderDetailId			= @ItemSalesOrderDetailId							
+							,@ItemInventoryShipmentItemId		= @ItemShipmentDetailId
+							,@ItemRecipeItemId					= @ItemRecipeItemId
+							,@ItemRecipeId						= @ItemRecipeId							
+							,@ItemCostTypeId					= @ItemCostTypeId
+							,@ItemMarginById					= @ItemMarginById
+							,@ItemCommentTypeId					= @ItemCommentTypeId
+							,@ItemMargin						= @ItemMargin
+							,@ItemRecipeQty						= @ItemRecipeQty
+							,@ItemSalesOrderNumber				= @ItemSalesOrderNumber
+							,@ItemShipmentNumber				= @ItemShipmentNumber
+							,@EntitySalespersonId				= @EntitySalespersonId
+							,@ItemMaintenanceType				= @ItemMaintenanceType
+							,@ItemFrequency						= @ItemFrequency
+							,@ItemMaintenanceDate				= @ItemMaintenanceDate
+							,@ItemSubCurrencyId					= @ItemSubCurrencyId
+							,@ItemSubCurrencyRate				= @ItemSubCurrencyRate
 							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
-							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
+							,@ItemCurrencyExchangeRate			= @ItemCurrencyExchangeRate
+							,@ItemCompanyLocationSubLocationId	= @ItemCompanyLocationSubLocationId
+							,@ItemStorageLocationId				= @ItemStorageLocationId
 
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN

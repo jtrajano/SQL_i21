@@ -234,20 +234,8 @@ EXEC dbo.[uspARGetItemPrice]
 		,@CurrencyExchangeRate			= @CurrencyExchangeRate			OUTPUT
 		,@SubCurrencyId					= @SubCurrencyId				OUTPUT
 		,@SubCurrencyRate				= @SubCurrencyRate				OUTPUT
-	--,@AvailableQuantity			= NULL OUTPUT
-	--,@UnlimitedQuantity			= 0    OUTPUT
-	--,@OriginalQuantity			= NULL
-	--,@CustomerPricingOnly			= 0
-	--,@ItemPricingOnly				= 0
-	--,@VendorId					= NULL
-	--,@SupplyPointId				= NULL
-	--,@LastCost					= NULL
-	--,@ShipToLocationId			= NULL
-	--,@VendorLocationId			= NULL
-	--,@PricingLevelId			= NULL
-	--,@AllowQtyToExceedContract	= 0
-	,@InvoiceType				= @InvoiceType
-	,@TermId					= @TermId 
+		,@InvoiceType					= @InvoiceType
+		,@TermId						= @TermId 
 
 IF (ISNULL(@RefreshPrice,0) = 1)
 	BEGIN

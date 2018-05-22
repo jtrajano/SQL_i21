@@ -1,57 +1,57 @@
 ﻿CREATE VIEW [dbo].[vyuARGetSalesOrderItems]
 AS 
-SELECT intSalesOrderId			= SO.intSalesOrderId
-	 , intEntityCustomerId		= SO.intEntityCustomerId
-	 , intCompanyLocationId		= SO.intCompanyLocationId
-     , intSalesOrderDetailId	= SODETAIL.intSalesOrderDetailId
-	 , intItemId				= SODETAIL.intItemId
-	 , strItemDescription		= SODETAIL.strItemDescription
-	 , intItemUOMId				= SODETAIL.intItemUOMId
-	 , intPriceUOMId			= SODETAIL.intPriceUOMId
-	 , intContractHeaderId		= SODETAIL.intContractHeaderId
-	 , intContractDetailId		= SODETAIL.intContractDetailId
-	 , intRecipeId				= SODETAIL.intRecipeId
-	 , intRecipeItemId			= SODETAIL.intRecipeItemId
-	 , intSubLocationId			= SODETAIL.intSubLocationId
-	 , intCostTypeId			= SODETAIL.intCostTypeId
-	 , intMarginById			= SODETAIL.intMarginById
-	 , intCommentTypeId			= SODETAIL.intCommentTypeId
-	 , intStorageScheduleTypeId	= SODETAIL.intStorageScheduleTypeId
-	 , intCurrencyExchangeRateTypeId = SODETAIL.intCurrencyExchangeRateTypeId
-	 , intCurrencyExchangeRateId = SODETAIL.intCurrencyExchangeRateId
-	 , intSubCurrencyId			= SODETAIL.intSubCurrencyId
-	 , dblQtyOrdered			= SODETAIL.dblQtyOrdered
-	 , dblQtyShipped			= SODETAIL.dblQtyShipped
-	 , dblQtyRemaining			= SODETAIL.dblQtyRemaining
-	 , dblPrice					= SODETAIL.dblPrice
-	 , dblBasePrice				= SODETAIL.dblBasePrice
-	 , dblUnitPrice				= SODETAIL.dblUnitPrice
-	 , dblBaseUnitPrice			= SODETAIL.dblBaseUnitPrice
-	 , dblUnitQuantity			= SODETAIL.dblUnitQuantity
-	 , dblDiscount				= SODETAIL.dblDiscount
-	 , dblCurrencyExchangeRate	= SODETAIL.dblCurrencyExchangeRate
-	 , dblSubCurrencyRate		= SODETAIL.dblSubCurrencyRate
-	 , strSalesOrderNumber		= SO.strSalesOrderNumber
-	 , strCustomerName			= E.strName
-	 , strLocationName			= LOCATION.strLocationName
-	 , strDescription			= CASE WHEN ISNULL(SODETAIL.intItemId, 0) <> 0 THEN ITEM.strDescription ELSE SODETAIL.strItemDescription END
-	 , strPricing				= SODETAIL.strPricing
-	 , strVFDDocumentNumber		= SODETAIL.strVFDDocumentNumber
-	 , strType					= ITEM.strType
-	 , strBundleType			= ITEM.strBundleType
-	 , strLotTracking			= ITEM.strLotTracking
-	 , intContractSeq			= CONTRACTS.intContractSeq
-	 , strContractNumber		= CONTRACTS.strContractNumber
-	 , strItemNo				= ITEM.strItemNo
-	 , strUnitMeasure			= UOM.strUnitMeasure
-	 , strPriceUnitMeasure		= PUOM.strUnitMeasure
-	 , dtmDate					= SO.dtmDate
-	 , ysnBlended				= SODETAIL.ysnBlended
-	 , intTaxGroupId			= SODETAIL.intTaxGroupId
-	 , strSubCurrency				= CURRENCY.strCurrency
-	 , strStorageLocation		= STOLOC.strName
-	 , strSubLocationName		= SUBLOC.strSubLocationName
-	 , intStorageLocationId		=  SODETAIL.intStorageLocationId
+SELECT intSalesOrderId					= SO.intSalesOrderId
+	 , intEntityCustomerId				= SO.intEntityCustomerId
+	 , intCompanyLocationId				= SO.intCompanyLocationId
+     , intSalesOrderDetailId			= SODETAIL.intSalesOrderDetailId
+	 , intItemId						= SODETAIL.intItemId
+	 , strItemDescription				= SODETAIL.strItemDescription
+	 , intItemUOMId						= SODETAIL.intItemUOMId
+	 , intPriceUOMId					= SODETAIL.intPriceUOMId
+	 , intContractHeaderId				= SODETAIL.intContractHeaderId
+	 , intContractDetailId				= SODETAIL.intContractDetailId
+	 , intRecipeId						= SODETAIL.intRecipeId
+	 , intRecipeItemId					= SODETAIL.intRecipeItemId
+	 , intSubLocationId					= SODETAIL.intSubLocationId
+	 , intStorageLocationId				= SODETAIL.intStorageLocationId
+	 , intCostTypeId					= SODETAIL.intCostTypeId
+	 , intMarginById					= SODETAIL.intMarginById
+	 , intCommentTypeId					= SODETAIL.intCommentTypeId
+	 , intStorageScheduleTypeId			= SODETAIL.intStorageScheduleTypeId
+	 , intCurrencyExchangeRateTypeId	= SODETAIL.intCurrencyExchangeRateTypeId
+	 , intCurrencyExchangeRateId		= SODETAIL.intCurrencyExchangeRateId
+	 , intSubCurrencyId					= SODETAIL.intSubCurrencyId
+	 , dblQtyOrdered					= SODETAIL.dblQtyOrdered
+	 , dblQtyShipped					= SODETAIL.dblQtyShipped
+	 , dblQtyRemaining					= SODETAIL.dblQtyRemaining
+	 , dblPrice							= SODETAIL.dblPrice
+	 , dblBasePrice						= SODETAIL.dblBasePrice
+	 , dblUnitPrice						= SODETAIL.dblUnitPrice
+	 , dblBaseUnitPrice					= SODETAIL.dblBaseUnitPrice
+	 , dblUnitQuantity					= SODETAIL.dblUnitQuantity
+	 , dblDiscount						= SODETAIL.dblDiscount
+	 , dblCurrencyExchangeRate			= SODETAIL.dblCurrencyExchangeRate
+	 , dblSubCurrencyRate				= SODETAIL.dblSubCurrencyRate
+	 , strSalesOrderNumber				= SO.strSalesOrderNumber
+	 , strCustomerName					= E.strName
+	 , strLocationName					= LOCATION.strLocationName
+	 , strDescription					= CASE WHEN ISNULL(SODETAIL.intItemId, 0) <> 0 THEN ITEM.strDescription ELSE SODETAIL.strItemDescription END
+	 , strPricing						= SODETAIL.strPricing
+	 , strVFDDocumentNumber				= SODETAIL.strVFDDocumentNumber
+	 , strType							= ITEM.strType
+	 , strBundleType					= ITEM.strBundleType
+	 , strLotTracking					= ITEM.strLotTracking
+	 , intContractSeq					= CONTRACTS.intContractSeq
+	 , strContractNumber				= CONTRACTS.strContractNumber
+	 , strItemNo						= ITEM.strItemNo
+	 , strUnitMeasure					= UOM.strUnitMeasure
+	 , strPriceUnitMeasure				= PUOM.strUnitMeasure
+	 , dtmDate							= SO.dtmDate
+	 , ysnBlended						= SODETAIL.ysnBlended
+	 , intTaxGroupId					= SODETAIL.intTaxGroupId
+	 , strSubCurrency					= CURRENCY.strCurrency
+	 , strStorageLocation				= STOLOC.strName
+	 , strSubLocationName				= SUBLOC.strSubLocationName	 
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -149,20 +149,22 @@ LEFT JOIN (
 	) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 ) CONTRACTS ON SODETAIL.intContractHeaderId = CONTRACTS.intContractHeaderId
 	       AND SODETAIL.intContractDetailId = CONTRACTS.intContractDetailId
-
 LEFT OUTER JOIN (
 	SELECT intCurrencyID
 		 , intCent
 		 , strCurrency
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) CURRENCY ON SODETAIL.intSubCurrencyId = CURRENCY.intCurrencyID
-
-LEFT JOIN ( SELECT intStorageLocationId, strName FROM tblICStorageLocation WITH (NOLOCK) ) STOLOC
-	ON STOLOC.intStorageLocationId = SODETAIL.intStorageLocationId
-
-LEFT JOIN ( SELECT intCompanyLocationSubLocationId,  strSubLocationName FROM tblSMCompanyLocationSubLocation WITH (NOLOCK) ) SUBLOC
-	ON SUBLOC.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId
-
+LEFT JOIN ( 
+	SELECT intStorageLocationId
+		 , strName 
+	FROM tblICStorageLocation WITH (NOLOCK) 
+) STOLOC ON STOLOC.intStorageLocationId = SODETAIL.intStorageLocationId
+LEFT JOIN ( 
+	SELECT intCompanyLocationSubLocationId
+	     , strSubLocationName 
+	FROM tblSMCompanyLocationSubLocation WITH (NOLOCK)
+) SUBLOC ON SUBLOC.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
   AND (SODETAIL.intItemId IS NOT NULL OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
