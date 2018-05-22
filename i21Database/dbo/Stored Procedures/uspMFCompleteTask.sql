@@ -68,6 +68,7 @@ BEGIN TRY
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@intManufacturingProcessId INT
+		,@intOutputItemId INT
 
 	IF @strTaskId = ''
 		SELECT @strTaskId = NULL
@@ -862,6 +863,22 @@ BEGIN TRY
 		BEGIN
 			IF NOT EXISTS (
 					SELECT *
+					FROM tblMFWorkOrderRecipe
+					WHERE intWorkOrderId = @intWorkOrderId
+					)
+			BEGIN
+				SELECT @intOutputItemId = intItemId
+				FROM tblMFWorkOrder
+				WHERE intWorkOrderId = @intWorkOrderId
+
+				EXEC dbo.uspMFCopyRecipe @intItemId = @intOutputItemId
+					,@intLocationId = @intLocationId
+					,@intUserId = @intUserId
+					,@intWorkOrderId = @intWorkOrderId
+			END
+
+			IF NOT EXISTS (
+					SELECT *
 					FROM tblMFWorkOrderRecipeItem RI
 					LEFT JOIN tblMFWorkOrderRecipeSubstituteItem RS ON RS.intRecipeItemId = RI.intRecipeItemId
 					WHERE (
@@ -935,6 +952,7 @@ BEGIN TRY
 						,intConcurrencyId
 						,intCostDriverId
 						,dblCostRate
+						,ysnLock
 						)
 					SELECT intRecipeItemId = @intRecipeItemId
 						,intRecipeId = @intRecipeId
@@ -974,6 +992,7 @@ BEGIN TRY
 						,intConcurrencyId = 1
 						,intCostDriverId = NULL
 						,dblCostRate = NULL
+						,ysnLock = 1
 				END
 				ELSE
 				BEGIN
@@ -1011,6 +1030,7 @@ BEGIN TRY
 						,intLastModifiedUserId
 						,dtmLastModified
 						,intConcurrencyId
+						,ysnLock
 						)
 					SELECT intWorkOrderId = @intWorkOrderId
 						,intRecipeSubstituteItemId = @intRecipeSubstituteItemId
@@ -1030,6 +1050,7 @@ BEGIN TRY
 						,intLastModifiedUserId = @intUserId
 						,dtmLastModified = @dtmDate
 						,intConcurrencyId = 1
+						,ysnLock = 1
 				END
 			END
 		END

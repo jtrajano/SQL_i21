@@ -486,6 +486,7 @@ BEGIN TRY
 				,intConcurrencyId
 				,intCostDriverId
 				,dblCostRate
+				,ysnLock
 				)
 			SELECT intRecipeItemId = @intRecipeItemId
 				,intRecipeId = @intRecipeId
@@ -525,6 +526,7 @@ BEGIN TRY
 				,intConcurrencyId = 1
 				,intCostDriverId = NULL
 				,dblCostRate = NULL
+				,ysnLock=1
 		END
 		ELSE
 		BEGIN
@@ -562,6 +564,7 @@ BEGIN TRY
 				,intLastModifiedUserId
 				,dtmLastModified
 				,intConcurrencyId
+				,ysnLock
 				)
 			SELECT intWorkOrderId = @intWorkOrderId
 				,intRecipeSubstituteItemId = @intRecipeSubstituteItemId
@@ -581,6 +584,7 @@ BEGIN TRY
 				,intLastModifiedUserId = @intUserId
 				,dtmLastModified = @dtmCurrentDateTime
 				,intConcurrencyId = 1
+				,ysnLock=1
 		END
 
 		IF @intRecipeTypeId = 3

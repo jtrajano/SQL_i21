@@ -783,6 +783,7 @@ BEGIN TRY
 				,intConcurrencyId
 				,intCostDriverId
 				,dblCostRate
+				,ysnLock
 				)
 			SELECT intRecipeItemId = @intWorkOrderId + @intRecipeItemId
 				,intRecipeId = @intRecipeId
@@ -822,6 +823,7 @@ BEGIN TRY
 				,intConcurrencyId = 1
 				,intCostDriverId = NULL
 				,dblCostRate = NULL
+				,ysnLock=1
 		END
 	END
 
