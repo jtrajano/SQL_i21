@@ -4,7 +4,8 @@
 @strDirection NVARCHAR(50),
 @strStatusMsg NVARCHAR(1000) OUTPUT,
 @strNewCheckoutStatus NVARCHAR(100) OUTPUT,
-@ysnInvoiceStatus BIT OUTPUT
+@ysnInvoiceStatus BIT OUTPUT,
+@ysnCustomerChargesInvoiceStatus BIT OUTPUT
 AS
 BEGIN
 
@@ -19,6 +20,7 @@ BEGIN
 		-- OUT Params
 		SET @strStatusMsg = 'Success'
 		SET @ysnInvoiceStatus = 0
+		SET @ysnCustomerChargesInvoiceStatus = 0
 		SET @strNewCheckoutStatus = ''
 
 
@@ -46,11 +48,22 @@ BEGIN
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		DECLARE @ysnPost BIT = NULL
 		-- DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
-		DECLARE @intCurrentInvoiceId INT = (SELECT intInvoiceId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
+
+		DECLARE @intCurrentInvoiceId INT
+		DECLARE @intCurrentCustomerChragesInvoiceId INT
+
+		SELECT @intCurrentInvoiceId = intInvoiceId
+				, @intCurrentCustomerChragesInvoiceId = @intCurrentCustomerChragesInvoiceId
+		FROM tblSTCheckoutHeader 
+		WHERE intCheckoutId = @intCheckoutId
+
+
 		DECLARE @intCreatedInvoiceId INT = NULL
+		DECLARE @intCreatedCustomerChragesInvoiceId INT = NULL
 
 		-- FOR UNPOST
 		DECLARE @strInvoiceId NVARCHAR(50) = ''
+		DECLARE @strCustomerChargesInvoiceId NVARCHAR(50) = ''
 		DECLARE @ysnInvoiceIsPosted BIT = NULL
 		DECLARE @intSuccessfullCount INT
 		DECLARE @intInvalidCount INT
@@ -91,6 +104,25 @@ BEGIN
 			END
 		----------------------------------------------------------------------
 		------------------ End check current Invoice status ------------------
+		----------------------------------------------------------------------
+
+
+		----------------------------------------------------------------------
+		------------ Check current Customer Charges Invoice status -----------
+		----------------------------------------------------------------------
+		IF(@intCurrentCustomerChragesInvoiceId IS NOT NULL)
+			BEGIN
+				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCurrentCustomerChragesInvoiceId)
+					BEGIN
+						SET @ysnCustomerChargesInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCurrentCustomerChragesInvoiceId)			
+					END
+			END
+		ELSE
+			BEGIN
+				SET @ysnCustomerChargesInvoiceStatus = 0 -- Set to false
+			END
+		----------------------------------------------------------------------
+		--- ---- End Check current Customer Charges Invoice status -----------
 		----------------------------------------------------------------------
 
 
@@ -224,6 +256,8 @@ BEGIN
 										,[dblCurrencyExchangeRate]
 										,[intSubCurrencyId]
 										,[dblSubCurrencyRate]
+										--,[ysnImportedFromOrigin]
+										--,[ysnImportedAsPosted]
 									)
 									SELECT 
 										 [strSourceTransaction]		= 'Invoice'
@@ -343,6 +377,8 @@ BEGIN
 										,[dblCurrencyExchangeRate]	= 1.000000
 										,[intSubCurrencyId]			= @intCurrencyId
 										,[dblSubCurrencyRate]		= 1.000000
+										--,0
+										--,1
 							FROM tblSTCheckoutPumpTotals CPT
 							JOIN tblICItemUOM UOM ON CPT.intPumpCardCouponId = UOM.intItemUOMId
 							JOIN tblSTCheckoutHeader CH ON CPT.intCheckoutId = CH.intCheckoutId
@@ -460,6 +496,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -552,6 +590,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTCheckoutItemMovements IM
 								JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
 								JOIN tblSTCheckoutHeader CH ON IM.intCheckoutId = CH.intCheckoutId
@@ -668,6 +708,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -794,6 +836,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTCheckoutDepartmetTotals DT
 								JOIN tblICItem I ON DT.intItemId = I.intItemId
 								--JOIN tblICCategory CAT ON I.intCategoryId = CAT.intCategoryId
@@ -911,6 +955,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -998,6 +1044,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTCheckoutSalesTaxTotals STT
 								JOIN tblICItem I ON STT.intItemId = I.intItemId
 								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
@@ -1115,6 +1163,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -1202,6 +1252,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTCheckoutPaymentOptions CPO
 								JOIN tblICItem I ON CPO.intItemId = I.intItemId
 								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
@@ -1319,6 +1371,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -1406,6 +1460,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTCheckoutCustomerCharges CC
 								JOIN tblICItemUOM UOM ON CC.intProduct = UOM.intItemUOMId
 								JOIN tblICItem I ON UOM.intItemId = I.intItemId
@@ -1523,6 +1579,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -1610,6 +1668,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTCheckoutCustomerPayments CP
 								JOIN tblICItem I ON CP.intItemId = I.intItemId
 								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
@@ -1727,6 +1787,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]
 											,[intSubCurrencyId]
 											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
 										)
 										SELECT 
 											 [strSourceTransaction]		= 'Invoice'
@@ -1814,6 +1876,8 @@ BEGIN
 											,[dblCurrencyExchangeRate]	= 1.000000
 											,[intSubCurrencyId]			= NULL
 											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
 								FROM tblSTStore ST
 								JOIN tblICItem I ON ST.intOverShortItemId = I.intItemId 
 								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
@@ -1972,11 +2036,13 @@ BEGIN
 															,[dblCurrencyExchangeRate]
 															,[intSubCurrencyId]
 															,[dblSubCurrencyRate]
+															--,[ysnImportedFromOrigin]
+															--,[ysnImportedAsPosted]
 														)
 														SELECT 
 															 [strSourceTransaction]		= 'Invoice'
 															,[strTransactionType]		= 'Invoice'
-															,[strType]					= 'Standard'
+															,[strType]					= @strInvoiceType
 															,[intSourceId]				= @intCheckoutId
 															,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
 															,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
@@ -2059,6 +2125,8 @@ BEGIN
 															,[dblCurrencyExchangeRate]	= 1.000000
 															,[intSubCurrencyId]			= NULL
 															,[dblSubCurrencyRate]		= 1.000000
+															--,0
+															--,1
 												FROM tblSTCheckoutCustomerCharges CC
 												JOIN tblICItemUOM UOM ON CC.intProduct = UOM.intItemUOMId
 												JOIN tblICItem I ON UOM.intItemId = I.intItemId
@@ -2080,6 +2148,11 @@ BEGIN
 												,@RaiseError		 = 1
 												,@ErrorMessage		 = @ErrorMessage OUTPUT
 												,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+
+											SET @intCreatedCustomerChragesInvoiceId = CAST(@CreatedIvoices AS INT)
+											SET @ysnUpdateCheckoutStatus = 1
+											SET @strStatusMsg = 'Success'
+											SET @ysnCustomerChargesInvoiceStatus = 1
 									END
 								END
 								----------------------------------------------------------------------
@@ -2104,6 +2177,7 @@ BEGIN
 				----------------------------------------------------------------------
 				----------------------------- UN-POST ---------------------------------
 				----------------------------------------------------------------------
+				-- 1st Invoice: CHeckout
 				BEGIN TRY
 						EXEC [dbo].[uspARPostInvoice]
 								@batchId			= NULL,
@@ -2141,6 +2215,41 @@ BEGIN
 				IF(@ysnSuccess = 1)
 					BEGIN
 						SET @ysnInvoiceStatus = 0
+
+						-- UNPOST 2nd Invoice: Customer Charges
+						SET @strCustomerChargesInvoiceId = CAST(@intCurrentCustomerChragesInvoiceId AS NVARCHAR(50))
+						BEGIN TRY
+							EXEC [dbo].[uspARPostInvoice]
+									@batchId			= NULL,
+									@post				= 0, -- 0 = UnPost
+									@recap				= 0,
+									@param				= @strCustomerChargesInvoiceId,
+									@userId				= @intCurrentUserId,
+									@beginDate			= NULL,
+									@endDate			= NULL,
+									@beginTransaction	= NULL,
+									@endTransaction		= NULL,
+									@exclude			= NULL,
+									@successfulCount	= @intSuccessfullCount OUTPUT,
+									@invalidCount		= @intInvalidCount OUTPUT,
+									@success			= @ysnSuccess OUTPUT,
+									@batchIdUsed		= @strBatchIdUsed OUTPUT,
+									@transType			= N'all',
+									@raiseError			= 1
+
+							SET @ysnSuccess = 1
+						END TRY
+
+						BEGIN CATCH
+							SET @ysnUpdateCheckoutStatus = 0
+							SET @ysnSuccess = 0
+							SET @strStatusMsg = ERROR_MESSAGE()
+						END CATCH
+
+						IF(@ysnSuccess = 1)
+							BEGIN
+								SET @ysnCustomerChargesInvoiceStatus = 0
+							END
 					END
 			END
 		----------------------------------------------------------------------
@@ -2197,13 +2306,43 @@ BEGIN
 									, intInvoiceId = @intCreatedInvoiceId -- New Invoice Id
 								WHERE intCheckoutId = @intCheckoutId
 							END
+
+						--CUSTOMER CHARGES
+						ELSE IF(@intCurrentCustomerChragesInvoiceId IS NOT NULL AND @intCreatedCustomerChragesInvoiceId IS NULL)
+							BEGIN
+								-- This is a Re-Post
+								-- If current customer charges invoice exist it will just update from UnPosted to Posted
+								UPDATE dbo.tblSTCheckoutHeader 
+								SET strCheckoutStatus = @strNewCheckoutStatus
+									, intCustomerChargesInvoiceId = @intCurrentCustomerChragesInvoiceId -- Retail current customer charges Invoice Id
+								WHERE intCheckoutId = @intCheckoutId
+							END
+						ELSE IF(@intCurrentCustomerChragesInvoiceId IS NULL AND @intCreatedCustomerChragesInvoiceId IS NOT NULL)
+							BEGIN
+								-- First time to Post
+								-- New created customer charges invoice will be made
+								UPDATE dbo.tblSTCheckoutHeader 
+								SET strCheckoutStatus = @strNewCheckoutStatus
+									, intCustomerChargesInvoiceId = @intCreatedCustomerChragesInvoiceId -- New Invoice Id
+								WHERE intCheckoutId = @intCheckoutId
+							END
 					END
 				ELSE IF(@ysnPost = 0) -- UNPOST
 					BEGIN
-						UPDATE dbo.tblSTCheckoutHeader 
-						SET strCheckoutStatus = @strNewCheckoutStatus
-							, intInvoiceId = @intCurrentInvoiceId -- Current Invoice
-						WHERE intCheckoutId = @intCheckoutId
+						IF(@intCurrentInvoiceId IS NOT NULL)
+							BEGIN
+								UPDATE dbo.tblSTCheckoutHeader 
+								SET strCheckoutStatus = @strNewCheckoutStatus
+									, intInvoiceId = @intCurrentInvoiceId -- Current Invoice
+								WHERE intCheckoutId = @intCheckoutId
+							END	
+						ELSE IF(@intCurrentCustomerChragesInvoiceId IS NOT NULL)
+							BEGIN
+								UPDATE dbo.tblSTCheckoutHeader 
+								SET strCheckoutStatus = @strNewCheckoutStatus
+									, intCustomerChargesInvoiceId = @intCurrentCustomerChragesInvoiceId -- Current Invoice
+								WHERE intCheckoutId = @intCheckoutId
+							END	
 					END
 			END
 	END TRY
