@@ -754,14 +754,14 @@ BEGIN
 				,dblOrderQty			= --ISNULL(RawData.dblQty, 0)
 										(
 											CASE	WHEN RawData.strReceiptType = 'Purchase Contract' THEN 
-														CASE	WHEN RawData.intSourceType = 0 THEN -- None
+														CASE	WHEN RawData.intSourceType = 0 OR RawData.intSourceType = 1 THEN -- None
 																	CASE	WHEN (ContractView.ysnLoad = 1) THEN 
 																				ISNULL(ContractView.intNoOfLoad, 0)
 																			ELSE 
 																				ISNULL(ContractView.dblDetailQuantity, 0) 
 																	END
-																WHEN RawData.intSourceType = 1 THEN -- Scale
-																	0 
+																--WHEN RawData.intSourceType = 1 THEN -- Scale
+																--	0 
 																WHEN RawData.intSourceType = 2 THEN -- Inbound Shipment
 																	ISNULL(LogisticsView.dblQuantity, 0)
 																WHEN RawData.intSourceType = 3 THEN -- Transport
