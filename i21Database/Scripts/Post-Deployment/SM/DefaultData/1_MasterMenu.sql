@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consolidated Checkout' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Store'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Inventory' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Report' AND strModuleName = 'Logistics'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3658,30 +3658,42 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Allocated
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Logistics.view.AllocatedReport?showSearch=true' WHERE strMenuName = 'Allocated' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Inventory' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Allocated Inventory', N'Logistics', @LogisticsReportParentMenuId, N'Allocated Inventory', N'Report', N'Screen', N'Logistics.view.AllocatedInventoryReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Logistics.view.AllocatedInventoryReport?showSearch=true' WHERE strMenuName = 'Allocated Inventory' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Delivered Not Invoiced' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Delivered Not Invoiced', N'Logistics', @LogisticsReportParentMenuId, N'Delivered Not Invoiced', N'Report', N'Screen', N'Logistics.view.DeliveredNotInvoicedReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Delivered Not Invoiced', N'Logistics', @LogisticsReportParentMenuId, N'Delivered Not Invoiced', N'Report', N'Screen', N'Logistics.view.DeliveredNotInvoicedReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Logistics.view.DeliveredNotInvoicedReport?showSearch=true' WHERE strMenuName = 'Delivered Not Invoiced' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Logistics.view.DeliveredNotInvoicedReport?showSearch=true' WHERE strMenuName = 'Delivered Not Invoiced' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory View' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Inventory View', N'Logistics', @LogisticsReportParentMenuId, N'Inventory View', N'Report', N'Screen', N'Logistics.view.InventoryViewReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Inventory View', N'Logistics', @LogisticsReportParentMenuId, N'Inventory View', N'Report', N'Screen', N'Logistics.view.InventoryViewReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Logistics.view.InventoryViewReport?showSearch=true' WHERE strMenuName = 'Inventory View' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Logistics.view.InventoryViewReport?showSearch=true' WHERE strMenuName = 'Inventory View' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Track Shipments/Documents' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Track Shipments/Documents', N'Logistics', @LogisticsReportParentMenuId, N'Track Shipments/Documents', N'Report', N'Screen', N'Logistics.view.ShipmentTracking?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 3, 1)
+	VALUES (N'Track Shipments/Documents', N'Logistics', @LogisticsReportParentMenuId, N'Track Shipments/Documents', N'Report', N'Screen', N'Logistics.view.ShipmentTracking?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Logistics.view.ShipmentTracking?showSearch=true' WHERE strMenuName = 'Track Shipments/Documents' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Logistics.view.ShipmentTracking?showSearch=true' WHERE strMenuName = 'Track Shipments/Documents' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Unallocated', N'Logistics', @LogisticsReportParentMenuId, N'Unallocated', N'Report', N'Screen', N'Logistics.view.UnallocatedReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Unallocated', N'Logistics', @LogisticsReportParentMenuId, N'Unallocated', N'Report', N'Screen', N'Logistics.view.UnallocatedReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Logistics.view.UnallocatedReport?showSearch=true' WHERE strMenuName = 'Unallocated' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
-	
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Logistics.view.UnallocatedReport?showSearch=true' WHERE strMenuName = 'Unallocated' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Inventory' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Unallocated Inventory', N'Logistics', @LogisticsReportParentMenuId, N'Unallocated Inventory', N'Report', N'Screen', N'Logistics.view.UnallocatedInventoryReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 6, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Logistics.view.UnallocatedInventoryReport?showSearch=true' WHERE strMenuName = 'Unallocated Inventory' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
