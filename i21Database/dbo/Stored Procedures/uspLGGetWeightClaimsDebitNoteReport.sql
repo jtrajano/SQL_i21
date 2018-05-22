@@ -128,8 +128,12 @@ SELECT DISTINCT WC.intWeightClaimId
 	,WCD.dblUnitPrice
 	,WCD.intCurrencyId
 	,CU.strCurrency
+	,LTRIM(CU.strCurrency) + ' ' + LTRIM(dbo.fnRemoveTrailingZeroes(WCD.dblUnitPrice)) AS strPriceInfo
+	,PRU.strUnitMeasure AS strPriceUOM
+	,'/'+ LTRIM(PRU.strUnitMeasure) AS strPriceUOMInfo
 	,WCD.dblClaimAmount
 	,CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END AS strClaimCurrency
+	,LTRIM(CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END) + ' ' + dbo.fnRemoveTrailingZeroes(ROUND(WCD.dblClaimAmount,2)) AS strTotalAmountInfo
 	,I.strItemNo
 	,I.strDescription AS strItemDescription
 	,B.strVendorOrderNumber AS strInvoiceNo
@@ -167,6 +171,8 @@ LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItemUOM PUM ON PUM.intItemUOMId = WCD.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure PRU ON PRU.intUnitMeasureId = PUM.intUnitMeasureId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
 LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intSourceId = LD.intLoadDetailId
@@ -221,3 +227,4 @@ GROUP BY WC.intWeightClaimId
 	,IRI.dblGross
 	,IRI.dblNet
 	,WC.dtmActualWeighingDate
+	,PRU.strUnitMeasure

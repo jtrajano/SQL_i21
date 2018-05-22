@@ -141,14 +141,14 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 1
 			THEN 'Debit Note Report Format - 1'
 		WHEN 2
-			THEN ''
+			THEN 'Debit Note Report Format - 2'
 		END strDebitNoteReportFormat
 	,CP.intCreditNoteReportFormat
 	,CASE CP.intCreditNoteReportFormat
 		WHEN 1
 			THEN 'Credit Note Report Format - 1'
 		WHEN 2
-			THEN ''
+			THEN 'Credit Note Report Format - 2'
 		END strCreditNoteReportFormat
 	,CP.intOrganicDeclarationReportFormat
 	,CASE CP.intOrganicDeclarationReportFormat
