@@ -15,9 +15,10 @@ SELECT
 	, intSourceId = NULL
 	, strSourceNumber = NULL
 	, SODetail.intItemId
-	, strItemNo
-	, strItemDescription
-	, strLotTracking
+	, Item.strItemNo
+	, strItemDescription = Item.strDescription
+	, Item.strLotTracking
+	, strBundleType = ISNULL(Item.strBundleType,'')
 	, SODetail.intCommodityId
 	, DefaultFromItemLocation.intSubLocationId
 	, SubLocation.strSubLocationName
@@ -79,6 +80,7 @@ SELECT
 FROM vyuSOSalesOrderDetail SODetail
 	INNER JOIN vyuSOSalesOrderSearch SO ON SODetail.intSalesOrderId = SO.intSalesOrderId
 	INNER JOIN tblSOSalesOrder OSO ON OSO.intSalesOrderId = SO.intSalesOrderId
+	LEFT JOIN tblICItem Item ON Item.intItemId = SODetail.intItemId
 	LEFT JOIN dbo.tblICItemLocation DefaultFromItemLocation ON DefaultFromItemLocation.intItemId = SODetail.intItemId
 		AND DefaultFromItemLocation.intLocationId = SODetail.intCompanyLocationId
 	LEFT JOIN dbo.tblSMCompanyLocationSubLocation SubLocation
