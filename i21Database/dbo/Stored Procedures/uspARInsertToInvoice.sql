@@ -1182,23 +1182,6 @@ IF ISNULL(@RaiseError,0) = 0
 			WHERE
 				SOSOD.[intSalesOrderId]	= @SalesOrderId
 
-			--UPDATE ACTUAL COST IF HAS BLENDED FG ITEM
-			UPDATE I
-			SET strActualCostId = CASE WHEN ISNULL(SO.intCount, 0) > 0 THEN SO.strWorkOrderNo ELSE NULL END
-			FROM tblARInvoice I
-			CROSS APPLY (
-				SELECT intCount = COUNT(*)
-					 , strSalesOrderNumber
-					 , strWorkOrderNo
-				FROM tblSOSalesOrderDetail SOD
-				INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
-				INNER JOIN tblMFWorkOrder WO ON SOD.intSalesOrderDetailId = WO.intSalesOrderLineItemId
-				WHERE SOD.intSalesOrderId = @SalesOrderId
-				  AND SOD.ysnBlended = 1
-				GROUP BY strSalesOrderNumber, strWorkOrderNo
-			) SO
-			WHERE I.intInvoiceId = @NewInvoiceId
-
 		END	
 
 		EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId	

@@ -123,7 +123,7 @@ SELECT
 	,[intLotId]					= ARID.[intLotId]
 	,[intSubLocationId]			= ARID.[intCompanyLocationSubLocationId]
 	,[intStorageLocationId]		= ARID.[intStorageLocationId]
-	,[strActualCostId]			= CASE WHEN (ISNULL(ARI.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARI.[intLoadDistributionHeaderId],0) <> 0) OR ISNULL(ARI.[intSalesOrderId], 0) <> 0 THEN ARI.[strActualCostId] ELSE NULL END
+	,[strActualCostId]			= CASE WHEN (ISNULL(ARI.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARI.[intLoadDistributionHeaderId],0) <> 0) THEN ARI.[strActualCostId] ELSE NULL END
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 FROM 
@@ -132,7 +132,7 @@ FROM
 	 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 INNER JOIN
 	(SELECT [intInvoiceId], [strInvoiceNumber], [strTransactionType], [intCurrencyId], [strImportFormat], [intCompanyLocationId], [intDistributionHeaderId], 
-		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intSalesOrderId]
+		[intLoadDistributionHeaderId], [strActualCostId], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId]
 	 FROM @Invoices) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId] AND ARI.[strTransactionType]  IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
 			AND ISNULL(intPeriodsToAccrue,0) <= 1

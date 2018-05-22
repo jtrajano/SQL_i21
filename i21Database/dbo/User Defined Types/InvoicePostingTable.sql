@@ -39,7 +39,6 @@
 	,[intStorageScheduleTypeId]		INT				NULL
 	,[intSubLocationId]				INT				NULL
 	,[intStorageLocationId]			INT				NULL
-	,[intSalesOrderId]				INT				NULL
 	,[dblQuantity]					NUMERIC(18, 6)	NULL
 	,[dblMaxQuantity]				NUMERIC(18, 6)	NULL	
 	,[strOptionType]				NVARCHAR(30)	COLLATE Latin1_General_CI_AS	NULL
