@@ -24,7 +24,7 @@ BEGIN
 	RETURN
 END
 
-INSERT INTO tblMFLotSnapshot
+INSERT INTO tblMFLotSnapshot(dtmDate)
 SELECT @dtmCurrentDate
 
 SET @intLotSnapshotId = SCOPE_IDENTITY()
