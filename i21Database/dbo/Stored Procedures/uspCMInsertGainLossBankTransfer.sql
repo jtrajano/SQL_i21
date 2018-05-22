@@ -5,7 +5,11 @@ BEGIN
 	
 	DECLARE @intAccountsPayableRealizedId INT
 	SELECT TOP 1 @intAccountsPayableRealizedId= intAccountsPayableRealizedId FROM tblSMMultiCurrency
-	IF @intAccountsPayableRealizedId is NULL RETURN
+	IF @intAccountsPayableRealizedId is NULL
+	BEGIN
+		RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
+		RETURN
+	END
 	DECLARE @gainLoss DECIMAL(18,6)
 	SELECT @gainLoss= sum(dblDebit - dblCredit) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	INSERT INTO #tmpGLDetail (
