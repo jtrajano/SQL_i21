@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReportPriceFixation]
-		
-	@xmlParam NVARCHAR(MAX) = NULL  
-	
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
 BEGIN TRY
@@ -64,13 +62,27 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
     
+	INSERT INTO @temp_xml_table
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(50), 
+				[to]			NVARCHAR(50),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)  
+    
 	SELECT	@intPriceFixationId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intPriceFixationId'
     
 	SELECT	@intLaguageId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intLaguageId'
+	WHERE	[fieldname] = 'intSrLanguageId'
 
 	SELECT  @intContractHeaderId= intContractHeaderId FROM tblCTPriceFixation WHERE intPriceFixationId=@intPriceFixationId
 	SELECT  @IntNoOFUniFormItemUOM=COUNT(DISTINCT intUnitMeasureId)  FROM tblCTContractDetail  WHERE intContractHeaderId= @intContractHeaderId
@@ -180,10 +192,10 @@ BEGIN TRY
 			strLastModifiedUserSign = @LastModifiedUserSign,
 			strTotalLots = dbo.fnRemoveTrailingZeroes(ISNULL(PF.dblTotalLots,0)),
 			strMarketMonth = isnull(rtrt6.strTranslation,MA.strFutMarketName) +  ' '  + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate),
-			--strMarketMonth = isnull(rtrt6.strTranslation,MA.strFutMarketName) +  ' '  + isnull(rtrt1.strTranslation,MO.strFutureMonth),
 			strCompanyCityAndDate = ISNULL(@strCity + ', ', '') + CONVERT(NVARCHAR(20),GETDATE(),106),
 			strCompanyName = @strCompanyName,
-			strCPContract  = CH.strCPContract
+			strCPContract  = CH.strCPContract,
+			intLanguageId = @intLaguageId
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
