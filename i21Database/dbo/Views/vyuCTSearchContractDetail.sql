@@ -90,6 +90,7 @@ AS
 			CD.dblNoOfLots - ISNULL(SY.intHedgedLots,0) AS dblBalLotsToHedge,
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * ISNULL(SY.intHedgedLots,0))	AS dblHedgeQty,
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * (CD.dblNoOfLots - ISNULL(SY.intHedgedLots,0)))	AS dblBalQtyToHedge,
+			CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
 			--Header
 	
 			CH.*
