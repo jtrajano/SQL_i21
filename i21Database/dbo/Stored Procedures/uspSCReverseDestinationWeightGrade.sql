@@ -30,7 +30,9 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@recCount INT
 		,@intInvoiceId INT
 		,@intBillId INT
-		,@ysnPosted BIT;
+		,@ysnPosted BIT
+		,@ysnRecap AS BIT 
+		;
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
@@ -77,9 +79,10 @@ BEGIN TRY
 		IF ISNULL(@intInvoiceId, 0) > 0
 			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 	END
-	--ELSE
-	--BEGIN
-	--END
+	ELSE
+	BEGIN
+		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
+	END
 
 END TRY
 BEGIN CATCH

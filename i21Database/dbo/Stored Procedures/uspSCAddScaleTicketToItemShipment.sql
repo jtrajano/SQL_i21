@@ -319,14 +319,9 @@ BEGIN
 											END 
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
-
 	,[intCostUOMId]						= CASE
-												WHEN IC.strCostMethod = 'Amount' THEN NULL
-												ELSE
-													CASE
-														WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
-														WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
-													END
+											WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
+											WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
 										END
 	,[intOtherChargeEntityVendorId]		= NULL
 	,[dblAmount]						= CASE

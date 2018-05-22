@@ -32,7 +32,11 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblContractUnits NUMERIC(38, 20)
 		,@intMatchContractDetailId INT
 		,@dblMatchContractUnits NUMERIC(38, 20)
-		,@intTicketItemUOMId INT;
+		,@intTicketItemUOMId INT
+		,@DestinationItems AS DestinationShipmentItem 
+		,@ShipmentCharges AS DestinationShipmentCharge 
+		,@strBatchId NVARCHAR(40)
+		,@InventoryShipmentId INT;
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
 	BEGIN
@@ -105,10 +109,80 @@ BEGIN TRY
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 			END
 		END
-		--ELSE
-		--BEGIN
-		--	--LOAD OUT destination weight
-		--END
+		ELSE
+		BEGIN
+			--LOAD OUT destination weight
+			INSERT INTO @DestinationItems (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[dblDestinationQty] 
+				,[intSourceId] 
+				,[intInventoryShipmentId] 
+				,[intInventoryShipmentItemId] 
+			)
+			SELECT	
+				[intItemId] = si.intItemId 
+				,[intItemLocationId] = il.intItemLocationId
+				,[dblDestinationQty] = sc.dblNetUnits
+				,[intSourceId] = 1
+				,[intInventoryShipmentId] = s.intInventoryShipmentId
+				,[intInventoryShipmentItemId] = si.intInventoryShipmentItemId 
+			FROM tblSCTicket sc 
+				INNER JOIN tblICInventoryShipmentItem si ON si.intSourceId = sc.intTicketId 
+				INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = si.intInventoryShipmentId
+				INNER JOIN tblICItemLocation il ON il.intItemId = si.intItemId AND il.intLocationId = s.intShipFromLocationId 
+			WHERE sc.intTicketId = @intTicketId AND s.intSourceType = 1
+
+			INSERT INTO @ShipmentCharges (
+				intInventoryShipmentId
+				,intContractId 
+				,intChargeId 
+				,strCostMethod 
+				,dblRate 
+				,intCostUOMId 
+				,intCurrency 
+				,dblAmount 
+				,ysnAccrue 
+				,intEntityVendorId 
+				,ysnPrice 
+				,intForexRateTypeId 
+				,dblForexRate 
+			)
+			SELECT 
+				intInventoryShipmentId = c.intInventoryShipmentId 
+				,intContractId = c.intContractId 
+				,intChargeId = c.intChargeId
+				,strCostMethod = c.strCostMethod 
+				,dblRate = c.dblRate 
+				,intCostUOMId = c.intCostUOMId 
+				,intCurrency = c.intCurrencyId
+				,dblAmount = c.dblAmount
+				,ysnAccrue = c.ysnAccrue
+				,intEntityVendorId = c.intEntityVendorId
+				,ysnPrice = c.ysnPrice
+				,intForexRateTypeId = c.intForexRateTypeId 
+				,dblForexRate = c.dblForexRate
+			FROM @DestinationItems s INNER JOIN tblICInventoryShipmentCharge c ON c.intInventoryShipmentId = s.intInventoryShipmentId
+
+			-- Call the uspICPostDestinationInventoryShipment sp to post the following:
+			-- 1. Destination qty 
+			-- 2. Other charges. 
+			-- 3. Inventory Adjustment. 
+			EXEC [uspICPostDestinationInventoryShipment]
+				1 
+				,0 
+				,@dtmScaleDate 
+				,@DestinationItems 
+				,@ShipmentCharges 
+				,@intUserId 
+				,@strBatchId 
+
+			SELECT TOP 1 @InventoryShipmentId = intInventoryShipmentId FROM @DestinationItems
+			IF ISNULL(@InventoryShipmentId, 0) != 0
+			BEGIN
+				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
+			END
+		END
 	END
 	ELSE
 	BEGIN

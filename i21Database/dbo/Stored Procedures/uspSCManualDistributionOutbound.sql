@@ -42,21 +42,22 @@ DECLARE @intStorageScheduleId AS INT
 		,@intInventoryShipmentItemId AS INT
 		,@intInvoiceId AS INT
 		,@intOwnershipType AS INT
-		,@intDestinationGradeId AS INT
-		,@intDestinationWeightId AS INT
 		,@intPricingTypeId AS INT
 		,@intShipmentOrderId AS INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@success AS INT
 		,@batchIdUsed AS INT
-		,@recapId AS INT;
+		,@recapId AS INT
+		,@strWhereFinalizedWeight NVARCHAR(20)
+		,@strWhereFinalizedGrade NVARCHAR(20);
 
-SELECT @intTicketItemUOMId = UOM.intItemUOMId
-	, @intLoadId = SC.intLoadId
-	, @intItemId = SC.intItemId
-FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+SELECT @intTicketItemUOMId = intItemUOMIdTo
+	, @intLoadId = intLoadId
+	, @intItemId = intItemId 
+	, @strWhereFinalizedWeight = strWeightFinalized
+	, @strWhereFinalizedWeight = strGradeFinalized
+FROM vyuSCTicketScreenView where @intTicketId = @intTicketId
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -374,7 +375,7 @@ BEGIN
 			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 			WHERE intInventoryShipmentId = @InventoryShipmentId
 
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
+			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
 			BEGIN
 				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 			END

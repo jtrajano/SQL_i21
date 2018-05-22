@@ -50,8 +50,7 @@ DECLARE @totalContract AS INT
 DECLARE @intInventoryShipmentItemId AS INT
 		,@intInvoiceId AS INT
 		,@intOwnershipType AS INT
-		,@intDestinationGradeId AS INT
-		,@intDestinationWeightId AS INT
+		,@intItemId INT
 		,@intPricingTypeId AS INT
 		,@intShipmentOrderId AS INT
 		,@successfulCount AS INT
@@ -59,21 +58,27 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@success AS INT
 		,@batchIdUsed AS NVARCHAR(100)
 		,@recapId AS INT
-		,@dblQtyShipped AS DECIMAL (18,6);
-BEGIN
-    SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
-	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
-	FROM dbo.tblSCTicket ST WHERE
-	ST.intTicketId = @intTicketId
-END
+		,@dblQtyShipped AS DECIMAL (18,6)
+		,@strWhereFinalizedWeight NVARCHAR(20)
+		,@strWhereFinalizedGrade NVARCHAR(20);
 
-DECLARE @ErrMsg                    NVARCHAR(MAX),
-              @dblBalance          NUMERIC(12,4),                    
-              @intItemId           INT,
-              @dblNewBalance       NUMERIC(12,4),
-              @strInOutFlag        NVARCHAR(4),
-              @dblQuantity         NUMERIC(12,4),
-              @strAdjustmentNo     NVARCHAR(50)
+SELECT @intLoadId = intLoadId
+	, @dblTicketFreightRate = dblFreightRate
+	, @intScaleStationId = intScaleSetupId
+	, @ysnDeductFreightFarmer = ysnFarmerPaysFreight
+	, @strWhereFinalizedWeight = strWeightFinalized
+	, @strWhereFinalizedWeight = strGradeFinalized
+	, @intTicketItemUOMId = intItemUOMIdTo
+	, @intItemId = intItemId
+FROM vyuSCTicketScreenView where @intTicketId = @intTicketId
+
+DECLARE @ErrMsg              NVARCHAR(MAX),
+        @dblBalance          NUMERIC(12,4),                    
+        
+        @dblNewBalance       NUMERIC(12,4),
+        @strInOutFlag        NVARCHAR(4),
+        @dblQuantity         NUMERIC(12,4),
+        @strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
 		IF @strDistributionOption = 'LOD'
@@ -107,13 +112,6 @@ BEGIN TRY
  		ELSE
  		BEGIN
  			SET @intOrderId = 4
- 		END
-
- 		BEGIN 
- 			SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
- 				FROM dbo.tblICItemUOM UM	
- 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
- 			WHERE SC.intTicketId = @intTicketId AND UM.ysnStockUnit = 1
  		END
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
@@ -467,7 +465,7 @@ BEGIN TRY
 			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 			WHERE intInventoryShipmentId = @InventoryShipmentId
 
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
+			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
 			BEGIN
 				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 			END
