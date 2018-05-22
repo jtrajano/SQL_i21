@@ -32,6 +32,8 @@ BEGIN TRY
 	DECLARE @ReportSection NVARCHAR(MAX)
 	DECLARE @TempComputedValue NUMERIC(18, 6)
 	DECLARE @QueryTransaction NVARCHAR(MAX)
+	DECLARE @GasoholGutRate NUMERIC(18,4) = NULL;
+	DECLARE @GasGutRate NUMERIC(18,4) = NULL;
 
 	IF @Refresh = 1
 	BEGIN
@@ -112,6 +114,10 @@ BEGIN TRY
 	WHERE strFormCode = @FormCodeParam 
 		AND strSegment = 'Summary'
 	ORDER BY intReportItemSequence ASC
+
+	-- GET GUT RATE
+	SELECT @GasGutRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0  ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM #tmpTransactionSummaryItem WHERE strTemplateItemId = 'GT-103-2DGasoline'
+	SELECT @GasoholGutRate = CASE WHEN ISNULL(strConfiguration, '') = '' THEN 0  ELSE CONVERT(NUMERIC(18,4), strConfiguration) END FROM #tmpTransactionSummaryItem WHERE strTemplateItemId = 'GT-103-2DGasohol'
 
 	--SELECT intTransactionSummaryItemId = intReportingComponentConfigurationId
 	--	, Config.strScheduleCode
@@ -346,6 +352,17 @@ BEGIN TRY
 					AND uniqTransactionGuid = @Guid 
 					AND strFormCode = @FormCodeParam
 			END
+
+			-- Include Rate in Gasoline and Gasohol Description
+			IF(@TemplateItemDescription = 'Gasoline')
+			BEGIN
+				SET @TemplateItemDescription = @TemplateItemDescription + ' GUT Rate(' + CONVERT(NVARCHAR(20), @GasGutRate) + ')'
+			END
+			ELSE IF (@TemplateItemDescription = 'Gasohol')
+			BEGIN
+				SET @TemplateItemDescription = @TemplateItemDescription + ' GUT Rate(' + CONVERT(NVARCHAR(20), @GasoholGutRate) + ')'
+			END
+
 			-- REFACTOR THIS
 			INSERT INTO tblTFTransactionSummary (strSummaryGuid,intTaxAuthorityId,strFormCode, strScheduleCode, intItemSequenceNumber, strSegment, strColumn,strProductCode,strColumnValue, strSection,strDescription, dtmDateRun)		
 			SELECT @Guid,@TA,@FormCodeParam,@TemplateScheduleCode, @CountTemplateItem, 'Details', 'Total Gallons Sold', '',@TotalGallonsSold, @TemplateSection, @TemplateItemDescription, CAST(GETDATE() AS DATE)
