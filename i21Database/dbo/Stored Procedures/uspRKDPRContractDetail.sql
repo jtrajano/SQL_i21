@@ -27,6 +27,8 @@ SELECT * FROM (
 		,strContractType+' Priced' AS strType	
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
+		,intFutureMarketId
+		,intFutureMonthId		
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId 
@@ -59,6 +61,8 @@ SELECT * FROM (
 		,strContractType+' Basis' AS strType
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
+		,intFutureMarketId
+		,intFutureMonthId
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId
@@ -90,6 +94,8 @@ SELECT * FROM (
 		,strContractType+' Priced' AS strType
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
+		,intFutureMarketId
+		,intFutureMonthId
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId
@@ -121,6 +127,8 @@ SELECT * FROM (
 		,strContractType+' Basis' AS strType
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
+		,intFutureMarketId
+		,intFutureMonthId
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId
@@ -152,6 +160,8 @@ SELECT * FROM (
 		,case when intPricingTypeId=1 then strContractType+' Priced'  else  strContractType+' Basis' end AS strType
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
+		,intFutureMarketId
+		,intFutureMonthId
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId
@@ -183,6 +193,8 @@ SELECT * FROM (
 		,strContractType + ' ' + strPricingType AS strType
 		,i.intItemId intItemId
 		,strItemNo,getdate() dtmContractDate,e.strName strEntityName,'' strCustomerContract
+		,intFutureMarketId
+		,intFutureMonthId
 	FROM    tblCTSequenceHistory h
 	JOIN tblICItem i on h.intItemId=i.intItemId
 	JOIN tblEMEntity e on e.intEntityId=h.intEntityId

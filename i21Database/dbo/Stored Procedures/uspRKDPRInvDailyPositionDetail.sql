@@ -146,7 +146,9 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		strItemNo  nvarchar(100),
 		dtmContractDate datetime,
 		strEntityName  nvarchar(100),
-		strCustomerContract  nvarchar(100))
+		strCustomerContract  nvarchar(100)
+				,intFutureMarketId int
+		,intFutureMonthId int)
 
 DECLARE @tblGetStorageDetailByDate TABLE (
 		intRowNum int, 
@@ -226,7 +228,8 @@ DECLARE @tblGetSalesIntransitWOPickLot TABLE (
 )
 
 INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
-	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract)
+	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract
+	   	   ,intFutureMarketId,intFutureMonthId)
 EXEC uspRKDPRContractDetail @intCommodityId, @dtmToDate
 
 INSERT INTO @tblGetStorageDetailByDate

@@ -40,7 +40,9 @@ DECLARE @tblGetOpenContractDetail TABLE (
 		strItemNo  nvarchar(100),
 		dtmContractDate datetime,
 		strEntityName  nvarchar(100),
-		strCustomerContract  nvarchar(100))
+		strCustomerContract  nvarchar(100)
+				,intFutureMarketId int
+		,intFutureMonthId int)
 
 DECLARE @tblGetOpenFutureByDate TABLE (
 		intFutOptTransactionId int, 
@@ -85,7 +87,8 @@ BEGIN
 
 SELECT @intNewCommodityId=intCommodity FROM @Commodity where intCommodityIdentity=@mRowNumber
 INSERT INTO @tblGetOpenContractDetail (intRowNum,strCommodityCode,intCommodityId,intContractHeaderId,strContractNumber,strLocationName,dtmEndDate,dblBalance,intUnitMeasureId,intPricingTypeId,intContractTypeId,
-	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract)
+	   intCompanyLocationId,strContractType,strPricingType,intCommodityUnitMeasureId,intContractDetailId,intContractStatusId,intEntityId,intCurrencyId,strType,intItemId,strItemNo ,dtmContractDate,strEntityName,strCustomerContract
+	   	   ,intFutureMarketId,intFutureMonthId)
 EXEC uspRKDPRContractDetail @intNewCommodityId, @dtmToDate
 
 INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId,intOpenContract)

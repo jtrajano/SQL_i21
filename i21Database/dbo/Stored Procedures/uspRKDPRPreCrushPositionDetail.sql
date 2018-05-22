@@ -176,6 +176,8 @@ BEGIN
 				,dtmContractDate DATETIME
 				,strEntityName NVARCHAR(100)
 				,strCustomerContract NVARCHAR(100)
+				,intFutureMarketId int
+				,intFutureMonthId int
 				)
 
 			INSERT INTO @tblGetOpenContractDetail (
@@ -204,6 +206,8 @@ BEGIN
 				,dtmContractDate
 				,strEntityName
 				,strCustomerContract
+				,intFutureMarketId
+				,intFutureMonthId
 				)
 			EXEC uspRKDPRContractDetail @intCommodityId	,@dtmToDate
 
@@ -233,23 +237,30 @@ BEGIN
 				)
 			SELECT strCommodityCode
 				,CD.intCommodityId
-				,intContractHeaderId
+				,CD.intContractHeaderId
 				,strContractNumber
 				,CD.strType [strType]
 				,strLocationName
-				,RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8) strContractEndMonth
-				,RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8)
+				,case when @strPositionBy ='Delivery Month' then RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
+						else RIGHT(CONVERT(VARCHAR(11), dtmFutureMonthsDate, 106), 8) end strContractEndMonth
+				,case when @strPositionBy ='Delivery Month' then RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) 
+						else RIGHT(CONVERT(VARCHAR(11), dtmFutureMonthsDate, 106), 8) end strContractEndMonthNearBy
 				,CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, isnull((CD.dblBalance), 0)) END AS dblTotal
 				,CD.intUnitMeasureId
 				,CD.strEntityName
 			FROM @tblGetOpenContractDetail CD
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3 AND intCompanyLocationId IN (
+			JOIN tblCTContractDetail det on CD.intContractDetailId=det.intContractDetailId
+			JOIN tblRKFuturesMonth fm on CD.intFutureMonthId=fm.intFutureMonthId and CD.intFutureMarketId=fm.intFutureMarketId
+			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3 
+			AND CD.intCompanyLocationId IN (
 					SELECT intCompanyLocationId
 					FROM tblSMCompanyLocation
 					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 					)
-			WHERE intContractTypeId IN (1, 2) AND CD.intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intLocationId END AND CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
-
+			WHERE intContractTypeId IN (1, 2) AND CD.intCommodityId = @intCommodityId AND CD.intCompanyLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN CD.intCompanyLocationId ELSE @intLocationId END AND CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
+			and det.intBookId = case when isnull(@intBookId,0) =0 then det.intBookId else @intBookId end
+			and det.intSubBookId = case when isnull(@intSubBookId,0) =0 then det.intSubBookId else @intSubBookId end
+			
 
 			DECLARE @intUnitMeasureId INT
 			DECLARE @strUnitMeasure NVARCHAR(50)
@@ -338,9 +349,12 @@ SELECT strCommodityCode,dblTotal ,strLocationName ,intCommodityId,intFromCommodi
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
+		LEFT JOIn tblCTContractDetail det on ch.intContractDetailId=det.intContractDetailId
 		WHERE c.intCommodityId = @intCommodityId 
 		AND c.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then c.intLocationId else @intLocationId end
 		and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+		and det.intBookId = case when isnull(@intBookId,0) =0 then det.intBookId else @intBookId end
+		and det.intSubBookId = case when isnull(@intSubBookId,0) =0 then det.intSubBookId else @intSubBookId end
 		) a where   a.intRowNum =1 )t group by strCommodityCode ,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType
 -- OFfSite
 INSERT INTO @InventoryStock(strCommodityCode ,dblTotal ,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType)
@@ -362,7 +376,7 @@ SELECT strCommodityCode,dblTotal ,strLocationName ,intCommodityId,intFromCommodi
 INSERT INTO @InventoryStock(strCommodityCode ,dblTotal ,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType)
 select strCommodityCode ,sum(dblTotal)  dblTotal,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType from(
 select  strCommodityCode,dblTotal ,strLocationName ,intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId ,'Sls Basis Deliveries' strInventoryType from (
-	SELECT strCommodityCode,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,cl.strLocationName
+	SELECT strCommodityCode,dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,cd.intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))  AS dblTotal,cl.strLocationName
 	,cd.intCommodityId,cd.intCompanyLocationId
 	FROM vyuICGetInventoryValuation v 
 	JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
@@ -370,9 +384,12 @@ select  strCommodityCode,dblTotal ,strLocationName ,intCommodityId,@intCommodity
 	INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 	INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
+	LEFT  JOIN tblCTContractDetail det on cd.intContractDetailId=det.intContractDetailId
 	WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
 	AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
 	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+				and det.intBookId = case when isnull(@intBookId,0) =0 then det.intBookId else @intBookId end
+			and det.intSubBookId = case when isnull(@intSubBookId,0) =0 then det.intSubBookId else @intSubBookId end	
 	)t
 		WHERE intCompanyLocationId IN (
 		SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -587,6 +604,8 @@ INSERT INTO @List (
 				INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
 				WHERE ic.intCommodityId IN (select distinct intCommodity from @Commodity c) 
 				AND f.intLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN f.intLocationId ELSE @intLocationId END
+				and f.intBookId = case when isnull(@intBookId,0) =0 then f.intBookId else @intBookId end
+				and f.intSubBookId = case when isnull(@intSubBookId,0) =0 then f.intSubBookId else @intSubBookId end
 				) t
 
 INSERT INTO @List (
@@ -655,6 +674,8 @@ INSERT INTO @List (
 				INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
 				WHERE ic.intCommodityId IN (select distinct intCommodity from @Commodity c) 
 				AND f.intLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN f.intLocationId ELSE @intLocationId END
+				and f.intBookId = case when isnull(@intBookId,0) =0 then f.intBookId else @intBookId end
+				and f.intSubBookId = case when isnull(@intSubBookId,0) =0 then f.intSubBookId else @intSubBookId end
 				) t
 
 INSERT INTO @List (
@@ -675,7 +696,7 @@ INSERT INTO @List (
 				,dblNoOfLot
 				,intOrderId
 				)
-select 	strCommodityCode
+SELECT strCommodityCode
 				,intCommodityId
 				,strInternalTradeNo
 				,intFutOptTransactionHeaderId
@@ -788,4 +809,5 @@ SELECT intSeqNo
 		,intBrokerageAccountId
 		,strInstrumentType
 		,strEntityName
-	FROM @List WHERE isnull(dblTotal,0) <> 0 order by intOrderId asc
+	FROM @List 
+	WHERE ISNULL(dblTotal,0) <> 0 ORDER BY intOrderId ASC
