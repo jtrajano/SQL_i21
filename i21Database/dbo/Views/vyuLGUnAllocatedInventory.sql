@@ -72,7 +72,7 @@ LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 LEFT JOIN tblRKFuturesMonth FM ON FM.intFutureMonthId = CD.intFutureMonthId
 LEFT JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND L.intShipmentType = 1
 LEFT JOIN tblLGReservation RES ON RES.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICUnitMeasure RUM ON RUM.intUnitMeasureId = RES.intUnitMeasureId
 LEFT JOIN tblEMEntity TER ON TER.intEntityId = L.intTerminalEntityId
@@ -92,7 +92,6 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 LEFT JOIN tblICCommodityAttribute PT ON PT.intCommodityAttributeId = IM.intProductTypeId
 	AND PT.strType = 'ProductType'
 LEFT JOIN tblCTCropYear CY ON CY.intCropYearId = CH.intCropYearId
-WHERE L.intShipmentType = 1
 GROUP BY CH.strContractNumber
 	,CD.intContractSeq
 	,CO.strCountry
