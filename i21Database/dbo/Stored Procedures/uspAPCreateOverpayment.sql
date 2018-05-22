@@ -68,6 +68,7 @@ BEGIN
 		[strShipFromCountry]	,
 		[strShipFromPhone]		,
 		[intShipFromId]			,
+		[intShipFromEntityId]	,
 		[intPayToAddressId]		,
 		[intShipToId]			,
 		[intShipViaId]			,
