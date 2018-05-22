@@ -231,7 +231,7 @@ AS
 					,[intCurrencyId]		=   ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 					,[intItemUnitMeasureId]	=   CD.intItemUOMId
 					,[dblQuantity]			=   CC.dblQuantity
-					,[dblGrossWeight]		=   CC.dblQuantity
+					,[dblGrossWeight]		=   dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,CC.dblQuantity)
 					,[dblTareWeight]		=   0
 					,[dblCost]				=   CASE	WHEN	CD.intPricingTypeId = 2 
 														THEN	(
