@@ -54,6 +54,7 @@ RETURNS @returntable TABLE
 	[strShipFromCountry]	NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipFromPhone]		NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
     [intShipFromId]			INT NULL , 
+	[intShipFromEntityId]	INT NOT NULL,
 	[intPayToAddressId]		INT NULL , 
 	[intShipToId]			INT NULL , 
 	[intShipViaId]			INT NULL , 
@@ -180,7 +181,8 @@ BEGIN
 		[intContactId]			,
 		[intOrderById]			,
 		[intCurrencyId]			,
-		[intSubCurrencyCents]	
+		[intSubCurrencyCents]	,
+		[intShipFromEntityId]
 	)
 	SELECT 
 		@term, 
@@ -210,7 +212,8 @@ BEGIN
 		@shipVia,
 		@contact,
 		@userId,
-		@currency,
-		ISNULL(@subCurrencyCents,1)
+		@currency,		
+		ISNULL(@subCurrencyCents,1),
+		@vendorId
 	RETURN;
 END
