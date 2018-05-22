@@ -5,13 +5,14 @@
 	,@intElectronicFilingSUIId INT = NULL OUTPUT
 AS
 
-/* Check if Electronic Filing SUI for the Year and Quarter exists */
+/* Check if Electronic Filing SUI for the Year exists */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblPRElectronicFilingSUI WHERE intYear = @intYear AND intQuarter = @intQuarter)
 BEGIN
 	INSERT INTO tblPRElectronicFilingSUI 
 		(intYear
 		,intQuarter
 		,strState
+		,strFormat
 		,strFileName
 		,strSubmitterEIN
 		,strSubmitterName
@@ -41,6 +42,7 @@ BEGIN
 		,strCompanyZipCode
 		,strCompanyZipCodeExt
 		,strReasonForAdjustment
+		,strEmployerEIN
 		,strEmployerName
 		,strEmployerAddress
 		,strEmployerCity
@@ -68,21 +70,22 @@ BEGIN
 		intYear = @intYear
 		,intQuarter = @intQuarter
 		,strState = LEFT(ISNULL(COM.strState, ''), 2)
+		,strFormat = LEFT(ISNULL(PREV.strFormat, ''), 50)
 		,strFileName = ''
-		,strSubmitterEIN = REPLACE(COM.strEin, '-', '')
-		,strSubmitterName = LEFT(SUB.strName, 50)
-		,strSubmitterAddress = LEFT(SUB.strAddress, 40)
-		,strSubmitterCity = LEFT(SUB.strCity, 25)
-		,strSubmitterState = LEFT(SUB.strState, 2)
-		,strSubmitterZipCode = LEFT(REPLACE(SUB.strZipCode, '-', ''), 5)
+		,strSubmitterEIN = LEFT(ISNULL(REPLACE(COM.strEin, '-', ''), ''), 9)
+		,strSubmitterName = LEFT(ISNULL(SUB.strName, ''), 50)
+		,strSubmitterAddress = LEFT(ISNULL(SUB.strAddress, ''), 40)
+		,strSubmitterCity = LEFT(ISNULL(SUB.strCity, ''), 25)
+		,strSubmitterState = LEFT(ISNULL(SUB.strState, ''), 2)
+		,strSubmitterZipCode = LEFT(ISNULL(REPLACE(SUB.strZipCode, '-', ''), ''), 5)
 		,strSubmitterZipCodeExt = LEFT(CASE WHEN (LEN(REPLACE(SUB.strZipCode, '-', '')) > 5)
 									THEN SUBSTRING(SUB.strZipCode, 5, 4)
 									ELSE '' END, 5)
-		,strSubmitterContact = LEFT(SUB.strName, 30)
-		,strSubmitterContactPhone = LEFT(dbo.fnAPRemoveSpecialChars(SUB.strPhone), 9)
-		,strSubmitterContactPhoneExt = LEFT(CASE WHEN (CHARINDEX ('x', SUB.strPhone) > 0)
+		,strSubmitterContact = LEFT(ISNULL(SUB.strName, ''), 30)
+		,strSubmitterContactPhone = LEFT(ISNULL(dbo.fnAPRemoveSpecialChars(SUB.strPhone), ''), 9)
+		,strSubmitterContactPhoneExt = LEFT(ISNULL(CASE WHEN (CHARINDEX ('x', SUB.strPhone) > 0)
 											   THEN SUBSTRING(SUB.strPhone, CHARINDEX('x', SUB.strPhone) + 1, LEN(SUB.strPhone))
-											   ELSE '' END, 5) 
+											   ELSE '' END, ''), 5)
 		,strAuthorizationNumber = LEFT(ISNULL(PREV.strAuthorizationNumber, ''), 6)
 		,strC3Data = LEFT(ISNULL(PREV.strC3Data, ''), 1)
 		,strSuffixCode = LEFT(ISNULL(PREV.strSuffixCode, ''), 5)
@@ -103,6 +106,7 @@ BEGIN
 									THEN SUBSTRING(COM.strZip, 5, 4)
 									ELSE '' END, 5)
 		,strReasonForAdjustment = ''
+		,strEmployerEIN = LEFT(ISNULL(REPLACE(COM.strEin, '-', ''), ''), 9)
 		,strEmployerName = LEFT(ISNULL(COM.strCompanyName, ''), 50)
 		,strEmployerAddress = LEFT(ISNULL(COM.strAddress, ''), 35)
 		,strEmployerCity = LEFT(ISNULL(COM.strCity, ''), 20)

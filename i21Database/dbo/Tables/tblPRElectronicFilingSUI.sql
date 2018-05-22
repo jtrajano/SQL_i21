@@ -34,6 +34,7 @@
 	[strCompanyZipCode] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyZipCodeExt] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL,
 	[strReasonForAdjustment] NVARCHAR(245) COLLATE Latin1_General_CI_AS NULL,
+	[strEmployerEIN] NVARCHAR(9) COLLATE Latin1_General_CI_AS NULL,
 	[strEmployerName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strEmployerAddress] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	[strEmployerCity] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
