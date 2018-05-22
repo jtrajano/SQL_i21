@@ -68,14 +68,14 @@ BEGIN
 
 	IF	ISNULL(@ysnUseFXPrice,0) = 1 AND @intExchangeRateId IS NOT NULL AND @dblRate IS NOT NULL AND @intFXPriceUOMId IS NOT NULL
 	BEGIN
-		IF EXISTS(SELECT * FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId)
+		IF EXISTS(SELECT * FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intToCurrencyId = @intMainCurrencyId)
 		BEGIN
-			SELECT @intSeqCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId
+			SELECT @intSeqCurrencyId = intFromCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intToCurrencyId = @intMainCurrencyId
 			SELECT @dblRate = 1 / CASE WHEN ISNULL(@dblRate,0) = 0 THEN 1 ELSE @dblRate END
 		END
 		ELSE
 		BEGIN
-			SELECT @intSeqCurrencyId = intFromCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intToCurrencyId = @intMainCurrencyId
+			SELECT @intSeqCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate WHERE intCurrencyExchangeRateId = @intExchangeRateId AND intFromCurrencyId = @intMainCurrencyId
 		END
 
 		SELECT @strSeqCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intSeqCurrencyId
