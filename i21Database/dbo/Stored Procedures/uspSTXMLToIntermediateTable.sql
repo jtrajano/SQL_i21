@@ -281,6 +281,42 @@ BEGIN
 SET @intLevelMin = @intLevelMin + 1
 END
 
+--SET @SQL =
+--N'
+--If(OBJECT_ID(''tempdb..#tempCheckoutInsert'') Is Not Null)
+--Begin
+--    Drop Table #tempCheckoutInsert
+--End
+--Declare @strXML nvarchar(max) 
+--SET @strXML = ''' + @strXML + '''
+--SET @strXML = REPLACE(@strXML, ''' + @strXMLinitiator + ''', '''')
+
+----Replace single quote to double quote
+--SET @strXML = REPLACE(@strXML, '''''''','''')
+
+--Declare @xml XML = @strXML
+--' + @strRootTagNamespace + '
+
+--SELECT ' + CHAR(13)
+--+ ' IDENTITY(int, 1, 1) AS intRowCount,' + CHAR(13)
+--+ @SELECTCOLUMNS
+--+ ' INTO #tempCheckoutInsert ' + CHAR(13)
+--+ ' FROM ' + CHAR(13)
+--+ @FROMNODES + CHAR(13)
+--+ ' ORDER BY intRowCount ASC'
+--+ ' SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
+--+ ' EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20)) + ', ' + '@strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
+--+ ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
+
+
+--DECLARE @ParmDef nvarchar(max);
+
+--SET @ParmDef = N'@strStatusMsg NVARCHAR(250) OUTPUT'
+--             + ', @intCountRows INT OUTPUT';
+
+--EXEC sp_executesql @SQL, @ParmDef, @strStatusMsg OUTPUT, @intCountRows OUTPUT
+
+
 SET @SQL =
 N'
 If(OBJECT_ID(''tempdb..#tempCheckoutInsert'') Is Not Null)
@@ -288,13 +324,13 @@ Begin
     Drop Table #tempCheckoutInsert
 End
 Declare @strXML nvarchar(max) 
-SET @strXML = ''' + @strXML + '''
-SET @strXML = REPLACE(@strXML, ''' + @strXMLinitiator + ''', '''')
+SET @strXML = @strXMLParam
+SET @strXML = REPLACE(@strXML, @strXMLinitiatorParam, '''')
 
 --Replace single quote to double quote
 SET @strXML = REPLACE(@strXML, '''''''','''')
 
-Declare @xml XML = @strXML
+Declare @xml XML = @strXML 
 ' + @strRootTagNamespace + '
 
 SELECT ' + CHAR(13)
@@ -305,16 +341,21 @@ SELECT ' + CHAR(13)
 + @FROMNODES + CHAR(13)
 + ' ORDER BY intRowCount ASC'
 + ' SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
-+ ' EXEC ' + @strSPName + ' ' + CAST(@intCheckoutId as nvarchar(20)) + ', ' + '@strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
++ ' EXEC @strSPNameParam @intCheckoutIdParam, @strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
 + ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
-
 
 DECLARE @ParmDef nvarchar(max);
 
-SET @ParmDef = N'@strStatusMsg NVARCHAR(250) OUTPUT'
+SET @ParmDef = N'@strXMLParam NVARCHAR(MAX)'
+             + ', @strXMLinitiatorParam NVARCHAR(MAX)'
+			 + ', @strRootTagNamespaceParam NVARCHAR(MAX)'
+			 + ', @strSPNameParam NVARCHAR(250)'
+			 + ', @intCheckoutIdParam INT'
+             + ', @strStatusMsg NVARCHAR(250) OUTPUT'
              + ', @intCountRows INT OUTPUT';
 
-EXEC sp_executesql @SQL, @ParmDef, @strStatusMsg OUTPUT, @intCountRows OUTPUT
+EXEC sp_executesql @SQL, @ParmDef, @strXML, @strXMLinitiator, @strRootTagNamespace, @strSPName, @intCheckoutId, @strStatusMsg OUTPUT, @intCountRows OUTPUT
+
 
 End Try
 
