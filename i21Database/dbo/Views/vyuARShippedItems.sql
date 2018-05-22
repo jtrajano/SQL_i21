@@ -805,7 +805,7 @@ FROM (
 	     , intItemId						= intItemId
 	     , strItemDescription				= strItemDescription
 	     , intItemUOMId						= intItemUOMId
-		 , intPriceUOMId					= NULL
+		 , intPriceUOMId					= intWeightUOMId
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
 		 , intWeightUOMId					= intWeightUOMId
