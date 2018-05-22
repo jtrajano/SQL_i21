@@ -1,7 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTProvisionalCommission]
-	
   @xmlParam NVARCHAR(MAX) = NULL  
-	
 AS
 
 BEGIN TRY
@@ -55,13 +53,27 @@ BEGIN TRY
 			[datatype]		NVARCHAR(50)  
 	)  
     
+	INSERT INTO @temp_xml_table
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(50), 
+				[to]			NVARCHAR(50),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)  
+    
 	SELECT	@intBrkgCommnId =	  [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname]	   =	  'intBrkgCommnId' 
     
 	SELECT	@intLaguageId =	  [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname]	   =	  'intLaguageId' 
+	WHERE	[fieldname]	   =	  'intSrLanguageId' 
 
 	SELECT	@blbFile		=	  B.blbFile 
 	FROM	tblSMAttachment	A 
