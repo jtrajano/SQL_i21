@@ -314,6 +314,7 @@ BEGIN TRY
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
 	JOIN tblLGLoadDetail LD ON LD.intSContractDetailId = CD.intContractDetailId
+	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND L.intShipmentType = 2
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	LEFT OUTER JOIN (
 		SELECT intLoadDetailId

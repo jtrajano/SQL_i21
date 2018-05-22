@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspLGGetWeightClaimsDebitNoteReport 
+﻿CREATE PROCEDURE uspLGGetWeightClaimsCreditNoteReport 
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 DECLARE @intWeightClaimId INT
@@ -91,17 +91,13 @@ SELECT DISTINCT WC.intWeightClaimId
 	,EL.strCity
 	,EL.strState
 	,EL.strCountry
-	,E.strName + CHAR(13) + EL.strAddress + CHAR(13) + EL.strZipCode + ' ' + EL.strCity + CHAR(13) + EL.strState + ' ' + EL.strCountry AS strVendorAddress
-	,B.strBillId
+	,E.strName + CHAR(13) + EL.strAddress + CHAR(13) + EL.strZipCode + ' ' + EL.strCity + CHAR(13) + EL.strState + ' ' + EL.strCountry AS strCustomerAddress
+	,INV.intInvoiceId
+	,INV.strInvoiceNumber
 	,'via ' + ShippingLine.strName AS strShippingLine
 	,L.strMVessel
 	,CH.strContractNumber
 	,CH.strCustomerContract
-	,BA.strBankAccountNo
-	,BA.strIBAN
-	,BA.strSWIFT
-	,BA.strBankName
-	,B.strRemarks
 	,ROUND(SUM(WCD.dblClaimAmount), 2) dblTotalClaimAmount
 	,CASE 
 		WHEN WCD.intBillId IS NOT NULL
@@ -109,7 +105,7 @@ SELECT DISTINCT WC.intWeightClaimId
 		WHEN WCD.intInvoiceId IS NOT NULL
 			THEN 'Invoice'
 		END strMemoType
-	,'Please transfer this amount in our favor with: ' + CHAR(13) + BA.strBankName + CHAR(13) + 'IBAN : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + 'Swift : ' + ISNULL(BA.strSWIFT, '') AS	strVoucherBankInfo
+	--,'Please transfer this amount in our favor with: ' + CHAR(13) + BA.strBankName + CHAR(13) + 'IBAN : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + 'Swift : ' + ISNULL(BA.strSWIFT, '') AS	strVoucherBankInfo
 	,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 	,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
 	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
@@ -137,11 +133,13 @@ SELECT DISTINCT WC.intWeightClaimId
 	,LTRIM(CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END) + ' ' + dbo.fnRemoveTrailingZeroes(ROUND(WCD.dblClaimAmount,2)) AS strTotalAmountInfo
 	,I.strItemNo
 	,I.strDescription AS strItemDescription
-	,B.strVendorOrderNumber AS strInvoiceNo
-	,IRI.dblGross AS dblReceivedGross
-	,IRI.dblNet AS dblReceivedNet
-	,(ISNULL(IRI.dblGross,0) - ISNULL(IRI.dblNet,0)) AS dblReceivedTare
+	--,B.strVendorOrderNumber AS strInvoiceNo
+	--,IRI.dblGross AS dblReceivedGross
+	--,IRI.dblNet AS dblReceivedNet
+	--,(ISNULL(IRI.dblGross,0) - ISNULL(IRI.dblNet,0)) AS dblReceivedTare
 	,WC.dtmActualWeighingDate
+	,INV.strComments
+	,CUS.strVatNumber
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
@@ -165,19 +163,17 @@ JOIN (
 		,LOD.intLoadDetailId
 	FROM tblLGLoadDetail LOD
 	WHERE LOD.intLoadId = @intLoadId
-	) LD ON ISNULL(LD.intVendorEntityId, LD.intCustomerEntityId) = E.intEntityId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(LD.intVendorEntityLocationId, E.intDefaultLocationId)
-LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
-LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
+	) LD ON LD.intCustomerEntityId = E.intEntityId
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(LD.intCustomerEntityLocationId, E.intDefaultLocationId)
+LEFT JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblARCustomer CUS ON CUS.intEntityId = E.intEntityId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItemUOM PUM ON PUM.intItemUOMId = WCD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PRU ON PRU.intUnitMeasureId = PUM.intUnitMeasureId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
-LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intSourceId = LD.intLoadDetailId
-LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 CROSS APPLY tblLGCompanyPreference CP
 WHERE WC.intWeightClaimId = @intWeightClaimId
 GROUP BY WC.intWeightClaimId
@@ -194,14 +190,8 @@ GROUP BY WC.intWeightClaimId
 	,EL.strCity
 	,EL.strState
 	,EL.strCountry
-	,B.strBillId
 	,ShippingLine.strName
 	,L.strMVessel
-	,BA.strBankAccountNo
-	,BA.strSWIFT
-	,BA.strIBAN
-	,BA.strBankName
-	,B.strRemarks
 	,WCD.intBillId
 	,WCD.intInvoiceId
 	,CP.ysnFullHeaderLogo
@@ -224,8 +214,9 @@ GROUP BY WC.intWeightClaimId
 	,MCU.strCurrency
 	,I.strItemNo
 	,I.strDescription
-	,B.strVendorOrderNumber	
-	,IRI.dblGross
-	,IRI.dblNet
 	,WC.dtmActualWeighingDate
 	,PRU.strUnitMeasure
+	,INV.intInvoiceId
+	,INV.strInvoiceNumber
+	,INV.strComments
+	,CUS.strVatNumber
