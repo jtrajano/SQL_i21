@@ -95,8 +95,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
 	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
-	,[ysnImportedFromOrigin]				BIT												NOT NULL
-	,[ysnImportedAsPosted]					BIT												NOT NULL
+	,[ysnImportedFromOrigin]				BIT												NULL
+	,[ysnImportedAsPosted]					BIT												NULL
 
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
