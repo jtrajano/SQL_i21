@@ -19,7 +19,7 @@ AS
 			ISNULL(IM.ysnUseWeighScales,0)		ysnUseWeighScales,																								
 			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)	AS	dblAvailableQty,											
 			CASE	WHEN	CH.ysnLoad = 1 
-					THEN	dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,CD.dblQuantityPerLoad) * ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)		
+					THEN	dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,CD.dblQuantityPerLoad * (ISNULL(CD.dblBalanceLoad,0) - ISNULL(CD.dblScheduleLoad,0)))		
 					ELSE	dbo.fnCTConvertQtyToTargetItemUOM(	CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))			
 			END		AS		dblAvailableQtyInItemStockUOM,			
 			CD.dblQuantityPerLoad,

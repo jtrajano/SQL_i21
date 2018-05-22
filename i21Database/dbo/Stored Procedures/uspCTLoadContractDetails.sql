@@ -8,14 +8,13 @@ BEGIN TRY
 	DECLARE @ErrMsg	NVARCHAR(MAX)
 
 	SELECT	*,
-			dblBalance * dblQuantityPerLoad			AS	dblBalanceLoadQty,
-			dblAvailableQty * dblQuantityPerLoad	AS	dblAvailableLoadQty,
 			dblAppliedQty * dblQuantityPerLoad		AS	dblAppliedLoadQty
 	FROM
 	(
 		SELECT	CD.*,
 
 				CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
+				CD.dblBalanceLoad - ISNULL(CD.dblScheduleLoad, 0) dblAvailableLoad,
 				CD.intContractStatusId intCurrentContractStatusId,
 				MZ.strMarketZoneCode,
 				IM.strItemNo,
@@ -65,7 +64,7 @@ BEGIN TRY
 				END		AS		dblConversionFactor,
 				ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM,
 				CASE	WHEN	CH.ysnLoad = 1
-							THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+							THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 							ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 				END		AS	dblAppliedQty,
 				dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,

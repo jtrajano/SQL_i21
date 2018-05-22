@@ -18,15 +18,19 @@ BEGIN TRY
 			@ysnUnlimitedQuantity	BIT,
 			@ysnCompleted			BIT	= 0,
 			@intPricingTypeId		INT,
-			@dblTolerance			NUMERIC(18,6) = 0.0001
+			@dblTolerance			NUMERIC(18,6) = 0.0001,
+			@ysnLoad				BIT
 	
 	BEGINING:
 
-	SELECT	@dblQuantity			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblDetailQuantity,0) ELSE ISNULL(intNoOfLoad,0) END,
-			@dblOldBalance			=	ISNULL(dblBalance,0),
-			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0),
-			@intPricingTypeId		=	intPricingTypeId
-	FROM	vyuCTContractDetailView 
+	SELECT	@dblQuantity			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblQuantity,0) ELSE ISNULL(CD.intNoOfLoad,0) END,
+			@dblOldBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
+			@ysnUnlimitedQuantity	=	ISNULL(CH.ysnUnlimitedQuantity,0),
+			@intPricingTypeId		=	CD.intPricingTypeId,
+			@ysnLoad				=	CH.ysnLoad
+
+	FROM	tblCTContractDetail		CD
+	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
 	WHERE	intContractDetailId		=	@intContractDetailId 
 	
 	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
@@ -84,7 +88,8 @@ BEGIN TRY
 
 	UPDATE	tblCTContractDetail
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
-			dblBalance			=	@dblNewBalance,
+			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END, 
+			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END, 
 			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0  
 											THEN	CASE	WHEN intContractStatusId = 5 
 															THEN 1 

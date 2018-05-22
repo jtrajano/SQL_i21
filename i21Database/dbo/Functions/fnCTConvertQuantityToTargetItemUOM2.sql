@@ -34,7 +34,7 @@ BEGIN
 	SET @dblUnitQtyFrom = ISNULL(@dblUnitQtyFrom, 0)
 	SET @dblUnitQtyTo = ISNULL(@dblUnitQtyTo, 0)
 	SET @dblBalance = ISNULL(@dblBalance, 0)
-	SET @dblAppliedQty = CASE WHEN @ysnLoad = 1 THEN ISNULL(@intNoOfLoad,0) - ISNULL(@dblBalance,0) ELSE ISNULL(@dblQuantity,0) - ISNULL(@dblBalance,0) END
+	SET @dblAppliedQty = ISNULL(@dblQuantity,0) - ISNULL(@dblBalance,0) --CASE WHEN @ysnLoad = 1 THEN ISNULL(@intNoOfLoad,0) - ISNULL(@dblBalance,0) ELSE ISNULL(@dblQuantity,0) - ISNULL(@dblBalance,0) END
 
 	IF @dblUnitQtyFrom = 0 OR @dblUnitQtyTo = 0 
 	BEGIN 

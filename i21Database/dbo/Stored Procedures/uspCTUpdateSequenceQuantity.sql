@@ -30,17 +30,18 @@ BEGIN TRY
 		RAISERROR('Sequence is deleted by other user.',16,1)
 	END 
 	
-	SELECT	@dblQuantity				=		CASE WHEN ISNULL(ysnLoad,0) = 0 THEN dblDetailQuantity ELSE ISNULL(intNoOfLoad,0) END,
-			@dblScheduleQty				=		ISNULL(dblScheduleQty,0),
-			@dblBalance					=		ISNULL(dblBalance,0),
-			@dblAvailable				=		ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0),
-			@intCommodityUnitMeasureId	=		intCommodityUnitMeasureId,
+	SELECT	@dblQuantity				=		CASE WHEN ISNULL(ysnLoad,0) = 0 THEN CD.dblQuantity ELSE ISNULL(CD.intNoOfLoad,0) END,
+			@dblScheduleQty				=		CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblScheduleQty,0) ELSE ISNULL(CD.dblScheduleLoad,0) END,
+			@dblBalance					=		CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
+			@dblAvailable				=		CASE WHEN ISNULL(ysnLoad,0) = 0 THEN ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0) ELSE ISNULL(dblBalanceLoad,0) - ISNULL(dblScheduleLoad,0) END,
+			@intCommodityUnitMeasureId	=		CH.intCommodityUOMId,
 			@intItemUOMId				=		intItemUOMId,
 			@intItemId					=		intItemId,
-			@intContractHeaderId		=		intContractHeaderId,
+			@intContractHeaderId		=		CH.intContractHeaderId,
 			@ysnLoad					=		ysnLoad 
-	FROM	vyuCTContractDetailView
-	WHERE	intContractDetailId = @intContractDetailId
+	FROM	tblCTContractDetail		CD
+	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
+	WHERE	intContractDetailId		=	@intContractDetailId
 	
 	IF ABS(@dblQuantityToUpdate)- @dblAvailable < @dblTolerance AND ABS(@dblQuantityToUpdate)- @dblAvailable >0
 	BEGIN
@@ -56,8 +57,8 @@ BEGIN TRY
 	SELECT	@dblNewQuantity		=	@dblQuantity + @dblQuantityToUpdate
 
 	UPDATE 	tblCTContractDetail
-	SET		dblQuantity			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewQuantity ELSE dblQuantity END,
-			intNoOfLoad			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN intNoOfLoad ELSE @dblNewQuantity END,
+	SET		dblQuantity			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewQuantity ELSE @dblNewQuantity * dblQuantityPerLoad END,
+			intNoOfLoad			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewQuantity END,
 			dblNetWeight		=	dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,@dblNewQuantity),
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractDetailId =	@intContractDetailId
@@ -82,10 +83,13 @@ BEGIN TRY
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	@strScreenName
 
-	SELECT	@IntFromUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId
-	SELECT	@intToUnitMeasureId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityUnitMeasureId = @intCommodityUnitMeasureId
+	IF ISNULL(@ysnLoad,0) = 0 
+	BEGIN
+		SELECT	@IntFromUnitMeasureId = intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId
+		SELECT	@intToUnitMeasureId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityUnitMeasureId = @intCommodityUnitMeasureId
 
-	SELECT	@dblQuantityToUpdate = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@IntFromUnitMeasureId,@intToUnitMeasureId,@dblQuantityToUpdate)
+		SELECT	@dblQuantityToUpdate = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@IntFromUnitMeasureId,@intToUnitMeasureId,@dblQuantityToUpdate)
+	END
 
 	IF @dblQuantityToUpdate = NULL
 	BEGIN
@@ -93,7 +97,8 @@ BEGIN TRY
 	END
 
 	UPDATE	tblCTContractHeader
-	SET		dblQuantity			=	dblQuantity + @dblQuantityToUpdate,
+	SET		dblQuantity			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN dblQuantity + @dblQuantityToUpdate ELSE (dblQuantity + @dblQuantityToUpdate) * dblQuantityPerLoad END,
+			intNoOfLoad			=	CASE  WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE intNoOfLoad + @dblQuantityToUpdate END,
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	

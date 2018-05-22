@@ -27,6 +27,8 @@ BEGIN TRY
 			@intOldQtyUnitMeasureId		INT,
 			@dblOldBalance				NUMERIC(18,6),
 			@dblOldScheduleQty			NUMERIC(18,6),
+			@dblOldBalanceLoad			NUMERIC(18,6),
+			@dblOldScheduleLoad			NUMERIC(18,6),
 			@intOldNoOfLoad				INT,
 
 			@intNewCompanyLocationId	INT,
@@ -137,6 +139,8 @@ BEGIN TRY
 				@intOldQtyUnitMeasureId	=	IU.intUnitMeasureId,
 				@dblOldBalance			=	CD.dblBalance,
 				@dblOldScheduleQty		=	CD.dblScheduleQty,
+				@dblOldBalanceLoad		=	CD.dblBalanceLoad,
+				@dblOldScheduleLoad		=	CD.dblScheduleLoad,
 				@intOldNoOfLoad			=	CD.intNoOfLoad,
 
 				@dblNewQuantity			=	ISNULL(@dblNewQuantity,CD.dblQuantity),
@@ -349,9 +353,9 @@ BEGIN TRY
 		BEGIN
 			IF @ysnLoad = 1
 			BEGIN
-				IF (@intNewNoOfLoad < @intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty)
+				IF (@intNewNoOfLoad < @intOldNoOfLoad - @dblOldBalanceLoad + @dblOldScheduleLoad)
 				BEGIN
-					SET @ErrMsg = 'No. of Loads for Sequence ' + LTRIM(@intContractSeq) + ' cannot be reduced below ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '. As current no. of load is ' + LTRIM(@intOldNoOfLoad) + ' and no. of load in use is ' + LTRIM(@intOldNoOfLoad - @dblOldBalance + @dblOldScheduleQty) + '.'
+					SET @ErrMsg = 'No. of Loads for Sequence ' + LTRIM(@intContractSeq) + ' cannot be reduced below ' + LTRIM(@intOldNoOfLoad - @dblOldBalanceLoad + @dblOldScheduleLoad) + '. As current no. of load is ' + LTRIM(@intOldNoOfLoad) + ' and no. of load in use is ' + LTRIM(@intOldNoOfLoad - @dblOldBalanceLoad + @dblOldScheduleLoad) + '.'
 					RAISERROR(@ErrMsg,16,1) 
 				END
 			

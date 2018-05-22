@@ -33,7 +33,7 @@ AS
 			CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)									AS	ysnSubCurrency,
 			ISNULL(CD.dblBalance,0)		-	ISNULL(CD.dblScheduleQty,0)					AS	dblAvailableQty,
 			CASE	WHEN	CH.ysnLoad = 1
-					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+					THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 					ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 			END																			AS	dblAppliedQty,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)						AS	strSequenceNumber,

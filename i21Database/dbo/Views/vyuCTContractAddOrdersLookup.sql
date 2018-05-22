@@ -8,7 +8,7 @@ SELECT	  CD.intContractDetailId
 		, CH.ysnLoad
 		, CD.intNoOfLoad
 		, CD.dblQuantity AS	dblDetailQuantity
-		, CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0) AS INT) AS intLoadReceived
+		, CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalanceLoad,0) AS INT) AS intLoadReceived
 		, CD.dblBalance
 		, ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty
 		, PT.strPricingType
