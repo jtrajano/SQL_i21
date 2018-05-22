@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
+﻿
+
+CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
 	 @entityId					INT			   = NULL
 	,@username					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
@@ -7,6 +9,7 @@
 	,@SuccessfulPostCount		INT			   = 0		OUTPUT
 	,@InvalidPostCount			INT			   = 0		OUTPUT
 	,@ysnDevMode				BIT = 0
+	,@reportName				NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -178,13 +181,10 @@ BEGIN TRY
 	--		,@CreatedIvoices		AS 'CreatedIvoices'
 	--		,@UpdatedIvoices		AS 'UpdatedIvoices'
 
-
-
 	DECLARE @CatchErrorMessage NVARCHAR(MAX);  
 	DECLARE @CatchErrorSeverity INT;  
 	DECLARE @CatchErrorState INT;  
 	DECLARE @index INT = 0
-
 
 	IF(@ysnHasError = 1)
 	BEGIN
@@ -213,6 +213,7 @@ BEGIN TRY
 		IF (@@TRANCOUNT > 0) COMMIT TRANSACTION
 	END
 
+	--------HISTORY--------
 
 	INSERT INTO tblCFInvoiceProcessHistory
 	(
@@ -228,6 +229,9 @@ BEGIN TRY
 		,dblDiscountEligibleQuantity
 		,dblDiscountAmount
 		,dtmInvoiceDate
+		,ysnRemittancePage
+		,strInvoiceNumberHistory
+		,strReportName
 	)
 	SELECT
 		 intCustomerId
@@ -242,9 +246,565 @@ BEGIN TRY
 		,dblInvoiceQuantity
 		,dblInvoiceDiscount
 		,dtmInvoiceDate
+		,  (CASE WHEN
+                             ((SELECT        COUNT(*)
+                                 FROM        tblARCustomerStatementStagingTable
+                                 WHERE        strInvoiceReportNumber = ipr.strInvoiceReportNumber) > 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
+		,strInvoiceReportNumber
+		,@reportName
 	FROM tblCFInvoiceProcessResult as ipr
 	INNER JOIN tblEMEntity as ent
 	ON ipr.intCustomerId = ent.intEntityId
+
+	INSERT INTO tblCFInvoiceHistoryStagingTable
+	(
+		intCustomerGroupId
+		,intTransactionId
+		,intOdometer
+		,intOdometerAging
+		,intInvoiceId
+		,intProductId
+		,intCardId
+		,intAccountId
+		,intInvoiceCycle
+		,intSubAccountId
+		,intCustomerId
+		,intDiscountScheduleId
+		,intTermsCode
+		,intTermsId
+		,intARItemId
+		,intSalesPersonId
+		,intTermID
+		,intBalanceDue
+		,intDiscountDay
+		,intDayofMonthDue
+		,intDueNextMonth
+		,intSort
+		,intFeeLoopId
+		,intItemId
+		,intARLocationId
+		,strGroupName
+		,strCustomerNumber
+		,strShipTo
+		,strBillTo
+		,strCompanyName
+		,strCompanyAddress
+		,strType
+		,strCustomerName
+		,strLocationName
+		,strInvoiceNumber
+		,strTransactionId
+		,strTransactionType
+		,strInvoiceReportNumber
+		,strTempInvoiceReportNumber
+		,strMiscellaneous
+		,strName
+		,strCardNumber
+		,strCardDescription
+		,strNetwork
+		,strInvoiceCycle
+		,strPrimarySortOptions
+		,strSecondarySortOptions
+		,strPrintRemittancePage
+		,strPrintPricePerGallon
+		,strPrintSiteAddress
+		,strSiteNumber
+		,strSiteName
+		,strProductNumber
+		,strItemNo
+		,strDescription
+		,strVehicleNumber
+		,strVehicleDescription
+		,strTaxState
+		,strDepartment
+		,strSiteType
+		,strState
+		,strSiteAddress
+		,strSiteCity
+		,strPrintTimeStamp
+		,strEmailDistributionOption
+		,strEmail
+		,strDepartmentDescription
+		,strShortName
+		,strProductDescription
+		,strItemNumber
+		,strItemDescription
+		,strTerm
+		,strTermCode
+		,strTermType
+		,strCalculationType
+		,strFeeDescription
+		,strFee
+		,strInvoiceFormat
+		,dtmTransactionDate
+		,dtmDate
+		,dtmPostedDate
+		,dtmDiscountDate
+		,dtmDueDate
+		,dtmInvoiceDate
+		,dtmStartDate
+		,dtmEndDate
+		,dblTotalMiles
+		,dblQuantity
+		,dblCalculatedTotalAmount
+		,dblOriginalTotalAmount
+		,dblCalculatedGrossAmount
+		,dblOriginalGrossAmount
+		,dblCalculatedNetAmount
+		,dblOriginalNetAmount
+		,dblMargin
+		,dblTotalTax
+		,dblTotalSST
+		,dblTaxExceptSST
+		,dblInvoiceTotal
+		,dblTotalQuantity
+		,dblTotalGrossAmount
+		,dblTotalNetAmount
+		,dblTotalAmount
+		,dblTotalTaxAmount
+		,TotalFET
+		,TotalSET
+		,TotalSST
+		,TotalLC
+		,dblDiscountRate
+		,dblDiscount
+		,dblAccountTotalAmount
+		,dblAccountTotalDiscount
+		,dblAccountTotalLessDiscount
+		,dblDiscountEP
+		,dblAPR
+		,dblFeeAmount
+		,dblFeeRate
+		,dblEligableGallon
+		,ysnPrintMiscellaneous
+		,ysnSummaryByCard
+		,ysnSummaryByDepartment
+		,ysnSummaryByMiscellaneous
+		,ysnSummaryByProduct
+		,ysnSummaryByVehicle
+		,ysnSummaryByDeptCardProd
+		,ysnSummaryByCardProd
+		,ysnPrintTimeOnInvoices
+		,ysnPrintTimeOnReports
+		,ysnInvalid
+		,ysnPostedCSV
+		,ysnPosted
+		,ysnIncludeInQuantityDiscount
+		,ysnAllowEFT
+		,ysnActive
+		,ysnEnergyTrac
+		,strDiscountSchedule
+		,ysnShowOnCFInvoice
+		,ysnPostForeignSales
+		,ysnSummaryByDeptVehicleProd
+		,ysnDepartmentGrouping
+		,strGuid
+		,strUserId
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		intCustomerGroupId
+		,intTransactionId
+		,intOdometer
+		,intOdometerAging
+		,intInvoiceId
+		,intProductId
+		,intCardId
+		,intAccountId
+		,intInvoiceCycle
+		,intSubAccountId
+		,intCustomerId
+		,intDiscountScheduleId
+		,intTermsCode
+		,intTermsId
+		,intARItemId
+		,intSalesPersonId
+		,intTermID
+		,intBalanceDue
+		,intDiscountDay
+		,intDayofMonthDue
+		,intDueNextMonth
+		,intSort
+		,intFeeLoopId
+		,intItemId
+		,intARLocationId
+		,strGroupName
+		,strCustomerNumber
+		,strShipTo
+		,strBillTo
+		,strCompanyName
+		,strCompanyAddress
+		,strType
+		,strCustomerName
+		,strLocationName
+		,strInvoiceNumber
+		,strTransactionId
+		,strTransactionType
+		,strTempInvoiceReportNumber --strInvoiceReportNumber
+		,strTempInvoiceReportNumber
+		,strMiscellaneous
+		,strName
+		,strCardNumber
+		,strCardDescription
+		,strNetwork
+		,strInvoiceCycle
+		,strPrimarySortOptions
+		,strSecondarySortOptions
+		,strPrintRemittancePage
+		,strPrintPricePerGallon
+		,strPrintSiteAddress
+		,strSiteNumber
+		,strSiteName
+		,strProductNumber
+		,strItemNo
+		,strDescription
+		,strVehicleNumber
+		,strVehicleDescription
+		,strTaxState
+		,strDepartment
+		,strSiteType
+		,strState
+		,strSiteAddress
+		,strSiteCity
+		,strPrintTimeStamp
+		,strEmailDistributionOption
+		,strEmail
+		,strDepartmentDescription
+		,strShortName
+		,strProductDescription
+		,strItemNumber
+		,strItemDescription
+		,strTerm
+		,strTermCode
+		,strTermType
+		,strCalculationType
+		,strFeeDescription
+		,strFee
+		,strInvoiceFormat
+		,dtmTransactionDate
+		,dtmDate
+		,dtmPostedDate
+		,dtmDiscountDate
+		,dtmDueDate
+		,dtmInvoiceDate
+		,dtmStartDate
+		,dtmEndDate
+		,dblTotalMiles
+		,dblQuantity
+		,dblCalculatedTotalAmount
+		,dblOriginalTotalAmount
+		,dblCalculatedGrossAmount
+		,dblOriginalGrossAmount
+		,dblCalculatedNetAmount
+		,dblOriginalNetAmount
+		,dblMargin
+		,dblTotalTax
+		,dblTotalSST
+		,dblTaxExceptSST
+		,dblInvoiceTotal
+		,dblTotalQuantity
+		,dblTotalGrossAmount
+		,dblTotalNetAmount
+		,dblTotalAmount
+		,dblTotalTaxAmount
+		,TotalFET
+		,TotalSET
+		,TotalSST
+		,TotalLC
+		,dblDiscountRate
+		,dblDiscount
+		,dblAccountTotalAmount
+		,dblAccountTotalDiscount
+		,dblAccountTotalLessDiscount
+		,dblDiscountEP
+		,dblAPR
+		,dblFeeAmount
+		,dblFeeRate
+		,dblEligableGallon
+		,ysnPrintMiscellaneous
+		,ysnSummaryByCard
+		,ysnSummaryByDepartment
+		,ysnSummaryByMiscellaneous
+		,ysnSummaryByProduct
+		,ysnSummaryByVehicle
+		,ysnSummaryByDeptCardProd
+		,ysnSummaryByCardProd
+		,ysnPrintTimeOnInvoices
+		,ysnPrintTimeOnReports
+		,ysnInvalid
+		,ysnPostedCSV
+		,ysnPosted
+		,ysnIncludeInQuantityDiscount
+		,ysnAllowEFT
+		,ysnActive
+		,ysnEnergyTrac
+		,strDiscountSchedule
+		,ysnShowOnCFInvoice
+		,ysnPostForeignSales
+		,ysnSummaryByDeptVehicleProd
+		,ysnDepartmentGrouping
+		,strGuid
+		,strUserId
+		,strTempInvoiceReportNumber
+	FROM
+	tblCFInvoiceStagingTable
+	WHERE strUserId = @username
+	
+	INSERT INTO tblCFCustomerStatementHistoryStagingTable
+	(
+	intEntityCustomerId
+	,intInvoiceId
+	,intPaymentId
+	,intDaysDue
+	,intEntityUserId
+	,dtmDate
+	,dtmDueDate
+	,dtmShipDate
+	,dtmDatePaid
+	,dtmAsOfDate
+	,strCustomerNumber
+	,strCustomerName
+	,strDisplayName
+	,strInvoiceNumber
+	,strReferenceNumber
+	,strBOLNumber
+	,strRecordNumber
+	,strTransactionType
+	,strPaymentInfo
+	,strSalespersonName
+	,strAccountStatusCode
+	,strLocationName
+	,strFullAddress
+	,strStatementFooterComment
+	,strContact
+	,strPaid
+	,strPaymentMethod
+	,strTicketNumbers
+	,strCompanyName
+	,strCompanyAddress
+	,strUserId
+	,strStatementFormat
+	,dblTotalAmount
+	,dblAmountPaid
+	,dblAmountDue
+	,dblAmountApplied
+	,dblPastDue
+	,dblMonthlyBudget
+	,dblRunningBalance
+	,dblCreditLimit
+	,dblInvoiceTotal
+	,dblPayment
+	,dblBalance
+	,dblTotalAR
+	,dblCreditAvailable
+	,dblFuture
+	,dbl0Days
+	,dbl10Days
+	,dbl30Days
+	,dbl60Days
+	,dbl90Days
+	,dbl91Days
+	,dblCredits
+	,dblPrepayments
+	,dblUnappliedAmount
+	,ysnPrintFromCardFueling
+	,intCFAccountId
+	,dblCFDiscount
+	,dblCFEligableGallon
+	,strCFGroupDiscoount
+	,intCFDiscountDay
+	,strCFTermType
+	,dtmCFInvoiceDate
+	,dblCFTotalBalance
+	,intCFTermID
+	,dblCFAccountTotalAmount
+	,dblCFAccountTotalDiscount
+	,dblCFFeeTotalAmount
+	,dblCFInvoiceTotal
+	,dblCFTotalQuantity
+	,strCFTempInvoiceReportNumber
+	,strCFEmailDistributionOption
+	,strCFEmail
+	,ysnCFShowDiscountOnInvoice
+	,ysnStatementCreditLimit
+	,blbLogo
+	,strCFTerm
+	,strCFTermCode
+	,strComment
+	,strCFInvoiceNumber
+	,strInvoiceNumberHistory
+	)
+	SELECT 
+	intEntityCustomerId
+	,intInvoiceId
+	,intPaymentId
+	,intDaysDue
+	,intEntityUserId
+	,dtmDate
+	,dtmDueDate
+	,dtmShipDate
+	,dtmDatePaid
+	,dtmAsOfDate
+	,strCustomerNumber
+	,strCustomerName
+	,strDisplayName
+	,strInvoiceNumber
+	,strReferenceNumber
+	,strBOLNumber
+	,strRecordNumber
+	,strTransactionType
+	,strPaymentInfo
+	,strSalespersonName
+	,strAccountStatusCode
+	,strLocationName
+	,strFullAddress
+	,strStatementFooterComment
+	,strContact
+	,strPaid
+	,strPaymentMethod
+	,strTicketNumbers
+	,strCompanyName
+	,strCompanyAddress
+	,strUserId
+	,strStatementFormat
+	,dblTotalAmount
+	,dblAmountPaid
+	,dblAmountDue
+	,dblAmountApplied
+	,dblPastDue
+	,dblMonthlyBudget
+	,dblRunningBalance
+	,dblCreditLimit
+	,dblInvoiceTotal
+	,dblPayment
+	,dblBalance
+	,dblTotalAR
+	,dblCreditAvailable
+	,dblFuture
+	,dbl0Days
+	,dbl10Days
+	,dbl30Days
+	,dbl60Days
+	,dbl90Days
+	,dbl91Days
+	,dblCredits
+	,dblPrepayments
+	,dblUnappliedAmount
+	,ysnPrintFromCardFueling
+	,intCFAccountId
+	,dblCFDiscount
+	,dblCFEligableGallon
+	,strCFGroupDiscoount
+	,intCFDiscountDay
+	,strCFTermType
+	,dtmCFInvoiceDate
+	,dblCFTotalBalance
+	,intCFTermID
+	,dblCFAccountTotalAmount
+	,dblCFAccountTotalDiscount
+	,dblCFFeeTotalAmount
+	,dblCFInvoiceTotal
+	,dblCFTotalQuantity
+	,strCFTempInvoiceReportNumber
+	,strCFEmailDistributionOption
+	,strCFEmail
+	,ysnCFShowDiscountOnInvoice
+	,ysnStatementCreditLimit
+	,blbLogo
+	,strCFTerm
+	,strCFTermCode
+	,strComment
+	,strCFTempInvoiceReportNumber
+	,strCFTempInvoiceReportNumber
+	FROM
+	tblARCustomerStatementStagingTable
+	WHERE intEntityUserId = @entityId
+
+	INSERT INTO tblCFDiscountScheduleHistory
+	(
+		intCustomerId
+		,intAccountId
+		,intFromQty
+		,intThruQty
+		,dblRate
+		,intDiscountScheduleId
+		,intDiscountSchedDetailId
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		dis.intCustomerId
+		,dis.intAccountId
+		,intFromQty
+		,intThruQty
+		,dblRate
+		,dis.intDiscountScheduleId
+		,intDiscountSchedDetailId
+		,inv.strTempInvoiceReportNumber
+	FROM vyuCFDiscountSchedule as dis 
+	INNER JOIN tblCFInvoiceStagingTable as inv
+	ON dis.intDiscountScheduleId = inv.intDiscountScheduleId
+	WHERE strUserId = @username
+
+	INSERT INTO tblCFInvoiceFeeHistoryStagingTable
+	(
+		 intFeeLoopId
+		,intAccountId
+		,intTransactionId
+		,intCardId
+		,intCustomerId
+		,intTermID
+		,intSalesPersonId
+		,intItemId
+		,intARLocationId
+		,dblFeeRate
+		,dblQuantity
+		,dblFeeAmount
+		,dblFeeTotalAmount
+		,strFeeDescription
+		,strFee
+		,strInvoiceFormat
+		,strInvoiceReportNumber
+		,strCalculationType
+		,strGuid
+		,strUserId
+		,dtmTransactionDate
+		,dtmInvoiceDate
+		,dtmStartDate
+		,dtmEndDate
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		intFeeLoopId
+		,intAccountId
+		,intTransactionId
+		,intCardId
+		,intCustomerId
+		,intTermID
+		,intSalesPersonId
+		,intItemId
+		,intARLocationId
+		,dblFeeRate
+		,dblQuantity
+		,dblFeeAmount
+		,dblFeeTotalAmount
+		,strFeeDescription
+		,strFee
+		,strInvoiceFormat
+		,strInvoiceReportNumber
+		,strCalculationType
+		,strGuid
+		,strUserId
+		,dtmTransactionDate
+		,dtmInvoiceDate
+		,dtmStartDate
+		,dtmEndDate
+		,strInvoiceReportNumber
+	FROM
+	tblCFInvoiceFeeStagingTable
+	WHERE strUserId = @username
+
+
+	-------HISTORY----------
 
 
 	----------DROP TEMPORARY TABLE----------

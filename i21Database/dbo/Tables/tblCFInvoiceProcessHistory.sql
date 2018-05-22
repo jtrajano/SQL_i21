@@ -11,8 +11,13 @@
     [dblTotalQuantity]            NUMERIC (18, 6) NULL,
     [dblDiscountEligibleQuantity] NUMERIC (18, 6) NULL,
     [dblDiscountAmount]           NUMERIC (18, 6) NULL,
-    [dtmInvoiceDate]	          DATETIME		  NULL,
+    [dtmInvoiceDate]              DATETIME        NULL,
+    [strInvoiceNumberHistory]     NVARCHAR (MAX)  NULL,
+    [ysnRemittancePage]           BIT             NULL,
+    [strReportName]               NVARCHAR (MAX)  NULL,
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFInvoiceProcessHistoryId_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFInvoiceProcessHistoryId] PRIMARY KEY CLUSTERED ([intInvoiceProcessHistoryId] ASC)
 );
+
+
 
