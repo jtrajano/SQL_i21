@@ -29,7 +29,7 @@ FROM
 		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
 		,[intInventoryReceiptItemAllocatedChargeId]	= NULL
 		,[intContractChargeId]		=	NULL
-		,[dblUnitCost]				=	tblReceived.dblUnitCost
+		,[dblUnitCost]				=	CAST(tblReceived.dblUnitCost AS DECIMAL(38,20))
 		,[dblDiscount]				=	B.dblDiscount
 		,[dblTax]					=	tblReceived.dblTax
 		,[dblRate]					=	tblReceived.dblRate
@@ -62,7 +62,7 @@ FROM
 		,[strCostUOM]				=	tblReceived.costUOM
 		,[strgrossNetUOM]			=	tblReceived.grossNetUOM
   		,[dblWeightUnitQty]			=	tblReceived.weightUnitQty
-		,[dblCostUnitQty]			=	tblReceived.costUnitQty      
+		,[dblCostUnitQty]			=	CAST(tblReceived.costUnitQty AS DECIMAL(38,20))
 		,[dblUnitQty]				=	tblReceived.itemUnitQty
 		,[intCurrencyId]			=	tblReceived.intCurrencyId
 		,[strCurrency]				=	tblReceived.strCurrency
@@ -104,7 +104,7 @@ FROM
 				,B1.intItemId
 				,B1.intLineNo
 				,B1.dblOrderQty
-				,B1.dblUnitCost
+				,CAST(B1.dblUnitCost AS DECIMAL(38,20)) AS dblUnitCost
 				,dbo.fnCalculateQtyBetweenUOM(B1.intUnitMeasureId, B.intUnitOfMeasureId, SUM(ISNULL(B1.dblOpenReceive,0))) dblPOOpenReceive
 				,SUM(ISNULL(B1.dblOpenReceive,0)) dblOpenReceive
 				,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
@@ -244,7 +244,7 @@ FROM
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
 	,[intInventoryReceiptChargeId]	= NULL
 	,[intContractChargeId]		=	NULL  
-	,[dblUnitCost]				=	B.dblCost
+	,[dblUnitCost]				=	CAST(B.dblCost AS DECIMAL(38,20))
 	,[dblDiscount]				=	B.dblDiscount
 	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	ISNULL(NULLIF(B.dblForexRate,0),1)
@@ -281,7 +281,7 @@ FROM
 	,[strCostUOM]				=	NULL
 	,[strgrossNetUOM]			=	NULL
 	,[dblWeightUnitQty]			=	1
-	,[dblCostUnitQty]			=	1
+	,[dblCostUnitQty]			=	CAST(1 AS DECIMAL(38,20))
 	,[dblUnitQty]				=	1
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,0)
 	,[strCurrency]				=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
@@ -358,10 +358,10 @@ FROM
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptChargeId]	= NULL
 	,[intContractChargeId]		=	NULL
-	,[dblUnitCost]				=	CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
+	,[dblUnitCost]				=	CAST(CASE WHEN (B.dblUnitCost IS NULL OR B.dblUnitCost = 0)
 												 THEN (CASE WHEN CD.dblCashPrice IS NOT NULL THEN CD.dblCashPrice ELSE B.dblUnitCost END)
 												 ELSE B.dblUnitCost
-											END  	
+											END AS DECIMAL(38,20))  	
 	,[dblDiscount]				=	0
 	,[dblTax]					=	ISNULL(B.dblTax,0)
 	,[dblRate]					=	ISNULL(NULLIF(B.dblForexRate,0),1)
@@ -399,7 +399,7 @@ FROM
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
 	,[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1)
-	,[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1)
+	,[dblCostUnitQty]			=	CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))
 	,[strCurrency]				=   H1.strCurrency
@@ -522,7 +522,7 @@ FROM
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	A.dblUnitCost
+		,[dblUnitCost]								=	CAST(A.dblUnitCost AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
@@ -561,7 +561,7 @@ FROM
 		,[strCostUOM]								=	A.strCostUnitMeasure
 		,[strgrossNetUOM]							=	NULL
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
+		,[dblCostUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -655,14 +655,14 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
-		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+		,[dblUnitCost]								=	CAST(ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			
 																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)
+														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -778,13 +778,13 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
-		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+		,[dblUnitCost]								=	CAST(ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)
+														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -901,14 +901,14 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
-		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+		,[dblUnitCost]								=	CAST(ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			
 																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)
+														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -1026,13 +1026,13 @@ FROM
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	CC.intContractCostId      
-		,[dblUnitCost]								=	ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+		,[dblUnitCost]								=	CAST(ISNULL(CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
 																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
 																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
                                                                		WHEN	CC.strCostMethod = 'Per Unit' THEN       
 																			ISNULL(CC.dblRate,0)
 																ELSE	ISNULL(CC.dblRate,0) 
-														END,0)
+														END,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	CASE WHEN CY.ysnSubCurrency > 0  THEN  ISNULL(RateDetail.dblRate,1) ELSE ISNULL(G1.dblRate,1) END
@@ -1148,7 +1148,7 @@ FROM
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	NULL
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	ISNULL(A.dblCashPrice,0)
+		,[dblUnitCost]								=	CAST(ISNULL(A.dblCashPrice,0) AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	0
 		,[dblRate]									=	1
@@ -1182,7 +1182,7 @@ FROM
 		,[strgrossNetUOM]							=	A.strWeightUOM
 		--,[dblUnitQty]								=	dbo.fnLGGetItemUnitConversion (A.intItemId, A.intPriceItemUOMId, A.intWeightUOMId)
 		,[dblWeightUnitQty]							=	ISNULL(ItemWeightUOM.dblUnitQty,1)
-		,[dblCostUnitQty]							=	ISNULL(ItemCostUOM.dblUnitQty,1)
+		,[dblCostUnitQty]							=	CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 		,[dblUnitQty]								=	ISNULL(ItemUOM.dblUnitQty,1)
 		,[intCurrencyId]							=	A.intCurrencyId
 		,[strCurrency]								=	A.strLoadCurrency
@@ -1286,7 +1286,7 @@ FROM
 		,[strCostUOM]								=	A.strCostUnitMeasure
 		,[strgrossNetUOM]							=	NULL
 		,[dblWeightUnitQty]							=	1
-		,[dblCostUnitQty]							=	1
+		,[dblCostUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
 															 THEN (SELECT ISNULL(intMainCurrencyId,A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
@@ -1380,7 +1380,7 @@ FROM
 	  ,[intInventoryReceiptItemId]				= NULL
 	  ,[intInventoryReceiptChargeId]			= NULL	
 	  ,[intContractChargeId]					= NULL	
-	  ,[dblUnitCost]							= I.dblInvoiceTotal	
+	  ,[dblUnitCost]							= CAST(I.dblInvoiceTotal AS DECIMAL(38,20))
 	  ,[dblDiscount]							= 0	
 	  ,[dblTax]									= 0	
 	  ,[dblRate]								= 1	
@@ -1413,7 +1413,7 @@ FROM
 	  ,[strCostUOM]								= NULL
 	  ,[strgrossNetUOM]							= NULL
 	  ,[dblWeightUnitQty]						= NULL
-	  ,[dblCostUnitQty]							= NULL
+	  ,[dblCostUnitQty]							= CAST(1 AS DECIMAL(38,20))
 	  ,[dblUnitQty]								= NULL
 	  ,[intCurrencyId]							= I.intCurrencyId
 	  ,[strCurrency]							= CY.strCurrency
