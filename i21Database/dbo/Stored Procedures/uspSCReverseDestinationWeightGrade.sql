@@ -31,13 +31,23 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intInvoiceId INT
 		,@intBillId INT
 		,@ysnPosted BIT
-		,@ysnRecap AS BIT 
-		;
+		,@ysnRecap BIT
+		,@intContractDetailId INT
+		,@dblContractQty INT
+		,@intTicketItemUOMId INT;
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
 	BEGIN
-		SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId
+		IF ISNULL(@intMatchTicketId, 0) > 0
+		BEGIN
+			SELECT @intTicketItemUOMId = intItemUOMIdTo
+				, @intContractDetailId = intContractId
+				, @dblContractQty = dblNetUnits
+			FROM tblSCTicket WHERE intTicketId = @intTicketId
+		END
+
+		SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId AND intContractDetailId > 0
 		SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 		IF @ysnPosted = 1
 		BEGIN
@@ -51,6 +61,12 @@ BEGIN TRY
 		END
 		IF ISNULL(@intBillId, 0) > 0
 			EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+
+		IF ISNULL(@intContractDetailId,0) != 0
+		BEGIN
+			SET @dblContractQty = (@dblContractQty * -1)
+			EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractQty, @intUserId, @intMatchTicketId, 'Scale', @intTicketItemUOMId
+		END
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
 		SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
@@ -81,7 +97,33 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
+		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId;
+		SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+		IF @ysnPosted = 1
+		BEGIN
+			EXEC [dbo].[uspARPostInvoice]
+				@batchId			= NULL,
+				@post				= 0,
+				@recap				= 0,
+				@param				= @intInvoiceId,
+				@userId				= @intUserId,
+				@beginDate			= NULL,
+				@endDate			= NULL,
+				@beginTransaction	= NULL,
+				@endTransaction		= NULL,
+				@exclude			= NULL,
+				@successfulCount	= @successfulCount OUTPUT,
+				@invalidCount		= @invalidCount OUTPUT,
+				@success			= @success OUTPUT,
+				@batchIdUsed		= @batchIdUsed OUTPUT,
+				@recapId			= @recapId OUTPUT,
+				@transType			= N'all',
+				@accrueLicense		= 0,
+				@raiseError			= 1
+		END
+		IF ISNULL(@intInvoiceId, 0) > 0
+			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
 	END
 
 END TRY

@@ -18,6 +18,7 @@ DECLARE @ErrMsg NVARCHAR(MAX);
 
 DECLARE @DestinationItems AS DestinationShipmentItem 
 		,@ShipmentCharges AS DestinationShipmentCharge 
+		,@scaleStaging AS ScaleDestinationStagingTable
 		,@strBatchId NVARCHAR(40)
 		,@InventoryShipmentId INT
 		,@intHaulerId INT
@@ -51,6 +52,53 @@ BEGIN TRY
 	LEFT JOIN tblSCTicket SCTicket ON SCSetup.intScaleSetupId = SCTicket.intScaleSetupId
 	WHERE intTicketId = @intTicketId
 
+	INSERT INTO @scaleStaging
+	(
+		[intTicketId]
+		,[intEntityId]
+		,[intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[intCurrencyId]
+		,[intContractHeaderId]
+		,[intContractDetailId]
+		,[intTransactionHeaderId]
+		,[intTransactionDetailId]
+		,[strCostMethod]
+		,[intScaleSetupId]
+		,[dblFreightRate]
+		,[dblTicketFees]
+		,[ysnIsStorage]
+	)
+	SELECT 
+		[intTicketId]					= SC.intTicketId
+		,[intEntityId]					= ICS.intEntityCustomerId
+		,[intItemId]					= SC.intItemId
+		,[intItemLocationId]			= SC.intProcessingLocationId
+		,[intItemUOMId]					= SC.intItemUOMIdTo
+		,[dtmDate]						= SC.dtmTicketDateTime
+		,[dblQty]						= ICSI.dblQuantity
+		,[dblUOMQty]					= SC.dblConvertedUOMQty
+		,[dblCost]						= ICSI.dblUnitPrice
+		,[intCurrencyId]				= SC.intCurrencyId
+		,[intContractHeaderId]			= ICSI.intOrderId
+		,[intContractDetailId]			= ICSI.intLineNo
+		,[intTransactionHeaderId]		= ICS.intInventoryShipmentId
+		,[intTransactionDetailId]		= ICSI.intInventoryShipmentId
+		,[strCostMethod]				= SC.strCostMethod
+		,[intScaleSetupId]				= SC.intScaleSetupId
+		,[dblFreightRate]				= SC.dblFreightRate
+		,[dblTicketFees]				= SC.dblTicketFees
+		,[ysnIsStorage]					= CASE WHEN ICSI.intOwnershipType = 1 THEN 1 ELSE 0 END
+	FROM tblSCTicket SC 
+	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intSourceId = SC.intTicketId
+	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
+	WHERE SC.intTicketId = @intTicketId AND ICS.intSourceType = 1
+
 	INSERT INTO @DestinationItems (
 		[intItemId] 
 		,[intItemLocationId] 
@@ -60,17 +108,15 @@ BEGIN TRY
 		,[intInventoryShipmentItemId] 
 	)
 	SELECT	
-		[intItemId] = si.intItemId 
-		,[intItemLocationId] = il.intItemLocationId
-		,[dblDestinationQty] = sc.dblNetUnits
+		[intItemId] = SC.intItemId 
+		,[intItemLocationId] = ICIL.intItemLocationId
+		,[dblDestinationQty] = SC.dblQty
 		,[intSourceId] = 1
-		,[intInventoryShipmentId] = s.intInventoryShipmentId
-		,[intInventoryShipmentItemId] = si.intInventoryShipmentItemId 
-	FROM tblSCTicket sc 
-		INNER JOIN tblICInventoryShipmentItem si ON si.intSourceId = sc.intTicketId 
-		INNER JOIN tblICInventoryShipment s ON s.intInventoryShipmentId = si.intInventoryShipmentId
-		INNER JOIN tblICItemLocation il ON il.intItemId = si.intItemId AND il.intLocationId = s.intShipFromLocationId 
-	WHERE sc.intTicketId = @intTicketId AND s.intSourceType = 1
+		,[intInventoryShipmentId] = SC.intTransactionHeaderId
+		,[intInventoryShipmentItemId] = SC.intTransactionDetailId 
+	FROM @scaleStaging SC 
+	INNER JOIN tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intItemLocationId 
+	WHERE SC.intTicketId = @intTicketId
 
 	INSERT INTO @ShipmentCharges
 	(
@@ -90,20 +136,20 @@ BEGIN TRY
 	)
 	SELECT
 	--Charges
-	[intInventoryShipmentId]			= SC.intInventoryShipmentId
-	,[intContractId]					= SC.intContractId
-	,[intChargeId]						= IC.intItemId
+	[intInventoryShipmentId]			= SC.intTransactionHeaderId
+	,[intContractId]					= SC.intContractDetailId
+	,[intChargeId]						= SC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE
-												WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, 0) * -1)
+												WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId, 0) * -1)
 												ELSE (QM.dblDiscountAmount * -1)
 											END 
 											WHEN IC.strCostMethod = 'Amount' THEN 0
 										END
 	,[intCostUOMId]						= CASE
-											WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, SC.intItemUOMIdTo)
+											WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, SC.intItemUOMId)
 											WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
 										END
 	,[intCurrencyId]  					= SC.intCurrencyId
@@ -111,11 +157,11 @@ BEGIN TRY
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
 												WHEN IC.strCostMethod = 'Amount' THEN 
 												CASE
-													WHEN SC.intTicketTypeId > 0 AND ISNULL(SC.intContractId, 0 ) = 0 THEN 0
+													WHEN SC.ysnIsStorage = 0 THEN 0
 													ELSE
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, 0) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId) * -1)
+														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId, 0) * -1)
+														ELSE (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId) * -1)
 													END
 												END 
 											END
@@ -124,7 +170,7 @@ BEGIN TRY
 	,[ysnPrice]							= 1
 	,[intForexRateTypeId]				= NULL
 	,[dblForexRate]						= NULL
-	FROM tblSCTicket SC
+	FROM @scaleStaging SC
 	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intTicketId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 	LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
@@ -149,7 +195,7 @@ BEGIN TRY
 		,dblForexRate 
 	)
 	SELECT	
-		intInventoryShipmentId = SC.intInventoryShipmentId 
+		intInventoryShipmentId = SC.intTransactionHeaderId 
 		,intContractId = NULL 
 		,intChargeId = SCSetup.intDefaultFeeItemId
 		,strCostMethod = IC.strCostMethod 
@@ -161,14 +207,14 @@ BEGIN TRY
 						END
 						WHEN IC.strCostMethod = 'Amount' THEN 0
 					END
-		,intCostUOMId = dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, SC.intItemUOMIdTo) 
+		,intCostUOMId = dbo.fnGetMatchingItemUOMId(SCSetup.intDefaultFeeItemId, SC.intItemUOMId) 
 		,intCurrency = SC.intCurrencyId
 		,dblAmount = CASE
 						WHEN IC.strCostMethod = 'Per Unit' THEN 0
 						WHEN IC.strCostMethod = 'Amount' THEN 
 						CASE
-							WHEN @ysnDeductFeesCusVen = 0 THEN SC.dblTicketFees
-							WHEN @ysnDeductFeesCusVen = 1 THEN (SC.dblTicketFees * -1)
+							WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2)
+							WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2) * -1
 						END
 					END
 		,intEntityVendorId = null
@@ -176,7 +222,7 @@ BEGIN TRY
 		,ysnPrice = 1
 		,intForexRateTypeId = null 
 		,dblForexRate = null
-	FROM tblSCTicket SC
+	FROM @scaleStaging SC
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 	INNER JOIN tblICItem IC ON IC.intItemId = SCSetup.intDefaultFeeItemId
 	WHERE SC.intTicketId = @intTicketId AND SC.dblTicketFees > 0
@@ -231,7 +277,7 @@ BEGIN TRY
 								,dblForexRate 
 							)
 							SELECT	
-							[intInventoryShipmentId]		= SC.intInventoryShipmentId
+							[intInventoryShipmentId]		= SC.intTransactionHeaderId
 							,[intContractId]				= LoadDetail.intSContractDetailId
 							,[intChargeId]					= LoadCost.intItemId
 							,[strCostMethod]				= SC.strCostMethod
@@ -242,7 +288,7 @@ BEGIN TRY
 							,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
-																WHEN SC.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * LoadCost.dblRate,2)
+																WHEN SC.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * LoadCost.dblRate,2)
 																ELSE 0
 															END	
 							,[intEntityVendorId]			= LoadCost.intVendorId
@@ -251,7 +297,7 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN tblSCTicket SC ON SC.intContractId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
@@ -275,7 +321,7 @@ BEGIN TRY
 								,dblForexRate 
 							)
 							SELECT	
-							[intInventoryShipmentId]		= SC.intInventoryShipmentId
+							[intInventoryShipmentId]		= SC.intTransactionHeaderId
 							,[intContractId]				= LoadDetail.intSContractDetailId
 							,[intChargeId]					= LoadCost.intItemId
 							,[strCostMethod]				= LoadCost.strCostMethod
@@ -286,7 +332,7 @@ BEGIN TRY
 							,[intCostUOMId]					= LoadCost.intItemUOMId
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
-																WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * LoadCost.dblRate,2)
+																WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * LoadCost.dblRate,2)
 																ELSE 0
 															END	
 							,[intEntityVendorId]			= LoadCost.intVendorId
@@ -295,7 +341,7 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN tblSCTicket SC ON SC.intContractId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							WHERE LoadCost.intItemId != @intFreightItemId AND LoadDetail.intSContractDetailId = @intLoadContractId 
 							AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0 AND SC.intTicketId = @intTicketId
@@ -319,8 +365,8 @@ BEGIN TRY
 								,dblForexRate 
 							)
 							SELECT	
-							[intInventoryShipmentId]		= SC.intInventoryShipmentId
-							,[intContractId]				= SC.intContractId
+							[intInventoryShipmentId]		= SC.intTransactionHeaderId
+							,[intContractId]				= SC.intContractDetailId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= SC.strCostMethod
 							,[dblRate]						= CASE
@@ -330,7 +376,7 @@ BEGIN TRY
 							,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
-																WHEN SC.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * ContractCost.dblRate,2)
+																WHEN SC.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * ContractCost.dblRate,2)
 																ELSE 0
 															END	
 							,[intEntityVendorId]			= ContractCost.intVendorId
@@ -339,10 +385,10 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN tblSCTicket SC ON SC.intContractId = ContractCost.intContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-							WHERE ContractCost.intItemId = @intFreightItemId AND SC.intContractId = @intLoadContractId 
+							WHERE ContractCost.intItemId = @intFreightItemId AND SC.intContractDetailId = @intLoadContractId 
 							AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 
 							INSERT INTO @ShipmentCharges
@@ -362,8 +408,8 @@ BEGIN TRY
 								,dblForexRate 
 							)
 							SELECT	
-							[intInventoryShipmentId]		= SC.intInventoryShipmentId
-							,[intContractId]				= SC.intContractId
+							[intInventoryShipmentId]		= SC.intTransactionHeaderId
+							,[intContractId]				= SC.intContractDetailId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= ContractCost.strCostMethod
 							,[dblRate]						= CASE
@@ -373,7 +419,7 @@ BEGIN TRY
 							,[intCostUOMId]					= ContractCost.intItemUOMId
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
-																WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * ContractCost.dblRate,2)
+																WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * ContractCost.dblRate,2)
 																ELSE 0
 															END	
 							,[intEntityVendorId]			= ContractCost.intVendorId
@@ -382,8 +428,8 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN tblSCTicket SC ON SC.intContractId = ContractCost.intContractDetailId
-							WHERE ContractCost.intItemId != @intFreightItemId AND SC.intContractId = @intLoadContractId 
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
+							WHERE ContractCost.intItemId != @intFreightItemId AND SC.intContractDetailId = @intLoadContractId 
 							AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 						END
 				END
@@ -408,7 +454,7 @@ BEGIN TRY
 								,dblForexRate 
 							)
 							SELECT	
-							[intInventoryShipmentId]		= SC.intInventoryShipmentId
+							[intInventoryShipmentId]		= SC.intTransactionHeaderId
 							,[intContractId]				= LoadDetail.intSContractDetailId
 							,[intChargeId]					= LoadCost.intItemId
 							,[strCostMethod]				= LoadCost.strCostMethod
@@ -419,7 +465,7 @@ BEGIN TRY
 							,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
-																WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * LoadCost.dblRate,2)
+																WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * LoadCost.dblRate,2)
 																ELSE 0
 															END	
 							,[intEntityVendorId]			= LoadCost.intVendorId
@@ -428,7 +474,7 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN tblSCTicket SC ON SC.intContractId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							WHERE LoadCost.intLoadId = @intLoadId AND LoadDetail.intSContractDetailId = @intLoadContractId 
 							AND LoadCost.dblRate != 0 AND SC.intTicketId = @intTicketId
@@ -452,7 +498,7 @@ BEGIN TRY
 								,dblForexRate 
 							)
 							SELECT	
-							[intInventoryShipmentId]		= SC.intInventoryShipmentId
+							[intInventoryShipmentId]		= SC.intTransactionHeaderId
 							,[intContractId]				= ContractCost.intContractDetailId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= ContractCost.strCostMethod
@@ -464,7 +510,7 @@ BEGIN TRY
 							,[intCurrencyId]  				= SC.intCurrencyId
 							,[dblAmount]					=  CASE
 																WHEN ContractCost.strCostMethod = 'Per Unit' THEN 0
-																WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * ContractCost.dblRate, 2)
+																WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * ContractCost.dblRate, 2)
 																ELSE 0
 															END	
 							,[intEntityVendorId]			= ContractCost.intVendorId
@@ -473,8 +519,8 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN tblSCTicket SC ON SC.intContractId = ContractCost.intContractDetailId
-							WHERE SC.intContractId = @intLoadContractId AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
+							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
+							WHERE SC.intContractDetailId = @intLoadContractId AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 						END
 				END
 		END
@@ -499,7 +545,7 @@ BEGIN TRY
 						,dblForexRate 
 					)
 					SELECT	
-					[intInventoryShipmentId]		= SC.intInventoryShipmentId
+					[intInventoryShipmentId]		= SC.intTransactionHeaderId
 					,[intContractId]				= NULL
 					,[intChargeId]					= @intFreightItemId
 					,[strCostMethod]				= SC.strCostMethod
@@ -507,10 +553,10 @@ BEGIN TRY
 														WHEN SC.strCostMethod = 'Amount' THEN 0
 														ELSE SC.dblFreightRate
 													END
-					,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SC.intItemUOMIdTo)
+					,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SC.intItemUOMId)
 					,[intCurrencyId]  				= SC.intCurrencyId
 					,[dblAmount]					=  CASE
-														WHEN SC.strCostMethod = 'Amount' THEN ROUND (SC.dblNetUnits * SC.dblFreightRate, 2)
+														WHEN SC.strCostMethod = 'Amount' THEN ROUND (SC.dblQty * SC.dblFreightRate, 2)
 														ELSE 0
 													END 
 					,[intEntityVendorId]			= CASE
@@ -521,7 +567,7 @@ BEGIN TRY
 					,[ysnPrice]						= @ysnPrice
 					,[intForexRateTypeId]			= NULL
 					,[dblForexRate]					= NULL
-					FROM blSCTicket SC
+					FROM @scaleStaging SC
 					LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 					LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 					WHERE SC.dblFreightRate > 0 AND SC.intTicketId = @intTicketId
@@ -547,21 +593,21 @@ BEGIN TRY
 							,dblForexRate 
 						)
 						SELECT	
-						[intInventoryShipmentId]	= SC.intInventoryShipmentId
-						,[intContractId]			= SC.intContractId
+						[intInventoryShipmentId]	= SC.intTransactionHeaderId
+						,[intContractId]			= SC.intContractDetailId
 						,[intChargeId]				= SCS.intFreightItemId
 						,[strCostMethod]			= SC.strCostMethod
 						,[dblRate]					= CASE
 														WHEN SC.strCostMethod = 'Amount' THEN 0
 														ELSE SC.dblFreightRate
 													END
-						,[intCostUOMId]				= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SC.intItemUOMIdTo)
+						,[intCostUOMId]				= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SC.intItemUOMId)
 						,[intCurrencyId]  			= SC.intCurrencyId
 						,[dblAmount]				=  CASE
 														WHEN SC.strCostMethod = 'Amount' THEN 
 														CASE
-															WHEN ISNULL(CT.intContractCostId,0) = 0 THEN ROUND(SC.dblNetUnits * SC.dblFreightRate, 2)
-															ELSE ROUND(SC.dblNetUnits * CT.dblRate, 2)
+															WHEN ISNULL(CT.intContractCostId,0) = 0 THEN ROUND(SC.dblQty * SC.dblFreightRate, 2)
+															ELSE ROUND(SC.dblQty * CT.dblRate, 2)
 														END
 														ELSE 0
 													END
@@ -573,11 +619,11 @@ BEGIN TRY
 						,[ysnPrice]					= @ysnPrice
 						,[intForexRateTypeId]		= NULL
 						,[dblForexRate]				= NULL
-						FROM tblSCTicket SC
+						FROM @scaleStaging SC
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						OUTER APPLY(
-							SELECT * FROM tblCTContractCost WHERE intContractDetailId = SC.intContractId 
+							SELECT * FROM tblCTContractCost WHERE intContractDetailId = SC.intContractDetailId 
 							AND dblRate != 0 
 							AND intItemId = @intFreightItemId
 						) CT
@@ -602,8 +648,8 @@ BEGIN TRY
 							,dblForexRate 
 						)
 						SELECT	
-						[intInventoryShipmentId]		= SC.intInventoryShipmentId
-						,[intContractId]				= SC.intContractId
+						[intInventoryShipmentId]		= SC.intTransactionHeaderId
+						,[intContractId]				= SC.intContractDetailId
 						,[intChargeId]					= ContractCost.intItemId
 						,[strCostMethod]				= SC.strCostMethod
 						,[dblRate]						= CASE
@@ -613,7 +659,7 @@ BEGIN TRY
 						,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, ContractCost.intItemUOMId)
 						,[intCurrencyId]  				= SC.intCurrencyId
 						,[dblAmount]					=  CASE
-															WHEN SC.strCostMethod = 'Amount' THEN ROUND(SC.dblNetUnits * ContractCost.dblRate, 2)
+															WHEN SC.strCostMethod = 'Amount' THEN ROUND(SC.dblQty * ContractCost.dblRate, 2)
 															ELSE 0
 														END
 						,[intEntityVendorId]			= ContractCost.intVendorId
@@ -622,7 +668,7 @@ BEGIN TRY
 						,[intForexRateTypeId]			= NULL
 						,[dblForexRate]					= NULL
 						FROM tblCTContractCost ContractCost
-						LEFT JOIN tblSCTicket SC ON SC.intContractId = ContractCost.intContractDetailId
+						LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						WHERE ContractCost.intItemId = @intFreightItemId 
@@ -646,7 +692,7 @@ BEGIN TRY
 							,dblForexRate 
 						)
 						SELECT	
-						[intInventoryShipmentId]		= SC.intInventoryShipmentId
+						[intInventoryShipmentId]		= SC.intTransactionHeaderId
 						,[intContractId]				= NULL
 						,[intChargeId]					= @intFreightItemId
 						,[strCostMethod]				= SC.strCostMethod
@@ -654,10 +700,10 @@ BEGIN TRY
 															WHEN SC.strCostMethod = 'Amount' THEN 0
 															ELSE SC.dblFreightRate
 														END
-						,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SC.intItemUOMIdTo)
+						,[intCostUOMId]					= dbo.fnGetMatchingItemUOMId(@intFreightItemId, SC.intItemUOMId)
 						,[intCurrencyId]  				= SC.intCurrencyId
 						,[dblAmount]					=  CASE
-															WHEN SC.strCostMethod = 'Amount' THEN ROUND (SC.dblNetUnits * SC.dblFreightRate, 2)
+															WHEN SC.strCostMethod = 'Amount' THEN ROUND (SC.dblQty * SC.dblFreightRate, 2)
 															ELSE 0
 														END
 						,[intEntityVendorId]			= CASE
@@ -668,7 +714,7 @@ BEGIN TRY
 						,[ysnPrice]						= @ysnPrice
 						,[intForexRateTypeId]			= NULL
 						,[dblForexRate]					= NULL
-						FROM tblSCTicket SC
+						FROM @scaleStaging SC
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						WHERE SC.dblFreightRate > 0 AND SC.intTicketId = @intTicketId
@@ -692,8 +738,8 @@ BEGIN TRY
 				,dblForexRate 
 			)
 			SELECT	
-			[intInventoryShipmentId]			= SC.intInventoryShipmentId
-			,[intContractId]					= SC.intContractId
+			[intInventoryShipmentId]			= SC.intTransactionHeaderId
+			,[intContractId]					= SC.intContractDetailId
 			,[intChargeId]						= ContractCost.intItemId
 			,[strCostMethod]					= ContractCost.strCostMethod
 			,[dblRate]							= CASE
@@ -703,7 +749,7 @@ BEGIN TRY
 			,[intCostUOMId]						= ContractCost.intItemUOMId
 			,[intCurrencyId]  					= SC.intCurrencyId
 			,[dblAmount]						=  CASE
-													WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND (SC.dblNetUnits * ISNULL(ContractCost.dblRate,SC.dblFreightRate), 2)
+													WHEN ContractCost.strCostMethod = 'Amount' THEN ROUND (SC.dblQty * ISNULL(ContractCost.dblRate, SC.dblFreightRate), 2)
 													ELSE 0
 												END	
 			,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
@@ -712,7 +758,7 @@ BEGIN TRY
 			,[intForexRateTypeId]				= NULL
 			,[dblForexRate]						= NULL
 			FROM tblCTContractCost ContractCost
-			LEFT JOIN tblSCTicket SC ON SC.intContractId = ContractCost.intContractDetailId
+			LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
 			WHERE ContractCost.intItemId != @intFreightItemId AND ContractCost.dblRate != 0 
 			AND SC.intTicketId = @intTicketId
 		END

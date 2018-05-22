@@ -404,8 +404,8 @@ BEGIN
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
 											WHEN IC.strCostMethod = 'Amount' THEN 
 											CASE
-												WHEN @ysnDeductFeesCusVen = 0 THEN SC.dblTicketFees
-												WHEN @ysnDeductFeesCusVen = 1 THEN (SC.dblTicketFees * -1)
+												WHEN @ysnDeductFeesCusVen = 0 THEN (SE.dblQuantity / SC.dblNetUnits * SC.dblTicketFees)
+												WHEN @ysnDeductFeesCusVen = 1 THEN ROUND ((SE.dblQuantity / SC.dblNetUnits * SC.dblTicketFees), 2) * -1
 											END
 										END
 	,[ysnAccrue]						= 0
