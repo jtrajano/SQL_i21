@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCTReportIdealContractBuyer]
+﻿------------------------uspCTReportIdealContractBuyer
+CREATE PROCEDURE [dbo].[uspCTReportIdealContractBuyer]
 @xmlParam NVARCHAR(MAX) = NULL  
 	
 AS
@@ -55,6 +56,20 @@ BEGIN TRY
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
 	)
+    
+	INSERT INTO @temp_xml_table
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(50), 
+				[to]			NVARCHAR(50),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)  
 	
 	SELECT @strLanguage = [from]
 	FROM @temp_xml_table
@@ -66,7 +81,12 @@ BEGIN TRY
     
 	SELECT	@intLaguageId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intLaguageId'
+	WHERE	[fieldname] = 'intSrLanguageId'
+
+	if (@intLaguageId is null)
+	begin
+		set @intLaguageId = 0;
+	end
 
 	/*Declared variables for translating expression*/
 	declare @Messrs nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Messrs'),'Messrs');
@@ -79,7 +99,7 @@ BEGIN TRY
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
-			@strCounty		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry))) END,
+			@strCounty		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCounty)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCounty))) END,
 			@strCity		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCity)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCity)) END,
 			@strState		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strState)) END,
 			@strZip			=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strZip)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strZip)) END,
@@ -100,7 +120,7 @@ BEGIN TRY
 										ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
 										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
-										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END,'')
+										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt10.strTranslation,LTRIM(RTRIM(EC.strEntityCountry))) END,'')
 
 		,strHeaderLabelText         =  @strHeaderLabelText + ' '+LTRIM(CH.strContractNumber)   
 		,strHeaderText		        =  @strHeaderText1 + ' '+ isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@strHeaderText2+'.'
@@ -110,14 +130,14 @@ BEGIN TRY
 										ISNULL(LTRIM(RTRIM(EV.strEntityCity)),'') + 
 										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityState)) END,'') + 
 										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityZipCode)) END,'') + 
-										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityCountry)) END,'')
+										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt11.strTranslation,LTRIM(RTRIM(EV.strEntityCountry))) END,'')
 
 		,strBuyer			        =  LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 										ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 										ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
 										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
-										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END,'')
+										ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt10.strTranslation,LTRIM(RTRIM(EC.strEntityCountry))) END,'')
 
 		,strQuality			        =  isnull(rtrt3.strTranslation,IM.strDescription)+' , '+CD.strItemSpecification		 
 		,strSample			        =  '-'
@@ -186,6 +206,16 @@ BEGIN TRY
 	left join tblSMScreen				rts8 on rts8.strNamespace = 'ContractManagement.view.WeightGrades'
 	left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = W.intWeightGradeId
 	left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Name'
+
+	left join tblSMCountry				rtc10 on lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
+	left join tblSMScreen				rts10 on rts10.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt10 on rtt10.intScreenId = rts10.intScreenId and rtt10.intRecordId = rtc10.intCountryID
+	left join tblSMReportTranslation	rtrt10 on rtrt10.intLanguageId = @intLaguageId and rtrt10.intTransactionId = rtt10.intTransactionId and rtrt10.strFieldName = 'Country'
+
+	left join tblSMCountry				rtc11 on lower(rtrim(ltrim(rtc11.strCountry))) = lower(rtrim(ltrim(EV.strEntityCountry)))
+	left join tblSMScreen				rts11 on rts11.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt11 on rtt11.intScreenId = rts11.intScreenId and rtt11.intRecordId = rtc11.intCountryID
+	left join tblSMReportTranslation	rtrt11 on rtrt11.intLanguageId = @intLaguageId and rtrt11.intTransactionId = rtt11.intTransactionId and rtrt11.strFieldName = 'Country'
 
 	WHERE CH.intContractHeaderId = @intContractHeaderId
 
