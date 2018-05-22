@@ -326,7 +326,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 	UNION
 	
 		 SELECT 
-		  intContractTypeId							= CH.intContractTypeId 
+		 intContractTypeId							= CH.intContractTypeId 
 		,intContractDetailId						= CD.intContractDetailId
 		,intBookId									= Book.intBookId
 		,strBook									= Book.strBook
@@ -334,7 +334,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,intCommodityId								= Commodity.intCommodityId
 		,strCommodity								= Commodity.strDescription
 		,strProductType								= CA1.strDescription
-		,strRealizedType							= 'Realized'							
+		,strRealizedType							= CASE WHEN ISNULL(StandardInvoice.intOriginalInvoiceId,0) = 0 THEN 'Realized Not Fixed' ELSE 'Realized' END							
 		,dtmContractDate							= CONVERT(DATETIME, CONVERT(VARCHAR, CH.dtmContractDate, 101), 101)
 		,strTransactionType							= 'Contract('+CASE 
 																	  WHEN CH.intContractTypeId=1 THEN 'P'
@@ -410,7 +410,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strCompany									= Company.strCompanyName	
 
 		FROM tblARInvoiceDetail InvoiceDetail
-		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId
+		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 		JOIN tblLGLoadDetail LoadDetail			    ON LoadDetail.intLoadDetailId = InvoiceDetail.intLoadDetailId
 		JOIN tblLGAllocationDetail AllocationDetail ON AllocationDetail.intAllocationDetailId = LoadDetail.intAllocationDetailId
 		JOIN tblCTContractDetail	CD				ON CD.intContractDetailId = AllocationDetail.intSContractDetailId
@@ -431,6 +431,10 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		JOIN tblICItem							Item			 ON Item.intItemId					 = CD.intItemId		
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
+		LEFT JOIN
+		(
+		 SELECT * FROM tblARInvoice WHERE ISNULL(intOriginalInvoiceId,0) >0
+		)								StandardInvoice		ON	StandardInvoice.intOriginalInvoiceId = Invoice.intInvoiceId
 		LEFT JOIN tblCTPosition					PO				 ON PO.intPositionId				 = CH.intPositionId
 		LEFT JOIN tblICCommodityAttribute		CA				 ON CA.intCommodityAttributeId		 = Item.intOriginId
 																	AND	CA.strType						 = 'Origin'
@@ -476,6 +480,8 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
 
 		WHERE Book.intBookId = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  Book.intBookId END
+		AND  StandardInvoice.intInvoiceId IS NULL
+		AND  StandardInvoice.intOriginalInvoiceId IS NULL
 
 		-----------------------------------------------------dblCOGSOrNetSaleValue Updation--------------------------------------------
 		
