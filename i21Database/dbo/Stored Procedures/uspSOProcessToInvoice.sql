@@ -40,27 +40,117 @@ IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrder
 	END
 ELSE
 	BEGIN
-		DECLARE @EntityCustomerId INT
-		DECLARE @TermsId INT
-
-		select @EntityCustomerId = intEntityCustomerId,
-			@TermsId = intTermId
-			from tblSOSalesOrder with(nolock) where intSalesOrderId = @SalesOrderId
-
-		if exists(select top 1 1 from tblEMEntityType with(nolock) where intEntityId = @EntityCustomerId and strType = 'Prospect')
-			and not exists(select top 1 1 from tblEMEntityType with(nolock) where intEntityId = @EntityCustomerId and strType = 'Customer')
+		--AUTO-BLEND ITEMS
+		IF(OBJECT_ID('tempdb..#UNBLENDEDITEMS') IS NOT NULL)
 		BEGIN
-			update tblEMEntityType 
-				set strType = 'Customer'
-					where intEntityId = @EntityCustomerId and strType = 'Prospect'
-						and not exists ( select top 1 1 
-											from tblEMEntityType 
-												where intEntityId = @EntityCustomerId 
-													and strType ='Customer')
-
-			update tblARCustomer set intTermsId = @TermsId where intEntityId = @EntityCustomerId
+			DROP TABLE #UNBLENDEDITEMS
 		END
+		
+		CREATE TABLE #UNBLENDEDITEMS (
+			  intSalesOrderDetailId	INT NULL
+			, intItemId				INT NULL
+			, intItemUOMId			INT NULL
+			, intCompanyLocationId	INT NULL
+			, intSubLocationId		INT NULL
+			, intStorageLocationId	INT NULL
+			, dblQtyOrdered			NUMERIC(18, 6) NULL
+			, dtmDate				DATETIME NULL
+		)
 
+		INSERT INTO #UNBLENDEDITEMS
+		SELECT intSalesOrderDetailId	= SOD.intSalesOrderDetailId
+			 , intItemId				= SOD.intItemId			 
+			 , intItemUOMId				= SOD.intItemUOMId
+			 , intCompanyLocationId		= SO.intCompanyLocationId
+			 , intSubLocationId			= SOD.intSubLocationId
+			 , intStorageLocationId		= SOD.intStorageLocationId
+			 , dblQtyOrdered			= SOD.dblQtyOrdered
+			 , dtmDate					= SO.dtmDate
+		FROM tblSOSalesOrderDetail SOD
+		INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+		INNER JOIN tblICItem ITEM ON ITEM.intItemId = SOD.intItemId		
+		WHERE SOD.intSalesOrderId = @SalesOrderId
+		  AND ISNULL(SOD.ysnBlended, 0) = 0
+		  AND ITEM.strType = 'Finished Good'
+		  AND ITEM.ysnAutoBlend = 1
+		
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
+			BEGIN
+				DECLARE @intSalesOrderDetailId	INT = NULL
+					  , @intItemId				INT = NULL
+					  , @intItemUOMId			INT = NULL
+					  , @intCompanyLocationId	INT = NULL
+					  , @intSubLocationId		INT = NULL
+					  , @intStorageLocationId	INT = NULL
+					  , @dblQtyOrdered			NUMERIC(18, 6) = 0
+					  , @dblMaxQtyToProduce		NUMERIC(18, 6) = 0
+					  , @dtmDate				DATETIME = NULL
+
+				SELECT TOP 1 @intSalesOrderDetailId = intSalesOrderDetailId
+						   , @intItemId				= intItemId			 
+						   , @intItemUOMId			= intItemUOMId
+						   , @intCompanyLocationId	= intCompanyLocationId
+						   , @intSubLocationId		= intSubLocationId
+						   , @intStorageLocationId	= intStorageLocationId
+						   , @dblQtyOrdered			= dblQtyOrdered
+						   , @dtmDate				= dtmDate
+				FROM #UNBLENDEDITEMS
+				ORDER BY intSalesOrderDetailId
+
+				EXEC [dbo].[uspMFAutoBlend] @intSalesOrderDetailId	= @intSalesOrderDetailId
+										  , @intItemId				= @intItemId
+										  , @dblQtyToProduce		= @dblQtyOrdered
+										  , @intItemUOMId			= @intItemUOMId
+										  , @intLocationId			= @intCompanyLocationId
+										  , @intSubLocationId		= @intSubLocationId
+										  , @intStorageLocationId	= @intStorageLocationId
+										  , @intUserId				= @UserId
+										  , @dblMaxQtyToProduce		= @dblMaxQtyToProduce OUT
+										  , @dtmDate				= @dtmDate
+
+				IF ISNULL(@dblMaxQtyToProduce, 0) > 0
+					BEGIN
+						UPDATE tblSOSalesOrderDetail SET dblQtyOrdered = @dblMaxQtyToProduce WHERE intSalesOrderDetailId = @intSalesOrderDetailId
+
+						EXEC [dbo].[uspMFAutoBlend] @intSalesOrderDetailId	= @intSalesOrderDetailId
+												  , @intItemId				= @intItemId
+												  , @dblQtyToProduce		= @dblMaxQtyToProduce
+												  , @intItemUOMId			= @intItemUOMId
+												  , @intLocationId			= @intCompanyLocationId
+												  , @intSubLocationId		= @intSubLocationId
+												  , @intStorageLocationId	= @intStorageLocationId
+												  , @intUserId				= @UserId
+												  , @dblMaxQtyToProduce		= @dblMaxQtyToProduce OUT
+												  , @dtmDate				= @dtmDate
+					END
+
+				UPDATE tblSOSalesOrderDetail SET ysnBlended = 1 WHERE intSalesOrderDetailId = @intSalesOrderDetailId
+							
+				DELETE FROM #UNBLENDEDITEMS WHERE intSalesOrderDetailId  = @intSalesOrderDetailId
+			END
+		
+		--CONVERT PROSPECT TO CUSTOMER
+		DECLARE @intEntityCustomerId	INT
+			  , @intTermsId				INT
+
+		SELECT @intEntityCustomerId = intEntityCustomerId
+			 , @intTermsId			= intTermId
+		FROM dbo.tblSOSalesOrder WITH(NOLOCK) 
+		where intSalesOrderId = @SalesOrderId
+
+		IF EXISTS(SELECT top 1 1 FROM tblEMEntityType WITH(NOLOCK) WHERE intEntityId = @intEntityCustomerId AND strType = 'Prospect')
+			AND NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityType WITH(NOLOCK) WHERE intEntityId = @intEntityCustomerId AND strType = 'Customer')
+		BEGIN
+			UPDATE tblEMEntityType 
+			SET strType = 'Customer'
+			WHERE intEntityId = @intEntityCustomerId 
+			 AND strType = 'Prospect'
+			 AND NOT EXISTS (SELECT top 1 1 FROM tblEMEntityType WHERE intEntityId = @intEntityCustomerId AND strType ='Customer')
+
+			UPDATE tblARCustomer 
+			SET intTermsId = @intTermsId 
+			WHERE intEntityId = @intEntityCustomerId
+		END
 
 
 		--INSERT TO INVOICE
