@@ -21,6 +21,12 @@ BEGIN TRY
 	DECLARE @ExistingMonthsToView INT
 		,@NewMonthsToView INT
 		,@ExistingInvChk BIT
+		,@dtmCurrentDate DATETIME
+		,@intDayOfYear INT
+
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+
+	SELECT @intDayOfYear = DATEPART(dy, GETDATE())
 
 	SET @ExistingMonthsToView = 0
 
@@ -267,6 +273,18 @@ BEGIN TRY
 								END
 							)
 						AND RI.intRecipeItemTypeId = 1
+						AND (
+							(
+								RI.ysnYearValidationRequired = 1
+								AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+									AND RI.dtmValidTo
+								)
+							OR (
+								RI.ysnYearValidationRequired = 0
+								AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+									AND DATEPART(dy, RI.dtmValidTo)
+								)
+							)
 					JOIN #OpeningInventory OI ON OI.intItemId = R.intItemId
 					JOIN [dbo].[tblICItemUOM] IUOM ON IUOM.intItemId = OI.intItemId
 						AND IUOM.ysnStockUnit = 1
@@ -314,6 +332,18 @@ BEGIN TRY
 							END
 						)
 					AND RI.intRecipeItemTypeId = 1
+					AND (
+						(
+							RI.ysnYearValidationRequired = 1
+							AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+								AND RI.dtmValidTo
+							)
+						OR (
+							RI.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+								AND DATEPART(dy, RI.dtmValidTo)
+							)
+						)
 				JOIN #ExistingPurchases EP ON EP.intItemId = R.intItemId
 				WHERE RI.intItemId = @intItemId
 					AND EP.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
@@ -360,6 +390,18 @@ BEGIN TRY
 							END
 						)
 					AND RI.intRecipeItemTypeId = 1
+					AND (
+						(
+							RI.ysnYearValidationRequired = 1
+							AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+								AND RI.dtmValidTo
+							)
+						OR (
+							RI.ysnYearValidationRequired = 0
+							AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+								AND DATEPART(dy, RI.dtmValidTo)
+							)
+						)
 				JOIN #IntransitPurchases IP ON IP.intItemId = R.intItemId
 				WHERE RI.intItemId = @intItemId
 					AND IP.dtmUpdatedAvailabilityDate <= (CAST((CONVERT(VARCHAR(25), DATEADD(dd, - (DAY(GETDATE())), GETDATE()), 101)) AS DATETIME)) -- previous month last date
@@ -806,6 +848,18 @@ BEGIN TRY
 													END
 												)
 											AND RI.intRecipeItemTypeId = 1
+											AND (
+												(
+													RI.ysnYearValidationRequired = 1
+													AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+														AND RI.dtmValidTo
+													)
+												OR (
+													RI.ysnYearValidationRequired = 0
+													AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+														AND DATEPART(dy, RI.dtmValidTo)
+													)
+												)
 										JOIN #ExistingPurchases EP ON EP.intItemId = R.intItemId
 										WHERE RI.intItemId = @intItemId
 											AND left(convert(CHAR(12), EP.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -854,6 +908,18 @@ BEGIN TRY
 													END
 												)
 											AND RI.intRecipeItemTypeId = 1
+											AND (
+												(
+													RI.ysnYearValidationRequired = 1
+													AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+														AND RI.dtmValidTo
+													)
+												OR (
+													RI.ysnYearValidationRequired = 0
+													AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+														AND DATEPART(dy, RI.dtmValidTo)
+													)
+												)
 										JOIN #IntransitPurchases IP ON IP.intItemId = R.intItemId
 										WHERE RI.intItemId = @intItemId
 											AND left(convert(CHAR(12), IP.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -1340,6 +1406,18 @@ BEGIN TRY
 												END
 											)
 										AND RI.intRecipeItemTypeId = 1
+										AND (
+											(
+												RI.ysnYearValidationRequired = 1
+												AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+													AND RI.dtmValidTo
+												)
+											OR (
+												RI.ysnYearValidationRequired = 0
+												AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+													AND DATEPART(dy, RI.dtmValidTo)
+												)
+											)
 									JOIN #ExistingPurchases EP ON EP.intItemId = R.intItemId
 									WHERE RI.intItemId = @intItemId
 										AND left(convert(CHAR(12), EP.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -1388,6 +1466,18 @@ BEGIN TRY
 												END
 											)
 										AND RI.intRecipeItemTypeId = 1
+										AND (
+											(
+												RI.ysnYearValidationRequired = 1
+												AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+													AND RI.dtmValidTo
+												)
+											OR (
+												RI.ysnYearValidationRequired = 0
+												AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+													AND DATEPART(dy, RI.dtmValidTo)
+												)
+											)
 									JOIN #IntransitPurchases IP ON IP.intItemId = R.intItemId
 									WHERE RI.intItemId = @intItemId
 										AND left(convert(CHAR(12), IP.dtmUpdatedAvailabilityDate), 3) = left(convert(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)

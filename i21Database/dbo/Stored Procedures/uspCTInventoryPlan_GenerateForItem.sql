@@ -21,6 +21,12 @@ BEGIN TRY
 	DECLARE @ExistingMonthsToView INT
 		,@NewMonthsToView INT
 		,@ExistingInvChk BIT
+		,@dtmCurrentDate DATETIME
+		,@intDayOfYear INT
+
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101))
+
+	SELECT @intDayOfYear = DATEPART(dy, GETDATE())
 
 	SET @ExistingMonthsToView = 0
 
@@ -496,6 +502,18 @@ BEGIN TRY
 					)
 			WHERE RI.intRecipeId = @intBlendDemandItemRecipeId
 				AND intRecipeItemTypeId = 1
+				AND (
+					(
+						RI.ysnYearValidationRequired = 1
+						AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+							AND RI.dtmValidTo
+						)
+					OR (
+						RI.ysnYearValidationRequired = 0
+						AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+							AND DATEPART(dy, RI.dtmValidTo)
+						)
+					)
 
 			INSERT INTO #TempInputALL
 			SELECT *
@@ -573,6 +591,18 @@ BEGIN TRY
 							)
 					WHERE RI.intRecipeId = @intRecipeId
 						AND RI.intRecipeItemTypeId = 1
+						AND (
+							(
+								RI.ysnYearValidationRequired = 1
+								AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+									AND RI.dtmValidTo
+								)
+							OR (
+								RI.ysnYearValidationRequired = 0
+								AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+									AND DATEPART(dy, RI.dtmValidTo)
+								)
+							)
 
 					INSERT INTO #TempInputALL
 					SELECT *
