@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReportPriceFixation]
-	@xmlParam NVARCHAR(MAX) = NULL
+	@xmlParam NVARCHAR(MAX) = NULL  
 AS
 
 BEGIN TRY
@@ -129,7 +129,8 @@ BEGIN TRY
 			CH.strCustomerContract,
 			strDescription = isnull(rtrt.strTranslation,IM.strDescription),
 			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) ,
-			strPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
+			--strPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
+			strPeriod = datename(dd,dtmStartDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,dtmStartDate)),datename(mm,dtmStartDate)) + ' ' + datename(yyyy,dtmStartDate) + ' - ' + datename(dd,dtmEndDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,dtmEndDate)),datename(mm,dtmEndDate)) + ' ' + datename(yyyy,dtmEndDate),
 			strStatus = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strStatus1
 								ELSE	@strStatus2
@@ -192,7 +193,9 @@ BEGIN TRY
 			strLastModifiedUserSign = @LastModifiedUserSign,
 			strTotalLots = dbo.fnRemoveTrailingZeroes(ISNULL(PF.dblTotalLots,0)),
 			strMarketMonth = isnull(rtrt6.strTranslation,MA.strFutMarketName) +  ' '  + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate),
-			strCompanyCityAndDate = ISNULL(@strCity + ', ', '') + CONVERT(NVARCHAR(20),GETDATE(),106),
+			--strMarketMonth = isnull(rtrt6.strTranslation,MA.strFutMarketName) +  ' '  + isnull(rtrt1.strTranslation,MO.strFutureMonth),
+			--strCompanyCityAndDate = ISNULL(@strCity + ', ', '') + CONVERT(NVARCHAR(20),GETDATE(),106),
+			strCompanyCityAndDate = ISNULL(@strCity + ', ', '') + datename(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,getdate())),datename(mm,getdate())) + ' ' + datename(yyyy,getdate()),
 			strCompanyName = @strCompanyName,
 			strCPContract  = CH.strCPContract,
 			intLanguageId = @intLaguageId
