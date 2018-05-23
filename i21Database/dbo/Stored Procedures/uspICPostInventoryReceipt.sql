@@ -2001,7 +2001,7 @@ BEGIN
 		SET @ysnAllowBlankGLEntries = 1
 	END 
 
-	IF @ysnAllowBlankGLEntries = 0 
+	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
