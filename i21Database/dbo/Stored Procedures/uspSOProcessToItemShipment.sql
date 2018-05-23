@@ -136,7 +136,20 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM #ITEMSTOSHIP)
         RETURN
 	END
 ELSE
-	BEGIN 
+	BEGIN
+		--AUTO-BLEND ITEMS
+		DECLARE @strErrorMessage	NVARCHAR(MAX)
+
+		BEGIN TRY
+			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId
+		END TRY
+		BEGIN CATCH
+			SET @strErrorMessage	= ERROR_MESSAGE()
+				
+			RAISERROR(@strErrorMessage, 11, 1)
+			RETURN
+		END CATCH
+		 
 		DECLARE @Items				ShipmentStagingTable
 			  , @Charges			ShipmentChargeStagingTable
 			  , @Lots				ShipmentItemLotStagingTable			  

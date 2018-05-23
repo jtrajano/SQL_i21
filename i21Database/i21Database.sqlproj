@@ -6613,6 +6613,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationForCStore.sql" />
     <Build Include="dbo\Views\vyuRKGetMatchingLotAvailableQty.sql" />
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
