@@ -95,6 +95,7 @@ AS
 	, TransferDetail.intNewLotStatusId
 	, TransferDetail.intGrossNetUOMId
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
+	, strNewLotId = ISNULL(TransferDetail.strNewLotId, '')
 	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
 	, dblGrossNetUnitQty = TransferDetail.dblGrossNetUnitQty
 	, dblItemUnitQty = TransferDetail.dblItemUnitQty
