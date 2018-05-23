@@ -40,19 +40,19 @@ AS
 							strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 							intPricingTypeId INT,
 							strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							dblContractRatio NUMERIC(24, 10), 
 							dblContractBasis NUMERIC(24, 10),
 							dblFutures NUMERIC(24, 10),
 							dblCash NUMERIC(24, 10), 
 							dblCosts NUMERIC(24, 10),
 							dblMarketBasis NUMERIC(24, 10), 
+							dblMarketRatio NUMERIC(24, 10), 
 							dblFuturePrice NUMERIC(24, 10),
 							intContractTypeId INT,
 							dblAdjustedContractPrice NUMERIC(24, 10),
 							dblCashPrice NUMERIC(24, 10), 
 							dblMarketPrice NUMERIC(24, 10),
-							dblResult NUMERIC(24, 10),
 							dblResultBasis NUMERIC(24, 10),
-							dblMarketFuturesResult NUMERIC(24, 10),
 							dblResultCash NUMERIC(24, 10),
 							dblContractPrice NUMERIC(24, 10)
 							,intQuantityUOMId INT
@@ -66,6 +66,9 @@ AS
 							,intMarketZoneId int 
 							,strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
 							,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dblResult NUMERIC(24, 10)
+							,dblMarketFuturesResult NUMERIC(24, 10)
+							,dblResultRatio NUMERIC(24, 10)
 						)
 
 
@@ -103,17 +106,20 @@ INSERT INTO [dbo].[tblRKM2MInquiryTransaction]
            ,[strPriOrNotPriOrParPriced]
            ,[strPricingType]
            ,[dblContractBasis]
+		   ,[dblContractRatio]
            ,[dblFutures]
            ,[dblCash]
            ,[dblContractPrice]
            ,[dblCosts]
            ,[dblAdjustedContractPrice]
            ,[dblMarketBasis]
+		   ,[dblMarketRatio]
            ,[dblFuturePrice]
            ,[dblContractCash]
            ,[dblMarketPrice]
            ,[dblResult]
            ,[dblResultBasis]
+		   ,[dblResultRatio]
            ,[dblMarketFuturesResult]
            ,[dblResultCash]
            ,[intContractHeaderId]
@@ -141,17 +147,20 @@ INSERT INTO [dbo].[tblRKM2MInquiryTransaction]
            ,strPriOrNotPriOrParPriced
            ,strPricingType
            ,dblContractBasis
+		   ,dblContractRatio
            ,dblFutures
            ,dblCash
            ,dblContractPrice
            ,dblCosts
            ,dblAdjustedContractPrice
            ,dblMarketBasis
+		   ,dblMarketRatio
            ,dblFuturePrice
            ,NULL --dblContractCash
            ,dblMarketPrice
            ,dblResult
            ,dblResultBasis
+		   ,dblResultRatio
            ,dblMarketFuturesResult
            ,dblResultCash
            ,intContractHeaderId
@@ -248,6 +257,7 @@ INSERT INTO [dbo].[tblRKM2MInquiryTransaction]
 							,intContractTypeId INT
 							,dblCashOrFuture NUMERIC(24, 10)
 							,dblBasisOrDiscount NUMERIC(24, 10)
+							,dblRatio NUMERIC(24, 10)
 							,intUnitMeasureId INT
 							,strMarketValuation NVARCHAR(200) COLLATE Latin1_General_CI_AS
 							,intConcurrencyId INT
@@ -281,6 +291,7 @@ SELECT
 	,bd.intContractTypeId
 	,bd.dblCashOrFuture
 	,bd.dblBasisOrDiscount
+	,bd.dblRatio
 	,bd.intUnitMeasureId
 	,i.strMarketValuation
 	,0 as intConcurrencyId	
@@ -328,8 +339,8 @@ INSERT INTO [dbo].[tblRKM2MInquiryBasisDetail]
            ,[intContractTypeId]
            ,[dblCashOrFuture]
            ,[dblBasisOrDiscount]
-           ,[intUnitMeasureId]
-		   ,[intM2MBasisDetailId])
+		   ,[dblRatio]
+           ,[intUnitMeasureId])
      SELECT 
            @intM2MInquiryId
            ,1
@@ -347,8 +358,8 @@ INSERT INTO [dbo].[tblRKM2MInquiryBasisDetail]
            ,intContractTypeId
            ,dblCashOrFuture
            ,dblBasisOrDiscount
+		   ,dblRatio
            ,intUnitMeasureId
-		   ,intM2MBasisDetailId
 		FROM @#tempInquiryBasisDetail
 
 	--================================================================

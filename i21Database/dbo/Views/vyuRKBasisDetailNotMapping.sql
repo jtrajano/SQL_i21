@@ -18,6 +18,7 @@ SELECT
 		bd.strContractInventory,
 		bd.intContractTypeId,
 		bd.dblCashOrFuture,
+		bd.dblRatio,
 		bd.dblBasisOrDiscount,
 		bd.intUnitMeasureId,
 		bd.strMarketValuation
