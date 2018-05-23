@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICDuplicateItem]
 	@ItemId INT,
+	@intUserId INT,
 	@NewItemId INT OUTPUT
 AS
 BEGIN
@@ -985,5 +986,33 @@ BEGIN
 	--------------------------------------------------------------
 	---- End duplication of Item Contract table and its details --
 	--------------------------------------------------------------
+
+
+	---------------------------------
+	-- Duplicate Item Add-on table --
+	---------------------------------
+	INSERT INTO tblICItemAddOn(
+		intItemId,
+		intAddOnItemId,
+		dblQuantity,
+		intItemUOMId,
+		ysnAutoAdd,
+		intConcurrencyId,
+		dtmDateCreated,
+		intCreatedByUserId
+	)
+	SELECT	@NewItemId,
+			intAddOnItemId,
+			dblQuantity,
+			intItemUOMId,
+			ysnAutoAdd,
+			1,
+			GETDATE(),
+			@intUserId
+	FROM tblICItemAddOn
+	WHERE intItemId = @ItemId
+	-------------------------------------
+	-- End Duplicate Item Add-on table --
+	-------------------------------------
 END
 GO
