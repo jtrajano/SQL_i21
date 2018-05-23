@@ -54,7 +54,7 @@ AS
 			NM.intEntityDefaultLocationId,
 			NM.strEntityDefaultLocation,
 			NM.intPositionNoOfDays,
-			CH.intNoOfLoad - (SELECT SUM(dblBalance) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dblLoadsDelivered,
+			CH.intNoOfLoad - (SELECT SUM(dblBalanceLoad) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dblLoadsDelivered,
 			NM.strBook,
 			NM.strSubBook,
 			NM.strMarketMainCurrency

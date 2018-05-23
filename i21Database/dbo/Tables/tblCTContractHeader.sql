@@ -74,6 +74,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	ysnMailSent BIT,
 	strAmendmentLog  [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	ysnBrokerage BIT,
+	ysnBestPriceOnly BIT,
 	intCompanyId INT,
 	intContractHeaderRefId INT,
 
