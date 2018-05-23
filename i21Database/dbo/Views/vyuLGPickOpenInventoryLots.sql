@@ -38,8 +38,16 @@ SELECT Lot.intLotId
        , strLotStatusType = LotStatus.strPrimaryStatus
        , Lot.intParentLotId
        , Lot.intSplitFromLotId
-       , dblGrossWeightFull = IsNull((((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty) + Lot.dblWeight), 0.0)
-       , dblTareWeightFull = IsNull(((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty), 0.0)
+       , dblGrossWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
+                                                       IsNull((((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty) + Lot.dblWeight), 0.0) 
+                                                  ELSE
+                                                       ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0))
+                                                  END
+       , dblTareWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
+                                                       IsNull(((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty), 0.0)
+                                                ELSE
+                                                       0.0
+                                                END
        , Lot.dblWeight as dblNetWeightFull
        , CASE WHEN isnull(Lot.intWeightUOMId,0) = 0 THEN Lot.intItemUOMId ELSE Lot.intWeightUOMId end intItemWeightUOMId
        , strWeightUOM = CASE WHEN isnull(Lot.intWeightUOMId,0) = 0 THEN UOM.strUnitMeasure ELSE WeightUOM.strUnitMeasure END
@@ -95,7 +103,7 @@ SELECT Lot.intLotId
 	   , '' COLLATE Latin1_General_CI_AS AS strCertification  
 	   , '' COLLATE Latin1_General_CI_AS AS strCertificationId 
 FROM tblICLot Lot
-JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
+LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 

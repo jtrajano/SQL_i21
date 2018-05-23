@@ -124,6 +124,11 @@ BEGIN TRY
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
+				IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intContractStatusId = 3)
+				BEGIN
+					RAISERROR ('Associated contract seq is in cancelled status. Cannot continue.',11,1)
+				END
+
 				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
 					,@dblQuantityToUpdate = @dblQuantityToUpdate
 					,@intUserId = @intEntityUserSecurityId
