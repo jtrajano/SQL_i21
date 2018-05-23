@@ -146,72 +146,72 @@ SELECT intPropertyId
 	,strPropertyName
 	,IsNULL(strPropertyValue, 0) AS dblEstimatedOutput
 	,I.strDescription AS strGrade
-	,S.dblQty AS dblInputWeight
-	,WP.dblQuantity AS dblOutputWeight
-	,IsNULL(strActualOutput, 0) AS dblActualOutput
-	,(
-		CASE 
-			WHEN dblCoEfficient = 0
-				THEN NULL
-			ELSE (
-					CASE 
-						WHEN Sum(CASE 
-									WHEN dblCoEfficient = 0
-										THEN 0
-									ELSE [strActualOutput]
-									END) OVER () = 0
-							THEN 0
-						ELSE (
-								[strActualOutput] / Sum(CASE 
-										WHEN dblCoEfficient = 0
-											THEN 0
-										ELSE [strActualOutput]
-										END) OVER ()
-								) * 100
-						END
-					)
-			END
-		) AS dblCleanGradeOutput
-	,(
-		(
+	,Convert(NUMERIC(38, 5), S.dblQty) AS dblInputWeight
+	,Convert(NUMERIC(38, 5), WP.dblQuantity) AS dblOutputWeight
+	,Convert(NUMERIC(38, 5), IsNULL(strActualOutput, 0)) AS dblActualOutput
+	,Convert(NUMERIC(38, 5), (
 			CASE 
 				WHEN dblCoEfficient = 0
-					THEN IsNULL(strActualOutput, 0)
+					THEN NULL
 				ELSE (
 						CASE 
 							WHEN Sum(CASE 
 										WHEN dblCoEfficient = 0
 											THEN 0
-										ELSE IsNULL(strActualOutput, 0)
+										ELSE [strActualOutput]
 										END) OVER () = 0
 								THEN 0
 							ELSE (
-									IsNULL(strActualOutput, 0) / Sum(CASE 
+									[strActualOutput] / Sum(CASE 
 											WHEN dblCoEfficient = 0
 												THEN 0
-											ELSE IsNULL(strActualOutput, 0)
+											ELSE [strActualOutput]
 											END) OVER ()
 									) * 100
 							END
 						)
 				END
-			) - IsNULL(strPropertyValue, 0)
-		) AS dblVariance
-	,CASE 
-		WHEN PS.ysnZeroCost = 1
-			THEN NULL
-		ELSE (PS.dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
-		END AS dblMarketPrice
-	,CASE 
-		WHEN PS.ysnZeroCost = 1
-			THEN NULL
-		ELSE dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
-		END AS dblMarketDifferential
-	,CASE 
-		WHEN PS.ysnZeroCost = 1
-			THEN NULL
-		ELSE ((dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1)) + dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))) * IsNULL(WP.dblQuantity, - S.dblQty)
-		END AS dblMTMPL
+			)) AS dblCleanGradeOutput
+	,Convert(NUMERIC(38, 5), (
+			(
+				CASE 
+					WHEN dblCoEfficient = 0
+						THEN IsNULL(strActualOutput, 0)
+					ELSE (
+							CASE 
+								WHEN Sum(CASE 
+											WHEN dblCoEfficient = 0
+												THEN 0
+											ELSE IsNULL(strActualOutput, 0)
+											END) OVER () = 0
+									THEN 0
+								ELSE (
+										IsNULL(strActualOutput, 0) / Sum(CASE 
+												WHEN dblCoEfficient = 0
+													THEN 0
+												ELSE IsNULL(strActualOutput, 0)
+												END) OVER ()
+										) * 100
+								END
+							)
+					END
+				) - IsNULL(strPropertyValue, 0)
+			)) AS dblVariance
+	,Convert(NUMERIC(38, 3), CASE 
+			WHEN PS.ysnZeroCost = 1
+				THEN NULL
+			ELSE (PS.dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
+			END) AS dblMarketPrice
+	,Convert(NUMERIC(38, 3), CASE 
+			WHEN PS.ysnZeroCost = 1
+				THEN NULL
+			ELSE dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
+			END) AS dblMarketDifferential
+	,Convert(NUMERIC(38, 3), CASE 
+			WHEN PS.ysnZeroCost = 1
+				THEN NULL
+			ELSE ((dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1)) + dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))) * IsNULL(WP.dblQuantity, - S.dblQty)
+			END) AS dblMTMPL
 FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
 LEFT JOIN #StageQty S ON S.intItemId = G.intItemId

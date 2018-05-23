@@ -80,6 +80,7 @@ BEGIN TRY
 		,@ysnConsumptionByRatio BIT
 		,@intStageLocationId INT
 		,@ysnLifeTimeByEndOfMonth BIT
+		,@intRecipeTypeId int
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -116,6 +117,7 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@intManufacturingCellId = intManufacturingCellId
 		,@strWorkOrderNo = strWorkOrderNo
+		,@intRecipeTypeId=intRecipeTypeId 
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -2496,6 +2498,12 @@ BEGIN TRY
 
 		RETURN
 	END
+
+	If @intRecipeTypeId=3 and not exists(Select *from tblMFWorkOrderConsumedLot Where intWorkOrderId =@intWorkOrderId and IsNULL(intBatchId, @intBatchId) = @intBatchId  )
+	Begin
+		Raiserror('Enough quantity is not available in the production staging location for one or more raw materials.',11,1)
+		RETURN
+	End
 
 	IF @intTransactionCount = 0
 		COMMIT TRAN
