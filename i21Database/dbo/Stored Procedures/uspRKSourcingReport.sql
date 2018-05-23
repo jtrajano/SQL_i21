@@ -15,10 +15,31 @@ from (
 SELECT 
               strName as strName,        
               CONVERT(NUMERIC(16,6),isnull(dblQty,0)) as dblQty,            
-        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
-              WHEN (isnull(dblFullyPriced,0)) <> 0  then (isnull(dblFullyPriced,0))
-              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then (isnull(dblParPriced,0))
-              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased                   
+			   CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 
+						case when isnull(dblRatio,0) <> 0 then
+								((CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+							else
+								0
+						end
+				  WHEN (isnull(dblFullyPriced,0)) <> 0  then 
+						case when isnull(dblRatio,0) <> 0 then
+								(((isnull(dblFullyPricedFutures,0)) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+							else
+								(isnull(dblFullyPriced,0)) 
+						end
+				  WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then 
+						case when isnull(dblRatio,0) <> 0 then
+								((ISNULL(dblParPricedAvgPrice,0) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+							else
+								(isnull(dblParPriced,0)) 
+						end
+				  WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then 
+						case when isnull(dblRatio,0) <> 0 then
+								((ISNULL(dblUnPricedSettlementPrice,0) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+							else
+								(isnull(dblUnPriced,0))
+						end
+			 end AS dblTotPurchased                 
 FROM(
 SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,intContractDetailId,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
@@ -59,7 +80,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
               join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
                        JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = det.intFutureMarketId
                        join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
-              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2))) dblUnPricedSettlementPrice
+              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2,8))) dblUnPricedSettlementPrice
 
             ,(SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
@@ -124,7 +145,9 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
                                    JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-                       as dblReturn
+                       as dblReturn,
+					   dblRatio,
+					   dblBasis
 
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
@@ -142,10 +165,31 @@ select CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName,su
 from (
 SELECT CAST(ROW_NUMBER() OVER (ORDER BY strName) AS INT) as intRowNum,strName as strName,       
               CONVERT(NUMERIC(16,6),isnull(dblQty,0)) as dblQty,            
-        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 0
-              WHEN (isnull(dblFullyPriced,0)) <> 0  then (isnull(dblFullyPriced,0))
-              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then (isnull(dblParPriced,0))
-              WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then (isnull(dblUnPriced,0)) end AS dblTotPurchased, 0 as intCuncorrencyId
+        CASE WHEN (isnull(dblFullyPriced,0)) =0 and (isnull(dblUnPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0 then 
+				case when isnull(dblRatio,0) <> 0 then
+						((CONVERT(NUMERIC(16,6),dblUnPricedSettlementPrice) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+					else
+						0
+				end
+          WHEN (isnull(dblFullyPriced,0)) <> 0  then 
+				case when isnull(dblRatio,0) <> 0 then
+						(((isnull(dblFullyPricedFutures,0)) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+					else
+						(isnull(dblFullyPriced,0)) 
+				end
+          WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) <> 0 then 
+				case when isnull(dblRatio,0) <> 0 then
+						((ISNULL(dblParPricedAvgPrice,0) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+					else
+						(isnull(dblParPriced,0)) 
+				end
+          WHEN (isnull(dblFullyPriced,0)) = 0 and (isnull(dblParPriced,0)) = 0  then 
+				case when isnull(dblRatio,0) <> 0 then
+						((ISNULL(dblUnPricedSettlementPrice,0) * dblRatio) + CONVERT(NUMERIC(16,6),isnull(dblFullyPricedBasis,isnull(dblParPricedBasis,isnull(dblUnPricedBasis,dblBasis))))) * dblQty
+					else
+						(isnull(dblUnPriced,0))
+				end
+	 end AS dblTotPurchased , 0 as intCuncorrencyId
 FROM(
 SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarchar,cd.intContractSeq) strContractNumber,intContractDetailId,
              dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, @intUnitMeasureId,cd.dblQuantity) dblQty  
@@ -186,7 +230,7 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
               join tblSMCurrency c on det.intCurrencyId=c.intCurrencyID
                        JOIN tblRKFutureMarket MA ON MA.intFutureMarketId = det.intFutureMarketId
                        join tblSMCurrency mc on MA.intCurrencyId=mc.intCurrencyID
-              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2))) dblUnPricedSettlementPrice
+              WHERE det.intContractDetailId=cd.intContractDetailId and det.intPricingTypeId in(2,8))) dblUnPricedSettlementPrice
 
             ,(SELECT DISTINCT
                dbo.fnCTConvertQtyToTargetCommodityUOM
@@ -251,7 +295,9 @@ SELECT e.strName,ch.intContractHeaderId,ch.strContractNumber +'-'+Convert(nvarch
                      JOIN tblCTContractDetail cd1 on cd1.intContractDetailId=ri.intLineNo 
                                    JOIN tblICCommodityUnitMeasure cuc on cuc.intCommodityId=@intCommodityId and cuc.intUnitMeasureId=cd1.intUnitMeasureId 
               WHERE strReceiptType='Inventory Return' and cd1.intContractDetailId=cd.intContractDetailId )t) 
-                       as dblReturn
+                       as dblReturn,
+					   dblRatio,
+					   dblBasis
 
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intContractStatusId not in(2,3)
