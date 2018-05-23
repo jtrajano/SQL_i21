@@ -372,8 +372,8 @@ BEGIN
 		,@ResetDetails					= [ysnResetDetails]
 		,@Recap							= [ysnRecap]
 		,@Post							= [ysnPost]
-		,@ImportedFromOrigin 			= [ysnImportedFromOrigin]
-		,@ImportedAsPosted				= [ysnImportedAsPosted]
+		,@ImportedFromOrigin 			= ISNULL([ysnImportedFromOrigin],0)
+		,@ImportedAsPosted				= ISNULL([ysnImportedAsPosted],0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ImportFormat					= [strImportFormat]
 
