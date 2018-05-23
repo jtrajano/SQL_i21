@@ -6607,6 +6607,7 @@
     <Build Include="dbo\Tables\tblCFCustomerStatementHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsCreditNoteReport.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutHeaderReport.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
