@@ -14,6 +14,7 @@
 	[intCleanCostCurrencyId] INT NULL,
 	[intCleanCostUOMId] INT NULL,
 	[strDefaultContractReport] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[ysnShowReportLangaugeSelection] BIT NULL,
 	[strDefaultAmendmentReport] NVARCHAR(50) COLLATE Latin1_General_CI_AS,  
 	[ysnDemandViewForBlend] BIT NOT NULL CONSTRAINT [DF_tblCTCompanyPreference_ysnDemandViewForBlend] DEFAULT 0,
 	[intEarlyDaysPurchase] INT NULL,
