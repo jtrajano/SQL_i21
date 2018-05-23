@@ -47,12 +47,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NULL
 	CREATE TABLE #tmpUpdateItemAccountForCStore_itemAuditLog (
 		intItemId INT
 		, intItemAccountId INT		
-		-- Original Fields
-		, intAccountCategoryId_Original INT 
-		, intAccountId_Original INT NULL
-		
+		, intAccountCategoryId INT 
+		, strAction NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		-- Original Fields		
+		, intAccountId_Original INT NULL		
 		-- Modified Fields
-		, intAccountCategoryId_New INT 
 		, intAccountId_New INT NULL		
 	)
 ;
@@ -61,17 +60,21 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NULL
 IF @intGLAccountCOGS IS NOT NULL 
 BEGIN 
 	INSERT INTO #tmpUpdateItemAccountForCStore_itemAuditLog (
-		intItemId 
-		,intItemAccountId
+		strAction
+		, intItemId 
+		, intItemAccountId
+		, intAccountCategoryId		
 		-- Original Fields
-		, intAccountCategoryId_Original
 		, intAccountId_Original		
 		-- Modified Fields
-		, intAccountCategoryId_New 
 		, intAccountId_New 
 	)
-	SELECT	[Changes].intItemId 
+	SELECT	[Changes].Action 
+			, [Changes].intItemId 
 			, [Changes].intItemAccountId 
+			, [Changes].intAccountCategoryId 			
+			, [Changes].intAccountId_Original
+			, [Changes].intAccountId_New 
 	FROM	(
 				-- Merge will help us build the audit log and update the records at the same time. 
 				MERGE	
@@ -181,22 +184,20 @@ BEGIN
 						$action
 						, inserted.intItemId
 						, inserted.intItemAccountId 						
+						, inserted.intAccountCategoryId
 						-- Original values
-						, deleted.intAccountCategoryId
 						, deleted.intAccountId
 						-- Modified values 
-						, inserted.intAccountCategoryId
 						, inserted.intAccountId
 
 			) AS [Changes] (
 				Action
 				, intItemId 
 				, intItemAccountId
+				, intAccountCategoryId
 				-- Original values
-				, intAccountCategoryId_Original
 				, intAccountId_Original
 				-- Modified values 
-				, intAccountCategoryId_New 
 				, intAccountId_New 
 			)
 	WHERE	[Changes].Action IN ('UPDATE', 'INSERT') 
@@ -208,17 +209,21 @@ END
 IF @intGLAccountSalesRevenue IS NOT NULL 
 BEGIN 
 	INSERT INTO #tmpUpdateItemAccountForCStore_itemAuditLog (
-		intItemId 
+		strAction
+		, intItemId 
 		, intItemAccountId
+		, intAccountCategoryId		
 		-- Original Fields
-		, intAccountCategoryId_Original
 		, intAccountId_Original		
 		-- Modified Fields
-		, intAccountCategoryId_New 
 		, intAccountId_New 
 	)
-	SELECT	[Changes].intItemId 
+	SELECT	[Changes].Action 
+			, [Changes].intItemId 
 			, [Changes].intItemAccountId 
+			, [Changes].intAccountCategoryId 			
+			, [Changes].intAccountId_Original
+			, [Changes].intAccountId_New 
 	FROM	(
 				-- Merge will help us build the audit log and update the records at the same time. 
 				MERGE	
@@ -328,94 +333,105 @@ BEGIN
 						$action
 						, inserted.intItemId
 						, inserted.intItemAccountId 						
+						, inserted.intAccountCategoryId
 						-- Original values
-						, deleted.intAccountCategoryId
 						, deleted.intAccountId
 						-- Modified values 
-						, inserted.intAccountCategoryId
 						, inserted.intAccountId
 
 			) AS [Changes] (
 				Action
 				, intItemId 
 				, intItemAccountId
+				, intAccountCategoryId
 				-- Original values
-				, intAccountCategoryId_Original
 				, intAccountId_Original
 				-- Modified values 
-				, intAccountCategoryId_New 
 				, intAccountId_New 
 			)
 	WHERE	[Changes].Action IN ('UPDATE', 'INSERT') 
 	;
 END
 
---IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemAccountForCStore_itemAuditLog)
---BEGIN 
---	DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemAccountForCStore_itemAuditLog)
+BEGIN 
+	DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
 	
---	DECLARE @json2_int AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%i","to":"%i","leaf":true}'
---	DECLARE @json2_float AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
---	DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
---	DECLARE @json2_date AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
+	DECLARE @json2_int AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%i","to":"%i","leaf":true}'
+	DECLARE @json2_float AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
+	DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
+	DECLARE @json2_date AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
 
---	-- Add audit logs for Standard Cost changes. 
---	INSERT INTO tblSMAuditLog(
---			strActionType
---			, strTransactionType
---			, strRecordNo
---			, strDescription
---			, strRoute
---			, strJsonData
---			, dtmDate
---			, intEntityId
---			, intConcurrencyId
---	)
---	SELECT 
---			strActionType = 'Updated'
---			, strTransactionType =  'Inventory.view.Item'
---			, strRecordNo = auditLog.intItemId
---			, strDescription = ''
---			, strRoute = null 
---			, strJsonData = auditLog.strJsonData
---			, dtmDate = GETUTCDATE()
---			, intEntityId = @intEntityUserSecurityId 
---			, intConcurrencyId = 1
---	FROM	(
---		SELECT	intItemId
---				,strJsonData = 
---					dbo.fnFormatMessage(
---						@json1
---						, CAST(intItemId AS NVARCHAR(20)) 
---						, dbo.fnFormatMessage(
---							@json2_int
---							, 'C-Store updates the Category'
---							, intCategoryId_Original
---							, intCategoryId_New
---							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
---						) 
---						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
---					) 
---		FROM	#tmpUpdateItemAccountForCStore_itemAuditLog 
---		WHERE	ISNULL(intCategoryId_Original, 0) <> ISNULL(intCategoryId_New, 0)
---		UNION ALL
---		SELECT	intItemId
---				, strJsonData = 
---					dbo.fnFormatMessage(
---						@json1
---						, CAST(intItemId AS NVARCHAR(20)) 
---						, dbo.fnFormatMessage(
---							@json2_string
---							, 'C-Store updates the Count Code'
---							, strCountCode_Original
---							, strCountCode_New
---							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
---						) 
---						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
---					)
---		FROM	#tmpUpdateItemAccountForCStore_itemAuditLog 
---		WHERE	ISNULL(strCountCode_Original, 0) <> ISNULL(strCountCode_New, 0)
+	-- Add audit logs for Standard Cost changes. 
+	INSERT INTO tblSMAuditLog(
+			strActionType
+			, strTransactionType
+			, strRecordNo
+			, strDescription
+			, strRoute
+			, strJsonData
+			, dtmDate
+			, intEntityId
+			, intConcurrencyId
+	)
+	SELECT 
+			strActionType = 'Updated'
+			, strTransactionType =  'Inventory.view.Item'
+			, strRecordNo = auditLog.intItemId
+			, strDescription = ''
+			, strRoute = null 
+			, strJsonData = auditLog.strJsonData
+			, dtmDate = GETUTCDATE()
+			, intEntityId = @intEntityUserSecurityId 
+			, intConcurrencyId = 1
+	FROM	(
+		SELECT	intItemId
+				,strJsonData = 
+					dbo.fnFormatMessage(
+						@json1
+						, CAST(intItemId AS NVARCHAR(20)) 
+						, dbo.fnFormatMessage(
+							@json2_string
+							, 'C-Store adds a new GL Account Id for ' + ga.strAccountCategory 
+							, fromAccount.strAccountId
+							, toAccount.strAccountId
+							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+						) 
+						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+					) 
+		FROM	#tmpUpdateItemAccountForCStore_itemAuditLog auditLog LEFT JOIN tblGLAccountCategory ga
+					ON auditLog.intAccountCategoryId = ga.intAccountCategoryId 
+				LEFT JOIN tblGLAccount fromAccount 
+					ON fromAccount.intAccountId = intAccountId_Original
+				LEFT JOIN tblGLAccount toAccount 
+					ON toAccount.intAccountId = intAccountId_New
+		WHERE	ISNULL(intAccountId_Original, 0) <> ISNULL(intAccountId_New, 0)
+				AND auditLog.strAction = 'INSERT'
 
---	) auditLog
---	WHERE auditLog.strJsonData IS NOT NULL 
---END 
+		UNION ALL
+		SELECT	intItemId
+				,strJsonData = 
+					dbo.fnFormatMessage(
+						@json1
+						, CAST(intItemId AS NVARCHAR(20)) 
+						, dbo.fnFormatMessage(
+							@json2_string
+							, 'C-Store updates the GL Account Id for ' + ga.strAccountCategory 
+							, fromAccount.strAccountId
+							, toAccount.strAccountId
+							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+						) 
+						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+					) 
+		FROM	#tmpUpdateItemAccountForCStore_itemAuditLog auditLog LEFT JOIN tblGLAccountCategory ga
+					ON auditLog.intAccountCategoryId = ga.intAccountCategoryId 
+				LEFT JOIN tblGLAccount fromAccount 
+					ON fromAccount.intAccountId = intAccountId_Original
+				LEFT JOIN tblGLAccount toAccount 
+					ON toAccount.intAccountId = intAccountId_New
+		WHERE	ISNULL(intAccountId_Original, 0) <> ISNULL(intAccountId_New, 0)
+				AND auditLog.strAction = 'UPDATE'
+
+	) auditLog
+	WHERE auditLog.strJsonData IS NOT NULL 
+END 
