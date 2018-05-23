@@ -33,6 +33,7 @@ BEGIN TRY
 			,@type					INT
 			,@intCompanyLocationId	INT 
 			,@intLoadId				INT
+			,@intLocationId			INT
 			,@voucherNonInvDetails	VoucherDetailNonInventory
 			,@InvoiceEntries		InvoiceIntegrationStagingTable	
 			,@LineItemTaxEntries	LineItemTaxDetailStagingTable
@@ -55,7 +56,8 @@ BEGIN TRY
 	SELECT  @strSequenceNumber		=	strSequenceNumber,
 			@dblCashPrice			=	dblCashPrice,
 			@intEntityId			=	intEntityId,
-			@intCompanyLocationId	=	intCompanyLocationId 
+			@intCompanyLocationId	=	intCompanyLocationId,
+			@intLocationId			=	intCompanyLocationId
 	FROM	vyuCTContractSequence 
 	WHERE   intContractDetailId = @intSourceDetailId
 
@@ -136,6 +138,7 @@ BEGIN TRY
 				@vendorId				=   @intEntityId,
 				@type					=   @type,
 				@voucherNonInvDetails	=   @voucherNonInvDetails,
+				@shipTo					=	@intLocationId,
 				@billId					=   @intBillInvoiceId OUTPUT
 
 	   SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId
