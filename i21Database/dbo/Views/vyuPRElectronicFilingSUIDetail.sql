@@ -1,13 +1,13 @@
 ﻿CREATE VIEW [dbo].[vyuPRElectronicFilingSUIDetail]
 AS
-SELECT
+SELECT DISTINCT
 	intYear = SUI.intYear
 	,intQuarter = SUI.intQuarter
 	,intEntityId = SUI.intEntityId
 	,strSSN = LEFT(dbo.fnAPRemoveSpecialChars(ISNULL(EMP.strSocialSecurity, '')), 9)
-	,strFirstName = LEFT(ISNULL(EMP.strFirstName, ''), 15)
-	,strMiddleName = LEFT(ISNULL(EMP.strMiddleName, ''), 15)
-	,strLastName = LEFT(ISNULL(EMP.strLastName, ''), 20)
+	,strFirstName = UPPER(LEFT(ISNULL(EMP.strFirstName, ''), 15))
+	,strMiddleName = UPPER(LEFT(ISNULL(EMP.strMiddleName, ''), 15))
+	,strLastName = UPPER(LEFT(ISNULL(EMP.strLastName, ''), 20))
 	,strStateCode = ISNULL((SELECT TOP 1 strFIPSCode FROM tblPRTypeTaxState WHERE strCode = ESUI.strState), '')
 	,dblWages = ISNULL(SUI.dblGross, 0)
 	,dblGross = ISNULL(SUI.dblAdjustedGross, 0)
@@ -18,10 +18,11 @@ SELECT
 	,dblTips = ISNULL(TIP.dblTotal, 0)
 	,intWeeks = CONVERT(INT, ISNULL(SUI.dblTotalHours, 0)) / 40
 	,intHours = CONVERT(INT, ISNULL(SUI.dblTotalHours, 0))
-	,strSUIAccount = LEFT(dbo.fnAPRemoveSpecialChars(ISNULL(ESUI.strSUIAccountNumber, '')), 10)
-	,strWorkSiteID = ESUI.strAuthorizationNumber
+	,strSUIAccount = ISNULL(LEFT(dbo.fnAPRemoveSpecialChars(ESUI.strSUIAccountNumber), 10), '')
+	,strWorkSiteID = ISNULL(ESUI.strAuthorizationNumber, '')
 	,dblTaxableState = ISNULL(ST.dblAdjustedGross, 0)
 	,dblStateTax = ISNULL(ST.dblStateTotal, 0)
+	,ysnOfficer = CASE WHEN (EMP.strEEOCCode IN ('1.1 - Executive/Senior Level Officials and Managers', '1.2 - First/Mid Level Officials & Managers')) THEN 1 ELSE 0 END 
 	,ysnMonth1Employed = ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
 		AND DATEADD(DD, 12 -1, 
 			DATEADD(MM, (CASE SUI.intQuarter WHEN 1 THEN 1 WHEN 2 THEN 4 WHEN 3 THEN 7 WHEN 4 THEN 10 END) - 1, 
