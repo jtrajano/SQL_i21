@@ -50,7 +50,7 @@ BEGIN TRY
 			@strContractNumber		=	CH.strContractNumber,
 			@strContractSeq			=	LTRIM(CD.intContractSeq),
 			@strAvailableQty		=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN LTRIM(ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)) ELSE LTRIM(ISNULL(CD.dblBalanceLoad,0) - ISNULL(CD.dblScheduleLoad,0)) END,
-			@strBalanceQty			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN LTRIM(ISNULL(CD.dblBalance,0)) ELSE ISNULL(CD.intNoOfLoad,0) END,
+			@strBalanceQty			=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN LTRIM(ISNULL(CD.dblBalance,0)) ELSE LTRIM(ISNULL(CD.intNoOfLoad,0)) END,
 			@ysnLoad				=	CH.ysnLoad
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
