@@ -11,7 +11,7 @@ SELECT ST.intStoreId
 , IT.strItemNo
 , IT.strDescription strItemDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, 0) ysnPosted
 , CPT.dblQuantity
 , CPT.dblAmount
 , CPT.dblPrice 

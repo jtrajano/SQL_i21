@@ -6,7 +6,7 @@ SELECT ST.intStoreId
 , ST.strDistrict
 , ST.strDescription strStoreDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, 0) ysnPosted
 , CPO.intPaymentOptionId
 , PO.strPaymentOptionId
 , PO.strDescription
@@ -20,5 +20,5 @@ INNER JOIN tblSTPaymentOption PO ON PO.intPaymentOptionId = CPO.intPaymentOption
 INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CPO.intItemId 
 INNER JOIN tblICItem IT ON IT.intItemId = IU.intItemId 
 WHERE CPO.dblAmount > 0	
-GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CH.dtmCheckoutDate, Inv.ysnPosted, CPO.intPaymentOptionId, PO.strPaymentOptionId, PO.strDescription, ACC.strAccountId
+GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CH.dtmCheckoutDate, ISNULL(Inv.ysnPosted, 0), CPO.intPaymentOptionId, PO.strPaymentOptionId, PO.strDescription, ACC.strAccountId
 

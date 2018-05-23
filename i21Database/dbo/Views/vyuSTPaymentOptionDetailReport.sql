@@ -6,7 +6,7 @@ SELECT ST.intStoreId
 , ST.strDistrict
 , ST.strDescription strStoreDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, 0) ysnPosted
 , CPO.intPaymentOptionId
 , PO.strPaymentOptionId
 , PO.strDescription

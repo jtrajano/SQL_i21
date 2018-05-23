@@ -9,7 +9,7 @@ SELECT ST.intStoreId
 , CAT.strCategoryCode
 , CAT.strDescription strCategoryDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, 0) ysnPosted
 , SUM(CDT.intItemsSold) intItemsSold
 , SUM(CDT.intTotalSalesCount) intTotalSalesCount
 , SUM(CDT.dblTotalSalesAmount) dblTotalSalesAmount
@@ -19,4 +19,4 @@ INNER JOIN tblSTCheckoutDepartmetTotals CDT ON CDT.intCheckoutId = CH.intCheckou
 INNER JOIN tblICItem IT ON IT.intItemId = CDT.intItemId 
 INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
 WHERE CDT.dblTotalSalesAmount > 0	
-GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CAT.intCategoryId, CAT.strCategoryCode, CAT.strDescription, CH.dtmCheckoutDate, Inv.ysnPosted
+GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CAT.intCategoryId, CAT.strCategoryCode, CAT.strDescription, CH.dtmCheckoutDate, ISNULL(Inv.ysnPosted, 0)

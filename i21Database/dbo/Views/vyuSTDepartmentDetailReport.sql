@@ -9,7 +9,7 @@ SELECT ST.intStoreId
 , CAT.strCategoryCode
 , CAT.strDescription strCategoryDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, 0) ysnPosted
 , CDT.intItemsSold 
 , CDT.intTotalSalesCount
 , CDT.dblTotalSalesAmount

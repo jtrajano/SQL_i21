@@ -6,6 +6,6 @@ SELECT ST.intStoreId
 , ST.strDistrict
 , ST.strDescription strStoreDescription
 , CH.dtmCheckoutDate
-, Inv.ysnPosted
+, ISNULL(Inv.ysnPosted, 0) ysnPosted
 FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId 
 LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId = CH.intInvoiceId

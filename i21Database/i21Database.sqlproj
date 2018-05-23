@@ -6606,6 +6606,7 @@
     <Build Include="dbo\Tables\tblCFDiscountScheduleHistory.sql" />
     <Build Include="dbo\Tables\tblCFCustomerStatementHistoryStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsCreditNoteReport.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutHeaderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
