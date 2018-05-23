@@ -50,7 +50,7 @@ BEGIN
 		SELECT CUS.intEntityId --[intEntityId]            
 		   	,BNK.[intBankId] --[intBankId]              
 		   	,BNK.[strBankName] --[strBankName]            
-		   	,EFT.efeft_account_no--[strAccountNumber]        
+		   	,RTRIM(EFT.efeft_account_no)--[strAccountNumber]        
 		   	,CASE WHEN EFT.efeft_acct_type = 'C' THEN 'Checking' ELSE 'Saving' END --[strAccountType]          
 		   	,CASE WHEN EFT.efeft_acct_class_cp = 'C' THEN 'Corporate' ELSE 'Personal' END --strAccountClassification
 		   	,CONVERT(DATETIME, CAST(EFT.efeft_effective_date AS CHAR(12)), 112) --[dtmEffectiveDate]        
@@ -96,7 +96,7 @@ BEGIN
 		SELECT VND.intEntityId --[intEntityId]            
 		   	,BNK.[intBankId] --[intBankId]              
 		   	,BNK.[strBankName] --[strBankName]            
-		   	,EFT.efeft_account_no--[strAccountNumber]        
+		   	,RTRIM(EFT.efeft_account_no) --[strAccountNumber]        
 		   	,CASE WHEN EFT.efeft_acct_type = 'C' THEN 'Checking' ELSE 'Saving' END --[strAccountType]          
 		   	,CASE WHEN EFT.efeft_acct_class_cp = 'C' THEN 'Corporate' ELSE 'Personal' END --strAccountClassification
 		   	,CONVERT(DATETIME, CAST(EFT.efeft_effective_date AS CHAR(12)), 112) --[dtmEffectiveDate]        
