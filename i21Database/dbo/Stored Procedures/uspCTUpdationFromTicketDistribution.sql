@@ -43,7 +43,8 @@ BEGIN TRY
 			intContractDetailId INT,
 			dblUnitsDistributed NUMERIC(18,6),
 			dblUnitsRemaining	NUMERIC(18,6),
-			dblCost				NUMERIC(18,6)
+			dblCost				NUMERIC(18,6),
+			ysnIgnore			BIT
 	)			
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
@@ -219,7 +220,7 @@ BEGIN TRY
 
 			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
-			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0
 
 			--EXEC	uspCTUpdateSequenceQuantity 
 			--		@intContractDetailId	=	@intContractDetailId,
@@ -235,12 +236,13 @@ BEGIN TRY
 
 		IF NOT @dblAvailable > 0
 		BEGIN
+			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
 			GOTO CONTINUEISH
 		END
 
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
 
 			SELECT	@dblNetUnits = 0
 
@@ -248,7 +250,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
 
 			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
 		END
@@ -297,6 +299,7 @@ BEGIN TRY
 			PR.dblCost
 	FROM	@Processed	PR
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+	WHERE	ISNULL(ysnIgnore,0) <> 1
 	
 END TRY
 
