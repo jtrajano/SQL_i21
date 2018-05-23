@@ -6323,6 +6323,7 @@
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
     <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
