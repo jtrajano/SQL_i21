@@ -6329,6 +6329,7 @@
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
     <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
