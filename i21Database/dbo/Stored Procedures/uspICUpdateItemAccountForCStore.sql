@@ -82,17 +82,10 @@ BEGIN
 					WITH	(HOLDLOCK) 
 					AS		itemAccount	
 					USING (
-						SELECT	ia.intItemAccountId
-								, i.intItemId
-								, ia.intAccountCategoryId 
+						SELECT	i.intItemId
 								, category = gaSource.strAccountCategory
 								, categoryId = gaSource.intAccountCategoryId
-						FROM	tblICItem i LEFT JOIN (
-									tblICItemAccount ia INNER JOIN tblGLAccountCategory ga
-										ON ia.intAccountCategoryId = ga.intAccountCategoryId
-								)
-									ON i.intItemId = ia.intItemId 
-								LEFT JOIN tblGLAccountCategory gaSource
+						FROM	tblICItem i LEFT JOIN tblGLAccountCategory gaSource
 									ON gaSource.strAccountCategory = 'Cost of Goods'
 								CROSS APPLY (
 									SELECT	TOP 1 
@@ -124,8 +117,6 @@ BEGIN
 												@dblRetailPriceTo IS NULL 
 												OR ISNULL(itemPricing.dblSalePrice, 0) <= @dblRetailPriceTo
 											)
-											AND 
-											ga.strAccountCategory = 'Cost of Goods'
 
 								) filterQuery 
 						WHERE	(
@@ -146,8 +137,8 @@ BEGIN
 									)
 								)
 					) AS Source_Query  
-						ON itemAccount.intItemAccountId = Source_Query.intItemAccountId
-						AND itemAccount.intAccountCategoryId = Source_Query.intAccountCategoryId
+						ON itemAccount.intItemId = Source_Query.intItemId
+						AND itemAccount.intAccountCategoryId = Source_Query.categoryId
 					
 					WHEN MATCHED THEN 
 						UPDATE 
@@ -231,17 +222,10 @@ BEGIN
 					WITH	(HOLDLOCK) 
 					AS		itemAccount	
 					USING (
-						SELECT	ia.intItemAccountId
-								, i.intItemId
-								, ia.intAccountCategoryId 
+						SELECT	i.intItemId
 								, category = gaSource.strAccountCategory
 								, categoryId = gaSource.intAccountCategoryId
-						FROM	tblICItem i LEFT JOIN (
-									tblICItemAccount ia INNER JOIN tblGLAccountCategory ga
-										ON ia.intAccountCategoryId = ga.intAccountCategoryId
-								)
-									ON i.intItemId = ia.intItemId 
-								LEFT JOIN tblGLAccountCategory gaSource
+						FROM	tblICItem i LEFT JOIN tblGLAccountCategory gaSource
 									ON gaSource.strAccountCategory = 'Sales Account'
 								CROSS APPLY (
 									SELECT	TOP 1 
@@ -273,9 +257,6 @@ BEGIN
 												@dblRetailPriceTo IS NULL 
 												OR ISNULL(itemPricing.dblSalePrice, 0) <= @dblRetailPriceTo
 											)
-											AND 
-											ga.strAccountCategory = 'Sales Account'
-
 								) filterQuery 
 						WHERE	(
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category)
@@ -295,8 +276,8 @@ BEGIN
 									)
 								)
 					) AS Source_Query  
-						ON itemAccount.intItemAccountId = Source_Query.intItemAccountId
-						AND itemAccount.intAccountCategoryId = Source_Query.intAccountCategoryId
+						ON itemAccount.intItemId = Source_Query.intItemId
+						AND itemAccount.intAccountCategoryId = Source_Query.categoryId
 					
 					WHEN MATCHED THEN 
 						UPDATE 
