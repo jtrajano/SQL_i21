@@ -11,6 +11,14 @@ CREATE TYPE [dbo].[VoucherDetailReceipt] AS TABLE
 (
 	[intInventoryReceiptType]		INT				NOT NULL,
 	[intInventoryReceiptItemId]		INT				NOT NULL,
+	/*Start - Bund Item Info*/
+	[intItemBundleId]				INT				NULL, --Primary key of tblICItemBundle
+	[intBundletUOMId]				INT				NULL,
+	[dblQtyBundleReceived]			INT				NULL,
+	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	/*End - Bund Item Info*/
+	[intInventoryReceiptItemId]		INT				NOT NULL,
+	[intInventoryReceiptItemId]		INT				NOT NULL,
     [dblQtyReceived]				DECIMAL(18, 6)	NULL, 
     [dblCost]						DECIMAL(38, 20)	NULL, 
     [intTaxGroupId]					INT NULL,

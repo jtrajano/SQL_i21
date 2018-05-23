@@ -23,6 +23,12 @@ DECLARE @receiptItems AS TABLE (
 	[dblCostUnitQty]				DECIMAL(38, 20)	NULL, 
 	[dblTotal]						DECIMAL(18, 6)	NULL, 
 	[dblNetWeight]					DECIMAL(18, 6)	NULL, 
+	/*Start - Bund Item Info*/
+	[intItemBundleId]				INT				NOT NULL, --Primary key of tblICItemBundle
+	[intBundletUOMId]				INT				NOT NULL,
+	[dblQtyBundleReceived]			INT				NOT NULL,
+	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	/*End - Bund Item Info*/
 	[intCostUOMId]					INT NULL,
     [intTaxGroupId]					INT NULL,
 	[int1099Form] 					INT NULL DEFAULT 0 , 
@@ -51,6 +57,13 @@ CREATE TABLE #tempBillDetail (
 	[dblNetShippedWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightLoss] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblFranchiseWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	/*Start - Bund Item Info*/
+	[intItemBundleId]				INT				NOT NULL, --Primary key of tblICItemBundle
+	[intBundletUOMId]				INT				NOT NULL,
+	[dblQtyBundleReceived]			INT				NOT NULL,
+	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	[strBundlecDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+	/*End - Bund Item Info*/
 	[intContractDetailId]    		INT             NULL,
 	[intContractHeaderId]    		INT             NULL,
 	[intContractSeq] 		   		INT             NULL,
@@ -137,6 +150,11 @@ SELECT
 	[intCostUOMId]					=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
 											THEN contractDetail.intPriceItemUOMId
 											ELSE B.intCostUOMId END,
+	[intItemBundleId]				=	A.intItemBundleId,
+	[intBundletUOMId]				=	A.intBundletUOMId,
+	[dblQtyBundleReceived]			=	A.dblQtyBundleReceived,
+	[dblBundleUnitQty]				=	A.dblBundleUnitQty,
+	[strBundlecDescription]			=	itemBundle.strDescription,
 	[intTaxGroupId]					=	A.intTaxGroupId,
 	[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 													AND B.intItemId > 0
@@ -161,6 +179,7 @@ INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInv
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
 INNER JOIN tblEMEntity entity ON C.[intEntityId] = entity.intEntityId
 INNER JOIN tblICItem item ON B.intItemId = item.intItemId
+LEFT JOIN tblICItemBundle itemBundle ON itemBundle.intItemBundleId = A.intItemBundleId
 LEFT JOIN vyuSCGetScaleDistribution D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 LEFT JOIN vyuPATEntityPatron patron ON C.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
@@ -228,7 +247,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Category],
 			[strBillOfLading],
 			[intScaleTicketId],
-			[intLocationId]
+			[intLocationId],
+			[intItemBundleId],
+			[intBundletUOMId],
+			[dblQtyBundleReceived],
+			[dblBundleUnitQty],
+			[strBundlecDescription]
 		)
 		SELECT 
 			[intBillId]						=	@voucherId,
@@ -294,7 +318,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Category]				=	voucherDetailReceipt.int1099Category,
 			[strBillOfLading]				= 	A.strBillOfLading,
 			[intScaleTicketId]				=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
-			[intLocationId]					=	A.intLocationId
+			[intLocationId]					=	A.intLocationId,
+			[intItemBundleId]				=	voucherDetailReceipt.intItemBundleId,
+			[intBundletUOMId]				=	voucherDetailReceipt.intBundletUOMId,
+			[dblQtyBundleReceived]			=	voucherDetailReceipt.dblQtyBundleReceived,
+			[dblBundleUnitQty]				=	voucherDetailReceipt.dblBundleUnitQty,
+			[strBundlecDescription]			=	voucherDetailReceipt.strBundlecDescription
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -360,7 +389,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intLoadDetailId],
 			[strBillOfLading],
 			[intScaleTicketId],
-			[intLocationId]
+			[intLocationId],
+			[intItemBundleId],
+			[intBundletUOMId],
+			[dblQtyBundleReceived],
+			[dblBundleUnitQty],
+			[strBundlecDescription]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -434,7 +468,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
 			[strBillOfLading]			= 	A.strBillOfLading,
 			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
-			[intLocationId]				=	A.intLocationId
+			[intLocationId]				=	A.intLocationId,
+			[intItemBundleId]			=	voucherDetailReceipt.intItemBundleId,
+			[intBundletUOMId]			=	voucherDetailReceipt.intBundletUOMId,
+			[dblQtyBundleReceived]		=	voucherDetailReceipt.dblQtyBundleReceived,
+			[dblBundleUnitQty]			=	voucherDetailReceipt.dblBundleUnitQty,
+			[strBundlecDescription]		=	voucherDetailReceipt.strBundlecDescription
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -503,7 +542,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Form],
 			[int1099Category],
 			[intLoadDetailId],
-			[strBillOfLading]
+			[strBillOfLading],
+			[intItemBundleId],
+			[intBundletUOMId],
+			[dblQtyBundleReceived],
+			[dblBundleUnitQty],
+			[strBundlecDescription]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -576,7 +620,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[int1099Form]				=	voucherDetailReceipt.int1099Form,
 			[int1099Category]			=	voucherDetailReceipt.int1099Category,
 			[intLoadDetailId]			=	B.intSourceId,
-			[strBillOfLading]			= 	A.strBillOfLading
+			[strBillOfLading]			= 	A.strBillOfLading,
+			[intItemBundleId]			=	voucherDetailReceipt.intItemBundleId,
+			[intBundletUOMId]			=	voucherDetailReceipt.intBundletUOMId,
+			[dblQtyBundleReceived]		=	voucherDetailReceipt.dblQtyBundleReceived,
+			[dblBundleUnitQty]			=	voucherDetailReceipt.dblBundleUnitQty,
+			[strBundlecDescription]		=	voucherDetailReceipt.strBundlecDescription
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -653,7 +702,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intLoadDetailId],
 			[strBillOfLading],
 			[intScaleTicketId],
-			[intLocationId]
+			[intLocationId],
+			[intItemBundleId],
+			[intBundletUOMId],
+			[dblQtyBundleReceived],
+			[dblBundleUnitQty],
+			[strBundlecDescription]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -733,7 +787,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intLoadDetailId]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN B.intSourceId ELSE NULL END,
 			[strBillOfLading]			= 	A.strBillOfLading,
 			[intScaleTicketId]			=	CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE NULL END,
-			[intLocationId]				=	A.intLocationId
+			[intLocationId]				=	A.intLocationId,
+			[intItemBundleId]			=	voucherDetailReceipt.intItemBundleId,
+			[intBundletUOMId]			=	voucherDetailReceipt.intBundletUOMId,
+			[dblQtyBundleReceived]		=	voucherDetailReceipt.dblQtyBundleReceived,
+			[dblBundleUnitQty]			=	voucherDetailReceipt.dblBundleUnitQty,
+			[strBundlecDescription]		=	voucherDetailReceipt.strBundlecDescription
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -802,7 +861,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dbl1099],
 		[strBillOfLading],
 		[intScaleTicketId],
-		[intLocationId]
+		[intLocationId],
+		[intItemBundleId],
+		[intBundletUOMId],
+		[dblQtyBundleReceived],
+		[dblBundleUnitQty],
+		[strBundlecDescription]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptItemId INTO @detailCreated(intBillDetailId, intInventoryReceiptItemId)
 	SELECT
@@ -842,7 +906,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dbl1099],
 		[strBillOfLading],
 		[intScaleTicketId],
-		[intLocationId]
+		[intLocationId],
+		[intItemBundleId],
+		[intBundletUOMId],
+		[dblQtyBundleReceived],
+		[dblBundleUnitQty],
+		[strBundlecDescription]
 	FROM #tempBillDetail
 
 	--ADD TAXES
