@@ -60,7 +60,7 @@ BEGIN
 		SELECT @msg = 
 			CASE 
 				WHEN @pos > 0 AND SUBSTRING(@msg, @pos, 2) = '%i' THEN 
-					STUFF(@msg, @pos, 2, COALESCE(CAST(@p AS INT),'<null>')) 
+					STUFF(@msg, @pos, 2, COALESCE(CAST(CAST(@p AS INT) AS NVARCHAR(20)),'<null>')) 
 				WHEN @pos > 0 AND SUBSTRING(@msg, @pos, 2) = '%s' THEN 
 					STUFF(@msg, @pos, 2, COALESCE(CAST(@p AS NVARCHAR(MAX)),'<null>')) 
 				WHEN @pos > 0 AND SUBSTRING(@msg, @pos, 2) = '%d' THEN 
