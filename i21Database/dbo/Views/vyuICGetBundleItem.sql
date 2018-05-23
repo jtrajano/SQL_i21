@@ -35,6 +35,7 @@ SELECT	ItemBundle.intItemBundleId
 		,ItemBundle.dblMarkUpOrDown
 		,ItemBundle.dtmBeginDate
 		,ItemBundle.dtmEndDate
+		,ItemBundle.intConcurrencyId
 FROM	tblICItemBundle ItemBundle
 		LEFT JOIN tblICItem Item ON Item.intItemId = ItemBundle.intItemId
 		LEFT JOIN tblICItem BundleComponent ON BundleComponent.intItemId = ItemBundle.intBundleItemId
