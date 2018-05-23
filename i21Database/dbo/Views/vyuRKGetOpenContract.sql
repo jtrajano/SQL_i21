@@ -2,49 +2,32 @@
 
 AS
 
-
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
-	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
-	FROM tblRKFutOptTransaction ot 
-		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intLFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
-			INNER JOIN tblRKMatchFuturesPSHeader h on mf.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
-			group by strType,intLFutOptTransactionId) as m on m.intLFutOptTransactionId = ot.intFutOptTransactionId
-	WHERE ot.strBuySell='Buy' and intInstrumentTypeId = 1
-	GROUP BY intFutOptTransactionId,intOpenContract,strType
-) t
+SELECT distinct intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) intOpenContract from (
+SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,
+	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf where ot.intFutOptTransactionId=mf.intLFutOptTransactionId) intOpenContract
+FROM tblRKFutOptTransaction ot where ot.strBuySell='Buy' and intInstrumentTypeId = 1
+GROUP BY intFutOptTransactionId) t
 
 UNION 
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
-	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
-	FROM tblRKFutOptTransaction ot 
-		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intSFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
-			INNER JOIN tblRKMatchFuturesPSHeader h on mf.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
-			group by strType,intSFutOptTransactionId) as m on m.intSFutOptTransactionId = ot.intFutOptTransactionId
-	WHERE ot.strBuySell='Sell' and intInstrumentTypeId = 1
-	GROUP BY intFutOptTransactionId,intOpenContract,strType
-) t
+SELECT distinct intFutOptTransactionId,-(intNoOfContract-isnull(intOpenContract,0)) intOpenContract from (
+SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,
+	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf where ot.intFutOptTransactionId=mf.intSFutOptTransactionId) intOpenContract
+FROM tblRKFutOptTransaction ot where ot.strBuySell='Sell' and intInstrumentTypeId = 1
+Group by intFutOptTransactionId) t
 
 UNION
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
-	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
-	FROM tblRKFutOptTransaction ot 
-		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intLFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
-			INNER JOIN tblRKMatchFuturesPSHeader h on mf.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
-			group by strType,intLFutOptTransactionId) as m on m.intLFutOptTransactionId = ot.intFutOptTransactionId
-	WHERE ot.strBuySell='Buy' and intInstrumentTypeId = 2
-	GROUP BY intFutOptTransactionId,intOpenContract,strType
-) t
+SELECT distinct intFutOptTransactionId,(isnull(intNoOfContract,0)-isnull(intOpenContract,0)) intOpenContract from (
+SELECT ot.intFutOptTransactionId,sum(isnull(ot.intNoOfContract,0)) intNoOfContract,
+	   (SELECT SUM(CONVERT(int,mf.intMatchQty)) FROM tblRKOptionsMatchPnS mf where ot.intFutOptTransactionId=mf.intLFutOptTransactionId) intOpenContract
+FROM tblRKFutOptTransaction ot where ot.strBuySell='Buy' and intInstrumentTypeId = 2
+Group by intFutOptTransactionId) t
 
 UNION 
 
-SELECT DISTINCT intFutOptTransactionId,(intNoOfContract-isnull(intOpenContract,0)) AS intOpenContract,strType FROM (
-	SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,m.intOpenContract,strType
-	FROM tblRKFutOptTransaction ot 
-		inner join (select SUM(CONVERT(int,mf.dblMatchQty)) as intOpenContract , h.strType,intSFutOptTransactionId from tblRKMatchFuturesPSDetail mf 
-			INNER JOIN tblRKMatchFuturesPSHeader h on mf.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
-			group by strType,intSFutOptTransactionId) as m on m.intSFutOptTransactionId = ot.intFutOptTransactionId
-	WHERE ot.strBuySell='Sell' and intInstrumentTypeId = 2
-	GROUP BY intFutOptTransactionId,intOpenContract,strType
-) t
+SELECT distinct intFutOptTransactionId,-(intNoOfContract-isnull(intOpenContract,0)) intOpenContract from (
+SELECT ot.intFutOptTransactionId,sum(ot.intNoOfContract) intNoOfContract,
+	   (SELECT SUM(CONVERT(int,mf.intMatchQty)) FROM tblRKOptionsMatchPnS mf where ot.intFutOptTransactionId=mf.intSFutOptTransactionId) intOpenContract
+FROM tblRKFutOptTransaction ot where ot.strBuySell='Sell' and intInstrumentTypeId = 2
+Group by intFutOptTransactionId) t

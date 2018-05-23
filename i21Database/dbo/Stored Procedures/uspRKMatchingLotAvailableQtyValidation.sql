@@ -11,11 +11,11 @@ DECLARE @ErrMsg1 nvarchar(Max)
 declare @strInternalTradeNo nvarchar(50)
 declare @intOpenContract int
 declare @msg nvarchar(max)   
-IF(SELECT ABS(intOpenContract) FROM vyuRKGetOpenContract where intFutOptTransactionId=@intLFutOptTransactionId and strType = @strType) < @dblMatchQty
+IF(SELECT ABS(intOpenContract) FROM vyuRKGetMatchingLotAvailableQty where intFutOptTransactionId=@intLFutOptTransactionId and strType = @strType) < @dblMatchQty
 BEGIN
 	RAISERROR('Selected lots are no longer available for matching.',16,1)
 END
-ELSE IF(SELECT ABS(intOpenContract) FROM vyuRKGetOpenContract where intFutOptTransactionId=@intSFutOptTransactionId and strType = @strType) < @dblMatchQty
+ELSE IF(SELECT ABS(intOpenContract) FROM vyuRKGetMatchingLotAvailableQty where intFutOptTransactionId=@intSFutOptTransactionId and strType = @strType) < @dblMatchQty
 BEGIN
 
 	RAISERROR('Selected lots are no longer available for matching.',16,1)
