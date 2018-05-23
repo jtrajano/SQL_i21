@@ -60,6 +60,20 @@ BEGIN
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
 	)  
+
+	INSERT INTO @temp_xml_table
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(50), 
+				[to]			NVARCHAR(50),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)  
     
 	SELECT	@intTrackingNumber = [from]
 	FROM	@temp_xml_table   
@@ -84,10 +98,10 @@ BEGIN
 	SELECT	@strInstoreTo = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strInstoreTo'  
-	
+    
 	SELECT	@intLaguageId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intLaguageId' 
+	WHERE	[fieldname] = 'intSrLanguageId'
 
 	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
 				,@strCompanyAddress = tblSMCompanySetup.strAddress
@@ -181,7 +195,7 @@ BEGIN
 				Vendor.strWebsite as strVendorWebsite,
 				VLocation.strAddress as strVendorAddress,
 				VLocation.strCity as strVendorCity,
-				VLocation.strCountry as strVendorCountry,
+				isnull(rtrt5.strTranslation,VLocation.strCountry) as strVendorCountry,
 				VLocation.strState as strVendorState,
 				VLocation.strZipCode as strVendorZipCode,
 
@@ -193,7 +207,7 @@ BEGIN
 				Customer.strWebsite as strCustomerWebsite,
 				CLocation.strAddress as strCustomerAddress,
 				CLocation.strCity as strCustomerCity,
-				CLocation.strCountry as strCustomerCountry,
+				isnull(rtrt4.strTranslation,CLocation.strCountry) as strCustomerCountry,
 				CLocation.strState as strCustomerState,
 				CLocation.strZipCode as strCustomerZipCode,
 
@@ -205,7 +219,7 @@ BEGIN
 				SLEntity.strWebsite as strShippingLineWebsite,
 				SLLocation.strAddress as strShippingLineAddress,
 				SLLocation.strCity as strShippingLineCity,
-				SLLocation.strCountry as strShippingLineCountry,
+				isnull(rtrt6.strTranslation,SLLocation.strCountry) as strShippingLineCountry,
 				SLLocation.strState as strShippingLineState,
 				SLLocation.strZipCode as strShippingLineZipCode,
 				SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,'') as strShippingLineWithAddress,
@@ -218,7 +232,7 @@ BEGIN
 				TerminalEntity.strWebsite as strTerminalWebsite,
 				TerminalLocation.strAddress as strTerminalAddress,
 				TerminalLocation.strCity as strTerminalCity,
-				TerminalLocation.strCountry as strTerminalCountry,
+				isnull(rtrt7.strTranslation,TerminalLocation.strCountry) as strTerminalCountry,
 				TerminalLocation.strState as strTerminalState,
 				TerminalLocation.strZipCode as strTerminalZipCode,
 
@@ -230,7 +244,7 @@ BEGIN
 				InsurEntity.strWebsite as strInsurerWebsite,
 				InsurLocation.strAddress as strInsurerAddress,
 				InsurLocation.strCity as strInsurerCity,
-				InsurLocation.strCountry as strInsurerCountry,
+				isnull(rtrt8.strTranslation,InsurLocation.strCountry) as strInsurerCountry,
 				InsurLocation.strState as strInsurerState,
 				InsurLocation.strZipCode as strInsurerZipCode,
 
@@ -338,7 +352,33 @@ BEGIN
 		left join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.Item'
 		left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = I.intItemId
 		left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Description'
+		
+		left join tblSMCountry				rtc4 on lower(rtrim(ltrim(rtc4.strCountry))) = lower(rtrim(ltrim(CLocation.strCountry)))
+		left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = rtc4.intCountryID
+		left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
+		
+		left join tblSMCountry				rtc5 on lower(rtrim(ltrim(rtc5.strCountry))) = lower(rtrim(ltrim(VLocation.strCountry)))
+		left join tblSMScreen				rts5 on rts4.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt5 on rtt4.intScreenId = rts5.intScreenId and rtt5.intRecordId = rtc5.intCountryID
+		left join tblSMReportTranslation	rtrt5 on rtrt4.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
+				
+		left join tblSMCountry				rtc6 on lower(rtrim(ltrim(rtc6.strCountry))) = lower(rtrim(ltrim(SLLocation.strCountry)))
+		left join tblSMScreen				rts6 on rts6.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = rtc6.intCountryID
+		left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Country'
+				
+		left join tblSMCountry				rtc7 on lower(rtrim(ltrim(rtc7.strCountry))) = lower(rtrim(ltrim(TerminalLocation.strCountry)))
+		left join tblSMScreen				rts7 on rts7.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt7 on rtt7.intScreenId = rts7.intScreenId and rtt7.intRecordId = rtc7.intCountryID
+		left join tblSMReportTranslation	rtrt7 on rtrt7.intLanguageId = @intLaguageId and rtrt7.intTransactionId = rtt7.intTransactionId and rtrt7.strFieldName = 'Country'
+						
+		left join tblSMCountry				rtc8 on lower(rtrim(ltrim(rtc8.strCountry))) = lower(rtrim(ltrim(InsurLocation.strCountry)))
+		left join tblSMScreen				rts8 on rts8.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = rtc8.intCountryID
+		left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
 
+		--
 		WHERE L.strLoadNumber = @strTrackingNumber
 	END
 END
