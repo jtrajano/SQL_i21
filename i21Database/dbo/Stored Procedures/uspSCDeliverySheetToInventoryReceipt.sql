@@ -46,7 +46,6 @@ DECLARE @intStorageScheduleId AS INT
 		,@dblNetUnits AS DECIMAL(38,20)
 		,@returnValue AS BIT
 		,@requireApproval AS BIT
-		,@intLocationId AS INT
 		,@intShipTo AS INT
 		,@intShipFrom AS INT
 		,@intCurrencyId AS INT
@@ -462,7 +461,7 @@ END
 				,@type = 1
 				,@voucherDetailReceipt = @voucherItems
 				,@voucherDetailReceiptCharge = @voucherOtherCharges
-				,@shipTo = @intLocationId
+				,@shipTo = @intShipTo
 				,@shipFrom = @intShipFrom
 				,@vendorOrderNumber = @vendorOrderNumber
 				,@voucherDate = @voucherDate
