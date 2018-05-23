@@ -52,6 +52,7 @@
 	[intQuoteProduct4Id]       INT             NULL,
 	[intQuoteProduct5Id]       INT             NULL,
 	[ysnQuoteTaxExempt]	  BIT		  DEFAULT ((0))	  NOT NULL,
+	[ysnConvertMiscToVehicle]	  BIT		  DEFAULT ((0))	  NOT NULL,
     CONSTRAINT [PK_tblCFAccount] PRIMARY KEY CLUSTERED ([intAccountId] ASC),
     CONSTRAINT [FK_tblCFAccount_tblARAccountStatus] FOREIGN KEY ([intAccountStatusCodeId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblCFAccount_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),

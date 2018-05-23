@@ -186,8 +186,9 @@ BEGIN
 
 	DECLARE @ysnOnHold					BIT = 0
 
-	DECLARE @intCardTypeId					INT				= 0
-	DECLARE @ysnDualCard					BIT				= 0
+	DECLARE @intCardTypeId				INT				= 0
+	DECLARE @ysnDualCard				BIT				= 0
+	DECLARE @ysnConvertMiscToVehicle	BIT				= 0
 
 	--DECLARE @strSiteType				NVARCHAR(MAX)
 	  
@@ -866,11 +867,17 @@ BEGIN
 		,intAccountId				int
 	)
 
-	
+	SELECT TOP 1 @ysnConvertMiscToVehicle = ysnConvertMiscToVehicle 
+	FROM tblCFAccount 
+	WHERE intAccountId = @intAccountId
 
 
 	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
 	BEGIN
+		IF((@strVehicleId = '0' OR  @strVehicleId IS NULL OR @strVehicleId = 0) AND @ysnConvertMiscToVehicle = 1)
+		BEGIN
+			SET @strVehicleId = @strMiscellaneous
+		END
 
 		IF(@strVehicleId IS NOT NULL)
 		BEGIN
