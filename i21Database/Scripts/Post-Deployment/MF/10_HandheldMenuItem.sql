@@ -152,15 +152,34 @@ BEGIN
 END
 GO
 
-INSERT INTO tblMFHaldheldUserMenuItemMap
-SELECT b.intEntityId
- ,intHandheldMenuItemId
-FROM tblMFHandheldMenuItem a
- ,tblSMUserSecurity b
-WHERE b.intEntityId NOT IN (
-  SELECT intUserSecurityId
-  FROM tblMFHaldheldUserMenuItemMap
-  )
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Stock By Item'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Stock By Item')
+END
 GO
 
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Stock By Storage Unit'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Stock By Storage Unit')
+END
+GO
 
+--INSERT INTO tblMFHaldheldUserMenuItemMap
+--SELECT b.intEntityId
+-- ,intHandheldMenuItemId
+--FROM tblMFHandheldMenuItem a
+-- ,tblSMUserSecurity b
+--WHERE b.intEntityId NOT IN (
+--  SELECT intUserSecurityId
+--  FROM tblMFHaldheldUserMenuItemMap
+--  )
