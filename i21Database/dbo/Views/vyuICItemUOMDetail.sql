@@ -25,6 +25,8 @@ SELECT
 	,intStockUOMId = StockUOM.intItemUOMId
 	,strStockUOM = sUOM.strUnitMeasure
 	,strStockUOMType = sUOM.strUnitType
+	,StockUOM.strUpcCode
+	,StockUOM.strLongUPCCode
 	,dblStockUnitQty = StockUOM.dblUnitQty
 	,ItemLocation.intAllowNegativeInventory
 	,strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
