@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspCTReportContract]
+﻿------------------------uspCTReportContract
+------------------------uspCTReportContract
+CREATE PROCEDURE [dbo].[uspCTReportContract]
 	
 	@xmlParam NVARCHAR(MAX) = NULL  
 	
@@ -82,6 +84,20 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
     
+	INSERT INTO @temp_xml_table
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(50), 
+				[to]			NVARCHAR(50),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)  
+    
 	SELECT	@intContractHeaderId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intContractHeaderId'
@@ -92,7 +108,7 @@ BEGIN TRY
 	
 	SELECT	@intLaguageId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intLaguageId'
+	WHERE	[fieldname] = 'intSrLanguageId'
 
 	INSERT INTO @tblSequenceHistoryId
 	(
@@ -343,7 +359,7 @@ BEGIN TRY
 														ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt10.strTranslation,EY.strEntityCountry))) END,'') +
 														CASE WHEN @ysnFairtrade = 1 THEN
 															ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 														ELSE '' END
@@ -379,7 +395,8 @@ BEGIN TRY
 			,lblGrade								= CASE WHEN ISNULL(W2.strWeightGradeDesc,'') <>''	   THEN @rtApprovalterm + ' :'				ELSE NULL END
 			,lblInsurance							= CASE WHEN ISNULL(IB.strInsuranceBy,'') <>''		   THEN @rtInsurance + ':'					ELSE NULL END
 			,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN @rtConditions + ':'					ELSE NULL END
-			,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
+			--,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
+			,strLocationWithDate					= SQ.strLocationName+', '+DATENAME(dd,CH.dtmContractDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CH.dtmContractDate,'MMM')), format(CH.dtmContractDate,'MMM')) + ' ' + DATENAME(yyyy,CH.dtmContractDate)
 			,strContractText						= ISNULL(TX.strText,'') 
 	        ,strCondition							=	CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
 																@rtStrCondition1 + ' '+ isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+@rtStrCondition2+' .' 
@@ -419,7 +436,7 @@ BEGIN TRY
 														LTRIM(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
 														'''s '+@rtStrPricing2+':'+LTRIM(dblLotsToFix)+').'
-			,strGABHeader							=	@rtConfirmationOf + ' ' + TP.strContractType + ' ' + CH.strContractNumber		
+			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CH.strContractNumber		
 			,strGABAssociation						=	@rtStrGABAssociation1 + ' ' + isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + FORMAT(GETDATE(), 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(getdate(), 'MMM')), FORMAT(getdate(), 'MMM')) + ' ' + FORMAT(GETDATE(), 'yyyy')
 			,strCompanyName							=	@strCompanyName
@@ -529,7 +546,11 @@ BEGIN TRY
 	left join tblSMScreen				rts8 on rts8.strNamespace = 'i21.view.Country'
 	left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = RY.intCountryID
 	left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
-
+	
+	left join tblSMCountry				rtc10 on lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
+	left join tblSMScreen				rts10 on rts10.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt10 on rtt10.intScreenId = rts10.intScreenId and rtt10.intRecordId = rtc10.intCountryID
+	left join tblSMReportTranslation	rtrt10 on rtrt10.intLanguageId = @intLaguageId and rtrt10.intTransactionId = rtt10.intTransactionId and rtrt10.strFieldName = 'Country'
 	
 
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
