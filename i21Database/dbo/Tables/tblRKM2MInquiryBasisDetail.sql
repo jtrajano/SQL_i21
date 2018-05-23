@@ -17,6 +17,7 @@
     [intContractTypeId] INT NULL, 
     [dblCashOrFuture] NUMERIC(18, 6) NULL, 
     [dblBasisOrDiscount] NUMERIC(18, 6) NULL, 
+	[dblRatio] NUMERIC(18, 6) NULL, 
     [intUnitMeasureId] INT NULL, 
     CONSTRAINT [PK_tblRKM2MInquiryBasisDetail_intM2MInquiryBasisDetailId] PRIMARY KEY (intM2MInquiryBasisDetailId),
 	CONSTRAINT [FK_tblRKM2MInquiryBasisDetail_tblRKM2MInquiry_intM2MInquiryId] FOREIGN KEY([intM2MInquiryId])REFERENCES [dbo].[tblRKM2MInquiry] (intM2MInquiryId) ON DELETE CASCADE,  

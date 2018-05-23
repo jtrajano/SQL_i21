@@ -16,6 +16,7 @@
     [strContractInventory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intContractTypeId] INT NULL, 
     [dblCashOrFuture] NUMERIC(18, 6) NULL, 
+	[dblRatio] NUMERIC(18, 6) NULL, 
     [dblBasisOrDiscount] NUMERIC(18, 6) NULL, 
     [intUnitMeasureId] INT NULL, 
     [strMarketValuation] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,  
