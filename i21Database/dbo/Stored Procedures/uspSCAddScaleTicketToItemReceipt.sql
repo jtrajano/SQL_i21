@@ -1213,9 +1213,15 @@ BEGIN
 		,[intSubLocationId]		= RE.intSubLocationId
 		,[intStorageLocationId] = RE.intStorageLocationId
 		,[intCurrencyId]		= RE.intCurrencyId
-		,[intItemUnitMeasureId] = CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN SC.intItemUOMIdFrom
-									ELSE RE.intItemUOMId
+		,[intItemUnitMeasureId] = RE.intItemUOMId
+		,[dblQuantity]			= RE.dblQty
+		,[dblGrossWeight]		= CASE
+									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
+									ELSE SC.dblGrossUnits
+								END
+		,[dblTareWeight]		= CASE
+									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
+									ELSE SC.dblShrink
 								END
 		,[dblQuantity]			= RE.dblQty
 		,[dblGrossWeight]		= RE.dblQty
