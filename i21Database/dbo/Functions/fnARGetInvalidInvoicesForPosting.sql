@@ -1874,6 +1874,16 @@ SELECT
 FROM 
 	[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @Post)
 
+UPDATE RT
+SET RT.[strBatchId] = I.[strBatchId]
+FROM
+	@returntable RT
+INNER JOIN
+	@Invoices I
+		ON RT.[intInvoiceId] = I.[intInvoiceId]
+WHERE 
+	LTRIM(RTRIM(ISNULL(RT.[strBatchId],''))) = ''	
+
 RETURN
 
 END
