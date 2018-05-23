@@ -58,13 +58,14 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NULL
 ;
 
 -- Update or Add the account id for COGS
+IF @intGLAccountCOGS IS NOT NULL 
 BEGIN 
 	INSERT INTO #tmpUpdateItemAccountForCStore_itemAuditLog (
 		intItemId 
 		,intItemAccountId
 		-- Original Fields
-		,intAccountCategoryId_Original
-		,intAccountId_Original		
+		, intAccountCategoryId_Original
+		, intAccountId_Original		
 		-- Modified Fields
 		, intAccountCategoryId_New 
 		, intAccountId_New 
@@ -152,7 +153,7 @@ BEGIN
 							,dtmDateModified = GETUTCDATE()
 							,intModifiedByUserId = @intEntityUserSecurityId
 
-					WHEN NOT MATCHED BY TARGET AND @intGLAccountCOGS IS NOT NULL THEN 
+					WHEN NOT MATCHED BY TARGET THEN 
 						INSERT (
 							intItemId
 							,intAccountCategoryId
@@ -204,13 +205,14 @@ END
 
 
 -- Update or Add the account id for Sales Account 
+IF @intGLAccountSalesRevenue IS NOT NULL 
 BEGIN 
 	INSERT INTO #tmpUpdateItemAccountForCStore_itemAuditLog (
 		intItemId 
-		,intItemAccountId
+		, intItemAccountId
 		-- Original Fields
-		,intAccountCategoryId_Original
-		,intAccountId_Original		
+		, intAccountCategoryId_Original
+		, intAccountId_Original		
 		-- Modified Fields
 		, intAccountCategoryId_New 
 		, intAccountId_New 
@@ -298,7 +300,7 @@ BEGIN
 							,dtmDateModified = GETUTCDATE()
 							,intModifiedByUserId = @intEntityUserSecurityId
 
-					WHEN NOT MATCHED BY TARGET AND @intGLAccountSalesRevenue IS NOT NULL THEN 
+					WHEN NOT MATCHED BY TARGET THEN 
 						INSERT (
 							intItemId
 							,intAccountCategoryId
