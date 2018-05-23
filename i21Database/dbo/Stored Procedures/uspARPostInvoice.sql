@@ -1482,7 +1482,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
+				,dblExchangeRate			= ISNULL(NULLIF(dblBaseInvoiceTotal, 0), 1)/ISNULL(NULLIF(dblInvoiceTotal, 0), 1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -1554,7 +1554,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
+				,dblExchangeRate			= ISNULL(NULLIF(dblBaseInvoiceTotal, 0), 1)/ISNULL(NULLIF(dblInvoiceTotal, 0), 1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -1607,7 +1607,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
+				,dblExchangeRate			= ISNULL(NULLIF(dblBaseInvoiceTotal, 0), 1)/ISNULL(NULLIF(dblInvoiceTotal, 0), 1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= 'Provisional Amount'
@@ -1715,7 +1715,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
+				,dblExchangeRate			= ISNULL(NULLIF(dblBaseInvoiceTotal, 0), 1)/ISNULL(NULLIF(dblInvoiceTotal, 0), 1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -2450,7 +2450,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
+				,dblExchangeRate			= ISNULL(NULLIF(dblBaseInvoiceTotal, 0), 1)/ISNULL(NULLIF(dblInvoiceTotal, 0), 1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -2508,7 +2508,7 @@ IF @post = 1
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
 				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1)
+				,dblExchangeRate			= ISNULL(NULLIF(dblBaseInvoiceTotal, 0), 1)/ISNULL(NULLIF(dblInvoiceTotal, 0), 1)
 				,dtmDateEntered				= @PostDate
 				,dtmTransactionDate			= A.dtmDate
 				,strJournalLineDescription	= @POSTDESC + A.strTransactionType 
@@ -3589,7 +3589,7 @@ IF @recap = 1
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE ISNULL(dblBaseInvoiceTotal,1)/ISNULL(dblInvoiceTotal,1) END
+			,[dblExchangeRate]					= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN 0.00 ELSE ISNULL(NULLIF(dblBaseInvoiceTotal, 0),1)/ISNULL(NULLIF(dblInvoiceTotal, 0),1) END
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]
