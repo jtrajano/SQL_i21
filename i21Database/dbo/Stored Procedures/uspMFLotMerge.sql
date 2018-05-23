@@ -46,6 +46,14 @@ BEGIN TRY
 		,@strDescription NVARCHAR(MAX)
 		,@dtmSourceLotExpiryDate DATETIME
 		,@dtmDestinationLotExpiryDate DATETIME
+		,@strSourceCertificate NVARCHAR(50)
+		,@intSourceProducerId INT
+		,@strSourceCertificateId NVARCHAR(50)
+		,@strSourceTrackingNumber NVARCHAR(255)
+		,@strDestinationCertificate NVARCHAR(50)
+		,@intDestinationProducerId INT
+		,@strDestinationCertificateId NVARCHAR(50)
+		,@strDestinationTrackingNumber NVARCHAR(255)
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
@@ -72,6 +80,10 @@ BEGIN TRY
 			END
 		,@intItemUOMId = intItemUOMId
 		,@dtmSourceLotExpiryDate = dtmExpiryDate
+		,@strSourceCertificate = strCertificate
+		,@intSourceProducerId = intProducerId
+		,@strSourceCertificateId = strCertificateId
+		,@strSourceTrackingNumber = strTrackingNumber
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -148,6 +160,10 @@ BEGIN TRY
 			ELSE dblWeight
 			END
 		,@dtmDestinationLotExpiryDate = dtmExpiryDate
+		,@strDestinationCertificate = strCertificate
+		,@intDestinationProducerId = intProducerId
+		,@strDestinationCertificateId = strCertificateId
+		,@strDestinationTrackingNumber = strTrackingNumber
 	FROM tblICLot
 	WHERE intLotId = @intNewLotId
 
@@ -199,6 +215,27 @@ BEGIN TRY
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
+	IF @intSourceProducerId = @intDestinationProducerId
+		AND @strSourceCertificate = @strDestinationCertificate
+	BEGIN
+		IF NOT (@strDestinationCertificateId LIKE '%' + @strSourceCertificateId + '%')
+		BEGIN
+			SELECT @strDestinationCertificateId = @strDestinationCertificateId + ', ' + @strSourceCertificateId
+		END
+
+		IF NOT (@strDestinationTrackingNumber LIKE '%' + @strSourceTrackingNumber + '%')
+		BEGIN
+			SELECT @strDestinationTrackingNumber = @strDestinationTrackingNumber + ', ' + @strSourceTrackingNumber
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @intSourceProducerId = NULL
+			,@strSourceCertificate = NULL
+			,@strDestinationCertificateId = NULL
+			,@strDestinationTrackingNumber = NULL
+	END
+
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
@@ -242,6 +279,13 @@ BEGIN TRY
 		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	UPDATE tblICLot
+	SET intProducerId = @intSourceProducerId
+		,strCertificate = @strSourceCertificate
+		,strCertificateId = @strDestinationCertificateId
+		,strTrackingNumber = @strDestinationTrackingNumber
+	WHERE intLotId = @intNewLotId
 
 	IF EXISTS (
 			SELECT 1

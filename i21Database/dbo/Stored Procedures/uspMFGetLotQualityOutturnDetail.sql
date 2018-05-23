@@ -40,25 +40,6 @@ INSERT INTO @tblMFLot (
 	,dblQty
 	,intItemUOMId
 	)
-SELECT OM.intLotId
-	,T.intItemId
-	,T.dblWeight
-	,T.intWeightUOMId
-FROM tblMFWorkOrder W
-JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
-JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
-JOIN tblMFOrderManifest OM ON OM.intOrderHeaderId = SW.intOrderHeaderId
-JOIN tblICLot L ON L.intLotId = OM.intLotId
-JOIN tblMFTask T ON T.intLotId = L.intLotId
-	AND T.intOrderHeaderId = OM.intOrderHeaderId
-WHERE W.intWorkOrderId = @intWorkOrderId
-
-INSERT INTO @tblMFLot (
-	intLotId
-	,intItemId
-	,dblQty
-	,intItemUOMId
-	)
 SELECT WI.intLotId
 	,WI.intItemId
 	,WI.dblQuantity

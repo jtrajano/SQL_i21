@@ -2377,11 +2377,15 @@ BEGIN
         ,strSQL
         )
     SELECT 108
-        ,'Pick Lot/Pallet after closing work order'
+        ,'Allow Shipment Pick List for WO lots after closing WO'
         ,5
         ,5
         ,0
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+ELSE
+BEGIN
+	Update tblMFAttribute Set strSQL ='Allow Shipment Pick List for WO lots after closing WO' Where intAttributeId=108
 END
 GO
 IF NOT EXISTS (

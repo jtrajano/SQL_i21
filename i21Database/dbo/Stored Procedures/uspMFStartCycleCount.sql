@@ -541,21 +541,6 @@ BEGIN TRY
 		if @dblStagedQty is null
 		Select @dblStagedQty=0
 
-		If @intRecipeTypeId=3
-		Begin
-			SELECT @dblStagedQty = @dblStagedQty+SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, IU.intItemUOMId, T.dblQty))
-			FROM tblMFWorkOrder W
-			JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
-			JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
-			JOIN tblMFOrderManifest OM ON OM.intOrderHeaderId = SW.intOrderHeaderId
-			JOIN tblICLot L ON L.intLotId = OM.intLotId
-			JOIN tblMFTask T ON T.intLotId = L.intLotId
-				AND T.intOrderHeaderId = OM.intOrderHeaderId
-			JOIN tblICItemUOM IU ON IU.intItemId = L.intItemId
-			AND IU.intUnitMeasureId = @intUnitMeasureId
-			WHERE W.intWorkOrderId =@intWorkOrderId
-		End
-
 		IF @dblStagedQty > @dblProducedQty
 		BEGIN
 			RAISERROR (

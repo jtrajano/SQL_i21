@@ -62,6 +62,12 @@ BEGIN
 		,@intProducerId INT
 		,@strCertificateId NVARCHAR(50)
 		,@strTrackingNumber NVARCHAR(255)
+	DECLARE @tblMFCertification TABLE (
+		strCertificate NVARCHAR(50)
+		,intProducerId INT
+		,strCertificateId NVARCHAR(50)
+		,strTrackingNumber NVARCHAR(255)
+		)
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
@@ -347,21 +353,61 @@ BEGIN
 			SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
 
 		IF (
-				SELECT Count(DISTINCT strCertificate)
-				FROM dbo.tblICLot L
-				JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
-				WHERE WC.intWorkOrderId = @intWorkOrderId
-					AND WC.intBatchId = @intBatchId
+				SELECT Count(*)
+				FROM (
+					SELECT DISTINCT intProducerId
+						,strCertificate
+					FROM dbo.tblICLot L
+					JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
+					WHERE WC.intWorkOrderId = @intWorkOrderId
+						AND WC.intBatchId = @intBatchId
+					) AS DT
 				) = 1
 		BEGIN
-			SELECT @strCertificate = strCertificate
-				,@intProducerId = intProducerId
-				,@strCertificateId = strCertificateId
-				,@strTrackingNumber = strTrackingNumber
+			INSERT INTO @tblMFCertification (
+				strCertificate
+				,intProducerId
+				,strCertificateId
+				,strTrackingNumber
+				)
+			SELECT DISTINCT strCertificate
+				,intProducerId
+				,strCertificateId
+				,strTrackingNumber
 			FROM dbo.tblICLot L
 			JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intLotId = L.intLotId
 			WHERE WC.intWorkOrderId = @intWorkOrderId
 				AND WC.intBatchId = @intBatchId
+
+			SELECT @strCertificate = strCertificate
+				,@intProducerId = intProducerId
+			FROM @tblMFCertification
+
+			SELECT @strCertificateId = ''
+
+			SELECT @strCertificateId = @strCertificateId + strCertificateId + ','
+			FROM (
+				SELECT DISTINCT strCertificateId
+				FROM @tblMFCertification
+				) AS DT
+
+			IF Len(@strCertificateId) > 0
+			BEGIN
+				SELECT @strCertificateId = Left(@strCertificateId, Len(@strCertificateId) - 1)
+			END
+
+			SELECT @strTrackingNumber = ''
+
+			SELECT @strTrackingNumber = @strTrackingNumber + strTrackingNumber + ','
+			FROM (
+				SELECT DISTINCT strTrackingNumber
+				FROM @tblMFCertification
+				) AS DT
+
+			IF Len(@strTrackingNumber) > 0
+			BEGIN
+				SELECT @strTrackingNumber = Left(@strTrackingNumber, Len(@strTrackingNumber) - 1)
+			END
 		END
 
 		INSERT INTO @ItemsThatNeedLotId (
