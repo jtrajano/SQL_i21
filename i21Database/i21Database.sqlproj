@@ -6317,6 +6317,7 @@
     <Build Include="dbo\Functions\fnAPGetPaymentForexRate.sql" />
     <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
     <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
