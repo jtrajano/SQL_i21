@@ -6628,6 +6628,7 @@
     <Build Include="dbo\Views\vyuCFinvoiceGroupByDeptHistory.sql" />
     <Build Include="dbo\Views\vyuCFinvoiceGroupByCardHistory.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMI.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
