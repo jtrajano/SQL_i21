@@ -113,7 +113,7 @@ END
 IF ISNULL(@intUOMId,0) = 0
 BEGIN	
 SELECT @intUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intFCommodityId AND ysnDefault=1
-	--select @intUOMId=intUnitMeasureId from tblRKFutureMarket where intFutureMarketId=@intFMarketId
+	
 	
 END
 
@@ -127,8 +127,6 @@ EXEC uspRKRiskPositionInquiryByTraderSub
         @intFutureMonthId  = @intFMonthId,  
         @intUOMId  = @intUOMId,  
         @intDecimal  = @intDecimal,  
-        @intForecastWeeklyConsumption  = @intForecastWeeklyConsumption,
-        @intForecastWeeklyConsumptionUOMId  = @intForecastWeeklyConsumptionUOMId,
 		@intBookId  = @intBookId, 
 		@intSubBookId  = @intSubBookId,
 		@strPositionBy  = @strPositionBy,
@@ -143,7 +141,7 @@ insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,
 SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strTranType not in ('PTBF Buy','PTBF Sell')
+FROM @List where strFutureMonth not in('Total','Delta Ratio','Delta Total') and strTranType not in ('PTBF Buy','PTBF Sell')
  order by strFutureMonth,intRowNumber
 
 insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
@@ -152,7 +150,7 @@ insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,
 SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strTranType='PTBF Buy'
+FROM @List where strFutureMonth not in('Total','Delta Ratio','Delta Total') and strTranType='PTBF Buy'
  order by strFutureMonth,intRowNumber
 
  insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
@@ -161,7 +159,7 @@ FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Rat
 SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth not in('Total UP','Total P','Overall','Delta Ratio','Delta Total') and strTranType='PTBF Sell'
+FROM @List where strFutureMonth not in('Total','Delta Ratio','Delta Total') and strTranType='PTBF Sell'
  order by strFutureMonth,intRowNumber
 
 insert into @FinalList ( intSumRowNum,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
@@ -170,14 +168,8 @@ insert into @FinalList ( intSumRowNum,strFutMarketName,strBook,strProductType ,s
 SELECT 	 intRowNumber,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth in ('Total UP','Total P')  order by strFutureMonth,intRowNumber
-insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
-		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
-		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod)
-SELECT 	 intRowNumber,strFutMarketName,strBook,strProductType ,strProductLine ,strContractType  
-		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
-		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
-FROM @List where strFutureMonth='Overall' order by strFutureMonth,intRowNumber
+FROM @List where strFutureMonth in ('Total')  order by strFutureMonth,intRowNumber
+
 insert into @FinalList ( intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod)
@@ -193,5 +185,13 @@ SELECT 	 intRowNumber,strFutMarketName,strBook ,strProductType ,strProductLine ,
 		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
 FROM @List where strFutureMonth='Delta Total'  order by strFutureMonth,intRowNumber
 
-select * from 	@FinalList 
-order by  intRowNumber,strFutMarketName,strCompanyName
+SELECT intSumRowNum,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
+		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
+		,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,
+		case when isnull(mc.intMultiCompanyParentId,0) =0 then 'Parent' else 'Subsidiary' end strCompanyName,l.strCompanyName strName,strShipmentPeriod 
+		,case when strPhysicalOrFuture='Futures' and strProductLine in('PTBF Buy','PTBF Sell') then strProductLine
+			  when strPhysicalOrFuture='Futures' and strProductLine not in('PTBF Buy','PTBF Sell') then 'Hedges (Clearing)'
+			  else 'Physical'  end strProductLineBuySell
+FROM @FinalList l
+JOIN tblSMMultiCompany mc on l.strCompanyName=mc.strCompanyName
+ORDER BY  intRowNumber,strFutMarketName,strCompanyName

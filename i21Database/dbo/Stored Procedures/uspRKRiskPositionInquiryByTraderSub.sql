@@ -5,23 +5,11 @@
         @intFutureMonthId INTEGER,  
         @intUOMId INTEGER,  
         @intDecimal INTEGER,
-        @intForecastWeeklyConsumption INTEGER = null,
-        @intForecastWeeklyConsumptionUOMId INTEGER = null,
 		@intBookId int = NULL, 
 		@intSubBookId int = NULL,
 		@strPositionBy nvarchar(100) = NULL,
 		@intCompanyId int
 AS  
-
-IF isnull(@intForecastWeeklyConsumptionUOMId, 0) = 0
-BEGIN
-	SET @intForecastWeeklyConsumption = 1
-END
-
-IF isnull(@intForecastWeeklyConsumptionUOMId, 0) = 0
-BEGIN
-	SET @intForecastWeeklyConsumptionUOMId = @intUOMId
-END
 
 DECLARE @strUnitMeasure NVARCHAR(max)
 DECLARE @dtmFutureMonthsDate DATETIME
@@ -29,17 +17,12 @@ DECLARE @dblContractSize INT
 DECLARE @ysnIncludeInventoryHedge BIT
 DECLARE @strRiskView NVARCHAR(max)
 DECLARE @strFutureMonth NVARCHAR(max)
-	,@dblForecastWeeklyConsumption NUMERIC(24, 10)
 DECLARE @strParamFutureMonth NVARCHAR(max)
 DECLARE @strMarketSymbol NVARCHAR(max)
 
-SELECT @dblContractSize = convert(INT, dblContractSize)
-FROM tblRKFutureMarket
-WHERE intFutureMarketId = @intFutureMarketId
+SELECT @dblContractSize = convert(INT, dblContractSize) FROM tblRKFutureMarket WHERE intFutureMarketId = @intFutureMarketId
 
-SELECT TOP 1 @dtmFutureMonthsDate = dtmFutureMonthsDate
-	,@strParamFutureMonth = strFutureMonth,@strMarketSymbol=strSymbol
-FROM tblRKFuturesMonth
+SELECT TOP 1 @dtmFutureMonthsDate = dtmFutureMonthsDate,@strParamFutureMonth = strFutureMonth,@strMarketSymbol=strSymbol FROM tblRKFuturesMonth 
 WHERE intFutureMonthId = @intFutureMonthId
 
 SELECT TOP 1 @strUnitMeasure = strUnitMeasure
@@ -56,13 +39,6 @@ FROM tblRKCompanyPreference
 SELECT @strRiskView = strRiskView
 FROM tblRKCompanyPreference
 
-DECLARE @intForecastWeeklyConsumptionUOMId1 INT
-
-SELECT @intForecastWeeklyConsumptionUOMId1 = intCommodityUnitMeasureId
-FROM tblICCommodityUnitMeasure
-WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intForecastWeeklyConsumptionUOMId
-
-SELECT @dblForecastWeeklyConsumption = isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intForecastWeeklyConsumptionUOMId1, @intUOMId, @intForecastWeeklyConsumption), 1)
 
 --    Invoice End
 DECLARE @List AS TABLE (
@@ -93,6 +69,8 @@ DECLARE @List AS TABLE (
 	,intMultiCompanyId int
 	,strCompanyName  NVARCHAR(max) COLLATE Latin1_General_CI_AS
 	,strShipmentPeriod  NVARCHAR(max) COLLATE Latin1_General_CI_AS
+	,intGroupId int
+	,dblDeltaPercent DECIMAL(24, 10)
 	)
 DECLARE @PricedContractList AS TABLE (
 	strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
@@ -177,15 +155,14 @@ LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = cv.intCommodityId 
 WHERE cv.intCommodityId = @intCommodityId AND cv.intFutureMarketId = @intFutureMarketId AND cv.intContractStatusId NOT IN (2, 3) 
 AND isnull(intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(intBookId,0) else @intBookId end
 AND isnull(cv.intMultiCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isnull(intMultiCompanyId,0) else @intCompanyId end
-
 		
-	SELECT strFutMarketName
+SELECT strFutMarketName
 		,strBook
 		,strProductType 
 		,strProductLine 
 		,strPricingType 
 		,strTranType
-		,case when intPricingTypeId= 1 then right(strFutureMonth,2)+' '+strSymbol+' (P)' else right(strFutureMonth,2)+' '+strSymbol+' (UP)'  end strFutureMonth
+		,case when intPricingTypeId= 1 then right(strFutureMonth,2)+strSymbol else right(strFutureMonth,2)+strSymbol+' (UP)'  end strFutureMonth
 		,((ROUND(dblNoOfContract, @intDecimal)) * case when isnull(dblYield,0)=0 then 1 else dblYield end)/100 AS dblNoOfContract
 		,((dblNoOfLot/dblContractSize) * case when isnull(dblYield,0)=0 then 1 else dblYield end)/100  dblNoOfLot
 		,dblQuantity
@@ -213,8 +190,7 @@ AND isnull(cv.intMultiCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isn
 					SELECT intSampleId,sum(convert(numeric(24,10),isnull(strPropertyValue,0))) strPropertyValue
 					FROM tblQMTestResult TR
 					JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-					 AND P.intDataTypeId IN (1,2)
-					 AND TR.intProductTypeId = 6 -- Lot Identifier
+					 AND P.intDataTypeId IN (1,2) AND TR.intProductTypeId = 6 -- Lot Identifier
 					 AND TR.intProductValueId = oc.intLotId -- Lot Id
 					 AND TR.intPropertyItemId IS NOT NULL -- Inventory Item Id
 					 WHERE isnull(strPropertyValue,'') <> ''
@@ -244,7 +220,7 @@ AND isnull(cv.intMultiCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isn
 			JOIN tblRKFutureMarket fm on fm.intFutureMarketId=cd.intFutureMarketId
 
 			join tblRKFuturesMonth mo on mo.intFutureMonthId=cd.intFutureMonthId
-			JOIN tblCTBook b on b.intBookId=case when isnull(cd.intBookId,0)=0 then (SELECT DISTINCT b.intBookId from tblCTBookVsEntity e
+			JOIN tblCTBook b on b.intBookId=case when isnull(cd.intBookId,0)=0 then (SELECT DISTINCT top 1 b.intBookId from tblCTBookVsEntity e
 																	join tblCTContractHeader ch on ch.intEntityId=e.intEntityId
 																	join tblCTBook b on b.intBookId=ch.intBookId) else cd.intBookId end	
 			LEFT JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = c.intCommodityId AND um.intUnitMeasureId = cd.intUnitMeasureId
@@ -259,11 +235,11 @@ AND isnull(cv.intMultiCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isn
 			AND isnull(cd.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(cd.intBookId,0) else @intBookId end
 			AND isnull(oc.intCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isnull(oc.intCompanyId,0) else @intCompanyId end
 
-			union
+			UNION
 
 			SELECT DISTINCT 
 				 strFutMarketName
-				,null strBook
+				,strBook strBook
 				,pty.strDescription strProductType 
 				,ptl.strDescription strProductLine 
 				,'Priced' strPricingType 
@@ -276,7 +252,7 @@ AND isnull(cv.intMultiCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isn
 				1 intPricingTypeId,@dtmFutureMonthsDate dtmFutureMonthsDate,strItemNo  strTradeNo
 				,null intContractHeaderId,@dtmFutureMonthsDate TransactionDate, 'FG (I)' TranType,null CustVendor
 				,isnull(ysnDeltaHedge,0) ysnDeltaHedge,CA.strDescription AS	strItemOrigin,null strLocationName,IM.strDescription strItemDescription
-				,100 dblYield,dblDeltaPercent,intMultiCompanyId, strCompanyName
+				,100 dblYield,dblDeltaPercent,oc.intCompanyId, strCompanyName
 					,'' strShipmentPeriod
 					,dbo.fnCTConvertQtyToTargetCommodityUOM(c.intCommodityId,um.intUnitMeasureId,@intUOMId, fm.dblContractSize)dblContractSize
 			FROM tblICLot oc 
@@ -286,6 +262,8 @@ AND isnull(cv.intMultiCompanyId,0)= case when isnull(@intCompanyId,0)=0 then isn
 			JOIN tblRKFutureMarket fm on fm.intFutureMarketId=mm.intFutureMarketId
 			 JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = c.intCommodityId AND um.intUnitMeasureId = fm.intUnitMeasureId			
 			 JOIN tblSMMultiCompany comp on comp.intMultiCompanyId=oc.intCompanyId
+			 join tblCTBookVsEntity be on comp.intMultiCompanyId=be.intMultiCompanyId
+			 join tblCTBook b on b.intBookId=be.intBookId
 			 JOIN tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId				
 			 JOIN tblICCommodityAttribute pty on IM.intProductTypeId=pty.intCommodityAttributeId and pty.strType='ProductType'
 			 JOIN tblICCommodityProductLine ptl on IM.intProductLineId=ptl.intCommodityProductLineId 
@@ -302,12 +280,13 @@ SELECT strFutMarketName
 		,strProductLine 
 		,strPricingType 
 		,strTranType
-		,right(strFutureMonth,2)+' '+strSymbol+' (P)' strFutureMonth
+		,right(strFutureMonth,2)+strSymbol strFutureMonth
 		,ROUND(dblNoOfContract, @intDecimal) AS dblNoOfContract
 		,dblNoOfLot
 		,dblQuantity
 		,'Futures' strPhysicalOrFuture,strContractType ,dtmFutureMonthsDate,@strMarketSymbol strMarketSymbol,strTradeNo,
-		intFutOptTransactionHeaderId,TransactionDate,TranType,CustVendor,strLocationName,intMultiCompanyId,strCompanyName,isnull(ysnDeltaHedge,0) ysnDeltaHedge INTO #tempFutureRec
+		intFutOptTransactionHeaderId,TransactionDate,TranType,CustVendor,strLocationName,intMultiCompanyId,strCompanyName,isnull(ysnDeltaHedge,0) ysnDeltaHedge 
+INTO #tempFutureRec
 	FROM (			
 			SELECT DISTINCT 
 				 strFutMarketName
@@ -334,9 +313,9 @@ SELECT strFutMarketName
 			join tblSMCompanyLocation l on l.intCompanyLocationId=ft.intLocationId
 			LEFT JOIN tblSMMultiCompany comp on comp.intMultiCompanyId=fh.intCompanyId
 			LEFT join tblICCommodityAttribute ca on ca.intCommodityAttributeId=mm.strCommodityAttributeId 
-			LEFT JOIN tblCTBook b on b.intBookId=case when isnull(ft.intBookId,0)=0 then (SELECT DISTINCT b.intBookId from tblCTBookVsEntity e
-																	join tblRKFutOptTransaction ch on ch.intEntityId=e.intEntityId
-																	join tblCTBook b on b.intBookId=ch.intBookId) else ft.intBookId end	
+			LEFT JOIN tblCTBook b on b.intBookId=case when isnull(ft.intBookId,0)=0 then (SELECT DISTINCT top 1 b.intBookId from tblCTBookVsEntity e
+																	JOIN tblCTBookVsEntity be on comp.intMultiCompanyId=be.intMultiCompanyId
+																	join tblCTBook b on b.intBookId=be.intBookId) else ft.intBookId end	
 			WHERE ft.intCommodityId = @intCommodityId AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END 
 			AND intLocationId = CASE WHEN isnull(@intCompanyLocationId, 0) = 0 THEN intLocationId ELSE @intCompanyLocationId END 
 			AND ft.intFutureMarketId = @intFutureMarketId 
@@ -357,14 +336,14 @@ BEGIN
 		,strProductLine 
 		,strPricingType 
 		,strTranType
-		,case when intPricingTypeId= 1 then  right(strFutureMonth,2)+' '+strSymbol+' (P)' else  right(strFutureMonth,2)+' '+strSymbol+' (UP)'  end strFutureMonth
+		,right(strFutureMonth,2)+strSymbol strFutureMonth
 		,ROUND(dblNoOfContract, @intDecimal) AS dblNoOfContract
 		,dblNoOfLot
 		,dblQuantity
 		,'Physical' strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName
 		,strItemDescription,strCompanyName,strShipmentPeriod
 	FROM (			
-			SELECT distinct strFutMarketName
+			SELECT DISTINCT strFutMarketName
 				,strBook 
 				,strProductType 
 				,strProductLine 
@@ -388,7 +367,7 @@ BEGIN
 		,strProductLine 
 		,strPricingType 
 		,strTranType
-		,case when intPricingTypeId= 1 then  right(strFutureMonth,2)+' '+strSymbol+' (P)' else  right(strFutureMonth,2)+' '+strSymbol+' (UP)'  end strFutureMonth
+		,right(strFutureMonth,2)+strSymbol strFutureMonth
 		,ROUND(dblNoOfContract, @intDecimal) AS dblNoOfContract
 		,dblNoOfLot
 		,dblQuantity
@@ -416,8 +395,7 @@ INSERT INTO @List (
 		 strFutMarketName,strBook,strProductType ,strProductLine ,strPricingType 
 		,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,
 		TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod)	
-SELECT DISTINCT strFutMarketName,strBook,strProductType ,strProductLine ,strPricingType ,strTranType,
-CASE WHEN strTranType = 'Priced' THEN  @strMarketSymbol+' '+right(@strParamFutureMonth,2)+' P' ELSE  @strMarketSymbol+' '+right(@strParamFutureMonth,2)+' UP'  end
+SELECT DISTINCT strFutMarketName,strBook,strProductType ,strProductLine ,strPricingType ,strTranType, @strMarketSymbol+right(@strParamFutureMonth,2)+'P'
 ,dblNoOfContract	,dblNoOfLot	,dblQuantity,'Physical' strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,TransactionDate,TranType,CustVendor
 ,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
 FROM #tempContractAfterRecInventory where  dtmFutureMonthsDate < @dtmFutureMonthsDate and ysnDeltaHedge=0  
@@ -449,14 +427,13 @@ GROUP BY strFutMarketName,strBook,strProductType ,strPricingType,strFutureMonth,
 
 END		
 
----Future Rec 
+--Future Rec 
 INSERT INTO @List (
 		 strFutMarketName,strBook,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,dblNoOfContract,
 		 dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,
-		 CustVendor,strLocationName,strCompanyName
-		 
+		 CustVendor,strLocationName,strCompanyName		 
 		)
-SELECT strFutMarketName,strBook,strProductType ,strProductLine ,strPricingType ,strTranType,@strMarketSymbol+' '+right(@dtmFutureMonthsDate,2)+' P',
+SELECT strFutMarketName,strBook,strProductType ,strProductLine ,strPricingType ,strTranType,@strMarketSymbol+right(@dtmFutureMonthsDate,2)+'P',
 	dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intFutOptTransactionHeaderId,null,TransactionDate,TranType,CustVendor
 	,strLocationName,strCompanyName
 FROM #tempFutureRec	WHERE isnull(ysnDeltaHedge,0) = 0 and dtmFutureMonthsDate < @dtmFutureMonthsDate    
@@ -475,11 +452,12 @@ INSERT INTO @List (
 ,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod
 )
 select strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,'Total P' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
+,strTranType,'Total' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
 ,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName,strShipmentPeriod	
- FROM @List WHERE strTranType='Priced'
+ FROM @List WHERE strTranType in('Priced','Unpriced')
 GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,strPhysicalOrFuture,strContractType
 ,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod
+
 
 INSERT INTO @List (
 	strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
@@ -487,48 +465,13 @@ INSERT INTO @List (
 ,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod		
 )
 select strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,'Total UP' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
+,strTranType,'Total' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
 ,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName,strShipmentPeriod
- FROM @List where strTranType='Unpriced'
+ FROM @List where strTranType in('PTBF Sell','PTBF Buy')
 GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,strPhysicalOrFuture,strContractType
 ,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod
 
 
-INSERT INTO @List (
-	strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod			
-)
-select strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,'Total UP' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName,strShipmentPeriod
-FROM @List where strTranType='PTBF Buy'
-GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod
-
-INSERT INTO @List (
-	strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod		
-)
-select strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,'Total P' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName,strShipmentPeriod
- FROM @List where strTranType='PTBF Sell'
-GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,strShipmentPeriod
-
-
-INSERT INTO @List (
-	strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName	,	strShipmentPeriod	
-)
-select strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
-,strTranType,'Overall' strFutureMonth,sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName,strShipmentPeriod	 FROM @List where strFutureMonth in('Total UP','Total P')
-GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,strPhysicalOrFuture,strContractType
-,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName,strShipmentPeriod	
 ----------------------- delta % 
 	INSERT INTO @List (
 		 strFutMarketName,strBook ,strProductType ,strProductLine ,strFutureMonth ,dblNoOfLot	,strPhysicalOrFuture,strCompanyName
@@ -547,7 +490,6 @@ GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingTyp
 			AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate < @dtmFutureMonthsDate and ysnDeltaHedge =1
 	UNION
 	-- Physical contract graterthan or equal to spot date
-
 			SELECT  DISTINCT strFutMarketName
 				,strBook 
 				,strProductType 
@@ -559,12 +501,13 @@ GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingTyp
 			FROM @PricedContractList
 			WHERE  intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
 			AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate and ysnDeltaHedge=1)t
-	GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strFutureMonth ,dblNoOfLot	,strPhysicalOrFuture,strCompanyName
+	GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strFutureMonth ,dblNoOfLot,strPhysicalOrFuture,strCompanyName
+
 
 	INSERT INTO @List (
 		 strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
 		,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,
-		TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
+		TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod,intGroupId,dblDeltaPercent
 		)
 	
 			SELECT DISTINCT strFutMarketName
@@ -573,14 +516,14 @@ GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingTyp
 				,strProductLine 
 				,strPricingType 
 				,strType strTranType
-				,'Delta Total' strFutureMonth 
-				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfContract*dblDeltaPercent)/100 ELSE - ((abs(dblNoOfContract))*dblDeltaPercent)/100 END AS dblNoOfContract
-				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfLot*dblDeltaPercent)/100 ELSE - ((abs(dblNoOfLot))*dblDeltaPercent)/100 END dblNoOfLot
-				,CASE WHEN strContractType = 'Purchase' THEN (dblQuantity*dblDeltaPercent)/100 ELSE - ((abs(dblQuantity))*dblDeltaPercent)/100 END AS dblQuantity
+				,right(strFutureMonth,2)+strSymbol strFutureMonth  
+				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfContract) ELSE - ((abs(dblNoOfContract))) END AS dblNoOfContract
+				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfLot) ELSE - ((abs(dblNoOfLot))) END dblNoOfLot
+				,CASE WHEN strContractType = 'Purchase' THEN (dblQuantity)/100 ELSE - ((abs(dblQuantity))) END AS dblQuantity
 				,'Physical' strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,TransactionDate,TranType,CustVendor,strItemOrigin,
 				strLocationName
 				,strItemDescription
-				,strCompanyName,strShipmentPeriod
+				,strCompanyName,strShipmentPeriod,1 intGroupId,dblDeltaPercent
 			FROM @PricedContractList
 			WHERE  intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
 			AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate < @dtmFutureMonthsDate and ysnDeltaHedge =1
@@ -593,37 +536,48 @@ GROUP BY strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingTyp
 				,strProductLine 
 				,strPricingType 
 				,strType strTranType
-				,'Delta Total' strFutureMonth 
-				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfContract*dblDeltaPercent)/100 ELSE - ((abs(dblNoOfContract))*dblDeltaPercent)/100 END AS dblNoOfContract
-				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfLot*dblDeltaPercent)/100 ELSE - ((abs(dblNoOfLot))*dblDeltaPercent)/100 END dblNoOfLot
-				,CASE WHEN strContractType = 'Purchase' THEN (dblQuantity*dblDeltaPercent)/100 ELSE - ((abs(dblQuantity))*dblDeltaPercent)/100 END AS dblQuantity
+				,right(strFutureMonth,2)+strSymbol strFutureMonth 
+				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfContract) ELSE - ((abs(dblNoOfContract))) END AS dblNoOfContract
+				,CASE WHEN strContractType = 'Purchase' THEN (dblNoOfLot) ELSE - ((abs(dblNoOfLot))) END dblNoOfLot
+				,CASE WHEN strContractType = 'Purchase' THEN (dblQuantity)/100 ELSE - ((abs(dblQuantity))) END AS dblQuantity
 				,'Physical' strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,TransactionDate,TranType,CustVendor,
-				strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
+				strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod,1 intGroupId,dblDeltaPercent
 			FROM @PricedContractList
 			WHERE  intCommodityId = @intCommodityId AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intCompanyLocationId END 
 			AND intFutureMarketId = @intFutureMarketId AND dtmFutureMonthsDate >= @dtmFutureMonthsDate and ysnDeltaHedge=1
+
+
+	INSERT INTO @List (
+		 strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType 
+		,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,
+		TransactionDate,TranType,CustVendor,strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
+		)
+	SELECT DISTINCT strFutMarketName
+				,strBook 
+				,strProductType 
+				,strProductLine 
+				,strPricingType 
+				,strTranType
+				,'Delta Total' strFutureMonth 
+				,(dblNoOfContract*dblDeltaPercent)/100 dblNoOfContract
+				,(dblNoOfLot*dblDeltaPercent)/100  dblNoOfLot
+				,(dblQuantity*dblDeltaPercent)/100  dblQuantity
+				,strPhysicalOrFuture,strContractType,strTradeNo,intContractHeaderId,TransactionDate,TranType,CustVendor,
+				strItemOrigin,strLocationName,strItemDescription,strCompanyName,strShipmentPeriod
+			FROM @List
+			WHERE  isnull(intGroupId,0)=1
 -- Delta Total future
 
-INSERT INTO @List (
-		 strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,dblNoOfContract,
-		 dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,
-		 CustVendor,strLocationName,strCompanyName
-		 
-		)
-SELECT strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,'Delta Total' strFutureMonth ,
-	dblNoOfContract,dblNoOfLot,dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intFutOptTransactionHeaderId,null,TransactionDate,TranType,CustVendor
-	,strLocationName,strCompanyName
-FROM #tempFutureRec	WHERE isnull(ysnDeltaHedge,0) = 1 and dtmFutureMonthsDate < @dtmFutureMonthsDate    
 
 INSERT INTO @List (
 		 strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType ,strTranType,strFutureMonth,dblNoOfContract,dblNoOfLot,
 		 dblQuantity,strPhysicalOrFuture,strContractType,strTradeNo,intFutOptTransactionHeaderId,intContractHeaderId,TransactionDate,TranType,CustVendor,strLocationName
 		 ,strCompanyName		 
 		)
+
 SELECT strFutMarketName,strBook ,strProductType ,strProductLine ,strPricingType,strTranType,'Delta Total' strFutureMonth ,dblNoOfContract,dblNoOfLot,dblQuantity,
 strPhysicalOrFuture,strContractType,strTradeNo,intFutOptTransactionHeaderId,null,TransactionDate,TranType,CustVendor,strLocationName,strCompanyName
-FROM #tempFutureRec	WHERE isnull(ysnDeltaHedge,0) = 1 and dtmFutureMonthsDate >= @dtmFutureMonthsDate  
-
+FROM @List where isnull(intGroupId,0) = 2
 
 SELECT 	 intRowNumber,strFutMarketName,strBook ,strProductType ,strProductLine ,strContractType  
 		,strTranType,strPhysicalOrFuture,strFutureMonth,dblNoOfContract,dblNoOfLot,dblQuantity,strTradeNo,intContractHeaderId,intFutOptTransactionHeaderId
