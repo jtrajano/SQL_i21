@@ -15,8 +15,16 @@ BEGIN TRY
 	DECLARE @strAckDocumentXML					NVARCHAR(MAX)
 	DECLARE @strContractNumber					NVARCHAR(MAX)
 	DECLARE @strTransactionType					NVARCHAR(MAX)
+	DECLARE @strBookStatus						NVARCHAR(MAX)
 	DECLARE @intContractHeaderId				INT
 	DECLARE @intContractHeaderRefId				INT
+
+	DECLARE @intToCompanyId			INT
+	DECLARE @intToEntityId			INT
+	DECLARE @intCompanyLocationId	INT
+	DECLARE @strInsert				NVARCHAR(100)
+	DECLARE @strUpdate			    NVARCHAR(100)
+	DECLARE @strToTransactionType	NVARCHAR(100)
 
 	
 
@@ -32,17 +40,20 @@ BEGIN TRY
 		SET @strAckCostXML		 = NULL
 		SET @strAckDocumentXML   = NULL
 		SET @strTransactionType  = NULL
+		SET @strBookStatus		 = NULL
 
 		SELECT @strAckHeaderXML  = strAckHeaderXML
 			,@strAckDetailXML	 = strAckDetailXML
 			,@strAckCostXML		 = strAckCostXML
 			,@strAckDocumentXML  = strAckDocumentXML
 			,@strTransactionType = strTransactionType
+			,@strBookStatus		 = strBookStatus
 		FROM tblCTContractAcknowledgementStage
 		WHERE intContractAcknowledgementStageId = @intContractAcknowledgementStageId
 
 		IF @strTransactionType = 'Sales Contract'
 		BEGIN
+			
 			
 			------------------Header------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckHeaderXML
@@ -57,75 +68,114 @@ BEGIN TRY
 					,strContractNumber	NvarChar(100)
 			)
 
-			UPDATE tblCTContractHeader
-			SET  intContractHeaderRefId = @intContractHeaderId 
-				,strCustomerContract    = @strContractNumber
-			WHERE intContractHeaderId   = @intContractHeaderRefId
-				AND intContractHeaderRefId IS NULL
+			IF @strBookStatus = 'BookChanged'
+			BEGIN
+					UPDATE tblCTContractDocument SET intContractDocumentRefId = NULL WHERE intContractHeaderId = @intContractHeaderRefId
+					
+					UPDATE Cost 
+					SET Cost.intContractCostRefId = NULL
+					FROM tblCTContractCost  Cost 
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = Cost.intContractDetailId
+					WHERE CD.intContractHeaderId = @intContractHeaderRefId
 
-			-----------------------------------Detail-------------------------------------------
-			EXEC sp_xml_removedocument @idoc
+					UPDATE tblCTContractDetail SET intContractDetailRefId = NULL WHERE intContractHeaderId = @intContractHeaderRefId
+					UPDATE tblCTContractHeader SET intContractHeaderRefId = NULL WHERE intContractHeaderId = @intContractHeaderRefId
+					
+					IF EXISTS(SELECT 1 FROM tblCTContractHeader CH 
+									   JOIN tblCTBookVsEntity BVE ON BVE.intBookId = CH.intBookId AND BVE.intEntityId = CH.intEntityId 
+									   WHERE CH.intContractHeaderId = @intContractHeaderRefId
+							 )
+					BEGIN
+						
+						SELECT 
+						 @intToCompanyId		 = TC.intToCompanyId
+						,@intToEntityId			 = TC.intEntityId
+						,@strToTransactionType	 = TT1.strTransactionType
+						,@intCompanyLocationId	 = TC.intCompanyLocationId
+						FROM tblSMInterCompanyTransactionConfiguration  TC 
+						JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+						JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+						JOIN tblCTContractHeader CH ON CH.intCompanyId = TC.intFromCompanyId AND CH.intBookId = TC.intFromBookId
+						WHERE TT.strTransactionType = 'Purchase Contract' 
+						AND CH.intContractHeaderId = @intContractHeaderRefId
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckDetailXML
+						EXEC uspCTContractPopulateStgXML @intContractHeaderRefId,@intToEntityId,@intCompanyLocationId,@strToTransactionType,@intToCompanyId,'Added'
 
-			UPDATE CD
-			SET CD.intContractDetailRefId = XMLDetail.intContractDetailId
-			FROM OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail', 2) WITH 
-			(
-					 intContractDetailId INT
-					,intContractDetailRefId INT
-			) XMLDetail
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = XMLDetail.intContractDetailRefId
-			WHERE CD.intContractHeaderId = @intContractHeaderRefId
-				AND CD.intContractDetailRefId IS NULL
+					END
+					
+			END
 
-			-----------------------------------------Cost-------------------------------------------
-			EXEC sp_xml_removedocument @idoc
+			ELSE			
+			BEGIN
+				UPDATE tblCTContractHeader
+				SET  intContractHeaderRefId = @intContractHeaderId 
+					,strCustomerContract    = @strContractNumber
+				WHERE intContractHeaderId   = @intContractHeaderRefId
+					AND intContractHeaderRefId IS NULL
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckCostXML
+				-----------------------------------Detail-------------------------------------------
+				EXEC sp_xml_removedocument @idoc
 
-			UPDATE tblCTContractCost
-			SET tblCTContractCost.intContractCostRefId = XMLCost.intContractCostId
-			FROM OPENXML(@idoc, 'tblCTContractCosts/tblCTContractCost', 2) WITH 
-			(
-					 intContractCostId INT
-					,intContractCostRefId INT
-					,intContractDetailId INT
-			) XMLCost
-			JOIN tblCTContractCost ContractCost ON ContractCost.intContractCostId = XMLCost.intContractCostRefId
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = ContractCost.intContractDetailId
-								       AND CD.intContractDetailRefId = XMLCost.intContractDetailId
-			WHERE ContractCost.intContractCostRefId IS NULL
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckDetailXML
 
-			------------------------------------------------------------Document-----------------------------------------------------
-			EXEC sp_xml_removedocument @idoc
+				UPDATE CD
+				SET CD.intContractDetailRefId = XMLDetail.intContractDetailId
+				FROM OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail', 2) WITH 
+				(
+						 intContractDetailId INT
+						,intContractDetailRefId INT
+				) XMLDetail
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = XMLDetail.intContractDetailRefId
+				WHERE CD.intContractHeaderId = @intContractHeaderRefId
+					AND CD.intContractDetailRefId IS NULL
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckDocumentXML
+				-----------------------------------------Cost-------------------------------------------
+				EXEC sp_xml_removedocument @idoc
 
-			UPDATE ContractDocument
-			SET ContractDocument.intContractDocumentRefId = XMLDocument.intContractDocumentId
-			FROM OPENXML(@idoc, 'tblCTContractDocuments/tblCTContractDocument', 2) WITH 
-			(
-					 intContractDocumentId INT
-					,intContractDocumentRefId INT
-			) XMLDocument
-			JOIN tblCTContractDocument ContractDocument ON ContractDocument.intContractDocumentId = XMLDocument.intContractDocumentRefId
-			WHERE ContractDocument.intContractHeaderId = @intContractHeaderRefId
-				AND ContractDocument.intContractDocumentRefId IS NULL
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckCostXML
 
-			---UPDATE Feed Status in Staging
-			UPDATE tblCTContractStage
-			SET strFeedStatus = 'Ack Rcvd'
-				,strMessage = 'Success'
-			WHERE intContractHeaderId = @intContractHeaderRefId AND strFeedStatus = 'Awt Ack'
+				UPDATE tblCTContractCost
+				SET tblCTContractCost.intContractCostRefId = XMLCost.intContractCostId
+				FROM OPENXML(@idoc, 'tblCTContractCosts/tblCTContractCost', 2) WITH 
+				(
+						 intContractCostId INT
+						,intContractCostRefId INT
+						,intContractDetailId INT
+				) XMLCost
+				JOIN tblCTContractCost ContractCost ON ContractCost.intContractCostId = XMLCost.intContractCostRefId
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = ContractCost.intContractDetailId
+									       AND CD.intContractDetailRefId = XMLCost.intContractDetailId
+				WHERE ContractCost.intContractCostRefId IS NULL
 
-			---UPDATE Feed Status in Acknowledgement
-			UPDATE tblCTContractAcknowledgementStage
-			SET strFeedStatus = 'Ack Processed'
-			WHERE intContractAcknowledgementStageId = intContractAcknowledgementStageId
+				------------------------------------------------------------Document-----------------------------------------------------
+				EXEC sp_xml_removedocument @idoc
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckDocumentXML
+
+				UPDATE ContractDocument
+				SET ContractDocument.intContractDocumentRefId = XMLDocument.intContractDocumentId
+				FROM OPENXML(@idoc, 'tblCTContractDocuments/tblCTContractDocument', 2) WITH 
+				(
+						 intContractDocumentId INT
+						,intContractDocumentRefId INT
+				) XMLDocument
+				JOIN tblCTContractDocument ContractDocument ON ContractDocument.intContractDocumentId = XMLDocument.intContractDocumentRefId
+				WHERE ContractDocument.intContractHeaderId = @intContractHeaderRefId
+					AND ContractDocument.intContractDocumentRefId IS NULL
+				END
+				---UPDATE Feed Status in Staging
+				UPDATE tblCTContractStage
+				SET strFeedStatus = 'Ack Rcvd'
+					,strMessage = 'Success'
+				WHERE intContractHeaderId = @intContractHeaderRefId AND strFeedStatus = 'Awt Ack'
+
+				---UPDATE Feed Status in Acknowledgement
+				UPDATE tblCTContractAcknowledgementStage
+				SET strFeedStatus = 'Ack Processed'
+				WHERE intContractAcknowledgementStageId = intContractAcknowledgementStageId
 		END
 
 		SELECT @intContractAcknowledgementStageId = MIN(intContractAcknowledgementStageId)

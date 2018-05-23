@@ -42,7 +42,7 @@ BEGIN TRY
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM tblCTContractStage 
-	WHERE ISNULL(strFeedStatus,'')=''
+	WHERE ISNULL(strFeedStatus,'')='' AND strRowState ='Added'
 	
 
 	
@@ -256,7 +256,7 @@ BEGIN TRY
 	
 		SELECT @intContractStageId = MIN(intContractStageId)
 		FROM tblCTContractStage
-		WHERE intContractStageId > @intContractStageId AND ISNULL(strFeedStatus,'')=''
+		WHERE intContractStageId > @intContractStageId AND ISNULL(strFeedStatus,'')='' AND strRowState ='Added'
 	END
 
 END TRY

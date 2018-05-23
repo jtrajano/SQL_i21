@@ -33,6 +33,7 @@ BEGIN TRY
 	DECLARE @strAckCostXML							 NVARCHAR(MAX)
 	DECLARE @strAckDocumentXML						 NVARCHAR(MAX)
 	DECLARE @idoc									 INT
+	DECLARE @intLastModifiedById					 INT
 
 	DECLARE @tblCTContractHeader AS TABLE
 	(
@@ -287,7 +288,7 @@ BEGIN TRY
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM tblCTContractStage 
-	WHERE strRowState ='Modified'
+	WHERE strRowState ='Modified' AND ISNULL(strFeedStatus,'')=''
 	
 
 	
@@ -308,6 +309,7 @@ BEGIN TRY
 			SET @intMultiCompanyId		= NULL
 			SET @intEntityId			= NULL
 			SET @strTransactionType		= NULL
+			SET @intLastModifiedById	= NULL
 
 			 SELECT
 			  @intContractHeaderId	= intContractHeaderId	
@@ -564,86 +566,123 @@ BEGIN TRY
 							,intCompanyId							 INT
 							,intContractHeaderRefId					 INT
 					)
-
-					UPDATE SH 
-					SET  
-						-- intContractTypeId      = 2
-					 --   ,intEntityId            = @intEntityId
-						--,intContractHeaderRefId = @intContractHeaderId
-						--,strContractNumber		= @strContractNumber
-						--,strCustomerContract	= @strCustomerContract
-						 SH.intBookId						 = 	CH.intBookId						
-						,SH.intSubBookId					 = 	CH.intSubBookId					
-						,SH.intCounterPartyId				 = 	CH.intCounterPartyId				
-						,SH.intEntityContactId				 = 	CH.intEntityContactId				
-						,SH.intContractPlanId				 = 	CH.intContractPlanId				
-						,SH.intCommodityId					 = 	CH.intCommodityId					
-						,SH.dblQuantity						 = 	CH.dblQuantity						
-						,SH.intCommodityUOMId				 = 	CH.intCommodityUOMId				
-						--,SH.strContractNumber				 = 	CH.strContractNumber				
-						,SH.dtmContractDate					 = 	CH.dtmContractDate					
-						--,SH.strCustomerContract				 = 	CH.strCustomerContract				
-						,SH.strCPContract					 = 	CH.strCPContract					
-						,SH.dtmDeferPayDate					 = 	CH.dtmDeferPayDate					
-						,SH.dblDeferPayRate					 = 	CH.dblDeferPayRate					
-						,SH.intContractTextId				 = 	CH.intContractTextId				
-						,SH.ysnSigned						 = 	CH.ysnSigned						
-						,SH.dtmSigned						 = 	CH.dtmSigned						
-						,SH.ysnPrinted						 = 	CH.ysnPrinted						
-						,SH.intSalespersonId				 = 	CH.intSalespersonId				
-						,SH.intGradeId						 = 	CH.intGradeId						
-						,SH.intWeightId						 = 	CH.intWeightId						
-						,SH.intCropYearId					 = 	CH.intCropYearId					
-						,SH.strInternalComment				 = 	CH.strInternalComment				
-						,SH.strPrintableRemarks				 = 	CH.strPrintableRemarks				
-						,SH.intAssociationId				 = 	CH.intAssociationId				
-						,SH.intTermId						 = 	CH.intTermId						
-						,SH.intPricingTypeId				 = 	CH.intPricingTypeId				
-						,SH.intApprovalBasisId				 = 	CH.intApprovalBasisId				
-						,SH.intContractBasisId				 = 	CH.intContractBasisId				
-						,SH.intPositionId					 = 	CH.intPositionId					
-						,SH.intInsuranceById				 = 	CH.intInsuranceById				
-						,SH.intInvoiceTypeId				 = 	CH.intInvoiceTypeId				
-						,SH.dblTolerancePct					 = 	CH.dblTolerancePct					
-						,SH.dblProvisionalInvoicePct		 = 	CH.dblProvisionalInvoicePct		
-						,SH.ysnSubstituteItem				 = 	CH.ysnSubstituteItem				
-						,SH.ysnUnlimitedQuantity			 = 	CH.ysnUnlimitedQuantity			
-						,SH.ysnMaxPrice						 = 	CH.ysnMaxPrice						
-						,SH.intINCOLocationTypeId			 = 	CH.intINCOLocationTypeId			
-						,SH.intWarehouseId					 = 	CH.intWarehouseId					
-						,SH.intCountryId					 = 	CH.intCountryId					
-						,SH.intCompanyLocationPricingLevelId =  CH.intCompanyLocationPricingLevelId  
-						,SH.ysnProvisional					 = 	CH.ysnProvisional					
-						,SH.ysnLoad							 = 	CH.ysnLoad							
-						,SH.intNoOfLoad						 = 	CH.intNoOfLoad						
-						,SH.dblQuantityPerLoad				 = 	CH.dblQuantityPerLoad				
-						,SH.intLoadUOMId					 = 	CH.intLoadUOMId					
-						,SH.ysnCategory						 = 	CH.ysnCategory						
-						,SH.ysnMultiplePriceFixation		 = 	CH.ysnMultiplePriceFixation		
-						,SH.intFutureMarketId				 = 	CH.intFutureMarketId				
-						,SH.intFutureMonthId				 = 	CH.intFutureMonthId				
-						,SH.dblFutures						 = 	CH.dblFutures						
-						,SH.dblNoOfLots						 = 	CH.dblNoOfLots						
-						,SH.intCategoryUnitMeasureId		 = 	CH.intCategoryUnitMeasureId		
-						,SH.intLoadCategoryUnitMeasureId	 = 	CH.intLoadCategoryUnitMeasureId	
-						,SH.intArbitrationId				 = 	CH.intArbitrationId				
-						,SH.intProducerId					 = 	CH.intProducerId					
-						,SH.ysnClaimsToProducer				 = 	CH.ysnClaimsToProducer				
-						,SH.ysnRiskToProducer				 = 	CH.ysnRiskToProducer				
-						,SH.ysnExported						 = 	CH.ysnExported						
-						,SH.dtmExported						 = 	CH.dtmExported						
-						,SH.intCreatedById					 = 	CH.intCreatedById					
-						,SH.dtmCreated						 = 	CH.dtmCreated						
-						,SH.intLastModifiedById				 = 	CH.intLastModifiedById				
-						,SH.dtmLastModified					 = 	CH.dtmLastModified					
-						,SH.ysnMailSent						 = 	CH.ysnMailSent						
-						,SH.strAmendmentLog					 = 	CH.strAmendmentLog					
-						,SH.ysnBrokerage					 = 	CH.ysnBrokerage					
-						,SH.intCompanyId					 = 	CH.intCompanyId					
-					FROM tblCTContractHeader SH  
-                    JOIN @tblCTContractHeader CH ON CH.intContractHeaderId = SH.intContractHeaderRefId
 					
-						SELECT @NewContractHeaderId =SH.intContractHeaderId 
+					SELECT @NewContractHeaderId = SH.intContractHeaderId,@intLastModifiedById = CH.intLastModifiedById 
+					FROM tblCTContractHeader SH  
+					JOIN @tblCTContractHeader CH ON CH.intContractHeaderId = SH.intContractHeaderRefId
+
+					IF EXISTS
+					(
+						SELECT 1 FROM tblCTContractHeader SH  
+						JOIN @tblCTContractHeader CH ON CH.intContractHeaderId = SH.intContractHeaderRefId
+						WHERE CH.intBookId <> SH.intBookId
+					)
+					BEGIN
+							EXEC uspCTChangeContractStatus @NewContractHeaderId,3,@intLastModifiedById,'Header'
+							
+							INSERT INTO tblCTContractAcknowledgementStage 
+							(
+									 intContractHeaderId
+									,strContractAckNumber
+									,dtmFeedDate
+									,strMessage
+									,strTransactionType
+									,intMultiCompanyId
+									,strBookStatus
+							)
+							SELECT 
+								 @NewContractHeaderId
+								,@strContractNumber
+								,GETDATE()
+								,'Success'
+								,@strTransactionType
+								,@intMultiCompanyId
+								,'BookChanged'
+						
+						SELECT @intContractAcknowledgementStageId = SCOPE_IDENTITY();
+
+						SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@NewContractHeaderId)
+						
+						EXEC uspCTGetTableDataInXML 'tblCTContractHeader',@strHeaderCondition,@strAckHeaderXML  OUTPUT
+
+						UPDATE  tblCTContractAcknowledgementStage 
+						SET		strAckHeaderXML =@strAckHeaderXML 
+						WHERE   intContractAcknowledgementStageId =@intContractAcknowledgementStageId
+                        								 
+					END
+					
+					ELSE
+					
+					BEGIN
+
+						UPDATE SH 
+						SET  
+							 SH.intBookId						 = 	CH.intBookId						
+							,SH.intSubBookId					 = 	CH.intSubBookId					
+							,SH.intCounterPartyId				 = 	CH.intCounterPartyId				
+							,SH.intEntityContactId				 = 	CH.intEntityContactId				
+							,SH.intContractPlanId				 = 	CH.intContractPlanId				
+							,SH.intCommodityId					 = 	CH.intCommodityId					
+							,SH.dblQuantity						 = 	CH.dblQuantity						
+							,SH.intCommodityUOMId				 = 	CH.intCommodityUOMId				
+							,SH.dtmContractDate					 = 	CH.dtmContractDate
+							,SH.strCPContract					 = 	CH.strCPContract					
+							,SH.dtmDeferPayDate					 = 	CH.dtmDeferPayDate					
+							,SH.dblDeferPayRate					 = 	CH.dblDeferPayRate					
+							,SH.intContractTextId				 = 	CH.intContractTextId				
+							,SH.ysnSigned						 = 	CH.ysnSigned						
+							,SH.dtmSigned						 = 	CH.dtmSigned						
+							,SH.ysnPrinted						 = 	CH.ysnPrinted						
+							,SH.intSalespersonId				 = 	CH.intSalespersonId				
+							,SH.intGradeId						 = 	CH.intGradeId						
+							,SH.intWeightId						 = 	CH.intWeightId						
+							,SH.intCropYearId					 = 	CH.intCropYearId					
+							,SH.strInternalComment				 = 	CH.strInternalComment				
+							,SH.strPrintableRemarks				 = 	CH.strPrintableRemarks				
+							,SH.intAssociationId				 = 	CH.intAssociationId				
+							,SH.intTermId						 = 	CH.intTermId						
+							,SH.intPricingTypeId				 = 	CH.intPricingTypeId				
+							,SH.intApprovalBasisId				 = 	CH.intApprovalBasisId				
+							,SH.intContractBasisId				 = 	CH.intContractBasisId				
+							,SH.intPositionId					 = 	CH.intPositionId					
+							,SH.intInsuranceById				 = 	CH.intInsuranceById				
+							,SH.intInvoiceTypeId				 = 	CH.intInvoiceTypeId				
+							,SH.dblTolerancePct					 = 	CH.dblTolerancePct					
+							,SH.dblProvisionalInvoicePct		 = 	CH.dblProvisionalInvoicePct		
+							,SH.ysnSubstituteItem				 = 	CH.ysnSubstituteItem				
+							,SH.ysnUnlimitedQuantity			 = 	CH.ysnUnlimitedQuantity			
+							,SH.ysnMaxPrice						 = 	CH.ysnMaxPrice						
+							,SH.intINCOLocationTypeId			 = 	CH.intINCOLocationTypeId			
+							,SH.intWarehouseId					 = 	CH.intWarehouseId					
+							,SH.intCountryId					 = 	CH.intCountryId					
+							,SH.intCompanyLocationPricingLevelId =  CH.intCompanyLocationPricingLevelId  
+							,SH.ysnProvisional					 = 	CH.ysnProvisional					
+							,SH.ysnLoad							 = 	CH.ysnLoad							
+							,SH.intNoOfLoad						 = 	CH.intNoOfLoad						
+							,SH.dblQuantityPerLoad				 = 	CH.dblQuantityPerLoad				
+							,SH.intLoadUOMId					 = 	CH.intLoadUOMId					
+							,SH.ysnCategory						 = 	CH.ysnCategory						
+							,SH.ysnMultiplePriceFixation		 = 	CH.ysnMultiplePriceFixation		
+							,SH.intFutureMarketId				 = 	CH.intFutureMarketId				
+							,SH.intFutureMonthId				 = 	CH.intFutureMonthId				
+							,SH.dblFutures						 = 	CH.dblFutures						
+							,SH.dblNoOfLots						 = 	CH.dblNoOfLots						
+							,SH.intCategoryUnitMeasureId		 = 	CH.intCategoryUnitMeasureId		
+							,SH.intLoadCategoryUnitMeasureId	 = 	CH.intLoadCategoryUnitMeasureId	
+							,SH.intArbitrationId				 = 	CH.intArbitrationId				
+							,SH.intProducerId					 = 	CH.intProducerId					
+							,SH.ysnClaimsToProducer				 = 	CH.ysnClaimsToProducer				
+							,SH.ysnRiskToProducer				 = 	CH.ysnRiskToProducer				
+							,SH.ysnExported						 = 	CH.ysnExported						
+							,SH.dtmExported						 = 	CH.dtmExported						
+							,SH.intCreatedById					 = 	CH.intCreatedById					
+							,SH.dtmCreated						 = 	CH.dtmCreated						
+							,SH.intLastModifiedById				 = 	CH.intLastModifiedById				
+							,SH.dtmLastModified					 = 	CH.dtmLastModified					
+							,SH.ysnMailSent						 = 	CH.ysnMailSent						
+							,SH.strAmendmentLog					 = 	CH.strAmendmentLog					
+							,SH.ysnBrokerage					 = 	CH.ysnBrokerage					
+							,SH.intCompanyId					 = 	CH.intCompanyId					
 						FROM tblCTContractHeader SH  
 						JOIN @tblCTContractHeader CH ON CH.intContractHeaderId = SH.intContractHeaderRefId
 
@@ -1310,40 +1349,41 @@ BEGIN TRY
 						,strReferenceNo			NVARCHAR(200)
 						,intContractCostRefId   INT
 					)
-					UPDATE SCost
-					SET 
-					   -- SCost.intContractCostId			= PCost.intContractCostId	
-					   --,SCost.intConcurrencyId			= PCost.intConcurrencyId	
-					   --,SCost.intContractDetailId			= PCost.intContractDetailId
-					    SCost.intItemId						= PCost.intItemId			
-					   ,SCost.intVendorId					= PCost.intVendorId		
-					   ,SCost.strCostMethod					= PCost.strCostMethod		
-					   ,SCost.intCurrencyId					= PCost.intCurrencyId		
-					   ,SCost.dblRate						= PCost.dblRate			
-					   ,SCost.intItemUOMId					= PCost.intItemUOMId		
-					   ,SCost.intRateTypeId					= PCost.intRateTypeId		
-					   ,SCost.dblFX							= PCost.dblFX				
-					   ,SCost.ysnAccrue						= PCost.ysnAccrue			
-					   ,SCost.ysnMTM						= PCost.ysnMTM				
-					   ,SCost.ysnPrice						= PCost.ysnPrice			
-					   ,SCost.ysnAdditionalCost				= PCost.ysnAdditionalCost	
-					   ,SCost.ysnBasis						= PCost.ysnBasis			
-					   ,SCost.ysnReceivable					= PCost.ysnReceivable		
-					   ,SCost.strPaidBy						= PCost.strPaidBy			
-					   ,SCost.dtmDueDate					= PCost.dtmDueDate			
-					   ,SCost.strReference					= PCost.strReference		
-					   ,SCost.strRemarks					= PCost.strRemarks			
-					   ,SCost.strStatus						= PCost.strStatus			
-					   ,SCost.dblReqstdAmount				= PCost.dblReqstdAmount	
-					   ,SCost.dblRcvdPaidAmount				= PCost.dblRcvdPaidAmount	
-					   ,SCost.strAPAR						= PCost.strAPAR			
-					   ,SCost.strPayToReceiveFrom			= PCost.strPayToReceiveFrom
-					   ,SCost.strReferenceNo				= PCost.strReferenceNo		
-					   --,SCost.intContractCostRefId			= PCost.intContractCostRefId
-					FROM  tblCTContractCost  SCost
-					JOIN  @tblCTContractCost PCost ON PCost.intContractCostId = SCost.intContractCostRefId
+						
+						UPDATE SCost
+						SET 
+						   -- SCost.intContractCostId			= PCost.intContractCostId	
+						   --,SCost.intConcurrencyId			= PCost.intConcurrencyId	
+						   --,SCost.intContractDetailId			= PCost.intContractDetailId
+						    SCost.intItemId						= PCost.intItemId			
+						   ,SCost.intVendorId					= PCost.intVendorId		
+						   ,SCost.strCostMethod					= PCost.strCostMethod		
+						   ,SCost.intCurrencyId					= PCost.intCurrencyId		
+						   ,SCost.dblRate						= PCost.dblRate			
+						   ,SCost.intItemUOMId					= PCost.intItemUOMId		
+						   ,SCost.intRateTypeId					= PCost.intRateTypeId		
+						   ,SCost.dblFX							= PCost.dblFX				
+						   ,SCost.ysnAccrue						= PCost.ysnAccrue			
+						   ,SCost.ysnMTM						= PCost.ysnMTM				
+						   ,SCost.ysnPrice						= PCost.ysnPrice			
+						   ,SCost.ysnAdditionalCost				= PCost.ysnAdditionalCost	
+						   ,SCost.ysnBasis						= PCost.ysnBasis			
+						   ,SCost.ysnReceivable					= PCost.ysnReceivable		
+						   ,SCost.strPaidBy						= PCost.strPaidBy			
+						   ,SCost.dtmDueDate					= PCost.dtmDueDate			
+						   ,SCost.strReference					= PCost.strReference		
+						   ,SCost.strRemarks					= PCost.strRemarks			
+						   ,SCost.strStatus						= PCost.strStatus			
+						   ,SCost.dblReqstdAmount				= PCost.dblReqstdAmount	
+						   ,SCost.dblRcvdPaidAmount				= PCost.dblRcvdPaidAmount	
+						   ,SCost.strAPAR						= PCost.strAPAR			
+						   ,SCost.strPayToReceiveFrom			= PCost.strPayToReceiveFrom
+						   ,SCost.strReferenceNo				= PCost.strReferenceNo		
+						   --,SCost.intContractCostRefId			= PCost.intContractCostRefId
+						FROM  tblCTContractCost  SCost
+						JOIN  @tblCTContractCost PCost ON PCost.intContractCostId = SCost.intContractCostRefId
 
-					SELECT @strContractDetailAllId = STUFF((
+						SELECT @strContractDetailAllId = STUFF((
 													SELECT DISTINCT ',' + LTRIM(intContractDetailId)
 													FROM tblCTContractDetail
 													WHERE intContractHeaderId = @NewContractHeaderId
@@ -1422,14 +1462,16 @@ BEGIN TRY
 					  @approverConfiguration = @config 
 
 					--------------------------------------------------------------------------------------------------------------------------
+               END
 
 			 END
 		
-	
+			 UPDATE tblCTContractStage SET strFeedStatus = 'Processed' WHERE intContractStageId = @intContractStageId
+
 		SELECT @intContractStageId = MIN(intContractStageId)
 		FROM tblCTContractStage
 		WHERE intContractStageId > @intContractStageId
-		AND strRowState ='Modified'
+		AND strRowState ='Modified' AND ISNULL(strFeedStatus,'')=''
 
 	END
 

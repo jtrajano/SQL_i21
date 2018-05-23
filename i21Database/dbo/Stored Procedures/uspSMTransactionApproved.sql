@@ -18,7 +18,8 @@ BEGIN
 		FROM tblSMInterCompanyTransactionConfiguration TC 
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-		WHERE TT.strTransactionType ='Purchase Contract'
+		JOIN tblCTContractHeader CH ON CH.intCompanyId = TC.intFromCompanyId AND CH.intBookId = TC.intFromBookId
+		WHERE TT.strTransactionType ='Purchase Contract' AND CH.intContractHeaderId = @recordId
 	
 
 		IF @type = 'ContractManagement.view.Contract' OR @type = 'ContractManagement.view.Amendments'

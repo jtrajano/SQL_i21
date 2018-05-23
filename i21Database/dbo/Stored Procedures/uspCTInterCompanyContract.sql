@@ -19,20 +19,24 @@ BEGIN TRY
 				WHERE TT.strTransactionType ='Purchase Contract'
 			  )
 	BEGIN
-	     SELECT 
-		 @intToCompanyId		 = TC.intToCompanyId
-		,@intToEntityId			 = TC.intEntityId			 
-		,@strInsert				 = TC.strInsert				 
-		,@strUpdate			   	 = TC.strUpdate
-		,@strToTransactionType	 = TT1.strTransactionType
-		,@intCompanyLocationId	 = TC.intCompanyLocationId
-		FROM tblSMInterCompanyTransactionConfiguration  TC 
-		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
-		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-		WHERE TT.strTransactionType ='Purchase Contract'
-		
-		IF EXISTS(SELECT 1 FROM tblCTContractHeader CH JOIN tblCTBookVsEntity BVE ON BVE.intBookId = CH.intBookId AND BVE.intEntityId = CH.intEntityId WHERE CH.intContractHeaderId = @ContractHeaderId)
+
+		IF EXISTS(SELECT 1 FROM tblCTContractHeader CH 
+						  JOIN tblCTBookVsEntity BVE ON BVE.intBookId = CH.intBookId 
+						  AND BVE.intEntityId = CH.intEntityId WHERE CH.intContractHeaderId = @ContractHeaderId)
 		BEGIN
+				 SELECT 
+				  @intToCompanyId			 = TC.intToCompanyId
+				 ,@intToEntityId			 = TC.intEntityId			 
+				 ,@strInsert				 = TC.strInsert				 
+				 ,@strUpdate			   	 = TC.strUpdate
+				 ,@strToTransactionType	 = TT1.strTransactionType
+				 ,@intCompanyLocationId	 = TC.intCompanyLocationId
+				 FROM tblSMInterCompanyTransactionConfiguration  TC 
+				 JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+				 JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+				 JOIN tblCTContractHeader CH ON CH.intCompanyId = TC.intFromCompanyId AND CH.intBookId = TC.intFromBookId
+				 WHERE TT.strTransactionType ='Purchase Contract' AND CH.intContractHeaderId = @ContractHeaderId
+
 				IF @strInsert = 'Insert'
 				BEGIN
 					IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @ContractHeaderId AND intConcurrencyId =1)

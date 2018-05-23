@@ -468,7 +468,7 @@ BEGIN TRY
 			)
 
 			SELECT 
-				 strPNL			 = 'PNL'
+				 strPNL			 = 'P&L'
 				,strType		 = 'Realized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook
@@ -486,7 +486,7 @@ BEGIN TRY
 				,strCompany
 			UNION     
 			SELECT 
-				 strPNL			 = 'PNL'
+				 strPNL			 = 'P&L'
 				,strType		 = 'Realized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook				
@@ -504,7 +504,7 @@ BEGIN TRY
 				,strCompany
 		UNION
 		 SELECT 
-				 strPNL			 = 'PNL'
+				 strPNL			 = 'P&L'
 				,strType		 = 'Unrealized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook				
@@ -523,7 +523,7 @@ BEGIN TRY
 			
 		UNION
 		SELECT 
-				 strPNL			 = 'PNL'
+				 strPNL			 = 'P&L'
 				,strType		 = 'Unrealized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook
@@ -541,7 +541,7 @@ BEGIN TRY
 				,strCompanyName	
 		UNION
 		SELECT 
-				 strPNL			 = 'PNL'
+				 strPNL			 = 'P&L'
 				,strType		 = 'Realized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook			
@@ -559,7 +559,7 @@ BEGIN TRY
 			
 		UNION
 		SELECT 
-				 strPNL			 = 'PNL'
+				 strPNL			 = 'P&L'
 				,strType		 = 'Realized'
 				,intBookId		 = intBookId
 				,strBook		 = strBook
