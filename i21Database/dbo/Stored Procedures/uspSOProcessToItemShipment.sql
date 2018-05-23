@@ -40,9 +40,10 @@ IF EXISTS(SELECT NULL FROM vyuARForApprovalTransction WHERE strScreenName = 'Sal
 IF @Unship = 1
 	BEGIN
 		--VALIDATE IF SO HAS POSTED SHIPMENT RECORDS
-		DECLARE @shipmentNos NVARCHAR(MAX) = NULL
+		DECLARE @PostedShipmentNos NVARCHAR(MAX) = NULL
+			  , @UnpostedShipmentNos NVARCHAR(MAX) = NULL
 
-		SELECT @shipmentNos = COALESCE(@shipmentNos + ', ' ,'') + ISH.strShipmentNumber 
+		SELECT @PostedShipmentNos = COALESCE(@PostedShipmentNos + ', ' ,'') + ISH.strShipmentNumber 
 		FROM (
 			SELECT intInventoryShipmentId
 			FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
@@ -56,9 +57,23 @@ IF @Unship = 1
 			WHERE ysnPosted = 1
 		) ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 
-		IF ISNULL(@shipmentNos, '') <> ''
+		SELECT @UnpostedShipmentNos = COALESCE(@UnpostedShipmentNos + ', ' ,'') + ISH.strShipmentNumber 
+		FROM (
+			SELECT intInventoryShipmentId
+			FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
+			WHERE intOrderId = @SalesOrderId
+			GROUP BY intInventoryShipmentId
+		) ISHI 
+		INNER JOIN (
+			SELECT intInventoryShipmentId
+				 , strShipmentNumber
+			FROM dbo.tblICInventoryShipment WITH (NOLOCK)
+			WHERE ysnPosted = 0
+		) ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
+
+		IF ISNULL(@PostedShipmentNos, '') <> '' AND ISNULL(@UnpostedShipmentNos, '') = ''
 			BEGIN				
-				RAISERROR('Failed to unship Sales Order. Unpost this Shipment Record first: %s', 16, 1, @shipmentNos)
+				RAISERROR('Failed to unship Sales Order. Unpost this Shipment Record first: %s', 16, 1, @PostedShipmentNos)
 				RETURN
 			END
 		ELSE
@@ -73,6 +88,7 @@ IF @Unship = 1
 					FROM tblICInventoryShipmentItem ISHI
 						INNER JOIN tblICInventoryShipment ISH ON ISHI.intInventoryShipmentId = ISH.intInventoryShipmentId
 					WHERE intOrderId = @SalesOrderId
+					  AND ISH.ysnPosted = 0
 					
 					DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 					FOR
@@ -91,7 +107,9 @@ IF @Unship = 1
 					DEALLOCATE c;
 				END
 			
-				UPDATE tblSOSalesOrder SET ysnShipped = 0 WHERE intSalesOrderId = @SalesOrderId
+				UPDATE tblSOSalesOrder 
+				SET ysnShipped = CASE WHEN ISNULL(@PostedShipmentNos, '') <> '' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END 
+				WHERE intSalesOrderId = @SalesOrderId
 				RETURN 1
 			END
 	END
