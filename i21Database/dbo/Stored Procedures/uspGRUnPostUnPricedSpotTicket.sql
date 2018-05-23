@@ -131,8 +131,8 @@ BEGIN TRY
 	JOIN tblSCTicket SC ON SC.intTicketId = SpotTicket.intTicketId
 	WHERE SpotTicket.intUnPricedId = @intUnPricedId
 
-	DELETE
-	FROM tblGRUnPriced
+	UPDATE tblGRUnPriced 
+	SET ysnPosted = 0
 	WHERE intUnPricedId = @intUnPricedId
 
 END TRY
