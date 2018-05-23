@@ -6318,6 +6318,7 @@
     <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
     <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
