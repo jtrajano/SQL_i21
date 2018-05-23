@@ -1193,7 +1193,6 @@ IF (@total = 0)
 SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 IF @intLotType != 0
 BEGIN 
-	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
 	IF ISNULL(@ysnRequireProducerQty, 0) = 1
 	BEGIN
@@ -1245,25 +1244,25 @@ BEGIN
 			,[dblGrossWeight]		= CASE
 										WHEN IC.ysnLotWeightsRequired = 1 THEN 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblGrossUnits),@currencyDecimal)
-												ELSE ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits),@currencyDecimal)
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblGrossUnits)
+												ELSE dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
 											END
 										ELSE 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblGrossUnits,@currencyDecimal)
-												ELSE 0
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblGrossUnits)
+												ELSE SC.dblGrossUnits
 											END
 									END
 			,[dblTareWeight]		= CASE
 										WHEN IC.ysnLotWeightsRequired = 1 THEN 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblShrink),@currencyDecimal)
-												ELSE ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink),@currencyDecimal)
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblShrink)
+												ELSE dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
 											END
 										ELSE 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity)) * SC.dblShrink,@currencyDecimal)
-												ELSE 0
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblShrink)
+												ELSE SC.dblShrink
 											END
 									END
 			,[dblCost]				= RE.dblCost
@@ -1325,12 +1324,12 @@ BEGIN
 			,[intItemUnitMeasureId] = RE.intItemUOMId
 			,[dblQuantity]			= RE.dblQty
 			,[dblGrossWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits),@currencyDecimal)
-										ELSE 0
+										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
+										ELSE SC.dblGrossUnits
 									END
 			,[dblTareWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink),@currencyDecimal)
-										ELSE 0
+										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
+										ELSE SC.dblShrink
 									END
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
