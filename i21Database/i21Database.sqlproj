@@ -6608,6 +6608,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsCreditNoteReport.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutHeaderReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
+    <Build Include="dbo\Tables\tblGLVendorMapping.sql" />
+    <Build Include="dbo\Tables\tblGLVendorMappingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
