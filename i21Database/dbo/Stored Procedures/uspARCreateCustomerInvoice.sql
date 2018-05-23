@@ -490,8 +490,8 @@ BEGIN TRY
 												WHEN (@TransactionType IN ('Invoice') AND @ImportedFromOrigin = 1) 
 													THEN  1 
 												ELSE 0 END)
-		,[ysnImportedFromOrigin]		= @ImportedFromOrigin
-		,[ysnImportedAsPosted]			= @ImportedAsPosted
+		,[ysnImportedFromOrigin]		= ISNULL(@ImportedFromOrigin, 0)
+		,[ysnImportedAsPosted]			= ISNULL(@ImportedAsPosted, 0)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
