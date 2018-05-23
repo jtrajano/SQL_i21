@@ -1229,11 +1229,11 @@ BEGIN
 		,[dblQuantity]			= RE.dblQty
 		,[dblGrossWeight]		= CASE
 									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
-									ELSE 0
+									ELSE SC.dblGrossUnits
 								END
 		,[dblTareWeight]		= CASE
 									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
-									ELSE 0
+									ELSE SC.dblShrink
 								END
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
