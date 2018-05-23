@@ -753,7 +753,8 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	AND ysnBilled = 0 AND CC.ysnPrice = 1
+	--AND ysnBilled = 0 
+	AND CC.ysnPrice = 1
 	UNION ALL
 
 	SELECT
@@ -876,7 +877,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	AND ysnBilled = 0
+	--AND ysnBilled = 0
 	UNION ALL
 
 	SELECT
@@ -999,8 +1000,8 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	AND ysnBilled = 0 
-	AND CC.strCostStatus = 'Open'
+	--AND ysnBilled = 0 
+	AND ISNULL(CC.strCostStatus,'Open') = 'Open'
 	
 	UNION ALL
 
@@ -1124,7 +1125,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-	AND ysnBilled = 0
+	--AND ysnBilled = 0
 	
 	UNION ALL
 	SELECT

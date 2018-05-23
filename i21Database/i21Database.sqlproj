@@ -6612,6 +6612,7 @@
     <Build Include="dbo\Tables\tblGLVendorMappingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationForCStore.sql" />
     <Build Include="dbo\Views\vyuRKGetMatchingLotAvailableQty.sql" />
+    <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
