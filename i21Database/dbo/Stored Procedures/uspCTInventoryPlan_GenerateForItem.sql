@@ -201,9 +201,18 @@ BEGIN TRY
 			SELECT @TargetUOMKey = UOM.intUnitMeasureId
 				,@TargetUOMName = UOM.strUnitMeasure
 			FROM tblICItem M
-			JOIN tblCTItemDefaultUOM IUOM ON IUOM.intItemId = M.intItemId
-			JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intPurchaseUOMId
+			JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = M.intMaterialPackTypeId
 			WHERE M.intItemId = @intItemId
+
+			IF ISNULL(@TargetUOMKey, 0) = 0
+			BEGIN
+				SELECT @TargetUOMKey = UOM.intUnitMeasureId
+					,@TargetUOMName = UOM.strUnitMeasure
+				FROM tblICItem M
+				JOIN tblCTItemDefaultUOM IUOM ON IUOM.intItemId = M.intItemId
+				JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intPurchaseUOMId
+				WHERE M.intItemId = @intItemId
+			END
 		END
 		ELSE
 		BEGIN
