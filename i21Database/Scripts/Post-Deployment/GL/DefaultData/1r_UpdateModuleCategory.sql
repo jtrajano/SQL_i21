@@ -85,21 +85,29 @@ GO
 
 PRINT ('Begin inserting to tblGLRequiredPrimaryCategory');
 GO
-IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblGLRequiredPrimaryCategory)
-    INSERT INTO dbo.tblGLRequiredPrimaryCategory
-    (
-        intAccountCategoryId,
-        intModuleId
-     )
-     SELECT C.intAccountCategoryId,
-           C.intModuleId
-     FROM dbo.tblGLAccountCategory C
-		CROSS APPLY
-		(
-			SELECT TOP 1 strModuleName
-			FROM dbo.tblARCustomerLicenseModule
-			WHERE intModuleId = C.intModuleId
-		) M
+	MERGE 
+		dbo.tblGLRequiredPrimaryCategory AS Target
+	USING	(
+			   SELECT C.intAccountCategoryId,
+				M.intModuleId
+				FROM dbo.tblGLAccountCategory C
+				CROSS APPLY
+				(
+					SELECT TOP 1 intModuleId
+					FROM dbo.tblARCustomerLicenseModule
+					WHERE intModuleId = C.intModuleId
+				) M
+	) AS Source
+		ON  (Target.intAccountCategoryId = Source.intAccountCategoryId)
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET 	Target.intModuleId = Source.intModuleId
+	WHEN NOT MATCHED by Target THEN
+		INSERT (intAccountCategoryId,intModuleId)
+		VALUES (Source.intAccountCategoryId,Source.intModuleId)
+	WHEN NOT MATCHED BY SOURCE THEN
+		DELETE;
+GO
 
 
 UPDATE  dbo.tblGLRequiredPrimaryCategory
