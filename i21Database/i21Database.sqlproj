@@ -6611,6 +6611,8 @@
     <Build Include="dbo\Tables\tblGLVendorMapping.sql" />
     <Build Include="dbo\Tables\tblGLVendorMappingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemLocationForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemAccountForCStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

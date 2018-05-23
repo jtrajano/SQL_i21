@@ -1,8 +1,40 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUpdateItemLocationForCStore]
+	-- filter params
 	@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strDescription AS NVARCHAR(250) = NULL 
 	,@dblRetailPriceFrom AS NUMERIC(38, 20) = NULL  
 	,@dblRetailPriceTo AS NUMERIC(38, 20) = NULL 
+	-- update params 
+	,@ysnTaxFlag1 BIT = NULL
+	,@ysnTaxFlag2 BIT = NULL
+	,@ysnTaxFlag3 BIT = NULL
+	,@ysnTaxFlag4 BIT = NULL
+	,@ysnDepositRequired BIT = NULL
+	,@intDepositPLUId INT = NULL 
+	,@ysnQuantityRequired BIT = NULL 
+	,@ysnScaleItem BIT = NULL 
+	,@ysnFoodStampable BIT = NULL 
+	,@ysnReturnable BIT = NULL 
+	,@ysnSaleable BIT = NULL 
+	,@ysnIdRequiredLiquor BIT = NULL 
+	,@ysnIdRequiredCigarette BIT = NULL 
+	,@ysnPromotionalItem BIT = NULL 
+	,@ysnPrePriced BIT = NULL 
+	,@ysnApplyBlueLaw1 BIT = NULL 
+	,@ysnApplyBlueLaw2 BIT = NULL 
+	,@ysnCountedDaily BIT = NULL 
+	,@strCounted NVARCHAR(50) = NULL
+	,@ysnCountBySINo BIT = NULL 
+	,@intFamilyId INT = NULL 
+	,@intClassId INT = NULL 
+	,@intProductCodeId INT = NULL 
+	,@intVendorId INT = NULL 
+	,@intMinimumAge INT = NULL 
+	,@dblMinOrder NUMERIC(18, 6) = NULL 
+	,@dblSuggestedQty NUMERIC(18, 6) = NULL
+	,@intCountGroupId INT = NULL 
+	,@intStorageLocationId INT = NULL 
+	,@dblReorderPoint NUMERIC(18, 6) = NULL
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -13,64 +45,29 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the temp table used for filtering. 
-IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_Location') IS NULL  
-	CREATE TABLE #tmpUpdateItemLocationForCStore_Location (
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_Location (
 		intLocationId INT 
 	)
 
-IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_Vendor') IS NULL  
-	CREATE TABLE #tmpUpdateItemLocationForCStore_Vendor (
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_Vendor (
 		intVendorId INT 
 	)
 
-IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_Category') IS NULL  
-	CREATE TABLE #tmpUpdateItemLocationForCStore_Category (
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_Category (
 		intCategoryId INT 
 	)
 
-IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_Family') IS NULL  
-	CREATE TABLE #tmpUpdateItemLocationForCStore_Family (
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_Family (
 		intFamilyId INT 
 	)
 
-IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_Class') IS NULL  
-	CREATE TABLE #tmpUpdateItemLocationForCStore_Class (
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_Class (
 		intClassId INT 
-	)
-
--- Create the temp table to hold the update data. 
-IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_UpdateData') IS NULL  
-	CREATE TABLE #tmpUpdateItemLocationForCStore_UpdateData (
-		ysnTaxFlag1 BIT NULL
-		,ysnTaxFlag2 BIT NULL
-		,ysnTaxFlag3 BIT NULL
-		,ysnTaxFlag4 BIT NULL
-		,ysnDepositRequired BIT NULL
-		,intDepositPLUId INT NULL 
-		,ysnQuantityRequired BIT NULL 
-		,ysnScaleItem BIT NULL 
-		,ysnFoodStampable BIT NULL 
-		,ysnReturnable BIT NULL 
-		,ysnSaleable BIT NULL 
-		,ysnIdRequiredLiquor BIT NULL 
-		,ysnIdRequiredCigarette BIT NULL 
-		,ysnPromotionalItem BIT NULL 
-		,ysnPrePriced BIT NULL 
-		,ysnApplyBlueLaw1 BIT NULL 
-		,ysnApplyBlueLaw2 BIT NULL 
-		,ysnCountedDaily BIT NULL 
-		,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,ysnCountBySINo BIT NULL 
-		,intFamilyId INT NULL 
-		,intClassId INT NULL 
-		,intProductCodeId INT NULL 
-		,intVendorId INT NULL 
-		,intMinimumAge INT NULL 
-		,dblMinOrder NUMERIC(18, 6) NULL 
-		,dblSuggestedQty NUMERIC(18, 6) NULL
-		,intCountGroupId INT NULL 
-		,intStorageLocationId INT NULL 
-		,dblReorderPoint NUMERIC(18, 6) NULL
 	)
 
 -- Create the temp table for the audit log. 
@@ -214,67 +211,67 @@ BEGIN
 	SELECT	[Changes].intItemId 
 			,[Changes].intItemLocationId
 			-- Original values
-			, ysnTaxFlag1_Original
-			, ysnTaxFlag2_Original
-			, ysnTaxFlag3_Original
-			, ysnTaxFlag4_Original
-			, ysnDepositRequired_Original
-			, intDepositPLUId_Original
-			, ysnQuantityRequired_Original
-			, ysnScaleItem_Original
-			, ysnFoodStampable_Original
-			, ysnReturnable_Original
-			, ysnSaleable_Original
-			, ysnIdRequiredLiquor_Original
-			, ysnIdRequiredCigarette_Original
-			, ysnPromotionalItem_Original
-			, ysnPrePriced_Original
-			, ysnApplyBlueLaw1_Original
-			, ysnApplyBlueLaw2_Original
-			, ysnCountedDaily_Original
-			, strCounted_Original
-			, ysnCountBySINo_Original
-			, intFamilyId_Original
-			, intClassId_Original
-			, intProductCodeId_Original
-			, intVendorId_Original
-			, intMinimumAge_Original
-			, dblMinOrder_Original
-			, dblSuggestedQty_Original
-			, intCountGroupId_Original
-			, intStorageLocationId_Original
-			, dblReorderPoint_Original
+			, [Changes].ysnTaxFlag1_Original
+			, [Changes].ysnTaxFlag2_Original
+			, [Changes].ysnTaxFlag3_Original
+			, [Changes].ysnTaxFlag4_Original
+			, [Changes].ysnDepositRequired_Original
+			, [Changes].intDepositPLUId_Original
+			, [Changes].ysnQuantityRequired_Original
+			, [Changes].ysnScaleItem_Original
+			, [Changes].ysnFoodStampable_Original
+			, [Changes].ysnReturnable_Original
+			, [Changes].ysnSaleable_Original
+			, [Changes].ysnIdRequiredLiquor_Original
+			, [Changes].ysnIdRequiredCigarette_Original
+			, [Changes].ysnPromotionalItem_Original
+			, [Changes].ysnPrePriced_Original
+			, [Changes].ysnApplyBlueLaw1_Original
+			, [Changes].ysnApplyBlueLaw2_Original
+			, [Changes].ysnCountedDaily_Original
+			, [Changes].strCounted_Original
+			, [Changes].ysnCountBySINo_Original
+			, [Changes].intFamilyId_Original
+			, [Changes].intClassId_Original
+			, [Changes].intProductCodeId_Original
+			, [Changes].intVendorId_Original
+			, [Changes].intMinimumAge_Original
+			, [Changes].dblMinOrder_Original
+			, [Changes].dblSuggestedQty_Original
+			, [Changes].intCountGroupId_Original
+			, [Changes].intStorageLocationId_Original
+			, [Changes].dblReorderPoint_Original
 			-- Modified values 
-			, ysnTaxFlag1_New
-			, ysnTaxFlag2_New
-			, ysnTaxFlag3_New
-			, ysnTaxFlag4_New
-			, ysnDepositRequired_New
-			, intDepositPLUId_New
-			, ysnQuantityRequired_New
-			, ysnScaleItem_New
-			, ysnFoodStampable_New
-			, ysnReturnable_New
-			, ysnSaleable_New
-			, ysnIdRequiredLiquor_New
-			, ysnIdRequiredCigarette_New
-			, ysnPromotionalItem_New
-			, ysnPrePriced_New
-			, ysnApplyBlueLaw1_New
-			, ysnApplyBlueLaw2_New
-			, ysnCountedDaily_New
-			, strCounted_New
-			, ysnCountBySINo_New
-			, intFamilyId_New
-			, intClassId_New
-			, intProductCodeId_New
-			, intVendorId_New
-			, intMinimumAge_New
-			, dblMinOrder_New
-			, dblSuggestedQty_New
-			, intCountGroupId_New
-			, intStorageLocationId_New
-			, dblReorderPoint_New
+			, [Changes].ysnTaxFlag1_New
+			, [Changes].ysnTaxFlag2_New
+			, [Changes].ysnTaxFlag3_New
+			, [Changes].ysnTaxFlag4_New
+			, [Changes].ysnDepositRequired_New
+			, [Changes].intDepositPLUId_New
+			, [Changes].ysnQuantityRequired_New
+			, [Changes].ysnScaleItem_New
+			, [Changes].ysnFoodStampable_New
+			, [Changes].ysnReturnable_New
+			, [Changes].ysnSaleable_New
+			, [Changes].ysnIdRequiredLiquor_New
+			, [Changes].ysnIdRequiredCigarette_New
+			, [Changes].ysnPromotionalItem_New
+			, [Changes].ysnPrePriced_New
+			, [Changes].ysnApplyBlueLaw1_New
+			, [Changes].ysnApplyBlueLaw2_New
+			, [Changes].ysnCountedDaily_New
+			, [Changes].strCounted_New
+			, [Changes].ysnCountBySINo_New
+			, [Changes].intFamilyId_New
+			, [Changes].intClassId_New
+			, [Changes].intProductCodeId_New
+			, [Changes].intVendorId_New
+			, [Changes].intMinimumAge_New
+			, [Changes].dblMinOrder_New
+			, [Changes].dblSuggestedQty_New
+			, [Changes].intCountGroupId_New
+			, [Changes].intStorageLocationId_New
+			, [Changes].dblReorderPoint_New
 	FROM	(
 				-- Merge will help us build the audit log and update the records at the same time. 
 				MERGE	
@@ -283,32 +280,29 @@ BEGIN
 					AS		itemLocation	
 					USING (
 						SELECT	itemLocation.intItemLocationId
-								,updateData.* 
 						FROM	tblICItemLocation itemLocation INNER JOIN tblICItem i
 									ON i.intItemId = itemLocation.intItemId 
 								LEFT JOIN tblICItemPricing itemPricing
 									ON itemPricing.intItemLocationId = itemLocation.intItemLocationId
-								LEFT JOIN #tmpUpdateItemLocationForCStore_UpdateData updateData
-									ON 1 = 1 
 						WHERE	(
-									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Location)
-									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Location WHERE intLocationId = itemLocation.intLocationId) 			
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = itemLocation.intLocationId) 			
 								)
 								AND (
-									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Vendor)
-									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Vendor WHERE intVendorId = itemLocation.intVendorId) 			
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Vendor)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Vendor WHERE intVendorId = itemLocation.intVendorId) 			
 								)
 								AND (
-									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Category)
-									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Category WHERE intCategoryId = i.intCategoryId)			
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category WHERE intCategoryId = i.intCategoryId)			
 								)
 								AND (
-									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Family)
-									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Family WHERE intFamilyId = itemLocation.intFamilyId)			
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Family)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Family WHERE intFamilyId = itemLocation.intFamilyId)			
 								)
 								AND (
-									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Class)
-									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_Class WHERE intClassId = itemLocation.intClassId )			
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Class)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Class WHERE intClassId = itemLocation.intClassId )			
 								)
 								AND (
 									@strDescription IS NULL 
@@ -339,36 +333,36 @@ BEGIN
 					WHEN MATCHED THEN 
 						UPDATE 
 						SET		
-							ysnTaxFlag1 = ISNULL(Source_Query.ysnTaxFlag1, itemLocation.ysnTaxFlag1) 
-							,ysnTaxFlag2 = ISNULL(Source_Query.ysnTaxFlag2, itemLocation.ysnTaxFlag2) 
-							,ysnTaxFlag3 = ISNULL(Source_Query.ysnTaxFlag3, itemLocation.ysnTaxFlag3) 
-							,ysnTaxFlag4 = ISNULL(Source_Query.ysnTaxFlag4, itemLocation.ysnTaxFlag4) 
-							,ysnDepositRequired = ISNULL(Source_Query.ysnDepositRequired, itemLocation.ysnDepositRequired) 
-							,intDepositPLUId = ISNULL(Source_Query.intDepositPLUId, itemLocation.intDepositPLUId) 
-							,ysnQuantityRequired = ISNULL(Source_Query.ysnQuantityRequired, itemLocation.ysnQuantityRequired) 
-							,ysnScaleItem = ISNULL(Source_Query.ysnScaleItem, itemLocation.ysnScaleItem) 
-							,ysnFoodStampable = ISNULL(Source_Query.ysnFoodStampable, itemLocation.ysnFoodStampable) 
-							,ysnReturnable = ISNULL(Source_Query.ysnReturnable, itemLocation.ysnReturnable) 
-							,ysnSaleable = ISNULL(Source_Query.ysnSaleable, itemLocation.ysnSaleable) 
-							,ysnIdRequiredLiquor = ISNULL(Source_Query.ysnIdRequiredLiquor, itemLocation.ysnIdRequiredLiquor) 
-							,ysnIdRequiredCigarette = ISNULL(Source_Query.ysnIdRequiredCigarette, itemLocation.ysnIdRequiredCigarette) 
-							,ysnPromotionalItem = ISNULL(Source_Query.ysnPromotionalItem, itemLocation.ysnPromotionalItem) 
-							,ysnPrePriced = ISNULL(Source_Query.ysnPrePriced, itemLocation.ysnPrePriced) 
-							,ysnApplyBlueLaw1 = ISNULL(Source_Query.ysnApplyBlueLaw1, itemLocation.ysnApplyBlueLaw1) 
-							,ysnApplyBlueLaw2 = ISNULL(Source_Query.ysnApplyBlueLaw2, itemLocation.ysnApplyBlueLaw2) 
-							,ysnCountedDaily = ISNULL(Source_Query.ysnCountedDaily, itemLocation.ysnCountedDaily) 
-							,strCounted = ISNULL(Source_Query.strCounted, itemLocation.strCounted) 
-							,ysnCountBySINo = ISNULL(Source_Query.ysnCountBySINo, itemLocation.ysnCountBySINo) 
-							,intFamilyId = ISNULL(Source_Query.intFamilyId, itemLocation.intFamilyId) 
-							,intClassId = ISNULL(Source_Query.intClassId, itemLocation.intClassId) 
-							,intProductCodeId = ISNULL(Source_Query.intProductCodeId, itemLocation.intProductCodeId) 
-							,intVendorId = ISNULL(Source_Query.intVendorId, itemLocation.intVendorId) 
-							,intMinimumAge = ISNULL(Source_Query.intMinimumAge, itemLocation.intMinimumAge) 
-							,dblMinOrder = ISNULL(Source_Query.dblMinOrder, itemLocation.dblMinOrder) 
-							,dblSuggestedQty = ISNULL(Source_Query.dblSuggestedQty, itemLocation.dblSuggestedQty) 
-							,intCountGroupId = ISNULL(Source_Query.intCountGroupId, itemLocation.intCountGroupId) 
-							,intStorageLocationId = ISNULL(Source_Query.intStorageLocationId, itemLocation.intStorageLocationId) 
-							,dblReorderPoint = ISNULL(Source_Query.dblReorderPoint, itemLocation.dblReorderPoint) 
+							ysnTaxFlag1 = ISNULL(@ysnTaxFlag1, itemLocation.ysnTaxFlag1) 
+							,ysnTaxFlag2 = ISNULL(@ysnTaxFlag2, itemLocation.ysnTaxFlag2) 
+							,ysnTaxFlag3 = ISNULL(@ysnTaxFlag3, itemLocation.ysnTaxFlag3) 
+							,ysnTaxFlag4 = ISNULL(@ysnTaxFlag4, itemLocation.ysnTaxFlag4) 
+							,ysnDepositRequired = ISNULL(@ysnDepositRequired, itemLocation.ysnDepositRequired) 
+							,intDepositPLUId = ISNULL(@intDepositPLUId, itemLocation.intDepositPLUId) 
+							,ysnQuantityRequired = ISNULL(@ysnQuantityRequired, itemLocation.ysnQuantityRequired) 
+							,ysnScaleItem = ISNULL(@ysnScaleItem, itemLocation.ysnScaleItem) 
+							,ysnFoodStampable = ISNULL(@ysnFoodStampable, itemLocation.ysnFoodStampable) 
+							,ysnReturnable = ISNULL(@ysnReturnable, itemLocation.ysnReturnable) 
+							,ysnSaleable = ISNULL(@ysnSaleable, itemLocation.ysnSaleable) 
+							,ysnIdRequiredLiquor = ISNULL(@ysnIdRequiredLiquor, itemLocation.ysnIdRequiredLiquor) 
+							,ysnIdRequiredCigarette = ISNULL(@ysnIdRequiredCigarette, itemLocation.ysnIdRequiredCigarette) 
+							,ysnPromotionalItem = ISNULL(@ysnPromotionalItem, itemLocation.ysnPromotionalItem) 
+							,ysnPrePriced = ISNULL(@ysnPrePriced, itemLocation.ysnPrePriced) 
+							,ysnApplyBlueLaw1 = ISNULL(@ysnApplyBlueLaw1, itemLocation.ysnApplyBlueLaw1) 
+							,ysnApplyBlueLaw2 = ISNULL(@ysnApplyBlueLaw2, itemLocation.ysnApplyBlueLaw2) 
+							,ysnCountedDaily = ISNULL(@ysnCountedDaily, itemLocation.ysnCountedDaily) 
+							,strCounted = ISNULL(@strCounted, itemLocation.strCounted) 
+							,ysnCountBySINo = ISNULL(@ysnCountBySINo, itemLocation.ysnCountBySINo) 
+							,intFamilyId = ISNULL(@intFamilyId, itemLocation.intFamilyId) 
+							,intClassId = ISNULL(@intClassId, itemLocation.intClassId) 
+							,intProductCodeId = ISNULL(@intProductCodeId, itemLocation.intProductCodeId) 
+							,intVendorId = ISNULL(@intVendorId, itemLocation.intVendorId) 
+							,intMinimumAge = ISNULL(@intMinimumAge, itemLocation.intMinimumAge) 
+							,dblMinOrder = ISNULL(@dblMinOrder, itemLocation.dblMinOrder) 
+							,dblSuggestedQty = ISNULL(@dblSuggestedQty, itemLocation.dblSuggestedQty) 
+							,intCountGroupId = ISNULL(@intCountGroupId, itemLocation.intCountGroupId) 
+							,intStorageLocationId = ISNULL(@intStorageLocationId, itemLocation.intStorageLocationId) 
+							,dblReorderPoint = ISNULL(@dblReorderPoint, itemLocation.dblReorderPoint) 
 							,dtmDateModified = GETUTCDATE()
 							,intModifiedByUserId = @intEntityUserSecurityId
 					OUTPUT 
