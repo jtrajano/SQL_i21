@@ -186,6 +186,9 @@ BEGIN
 
 	DECLARE @ysnOnHold					BIT = 0
 
+	DECLARE @intCardTypeId					INT				= 0
+	DECLARE @ysnDualCard					BIT				= 0
+
 	--DECLARE @strSiteType				NVARCHAR(MAX)
 	  
 	------------------------------------------------------------
@@ -1252,7 +1255,27 @@ BEGIN
 
 			RETURN;
 		END
-		IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND @strTransactionType != 'Foreign Sale')
+
+		------------------------------------------------------
+		-------------- Start get card type/ dual card
+		------------------------------------------------------
+	
+		SELECT TOP 1 
+			@intCardTypeId =  intCardTypeId
+		FROM tblCFCard
+		WHERE intCardId = @intCardId
+
+
+		SELECT TOP 1
+			@ysnDualCard = ysnDualCard
+		FROM tblCFCardType
+		WHERE intCardTypeId = @intCardTypeId
+		------------------------------------------------------
+		-------------- End get card type/ dual card
+		------------------------------------------------------
+
+		--IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND @strTransactionType != 'Foreign Sale')
+		IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND (@ysnDualCard = 1 OR (@intCardTypeId = 0 OR @intCardTypeId IS NULL)) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
 			IF(@ysnVehicleRequire = 1)
 			BEGIN
