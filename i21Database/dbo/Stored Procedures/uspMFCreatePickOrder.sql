@@ -462,7 +462,7 @@ BEGIN TRY
 			,''
 			,CASE 
 				WHEN C.intCategoryId = @intPMCategoryId
-					THEN @intPMStageLocationId
+					THEN (CASE WHEN @intPMStageLocationId = 0 THEN NULL ELSE @intPMStageLocationId END)
 				ELSE NULL
 				END
 			,I.strInventoryTracking
