@@ -178,23 +178,27 @@ ELSE
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 	BEGIN
-		DECLARE @intSOToUpdate INT = NULL		
-		DECLARE @ysnShipmentPosted BIT = 0
+		DECLARE @intSOToUpdate		INT = NULL		
+		      , @ysnShipmentPosted	BIT = 0
+			  , @intUserId			INT = NULL
 
-		SELECT TOP 1 @intSOToUpdate = intId FROM @tblSOToUpdate
+		SELECT TOP 1 @intSOToUpdate = intId 
+		FROM @tblSOToUpdate
+
 		SET @dblTotalQtyOrdered = 0
 		SET @dblTotalQtyShipped = 0
 
-		SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
-			  ,@dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END)
-			  ,@ysnShipmentPosted = [IS].ysnPosted
+		SELECT @dblTotalQtyOrdered	= SUM(dblQtyOrdered)
+			  ,@dblTotalQtyShipped	= SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END)
+			  ,@ysnShipmentPosted	= [IS].ysnPosted
+			  ,@intUserId			= [SO].intEntityId
 		FROM tblSOSalesOrderDetail [SOD]
 		INNER JOIN tblSOSalesOrder [SO]
 			ON [SO].intSalesOrderId = [SOD].intSalesOrderId
 		LEFT JOIN tblICInventoryShipment [IS]
 			ON [IS].strReferenceNumber = SO.strSalesOrderNumber
 		WHERE [SO].intSalesOrderId = @intSOToUpdate
-		GROUP BY [SO].intSalesOrderId, [IS].ysnPosted
+		GROUP BY [SO].intSalesOrderId, [IS].ysnPosted, [SO].intEntityId
 
 		IF (@dblTotalQtyShipped = 0)
 			SET @strOrderStatus = 'Open'
@@ -209,6 +213,9 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 			, ysnProcessed   = CASE WHEN @strOrderStatus <> 'Open' THEN 1 ELSE 0 END
 			, ysnShipped     = CASE WHEN @strOrderStatus = 'Open' THEN 0 ELSE ysnShipped END
 		WHERE intSalesOrderId = @intSOToUpdate
+
+		IF @ysnForDelete = 1
+			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @intSOToUpdate, @intUserId = @intUserId, @ysnDelete = 1
 
 		DELETE FROM @tblSOToUpdate WHERE intId = @intSOToUpdate
 	END
