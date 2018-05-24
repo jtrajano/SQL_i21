@@ -37,6 +37,7 @@ BEGIN TRY
 	DECLARE @intContractDetailId						INT
 	DECLARE @intPriceFixationRefId						INT
 	DECLARE @idoc										INT 
+	DECLARE @intNumber                                   INT
 
 	DECLARE @tblCTPriceFixation AS TABLE
 	(
@@ -347,33 +348,49 @@ BEGIN TRY
 					DECLARE @tblPriceFixation AS TABLE
 					(
 						intRowNo INT IDENTITY,
-						PriceFixationId INT
+						PriceFixationId INT,
+						TradeNo  NVARCHAR(20) 
 					)
 					
 					EXEC sp_xml_preparedocument @idoc OUTPUT, @strPriceFixationDetailXML
 					
-					INSERT INTO @tblPriceFixation(PriceFixationId)
-					SELECT DISTINCT intPriceFixationId 
+					INSERT INTO @tblPriceFixation(PriceFixationId,TradeNo)
+					SELECT DISTINCT intPriceFixationId,strTradeNo 
 					FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH 
 						(
-								intPriceFixationId INT
+								 intPriceFixationId INT
+								,strTradeNo NVARCHAR(20) 
 						 )
 					
 					
 					DECLARE @strFixationDetailXml NVARCHAR(max)=''
 					
-					SELECT @strFixationDetailXml = @strFixationDetailXml +  '<tags>' +
-					'<toFind>&lt;intPriceFixationId&gt;'+LTRIM(t1.PriceFixationId)+'&lt;/intPriceFixationId&gt;</toFind>' + 
-					'<toReplace>&lt;intPriceFixationId&gt;'+LTRIM(t1.intPriceFixationId)+'&lt;/intPriceFixationId&gt;</toReplace>'
-					+ '</tags>'
+					SELECT @strFixationDetailXml = @strFixationDetailXml 
+												+ '<tags>' +
+															'<toFind>&lt;intPriceFixationId&gt;'   +LTRIM(t1.PriceFixationId)+'&lt;/intPriceFixationId&gt;</toFind>' + 
+															'<toReplace>&lt;intPriceFixationId&gt;'+LTRIM(t1.intPriceFixationId)+'&lt;/intPriceFixationId&gt;</toReplace>'
+												+ '</tags>'
+												+ '<tags>' +
+															'<toFind>&lt;strTradeNo&gt;'   +LTRIM(t1.TradeNo)+'&lt;/strTradeNo&gt;</toFind>' + 
+															'<toReplace>&lt;strTradeNo&gt;'+LTRIM(SN.strPrefix)+LTRIM(SN.intNumber + t1.intRowNo)+'&lt;/strTradeNo&gt;</toReplace>'
+												+ '</tags>'
 					FROM  (
-							 SELECT t.intPriceFixationId,td.PriceFixationId 
+							 SELECT t.intRowNo
+							 ,t.intPriceFixationId
+							 ,td.PriceFixationId 
+							 ,td.TradeNo
 							 From
 							 (
 							 	SELECT ROW_NUMBER() OVER(ORDER BY intPriceFixationId) intRowNo , * FROM tblCTPriceFixation cd WHERE cd.intPriceContractId = @NewPriceContractId
 							 ) t 
 							 JOIN @tblPriceFixation td on t.intRowNo=td.intRowNo 
 					     ) t1
+                    JOIN  tblSMStartingNumber SN ON 1 =1  
+					WHERE SN.strTransactionType = N'Price Fixation Trade No'
+
+					SELECT @intNumber = COUNT(1) FROM @tblPriceFixation
+					UPDATE tblSMStartingNumber SET intNumber = intNumber + @intNumber 
+					WHERE strTransactionType = N'Price Fixation Trade No'
 					
 					Set @strFixationDetailXml = '<root>' + @strFixationDetailXml + '</root>'
 					
