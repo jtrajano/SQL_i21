@@ -1,14 +1,24 @@
 ﻿CREATE FUNCTION [dbo].[fnCMGetACHTransactionCode]
 (
 	@strTransactionId NVARCHAR(30)
+	
 )
 RETURNS NVARCHAR(1)
 AS
 BEGIN
 	-- Declare the return variable here
 DECLARE @Code NVARCHAR(1)
+DECLARE @ysnVoid BIT
+DECLARE @prefix NVARCHAR(10)
 
-	-- Add the T-SQL statements to compute the return value here;with result as (
+SELECT @prefix=SUBSTRING(@strTransactionId,LEN(@strTransactionId),1)
+IF @prefix = 'V'
+BEGIN
+	SELECT @strTransactionId= SUBSTRING(@strTransactionId,1, LEN(@strTransactionId)-1)
+	SET @ysnVoid = 1
+END
+
+	
 ;with r as (
 select trns.strTransactionId, CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) = 1 THEN '7' ELSE '2' END Code from tblARInvoice invoice join 
 tblARPaymentDetail paymentdetail on paymentdetail.intInvoiceId = invoice.intInvoiceId
@@ -28,6 +38,11 @@ join tblCMBankTransaction trns on trns.strTransactionId = pchk.strPaycheckId
 WHERE strTransactionId = @strTransactionId
 
 	-- Return the result of the function
+IF (@ysnVoid =1)
+BEGIN
+	SELECT @Code = CASE WHEN @Code = '7' THEN '2' ELSE '7' END
+END
+
 RETURN @Code
 
 END
