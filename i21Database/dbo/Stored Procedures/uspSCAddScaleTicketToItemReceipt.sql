@@ -1227,12 +1227,12 @@ BEGIN
 		,[intItemUnitMeasureId] = RE.intItemUOMId
 		,[dblQuantity]			= RE.dblQty
 		,[dblGrossWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
-									ELSE SC.dblGrossUnits
+									WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross
+									ELSE (RE.dblQty /  SC.dblNetUnits) * SC.dblGrossUnits
 								END
 		,[dblTareWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
-									ELSE SC.dblShrink
+									WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross - RE.dblNet
+									ELSE (RE.dblQty /  SC.dblNetUnits) * SC.dblShrink
 								END
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
