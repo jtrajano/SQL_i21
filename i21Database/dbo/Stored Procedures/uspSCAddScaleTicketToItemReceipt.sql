@@ -37,7 +37,8 @@ DECLARE @intScaleStationId AS INT
 		,@ticketBatchId AS NVARCHAR(40)
 		,@splitDistribution AS NVARCHAR(40)
 		,@ticketStatus AS NVARCHAR(10)
-		,@intContractCostId AS INT;
+		,@intContractCostId AS INT
+		,@currencyDecimal AS INT;
 		
 BEGIN 
 	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
@@ -145,7 +146,10 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= LI.intItemUOMId
+		,intGrossNetUOMId			= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN SC.intItemUOMIdFrom
+										ELSE LI.intItemUOMId
+									END
 		,intCostUOMId				= LI.intItemUOMId
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
@@ -191,8 +195,14 @@ SELECT
 		,intSourceType		 		= 1 -- Source type for scale is 1 
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
-		,dblGross					= (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
-		,dblNet						= LI.dblQty
+		,dblGross					=  CASE
+										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
+										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+									END
+		,dblNet						= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
+										ELSE LI.dblQty 
+									END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -220,6 +230,7 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 
@@ -1223,9 +1234,6 @@ BEGIN
 									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
 									ELSE SC.dblShrink
 								END
-		,[dblQuantity]			= RE.dblQty
-		,[dblGrossWeight]		= RE.dblQty
-		,[dblTareWeight]		= 0
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
 		,[dtmManufacturedDate]	= RE.dtmDate
