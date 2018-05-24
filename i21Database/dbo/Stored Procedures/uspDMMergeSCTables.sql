@@ -294,6 +294,41 @@ BEGIN
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketPoolId = Source.intTicketPoolId, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.ysnTicketAllowed = Source.ysnTicketAllowed, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intDiscountSchedule = Source.intDiscountSchedule, Target.intDistributionMethod = Source.intDistributionMethod, Target.ysnSelectByPO = Source.ysnSelectByPO, Target.intSplitInvoiceOption = Source.intSplitInvoiceOption, Target.intContractRequired = Source.intContractRequired, Target.intOverrideTicketCopies = Source.intOverrideTicketCopies, Target.ysnPrintAtKiosk = Source.ysnPrintAtKiosk, Target.ynsVerifySplitMethods = Source.ynsVerifySplitMethods, Target.ysnOverrideSingleTicketSeries = Source.ysnOverrideSingleTicketSeries, Target.intConcurrencyId = Source.intConcurrencyId
+		WHEN NOT MATCHED BY TARGET THEN
+            INSERT(
+				intTicketTypeId
+				,intTicketPoolId
+				,intListTicketTypeId
+				,ysnTicketAllowed
+				,intNextTicketNumber
+				,intDiscountSchedule
+				,intDistributionMethod
+				,ysnSelectByPO
+				,intSplitInvoiceOption
+				,intContractRequired
+				,intOverrideTicketCopies
+				,ysnPrintAtKiosk
+				,ynsVerifySplitMethods
+				,ysnOverrideSingleTicketSeries
+				,intConcurrencyId
+			)
+			VALUES(
+				Source.intTicketTypeId
+				,Source.intTicketPoolId
+				,Source.intListTicketTypeId
+				,Source.ysnTicketAllowed
+				,Source.intNextTicketNumber
+				,Source.intDiscountSchedule
+				,Source.intDistributionMethod
+				,Source.ysnSelectByPO
+				,Source.intSplitInvoiceOption
+				,Source.intContractRequired
+				,Source.intOverrideTicketCopies
+				,Source.ysnPrintAtKiosk
+				,Source.ynsVerifySplitMethods
+				,Source.ysnOverrideSingleTicketSeries
+				,Source.intConcurrencyId
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -308,11 +343,31 @@ BEGIN
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketType = Source.intTicketType, Target.strTicketType = Source.strTicketType, Target.strInOutIndicator = Source.strInOutIndicator, Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
+		WHEN NOT MATCHED BY TARGET THEN
+        INSERT(
+			intTicketTypeId
+			,intTicketType
+			,strTicketType
+			,strInOutIndicator
+			,ysnActive
+			,intConcurrencyId
+		)
+		VALUES(
+			Source.intTicketTypeId
+			,Source.intTicketType
+			,Source.strTicketType
+			,Source.strInOutIndicator
+			,Source.ysnActive
+			,Source.intConcurrencyId
+		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCListTicketTypes ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCListTicketTypes OFF
+
 
     -- tblSCUncompletedTicketAlert
     SET @SQLString = N'MERGE tblSCUncompletedTicketAlert AS Target
@@ -337,9 +392,30 @@ BEGIN
 			, Target.ysnDistributionAllowed = Source.ysnDistributionAllowed
 			, Target.ysnDefaultDistribution = Source.ysnDefaultDistribution
 			, Target.intConcurrencyId = Source.intConcurrencyId
+		WHEN NOT MATCHED BY TARGET THEN
+		INSERT(
+			intDistributionOptionId
+			,strDistributionOption
+			,intTicketPoolId
+			,intTicketTypeId
+			,ysnDistributionAllowed
+			,ysnDefaultDistribution
+			,intStorageScheduleTypeId
+			,intConcurrencyId
+		)
+		VALUES(
+			Source.intDistributionOptionId
+			,Source.strDistributionOption
+			,Source.intTicketPoolId
+			,Source.intTicketTypeId
+			,Source.ysnDistributionAllowed
+			,Source.ysnDefaultDistribution
+			,Source.intStorageScheduleTypeId
+			,Source.intConcurrencyId
+		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
-
+			
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     SET IDENTITY_INSERT tblSCDistributionOption ON
     EXECUTE sp_executesql @SQLString;
@@ -394,7 +470,7 @@ BEGIN
 			,strNTEPCapacity
 			,intConcurrencyId
 		)
-		VALUE(
+		VALUES(
 			Source.intScaleDeviceId
 			, Source.intPhysicalEquipmentId
 			, Source.strDeviceDescription
@@ -566,8 +642,10 @@ BEGIN
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCTicketFormat ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCTicketFormat OFF
 
     -- tblSCTicketPool
     SET @SQLString = N'MERGE tblSCTicketPool AS Target
@@ -593,8 +671,10 @@ BEGIN
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCTicketPool ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCTicketPool OFF
 
     -- tblSCTicketPrintOption
     SET @SQLString = N'MERGE tblSCTicketPrintOption AS Target
@@ -638,8 +718,11 @@ BEGIN
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+   
+	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCTicketPrintOption ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCTicketPrintOption OFF
 
     -- tblSCTicketSplit
     SET @SQLString = N'MERGE tblSCTicketSplit AS Target
