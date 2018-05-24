@@ -7,7 +7,7 @@
 	[dtmBeginDate] [datetime] NOT NULL,
 	[dtmEndDate] [datetime] NULL,
 	[intProgramId] [int] NOT NULL,
-	[intItemUOMId] [int] NOT NULL,
+	[intUnitMeasureId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblVRProgramItem_intConcurrencyId]  DEFAULT ((0)),
 	CONSTRAINT [PK_tblVRProgramItem] PRIMARY KEY CLUSTERED ([intProgramItemId] ASC),
 	CONSTRAINT [FK_tblVRProgramItem_tblICCategory] FOREIGN KEY([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),

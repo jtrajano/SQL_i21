@@ -21,8 +21,17 @@ FROM(
 		,B.dtmBeginDate
 		,B.dtmEndDate
 		,B.intConcurrencyId
+		,strCategoryCode = ''
 	FROM tblVRProgram A
-	LEFT JOIN tblVRProgramItem B
+	LEFT JOIN (
+		SELECT 
+			AA.*
+			,BB.intItemUOMId
+		FROM tblVRProgramItem AA
+		LEFT JOIN tblICItemUOM BB
+			ON AA.intItemId = BB.intItemId
+				AND AA.intUnitMeasureId = BB.intUnitMeasureId
+	) B
 		ON A.intProgramId = B.intProgramId
 	INNER JOIN tblICItem C
 		ON B.intItemId = C.intItemId
@@ -50,26 +59,23 @@ FROM(
 		,A.strProgram
 		,A.strProgramDescription
 		,A.strVendorProgram
-		,strItemNumber = C.strItemNo
-		,strItemDescription = C.strDescription
+		,strItemNumber = ''
+		,strItemDescription = ''
 		,strUnitMeasure = I.strUnitMeasure
-		,D.dblUnitQty
+		,0
 		,B.strRebateBy
 		,B.dblRebateRate
 		,B.dtmBeginDate
 		,B.dtmEndDate
 		,B.intConcurrencyId
+		,strCategoryCode = E.strCategoryCode
 	FROM tblVRProgram A
 	INNER JOIN tblVRProgramItem B
 		ON A.intProgramId = B.intProgramId
 	INNER JOIN tblICCategory E
 		ON B.intCategoryId = E.intCategoryId
-	INNER JOIN tblICItem C
-		ON E.intCategoryId = C.intCategoryId
-	LEFT JOIN tblICItemUOM D
-		ON B.intItemUOMId = D.intItemUOMId
 	LEFT JOIN tblICUnitMeasure I
-		ON D.intUnitMeasureId = I.intUnitMeasureId
+		ON B.intUnitMeasureId = I.intUnitMeasureId
 	INNER JOIN tblVRVendorSetup F
 		ON A.intVendorSetupId = F.intVendorSetupId
 	INNER JOIN tblAPVendor G
@@ -96,6 +102,7 @@ FROM(
 		,B.dtmBeginDate
 		,B.dtmEndDate
 		,intConcurrencyId = 0
+		,strCategoryCode = ''
 	FROM tblVRProgram A
 	LEFT JOIN tblVRProgramItem B
 		ON A.intProgramId = B.intProgramId

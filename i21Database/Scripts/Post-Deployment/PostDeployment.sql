@@ -476,5 +476,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CF\2_DataFix.sql
 :r .\CF\3_DataFixPriceAdjustment.sql
 
+-- Vendor rebate
+:r .\VR\1_UpdateColumnTableProgramItem.sql
+
+
+
 
 print 'END POST DEPLOYMENT'

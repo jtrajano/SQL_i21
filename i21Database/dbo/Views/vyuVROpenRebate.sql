@@ -26,9 +26,9 @@ AS
 		,dblCost = B.dblPrice
 		,dblRebateRate = ISNULL(M.dblRebateRate,ISNULL(N.dblRebateRate,0.0))
 		,dblRebateQuantity =	CASE WHEN A.strTransactionType = 'Credit Memo' THEN 
-									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6)) * -1
+									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N1.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6)) * -1
 								ELSE
-									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6))
+									CAST((dbo.fnCalculateQtyBetweenUOM(B.intItemUOMId, ISNULL(M.intItemUOMId,ISNULL(N1.intItemUOMId,0.0)), B.dblQtyShipped)) AS NUMERIC(18,6))
 								END
 		,B.intInvoiceDetailId
 		,B.intConcurrencyId 
@@ -59,19 +59,31 @@ AS
 		ON L.intVendorSetupId = J.intVendorSetupId
 	INNER JOIN tblVRProgram I
 		ON J.intVendorSetupId = I.intVendorSetupId
-	INNER JOIN tblICItemVendorXref O
-		ON B.intItemId = O.intItemId
-			AND J.intVendorSetupId = O.intVendorSetupId
-	LEFT JOIN tblVRProgramItem M
+	--INNER JOIN tblICItemVendorXref O
+	--	ON B.intItemId = O.intItemId
+	--		AND J.intVendorSetupId = O.intVendorSetupId
+	LEFT JOIN (
+		SELECT 
+			AA.*
+			,BB.intItemUOMId
+		FROM tblVRProgramItem AA
+		LEFT JOIN tblICItemUOM BB
+			ON AA.intItemId = BB.intItemId
+				AND AA.intUnitMeasureId = BB.intUnitMeasureId
+			
+	) M
 		ON I.intProgramId = M.intProgramId
 			AND B.intItemId = M.intItemId
 			AND A.dtmDate >= M.dtmBeginDate
 			AND A.dtmDate <= ISNULL(M.dtmEndDate,'12/31/9999')
-	LEFT JOIN tblVRProgramItem N
+	LEFT JOIN tblVRProgramItem  N
 		ON I.intProgramId = N.intProgramId
 			AND D.intCategoryId = N.intCategoryId
 			AND A.dtmDate >= N.dtmBeginDate
 			AND A.dtmDate <= ISNULL(N.dtmEndDate,'12/31/9999')
+	LEFT JOIN tblICItemUOM N1
+		ON B.intItemId = N1.intItemId
+			AND N.intUnitMeasureId = N1.intUnitMeasureId
 	INNER JOIN tblAPVendor K 
 		ON J.intEntityId = K.intEntityId
 	INNER JOIN tblEMEntity P

@@ -183,6 +183,7 @@
     <Folder Include="Scripts\Post-Deployment\FRM\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM\DataMigration" />
     <Folder Include="Scripts\Post-Deployment\CCR" />
+    <Folder Include="Scripts\Post-Deployment\VR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -6631,6 +6632,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemAccountForCStore.sql" />
+    <None Include="Scripts\Post-Deployment\VR\1_UpdateColumnTableProgramItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
