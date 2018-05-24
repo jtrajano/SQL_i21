@@ -56,7 +56,7 @@ SET ANSI_WARNINGS OFF
 			LEFT JOIN tblCTContractHeader		CH  ON CH.intEntityId = CV.intEntityId AND CH.intCommodityId = CO.intCommodityId
 														AND CH.strContractNumber collate Latin1_General_CI_AS = CT.gacnt_cnt_no collate Latin1_General_CI_AS
 														AND CH.intPricingTypeId = PT.intPricingTypeId
-			WHERE gacnt_pur_sls_ind <> '1'  AND CH.intContractHeaderId IS NULL
+			WHERE gacnt_pur_sls_ind <> '1' AND (gacnt_un_bal <> 0 OR gacnt_un_bal_transit <> 0 OR gacnt_un_bal_unprc <> 0 OR gacnt_sched_un <> 0) AND CH.intContractHeaderId IS NULL
 		END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptcntmst')
@@ -66,9 +66,7 @@ SET ANSI_WARNINGS OFF
 			JOIN	tblCTContractType			TY	ON	TY.strContractType	=	'Sale' 
 			JOIN	tblCTPricingType			PT	ON	PT.strPricingType	=	'Cash'
 			join    tblARCustomer C on LTRIM(RtRIM(C.strCustomerNumber)) collate Latin1_General_CI_AS  = LTRIM(RtRIM(CT.ptcnt_cus_no))
-			JOIN	tblEMEntity					CV	ON	C.intEntityId = CV. intEntityId  
-			JOIN	tblEMEntityType				ET	ON	ET.intEntityId = CV.intEntityId AND ET.strType IN ('Vendor','Customer')
-			where CT.ptcnt_line_no = 1
+			where CT.ptcnt_line_no = 1 AND CT.ptcnt_un_bal > 0 AND  CT.ptcnt_due_rev_dt !< (select pt3cf_business_rev_dt from ptctlmst where ptctl_key = 3)
 		END
 
 			RETURN @Total
@@ -142,7 +140,7 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		LEFT JOIN tblCTContractHeader		CH  ON CH.intEntityId = CV.intEntityId AND CH.intCommodityId = CO.intCommodityId
 													AND CH.strContractNumber collate Latin1_General_CI_AS = CT.gacnt_cnt_no collate Latin1_General_CI_AS
 													AND CH.intPricingTypeId = PT.intPricingTypeId
-		WHERE gacnt_pur_sls_ind <> '1'  AND CH.intContractHeaderId IS NULL
+		WHERE gacnt_pur_sls_ind <> '1' AND (gacnt_un_bal <> 0 OR gacnt_un_bal_transit <> 0 or gacnt_un_bal_unprc <> 0 OR gacnt_sched_un <> 0) AND CH.intContractHeaderId IS NULL
 
 		--Insert GA Contract Details--
 
@@ -246,7 +244,7 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		LEFT JOIN	tblCTRailGrade		RG	ON	LTRIM(RTRIM(RG.strRailGrade)) =		CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_avg_car_grade,''))) = 'A'	 THEN 'Average' 
 																							WHEN LTRIM(RTRIM(ISNULL(gacnt_avg_car_grade,''))) = 'C'  THEN 'Car' 
 																					END	
-		WHERE gacnt_pur_sls_ind <> '1' AND CH.intContractHeaderId > @MaxContractId
+		WHERE gacnt_pur_sls_ind <> '1' AND (gacnt_un_bal <> 0 OR gacnt_un_bal_transit <> 0 or gacnt_un_bal_unprc <> 0 OR gacnt_sched_un <> 0) AND CH.intContractHeaderId > @MaxContractId
 
 
  END
@@ -283,16 +281,17 @@ IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 			SELECT	TY.intContractTypeId,
 					C.intEntityId,
 					(select intCommodityId from tblICCommodity CM 
-					where CM.strDescription collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) 'intCommodityId',
+					where CM.strCommodityCode collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) 'intCommodityId',
 					ptcnt_cnt_no AS strContractNumber,
 					CONVERT(DATETIME, LEFT(ptcnt_cnt_rev_dt,8)) dtmContractDate,		
 					PT.intPricingTypeId,
 					(select intContractPlanId from tblCTContractPlan P 
 					where LTRIM(RtRIM(P.strContractPlan)) collate Latin1_General_CI_AS = CT.ptcnt_cnt_plan) as intContractPlanId,
-					ptcnt_un_orig AS dblQuantity,		
+					(SELECT   sum(ptcnt_un_orig) FROM ptcntmst WHERE ptcnt_due_rev_dt !< (SELECT pt3cf_business_rev_dt FROM ptctlmst WHERE ptctl_key = 3) 
+						AND ptcnt_cnt_no = CT.ptcnt_cnt_no GROUP BY ptcnt_cus_no, ptcnt_cnt_no, ptcnt_cnt_rev_dt HAVING SUM(ptcnt_un_bal) > 0)  AS dblQuantity,		
 					(select top 1 intCommodityUnitMeasureId 
 					from tblICCommodityUnitMeasure UM join tblICCommodity CM on CM.intCommodityId = UM.intCommodityId
-					where CM.strDescription collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) AS intCommodityUOMId,
+					where CM.strCommodityCode collate Latin1_General_CI_AS = CT.ptcnt_itm_or_cls) AS intCommodityUOMId,
 					null intContractTextId,
 					1 AS ysnSigned,
 					1 AS ysnPrinted,		
@@ -309,9 +308,7 @@ IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 			JOIN	tblCTContractType			TY	ON	TY.strContractType	=	'Sale' 
 			JOIN	tblCTPricingType			PT	ON	PT.strPricingType	=	'Cash'
 			join    tblARCustomer C on LTRIM(RtRIM(C.strCustomerNumber)) collate Latin1_General_CI_AS  = LTRIM(RtRIM(CT.ptcnt_cus_no))
-			JOIN	tblEMEntity					CV	ON	C.intEntityId = CV.intEntityId  
-			JOIN	tblEMEntityType				ET	ON	ET.intEntityId = CV.intEntityId AND ET.strType IN ('Vendor','Customer')
-			where CT.ptcnt_line_no = 1
+			WHERE CT.ptcnt_line_no = 1 AND CT.ptcnt_un_bal > 0 AND  CT.ptcnt_due_rev_dt !< (select pt3cf_business_rev_dt from ptctlmst where ptctl_key = 3)
 
 		--insert into Contract Sequence		
 		

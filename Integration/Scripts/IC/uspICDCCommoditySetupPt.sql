@@ -17,7 +17,9 @@ SET ANSI_WARNINGS OFF
 --Origin Petro does not have commodity
 --Contracts need commodity. So create commodity for classes used in origin contract.
 INSERT INTO tblICCommodity(strCommodityCode,strDescription)
-select distinct cl.ptcls_class, cl.ptcls_desc from ptclsmst cl join ptcntmst ct on cl.ptcls_class = ct.ptcnt_itm_or_cls
+select distinct cl.ptcls_class, cl.ptcls_desc from ptitmmst it join ptclsmst cl on cl.ptcls_class = it.ptitm_class
+join ptcntmst ct on it.ptitm_itm_no = ct.ptcnt_itm_or_cls
+
 
 
 ----=====================================STEP 2=========================================
