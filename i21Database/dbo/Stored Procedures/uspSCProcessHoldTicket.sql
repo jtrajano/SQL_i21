@@ -52,6 +52,11 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		IF EXISTS (SELECT intDeliverySheetId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId AND ysnPost = 1)
+		BEGIN 
+			RAISERROR('Undistribute the delivery sheet first to undistribute this ticket', 11, 1);
+			RETURN;
+		END
 		INSERT INTO @InTransitTableType (
 			[intItemId]
 			,[intItemLocationId]
