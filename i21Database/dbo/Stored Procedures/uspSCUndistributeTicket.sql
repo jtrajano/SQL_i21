@@ -84,7 +84,7 @@ BEGIN TRY
 				END
 			END
 			SELECT @intId = MIN(intInventoryReceiptItemId) 
-			FROM tblICInventoryReceiptItemId where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+			FROM vyuICGetInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 		END
 
 		IF @strInOutFlag = 'I'
