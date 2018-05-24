@@ -899,6 +899,76 @@ BEGIN TRY
 						)
 					AND strPurpose <> 'Cancel'
 
+				INSERT INTO @ShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
+					,intShipViaId
+					)
+				SELECT DISTINCT intOrderType = 4
+					,intSourceType = 0
+					,intEntityCustomerId = EL.intEntityId
+					,dtmShipDate = EDI.strShipmentDate
+					,intShipFromLocationId = IL.intLocationId
+					,intShipToLocationId = EL.intEntityLocationId
+					,intFreightTermId = IsNULL(FT.intFreightTermId, (
+							SELECT TOP 1 intFreightTermId
+							FROM tblSMFreightTerms
+							WHERE strFreightTerm = 'Deliver'
+							))
+					,strSourceScreenName = 'EDI940'
+					,strBOLNumber = ''
+					,strReferenceNumber = EDI.strDepositorOrderNumber
+					,intItemId = I.intItemId
+					,intOwnershipType = 1
+					,dblQuantity = EDI.dblQtyOrdered
+					,intItemUOMId = IU.intItemUOMId
+					,intOrderId = NULL
+					,intLineNo = EDI.intLineNumber
+					,intWeightUOMId = NULL
+					,dblUnitPrice = 0
+					,intCurrencyId = NULL
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,dtmRequestedArrivalDate = EDI.strShipmentDate
+					,intShipViaId = @intShipViaId
+				FROM tblMFEDI940 EDI
+				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.intLocationId IS NOT NULL
+				JOIN tblEMEntityLocation EL ON 1 = 1
+					AND EL.intEntityLocationId = @intEntityLocationId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitMeasure = EDI.strUOM
+				LEFT JOIN tblSMFreightTerms FT ON FT.strFreightTerm = EDI.strShipmentMethodOfPayment
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+					AND NOT EXISTS (
+						SELECT *
+						FROM @ShipmentStagingTable SST
+						WHERE SST.intItemId = I.intItemId
+						)
+					AND strPurpose <> 'Cancel'
+
 				INSERT INTO @FinalShipmentStagingTable (
 					intOrderType
 					,intSourceType
@@ -1146,6 +1216,75 @@ BEGIN TRY
 					AND UM.strUnitType <> 'Weight'
 				WHERE EDI.strDepositorOrderNumber = @strOrderNo
 					AND NOT EXISTS (
+						SELECT *
+						FROM @ShipmentStagingTable SST
+						WHERE SST.intItemId = I.intItemId
+						)
+					AND strPurpose <> 'Cancel'
+
+				INSERT INTO @ShipmentStagingTable (
+					intOrderType
+					,intSourceType
+					,intEntityCustomerId
+					,dtmShipDate
+					,intShipFromLocationId
+					,intShipToLocationId
+					,intFreightTermId
+					,strSourceScreenName
+					,strBOLNumber
+					,strReferenceNumber
+					,intItemId
+					,intOwnershipType
+					,dblQuantity
+					,intItemUOMId
+					,intOrderId
+					,intLineNo
+					,intWeightUOMId
+					,dblUnitPrice
+					,intCurrencyId
+					,intForexRateTypeId
+					,dblForexRate
+					,dtmRequestedArrivalDate
+					,intShipViaId
+					)
+				SELECT DISTINCT intOrderType = 4
+					,intSourceType = 0
+					,intEntityCustomerId = EL.intEntityId
+					,dtmShipDate = EDI.strShipmentDate
+					,intShipFromLocationId = IL.intLocationId
+					,intShipToLocationId = EL.intEntityLocationId
+					,intFreightTermId = (
+						SELECT TOP 1 intFreightTermId
+						FROM tblSMFreightTerms
+						WHERE strFreightTerm = 'Deliver'
+						)
+					,strSourceScreenName = 'EDI940'
+					,strBOLNumber = ''
+					,strReferenceNumber = EDI.strDepositorOrderNumber
+					,intItemId = I.intItemId
+					,intOwnershipType = 1
+					,dblQuantity = EDI.dblQtyOrdered
+					,intItemUOMId = IU.intItemUOMId
+					,intOrderId = NULL
+					,intLineNo = EDI.intLineNumber
+					,intWeightUOMId = NULL
+					,dblUnitPrice = 0
+					,intCurrencyId = NULL
+					,intForexRateTypeId = NULL
+					,dblForexRate = NULL
+					,dtmRequestedArrivalDate = EDI.strShipmentDate
+					,intShipViaId = @intShipViaId
+				FROM tblMFEDI940 EDI
+				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.intLocationId IS NOT NULL
+				JOIN tblEMEntityLocation EL ON 1 = 1
+					AND EL.intEntityLocationId = @intEntityLocationId
+				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
+				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+					AND UM.strUnitMeasure = EDI.strUOM
+				WHERE EDI.strDepositorOrderNumber = @strOrderNo
+				AND NOT EXISTS (
 						SELECT *
 						FROM @ShipmentStagingTable SST
 						WHERE SST.intItemId = I.intItemId
