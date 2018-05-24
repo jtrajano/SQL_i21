@@ -39,19 +39,20 @@ SELECT strTransactionType = 'Load Schedule'
 	,dblQtyRemaining = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblDiscount = 0.0000000
 	,dblPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId)
-	,dblShipmentUnitPrice = (
-			(
-				dbo.fnCTGetSequencePrice(CD.intContractDetailId)
-			) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
-		)
+    ,dblShipmentUnitPrice = (
+                    (
+                        dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+            )
 	,strPricing = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strVFDDocumentNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,dblTotalTax = 0.000000
-	,dblTotal = (
-			(
-				dbo.fnCTGetSequencePrice(CD.intContractDetailId)
-			) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
-		) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+    ,dblTotal = 
+            (
+                    (
+                        dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+            ) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
 	,intStorageLocationId = NULL
 	,intTermId = NULL
 	,intEntityShipViaId = NULL
