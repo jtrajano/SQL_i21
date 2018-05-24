@@ -6629,6 +6629,8 @@
     <Build Include="dbo\Views\vyuCFinvoiceGroupByCardHistory.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMI.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemAccountForCStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
