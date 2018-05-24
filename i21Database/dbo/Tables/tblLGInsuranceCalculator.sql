@@ -15,6 +15,7 @@
 	,[dblFreight] NUMERIC(18, 6)
 	,[intFreightCurrencyId] INT
 	,[dblMarkupFor] NUMERIC(18, 6)
+	,[dblMarkupForPercentage] NUMERIC(18, 6)
 	,[dblMarkupValue] NUMERIC(18, 6)
 	,[dblInsuranceValue] NUMERIC(18, 6)
 	,[intInsuranceValueCurrencyId] INT
