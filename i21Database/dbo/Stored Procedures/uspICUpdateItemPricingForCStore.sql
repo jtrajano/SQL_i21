@@ -2,7 +2,11 @@
 	This stored procedure will update the Sales Price in the Item Pricing and Item Pricing Level. 
 */
 CREATE PROCEDURE [dbo].[uspICUpdateItemPricingForCStore]
-	@dblStandardCost AS NUMERIC(38, 20) = NULL 
+	-- filter params
+	@strUpcCode AS NVARCHAR(50) = NULL 
+	,@strDescription AS NVARCHAR(250) = NULL 
+	-- update params
+	,@dblStandardCost AS NUMERIC(38, 20) = NULL 
 	,@dblRetailPrice AS NUMERIC(38, 20) = NULL 
 	,@intEntityUserSecurityId AS INT 
 AS
@@ -99,6 +103,20 @@ BEGIN
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class WHERE intClassId = il.intClassId )			
 								)
+								AND (
+									@strDescription IS NULL 
+									OR i.strDescription = @strDescription 
+								)
+								AND (
+									@strUpcCode IS NULL 
+									OR EXISTS (
+										SELECT TOP 1 1 
+										FROM	tblICItemUOM uom 
+										WHERE	uom.intItemId = i.intItemId 
+												AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
+									)
+								)
+								AND ISNULL(ItemPricing.strPricingMethod, 0) = 'None'
 					) AS Source_Query  
 						ON itemPricing.intItemPricingId = Source_Query.intItemPricingId					
 					
