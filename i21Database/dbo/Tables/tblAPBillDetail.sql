@@ -28,6 +28,7 @@
 	[intPrepayTypeId]    INT             NULL,
 	[intItemBundleId]	INT 	NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
+	[dblBundleTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dblQtyContract] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblContractCost] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

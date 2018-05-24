@@ -28,6 +28,7 @@ DECLARE @receiptItems AS TABLE (
 	[intBundletUOMId]				INT				NOT NULL,
 	[dblQtyBundleReceived]			INT				NOT NULL,
 	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	[dblBundleTotal]				DECIMAL(38, 20)	NULL, 
 	/*End - Bund Item Info*/
 	[intCostUOMId]					INT NULL,
     [intTaxGroupId]					INT NULL,
@@ -56,14 +57,7 @@ CREATE TABLE #tempBillDetail (
 	[dblNetWeight] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblNetShippedWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightLoss] 				DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblFranchiseWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	/*Start - Bund Item Info*/
-	[intItemBundleId]				INT				NOT NULL, --Primary key of tblICItemBundle
-	[intBundletUOMId]				INT				NOT NULL,
-	[dblQtyBundleReceived]			INT				NOT NULL,
-	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
-	[strBundleDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
-	/*End - Bund Item Info*/
+	[dblFranchiseWeight] 			DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[intContractDetailId]    		INT             NULL,
 	[intContractHeaderId]    		INT             NULL,
 	[intContractSeq] 		   		INT             NULL,
@@ -82,7 +76,15 @@ CREATE TABLE #tempBillDetail (
 	[dbl1099] 						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[strBillOfLading] 				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intScaleTicketId]				INT             NULL,
-	[intLocationId]					INT             NULL
+	[intLocationId]					INT             NULL, 
+	/*Start - Bund Item Info*/
+	[intItemBundleId]				INT				NOT NULL, --Primary key of tblICItemBundle
+	[intBundletUOMId]				INT				NOT NULL,
+	[dblQtyBundleReceived]			INT				NOT NULL,
+	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	[strBundleDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+	[dblBundleTotal]				DECIMAL(38, 20)	NULL
+	/*End - Bund Item Info*/
 )
 
 -- CREATE TABLE #tempBillDetailTax (
@@ -155,6 +157,7 @@ SELECT
 	[dblQtyBundleReceived]			=	A.dblQtyBundleReceived,
 	[dblBundleUnitQty]				=	A.dblBundleUnitQty,
 	[strBundleDescription]			=	itemBundle.strDescription,
+	[dblBundleTotal]				=	A.dblBundleTotal,
 	[intTaxGroupId]					=	A.intTaxGroupId,
 	[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 													AND B.intItemId > 0
@@ -252,7 +255,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId],
 			[dblQtyBundleReceived],
 			[dblBundleUnitQty],
-			[strBundleDescription]
+			[strBundleDescription],
+			[dblBundleTotal]
 		)
 		SELECT 
 			[intBillId]						=	@voucherId,
@@ -323,7 +327,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId]				=	voucherDetailReceipt.intBundletUOMId,
 			[dblQtyBundleReceived]			=	voucherDetailReceipt.dblQtyBundleReceived,
 			[dblBundleUnitQty]				=	voucherDetailReceipt.dblBundleUnitQty,
-			[strBundleDescription]			=	voucherDetailReceipt.strBundleDescription
+			[strBundleDescription]			=	voucherDetailReceipt.strBundleDescription,
+			[dblBundleTotal]				=	voucherDetailReceipt.dblBundleTotal
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -394,7 +399,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId],
 			[dblQtyBundleReceived],
 			[dblBundleUnitQty],
-			[strBundleDescription]
+			[strBundleDescription],
+			[dblBundleTotal]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -473,7 +479,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId]			=	voucherDetailReceipt.intBundletUOMId,
 			[dblQtyBundleReceived]		=	voucherDetailReceipt.dblQtyBundleReceived,
 			[dblBundleUnitQty]			=	voucherDetailReceipt.dblBundleUnitQty,
-			[strBundleDescription]		=	voucherDetailReceipt.strBundleDescription
+			[strBundleDescription]		=	voucherDetailReceipt.strBundleDescription,
+			[dblBundleTotal]			=	voucherDetailReceipt.dblBundleTotal
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -547,7 +554,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId],
 			[dblQtyBundleReceived],
 			[dblBundleUnitQty],
-			[strBundleDescription]
+			[strBundleDescription],
+			[dblBundleTotal]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -625,7 +633,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId]			=	voucherDetailReceipt.intBundletUOMId,
 			[dblQtyBundleReceived]		=	voucherDetailReceipt.dblQtyBundleReceived,
 			[dblBundleUnitQty]			=	voucherDetailReceipt.dblBundleUnitQty,
-			[strBundleDescription]		=	voucherDetailReceipt.strBundleDescription
+			[strBundleDescription]		=	voucherDetailReceipt.strBundleDescription,
+			[dblBundleTotal]			=	voucherDetailReceipt.dblBundleTotal
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -707,7 +716,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId],
 			[dblQtyBundleReceived],
 			[dblBundleUnitQty],
-			[strBundleDescription]
+			[strBundleDescription],
+			[dblBundleTotal]
 		)
 		SELECT 
 			[intBillId]					=	@voucherId,
@@ -792,7 +802,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intBundletUOMId]			=	voucherDetailReceipt.intBundletUOMId,
 			[dblQtyBundleReceived]		=	voucherDetailReceipt.dblQtyBundleReceived,
 			[dblBundleUnitQty]			=	voucherDetailReceipt.dblBundleUnitQty,
-			[strBundleDescription]		=	voucherDetailReceipt.strBundleDescription
+			[strBundleDescription]		=	voucherDetailReceipt.strBundleDescription,
+			[dblBundleTotal]			=	voucherDetailReceipt.dblBundleTotal
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -866,7 +877,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intBundletUOMId],
 		[dblQtyBundleReceived],
 		[dblBundleUnitQty],
-		[strBundleDescription]
+		[strBundleDescription],
+		[dblBundleTotal]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptItemId INTO @detailCreated(intBillDetailId, intInventoryReceiptItemId)
 	SELECT
@@ -911,7 +923,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intBundletUOMId],
 		[dblQtyBundleReceived],
 		[dblBundleUnitQty],
-		[strBundleDescription]
+		[strBundleDescription],
+		[dblBundleTotal]
 	FROM #tempBillDetail
 
 	--ADD TAXES
