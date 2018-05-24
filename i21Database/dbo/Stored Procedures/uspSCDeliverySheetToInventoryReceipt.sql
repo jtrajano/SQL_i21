@@ -343,6 +343,7 @@ END
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 	SELECT @dblNetUnits = SUM(dblQty) FROM @ItemsForItemReceipt
 	EXEC dbo.uspSCProcessHoldTicket @intDeliverySheetId,@intEntityId, @dblNetUnits , @intUserId, 'I', 0, 1
+	UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 1 WHERE intDeliverySheetId = @intDeliverySheetId;
 
 	-- VOUCHER INTEGRATION
 	IF OBJECT_ID (N'tempdb.dbo.#tmpReceiptItem') IS NOT NULL
