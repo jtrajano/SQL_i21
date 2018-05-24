@@ -6615,6 +6615,8 @@
     <Build Include="dbo\Functions\fnCTGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInvoiceIdealReport.sql" />
+    <Build Include="dbo\Views\vyuGLVendorMapping.sql" />
+    <Build Include="dbo\Views\vyuCMExchangeRateTypeCombo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
