@@ -687,7 +687,7 @@ BEGIN TRY
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblAPVendor
-					WHERE intEntityVendorId = @intEntityId
+					WHERE intEntityId = @intEntityId
 					)
 			BEGIN
 				SELECT @strEntityNo = strEntityNo
@@ -695,7 +695,7 @@ BEGIN TRY
 				WHERE intEntityId = @intEntityId
 
 				INSERT INTO tblAPVendor (
-					intEntityVendorId
+					intEntityId
 					,strVendorPayToId
 					,intVendorType
 					,strVendorId
