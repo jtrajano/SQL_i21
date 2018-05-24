@@ -2038,9 +2038,9 @@ IF @post = 1
 			,[dblDebitReport]			= 0
 			,[dblCreditForeign]			= 0
 			,[dblCreditReport]			= 0
-			,[dblReportingRate]			= 0
-			,[dblForeignRate]			= 0
-			,[strRateType]				= SMCERT.strCurrencyExchangeRateType				 
+			,[dblReportingRate]			= B.dblCurrencyExchangeRate
+			,[dblForeignRate]			= B.dblCurrencyExchangeRate
+			,[strRateType]				= SMCERT.strCurrencyExchangeRateType					 
 		FROM
 			tblARPaymentDetail B
 		INNER JOIN 
