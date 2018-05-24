@@ -2377,7 +2377,7 @@ BEGIN
         ,strSQL
         )
     SELECT 108
-        ,'Allow Shipment Pick List for WO lots after closing WO'
+        ,'Shipment Pick List for WO lots after closing WO'
         ,5
         ,5
         ,0
@@ -2385,7 +2385,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	Update tblMFAttribute Set strSQL ='Allow Shipment Pick List for WO lots after closing WO' Where intAttributeId=108
+	Update tblMFAttribute Set strSQL ='Shipment Pick List for WO lots after closing WO' Where intAttributeId=108
 END
 GO
 IF NOT EXISTS (
