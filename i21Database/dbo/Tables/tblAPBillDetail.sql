@@ -2,7 +2,7 @@
     [intBillDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intBillId]       INT             NOT NULL,
     [strMiscDescription]  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
-	[strBundlecDescription]  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
+	[strBundleDescription]  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intAccountId]    INT             NULL ,
 	[intUnitOfMeasureId]    INT             NULL ,
