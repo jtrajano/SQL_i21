@@ -56,7 +56,7 @@ SELECT	Errors.intItemId
 		,Item.intTransactionTypeId
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(
 			Item.intItemId
-			, Item.intItemLocationId
+			, ISNULL(Item.intInTransitSourceLocationId, Item.intItemLocationId) 
 			, Item.intItemUOMId
 			--, Item.intSubLocationId
 			--, Item.intStorageLocationId
