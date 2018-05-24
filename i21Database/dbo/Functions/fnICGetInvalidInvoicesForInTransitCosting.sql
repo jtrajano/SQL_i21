@@ -36,7 +36,7 @@ BEGIN
 	FROM	@Items vi 
 			CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(
 				vi.intItemId
-				, vi.intItemLocationId
+				, ISNULL(vi.intInTransitSourceLocationId, vi.intItemLocationId)
 				, vi.intItemUOMId
 				-- , vi.intSubLocationId
 				-- , vi.intStorageLocationId
