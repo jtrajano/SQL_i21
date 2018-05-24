@@ -6776,4 +6776,67 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCompanyLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b2d50ade-76a2-4231-90c4-7caceb07daeb" ChangeDateTime="05/23/2018 08:21:50">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1ceb237d-81e7-489d-a4d1-d151fcce68f0" ChangeDateTime="05/23/2018 08:23:24">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strOri]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strOriginZip" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6cf1c958-4a47-4e99-9e97-4d22ef153362" ChangeDateTime="05/23/2018 09:04:35">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strOriginAddress]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIOriginAddress" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a2e5fbe1-b3d5-4176-a5cb-b17f425f9019" ChangeDateTime="05/23/2018 09:04:43">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strOriginCountry]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIOriginCountry" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3ab9f589-b8be-4dee-842e-b0b3be64d7c1" ChangeDateTime="05/23/2018 09:04:49">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strDestinationTCN]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIDestinationTCN" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="716d9680-eda5-41b2-9a37-721ef1f9fe88" ChangeDateTime="05/23/2018 09:04:56">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strDestinationAddress]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIDestinationAddress" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3e551d6f-dcda-4179-ba82-07d26968d43f" ChangeDateTime="05/23/2018 09:05:03">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strDestinationZip]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIDestinationZip" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8c160f69-7611-4aad-8f6f-eaaa6e3fd6c2" ChangeDateTime="05/23/2018 09:05:11">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strDestinationCountry]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIDestinationCountry" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="53597caa-6b01-47cc-9944-f56f21a9166b" ChangeDateTime="05/23/2018 09:05:30">
+    <Property Name="ElementName" Value="[dbo].[tblTFTransactionDynamicMI].[strOriginZip]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTFTransactionDynamicMI]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMIOriginZip" />
+  </Operation>
 </Operations>

@@ -6330,6 +6330,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
     <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicMI.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
