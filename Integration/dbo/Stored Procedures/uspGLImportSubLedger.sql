@@ -18,32 +18,73 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     	AS
     	BEGIN
     	SET NOCOUNT ON;
-    	DECLARE @isCOAPresent BIT, @halt BIT  = 0
+    	DECLARE @isCOAPresent BIT, @halt BIT  = 0, @postCount INT = 0, @intErrorCount INT, @success bit = 0
     	SELECT @isCOAPresent = 1,@importLogId = 0
+		DECLARE @tblLog TABLE (
+				[strEventDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+				[strPeriod] [nvarchar](50) NULL,
+				[strSourceNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[strSourceSystem] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[strFiscalYear] [nvarchar](4) COLLATE Latin1_General_CI_AS NULL,
+				[strFiscalYearPeriod] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+				[strExternalId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[strLineNumber] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+				[strTransactionDate] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+				[strTransactionTime] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+				[strReference] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+				[strDocument] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+				[strComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+				[strDebitCredit] [nvarchar](1) COLLATE Latin1_General_CI_AS NULL,
+				[decAmount] [decimal](11, 2) NULL,
+				[decUnits] [decimal](16, 4) NULL,
+				[blnCorrection] [bit] NULL,
+				[strJournalId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[dtePostDate] [date] NULL
+		)
+		DECLARE @tblLogSuccess TABLE (
+				[strEventDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+				[strPeriod] [nvarchar](50) NULL,
+				[strSourceNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[strSourceSystem] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[strFiscalYear] [nvarchar](4) COLLATE Latin1_General_CI_AS NULL,
+				[strFiscalYearPeriod] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+				[strExternalId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[strLineNumber] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+				[strTransactionDate] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+				[strTransactionTime] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+				[strReference] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+				[strDocument] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+				[strComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+				[strDebitCredit] [nvarchar](1) COLLATE Latin1_General_CI_AS NULL,
+				[decAmount] [decimal](11, 2) NULL,
+				[decUnits] [decimal](16, 4) NULL,
+				[blnCorrection] [bit] NULL,
+				[strJournalId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+				[dtePostDate] [date] NULL
+		)
+
+
     	IF NOT EXISTS (SELECT * FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod)
     	BEGIN
-    		IF @importLogId = 0
-    			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId , ''No Data to import from the Origin on a given period.'' ,null ,null
-			SET @halt = 1
+    		INSERT INTO @tblLog ([strEventDescription]) 
+			SELECT ''No Data to import from the Origin on a given period.''
     	END
 
 		IF EXISTS(SELECT TOP 1 1 FROM vyuAPOriginCCDTransaction) -- AP-3144 check for non-imported Credit Card Reconciliation records
 		BEGIN
-			IF @importLogId = 0
-    			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-			EXEC dbo.[uspGLCreateImportLogDetail]	@importLogId ,  ''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.'' ,null ,null
-			SET @halt = 1
+			INSERT INTO @tblLog ([strEventDescription]) 
+			SELECT ''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.''
 		END
 
-		IF @halt = 1 RETURN
-		
+		IF EXISTS(SELECT TOP 1 1 FROM @tblLog)
+		BEGIN
+			-- INSERT TO COA IMPORT LOG TABLE HERE
+			RETURN
+		END
     	IF NOT EXISTS( SELECT * FROM tblGLCOACrossReference)
     	BEGIN
-    		IF @importLogId = 0
-    			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-    		UPDATE tblGLCOAImportLog SET strEvent = ''Unable to Post because there is no cross reference between i21 and Origin.'' WHERE intImportLogId = @importLogId
-    		SELECT @isCOAPresent = 0
+    		INSERT INTO @tblLog ([strEventDescription]) SELECT ''Unable to Post because there is no cross reference between i21 and Origin.''
+    		SET @isCOAPresent = 0
     	END
     	ELSE
     	BEGIN
@@ -69,11 +110,11 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 
     		IF EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
     		BEGIN
-    			EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
+    			--EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
     			BEGIN
     			
-    				INSERT INTO tblGLCOAImportLogDetail ([intImportLogId]
-						  ,[strEventDescription]
+    				INSERT INTO @tblLog (
+						  [strEventDescription]
 						  ,[strPeriod]
 						  ,[strSourceNumber]
 						  ,[strSourceSystem]
@@ -90,7 +131,7 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[decAmount]
 						  ,[decUnits]
 						  ,[blnCorrection])
-					SELECT @importLogId,
+					SELECT 
 						''Invalid Date (glije_date) in Origin Table'',
 						A.glije_period,
 						A.glije_src_no,
@@ -112,6 +153,7 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     					ON A.A4GLIdentity = B.ID
     					WHERE B.glije_date = 0
     			END
+				-- INSERT TO COA IMPORT LOG TABLE HERE
     			RETURN
     		END
 
@@ -121,29 +163,51 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     		SELECT @uid =NEWID()
     		
 
-			INSERT INTO tblGLIjemst(glije_period,glije_acct_no,glije_src_sys,glije_src_no, glije_line_no,glije_date,glije_time,glije_ref,glije_doc,glije_comments,
-    		glije_dr_cr_ind,glije_amt,glije_units,glije_correcting,glije_source_pgm,glije_work_area,glije_cbk_no,glije_user_id,glije_user_rev_dt,A4GLIdentity,glije_uid)
-    		SELECT ISNULL(a.glije_period, ''0'')
-    				   ,ISNULL(a.glije_acct_no, ''0'')
-    				   ,ISNULL(glije_src_sys, '''')
-    				   ,ISNULL(a.glije_src_no, '''')
-    				   ,ISNULL(glije_line_no, '''')
-    				   ,ISNULL(a.glije_date, CONVERT(INT,REPLACE(CONVERT(DATE,GETDATE()),''-'','''')))
-    				   ,ISNULL(glije_time, ''0'')
-    				   ,ISNULL(glije_ref, '''')
-    				   ,ISNULL(glije_doc, '''')
-    				   ,ISNULL(glije_comments, '''')
-    				   ,ISNULL(glije_dr_cr_ind, '''')
-    				   ,ISNULL(glije_amt, ''0'')
-    				   ,ISNULL(glije_units, ''0'')
-    				   ,ISNULL(glije_correcting, '''')
-    				   ,ISNULL(glije_source_pgm, '''')
-    				   ,ISNULL(glije_work_area, '''')
-    				   ,ISNULL(glije_cbk_no, '''')
-    				   ,ISNULL(glije_user_id, '''')
-    				   ,ISNULL(glije_user_rev_dt, ''0'')
-    				   ,ISNULL(A4GLIdentity, ''0'')
-    				   ,@uid FROM glijemst a JOIN @tmpID b on a.A4GLIdentity = b.ID
+			INSERT INTO tblGLIjemst(
+				glije_period,
+				glije_acct_no,
+				glije_src_sys,
+				glije_src_no, 
+				glije_line_no,
+				glije_date,
+				glije_time,
+				glije_ref,
+				glije_doc,
+				glije_comments,
+    			glije_dr_cr_ind,
+				glije_amt,
+				glije_units,
+				glije_correcting,
+				glije_source_pgm,
+				glije_work_area,
+				glije_cbk_no,
+				glije_user_id,
+				glije_user_rev_dt,
+				A4GLIdentity,
+				glije_uid)
+    		SELECT 
+				ISNULL(a.glije_period, ''0'')
+    			,ISNULL(a.glije_acct_no, ''0'')
+    			,ISNULL(glije_src_sys, '''')
+    			,ISNULL(a.glije_src_no, '''')
+    			,ISNULL(glije_line_no, '''')
+    			,ISNULL(a.glije_date, CONVERT(INT,REPLACE(CONVERT(DATE,GETDATE()),''-'','''')))
+    			,ISNULL(glije_time, ''0'')
+    			,ISNULL(glije_ref, '''')
+    			,ISNULL(glije_doc, '''')
+    			,ISNULL(glije_comments, '''')
+    			,ISNULL(glije_dr_cr_ind, '''')
+    			,ISNULL(glije_amt, ''0'')
+    			,ISNULL(glije_units, ''0'')
+    			,ISNULL(glije_correcting, '''')
+    			,ISNULL(glije_source_pgm, '''')
+				,ISNULL(glije_work_area, '''')
+    			,ISNULL(glije_cbk_no, '''')
+    			,ISNULL(glije_user_id, '''')
+    			,ISNULL(glije_user_rev_dt, ''0'')
+    			,ISNULL(A4GLIdentity, ''0'')
+    			,@uid 
+			FROM glijemst a JOIN @tmpID b on a.A4GLIdentity = b.ID
 
     		DELETE a FROM glijemst a  JOIN @tmpID b on a.A4GLIdentity = b.ID 
 
@@ -193,9 +257,7 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     				@glije_date VARCHAR(20),@intAccountId INT, @strDescription VARCHAR(50),@headerDescription VARCHAR(50),@dtmDate DATE,
     				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(16,4),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
     				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),
-					--@totalDebit DECIMAL(18,2),
-					--@totalCredit DECIMAL(18,2),
-    				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0,
+					@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0,
 					@intCompanyId INT
 			SELECT TOP 1 @intCompanyId = intCompanySetupID FROM tblSMCompanySetup
 
@@ -217,9 +279,7 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 
     			SELECT @intJournalId = @@IDENTITY
     			SET @journalCount = @journalCount +1
-    			--select @totalCredit =0, @totalDebit = 0,
 				SET @isValid =1
-
     			DECLARE cursor_gldetail CURSOR LOCAL FOR SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
     			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period
     			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate and glije_src_sys = @glije_src_sys and glije_src_no= @glije_src_no
@@ -232,10 +292,10 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     				IF NOT EXISTS (
     					SELECT * FROM tblGLCOACrossReference WHERE @glije_acct_no = strExternalId)
     				BEGIN
-    					IF @importLogId = 0
-    						EXEC uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
-    				INSERT INTO tblGLCOAImportLogDetail ([intImportLogId]
-						  ,[strEventDescription]
+    					--IF @importLogId = 0
+    					--	EXEC uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
+    				INSERT INTO @tblLog (
+						  [strEventDescription]
 						  ,[strPeriod]
 						  ,[strSourceNumber]
 						  ,[strSourceSystem]
@@ -253,7 +313,7 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[decUnits]
 						  ,[strJournalId]
 						  ,[blnCorrection])
-					SELECT @importLogId,
+					SELECT 
 						''Unable to Post because Origin account id :'' + CAST ( glije_acct_no AS nvarchar (max)) + ''  ''+ '' is not in i21 Cross Reference table. '' + ''Please check GL Account Detail | Chart Of Accounts - External Id column to verify if the account exists.'',
 						glije_period,
 						glije_src_no,
@@ -304,8 +364,6 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     				ELSE
     				    SELECT @creditUnit +=@glije_units,@creditUnitInLBS += @glije_units,@debitUnit = 0,@debitUnitInLBS = 0
 
-    				--SELECT @totalCredit += @credit, @totalDebit +=@debit
-
     				INSERT INTO tblGLJournalDetail (intCompanyId, intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,dblDebitRate, dblCreditRate,
     				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument, strSourceKey)
     				SELECT @intCompanyId, @intAccountId,@headerDescription,@dtmDate,@intJournalId,ROUND(@debit,2),ROUND(@credit,2),@debitUnit,@creditUnit,1,1,
@@ -317,6 +375,9 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			END
     			CLOSE cursor_gldetail
     			DEALLOCATE cursor_gldetail
+
+				
+
     			IF @isCOAPresent = 0 SET @isValid = 0
     			IF @isValid = 1
     			BEGIN
@@ -326,27 +387,51 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     				DECLARE @strBatchId nvarchar(100)
 					DECLARE @successfulCount int
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
-
-    				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
-
-    				IF @successfulCount = @journalCount
+					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
+    				IF @successfulCount = 1
     				BEGIN
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
-    					IF @importLogId = 0
-    						EXEC dbo.uspGLCreateImportLogHeader ''Successful Transaction'', @intUserId,@version ,@importLogId OUTPUT
-    					INSERT INTO tblGLCOAImportLogDetail(strEventDescription,intImportLogId,dtePostDate,strPeriod,strSourceSystem,strSourceNumber,strJournalId,strFiscalYear,strFiscalYearPeriod)
-    					SELECT strDescription,@importLogId,@postdate,@glije_period,@glije_src_sys,@glije_src_no,strTransactionId,SUBSTRING(CAST(@glije_period AS NCHAR(10)),1,4),SUBSTRING(CAST(@glije_period AS NCHAR(10)),5,2) from tblGLPostResult
-    					WHERE strBatchId = @strBatchId and intEntityId = @intUserId
-    					UPDATE tblGLCOAImportLog SET strEvent = ''Successful Transaction'' WHERE intImportLogId = @importLogId
+    					INSERT INTO @tblLogSuccess(
+							strEventDescription,
+							dtePostDate,
+							strPeriod,
+							strSourceSystem,
+							strSourceNumber,
+							strJournalId,
+							strFiscalYear,
+							strFiscalYearPeriod)
+    					SELECT strDescription,
+							@postdate,
+							@glije_period,
+							@glije_src_sys,
+							@glije_src_no,
+							strTransactionId,
+							SUBSTRING(CAST(@glije_period AS NCHAR(10)),1,4),
+							SUBSTRING(CAST(@glije_period AS NCHAR(10)),5,2) from tblGLPostResult
+    						WHERE strBatchId = @strBatchId and intEntityId = @intUserId
     				END
     				ELSE
     				BEGIN
-    					IF @importLogId = 0
-    						EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version ,@importLogId OUTPUT
-						INSERT INTO tblGLCOAImportLogDetail(strEventDescription,intImportLogId,dtePostDate,strPeriod,strSourceSystem,strSourceNumber,strJournalId,strFiscalYear,strFiscalYearPeriod)
-    					SELECT strDescription,@importLogId,@postdate,@glije_period,@glije_src_sys,@glije_src_no,strTransactionId,SUBSTRING(CAST(@glije_period AS NCHAR(10)),1,4),SUBSTRING(CAST(@glije_period AS NCHAR(10)),5,2) from tblGLPostResult
+    					INSERT INTO @tblLog(
+							strEventDescription,
+							dtePostDate,
+							strPeriod,
+							strSourceSystem,
+							strSourceNumber,
+							strJournalId,
+							strFiscalYear,
+							strFiscalYearPeriod)
+    					SELECT 
+							strDescription,
+							@postdate,
+							@glije_period,
+							@glije_src_sys,
+							@glije_src_no,
+							strTransactionId,
+							SUBSTRING(CAST(@glije_period AS NCHAR(10)),1,4),
+							SUBSTRING(CAST(@glije_period AS NCHAR(10)),5,2) 
+						FROM tblGLPostResult
     					WHERE strBatchId = @strBatchId and intEntityId = @intUserId
-    					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
     				END
 
     			END
@@ -354,17 +439,143 @@ EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			END
     			CLOSE cursor_postdate
 				DEALLOCATE cursor_postdate
+
+				set @success = 1
+				SELECT @intErrorCount = COUNT(1) FROM @tblLog
+				SELECT @postCount = COUNT(1) FROM @tblLogSuccess
+
+				IF @importLogId = 0
+    				EXEC dbo.uspGLCreateImportLogHeader 
+					@msg=''Successful Transaction'', 
+					@user = @intUserId,
+					@version= @version,
+					@intSuccessCount= @postCount,
+					@intErrorCount = @intErrorCount,
+					@intID = @importLogId OUTPUT
+
+
+				INSERT INTO tblGLCOAImportLogDetail (
+					intImportLogId
+					,[strEventDescription]
+					,[strPeriod]
+					,[strSourceNumber]
+					,[strSourceSystem]
+					,[strFiscalYear]
+					,[strFiscalYearPeriod]
+					,[strExternalId]
+					,[strLineNumber]
+					,[strTransactionDate]
+					,[strTransactionTime]
+					,[strReference]
+					,[strDocument]
+					,[strComments]
+					,[strDebitCredit]
+					,[decAmount]
+					,[decUnits]
+					,[strJournalId]
+					,[blnCorrection])
+					SELECT @importLogId
+					,[strEventDescription]
+					,[strPeriod]
+					,[strSourceNumber]
+					,[strSourceSystem]
+					,[strFiscalYear]
+					,[strFiscalYearPeriod]
+					,[strExternalId]
+					,[strLineNumber]
+					,[strTransactionDate]
+					,[strTransactionTime]
+					,[strReference]
+					,[strDocument]
+					,[strComments]
+					,[strDebitCredit]
+					,[decAmount]
+					,[decUnits]
+					,[strJournalId]
+					,[blnCorrection] from @tblLogSuccess
+					UNION
+					SELECT @importLogId
+					,[strEventDescription]
+					,[strPeriod]
+					,[strSourceNumber]
+					,[strSourceSystem]
+					,[strFiscalYear]
+					,[strFiscalYearPeriod]
+					,[strExternalId]
+					,[strLineNumber]
+					,[strTransactionDate]
+					,[strTransactionTime]
+					,[strReference]
+					,[strDocument]
+					,[strComments]
+					,[strDebitCredit]
+					,[decAmount]
+					,[decUnits]
+					,[strJournalId]
+					,[blnCorrection] from @tblLog
 				IF @@TRANCOUNT > 0
 	    			COMMIT TRANSACTION
     		END TRY
 
     		BEGIN CATCH
 				IF @@TRANCOUNT > 0
-    				ROLLBACK TRANSACTION
-    			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
-    			DECLARE @errorMsg VARCHAR(MAX)
-    			SELECT @errorMsg = ERROR_MESSAGE()
-    			UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
+    			ROLLBACK TRANSACTION
+				INSERT INTO @tblLog (strEventDescription) SELECT  ERROR_MESSAGE()
+				SELECT @intErrorCount = COUNT(1) FROM @tblLog
+
+				IF @importLogId = 0
+    				EXEC dbo.uspGLCreateImportLogHeader 
+					@msg=''Failed Transaction'', 
+					@user = @intUserId,
+					@version= @version,
+					@intSuccessCount= 0,
+					@intErrorCount = @intErrorCount,
+					@intID = @importLogId OUTPUT
+
+				
+				INSERT INTO tblGLCOAImportLogDetail (
+							intImportLogId
+							,[strEventDescription]
+							,[strPeriod]
+							,[strSourceNumber]
+							,[strSourceSystem]
+							,[strFiscalYear]
+							,[strFiscalYearPeriod]
+							,[strExternalId]
+							,[strLineNumber]
+							,[strTransactionDate]
+							,[strTransactionTime]
+							,[strReference]
+							,[strDocument]
+							,[strComments]
+							,[strDebitCredit]
+							,[decAmount]
+							,[decUnits]
+							,[strJournalId]
+							,[blnCorrection])
+							SELECT @importLogId
+							,[strEventDescription]
+							,[strPeriod]
+							,[strSourceNumber]
+							,[strSourceSystem]
+							,[strFiscalYear]
+							,[strFiscalYearPeriod]
+							,[strExternalId]
+							,[strLineNumber]
+							,[strTransactionDate]
+							,[strTransactionTime]
+							,[strReference]
+							,[strDocument]
+							,[strComments]
+							,[strDebitCredit]
+							,[decAmount]
+							,[decUnits]
+							,[strJournalId]
+							,[blnCorrection] from @tblLog
+    			--UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
+
     		END CATCH
+
+
     	END')
 END
