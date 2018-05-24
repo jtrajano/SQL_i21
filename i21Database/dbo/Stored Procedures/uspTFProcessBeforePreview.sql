@@ -187,6 +187,24 @@ BEGIN TRY
 			DROP TABLE #tmpUpdateNC
 		END
 
+		ELSE IF (@TaxAuthorityCode = 'MI')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicMI
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicMI(
+				intTransactionId
+				, strMIOriginCountry
+				, strMIDestinationCountry
+			)
+			SELECT Trans.intTransactionId
+				, strCounty = 'USA'
+				, strLocation = 'USA'
+			FROM #tmpTransaction Trans
+		END
+
 		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
 
 		DROP TABLE #tmpTransaction
