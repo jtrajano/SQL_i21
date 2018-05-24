@@ -51,7 +51,8 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , intTaxGroupId					= SODETAIL.intTaxGroupId
 	 , strSubCurrency					= CURRENCY.strCurrency
 	 , strStorageLocation				= STOLOC.strName
-	 , strSubLocationName				= SUBLOC.strSubLocationName	 
+	 , strSubLocationName				= SUBLOC.strSubLocationName	
+	 , strTaxGroup						= TAXGROUP.strTaxGroup
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT intSalesOrderId
@@ -165,6 +166,11 @@ LEFT JOIN (
 	     , strSubLocationName 
 	FROM tblSMCompanyLocationSubLocation WITH (NOLOCK)
 ) SUBLOC ON SUBLOC.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId
+LEFT JOIN (
+	SELECT intTaxGroupId
+		 , strTaxGroup
+	FROM dbo.tblSMTaxGroup WITH (NOLOCK)
+) TAXGROUP ON TAXGROUP.intTaxGroupId = SODETAIL.intTaxGroupId
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
   AND (SODETAIL.intItemId IS NOT NULL OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
