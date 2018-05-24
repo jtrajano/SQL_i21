@@ -284,7 +284,7 @@ BEGIN
 			) 
 
 	-- Remove zero cost adjustments. 
-	DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 6) = 0 
+	DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0 
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
