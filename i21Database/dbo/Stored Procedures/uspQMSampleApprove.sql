@@ -122,7 +122,7 @@ BEGIN TRY
 	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Container'
 	BEGIN
-		IF @strContainerNumber <> ''
+		IF IsNULL(@strContainerNumber, '') <> ''
 		BEGIN
 			UPDATE LI
 			SET intBondStatusId = @intLotStatusId
@@ -141,7 +141,7 @@ BEGIN TRY
 	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Warehouse Ref No'
 	BEGIN
-		IF @strWarehouseRefNo <> ''
+		IF isNULL(@strWarehouseRefNo, '') <> ''
 		BEGIN
 			UPDATE LI
 			SET intBondStatusId = @intLotStatusId
@@ -159,7 +159,7 @@ BEGIN TRY
 	ELSE IF @intSampleControlPointId = 14
 		AND @strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	BEGIN
-		IF @strWarehouseRefNo <> ''
+		IF isNULL(@strWarehouseRefNo, '') <> ''
 		BEGIN
 			UPDATE LI
 			SET intBondStatusId = @intLotStatusId
@@ -318,70 +318,157 @@ BEGIN TRY
 		END
 		ELSE IF @strApprovalBase = 'Warehouse Ref No'
 		BEGIN
-			INSERT INTO @LotData (
-				intLotId
-				,strLotNumber
-				,intItemId
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-				,intLotStatusId
-				)
-			SELECT L.intLotId
-				,L.strLotNumber
-				,L.intItemId
-				,L.intLocationId
-				,L.intSubLocationId
-				,L.intStorageLocationId
-				,L.intLotStatusId
-			FROM tblICLot L
-			JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
-			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+			IF @strWarehouseRefNo IS NULL
+				OR @strWarehouseRefNo = ''
+			BEGIN
+				SELECT @strMainLotNumber = strLotNumber
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				WHERE strLotNumber = @strMainLotNumber
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+			END
 		END
 		ELSE IF @strApprovalBase = 'Warehouse Ref No & Parent Lot'
 		BEGIN
-			INSERT INTO @LotData (
-				intLotId
-				,strLotNumber
-				,intItemId
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-				,intLotStatusId
-				)
-			SELECT L.intLotId
-				,L.strLotNumber
-				,L.intItemId
-				,L.intLocationId
-				,L.intSubLocationId
-				,L.intStorageLocationId
-				,L.intLotStatusId
-			FROM tblICLot L
-			JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
-			WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
-				AND L.intParentLotId = @intParentLotId
+			IF @strWarehouseRefNo IS NULL
+				OR @strWarehouseRefNo = ''
+			BEGIN
+				SELECT @strMainLotNumber = strLotNumber
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				WHERE strLotNumber = @strMainLotNumber
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				WHERE LI.strWarehouseRefNo = @strWarehouseRefNo
+					AND L.intParentLotId = @intParentLotId
+			END
 		END
 		ELSE IF @strApprovalBase = 'Container'
 		BEGIN
-			INSERT INTO @LotData (
-				intLotId
-				,strLotNumber
-				,intItemId
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-				,intLotStatusId
-				)
-			SELECT L.intLotId
-				,L.strLotNumber
-				,L.intItemId
-				,L.intLocationId
-				,L.intSubLocationId
-				,L.intStorageLocationId
-				,L.intLotStatusId
-			FROM tblICLot L
-			JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
-			WHERE RIL.strContainerNo = @strContainerNumber
+			IF @strContainerNumber IS NULL
+				OR @strContainerNumber = ''
+			BEGIN
+				SELECT @strMainLotNumber = strLotNumber
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				WHERE strLotNumber = @strMainLotNumber
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT L.intLotId
+					,L.strLotNumber
+					,L.intItemId
+					,L.intLocationId
+					,L.intSubLocationId
+					,L.intStorageLocationId
+					,L.intLotStatusId
+				FROM tblICLot L
+				JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+				WHERE RIL.strContainerNo = @strContainerNumber
+			END
 		END
 		ELSE IF @strApprovalBase = 'Work Order'
 		BEGIN
@@ -389,24 +476,53 @@ BEGIN TRY
 			FROM tblICLot
 			WHERE intLotId = @intProductValueId
 
-			INSERT INTO @LotData (
-				intLotId
-				,strLotNumber
-				,intItemId
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-				,intLotStatusId
-				)
-			SELECT intLotId
-				,strLotNumber
-				,intItemId
-				,intLocationId
-				,intSubLocationId
-				,intStorageLocationId
-				,intLotStatusId
-			FROM tblICLot
-			WHERE strLotAlias = @strLotAlias
+			IF @strLotAlias IS NULL
+				OR @strLotAlias = ''
+			BEGIN
+				SELECT @strMainLotNumber = strLotNumber
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+				FROM tblICLot
+				WHERE strLotNumber = @strMainLotNumber
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @LotData (
+					intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+					)
+				SELECT intLotId
+					,strLotNumber
+					,intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+					,intLotStatusId
+				FROM tblICLot
+				WHERE strLotAlias = @strLotAlias
+			END
 		END
 		ELSE IF @strApprovalBase = 'Item & Parent Lot'
 		BEGIN
