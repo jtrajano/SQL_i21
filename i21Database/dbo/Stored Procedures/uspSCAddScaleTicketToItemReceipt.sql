@@ -147,7 +147,7 @@ SELECT
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
 		,intGrossNetUOMId			= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN SC.intItemUOMIdFrom
+										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN SC.intItemUOMIdFrom
 										ELSE LI.intItemUOMId
 									END
 		,intCostUOMId				= LI.intItemUOMId
@@ -196,11 +196,11 @@ SELECT
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN SC.dblGrossWeight - SC.dblTareWeight
+										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
 										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 									END
 		,dblNet						= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
+										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
 										ELSE LI.dblQty 
 									END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
@@ -1192,7 +1192,6 @@ IF (@total = 0)
 SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 IF @intLotType != 0
 BEGIN 
-	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 	INSERT INTO @ReceiptItemLotStagingTable(
 		[strReceiptType]
 		,[intItemId]
@@ -1228,12 +1227,12 @@ BEGIN
 		,[intItemUnitMeasureId] = RE.intItemUOMId
 		,[dblQuantity]			= RE.dblQty
 		,[dblGrossWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
-									ELSE SC.dblGrossUnits
+									WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross
+									ELSE (RE.dblQty /  SC.dblNetUnits) * SC.dblGrossUnits
 								END
 		,[dblTareWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
-									ELSE SC.dblShrink
+									WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross - RE.dblNet
+									ELSE (RE.dblQty /  SC.dblNetUnits) * SC.dblShrink
 								END
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
