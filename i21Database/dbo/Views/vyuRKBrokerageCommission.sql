@@ -29,6 +29,7 @@ SELECT
 	,CAST(ISNULL(FOT.ysnLock,0) AS BIT) AS ysnLock
 	,FOT.dtmTransactionDate AS dtmLatestTransactionDate
 	,FOT.strInternalTradeNo as strLatestTransaction
+	,BC.dblAAFees
 FROM tblRKBrokerageCommission BC
 INNER JOIN tblRKFutureMarket FM ON BC.intFutureMarketId = FM.intFutureMarketId
 LEFT JOIN vyuRKCommodityMarketMap CMM ON BC.intCommodityMarketId = CMM.intCommodityMarketId
