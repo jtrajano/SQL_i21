@@ -187,7 +187,11 @@ FROM
 			AND strTransactionType != 'Credit Note'
 			AND ((ARI.strType = 'Service Charge' AND ARI.ysnForgiven = 0) OR ((ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 1) OR (ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 0)))
 			AND NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1)
-	
+			AND ARI.intInvoiceId NOT IN(SELECT intPrepaymentId FROM tblARInvoice I 
+							INNER JOIN tblARPrepaidAndCredit CP
+								ON CP.intInvoiceId = I.intInvoiceId
+							WHERE I.strTransactionType = 'Cash Refund'
+			)
 	
 		UNION ALL
 
