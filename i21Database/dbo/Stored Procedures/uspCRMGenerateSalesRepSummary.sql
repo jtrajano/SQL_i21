@@ -11,7 +11,7 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 SET ANSI_WARNINGS OFF;
 
-	delete from tblCRMSalesRepSummaryResult where intCreatedDate < convert(int, convert(nvarchar(8), DATEADD(day,-1,getdate()), 112)) or strFilterKey = @strIdentifier;
+	--delete from tblCRMSalesRepSummaryResult where intCreatedDate < convert(int, convert(nvarchar(8), DATEADD(day,-1,getdate()), 112)) or strFilterKey = @strIdentifier;
 
 	with sales as
 	(
@@ -96,5 +96,52 @@ SET ANSI_WARNINGS OFF;
 		) as salesrepid
 	) as salesrep
 	left join tblEMEntity a on a.intEntityId = salesrep.intEntitySalespersonId
+
+	exec('IF EXISTS(select * FROM sys.views where name = ''vyuCRMSalesRepSummaryResult'') begin drop view vyuCRMSalesRepSummaryResult; end');
+	exec('
+	create view vyuCRMSalesRepSummaryResult as
+	select
+		intSalesRepSummaryFilterId = convert(int,row_number() over (order by strSalesRepName))
+		,intSalesRepId
+		,strSalesRepName
+		,intCalls
+		,intTasks
+		,intEvents
+		,intEmails
+		,intQuotes
+		,dblDollarValueOfQuotes
+		,intOrders
+		,dblDollarValueOfOrders
+		,intStartDate
+		,intEndDate
+		,strFilterKey
+		,intRequestedByEntityId
+		,intCreatedDate
+		,strDisplayType
+		,intConcurrencyId
+	from
+	(
+		select distinct
+			intSalesRepId
+			,strSalesRepName
+			,intCalls
+			,intTasks
+			,intEvents
+			,intEmails
+			,intQuotes
+			,dblDollarValueOfQuotes
+			,intOrders
+			,dblDollarValueOfOrders
+			,intStartDate
+			,intEndDate
+			,strFilterKey
+			,intRequestedByEntityId
+			,intCreatedDate
+			,strDisplayType
+			,intConcurrencyId
+		from 
+			tblCRMSalesRepSummaryResult
+	) as r
+	');
 
 END
