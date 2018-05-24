@@ -28,6 +28,7 @@ DECLARE @receiptItems AS TABLE (
 	[intBundletUOMId]				INT				NOT NULL,
 	[dblQtyBundleReceived]			INT				NOT NULL,
 	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	[strBundleDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[dblBundleTotal]				DECIMAL(38, 20)	NULL, 
 	/*End - Bund Item Info*/
 	[intCostUOMId]					INT NULL,
