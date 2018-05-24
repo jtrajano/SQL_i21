@@ -6637,6 +6637,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotByItem.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotByStorageUnit.sql" />
     <Build Include="dbo\Functions\fnLGGetTotalAmountPerLoad.sql" />
+    <Build Include="dbo\Views\vyuLGInsuranceCalculatorNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
