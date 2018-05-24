@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Intercompany Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -6321,6 +6321,20 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote (Portal
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CFQuoteMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CFQuoteMenuId, 1)
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Invoice History (Portal)', N'Card Fueling', @CardFuelingPortalParentMenuId, N'Invoice History (Portal)', N'Portal Menu', N'Screen', N'CardFueling.view.InvoiceProcessHistory', N'small-menu-portal', 1, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'CardFueling.view.InvoiceProcessHistory' WHERE strMenuName = 'Invoice History (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId
+
+DECLARE @CFInventoryHistoryMenuId INT
+SELECT  @CFInventoryHistoryMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @CFInventoryHistoryMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@CFInventoryHistoryMenuId, 1)
 END
 
 /* Tank Management */
