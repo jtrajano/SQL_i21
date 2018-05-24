@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMUserRole] (
     [intUserRoleID]     INT            IDENTITY (1, 1) NOT NULL,
-    [strName]           NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL ,
-    [strDescription]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+    [strName]           NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL ,
+    [strDescription]    NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strMenu]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strMenuPermission] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strForm]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
