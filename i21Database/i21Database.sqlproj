@@ -6619,6 +6619,14 @@
     <Build Include="dbo\Views\vyuCMExchangeRateTypeCombo.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepAddArticleParentToSub.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepAddArticleSubToParent.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceGroupByVehicleOdometerHistory.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceGroupByMiscOdometerHistory.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceGroupByDeptOdometerHistory.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceGroupByCardOdometerHistory.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByVehicleHistory.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByMiscHistory.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByDeptHistory.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByCardHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

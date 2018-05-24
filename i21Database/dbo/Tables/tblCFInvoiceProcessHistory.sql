@@ -15,9 +15,12 @@
     [strInvoiceNumberHistory]     NVARCHAR (MAX)  NULL,
     [ysnRemittancePage]           BIT             NULL,
     [strReportName]               NVARCHAR (MAX)  NULL,
+    [dtmBalanceForwardDate]       DATETIME        NULL,
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFInvoiceProcessHistoryId_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFInvoiceProcessHistoryId] PRIMARY KEY CLUSTERED ([intInvoiceProcessHistoryId] ASC)
 );
+
+
 
 
 

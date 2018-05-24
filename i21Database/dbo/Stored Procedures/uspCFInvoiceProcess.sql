@@ -10,6 +10,7 @@ CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
 	,@InvalidPostCount			INT			   = 0		OUTPUT
 	,@ysnDevMode				BIT = 0
 	,@reportName				NVARCHAR(MAX)
+	,@balanceForwardDate		DATETIME	   = NULL
 )
 AS
 BEGIN
@@ -232,6 +233,7 @@ BEGIN TRY
 		,ysnRemittancePage
 		,strInvoiceNumberHistory
 		,strReportName
+		,dtmBalanceForwardDate
 	)
 	SELECT
 		 intCustomerId
@@ -252,6 +254,7 @@ BEGIN TRY
                                  WHERE        strInvoiceReportNumber = ipr.strInvoiceReportNumber) > 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
 		,strInvoiceReportNumber
 		,@reportName
+		,@balanceForwardDate
 	FROM tblCFInvoiceProcessResult as ipr
 	INNER JOIN tblEMEntity as ent
 	ON ipr.intCustomerId = ent.intEntityId
@@ -802,6 +805,74 @@ BEGIN TRY
 	FROM
 	tblCFInvoiceFeeStagingTable
 	WHERE strUserId = @username
+	
+	--vyuCFInvoiceGroupByCardOdometer
+	INSERT INTO tblCFInvoiceGroupByCardOdometerHistory(
+		 intCardId
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		 intCardId
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+	FROM
+	vyuCFInvoiceGroupByCardOdometer as vyu
+	
+	--vyuCFInvoiceGroupByDeptOdometer
+	INSERT INTO tblCFInvoiceGroupByDeptOdometerHistory(
+		 strDepartment
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		 strDepartment
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+	FROM
+	vyuCFInvoiceGroupByDeptOdometer as vyu
+
+	--vyuCFInvoiceGroupByMiscOdometer
+	INSERT INTO tblCFInvoiceGroupByMiscOdometerHistory(
+		 strMiscellaneous
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		 strMiscellaneous
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+	FROM
+	vyuCFInvoiceGroupByMiscOdometer as vyu
+
+	--vyuCFInvoiceGroupByVehicleOdometer
+	INSERT INTO tblCFInvoiceGroupByVehicleOdometerHistory(
+		 strVehicleNumber
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,strInvoiceNumberHistory
+	)
+	SELECT 
+		 strVehicleNumber
+		,intAccountId
+		,intLastOdometer
+		,dtmMinDate
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+	FROM
+	vyuCFInvoiceGroupByVehicleOdometer as vyu
 
 
 	-------HISTORY----------
