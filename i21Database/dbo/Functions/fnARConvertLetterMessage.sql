@@ -37,7 +37,7 @@ BEGIN
 	FROM
 		@TempPlaceHolderTable
 
-	SET @temp_newHTMLMessage =  (REPLACE(dbo.fnARRemoveWhiteSpace(@newHTMLMessage), dbo.fnARRemoveWhiteSpace(@strPlaceHolder), @strPlaceValue))
+	SET @temp_newHTMLMessage =  (REPLACE(dbo.fnARRemoveWhiteSpace(@newHTMLMessage), dbo.fnARRemoveWhiteSpace(@strPlaceHolder), ISNULL(@strPlaceValue,'')))
 	
 	IF	@temp_newHTMLMessage IS NOT NULL AND LEN(LTRIM(RTRIM(@temp_newHTMLMessage))) <> 0
 			BEGIN

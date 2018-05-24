@@ -228,7 +228,7 @@ BEGIN
 	FROM dbo.tblARLetterPlaceHolder WITH(NOLOCK)
 	WHERE CHARINDEX (dbo.fnARRemoveWhiteSpace(strPlaceHolder), dbo.fnARRemoveWhiteSpace(@originalMsgInHTML)) <> 0
 
-	IF @strLetterName IN ('Recent Overdue Collection Letter', 'Customer Balance Collection Letter', '1 Day Overdue Collection Letter', '10 Day Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
+	IF @strLetterName IN ('Recent Overdue Collection Letter', 'Customer Balance Collection Letter', 'Keep Full Past Due Balance Letter', 'Keep Full Balance Letter', '1 Day Overdue Collection Letter', '10 Day Overdue Collection Letter', '30 Day Overdue Collection Letter', '60 Day Overdue Collection Letter', '90 Day Overdue Collection Letter', 'Final Overdue Collection Letter')
 		BEGIN
 			SET @strTableSource = 'vyuARCollectionOverdueReport';
 
@@ -597,7 +597,7 @@ BEGIN
 											SET 												
 												strValues = CONVERT(varchar, CAST(strValues AS money), 1)
 											WHERE 
-												ISNUMERIC(strValues) = 1 AND strPlaceHolder <> ''[EntityPhoneNumber]''
+												ISNUMERIC(strValues) = 1 AND strPlaceHolder <> ''[EntityPhoneNumber]'' AND strPlaceHolder <> ''[Account Number]''
 											
 											SELECT 
 												TOP 1 @SetQuery = strValues 
