@@ -3800,6 +3800,9 @@ BEGIN
 	END
 	ELSE IF (@strTransactionType = 'Foreign Sale')
 	BEGIN
+		--Foreign Sale 
+		--would be NetTransfer Cost - Inventory Average Cost
+		--or if Avg Cost = 0, then Net Price - Net Transfer Cost
 		SELECT
 		@dblInventoryCost = dblAverageCost
 		FROM vyuICGetItemPricing 
@@ -3814,24 +3817,17 @@ BEGIN
 
 		IF(ISNULL(@dblInventoryCost,0) = 0)
 		BEGIN
-			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@dblInventoryCost,0)
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 		END
 		ELSE
 		BEGIN
-			SET @dblMargin = ISNULL(@TransferCost,0) - ISNULL(@TransferCost,0)
+			SET @dblMargin = ISNULL(@dblNetTransferCost,0) - ISNULL(@dblInventoryCost,0)
 		END
-
-
 	END
-
+	ELSE
 	BEGIN
-		--SELECT TOP 1 @dblInventoryCost = ISNULL(arSalesAnalysisReport.dblUnitCost ,0)
-		--FROM tblCFTransaction AS cfTransaction
-		--		INNER JOIN tblARInvoice AS arInvoice
-		--		ON cfTransaction.intInvoiceId = arInvoice.intInvoiceId
-		--		INNER JOIN vyuARSalesAnalysisReport AS arSalesAnalysisReport
-		--		ON arInvoice.intInvoiceId = arSalesAnalysisReport.intTransactionId
-		--		WHERE cfTransaction.intTransactionId = @intTransactionId
+		--Local Trans would be NetPrice - Inventory Average Cost.
+		--Or if Avg Cost = 0, then NetPrice - Net Transfer Cost
 
 		SELECT
 		@dblInventoryCost = dblAverageCost
@@ -3840,17 +3836,15 @@ BEGIN
 		AND intLocationId = @intLocationId
 
 		IF(ISNULL(@dblInventoryCost,0) = 0)
-		BEGIN
-			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
-		END
-		ELSE
 		BEGIN
 			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@TransferCost,0)
 		END
+		ELSE
+		BEGIN
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
+		END
 
 	END
-
-
 
 	---------------------------------------------------
 	--				MARGIN COMPUTATION				 --
