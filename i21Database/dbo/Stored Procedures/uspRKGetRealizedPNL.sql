@@ -209,11 +209,11 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dtmEndDate									= CD.dtmEndDate
 		,strPriceTerms								= CASE 
 															WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
-																									+' '+LTRIM(CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+																									+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
 
-															ELSE 'fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+LTRIM(CD.dblFutures)
+															ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
 															+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
-															+LTRIM(CD.dblFutures)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+															+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
 													  END
 		,strIncoTermLocation						= CB.strContractBasis + ISNULL(CASE WHEN CB.strINCOLocationType IN('City','Port') THEN CT.strCity+','+CO.strCountry ELSE SL.strSubLocationName END,'')
 		,dblContractDifferential					= CD.dblBasis
@@ -226,7 +226,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strContractPriceUOM						= PUOM.strUnitMeasure	
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
-		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((CD.[dblNoOfLots] -PF.dblLotsFixed),0) ELSE 0 END
+		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
 		,dblContractInvoiceValue					= (BillDetail.dblTotal)*
 													  (InvoiceDetail.dblQtyShipped
 													  /dbo.fnCTConvertQuantityToTargetItemUOM(BillDetail.intItemId,BillUOM.intUnitMeasureId,ShipUOM.intUnitMeasureId,BillDetail.dblQtyReceived))
@@ -263,7 +263,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strCompany									= Company.strCompanyName
 
 		FROM tblARInvoiceDetail InvoiceDetail
-		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId
+		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId AND Invoice.strType = 'Standard'
 		JOIN tblLGLoadDetail LoadDetail			    ON LoadDetail.intLoadDetailId = InvoiceDetail.intLoadDetailId
 		JOIN tblLGAllocationDetail AllocationDetail ON AllocationDetail.intAllocationDetailId = LoadDetail.intAllocationDetailId
 		JOIN tblCTContractDetail	CD				ON CD.intContractDetailId = AllocationDetail.intPContractDetailId
@@ -380,11 +380,11 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dtmEndDate									= CD.dtmEndDate
 		,strPriceTerms								= CASE 
 															WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
-																									+' '+LTRIM(CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
+																									+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
 
-															ELSE 'fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+LTRIM(CD.dblFutures)
+															ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
 															+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
-															+LTRIM(CD.dblFutures)+' '+ MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+															+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
 													  END
 		,strIncoTermLocation						= CB.strContractBasis + ISNULL(CASE WHEN CB.strINCOLocationType IN('City','Port') THEN CT.strCity+','+CO.strCountry ELSE SL.strSubLocationName END,'')
 		,dblContractDifferential					= CD.dblBasis
@@ -397,7 +397,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strContractPriceUOM						= PUOM.strUnitMeasure	
 		,strFixationDetails							= NULL
 		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
-		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((CD.[dblNoOfLots] -PF.dblLotsFixed),0) ELSE 0 END
+		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
 		,dblContractInvoiceValue					= InvoiceDetail.dblTotal
 		,dblSecondaryCosts							= ISNULL((BillCost.dblTotal)*
 													  (InvoiceDetail.dblQtyShipped
@@ -430,7 +430,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strCompany									= Company.strCompanyName	
 
 		FROM tblARInvoiceDetail InvoiceDetail
-		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId
+		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId AND Invoice.strType = 'Standard'
 		JOIN tblLGLoadDetail LoadDetail			    ON LoadDetail.intLoadDetailId = InvoiceDetail.intLoadDetailId
 		JOIN tblLGAllocationDetail AllocationDetail ON AllocationDetail.intAllocationDetailId = LoadDetail.intAllocationDetailId
 		JOIN tblCTContractDetail	CD				ON CD.intContractDetailId = AllocationDetail.intSContractDetailId
@@ -547,12 +547,12 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		SET  tblRealized.dblRealizedPNLValue = t.dblCOGSOrNetSaleValue * 
 													CASE 
 														 WHEN t.dblCOGSOrNetSaleValue > 0 THEN CASE WHEN intContractTypeId = 2 THEN 1  ELSE 0 END
-														 WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
+														 WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN -1 ELSE 0 END
 													 END
 											 
 		    ,tblRealized.dblRealizedFuturesPNLValue = t.dblNetFuturesValue *
 													 CASE 
-														 WHEN t.dblNetFuturesValue > 0 THEN CASE WHEN intContractTypeId = 1 THEN 1  ELSE 0 END
+														 WHEN t.dblNetFuturesValue > 0 THEN CASE WHEN intContractTypeId = 1 THEN -1  ELSE 0 END
 														 WHEN t.dblNetFuturesValue <= 0 THEN CASE WHEN intContractTypeId = 2 THEN 1 ELSE 0 END
 													 END
 		FROM @tblRealizedPNL tblRealized
@@ -568,7 +568,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		UPDATE tblRealized 
 		SET  tblRealized.dblNetPNLValue = (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) * 
 													CASE 
-														 WHEN (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) > 0 THEN CASE WHEN intContractTypeId = 2 THEN 1  ELSE 0 END
+														 WHEN (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) > 0 THEN CASE WHEN intContractTypeId = 2 THEN  1  ELSE 0 END
 														 WHEN (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
 													 END
 		FROM @tblRealizedPNL tblRealized

@@ -10,9 +10,9 @@ BEGIN TRY
 		   intCompanyId			INT
 		  ,strCompany			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		  ,intBookId			INT
-		  ,strBook			NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		  ,dblSaleAmount    NUMERIC(24,10)
-		  ,dblCogs			NUMERIC(24,10)  
+		  ,strBook				NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		  ,dblSaleAmount		NUMERIC(24,10)
+		  ,dblCogs				NUMERIC(24,10)  
 		)
 
 		 DECLARE @tblConsolidatedPNL AS TABLE 
@@ -25,8 +25,11 @@ BEGIN TRY
 			,intCompanyId		INT
 			,strCompany			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strPurchaseSale	NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			,dblBookValue		NUMERIC(24, 10)
+			,dblMarketValue		NUMERIC(24, 10)
 			,dblAmount			NUMERIC(24, 10)
-			,dblPNL				NUMERIC(24, 10)
+			,strBookValue		NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			,strMarketValue		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strTotalAmount		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		)
 		
@@ -136,11 +139,11 @@ BEGIN TRY
 			,strCompanyName							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		)
 		 
-	    DECLARE @tblRealizedPNL AS TABLE 
-	   (
+	  DECLARE @tblRealizedPNL AS TABLE 
+	  (
 		 intRealizedPNL                         INT
 		,intContractTypeId						INT
-		,intContractDetailId					INT
+		,intContractDetailId					INT	
 		,intBookId								INT
 		,strBook								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strSubBook								NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -156,15 +159,16 @@ BEGIN TRY
 		,strEntityName							NVARCHAR(100)
 		,strInternalCompany						NVARCHAR(20)
 		,dblQuantity							NUMERIC(24, 10)
-		,intQuantityUOMId						INT							
-		,intQuantityUnitMeasureId				INT							
+		,intQuantityUOMId						INT							---ItemUOM
+		,intQuantityUnitMeasureId				INT							---UnitMeasure
 		,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,dblWeight								NUMERIC(24, 10)
-		,intWeightUOMId							INT							
+		,intWeightUOMId							INT							---ItemUOM		
 		,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intOriginId							INT
 		,strOrigin								NVARCHAR(100)
 		,strItemDescription						NVARCHAR(100)
+		,strGrade								NVARCHAR(100)
 		,strCropYear							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strProductionLine						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strCertification						NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -179,8 +183,8 @@ BEGIN TRY
 		,dblFuturesPrice						NUMERIC(24, 10)
 		,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,dblCashPrice							NUMERIC(24, 10)
-		,intPriceUOMId							INT							
-		,intPriceUnitMeasureId					INT							
+		,intPriceUOMId							INT							---ItemUOM
+		,intPriceUnitMeasureId					INT							---UnitMeasure
 		,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,dblFixedLots							NUMERIC(24, 10)
@@ -217,7 +221,7 @@ BEGIN TRY
 	 
 		INSERT INTO @tblRealizedPNL
 		(
-			 intRealizedPNL 
+			 intRealizedPNL
 			,intContractTypeId
 			,intContractDetailId
 			,intBookId
@@ -243,7 +247,8 @@ BEGIN TRY
 			,strWeightUOM					
 			,intOriginId					
 			,strOrigin
-			,strItemDescription						
+			,strItemDescription
+			,strGrade						
 			,strCropYear					
 			,strProductionLine				
 			,strCertification				
@@ -406,6 +411,7 @@ BEGIN TRY
 		,@intCommodityId			 = NULL
 		,@intLocationId				 = NULL
 		,@intCompanyId				 = NULL
+		,@intM2MBasisId				 = NULL
 
 		UPDATE t SET t.intBookId = Book.intBookId ,t.strBook = Book.strBook
 		FROM @tblUnRealizedPNL t
@@ -463,7 +469,11 @@ BEGIN TRY
 				,intCompanyId	
 				,strCompany		
 				,strPurchaseSale
+				,dblBookValue	
+				,dblMarketValue	
 				,dblAmount
+				,strBookValue	
+				,strMarketValue
 				,strTotalAmount
 			)
 
@@ -474,8 +484,12 @@ BEGIN TRY
 				,strBook		 = strBook
 				,intCompanyId	 = intCompanyId
 				,strCompany		 = strCompany
-				,strPurchaseSale = 'Purchase'
-				,dblAmount       = SUM(dblNetPNLValue)
+				,strPurchaseSale = 'COGS'
+				,dblBookValue	 = 0
+				,dblMarketValue	 = 0
+				,dblAmount       =  - SUM(dblCOGSOrNetSaleValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'
 				FROM @tblRealizedPNL 
 				WHERE intContractTypeId  = 1
@@ -492,8 +506,12 @@ BEGIN TRY
 				,strBook		 = strBook				
 				,intCompanyId	 = intCompanyId
 				,strCompany		 = strCompany
-				,strPurchaseSale = 'Sale'
-				,dblAmount       = SUM(dblNetPNLValue)
+				,strPurchaseSale = 'Sales'
+				,dblBookValue	 = 0
+				,dblMarketValue	 = 0
+				,dblAmount       = -SUM(dblCOGSOrNetSaleValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'
 				FROM @tblRealizedPNL 
 				WHERE intContractTypeId  = 2
@@ -511,10 +529,15 @@ BEGIN TRY
 				,intCompanyId	 = intCompanyId
 				,strCompany		 = strCompanyName
 				,strPurchaseSale = 'Purchase'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
 				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'
 				FROM @tblUnRealizedPNL 
-				WHERE intContractTypeId  = 1
+				WHERE intContractTypeId  = 1 
+				AND intTransactionType = 1
 				GROUP BY 
 				 intBookId
 				,strBook
@@ -530,15 +553,135 @@ BEGIN TRY
 				,intCompanyId	 = intCompanyId
 				,strCompany		 = strCompanyName
 				,strPurchaseSale = 'Sale'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
 				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'
 				FROM @tblUnRealizedPNL 
 				WHERE intContractTypeId  = 2
+				AND intTransactionType = 1
+				GROUP BY 
+				 intBookId
+				,strBook
+				,intCompanyId
+				,strCompanyName
+		UNION
+		 SELECT 
+				 strPNL			 = 'P&L'
+				,strType		 = 'Unrealized'
+				,intBookId		 = intBookId
+				,strBook		 = strBook				
+				,intCompanyId	 = intCompanyId
+				,strCompany		 = strCompanyName
+				,strPurchaseSale = 'In-transit(P)'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
+				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
+				,strTotalAmount  = 'Total'
+				FROM @tblUnRealizedPNL 
+				WHERE intContractTypeId  = 1 
+				AND intTransactionType = 2
+				GROUP BY 
+				 intBookId
+				,strBook
+				,intCompanyId
+				,strCompanyName
+			
+		UNION
+		SELECT 
+				 strPNL			 = 'P&L'
+				,strType		 = 'Unrealized'
+				,intBookId		 = intBookId
+				,strBook		 = strBook
+				,intCompanyId	 = intCompanyId
+				,strCompany		 = strCompanyName
+				,strPurchaseSale = 'In-transit(S)'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
+				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
+				,strTotalAmount  = 'Total'
+				FROM @tblUnRealizedPNL 
+				WHERE intContractTypeId  = 2
+				AND intTransactionType = 2
+				GROUP BY 
+				 intBookId
+				,strBook
+				,intCompanyId
+				,strCompanyName
+        UNION
+		 SELECT 
+				 strPNL			 = 'P&L'
+				,strType		 = 'Unrealized'
+				,intBookId		 = intBookId
+				,strBook		 = strBook				
+				,intCompanyId	 = intCompanyId
+				,strCompany		 = strCompanyName
+				,strPurchaseSale = 'In-transit(P)'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
+				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
+				,strTotalAmount  = 'Total'
+				FROM @tblUnRealizedPNL 
+				WHERE intContractTypeId  = 1 
+				AND intTransactionType = 2
+				GROUP BY 
+				 intBookId
+				,strBook
+				,intCompanyId
+				,strCompanyName
+			
+		UNION
+		SELECT 
+				 strPNL			 = 'P&L'
+				,strType		 = 'Unrealized'
+				,intBookId		 = intBookId
+				,strBook		 = strBook
+				,intCompanyId	 = intCompanyId
+				,strCompany		 = strCompanyName
+				,strPurchaseSale = 'Inventory (P)'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
+				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
+				,strTotalAmount  = 'Total'
+				FROM @tblUnRealizedPNL 
+				WHERE intTransactionType = 3
 				GROUP BY 
 				 intBookId
 				,strBook
 				,intCompanyId
 				,strCompanyName	
+        UNION
+		SELECT 
+				 strPNL			 = 'P&L'
+				,strType		 = 'Unrealized'
+				,intBookId		 = intBookId
+				,strBook		 = strBook
+				,intCompanyId	 = intCompanyId
+				,strCompany		 = strCompanyName
+				,strPurchaseSale = 'Inventory (FG)'
+				,dblBookValue	 = SUM(dblCOGSOrNetSaleValue)
+				,dblMarketValue	 = SUM(dblNetMarketValue)
+				,dblAmount       = SUM(dblProfitOrLossValue)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
+				,strTotalAmount  = 'Total'
+				FROM @tblUnRealizedPNL 
+				WHERE intTransactionType = 4
+				GROUP BY 
+				 intBookId
+				,strBook
+				,intCompanyId
+				,strCompanyName
 		UNION
 		SELECT 
 				 strPNL			 = 'P&L'
@@ -547,8 +690,12 @@ BEGIN TRY
 				,strBook		 = strBook			
 				,intCompanyId	 = intCompanyId
 				,strCompany		 = strCompany
-				,strPurchaseSale = 'Purchase'
+				,strPurchaseSale = 'COGS'
+				,dblBookValue	 = 0
+				,dblMarketValue	 = 0
 				,dblAmount       = SUM(dblCogs)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'
 				FROM @tblGLSaleCogs 
 				GROUP BY 
@@ -565,8 +712,12 @@ BEGIN TRY
 				,strBook		 = strBook
 				,intCompanyId	 = intCompanyId
 				,strCompany		 = strCompany
-				,strPurchaseSale = 'Sale'
+				,strPurchaseSale = 'Sales'
+				,dblBookValue	 = 0
+				,dblMarketValue	 = 0
 				,dblAmount       = SUM(dblSaleAmount)
+				,strBookValue	 = 'TotalBookvalue'
+				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'
 				FROM @tblGLSaleCogs 
 				GROUP BY 
