@@ -376,6 +376,9 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 			OR E2.dblForexRate <> B.dblRate
 		) 
 
+-- Remove zero cost adjustments. 
+DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0 
+
 --CHARGES COST ADJUSTMENT
 DECLARE @ChargesToAdjust as OtherChargeCostAdjustmentTableType
 INSERT INTO @ChargesToAdjust 
