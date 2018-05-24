@@ -6633,6 +6633,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateItemForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemAccountForCStore.sql" />
     <None Include="Scripts\Post-Deployment\VR\1_UpdateColumnTableProgramItem.sql" />
+    <Build Include="dbo\Tables\tblSMReplicationAgentSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
