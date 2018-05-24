@@ -3787,7 +3787,10 @@ BEGIN
 	DECLARE @dblInventoryCost	NUMERIC(18,6)
 	DECLARE @dblMarginNetPrice	NUMERIC(18,6)
 
-	SELECT TOP 1 @dblMarginNetPrice = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+	
+	--SET @dblNetTransferCost = ISNULL(@dblGrossTransferCost,0) - (ISNULL(@totalOriginalTax,0) / ISNULL(@dblQuantity,0))
+
+	SELECT TOP 1 @dblMarginNetPrice = @dblCalculatedNetPrice --dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 	--SELECT TOP 1 @dblMarginNetPrice = dblCalculatedAmount 
 	--FROM @tblTransactionPrice  
