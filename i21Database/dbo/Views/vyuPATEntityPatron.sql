@@ -4,6 +4,7 @@ SELECT	A.intEntityId,
 		D.strName,
 		D.strEntityNo,
 		strEntityAddress = [dbo].[fnARFormatCustomerAddress](NULL, NULL, NULL, Loc.strAddress, Loc.strCity, Loc.strState, Loc.strZipCode, Loc.strCountry, NULL, NULL),
+		strEntityCity = ISNULL(Loc.strCity,''),
 		strAccountStatus = [dbo].[fnARGetCustomerAccountStatusCodes](A.intEntityId),
 		strStockStatus = ISNULL(C.strStockStatus,''),
 		ysnStockStatusQualified = CASE 
