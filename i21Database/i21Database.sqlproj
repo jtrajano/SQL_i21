@@ -6617,6 +6617,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInvoiceIdealReport.sql" />
     <Build Include="dbo\Views\vyuGLVendorMapping.sql" />
     <Build Include="dbo\Views\vyuCMExchangeRateTypeCombo.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddArticleParentToSub.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepAddArticleSubToParent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
