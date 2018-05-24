@@ -114,7 +114,8 @@ SELECT DISTINCT WC.intWeightClaimId
 	,@strCountry AS strCompanyCountry
 	,@strPhone AS strCompanyPhone
 	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
-	,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
+	--,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
+	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
