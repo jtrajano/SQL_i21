@@ -27,7 +27,6 @@ DECLARE @LineItems AS ScaleTransactionTableType
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge
 		,@thirdPartyVoucher AS VoucherDetailReceiptCharge
 DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @ysnIsStorage AS BIT
@@ -57,21 +56,17 @@ DECLARE @intStorageScheduleId AS INT
 		,@vendorOrderNumber NVARCHAR(50)
 		,@voucherDate DATETIME
 		,@createVoucher AS BIT
-		,@postVoucher AS BIT;
+		,@postVoucher AS BIT
+		,@shipFromEntityId INT;
 
 BEGIN 
-	SELECT DISTINCT	@intTicketItemUOMId = UM.intItemUOMId, @intItemId = SC.intItemId
-	FROM	dbo.tblICItemUOM UM	
-	INNER JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intDeliverySheetId = @intDeliverySheetId
+	SELECT @intTicketItemUOMId = UM.intItemUOMId
+	, @intItemId = SCD.intItemId 
+	, @shipFromEntityId = SCD.intEntityId 
+	FROM tblSCDeliverySheet SCD 
+	INNER JOIN dbo.tblICItemUOM UM	ON UM.intItemId = SCD.intItemId AND UM.ysnStockUnit = 1
+	WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 END
-
---BEGIN 
---	SELECT	@intTicketItemUOMId = UM.intItemUOMId
---	FROM	dbo.tblICItemUOM UM	
---			JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
---	WHERE	UM.intUnitMeasureId = @intTicketUOM AND SC.intTicketId = @intDeliverySheetId
---END
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -463,6 +458,7 @@ END
 				,@voucherDetailReceiptCharge = @voucherOtherCharges
 				,@shipTo = @intShipTo
 				,@shipFrom = @intShipFrom
+				,@shipFromEntityId = @shipFromEntityId
 				,@vendorOrderNumber = @vendorOrderNumber
 				,@voucherDate = @voucherDate
 				,@currencyId = @intCurrencyId

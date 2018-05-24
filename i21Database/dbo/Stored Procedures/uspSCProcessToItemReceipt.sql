@@ -38,7 +38,6 @@ DECLARE @dblRemainingUnits AS NUMERIC(38, 20)
 DECLARE @dblRemainingQuantity AS NUMERIC(38, 20)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @intDirectType AS INT = 3
-DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
@@ -78,33 +77,37 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@voucherDate DATETIME
 		,@dblGrossUnits AS NUMERIC(38, 20)
 		,@dblTicketNetUnits AS NUMERIC(38, 20)
+		,@intItemId INT
 		,@createVoucher AS BIT
 		,@postVoucher AS BIT
 		,@intLotType INT
 		,@intLotId INT
-		,@intContractDetailId INT;
+		,@intContractDetailId INT
+		,@shipFromEntityId INT;
 
-BEGIN
-    SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
-	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intLocationId = ST.intProcessingLocationId
-	, @dblGrossUnits = ST.dblGrossUnits, @dblTicketNetUnits = ST.dblNetUnits
+	SELECT TOP 1 @intLoadId = ST.intLoadId
+	, @dblTicketFreightRate = ST.dblFreightRate
+	, @intScaleStationId = ST.intScaleSetupId
+	, @ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
+	, @intLocationId = ST.intProcessingLocationId
+	, @dblGrossUnits = ST.dblGrossUnits
+	, @dblTicketNetUnits = ST.dblNetUnits
+	, @intItemId = ST.intItemId
+	, @intTicketItemUOMId = ST.intItemUOMIdTo
+	, @shipFromEntityId = ST.intEntityId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
-END
 
-BEGIN
 	SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
 	FROM dbo.tblGRStorageType ST WHERE 
 	ST.strStorageTypeCode = @strDistributionOption
-END
 
 DECLARE @ErrMsg              NVARCHAR(MAX),
         @dblBalance          NUMERIC(38, 20),                    
-        @intItemId           INT,
         @dblNewBalance       NUMERIC(38, 20),
         @strInOutFlag        NVARCHAR(4),
         @dblQuantity         NUMERIC(38, 20),
-        @strAdjustmentNo     NVARCHAR(50)
+        @strAdjustmentNo     NVARCHAR(50);
 
 BEGIN TRY
 		IF @strDistributionOption = 'LOD'
@@ -127,7 +130,7 @@ BEGIN TRY
 			END
 			BEGIN
 				SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-				EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
+				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 			END
 			BEGIN
 				INSERT INTO [dbo].[tblSCTicketCost]
@@ -183,27 +186,9 @@ BEGIN TRY
 		BEGIN
 			SET @strReceiptType = 'Purchase Contract'
 		END
-		--ELSE IF @ysnDPStorage = 1
-  --      BEGIN
-  --          SET @strReceiptType = 'Delayed Price'
-  --      END
 		ELSE
 		BEGIN
 			SET @strReceiptType = 'Direct'
-		END
-		BEGIN 
-			SELECT	@intTicketUOM = UOM.intUnitMeasureId, @intItemId = SC.intItemId
-			FROM	dbo.tblSCTicket SC	        
-					--JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
-					JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
-		END
-
-		BEGIN 
-			SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-				FROM	dbo.tblICItemUOM UM	
-				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-			WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 		END
 
 	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
@@ -701,6 +686,7 @@ BEGIN TRY
 				,@voucherDetailReceiptCharge = @voucherOtherCharges
 				,@shipTo = @intLocationId
 				,@shipFrom = @intShipFrom
+				,@shipFromEntityId = @shipFromEntityId
 				,@vendorOrderNumber = @vendorOrderNumber
 				,@voucherDate = @voucherDate
 				,@currencyId = @intCurrencyId
