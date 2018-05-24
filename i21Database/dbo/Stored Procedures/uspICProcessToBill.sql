@@ -23,6 +23,7 @@ DECLARE @intEntityVendorId AS INT
 
 		,@intShipFrom AS INT
 		,@intShipTo AS INT 
+		,@strVendorRefNo NVARCHAR(50)
 		,@intCurrencyId AS INT 
 
 		,@intShipFrom_DebitMemo AS INT
@@ -40,9 +41,10 @@ SELECT	@intEntityVendorId = intEntityVendorId
 			END
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
+		,@strVendorRefNo = r.strVendorRefNo
 		,@intCurrencyId = r.intCurrencyId
 		,@receiptType = r.strReceiptType
-FROM	tblICInventoryReceipt r 
+FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
 		AND ISNULL(r.strReceiptType, '') <> 'Transfer Order'
@@ -283,6 +285,7 @@ BEGIN
 			,@voucherDetailReceiptCharge = @voucherOtherCharges
 			,@shipTo = @intShipTo
 			,@shipFrom = @intShipFrom
+			,@vendorOrderNumber = @strVendorRefNo
 			,@currencyId = @intCurrencyId
 			,@billId = @intBillId OUTPUT
 	END 
