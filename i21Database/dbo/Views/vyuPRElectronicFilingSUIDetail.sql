@@ -22,19 +22,19 @@ SELECT DISTINCT
 	,strWorkSiteID = ISNULL(ESUI.strAuthorizationNumber, '')
 	,dblTaxableState = ISNULL(ST.dblAdjustedGross, 0)
 	,dblStateTax = ISNULL(ST.dblStateTotal, 0)
-	,ysnOfficer = CASE WHEN (EMP.strEEOCCode IN ('1.1 - Executive/Senior Level Officials and Managers', '1.2 - First/Mid Level Officials & Managers')) THEN 1 ELSE 0 END 
-	,ysnMonth1Employed = ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
+	,ysnOfficer = CAST(CASE WHEN (EMP.strEEOCCode IN ('1.1 - Executive/Senior Level Officials and Managers', '1.2 - First/Mid Level Officials & Managers')) THEN 1 ELSE 0 END AS BIT)
+	,ysnMonth1Employed = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
 		AND DATEADD(DD, 12 -1, 
 			DATEADD(MM, (CASE SUI.intQuarter WHEN 1 THEN 1 WHEN 2 THEN 4 WHEN 3 THEN 7 WHEN 4 THEN 10 END) - 1, 
-			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0)
-	,ysnMonth2Employed = ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
+			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0) AS BIT)
+	,ysnMonth2Employed = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
 		AND DATEADD(DD, 12 -1, 
 			DATEADD(MM, (CASE SUI.intQuarter WHEN 1 THEN 2 WHEN 2 THEN 5 WHEN 3 THEN 8 WHEN 4 THEN 11 END) - 1, 
-			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0)
-	,ysnMonth3Employed = ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
+			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0) AS BIT)
+	,ysnMonth3Employed = CAST(ISNULL((SELECT TOP 1 1 FROM tblPRPaycheck WHERE intEntityEmployeeId = SUI.intEntityId 
 		AND DATEADD(DD, 12 -1, 
 			DATEADD(MM, (CASE SUI.intQuarter WHEN 1 THEN 3 WHEN 2 THEN 6 WHEN 3 THEN 9 WHEN 4 THEN 12 END) - 1, 
-			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0)
+			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0) AS BIT)
 	,strQuarterYear = RIGHT('000000'+ CONVERT(nvarchar(10), CASE SUI.intQuarter WHEN 1 THEN 3 WHEN 2 THEN 6 WHEN 3 THEN 9 WHEN 4 THEN 12 END) + CONVERT(nvarchar(10), SUI.intYear), 6)
 	,strMonthYearHired = ISNULL(RIGHT('000000'+ CONVERT(nvarchar(10), MONTH(EMP.dtmOriginalDateHired)) + CONVERT(nvarchar(10), YEAR(EMP.dtmOriginalDateHired)), 6), '')
 	,strMonthYearTerminated = ISNULL(RIGHT('000000'+ CONVERT(nvarchar(10), MONTH(EMP.dtmTerminated)) + CONVERT(nvarchar(10), YEAR(EMP.dtmTerminated)), 6), '')
