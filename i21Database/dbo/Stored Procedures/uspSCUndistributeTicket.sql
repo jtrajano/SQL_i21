@@ -34,6 +34,12 @@ DECLARE @InventoryReceiptId INT
 		,@intLoadContractId INT
 		,@dblLoadScheduledUnits AS NUMERIC(38,20)
 		,@dblDeliveredQuantity AS NUMERIC(38,20)
+		,@intMatchLoadId INT
+		,@intMatchLoadDetailId INT
+		,@intMatchLoadContractId INT
+		,@dblMatchScheduledUnits AS NUMERIC(38,20)
+		,@dblMatchDeliveredQuantity AS NUMERIC(38,20)
+		,@dblMatchLoadScheduledUnits AS NUMERIC(38,20)
 		,@intInventoryTransferId AS INT
 		,@intMatchTicketId AS INT
 		,@strXml NVARCHAR(MAX)
@@ -52,6 +58,32 @@ BEGIN TRY
 
 		IF @strInOutFlag = 'I'
 			BEGIN
+				SELECT @intMatchTicketId = intMatchTicketId FROM tblSCTicket WHERE intTicketId = @intTicketId
+				IF ISNULL(@intMatchTicketId, 0) > 0
+				BEGIN
+					SELECT @intMatchLoadId = LGLD.intLoadId 
+					,@intMatchLoadDetailId = LGLD.intLoadDetailId
+					, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
+					, @dblMatchLoadScheduledUnits = LGLD.dblQuantity
+					, @intMatchLoadContractId = LGLD.intSContractDetailId
+					FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
+					WHERE LGL.intTicketId = @intMatchTicketId
+
+					IF EXISTS (SELECT intMatchTicketId FROM tblSCTicket WHERE intTicketId = @intMatchTicketId AND strTicketStatus = 'C')
+					BEGIN
+						RAISERROR('Unable to un-distribute ticket, match ticket already completed', 11, 1);
+						RETURN;
+					END
+					IF ISNULL(@intMatchLoadDetailId, 0) > 0
+					BEGIN
+						EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
+						UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
+					END
+					UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+					DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
+					DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+				END
+
 				IF OBJECT_ID (N'tempdb.dbo.#tmpSettleStorage') IS NOT NULL
                     DROP TABLE #tmpSettleStorage
 				CREATE TABLE #tmpSettleStorage (
@@ -286,7 +318,7 @@ BEGIN TRY
 
 		IF ISNULL(@intLoadDetailId,0) > 0
 		BEGIN
-			EXEC [dbo].[uspLGUpdateLoadDetails] @intLoadDetailId, 1 , @intTicketId, NULL, 0;
+			EXEC [dbo].[uspLGUpdateLoadDetails] @intLoadDetailId, 1 , @intTicketId;
 			SET @dblDeliveredQuantity = @dblDeliveredQuantity * -1;
 			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
 			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
