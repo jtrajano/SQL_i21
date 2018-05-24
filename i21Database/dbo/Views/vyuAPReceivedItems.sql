@@ -58,10 +58,10 @@ FROM
 		,[strUOM]					=	tblReceived.strUOM
 		,[intWeightUOMId]			=	tblReceived.intWeightUOMId
 		,[intCostUOMId]				=	tblReceived.intCostUOMId
-		,[dblNetWeight]				=	tblReceived.dblNetWeight
+		,[dblNetWeight]				=	CAST(tblReceived.dblNetWeight AS DECIMAL(38,20))
 		,[strCostUOM]				=	tblReceived.costUOM
 		,[strgrossNetUOM]			=	tblReceived.grossNetUOM
-  		,[dblWeightUnitQty]			=	tblReceived.weightUnitQty
+  		,[dblWeightUnitQty]			=	CAST(tblReceived.weightUnitQty AS DECIMAL(38,20))
 		,[dblCostUnitQty]			=	tblReceived.costUnitQty      
 		,[dblUnitQty]				=	tblReceived.itemUnitQty
 		,[intCurrencyId]			=	tblReceived.intCurrencyId
@@ -265,10 +265,10 @@ FROM
 	,[strUOM]					=	UOM.strUnitMeasure
 	,[intWeightUOMId]			=	NULL
 	,[intCostUOMId]				=	NULL
-	,[dblNetWeight]				=	0
+	,[dblNetWeight]				=	CAST(0  AS DECIMAL(38,20))
 	,[strCostUOM]				=	NULL
 	,[strgrossNetUOM]			=	NULL
-	,[dblWeightUnitQty]			=	1
+	,[dblWeightUnitQty]			=	CAST(1 AS DECIMAL(38,20))
 	,[dblCostUnitQty]			=	1
 	,[dblUnitQty]				=	1
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,0)
@@ -369,15 +369,15 @@ FROM
 	,[strUOM]					=	UOM.strUnitMeasure
 	,[intWeightUOMId]			=	B.intWeightUOMId
 	,[intCostUOMId]				=	B.intCostUOMId
-	,[dblNetWeight]				=	CASE WHEN B.intWeightUOMId > 0 THEN  
+	,[dblNetWeight]				=	CAST(CASE WHEN B.intWeightUOMId > 0 THEN  
 													(CASE WHEN B.dblBillQty > 0 
 															THEN ABS(B.dblOpenReceive - B.dblBillQty) * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
 														ELSE B.dblNet --THIS IS FOR NO RECEIVED QTY YET BUT HAS NET WEIGHT DIFFERENT FROM GROSS
 											END)
-									ELSE 0 END
+									ELSE 0 END AS DECIMAL(38,20))
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
-	,[dblWeightUnitQty]			=	ISNULL(ItemWeightUOM.dblUnitQty,1)
+	,[dblWeightUnitQty]			=	CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
 	,[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1)
 	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))
@@ -527,10 +527,10 @@ FROM
 		,[strUOM]									=	A.strCostUnitMeasure
 		,[intWeightUOMId]							=	NULL
 		,[intCostUOMId]								=	A.intCostUnitMeasureId
-		,[dblNetWeight]								=	0      
+		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))
 		,[strCostUOM]								=	A.strCostUnitMeasure
 		,[strgrossNetUOM]							=	NULL
-		,[dblWeightUnitQty]							=	1
+		,[dblWeightUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
@@ -654,10 +654,10 @@ FROM
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 		,[intCostUOMId]								=	CC.intItemUOMId
-		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
+		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
-		,[dblWeightUnitQty]							=	1
+		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
@@ -767,10 +767,10 @@ FROM
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 		,[intCostUOMId]								=	CC.intItemUOMId
-		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
+		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
-		,[dblWeightUnitQty]							=	1
+		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
@@ -882,10 +882,10 @@ FROM
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 		,[intCostUOMId]								=	CC.intItemUOMId
-		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
+		,[dblNetWeight]								=	CAST(0  AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
-		,[dblWeightUnitQty]							=	1
+		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
@@ -995,10 +995,10 @@ FROM
 		,[strUOM]									=	UOM.strUnitMeasure
 		,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 		,[intCostUOMId]								=	CC.intItemUOMId
-		,[dblNetWeight]								=	0--ISNULL(CD.dblNetWeight,0)      
+		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
 		,[strCostUOM]								=	CC.strUOM
 		,[strgrossNetUOM]							=	CC.strUOM
-		,[dblWeightUnitQty]							=	1
+		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
