@@ -279,7 +279,7 @@
 			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId 
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
-	) LGD on LGD.intLoadId = SCT.intLoadId AND LGD.intTicketId = SCT.intTicketId
+	) LGD on LGD.intLoadId = SCT.intLoadId
 	LEFT JOIN tblSOSalesOrderDetail SOD on SOD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SOD.intSalesOrderId
 	
