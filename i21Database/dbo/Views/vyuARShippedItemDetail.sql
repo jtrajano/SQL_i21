@@ -18,10 +18,12 @@ SELECT
 	,[intItemId]					= LS.[intItemId]
 	,[strItemNo]					= ICI.[strItemNo]
 	,[strItemDescription]			= ICI.[strDescription]
+	,[intOrderUOMId]				= LS.[intOrderUOMId]
+	,[strOrderUnitMeasure]			= OUOM.[strUnitMeasure]
 	,[intItemUOMId]					= LS.[intItemUOMId]
-	,[strUnitMeasure]				= ARCC.[strUnitMeasure]
-	,[intPriceUOMId]				= ARCC.[intPriceItemUOMId]
-	,[strPriceUnitMeasure]			= ARCC.[strPriceUnitMeasure]
+	,[strUnitMeasure]				= SUOM.[strUnitMeasure]
+	,[intPriceUOMId]				= LS.[intWeightUOMId]
+	,[strPriceUnitMeasure]			= WUOM.[strUnitMeasure]
 	,[intShipmentItemUOMId]			= LS.[intShipmentItemUOMId]
 	,[strShipmentUnitMeasure]		= SUOM.[strUnitMeasure]
 	,[dblQtyShipped]				= LS.[dblQtyShipped]
@@ -106,7 +108,31 @@ LEFT JOIN (
 			 , strUnitMeasure
 		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
 	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-) SUOM ON ISNULL(ARCC.intPriceItemUOMId,LS.intItemUOMId) = SUOM.intItemUOMId							
+) SUOM ON LS.[intItemUOMId] = SUOM.intItemUOMId	
+LEFT JOIN (
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) WUOM ON LS.[intWeightUOMId] = WUOM.intItemUOMId			
+LEFT JOIN (
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) OUOM ON LS.[intOrderUOMId] = OUOM.intItemUOMId						
 LEFT OUTER JOIN (
 	SELECT [intItemId]
 		 , [intAccountId]
