@@ -112,7 +112,27 @@ FROM tblAPBill voucher
 WHERE voucher.intBillId = @voucherId
 
 --Filter the records per currency
-INSERT INTO @receiptItems
+INSERT INTO @receiptItems(
+	[intInventoryReceiptType]		
+	,[intInventoryReceiptItemId]		
+	,[dblQtyReceived]				
+	,[dblCost]						
+	,[dblCostUnitQty]				
+	,[dblTotal]						
+	,[dblNetWeight]					
+	,[intCostUOMId]					
+	,[intTaxGroupId]					
+	,[int1099Form] 					
+	,[int1099Category] 		
+	/*Start - Bund Item Info*/
+	,[intItemBundleId]				
+	,[intBundletUOMId]				
+	,[dblQtyBundleReceived]			
+	,[dblBundleUnitQty]		
+	,[strBundleDescription]		
+	,[dblBundleTotal]				
+	/*End - Bund Item Info*/
+)		
 SELECT 
 	[intInventoryReceiptType]		=	A.intInventoryReceiptType,
 	[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
@@ -152,12 +172,6 @@ SELECT
 	[intCostUOMId]					=	CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
 											THEN contractDetail.intPriceItemUOMId
 											ELSE B.intCostUOMId END,
-	[intItemBundleId]				=	A.intItemBundleId,
-	[intBundletUOMId]				=	A.intBundletUOMId,
-	[dblQtyBundleReceived]			=	A.dblQtyBundleReceived,
-	[dblBundleUnitQty]				=	A.dblBundleUnitQty,
-	[strBundleDescription]			=	itemBundle.strDescription,
-	[dblBundleTotal]				=	A.dblBundleTotal,
 	[intTaxGroupId]					=	A.intTaxGroupId,
 	[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 													AND B.intItemId > 0
@@ -176,7 +190,13 @@ SELECT
 												THEN 3
 									ELSE
 										ISNULL(F.int1099CategoryId,0)
-									END
+									END,
+	[intItemBundleId]				=	A.intItemBundleId,
+	[intBundletUOMId]				=	A.intBundletUOMId,
+	[dblQtyBundleReceived]			=	A.dblQtyBundleReceived,
+	[dblBundleUnitQty]				=	A.dblBundleUnitQty,
+	[strBundleDescription]			=	itemBundle.strDescription,
+	[dblBundleTotal]				=	A.dblBundleTotal
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
