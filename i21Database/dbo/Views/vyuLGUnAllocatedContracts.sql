@@ -61,6 +61,8 @@ FROM (
 		,CD.intSubBookId
 		,SB.strSubBook
 		,CASE 
+			WHEN CD.intPricingTypeId = 1
+				THEN 'Priced'
 			WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL([dblLotsFixed], 0) = 0
 				THEN 'Fully Priced'
 			WHEN ISNULL([dblLotsFixed], 0) = 0
@@ -182,5 +184,6 @@ FROM (
 		,CD.intFutureMarketId
 		,CD.intFutureMonthId
 		,CD.dblNoOfLots
+		,CD.intPricingTypeId
 	) tbl
 WHERE dblUnAllocatedQty > 0
