@@ -3,7 +3,7 @@
 	select
 		strName = ec.strUserName,
 		intId = us.[intEntityId],
-		strFullName = en.strName,
+		strFullName = ue.strName,
 		strEmail = en.strEmail,
 		intEntityId = us.[intEntityId],
 		ysnDisabled = us.ysnDisabled,
@@ -13,6 +13,7 @@
 		tblSMUserSecurity us
 		inner join vyuEMEntityContact en on en.intEntityId = us.[intEntityId] and en.ysnDefaultContact = 1
 		inner join [tblEMEntityCredential] ec on ec.intEntityId = us.[intEntityId]
+		inner join tblEMEntity ue on ue.intEntityId = us.intEntityId
 	where
 		us.[intEntityId] is not null
 
