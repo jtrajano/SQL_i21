@@ -32,6 +32,7 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
 	,[ysnWeights] BIT NULL													-- Destination Weights. This is used by Scale.
 	,[strFromLocationActualCostId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
 	,[strToLocationActualCostId]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
+	,[dblCost]					NUMERIC(38, 20) NULL 
 
 	-- Integration Field
 	,[intInventoryTransferId] INT NULL											-- Existing id of an Inventory Transfer
