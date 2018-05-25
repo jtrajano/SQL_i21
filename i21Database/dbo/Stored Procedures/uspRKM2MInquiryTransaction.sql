@@ -1929,7 +1929,21 @@ FROM (
 		,dblMarketRatio
 		,isnull(dblFuturePrice,0) dblFuturePrice
 		,intContractTypeId
-		,dblContractPrice+dblCosts dblAdjustedContractPrice
+		,CASE WHEN @ysnCanadianCustomer = 1 THEN 
+				dblCanadianFutures + case when isnull(@ysnIncludeBasisDifferentialsInResults,0) = 0 then dblDummyContractBasis else dblCanadianContractBasis end  +dblCash + dblCosts
+			ELSE 
+				isnull(dblContractBasis,0) 
+				+ 
+				(isnull(case when strPricingType = 'Ratio' and strPriOrNotPriOrParPriced = 'Unpriced' then 
+								dblFuturePrice 
+							when strPricingType = 'Ratio' and strPriOrNotPriOrParPriced = 'Partially Priced' then 
+								((dblLotsFixed * dblPriceWORollArb) + ((dblNoOfLots - dblLotsFixed) * dblFuturePrice)) / dblNoOfLots
+							else  dblFutures  end,0) * isnull(dblContractRatio,1)) 
+				+ 
+				isnull(dblCash,0)
+				+ 
+				dblCosts  
+		 END dblAdjustedContractPrice
 		,dblCashPrice dblCashPrice
 		,isnull(dblMarketBasis,0)+(isnull(dblFuturePrice,0) * isnull(dblMarketRatio,1))+isnull(dblCashPrice,0) dblMarketPrice
 		--,isnull(dblResultBasis,0)+isnull(dblMarketFuturesResult,0)+isnull(dblResultCash,0) dblResult 
