@@ -10,7 +10,7 @@
 	,intEntityId			= c.intEntityId
 
 from tblSMUserRole a
-	join tblEMEntityToRole b
+	left join tblEMEntityToRole b
 		on a.intUserRoleID = b.intEntityRoleId
-	join tblEMEntity c
+	left join tblEMEntity c
 		on c.intEntityId = b.intEntityId

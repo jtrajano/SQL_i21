@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspEMTogglePortalAccess]
 	@intEntityId			int,
-	@intEntityContactId		int,
-	@ysnEnablePortalAccess	bit,
-	@message				nvarchar(200) output,
-	@intUserRoleId			int output,
+	@intEntityContactId		int,	
+	@ysnEnablePortalAccess	bit,	
+	@intUserRoleId			int,
 	@strPassword			nvarchar(100) = '',
-	@ysnAdmin				bit = 1
+	--@ysnAdmin				bit = 1,
+	@message				nvarchar(200) output	
 AS
 BEGIN
 	if @ysnEnablePortalAccess = 0 
@@ -21,30 +21,30 @@ BEGIN
 
 		if not exists(select top 1 1 from tblEMEntityToRole where intEntityId = @intEntityId)
 		begin
-			exec [uspSMCreateContactAdmin] @entityId = @intEntityId
+			INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId) VALUES(@intEntityId, @intUserRoleId) --exec [uspSMCreateContactAdmin] @entityId = @intEntityId
 		end 
 
-		declare @roleId int
-		select @roleId = a.intEntityRoleId 
-			from tblEMEntityToRole a
-			 join tblSMUserRole b
-				on a.intEntityRoleId = b.intUserRoleID		 
-			 where intEntityId = @intEntityId and b.ysnAdmin = @ysnAdmin
+		--declare @roleId int
+		--select @roleId = a.intEntityRoleId 
+		--	from tblEMEntityToRole a
+		--	 join tblSMUserRole b
+		--		on a.intEntityRoleId = b.intUserRoleID		 
+		--	 where intEntityId = @intEntityId and b.ysnAdmin = @ysnAdmin
 		declare @userName nvarchar(200)
 		select @userName = strEmail from tblEMEntity where intEntityId = @intEntityContactId
 				
-		if(@roleId is null or @roleId < 0)
-		begin
-			set @message =  'User role is not yet created'
-			return 0
-		end
+		--if(@roleId is null or @roleId < 0)
+		--begin
+		--	set @message =  'User role is not yet created'
+		--	return 0
+		--end
 
-		if exists( select top 1 1 from [tblEMEntityToContact] where intEntityRoleId = @roleId and intEntityContactId = @intEntityContactId and ysnPortalAccess = 1)
-		begin
-			return 0;
-		end
+		--if exists( select top 1 1 from [tblEMEntityToContact] where intEntityRoleId = @roleId and intEntityContactId = @intEntityContactId and ysnPortalAccess = 1)
+		--begin
+		--	return 0;
+		--end
 
-		set @intUserRoleId = @roleId
+		--set @intUserRoleId = @roleId
 
 		if(@userName is null or @userName = '')
 		begin
@@ -81,11 +81,11 @@ BEGIN
 			--ysnPortalAccess = 0, 
 			intEntityRoleId = null 
 				where intEntityId = @intEntityId 
-					and intEntityRoleId = @roleId
+					and intEntityRoleId = @intUserRoleId--@roleId
 
 		update [tblEMEntityToContact] set 
 			ysnPortalAccess = 1, 
-			intEntityRoleId = @roleId 
+			intEntityRoleId = @intUserRoleId--@roleId 
 				where intEntityId = @intEntityId 
 					and intEntityContactId = @intEntityContactId
 
