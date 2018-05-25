@@ -159,6 +159,8 @@ BEGIN
 				,@shipTo = @intShipTo
 				,@shipFrom = @intShipFrom_DebitMemo
 				,@currencyId = @intCurrencyId
+				,@throwError = 0
+				,@error = NULL 			
 				,@billId = @intBillId OUTPUT
 
 			SELECT @strBillIds = 
@@ -287,6 +289,8 @@ BEGIN
 			,@shipFrom = @intShipFrom
 			,@vendorOrderNumber = @strVendorRefNo
 			,@currencyId = @intCurrencyId
+			,@throwError = 0
+			,@error = NULL 			
 			,@billId = @intBillId OUTPUT
 	END 
 
