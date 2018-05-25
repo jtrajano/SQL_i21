@@ -30,7 +30,7 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
 	@currencyId INT = NULL,
-	@throwError BIT = 0,
+	@throwError BIT = 1,
 	@billId INT OUTPUT,
 	@error NVARCHAR(1000) OUTPUT
 AS
