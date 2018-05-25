@@ -38,7 +38,7 @@ FROM	tblICInventoryReceipt Receipt
 			SELECT	strOrderNumber = ct.strContractNumber
 					,rc.intInventoryReceiptChargeId
 					,dblUnitCost = ROUND(rc.dblAmount, 2) 
-					,dblReceiptQty = 1
+					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(rc.dblQuantityPriced,0) ELSE ISNULL(rc.dblAmountBilled,0) END)
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
