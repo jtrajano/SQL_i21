@@ -66,12 +66,17 @@ SELECT	strOrderType = 'Sales Contract'
 		, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, ContractView.strItemUOM) 
 FROM	vyuCTContractAddOrdersLookup ContractView
 		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
-		INNER JOIN tblICItemUOM Iuom ON Iuom.intItemId = Item.intItemId AND Iuom.ysnStockUOM = 1
 		LEFT JOIN (
 			tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
 				ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
 		)
-			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, Iuom.intItemUOMId)
+			ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, ContractView.intSeqPriceUOMId)
+		--INNER JOIN tblICItemUOM Iuom ON Iuom.intItemId = Item.intItemId AND Iuom.ysnStockUOM = 1
+		--LEFT JOIN (
+		--	tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
+		--		ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
+		--)
+		--	ON ItemPriceUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(ContractView.intItemId, Iuom.intItemUOMId)
 		LEFT JOIN (
 			tblICItemUOM ItemWeightUOM INNER JOIN tblICUnitMeasure weightUOM
 				ON ItemWeightUOM.intUnitMeasureId = weightUOM.intUnitMeasureId
