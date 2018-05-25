@@ -226,7 +226,7 @@ SELECT
 	,0 AS dblWithheld
 	,0 AS dblDiscount
 	,0 AS dblInterest
-	,B.dblAmountApplied AS dblPrepaidAmount
+	,B.dblAmountApplied AS dblPrepaidAmount --check if there still use for this
 	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
 	,D.strVendorId
 	,A.dtmDueDate
