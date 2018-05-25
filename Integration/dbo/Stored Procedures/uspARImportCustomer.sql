@@ -809,6 +809,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			END
 	
 		SET @Total = @Counter
+		
+		--IMPORT CUSTOMER COMMENTS
+		-----------------------------------
+		EXEC uspARImportCustomerComments	
+		-----------------------------------
 
 		END
 
@@ -1686,6 +1691,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			END
 
 		SET @Total = @Counter
+
+		--IMPORT CUSTOMER COMMENTS
+		-----------------------------------
+		EXEC uspARImportCustomerComments	
+		-----------------------------------
 
 		END
 
