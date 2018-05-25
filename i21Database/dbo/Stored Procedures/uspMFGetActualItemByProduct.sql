@@ -12,6 +12,7 @@ BEGIN
 	DECLARE @intManufacturingProcessId INT
 		,@strDefaultConsumptionUOM NVARCHAR(50)
 		,@intRecipeTypeId INT
+		,@strAutoProduceBiProducts NVARCHAR(50)
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intRecipeTypeId = intRecipeTypeId
@@ -26,6 +27,18 @@ BEGIN
 
 	IF ISNULL(@strDefaultConsumptionUOM, '') = ''
 		SELECT @strDefaultConsumptionUOM = '1'
+
+	SELECT @strAutoProduceBiProducts = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 115
+
+	IF @strAutoProduceBiProducts IS NULL
+		OR @strAutoProduceBiProducts = ''
+	BEGIN
+		SELECT @strAutoProduceBiProducts = 'False'
+	END
 
 	IF @intRecipeTypeId = 3
 	BEGIN
@@ -158,6 +171,13 @@ BEGIN
 					WHEN @intCategoryId > 0
 						THEN @intCategoryId
 					ELSE - 1
+					END
+				)
+			AND RI.ysnConsumptionRequired = (
+				CASE 
+					WHEN @strAutoProduceBiProducts = 'True'
+						THEN 1
+					ELSE RI.ysnConsumptionRequired
 					END
 				)
 		ORDER BY I.strItemNo

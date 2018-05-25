@@ -34,8 +34,11 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@strLotNumber NVARCHAR(50)
 		,@intMachineId INT
-		,@intManufacturingProcessId int
-		,@strInstantConsumption nvarchar(50)
+		,@intManufacturingProcessId INT
+		,@strInstantConsumption NVARCHAR(50)
+		,@intWorkOrderProducedLotParentId INT
+		,@intWorkOrderProducedLotId INT
+		,@intBiProductWorkOrderProducedLotId int
 
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
@@ -100,7 +103,7 @@ BEGIN TRY
 
 	SELECT @strTransactionId = strWorkOrderNo
 		,@intLocationId = intLocationId
-		,@intManufacturingProcessId=intManufacturingProcessId 
+		,@intManufacturingProcessId = intManufacturingProcessId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -110,6 +113,7 @@ BEGIN TRY
 		,@intTransactionDetailId = intWorkOrderProducedLotId
 		,@intStorageLocationId = intStorageLocationId
 		,@intItemId = intItemId
+		,@intWorkOrderProducedLotParentId = intWorkOrderProducedLotParentId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
@@ -206,6 +210,17 @@ BEGIN TRY
 	BEGIN
 		RAISERROR (
 				'Pallet/Lot cannot be reversed. It is moved/adjusted/shipped.'
+				,11
+				,1
+				)
+
+		RETURN
+	END
+
+	IF @intWorkOrderProducedLotParentId IS NOT NULL
+	BEGIN
+		RAISERROR (
+				'You cannot reverse a bi-product. Please try reversing the main product.'
 				,11
 				,1
 				)
@@ -462,15 +477,6 @@ BEGIN TRY
 		,@intUserId
 		,0
 
-	IF EXISTS (
-			SELECT *
-			FROM @GLEntries
-			)
-	BEGIN
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
-	END
-
 	UPDATE dbo.tblMFWorkOrderProducedLot
 	SET ysnProductionReversed = 1
 		,dtmLastModified = GETDATE()
@@ -483,6 +489,7 @@ BEGIN TRY
 		,@dblPhysicalCount = dblPhysicalCount
 		,@intSpecialPalletLotId = intSpecialPalletLotId
 		,@intMachineId = intMachineId
+		,@intWorkOrderProducedLotId = intWorkOrderProducedLotId
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
@@ -518,39 +525,142 @@ BEGIN TRY
 		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 
 	SELECT @strInstantConsumption = strAttributeValue
-		FROM tblMFManufacturingProcessAttribute
-		WHERE intManufacturingProcessId = @intManufacturingProcessId
-			AND intLocationId = @intLocationId
-			AND intAttributeId = 20 --Is Instant Consumption
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 20 --Is Instant Consumption
 
-			DECLARE @tblMFWorkOrderConsumedLot table(  
-					intWorkOrderId int,  
-					intItemId int,  
-					dblQuantity int 
-					,intMachineId int 
-				   ); 
+	DECLARE @tblMFWorkOrderConsumedLot TABLE (
+		intWorkOrderId INT
+		,intItemId INT
+		,dblQuantity INT
+		,intMachineId INT
+		);
 
-		IF @strInstantConsumption = 'True'
-		BEGIN
-			DELETE
-			FROM dbo.tblMFWorkOrderConsumedLot
-			OUTPUT deleted.intWorkOrderId,  
-				   deleted.intItemId,  
-				   deleted.dblQuantity, 
-				   deleted.intMachineId 
-			INTO @tblMFWorkOrderConsumedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND intBatchId = @intBatchId
+	IF @strInstantConsumption = 'True'
+	BEGIN
+		DELETE
+		FROM dbo.tblMFWorkOrderConsumedLot
+		OUTPUT deleted.intWorkOrderId
+			,deleted.intItemId
+			,deleted.dblQuantity
+			,deleted.intMachineId
+		INTO @tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intBatchId = @intBatchId
 
-			UPDATE PS
-			SET dblConsumedQuantity = dblConsumedQuantity - WC.dblQuantity
-			from tblMFProductionSummary PS
-			JOIN @tblMFWorkOrderConsumedLot WC on PS.intWorkOrderId =WC.intWorkOrderId and PS.intItemId=WC.intItemId 
-			and IsNULL(PS.intMachineId, 0) = IsNULL(WC.intMachineId, 0)
-			WHERE PS.intWorkOrderId = @intWorkOrderId
-				AND PS.intItemId = @intItemId
-				AND IsNULL(PS.intMachineId, 0) = IsNULL(@intMachineId, 0)
-		END
+		UPDATE PS
+		SET dblConsumedQuantity = dblConsumedQuantity - WC.dblQuantity
+		FROM tblMFProductionSummary PS
+		JOIN @tblMFWorkOrderConsumedLot WC ON PS.intWorkOrderId = WC.intWorkOrderId
+			AND PS.intItemId = WC.intItemId
+			AND IsNULL(PS.intMachineId, 0) = IsNULL(WC.intMachineId, 0)
+		WHERE PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemId = @intItemId
+			AND IsNULL(PS.intMachineId, 0) = IsNULL(@intMachineId, 0)
+	END
+
+	DECLARE @tblMFWorkOrderProducedLot TABLE (
+		intWorkOrderProducedLotId INT
+		,intBatchId INT
+		,intItemId INT
+		)
+
+	INSERT INTO @tblMFWorkOrderProducedLot (
+		intWorkOrderProducedLotId
+		,intBatchId
+		,intItemId
+		)
+	SELECT intWorkOrderProducedLotId
+		,intBatchId
+		,intItemId
+	FROM tblMFWorkOrderProducedLot
+	WHERE intWorkOrderProducedLotParentId = @intWorkOrderProducedLotId
+
+	SELECT @intBiProductWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
+	FROM @tblMFWorkOrderProducedLot
+
+	WHILE @intBiProductWorkOrderProducedLotId IS NOT NULL
+	BEGIN
+		SELECT @intBatchId = NULL
+
+		SELECT @strBatchId = NULL
+
+		SELECT @intItemId = NULL
+
+		SELECT @intBatchId = intBatchId
+			,@intItemId = intItemId
+		FROM @tblMFWorkOrderProducedLot
+		WHERE intWorkOrderProducedLotId = @intBiProductWorkOrderProducedLotId
+
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+			,@strBatchId OUTPUT
+
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			)
+		EXEC dbo.uspICUnpostCosting @intBatchId
+			,@strTransactionId
+			,@strBatchId
+			,@intUserId
+			,0
+
+		UPDATE dbo.tblMFWorkOrderProducedLot
+		SET ysnProductionReversed = 1
+			,dtmLastModified = GETDATE()
+			,intLastModifiedUserId = @intUserId
+		WHERE intWorkOrderProducedLotId = @intBiProductWorkOrderProducedLotId
+
+		UPDATE tblMFProductionSummary
+		SET dblOutputQuantity = dblOutputQuantity - @dblQuantity
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intItemId
+			AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
+
+		SELECT @intBiProductWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
+		FROM @tblMFWorkOrderProducedLot
+		WHERE intWorkOrderProducedLotId > @intBiProductWorkOrderProducedLotId
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM @GLEntries
+			)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries
+			,0
+	END
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

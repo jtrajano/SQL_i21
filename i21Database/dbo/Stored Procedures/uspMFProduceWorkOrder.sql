@@ -33,6 +33,7 @@
 	,@ysnRecap BIT = 0
 	,@intWorkOrderProducedLotId int=NULL OUTPUT
 	,@intLotStatusId int=NULL
+	,@intWorkOrderProducedLotParentId int=NULL
 	)
 AS
 BEGIN
@@ -133,6 +134,7 @@ BEGIN
 		,ysnFillPartialPallet
 		,intSpecialPalletLotId
 		,intItemTypeId
+		,intWorkOrderProducedLotParentId 
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -184,6 +186,7 @@ BEGIN
 		,@ysnFillPartialPallet
 		,@intSpecialPalletLotId
 		,@intItemTypeId
+		,@intWorkOrderProducedLotParentId
 
 	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
 
@@ -202,6 +205,7 @@ BEGIN
 				END
 			)
 		,dtmActualProductionEndDate = @dtmCreated
+		,dtmActualProductionStartDate=(Case When dtmActualProductionStartDate is null then @dtmCreated else dtmActualProductionStartDate End)
 		,intStatusId = @intStatusId
 		,intStorageLocationId = @intStorageLocationId
 		,intActualShiftId = @intBusinessShiftId
