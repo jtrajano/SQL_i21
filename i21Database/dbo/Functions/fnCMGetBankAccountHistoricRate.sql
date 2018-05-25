@@ -20,8 +20,8 @@ WHERE	tblCMBankAccount.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(tblGLDetail.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, tblGLDetail.dtmDate) AS FLOAT)) AS DATETIME)
 		AND ysnIsUnposted = 0
 
-IF @glBalance = 0
-	RETURN -1
+IF @glBalance = 0 RETURN -1
+IF @bankBalance = 0 RETURN -2
 
 SELECT @result = @bankBalance/@glBalance
 RETURN @result
