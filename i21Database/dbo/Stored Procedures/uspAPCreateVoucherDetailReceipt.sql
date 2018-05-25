@@ -24,9 +24,9 @@ DECLARE @receiptItems AS TABLE (
 	[dblTotal]						DECIMAL(18, 6)	NULL, 
 	[dblNetWeight]					DECIMAL(18, 6)	NULL, 
 	/*Start - Bund Item Info*/
-	[intItemBundleId]				INT				NOT NULL, --Primary key of tblICItemBundle
-	[intBundletUOMId]				INT				NOT NULL,
-	[dblQtyBundleReceived]			INT				NOT NULL,
+	[intItemBundleId]				INT				NULL, --Primary key of tblICItemBundle
+	[intBundletUOMId]				INT				NULL,
+	[dblQtyBundleReceived]			INT				NULL,
 	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
 	[strBundleDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[dblBundleTotal]				DECIMAL(38, 20)	NULL, 
