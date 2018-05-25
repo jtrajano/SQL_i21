@@ -49,9 +49,11 @@ BEGIN
 		,FXCU.strCurrency AS strForexCurrency
 		,ERT.strCurrencyExchangeRateType AS strForexRateType
 		,PUM.strUnitMeasure AS strPriceUOM
+		,PCU.ysnSubCurrency AS ysnPriceSubCurrency
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							LOAD			ON		LOAD.intLoadId = LoadDetail.intLoadId AND LOAD.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
+	LEFT JOIN tblSMCurrency						PCU				ON		PCU.intCurrencyID = LoadDetail.intPriceCurrencyId
 	LEFT JOIN tblSMCompanyLocation				SCL				ON		SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	PCLSL			ON		PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation	SCLSL			ON		SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId

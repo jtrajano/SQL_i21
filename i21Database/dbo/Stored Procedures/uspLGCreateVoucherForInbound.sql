@@ -14,6 +14,7 @@ BEGIN TRY
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @intAPClearingAccountId INT
+	DECLARE @intShipTo INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intItemRecordId INT Identity(1, 1)
@@ -67,6 +68,12 @@ BEGIN TRY
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
+
+	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
+	WHERE L.intLoadId = @intLoadId
 
 	SELECT @intAPAccount = ISNULL(intAPAccount,0)
 	FROM tblSMCompanyLocation CL
@@ -210,6 +217,7 @@ BEGIN TRY
 		EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
+			,@shipTo = @intShipTo
 			,@billId = @intBillId OUTPUT
 
 		DELETE
