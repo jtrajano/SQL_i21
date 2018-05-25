@@ -442,6 +442,28 @@ BEGIN TRY
 										   END
 				FROM @SettleStorage
 				WHERE intSettleStorageKey = @SettleStorageKey
+				
+
+				IF @LocationId IS NULL
+				BEGIN
+					SET @LocationId = @intCompanyLocationId
+
+					SELECT @ItemLocationId = intItemLocationId
+					FROM tblICItemLocation
+					WHERE intItemId = @ItemId AND intLocationId = @LocationId
+
+					DECLARE @intTicketCompanyLocationId INT
+					DECLARE @intTempSettleStorageId INT
+
+					SELECT 
+						@intTicketCompanyLocationId  = SS.intCompanyLocationId
+						, @intTempSettleStorageId = SST.intSettleStorageId
+					FROM @SettleStorage SS
+					LEFT JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = SS.intCustomerStorageId
+					WHERE intSettleStorageKey = @SettleStorageKey
+
+					UPDATE tblGRSettleStorage SET intCompanyLocationId = @intCompanyLocationId WHERE intSettleStorageId = @intTempSettleStorageId
+				END
 
 				--Storage Due		
 				SET @dblStorageDuePerUnit = 0
