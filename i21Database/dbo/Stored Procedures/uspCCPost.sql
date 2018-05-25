@@ -18,9 +18,9 @@ DECLARE @billId INT
 DECLARE @InvoicesId NVARCHAR(MAX)
 DECLARE @bankTransactionId INT
 DECLARE @intCompanyLocationId INT
-DECLARE @intAPAccount INT;
-DECLARE @strCompanyLocation NVARCHAR(50);
-DECLARE @strAPAccountErrorMessage NVARCHAR(255);
+DECLARE @intAPAccount INT
+DECLARE @strCompanyLocation NVARCHAR(50)
+DECLARE @strAPAccountErrorMessage NVARCHAR(255)
 
 BEGIN TRY
 	
@@ -48,6 +48,24 @@ BEGIN TRY
 		RAISERROR(@strAPAccountErrorMessage,16,1)
 	END
 	
+	-- Validate Total Detail Gross, Fees and Net should equal to Header
+	DECLARE @dblGross NUMERIC(18,6) = NULL
+	DECLARE @dblFee NUMERIC(18,6) = NULL
+	DECLARE @dblNet NUMERIC(18,6) = NULL
+	
+	SELECT @dblGross = A.dblGross - SUM(ISNULL(B.dblGross,0))
+	, @dblFee = A.dblFees -  SUM(ISNULL(B.dblFees,0))
+	, @dblNet = A.dblNet - SUM(ISNULL(B.dblNet,0))
+	FROM tblCCSiteHeader A
+	INNER JOIN tblCCSiteDetail B ON A.intSiteHeaderId = B.intSiteHeaderId
+	WHERE A.intSiteHeaderId = @intSiteHeaderId
+	GROUP BY  A.intSiteHeaderId,  A.dblGross, A.dblFees, A.dblNet
+
+	IF(@dblGross != 0 OR @dblFee != 0 OR @dblNet != 0)
+	BEGIN
+		RAISERROR('Gross, Fees and Net should be equal to ZERO.',16,1)
+	END
+
 	-- AP Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToAPBill] 
 		@intSiteHeaderId = @intSiteHeaderId
