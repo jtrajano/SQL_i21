@@ -10,7 +10,7 @@
 AS
 
 BEGIN
-
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 	IF isnull(@strPurchaseSales, '') <> ''
 	BEGIN
 		IF @strPurchaseSales = 'Purchase'
@@ -350,7 +350,7 @@ INSERT INTO @InventoryStock(strCommodityCode ,dblTotal ,strLocationName ,intComm
 select strCommodityCode ,sum(dblTotal)  dblTotal,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,strInventoryType from(
 SELECT strCommodityCode,dblTotal ,strLocationName ,intCommodityId,intFromCommodityUnitMeasureId ,'Collateral' strInventoryType  FROM (
 		SELECT  ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC) intRowNum,
-		case when intContractTypeId=1 then
+		case when c.strType='Purchase' then
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0))
 		else -abs(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0))) end dblTotal,
 	    @intCommodityId as intCommodityId,co.strCommodityCode,cl.strLocationName,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId

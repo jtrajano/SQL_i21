@@ -6,8 +6,7 @@
 		,@strPositionIncludes NVARCHAR(100) = NULL
 		,@dtmToDate datetime = NULL
 AS
--- drop table #invQty
--- drop table #tempCollateral
+
 IF isnull(@strPurchaseSales,'') <> ''
 BEGIN
 	if @strPurchaseSales='Purchase'
@@ -19,7 +18,7 @@ BEGIN
 		SELECT @strPurchaseSales='Purchase'
 	END
 END
-
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @Commodity AS TABLE 
 (
 intCommodityIdentity int IDENTITY(1,1) PRIMARY KEY , 
@@ -229,7 +228,9 @@ SELECT * into #tempCollateral FROM (
 		c.intCollateralId,cl.strLocationName,ch.strItemNo,ch.strEntityName,c.intReceiptNo,ch.intContractHeaderId,	strContractNumber, c.dtmOpenDate,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblOriginalQuantity),0)) dblOriginalQuantity,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0)) dblRemainingQuantity,
-	    @intCommodityId as intCommodityId,c.intUnitMeasureId,c.intLocationId intCompanyLocationId,intContractTypeId,c.intLocationId,intEntityId
+	    @intCommodityId as intCommodityId,c.intUnitMeasureId,c.intLocationId intCompanyLocationId,
+		case when c.strType='Purchase' then 1 else 2 end	intContractTypeId
+		,c.intLocationId,intEntityId
 		FROM tblRKCollateralHistory c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 

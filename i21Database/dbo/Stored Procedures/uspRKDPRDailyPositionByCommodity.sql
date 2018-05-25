@@ -48,7 +48,7 @@ SELECT 	s.dblQuantity dblTotal,i.intItemId,s.strLocationName,s.strItemNo,s.intLo
 
 SELECT * into #tempCollateral FROM (
 		SELECT  ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC) intRowNum,intCollateralId,co.intCommodityId,intLocationId,c.intContractHeaderId,
-		c.dblRemainingQuantity dblRemainingQuantity,c.intUnitMeasureId,ch.intContractTypeId
+		c.dblRemainingQuantity dblRemainingQuantity,c.intUnitMeasureId,case when c.strType='Purchase' then 1 else 2 end	intContractTypeId
 		FROM tblRKCollateralHistory c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
