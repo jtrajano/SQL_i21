@@ -55,8 +55,8 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, ROUND(CASE WHEN A.intTransactionType != 1 THEN ISNULL(NULLIF(C.dblAdjustedTax,0), C.dblTax) *  B.dblRate * -1 
-				ELSE ISNULL(NULLIF(C.dblAdjustedTax,0), C.dblTax) * B.dblRate
+	, ROUND(CASE WHEN A.intTransactionType != 1 THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
+				ELSE ISNULL(B.dblTax, 0) * B.dblRate
 		END,2) AS dblTotal
 	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
 		END AS dblAmountDue 
@@ -75,7 +75,7 @@ FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 INNER JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
-INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
+--INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)  AND A.ysnOrigin = 0
 --ORIGIN
