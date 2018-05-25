@@ -261,7 +261,7 @@ BEGIN
 				,[dblTareWeight]			= 0 
 				,[intNewLotId]				= NULL 
 				,[strNewLotId]				= RawData.strNewLotId
-				,[dblCost]					= ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
+				,[dblCost]					= COALESCE(NULLIF(RawData.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
 				,[intTaxCodeId]				= NULL 
 				,[dblFreightRate]			= NULL 
 				,[dblFreightAmount]			= NULL 
