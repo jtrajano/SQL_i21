@@ -6642,6 +6642,8 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\38_ReplicationConfigurationTable.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucherStatus.sql" />
     <None Include="Scripts\Post-Deployment\IC\31_RemoveAfter18.3_DataFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStockControlReport.sql" />
+    <Build Include="dbo\Tables\tblMFItemDemandStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
