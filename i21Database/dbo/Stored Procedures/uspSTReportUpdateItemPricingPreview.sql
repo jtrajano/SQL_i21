@@ -306,16 +306,16 @@ BEGIN TRANSACTION
 			,UOM.strLongUPCCode
 			,I.strDescription
 			,CASE
-				WHEN [Changes].dblOldStandardCost IS NOT NULL AND [Changes].dblOldStandardCost != [Changes].dblNewStandardCost THEN 'Standard Cost'
-				WHEN [Changes].dblOldSalePrice IS NOT NULL AND [Changes].dblOldSalePrice != [Changes].dblNewSalePrice THEN 'Retail Price'
+				WHEN [Changes].dblOldStandardCost IS NOT NULL AND ISNULL([Changes].dblOldStandardCost, 0) != ISNULL([Changes].dblNewStandardCost, 0) THEN 'Standard Cost'
+				WHEN [Changes].dblOldSalePrice IS NOT NULL AND ISNULL([Changes].dblOldSalePrice, 0) != ISNULL([Changes].dblNewSalePrice, 0) THEN 'Retail Price'
 			 END
 			,CASE
-				WHEN [Changes].dblOldStandardCost IS NOT NULL AND [Changes].dblOldStandardCost != [Changes].dblNewStandardCost THEN CAST(CAST([Changes].dblOldStandardCost AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dblOldSalePrice IS NOT NULL AND [Changes].dblOldSalePrice != [Changes].dblNewSalePrice THEN CAST(CAST([Changes].dblOldSalePrice AS DECIMAL(18,2)) AS NVARCHAR(50))
+				WHEN [Changes].dblOldStandardCost IS NOT NULL AND ISNULL([Changes].dblOldStandardCost, 0) != ISNULL([Changes].dblNewStandardCost, 0) THEN CAST(CAST(ISNULL([Changes].dblOldStandardCost, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
+				WHEN [Changes].dblOldSalePrice IS NOT NULL AND ISNULL([Changes].dblOldSalePrice, 0) != ISNULL([Changes].dblNewSalePrice, 0) THEN CAST(CAST(ISNULL([Changes].dblOldSalePrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
 			 END
 			,CASE
-				WHEN [Changes].dblOldStandardCost IS NOT NULL AND [Changes].dblOldStandardCost != [Changes].dblNewStandardCost THEN CAST(CAST([Changes].dblNewStandardCost AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dblOldSalePrice IS NOT NULL AND [Changes].dblOldSalePrice != [Changes].dblNewSalePrice THEN CAST(CAST([Changes].dblNewSalePrice AS DECIMAL(18,2)) AS NVARCHAR(50))
+				WHEN [Changes].dblNewStandardCost IS NOT NULL AND ISNULL([Changes].dblOldStandardCost, 0) != ISNULL([Changes].dblNewStandardCost, 0) THEN CAST(CAST(ISNULL([Changes].dblNewStandardCost, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
+				WHEN [Changes].dblNewSalePrice IS NOT NULL AND ISNULL([Changes].dblOldSalePrice, 0) != ISNULL([Changes].dblNewSalePrice, 0) THEN CAST(CAST(ISNULL([Changes].dblNewSalePrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
 			 END
 	        ,[Changes].intItemId 
 			,[Changes].intItemPricingId
@@ -345,19 +345,19 @@ BEGIN TRANSACTION
 			,UOM.strLongUPCCode
 			,I.strDescription
 			,CASE
-				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND [Changes].dblOldUnitAfterDiscount != [Changes].dblNewUnitAfterDiscount THEN 'Sales Price'
-				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND [Changes].dtmOldBeginDate != [Changes].dtmNewBeginDate THEN 'Sales Starting Date'
-				WHEN [Changes].dtmOldEndDate IS NOT NULL AND [Changes].dtmOldEndDate != [Changes].dtmNewEndDate THEN 'Sales Ending Date'
+				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND ISNULL([Changes].dblOldUnitAfterDiscount, 0) != ISNULL([Changes].dblNewUnitAfterDiscount, 0) THEN 'Sales Price'
+				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND CAST([Changes].dtmOldBeginDate AS DATE) != CAST([Changes].dtmNewBeginDate AS DATE) THEN 'Sales Starting Date'
+				WHEN [Changes].dtmOldEndDate IS NOT NULL AND CAST([Changes].dtmOldEndDate AS DATE) != CAST([Changes].dtmNewEndDate AS DATE) THEN 'Sales Ending Date'
 			 END
 			,CASE
-				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND [Changes].dblOldUnitAfterDiscount != [Changes].dblNewUnitAfterDiscount THEN CAST(CAST([Changes].dblOldUnitAfterDiscount AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND [Changes].dtmOldBeginDate != [Changes].dtmNewBeginDate THEN CAST(CAST([Changes].dtmOldBeginDate AS DATE) AS NVARCHAR(50))
-				WHEN [Changes].dtmOldEndDate IS NOT NULL AND [Changes].dtmOldEndDate != [Changes].dtmNewEndDate THEN CAST(CAST([Changes].dtmOldEndDate AS DATE) AS NVARCHAR(50))
+				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND ISNULL([Changes].dblOldUnitAfterDiscount, 0) != ISNULL([Changes].dblNewUnitAfterDiscount, 0) THEN CAST(CAST(ISNULL([Changes].dblOldUnitAfterDiscount, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
+				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND CAST([Changes].dtmOldBeginDate AS DATE) != CAST([Changes].dtmNewBeginDate AS DATE) THEN CAST(CAST([Changes].dtmOldBeginDate AS DATE) AS NVARCHAR(50))
+				WHEN [Changes].dtmOldEndDate IS NOT NULL AND CAST([Changes].dtmOldEndDate AS DATE) != CAST([Changes].dtmNewEndDate AS DATE) THEN CAST(CAST([Changes].dtmOldEndDate AS DATE) AS NVARCHAR(50))
 			 END
 			,CASE
-				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND [Changes].dblOldUnitAfterDiscount != [Changes].dblNewUnitAfterDiscount THEN CAST(CAST([Changes].dblNewUnitAfterDiscount AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND [Changes].dtmOldBeginDate != [Changes].dtmNewBeginDate THEN CAST(CAST([Changes].dtmNewBeginDate AS DATE) AS NVARCHAR(50))
-				WHEN [Changes].dtmOldEndDate IS NOT NULL AND [Changes].dtmOldEndDate != [Changes].dtmNewEndDate THEN CAST(CAST([Changes].dtmNewEndDate AS DATE) AS NVARCHAR(50))
+				WHEN [Changes].dblNewUnitAfterDiscount IS NOT NULL AND ISNULL([Changes].dblOldUnitAfterDiscount, 0) != ISNULL([Changes].dblNewUnitAfterDiscount, 0) THEN CAST(CAST(ISNULL([Changes].dblNewUnitAfterDiscount, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
+				WHEN [Changes].dtmNewBeginDate IS NOT NULL AND CAST([Changes].dtmOldBeginDate AS DATE) != CAST([Changes].dtmNewBeginDate AS DATE) THEN CAST(CAST([Changes].dtmNewBeginDate AS DATE) AS NVARCHAR(50))
+				WHEN [Changes].dtmNewEndDate IS NOT NULL AND CAST([Changes].dtmOldEndDate AS DATE) != CAST([Changes].dtmNewEndDate AS DATE) THEN CAST(CAST([Changes].dtmNewEndDate AS DATE) AS NVARCHAR(50))
 			 END
 	        ,[Changes].intItemId 
 			,[Changes].intItemSpecialPricingId
@@ -369,7 +369,8 @@ BEGIN TRANSACTION
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 
 
-   DELETE FROM @tblPreview WHERE strOldData = strNewData
+   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+
    -- Query Preview display
    SELECT strLocation
 		  , strUpc
