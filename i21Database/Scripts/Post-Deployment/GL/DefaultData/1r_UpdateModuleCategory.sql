@@ -94,7 +94,7 @@ GO
 				CROSS APPLY
 				(
 					SELECT TOP 1 intModuleId
-					FROM dbo.tblARCustomerLicenseModule
+					FROM dbo.tblSMModule 
 					WHERE intModuleId = C.intModuleId
 				) M
 	) AS Source
