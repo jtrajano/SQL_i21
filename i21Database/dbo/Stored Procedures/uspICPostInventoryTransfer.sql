@@ -289,7 +289,7 @@ BEGIN
 				,Header.dtmTransferDate
 				,dblQty = -Detail.dblQuantity
 				,dblUOMQty = ItemUOM.dblUnitQty
-				,ISNULL(Lot.dblLastCost, ItemPricing.dblLastCost)
+				,COALESCE(NULLIF(Detail.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
 				,0
 				,@DefaultCurrencyId
 				,1
