@@ -6646,6 +6646,7 @@
     <Build Include="dbo\Tables\tblMFItemDemandStage.sql" />
     <Build Include="dbo\Views\vyuCTFinalizedContract.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetTemplateLotStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
