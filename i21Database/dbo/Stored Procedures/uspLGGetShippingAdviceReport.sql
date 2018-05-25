@@ -176,6 +176,7 @@ BEGIN
 				L.strDestinationCity,
 				L.dtmBLDate,
 				L.dtmScheduledDate,
+				strScheduledDate = datename(dd, L.dtmScheduledDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(L.dtmScheduledDate, 'MMM')),format(L.dtmScheduledDate, 'MMM')) + ' ' + datename(yyyy, L.dtmScheduledDate),
 				L.dtmETAPOL,
 				L.dtmETAPOD,
 				L.dtmETSPOL,
@@ -294,9 +295,9 @@ BEGIN
 				isnull(rtrt3.strTranslation,I.strDescription) AS strItemDescription,
 				CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo,
 				(SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId) dblLoadWeight,
-				UM.strUnitMeasure strLoadWeightUOM,
-				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) + ' ' + '(Shipment in ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) +')' AS strShipmentWeightInfo,
-				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + UM.strUnitMeasure AS strShipmentQtyInfo,
+				isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure) strLoadWeightUOM,
+				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) + ' ' + '('+@strShipmentWeightInfo+' ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) +')' AS strShipmentWeightInfo,
+				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure) AS strShipmentQtyInfo,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
 				(SELECT STUFF((
@@ -378,6 +379,10 @@ BEGIN
 		left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = rtc8.intCountryID
 		left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
 
+		left join tblSMScreen				rtUMScreen on rtUMScreen.strNamespace = 'Inventory.view.InventoryUOM'
+		left join tblSMTransaction			rtUMTransaction on rtUMTransaction.intScreenId = rtUMScreen.intScreenId and rtUMTransaction.intRecordId = WUM.intUnitMeasureId
+		left join tblSMReportTranslation	rtUMTranslation on rtUMTranslation.intLanguageId = @intLaguageId and rtUMTranslation.intTransactionId = rtUMTransaction.intTransactionId and rtUMTranslation.strFieldName = 'UOM'
+	
 		--
 		WHERE L.strLoadNumber = @strTrackingNumber
 	END
