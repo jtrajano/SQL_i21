@@ -5,14 +5,23 @@
 
  AS
  BEGIN
-	 IF object_id('tempdb..#ListOfArticles') IS NOT NULL
-	       DROP TABLE #ListOfArticles
+ IF object_id('tempdb..#ListOfArticles') IS NOT NULL
+	DROP TABLE #ListOfArticles
 
-		--DECLARE @ListOfArticles TABLE(strArticle VARCHAR(100));
+   CREATE TABLE dbo.#ListOfArticles 
+   (   
+    strArticle NVARCHAR(100)
+   ) 
+  
+ 
+		--DECLARE @result int;
+		--DECLARE @ListOfArticles TABLE(strArticle NVARCHAR(100));
+	--	DECLARE @ListOfArticles dbo.SubsidiaryType ;
 		DECLARE @sql NVARCHAR(MAX) = N'';
 		DECLARE @insertSQL NVARCHAR(MAX) = '';
+	
 
-		SET @insertSQL = N'INSERT INTO @ListOfArticles
+	  SET @insertSQL = N'INSERT INTO #ListOfArticles
 		SELECT DISTINCT Tab.strTableName FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
 		INNER JOIN tblSMReplicationConfigurationTable AS ConTab
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
@@ -20,11 +29,13 @@
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
 		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
 
-		SET @insertSQL = REPLACE(@insertSQL, 'parentDB', @parentDB)
-		EXECUTE sp_executesql @insertSQL;
-
-
-			--Create Query for adding articles
+		
+		--SET @insertSQL = 'Exec('' ' + Replace(@insertSQL, 'parentDB', @parentDB) + ' '')'
+		SET @insertSQL =  Replace(@insertSQL, 'parentDB', @parentDB)
+		
+        EXECUTE sp_executesql @insertSQL;
+		
+		
 					SELECT @sql += N'exec sp_addarticle '
 					+ N'@publication = '''+@publication+N''','
 					+ N'@article = '''+ strArticle + N''','
@@ -43,13 +54,13 @@
 					+ N'@vertical_partition = ''false'', '
 					+ N'@ins_cmd = ''CALL [sp_MSins_dbo'+strArticle+N']'', ' 
 					+ N'@del_cmd = ''CALL [sp_MSdel_dbo'+strArticle+N']'',  ' 
-					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'								
+					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'	
 					FROM sys.tables as systables
 					INNER JOIN #ListOfArticles as articles
 					ON systables.name = articles.strArticle
 					WHERE is_replicated = 0;
 
-				--Executed Created Query
-				EXEC @result = sp_executesql @sql;			
-			
+					
+				EXEC @result = sp_executesql @sql;	
+		
 END

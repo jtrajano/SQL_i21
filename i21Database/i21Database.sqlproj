@@ -6647,6 +6647,8 @@
     <Build Include="dbo\Views\vyuCTFinalizedContract.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateLotStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationSetIdentityNotForReplication.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationSetRangeStart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
