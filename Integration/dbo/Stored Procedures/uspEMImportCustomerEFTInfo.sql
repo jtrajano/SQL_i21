@@ -29,6 +29,10 @@ BEGIN
 	IF(@Checking = 0)
 	BEGIN
 	
+		OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+		DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+		WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+
 		INSERT INTO [dbo].[tblEMEntityEFTInformation]
 				   ([intEntityId]             
 		   			,[intBankId]               
@@ -50,7 +54,7 @@ BEGIN
 		SELECT CUS.intEntityId --[intEntityId]            
 		   	,BNK.[intBankId] --[intBankId]              
 		   	,BNK.[strBankName] --[strBankName]            
-		   	,RTRIM(EFT.efeft_account_no)--[strAccountNumber]        
+		   	,dbo.fnAESEncryptASym(RTRIM(EFT.efeft_account_no))--[strAccountNumber]        
 		   	,CASE WHEN EFT.efeft_acct_type = 'C' THEN 'Checking' ELSE 'Saving' END --[strAccountType]          
 		   	,CASE WHEN EFT.efeft_acct_class_cp = 'C' THEN 'Corporate' ELSE 'Personal' END --strAccountClassification
 		   	,CONVERT(DATETIME, CAST(EFT.efeft_effective_date AS CHAR(12)), 112) --[dtmEffectiveDate]        
@@ -96,7 +100,7 @@ BEGIN
 		SELECT VND.intEntityId --[intEntityId]            
 		   	,BNK.[intBankId] --[intBankId]              
 		   	,BNK.[strBankName] --[strBankName]            
-		   	,RTRIM(EFT.efeft_account_no) --[strAccountNumber]        
+		   	,dbo.fnAESEncryptASym(RTRIM(EFT.efeft_account_no))--[strAccountNumber]        
 		   	,CASE WHEN EFT.efeft_acct_type = 'C' THEN 'Checking' ELSE 'Saving' END --[strAccountType]          
 		   	,CASE WHEN EFT.efeft_acct_class_cp = 'C' THEN 'Corporate' ELSE 'Personal' END --strAccountClassification
 		   	,CONVERT(DATETIME, CAST(EFT.efeft_effective_date AS CHAR(12)), 112) --[dtmEffectiveDate]        
@@ -120,6 +124,8 @@ BEGIN
 		INNER JOIN tblCMBank BNK ON BNK.strBankName COLLATE SQL_Latin1_General_CP1_CS_AS = OBNK.ssbnk_name COLLATE SQL_Latin1_General_CP1_CS_AS
 		WHERE EFT.efeft_eft_type_cv = 'V' AND  VND.intEntityId NOT IN (SELECT intEntityId FROM [tblEMEntityEFTInformation] WHERE intEntityId = VND.intEntityId
 		AND (CASE WHEN EFT.efeft_src_sys ='AP' THEN 'Accounts Payable' WHEN EFT.efeft_src_sys ='AR' THEN 'Accounts Receivable' ELSE 'Payroll' END) = [strEFTType])
+
+		CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 	END
 
 
