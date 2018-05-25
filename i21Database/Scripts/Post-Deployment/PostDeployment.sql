@@ -303,6 +303,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\28_Company_Preferences.sql
 :r .\IC\29_Inventory_Constraints.sql
 :r .\IC\30_Populate_Shipment_LineTotal.sql
+:r .\IC\31_RemoveAfter18.3_DataFix.sql 
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
