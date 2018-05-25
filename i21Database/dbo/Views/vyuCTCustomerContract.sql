@@ -64,10 +64,11 @@ AS
 					, intCompanyLocationPricingLevelId	=	CH.intCompanyLocationPricingLevelId
 					, strType							=	IM.strType
 					, strBundleType						=	IM.strBundleType
-					, intBookId							= NULL
-					, intSubBookId						= NULL
-					, strBook							= NULL
-					, strSubBook						= NULL
+					, intBookId							=	NULL
+					, intSubBookId						=	NULL
+					, strBook							=	NULL
+					, strSubBook						=	NULL
+					, ysnBestPriceOnly					=	CH.ysnBestPriceOnly
     
 			FROM	tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON  CH.intContractHeaderId				=   CD.intContractHeaderId

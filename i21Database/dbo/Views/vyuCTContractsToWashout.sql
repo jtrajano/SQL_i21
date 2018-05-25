@@ -71,4 +71,4 @@ AS
 	)		PD	ON	PD.intContractDetailId	=	CD.intContractDetailId
 	WHERE	CD.intContractDetailId NOT IN (SELECT intSourceDetailId FROM tblCTWashout)
 	AND		CD.intContractDetailId NOT IN (SELECT intWashoutDetailId FROM tblCTWashout)
-	AND		CD.dblBalanceLoad = CASE WHEN CH.ysnLoad = 1 THEN CD.intNoOfLoad  ELSE CD.dblQuantity END
+	AND		ISNULL(CD.dblBalance,0) = ISNULL(CD.dblQuantity,0)
