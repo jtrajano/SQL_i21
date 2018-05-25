@@ -114,40 +114,40 @@ SELECT
 	INV.dblBaseBuybackAmount,
 
 
-	strUnitMeasure = IOUM.strUnitMeasure,
+	strUnitMeasure = isnull(IOUM.strUnitMeasure, ''),
     intUnitMeasureId =  IOUM.intUnitMeasureId,
-	strPriceUnitMeasure = POUM.strUnitMeasure,
-    strOrderUnitMeasure = OOUM.strUnitMeasure,
-    strWeightUnitMeasure =  WOUM.strUnitMeasure,
-	strSalespersonId =  SPER.strSalespersonId,
+	strPriceUnitMeasure = isnull(POUM.strUnitMeasure, ''),
+    strOrderUnitMeasure = isnull(OOUM.strUnitMeasure, ''),
+    strWeightUnitMeasure =  isnull(WOUM.strUnitMeasure, ''),
+	strSalespersonId =  isnull(SPER.strSalespersonId, ''),
 
-	strSiteNumber =  CSITE.strSiteNumber,
-    strContractNumber =  CT.strContractNumber,
+	strSiteNumber =  isnull(CSITE.strSiteNumber, ''),
+    strContractNumber =  isnull(CT.strContractNumber, ''),
 	intContractSeq =  CT.intContractSeq,
     dblOriginalQty =  INV.dblQtyShipped,
     dblOriginalPrice = INV.dblPrice,
     intOriginalItemUOMId = INV.intItemUOMId,
-    strTaxGroup = TAXGROUP.strTaxGroup,
-    strSalesAccountId = GL.strAccountId,
-    strSalespersonName = SPER.strSalespersonName,
+    strTaxGroup = isnull(TAXGROUP.strTaxGroup, ''),
+    strSalesAccountId = isnull(GL.strAccountId, ''),
+    strSalespersonName = isnull(SPER.strSalespersonName, ''),
     intPricingTypeId = CT.intPricingTypeId,
-    strPricingType = CT.strPricingType,
-    strStorageLocation = ICSLOC.strName,
-    strSubLocation = SMSLOC.strSubLocationName,
+    strPricingType = isnull(CT.strPricingType, ''),
+    strStorageLocation = isnull(ICSLOC.strName, ''),
+    strSubLocation = isnull(SMSLOC.strSubLocationName, ''),
     strPrepayType = CASE WHEN INV.intPrepayTypeId = 1 THEN 'Standard' 
 						WHEN INV.intPrepayTypeId = 2 THEN 'Unit' 
 						WHEN INV.intPrepayTypeId = 3 THEN 'Percentage' 
 					ELSE '0'
 					END,
-    strStorageTypeDescription = GRSTYPE.strStorageTypeDescription,
-    strCurrency = CUR.strCurrency,
+    strStorageTypeDescription = isnull(GRSTYPE.strStorageTypeDescription, ''),
+    strCurrency = isnull(CUR.strCurrency, ''),
     dblDefaultFull = ISNULL( ITMNO.dblDefaultFull, 0.0),
     ysnAvailableTM = ITMNO.ysnAvailableTM,
-    strItemNo = ITMNO.strItemNo,
-    strItemType = ITMNO.strType,
-    strRequired = ITMNO.strRequired,
-    strBundleType = ITMNO.strBundleType,
-	strLotTracking = ITMNO.strLotTracking,
+    strItemNo = isnull(ITMNO.strItemNo, ''),
+    strItemType = isnull(ITMNO.strType, ''),
+    strRequired = isnull(ITMNO.strRequired, ''),
+    strBundleType = isnull(ITMNO.strBundleType, ''),
+	strLotTracking = isnull(ITMNO.strLotTracking, ''),
     dblOriginalLicenseAmount = CASE WHEN ITM.strType =  'Software' THEN dblSalePrice ELSE 0 END,
     dblOriginalMaintenanceAmount =  CASE WHEN ITM.strType = 'Software' THEN
 										CASE WHEN ITM.strMaintenanceCalculationMethod = 'Percentage' THEN 
@@ -155,11 +155,11 @@ SELECT
 										ELSE  INV.dblLicenseAmount * dblMaintenanceRate END
 									ELSE 0 END,
     dblDiscountAmount = CASE WHEN ISNULL(INV.dblDiscount, 0) > 0 THEN  ((INV.dblQtyShipped * INV.dblPrice) * (INV.dblDiscount / 100)) ELSE 0 END,
-    strTicketNumber = TICKET.strTicketNumber,
-    strCustomerReference = TICKET.strCustomerReference,
-    strDestinationGrade = GRADE.strWeightGradeDesc,
-    strDestinationWeight = DWEIGHT.strWeightGradeDesc,
-    strCurrencyExchangeRateType = RTYPE.strCurrencyExchangeRateType,
+    strTicketNumber = isnull(TICKET.strTicketNumber, ''),
+    strCustomerReference = isnull(TICKET.strCustomerReference, ''),
+    strDestinationGrade = isnull(GRADE.strWeightGradeDesc, ''),
+    strDestinationWeight = isnull(DWEIGHT.strWeightGradeDesc, ''),
+    strCurrencyExchangeRateType = isnull(RTYPE.strCurrencyExchangeRateType, ''),
     intOriginDestWeight = DWEIGHT.intOriginDest
 
 
