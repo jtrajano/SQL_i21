@@ -977,16 +977,18 @@ BEGIN TRY
 					--	,@strBatchId
 					--	,'Cost of Goods'
 					--	,@intCreatedUserId
+					-- ,[dblVoucherCost]=SV.[dblCashPrice]						
+					---- NOTE: If Settlement will have multi-currency, it has to convert the foreign amount to functional currency. See commented code below as an example:
+					----CASE WHEN [Contract Currency] <> @intFunctionalCurrencyId THEN 
+					---- Convert the settlement cost to the functional currency. 
+					----SV.[dblCashPrice] * ISNULL([Exchange Rate], 0) 
+					----ELSE 
+					----SV.[dblCashPrice]
+					----END 
+					/*
 					IF @strOwnedPhysicalStock = 'Company'
 					BEGIN
-									 --,[dblVoucherCost] 					=	SV.[dblCashPrice]						
-							 		--								-- NOTE: If Settlement will have multi-currency, it has to convert the foreign amount to functional currency. See commented code below as an example:
-							 		--								--CASE WHEN [Contract Currency] <> @intFunctionalCurrencyId THEN 
-							 		--								--		-- Convert the settlement cost to the functional currency. 
-							 		--								--		SV.[dblCashPrice] * ISNULL([Exchange Rate], 0) 
-							 		--								--	 ELSE 
-							 		--								--		SV.[dblCashPrice]
-							 		--								--END 
+			
 								INSERT INTO @adjustCostOfDelayedPricingStock 
 								(
 								   [intItemId] 
@@ -1312,7 +1314,7 @@ BEGIN TRY
 						END 
 					
 					END
-						
+					*/	
 						DELETE FROM @GLEntries
 						
 						INSERT INTO @GLEntries (
@@ -1358,7 +1360,7 @@ BEGIN TRY
 					IF @intReturnValue < 0
 						GOTO SettleStorage_Exit;
 
-					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) AND @strOwnedPhysicalStock ='Customer' 
 					BEGIN 
 							EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
 					END 
