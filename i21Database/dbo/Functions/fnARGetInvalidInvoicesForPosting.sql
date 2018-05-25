@@ -1230,6 +1230,11 @@ IF(ISNULL(@Post,0)) = 1
 			  AND ISNULL(ARID.[intTicketId],0) = 0
 			  AND ISNULL(ARID.[ysnBlended],0) = 0
 		) ARID ON I.[intInvoiceId] = ARID.[intInvoiceId]
+		LEFT JOIN (
+			SELECT [intLoadId]
+				 , [intPurchaseSale]
+			FROM dbo.tblLGLoad WITH (NOLOCK)
+		) LG ON I.[intLoadId] = LG.[intLoadId]
 		OUTER APPLY (
 			SELECT [dblTotalQtyShipped] = SUM(ISNULL(dblQuantityShipped, 0))
 			FROM dbo.tblARInvoiceDetailLot ARIDL WITH (NOLOCK)
@@ -1237,6 +1242,7 @@ IF(ISNULL(@Post,0)) = 1
 		) LOT
 		WHERE ARID.dblQtyShipped <> ISNULL(LOT.[dblTotalQtyShipped], 0)
 		  AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
+		  AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) <> 3) OR ISNULL(I.[intLoadId], 0) IS NULL)
 																																			
 	END
 ELSE
