@@ -4,7 +4,7 @@
 	-- Parent
 
 	/* System Manager */
-				DECLARE @ListTables TABLE(strTableName VARCHAR(100));
+			DECLARE @ListTables TABLE(strTableName VARCHAR(100));
 			DECLARE @TableName nvarchar(50);
 
 			INSERT INTO @ListTables 
@@ -12,6 +12,7 @@
 
 			--Parent To Sub
 				--Entity
+			--Entity
 			('tblEMContactDetail'),  	--1					
 			('tblEMContactDetailType'), --2
 			('tblEMEntity'),  --3
@@ -56,15 +57,15 @@
 
 			--SM Company Configuration
 		--	('tblSMCompanyPreference'),		--initialization only
-			('tblAPCompanyPreference'),
-			('tblARCompanyPreference'),
-			('tblCTCompanyPreference'),
+				('tblAPCompanyPreference'),
+				('tblARCompanyPreference'),
+				('tblCTCompanyPreference'),
 				--('tblGLCompanyPreferenceOption'), Exist in GL
-			('tblICCompanyPreference'),
-			('tblLGCompanyPreference'),
-			('tblRKCompanyPreference'),
-			('tblQMCompanyPreference'),
-			('tblSMMultiCompany'),
+				('tblICCompanyPreference'),
+				('tblLGCompanyPreference'),
+				('tblRKCompanyPreference'),
+				('tblQMCompanyPreference'),
+				('tblSMMultiCompany'),
 		--	('tblSMCompanySetup'), -- initialization only
 		--	('tblSMMultiCurrency'), -- initialization only
 		--	('tblSMPricingLevel'), -- initialization only
@@ -87,10 +88,10 @@
 			--SM Users/User Roles
 		 --  ('tblEMEntity'), --1
 			 ('tblSMControl'), --2
-			 ('tblSMControlStage'), --3
-			 ('tblSMEntityMenuFavorite'), --4
-			 ('tblSMScreen'), --5
-			 ('tblSMScreenStage'), --6
+				('tblSMControlStage'), --3
+					('tblSMEntityMenuFavorite'), --4
+						('tblSMScreen'), --5
+							('tblSMScreenStage'), --6
 			--('tblSMUserLogin'), --7
 			('tblSMUserPreference'), --8
 			('tblSMUserRole'), --9
@@ -149,6 +150,18 @@
 
 			--Common Info Terms
 			('tblSMTerm '),
+
+
+
+			--Tax
+			('tblSMTaxClass'),
+			('tblSMTaxCode'),
+			('tblSMTaxCodeRate'),
+			('tblSMTaxGroup'),
+			('tblSMTaxGroupCode'),
+			('tblSMTaxGroupCodeCategoryExemption'),
+			('tblSMTaxType'),
+
 
 			--GL
 			('tblGLAccountSegment'), --1
@@ -225,7 +238,7 @@
 			('tblICItemOwner'), --19
 			('tblICItemPOSCategory'), --20
 			('tblICItemPOSSLA'), --21
-		--	('tblICItemPricing'), removed --22
+			('tblICItemPricing'), -- removed --22
 			('tblICItemPricingLevel'), --23
 			('tblICItemSpecialPricing'), --24
 			('tblICItemStockType'), --25
@@ -405,10 +418,112 @@
 			('tblQMConditionalProductProperty'),
 			('tblQMProductPropertyFormulaProperty'),
 
+			--Scale
+			('tblSCScaleSetup'),
+			('tblSCDistributionOption'),
+			('tblSCDeliverySheetImportingTemplate'),
+			('tblSCListTicketTypes'),
+			('tblSCTicketEmailOption'),
+			('tblSCTicketFormat'),
+			('tblSCTicketPrintOption'),
+			('tblSCScaleDevice'),
+			('tblSCTicketPool'),
+			('tblSCTicketType'),
+			('tblSCDeliverySheetImportingTemplateDetail'),
+			('tblSCScaleOperator'),
+			('tblSCTruckDriverReference'),
+			('tblSCLastScaleSetup'),
+			('tblSCUncompletedTicketAlert'),
+		
+			--Grain
+			('tblGRDiscountId'),
+			('tblGRDiscountLocationUse'),
+			('tblGRDiscountCrossReference'),
+			('tblGRDiscountSchedule'),
+			('tblGRDiscountScheduleCode'),
+			('tblGRDiscountScheduleLine'),
+			
+			
 
-			--Subsidiary to Parent
+			--Manufacturing
+			('tblMFAttribute'),
+			('tblMFBlendValidation'),
+			('tblMFBuyingGroup'),
+			('tblMFCompanyPreference'),
+			('tblMFDepartment'),
+			('tblMFHaldheldUserMenuItemMap'),
+			('tblMFHandheldMenuItem'),
+			('tblMFHolidayCalendar'),
+			('tblMFInventoryShipmentRestrictionType'),
+			('tblMFItemChangeMap'),
+			('tblMFItemContamination'),
+			('tblMFItemContaminationDetail'),
+			('tblMFItemGradeDiff'),
+			('tblMFItemGroup'),
+			('tblMFItemMachine'),
+			('tblMFItemOwner'),
+			('tblMFItemSubstitution'),
+			('tblMFItemSubstitutionDetail'),
+			('tblMFItemSubstitutionRecipe'),
+			('tblMFItemSubstitutionRecipeDetail'),
+			('tblMFLotStatusException'),
+			('tblMFMachine'),
+			('tblMFMachineMeasurement'),
+			('tblMFMachinePackType'),
+			('tblMFManufacturingCell'),
+			('tblMFManufacturingCellPackType'),
+			('tblMFManufacturingProcess'),
+			('tblMFManufacturingProcessAttribute'),
+			('tblMFManufacturingProcessMachine'),
+			('tblMFManufacturingProcessRunDuration'),
+			('tblMFMeasurement'),
+			('tblMFNutrient'),
+			('tblMFOneLinePrint'),
+			('tblMFOrderDirection'),
+			('tblMFPackType'),
+			('tblMFPackTypeDetail'),
+			('tblMFParentLotNumberPattern'),
+			('tblMFPattern'),
+			('tblMFPatternByCategory'),
+			('tblMFPatternCode'),
+			('tblMFPatternDetail'),
+			('tblMFPatternSequence'),
+			('tblMFReasonCode'),
+			('tblMFReasonCodeDetail'),
+			('tblMFRecipe'),
+			('tblMFRecipeAlertLog'),
+			('tblMFRecipeCategory'),
+			('tblMFRecipeGuide'),
+			('tblMFRecipeGuideNutrient'),
+			('tblMFRecipeItem'),
+			('tblMFRecipeItemStage'),
+			('tblMFRecipeStage'),
+			('tblMFRecipeSubstituteItem'),
+			('tblMFRecipeSubstituteItemStage'),
+			('tblMFReportCategory'),
+			('tblMFReportCategoryByCustomer'),
+			('tblMFReportLabel'),
+			('tblMFReportLidlUCCPalletLabel'),
+			('tblMFScheduleChangeoverFactor'),
+			('tblMFScheduleChangeoverFactorDetail'),
+			('tblMFScheduleConstraint'),
+			('tblMFScheduleConstraintDetail'),
+			('tblMFScheduleGroup'),
+			('tblMFScheduleGroupDetail'),
+			('tblMFScheduleRule'),
+			('tblMFShift'),
+			('tblMFShiftBreakType'),
+			('tblMFShiftDetail'),
+			('tblMFStorageLocationRestrictionTypeLotStatus'),
+			('tblMFUserPrinterMap'),
+			('tblMFUserRoleEventMap'),
+			('tblMFYield'),
+			('tblMFYieldDetail'),
 
-		     --CM Contracts
+
+
+			----Sub to parent
+			  --CM Contracts
             ('tblCTContractCost'), --1
             ('tblCTContractDetail'), --2
             ('tblCTContractHeader'), --3
@@ -435,7 +550,11 @@
             ('tblLGLoadWarehouse'), --12
             ('tblLGLoadWarehouseContainer'), --13
 
-              ('tblLGLoadDocuments'), --7
+            ('tblLGAllocationHeader'),
+            ('tblLGAllocationDetailOrigin'),
+            ('tblLGAllocationDetail'),
+
+            ('tblLGLoadDocuments'), --7
   
             --LG Weight Claims
             ('tblLGWeightClaim'), --1
@@ -504,7 +623,7 @@
             ('tblICItemStockUOM'), --27 -- included in first set up
             ('tblICItemStockDetail'), --28
             ('tblICStockReservation'), --29
-            ('tblICItemPricing'), --30 -- included in first set up
+           -- ('tblICItemPricing'), --30 -- included in first set up
             ('tblICLot'), --31
             ('tblICLotStatus'), --32
             ('tblICParentLot'), --33
@@ -539,7 +658,85 @@
             ('tblQMSample'), --1
             ('tblQMSampleDetail'), --2
             ('tblQMTestResult'), --3
-            ('tblGLDetail') 
+
+
+            --GL
+            ('tblGLDetail'),
+
+            --Scale
+            ('tblSCTicket'),
+            ('tblSCTicketSplit'),
+            ('tblSCTicketHistory'),
+            ('tblQMTicketDiscount'),
+            ('tblSCTicketContractUsed'),
+            ('tblSCTicketDiscount'),
+            ('tblSCTicketLVStaging'),
+            ('tblSCTicketDiscountLVStaging'),
+            ('tblSCTicketStorageType'),
+            ('tblSCTicketCost'),
+            ('tblSCDeliverySheet'),
+            ('tblSCDeliverySheetSplit'),
+            ('tblSCDeliverySheetHistory'),
+
+            --Manufacturing
+            ('tblMFBlendDemand'),
+            ('tblMFBlendProductionOutputDetail'),
+            ('tblMFBlendRequirement'),
+            ('tblMFBlendRequirementRule'),
+            ('tblMFBudget'),
+            ('tblMFBudgetLog'),
+            ('tblMFCustomFieldValue'),
+            ('tblMFDowntime'),
+            ('tblMFDowntimeMachines'),
+            ('tblMFForecastItemValue'),
+            ('tblMFInventoryAdjustment'),
+            ('tblMFItemDemand'),
+            ('tblMFItemOwnerDetail'),
+            ('tblMFLotInventory'),
+            ('tblMFLotSnapshot'),
+            ('tblMFLotSnapshotDetail'),
+            ('tblMFLotTareWeight'),
+            ('tblMFOrderDetail'),
+            ('tblMFOrderHeader'),
+            ('tblMFOrderManifest'),
+            ('tblMFOrderManifestLabel'),
+            ('tblMFPickForWOStaging'),
+            ('tblMFPickList'),
+            ('tblMFPickListDetail'),
+            ('tblMFProcessCycleCount'),
+            ('tblMFProcessCycleCountMachine'),
+            ('tblMFProcessCycleCountSession'),
+            ('tblMFProductionSummary'),
+            ('tblMFSchedule'),
+            ('tblMFScheduleCalendar'),
+            ('tblMFScheduleCalendarDetail'),
+            ('tblMFScheduleCalendarMachineDetail'),
+            ('tblMFScheduledMaintenance'),
+            ('tblMFScheduledMaintenanceDetail'),
+            ('tblMFScheduleMachineDetail'),
+            ('tblMFScheduleWorkOrder'),
+            ('tblMFScheduleWorkOrderDetail'),
+            ('tblMFShiftActivity'),
+            ('tblMFShiftActivityMachines'),
+            ('tblMFStageWorkOrder'),
+            ('tblMFTask'),
+            ('tblMFWastage'),
+            ('tblMFWorkOrder'),
+            ('tblMFWorkOrderConsumedLot'),
+            ('tblMFWorkOrderInputLot'),
+            ('tblMFWorkOrderInputParentLot'),
+            ('tblMFWorkOrderItem'),
+            ('tblMFWorkOrderProducedLot'),
+            ('tblMFWorkOrderProducedLotTransaction'),
+            ('tblMFWorkOrderProductSpecification'),
+            ('tblMFWorkOrderRecipe'),
+            ('tblMFWorkOrderRecipeCategory'),
+            ('tblMFWorkOrderRecipeComputation'),
+            ('tblMFWorkOrderRecipeComputationMethod'),
+            ('tblMFWorkOrderRecipeComputationType'),
+            ('tblMFWorkOrderRecipeItem'),
+            ('tblMFWorkOrderRecipeSubstituteItem') 
+
 
 			While EXISTS(select TOP 1 strTableName from @ListTables) 
 			Begin

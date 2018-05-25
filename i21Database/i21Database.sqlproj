@@ -6638,6 +6638,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotByStorageUnit.sql" />
     <Build Include="dbo\Functions\fnLGGetTotalAmountPerLoad.sql" />
     <Build Include="dbo\Views\vyuLGInsuranceCalculatorNotMapped.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\37_ReplicationConfiguration.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\38_ReplicationConfigurationTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
