@@ -89,6 +89,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Invoice')
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
+	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -272,3 +273,18 @@ OUTER APPLY (
 	  AND ysnProcessed = 1
 	  AND intInvoiceId = INV.intOriginalInvoiceId
 ) PROVISIONAL
+OUTER APPLY (
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	FROM (
+		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+		INNER JOIN (
+			SELECT intTicketId
+				 , strTicketNumber 
+			FROM dbo.tblSCTicket WITH(NOLOCK)
+		) T ON ID.intTicketId = T.intTicketId
+		WHERE ID.intInvoiceId = INV.intInvoiceId
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+		FOR XML PATH ('')
+	) INV (strTicketNumber)
+) SCALETICKETS
