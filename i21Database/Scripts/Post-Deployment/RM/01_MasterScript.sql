@@ -21,6 +21,6 @@ END
 GO
 IF EXISTS ( SELECT 1 FROM tblRKCompanyPreference WHERE strM2MView IS NULL)
 BEGIN
-	UPDATE tblRKCompanyPreference SET strM2MView = 'View 1' WHERE strM2MView IS NULL
+	UPDATE tblRKCompanyPreference SET strM2MView = 'View 1 - Standard' WHERE strM2MView IS NULL
 END
 GO
