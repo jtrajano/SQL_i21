@@ -9,8 +9,8 @@ SELECT TOP 100 PERCENT * FROM (
         ,entity.intEntityId
         ,ISNULL(customer.dblARBalance,0) AS dblARBalance
         ,split.strSplitNumber AS strSplit
-        ,ct.strContractNumber
-        ,ct.intContractHeaderId
+        ,ctd.strContractNumber
+        ,ctd.intContractHeaderId
         ,ctd.intContractDetailId
         ,ctd.intContractSeq
         ,ticket.strTicketNumber 
@@ -28,17 +28,17 @@ SELECT TOP 100 PERCENT * FROM (
         ,commodity.strDescription
         ,0.00 AS dblFuture
         ,cur.strCurrency
-        ,ctd.intCurrencyId
+        ,ctd.intSeqCurrencyId AS intCurrencyId
         ,ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
         ,(ISNULL(basisFutures.dblPrice, 0) 
-                + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) 
+                + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
             * (ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0)) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
         ,0.00 AS dblAdvance
         ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0
                 ELSE CAST(((
                     ((ISNULL(basisFutures.dblPrice, 0) 
-                        + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) 
+                        + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
                         * (ISNULL(receiptItem.dblOpenReceive,0) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
                     - ISNULL(discounts.dblAmount,0)
                     + ISNULL(charges.dblAmount, 0)
@@ -48,7 +48,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,ISNULL(priorAdvances.dblPriorAdvance,0.00) AS dblPriorAdvance
         ,priorAdvances.strBillIds
         ,uom.strUnitMeasure
-        ,ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0) AS dblUnitBasis
+        ,ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0) AS dblUnitBasis
         ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0 ELSE ISNULL(basisFutures.dblPrice, 0) END AS dblFuturesPrice
         ,ISNULL(discounts.dblAmount,0) AS dblDiscountAmount
         ,ISNULL(charges.dblAmount,0) AS dblChargeAmount
@@ -68,12 +68,13 @@ SELECT TOP 100 PERCENT * FROM (
     --Load basis ticket that is always have receipt or delivered
     INNER JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
         ON ticket.intTicketId = receiptItem.intSourceId AND receipt.intSourceType = 1
-    INNER JOIN (tblCTContractHeader ct INNER JOIN tblCTContractDetail ctd ON ct.intContractHeaderId =  ctd.intContractHeaderId)
-        ON receiptItem.intLineNo = ctd.intContractDetailId
+    -- INNER JOIN (tblCTContractHeader ct INNER JOIN tblCTContractDetail ctd ON ct.intContractHeaderId =  ctd.intContractHeaderId)
+    --     ON receiptItem.intLineNo = ctd.intContractDetailId
+    INNER JOIN vyuCTContractDetailView ctd ON receiptItem.intLineNo = ctd.intContractDetailId
     INNER JOIN tblRKFutureMarket futureMarket ON ctd.intFutureMarketId = futureMarket.intFutureMarketId
     INNER JOIN tblRKFuturesMonth futureMonth ON ctd.intFutureMonthId = futureMonth.intFutureMonthId
     INNER JOIN tblICCommodity commodity ON ticket.intCommodityId = commodity.intCommodityId
-    INNER JOIN tblSMCurrency cur ON ctd.intCurrencyId = cur.intCurrencyID
+    INNER JOIN tblSMCurrency cur ON ctd.intSeqCurrencyId = cur.intCurrencyID
     INNER JOIN (tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure uom ON itemUOM.intUnitMeasureId = uom.intUnitMeasureId)
         ON itemUOM.intItemId = ticket.intItemId AND itemUOM.ysnStockUnit = 1
     OUTER APPLY (
@@ -162,7 +163,7 @@ SELECT TOP 100 PERCENT * FROM (
             FROM tblSMCompanyPreference
         ) mainCurrency
 		WHERE exchangeRateDetail.intRateTypeId = rateType.intAccountsPayableRateTypeId
-		AND exchangeRate.intFromCurrencyId = ctd.intCurrencyId AND exchangeRate.intToCurrencyId = mainCurrency.intDefaultCurrencyId
+		AND exchangeRate.intFromCurrencyId = ctd.intSeqCurrencyId AND exchangeRate.intToCurrencyId = mainCurrency.intDefaultCurrencyId
 		AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
 		ORDER BY exchangeRateDetail.dtmValidFromDate DESC
     ) exchangeRates
