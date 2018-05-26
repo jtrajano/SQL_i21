@@ -37,7 +37,7 @@ FROM	tblICInventoryReceipt Receipt
 		OUTER APPLY (
 			SELECT	strOrderNumber = ct.strContractNumber
 					,rc.intInventoryReceiptChargeId
-					,dblUnitCost = ROUND(rc.dblAmount, 2) 
+					,dblUnitCost = (CASE WHEN rc.strCostMethod = 'Per Unit' THEN  ROUND(rc.dblRate, 2) ELSE ROUND(rc.dblAmount, 2) END )
 					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(rc.dblQuantityPriced,0) ELSE ISNULL(rc.dblAmountBilled,0) END)
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
@@ -54,7 +54,7 @@ FROM	tblICInventoryReceipt Receipt
 						END 
 
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
-					,dblOpenQty = 1 - ISNULL(voucher.QtyTotal, 0)
+					,dblOpenQty =  ISNULL(rc.dblQuantity,1) - ISNULL(voucher.QtyTotal, 0)
 					,dblItemsPayable = 
 						ROUND(rc.dblAmount, 2)
 						- ISNULL(voucher.LineTotal, 0)
