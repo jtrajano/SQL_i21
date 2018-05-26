@@ -718,7 +718,10 @@ BEGIN
 		,intItemLocationId = @intItemLocationId
 		,intItemUOMId = (
 			CASE 
-				WHEN @intItemStockUOMId = @intItemUOMId
+				WHEN (
+						@intItemStockUOMId = @intItemUOMId
+						OR @intWeightUOMId IS NULL
+						)
 					THEN @intItemUOMId
 				ELSE @intWeightUOMId
 				END
@@ -726,7 +729,10 @@ BEGIN
 		,dtmDate = @dtmProductionDate
 		,dblQty = (
 			CASE 
-				WHEN @intItemStockUOMId = @intItemUOMId
+				WHEN (
+						@intItemStockUOMId = @intItemUOMId
+						OR @intWeightUOMId IS NULL
+						)
 					THEN @dblQty
 				ELSE @dblWeight
 				END

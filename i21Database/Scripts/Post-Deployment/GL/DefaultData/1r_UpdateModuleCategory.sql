@@ -94,7 +94,7 @@ GO
 				CROSS APPLY
 				(
 					SELECT TOP 1 intModuleId
-					FROM dbo.tblARCustomerLicenseModule
+					FROM dbo.tblSMModule 
 					WHERE intModuleId = C.intModuleId
 				) M
 	) AS Source
@@ -114,10 +114,19 @@ UPDATE  dbo.tblGLRequiredPrimaryCategory
 SET strView = 'i21.view.CompanyLocation', strTab = 'GL Accounts', strScreen = 'Company Location'
 WHERE intAccountCategoryId IN (
 	SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory IN(
-	'AR Account', 'AP Account', 'Vendor Prepayments',
-	 'Customer Prepayments','Service Charges','Sales Discount'
-	,'Write Off','Undeposited Funds','Deferred Revenue'))
+	 'AP Account', 'Vendor Prepayments','Customer Prepayments','Undeposited Funds',
+	 'Sales Discount','Service Charges','Deferred Revenue','AR Account','Write Off'))
 
+
+UPDATE  dbo.tblGLRequiredPrimaryCategory
+SET strView = 'Manufacturing.view.BagOff', strScreen= 'Bag Off'
+WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory ='Work In Progress')
+
+UPDATE  dbo.tblGLRequiredPrimaryCategory
+SET strView = 'AccountsPayable.view.Voucher', strScreen ='Voucher'
+WHERE intAccountCategoryId IN(
+SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory in ('Other Charge Expense','Other Charge Income'))
+	
 
 UPDATE  dbo.tblGLRequiredPrimaryCategory
 SET strView = 'i21.view.CompanyPreference', strTab = 'System Manager', strScreen = 'Company Configuration'

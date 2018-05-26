@@ -95,6 +95,21 @@ BEGIN TRY
 		,@ysnSourceEmptyOut BIT
 		,@intRecipeTypeId INT
 		,@ysnSellableItem BIT
+		,@strAutoProduceBiProducts NVARCHAR(50)
+		,@intId INT
+		,@intBiProductItemId INT
+		,@intBiProductItemUOMId INT
+		,@dblBiProductQty NUMERIC(38, 20)
+		,@dblQuantity NUMERIC(38, 20)
+		,@dblBiProductQuantity NUMERIC(38, 20)
+		,@intWorkOrderProducedLotParentId INT
+		,@intBiProductLotId INT
+	DECLARE @tblMFWorkOrderRecipeItem TABLE (
+		intId INT identity(1, 1)
+		,intItemId INT
+		,intItemUOMId INT
+		,dblQuantity NUMERIC(38, 20)
+		)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -823,7 +838,7 @@ BEGIN TRY
 				,intConcurrencyId = 1
 				,intCostDriverId = NULL
 				,dblCostRate = NULL
-				,ysnLock=1
+				,ysnLock = 1
 		END
 	END
 
@@ -1118,6 +1133,143 @@ BEGIN TRY
 				EXEC uspMFSetLotStatus @intLotId
 					,@intLotStatusId
 					,@intUserId
+			END
+
+			SELECT @strAutoProduceBiProducts = strAttributeValue
+			FROM tblMFManufacturingProcessAttribute
+			WHERE intManufacturingProcessId = @intManufacturingProcessId
+				AND intLocationId = @intLocationId
+				AND intAttributeId = 115
+
+			IF @strAutoProduceBiProducts IS NULL
+				OR @strAutoProduceBiProducts = ''
+			BEGIN
+				SELECT @strAutoProduceBiProducts = 'False'
+			END
+
+			IF @strAutoProduceBiProducts = 'True'
+			BEGIN
+				INSERT INTO @tblMFWorkOrderRecipeItem (
+					intItemId
+					,intItemUOMId
+					,dblQuantity
+					)
+				SELECT intItemId
+					,intItemUOMId
+					,dblQuantity
+				FROM tblMFWorkOrderRecipeItem
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intRecipeItemTypeId = 2
+					AND ysnConsumptionRequired = 0
+
+				SELECT @dblQuantity = dblQuantity
+				FROM tblMFWorkOrderRecipeItem
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intRecipeItemTypeId = 2
+					AND intItemId = @intItemId
+
+				SELECT @intWorkOrderProducedLotParentId = @intWorkOrderProducedLotId
+
+				SELECT @intId = MIN(intId)
+				FROM @tblMFWorkOrderRecipeItem
+
+				WHILE @intId IS NOT NULL
+				BEGIN
+					SELECT @intBiProductItemId = NULL
+						,@intBiProductItemUOMId = NULL
+						,@dblBiProductQuantity = NULL
+						,@strRetBatchId = NULL
+
+					SELECT @intBiProductItemId = intItemId
+						,@intBiProductItemUOMId = intItemUOMId
+						,@dblBiProductQuantity = dblQuantity
+					FROM @tblMFWorkOrderRecipeItem
+					WHERE intId = @intId
+
+					EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+						,@intItemId = @intItemId
+						,@intManufacturingId = @intManufacturingCellId
+						,@intSubLocationId = @intSubLocationId
+						,@intLocationId = @intLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 33
+						,@ysnProposed = 0
+						,@strPatternString = @intBatchId OUTPUT
+
+					IF @strInstantConsumption = 'False'
+					BEGIN
+						SELECT @strRetBatchId = strBatchId
+						FROM tblMFWorkOrder
+						WHERE intWorkOrderId = @intWorkOrderId
+					END
+
+					IF @strRetBatchId IS NULL
+					BEGIN
+						-- Get the next batch number
+						EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+							,@strRetBatchId OUTPUT
+					END
+
+					SELECT @dblBiProductQty = (@dblProduceQty / @dblQuantity) * @dblBiProductQuantity
+
+					EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
+						,@intItemId = @intBiProductItemId
+						,@dblProduceQty = @dblBiProductQty
+						,@intProduceUOMKey = @intBiProductItemUOMId
+						,@strVesselNo = @strVesselNo
+						,@intUserId = @intUserId
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = NULL
+						,@intContainerId = @intContainerId
+						,@dblTareWeight = NULL
+						,@dblUnitQty = 1
+						,@dblPhysicalCount = @dblBiProductQty
+						,@intPhysicalItemUOMId = @intBiProductItemUOMId
+						,@intBatchId = @intBatchId
+						,@strBatchId = @strRetBatchId
+						,@intShiftId = @intPlannedShiftId
+						,@strReferenceNo = @strReferenceNo
+						,@intStatusId = @intStatusId
+						,@intLotId = @intBiProductLotId OUTPUT
+						,@ysnPostProduction = 1
+						,@strLotAlias = @strLotAlias
+						,@intLocationId = @intLocationId
+						,@intMachineId = @intMachineId
+						,@dtmProductionDate = @dtmPlannedDate
+						,@strVendorLotNo = @strVendorLotNo
+						,@strComment = @strComment
+						,@strParentLotNumber = @strParentLotNumber
+						,@intInputLotId = @intInputLotId
+						,@intInputStorageLocationId = @intInputLotStorageLocationId
+						,@ysnFillPartialPallet = 0
+						,@intSpecialPalletLotId = NULL
+						,@ysnRecap = @ysnRecap
+						,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId OUTPUT
+						,@intLotStatusId = @intLotStatusId
+						,@intWorkOrderProducedLotParentId = @intWorkOrderProducedLotParentId
+
+					IF @intLotStatusId IS NOT NULL
+						AND NOT EXISTS (
+							SELECT *
+							FROM dbo.tblICLot
+							WHERE intLotId = @intLotId
+								AND intLotStatusId = @intLotStatusId
+							)
+						AND @strLotTracking <> 'No'
+					BEGIN
+						--UPDATE dbo.tblICLot
+						--SET intLotStatusId = @intLotStatusId
+						--WHERE intLotId = @intLotId
+						EXEC uspMFSetLotStatus @intLotId
+							,@intLotStatusId
+							,@intUserId
+					END
+
+					SELECT @intId = MIN(intId)
+					FROM @tblMFWorkOrderRecipeItem
+					WHERE intId > @intId
+				END
 			END
 
 			EXEC uspQMSampleCreateBySystem @intWorkOrderId = @intWorkOrderId

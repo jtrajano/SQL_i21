@@ -99,6 +99,7 @@ SELECT CD.intContractDetailId
 	,AD.strSeqCurrency
 	,AD.intSeqPriceUOMId
 	,AD.strSeqPriceUOM
+	,PCU.ysnSubCurrency
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -106,6 +107,7 @@ JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -255,6 +257,7 @@ SELECT CD.intContractDetailId
 	,AD.strSeqCurrency
 	,AD.intSeqPriceUOMId
 	,AD.strSeqPriceUOM
+	,PCU.ysnSubCurrency
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -262,6 +265,7 @@ JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -377,3 +381,4 @@ GROUP BY CD.intContractDetailId
 	,AD.strSeqCurrency
 	,AD.intSeqPriceUOMId
 	,AD.strSeqPriceUOM
+	,PCU.ysnSubCurrency

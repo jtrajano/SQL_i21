@@ -82,6 +82,8 @@ SELECT C.intManufacturingCellId
 			ELSE NULL
 			END
 		) AS intOrderId
+		,W.dtmActualProductionStartDate
+		,W.dtmActualProductionEndDate
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId

@@ -9,7 +9,7 @@ FROM
 tblGLAccountCategory C 
 join tblGLRequiredPrimaryCategory D on C.intAccountCategoryId = D.intAccountCategoryId
 OUTER APPLY (
-	select TOP 1 strModuleName from tblARCustomerLicenseModule where intModuleId = D.intModuleId
+	select TOP 1 strModule strModuleName from tblSMModule where intModuleId = D.intModuleId
 )M
 OUTER APPLY (
 	SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE intAccountCategoryId = D.intAccountCategoryId

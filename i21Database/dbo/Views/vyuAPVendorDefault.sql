@@ -9,8 +9,8 @@ SELECT
 	A.str1099Type,
 	intCurrencyId = ISNULL(C.intDefaultCurrencyId,B.intCurrencyId),
 	strCurrency = ISNULL(E1.strCurrency, E.strCurrency),
-	C.intTermsId,
-	J.strTerm,
+	ISNULL(C.intTermsId,B.intTermsId) AS intTermsId,
+	ISNULL(J.strTerm,J2.strTerm) AS strTerm,
 	D.intEntityId AS intDefaultContactId,
 	D.strName AS strDefaultContactName,
 	D.strEmail AS strDefaultContactEmail,
@@ -57,6 +57,8 @@ FROM
 		ON C.intFreightTermId = Freight.intFreightTermId
 	LEFT JOIN dbo.tblSMTerm J
 		ON C.intTermsId = J.intTermID
+	LEFT JOIN dbo.tblSMTerm J2
+		ON B.intTermsId = J2.intTermID
 	LEFT JOIN dbo.tblGLAccount K
 		ON B.intGLAccountExpenseId = K.intAccountId
 	OUTER APPLY (

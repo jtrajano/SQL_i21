@@ -67,6 +67,9 @@
 	ysnGenerateTaskOnCreatePickOrder Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnGenerateTaskOnCreatePickOrder] DEFAULT 0,
 	ysnLotSnapshotByFiscalMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLotSnapshotByFiscalMonth] DEFAULT 1,
 	intPreProductionControlPointId INT,
-
+	dblDemandUsageDays NUMERIC(18,6),
+	strStartDayOfTheWeekForDemandPlanning NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	ysnConsiderCurrentWeekForDemandPlanning BIT Default 1,
+	dblAverageWeekTransitPeriodForDemandPlanning NUMERIC(18,6),
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

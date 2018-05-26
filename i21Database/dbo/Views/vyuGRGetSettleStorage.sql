@@ -5,7 +5,7 @@ AS
 ,intEntityId				= SS.intEntityId
 ,strEntityName				= E.strName
 ,intCompanyLocationId		= SS.intCompanyLocationId
-,strLocationName			= L.strLocationName
+,strLocationName			= ISNULL(L.strLocationName, 'Multi')
 ,intItemId					= SS.intItemId
 ,strItemNo					= Item.strItemNo
 ,dblSpotUnits				= SS.dblSpotUnits
@@ -30,7 +30,7 @@ AS
 ,strBillId					= ISNULL(Bill.strBillId,'')
 FROM tblGRSettleStorage SS
 JOIN tblEMEntity E ON E.intEntityId = SS.intEntityId
-JOIN tblSMCompanyLocation L ON L.intCompanyLocationId= SS.intCompanyLocationId  
+LEFT JOIN tblSMCompanyLocation L ON L.intCompanyLocationId= SS.intCompanyLocationId
 JOIN tblICItem Item ON Item.intItemId = SS.intItemId
 JOIN tblSMUserSecurity Entity ON Entity.intEntityId=SS.intCreatedUserId
 LEFT JOIN tblAPBill Bill ON Bill.intBillId=SS.intBillId

@@ -1302,7 +1302,12 @@ BEGIN
 				,[strCostMethod]			= RawData.strCostMethod
 				,[dblRate]					= RawData.dblRate
 				,[intCostUOMId]				= RawData.intCostUOMId
-				,[intEntityVendorId]		= ISNULL(RawData.intOtherChargeEntityVendorId, RawData.intEntityVendorId) 
+				,[intEntityVendorId]		= 
+							CASE WHEN RawData.ysnAccrue = 1 THEN 
+									ISNULL(RawData.intOtherChargeEntityVendorId, RawData.intEntityVendorId) 
+								 ELSE 
+									NULL
+							END 
 				,[dblAmount]				= RawData.dblAmount
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
 				,[ysnAccrue]				= RawData.ysnAccrue

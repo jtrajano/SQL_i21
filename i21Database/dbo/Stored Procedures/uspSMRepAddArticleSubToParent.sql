@@ -1,23 +1,41 @@
 ﻿CREATE  PROCEDURE [dbo].[uspSMRepAddArticleSubToParent]
 @result int output,
- @publication  As sysname
- As
- Begin
-		--DECLARE @result int;
-		DECLARE @ListOfArticles TABLE(strArticle VARCHAR(100));
-		DECLARE @sql NVARCHAR(MAX) = N'';
+@publication  As sysname,
+@parentDB NVARCHAR(100)
 
-			INSERT INTO @ListOfArticles
-		SELECT DISTINCT Tab.strTableName FROM tblSMReplicationConfiguration AS Con
+ AS
+ BEGIN
+ IF object_id('tempdb..#ListOfArticles') IS NOT NULL
+	DROP TABLE #ListOfArticles
+
+   CREATE TABLE dbo.#ListOfArticles 
+   (   
+    strArticle NVARCHAR(100)
+   ) 
+  
+ 
+		--DECLARE @result int;
+		--DECLARE @ListOfArticles TABLE(strArticle NVARCHAR(100));
+	--	DECLARE @ListOfArticles dbo.SubsidiaryType ;
+		DECLARE @sql NVARCHAR(MAX) = N'';
+		DECLARE @insertSQL NVARCHAR(MAX) = '';
+	
+
+	  SET @insertSQL = N'INSERT INTO #ListOfArticles
+		SELECT DISTINCT Tab.strTableName FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
 		INNER JOIN tblSMReplicationConfigurationTable AS ConTab
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 		INNER JOIN tblSMReplicationTable AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = 'Subsidiary' AND ysnCommitted = 1 AND ysnEnabled = 1
+		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
 
-
-
-			--Create Query for adding articles
+		
+		--SET @insertSQL = 'Exec('' ' + Replace(@insertSQL, 'parentDB', @parentDB) + ' '')'
+		SET @insertSQL =  Replace(@insertSQL, 'parentDB', @parentDB)
+		
+        EXECUTE sp_executesql @insertSQL;
+		
+		
 					SELECT @sql += N'exec sp_addarticle '
 					+ N'@publication = '''+@publication+N''','
 					+ N'@article = '''+ strArticle + N''','
@@ -36,14 +54,13 @@
 					+ N'@vertical_partition = ''false'', '
 					+ N'@ins_cmd = ''CALL [sp_MSins_dbo'+strArticle+N']'', ' 
 					+ N'@del_cmd = ''CALL [sp_MSdel_dbo'+strArticle+N']'',  ' 
-					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'								
+					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'	
 					FROM sys.tables as systables
-					INNER JOIN @ListOfArticles as articles
+					INNER JOIN #ListOfArticles as articles
 					ON systables.name = articles.strArticle
 					WHERE is_replicated = 0;
 
-				--Executed Created Query
-				EXEC @result = sp_executesql @sql;			
-			
-End
-
+					
+				EXEC @result = sp_executesql @sql;	
+		
+END

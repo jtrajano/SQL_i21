@@ -2,12 +2,14 @@
 AS
 
 WITH DIV1099 (
-	intYear
+	intYear,
+	strVendorId
 )
 AS
 (
 	SELECT
-	 A.intYear
+	 A.intYear,
+	 A.strVendorId
 																  
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
@@ -19,5 +21,6 @@ AS
 		*
 	FROM DIV1099 A
 GO
+
 
 

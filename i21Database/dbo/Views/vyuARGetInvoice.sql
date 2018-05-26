@@ -143,7 +143,8 @@ SELECT
 	strBook = CBOOK.strBook,
 	strSubBook = CSBOOK.strSubBook,
 	intCreditStopDays = CUS.intCreditStopDays,
-	strCreditCode = CUS.strCreditCode
+	strCreditCode = CUS.strCreditCode,
+	intPurchaseSale	= LG.intPurchaseSale
 FROM 
 tblARInvoice INV
 JOIN (SELECT intEntityId,					strCustomerNumber, 
@@ -217,7 +218,11 @@ LEFT JOIN ( SELECT intBookId, strBook
 LEFT JOiN ( SELECT intSubBookId, strSubBook
 				FROM tblCTSubBook  WITH ( NOLOCK) ) CSBOOK
 	ON INV.intSubBookId = CSBOOK.intSubBookId
-		
+LEFT JOIN (
+	SELECT intLoadId
+		 , intPurchaseSale
+	FROM dbo.tblLGLoad WITH (NOLOCK)
+) LG ON INV.intLoadId = LG.intLoadId
 
 
 		                                      

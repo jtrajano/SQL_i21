@@ -6,7 +6,7 @@
 
 AS
 
-
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @Commodity AS TABLE 
 (
 intCommodityIdentity int IDENTITY(1,1) PRIMARY KEY , 
@@ -109,8 +109,9 @@ SELECT 	s.dblQuantity dblTotal,i.intItemId,s.strLocationName,s.strItemNo,s.intLo
 				and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 
 SELECT * INTO #tempCollateral FROM (
-		SELECT  ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC) intRowNum,intCollateralId,co.intCommodityId,intLocationId,c.intContractHeaderId,
-		c.dblRemainingQuantity dblRemainingQuantity,c.intUnitMeasureId,ch.intContractTypeId
+		SELECT  ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC) intRowNum,intCollateralId,co.intCommodityId,intLocationId,
+		c.intContractHeaderId,
+		c.dblRemainingQuantity dblRemainingQuantity,c.intUnitMeasureId,case when c.strType='Purchase' then 1 else 2 end	intContractTypeId
 		FROM tblRKCollateralHistory c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 

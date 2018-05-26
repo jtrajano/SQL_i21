@@ -2273,19 +2273,15 @@ BEGIN TRY
 	DELETE FROM @TempInvoiceIdTable
 	INSERT INTO @TempInvoiceIdTable
 	SELECT DISTINCT
-		EFP.[intInvoiceId]
+		[intInvoiceId]
 	FROM
-		#EntriesForProcessing EFP
-	INNER JOIN
-		@InvoiceEntries IE
-			ON EFP.[intInvoiceId] = IE.[intInvoiceId] 
+		#EntriesForProcessing
 	WHERE
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
-		AND ISNULL(EFP.[intInvoiceId],0) <> 0
-		AND ISNULL(IE.[ysnPost],0) = 1
-		AND ISNULL(IE.[ysnImportedFromOrigin],0) = 0
-		AND ISNULL(EFP.[ysnRecap],0) <> 1	
+		AND ISNULL([intInvoiceId],0) <> 0
+		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnRecap],0) <> 1	
 		
 	SELECT 
 		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))

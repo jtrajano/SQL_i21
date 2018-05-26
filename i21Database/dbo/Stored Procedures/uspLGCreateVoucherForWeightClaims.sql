@@ -24,6 +24,7 @@ BEGIN TRY
 	DECLARE @dblAmountDueForBill NUMERIC(18,6)
 	DECLARE @intBillId INT
 	DECLARE @intVoucherType INT
+	DECLARE @intShipTo INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intWeightClaimRecordId INT Identity(1, 1)
@@ -82,6 +83,12 @@ BEGIN TRY
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
+
+	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
+	FROM tblLGLoad L
+	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
+	WHERE L.intLoadId = @intLoadId
 
 	SELECT TOP 1 @intAPAccount = (ISNULL(intAPAccount,0))
 	FROM tblLGWeightClaim WC 
@@ -248,6 +255,7 @@ BEGIN TRY
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailClaim = @VoucherDetailClaim
 			,@type = @intVoucherType
+			,@shipTo = @intShipTo
 			,@billId = @intBillId OUTPUT
 	
 		IF (@total = @intCount)

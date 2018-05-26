@@ -516,7 +516,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intTransactionId]			= NULL
 							,[intEntityId]				= @EntityId
 							,[ysnResetDetails]			= 1
-							,[ysnPost]					= CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END
+							,[ysnPost]					= case when isnull(@ysnOrigin, 0) = 1 then null  else CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END end
 							,[ysnImportedFromOrigin]	= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
 							,[ysnImportedAsPosted]		= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
 							,[intInvoiceDetailId]		= NULL
