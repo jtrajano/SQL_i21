@@ -381,6 +381,18 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND B.dblOldCost IS NOT NULL AND D.ysnInventoryCost = 0
 		AND [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense') IS NULL
+
+		--Do not allow to post if tblAPBill.dblTotal != tblAPBill.dblTotalController
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			'Voucher Total is not equal with control total.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			32
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
+			A.dblTotalController != 0 AND A.dblTotal <> A.dblTotalController
 	END
 	ELSE
 	BEGIN
