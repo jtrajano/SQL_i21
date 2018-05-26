@@ -2,7 +2,7 @@
 @intCurrentUserId INT,
 @intCheckoutId INT,
 @intInvoiceId INT,
-@intCustomerChargesInvoiceId INT,
+@strAllInvoiceIdList NVARCHAR(1000),
 @intStoreId INT,
 @intShiftNo INT,
 @dtmCheckoutDate DATE,
@@ -13,34 +13,17 @@ BEGIN
 
 		SET @strStatusMsg = 'Success'
 
-		---- Values for deleting from table tblSTMarkUpDown
-		--DECLARE @intStoreId INT = NULL 
-		--DECLARE @intShiftNo INT = NULL
-		--DECLARE @dtmCheckoutDate DATE = NULL
-
 		-- Values for deleting from tblSTCheckoutHeader, UnPosting Sales Invoice
 		DECLARE @strInvoiceId NVARCHAR(50) = ''
 		DECLARE @ysnInvoiceIsPosted BIT = NULL
-		DECLARE @intSuccessfullCount INT
+		DECLARE @intMainCheckoutSuccessfullCountOut INT
 		DECLARE @intInvalidCount INT
-		DECLARE @ysnSuccess BIT
+		DECLARE @ysnMainCheckoutSuccessOut BIT
 		DECLARE @strBatchIdUsed NVARCHAR(40)
 		DECLARE @ysnError BIT = 1
 
-		--IF EXISTS(SELECT intCheckoutId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
-		--	BEGIN
-		--		SELECT @intStoreId = intStoreId
-		--			   , @intShiftNo = intShiftNo
-		--			   , @dtmCheckoutDate = dtmCheckoutDate
-		--			   , @intInvoiceId = intInvoiceId
-		--		FROM tblSTCheckoutHeader 
-		--		WHERE intCheckoutId = @intCheckoutId
-		--	END
-		--ELSE
-		--	BEGIN
-		--		SET @strStatusMsg = 'Checkout does not exist'
-		--	END
-
+		DECLARE @ysnContinueToPostMainCheckout BIT
+		DECLARE @intCurrentInvoiceLoop AS INT
 		----------------------------------------------------------------------------------
 		------------------------ Delete From tblSTMarkUpDown -----------------------------
 		----------------------------------------------------------------------------------
@@ -59,130 +42,67 @@ BEGIN
 		----------------------------------------------------------------------------------
 
 
-		IF(@intInvoiceId IS NOT NULL)
+
+
+		IF(@strAllInvoiceIdList IS NOT NULL)
 			BEGIN
-				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN(SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strAllInvoiceIdList)))
 					BEGIN
-							SELECT @ysnInvoiceIsPosted = ysnPosted 
-							FROM tblARInvoice 
-							WHERE intInvoiceId = @intInvoiceId 
-							AND ISNULL(ysnPosted,0) = 1
-
-
-							IF(@ysnInvoiceIsPosted = 1)
+							-- Create the temp table for the intInvoiceId's.
+							IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
 								BEGIN
-									------------------------------------------------------------------
-									------------------------ UnPost Invoice --------------------------
-									------------------------------------------------------------------
-
-									SET @strInvoiceId = CAST(@intInvoiceId AS NVARCHAR(50))
-
-									EXEC [dbo].[uspARPostInvoice]
-											@batchId			= NULL,
-											@post				= 0, -- 0 = UnPost
-											@recap				= 0,
-											@param				= @strInvoiceId,
-											@userId				= @intCurrentUserId,
-											@beginDate			= NULL,
-											@endDate			= NULL,
-											@beginTransaction	= NULL,
-											@endTransaction		= NULL,
-											@exclude			= NULL,
-											@successfulCount	= @intSuccessfullCount OUTPUT,
-											@invalidCount		= @intInvalidCount OUTPUT,
-											@success			= @ysnSuccess OUTPUT,
-											@batchIdUsed		= @strBatchIdUsed OUTPUT,
-											@transType			= N'all',
-											@raiseError			= @ysnError
-
-										-- Example OutPut params
-										-- @intSuccessfullCount: 1
-										-- @intInvalidCount: 0
-										-- @ysnSuccess: 1
-										-- @strBatchIdUsed: BATCH-722
-										------------------------------------------------------------------
-										--------------------- End UnPost Invoice -------------------------
-										------------------------------------------------------------------
+									DROP TABLE #tmpCustomerInvoiceIdList
 								END
-								
+							IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NULL  
+								BEGIN
+									CREATE TABLE #tmpCustomerInvoiceIdList (
+									intInvoiceId INT
+								);
+								END
 
-								------------------------------------------------------------------
-								------------------------ Delete Invoice --------------------------
-								------------------------------------------------------------------
+							-- Insert to temp table
+							INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
+							SELECT [intID] AS intInvoiceId 
+							FROM [dbo].[fnGetRowsFromDelimitedValues](@strAllInvoiceIdList) ORDER BY [intID] ASC
+
+							------------------------------------------------------------------
+							------------------------ Delete Invoice --------------------------
+							------------------------------------------------------------------
+
+							
+							WHILE EXISTS (SELECT TOP (1) 1 FROM #tmpCustomerInvoiceIdList)
+							BEGIN
+								SELECT TOP 1 @intCurrentInvoiceLoop = CAST([intInvoiceId] AS NVARCHAR(50)) FROM #tmpCustomerInvoiceIdList
 
 								EXEC [dbo].[uspARDeleteInvoice]
-									 @InvoiceId	= @intInvoiceId,
-									 @UserId	= @intCurrentUserId
+										 @InvoiceId	= @intCurrentInvoiceLoop,
+										 @UserId	= @intCurrentUserId
 
-								------------------------------------------------------------------
-								---------------------- End Delete Invoice ------------------------
-								------------------------------------------------------------------
+								DELETE TOP (1) FROM #tmpCustomerInvoiceIdList
 							END
+
+
+							------------------------------------------------------------------
+							---------------------- End Delete Invoice ------------------------
+							------------------------------------------------------------------
+
 					END
-
-			IF(@intCustomerChargesInvoiceId IS NOT NULL)
-			BEGIN
-				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCustomerChargesInvoiceId)
-					BEGIN
-							SELECT @ysnInvoiceIsPosted = ysnPosted 
-							FROM tblARInvoice 
-							WHERE intInvoiceId = @intCustomerChargesInvoiceId 
-							AND ISNULL(ysnPosted,0) = 1
-
-
-							IF(@ysnInvoiceIsPosted = 1)
-								BEGIN
-									------------------------------------------------------------------
-									------------------------ UnPost Invoice --------------------------
-									------------------------------------------------------------------
-
-									SET @strInvoiceId = CAST(@intCustomerChargesInvoiceId AS NVARCHAR(50))
-
-									EXEC [dbo].[uspARPostInvoice]
-											@batchId			= NULL,
-											@post				= 0, -- 0 = UnPost
-											@recap				= 0,
-											@param				= @strInvoiceId,
-											@userId				= @intCurrentUserId,
-											@beginDate			= NULL,
-											@endDate			= NULL,
-											@beginTransaction	= NULL,
-											@endTransaction		= NULL,
-											@exclude			= NULL,
-											@successfulCount	= @intSuccessfullCount OUTPUT,
-											@invalidCount		= @intInvalidCount OUTPUT,
-											@success			= @ysnSuccess OUTPUT,
-											@batchIdUsed		= @strBatchIdUsed OUTPUT,
-											@transType			= N'all',
-											@raiseError			= @ysnError
-
-										-- Example OutPut params
-										-- @intSuccessfullCount: 1
-										-- @intInvalidCount: 0
-										-- @ysnSuccess: 1
-										-- @strBatchIdUsed: BATCH-722
-										------------------------------------------------------------------
-										--------------------- End UnPost Invoice -------------------------
-										------------------------------------------------------------------
-								END
-								
-
-								------------------------------------------------------------------
-								------------------------ Delete Invoice --------------------------
-								------------------------------------------------------------------
-
-								EXEC [dbo].[uspARDeleteInvoice]
-									 @InvoiceId	= @intCustomerChargesInvoiceId,
-									 @UserId	= @intCurrentUserId
-
-								------------------------------------------------------------------
-								---------------------- End Delete Invoice ------------------------
-								------------------------------------------------------------------
-							END
-					END
+			END
+			
+			--DROP
+			IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+				BEGIN
+					DROP TABLE #tmpCustomerInvoiceIdList
+				END
 	END TRY
 
 	BEGIN CATCH
+		--DROP
+		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+			BEGIN
+					DROP TABLE #tmpCustomerInvoiceIdList
+			END
+
 		SET @strStatusMsg = ERROR_MESSAGE()
 	END CATCH
 END

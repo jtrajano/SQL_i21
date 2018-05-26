@@ -50,19 +50,19 @@ BEGIN
 		-- DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
 
 		DECLARE @intCurrentInvoiceId INT
-		DECLARE @intCurrentCustomerChragesInvoiceId INT
+		DECLARE @strCurrentAllInvoiceIdList NVARCHAR(1000)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
-				, @intCurrentCustomerChragesInvoiceId = intCustomerChargesInvoiceId
+				, @strCurrentAllInvoiceIdList = strAllInvoiceIdList
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
 
 		DECLARE @intCreatedInvoiceId INT = NULL
-		DECLARE @intCreatedCustomerChragesInvoiceId INT = NULL
+		DECLARE @strAllCreatedInvoiceIdList NVARCHAR(1000)
 
 		-- FOR UNPOST
-		DECLARE @strInvoiceId NVARCHAR(50) = ''
+		DECLARE @strInvoiceIdList NVARCHAR(50) = ''
 		DECLARE @strCustomerChargesInvoiceId NVARCHAR(50) = ''
 		DECLARE @ysnInvoiceIsPosted BIT = NULL
 		DECLARE @intSuccessfullCount INT
@@ -71,6 +71,18 @@ BEGIN
 		DECLARE @strBatchIdUsed NVARCHAR(40)
 		DECLARE @ysnError BIT = 1
 
+		-- Create the temp table for the intInvoiceId's.
+		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+			BEGIN
+				DROP TABLE #tmpCustomerInvoiceIdList
+			END
+		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NULL  
+			BEGIN
+				CREATE TABLE #tmpCustomerInvoiceIdList (
+				intInvoiceId INT
+			);
+			END
+			
 
 		----------------------------------------------------------------------
 		-------------------- Check current Invoice status --------------------
@@ -83,47 +95,16 @@ BEGIN
 						SET @ysnCurrentInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCurrentInvoiceId)
 						
 						SET @ysnInvoiceStatus = @ysnCurrentInvoiceStatus
-
-						--IF(@ysnCurrentInvoiceStatus = 1)
-						--	BEGIN
-						--		SET @CheckoutCurrentStatus = 'Posted'
-						--	END
-						--ELSE IF(@ysnCurrentInvoiceStatus = 0)
-						--	BEGIN
-						--		SET @CheckoutCurrentStatus = 'Manager Verified'
-						--	END
 					END
 			END
 		ELSE
 			BEGIN
 				SET @ysnInvoiceStatus = 0 -- Set to false
-
-				--SELECT @CheckoutCurrentStatus = strCheckoutStatus
-				--FROM tblSTCheckoutHeader
-				--WHERE intCheckoutId = @intCheckoutId
 			END
 		----------------------------------------------------------------------
 		------------------ End check current Invoice status ------------------
 		----------------------------------------------------------------------
 
-
-		----------------------------------------------------------------------
-		------------ Check current Customer Charges Invoice status -----------
-		----------------------------------------------------------------------
-		IF(@intCurrentCustomerChragesInvoiceId IS NOT NULL)
-			BEGIN
-				IF EXISTS(SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId = @intCurrentCustomerChragesInvoiceId)
-					BEGIN
-						SET @ysnCustomerChargesInvoiceStatus = (SELECT ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intCurrentCustomerChragesInvoiceId)			
-					END
-			END
-		ELSE
-			BEGIN
-				SET @ysnCustomerChargesInvoiceStatus = 0 -- Set to false
-			END
-		----------------------------------------------------------------------
-		--- ---- End Check current Customer Charges Invoice status -----------
-		----------------------------------------------------------------------
 
 
 		----------------------------------------------------------------------
@@ -158,6 +139,7 @@ BEGIN
 		----------------------------------------------------------------------
 		-------------------- End Verify Posting Direction --------------------
 		----------------------------------------------------------------------
+
 
 
 		----------------------------------------------------------------------
@@ -1417,9 +1399,9 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[intOrderUOMId]			= CC.intProduct --UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- -1
-											,[intItemUOMId]				= UOM.intItemUOMId
+											,[intItemUOMId]				= CC.intProduct --UOM.intItemUOMId
 											,[dblQtyShipped]			= -1
 											,[dblDiscount]				= 0
 											,[dblPrice]					= ISNULL(CC.dblAmount,0)
@@ -1473,7 +1455,7 @@ BEGIN
 													AND CH.intStoreId = ST.intStoreId
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND CC.dblAmount > 0
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+								----AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
 				ELSE 
@@ -1901,60 +1883,13 @@ BEGIN
 
 
 
+
+				-- START CREATE SEPARATE INVOICE for Customer Charges
 				----------------------------------------------------------------------
-				------------------------------- POST ---------------------------------
+				-------------------------- CUSTOMER CHARGES --------------------------
 				----------------------------------------------------------------------
-				DECLARE @ErrorMessage AS NVARCHAR(MAX) = ''
-				DECLARE @CreatedIvoices AS NVARCHAR(MAX) = ''
-
-				-- SELECT * FROM @EntriesForInvoice
-
-				IF EXISTS(SELECT * FROM @EntriesForInvoice)
-					BEGIN
-						BEGIN TRY
-							
-							-- Filter dblPrice should not be 0 and null
-							DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
-							
-							-- CLEAR
-							SET @CreatedIvoices = ''
-
-							EXEC [dbo].[uspARProcessInvoices]
-										@InvoiceEntries	 = @EntriesForInvoice
-										--,@LineItemTaxEntries = NULL
-										,@UserId			 = @intCurrentUserId
-		 								,@GroupingOption	 = 11
-										,@RaiseError		 = 1
-										,@ErrorMessage		 = @ErrorMessage OUTPUT
-										,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-						END TRY
-
-						BEGIN CATCH
-							SET @ErrorMessage = ERROR_MESSAGE()
-						END CATCH
-
-
-						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
-							BEGIN
-								
-
-								SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
-								SET @ysnUpdateCheckoutStatus = 1
-								SET @strStatusMsg = 'Success'
-								SET @ysnInvoiceStatus = 1
-
-
-								-- IF Has Customer Charges
-								-- Create another Invoice
-								-- Clear @EntriesForInvoice
-								DELETE FROM @EntriesForInvoice
-
-
-								----------------------------------------------------------------------
-								-------------------------- CUSTOMER CHARGES --------------------------
-								----------------------------------------------------------------------
-								IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0 AND intProduct IS NOT NULL)
-									BEGIN																																																																																																																																																																																						BEGIN
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0 AND intProduct IS NOT NULL)
+					BEGIN																																																																																																																																																																																						BEGIN
 											INSERT INTO @EntriesForInvoice(
 															 [strSourceTransaction]
 															,[strTransactionType]
@@ -2050,7 +1985,7 @@ BEGIN
 															,[strType]					= @strInvoiceType
 															,[intSourceId]				= @intCheckoutId
 															,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
-															,[intInvoiceId]				= @intCurrentCustomerChragesInvoiceId -- @intCurrentInvoiceId -- NULL = New
+															,[intInvoiceId]				= CC.intCustomerChargesInvoiceId --@intCurrentCustomerChragesInvoiceId -- @intCurrentInvoiceId -- NULL = New
 															,[intEntityCustomerId]		= @intEntityCustomerId
 															,[intCompanyLocationId]		= @intCompanyLocationId
 															,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
@@ -2067,7 +2002,7 @@ BEGIN
 															,[strInvoiceOriginId]		= NULL -- not sure
 															,[strPONumber]				= NULL -- not sure
 															,[strBOLNumber]				= NULL -- not sure
-															,[strComments]				= @strComments
+															,[strComments]				= @strComments + CAST(CC.intCustChargeId AS NVARCHAR(100)) -- to be able to create reparate Invoices
 															,[intShipToLocationId]		= NULL
 															,[intBillToLocationId]		= NULL
 															,[ysnTemplate]				= 0
@@ -2087,10 +2022,10 @@ BEGIN
 															,[intItemId]				= I.intItemId
 															,[ysnInventory]				= 1
 															,[strItemDescription]		= I.strDescription
-															,[intOrderUOMId]			= UOM.intItemUOMId
+															,[intOrderUOMId]			= CC.intProduct --UOM.intItemUOMId
 															,[dblQtyOrdered]			= 0 -- -1
-															,[intItemUOMId]				= UOM.intItemUOMId
-															,[dblQtyShipped]			= 1 -- -1
+															,[intItemUOMId]				= CC.intProduct --UOM.intItemUOMId
+															,[dblQtyShipped]			= 1 -- If separate invoice change negative to positive Qty
 															,[dblDiscount]				= 0
 															,[dblPrice]					= ISNULL(CC.dblAmount, 0)
 															,[ysnRefreshPrice]			= 0
@@ -2143,51 +2078,72 @@ BEGIN
 																	AND CH.intStoreId = ST.intStoreId
 												WHERE CC.intCheckoutId = @intCheckoutId
 												AND CC.dblAmount > 0
-												AND UOM.ysnStockUnit = CAST(1 AS BIT)
+												--AND UOM.ysnStockUnit = CAST(1 AS BIT)
+												ORDER BY CC.intCustChargeId ASC
+					END
+			    END
+				------------------------------------------------------------------------
+				------------------------- END CUSTOMER CHARGES -------------------------
+				------------------------------------------------------------------------
+				-- END CREATE SEPARATE INVOICE for Customer Charges
 
-											IF EXISTS(SELECT * FROM @EntriesForInvoice)
-												BEGIN
 
-													BEGIN TRY
-														-- CLEAR
-														SET @CreatedIvoices = ''
 
-														EXEC [dbo].[uspARProcessInvoices]
-															@InvoiceEntries	 = @EntriesForInvoice
-															--,@LineItemTaxEntries = NULL
-															,@UserId			 = @intCurrentUserId
-		 													,@GroupingOption	 = 11
-															,@RaiseError		 = 1
-															,@ErrorMessage		 = @ErrorMessage OUTPUT
-															,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-													END TRY
+				----------------------------------------------------------------------
+				------------------------------- POST ---------------------------------
+				----------------------------------------------------------------------
+				DECLARE @ErrorMessage AS NVARCHAR(MAX) = ''
+				DECLARE @CreatedIvoices AS NVARCHAR(MAX) = ''
 
-													BEGIN CATCH
-														SET @ErrorMessage = ERROR_MESSAGE()
-													END CATCH
+				-- SELECT * FROM @EntriesForInvoice
 
-												    IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
-														BEGIN
-															SET @intCreatedCustomerChragesInvoiceId = CAST(@CreatedIvoices AS INT)
-															SET @ysnUpdateCheckoutStatus = 1
-															SET @strStatusMsg = 'Success'
-															SET @ysnCustomerChargesInvoiceStatus = 1
+				IF EXISTS(SELECT * FROM @EntriesForInvoice)
+					BEGIN
+						BEGIN TRY
+							
+							-- Filter dblPrice should not be 0 and null
+							DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
+							
+							-- CLEAR
+							SET @CreatedIvoices = ''
 
-														END
-													ELSE
-														BEGIN
-															SET @ysnUpdateCheckoutStatus = 0
-															SET @strStatusMsg = 'Customer Charges Invoice: ' + @ErrorMessage
-														END
+							-- POST Main Checkout Invoice
+							EXEC [dbo].[uspARProcessInvoices]
+										@InvoiceEntries	 = @EntriesForInvoice
+										--,@LineItemTaxEntries = NULL
+										,@UserId			 = @intCurrentUserId
+		 								,@GroupingOption	 = 11
+										,@RaiseError		 = 1
+										,@ErrorMessage		 = @ErrorMessage OUTPUT
+										,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+						END TRY
 
-													
-												END
-											
-									END
-								END
-								----------------------------------------------------------------------
-								----------------------- END CUSTOMER CHARGES -------------------------
-								----------------------------------------------------------------------
+						BEGIN CATCH
+							SET @ErrorMessage = ERROR_MESSAGE()
+						END CATCH
+
+
+						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
+							BEGIN
+								--SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
+
+								-- Insert to temp table
+								INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
+								SELECT [intID] AS intInvoiceId 
+								FROM [dbo].[fnGetRowsFromDelimitedValues](@CreatedIvoices) ORDER BY [intID] ASC
+
+								-- Invoice MAIN Checkout
+								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList ORDER BY intInvoiceId ASC)
+
+								-- Invoice remaining will be used for Customer CHarges
+								DELETE FROM #tmpCustomerInvoiceIdList WHERE intInvoiceId = @intCreatedInvoiceId
+
+								-- CUSTOMER CHARGES
+								SET @strAllCreatedInvoiceIdList = @CreatedIvoices
+
+								SET @ysnUpdateCheckoutStatus = 1
+								SET @strStatusMsg = 'Success'
+								SET @ysnInvoiceStatus = 1
 
 							END
 						ELSE
@@ -2202,72 +2158,36 @@ BEGIN
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
-				SET @strInvoiceId = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
+				--SET @strInvoiceIdList = CAST(@intCurrentInvoiceId AS NVARCHAR(50))
 
 				----------------------------------------------------------------------
 				----------------------------- UN-POST ---------------------------------
 				----------------------------------------------------------------------
-				-- 1st Invoice: CHeckout
-				BEGIN TRY
-						EXEC [dbo].[uspARPostInvoice]
-								@batchId			= NULL,
-								@post				= 0, -- 0 = UnPost
-								@recap				= 0,
-								@param				= @strInvoiceId,
-								@userId				= @intCurrentUserId,
-								@beginDate			= NULL,
-								@endDate			= NULL,
-								@beginTransaction	= NULL,
-								@endTransaction		= NULL,
-								@exclude			= NULL,
-								@successfulCount	= @intSuccessfullCount OUTPUT,
-								@invalidCount		= @intInvalidCount OUTPUT,
-								@success			= @ysnSuccess OUTPUT,
-								@batchIdUsed		= @strBatchIdUsed OUTPUT,
-								@transType			= N'all',
-								@raiseError			= 1
-
-						SET @ysnSuccess = 1
-				END TRY
-
-				BEGIN CATCH
-					SET @ysnUpdateCheckoutStatus = 0
-					SET @ysnSuccess = 0
-					SET @strStatusMsg = ERROR_MESSAGE()
-				END CATCH
-
-				-- Example OutPut params
-				-- @intSuccessfullCount: 1
-				-- @intInvalidCount: 0
-				-- @ysnSuccess: 1
-				-- @strBatchIdUsed: BATCH-722
-
-				IF(@ysnSuccess = 1)
+				-- Main Invoice: Main CHeckout
+				IF(@strCurrentAllInvoiceIdList IS NOT NULL AND @strCurrentAllInvoiceIdList != '')
 					BEGIN
-						SET @ysnInvoiceStatus = 0
-
-						-- UNPOST 2nd Invoice: Customer Charges
-						SET @strCustomerChargesInvoiceId = CAST(@intCurrentCustomerChragesInvoiceId AS NVARCHAR(50))
 						BEGIN TRY
-							EXEC [dbo].[uspARPostInvoice]
-									@batchId			= NULL,
-									@post				= 0, -- 0 = UnPost
-									@recap				= 0,
-									@param				= @strCustomerChargesInvoiceId,
-									@userId				= @intCurrentUserId,
-									@beginDate			= NULL,
-									@endDate			= NULL,
-									@beginTransaction	= NULL,
-									@endTransaction		= NULL,
-									@exclude			= NULL,
-									@successfulCount	= @intSuccessfullCount OUTPUT,
-									@invalidCount		= @intInvalidCount OUTPUT,
-									@success			= @ysnSuccess OUTPUT,
-									@batchIdUsed		= @strBatchIdUsed OUTPUT,
-									@transType			= N'all',
-									@raiseError			= 1
 
-							SET @ysnSuccess = 1
+								EXEC [dbo].[uspARPostInvoice]
+											@batchId			= NULL,
+											@post				= 0, -- 0 = UnPost
+											@recap				= 0,
+											@param				= @strCurrentAllInvoiceIdList,
+											@userId				= @intCurrentUserId,
+											@beginDate			= NULL,
+											@endDate			= NULL,
+											@beginTransaction	= NULL,
+											@endTransaction		= NULL,
+											@exclude			= NULL,
+											@successfulCount	= @intSuccessfullCount OUTPUT,
+											@invalidCount		= @intInvalidCount OUTPUT,
+											@success			= @ysnSuccess OUTPUT,
+											@batchIdUsed		= @strBatchIdUsed OUTPUT,
+											@transType			= N'all',
+											@raiseError			= 1
+
+								SET @ysnSuccess = 1
+
 						END TRY
 
 						BEGIN CATCH
@@ -2276,11 +2196,27 @@ BEGIN
 							SET @strStatusMsg = ERROR_MESSAGE()
 						END CATCH
 
-						IF(@ysnSuccess = 1)
+						-- Example OutPut params
+						-- @intSuccessfullCount: 1
+						-- @intInvalidCount: 0
+						-- @ysnSuccess: 1
+						-- @strBatchIdUsed: BATCH-722
+
+						IF(@ysnSuccess = CAST(1 AS BIT))
 							BEGIN
-								SET @ysnCustomerChargesInvoiceStatus = 0
+								SET @ysnInvoiceStatus = 0
+
+							END
+						ELSE IF(@ysnSuccess = CAST(0 AS BIT))
+							BEGIN
+								SET @strStatusMsg = ERROR_MESSAGE()
 							END
 					END
+				ELSE 
+					BEGIN
+						SET @strStatusMsg = 'There are no Invoice to Unpost'
+					END
+				
 			END
 		----------------------------------------------------------------------
 		----------------------- END POST / UNPOST ----------------------------
@@ -2310,76 +2246,89 @@ BEGIN
 
 				
 
+
 				IF(@ysnPost IS NULL)
 					BEGIN
+
 						UPDATE dbo.tblSTCheckoutHeader 
 						SET strCheckoutStatus = @strNewCheckoutStatus
 						WHERE intCheckoutId = @intCheckoutId
 					END
 				ELSE IF(@ysnPost = 1) -- POST
 					BEGIN
-						IF(@intCurrentInvoiceId IS NOT NULL AND @intCreatedInvoiceId IS NULL)
+
+						IF (@strAllCreatedInvoiceIdList IS NOT NULL AND @strAllCreatedInvoiceIdList != '')
 							BEGIN
-								-- This is a Re-Post
-								-- If current invoice exist it will just update from UnPosted to Posted
-								UPDATE dbo.tblSTCheckoutHeader 
-								SET strCheckoutStatus = @strNewCheckoutStatus
-									, intInvoiceId = @intCurrentInvoiceId -- Retail current Invoice Id
-								WHERE intCheckoutId = @intCheckoutId
-							END
-						ELSE IF(@intCurrentInvoiceId IS NULL AND @intCreatedInvoiceId IS NOT NULL)
-							BEGIN
+
 								-- First time to Post
 								-- New created invoice will be made
 								UPDATE dbo.tblSTCheckoutHeader 
 								SET strCheckoutStatus = @strNewCheckoutStatus
-									, intInvoiceId = @intCreatedInvoiceId -- New Invoice Id
+									, intInvoiceId = @intCreatedInvoiceId 
+									, strAllInvoiceIdList = @strAllCreatedInvoiceIdList -- New Invoice Id
 								WHERE intCheckoutId = @intCheckoutId
-							END
 
-						--CUSTOMER CHARGES
-						IF(@intCurrentCustomerChragesInvoiceId IS NOT NULL AND @intCreatedCustomerChragesInvoiceId IS NULL)
-							BEGIN
 
-								-- This is a Re-Post
-								-- If current customer charges invoice exist it will just update from UnPosted to Posted
-								UPDATE dbo.tblSTCheckoutHeader 
-								SET strCheckoutStatus = @strNewCheckoutStatus
-									, intCustomerChargesInvoiceId = @intCurrentCustomerChragesInvoiceId -- Retail current customer charges Invoice Id
-								WHERE intCheckoutId = @intCheckoutId
-							END
-						ELSE IF(@intCurrentCustomerChragesInvoiceId IS NULL AND @intCreatedCustomerChragesInvoiceId IS NOT NULL)
-							BEGIN
+								IF EXISTS (SELECT * FROM #tmpCustomerInvoiceIdList)
+									BEGIN
+										-- Update customer charges invoices on table tblSTCheckoutCustomerCharges
+										UPDATE CC
+											SET intCustomerChargesInvoiceId = IX.intInvoiceId
+										FROM tblSTCheckoutCustomerCharges CC
+										JOIN
+										(
+											SELECT 
+												ROW_NUMBER() OVER (ORDER BY intCustChargeId ASC) as intRowNumber
+												,intCustChargeId 
+											FROM tblSTCheckoutCustomerCharges C
+											JOIN tblICItemUOM UOM ON C.intProduct = UOM.intItemUOMId
+											JOIN tblICItem I ON UOM.intItemId = I.intItemId
+											JOIN tblSTCheckoutHeader CH ON C.intCheckoutId = CH.intCheckoutId
+											JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+											JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
+																	AND IL.intItemLocationId = IP.intItemLocationId
+											JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
+											AND CH.intStoreId = ST.intStoreId
+											WHERE C.intCheckoutId = @intCheckoutId
+											AND C.dblAmount > 0
+											AND UOM.ysnStockUnit = CAST(1 AS BIT)
 
-								-- First time to Post
-								-- New created customer charges invoice will be made
-								UPDATE dbo.tblSTCheckoutHeader 
-								SET strCheckoutStatus = @strNewCheckoutStatus
-									, intCustomerChargesInvoiceId = @intCreatedCustomerChragesInvoiceId -- New Invoice Id
-								WHERE intCheckoutId = @intCheckoutId
+										) CCX ON CC.intCustChargeId = CCX.intCustChargeId
+										JOIN
+										(
+											SELECT
+												ROW_NUMBER() OVER (ORDER BY intInvoiceId ASC) as intRowNumber
+												, intInvoiceId
+											FROM #tmpCustomerInvoiceIdList
+
+										) IX ON CCX.intRowNumber = IX.intRowNumber
+									END
+								
 							END
 					END
 				ELSE IF(@ysnPost = 0) -- UNPOST
 					BEGIN
-						IF(@intCurrentInvoiceId IS NOT NULL)
-							BEGIN
-								UPDATE dbo.tblSTCheckoutHeader 
-								SET strCheckoutStatus = @strNewCheckoutStatus
-									, intInvoiceId = @intCurrentInvoiceId -- Current Invoice
-								WHERE intCheckoutId = @intCheckoutId
-							END	
-						ELSE IF(@intCurrentCustomerChragesInvoiceId IS NOT NULL)
-							BEGIN
-								UPDATE dbo.tblSTCheckoutHeader 
-								SET strCheckoutStatus = @strNewCheckoutStatus
-									, intCustomerChargesInvoiceId = @intCurrentCustomerChragesInvoiceId -- Current Invoice
-								WHERE intCheckoutId = @intCheckoutId
-							END	
+
+						UPDATE dbo.tblSTCheckoutHeader 
+						SET strCheckoutStatus = @strNewCheckoutStatus
+						WHERE intCheckoutId = @intCheckoutId
 					END
 			END
+
+			--DROP
+			IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+				BEGIN
+					DROP TABLE #tmpCustomerInvoiceIdList
+				END
 	END TRY
 
 	BEGIN CATCH
+		--DROP
+		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+			BEGIN
+					DROP TABLE #tmpCustomerInvoiceIdList
+			END
+
 		SET @strStatusMsg = 'Script Error: ' + ERROR_MESSAGE()
 	END CATCH
 END
