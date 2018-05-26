@@ -365,7 +365,16 @@ FROM (
 	WHERE LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN 4
+			WHEN 2
+				THEN 6
+			WHEN 3
+				THEN 6
 			ELSE 6
+			END
+		OR
+		 LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
+			WHEN 3
+				THEN 11
 			END
 		AND ISNULL(WC.intWeightClaimId, 0) = 0
 		AND ISNULL(LD.ysnNoClaim, 0) = 0

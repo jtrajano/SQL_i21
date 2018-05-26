@@ -622,9 +622,9 @@ BEGIN TRY
 				,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
 				,dblGross = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross) --
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
-				,dblCost = ISNULL(AD.dblSeqPrice, 0) --
-				,intCostUOMId = AD.intSeqPriceUOMId --
-				,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+				,dblCost = ISNULL(AD.dblSeqPrice, LD.dblUnitPrice) --
+				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
+				,intCurrencyId = CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
@@ -653,6 +653,12 @@ BEGIN TRY
 			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 			LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
+					WHEN SC.intMainCurrencyId IS NOT NULL
+						THEN CD.intCurrencyId
+					ELSE NULL
+					END
+			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
+			LEFT JOIN tblSMCurrency LSubCurrency ON LSubCurrency.intCurrencyID = CASE 
 					WHEN SC.intMainCurrencyId IS NOT NULL
 						THEN CD.intCurrencyId
 					ELSE NULL
@@ -723,9 +729,9 @@ BEGIN TRY
 				,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
 				,dblGross =  LD.dblGross - ISNULL(LD.dblDeliveredGross,0) --
 				,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
-				,dblCost = ISNULL(AD.dblSeqPrice, 0) --
-				,intCostUOMId = AD.intSeqPriceUOMId --
-				,intCurrencyId = ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
+				,dblCost = ISNULL(AD.dblSeqPrice, LD.dblUnitPrice) --
+				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
+				,intCurrencyId = CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
@@ -752,6 +758,12 @@ BEGIN TRY
 				AND EL.ysnDefaultLocation = 1
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 			LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
+					WHEN SC.intMainCurrencyId IS NOT NULL
+						THEN CD.intCurrencyId
+					ELSE NULL
+					END
+			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
+			LEFT JOIN tblSMCurrency LSubCurrency ON LSubCurrency.intCurrencyID = CASE 
 					WHEN SC.intMainCurrencyId IS NOT NULL
 						THEN CD.intCurrencyId
 					ELSE NULL
