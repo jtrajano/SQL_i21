@@ -32,7 +32,7 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@currencyId INT = NULL,
 	@throwError BIT = 1,
 	@billId INT OUTPUT,
-	@error NVARCHAR(1000) OUTPUT
+	@error NVARCHAR(1000) = NULL OUTPUT 
 AS
 BEGIN
 

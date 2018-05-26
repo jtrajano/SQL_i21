@@ -26,10 +26,10 @@ DECLARE @receiptItems AS TABLE (
 	/*Start - Bund Item Info*/
 	[intItemBundleId]				INT				NULL, --Primary key of tblICItemBundle
 	[intBundletUOMId]				INT				NULL,
-	[dblQtyBundleReceived]			INT				NULL,
-	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	[dblQtyBundleReceived]			INT				NULL  DEFAULT(0),
+	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL  DEFAULT(0), 
 	[strBundleDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
-	[dblBundleTotal]				DECIMAL(38, 20)	NULL, 
+	[dblBundleTotal]				DECIMAL(38, 20)	NULL  DEFAULT(0), 
 	/*End - Bund Item Info*/
 	[intCostUOMId]					INT NULL,
     [intTaxGroupId]					INT NULL,
@@ -79,12 +79,12 @@ CREATE TABLE #tempBillDetail (
 	[intScaleTicketId]				INT             NULL,
 	[intLocationId]					INT             NULL, 
 	/*Start - Bund Item Info*/
-	[intItemBundleId]				INT				NOT NULL, --Primary key of tblICItemBundle
-	[intBundletUOMId]				INT				NOT NULL,
-	[dblQtyBundleReceived]			INT				NOT NULL,
-	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL, 
+	[intItemBundleId]				INT				NULL, --Primary key of tblICItemBundle
+	[intBundletUOMId]				INT				NULL,
+	[dblQtyBundleReceived]			INT				NULL DEFAULT(0),
+	[dblBundleUnitQty]				DECIMAL(38, 20)	NULL DEFAULT(0), 
 	[strBundleDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
-	[dblBundleTotal]				DECIMAL(38, 20)	NULL
+	[dblBundleTotal]				DECIMAL(38, 20)	NULL  DEFAULT(0)
 	/*End - Bund Item Info*/
 )
 
@@ -194,10 +194,10 @@ SELECT
 									END,
 	[intItemBundleId]				=	A.intItemBundleId,
 	[intBundletUOMId]				=	A.intBundletUOMId,
-	[dblQtyBundleReceived]			=	A.dblQtyBundleReceived,
-	[dblBundleUnitQty]				=	A.dblBundleUnitQty,
+	[dblQtyBundleReceived]			=	ISNULL(A.dblQtyBundleReceived,0),
+	[dblBundleUnitQty]				=	ISNULL(A.dblBundleUnitQty,0),
 	[strBundleDescription]			=	itemBundle.strDescription,
-	[dblBundleTotal]				=	A.dblBundleTotal
+	[dblBundleTotal]				=	ISNULL(A.dblBundleTotal,0)
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
