@@ -3,12 +3,14 @@ CREATE VIEW [dbo].[vyuAPYearPATR]
 AS
 
 WITH PATR1099 (
-	intYear
+	intYear,
+	strVendorId
 )
 AS
 (
 	SELECT
-	 A.intYear
+	 A.intYear,
+	 A.strVendorId
 FROM vyuAP1099 A
 CROSS JOIN tblSMCompanySetup B
 CROSS JOIN tblAP1099Threshold C

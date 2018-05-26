@@ -3,12 +3,14 @@ AS
 
 WITH MISC1099 (
 	
-	intYear
+	intYear,
+	strVendorId
 )
 AS
 (
 	SELECT DISTINCT
 		 A.intYear
+		 , A.strVendorId
 	FROM vyuAP1099 A
 	WHERE A.int1099Form = 1
 	
@@ -18,5 +20,6 @@ AS
 		*										
 	FROM MISC1099 A
 	GROUP BY 
-		intYear
+		intYear,
+		strVendorId
 GO
