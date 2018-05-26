@@ -6651,6 +6651,7 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationSetRangeStart.sql" />
     <Build Include="dbo\Views\vyuLGOpenLogisticsContract.sql" />
     <Build Include="dbo\Views\vyuLGBrokerCommissionInvoice.sql" />
+    <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
