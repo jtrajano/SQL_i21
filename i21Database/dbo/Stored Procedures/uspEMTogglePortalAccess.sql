@@ -4,7 +4,7 @@
 	@ysnEnablePortalAccess	bit,	
 	@intUserRoleId			int,
 	@strPassword			nvarchar(100) = '',
-	--@ysnAdmin				bit = 1,
+	@ysnAdmin				bit = 0,
 	@message				nvarchar(200) output	
 AS
 BEGIN
@@ -13,6 +13,11 @@ BEGIN
 		update [tblEMEntityToContact] set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId
 
 		delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId)
+
+		if @ysnAdmin = 1
+		begin
+			update [tblEMEntityToContact] set ysnPortalAdmin = 0 where intEntityContactId = @intEntityContactId
+		end
 
 		set @message =  ''
 	end
@@ -72,6 +77,11 @@ BEGIN
 			insert into [tblEMEntityCredential](intEntityId,strUserName,strPassword,ysnNotEncrypted)
 			select @intEntityContactId, @userName, @dc, 0
 		end
+
+		if @ysnAdmin = 1
+		begin
+			update [tblEMEntityToContact] set ysnPortalAdmin = 0 where intEntityId = @intEntityId
+		end
 		
 		UPDATE tblEMEntity SET strDateFormat = 'M/d/yyyy',
 			strNumberFormat = '1,234,567.89'
@@ -85,7 +95,8 @@ BEGIN
 
 		update [tblEMEntityToContact] set 
 			ysnPortalAccess = 1, 
-			intEntityRoleId = @intUserRoleId--@roleId 
+			ysnPortalAdmin = @ysnAdmin,
+			intEntityRoleId = @intUserRoleId--@roleId
 				where intEntityId = @intEntityId 
 					and intEntityContactId = @intEntityContactId
 
