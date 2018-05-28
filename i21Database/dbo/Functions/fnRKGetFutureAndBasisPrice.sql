@@ -58,7 +58,9 @@ BEGIN
 						WHERE 
 							[intFromCurrencyId] = bd.intCurrencyId 
 							AND [intToCurrencyId] = @intDefaultCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1)
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
 				END
 				WHEN @intCurrencyId = bd.intCurrencyId THEN
 					ISNULL(dblBasisOrDiscount, 0)
@@ -71,7 +73,9 @@ BEGIN
 						WHERE 
 							[intFromCurrencyId] = bd.intCurrencyId 
 							AND [intToCurrencyId] = @intCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1)
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
 			 END AS dblBasisOrDiscount
 			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
@@ -98,7 +102,9 @@ BEGIN
 						WHERE 
 							[intFromCurrencyId] = bd.intCurrencyId 
 							AND [intToCurrencyId] = @intDefaultCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1)
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
 				END
 				WHEN @intCurrencyId = bd.intCurrencyId THEN
 					ISNULL(dblBasisOrDiscount, 0)
@@ -111,7 +117,9 @@ BEGIN
 						WHERE 
 							[intFromCurrencyId] = bd.intCurrencyId 
 							AND [intToCurrencyId] = @intCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1)
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
 			 END AS dblBasisOrDiscount
 			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
@@ -139,7 +147,9 @@ BEGIN
 						WHERE 
 							[intFromCurrencyId] = m.intCurrencyId 
 							AND [intToCurrencyId] = @intDefaultCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1)
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
 				END
 				WHEN @intCurrencyId = m.intCurrencyId THEN
 					ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0)
@@ -152,7 +162,9 @@ BEGIN
 						WHERE 
 							[intFromCurrencyId] = m.intCurrencyId 
 							AND [intToCurrencyId] = @intCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1)
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
 			 END)
 		,@intSettlementUOMId=isnull(m.intUnitMeasureId,0) 
 		FROM tblRKFuturesSettlementPrice sp
