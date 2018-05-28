@@ -69,7 +69,7 @@ RETURNS @returntable TABLE
     ,[ysnTransactionPosted]             BIT             NULL
 	,[ysnTransactionPaid]               BIT             NULL
 	,[ysnTransactionProcessed]          BIT             NULL    
-    ,[dtmTransactionPostDate]           DATETIME        NOT NULL
+    ,[dtmTransactionPostDate]           DATETIME        NULL
 	,[dblTransactionDiscount]           NUMERIC(18,6)   NULL
     ,[dblBaseTransactionDiscount]       NUMERIC(18,6)   NULL
     ,[dblTransactionInterest]           NUMERIC(18,6)   NULL
