@@ -902,19 +902,39 @@ BEGIN
 					UPDATE @tblCFRemoteTax 
 					SET dblAdjustedTax = dblRate , dblTax = dblRate
 
-					UPDATE @tblCFRemoteTax 
-					SET dblRate = CASE 
-						WHEN LOWER(strCalculationMethod) = 'percentage' 
-						THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
-						ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
-						END
+					--BACKOUT TAX--
+					IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+					OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+					OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
+					OR @strPriceMethod = 'Import File Price' 
+					OR @strPriceMethod = 'Credit Card' 
+					OR @strPriceMethod = 'Posted Trans from CSV'
+					OR @strPriceMethod = 'Origin History'
+					OR @strPriceMethod = 'Network Cost')
+					BEGIN
+						UPDATE @tblCFRemoteTax 
+						SET dblRate = CASE 
+							WHEN LOWER(strCalculationMethod) = 'percentage' 
+							THEN ((ISNULL(dblRate,0) / @dblQuantity) / (ISNULL(@dblOriginalPrice,0) - (ISNULL(dblRate,0) / @dblQuantity))) * 100
+							--THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
+							ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+							END
+					END
+
+					ELSE
+					BEGIN
+						UPDATE @tblCFRemoteTax 
+						SET dblRate = CASE 
+							WHEN LOWER(strCalculationMethod) = 'percentage' 
+							THEN (ISNULL(dblRate,0) / @dblQuantity) / (ISNULL(@dblOriginalPrice,0)) * 100
+							--THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
+							ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+							END
+					END
 
 				END
 
-				IF(ISNULL(@DevMode,0) = 1)
-				BEGIN
-					SELECT '@tblCFRemoteTax1', * from @tblCFRemoteTax --HERE
-				END
+				
 			
 
 				IF(@IsImporting = 0)
@@ -936,7 +956,9 @@ BEGIN
 
 
 						UPDATE @tblCFRemoteTax 
-						SET dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+						SET 
+						 dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+						,dblTax = (SELECT TOP 1 dblTaxOriginalAmount FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
 						WHERE intTaxGroupId = @intLoopTaxGroupID
 						AND intTaxClassId = @intLoopTaxClassID
 						AND intTaxCodeId = @intLoopTaxCodeID
@@ -949,6 +971,11 @@ BEGIN
 					END
 
 					DROP TABLE #ItemTax
+				END
+
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					SELECT '@tblCFRemoteTax1', * from @tblCFRemoteTax --HERE
 				END
 
 				--LOG INVALID TAX SETUP--
