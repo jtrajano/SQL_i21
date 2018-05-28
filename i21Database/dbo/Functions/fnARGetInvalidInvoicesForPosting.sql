@@ -1315,7 +1315,25 @@ ELSE
 				ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
 		WHERE 
 			CMUF.[strSourceSystem] = 'AR'
-				
+
+		UNION
+
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'This Invoice was created from Patronage > Issue Stock - ' + ISNULL(PAT.strIssueNo, '') + '. Unpost it from there.'
+		FROM 
+			@Invoices I
+		CROSS APPLY (
+			SELECT TOP 1 P.strIssueNo
+			FROM dbo.tblPATIssueStock P WITH (NOLOCK)
+			WHERE P.intInvoiceId = I.intInvoiceId
+			  AND P.ysnPosted = 1
+		) PAT
 
 		--Don't allow Imported Invoice from Origin to be unposted
 		DECLARE @IsAG BIT = 0
