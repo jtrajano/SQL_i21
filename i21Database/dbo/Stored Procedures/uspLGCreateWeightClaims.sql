@@ -124,16 +124,26 @@ BEGIN TRY
 			)
 		SELECT 1
 			,@intNewWeightClaimId
-			,intItemId
+			,vyuLGGetOpenWeightClaim.intItemId
 			,dblShippedNetWt
-			,dblReceivedNetWt
+			,(SELECT dblToNet FROM tblLGWeightClaimDetail WHERE intWeightClaimDetailId = @intWeightClaimDetailId)
 			,dblFranchiseWt
-			,dblWeightLoss
-			,dblClaimableWt
+			,(SELECT dblWeightLoss FROM tblLGWeightClaimDetail WHERE intWeightClaimDetailId = @intWeightClaimDetailId)
+			,(SELECT dblWeightLoss FROM tblLGWeightClaimDetail WHERE intWeightClaimDetailId = @intWeightClaimDetailId) + dblFranchiseWt
 			,intPartyEntityId
 			,dblSeqPrice
 			,intSeqCurrencyId
-			,dblClaimableAmount
+			,(
+				dbo.[fnCTConvertQuantityToTargetItemUOM](vyuLGGetOpenWeightClaim.intItemId, intWeightUnitMeasureId, IU.intUnitMeasureId, ABS((
+							SELECT dblWeightLoss
+							FROM tblLGWeightClaimDetail
+							WHERE intWeightClaimDetailId = @intWeightClaimDetailId
+							) + dblFranchiseWt)) * dblSeqPrice
+				) / CASE 
+				WHEN CU.ysnSubCurrency = 1
+					THEN 100
+				ELSE 1
+				END
 			,intSeqPriceUOMId
 			,NULL
 			,NULL
@@ -143,6 +153,8 @@ BEGIN TRY
 			,dblFranchise
 			,dblSeqPriceConversionFactoryWeightUOM
 		FROM vyuLGGetOpenWeightClaim
+		JOIN tblSMCurrency CU ON CU.intCurrencyID = vyuLGGetOpenWeightClaim.intSeqCurrencyId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = vyuLGGetOpenWeightClaim.intSeqPriceUOMId
 		WHERE intLoadId = @intLoadId
 			AND intContractDetailId = @intPContractDetailId
 

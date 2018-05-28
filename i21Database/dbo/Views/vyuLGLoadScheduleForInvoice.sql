@@ -4,7 +4,7 @@ SELECT strTransactionType = 'Load Schedule'
 	,strTransactionNumber = L.strLoadNumber
 	,strShippedItemId = 'lgis:' + CAST(L.intLoadId AS NVARCHAR(250))
 	,intEntityCustomerId = LD.intCustomerEntityId
-	,intCurrencyId = AD.intSeqCurrencyId
+	,intCurrencyId = CASE WHEN L.intSourceType = 7 THEN LD.intPriceCurrencyId ELSE AD.intSeqCurrencyId END
 	,intSalesOrderId = NULL
 	,intSalesOrderDetailId = NULL
 	,strSalesOrderNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
@@ -32,27 +32,42 @@ SELECT strTransactionType = 'Load Schedule'
 	,intShipmentItemUOMId = ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId)
 	,intWeightUOMId = LD.intWeightItemUOMId
 	,dblWeight = dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(CD.intItemUOMId, LD.intItemUOMId), 1.000000)
-	,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM(ISNULL(CD.intItemUOMId, LD.intWeightItemUOMId), ISNULL(CD.intItemUOMId, LD.intItemUOMId), LD.dblQuantity)
+	,dblQtyShipped = CASE WHEN L.intSourceType = 7 THEN LD.dblQuantity ELSE dbo.fnCalculateQtyBetweenUOM(ISNULL(CD.intItemUOMId, LD.intWeightItemUOMId), ISNULL(CD.intItemUOMId, LD.intItemUOMId), LD.dblQuantity) END
 	,dblQtyOrdered = ISNULL(LD.dblQuantity, 0)
 	,dblShipmentQuantity = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblShipmentQtyShippedTotal = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblQtyRemaining = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblDiscount = 0.0000000
-	,dblPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId)
-    ,dblShipmentUnitPrice = (
+	,dblPrice = CASE 
+				WHEN L.intSourceType = 7
+					THEN LD.dblUnitPrice
+				ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+				END
+    ,dblShipmentUnitPrice = CASE WHEN L.intSourceType = 7 THEN  (
+                         LD.dblUnitPrice
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+					 ELSE (
                     (
                         dbo.fnCTGetSequencePrice(CD.intContractDetailId)
                     ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
-            )
+            ) 
+			END
 	,strPricing = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strVFDDocumentNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,dblTotalTax = 0.000000
-    ,dblTotal = 
-            (
+    ,dblTotal = CASE WHEN L.intSourceType = 7 THEN 
+	            (
                     (
-                        dbo.fnCTGetSequencePrice(CD.intContractDetailId)
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
-            ) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+                        LD.dblUnitPrice
+                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+	            ) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+			 ELSE
+				(
+					(
+						dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+					) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
+				) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
+			END
 	,intStorageLocationId = NULL
 	,intTermId = NULL
 	,intEntityShipViaId = NULL
@@ -91,6 +106,7 @@ FROM (
 	SELECT intLoadId
 		,strLoadNumber
 		,dtmScheduledDate
+		,intSourceType
 	FROM dbo.tblLGLoad WITH (NOLOCK)
 	WHERE ysnPosted = 1
 		AND intShipmentStatus = 6
@@ -109,6 +125,10 @@ JOIN (
 		,dblGross
 		,dblTare
 		,dblNet
+		,dblUnitPrice
+		,dblAmount
+		,intPriceCurrencyId
+		,intPriceUOMId
 	FROM dbo.tblLGLoadDetail WITH (NOLOCK)
 	) LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN (
