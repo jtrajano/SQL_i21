@@ -8,12 +8,11 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @strLotNo NVARCHAR(MAX)
+		,@strLotNo NVARCHAR(MAX)
 		,@xmlDocumentId INT
-	--DECLARE @intLotId INT
-	DECLARE @strLotId NVARCHAR(MAX)
+		,@strLotId NVARCHAR(MAX)
 		,@strInventoryReceiptItemLotId NVARCHAR(MAX)
-	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@ErrMsg NVARCHAR(MAX)
 		,@intInventoryReceiptItemLotId INT
 		,@strParentLotNumber NVARCHAR(50)
 		,@strLotNumber NVARCHAR(50)
@@ -29,6 +28,7 @@ BEGIN TRY
 		,@intManufacturingId INT
 		,@intOrderTypeId INT
 		,@intBlendRequirementId INT
+		,@intNoOfLabel INT
 	DECLARE @tblMFInventoryReceiptItemLot TABLE (intInventoryReceiptItemLotId INT)
 	DECLARE @tblMFFinalInventoryReceiptItemLot TABLE (intInventoryReceiptItemLotId INT)
 
@@ -81,6 +81,20 @@ BEGIN TRY
 	SELECT @strInventoryReceiptItemLotId = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intInventoryReceiptItemLotId'
+
+	SELECT @intNoOfLabel = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'intNoOfLabel'
+
+	DECLARE @tblMFNoOfLabel TABLE (intId INT)
+
+	WHILE @intNoOfLabel > 0
+	BEGIN
+		INSERT INTO @tblMFNoOfLabel
+		SELECT 1
+
+		SELECT @intNoOfLabel = @intNoOfLabel - 1
+	END
 
 	IF ISNULL(@strInventoryReceiptItemLotId, '') <> ''
 	BEGIN
@@ -213,88 +227,96 @@ BEGIN TRY
 	BEGIN
 		IF ISNULL(@strLotId, '') <> ''
 		BEGIN
-			SELECT l.intLotId
-				,l.intItemId
-				,l.dblQty
-				,um.strUnitMeasure AS strQtyUOM
-				,CASE 
-					WHEN l.intWeightUOMId IS NULL
-						THEN l.dblQty * i.dblWeight
-					ELSE l.dblWeight
-					END AS dblWeight
-				,um1.strUnitMeasure AS strWeightUOM
-				,l.strLotNumber
-				,i.strItemNo
-				,i.strDescription
-				,pl.strParentLotNumber
-				,l.strVendorLotNo
-				,(
-					SELECT Min(L1.dtmDateCreated)
-					FROM tblICLot L1
-					WHERE L1.strLotNumber = l.strLotNumber
-					) AS dtmDateCreated
-				,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
-			FROM tblICLot l
-			JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
-			JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
-			JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-			JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
-			LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
-			LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = (
-					CASE 
+			SELECT *
+			FROM (
+				SELECT l.intLotId
+					,l.intItemId
+					,l.dblQty
+					,um.strUnitMeasure AS strQtyUOM
+					,CASE 
 						WHEN l.intWeightUOMId IS NULL
-							THEN i.intWeightUOMId
-						ELSE iu1.intUnitMeasureId
-						END
-					)
-			WHERE l.intLotId IN (
-					SELECT *
-					FROM dbo.fnSplitString(@strLotId, '^')
-					)
-			ORDER BY strParentLotNumber
+							THEN l.dblQty * i.dblWeight
+						ELSE l.dblWeight
+						END AS dblWeight
+					,um1.strUnitMeasure AS strWeightUOM
+					,l.strLotNumber
+					,i.strItemNo
+					,i.strDescription
+					,pl.strParentLotNumber
+					,l.strVendorLotNo
+					,(
+						SELECT Min(L1.dtmDateCreated)
+						FROM tblICLot L1
+						WHERE L1.strLotNumber = l.strLotNumber
+						) AS dtmDateCreated
+					,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
+				FROM tblICLot l
+				JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
+				JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
+				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
+				JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
+				LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
+				LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = (
+						CASE 
+							WHEN l.intWeightUOMId IS NULL
+								THEN i.intWeightUOMId
+							ELSE iu1.intUnitMeasureId
+							END
+						)
+				WHERE l.intLotId IN (
+						SELECT *
+						FROM dbo.fnSplitString(@strLotId, '^')
+						)
+				) AS DT
+				,@tblMFNoOfLabel
+			ORDER BY DT.strParentLotNumber
 		END
 		ELSE
 		BEGIN
-			SELECT l.intLotId
-				,l.intItemId
-				,l.dblQty
-				,um.strUnitMeasure AS strQtyUOM
-				,CASE 
-					WHEN l.intWeightUOMId IS NULL
-						THEN l.dblQty * i.dblWeight
-					ELSE l.dblWeight
-					END AS dblWeight
-				,um1.strUnitMeasure AS strWeightUOM
-				,l.strLotNumber
-				,i.strItemNo
-				,i.strDescription
-				,pl.strParentLotNumber
-				,l.strVendorLotNo
-				,(
-					SELECT Min(L1.dtmDateCreated)
-					FROM tblICLot L1
-					WHERE L1.strLotNumber = l.strLotNumber
-					) AS dtmDateCreated
-				,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
-			FROM tblICLot l
-			JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
-			JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
-			JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-			JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
-			LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
-			LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = (
-					CASE 
+			SELECT *
+			FROM (
+				SELECT l.intLotId
+					,l.intItemId
+					,l.dblQty
+					,um.strUnitMeasure AS strQtyUOM
+					,CASE 
 						WHEN l.intWeightUOMId IS NULL
-							THEN i.intWeightUOMId
-						ELSE iu1.intUnitMeasureId
-						END
-					)
-			WHERE l.strLotNumber IN (
-					SELECT Item COLLATE DATABASE_DEFAULT
-					FROM dbo.fnSplitString(@strLotNo, '^')
-					)
-				AND l.dblQty > 0
-			ORDER BY strParentLotNumber
+							THEN l.dblQty * i.dblWeight
+						ELSE l.dblWeight
+						END AS dblWeight
+					,um1.strUnitMeasure AS strWeightUOM
+					,l.strLotNumber
+					,i.strItemNo
+					,i.strDescription
+					,pl.strParentLotNumber
+					,l.strVendorLotNo
+					,(
+						SELECT Min(L1.dtmDateCreated)
+						FROM tblICLot L1
+						WHERE L1.strLotNumber = l.strLotNumber
+						) AS dtmDateCreated
+					,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
+				FROM tblICLot l
+				JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
+				JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intItemUOMId
+				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
+				JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
+				LEFT JOIN tblICItemUOM iu1 ON iu1.intItemUOMId = l.intWeightUOMId
+				LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = (
+						CASE 
+							WHEN l.intWeightUOMId IS NULL
+								THEN i.intWeightUOMId
+							ELSE iu1.intUnitMeasureId
+							END
+						)
+				WHERE l.strLotNumber IN (
+						SELECT Item COLLATE DATABASE_DEFAULT
+						FROM dbo.fnSplitString(@strLotNo, '^')
+						)
+					AND l.dblQty > 0
+				) AS DT
+				,@tblMFNoOfLabel
+			ORDER BY DT.strParentLotNumber
 		END
 	END
 END TRY
