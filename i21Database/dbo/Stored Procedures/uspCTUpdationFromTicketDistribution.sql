@@ -131,7 +131,7 @@ BEGIN TRY
 				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 					DROP TABLE #FutureAndBasisPrice						
 
-				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,null,0,@intItemId)
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,null,0,@intItemId,null)
 
 				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
 				BEGIN
