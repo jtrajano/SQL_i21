@@ -24,12 +24,16 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@voucherDetailCC AS VoucherDetailCC READONLY,
 	@voucherDetailClaim AS VoucherDetailClaim READONLY,
 	@voucherDetailLoadNonInv AS VoucherDetailLoadNonInv READONLY,
+	@voucherDetailDirect AS VoucherDetailDirectInventory READONLY,
 	@shipTo INT= NULL,
 	@shipFrom INT = NULL,
+	@shipFromEntityId INT = NULL,
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
 	@currencyId INT = NULL,
-	@billId INT OUTPUT
+	@throwError BIT = 1,
+	@billId INT OUTPUT,
+	@error NVARCHAR(1000) = NULL OUTPUT 
 AS
 BEGIN
 
@@ -42,12 +46,36 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @startingRecordId INT;
+DECLARE @APAccount INT;
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
 	IF NOT EXISTS(SELECT 1 FROM tblAPVendor WHERE [intEntityId] = @vendorId)
 	BEGIN
-		RAISERROR('Vendor does not exists.', 16, 1);
+		SET @error =  'Vendor does not exists.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
+	END
+
+	IF ISNULL(@userId, 0) > 0 AND @shipTo IS NULL
+	BEGIN
+		SELECT TOP 1 
+			@shipTo = intCompanyLocationId
+		FROM tblSMUserSecurity WHERE [intEntityId] = @userId
+	END
+
+	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
+	IF @APAccount IS NULL OR @APAccount <= 0
+	BEGIN
+		SET @error =  'Please setup default AP Account.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
@@ -86,6 +114,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	EXEC uspSMGetStartingNumber @startingRecordId, @billRecordNumber OUTPUT
 
+	
 	SELECT 
 		[intTermsId]			=	A.[intTermsId],
 		[dtmDueDate]			=	A.[dtmDueDate],
@@ -112,6 +141,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strShipFromCountry]	=	A.[strShipFromCountry],
 		[strShipFromPhone]		=	A.[strShipFromPhone],
 		[intShipFromId]			=	A.[intShipFromId],
+		[intShipFromEntityId]	=	ISNULL(@shipFromEntityId,A.[intShipFromEntityId]),
 		[intPayToAddressId]		=	A.[intShipFromId],
 		[intShipToId]			=	A.[intShipToId],
 		[intStoreLocationId]	=	A.[intShipToId],
@@ -150,6 +180,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strShipFromCountry]	,
 		[strShipFromPhone]		,
 		[intShipFromId]			,
+		[intShipFromEntityId]	,
 		[intPayToAddressId]		, 
 		[intShipToId]			,
 		[intStoreLocationId]	,
@@ -173,7 +204,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 								 @voucherDetailCC,
 								 @voucherDetailStorage,
 								 @voucherDetailLoadNonInv,
-								 @voucherDetailClaim
+								 @voucherDetailClaim,
+								 @voucherDetailDirect
 	--EXEC uspAPUpdateVoucherTax @billId
 	--EXEC uspAPUpdateVoucherContract @billId
 
@@ -229,6 +261,10 @@ BEGIN CATCH
 	SET @ErrorState    = ERROR_STATE()
 	SET @ErrorLine     = ERROR_LINE()
 	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	SET @error = @ErrorMessage;
+	IF @throwError = 1
+	BEGIN
+		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	END
 END CATCH
 END
