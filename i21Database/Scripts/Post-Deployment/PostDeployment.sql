@@ -75,6 +75,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\37_ReplicationConfiguration.sql
 :r .\SM\DefaultData\38_ReplicationConfigurationTable.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
+:r .\SM\1830_Arrange_Portal_Menus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
