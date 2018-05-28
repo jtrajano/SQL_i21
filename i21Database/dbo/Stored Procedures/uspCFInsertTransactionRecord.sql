@@ -378,19 +378,95 @@ BEGIN
 			SET @strTransactionType = 'Extended Remote'
 		END
 
+		DECLARE @tblTaxTempTable TABLE
+		(
+			 strTaxCode		NVARCHAR(MAX)
+			,dblTaxValue	NUMERIC(18,6)
+		)
+
+		INSERT INTO @tblTaxTempTable 
+			(strTaxCode,dblTaxValue) 
+		VALUES 
+			 (@Tax1, @TaxValue1)
+			,(@Tax2, @TaxValue2)
+			,(@Tax3, @TaxValue3)
+			,(@Tax4, @TaxValue4)
+			,(@Tax5, @TaxValue5)
+			,(@Tax6, @TaxValue6)
+			,(@Tax7, @TaxValue7)
+			,(@Tax8, @TaxValue8)
+			,(@Tax9, @TaxValue9)
+			,(@Tax10, @TaxValue10)
+			
+		SET @TaxValue1	   = 0
+		SET @TaxValue2	   = 0
+		SET @TaxValue3	   = 0
+		SET @TaxValue4	   = 0
+		SET @TaxValue5	   = 0
+		SET @TaxValue6	   = 0
+		SET @TaxValue7	   = 0
+		SET @TaxValue8	   = 0
+		SET @TaxValue9	   = 0
+		SET @TaxValue10	   = 0
+
+		--SELECT '@tblTaxTempTable',* FROM @tblTaxTempTable--HERE
+
 		--TAXES--
 		IF(ISNULL(@dblQuantity,0) != 0)
 		BEGIN
-			SET @TaxValue1	= ISNULL(@TaxValue1,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue2	= ISNULL(@TaxValue2,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue3	= ISNULL(@TaxValue3,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue4	= ISNULL(@TaxValue4,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue5	= ISNULL(@TaxValue5,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue6	= ISNULL(@TaxValue6,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue7	= ISNULL(@TaxValue7,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue8	= ISNULL(@TaxValue8,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue9	= ISNULL(@TaxValue9,0)  / ISNULL(@dblQuantity,0)					
-			SET @TaxValue10	= ISNULL(@TaxValue10,0) / ISNULL(@dblQuantity,0)		
+
+			--GET RAW VALUE FROM CSV--
+			--TO BE CONVERT/COMPUTE IN RECALC SP--
+			SELECT TOP 1 @TaxValue1 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax1 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue1 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax1 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax1
+			IF(ISNULL(@TaxValue1,0) = 0) BEGIN SET @Tax1 = NULL END
+
+			SELECT TOP 1 @TaxValue2 = (SUM(ISNULL(dblTaxValue,0)) ) FROM @tblTaxTempTable WHERE strTaxCode = @Tax2 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue2 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax2 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax2
+			IF(ISNULL(@TaxValue2,0) = 0) BEGIN SET @Tax2 = NULL END
+
+			SELECT TOP 1 @TaxValue3 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax3 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue3 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax3 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax3
+			IF(ISNULL(@TaxValue3,0) = 0) BEGIN SET @Tax3 = NULL END
+			 
+			SELECT TOP 1 @TaxValue4 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax4 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue4 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax4 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax4
+			IF(ISNULL(@TaxValue4,0) = 0) BEGIN SET @Tax4 = NULL END
+			 
+			SELECT TOP 1 @TaxValue5 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax5 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue5 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax5 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax5
+			IF(ISNULL(@TaxValue5,0) = 0) BEGIN SET @Tax5 = NULL END
+			 
+			SELECT TOP 1 @TaxValue6 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax6 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue6 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax6 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax6
+			IF(ISNULL(@TaxValue6,0) = 0) BEGIN SET @Tax6 = NULL END
+			 
+			SELECT TOP 1 @TaxValue7 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax7 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue7 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax7 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax7
+			IF(ISNULL(@TaxValue7,0) = 0) BEGIN SET @Tax7 = NULL END
+			 
+			SELECT TOP 1 @TaxValue8 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax8 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue8 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax8 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax8
+			IF(ISNULL(@TaxValue8,0) = 0) BEGIN SET @Tax8 = NULL END
+			 
+			SELECT TOP 1 @TaxValue9 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax9 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue9 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax9 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax9
+			IF(ISNULL(@TaxValue9,0) = 0) BEGIN SET @Tax9 = NULL END
+			 
+			SELECT TOP 1 @TaxValue10 = (SUM(ISNULL(dblTaxValue,0))) FROM @tblTaxTempTable WHERE strTaxCode = @Tax10 GROUP BY strTaxCode
+			--SELECT TOP 1 @TaxValue10 = (SUM(ISNULL(dblTaxValue,0)) / ISNULL(@dblQuantity,0)) FROM @tblTaxTempTable WHERE strTaxCode = @Tax10 GROUP BY strTaxCode
+			DELETE FROM @tblTaxTempTable WHERE strTaxCode = @Tax10
+			IF(ISNULL(@TaxValue10,0) = 0) BEGIN SET @Tax10 = NULL END
+		
 		END					
 
 
@@ -1034,7 +1110,7 @@ BEGIN
 		END
 		
 		----------POSTED DATE----------
-		SELECT @strLaggingDate
+		--SELECT @strLaggingDate
 
 		IF (@dtmTransactionDate <= @strLaggingDate)
 		BEGIN
@@ -1588,6 +1664,7 @@ BEGIN
 		END
 
 
+		--DEBUGGER HERE-- SELECT * FROM tblCFTransactionTaxType --HERE--
 		------------------------------------------------------------
 		--						TRANSACTION TAX					  --
 		------------------------------------------------------------
