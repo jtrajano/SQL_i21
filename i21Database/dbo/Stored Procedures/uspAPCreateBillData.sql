@@ -27,6 +27,7 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@voucherDetailDirect AS VoucherDetailDirectInventory READONLY,
 	@shipTo INT= NULL,
 	@shipFrom INT = NULL,
+	@shipFromEntityId INT = NULL,
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
 	@currencyId INT = NULL,
@@ -56,6 +57,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		BEGIN
 			RAISERROR(@error, 16, 1);
 		END
+		RETURN;
+	END
+
+	IF ISNULL(@userId, 0) > 0 AND @shipTo IS NULL
+	BEGIN
+		SELECT TOP 1 
+			@shipTo = intCompanyLocationId
+		FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 	END
 
 	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
@@ -66,6 +75,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		BEGIN
 			RAISERROR(@error, 16, 1);
 		END
+		RETURN;
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
@@ -131,7 +141,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[strShipFromCountry]	=	A.[strShipFromCountry],
 		[strShipFromPhone]		=	A.[strShipFromPhone],
 		[intShipFromId]			=	A.[intShipFromId],
-		[intShipFromEntityId]	=	A.[intShipFromEntityId],
+		[intShipFromEntityId]	=	ISNULL(@shipFromEntityId,A.[intShipFromEntityId]),
 		[intPayToAddressId]		=	A.[intShipFromId],
 		[intShipToId]			=	A.[intShipToId],
 		[intStoreLocationId]	=	A.[intShipToId],

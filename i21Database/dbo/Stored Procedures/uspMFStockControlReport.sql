@@ -211,7 +211,7 @@ BEGIN TRY
 	DECLARE @tempDemand AS TABLE  (
 		MaterialKey INT
 		,[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[MINIMUM STOCK  WKS] FLOAT
 		,[Full Container Load] FLOAT
 		,[SHIP FREQUENCY] FLOAT
@@ -220,7 +220,7 @@ BEGIN TRY
 	DECLARE @tempDemandFilter AS TABLE (
 		MaterialKey INT
 		,[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[MINIMUM STOCK  WKS] FLOAT
 		,[Full Container Load] FLOAT
 		,[SHIP FREQUENCY] FLOAT
@@ -228,12 +228,12 @@ BEGIN TRY
 	DECLARE @tempDemandAvailableStock AS TABLE (MaterialKey INT)
 	DECLARE @tmpInventory AS TABLE (
 		PrimaryQty FLOAT
-		,materialKey INT
+		,MaterialKey INT
 		,UDA_CompanyNumber NVARCHAR(500)
 		)
 	DECLARE @tmpDetail AS TABLE (
 		[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[AVAILABLE STOCK] FLOAT
 		,MaterialKey INT
 		,[MINIMUM STOCK  WKS] FLOAT
@@ -243,7 +243,7 @@ BEGIN TRY
 		)
 	DECLARE @tmpFinal AS TABLE (
 		[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[AVAILABLE STOCK] FLOAT
 		)
 	DECLARE @Material AS TABLE (
@@ -253,20 +253,20 @@ BEGIN TRY
 		
 		
 	DECLARE @Month AS TABLE (
-		materialKey NUMERIC(18, 0)
+		MaterialKey NUMERIC(18, 0)
 		,Quantity FLOAT
 		,ETA DATETIME
 		,UDA_CompanyNumber NVARCHAR(500)
 		)
 	DECLARE @Week AS TABLE (
-		materialKey NUMERIC(18, 0)
+		MaterialKey NUMERIC(18, 0)
 		,Quantity FLOAT
 		,ETA DATETIME
 		,[Expected Week] INT
 		,UDA_CompanyNumber NVARCHAR(500)
 		)
 	DECLARE @MonthandWeek AS TABLE (
-		materialKey NUMERIC(18, 0)
+		MaterialKey NUMERIC(18, 0)
 		 ,ETA DATETIME
 		,[Week 1] FLOAT
 		,[Week 2] FLOAT
@@ -590,7 +590,7 @@ BEGIN TRY
 		DECLARE @tempDemand AS TABLE  (
 		MaterialKey INT
 		,[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[MINIMUM STOCK  WKS] FLOAT
 		,[Full Container Load] FLOAT
 		,[SHIP FREQUENCY] FLOAT
@@ -716,7 +716,7 @@ BEGIN TRY
 		,ISNULL(ti.PrimaryQty, 0) AS [AVAILABLE STOCK]
 		,td.MaterialKey
 		,td.[MINIMUM STOCK  WKS]
-		,td.[Full cONtainer load]
+		,td.[Full Container Load]
 		,td.[SHIP FREQUENCY]
 		,td.UDA_CompanyNumber
 	FROM @tempDemand td

@@ -64,7 +64,8 @@ DECLARE @intStorageScheduleId AS INT
 		,@postVoucher AS BIT
 		,@intLotType INT
 		,@intLotId INT
-		,@intContractDetailId INT;
+		,@intContractDetailId INT
+		,@shipFromEntityId INT;
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -72,6 +73,7 @@ SELECT
 	, @intItemId = SC.intItemId
 	, @dblGrossUnits = SC.dblGrossUnits
 	, @dblNetUnits = SC.dblNetUnits
+	, @shipFromEntityId = SC.intEntityId
 FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 
@@ -112,7 +114,7 @@ OPEN intListCursor;
 							IF @intLoadContractId IS NOT NULL
 							BEGIN
 								SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-								EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 							BEGIN
 								INSERT INTO [dbo].[tblSCTicketCost]
@@ -564,6 +566,7 @@ END
 				,@voucherDetailReceiptCharge = @voucherOtherCharges
 				,@shipTo = @intLocationId
 				,@shipFrom = @intShipFrom
+				,@shipFromEntityId = @shipFromEntityId
 				,@vendorOrderNumber = @vendorOrderNumber
 				,@voucherDate = @voucherDate
 				,@currencyId = @intCurrencyId

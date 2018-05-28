@@ -127,7 +127,7 @@ BEGIN TRY
 	JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intLotId = L.intLotId
 		AND ysnConsumptionReversed = 0
 	WHERE WI.intWorkOrderId = @intWorkOrderId
-		AND WI.intMachineId = IsNULL(@intMachineId, intMachineId)
+		AND IsNULL(WI.intMachineId,0) = (Case When IsNULL(WI.intMachineId,0)=0 Then IsNULL(WI.intMachineId,0) Else IsNULL(@intMachineId,IsNULL(intMachineId,0)) End)
 
 	DECLARE @tblMFWorkOrderInputItem TABLE (
 		intItemId INT

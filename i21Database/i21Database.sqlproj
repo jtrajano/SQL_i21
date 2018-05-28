@@ -6653,6 +6653,8 @@
     <Build Include="dbo\Views\vyuLGOpenLogisticsContract.sql" />
     <Build Include="dbo\Views\vyuLGBrokerCommissionInvoice.sql" />
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
+    <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

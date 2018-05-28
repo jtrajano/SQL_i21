@@ -101,7 +101,7 @@ BEGIN
 
 	SELECT
 		SC.*
-		, blbMessage			= CONVERT(varbinary(max),CONVERT(VARCHAR(MAX),(REPLACE(@strMessage,'[EntityName]', Cus.strName))))
+		, blbMessage			= CONVERT(varbinary(max),CONVERT(VARCHAR(MAX),(REPLACE(@strMessage,'[EntityName]', CusContact.strName))))
 		, msg = @strMessage
 		, strCompanyName		= @strCompanyName
 		, strCompanyAddress		= @strCompanyAddress
@@ -192,6 +192,7 @@ BEGIN
 							) BillToLoc ON ARC.[intEntityId] = BillToLoc.intEntityId AND ARC.intBillToId = BillToLoc.intEntityLocationId
 			) Cus
 		) Cus ON SC.intEntityId = Cus.[intEntityId] 
-
+		INNER JOIN vyuARCustomerContacts CusContact
+			ON CusContact.intEntityId = SC.intEntityId AND CusContact.ysnDefaultContact = 1
 
 END

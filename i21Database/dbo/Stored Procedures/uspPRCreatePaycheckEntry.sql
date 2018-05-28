@@ -1,14 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRCreatePaycheckEntry]
-	@intEmployeeId			INT	
-	,@dtmBeginDate			DATETIME
-	,@dtmEndDate			DATETIME
-	,@dtmPayDate			DATETIME
-	,@strPayGroupIds		NVARCHAR(MAX) = ''
-	,@strDepartmentIds		NVARCHAR(MAX) = ''
-	,@ysnUseStandardHours	BIT = 1
-	,@ysnExcludeDeductions  BIT = 0
-	,@intUserId				INT = NULL
-	,@intPaycheckId			INT = NULL OUTPUT
+	@intEmployeeId				INT	
+	,@dtmBeginDate				DATETIME
+	,@dtmEndDate				DATETIME
+	,@dtmPayDate				DATETIME
+	,@strPayGroupIds			NVARCHAR(MAX) = ''
+	,@strDepartmentIds			NVARCHAR(MAX) = ''
+	,@ysnUseStandardHours		BIT = 1
+	,@ysnExcludeDeductions		BIT = 0
+	,@ysnOverrideDirectDeposit	BIT = 0
+	,@intUserId					INT = NULL
+	,@intPaycheckId				INT = NULL OUTPUT
 AS
 BEGIN
 
@@ -18,6 +19,7 @@ DECLARE @intEmployee INT
 	   ,@dtmPay DATETIME
 	   ,@xmlPayGroups XML
 	   ,@ysnUseStandard BIT
+	   ,@ysnOverrideDD BIT
 	   ,@xmlDepartments XML
 
 /* Localize Parameters for Optimal Performance */
@@ -26,6 +28,7 @@ SELECT @intEmployee		= @intEmployeeId
 	  ,@dtmEnd			= @dtmEndDate
 	  ,@dtmPay			= @dtmPayDate
 	  ,@ysnUseStandard	= @ysnUseStandardHours
+	  ,@ysnOverrideDD	= @ysnOverrideDirectDeposit
 	  ,@xmlPayGroups	= CAST('<A>'+ REPLACE(@strPayGroupIds, ',', '</A><A>')+ '</A>' AS XML) 
 	  ,@xmlDepartments  = CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML) 
 
@@ -102,7 +105,7 @@ SELECT
 	,0
 	,0
 	,0
-	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM [tblEMEntityEFTInformation] WHERE ysnActive = 1 AND intEntityId = tblPREmployee.[intEntityId]) THEN 1 ELSE 0 END
+	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM [tblEMEntityEFTInformation] WHERE ysnActive = 1 AND intEntityId = tblPREmployee.[intEntityId] AND @ysnOverrideDD = 0) THEN 1 ELSE 0 END
 	,@intUserId
 	,GETDATE()
 	,@intUserId

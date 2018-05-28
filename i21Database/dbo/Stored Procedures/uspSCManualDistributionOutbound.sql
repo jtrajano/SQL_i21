@@ -96,7 +96,7 @@ OPEN intListCursor;
 							IF @intLoadContractId IS NOT NULL
 							BEGIN
 								SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
-								EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 							BEGIN
 								INSERT INTO [dbo].[tblSCTicketCost](

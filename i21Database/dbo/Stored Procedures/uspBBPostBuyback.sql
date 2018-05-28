@@ -210,7 +210,15 @@ AS
 			,@voucherDate = @APDate
 			,@voucherNonInvDetails = @voucherNonInvDetails
 			,@billId = @intCreatedBillId OUTPUT
+			,@error = @ErrorMessage OUTPUT
+			,@throwError = 0
 		
+		IF(ISNULL(@ErrorMessage,'') <> '')
+		BEGIN
+			SET @strPostingError = @ErrorMessage
+			GOTO ENDPOST
+		END
+
 
 		UPDATE tblAPBillDetail
 		SET intBuybackChargeId = A.intBuybackChargeId

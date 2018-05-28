@@ -300,6 +300,9 @@ BEGIN
 				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure) AS strShipmentQtyInfo,
 				CD.dtmStartDate,
 				CD.dtmEndDate,
+				strStartDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmStartDate, 'MMM')),format(CD.dtmStartDate, 'MMM')) + '-' + datename(yyyy, CD.dtmStartDate),
+				strEndDate = datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmEndDate, 'MMM')),format(CD.dtmEndDate, 'MMM')) + '-' + datename(yyyy, CD.dtmEndDate),
+				strStartToEndDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmStartDate, 'MMM')),format(CD.dtmStartDate, 'MMM')) + '-' + datename(yyyy, CD.dtmStartDate) + ' - ' + datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(CD.dtmEndDate, 'MMM')),format(CD.dtmEndDate, 'MMM')) + '-' + datename(yyyy, CD.dtmEndDate),
 				(SELECT STUFF((
 						SELECT ', ' + LTRIM(MRK.strMarks)
 						FROM (

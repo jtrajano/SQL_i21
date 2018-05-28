@@ -24,3 +24,11 @@ BEGIN
 	UPDATE tblRKCompanyPreference SET strM2MView = 'View 1 - Standard' WHERE strM2MView IS NULL
 END
 GO
+
+
+PRINT ('/*******************  START Syncing Commodity Attributes to RM *******************/')
+GO
+EXEC uspRKSyncCommodityMarketAttribute -- saving to an RM table with constraint to disallow deletion of commodity attributes in IC
+GO
+PRINT('/*******************  END Syncing Commodity Attributes to RM *******************/')
+GO
