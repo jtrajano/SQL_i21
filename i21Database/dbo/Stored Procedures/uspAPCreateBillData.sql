@@ -57,6 +57,14 @@ IF @transCount = 0 BEGIN TRANSACTION
 		BEGIN
 			RAISERROR(@error, 16, 1);
 		END
+		RETURN;
+	END
+
+	IF ISNULL(@userId, 0) > 0 AND @shipTo IS NULL
+	BEGIN
+		SELECT TOP 1 
+			@shipTo = intCompanyLocationId
+		FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 	END
 
 	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
@@ -67,6 +75,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		BEGIN
 			RAISERROR(@error, 16, 1);
 		END
+		RETURN;
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
