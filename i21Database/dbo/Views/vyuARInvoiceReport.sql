@@ -10,6 +10,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
 								  END
+	 , strCompanyPhoneNumber	= COMPANY.strPhone
+	 , strCompanyEmail			= COMPANY.strEmail
 	 , strType					= ISNULL(INV.strType, 'Standard')
      , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber        = CUSTOMER.strCustomerNumber
@@ -245,6 +247,8 @@ OUTER APPLY (
 			   , strZip
 			   , strCountry
 			   , ysnIncludeEntityName
+			   , strPhone
+			   , strEmail
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 OUTER APPLY (
@@ -283,3 +287,18 @@ OUTER APPLY (
 	  AND ysnProcessed = 1
 	  AND intInvoiceId = INV.intOriginalInvoiceId
 ) PROVISIONAL
+OUTER APPLY (
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	FROM (
+		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
+		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)		
+		INNER JOIN (
+			SELECT intTicketId
+				 , strTicketNumber 
+			FROM dbo.tblSCTicket WITH(NOLOCK)
+		) T ON ID.intTicketId = T.intTicketId
+		WHERE ID.intInvoiceId = INV.intInvoiceId
+		GROUP BY ID.intInvoiceId, ID.intTicketId, T.strTicketNumber
+		FOR XML PATH ('')
+	) INV (strTicketNumber)
+) SCALETICKETS
