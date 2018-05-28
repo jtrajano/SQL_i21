@@ -6654,6 +6654,7 @@
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
     <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemVendorXrefForCStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

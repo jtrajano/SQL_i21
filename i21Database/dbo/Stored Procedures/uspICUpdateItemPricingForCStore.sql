@@ -5,9 +5,11 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemPricingForCStore]
 	-- filter params
 	@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strDescription AS NVARCHAR(250) = NULL 
+	,@intItemId AS INT = NULL 
 	-- update params
 	,@dblStandardCost AS NUMERIC(38, 20) = NULL 
 	,@dblRetailPrice AS NUMERIC(38, 20) = NULL 
+	,@dblLastCost AS NUMERIC(38, 20) = NULL
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -50,8 +52,10 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NU
 		,intItemPricingId INT 
 		,dblOldStandardCost NUMERIC(38, 20) NULL
 		,dblOldSalePrice NUMERIC(38, 20) NULL
+		,dblOldLastCost NUMERIC(38, 20) NULL
 		,dblNewStandardCost NUMERIC(38, 20) NULL
 		,dblNewSalePrice NUMERIC(38, 20) NULL
+		,dblNewLastCost NUMERIC(38, 20) NULL
 	)
 ;
 
@@ -62,15 +66,19 @@ BEGIN
 		,intItemPricingId 
 		,dblOldStandardCost 
 		,dblOldSalePrice 
+		,dblOldLastCost
 		,dblNewStandardCost 
 		,dblNewSalePrice 
+		,dblNewLastCost
 	)
 	SELECT	[Changes].intItemId 
 			,[Changes].intItemPricingId
 			,[Changes].dblOldStandardCost
 			,[Changes].dblOldSalePrice
+			,[Changes].dblOldLastCost
 			,[Changes].dblNewStandardCost
 			,[Changes].dblNewSalePrice
+			,[Changes].dblNewLastCost
 	FROM	(
 				-- Merge will help us build the audit log and update the records at the same time. 
 				MERGE	
@@ -81,8 +89,10 @@ BEGIN
 						SELECT	ItemPricing.intItemPricingId
 						FROM	tblICItemPricing ItemPricing INNER JOIN tblICItemLocation il
 									ON ItemPricing.intItemLocationId = il.intItemLocationId 
+									AND il.intLocationId IS NOT NULL 
 								INNER JOIN tblICItem i
 									ON i.intItemId = ItemPricing.intItemId 
+									AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 						WHERE	(
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = il.intLocationId) 			
@@ -125,6 +135,7 @@ BEGIN
 						UPDATE 
 						SET		dblStandardCost = ISNULL(@dblStandardCost, itemPricing.dblStandardCost)
 								,dblSalePrice = ISNULL(@dblRetailPrice, itemPricing.dblSalePrice)
+								,dblLastCost = ISNULL(@dblLastCost, itemPricing.dblLastCost)
 								,dtmDateModified = GETUTCDATE()
 								,intModifiedByUserId = @intEntityUserSecurityId
 					OUTPUT 
@@ -133,16 +144,20 @@ BEGIN
 						, inserted.intItemPricingId
 						, deleted.dblStandardCost 
 						, deleted.dblSalePrice
+						, deleted.dblLastCost
 						, inserted.dblStandardCost
 						, inserted.dblSalePrice
+						, inserted.dblLastCost
 			) AS [Changes] (
 				Action
 				, intItemId 
 				, intItemPricingId
 				, dblOldStandardCost
 				, dblOldSalePrice
+				, dblOldLastCost
 				, dblNewStandardCost
 				, dblNewSalePrice
+				, dblNewLastCost 
 			)
 	WHERE	[Changes].Action = 'UPDATE'
 	;
@@ -150,6 +165,14 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog)
 BEGIN 
+	DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+	
+	DECLARE @json2_int AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%i","to":"%i","leaf":true}'
+	DECLARE @json2_float AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
+	DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
+	DECLARE @json2_date AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
+
+
 	-- Add audit logs for Standard Cost changes. 
 	INSERT INTO tblSMAuditLog(
 			strActionType
@@ -164,78 +187,65 @@ BEGIN
 	)
 	SELECT 
 			strActionType = 'Updated'
-			, strTransactionType = 'Inventory.view.Item'
-			, strRecordNo = intItemId
+			, strTransactionType =  'Inventory.view.Item'
+			, strRecordNo = auditLog.intItemId
 			, strDescription = ''
 			, strRoute = null 
-			, strJsonData = 
-				dbo.fnFormatMessage(
-					'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
-					, CAST(intItemId AS NVARCHAR(20)) 
-					, dbo.fnFormatMessage(
-						'{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
-						, 'C-Store updates the Standard Cost'
-						, dblOldStandardCost
-						, dblNewStandardCost
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-					) 
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-				) 
+			, strJsonData = auditLog.strJsonData
 			, dtmDate = GETUTCDATE()
 			, intEntityId = @intEntityUserSecurityId 
 			, intConcurrencyId = 1
-	FROM	#tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
-	WHERE	ISNULL(dblOldStandardCost, 0) <> ISNULL(dblNewStandardCost, 0)
-	-- Add audit logs for Retail Price changes. 
-	UNION ALL
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType = 'Inventory.view.Item'
-			, strRecordNo = intItemId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = 
-				dbo.fnFormatMessage(
-					'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
-					, CAST(intItemId AS NVARCHAR(20)) 
-					, dbo.fnFormatMessage(
-						'{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
-						, 'C-Store updates the Retail Price'
-						, dblOldSalePrice
-						, dblNewSalePrice
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
+	FROM	(
+		SELECT	intItemId
+				,strJsonData = 
+					dbo.fnFormatMessage(
+						@json1
+						, CAST(intItemId AS NVARCHAR(20)) 
+						, dbo.fnFormatMessage(
+							@json2_float
+							, 'C-Store updates the Standard Cost'
+							, dblOldStandardCost
+							, dblNewStandardCost
+							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+						) 
+						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
 					) 
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-				) 
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	#tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
-	WHERE	ISNULL(dblOldSalePrice, 0) <> ISNULL(dblNewSalePrice, 0)
+		FROM	#tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+		WHERE	ISNULL(dblOldStandardCost, 0) <> ISNULL(dblNewStandardCost, 0)
+		UNION ALL 
+		SELECT	intItemId
+				,strJsonData = 
+					dbo.fnFormatMessage(
+						@json1
+						, CAST(intItemId AS NVARCHAR(20)) 
+						, dbo.fnFormatMessage(
+							@json2_float
+							, 'C-Store updates the Retail Price'
+							, dblOldSalePrice
+							, dblNewSalePrice
+							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+						) 
+						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+					) 
+		FROM	#tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+		WHERE	ISNULL(dblOldSalePrice, 0) <> ISNULL(dblNewSalePrice, 0)
+		UNION ALL 
+		SELECT	intItemId
+				,strJsonData = 
+					dbo.fnFormatMessage(
+						@json1
+						, CAST(intItemId AS NVARCHAR(20)) 
+						, dbo.fnFormatMessage(
+							@json2_float
+							, 'C-Store updates the Last Cost'
+							, dblOldLastCost
+							, dblNewLastCost
+							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+						) 
+						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+					) 
+		FROM	#tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+		WHERE	ISNULL(dblOldLastCost, 0) <> ISNULL(dblNewLastCost, 0)
+	) auditLog
+	WHERE auditLog.strJsonData IS NOT NULL 
 END 
