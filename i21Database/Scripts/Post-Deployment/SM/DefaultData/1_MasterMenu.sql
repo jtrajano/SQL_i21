@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling (Portal)' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Electronic Filing SUI' AND strModuleName = 'Payroll' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Payroll'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -2484,45 +2484,41 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employees
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Payroll.view.EntityEmployee?showSearch=true' WHERE strMenuName = 'Employees' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
-
-
-
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Pay Groups', N'Payroll', @PayrollMaintenanceParentMenuId, N'Pay Groups', N'Maintenance', N'Screen', N'Payroll.view.EmployeePayGroup', N'small-menu-maintenance', 1, 1, 0, 1, 5, 0)
+	VALUES (N'Pay Groups', N'Payroll', @PayrollMaintenanceParentMenuId, N'Pay Groups', N'Maintenance', N'Screen', N'Payroll.view.EmployeePayGroup', N'small-menu-maintenance', 1, 1, 0, 1, 4, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Payroll.view.EmployeePayGroup' WHERE strMenuName = 'Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Payroll.view.EmployeePayGroup' WHERE strMenuName = 'Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ranks' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Ranks', N'Payroll', @PayrollMaintenanceParentMenuId, N'Ranks', N'Maintenance', N'Screen', N'Payroll.view.EmployeeRank', N'small-menu-maintenance', 1, 1, 0, 1, 6, 0)
+	VALUES (N'Ranks', N'Payroll', @PayrollMaintenanceParentMenuId, N'Ranks', N'Maintenance', N'Screen', N'Payroll.view.EmployeeRank', N'small-menu-maintenance', 1, 1, 0, 1, 5, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Payroll.view.EmployeeRank' WHERE strMenuName = 'Ranks' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Payroll.view.EmployeeRank' WHERE strMenuName = 'Ranks' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Tax Types', N'Payroll', @PayrollMaintenanceParentMenuId, N'Tax Types', N'Maintenance', N'Screen', N'Payroll.view.TaxType?showSearch=true&searchCommand=TaxType', N'small-menu-maintenance', 1, 1, 0, 1, 7, 0)
+	VALUES (N'Tax Types', N'Payroll', @PayrollMaintenanceParentMenuId, N'Tax Types', N'Maintenance', N'Screen', N'Payroll.view.TaxType?showSearch=true&searchCommand=TaxType', N'small-menu-maintenance', 1, 1, 0, 1, 6, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET  intSort = 7, strCommand = N'Payroll.view.TaxType?showSearch=true&searchCommand=TaxType' WHERE strMenuName = 'Tax Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET  intSort = 6, strCommand = N'Payroll.view.TaxType?showSearch=true&searchCommand=TaxType' WHERE strMenuName = 'Tax Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Templates', N'Payroll', @PayrollMaintenanceParentMenuId, N'Templates', N'Maintenance', N'Screen', N'Payroll.view.EmployeeTemplate?showSearch=true&searchCommand=EmployeeTemplate', N'small-menu-maintenance', 1, 1, 0, 1, 8, 0)
+	VALUES (N'Templates', N'Payroll', @PayrollMaintenanceParentMenuId, N'Templates', N'Maintenance', N'Screen', N'Payroll.view.EmployeeTemplate?showSearch=true&searchCommand=EmployeeTemplate', N'small-menu-maintenance', 1, 1, 0, 1, 7, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Payroll.view.EmployeeTemplate?showSearch=true&searchCommand=EmployeeTemplate' WHERE strMenuName = 'Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Payroll.view.EmployeeTemplate?showSearch=true&searchCommand=EmployeeTemplate' WHERE strMenuName = 'Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Time Off Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Time Off Types', N'Payroll', @PayrollMaintenanceParentMenuId, N'Time Off Types', N'Maintenance', N'Screen', N'Payroll.view.TimeOffType?showSearch=true&searchCommand=TimeOffType', N'small-menu-maintenance', 1, 1, 0, 1, 9, 0)
+	VALUES (N'Time Off Types', N'Payroll', @PayrollMaintenanceParentMenuId, N'Time Off Types', N'Maintenance', N'Screen', N'Payroll.view.TimeOffType?showSearch=true&searchCommand=TimeOffType', N'small-menu-maintenance', 1, 1, 0, 1, 8, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET  intSort = 9, strCommand = N'Payroll.view.TimeOffType?showSearch=true&searchCommand=TimeOffType' WHERE strMenuName = 'Time Off Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET  intSort = 8, strCommand = N'Payroll.view.TimeOffType?showSearch=true&searchCommand=TimeOffType' WHERE strMenuName = 'Time Off Types' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Workers Comp Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Workers Comp Codes', N'Payroll', @PayrollMaintenanceParentMenuId, N'Workers Comp Codes', N'Maintenance', N'Screen', N'Payroll.view.WorkersCompensationCodes', N'small-menu-maintenance', 1, 1, 0, 1, 10, 0)
+	VALUES (N'Workers Comp Codes', N'Payroll', @PayrollMaintenanceParentMenuId, N'Workers Comp Codes', N'Maintenance', N'Screen', N'Payroll.view.WorkersCompensationCodes', N'small-menu-maintenance', 1, 1, 0, 1, 9, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Payroll.view.WorkersCompensationCodes' WHERE strMenuName = 'Workers Comp Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Payroll.view.WorkersCompensationCodes' WHERE strMenuName = 'Workers Comp Codes' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Earnings History' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2548,47 +2544,53 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Earnings 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=EmployeeEarningRegister&direct=true' WHERE strMenuName = 'Earnings Register' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Electronic Filing SUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Electronic Filing SUI', N'Payroll', @PayrollReportParentMenuId, N'Electronic Filing SUI', N'Report', N'Screen', N'Payroll.view.ElectronicFilingSUI', N'small-menu-report', 1, 0, 0, 1, 4, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = 'Payroll.view.ElectronicFilingSUI' WHERE strMenuName = 'Electronic Filing SUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Form 941' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Form 941', N'Payroll', @PayrollReportParentMenuId, N'Form 941', N'Report', N'Screen', N'Payroll.view.Form941', N'small-menu-report', 1, 0, 0, 1, 4, 1)
+	VALUES (N'Form 941', N'Payroll', @PayrollReportParentMenuId, N'Form 941', N'Report', N'Screen', N'Payroll.view.Form941', N'small-menu-report', 1, 0, 0, 1, 5, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = 'Payroll.view.Form941' WHERE strMenuName = 'Form 941' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = 'Payroll.view.Form941' WHERE strMenuName = 'Form 941' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Origin Data' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Origin Data', N'Payroll', @PayrollReportParentMenuId, N'Origin Data', N'Report', N'Screen', N'Payroll.view.OriginData?showSearch=true&searchCommand=OriginData', N'small-menu-report', 1, 1, 0, 1, 5, 0)
+	VALUES (N'Origin Data', N'Payroll', @PayrollReportParentMenuId, N'Origin Data', N'Report', N'Screen', N'Payroll.view.OriginData?showSearch=true&searchCommand=OriginData', N'small-menu-report', 1, 1, 0, 1, 6, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Payroll.view.OriginData?showSearch=true&searchCommand=OriginData' WHERE strMenuName = 'Origin Data' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Payroll.view.OriginData?showSearch=true&searchCommand=OriginData' WHERE strMenuName = 'Origin Data' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Process W-2' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Process W-2', N'Payroll', @PayrollReportParentMenuId, N'Process W-2', N'Report', N'Screen', N'Payroll.view.ProcessW2', N'small-menu-report', 1, 0, 0, 1, 6, 1)
+	VALUES (N'Process W-2', N'Payroll', @PayrollReportParentMenuId, N'Process W-2', N'Report', N'Screen', N'Payroll.view.ProcessW2', N'small-menu-report', 1, 0, 0, 1, 7, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = 'Payroll.view.ProcessW2' WHERE strMenuName = 'Process W-2' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = 'Payroll.view.ProcessW2' WHERE strMenuName = 'Process W-2' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quarterly FUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quarterly FUI', N'Payroll', @PayrollReportParentMenuId, N'Quarterly FUI', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=QuarterlyFUI&direct=true', N'small-menu-report', 1, 0, 0, 1, 7, 1)
+	VALUES (N'Quarterly FUI', N'Payroll', @PayrollReportParentMenuId, N'Quarterly FUI', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=QuarterlyFUI&direct=true', N'small-menu-report', 1, 0, 0, 1, 8, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=QuarterlyFUI&direct=true' WHERE strMenuName = 'Quarterly FUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=QuarterlyFUI&direct=true' WHERE strMenuName = 'Quarterly FUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quarterly State' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quarterly State', N'Payroll', @PayrollReportParentMenuId, N'Quarterly State', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=QuarterlyStateTax&direct=true', N'small-menu-report', 1, 0, 0, 1, 8, 1)
+	VALUES (N'Quarterly State', N'Payroll', @PayrollReportParentMenuId, N'Quarterly State', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=QuarterlyStateTax&direct=true', N'small-menu-report', 1, 0, 0, 1, 9, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=QuarterlyStateTax&direct=true' WHERE strMenuName = 'Quarterly State' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=QuarterlyStateTax&direct=true' WHERE strMenuName = 'Quarterly State' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quarterly SUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quarterly SUI', N'Payroll', @PayrollReportParentMenuId, N'Quarterly SUI', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=QuarterlySUI&direct=true', N'small-menu-report', 1, 0, 0, 1, 9, 1)
+	VALUES (N'Quarterly SUI', N'Payroll', @PayrollReportParentMenuId, N'Quarterly SUI', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Payroll&report=QuarterlySUI&direct=true', N'small-menu-report', 1, 0, 0, 1, 10, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=QuarterlySUI&direct=true' WHERE strMenuName = 'Quarterly SUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = 'Reporting.view.ReportManager?group=Payroll&report=QuarterlySUI&direct=true' WHERE strMenuName = 'Quarterly SUI' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'W-2s' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'W-2s', N'Payroll', @PayrollReportParentMenuId, N'W-2s', N'Report', N'Screen', N'Payroll.view.EmployeeW2?showSearch=true&searchCommand=EmployeeW2&isFloating=true', N'small-menu-report', 1, 0, 0, 1, 10, 1)
+	VALUES (N'W-2s', N'Payroll', @PayrollReportParentMenuId, N'W-2s', N'Report', N'Screen', N'Payroll.view.EmployeeW2?showSearch=true&searchCommand=EmployeeW2&isFloating=true', N'small-menu-report', 1, 0, 0, 1, 11, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = 'Payroll.view.EmployeeW2?showSearch=true&searchCommand=EmployeeW2&isFloating=true' WHERE strMenuName = 'W-2s' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = 'Payroll.view.EmployeeW2?showSearch=true&searchCommand=EmployeeW2&isFloating=true' WHERE strMenuName = 'W-2s' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Workers Comp' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
