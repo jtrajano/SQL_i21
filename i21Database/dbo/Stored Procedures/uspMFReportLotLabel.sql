@@ -31,6 +31,7 @@ BEGIN TRY
 		,@intNoOfLabel INT
 	DECLARE @tblMFInventoryReceiptItemLot TABLE (intInventoryReceiptItemLotId INT)
 	DECLARE @tblMFFinalInventoryReceiptItemLot TABLE (intInventoryReceiptItemLotId INT)
+	DECLARE @tblMFNoOfLabel TABLE (intId INT)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -86,7 +87,11 @@ BEGIN TRY
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intNoOfLabel'
 
-	DECLARE @tblMFNoOfLabel TABLE (intId INT)
+	IF @intNoOfLabel IS NULL
+		OR @intNoOfLabel = 0
+	BEGIN
+		SELECT @intNoOfLabel = 1
+	END
 
 	WHILE @intNoOfLabel > 0
 	BEGIN
