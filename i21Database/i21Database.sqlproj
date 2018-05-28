@@ -6323,6 +6323,7 @@
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
     <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
