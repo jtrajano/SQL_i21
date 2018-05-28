@@ -211,7 +211,7 @@ BEGIN TRY
 	DECLARE @tempDemand AS TABLE  (
 		MaterialKey INT
 		,[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[MINIMUM STOCK  WKS] FLOAT
 		,[Full Container Load] FLOAT
 		,[SHIP FREQUENCY] FLOAT
@@ -220,7 +220,7 @@ BEGIN TRY
 	DECLARE @tempDemandFilter AS TABLE (
 		MaterialKey INT
 		,[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[MINIMUM STOCK  WKS] FLOAT
 		,[Full Container Load] FLOAT
 		,[SHIP FREQUENCY] FLOAT
@@ -233,7 +233,7 @@ BEGIN TRY
 		)
 	DECLARE @tmpDetail AS TABLE (
 		[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[AVAILABLE STOCK] FLOAT
 		,MaterialKey INT
 		,[MINIMUM STOCK  WKS] FLOAT
@@ -243,7 +243,7 @@ BEGIN TRY
 		)
 	DECLARE @tmpFinal AS TABLE (
 		[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[AVAILABLE STOCK] FLOAT
 		)
 	DECLARE @Material AS TABLE (
@@ -590,7 +590,7 @@ BEGIN TRY
 		DECLARE @tempDemand AS TABLE  (
 		MaterialKey INT
 		,[Item #] NVARCHAR(50)
-		,usage FLOAT
+		,USAGE FLOAT
 		,[MINIMUM STOCK  WKS] FLOAT
 		,[Full Container Load] FLOAT
 		,[SHIP FREQUENCY] FLOAT
