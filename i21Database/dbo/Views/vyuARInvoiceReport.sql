@@ -89,6 +89,9 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCustomerComments		= dbo.fnEMEntityMessage(CUSTOMER.intEntityId, 'Invoice')
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
+	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
+	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
+	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -140,6 +143,9 @@ LEFT JOIN (
 		 , ITEM.ysnListBundleSeparately
 		 , RECIPE.intRecipeId
 		 , RECIPE.intOneLinePrintId
+		 , SITE.intSiteID
+		 , SITE.strSiteNumber
+		 , SITE.dblEstimatedPercentLeft
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -199,6 +205,11 @@ LEFT JOIN (
 			 , intOneLinePrintId
 		FROM dbo.tblMFRecipe WITH (NOLOCK)
 	) RECIPE ON ID.intRecipeId = RECIPE.intRecipeId	
+	LEFT JOIN (
+		SELECT intSiteID,(CASE WHEN intSiteNumber < 9 THEN '00' + CONVERT(VARCHAR,intSiteNumber) ELSE '0' + CONVERT(VARCHAR,intSiteNumber) END ) + ' - ' + strDescription strSiteNumber,dblEstimatedPercentLeft 
+		FROM tblTMSite
+	) SITE
+		ON SITE.intSiteID = ID.intSiteId
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
