@@ -1545,8 +1545,61 @@ IF @post = 1
 				,intAccountId				= A.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN A.dblBaseAmountDue ELSE @ZeroDecimal END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN @ZeroDecimal ELSE A.dblBaseAmountDue END
-				,dblDebitUnit				= @ZeroDecimal
-				,dblCreditUnit				= @ZeroDecimal																				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
+																								(
+																									SELECT
+																										SUM(dbo.fnARCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped, null, I.strType))
+																									FROM
+																										(SELECT intInvoiceId, intItemId, intItemUOMId, dblQtyShipped 
+																										 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
+																									INNER JOIN
+																										(SELECT intInvoiceId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
+																											ON ARID.intInvoiceId = ARI.intInvoiceId	
+																									LEFT OUTER JOIN
+																										(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
+																											ON ARID.intItemId = I.intItemId
+																									LEFT OUTER JOIN
+																										(SELECT intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) IST
+																											ON ARID.intItemId = IST.intItemId 
+																											AND ARI.intCompanyLocationId = IST.intLocationId 
+																									LEFT OUTER JOIN
+																										(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON ARID.intItemId = ICIS.intItemId 
+																											AND ARI.intCompanyLocationId = ICIS.intLocationId 
+																									WHERE
+																										ARI.intInvoiceId = A.intInvoiceId
+																										AND ARID.dblQtyShipped <> @ZeroDecimal  
+																								)
+																							ELSE 
+																								0
+																							END
+				,dblCreditUnit				=  CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
+																								0
+																							ELSE 
+																								(
+																								SELECT
+																									SUM(dbo.fnARCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped, null, I.strType))
+																								FROM
+																									(SELECT intInvoiceId, intItemId, intItemUOMId, dblQtyShipped 
+																									 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
+																								INNER JOIN
+																									(SELECT intInvoiceId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
+																										ON ARID.intInvoiceId = ARI.intInvoiceId	
+																								LEFT OUTER JOIN
+																									(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
+																										ON ARID.intItemId = I.intItemId
+																								LEFT OUTER JOIN
+																									(SELECT intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) IST
+																										ON ARID.intItemId = IST.intItemId 
+																										AND ARI.intCompanyLocationId = IST.intLocationId 
+																								LEFT OUTER JOIN
+																									(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS
+																										ON ARID.intItemId = ICIS.intItemId 
+																										AND ARI.intCompanyLocationId = ICIS.intLocationId 
+																								WHERE
+																									ARI.intInvoiceId = A.intInvoiceId
+																									AND ARID.dblQtyShipped <> @ZeroDecimal  
+																								)
+																							END																					
 				,strDescription				= A.strComments
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
