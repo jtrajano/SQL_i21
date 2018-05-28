@@ -48,10 +48,15 @@ BEGIN TRY
 	DECLARE @strLoadDetailId NVARCHAR(100)
 	DECLARE @strLoadContainerId NVARCHAR(100)
 	DECLARE @strLoadWarehouseId NVARCHAR(100)
+	DECLARE @intSourceType INT
 
-	SELECT @strLoadNumber = strLoadNumber
+	SELECT @strLoadNumber = strLoadNumber,
+		   @intSourceType = intSourceType
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
+
+	IF (@intSourceType = 7)
+		Return;
 
 	---HEADER
 	SELECT @strLoadCondition = 'intLoadId = ' + LTRIM(@intLoadId)
