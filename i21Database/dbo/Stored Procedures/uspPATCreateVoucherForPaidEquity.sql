@@ -82,6 +82,7 @@ END
 	DECLARE @batchId AS NVARCHAR(40);
 	DECLARE @qualified BIT;
 	DECLARE @TransactionName AS VARCHAR(500) = 'CREATE VOUCHER' + CAST(NEWID() AS NVARCHAR(100));
+	DECLARE @shipToLocation INT = [dbo].[fnGetUserDefaultLocation](@intUserId);
 
 	DECLARE @equityPayments AS Id;
 	DECLARE @totalRecords AS INT = 0;
@@ -124,7 +125,7 @@ END
 			,@vendorId = @intCustomerPatronId
 			,@type = 1	
 			,@voucherNonInvDetails = @voucherDetailNonInventory
-			,@shipTo = NULL
+			,@shipTo = @shipToLocation
 			,@vendorOrderNumber = @strVenderOrderNumber
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
