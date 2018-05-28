@@ -12,6 +12,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomerComments]
 AS
 BEGIN
 	SET NOCOUNT ON;
+	SET ANSI_WARNINGS ON;
 
 	DECLARE @ysnAG BIT = 0
 	DECLARE @ysnPT BIT = 0
