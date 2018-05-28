@@ -72,6 +72,7 @@ SET ANSI_WARNINGS OFF
 	DECLARE @totalRecords AS INT = 0;
 	DECLARE @batchId AS NVARCHAR(40);
 	DECLARE @intAPClearingId AS INT;
+	DECLARE @shipToLocation INT = [dbo].[fnGetUserDefaultLocation](@intUserId);
 
 	DECLARE @voucherId as Id;
 
@@ -100,7 +101,7 @@ SET ANSI_WARNINGS OFF
 			,@vendorId = @intCustomerId
 			,@type = 1	
 			,@voucherNonInvDetails = @voucherDetailNonInventory
-			,@shipTo = NULL
+			,@shipTo = @shipToLocation
 			,@vendorOrderNumber = @strVenderOrderNumber
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT

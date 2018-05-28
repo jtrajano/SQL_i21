@@ -89,6 +89,7 @@ BEGIN
 	DECLARE @dbl1099Amount NUMERIC(18,6);
 	DECLARE @batchId AS NVARCHAR(40);
 	DECLARE @TransactionName AS VARCHAR(500) = 'CREATE VOUCHER' + CAST(NEWID() AS NVARCHAR(100));
+	DECLARE @shipToLocation INT = [dbo].[fnGetUserDefaultLocation](@intUserId);
 
 	DECLARE @refundProcessed AS Id;
 	DECLARE @totalRecords AS INT = 0;
@@ -159,7 +160,7 @@ BEGIN
 			,@vendorId = @intCustomerId
 			,@type = 1	
 			,@voucherNonInvDetails = @voucherDetailNonInventory
-			,@shipTo = NULL
+			,@shipTo = @shipToLocation
 			,@vendorOrderNumber = @strVendorOrderNumber
 			,@voucherDate = @dtmDate
 			,@billId = @intCreatedBillId OUTPUT;
