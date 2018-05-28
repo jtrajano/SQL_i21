@@ -10,6 +10,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
 								  END
+	 , strCompanyPhoneNumber	= COMPANY.strPhone
+	 , strCompanyEmail			= COMPANY.strEmail
 	 , strType					= ISNULL(INV.strType, 'Standard')
      , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber        = CUSTOMER.strCustomerNumber
@@ -245,6 +247,8 @@ OUTER APPLY (
 			   , strZip
 			   , strCountry
 			   , ysnIncludeEntityName
+			   , strPhone
+			   , strEmail
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 OUTER APPLY (
