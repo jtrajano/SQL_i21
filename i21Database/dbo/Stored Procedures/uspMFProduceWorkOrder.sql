@@ -31,9 +31,9 @@
 	,@ysnFillPartialPallet BIT = 0
 	,@intSpecialPalletLotId INT = NULL
 	,@ysnRecap BIT = 0
-	,@intWorkOrderProducedLotId int=NULL OUTPUT
-	,@intLotStatusId int=NULL
-	,@intWorkOrderProducedLotParentId int=NULL
+	,@intWorkOrderProducedLotId INT = NULL OUTPUT
+	,@intLotStatusId INT = NULL
+	,@intWorkOrderProducedLotParentId INT = NULL
 	)
 AS
 BEGIN
@@ -51,7 +51,8 @@ BEGIN
 		,@intSpecialPalletItemId INT
 		,@intSpecialPalletCategoryId INT
 		,@ysnProducedQtyByUnitCount BIT
-		,@strPickLot nvarchar(50)
+		,@strPickLot NVARCHAR(50)
+		,@ysnLotWeightsRequired BIT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -71,6 +72,20 @@ BEGIN
 			,intWeightUOMId = intItemUOMId
 			,dblWeightPerQty = 1
 		WHERE intLotId = @intLotId
+	END
+
+	SELECT @ysnLotWeightsRequired = IsNULL(ysnLotWeightsRequired, 1)
+		,@intCategoryId = intCategoryId
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
+	IF @ysnLotWeightsRequired = 0
+	BEGIN
+		SELECT @ysnProducedQtyByUnitCount = 1
+	END
+	ELSE
+	BEGIN
+		SELECT @ysnProducedQtyByUnitCount = 0
 	END
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated, @intLocationId)
@@ -134,7 +149,7 @@ BEGIN
 		,ysnFillPartialPallet
 		,intSpecialPalletLotId
 		,intItemTypeId
-		,intWorkOrderProducedLotParentId 
+		,intWorkOrderProducedLotParentId
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -205,7 +220,13 @@ BEGIN
 				END
 			)
 		,dtmActualProductionEndDate = @dtmCreated
-		,dtmActualProductionStartDate=(Case When dtmActualProductionStartDate is null then @dtmCreated else dtmActualProductionStartDate End)
+		,dtmActualProductionStartDate = (
+			CASE 
+				WHEN dtmActualProductionStartDate IS NULL
+					THEN @dtmCreated
+				ELSE dtmActualProductionStartDate
+				END
+			)
 		,intStatusId = @intStatusId
 		,intStorageLocationId = @intStorageLocationId
 		,intActualShiftId = @intBusinessShiftId
@@ -228,10 +249,6 @@ BEGIN
 					)
 			)
 	BEGIN
-		SELECT @intCategoryId = intCategoryId
-		FROM tblICItem
-		WHERE intItemId = @intItemId
-
 		INSERT INTO tblMFProductionSummary (
 			intWorkOrderId
 			,intItemId
@@ -334,12 +351,6 @@ BEGIN
 			END
 		END
 
-		SELECT @ysnProducedQtyByUnitCount = ysnProducedQtyByUnitCount
-		FROM tblMFCompanyPreference
-
-		IF @ysnProducedQtyByUnitCount IS NULL
-			SELECT @ysnProducedQtyByUnitCount = 0
-
 		IF @ysnProducedQtyByUnitCount = 1
 			OR @intProduceUOMKey IS NULL
 			OR @intProduceUOMKey = 0
@@ -396,12 +407,6 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT @ysnProducedQtyByUnitCount = ysnProducedQtyByUnitCount
-		FROM tblMFCompanyPreference
-
-		IF @ysnProducedQtyByUnitCount IS NULL
-			SELECT @ysnProducedQtyByUnitCount = 0
-
 		IF @ysnProducedQtyByUnitCount = 1
 			OR @intProduceUOMKey IS NULL
 			OR @intProduceUOMKey = 0
@@ -429,8 +434,8 @@ BEGIN
 			,@intStorageLocationId = @intStorageLocationId
 			,@dtmProductionDate = @dtmProductionDate
 			,@intTransactionDetailId = @intWorkOrderProducedLotId
-			,@strNotes=@strComment
-			,@intLotStatusId=@intLotStatusId
+			,@strNotes = @strComment
+			,@intLotStatusId = @intLotStatusId
 	END
 
 	IF @strParentLotNumber IS NULL
@@ -486,7 +491,9 @@ BEGIN
 		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
-	Update tblMFLotInventory Set dblTareWeight =@dblTareWeight Where intLotId=@intLotId
+	UPDATE tblMFLotInventory
+	SET dblTareWeight = @dblTareWeight
+	WHERE intLotId = @intLotId
 
 	IF @intSpecialPalletLotId IS NOT NULL
 	BEGIN
@@ -610,16 +617,18 @@ BEGIN
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND intAttributeId = 108--Pick Lot/Pallet after closing work order
+		AND intAttributeId = 108 --Pick Lot/Pallet after closing work order
 
-	If @strPickLot is null or @strPickLot=''
-	Begin
-		Select @strPickLot='False'
-	End
+	IF @strPickLot IS NULL
+		OR @strPickLot = ''
+	BEGIN
+		SELECT @strPickLot = 'False'
+	END
 
-	IF @strPickLot='True'
-	Begin
-		Update tblMFLotInventory Set ysnPickAllowed=0 Where intLotId=@intLotId
-	End
-
+	IF @strPickLot = 'True'
+	BEGIN
+		UPDATE tblMFLotInventory
+		SET ysnPickAllowed = 0
+		WHERE intLotId = @intLotId
+	END
 END
