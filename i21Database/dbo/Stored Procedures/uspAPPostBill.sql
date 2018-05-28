@@ -3,6 +3,7 @@
 	@billBatchId		AS NVARCHAR(40)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
+	@repost				AS BIT				= 0, -- do not validate if repost
 	@recap				AS BIT				= 0,
 	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
@@ -138,7 +139,7 @@ EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@recap, 0) = 0)
+IF (ISNULL(@recap, 0) = 0 AND @repost = 0)
 BEGIN
 
 	--VALIDATIONS
