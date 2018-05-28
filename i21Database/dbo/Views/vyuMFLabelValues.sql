@@ -22,4 +22,12 @@ FROM (
 		,strName AS DisplayMember
 		,strDescription
 	FROM tblICStorageLocation
+
+	UNION
+	
+	SELECT DISTINCT 3 AS intTypeId
+		,intCompanyLocationSubLocationId AS ValueMember
+		,strSubLocationName AS DisplayMember
+		,strSubLocationDescription AS strDescription
+	FROM tblSMCompanyLocationSubLocation
 	) t
