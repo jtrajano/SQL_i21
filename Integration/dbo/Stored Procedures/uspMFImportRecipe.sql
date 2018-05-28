@@ -103,6 +103,7 @@ BEGIN
 					   ,[intItemId]
 					   ,[dblQuantity]
 					   ,[intItemUOMId]
+					   ,[intMarginUOMId]
 					   ,[intLocationId]
 					   ,[intVersionNo]
 					   ,[intRecipeTypeId]
@@ -119,8 +120,9 @@ BEGIN
 			SELECT      LTRIM(RTRIM(RCP.agrcp_rcp_no))
 					   ,CUS.intEntityId --[intCustomerId]
 					   ,NULL
-					   ,0--[dblQuantity]
+					   ,1--[dblQuantity]
 					   ,NULL--[intItemUOMId]
+					   ,(SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE Upper(strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = 'LB')
 					   ,LOC.intCompanyLocationId--[intLocationId]
 					   ,1--[intVersionNo]
 					   ,(select intRecipeTypeId from tblMFRecipeType where strName = 'By Quantity')--[intRecipeTypeId]
@@ -345,7 +347,7 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 					   ,RCPI.agrcp_ingr_lbs_'+CAST(@cnt AS NVARCHAR)+'
 					   ,0  --[dblShrinkage]
 					   ,1  --[ysnScaled]
-					   ,CASE WHEN ITM.strType = ''Other Charge'' THEN 
+					   ,CASE WHEN ITM1.strType = ''Other Charge'' THEN 
 							(SELECT intConsumptionMethodId FROM tblMFConsumptionMethod WHERE strName = ''None'')
 							ELSE 1 END
 					   ,0  --[ysnYearValidationRequired]
