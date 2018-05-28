@@ -10,7 +10,8 @@
 	[strPassword]				NVARCHAR (30)	COLLATE Latin1_General_CI_AS NULL, 
 	[strType]					NVARCHAR (20)	COLLATE Latin1_General_CI_AS NULL, 
 	[intMultiCompanyParentId]	INT NULL,
-    [intConcurrencyId]			INT NOT NULL DEFAULT 1, 
-    [intRangeStart]				INT NULL	 DEFAULT 0, 
-	[ysnRange]					BIT NULL     DEFAULT 0
+	[intRange]				    INT NULL	 DEFAULT 0,
+	[ysnStatus]					BIT NULL     DEFAULT 0,
+    [intConcurrencyId]			INT NOT NULL DEFAULT 1
+   
 )

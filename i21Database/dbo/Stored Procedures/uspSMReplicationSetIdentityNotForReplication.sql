@@ -11,7 +11,8 @@
 --End
 
 CREATE PROCEDURE [dbo].[uspSMReplicationSetIdentityNotForReplication] 
-@parentDB NVARCHAR(100)
+@parentDB NVARCHAR(100),
+@type BIT
 AS
 BEGIN
 
@@ -20,29 +21,49 @@ BEGIN
 
 	   CREATE TABLE dbo.#ListOfArticles 
 	   (   
-		  strArticle NVARCHAR(100)
+		  strArticle NVARCHAR(100),
+		  intId INT
 	   ) 
 
    		DECLARE @sql NVARCHAR(MAX) = N'';
 		DECLARE @insertSQL NVARCHAR(MAX) = '';
 	
-	
-	  SET @insertSQL = N'INSERT INTO #ListOfArticles
-		SELECT DISTINCT Tab.strTableName FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
-		INNER JOIN tblSMReplicationConfigurationTable AS ConTab
-		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
-		INNER JOIN tblSMReplicationTable AS Tab
-		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
+	   --PARENT
+		IF( @type = 1)
+			BEGIN
+				SET @insertSQL = N'INSERT INTO #ListOfArticles
+								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM tblSMReplicationConfiguration AS Con
+								INNER JOIN tblSMReplicationConfigurationTable AS ConTab
+								ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
+								INNER JOIN tblSMReplicationTable AS Tab
+								ON ConTab.intReplicationTableId = Tab.intReplicationTableId
+								WHERE strType = ''Parent'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
 
-		SET @insertSQL =  Replace(@insertSQL, 'parentDB', @parentDB)
+			END
+	   ELSE 
+			BEGIN
+			    SET @insertSQL = N'INSERT INTO #ListOfArticles
+								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
+								INNER JOIN tblSMReplicationConfigurationTable AS ConTab
+								ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
+								INNER JOIN tblSMReplicationTable AS Tab
+								ON ConTab.intReplicationTableId = Tab.intReplicationTableId
+								WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
+
+				SET @insertSQL =  Replace(@insertSQL, 'parentDB', @parentDB)
+			END	
+
+
 	    EXECUTE sp_executesql @insertSQL;
 
-				SELECT @sql += N'exec sys.sp_identitycolumnforreplication '
+
+
+		SELECT @sql += N'exec sys.sp_identitycolumnforreplication '
 				    + N''+CAST(intId AS NVARCHAR(MAX))+ ', 1 '
 					FROM #ListOfArticles
+		
 				
-			EXEC  sp_executesql @sql;
+    	EXEC  sp_executesql @sql;
 
 
 
