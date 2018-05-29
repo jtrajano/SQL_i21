@@ -130,5 +130,22 @@ BEGIN
     --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Future Settlement Price','1')
 END   
-
+GO
+-- Fix invalid accounts set in company preference (not in correct category)
+UPDATE pref SET intUnrealizedGainOnBasisId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnBasisId WHERE strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedGainOnFuturesId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnFuturesId WHERE strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedGainOnCashId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnCashId WHERE strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedLossOnBasisId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnBasisId WHERE strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedLossOnFuturesId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnFuturesId WHERE strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedLossOnCashId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnCashId WHERE strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedGainOnInventoryBasisIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryBasisIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedGainOnInventoryFuturesIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryFuturesIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedGainOnInventoryCashIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryCashIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryBasisIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryBasisIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryFuturesIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryFuturesIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryCashIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryCashIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedGainOnInventoryIntransitIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryIntransitIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryIntransitIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryIntransitIOSId WHERE strAccountCategory = 'Mark to Market Offset'
+GO
 print('/*******************  END Risk Management Data Fixess *******************/')
+GO
