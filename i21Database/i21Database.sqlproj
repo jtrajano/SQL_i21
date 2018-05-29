@@ -6669,6 +6669,10 @@
     <Build Include="dbo\Stored Procedures\uspCTSaveAmendmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotDueDate.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetBestItemPrice.sql" />
+    <Build Include="dbo\Tables\tblMBILOrderItem.sql" />
+    <Build Include="dbo\Tables\tblMBILOrderSite.sql" />
+    <Build Include="dbo\Tables\tblMBILOrderTaxCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILBuildOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
