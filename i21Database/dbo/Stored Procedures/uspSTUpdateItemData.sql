@@ -55,7 +55,7 @@ BEGIN TRY
 				--@intNewGLVarianceAccount      INT,
 				@strYsnPreview             NVARCHAR(1),
 				@currentUserId			   INT
-				
+		SET @strResultMsg = 'success'
 
 	                  
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
@@ -204,9 +204,11 @@ BEGIN TRY
 				-- Original Fields
 				,intCategoryId_Original INT NULL
 				,strCountCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
 				,intCategoryId_New INT NULL
 				,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 			)
 		;
 
@@ -260,6 +262,7 @@ BEGIN TRY
 				,intCountGroupId_Original INT NULL 
 				,intStorageLocationId_Original INT NULL 
 				,dblReorderPoint_Original NUMERIC(18, 6) NULL
+				,strDescription_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
 				,ysnTaxFlag1_New BIT NULL
 				,ysnTaxFlag2_New BIT NULL
@@ -291,6 +294,7 @@ BEGIN TRY
 				,intCountGroupId_New INT NULL 
 				,intStorageLocationId_New INT NULL 
 				,dblReorderPoint_New NUMERIC(18, 6) NULL
+				,strDescription_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 			)
 		;
 
@@ -368,6 +372,7 @@ BEGIN TRY
 
 					,@intCategoryId = @intNewCategory
 					,@strCountCode = @strNewCountCode
+					,@strItemDescription = NULL
 
 					,@intEntityUserSecurityId = @currentUserId
 		END
@@ -396,49 +401,82 @@ BEGIN TRY
 			DECLARE @ysnTaxFlag2 AS BIT = CAST(@strTaxFlag2ysn AS BIT)
 			DECLARE @ysnTaxFlag3 AS BIT = CAST(@strTaxFlag3ysn AS BIT)
 			DECLARE @ysnTaxFlag4 AS BIT = CAST(@strTaxFlag4ysn AS BIT)
+			DECLARE @ysnDepositRequired AS BIT = CAST(@strDepositRequiredysn AS BIT)
+			--@intDepositPLU
+			DECLARE @ysnQuantityRequired AS BIT = CAST(@strQuantityRequiredysn AS BIT)
+			DECLARE @ysnScaleItem AS BIT = CAST(@strScaleItemysn AS BIT)
+			DECLARE @ysnFoodStampable AS BIT = CAST(@strFoodStampableysn AS BIT)
+			DECLARE @ysnReturnable AS BIT = CAST(@strReturnableysn AS BIT)
+			DECLARE @ysnSaleable AS BIT = CAST(@strSaleableysn AS BIT)
+			DECLARE @ysnIdRequiredCigarette AS BIT = CAST(@strID1Requiredysn AS BIT)
+			DECLARE @ysnIdRequiredLiquor AS BIT = CAST(@strID2Requiredysn AS BIT)
+			DECLARE @ysnPromotionalItem AS BIT = CAST(@strPromotionalItemysn AS BIT)
+			DECLARE @ysnPrePriced AS BIT = CAST(@strPrePricedysn AS BIT)
+			DECLARE @ysnApplyBlueLaw1 AS BIT = CAST(@strBlueLaw1ysn AS BIT)
+			DECLARE @ysnApplyBlueLaw2 AS BIT = CAST(@strBlueLaw2ysn AS BIT)
+			DECLARE @ysnCountedDaily AS BIT = CAST(@strCountedDailyysn AS BIT)
+			DECLARE @ysnCountBySINo AS BIT = CAST(@strCountSerialysn AS BIT)
+			DECLARE @intFamilyId AS INT = CAST(@intNewFamily AS INT)
+			DECLARE @intClassId AS INT = CAST(@intNewClass AS INT)
+			DECLARE @intVendorId AS INT = CAST(@intNewVendor AS INT)
+
 
 			EXEC [dbo].[uspICUpdateItemLocationForCStore]
+			    -- filter params
 				@strUpcCode = @strUpcCode 
 				,@strDescription = @strDescription 
 				,@dblRetailPriceFrom = NULL  
 				,@dblRetailPriceTo = NULL 
-
+				,@intItemLocationId = NULL 
+				-- update params 
 				,@ysnTaxFlag1 = @ysnTaxFlag1
 				,@ysnTaxFlag2 = @ysnTaxFlag2
 				,@ysnTaxFlag3 = @ysnTaxFlag3
 				,@ysnTaxFlag4 = @ysnTaxFlag4
-				,@ysnDepositRequired = NULL
-				,@intDepositPLUId = NULL
-				,@ysnQuantityRequired = NULL
-				,@ysnScaleItem = NULL
-				,@ysnFoodStampable = NULL
-				,@ysnReturnable = NULL
-				,@ysnSaleable = NULL
-				,@ysnIdRequiredLiquor = NULL
-				,@ysnIdRequiredCigarette = NULL
-				,@ysnPromotionalItem = NULL
-				,@ysnPrePriced = NULL
-				,@ysnApplyBlueLaw1 = NULL
-				,@ysnApplyBlueLaw2 = NULL		
-				,@ysnCountedDaily = NULL
-				,@strCounted = NULL
-				,@ysnCountBySINo = NULL
-				,@intFamilyId = NULL
-				,@intClassId = NULL
-				,@intProductCodeId = NULL
-				,@intVendorId = NULL
-				,@intMinimumAge = NULL
-				,@dblMinOrder = NULL
-				,@dblSuggestedQty = NULL
-				,@intCountGroupId = NULL
-				,@intStorageLocationId = NULL
-				,@dblReorderPoint = 1
+				,@ysnDepositRequired = @ysnDepositRequired
+				,@intDepositPLUId = @intDepositPLU 
+				,@ysnQuantityRequired = @ysnQuantityRequired 
+				,@ysnScaleItem = @ysnScaleItem 
+				,@ysnFoodStampable = @ysnFoodStampable 
+				,@ysnReturnable = @ysnReturnable 
+				,@ysnSaleable = @ysnSaleable 
+				,@ysnIdRequiredLiquor = @ysnIdRequiredLiquor 
+				,@ysnIdRequiredCigarette = @ysnIdRequiredCigarette 
+				,@ysnPromotionalItem = @ysnPromotionalItem 
+				,@ysnPrePriced = @ysnPrePriced 
+				,@ysnApplyBlueLaw1 = @ysnApplyBlueLaw1 
+				,@ysnApplyBlueLaw2 = @ysnApplyBlueLaw2 
+				,@ysnCountedDaily = @ysnCountedDaily 
+				,@strCounted = @strCounted
+				,@ysnCountBySINo = @ysnCountBySINo 
+				,@intFamilyId = @intFamilyId 
+				,@intClassId = @intClassId 
+				,@intProductCodeId = @intNewProductCode 
+				,@intVendorId =  @intVendorId
+				,@intMinimumAge = @intNewMinAge 
+				,@dblMinOrder = @dblNewMinVendorOrderQty 
+				,@dblSuggestedQty  = @dblNewVendorSuggestedQty
+				,@intCountGroupId =  NULL
+				,@intStorageLocationId = @intNewBinLocation 
+				,@dblReorderPoint = NULL
+				,@strItemLocationDescription = NULL 
 
 				,@intEntityUserSecurityId = @currentUserId
 		END
 
 
+	DECLARE @RecCount AS INT = 0
+	DECLARE @UpdateCount AS INT = 0
 
+	SET @RecCount = @RecCount + (SELECT DISTINCT COUNT(intItemId) FROM #tmpUpdateItemForCStore_itemAuditLog)
+	SET @RecCount = @RecCount + (SELECT DISTINCT COUNT(intItemAccountId) FROM #tmpUpdateItemAccountForCStore_itemAuditLog)
+	SET @RecCount = @RecCount + (SELECT DISTINCT COUNT(intItemLocationId) FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog)
+	SET @UpdateCount = @RecCount
+	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemPricingId) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog)
+	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemSpecialPricingId) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog)
+
+	--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
+	SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount	
 
 
 		-- Clean up 
