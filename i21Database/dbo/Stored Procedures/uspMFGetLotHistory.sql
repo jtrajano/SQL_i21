@@ -43,6 +43,8 @@ BEGIN
 		,dtmTransactionDate DATETIME
 		,strOldOwnerName NVARCHAR(100)
 		,strNewOwnerName NVARCHAR(100)
+		,dtmNewDueDate DATETIME
+		,dtmOldDueDate DATETIME
 		)
 
 	CREATE TABLE #tempLotHistoryFinal (
@@ -81,6 +83,8 @@ BEGIN
 		,dtmTransactionDate DATETIME
 		,strOldOwnerName NVARCHAR(100)
 		,strNewOwnerName NVARCHAR(100)
+		,dtmNewDueDate DATETIME
+		,dtmOldDueDate DATETIME
 		)
 
 	DECLARE @dblPrimaryQty NUMERIC(38, 20)
@@ -177,6 +181,8 @@ BEGIN
 		,ilt.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
+		,NULL AS dtmNewDueDate 
+		,NULL AS dtmOldDueDate
 	FROM tblICLot l
 	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -293,6 +299,8 @@ BEGIN
 		,ilt.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
+		,NULL As dtmNewDueDate
+		,NULL As dtmOldDueDate
 	FROM tblICLot l
 	JOIN tblICInventoryTransactionStorage ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -445,6 +453,8 @@ BEGIN
 			,ilt.dtmDate AS dtmTransactionDate
 			,NULL AS strOldOwnerName
 			,NULL AS strNewOwnerName
+			,NULL As dtmNewDueDate
+			,NULL As dtmOldDueDate
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -532,6 +542,8 @@ BEGIN
 		,ia.dtmAdjustmentDate AS dtmTransactionDate
 		,e1.strEntityNo + ' - ' + e1.strName AS strOldOwnerName
 		,e2.strEntityNo + ' - ' + e2.strName AS strNewOwnerName
+		,NULL As dtmNewDueDate
+		,NULL As dtmOldDueDate
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -573,6 +585,8 @@ BEGIN
 				THEN 'Inventory Adjustment - Lot Alias Change'
 			WHEN IA.intTransactionTypeId = 102
 				THEN 'Inventory Adjustment - Vendor Lot Number Change'
+			WHEN IA.intTransactionTypeId = 103
+				THEN 'Inventory Adjustment - Due Date'
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
 		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) * L.dblWeightPerQty AS dblTransactionWeight
@@ -600,6 +614,8 @@ BEGIN
 		,IA.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
+		,IA.dtmNewDueDate As dtmNewDueDate
+		,IA.dtmOldDueDate As dtmOldDueDate
 	FROM tblMFInventoryAdjustment IA
 	JOIN tblICLot L ON L.intLotId = IA.intSourceLotId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -615,6 +631,7 @@ BEGIN
 		AND (
 			IA.intTransactionTypeId = 101
 			OR IA.intTransactionTypeId = 102
+			OR IA.intTransactionTypeId = 103
 			)
 
 	INSERT INTO #tempLotHistoryFinal (
@@ -652,6 +669,8 @@ BEGIN
 		,dtmTransactionDate
 		,strOldOwnerName
 		,strNewOwnerName
+		,dtmNewDueDate
+		,dtmOldDueDate
 		)
 	SELECT dtmDateTime
 		,strLotNo
@@ -687,6 +706,8 @@ BEGIN
 		,dtmTransactionDate
 		,strOldOwnerName
 		,strNewOwnerName
+		,dtmNewDueDate
+		,dtmOldDueDate
 	FROM #tempLotHistory LH
 	ORDER BY LH.dtmDateTime ASC
 

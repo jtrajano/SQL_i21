@@ -22,6 +22,8 @@
 	,@strNewLotAlias nvarchar(50)= NULL
 	,@strOldVendorLotNumber nvarchar(50)= NULL
 	,@strNewVendorLotNumber nvarchar(50)= NULL
+	,@dtmOldDueDate DATETIME= NULL
+	,@dtmNewDueDate DATETIME= NULL
 	)
 AS
 BEGIN TRY
@@ -71,6 +73,8 @@ BEGIN TRY
 		,strNewLotAlias 
 		,strOldVendorLotNumber 
 		,strNewVendorLotNumber 
+		,dtmOldDueDate 
+		,dtmNewDueDate
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -99,6 +103,8 @@ BEGIN TRY
 		,@strNewLotAlias 
 		,@strOldVendorLotNumber 
 		,@strNewVendorLotNumber 
+		,@dtmOldDueDate 
+		,@dtmNewDueDate 
 
 	Update tblMFLotInventory
 	Set dtmLastMoveDate =@dtmDate
