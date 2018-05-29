@@ -546,8 +546,8 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		UPDATE tblRealized 
 		SET  tblRealized.dblRealizedPNLValue = t.dblCOGSOrNetSaleValue * 
 													CASE 
-														 WHEN t.dblCOGSOrNetSaleValue > 0 THEN CASE WHEN intContractTypeId = 2 THEN 1  ELSE 0 END
-														 WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN -1 ELSE 0 END
+														 WHEN t.dblCOGSOrNetSaleValue > 0 THEN CASE WHEN intContractTypeId = 2 THEN  1  ELSE 0 END
+														 WHEN t.dblCOGSOrNetSaleValue <= 0 THEN CASE WHEN intContractTypeId = 1 THEN 1 ELSE 0 END
 													 END
 											 
 		    ,tblRealized.dblRealizedFuturesPNLValue = t.dblNetFuturesValue *

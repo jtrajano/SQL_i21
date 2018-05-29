@@ -370,7 +370,8 @@ INNER JOIN (
 ) C ON CUST.intEntityId = C.intEntityCustomerId
 WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	AND CB.dblAmountPaid < CB.dblBudgetAmount
-	AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
+	AND @ysnIncludeBudgetLocal = 1
+	--AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
 
 ) AS A  
 
@@ -507,7 +508,8 @@ INNER JOIN (
 ) C ON CUST.intEntityId = C.intEntityCustomerId
 WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	AND CB.dblAmountPaid < CB.dblBudgetAmount 
-	AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
+	AND @ysnIncludeBudgetLocal = 1
+	--AND (@ysnIncludeBudgetLocal = 1 OR CUST.ysnCustomerBudgetTieBudget = 1)
 
 ) AS TBL) AS B
           

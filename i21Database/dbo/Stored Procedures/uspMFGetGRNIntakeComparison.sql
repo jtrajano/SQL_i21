@@ -48,7 +48,7 @@ INSERT INTO @tblMFGRN (
 	)
 SELECT P.intPropertyId
 	,P.strPropertyName
-		,SUM(TR.strPropertyValue*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
+		,SUM(IsNULL(TR.strPropertyValue,0)*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
 	,TR.intSequenceNo
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
@@ -85,7 +85,7 @@ INSERT INTO @tblMFGRN (
 	)
 SELECT P.intPropertyId
 	,P.strPropertyName
-	,SUM(TR.strPropertyValue*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
+	,SUM(IsNULL(TR.strPropertyValue,0)*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
 	,TR.intSequenceNo
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
@@ -127,7 +127,7 @@ INSERT INTO @tblMFIP (
 	)
 SELECT P.intPropertyId
 	,P.strPropertyName
-	,SUM(TR.strPropertyValue*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
+	,SUM(IsNULL(TR.strPropertyValue,0)*S.dblRepresentingQty)/SUM(S.dblRepresentingQty) AS strPropertyValue
 FROM @tblMFFinalLot L
 JOIN tblQMTestResult AS TR ON TR.intProductValueId = L.intLotId
 	AND ISNUMERIC(TR.strPropertyValue) = 1

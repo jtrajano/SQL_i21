@@ -389,7 +389,7 @@ BEGIN TRY
 					WHERE SN.strTransactionType = N'Price Fixation Trade No'
 
 					SELECT @intNumber = COUNT(1) FROM @tblPriceFixation
-					UPDATE tblSMStartingNumber SET intNumber = intNumber + @intNumber 
+					UPDATE tblSMStartingNumber SET intNumber = intNumber + @intNumber + 1 
 					WHERE strTransactionType = N'Price Fixation Trade No'
 					
 					Set @strFixationDetailXml = '<root>' + @strFixationDetailXml + '</root>'

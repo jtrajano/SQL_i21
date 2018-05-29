@@ -9,6 +9,7 @@
 	,@intMarketZoneId INT = NULL
 	,@dblBasisCost NUMERIC(18, 6)
 	,@intItemId int = null
+	,@intCurrencyId int = null --If null, go to company config functional currency
 	)
 RETURNS @returntable TABLE
 (
@@ -23,9 +24,12 @@ BEGIN
 	DECLARE @ysnEnterForwardCurveForMarketBasisDifferential BIT	
 	DECLARE @intSettlementUOMId int
 	DECLARE	@dblSettlementPrice NUMERIC(18,6)
+	DECLARE @intDefaultCurrencyId INT
 		
 	SELECT @ysnEnterForwardCurveForMarketBasisDifferential = isnull(ysnEnterForwardCurveForMarketBasisDifferential, 0)
 	FROM tblRKCompanyPreference
+
+	SELECT @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 	
 	IF(isnull(@intFutureMonthId,0)=0 AND isnull(@intFutureMarketId,0)=0)
 	BEGIN
@@ -41,7 +45,39 @@ BEGIN
 		IF @ysnEnterForwardCurveForMarketBasisDifferential = 0
 		BEGIN
 			INSERT INTO @returntable(dblBasis,intBasisUOMId)
-			SELECT TOP 1  ISNULL(dblBasisOrDiscount, 0),  isnull(intUnitMeasureId,0)
+			SELECT TOP 1  
+			CASE WHEN @intCurrencyId IS NULL THEN
+				CASE WHEN @intDefaultCurrencyId = bd.intCurrencyId THEN
+					ISNULL(dblBasisOrDiscount, 0)
+					ELSE
+						--Convert
+						ISNULL(dblBasisOrDiscount, 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = bd.intCurrencyId 
+							AND [intToCurrencyId] = @intDefaultCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+				END
+				WHEN @intCurrencyId = bd.intCurrencyId THEN
+					ISNULL(dblBasisOrDiscount, 0)
+				ELSE
+					--Convert
+						ISNULL(dblBasisOrDiscount, 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = bd.intCurrencyId 
+							AND [intToCurrencyId] = @intCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+			 END AS dblBasisOrDiscount
+			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
 			JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
 			WHERE bd.intItemId = @intItemId AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN isnull(@intLocationId, 0) = 0 THEN isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END AND ISNULL(dblBasisOrDiscount, 0) <> 0 
@@ -53,7 +89,39 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @returntable(dblBasis,intBasisUOMId)
-			SELECT TOP 1 ISNULL(dblBasisOrDiscount, 0) ,  isnull(intUnitMeasureId,0)
+			SELECT TOP 1 
+			CASE WHEN @intCurrencyId IS NULL THEN
+				CASE WHEN @intDefaultCurrencyId = bd.intCurrencyId THEN
+					ISNULL(dblBasisOrDiscount, 0)
+					ELSE
+						--Convert
+						ISNULL(dblBasisOrDiscount, 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = bd.intCurrencyId 
+							AND [intToCurrencyId] = @intDefaultCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+				END
+				WHEN @intCurrencyId = bd.intCurrencyId THEN
+					ISNULL(dblBasisOrDiscount, 0)
+				ELSE
+					--Convert
+						ISNULL(dblBasisOrDiscount, 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = bd.intCurrencyId 
+							AND [intToCurrencyId] = @intCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+			 END AS dblBasisOrDiscount
+			,isnull(intUnitMeasureId,0)
 			FROM tblRKM2MBasis b
 			JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
 			WHERE intContractTypeId = @intTicketType AND intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN intCommodityId ELSE @intCommodityId END AND strPeriodTo = @strSeqMonth AND bd.intFutureMarketId = @intFutureMarketId AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN isnull(@intLocationId, 0) = 0 THEN isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END AND ISNULL(dblBasisOrDiscount, 0) <> 0 AND strContractInventory = 'Contract'
@@ -65,7 +133,40 @@ BEGIN
 	END
 	IF @intSequenceTypeId in(2,3)
 	BEGIN			
-		SELECT TOP 1  @dblSettlementPrice=isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0),@intSettlementUOMId=isnull(m.intUnitMeasureId,0) 
+		SELECT TOP 1  
+		@dblSettlementPrice = (
+		CASE WHEN @intCurrencyId IS NULL THEN
+				CASE WHEN @intDefaultCurrencyId = m.intCurrencyId THEN
+					isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0)
+					ELSE
+						--Convert
+						ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = m.intCurrencyId 
+							AND [intToCurrencyId] = @intDefaultCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+				END
+				WHEN @intCurrencyId = m.intCurrencyId THEN
+					ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0)
+				ELSE
+					--Convert
+						ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = m.intCurrencyId 
+							AND [intToCurrencyId] = @intCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+			 END)
+		,@intSettlementUOMId=isnull(m.intUnitMeasureId,0) 
 		FROM tblRKFuturesSettlementPrice sp
 		INNER JOIN tblRKFutSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 		INNER JOIN tblRKFutureMarket m ON sp.intFutureMarketId = m.intFutureMarketId

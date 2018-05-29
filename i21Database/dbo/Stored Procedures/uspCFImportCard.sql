@@ -319,7 +319,7 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 						GETDATE()
 						,'Card'
 						,0
-						,'Uable to find Account for Card'
+						,'Unable to find Account for Card'
 						,'cfcusmst'
 						,@originCard
 						,'tblCFCard'

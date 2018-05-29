@@ -7,15 +7,9 @@
     [intConnectionMethod] INT NOT NULL, 
     [strFilePath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
     [strFileName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strIPAddress] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
-    [intIPPort] INT NULL, 
-    [intComPort] INT NULL, 
-    [intBaudRate] INT NULL, 
-    [intDataBits] INT NULL, 
-    [intStopBits] INT NULL, 
-    [intParityBits] INT NULL, 
-    [intFlowControl] INT NULL, 
     [intGraderModel] INT NULL, 
+    [intDelimiterId] INT NULL, 
+    [strDelimiterType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [ysnVerifyCommodityCode] BIT NULL, 
 	[ysnVerifyDateTime] BIT NULL, 
     [ysnDateTimeCheck] BIT NULL, 
@@ -101,78 +95,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCScaleDevice',
     @level2type = N'COLUMN',
     @level2name = N'strFileName'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'IP Address',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'strIPAddress'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'IP Port',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intIPPort'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'COM Port',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intComPort'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'BAUD Rate',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intBaudRate'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Data Bits',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intDataBits'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Stop Bits',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intStopBits'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Parity Bits',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intParityBits'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Flow Control',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'intFlowControl'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Grader Model',

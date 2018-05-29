@@ -430,28 +430,29 @@ BEGIN TRY
 			,dblSaleAmount
 			,dblCogs		
 		)
-		SELECT  intCompanyId  = Invoice.intCompanyId
+		SELECT   intCompanyId  = Invoice.intCompanyId
 				,strCompany   = Company.strCompanyName
 				,intBookId    = Book.intBookId
 				,strBook	  = Book.strBook
-			   ,dblSaleAmount = SUM(
-									CASE 
-										WHEN AccountCategory.strAccountCategory = 'Sales Account' THEN dblCredit
-										ELSE 0
-									END
-								   )
-
-			  ,dblCogs        = SUM(
-									 CASE 
-											WHEN AccountCategory.strAccountCategory = 'Cost of Goods' THEN dblDebit
-											ELSE 0
-									 END
-									)
+			    ,dblSaleAmount = SUM(Sales.dblSaleAmount)
+			    ,dblCogs       = SUM(Cogs.dblCogs)
 		FROM tblARInvoice Invoice
-		JOIN tblGLDetail GLDetail ON GLDetail.strBatchId = Invoice.strBatchId
-		JOIN tblGLAccount Account ON Account.intAccountId = GLDetail.intAccountId
-		JOIN tblGLAccountGroup AccountGroup ON AccountGroup.intAccountCategoryId = Account.intAccountGroupId
-		JOIN tblGLAccountCategory AccountCategory ON AccountCategory.intAccountCategoryId = AccountGroup.intAccountCategoryId
+		JOIN(
+			   SELECT 
+			   GLDetail.strBatchId
+			  ,GLDetail.dblCredit AS dblSaleAmount	 
+			   FROM tblGLDetail GLDetail
+			   JOIN vyuGLAccountDetail AccountDetail ON AccountDetail.intAccountId = GLDetail.intAccountId AND AccountDetail.strAccountCategory = 'Sales Account'
+			 )Sales ON Sales.strBatchId = Invoice.strBatchId
+	    
+		JOIN(
+			   SELECT 
+			    GLDetail.strBatchId
+			   ,GLDetail.dblDebit AS dblCogs	 
+				FROM tblGLDetail GLDetail
+				JOIN vyuGLAccountDetail AccountDetail ON AccountDetail.intAccountId = GLDetail.intAccountId AND AccountDetail.strAccountCategory = 'Cost of Goods'
+			 )Cogs ON Cogs.strBatchId = Invoice.strBatchId
+
 		JOIN tblCTBookVsEntity BVS ON BVS.intMultiCompanyId = Invoice.intCompanyId
 		JOIN tblCTBook Book ON  Book.intBookId =  BVS.intBookId
 		JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = Invoice.intCompanyId
@@ -693,7 +694,7 @@ BEGIN TRY
 				,strPurchaseSale = 'COGS'
 				,dblBookValue	 = 0
 				,dblMarketValue	 = 0
-				,dblAmount       = SUM(dblCogs)
+				,dblAmount       = -SUM(dblCogs)
 				,strBookValue	 = 'TotalBookvalue'
 				,strMarketValue  = 'TotalMarketValue'
 				,strTotalAmount  = 'Total'

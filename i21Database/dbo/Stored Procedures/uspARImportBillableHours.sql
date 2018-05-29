@@ -141,7 +141,7 @@ SELECT
 	,[ysnRefreshPrice]			= 0
 	,[ysnRecomputeTax]			= 1
 	,[intTicketHoursWorkedId]	= BILLABLE.intTicketHoursWorkedId
-	,[dblCurrencyExchangeRate]	= 1.000000
+	,[dblCurrencyExchangeRate]	= BILLABLE.dblCurrencyExchangeRate
 	,[intSubCurrencyId]			= BILLABLE.intSubCurrencyId
 	,[dblSubCurrencyRate]		= BILLABLE.dblSubCurrencyRate
 FROM #BILLABLE BILLABLE

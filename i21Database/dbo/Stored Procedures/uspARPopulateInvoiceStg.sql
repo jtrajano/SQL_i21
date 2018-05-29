@@ -16,6 +16,17 @@ BEGIN TRY
 	DECLARE @strInsert NVARCHAR(20)
 	DECLARE @strUpdate NVARCHAR(20)
 	DECLARE @intToSubBookId INT
+	DECLARE @intLoadId INT
+	DECLARE @intLoadSourceType INT
+
+	SELECT @intLoadId = L.intLoadId, 
+		   @intLoadSourceType = L.intSourceType
+	FROM tblARInvoice I
+	JOIN tblLGLoad L ON L.intLoadId = I.intLoadId
+	WHERE I.intInvoiceId = @intInvoiceId
+
+	IF(@intLoadSourceType = 7)
+		RETURN;
 
 	IF NOT EXISTS (
 			SELECT TOP 1 1

@@ -4,6 +4,7 @@
 	,@strDescription AS NVARCHAR(250) = NULL 
 	,@dblRetailPriceFrom AS NUMERIC(38, 20) = NULL  
 	,@dblRetailPriceTo AS NUMERIC(38, 20) = NULL 
+	,@intItemLocationId AS INT = NULL 
 	-- update params 
 	,@ysnTaxFlag1 BIT = NULL
 	,@ysnTaxFlag2 BIT = NULL
@@ -35,6 +36,7 @@
 	,@intCountGroupId INT = NULL 
 	,@intStorageLocationId INT = NULL 
 	,@dblReorderPoint NUMERIC(18, 6) = NULL
+	,@strItemLocationDescription NVARCHAR(1000) = NULL 
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -106,6 +108,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,intCountGroupId_Original INT NULL 
 		,intStorageLocationId_Original INT NULL 
 		,dblReorderPoint_Original NUMERIC(18, 6) NULL
+		,strDescription_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 		-- Modified Fields
 		,ysnTaxFlag1_New BIT NULL
 		,ysnTaxFlag2_New BIT NULL
@@ -137,6 +140,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,intCountGroupId_New INT NULL 
 		,intStorageLocationId_New INT NULL 
 		,dblReorderPoint_New NUMERIC(18, 6) NULL
+		,strDescription_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 	)
 ;
 
@@ -176,6 +180,7 @@ BEGIN
 		, intCountGroupId_Original
 		, intStorageLocationId_Original
 		, dblReorderPoint_Original
+		, strDescription_Original
 		-- Modified values 
 		, ysnTaxFlag1_New
 		, ysnTaxFlag2_New
@@ -207,6 +212,7 @@ BEGIN
 		, intCountGroupId_New
 		, intStorageLocationId_New
 		, dblReorderPoint_New
+		, strDescription_New
 	)
 	SELECT	[Changes].intItemId 
 			,[Changes].intItemLocationId
@@ -241,6 +247,7 @@ BEGIN
 			, [Changes].intCountGroupId_Original
 			, [Changes].intStorageLocationId_Original
 			, [Changes].dblReorderPoint_Original
+			, [Changes].strDescription_Original
 			-- Modified values 
 			, [Changes].ysnTaxFlag1_New
 			, [Changes].ysnTaxFlag2_New
@@ -272,6 +279,7 @@ BEGIN
 			, [Changes].intCountGroupId_New
 			, [Changes].intStorageLocationId_New
 			, [Changes].dblReorderPoint_New
+			, [Changes].strDescription_New
 	FROM	(
 				-- Merge will help us build the audit log and update the records at the same time. 
 				MERGE	
@@ -282,6 +290,8 @@ BEGIN
 						SELECT	itemLocation.intItemLocationId
 						FROM	tblICItemLocation itemLocation INNER JOIN tblICItem i
 									ON i.intItemId = itemLocation.intItemId 
+									AND itemLocation.intLocationId IS NOT NULL 
+									AND itemLocation.intItemLocationId = ISNULL(@intItemLocationId, itemLocation.intItemLocationId)
 								LEFT JOIN tblICItemPricing itemPricing
 									ON itemPricing.intItemLocationId = itemLocation.intItemLocationId
 						WHERE	(
@@ -363,6 +373,7 @@ BEGIN
 							,intCountGroupId = ISNULL(@intCountGroupId, itemLocation.intCountGroupId) 
 							,intStorageLocationId = ISNULL(@intStorageLocationId, itemLocation.intStorageLocationId) 
 							,dblReorderPoint = ISNULL(@dblReorderPoint, itemLocation.dblReorderPoint) 
+							,strDescription = ISNULL(@strItemLocationDescription, itemLocation.strDescription)
 							,dtmDateModified = GETUTCDATE()
 							,intModifiedByUserId = @intEntityUserSecurityId
 					OUTPUT 
@@ -400,6 +411,7 @@ BEGIN
 						, deleted.intCountGroupId
 						, deleted.intStorageLocationId
 						, deleted.dblReorderPoint
+						, deleted.strDescription
 						-- Modified values 
 						, inserted.ysnTaxFlag1
 						, inserted.ysnTaxFlag2
@@ -431,6 +443,7 @@ BEGIN
 						, inserted.intCountGroupId
 						, inserted.intStorageLocationId
 						, inserted.dblReorderPoint
+						, inserted.strDescription
 			) AS [Changes] (
 				Action
 				, intItemId 
@@ -466,6 +479,7 @@ BEGIN
 				, intCountGroupId_Original
 				, intStorageLocationId_Original
 				, dblReorderPoint_Original
+				, strDescription_Original
 				-- Modified values 
 				, ysnTaxFlag1_New
 				, ysnTaxFlag2_New
@@ -497,6 +511,7 @@ BEGIN
 				, intCountGroupId_New
 				, intStorageLocationId_New
 				, dblReorderPoint_New
+				, strDescription_New
 			)
 	WHERE	[Changes].Action = 'UPDATE'
 	;
@@ -951,15 +966,19 @@ BEGIN
 						@json1
 						, CAST(intItemLocationId AS NVARCHAR(20)) 
 						, dbo.fnFormatMessage(
-							@json2_int
+							@json2_string
 							, 'C-Store updates the Vendor Id'
-							, intVendorId_Original
-							, intVendorId_New
+							, vendor_Original.strVendorId
+							, vendor_New.strVendorId
 							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
 						) 
 						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
 					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog auditLog 
+				LEFT JOIN tblAPVendor vendor_Original
+					ON auditLog.intVendorId_Original = vendor_Original.intEntityId 
+				LEFT JOIN tblAPVendor vendor_New
+					ON auditLog.intVendorId_New = vendor_New.intEntityId 
 		WHERE	ISNULL(intVendorId_Original, 0) <> ISNULL(intVendorId_New, 0)
 
 		UNION ALL
@@ -1069,6 +1088,25 @@ BEGIN
 					)
 		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
 		WHERE	ISNULL(dblReorderPoint_Original, 0) <> ISNULL(dblReorderPoint_New, 0)
+
+		UNION ALL
+		SELECT	intItemLocationId
+				, strJsonData = 
+					dbo.fnFormatMessage(
+						@json1
+						, CAST(intItemLocationId AS NVARCHAR(20)) 
+						, dbo.fnFormatMessage(
+							@json2_string
+							, 'C-Store updates the Description'
+							, strDescription_Original
+							, strDescription_New
+							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+						) 
+						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+					)
+		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+		WHERE	ISNULL(strDescription_Original, '') <> ISNULL(strDescription_New, '')
+
 
 	) auditLog
 	WHERE auditLog.strJsonData IS NOT NULL 

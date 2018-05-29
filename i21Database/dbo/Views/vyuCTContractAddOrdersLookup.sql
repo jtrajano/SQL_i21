@@ -40,7 +40,7 @@ SELECT	  CD.intContractDetailId
 		, dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))	AS	dblAvailableNetWeight
 		, CD.intRateTypeId
 		, RT.strCurrencyExchangeRateType
-		, CD.dblRate
+		, dblRate = CAST(NULL AS NUMERIC(18, 6)) -- CD.dblRate
 		, ysnBundleItem = CAST(CASE WHEN Item.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) 
 		, Item.strBundleType
 		, CL.strLocationName
