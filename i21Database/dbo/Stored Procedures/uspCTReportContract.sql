@@ -508,11 +508,11 @@ BEGIN TRY
 				JOIN		tblICItemUOM			IU	ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
 				JOIN		tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
 	
-				left join tblSMScreen				rts5 on rts5.strNamespace = 'Inventory.view.InventoryUOM'
+				left join tblSMScreen				rts5 on rts5.strNamespace = 'Inventory.view.ReportTranslation'
 				left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = UM.intUnitMeasureId
-				left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'UOM'
+				left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Name'
 	
-				left join tblSMScreen				rts6 on rts6.strNamespace = 'Inventory.view.InventoryUOM'
+				left join tblSMScreen				rts6 on rts6.strNamespace = 'RiskManagement.view.FuturesMarket'
 				left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = MA.intFutureMarketId
 				left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Market Name'
 
@@ -527,9 +527,9 @@ BEGIN TRY
 	left join tblSMTransaction			rtt1 on rtt1.intScreenId = rts1.intScreenId and rtt1.intRecordId = AN.intAssociationId
 	left join tblSMReportTranslation	rtrt1 on rtrt1.intLanguageId = @intLaguageId and rtrt1.intTransactionId = rtt1.intTransactionId and rtrt1.strFieldName = 'Name'
 	
-	left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = UM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
 	
 	left join tblSMScreen				rts3 on rts3.strNamespace = 'ContractManagement.view.WeightGrades'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = W2.intWeightGradeId

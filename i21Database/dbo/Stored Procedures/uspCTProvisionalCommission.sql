@@ -125,13 +125,13 @@ BEGIN TRY
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	EO.intCountryID			LEFT
 	JOIN	tblCTContractHeader		ch	ON ch.intContractHeaderId		=	CD.intContractHeaderId
 	
-	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+	inner join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = BD.intItemReportUOMId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
 	
-	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.InventoryUOM'
+	inner join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = BD.intRateUOMId
-	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt2.strFieldName = 'Name'
 	
 	left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
 	left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = IG.intCountryID
