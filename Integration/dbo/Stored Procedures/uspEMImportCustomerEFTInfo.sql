@@ -17,18 +17,18 @@ BEGIN
 	
 	DECLARE @BankCount INT
 
-	SELECT @BankCount = COUNT(*) FROM (SELECT DISTINCT ssbnk_name FROM ssbnkmst
-		) Q
-	WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''))) COLLATE Latin1_General_CI_AS)
-	
-	IF @BankCount <> 0 
-	BEGIN
-		EXEC uspCMImportBanksFromOrigin
-	END		 	
-
 	IF(@Checking = 0)
 	BEGIN
 	
+		SELECT @BankCount = COUNT(*) FROM (SELECT DISTINCT ssbnk_name FROM ssbnkmst
+			) Q
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(Q.ssbnk_name, ''))) COLLATE Latin1_General_CI_AS)
+		
+		IF @BankCount <> 0 
+		BEGIN
+			EXEC uspCMImportBanksFromOrigin
+		END		
+ 	
 		INSERT INTO [dbo].[tblEMEntityEFTInformation]
 				   ([intEntityId]             
 		   			,[intBankId]               
