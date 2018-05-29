@@ -6666,6 +6666,7 @@
     <Build Include="dbo\User Defined Types\ReceivePaymentPostingTable.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidPaymentsForPosting.sql" />
     <Build Include="dbo\Functions\fnARGetPaymentDetailsForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveAmendmentLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
