@@ -6668,6 +6668,7 @@
     <Build Include="dbo\Functions\fnARGetPaymentDetailsForPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveAmendmentLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotDueDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetBestItemPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
