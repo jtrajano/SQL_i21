@@ -186,7 +186,7 @@ SELECT
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= SC.intLotId
+		,intLotId					= NULL -- SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
@@ -1212,12 +1212,14 @@ BEGIN
 		,[dtmManufacturedDate]
 		,[strBillOfLadding]
 		,[intSourceType]
+		,[intContractHeaderId]
+		,[intContractDetailId]
 	)
 	SELECT 
 		[strReceiptType]		= RE.strReceiptType
 		,[intItemId]			= RE.intItemId
-		,[intLotId]				= RE.intLotId
-		,[strLotNumber]			= SC.strLotNumber
+		,[intLotId]				= NULL --RE.intLotId
+		,[strLotNumber]			= NULL --SC.strLotNumber
 		,[intLocationId]		= RE.intLocationId
 		,[intShipFromId]		= RE.intShipFromId
 		,[intShipViaId]			= RE.intShipViaId
@@ -1239,6 +1241,9 @@ BEGIN
 		,[dtmManufacturedDate]	= RE.dtmDate
 		,[strBillOfLadding]		= ''
 		,[intSourceType]		= RE.intSourceType
+		,[intContractHeaderId]	= RE.intContractHeaderId
+		,[intContractDetailId]	= RE.intContractDetailId
+
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
