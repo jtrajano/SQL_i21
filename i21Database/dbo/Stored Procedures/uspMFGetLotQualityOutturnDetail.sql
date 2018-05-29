@@ -146,10 +146,10 @@ SELECT intPropertyId
 	,strPropertyName
 	,IsNULL(strPropertyValue, 0) AS dblEstimatedOutput
 	,I.strDescription AS strGrade
-	,Convert(NUMERIC(38, 5), S.dblQty) AS dblInputWeight
-	,Convert(NUMERIC(38, 5), WP.dblQuantity) AS dblOutputWeight
-	,Convert(NUMERIC(38, 5), IsNULL(strActualOutput, 0)) AS dblActualOutput
-	,Convert(NUMERIC(38, 5), (
+	,Convert(NUMERIC(38, 4), S.dblQty) AS dblInputWeight
+	,Convert(NUMERIC(38, 4), WP.dblQuantity) AS dblOutputWeight
+	,Convert(NUMERIC(38, 4), IsNULL(strActualOutput, 0)) AS dblActualOutput
+	,Convert(NUMERIC(38, 4), (
 			CASE 
 				WHEN dblCoEfficient = 0
 					THEN NULL
@@ -172,42 +172,20 @@ SELECT intPropertyId
 						)
 				END
 			)) AS dblCleanGradeOutput
-	,Convert(NUMERIC(38, 5), (
-			(
-				CASE 
-					WHEN dblCoEfficient = 0
-						THEN IsNULL(strActualOutput, 0)
-					ELSE (
-							CASE 
-								WHEN Sum(CASE 
-											WHEN dblCoEfficient = 0
-												THEN 0
-											ELSE IsNULL(strActualOutput, 0)
-											END) OVER () = 0
-									THEN 0
-								ELSE (
-										IsNULL(strActualOutput, 0) / Sum(CASE 
-												WHEN dblCoEfficient = 0
-													THEN 0
-												ELSE IsNULL(strActualOutput, 0)
-												END) OVER ()
-										) * 100
-								END
-							)
-					END
-				) - IsNULL(strPropertyValue, 0)
+	,Convert(NUMERIC(38, 4), (
+			IsNULL(strActualOutput, 0) - IsNULL(strPropertyValue, 0)
 			)) AS dblVariance
-	,Convert(NUMERIC(38, 3), CASE 
+	,Convert(NUMERIC(38, 2), CASE 
 			WHEN PS.ysnZeroCost = 1
 				THEN NULL
 			ELSE (PS.dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
 			END) AS dblMarketPrice
-	,Convert(NUMERIC(38, 3), CASE 
+	,Convert(NUMERIC(38, 2), CASE 
 			WHEN PS.ysnZeroCost = 1
 				THEN NULL
 			ELSE dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
 			END) AS dblMarketDifferential
-	,Convert(NUMERIC(38, 3), CASE 
+	,Convert(NUMERIC(38, 2), CASE 
 			WHEN PS.ysnZeroCost = 1
 				THEN NULL
 			ELSE ((dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1)) + dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))) * IsNULL(WP.dblQuantity, - S.dblQty)

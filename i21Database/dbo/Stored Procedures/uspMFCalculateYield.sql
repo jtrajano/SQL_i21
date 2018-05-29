@@ -41,6 +41,34 @@ BEGIN TRY
 		,@dblTotalProducedQty NUMERIC(18, 6)
 		,@dblQuantity NUMERIC(18, 6)
 		,@dblItemYieldQuantity NUMERIC(18, 6)
+		,@dblRatio NUMERIC(18, 6)
+		,@dblTotoalRatio NUMERIC(38, 20)
+		,@dblVariance NUMERIC(38, 20)
+		,@intProductionSummaryId INT
+		,@dblYieldQuantity NUMERIC(38, 20)
+		,@intStorageLocationId INT
+		,@strLotNumber NVARCHAR(MAX)
+		,@intLotId INT
+		,@dblQty NUMERIC(38, 20)
+		,@dblNewQty NUMERIC(38, 20)
+		,@intItemUOMId INT
+		,@intInventoryAdjustmentId INT
+		,@dblAdjustByQuantity NUMERIC(18, 6)
+		,@intWeightUOMId INT
+		,@dblWeightPerQty NUMERIC(18, 6)
+		,@intSubLocationId INT
+		,@strInventoryTracking NVARCHAR(50)
+		,@intYieldItemUOMId INT
+		,@strLifeTimeType NVARCHAR(50)
+		,@intLifeTime INT
+		,@dtmExpiryDate DATETIME
+		,@strLotTracking NVARCHAR(50)
+		,@intItemLocationId INT
+		,@intCategoryId INT
+		,@intWorkOrderProducedLotId INT
+		,@ysnYieldLoss BIT
+		,@intConsumedLotId INT
+		,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -69,25 +97,8 @@ BEGIN TRY
 		,dblQuantity NUMERIC(18, 6)
 		,intItemUOMId INT
 		,intBatchId INT
+		,dblRatio NUMERIC(38, 20)
 		)
-
-	INSERT INTO @tblMFWorkOrderOutputLot (
-		intWorkOrderProducedLotId
-		,dblQuantity
-		,intItemUOMId
-		,intBatchId
-		)
-	SELECT intWorkOrderProducedLotId
-		,dblQuantity
-		,intItemUOMId
-		,intBatchId
-	FROM dbo.tblMFWorkOrderProducedLot WP
-	WHERE WP.intWorkOrderId = @intWorkOrderId
-		AND WP.ysnProductionReversed = 0
-		AND WP.intItemTypeId IN (
-			2
-			,4
-			)
 
 	SELECT @dblTotalProducedQty = SUM(dblOutputQuantity)
 	FROM tblMFProductionSummary
@@ -96,6 +107,41 @@ BEGIN TRY
 			2
 			,4
 			)
+
+	INSERT INTO @tblMFWorkOrderOutputLot (
+		intWorkOrderProducedLotId
+		,dblQuantity
+		,intItemUOMId
+		,intBatchId
+		,dblRatio
+		)
+	SELECT intWorkOrderProducedLotId
+		,dblQuantity
+		,intItemUOMId
+		,intBatchId
+		,ROUND((dblQuantity / @dblTotalProducedQty) * 100, 0)
+	FROM dbo.tblMFWorkOrderProducedLot WP
+	WHERE WP.intWorkOrderId = @intWorkOrderId
+		AND WP.ysnProductionReversed = 0
+		AND WP.intItemTypeId IN (
+			2
+			,4
+			)
+
+	SELECT @dblTotoalRatio = SUM(dblRatio)
+	FROM @tblMFWorkOrderOutputLot
+
+	IF @dblTotoalRatio <> 100
+	BEGIN
+		SELECT @dblVariance = 100 - @dblTotoalRatio
+
+		SELECT @intWorkOrderProducedLotId = MAX(intWorkOrderProducedLotId)
+		FROM @tblMFWorkOrderOutputLot
+
+		UPDATE @tblMFWorkOrderOutputLot
+		SET dblRatio = dblRatio + (@dblVariance)
+		WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+	END
 
 	DECLARE @tblInputItem TABLE (
 		intItemRecordKey INT Identity(1, 1)
@@ -376,37 +422,11 @@ BEGIN TRY
 			)
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	DECLARE @intProductionSummaryId INT
-		,@dblYieldQuantity NUMERIC(38, 20)
-		,@intStorageLocationId INT
-		,@strLotNumber NVARCHAR(MAX)
-		,@intLotId INT
-		,@dblQty NUMERIC(38, 20)
-		,@dblNewQty NUMERIC(38, 20)
-		,@intItemUOMId INT
-		,@intInventoryAdjustmentId INT
-		,@dblAdjustByQuantity NUMERIC(18, 6)
-		,@intWeightUOMId INT
-		,@dblWeightPerQty NUMERIC(18, 6)
-		,@intSubLocationId INT
-		,@strInventoryTracking NVARCHAR(50)
-		,@intYieldItemUOMId INT
-	DECLARE @strLifeTimeType NVARCHAR(50)
-		,@intLifeTime INT
-		,@dtmExpiryDate DATETIME
-		,@strLotTracking NVARCHAR(50)
-		,@intItemLocationId INT
-		,@intCategoryId INT
-		,@intWorkOrderProducedLotId INT
-		,@ysnYieldLoss BIT
-		,@intConsumedLotId INT
-		,@ItemsThatNeedLotId AS dbo.ItemLotTableType
-
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
 	WHERE F.intWorkOrderId = @intWorkOrderId
-		AND F.dblYieldQuantity <>0
+		AND F.dblYieldQuantity <> 0
 
 	WHILE @intProductionSummaryId IS NOT NULL
 	BEGIN
@@ -1037,14 +1057,16 @@ BEGIN TRY
 			BEGIN
 				SELECT @intBatchId = NULL
 					,@dblQuantity = NULL
+					,@dblRatio = NULL
 
 				SELECT @intBatchId = intBatchId
 					--,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intYieldItemUOMId, dblQuantity)
 					,@dblQuantity = dblQuantity
+					,@dblRatio = dblRatio
 				FROM @tblMFWorkOrderOutputLot
 				WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
-				SELECT @dblYieldQuantity = (@dblQuantity / @dblTotalProducedQty) * @dblItemYieldQuantity
+				SELECT @dblYieldQuantity = @dblRatio / 100 * @dblItemYieldQuantity
 
 				IF @strInventoryTracking = 'Item Level'
 				BEGIN
@@ -1254,17 +1276,19 @@ BEGIN TRY
 
 						IF @ysnYieldLoss = 0
 						BEGIN
-							SELECT @intLotId = WC.intLotId,@intWeightUOMId=intItemUOMId,@dblWeight=dblQuantity
+							SELECT @intLotId = WC.intLotId
+								,@intWeightUOMId = intItemUOMId
+								,@dblWeight = dblQuantity
 							FROM tblMFWorkOrderConsumedLot WC
 							WHERE intWorkOrderId = @intWorkOrderId
 								AND intBatchId = @intBatchId
 								AND NOT EXISTS (
-								SELECT *
-								FROM tblMFWorkOrderProducedLotTransaction LT
-								WHERE LT.intWorkOrderId = @intWorkOrderId
-									and LT.intBatchId =@intBatchId 
-									AND LT.intLotId = WC.intLotId
-								)
+									SELECT *
+									FROM tblMFWorkOrderProducedLotTransaction LT
+									WHERE LT.intWorkOrderId = @intWorkOrderId
+										AND LT.intBatchId = @intBatchId
+										AND LT.intLotId = WC.intLotId
+									)
 
 							SELECT @dblNewQty = CASE 
 									WHEN @dblYieldQuantity >= @dblWeight
@@ -1279,16 +1303,16 @@ BEGIN TRY
 							SELECT TOP 1 @strLotNumber = L.strLotNumber
 								,@intLotId = L.intLotId
 								,@intSubLocationId = L.intSubLocationId
-								,@intWeightUOMId = IsNUll(L.intWeightUOMId, L.intItemUOMId)
+								,@intWeightUOMId = @intYieldItemUOMId
 								,@dblWeight = (
 									(
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
@@ -1313,13 +1337,14 @@ BEGIN TRY
 								AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 								AND (
 									(
+										--@intYieldItemUOMId
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
@@ -1336,7 +1361,7 @@ BEGIN TRY
 								AND L.strLotNumber IN (
 									SELECT WI.strLotNumber
 									FROM @tblMFWorkOrderInputLot WI
-									WHERE WI.intMachineId = @intMachineId
+									WHERE IsNULL(WI.intMachineId, @intMachineId) = @intMachineId
 									)
 							ORDER BY L.dtmDateCreated DESC
 
@@ -1353,16 +1378,16 @@ BEGIN TRY
 							SELECT TOP 1 @strLotNumber = L.strLotNumber
 								,@intLotId = L.intLotId
 								,@intSubLocationId = L.intSubLocationId
-								,@intWeightUOMId = IsNUll(L.intWeightUOMId, L.intItemUOMId)
+								,@intWeightUOMId = @intYieldItemUOMId
 								,@dblWeight = (
 									(
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
@@ -1387,30 +1412,31 @@ BEGIN TRY
 								AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 								AND (
 									(
+										--@intYieldItemUOMId
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
-											), 0) - ISNULL((
-											SELECT SUM(dblQuantity)
-											FROM tblMFWorkOrderProducedLotTransaction LT
-											WHERE LT.intWorkOrderId = @intWorkOrderId
-												AND LT.intLotId = L.intLotId
 											), 0)
-									) > 0
+									) - ISNULL((
+										SELECT SUM(dblQuantity)
+										FROM tblMFWorkOrderProducedLotTransaction LT
+										WHERE LT.intWorkOrderId = @intWorkOrderId
+											AND LT.intLotId = L.intLotId
+										), 0) >= 0
 								AND L.strLotNumber IN (
 									SELECT WI.strLotNumber
 									FROM @tblMFWorkOrderInputLot WI
-									WHERE WI.intMachineId = @intMachineId
+									WHERE IsNULL(WI.intMachineId, @intMachineId) = @intMachineId
 									)
 							ORDER BY L.dtmDateCreated DESC
 
@@ -1423,8 +1449,9 @@ BEGIN TRY
 										END
 
 								SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
-								if @dblYieldQuantity<0.0001
-								Select @dblYieldQuantity=0
+
+								IF @dblYieldQuantity < 0.0001
+									SELECT @dblYieldQuantity = 0
 							END
 						END
 
@@ -1433,16 +1460,16 @@ BEGIN TRY
 							SELECT TOP 1 @strLotNumber = L.strLotNumber
 								,@intLotId = L.intLotId
 								,@intSubLocationId = L.intSubLocationId
-								,@intWeightUOMId = IsNUll(L.intWeightUOMId, L.intItemUOMId)
+								,@intWeightUOMId = @intYieldItemUOMId
 								,@dblWeight = (
 									(
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
@@ -1467,13 +1494,14 @@ BEGIN TRY
 								AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 								AND (
 									(
+										--@intYieldItemUOMId
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
@@ -1502,16 +1530,16 @@ BEGIN TRY
 							SELECT TOP 1 @strLotNumber = L.strLotNumber
 								,@intLotId = L.intLotId
 								,@intSubLocationId = L.intSubLocationId
-								,@intWeightUOMId = IsNUll(L.intWeightUOMId, L.intItemUOMId)
+								,@intWeightUOMId = @intYieldItemUOMId
 								,@dblWeight = (
 									(
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
@@ -1536,26 +1564,27 @@ BEGIN TRY
 								AND ISNULL(dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
 								AND (
 									(
+										--@intYieldItemUOMId
 										CASE 
 											WHEN L.intWeightUOMId IS NULL
-												THEN L.dblQty
-											ELSE L.dblWeight
+												THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+											ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 											END
 										) - ISNULL((
-											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
+											SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, @intYieldItemUOMId, ISNULL(SR.dblQty, 0)))
 											FROM tblICStockReservation SR
 											JOIN dbo.tblICLot L1 ON SR.intLotId = L1.intLotId
 											WHERE SR.intLotId = L.intLotId
 												AND SR.intTransactionId <> @intWorkOrderId
 												AND SR.strTransactionId <> @strWorkOrderNo
 												AND ISNULL(ysnPosted, 0) = 0
-											), 0) - ISNULL((
-											SELECT SUM(dblQuantity)
-											FROM tblMFWorkOrderProducedLotTransaction LT
-											WHERE LT.intWorkOrderId = @intWorkOrderId
-												AND LT.intLotId = L.intLotId
 											), 0)
-									) > 0
+									) - ISNULL((
+										SELECT SUM(dblQuantity)
+										FROM tblMFWorkOrderProducedLotTransaction LT
+										WHERE LT.intWorkOrderId = @intWorkOrderId
+											AND LT.intLotId = L.intLotId
+										), 0) >= 0
 							ORDER BY L.dtmDateCreated DESC
 
 							IF @intLotId IS NOT NULL
@@ -1652,8 +1681,8 @@ BEGIN TRY
 									,@intLotId
 									,CASE 
 										WHEN @ysnYieldLoss = 1
-											THEN dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblNewQty)
-										ELSE - dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblNewQty)
+											THEN (dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblNewQty))
+										ELSE - (dbo.fnMFConvertQuantityToTargetItemUOM(@intYieldItemUOMId, @intWeightUOMId, @dblNewQty))
 										END
 									,@intWeightUOMId
 									,@intItemId

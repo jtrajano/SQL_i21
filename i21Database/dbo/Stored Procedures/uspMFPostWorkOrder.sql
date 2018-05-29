@@ -527,10 +527,10 @@ BEGIN TRY
 				)
 			SELECT intItemId = l.intItemId
 				,intItemLocationId = l.intItemLocationId
-				,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
+				,intItemUOMId = cl.intItemUOMId
 				,dtmDate = @dtmCurrentDateTime
 				,dblQty = (- cl.dblQuantity)
-				,dblUOMQty = ISNULL(WeightUOM.dblUnitQty, ItemUOM.dblUnitQty)
+				,dblUOMQty = l.dblWeightPerQty 
 				,dblCost = l.dblLastCost
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
