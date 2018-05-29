@@ -8,6 +8,7 @@
     [dblDefaultHours]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
 	[dblHoursToProcess]			NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [intAccountId]				INT             NULL,
+	[ysnUseLocationDistribution] BIT            DEFAULT ((1)) NOT NULL,
 	[intTaxCalculationType]		INT				NULL DEFAULT ((0)),
     [strW2Code]					NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intEmployeeTimeOffId]		INT             NULL,

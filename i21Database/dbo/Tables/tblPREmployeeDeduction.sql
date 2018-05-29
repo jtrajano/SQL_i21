@@ -11,6 +11,7 @@
     [dtmEndDate]             DATETIME        NULL,
     [intAccountId]           INT             NULL,
 	[intExpenseAccountId]	 INT			 NULL,
+	[ysnUseLocationDistribution] BIT         DEFAULT ((1)) NOT NULL,
     [strPaidBy]              NVARCHAR (15)   COLLATE Latin1_General_CI_AS DEFAULT ('Employee') NOT NULL,
     [ysnDefault]             BIT             DEFAULT ((1)) NOT NULL,
     [intSort]                INT             NULL,
