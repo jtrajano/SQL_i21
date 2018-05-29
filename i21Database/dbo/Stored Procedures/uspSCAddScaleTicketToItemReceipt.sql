@@ -187,7 +187,7 @@ SELECT
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= SC.intLotId
+		,intLotId					= NULL --SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
@@ -1221,6 +1221,9 @@ BEGIN
 			,[strCertificateId]
 			,[strTrackingNumber]
 			,[intSourceType]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+
 		)
 		SELECT 
 			[strReceiptType]		= RE.strReceiptType
@@ -1275,6 +1278,9 @@ BEGIN
 			,[strCertificateId]		= CTC.strCertificationId
 			,[strTrackingNumber]	= CTC.strTrackingNumber
 			,[intSourceType]		= RE.intSourceType
+			,[intContractHeaderId]	= RE.intContractHeaderId
+			,[intContractDetailId]	= RE.intContractDetailId
+
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
@@ -1306,6 +1312,8 @@ BEGIN
 			,[dtmExpiryDate]
 			,[strBillOfLadding]
 			,[intSourceType]
+			,[intContractHeaderId]
+			,[intContractDetailId]
 		)
 		SELECT 
 			[strReceiptType]		= RE.strReceiptType
@@ -1337,6 +1345,9 @@ BEGIN
 			,[dtmExpiryDate]		= dbo.fnICCalculateExpiryDate(RE.intItemId, NULL , RE.dtmDate)
 			,[strBillOfLadding]		= ''
 			,[intSourceType]		= RE.intSourceType
+			,[intContractHeaderId]	= RE.intContractHeaderId
+			,[intContractDetailId]	= RE.intContractDetailId
+
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId

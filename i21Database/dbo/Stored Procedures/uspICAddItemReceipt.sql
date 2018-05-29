@@ -871,7 +871,7 @@ BEGIN
 										
 				,dblUnitCost			= RawData.dblCost
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
-				,intSort				= 1
+				,intSort				= ISNULL(RawData.intSort, 1)
 				,intConcurrencyId		= 1
 				,intOwnershipType       = CASE	WHEN RawData.ysnIsStorage = 0 THEN @OWNERSHIP_TYPE_Own
 												WHEN RawData.ysnIsStorage = 1 THEN @OWNERSHIP_TYPE_Storage
@@ -1684,7 +1684,6 @@ BEGIN
 							ON ItemLot.strCertificate = c.strCertificationName 
 				WHERE	ItemLot.strCertificate IS NOT NULL 
 						AND c.strCertificationName IS NULL 
-
 				IF (@strCertificateName IS NOT NULL)
 				BEGIN 
 					--'Certificate {Certificate Name} is invalid or missing. Create or fix it at Contract Management -> Certification Programs.'
@@ -1793,6 +1792,9 @@ BEGIN
 					ON ReceiptItem.intItemId = ItemLot.intItemId
 					AND ISNULL(ReceiptItem.intSubLocationId, 0) = ISNULL(ItemLot.intSubLocationId, 0)
 					AND ISNULL(ReceiptItem.intStorageLocationId, 0) = ISNULL(ItemLot.intStorageLocationId, 0)
+					AND ISNULL(ReceiptItem.intOrderId, 0) = ISNULL(ItemLot.intContractHeaderId, 0)
+					AND ISNULL(ReceiptItem.intLineNo, 0) = ISNULL(ItemLot.intContractDetailId, 0)
+					AND ISNULL(ReceiptItem.intSort, 1) = ISNULL(ItemLot.intSort, 1)
 				INNER JOIN tblICInventoryReceipt Receipt
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE

@@ -212,6 +212,8 @@ AS
 				,[strCertificateId]
 				,[strTrackingNumber]
 				,[intSourceType]
+				,[intContractHeaderId]
+				,[intContractDetailId]
 			)
 
 			SELECT	 [strReceiptType]		=   'Purchase Contract'
@@ -248,6 +250,8 @@ AS
 					,[strCertificateId]		=   CC.strCertificationId
 					,[strTrackingNumber]	=   CC.strTrackingNumber
 					,[intSourceType]		=   0
+					,[intContractHeaderId]	=   CD.intContractHeaderId
+					,[intContractDetailId]	=   CD.intContractDetailId
 
 			FROM	tblCTContractDetail			CD 
 			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId

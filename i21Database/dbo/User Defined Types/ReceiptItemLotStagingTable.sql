@@ -19,7 +19,10 @@ CREATE TYPE [dbo].[ReceiptItemLotStagingTable] AS TABLE
 		,[intItemId] INT NULL	
 		,[intSubLocationId] INT NULL
 		,[intStorageLocationId] INT NULL
-				
+		,[intContractHeaderId] INT NULL	-- Contract Header Id
+		,[intContractDetailId] INT NULL -- Contract Detail Id
+		,[intSort] INT NULL									
+							
 		--Following fields are needed to add Lot Record	
 		,[intLotId] INT NULL
 		,[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
