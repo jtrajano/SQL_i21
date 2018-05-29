@@ -50,6 +50,11 @@ DECLARE	@InTransit_Outbound AS InTransitTableType
 		,@InTransit_Inbound AS InTransitTableType
 		,@ItemsForInTransitCosting AS ItemInTransitCostingTableType
 
+DECLARE	@sourceType_None AS INT = 0
+		,@sourceType_Scale AS INT = 1
+		,@sourceType_InboundShipment AS INT = 2
+		,@sourceType_Transports AS INT = 3
+
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
  
@@ -64,6 +69,8 @@ BEGIN
 			,@intTransactionType AS INT 
 			,@strGLDescription AS NVARCHAR(255)
 			,@intLocationId AS INT
+			,@intSourceType AS INT 
+			,@strTransferNo AS NVARCHAR(50)
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryTransferId
@@ -73,6 +80,8 @@ BEGIN
 			,@ysnShipmentRequired = ISNULL(ysnShipmentRequired, 0)
 			,@strGLDescription = strDescription
 			,@intLocationId = intFromLocationId
+			,@intSourceType = intSourceType 
+			,@strTransferNo = strTransferNo 
 	FROM	dbo.tblICInventoryTransfer
 	WHERE	strTransferNo = @strTransactionId
 END  
@@ -359,6 +368,26 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
+
+	-- Replace the cost for post-preview purposes only. 
+	IF @intSourceType = @sourceType_Transports AND @ysnRecap = 1
+	BEGIN 
+		UPDATE	t
+		SET		t.dblCost = dbo.fnCalculateCostBetweenUOM(stockUOM.intItemUOMId, t.intItemUOMId, Detail.dblCost)  
+		FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransferDetail Detail
+					ON t.intTransactionId = Detail.intInventoryTransferId
+					AND t.intTransactionDetailId = Detail.intInventoryTransferDetailId
+				OUTER APPLY (
+					SELECT	* 
+					FROM	tblICItemUOM u
+					WHERE	u.intItemId = Detail.intItemId
+							AND u.ysnStockUnit = 1
+				) stockUOM
+		WHERE	t.strBatchId = @strBatchId
+				AND t.strTransactionId = @strTransferNo
+				AND t.strActualCostId IS NOT NULL 
+				AND NULLIF(Detail.dblCost, 0.00) IS NOT NULL 
+	END 
 
 	-- Process the "To" Stock (Shipment is NOT required). 
 	IF @ysnShipmentRequired = 0 
