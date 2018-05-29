@@ -1,4 +1,6 @@
-﻿
+﻿/* FOR DELETION */
+
+
 
 PRINT ('*****BEGIN CHECKING EM change use encryption*****')
 if not exists (select top 1 1 from tblEMEntityPreferences where strPreference = 'EM change use encryption')
@@ -13,19 +15,19 @@ begin
 
 
 		OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
-			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
+			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd
 			WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
 
 			PRINT ('*****BEGIN EM change use encryption FROM ENTITY CREDENTIAL*****')
 			select * into tblEMEntityCredentialBackUpForEncryption from tblEMEntityCredential
 
-	
+
 			update tblEMEntityCredential set strPassword = dbo.fnAESEncryptASym(dbo.fnAESDecrypt(strPassword))
 
 
 			IF EXISTS(select a.strPassword, b.strPassword, dbo.fnAESDecrypt(a.strPassword), dbo.fnAESDecryptASym(b.strPassword) from tblEMEntityCredentialBackUpForEncryption a
-				join tblEMEntityCredential b 
+				join tblEMEntityCredential b
 					on a.intEntityCredentialId = b.intEntityCredentialId
 						where dbo.fnAESDecrypt(a.strPassword) <> dbo.fnAESDecryptASym(b.strPassword))
 			BEGIN
@@ -34,7 +36,7 @@ begin
 				   1 -- State.
 				   );
 			END
-	
+
 
 
 			PRINT ('*****END EM change use encryption FROM ENTITY CREDENTIAL*****')
@@ -52,7 +54,7 @@ begin
 				   16, -- Severity.
 				   1 -- State.
 				   );
-			END			
+			END
 
 			PRINT ('*****END EM change use encryption FROM ENTITY EFT INFORMATION*****')
 
@@ -65,9 +67,9 @@ begin
 
 		INSERT INTO tblEMEntityPreferences(strPreference,strValue)
 		select 'EM change use encryption', '1'
-		
+
 		commit transaction
-		
+
 	end try
 	begin catch
 		DECLARE @msg nvarchar(max)

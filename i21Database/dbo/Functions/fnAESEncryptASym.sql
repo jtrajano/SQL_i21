@@ -12,12 +12,13 @@
 
 CREATE FUNCTION [dbo].[fnAESEncryptASym](@plainText AS VARCHAR(MAX))
 RETURNS VARCHAR(max)
+WITH ENCRYPTION
 AS
 BEGIN
+	DECLARE @encryptedText AS VARCHAR(MAX)
 
-DECLARE @encryptedText AS VARCHAR(MAX)
-
-	DECLARE @binaryEncrypted VARBINARY(128) = EncryptByKey(Key_GUID('i21EncryptionSymKeyByASym'), @plainText)
+	--DECLARE @binaryEncrypted VARBINARY(128) = EncryptByKey(Key_GUID('i21EncryptionSymKeyByASym'), @plainText)
+	DECLARE @binaryEncrypted VARBINARY(256) = EncryptByCert(Cert_ID('iRelyi21Certificate'), @plainText)
 
 	SELECT @encryptedText = CAST(N'' AS XML).value('xs:base64Binary(sql:variable(''@binaryEncrypted''))', 'varchar(max)')
 
