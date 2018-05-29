@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Portal Roles' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'System Manager'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Portal User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'System Manager'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -463,11 +463,11 @@ UPDATE tblSMMasterMenu SET strCommand = N'i21.view.EntityUser?showSearch=true', 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'User Roles' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'i21.view.UserRole?showSearch=true', intSort = 1 WHERE strMenuName = N'User Roles' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Portal Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Portal User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Portal Roles', N'System Manager', @SystemManagerActivitiesParentMenuId, N'Portal Roles', N'Activity', N'Screen', N'i21.view.UserRole?showSearch=true&searchCommand=PortalRole', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Portal User Roles', N'System Manager', @SystemManagerActivitiesParentMenuId, N'Portal User Roles', N'Activity', N'Screen', N'i21.view.UserRole?showSearch=true&searchCommand=PortalRole', N'small-menu-activity', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.UserRole?showSearch=true&searchCommand=PortalRole', intSort = 2 WHERE strMenuName = 'Portal Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'i21.view.UserRole?showSearch=true&searchCommand=PortalRole', intSort = 2 WHERE strMenuName = 'Portal User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Security Policies' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
