@@ -128,8 +128,8 @@ BEGIN
 			[dtmDate]						=	CAST(arPay.dtmDatePaid AS DATE)
 			,[strBatchId]					=	@batchId	
 			,[intAccountId]					=	weightGrade.intAccountId
-			,[dblDebit]						=	0
-			,[dblCredit]					=	voucherDetail.dblFranchiseAmount
+			,[dblDebit]						=	voucherDetail.dblFranchiseAmount
+			,[dblCredit]					=	0
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
 			,[strDescription]				=	arPay.strNotes
@@ -150,10 +150,10 @@ BEGIN
 			,[strTransactionForm]			=	'Receive Payments'
 			,[strModuleName]				=	'Accounts Receivable'
 			,[intConcurrencyId]				=	1
-			,[dblDebitForeign]				=	0
-			,[dblDebitReport]				=	0
-			,[dblCreditForeign]				=	voucherDetail.dblFranchiseAmount * arPaymentDetail.dblCurrencyExchangeRate
-			,[dblCreditReport]				=	voucherDetail.dblFranchiseAmount * arPaymentDetail.dblCurrencyExchangeRate
+			,[dblDebitForeign]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPaymentDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitReport]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPaymentDetail.dblCurrencyExchangeRate,1)
+			,[dblCreditForeign]				=	0
+			,[dblCreditReport]				=	0
 			,[dblReportingRate]				=	arPayDetail.dblCurrencyExchangeRate
 			,[dblForeignRate]				=	arPayDetail.dblCurrencyExchangeRate
 			,[strRateType]					=	SMCERT.strCurrencyExchangeRateType	 	
