@@ -76,9 +76,9 @@ SET ANSI_WARNINGS OFF;
 		,intEvents = (select count(strType) from activity where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Event')
 		,intEmails = (select count(strType) from activity where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Email')
 		,intQuotes = (select count(intSalesOrderId) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Quote')
-		,dblDollarValueOfQuotes = (select isnull(sum(dblAmountDue),0) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and strType = 'Quote')
+		,dblDollarValueOfQuotes = (select isnull(sum(dblAmountDue),0) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Quote')
 		,intOrders = (select count(intSalesOrderId) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Order')
-		,dblDollarValueOfOrders = (select isnull(sum(dblAmountDue),0) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and strType = 'Order')
+		,dblDollarValueOfOrders = (select isnull(sum(dblAmountDue),0) from sales where intEntitySalespersonId = salesrep.intEntitySalespersonId and intDate between @DateFrom and @DateTo and strType = 'Order')
 		,intStartDate = @DateFrom
 		,intEndDate = @DateTo
 		,strFilterKey = @strIdentifier
