@@ -144,8 +144,8 @@ BEGIN
 		WHERE T.[intEntityId] = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId 
-				AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward)
-					OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND GETDATE() > T.dtmLastAward))
+				AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() >= T.dtmNextAward)
+					OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() > T.dtmLastAward))
 
 		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END
