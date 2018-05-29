@@ -15,7 +15,7 @@ SELECT
 FROM
 	tblARInvoice
 WHERE 
-	strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo') 
+	strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash') 
 	AND ysnPosted = 0  
 	AND (ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(intLoadDistributionHeaderId, 0) = 0) 
 	AND (ISNULL(intTransactionId, 0) = 0 AND strType <> 'CF Tran') 
