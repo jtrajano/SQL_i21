@@ -67,6 +67,7 @@ BEGIN
 					) intRankNo
 				,BO.strBook
 				,SB.strSubBook
+				,INC.intInsuranceCalculatorId
 			FROM tblLGLoad L
 			LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 			LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -98,6 +99,7 @@ BEGIN
 			LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 			LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+			LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
 			WHERE L.intLoadId IN (
 					SELECT *
 					FROM dbo.fnSplitString(@strLoadId, ',')
@@ -156,6 +158,7 @@ BEGIN
 			,Driver.strName AS strDriver
 			,BO.strBook
 			,SB.strSubBook
+			,INC.intInsuranceCalculatorId
 		FROM tblLGLoad L
 		LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 		LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -187,6 +190,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 		LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+		LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
 		WHERE L.strLoadNumber COLLATE Latin1_General_CI_AS IN (
 				SELECT *
 				FROM dbo.fnSplitString(@strLoadNumber, ',')

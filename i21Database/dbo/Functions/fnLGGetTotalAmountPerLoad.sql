@@ -42,7 +42,7 @@ BEGIN
 		,ISNULL(@dblTotalCostPerContainer, 0)
 		,@intTotalCostPerContainerCurrency
 		,dblCurrencyExchangeRate
-		,dblBrokerage * SUM(dblTotalAmount)
+		,SUM(dblBrokerage * dblTotalAmount)
 	FROM (
 		SELECT dblNet
 			,UM.intUnitMeasureId
@@ -72,13 +72,19 @@ BEGIN
 				ELSE CU.strCurrency
 				END
 			,dblCurrencyExchangeRate = 1
-			,dblBrokerage = (
-				SELECT TOP 1 dblRate
-				FROM tblCTContractCost CC
-				JOIN tblICItem I ON I.intItemId = CC.intItemId
-				WHERE intContractDetailId = CD.intContractDetailId
-					AND I.strItemNo = 'Brokerage'
-				)
+            ,dblBrokerage = (
+								SELECT SUM(CASE 
+											WHEN  BCU.ysnSubCurrency = 1
+												THEN (CC.dblRate / 100)/dbo.fnCTConvertQtyToTargetItemUOM(CC.intItemUOMId, CON.intNetWeightUOMId,1)
+											ELSE (CC.dblRate )/dbo.fnCTConvertQtyToTargetItemUOM(CC.intItemUOMId, CON.intNetWeightUOMId,1)
+											END)
+								FROM tblCTContractCost CC
+								JOIN tblICItem I ON I.intItemId = CC.intItemId
+								JOIN tblCTContractDetail CON ON CON.intContractDetailId = CC.intContractDetailId
+								LEFT JOIN tblSMCurrency BCU ON BCU.intCurrencyID = CC.intCurrencyId
+								WHERE CC.intContractDetailId = CD.intContractDetailId
+									AND I.strCostType = 'Commission'
+							)
 		FROM tblLGLoadDetail LD
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
@@ -91,7 +97,6 @@ BEGIN
 	GROUP BY intAmountCurrency
 		,strAmountCurrency
 		,t.dblCurrencyExchangeRate
-		,dblBrokerage
 
 	RETURN;
 END

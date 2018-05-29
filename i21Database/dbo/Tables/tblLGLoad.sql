@@ -129,7 +129,6 @@
 [intBookId] INT NULL,
 [intSubBookId] INT NULL,
 [intLoadRefId] INT NULL,
-[intInsuranceCalculatorId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
