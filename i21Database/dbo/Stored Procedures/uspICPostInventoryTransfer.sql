@@ -385,7 +385,6 @@ BEGIN
 				) stockUOM
 		WHERE	t.strBatchId = @strBatchId
 				AND t.strTransactionId = @strTransferNo
-				AND t.strActualCostId IS NOT NULL 
 				AND NULLIF(Detail.dblCost, 0.00) IS NOT NULL 
 	END 
 
