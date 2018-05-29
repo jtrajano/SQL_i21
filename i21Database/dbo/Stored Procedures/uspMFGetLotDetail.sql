@@ -85,6 +85,7 @@ BEGIN
 		,strCertification
 		,strCertificationId
 		,strTrackingNumber
+		,dtmDueDate
 	FROM vyuMFInventoryView
 	WHERE intLotId = @intLotId
 END
