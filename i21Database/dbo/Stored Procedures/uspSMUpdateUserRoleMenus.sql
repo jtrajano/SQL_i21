@@ -26,7 +26,7 @@ BEGIN TRY
 
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-	SELECT @isContact = CASE strRoleType WHEN 'Portal Default' THEN 1 ELSE (CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+	SELECT @isContact = CASE strRoleType WHEN 'Portal Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Portal User' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
 
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
@@ -134,8 +134,8 @@ BEGIN TRY
 
 	END
 
-	-- Update group if role is for contact admin.
-	EXEC uspSMResolveContactRoleMenus @UserRoleID
+	---- Update group if role is for contact admin.
+	--EXEC uspSMResolveContactRoleMenus @UserRoleID
 
 	-- Make Dashboards menu visible
 	UPDATE rolemenu SET ysnVisible = 1

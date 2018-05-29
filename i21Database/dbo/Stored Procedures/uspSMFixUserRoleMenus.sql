@@ -10,18 +10,18 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @IsAdmin BIT
 DECLARE @IsContact BIT
-DECLARE @IsDefaultPortal BIT
+--DECLARE @IsDefaultPortal BIT
 
 BEGIN TRANSACTION
 
 BEGIN TRY
 		-- Get whether User Role has administrative rights
 		SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-	    SELECT @IsContact = CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-		SELECT @IsDefaultPortal = CASE strRoleType WHEN 'Portal Default' THEN 1 ELSE 0 END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+	    SELECT @IsContact = CASE strRoleType WHEN 'Portal Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Portal User' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+		--SELECT @IsDefaultPortal = CASE strRoleType WHEN 'Portal Default' THEN 1 ELSE 0 END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
 
 		-- C O N T A C T
-		IF (@IsContact = 1 OR @IsDefaultPortal = 1)
+		IF @IsContact = 1 --(@IsContact = 1 OR @IsDefaultPortal = 1)
 			BEGIN
 				-- DELETE USER MENUS
 				DELETE FROM tblSMUserRoleMenu WHERE intMenuId NOT IN (SELECT intMasterMenuId FROM tblSMContactMenu) AND intUserRoleId = @UserRoleID
