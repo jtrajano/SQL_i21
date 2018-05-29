@@ -234,7 +234,7 @@ AS
 					,[dblCost]				=   CASE	WHEN	CD.intPricingTypeId = 2 
 														THEN	(
 																	SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CD.intBasisUOMId,CD.dblBasis),0)),0) 
-																	FROM dbo.fnRKGetFutureAndBasisPrice (1,CH.intCommodityId,right(convert(varchar, CD.dtmEndDate, 106),8),2,CD.intFutureMarketId,CD.intFutureMonthId,NULL,NULL,0 ,CD.intItemId)
+																	FROM dbo.fnRKGetFutureAndBasisPrice (1,CH.intCommodityId,right(convert(varchar, CD.dtmEndDate, 106),8),2,CD.intFutureMarketId,CD.intFutureMonthId,NULL,NULL,0 ,CD.intItemId,AD.intSeqCurrencyId)
 																	LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = CD.intItemId
 																)
 														ELSE	AD.dblSeqPrice
