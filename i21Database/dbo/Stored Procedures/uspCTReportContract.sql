@@ -426,7 +426,7 @@ BEGIN TRY
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
 		    ,strINCOTermWithWeight					=	CB.strContractBasis + ISNULL(', ' + isnull(rtrt4.strTranslation,W1.strWeightGradeDesc),'')
-			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure)
+			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
 			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
 			,strStartAndEndDate						=	SQ.strStartAndEndDate
 			,strNoOfContainerAndType				=	SQ.strNoOfContainerAndType
@@ -485,7 +485,7 @@ BEGIN TRY
 							IM.strDescription + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
 							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
 							FORMAT(CD.dtmStartDate, 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(CD.dtmStartDate, 'MMM')), FORMAT(CD.dtmStartDate, 'MMM')) + ' ' + FORMAT(CD.dtmStartDate, 'yyyy') + ' - ' + FORMAT(CD.dtmEndDate, 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(CD.dtmEndDate, 'MMM')), FORMAT(CD.dtmEndDate, 'MMM')) + ' ' + FORMAT(CD.dtmEndDate, 'yyyy') AS strStartAndEndDate,
-							LTRIM(CD.intNumberOfContainers) + ' x ' + CT.strContainerType AS strNoOfContainerAndType,
+							LTRIM(CD.intNumberOfContainers) + ' x ' + isnull(rtrt11.strTranslation,CT.strContainerType) AS strNoOfContainerAndType,
 							--DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
 							isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,MO.dtmFutureMonthsDate)), DATENAME(mm,MO.dtmFutureMonthsDate)) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
 							CD.dblBasis,
@@ -515,6 +515,10 @@ BEGIN TRY
 				left join tblSMScreen				rts6 on rts6.strNamespace = 'RiskManagement.view.FuturesMarket'
 				left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = MA.intFutureMarketId
 				left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Market Name'
+
+				left join tblSMScreen				rts11 on rts11.strNamespace = 'Logistics.view.ContainerType'
+				left join tblSMTransaction			rtt11 on rtt11.intScreenId = rts11.intScreenId and rtt11.intRecordId = CT.intContainerTypeId
+				left join tblSMReportTranslation	rtrt11 on rtrt11.intLanguageId = @intLaguageId and rtrt11.intTransactionId = rtt11.intTransactionId and rtrt11.strFieldName = 'Container Type'
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
@@ -551,7 +555,6 @@ BEGIN TRY
 	left join tblSMScreen				rts10 on rts10.strNamespace = 'i21.view.Country'
 	left join tblSMTransaction			rtt10 on rtt10.intScreenId = rts10.intScreenId and rtt10.intRecordId = rtc10.intCountryID
 	left join tblSMReportTranslation	rtrt10 on rtrt10.intLanguageId = @intLaguageId and rtrt10.intTransactionId = rtt10.intTransactionId and rtrt10.strFieldName = 'Country'
-	
 
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
