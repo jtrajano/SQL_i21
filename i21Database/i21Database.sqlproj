@@ -6660,6 +6660,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOPickListDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemSpecialPricingForCStore.sql" />
+    <Build Include="dbo\Functions\fnAPCreateClaimARGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

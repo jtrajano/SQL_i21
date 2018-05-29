@@ -22,6 +22,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			,
 		[intContractHeaderId]			,
 		[intInventoryReceiptItemId]		,
+		[intPrepayTransactionId]		,
 		[intItemId]						,
 		[intWeightUOMId]				,
 		[intCostUOMId]					,
@@ -32,6 +33,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						,
 		[dblNetShippedWeight]			,
 		[dblFranchiseWeight]			,
+		[dblFranchiseAmount]			,
 		[dblWeightLoss]					,
 		[dblClaimAmount]				,
 		[dblQtyOrdered]					,
@@ -48,6 +50,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			=	A.intContractDetailId			,
 		[intContractHeaderId]			=	A.intContractHeaderId			,
 		[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId		,
+		[intPrepayTransactionId]		=	prepayTransaction.intBillId		,
 		[intItemId]						=	A.[intItemId]					,
 		[intWeightUOMId]				=	A.intWeightUOMId				,
 		[intCostUOMId]					=	A.intCostUOMId					,
@@ -58,6 +61,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						=	A.dblCost * A.dblQtyReceived	,
 		[dblNetShippedWeight]			=	A.dblNetShippedWeight			,
 		[dblFranchiseWeight]			=	A.dblFranchiseWeight			,
+		[dblFranchiseAmount]			=	A.dblFranchiseAmount			,
 		[dblWeightLoss]					=	A.dblWeightLoss					,
 		[dblClaimAmount]				=	A.dblCost * A.dblQtyReceived	,
 		[dblQtyOrdered]					=	A.dblQtyReceived,
@@ -83,6 +87,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
+	INNER JOIN (tblAPBill prepayTransaction 
+					INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2)
+			ON prepayDetail.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
