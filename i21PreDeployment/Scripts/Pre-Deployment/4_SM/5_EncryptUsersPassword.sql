@@ -34,49 +34,42 @@ BEGIN
   ')
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityCredential') 
- AND NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityCredential' AND COLUMN_NAME = 'ysnNotEncrypted')
-BEGIN
-  EXEC('
-    ALTER TABLE tblEMEntityCredential
-      ADD ysnNotEncrypted bit NOT NULL DEFAULT((1));
-  ')
-END
-
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityCredential' AND [COLUMN_NAME] = 'strPassword') 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityCredential' AND [COLUMN_NAME] = 'strPassword')
 BEGIN
   EXEC('
     ALTER TABLE [tblEMEntityCredential] ALTER COLUMN [strPassword] nvarchar(MAX) COLLATE Latin1_General_CI_AS
   ')
 END
 
-EXEC('
-  OPEN SYMMETRIC KEY i21EncryptionSymKey
-    DECRYPTION BY CERTIFICATE i21EncryptionCert
-    WITH PASSWORD = ''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY=''
-')
-
-IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblEMEntityCredential' AND COLUMN_NAME = 'ysnNotEncrypted')
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblEMEntityCredential')
+  AND NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblEMEntityCredential' AND COLUMN_NAME = 'ysnNotEncrypted')
+  AND EXISTS (SELECT TOP 1 1 FROM sys.certificates WHERE name = 'iRelyi21Certificate')
 BEGIN
-
   EXEC('
-    DECLARE @EncryptionTable TABLE (
-      intEntityCredentialId INT,
-      encrypted_data VARBINARY(128)
-    )
-
-    INSERT INTO @EncryptionTable
-      SELECT intEntityCredentialId, EncryptByKey(Key_GUID(''i21EncryptionSymKey''), strPassword)
-      FROM tblEMEntityCredential
-      WHERE ysnNotEncrypted = 1
-
-    UPDATE EntityCredential
-    SET strPassword = CAST(N'''' AS XML).value(''xs:base64Binary(sql:column(''''Encrypt.encrypted_data''''))'', ''nvarchar(max)''), ysnNotEncrypted = 0
-    FROM tblEMEntityCredential EntityCredential
-    JOIN @EncryptionTable Encrypt on Encrypt.intEntityCredentialId = EntityCredential.intEntityCredentialId
-    WHERE ysnNotEncrypted = 1
+    ALTER TABLE tblEMEntityCredential
+      ADD ysnNotEncrypted bit NOT NULL DEFAULT((1));
   ')
 
-END
+  EXEC('
+    PRINT(''*** Backing up tblEMEntityCredential for certificate encryption ***'')
+    SELECT * INTO tblEMEntityCredentialBackupForCertEncryption FROM tblEMEntityCredential
 
-EXEC('CLOSE SYMMETRIC KEY i21EncryptionSymKey')
+    DECLARE @EncryptionTable TABLE (
+      intEntityCredentialId INT,
+      strPassword VARBINARY(256)
+    )
+
+    PRINT(''*** Encrypting password using certificate ***'')
+    INSERT INTO @EncryptionTable
+      SELECT intEntityCredentialId, ENCRYPTBYCERT(CERT_ID(''iRelyi21Certificate''), CAST(strPassword AS varchar(max)))
+      FROM tblEMEntityCredential
+
+    PRINT(''*** Saving certificate encrypted password ***'')
+    UPDATE EntityCredential
+      SET strPassword = CAST(N'''' AS XML).value(''xs:base64Binary(sql:column(''''Encrypt.strPassword''''))'', ''varchar(max)''), ysnNotEncrypted = 0
+      FROM tblEMEntityCredential AS EntityCredential
+      JOIN @EncryptionTable AS Encrypt on Encrypt.intEntityCredentialId = EntityCredential.intEntityCredentialId
+
+    INSERT INTO tblEMEntityPreferences (strPreference, strValue, intConcurrencyId) VALUES (''SM Password encrypted using certificate'', ''1'', 0)
+  ')
+END
