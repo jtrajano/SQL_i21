@@ -9,7 +9,7 @@
 AS	
 
 
-       
+SET @Error = ''
 IF @PostDate IS NULL
     SET @PostDate = GETDATE()
 IF @BatchId IS NULL
@@ -37,7 +37,12 @@ INSERT INTO @InvalidData
 SELECT * FROM [dbo].[fnARGetInvalidPaymentsForPosting](@PaymentData)
 
 DECLARE @ErrorMessage AS NVARCHAR(500)
-SELECT TOP 1 @ErrorMessage = [strError] FROM @InvalidData
+SELECT TOP 1
+    @ErrorMessage = [strError]
+FROM
+    @InvalidData
+WHERE
+    [strError] NOT IN ('There was no payment to receive.' )
 
 IF LTRIM(RTRIM(ISNULL(@ErrorMessage, ''))) <> ''
 BEGIN
@@ -230,6 +235,6 @@ BEGIN
 	RETURN 1
 END
 
-
+SET @Error = ''
 
 RETURN 0
