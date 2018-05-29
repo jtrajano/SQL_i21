@@ -6658,6 +6658,7 @@
     <Build Include="dbo\Tables\tblSCGraderDevice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOPickListDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemSpecialPricingForCStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
