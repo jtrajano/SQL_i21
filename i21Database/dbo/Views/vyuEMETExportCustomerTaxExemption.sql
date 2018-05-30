@@ -66,8 +66,7 @@ CROSS APPLY
 		,NULL
 		,NULL
 		,0
-		,NULL
-		,NULL
+		,[dbo].[fnGetItemStockUOM](ICI.intItemId)
 		,EMEL.intWarehouseId
 		,NULL
 		,NULL
