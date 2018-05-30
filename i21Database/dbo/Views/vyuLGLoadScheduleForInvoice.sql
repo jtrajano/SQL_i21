@@ -41,14 +41,14 @@ SELECT strTransactionType = 'Load Schedule'
 	,dblPrice = CASE 
 				WHEN L.intSourceType = 7
 					THEN LD.dblUnitPrice
-				ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+				ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
 				END
     ,dblShipmentUnitPrice = CASE WHEN L.intSourceType = 7 THEN  (
                          LD.dblUnitPrice
                     ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
 					 ELSE (
                     (
-                        dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+                        dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
                     ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
             ) 
 			END
@@ -64,7 +64,7 @@ SELECT strTransactionType = 'Load Schedule'
 			 ELSE
 				(
 					(
-						dbo.fnCTGetSequencePrice(CD.intContractDetailId)
+						dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
 					) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), 1)
 				) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intWeightItemUOMId, LDL.intWeightUOMId), ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), ISNULL(LDL.dblNet, LD.dblNet))
 			END

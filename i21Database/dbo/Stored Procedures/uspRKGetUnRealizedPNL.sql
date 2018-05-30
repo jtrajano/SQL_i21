@@ -15,6 +15,7 @@ BEGIN TRY
 			1 - Contract
 			2 - InTransit
 			3 - Inventory
+			4 - FG Lots
 
   */
 
@@ -980,9 +981,8 @@ BEGIN TRY
 				FROM tblRKFutSettlementPriceMarketMap MarketMap
 				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
 				WHERE SettlementPrice.intFutureSettlementPriceId = @intFutureSettlementPriceId
-   
-			UNION
-
+			
+			INSERT INTO @tblSettlementPrice(intFutureMarketId,intFutureMonthId,dblSettlementPrice)
 			SELECT 
 			     intFutureMarketId  = SettlementPrice.intFutureMarketId
 				,intFutureMonthId	= MarketMap.intFutureMonthId
@@ -990,6 +990,8 @@ BEGIN TRY
 				FROM tblRKFutSettlementPriceMarketMap MarketMap
 				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
 				WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId <> @intFutureSettlementPriceId)
+				--AND intFutureMarketId NOT IN(SELECT intFutureMarketId FROM @tblSettlementPrice)
+				AND intFutureMonthId  NOT IN(SELECT intFutureMonthId  FROM @tblSettlementPrice)
 	END
 	ELSE
 	BEGIN
@@ -1070,23 +1072,39 @@ BEGIN TRY
 	JOIN @tblContractCost CC ON CC.intContractDetailId = RealizedPNL.intContractDetailId	
 	-----------------------------------------------------ContractInvoiceValue Updation--------------------------------------------
 	UPDATE CD
-	SET 
-	 CD.dblContractInvoiceValue	= CASE 
-											  WHEN ISNULL(CD.dblCashPrice,0.0)<> 0.0 THEN
-													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
-													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intFutureMarketUnitMeasureId, CD.dblCashPrice)
-													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+	SET CD.dblContractInvoiceValue	
+	  =	  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+		* dbo.fnCTConvertQuantityToTargetItemUOM(
+												 CD.intItemId
+												,CD.intFutureMarketUnitMeasureId
+												,CD.intPriceUnitMeasureId
+												,[dbo].[fnCTGetSequencePrice](CD.intContractDetailId,ISNULL(SP.dblSettlementPrice,0))
+												)
 
-											  WHEN ISNULL(CD.dblCashPrice,0.0)= 0.0 THEN
-													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
-													*(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intBasisUnitMeasureId,CD.intFutureMarketUnitMeasureId, CD.dblBasis)+
-													  ISNULL(SP.dblSettlementPrice,0))
-													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
-								  END
    ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
 	FROM @tblUnRealizedPNL CD
 	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
 	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
+	WHERE CD.intTransactionType <> 4
+
+	UPDATE CD
+	SET 
+	 CD.dblContractInvoiceValue	= dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+								 *(
+									 dbo.fnCTConvertQuantityToTargetItemUOM(
+																		    CD.intItemId
+																		   ,CD.intFutureMarketUnitMeasureId
+																		   ,CD.intBasisUnitMeasureId
+																		   ,CD.dblBasis
+																		   )
+								    + ISNULL(SP.dblSettlementPrice,0)
+								  )
+								/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+   ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
+	FROM @tblUnRealizedPNL CD
+	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
+	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
+	WHERE CD.intTransactionType = 4
 	-----------------------------------------------------Net Market Updation--------------------------------------------	
 		 UPDATE @tblUnRealizedPNL 
 		 SET  

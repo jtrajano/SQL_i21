@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnCTGetSequencePrice] 
 	(
-		@intContractDetailId INT
+		 @intContractDetailId INT
+		,@dblSettlementPrice NUMERIC(24, 6) = NULL
 	)
 RETURNS NUMERIC(24, 6)
 AS
@@ -63,7 +64,14 @@ BEGIN
 			FROM tblCTPriceFixationDetail
 			WHERE intPriceFixationId = @intPriceFixationId
 
-			SELECT @dblSeqPrice = ((@dbldblNoOfLots - @dblLotsFixed) * dbo.fnRKGetLatestClosingPrice(@intFutureMarketId, @intFutureMonthId, GETDATE()) + @dblWtdAvg) / @dbldblNoOfLots
+			IF @dblSettlementPrice IS NULL
+			BEGIN
+					SELECT @dblSeqPrice = ((@dbldblNoOfLots - @dblLotsFixed) * dbo.fnRKGetLatestClosingPrice(@intFutureMarketId, @intFutureMonthId, GETDATE()) + @dblWtdAvg) / @dbldblNoOfLots
+			END
+			ELSE
+			BEGIN
+					SELECT @dblSeqPrice = ((@dbldblNoOfLots - @dblLotsFixed) * @dblSettlementPrice + @dblWtdAvg) / @dbldblNoOfLots
+			END
 
 			SELECT @dblSeqPrice = @dblSeqPrice + @dblBasis
 
