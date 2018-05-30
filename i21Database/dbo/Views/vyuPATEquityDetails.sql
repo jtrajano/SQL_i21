@@ -9,13 +9,33 @@ SELECT	id = CAST(ROW_NUMBER() OVER(ORDER BY FY.dtmDateFrom DESC, ENT.strName) AS
 		AR.strStockStatus,
 		TC.strTaxCode,
 		dtmLastActivityDate = MAX(AR.dtmLastActivityDate),
-		dblEquity = SUM(CASE WHEN CE.strEquityType = 'Undistributed' THEN CE.dblEquity - CE.dblEquityPaid ELSE 0 END),
-		dblEquityReserve = SUM(CASE WHEN CE.strEquityType = 'Reserve' THEN CE.dblEquity - CE.dblEquityPaid ELSE 0 END),
-		dblEquityPaid = SUM(ISNULL(CE.dblEquityPaid,0)),
-		dblTotalEquity = SUM(ISNULL(CE.dblEquity,0) - ISNULL(CE.dblEquityPaid,0)),
-		ysnTransferable = CASE WHEN SUM(CASE WHEN CE.strEquityType = 'Undistributed' THEN CE.dblEquity ELSE 0 END) > SUM(CASE WHEN CE.strEquityType = 'Undistributed' THEN ISNULL(CE.dblEquityPaid,0) ELSE 0 END) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
-		ysnReserveTransferable = CASE WHEN SUM(CASE WHEN CE.strEquityType = 'Reserve' THEN CE.dblEquity ELSE 0 END) > SUM(CASE WHEN CE.strEquityType = 'Reserve' THEN ISNULL(CE.dblEquityPaid,0) ELSE 0 END) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-	FROM tblPATCustomerEquity CE
+		dblQualifiedEquity = SUM(CE.dblQualfiedEquity),
+		dblNonQualifiedEquity = SUM(CE.dblNonQualifiedEquity),
+		dblEquityReserve = SUM(CE.dblEquityReserve),
+		dblEquityPaid = SUM(CE.dblEquityPaid),
+		dblEquityTotal = SUM(CE.dblQualfiedEquity + CE.dblNonQualifiedEquity + CE.dblEquityReserve),
+		ysnTransferable = CASE 
+								WHEN SUM(CE.dblQualfiedEquity + CE.dblNonQualifiedEquity) > 0 
+								THEN CAST(1 AS BIT) 
+								ELSE CAST(0 AS BIT) 
+							END,
+		ysnReserveTransferable = CASE 
+									WHEN SUM(dblEquityReserve) > 0 
+									THEN CAST(1 AS BIT) 
+									ELSE CAST(0 AS BIT) 
+								END
+	FROM (SELECT	Equity.intFiscalYearId,
+					Equity.intCustomerId,
+					Equity.strEquityType,
+					dblQualfiedEquity		= CASE WHEN RR.ysnQualified = 1 AND Equity.strEquityType != 'Reserve' THEN Equity.dblEquity - Equity.dblEquityPaid ELSE 0 END,
+					dblNonQualifiedEquity	= CASE WHEN RR.ysnQualified = 0 AND Equity.strEquityType != 'Reserve' THEN Equity.dblEquity - Equity.dblEquityPaid ELSE 0 END,
+					dblEquityReserve		= CASE WHEN Equity.strEquityType = 'Reserve' THEN Equity.dblEquity - Equity.dblEquityPaid ELSE 0 END,
+					dblEquityPaid			= Equity.dblEquityPaid
+		FROM tblPATCustomerEquity Equity
+		INNER JOIN tblPATRefundRate RR
+			ON RR.intRefundTypeId = Equity.intRefundTypeId
+		WHERE Equity.dblEquity <> 0
+	) CE
 INNER JOIN tblEMEntity ENT
 		ON ENT.intEntityId = CE.intCustomerId
 INNER JOIN tblGLFiscalYear FY
@@ -24,7 +44,6 @@ INNER JOIN tblARCustomer AR
 		ON AR.intEntityId = CE.intCustomerId
 LEFT JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = AR.intTaxCodeId
-		WHERE CE.dblEquity <> 0
 GROUP BY CE.intCustomerId,
 		ENT.strEntityNo,
 		ENT.strName,
