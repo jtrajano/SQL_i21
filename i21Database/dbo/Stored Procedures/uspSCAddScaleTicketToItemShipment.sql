@@ -130,15 +130,8 @@ BEGIN
 		,intFreightTermId			= (select top 1 intFreightTermId from tblEMEntityLocation where intEntityLocationId = AR.intShipToId)
 		,strBOLNumber				= SC.strTicketNumber
 		,intDiscountSchedule		= SC.intDiscountId
-		,intForexRateTypeId			= CASE
-										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.intRateTypeId
-										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
-									END
-		,dblForexRate				= CASE
-										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.dblRate
-										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
-									END
-		
+		,intForexRateTypeId			= NULL
+		,dblForexRate				= NULL
 		,intItemId					= LI.intItemId
 		,intLineNo					= LI.intTransactionDetailId
 		,intOwnershipType			= CASE
