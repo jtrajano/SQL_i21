@@ -624,7 +624,6 @@ BEGIN TRY
 								  	WHEN ISNULL(@intCommodityId, 0) = 0 THEN CH.intCommodityId
 								  	ELSE @intCommodityId
 								  END
-		AND   CD.dblQuantity		> ISNULL(CD.dblInvoicedQty, 0)
 		AND CL.intCompanyLocationId = CASE 
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
@@ -813,7 +812,6 @@ BEGIN TRY
 								  	ELSE @intCommodityId
 								  END		
 		AND Item.strLotTracking <> 'No'
-		--AND   CD.dblQuantity		> ISNULL(CD.dblInvoicedQty, 0)
 		AND CL.intCompanyLocationId = CASE 
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
