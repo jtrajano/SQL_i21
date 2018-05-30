@@ -50,6 +50,7 @@ DECLARE @InventoryReceiptId INT
 		,@strContractStatus NVARCHAR(40)
 		,@intContractSeq INT
 		,@intId INT;
+		,@intTicketType INT;
 
 BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
@@ -89,8 +90,8 @@ BEGIN TRY
 
 		IF @strInOutFlag = 'I'
 			BEGIN
-				SELECT @intMatchTicketId = intMatchTicketId, @intContractDetailId = intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId
-				IF ISNULL(@intMatchTicketId, 0) > 0
+				SELECT @intMatchTicketId = intMatchTicketId, @intTicketType = intTicketType FROM tblSCTicket WHERE intTicketId = @intTicketId
+				IF ISNULL(@intMatchTicketId, 0) > 0 AND @intTicketType = 6
 				BEGIN
 					SELECT @intMatchLoadId = LGLD.intLoadId 
 					,@intMatchLoadDetailId = LGLD.intLoadDetailId
