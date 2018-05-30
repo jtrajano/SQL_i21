@@ -1,6 +1,6 @@
 ﻿GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Risk Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Handheld Scanners' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Store'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4545,6 +4545,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate 
 	VALUES (N'Generate Shelf Tags', N'Store', @StoreActivitiesParentMenuId, N'Generate Shelf Tags', N'Activity', N'Screen', N'Store.view.GenerateShelfTags', N'small-menu-activity', 1, 0, 0, 1, 7, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET  intSort = 7, strCommand = N'Store.view.GenerateShelfTags', ysnVisible = 1 WHERE strMenuName = 'Generate Shelf Tags' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId
+	
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Handheld Scanners' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Handheld Scanners', N'Store', @StoreActivitiesParentMenuId, N'Handheld Scanners', N'Activity', N'Screen', N'Store.view.HandheldScanner', N'small-menu-activity', 1, 0, 0, 1, 8, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET  intSort = 8, strCommand = N'Store.view.HandheldScanner' WHERE strMenuName = 'Handheld Scanners' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cigarette Rebate Programs' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
