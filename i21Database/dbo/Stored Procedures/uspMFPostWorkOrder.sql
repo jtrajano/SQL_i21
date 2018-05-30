@@ -452,9 +452,12 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 
 		SELECT TOP 1 @intTransactionId = intBatchId
-			,@strBatchId = strBatchId
+		--,@strBatchId = strBatchId
 		FROM dbo.tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+			,@strBatchId OUTPUT
 
 		IF @strYieldCostValue = 'True'
 		BEGIN
@@ -495,10 +498,12 @@ BEGIN TRY
 				,@dtmBusinessDate
 				,L.intStorageLocationId
 				,L.intSubLocationId
-				,@strBatchId
+				,IsNULL(WP.strBatchId, @strBatchId)
 			FROM tblMFWorkOrderProducedLotTransaction PL
 			JOIN dbo.tblICLot L ON L.intLotId = PL.intLotId
-			WHERE intWorkOrderId = @intWorkOrderId
+			LEFT JOIN tblMFWorkOrderProducedLot WP ON WP.intBatchId = PL.intBatchId
+				AND WP.intWorkOrderId = PL.intWorkOrderId
+			WHERE PL.intWorkOrderId = @intWorkOrderId
 
 			DELETE
 			FROM @ItemsForPost
@@ -530,14 +535,14 @@ BEGIN TRY
 				,intItemUOMId = cl.intItemUOMId
 				,dtmDate = @dtmCurrentDateTime
 				,dblQty = (- cl.dblQuantity)
-				,dblUOMQty = l.dblWeightPerQty 
+				,dblUOMQty = l.dblWeightPerQty
 				,dblCost = l.dblLastCost
 				,dblSalesPrice = 0
 				,intCurrencyId = NULL
 				,dblExchangeRate = 1
 				,intTransactionId = cl.intBatchId
 				,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-				,strTransactionId = @strTransactionId
+				,strTransactionId = cl.strBatchId
 				,intTransactionTypeId = @INVENTORY_CONSUME
 				,intLotId = l.intLotId
 				,intSubLocationId = l.intSubLocationId
@@ -594,8 +599,14 @@ BEGIN TRY
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,1
+			IF EXISTS (
+					SELECT *
+					FROM @GLEntries
+					)
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,1
+			END
 		END
 
 		DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
@@ -778,6 +789,7 @@ BEGIN TRY
 				,@dblFirstGradeDiff NUMERIC(38, 20)
 				,@dblCoEfficientApplied NUMERIC(38, 20)
 				,@dblStandardUnitRate NUMERIC(38, 20)
+				,@dblValue NUMERIC(38, 20)
 
 			SELECT @dblInputCost = 0
 
@@ -798,6 +810,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intTransactionId = NULL
 					,@strBatchId = NULL
+					,@dblValue = NULL
 
 				SELECT @intTransactionId = CL.intBatchId
 					,@strBatchId = CL.strBatchId
@@ -805,6 +818,14 @@ BEGIN TRY
 				WHERE intWorkOrderConsumedLotId = @intWorkOrderConsumedLotId
 
 				SELECT @dblInputCost = @dblInputCost + ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId), 0)
+
+				SELECT @dblValue = SUM(CAST(dbo.fnMultiply(A.dblQty, A.dblCost) + ISNULL(A.dblValue, 0) AS NUMERIC(18, 6)))
+				FROM [dbo].[tblICInventoryTransaction] A
+				WHERE A.intTransactionId = @intTransactionId
+					AND A.strTransactionId = @strBatchId
+					AND A.intTransactionTypeId = 8
+
+				SELECT @dblInputCost = @dblInputCost + ISNULL(@dblValue, 0)
 
 				SELECT @intWorkOrderConsumedLotId = MIN(intWorkOrderConsumedLotId)
 				FROM @tblMFConsumedLot CL
