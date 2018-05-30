@@ -1025,6 +1025,19 @@ BEGIN
 					AND Charge.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	BillDetail.dblTotal > 0 
 
+		--UPDATE CONTRACT COST
+		UPDATE  CC
+			SET     CC.dblActualAmount = CC.dblActualAmount + tblBilled.dblTotal
+		FROM tblCTContractCost CC
+		JOIN ( 
+			SELECT Bill.intContractCostId, SUM(Bill.dblTotal) dblTotal 
+			FROM tblAPBillDetail Bill
+			INNER JOIN #tmpPostBillData
+						ON #tmpPostBillData.intBillId = Bill.intBillId
+			WHERE Bill.intContractCostId > 0 
+			GROUP BY intContractCostId
+		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
+
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -1143,6 +1156,18 @@ BEGIN
 					AND Charge.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	BillDetail.dblTotal > 0 				
 		
+		UPDATE  CC
+			SET     CC.dblActualAmount = CC.dblActualAmount - tblBilled.dblTotal
+		FROM tblCTContractCost CC
+		JOIN ( 
+			SELECT Bill.intContractCostId, SUM(Bill.dblTotal) dblTotal 
+			FROM tblAPBillDetail Bill
+			INNER JOIN #tmpPostBillData
+						ON #tmpPostBillData.intBillId = Bill.intBillId
+			WHERE Bill.intContractCostId > 0 
+			GROUP BY intContractCostId
+		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
+
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
