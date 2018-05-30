@@ -101,7 +101,7 @@ AS
 				strSourceScreenName			=	'Contract',
 				ysnSubCurrency				=	SubCurrency.ysnSubCurrency,
 				intForexRateTypeId			=	CD.intRateTypeId,
-				dblForexRate				=	CD.dblRate,
+				dblForexRate				=	NULL,
 				intFreightTermId			=	CD.intFreightTermId
 
 		FROM	tblCTContractDetail			CD	
