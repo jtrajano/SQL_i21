@@ -84,9 +84,7 @@ SELECT
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
 							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END),
 	ItemLocation.intCostingMethod,
-	strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
-							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
-							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END),
+	strCostingMethod = CostingMethod.strCostingMethod,
 	dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0),
 	dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0),
 	dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0),
@@ -208,3 +206,6 @@ FROM
 
 	LEFT JOIN tblSMModule m
 		ON m.intModuleId = Item.intModuleId
+
+	LEFT JOIN tblICCostingMethod CostingMethod
+		ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod

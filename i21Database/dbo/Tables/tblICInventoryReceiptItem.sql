@@ -57,6 +57,7 @@ Type the overview for the table here.
 		[strWarehouseRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intParentItemLinkId] INT NULL,
 		[intChildItemLinkId] INT NULL,
+		[intCostingMethod] INT NULL,
         [dtmDateCreated] DATETIME NULL,
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
