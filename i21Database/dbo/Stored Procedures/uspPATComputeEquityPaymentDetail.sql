@@ -2,7 +2,8 @@
 	@customerId AS INT = NULL,
 	@qualified AS BIT = 0,
 	@distributionMethod AS INT = NULL, -- 1 = Equally to Each Year, 2 = To Oldest Year Onwards
-	@equityPayout AS NUMERIC(18,6) = NULL
+	@equityPayout AS NUMERIC(18,6) = NULL,
+	@payoutType AS NVARCHAR(10) = '%'
 AS
 BEGIN
 
@@ -56,6 +57,9 @@ SET ANSI_WARNINGS OFF
 
 	IF(@distributionMethod = 1)
 	BEGIN
+		DECLARE @equityPaymentDetailCount INT;
+		SELECT @equityPaymentDetailCount = COUNT(*) FROM @tempEquityDetail;
+		
 		INSERT INTO @equityPaymentDetail 
 		SELECT	tempEP.intCustomerEquityId,
 				tempEP.intFiscalYearId,
@@ -65,7 +69,10 @@ SET ANSI_WARNINGS OFF
 				RR.strRefundType,
 				RR.ysnQualified,
 				tempEP.dblEquityAvailable,
-				dblEquityPay = ROUND(tempEP.dblEquityAvailable * (@equityPayout/100),2)
+				dblEquityPay = ROUND(CASE 
+										WHEN @payoutType = '%' THEN tempEP.dblEquityAvailable * (@equityPayout/100)
+										ELSE @equityPayout / @equityPaymentDetailCount
+									END, 2)
 		FROM @tempEquityDetail tempEP
 		INNER JOIN tblGLFiscalYear FY
 			ON FY.intFiscalYearId = tempEP.intFiscalYearId
@@ -78,7 +85,10 @@ SET ANSI_WARNINGS OFF
 		DECLARE @customerEquityPay NUMERIC (18,6) = 0;
 		DECLARE @selected INT;
 
-		SELECT @customerEquityPay = ROUND(SUM(dblEquityAvailable) * (@equityPayout/100),2) FROM @tempEquityDetail;
+		IF(@payoutType = '%')
+			SELECT @customerEquityPay = ROUND(SUM(dblEquityAvailable) * (@equityPayout/100),2) FROM @tempEquityDetail;
+		ELSE
+			SET @customerEquityPay = @equityPayout;
 
 		WHILE EXISTS(SELECT 1 FROM @tempEquityDetail)
 		BEGIN

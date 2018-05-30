@@ -316,6 +316,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\2_MigrateStockRecords.sql
 :r .\PAT\3_UpdateIssueStockNo.sql
 :r .\PAT\4_UpdateRetiredStockNo.sql
+:r .\PAT\5_UpdatePayoutType.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
