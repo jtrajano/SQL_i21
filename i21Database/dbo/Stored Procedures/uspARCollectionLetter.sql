@@ -624,7 +624,17 @@ BEGIN
 						PRINT 'Exception' --To catch exception only
 					END CATCH	
 			
-					IF(@strTableSource = 'vyuARCollectionOverdueReport')
+					IF (@strLetterName = 'Keep Full Balance Letter')
+					BEGIN
+						SELECT @ARBalance = (dbl0Days + dbl10Days + dbl30Days + dbl60Days + dbl90Days + dbl91Days)  + (dblUnappliedCredits + dblPrepaids) FROM vyuARCustomerInquiry
+						WHERE intEntityCustomerId = @CustomerId
+					END
+					ELSE IF (@strLetterName = 'Keep Full Past Due Balance Letter')
+					BEGIN
+						SELECT @ARBalance = (dbl10Days + dbl30Days + dbl60Days + dbl90Days + dbl91Days)  + (dblUnappliedCredits + dblPrepaids) FROM vyuARCustomerInquiry
+						WHERE intEntityCustomerId = @CustomerId
+					END
+					ELSE IF(@strTableSource = 'vyuARCollectionOverdueReport')
 					BEGIN
 						SELECT @ARBalance = SUM(D.dblAmount) 
 						FROM (
