@@ -101,7 +101,10 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT @dblSeqPrice = NULL
+			IF @dblSettlementPrice IS NULL
+				SELECT @dblSeqPrice = NULL
+			ELSE 
+				SELECT @dblSeqPrice = @dblSettlementPrice +@dblBasis
 		END
 	END
 
