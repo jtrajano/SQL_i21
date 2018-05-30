@@ -2,6 +2,7 @@
 	AS 
 SELECT	id = CAST(ROW_NUMBER() OVER(ORDER BY FY.dtmDateFrom DESC, ENT.strName) AS int),
 		CustomerVolume.intCustomerPatronId,
+		ENT.strEntityNo,
 		ENT.strName,
 		CustomerVolume.intFiscalYear,
 		FY.strFiscalYear,
@@ -59,6 +60,7 @@ INNER JOIN tblGLFiscalYear FY
 LEFT JOIN tblSMTaxCode TC
 	ON TC.intTaxCodeId = AR.intTaxCodeId
 GROUP BY CustomerVolume.intCustomerPatronId,
+		ENT.strEntityNo,
 		ENT.strName,
 		CustomerVolume.intFiscalYear,
 		FY.strFiscalYear,

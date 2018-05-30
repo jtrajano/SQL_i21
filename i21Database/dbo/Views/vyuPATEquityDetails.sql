@@ -2,6 +2,7 @@
 	AS 
 SELECT	id = CAST(ROW_NUMBER() OVER(ORDER BY FY.dtmDateFrom DESC, ENT.strName) AS int),
 		CE.intCustomerId,
+		ENT.strEntityNo,
 		ENT.strName,
 		CE.intFiscalYearId,
 		FY.strFiscalYear,
@@ -25,6 +26,7 @@ LEFT JOIN tblSMTaxCode TC
 		ON TC.intTaxCodeId = AR.intTaxCodeId
 		WHERE CE.dblEquity <> 0
 GROUP BY CE.intCustomerId,
+		ENT.strEntityNo,
 		ENT.strName,
 		CE.intFiscalYearId,
 		FY.dtmDateFrom,

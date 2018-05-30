@@ -5,6 +5,7 @@ SELECT	IssueStk.intIssueStockId,
 		IssueStk.dtmIssueDate,
 		CS.intCustomerStockId,
 		IssueStk.intCustomerPatronId,
+		Customer.strEntityNo,
 		Customer.strName,
 		IssueStk.intStockId,
 		PC.strStockName,
@@ -52,4 +53,3 @@ SELECT	IssueStk.intIssueStockId,
 		ON APPAY.intBillId = RetireStk.intBillId
 	LEFT OUTER JOIN (SELECT A.strPaymentInfo, B.intInvoiceId, A.dtmDatePaid, B.dblPayment FROM tblARPayment A INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId) ARPAY
 		ON ARPAY.intInvoiceId = IssueStk.intInvoiceId
-
