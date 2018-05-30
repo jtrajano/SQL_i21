@@ -1673,10 +1673,11 @@ IF @post = 1
 											WHEN UPPER(RTRIM(LTRIM(A.strPaymentMethod))) = UPPER('CF Invoice') THEN ISNULL(A.intWriteOffAccountId, @intCFAccount)
 											ELSE A.intAccountId
 											END
-			,dblDebit					= (CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
-												THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
-												ELSE B.dblBasePayment END)
-										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
+			,dblDebit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
+										  --(CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
+												--THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
+												--ELSE B.dblBasePayment END)
+										  --* (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
@@ -1707,9 +1708,9 @@ IF @post = 1
 			,[strRateType]				= ''			 
 		FROM
 			tblARPayment A		
-		INNER JOIN
-			tblARPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId and B.dblBasePayment <> 0
+		--INNER JOIN
+		--	tblARPaymentDetail B
+		--		ON A.intPaymentId = B.intPaymentId and B.dblBasePayment <> 0
 		INNER JOIN
 			tblSMPaymentMethod PM
 				ON A.intPaymentMethodId = PM.intPaymentMethodID
@@ -1964,7 +1965,10 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= B.intAccountId 
 			,dblDebit					= 0
-			,dblCredit					= (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END) * (A.dblBaseAmountPaid + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
+			,dblCredit					= (CASE WHEN (B.dblBaseAmountDue = (B.dblBasePayment - B.dblBaseInterest) + B.dblBaseDiscount)
+												THEN (B.dblBasePayment - B.dblBaseInterest)  + B.dblBaseDiscount
+												ELSE B.dblBasePayment END)
+										  * (CASE WHEN ISNULL(A.ysnInvoicePrepayment,0) = 1 THEN -1 ELSE 1 END)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
