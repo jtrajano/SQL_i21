@@ -134,14 +134,8 @@ SELECT
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
-		,intForexRateTypeId			= CASE
-										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.intRateTypeId
-										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
-									END
-		,dblForexRate				= CASE
-										WHEN ISNULL(SC.intContractId ,0) > 0 THEN CNT.dblRate
-										WHEN ISNULL(SC.intContractId ,0) = 0 THEN NULL
-									END
+		,intForexRateTypeId			= NULL
+		,dblForexRate				= NULL
 		--Detail
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
