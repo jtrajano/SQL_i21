@@ -167,7 +167,7 @@ BEGIN
 					AND PL.intItemLocationId = @ItemLocationId
 					AND PL.intItemUnitMeasureId = @ItemUOMId
 					AND ISNULL(PL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
-					AND ((@Quantity BETWEEN PL.dblMin AND PL.dblMax) OR (PL.dblMin = 0 AND PL.dblMax = 0))
+					AND ((@Quantity BETWEEN ISNULL(PL.dblMin, 0) AND ISNULL(PL.dblMax, 0) ) OR ( ISNULL(PL.dblMin, 0) = 0 AND ISNULL(PL.dblMax, 0) = 0))
 					AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(PL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
 				ORDER BY CAST(ISNULL(PL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
@@ -212,7 +212,7 @@ BEGIN
 		AND ICPL.intItemLocationId = @ItemLocationId
 		AND ICPL.intItemUnitMeasureId = @ItemUOMId
 		AND ISNULL(ICPL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
-		AND ((@Quantity BETWEEN ICPL.dblMin AND ICPL.dblMax) OR (ICPL.dblMin = @ZeroDecimal AND ICPL.dblMax = @ZeroDecimal))
+		AND ((@Quantity BETWEEN ISNULL(ICPL.dblMin, 0) AND ISNULL(ICPL.dblMax,0) ) OR (ISNULL(ICPL.dblMin, 0) = @ZeroDecimal AND ISNULL(ICPL.dblMax, 0) = @ZeroDecimal))
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(ICPL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
 	ORDER BY CAST(ISNULL(ICPL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		
