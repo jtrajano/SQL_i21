@@ -35,7 +35,7 @@ SELECT
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN ISNULL(SAR.dblQtyShipped, 0)
 												ELSE ISNULL(SAR.dblQtyOrdered, 0)
-											END > 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
+											END <> 0 AND ISNULL(SAR.dblLineTotal, 0) > 0
 									THEN ( ( (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
@@ -235,12 +235,12 @@ SELECT strRecordNumber				= ARI.strInvoiceNumber
 	  , dblQtyOrdered				= ARID.dblQtyOrdered
 	  , dblQtyShipped				= ARID.dblQtyShipped
 	  , dblStandardCost				= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-												THEN ISNULL(NONSO.dblCost, 0)
+												THEN CASE WHEN ISNULL(NONSO.dblCost, 0) > 0 THEN ISNULL(NONSO.dblCost, 0) / ARID.dblQtyShipped ELSE ISNULL(NONSO.dblCost, 0) END
 											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN NONLOTTED.dblCost
+												THEN CASE WHEN ISNULL(NONLOTTED.dblCost, 0) > 0 THEN ISNULL(NONLOTTED.dblCost, 0) / ARID.dblQtyShipped ELSE ISNULL(NONLOTTED.dblCost, 0) END
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN LOTTED.dblCost
-											ELSE ISNULL(NONSO.dblCost, 0)
+												THEN CASE WHEN ISNULL(LOTTED.dblCost, 0) > 0 THEN ISNULL(LOTTED.dblCost, 0) / ARID.dblQtyShipped ELSE ISNULL(LOTTED.dblCost, 0) END 
+											ELSE CASE WHEN ISNULL(NONSO.dblCost, 0) > 0 THEN ISNULL(NONSO.dblCost, 0) / ARID.dblQtyShipped ELSE ISNULL(NONSO.dblCost, 0) END
 										END)
 	  , dblPrice					= ARID.dblPrice
 	  ,	dblTax						= ARID.dblTotalTax
