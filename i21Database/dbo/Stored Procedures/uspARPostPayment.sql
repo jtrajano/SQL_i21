@@ -222,7 +222,7 @@ IF(@exclude IS NOT NULL)
 		
 		--Validation
 		INSERT INTO @ARReceivableInvalidData
-		SELECT * FROM [dbo].[fnARGetInvalidPaymentsForPosting](@ARReceivablePostData)
+		SELECT * FROM [dbo].[fnARGetInvalidPaymentsForPosting](@ARReceivablePostData, @post, @recap)
 
 		--POST VALIDATIONS
 		IF @post = 1
@@ -732,9 +732,12 @@ IF @post = 0
 				,[strRateType]					= ''
 			FROM
 				tblGLDetail GL
-			INNER JOIN
-				@ARReceivablePostData P
-					ON GL.intTransactionId = P.[intTransactionId]  
+			INNER JOIN (
+				SELECT intTransactionId
+					 , strTransactionId
+				FROM @ARReceivablePostData P
+				GROUP BY intTransactionId, strTransactionId
+			) P ON GL.intTransactionId = P.[intTransactionId]  
 					AND GL.strTransactionId = P.strTransactionId
 			WHERE
 				GL.ysnIsUnposted = 0

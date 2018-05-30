@@ -34,7 +34,7 @@ DECLARE @InvalidData TABLE (
 );
 
 INSERT INTO @InvalidData
-SELECT * FROM [dbo].[fnARGetInvalidPaymentsForPosting](@PaymentData)
+SELECT * FROM [dbo].[fnARGetInvalidPaymentsForPosting](@PaymentData, @Post, 1)
 
 DECLARE @ErrorMessage AS NVARCHAR(500)
 SELECT TOP 1
