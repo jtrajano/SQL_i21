@@ -110,7 +110,7 @@ AS
 				strSourceScreenName			=	'Contract',
 				ysnSubCurrency				=	SY.ysnSubCurrency,
 				intForexRateTypeId			=	CD.intRateTypeId,
-				dblForexRate				=	CD.dblRate,
+				dblForexRate				=	NULL,
 				intFreightTermId			=	CD.intFreightTermId,
 				intBookId					=	CD.intBookId,
 				intSubBookId				=	CD.intSubBookId
