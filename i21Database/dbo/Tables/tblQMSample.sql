@@ -51,6 +51,7 @@
 	[intShiftId] INT, 
 	[intLocationId] INT, 
 	[intInventoryReceiptId] INT, 
+	intInventoryShipmentId INT, 
 	[intWorkOrderId] INT, 
 	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
 	ysnAdjustInventoryQtyBySampleQty BIT CONSTRAINT [DF_tblQMSample_ysnAdjustInventoryQtyBySampleQty] DEFAULT 0,
@@ -93,6 +94,7 @@
 	CONSTRAINT [FK_tblQMSample_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES tblSMCompanyLocation([intCompanyLocationId]),
 	CONSTRAINT [FK_tblQMSample_tblICStorageLocation] FOREIGN KEY([intStorageLocationId]) REFERENCES tblICStorageLocation ([intStorageLocationId]),
 	CONSTRAINT [FK_tblQMSample_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblQMSample_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblQMSample_tblMFWorkOrder] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE
 )
 GO

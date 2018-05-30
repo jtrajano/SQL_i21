@@ -142,6 +142,8 @@ BEGIN TRY
 		,strComment = x.strComment
 		,intItemBundleId = x.intItemBundleId
 		,intWorkOrderId = x.intWorkOrderId
+		,intInventoryReceiptId = x.intInventoryReceiptId
+		,intInventoryShipmentId = x.intInventoryShipmentId
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -192,6 +194,8 @@ BEGIN TRY
 			,strComment NVARCHAR(MAX)
 			,intItemBundleId INT
 			,intWorkOrderId INT
+			,intInventoryReceiptId INT
+			,intInventoryShipmentId INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)

@@ -52,6 +52,7 @@ SELECT S.intSampleId
 	,S.intLocationId
 	,CL.strLocationName
 	,IR.strReceiptNumber
+	,INVS.strShipmentNumber AS strInvShipmentNumber
 	,WO.strWorkOrderNo
 	,S.strComment
 	,ISNULL(ito1.intOwnerId, ito2.intOwnerId) AS intEntityId
@@ -89,6 +90,7 @@ LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocat
 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
+LEFT JOIN tblICInventoryShipment INVS ON INVS.intInventoryShipmentId = S.intInventoryShipmentId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
