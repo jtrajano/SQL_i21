@@ -142,6 +142,25 @@ BEGIN TRY
 	FROM tblSMUserRoleMenu rolemenu
 	INNER JOIN tblSMMasterMenu mastermenu ON rolemenu.intMenuId = mastermenu.intMenuID
 	AND mastermenu.strMenuName = 'Dashboards'
+
+	-- Assigned Default Control Permission
+	IF @isContact = 1
+	BEGIN
+		DECLARE @entityCustomerId INT
+		SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)'
+
+		DECLARE @controlId INT
+		SELECT @controlId = intControlId FROM tblSMControl WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc'
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @controlId AND strPermission = 'Disable')
+		BEGIN
+			IF @controlId IS NOT NULL
+			BEGIN
+				INSERT INTO tblSMUserRoleControlPermission ([intUserRoleId],[intControlId],[strPermission])
+				VALUES (@UserRoleID, @controlId, 'Disable')
+			END
+		END
+	END
 	
 	---- Iterate through all affected user securities and apply Master Menus
 	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)
