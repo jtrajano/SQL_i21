@@ -6681,7 +6681,8 @@
     <Build Include="dbo\Views\vyuAPVouchersForARPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddInventoryCount.sql" />
     <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
-	<None Include="Scripts\Post-Deployment\PAT\5_UpdatePayoutType.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\5_UpdatePayoutType.sql" />
+    <Build Include="dbo\Tables\tblLGWeightClaimOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
