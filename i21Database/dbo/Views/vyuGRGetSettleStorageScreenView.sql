@@ -32,7 +32,7 @@ AS
 	,SS.intConcurrencyId
 FROM tblGRSettleStorage SS
 JOIN tblEMEntity E ON E.intEntityId = SS.intEntityId
-JOIN tblSMCompanyLocation L ON L.intCompanyLocationId= SS.intCompanyLocationId  
+LEFT JOIN tblSMCompanyLocation L ON L.intCompanyLocationId= SS.intCompanyLocationId  
 JOIN tblICItem Item ON Item.intItemId = SS.intItemId
 JOIN tblICItemUOM ItemUOM ON ISNULL(SS.intItemUOMId, SS.intCommodityStockUomId) = ItemUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
