@@ -9,6 +9,9 @@ DECLARE @List NVARCHAR(800)
 )
 SELECT @List= COALESCE(@List + CASE WHEN strCommodityAttributeId <> '' THEN ',' ELSE '' END, '') + LTRIM(strCommodityAttributeId) 
 FROM CommaTrimmed 
+SELECT @List = RTRIM(LTRIM(@List))
+IF LEN(@List )= 0  RETURN
+
 MERGE INTO tblRKCommodityMarketMappingAttribute
 WITH (HOLDLOCK)
 AS RMAttributeTable
@@ -20,4 +23,3 @@ RMAttributeTable.intCommodityAttributeId = Source.Value
 WHEN NOT MATCHED BY Target
 THEN INSERT (intCommodityAttributeId) VALUES(Source.Value)
 WHEN NOT MATCHED BY SOURCE THEN DELETE;
-
