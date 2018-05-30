@@ -162,6 +162,7 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_ItemChange
 			, @ADJUSTMENT_TYPE_UOMChange
 			, @ADJUSTMENT_TYPE_OpeningInventory
+			, @ADJUSTMENT_TYPE_ChangeLotWeight
 		)
 
 --------------------------------------------------------------------------------------------  
@@ -417,9 +418,33 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
 	BEGIN 
+		INSERT INTO @ItemsForAdjust (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId  
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  	
 		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentChangeLotWeight
 				@intTransactionId
 				,@ysnPost
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intEntityUserSecurityId
+				,@strAdjustmentDescription
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
@@ -505,6 +530,7 @@ BEGIN
 		, @ADJUSTMENT_TYPE_ItemChange
 		, @ADJUSTMENT_TYPE_UOMChange
 		, @ADJUSTMENT_TYPE_OpeningInventory
+		, @ADJUSTMENT_TYPE_ChangeLotWeight
 	)
 	BEGIN 
 		-- Call the post routine 
@@ -592,14 +618,18 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 	
-	IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
-	BEGIN 
-		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentChangeLotWeight
-				@intTransactionId
-				,@ysnPost
+	--IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
+	--BEGIN 
+	--	EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentChangeLotWeight
+	--			@intTransactionId
+	--			,@ysnPost
+	--			,@strBatchId  
+	--			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+	--			,@intEntityUserSecurityId
+	--			,@strAdjustmentDescription
 
-		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	END 
+	--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	--END 
 
 END   
 

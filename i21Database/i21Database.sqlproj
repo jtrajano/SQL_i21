@@ -6673,6 +6673,7 @@
     <Build Include="dbo\Tables\tblMBILOrderSite.sql" />
     <Build Include="dbo\Tables\tblMBILOrderTaxCode.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILBuildOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentChangeLotWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
