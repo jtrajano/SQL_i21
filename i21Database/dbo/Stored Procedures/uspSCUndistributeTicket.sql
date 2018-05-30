@@ -49,7 +49,7 @@ DECLARE @InventoryReceiptId INT
 		,@strContractNumber NVARCHAR(40)
 		,@strContractStatus NVARCHAR(40)
 		,@intContractSeq INT
-		,@intId INT;
+		,@intId INT
 		,@intTicketType INT;
 
 BEGIN TRY
