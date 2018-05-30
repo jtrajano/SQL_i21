@@ -6847,8 +6847,8 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
-    <None Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
-    <None Include="dbo\Functions\fnCFGetDefaultComment.sql" />
+    <Build Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
+    <Build Include="dbo\Functions\fnCFGetDefaultComment.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099PATR.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099DIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateNewShipFromEntity.sql" />
