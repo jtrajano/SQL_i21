@@ -6853,6 +6853,7 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099PATR.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099DIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateNewShipFromEntity.sql" />
+    <None Include="Scripts\Post-Deployment\EncryptionDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
