@@ -45,7 +45,7 @@ BEGIN
 		AND @dtmScheduledDate BETWEEN dtmValidFrom
 			AND dtmValidTo
 	
-	SELECT @dblCurrencyExchangeRate = CASE 
+	SELECT TOP 1 @dblCurrencyExchangeRate = CASE
 			WHEN ISNULL(CD.intInvoiceCurrencyId,0) = @intTotalCostPerContainerCurrency
 				THEN dblRate
 			ELSE 1
@@ -63,10 +63,11 @@ BEGIN
 		,ISNULL(@intTotalCostPerContainerCurrency,intAmountCurrency)
 		,ISNULL(@strTotalCostPerContainerCurrency,strAmountCurrency)
 		,ISNULL(dblCurrencyExchangeRate,1)
-		,SUM(dblBrokerage * dblTotalAmount)
+		,SUM(dblBrokerage * dblTotalWeightInCTUOM)
 	FROM (
 		SELECT dblNet
 			,UM.intUnitMeasureId
+			,ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, CD.intNetWeightUOMId, 1) * dblNet, 2) dblTotalWeightInCTUOM
 			,ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, AD.intSeqPriceUOMId, 1) * dblNet, 2) dblTotalQtyInPriceUOM
 			,ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, AD.intSeqPriceUOMId, 1) * dblNet, 2) * AD.dblSeqPrice AS dblTotalPrice
 			,LD.intWeightItemUOMId
