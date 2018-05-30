@@ -112,7 +112,7 @@ BEGIN
 		,ysnIncludeOnHand = ISNULL(@ysnIncludeOnHand, 0)
 		,ysnScannedCountEntry = ISNULL(@ysnScannedCountEntry, 0)
 		,ysnCountByLots = ISNULL(@ysnCountByLots, 0)
-		,strCountBy = e.strName 
+		,strCountBy = @strCountBy
 		,ysnCountByPallets = ISNULL(@ysnCountByPallets, 0)
 		,ysnRecountMismatch = ISNULL(@ysnRecountMismatch, 0)
 		,ysnExternal = ISNULL(@ysnExternal, 0)
