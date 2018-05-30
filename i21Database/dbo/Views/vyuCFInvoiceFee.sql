@@ -17,6 +17,7 @@ SELECT
 ,cfTrans.strPrintTimeStamp
 ,cfTrans.dtmInvoiceDate
 ,cfTrans.intSalesPersonId
+,cfTrans.ysnInvoiced
 ,dblTotalAmount = ROUND(ISNULL(cfTrans.dblCalculatedTotalPrice, 0),2)
 ----------------------------------------------
 ,arInv.strCustomerName

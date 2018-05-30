@@ -274,7 +274,310 @@ BEGIN
 				' ( ISNULL(strUpdateInvoiceReportNumber,'''') = '''')'
 		END
 
-		SELECT * INTO #tblCFTempInvoiceReportSummary FROM vyuCFInvoiceReportSummary
+
+		CREATE TABLE #tblCFTempInvoiceReportSummary(
+			 intCustomerId						INT
+			,intOdometer						INT
+			,intCardId							INT
+			,intProductId						INT
+			,intARItemId						INT
+			,intTransactionId					INT
+			,intAccountId						INT
+			,intDiscountScheduleId				INT
+			,intTermsCode						INT
+			,intTermsId							INT
+			-------------------------------------------------------
+			,strMiscellaneous					NVARCHAR(MAX)
+			,strTransactionId					NVARCHAR(MAX)
+			,strPrintTimeStamp					NVARCHAR(MAX)
+			,strUpdateInvoiceReportNumber		NVARCHAR(MAX)
+			,strInvoiceReportNumber				NVARCHAR(MAX)
+			,strCustomerName					NVARCHAR(MAX)
+			,strName							NVARCHAR(MAX)
+			,strCustomerNumber					NVARCHAR(MAX)
+			,strBillTo							NVARCHAR(MAX)
+			,strCardNumber						NVARCHAR(MAX)
+			,strCardDescription					NVARCHAR(MAX)
+			,strVehicleNumber					NVARCHAR(MAX)
+			,strVehicleDescription				NVARCHAR(MAX)
+			,strShortName						NVARCHAR(MAX)
+			,strItemNumber						NVARCHAR(MAX)
+			,strItemDescription					NVARCHAR(MAX)
+			,strNetwork							NVARCHAR(MAX)
+			,strProductNumber					NVARCHAR(MAX)
+			,strProductDescription				NVARCHAR(MAX)
+			,strSiteNumber						NVARCHAR(MAX)
+			,strSiteAddress						NVARCHAR(MAX)
+			,strTaxState						NVARCHAR(MAX)
+			,strInvoiceCycle					NVARCHAR(MAX)
+			,strDepartment						NVARCHAR(MAX)
+			,strDepartmentDescription			NVARCHAR(MAX)
+			,strEmailDistributionOption			NVARCHAR(MAX)
+			,strEmail							NVARCHAR(MAX)
+			-------------------------------------------------------
+			,dtmTransactionDate					DATETIME
+			,dtmCreatedDate						DATETIME
+			,dtmInvoiceDate						DATETIME
+			,dtmPostedDate						DATETIME
+			-------------------------------------------------------
+			,ysnPostedCSV						BIT
+			,ysnIncludeInQuantityDiscount		BIT
+			-------------------------------------------------------
+			,dblTotalQuantity				    NUMERIC(18,6)
+			,dblTotalGrossAmount			    NUMERIC(18,6)
+			,dblTotalNetAmount				    NUMERIC(18,6)
+			,dblTotalAmount					    NUMERIC(18,6)
+			,dblTotalTaxAmount				    NUMERIC(18,6)
+			,TotalFET						    NUMERIC(18,6)
+			,TotalSET						    NUMERIC(18,6)
+			,TotalSST						    NUMERIC(18,6)
+			,TotalLC						    NUMERIC(18,6)
+			-------------------------------------------------------
+		)
+
+		IF(ISNULL(@ysnReprintInvoice,0) = 1 OR ISNULL(@ysnIncludePrintedTransaction,0) = 1)
+		BEGIN
+			INSERT INTO #tblCFTempInvoiceReportSummary(
+				 intCustomerId					
+				,intOdometer					
+				,intCardId						
+				,intProductId					
+				,intARItemId					
+				,intTransactionId				
+				,intAccountId					
+				,intDiscountScheduleId			
+				,intTermsCode					
+				,intTermsId						
+				--------------------------------
+				,strMiscellaneous				
+				,strTransactionId				
+				,strPrintTimeStamp				
+				,strUpdateInvoiceReportNumber	
+				,strInvoiceReportNumber			
+				,strCustomerName				
+				,strName						
+				,strCustomerNumber				
+				,strBillTo						
+				,strCardNumber					
+				,strCardDescription				
+				,strVehicleNumber				
+				,strVehicleDescription			
+				,strShortName					
+				,strItemNumber					
+				,strItemDescription				
+				,strNetwork						
+				,strProductNumber				
+				,strProductDescription			
+				,strSiteNumber					
+				,strSiteAddress					
+				,strTaxState					
+				,strInvoiceCycle				
+				,strDepartment					
+				,strDepartmentDescription		
+				,strEmailDistributionOption		
+				,strEmail						
+				--------------------------------
+				,dtmTransactionDate				
+				,dtmCreatedDate					
+				,dtmInvoiceDate					
+				,dtmPostedDate					
+				--------------------------------
+				,ysnPostedCSV					
+				,ysnIncludeInQuantityDiscount	
+				--------------------------------
+				,dblTotalQuantity				
+				,dblTotalGrossAmount			
+				,dblTotalNetAmount				
+				,dblTotalAmount					
+				,dblTotalTaxAmount				
+				,TotalFET						
+				,TotalSET						
+				,TotalSST						
+				,TotalLC						
+			)
+			SELECT 
+				 intCustomerId					
+				,intOdometer					
+				,intCardId						
+				,intProductId					
+				,intARItemId					
+				,intTransactionId				
+				,intAccountId					
+				,intDiscountScheduleId			
+				,intTermsCode					
+				,intTermsId						
+				--------------------------------
+				,strMiscellaneous				
+				,strTransactionId				
+				,strPrintTimeStamp				
+				,strUpdateInvoiceReportNumber	
+				,strInvoiceReportNumber			
+				,strCustomerName				
+				,strName						
+				,strCustomerNumber				
+				,strBillTo						
+				,strCardNumber					
+				,strCardDescription				
+				,strVehicleNumber				
+				,strVehicleDescription			
+				,strShortName					
+				,strItemNumber					
+				,strItemDescription				
+				,strNetwork						
+				,strProductNumber				
+				,strProductDescription			
+				,strSiteNumber					
+				,strSiteAddress					
+				,strTaxState					
+				,strInvoiceCycle				
+				,strDepartment					
+				,strDepartmentDescription		
+				,strEmailDistributionOption		
+				,strEmail						
+				--------------------------------
+				,dtmTransactionDate				
+				,dtmCreatedDate					
+				,dtmInvoiceDate					
+				,dtmPostedDate					
+				--------------------------------
+				,ysnPostedCSV					
+				,ysnIncludeInQuantityDiscount	
+				--------------------------------
+				,dblTotalQuantity				
+				,dblTotalGrossAmount			
+				,dblTotalNetAmount				
+				,dblTotalAmount					
+				,dblTotalTaxAmount				
+				,TotalFET						
+				,TotalSET						
+				,TotalSST						
+				,TotalLC						
+			FROM
+			vyuCFInvoiceReportSummary
+		END
+		ELSE
+		BEGIN
+			INSERT INTO #tblCFTempInvoiceReportSummary(
+				 intCustomerId					
+				,intOdometer					
+				,intCardId						
+				,intProductId					
+				,intARItemId					
+				,intTransactionId				
+				,intAccountId					
+				,intDiscountScheduleId			
+				,intTermsCode					
+				,intTermsId						
+				--------------------------------
+				,strMiscellaneous				
+				,strTransactionId				
+				,strPrintTimeStamp				
+				,strUpdateInvoiceReportNumber	
+				,strInvoiceReportNumber			
+				,strCustomerName				
+				,strName						
+				,strCustomerNumber				
+				,strBillTo						
+				,strCardNumber					
+				,strCardDescription				
+				,strVehicleNumber				
+				,strVehicleDescription			
+				,strShortName					
+				,strItemNumber					
+				,strItemDescription				
+				,strNetwork						
+				,strProductNumber				
+				,strProductDescription			
+				,strSiteNumber					
+				,strSiteAddress					
+				,strTaxState					
+				,strInvoiceCycle				
+				,strDepartment					
+				,strDepartmentDescription		
+				,strEmailDistributionOption		
+				,strEmail						
+				--------------------------------
+				,dtmTransactionDate				
+				,dtmCreatedDate					
+				,dtmInvoiceDate					
+				,dtmPostedDate					
+				--------------------------------
+				,ysnPostedCSV					
+				,ysnIncludeInQuantityDiscount	
+				--------------------------------
+				,dblTotalQuantity				
+				,dblTotalGrossAmount			
+				,dblTotalNetAmount				
+				,dblTotalAmount					
+				,dblTotalTaxAmount				
+				,TotalFET						
+				,TotalSET						
+				,TotalSST						
+				,TotalLC						
+			)
+			SELECT 
+				 intCustomerId					
+				,intOdometer					
+				,intCardId						
+				,intProductId					
+				,intARItemId					
+				,intTransactionId				
+				,intAccountId					
+				,intDiscountScheduleId			
+				,intTermsCode					
+				,intTermsId						
+				--------------------------------
+				,strMiscellaneous				
+				,strTransactionId				
+				,strPrintTimeStamp				
+				,strUpdateInvoiceReportNumber	
+				,strInvoiceReportNumber			
+				,strCustomerName				
+				,strName						
+				,strCustomerNumber				
+				,strBillTo						
+				,strCardNumber					
+				,strCardDescription				
+				,strVehicleNumber				
+				,strVehicleDescription			
+				,strShortName					
+				,strItemNumber					
+				,strItemDescription				
+				,strNetwork						
+				,strProductNumber				
+				,strProductDescription			
+				,strSiteNumber					
+				,strSiteAddress					
+				,strTaxState					
+				,strInvoiceCycle				
+				,strDepartment					
+				,strDepartmentDescription		
+				,strEmailDistributionOption		
+				,strEmail						
+				--------------------------------
+				,dtmTransactionDate				
+				,dtmCreatedDate					
+				,dtmInvoiceDate					
+				,dtmPostedDate					
+				--------------------------------
+				,ysnPostedCSV					
+				,ysnIncludeInQuantityDiscount	
+				--------------------------------
+				,dblTotalQuantity				
+				,dblTotalGrossAmount			
+				,dblTotalNetAmount				
+				,dblTotalAmount					
+				,dblTotalTaxAmount				
+				,TotalFET						
+				,TotalSET						
+				,TotalSST						
+				,TotalLC						
+			FROM
+			vyuCFInvoiceReportSummary
+			WHERE ISNULL(ysnInvoiced,0) = 0
+		END
+
+		--SELECT * INTO #tblCFTempInvoiceReportSummary FROM vyuCFInvoiceReportSummary
 
 		BEGIN TRY
 			EXEC('

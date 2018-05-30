@@ -86,3 +86,6 @@ WHERE strTransactionType != 'Foreign Sale'
 AND ISNULL(tblCFTransaction.intCustomerId,0) = 0
 
 
+ UPDATE tblCFTransaction SET ysnInvoiced = 1 WHERE strInvoiceReportNumber IS NOT NULL
+
+

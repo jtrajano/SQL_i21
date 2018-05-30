@@ -70,6 +70,7 @@
     [intFreightTermId]           INT             NULL,
     [intForDeleteTransId]        INT             NULL,
     [intCustomerId]              INT             NULL,
+    [ysnInvoiced]                  BIT             NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),

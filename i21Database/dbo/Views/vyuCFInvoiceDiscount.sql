@@ -16,6 +16,7 @@ SELECT
  ,cfTrans.dtmCreatedDate
  ,cfTrans.strPrintTimeStamp
  ,cfTrans.intSalesPersonId
+ ,cfTrans.ysnInvoiced
  ,dblTotalAmount = ROUND(ISNULL(cfTrans.dblCalculatedTotalPrice, 0), 2) 
  ,dtmInvoiceDate = DATEADD(dd, DATEDIFF(dd, 0, cfTrans.dtmInvoiceDate), 0)
  ,dblQuantity = (

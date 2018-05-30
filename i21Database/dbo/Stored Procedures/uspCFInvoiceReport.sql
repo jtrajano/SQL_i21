@@ -806,7 +806,7 @@ BEGIN
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
 			FROM vyuCFInvoiceReport
-			WHERE  strInvoiceReportNumber IS NULL
+			WHERE  ISNULL(ysnInvoiced,0) = 0
 		END
 
 		--SELECT * INTO #tblCFTempInvoiceReport FROM vyuCFInvoiceReport

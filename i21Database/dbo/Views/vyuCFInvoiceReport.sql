@@ -34,6 +34,7 @@ SELECT
  ,cfTrans.ysnPosted
  ,cfTrans.strPrintTimeStamp
  ,cfTrans.ysnPostedCSV
+ ,cfTrans.ysnInvoiced
 ----------------------------------------------
 ,cfAccount.intAccountId
 ,cfAccount.intInvoiceCycle

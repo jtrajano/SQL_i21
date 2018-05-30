@@ -18,6 +18,7 @@ SELECT
 ,cfTrans.intTransactionId
 ,cfTrans.strPrintTimeStamp
 ,cfTrans.ysnPostedCSV
+,cfTrans.ysnInvoiced
 ,dblTotalQuantity = ISNULL(cfTrans.dblQuantity, 0)
 ,dblTotalGrossAmount = ISNULL(cfTrans.dblCalculatedGrossPrice, 0)
 ,dblTotalNetAmount = ISNULL(Round(cfTrans.dblCalculatedTotalPrice, 2), 0) -     ( ISNULL(FETTaxes_1.dblTaxCalculatedAmount, 0) 
