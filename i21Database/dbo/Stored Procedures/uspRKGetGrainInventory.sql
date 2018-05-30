@@ -3,7 +3,8 @@
 		@dtmToTransactionDate datetime = null,
 		@intCommodityId int =  null,
 		@intItemId int= null,
-		  @strPositionIncludes nvarchar(100) = NULL
+		@strPositionIncludes nvarchar(100) = NULL,
+		@intLocationId int = null
 
 AS
 
@@ -29,7 +30,11 @@ intInventoryReceiptId int,
 intInventoryShipmentId int,
 intInventoryAdjustmentId int,
 intInventoryCountId int,
-intInvoiceId int
+intInvoiceId int,
+intDeliverySheetId int,
+deliverySheetNumber nvarchar(50),
+intTicketId int,
+ticketNumber nvarchar(50)
 
 )
 DECLARE @intCommodityUnitMeasureId INT= NULL
@@ -39,7 +44,7 @@ SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityU
 
 INSERT INTO @tblResult(dtmDate,strDistributionOption,strShipDistributionOption,strAdjDistributionOption,strCountDistributionOption,tranShipmentNumber,tranShipQty,
 	tranReceiptNumber,tranRecQty,tranAdjNumber,dblAdjustmentQty,tranCountNumber,dblCountQty,tranInvoiceNumber,dblInvoiceQty
-,intInventoryReceiptId ,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId,BalanceForward)
+,intInventoryReceiptId ,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId,intDeliverySheetId,deliverySheetNumber,intTicketId,ticketNumber, BalanceForward)
 
 SELECT *,round(isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0),6) BalanceForward FROM 
 (
@@ -81,7 +86,11 @@ ROUND((SELECT TOP 1 intInventoryAdjustmentId FROM tblICInventoryAdjustment ia WH
 ROUND((SELECT TOP 1 intInventoryCountId FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId ),6) intInventoryCountId,
 ROUND((SELECT top 1 ia.intInvoiceId FROM tblARInvoice ia
 	JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  
-	WHERE ia.strInvoiceNumber=it.strTransactionId),6) intInvoiceId
+	WHERE ia.strInvoiceNumber=it.strTransactionId),6) intInvoiceId,
+	null intDeliverySheetId,
+	'' AS deliverySheetNumber ,
+	null intTicketId,
+	'' AS ticketNumber   
 
 FROM tblICInventoryTransaction it 
 JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 10, 23,33, 44)
@@ -96,7 +105,8 @@ JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId and it.in
 WHERE i.intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
-and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%')t
+and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%'
+AND it.intItemLocationId = @intLocationId)t
 union
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
 		'' as strAdjDistributionOption,
@@ -115,7 +125,11 @@ SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributio
 		null intInventoryShipmentId,
 		null intInventoryAdjustmentId,
 		null intInventoryCountId,
-		null intInvoiceId 
+		null intInvoiceId,
+		null intDeliverySheetId,
+		'' AS deliverySheetNumber,
+		null intTicketId,
+		'' AS ticketNumber    
 FROM(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='I' THEN st.dblNetUnits ELSE 0 END) ,6) dblInQty,
@@ -137,7 +151,8 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 )a
+		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
+		AND st.intProcessingLocationId = @intLocationId)a
 
 
 Union
@@ -158,7 +173,11 @@ SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributio
 		intInventoryShipmentId intInventoryShipmentId,
 		null intInventoryAdjustmentId,
 		null intInventoryCountId,
-		null intInvoiceId 
+		null intInvoiceId,
+		null intDeliverySheetId,
+		'' AS deliverySheetNumber,
+		null intTicketId,
+		'' AS ticketNumber    
 FROM(
 SELECT  CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
 round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END) ,6) dblOutQty,
@@ -180,7 +199,78 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-		and  gs.strOwnedPhysicalStock='Customer' )a
+		and  gs.strOwnedPhysicalStock='Customer'
+		AND st.intProcessingLocationId = @intLocationId )a
+
+UNION ALL --Delivery Sheet
+SELECT
+	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+	'' strDistributionOption,
+	'' strShipDistributionOption,
+	'' as strAdjDistributionOption,
+	'' as strCountDistributionOption,
+	'' as tranShipmentNumber,
+	(CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END)  tranShipQty,
+	'' tranReceiptNumber,
+	(CASE WHEN strInOutFlag='I' THEN dblNetUnits  ELSE 0 END) tranRecQty,
+	'' tranAdjNumber,
+	0.0 dblAdjustmentQty,
+	'' tranCountNumber,
+	0.0 dblCountQty,
+	'' tranInvoiceNumber,
+	0.0 dblInvoiceQty,
+	null intInventoryReceiptId,
+	NULL intInventoryShipmentId,
+	null intInventoryAdjustmentId,
+	null intInventoryCountId,
+	null intInvoiceId,
+	DS.intDeliverySheetId,
+	DS.strDeliverySheetNumber + '*' AS deliverySheetNumber,
+	null intTicketId,
+	'' AS ticketNumber  
+FROM tblSCTicket st
+	JOIN tblICItem i on i.intItemId=st.intItemId
+	JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
+WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+	AND i.intCommodityId= @intCommodityId
+	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+	AND st.intProcessingLocationId = @intLocationId
+	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H'
+	
+
+UNION ALL --On Hold without Delivery Sheet
+SELECT
+	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
+	st.strDistributionOption,
+	'' strShipDistributionOption,
+	'' as strAdjDistributionOption,
+	'' as strCountDistributionOption,
+	'' as tranShipmentNumber,
+	(CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END)  tranShipQty,
+	'' tranReceiptNumber,
+	(CASE WHEN strInOutFlag='I' THEN dblNetUnits  ELSE 0 END) tranRecQty,
+	'' tranAdjNumber,
+	0.0 dblAdjustmentQty,
+	'' tranCountNumber,
+	0.0 dblCountQty,
+	'' tranInvoiceNumber,
+	0.0 dblInvoiceQty,
+	null intInventoryReceiptId,
+	NULL intInventoryShipmentId,
+	null intInventoryAdjustmentId,
+	null intInventoryCountId,
+	null intInvoiceId,
+	null intDeliverySheetId,
+	'' AS deliverySheetNumber ,
+	st.intTicketId,
+	st.strTicketNumber AS ticketNumber 
+FROM tblSCTicket st
+	JOIN tblICItem i on i.intItemId=st.intItemId
+WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+	AND i.intCommodityId= @intCommodityId
+	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+	AND st.intProcessingLocationId = @intLocationId
+	AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H'
 
  )t
 
@@ -190,7 +280,9 @@ SELECT distinct
                                             when isnull(tranShipmentNumber,'') <> '' then tranShipmentNumber
                                             when isnull(tranAdjNumber,'') <> '' then tranAdjNumber
 											when isnull(tranInvoiceNumber,'') <> '' then tranInvoiceNumber
-											when isnull(tranCountNumber,'') <> '' then tranCountNumber end [strReceiptNumber],
+											when isnull(tranCountNumber,'') <> '' then tranCountNumber 
+											when isnull(deliverySheetNumber,'') <> '' then deliverySheetNumber 
+											when isnull(ticketNumber,'') <> '' then ticketNumber end [strReceiptNumber],
        
     CASE WHEN isnull(strDistributionOption,'') <> '' THEN strDistributionOption
                                             WHEN isnull(strShipDistributionOption,'') <> '' then strShipDistributionOption
@@ -201,5 +293,5 @@ SELECT distinct
 	   tranAdjNumber [strAdjNo],
        dblAdjustmentQty [dblAdjQty],tranCountNumber [strCountNumber],dblCountQty [dblCountQty],BalanceForward dblDummy,
 (SELECT SUM(BalanceForward) FROM @tblResult AS T2 WHERE T2.Id <= T1.Id) AS dblBalanceForward,strShipDistributionOption,
-	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId
+	intInventoryReceiptId,intInventoryShipmentId,intInventoryAdjustmentId,intInventoryCountId,intInvoiceId,intDeliverySheetId,deliverySheetNumber,intTicketId,ticketNumber
 FROM @tblResult T1)t order by strReceiptNumber

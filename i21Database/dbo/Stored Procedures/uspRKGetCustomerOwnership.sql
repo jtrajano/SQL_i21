@@ -3,7 +3,8 @@
 	   @dtmToTransactionDate datetime = null,
 	   @intCommodityId int =  null,
 	   @intItemId int= null,
-		  @strPositionIncludes nvarchar(100) = NULL
+	   @strPositionIncludes nvarchar(100) = NULL,
+	   @intLocationId int = null
 AS
 
 IF OBJECT_ID('tempdb..#tempCustomer') IS NOT NULL
@@ -38,7 +39,64 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 													SELECT intCompanyLocationId FROM tblSMCompanyLocation
 													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
 													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-													ELSE isnull(ysnLicensed, 0) END)
+													ELSE isnull(ysnLicensed, 0) END
+											)
+		AND st.intProcessingLocationId = @intLocationId
+
+		UNION ALL --Delivery Sheet
+			SELECT 
+				CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
+				,strStorageTypeDescription
+				,CASE WHEN strInOutFlag='I' THEN dblNetUnits * (DSS.dblSplitPercent/100)  ELSE 0 END dblInQty
+				,CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100)  ELSE 0 END dblOutQty  
+				,(select sum(SH.dblUnits) from tblGRStorageHistory SH
+						JOIN  tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+						JOIN tblGRSettleStorageTicket ST1 ON ST1.intCustomerStorageId = CS.intCustomerStorageId AND ST1.intSettleStorageId = SH.intSettleStorageId
+						JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = ST1.intSettleStorageId 
+						WHERE strType='Settlement' 
+						AND  ysnPosted=1 and CS.intDeliverySheetId=DS.intDeliverySheetId and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
+												= convert(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110)) 	dblSettleUnit		
+			FROM tblSCTicket st
+				JOIN tblICItem i on i.intItemId=st.intItemId
+				JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
+				JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId
+				JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId 
+			WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+				AND i.intCommodityId= @intCommodityId
+				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+				and  DSS.intStorageScheduleTypeId > 0 --and DSS.strOwnedPhysicalStock='Customer' 
+				AND  st.intProcessingLocationId  IN (
+															SELECT intCompanyLocationId FROM tblSMCompanyLocation
+															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+															ELSE isnull(ysnLicensed, 0) END
+													)
+				AND st.intProcessingLocationId = @intLocationId
+				AND DS.ysnPost = 0 AND st.strTicketStatus = 'H'
+
+			UNION ALL --On Hold without Delivery Sheet
+			SELECT 
+				CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
+				,'On Hold' as strStorageTypeDescription
+				,CASE WHEN strInOutFlag='I' THEN dblNetUnits   ELSE 0 END dblInQty
+				,CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END dblOutQty  
+				,NULL dblSettleUnit			
+			FROM tblSCTicket st
+				JOIN tblICItem i on i.intItemId=st.intItemId
+			WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN
+				 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+				AND i.intCommodityId= @intCommodityId
+				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+				AND  st.intProcessingLocationId  IN (
+															SELECT intCompanyLocationId FROM tblSMCompanyLocation
+															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+															ELSE isnull(ysnLicensed, 0) END
+													)
+				AND st.intProcessingLocationId = @intLocationId
+				AND st.strTicketStatus = 'H' AND st.intDeliverySheetId IS NULL
+
 		  )t     GROUP BY  dtmDate,strStorageTypeDescription
 ) t1
 declare @TempTableCreate nvarchar(max)=''
