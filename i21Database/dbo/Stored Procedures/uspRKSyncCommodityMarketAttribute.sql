@@ -10,7 +10,7 @@ DECLARE @List NVARCHAR(800)
 SELECT @List= COALESCE(@List + CASE WHEN strCommodityAttributeId <> '' THEN ',' ELSE '' END, '') + LTRIM(strCommodityAttributeId) 
 FROM CommaTrimmed 
 SELECT @List = RTRIM(LTRIM(@List))
-IF LEN(@List )= 0  
+IF LEN(ISNULL(@List,'') )= 0  
 BEGIN
 	DELETE FROM tblRKCommodityMarketMappingAttribute
 	RETURN
