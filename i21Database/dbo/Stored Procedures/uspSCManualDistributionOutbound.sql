@@ -246,9 +246,8 @@ OPEN intListCursor;
 				END
 			IF @ysnIsStorage = 1
 			BEGIN
-				IF @ysnDPStorage = 1 AND ISNULL(@intLoopContractId,0) = 0
+				IF @ysnDPStorage = 1
 					BEGIN
-					--SET @strReceiptType = 'Delayed Price'
 					INSERT INTO @LineItems (
 					intContractDetailId,
 					dblUnitsDistributed,
@@ -262,6 +261,7 @@ OPEN intListCursor;
 					,@intUserId
 					,@ysnDPStorage
 
+					SET @dblLoopContractUnits = @dblLoopContractUnits * -1
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(12,4);
 					DECLARE intListCursorDP CURSOR LOCAL FAST_FORWARD
@@ -302,7 +302,7 @@ OPEN intListCursor;
 							,ysnIsStorage
 							,strSourceTransactionId  
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblDPContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblDPContractUnits, @intEntityId, @ysnIsStorage;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
