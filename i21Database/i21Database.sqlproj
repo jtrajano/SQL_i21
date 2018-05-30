@@ -6676,6 +6676,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentChangeLotWeight.sql" />
     <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
     <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisDateList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
