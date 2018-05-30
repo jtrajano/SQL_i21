@@ -6678,6 +6678,7 @@
     <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
     <Build Include="dbo\Views\vyuRKM2MBasisDateList.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql" />
+    <Build Include="dbo\Views\vyuAPVouchersForARPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

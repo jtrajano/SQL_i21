@@ -112,7 +112,7 @@ BEGIN
 		FROM tblARPayment arPay
 		INNER JOIN @transactionIds ids ON arPay.intPaymentId = ids.intId
 		INNER JOIN tblARCustomer customer ON arPay.intEntityCustomerId = customer.intEntityId
-		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId
+		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId AND arPayDetail.dblPayment <> 0
 		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
 		LEFT OUTER JOIN
 		(
@@ -150,8 +150,8 @@ BEGIN
 			,[strTransactionForm]			=	'Receive Payments'
 			,[strModuleName]				=	'Accounts Receivable'
 			,[intConcurrencyId]				=	1
-			,[dblDebitForeign]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPaymentDetail.dblCurrencyExchangeRate,1)
-			,[dblDebitReport]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPaymentDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitForeign]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitReport]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
 			,[dblCreditForeign]				=	0
 			,[dblCreditReport]				=	0
 			,[dblReportingRate]				=	arPayDetail.dblCurrencyExchangeRate
@@ -160,11 +160,11 @@ BEGIN
 		FROM tblARPayment arPay
 		INNER JOIN @transactionIds ids ON arPay.intPaymentId = ids.intId
 		INNER JOIN tblARCustomer customer ON arPay.intEntityCustomerId = customer.intEntityId
-		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId
+		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId  AND arPayDetail.dblPayment <> 0
 		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
 		INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
-		INNER JOIN tblCTContract contractData ON voucherDetail.intContractHeaderId = contractData.intContractHeaderId
-		INNER JOIN tblCTWeightGrade weightGrade ON weightGrade.intWeightId = contractData.intWeightGradeId
+		INNER JOIN tblCTContractHeader contractData ON voucherDetail.intContractHeaderId = contractData.intContractHeaderId
+		INNER JOIN tblCTWeightGrade weightGrade ON weightGrade.intWeightGradeId = contractData.intWeightId
 		LEFT OUTER JOIN
 		(
 			SELECT

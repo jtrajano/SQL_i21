@@ -215,6 +215,7 @@ BEGIN
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[ysnTransactionPosted] = 0
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
+        AND P.[strTransactionType] <> 'Claim'
 
     UNION
     --Exclude Recieved Amount in Final Invoice enabled

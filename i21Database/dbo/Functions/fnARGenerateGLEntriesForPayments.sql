@@ -518,6 +518,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblDiscount] <> @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseDiscount] <> @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
@@ -638,6 +639,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
@@ -771,7 +773,8 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
-     AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
+    AND P.[strTransactionType] <> 'Claim'
+    AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
 
 UNION ALL
 --GAIN LOSS
@@ -889,6 +892,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
 			AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])  
 
@@ -1006,6 +1010,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblDiscount] <> @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseDiscount] <> @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
@@ -1127,6 +1132,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
