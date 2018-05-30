@@ -6853,4 +6853,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strMIOriginZip" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="91f484f9-6aaf-4b22-8c8a-6d8815982a6d" ChangeDateTime="05/29/2018 05:52:31">
+    <Property Name="ElementName" Value="[dbo].[tblSTHandheldScanner].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTHandheldScanner]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intHandheldScannerId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d6ca4ef4-4b54-4d0d-8e40-573b32696ae9" ChangeDateTime="05/29/2018 07:40:47">
+    <Property Name="ElementName" Value="[dbo].[tblSTHandheldScannerExportPricebook].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTHandheldScannerExportPricebook]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intHandheldScannerExportPricebookId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="05592dfe-39fa-4a91-b19f-6d0230f6ab53" ChangeDateTime="05/29/2018 07:42:08">
+    <Property Name="ElementName" Value="[dbo].[tblSTHandheldScannerExportPricebook].[str]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTHandheldScannerExportPricebook]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e4c26d9e-9631-46ac-b054-1f0702d6c9b8" ChangeDateTime="05/29/2018 08:25:24">
+    <Property Name="ElementName" Value="[dbo].[tblSTHandheldScannerImportReceipt].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTHandheldScannerImportReceipt]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intHandheldScannerImportReceiptId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="00d81a58-dc1a-4bdf-b043-67f69888aaa7" ChangeDateTime="05/29/2018 08:47:54">
+    <Property Name="ElementName" Value="[dbo].[tblSTHandheldScannerImportCount].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTHandheldScannerImportCount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intHandheldScannerImportCountId" />
+  </Operation>
 </Operations>

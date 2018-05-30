@@ -6659,6 +6659,13 @@
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOPickListDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemSpecialPricingForCStore.sql" />
+    <Build Include="dbo\Tables\tblSTHandheldScanner.sql" />
+    <Build Include="dbo\Tables\tblSTHandheldScannerExportPricebook.sql" />
+    <Build Include="dbo\Tables\tblSTHandheldScannerImportReceipt.sql" />
+    <Build Include="dbo\Tables\tblSTHandheldScannerImportCount.sql" />
+    <Build Include="dbo\Views\vyuSTGetHandheldScannerExportPricebook.sql" />
+    <Build Include="dbo\Views\vyuSTGetPricebookExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateHandheldScannerExportPricebook.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
