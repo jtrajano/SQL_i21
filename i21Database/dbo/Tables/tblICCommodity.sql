@@ -39,6 +39,7 @@ Type the overview for the table here.
 		[intAdjustInventorySales] INT NULL,
 		[intAdjustInventoryTransfer] INT NULL,
 		[intCompanyId] INT NULL, 
+		[intLineOfBusinessId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[dtmDateCreated] DATETIME NULL,
 		[dtmDateModified] DATETIME NULL,
@@ -50,7 +51,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]), 
 		CONSTRAINT [FK_tblICCommodity_tblICAdjustInventoryTerms1] FOREIGN KEY ([intAdjustInventorySales]) REFERENCES [tblICAdjustInventoryTerms]([intAdjustInventoryTermsId]), 
 		CONSTRAINT [FK_tblICCommodity_tblICAdjustInventoryTerms2] FOREIGN KEY ([intAdjustInventoryTransfer]) REFERENCES [tblICAdjustInventoryTerms]([intAdjustInventoryTermsId]), 
-		CONSTRAINT [AK_tblICCommodity_strCommodityCode] UNIQUE ([strCommodityCode]) 
+		CONSTRAINT [AK_tblICCommodity_strCommodityCode] UNIQUE ([strCommodityCode]),
+		CONSTRAINT [FK_tblICCommodity_tblSMLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblSMLineOfBusiness]([intLineOfBusinessId])
 	)
 
 	GO
