@@ -2149,7 +2149,7 @@ BEGIN
 						ELSE
 							BEGIN
 								SET @ysnUpdateCheckoutStatus = 0
-								SET @strStatusMsg = 'Cheackout Invoice: ' + @ErrorMessage
+								SET @strStatusMsg = 'Checkout Invoice: ' + @ErrorMessage
 							END
 							END
 				----------------------------------------------------------------------
