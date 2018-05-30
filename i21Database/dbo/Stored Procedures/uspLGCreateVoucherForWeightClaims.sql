@@ -48,7 +48,8 @@ BEGIN TRY
 		,intItemId INT
 		,intContractHeaderId INT
 		,intInventoryReceiptItemId INT
-		,intContractDetailId INT)
+		,intContractDetailId INT
+		,dblFranchiseAmount DECIMAL(18, 6))
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -126,7 +127,8 @@ BEGIN TRY
 		  ,intItemId
 		  ,intContractHeaderId
 		  ,intInventoryReceiptItemId
-		  ,intContractDetailId)
+		  ,intContractDetailId
+		  ,dblFranchiseAmount)
 	SELECT WC.intWeightClaimId
 		,WC.strReferenceNumber
 		,WCD.intWeightClaimDetailId
@@ -158,6 +160,11 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,NULL AS intInventoryReceiptItemId
 		,WCD.intContractDetailId
+		,CASE 
+		 WHEN CU.ysnSubCurrency = 1
+			THEN (dblUnitPrice * dbo.fnCTConvertQuantityToTargetItemUOM(WCD.intItemId, LOAD.intWeightUnitMeasureId, IU.intUnitMeasureId, 1)) * dblFranchiseWt / 100
+		 ELSE (dblUnitPrice * dbo.fnCTConvertQuantityToTargetItemUOM(WCD.intItemId, LOAD.intWeightUnitMeasureId, IU.intUnitMeasureId, 1)) * dblFranchiseWt
+		 END
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
@@ -167,6 +174,7 @@ BEGIN TRY
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
@@ -231,7 +239,8 @@ BEGIN TRY
 			,intItemId
 			,intContractHeaderId
 			,intInventoryReceiptItemId
-			,intContractDetailId)
+			,intContractDetailId
+			,dblFranchiseAmount)
 		SELECT dblNetShippedWeight
 			,dblWeightLoss
 			,dblFranchiseWeight
@@ -247,6 +256,7 @@ BEGIN TRY
 			,intContractHeaderId
 			,intInventoryReceiptItemId
 			,intContractDetailId
+			,dblFranchiseAmount
 		FROM @voucherDetailData
 		WHERE intPartyEntityId = @intVendorEntityId
 
