@@ -10,6 +10,7 @@
     [dtmUpdateDate]    DATETIME        NULL,
     [strUserName]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strRecord]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strAccountNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT             CONSTRAINT [DF_tblCFCSUAuditLog_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFCSUAuditLog] PRIMARY KEY CLUSTERED ([intId] ASC)
 );

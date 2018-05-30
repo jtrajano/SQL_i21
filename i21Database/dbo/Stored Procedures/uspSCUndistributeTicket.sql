@@ -188,9 +188,11 @@ BEGIN TRY
 			BEGIN
 				IF ISNULL(@ysnTransfer ,0) = 1
 					BEGIN
-						SELECT @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
-						LEFT JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
-						LEFT JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
+						SELECT TOP 1 @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
+						INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SCT.intSalesOrderId 
+						INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderId = SO.intSalesOrderId 
+						INNER JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+						INNER JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
 						WHERE SCT.intTicketId = @intTicketId
 
 						IF @ysnPosted = 1

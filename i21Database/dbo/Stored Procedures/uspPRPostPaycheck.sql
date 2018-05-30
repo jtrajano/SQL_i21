@@ -1292,7 +1292,7 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @intTypeTimeOffId = intTypeTimeOffId FROM #tmpEmployeeTimeOffHours
 
-		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId
+		EXEC uspPRUpdateEmployeeTimeOffHours @intTypeTimeOffId, @intEmployeeId, @intPaycheckId
 
 		DELETE FROM #tmpEmployeeTimeOffHours WHERE intTypeTimeOffId = @intTypeTimeOffId
 	END

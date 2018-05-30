@@ -893,6 +893,12 @@ BEGIN
 			FROM #tmpPostBillData A
 			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) B ON A.intBillId = B.intTransactionId
 			WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+			--DELETE data in @GLEntries so it will not add in computing the latest balance
+			DELETE A
+			FROM @GLEntries A
+			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId
+			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) C ON B.intBillId = C.intTransactionId
+			WHERE C.strDescription NOT LIKE '%success%' AND C.strBatchId = @batchId
 
 			SET @failedPostValidation = @@ROWCOUNT;
 			SET @invalidCount = @invalidCount + @failedPostValidation;
@@ -1035,7 +1041,6 @@ BEGIN
 			A.intBillId
 		FROM tblAPBill A
 		WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-
 		--GOTO Audit_Log_Invoke
 	END
 	ELSE
@@ -1200,7 +1205,17 @@ BEGIN
 		RAISERROR(@integrationError, 16, 1);
 		GOTO Post_Rollback
 	END CATCH
-
+	
+	-- --UPDATE tblAPBalance
+	-- DECLARE @idsToUpdateBalance AS Id
+	-- INSERT INTO @idsToUpdateBalance
+	-- SELECT intBillId FROM #tmpPostBillData
+	-- DECLARE @apBalance DECIMAL(18,6),  @apGLBalance DECIMAL(18,6);
+	-- SELECT
+	-- 	@apBalance = dblAPBalance, @apGLBalance = dblAPGLBalance
+	-- FROM dbo.fnAPGetVoucherBalance(@idsToUpdateBalance, @GLEntries, 0, @post);
+	
+	-- EXEC uspAPUpdateBalance @userId, @apBalance, @apGLBalance
 	--GOTO Audit_Log_Invoke
 	IF @@ERROR <> 0	GOTO Post_Rollback;
 

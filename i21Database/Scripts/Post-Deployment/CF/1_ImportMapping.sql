@@ -156,6 +156,58 @@ BEGIN
 END
 ------------WEX12-----------
 
+---------CFNCSU---------
+
+
+
+-----------CFN CSU------------
+DECLARE @CFNCSU INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'CFN CSU') =  0)
+BEGIN
+
+
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'CFN CSU', N'Fixed', NULL, NULL, NULL, 1, 4)
+	SET @CFNCSU = SCOPE_IDENTITY();
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Card Number', 0, 0, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 1, NULL, NULL, NULL, N'', NULL, 7, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Participant Number', 0, 7, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 2, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Account Number', 0, 10, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 3, NULL, NULL, NULL, NULL, NULL, 6, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Vehicle Number', 0, 16, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 4, NULL, NULL, NULL, NULL, NULL, 4, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Expiration Date', 0, 20, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 5, NULL, NULL, NULL, NULL, NULL, 4, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Manual Entry Code', 0, 24, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 6, NULL, NULL, NULL, NULL, NULL, 1, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Limit Code', 0, 25, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 7, NULL, NULL, NULL, NULL, NULL, 1, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Product Auth Code', 0, 26, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 8, NULL, NULL, NULL, NULL, NULL, 2, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Card Status', 0, 28, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 9, NULL, NULL, NULL, NULL, NULL, 1, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'PIN Number', 0, 114, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 10, NULL, NULL, NULL, NULL, NULL, 5, NULL, 1, 3)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Description', 0, 79, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 11, NULL, NULL, NULL, NULL, NULL, 20, NULL, 1, 2)
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@CFNCSU, N'Card Type', 0, 113, NULL, NULL, 3, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@CFNCSU, SCOPE_IDENTITY(), 12, NULL, NULL, NULL, NULL, NULL, 6, NULL, 1, 3)
+
+END
+---------CFNCSU---------
+
 
 -----------Pac Pride CSU------------
 DECLARE @PacPrideCSU INT
@@ -192,7 +244,7 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'Card Status', 0, 8, NULL, NULL, 2, NULL, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@PacPrideCSU, SCOPE_IDENTITY(), 9, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1, 1)
 	
-	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'PIN Number', 0, 9, NULL, NULL, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'PIN Number', 0, 22, NULL, NULL, 2, NULL, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@PacPrideCSU, SCOPE_IDENTITY(), 10, NULL, NULL, NULL, NULL, NULL, 0, NULL, 1, 1)
 	
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@PacPrideCSU, N'Description', 0, 17, NULL, NULL, 3, NULL, NULL)

@@ -30,13 +30,16 @@ CREATE TABLE #tmpAPGLAccountBalance(strAccountId NVARCHAR(40), dblBalance DECIMA
 INSERT INTO #tmpAPGLAccountBalance
 SELECT
 	B.strAccountId,
+	--CASE WHEN A.strJournalLineDescription LIKE '%Posted%' THEN A.strTransactionId ELSE A.strJournalLineDescription END strBillId,
 	SUM(ISNULL(A.dblCredit,0)) - SUM(ISNULL(A.dblDebit, 0))
+	
 FROM tblGLDetail A
 INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
 AND A.ysnIsUnposted = 0
 GROUP BY B.strAccountId
+--,A.strJournalLineDescription,A.strTransactionId
 
 SELECT @balance = SUM(dblBalance) FROM #tmpAPGLAccountBalance
 

@@ -50,7 +50,7 @@ BEGIN
 	SET @children = @details
 END
 
-SET @jsonData = '{"action":"' + @actionType + '","change":"Updated - Record: 1158","iconCls":"' + @actionIcon + '","children":['+ @children +']}'
+SET @jsonData = '{"action":"' + @actionType + '","change":"Updated - Record: ' + @keyValue + '","iconCls":"' + @actionIcon + '","children":['+ @children +']}'
 
 --=====================================================================================================================================
 -- 	INSERT AUDIT ENTRY

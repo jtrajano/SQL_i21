@@ -387,6 +387,31 @@ SET @batchIdUsed = @batchId
 					ISNULL(ARPD.dblPayment,0.00) <> 0.00
 					AND ISNULL(ARI.ysnPosted,0) = 0
 
+				--Exclude Recieved Amount in Final Invoice enabled
+				INSERT INTO   
+					@ARReceivableInvalidData  
+				SELECT  
+					'Invoice ' + ARI.strInvoiceNumber + ' was posted with ''Exclude Recieved Amount in Final Invoice'' option enabled! Payment not allowed!'  
+					,'Receivable'  
+					,ARP.strRecordNumber  
+					,@batchId  
+					,ARP.intPaymentId  
+				FROM  
+					tblARPaymentDetail ARPD   
+				INNER JOIN   
+					tblARPayment ARP  
+						ON ARPD.intPaymentId = ARP.intPaymentId  
+				INNER JOIN
+					tblARInvoice ARI
+						ON ARPD.intInvoiceId = ARI.intInvoiceId
+				INNER JOIN  
+					@ARReceivablePostData P  
+						ON ARP.intPaymentId = ARP.intPaymentId
+				WHERE
+					ISNULL(ARPD.dblPayment,0.00) <> 0.00
+					AND ISNULL(ARI.ysnPosted,0) = 1
+					AND ISNULL(ARI.ysnExcludeFromPayment,0) = 1
+
 				--Invoice Prepayment
 				INSERT INTO 
 					@ARReceivableInvalidData
@@ -2496,6 +2521,7 @@ IF @recap = 0
 					GOTO Do_Rollback
 				END
 			END
+
 			
 			DECLARE @InvalidGLEntries AS TABLE
 				(strTransactionId	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

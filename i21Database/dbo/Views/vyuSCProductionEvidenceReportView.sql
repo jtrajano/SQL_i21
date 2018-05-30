@@ -27,7 +27,6 @@
 	SC.dtmTareDateTime,
 	SC.dblGrossUnits,
 	SC.dblNetUnits, 
-	SC.strItemNumber,
 	SC.strItemUOM, 
 	SC.intSplitId, 
 	SC.strDistributionOption,

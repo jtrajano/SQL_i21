@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRUpdateEmployeeTimeOffHours]
 	@intTypeTimeOffId INT,
-	@intEntityEmployeeId INT = NULL
+	@intEntityEmployeeId INT = NULL,
+	@intPaycheckId INT = NULL
 AS
 BEGIN
 
@@ -8,7 +9,9 @@ BEGIN
 
 	--Get Employees with specified Time Off
 	SELECT E.intEntityId
-		,dtmLastAward = CASE WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
+		,dtmLastAward = CASE WHEN (strAwardPeriod = 'Paycheck' AND intPaycheckId IS NOT NULL) THEN
+								DATEADD(DD, -1, dtmDateFrom) 
+							WHEN (ISNULL(T.dtmEligible, E.dtmDateHired) > ISNULL(T.dtmLastAward, E.dtmDateHired)) THEN 
 								ISNULL(T.dtmEligible, E.dtmDateHired)
 							ELSE
 								ISNULL(T.dtmLastAward, E.dtmDateHired)
@@ -22,9 +25,17 @@ BEGIN
 		,dblRateFactor
 		,strAwardPeriod
 		,dtmDateHired
+		,intPaycheckId
+		,ysnPaycheckPosted = CASE WHEN (ysnVoid = 1) THEN 0 ELSE ysnPosted END
+		,dtmPaycheckStartDate = dtmDateFrom
+		,dtmPaycheckEndDate = dtmDateTo
 	INTO #tmpEmployees
-	FROM tblPREmployee E LEFT JOIN tblPREmployeeTimeOff T
-		ON E.intEntityId = T.intEntityEmployeeId
+	FROM tblPREmployee E 
+		LEFT JOIN tblPREmployeeTimeOff T
+			ON E.intEntityId = T.intEntityEmployeeId
+		LEFT JOIN (SELECT TOP 1 intPaycheckId, intEntityEmployeeId, ysnPosted, ysnVoid, dtmDateFrom, dtmDateTo 
+					FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId) P
+			ON E.intEntityId = P.intEntityEmployeeId
 	WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
 
@@ -60,12 +71,14 @@ BEGIN
 								END
 							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
 								DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
+							 WHEN (strAwardPeriod = 'Paycheck') THEN
+								dtmPaycheckEndDate
 							 ELSE NULL 
 						END
 
 	UPDATE #tmpEmployees 
 		--Calculate Total Accrued Hours
-		SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour') THEN 
+		SET dblAccruedHours = CASE WHEN (strPeriod = 'Hour' AND strAwardPeriod <> 'Paycheck') THEN 
 									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
 											FROM tblPRPaycheck P 
 												LEFT JOIN tblPRPaycheckEarning PE 
@@ -93,7 +106,7 @@ BEGIN
 												INNER JOIN tblPREmployeeTimeOff ET 
 													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
 														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
-												WHERE P.ysnPosted = 1
+												WHERE (P.ysnPosted = 1 OR P.intPaycheckId = #tmpEmployees.intPaycheckId)
 													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
 													  AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward 
 													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
@@ -109,7 +122,7 @@ BEGIN
 									CASE WHEN (DATEDIFF(YY, dtmLastAward, dtmNextAward) <= 0) THEN 1 ELSE (DATEDIFF(YY, dtmLastAward, dtmNextAward)) END
 										/ ISNULL(NULLIF(dblPerPeriod, 0), 1)
 								ELSE 0
-							END * dblRate * dblRateFactor
+							END * dblRate * dblRateFactor * CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END
 						ELSE 0
 					END
 
@@ -138,14 +151,17 @@ BEGIN
 									(dblHoursEarned + T.dblEarnedHours)
 								END
 				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
-				,dtmLastAward = T.dtmNextAward
+				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
+									DATEADD(DD, -1, dtmPaycheckStartDate) 
+								ELSE T.dtmNextAward END
 		FROM
 		#tmpEmployees T
 		WHERE T.[intEntityId] = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId 
-				AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() >= T.dtmNextAward)
-					OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() > T.dtmLastAward))
+				AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= T.dtmNextAward)
+					OR (T.strAwardPeriod IN ('Paycheck') AND T.dtmNextAward >= T.dtmLastAward)
+					OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Paycheck') AND GETDATE() > T.dtmLastAward))
 
 		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END

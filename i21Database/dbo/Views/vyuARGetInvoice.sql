@@ -69,6 +69,7 @@ SELECT
     INV.ysnImpactInventory,
     INV.ysnImportedFromOrigin,
     INV.ysnImportedAsPosted,
+	INV.ysnExcludeFromPayment,
     INV.ysnReturned,
     INV.intPaymentId,
     INV.intSplitId,
