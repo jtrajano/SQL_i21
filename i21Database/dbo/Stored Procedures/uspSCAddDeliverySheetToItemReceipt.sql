@@ -117,14 +117,8 @@ SELECT
 		,intShipViaId				= NULL
 		,intDiscountSchedule		= SCD.intDiscountId
 		,strVendorRefNo				= 'DS-' + SCD.strDeliverySheetNumber
-		,intForexRateTypeId			= CASE
-										WHEN ISNULL(LI.intTransactionDetailId ,0) > 0 THEN CNT.intRateTypeId
-										WHEN ISNULL(LI.intTransactionDetailId ,0) = 0 THEN NULL
-									END
-		,dblForexRate				= CASE
-										WHEN ISNULL(LI.intTransactionDetailId ,0) > 0 THEN CNT.dblRate
-										WHEN ISNULL(LI.intTransactionDetailId ,0) = 0 THEN NULL
-									END
+		,intForexRateTypeId			= NULL
+		,dblForexRate				= NULL
 		--Detail
 		,intItemId					= SCD.intItemId
 		,intItemLocationId			= SCD.intCompanyLocationId
