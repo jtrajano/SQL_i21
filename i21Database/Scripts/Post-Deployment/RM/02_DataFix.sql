@@ -147,5 +147,12 @@ UPDATE pref SET intUnrealizedLossOnInventoryCashIOSId= GL.intAccountId FROM tblR
 UPDATE pref SET intUnrealizedGainOnInventoryIntransitIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryIntransitIOSId WHERE strAccountCategory = 'Mark to Market Offset'
 UPDATE pref SET intUnrealizedLossOnInventoryIntransitIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryIntransitIOSId WHERE strAccountCategory = 'Mark to Market Offset'
 GO
+--REMOVES TRAILING COMMA (,) IN tblRKCommodityMarketMapping.strCommodityAttributeId TO AVOID ERROR IN uspRKSyncCommodityMarketAttribute
+UPDATE tblRKCommodityMarketMapping 
+SET strCommodityAttributeId = SUBSTRING(RTRIM(strCommodityAttributeId),1,LEN(RTRIM(strCommodityAttributeId))-1)
+FROM tblRKCommodityMarketMapping 
+WHERE strCommodityAttributeId IS NOT NULL
+AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
+GO
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
