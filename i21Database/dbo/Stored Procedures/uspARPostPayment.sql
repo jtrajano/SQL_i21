@@ -649,7 +649,7 @@ IF @post = 1
 
         DELETE FROM @PaymentIds
         INSERT INTO @PaymentIds
-        SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData
+        SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData WHERE [intTransactionDetailId] IS NOT NULL AND [strTransactionType] = 'Claim'
 
 		INSERT INTO @GLEntries
 			([dtmDate]

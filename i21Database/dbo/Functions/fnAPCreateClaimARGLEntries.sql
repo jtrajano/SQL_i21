@@ -128,7 +128,7 @@ BEGIN
 			[dtmDate]						=	CAST(arPay.dtmDatePaid AS DATE)
 			,[strBatchId]					=	@batchId	
 			,[intAccountId]					=	weightGrade.intAccountId
-			,[dblDebit]						=	voucherDetail.dblFranchiseAmount
+			,[dblDebit]						=	arPayDetail.dblBasePayment   --Please review -- voucherDetail.dblFranchiseAmount
 			,[dblCredit]					=	0
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
@@ -150,8 +150,8 @@ BEGIN
 			,[strTransactionForm]			=	'Receive Payments'
 			,[strModuleName]				=	'Accounts Receivable'
 			,[intConcurrencyId]				=	1
-			,[dblDebitForeign]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
-			,[dblDebitReport]				=	voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitForeign]				=	arPayDetail.dblBasePayment * ISNULL(arPayDetail.dblCurrencyExchangeRate,1) --Please review -- voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitReport]				=	arPayDetail.dblBasePayment * ISNULL(arPayDetail.dblCurrencyExchangeRate,1) --Please review -- voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
 			,[dblCreditForeign]				=	0
 			,[dblCreditReport]				=	0
 			,[dblReportingRate]				=	arPayDetail.dblCurrencyExchangeRate

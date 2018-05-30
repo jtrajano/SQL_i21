@@ -170,7 +170,7 @@ SELECT
     --                                        ELSE P.[dblBasePayment]
     --                                   END)
     --                                        * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblDebit]                     = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebit]                     = (P.[dblBaseAmountPaid] - P1.[dblBaseClaim]) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
@@ -192,8 +192,8 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @SCREEN_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = P.[dblAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblDebitReport]               = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebitForeign]              = (P.[dblAmountPaid] - P1.[dblClaim]) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebitReport]               = (P.[dblBaseAmountPaid] - P1.[dblBaseClaim]) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCreditForeign]             = @ZeroDecimal
     ,[dblCreditReport]              = @ZeroDecimal
     ,[dblReportingRate]             = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
@@ -211,6 +211,22 @@ SELECT
     ,[ysnRebuild]                   = NULL
 FROM
     @Payments P
+LEFT OUTER JOIN
+    (
+    SELECT
+         [dblClaim]         = SUM(P1.[dblPayment])
+        ,[dblBaseClaim]     = SUM(P1.[dblBasePayment])
+        ,[intTransactionId] = P1.[intTransactionId]
+    FROM
+        @Payments P1
+    WHERE
+            P1.[intTransactionDetailId] IS NOT NULL
+        AND P1.[strTransactionType] = 'Claim'
+        AND P1.[dblPayment] <> @ZeroDecimal
+    GROUP BY
+        P1.[intTransactionId]
+    ) P1
+        ON P.[intTransactionId] = P1.[intTransactionId]
 WHERE
     P.[intTransactionDetailId] IS NULL
 
