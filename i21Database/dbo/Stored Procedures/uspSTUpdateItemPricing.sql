@@ -101,8 +101,10 @@ BEGIN TRY
 				,intItemPricingId INT 
 				,dblOldStandardCost NUMERIC(38, 20) NULL
 				,dblOldSalePrice NUMERIC(38, 20) NULL
+				,dblOldLastCost NUMERIC(38, 20) NULL
 				,dblNewStandardCost NUMERIC(38, 20) NULL
 				,dblNewSalePrice NUMERIC(38, 20) NULL
+				,dblNewLastCost NUMERIC(38, 20) NULL
 			)
 		;
 
@@ -129,7 +131,9 @@ BEGIN TRY
 				INSERT INTO #tmpUpdateItemPricingForCStore_Location (
 					intLocationId
 				)
-				SELECT intLocationId = CAST(@Location AS INT)
+				--SELECT intLocationId = CAST(@Location AS INT)
+				SELECT [intID] AS intLocationId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Location)
 			END
 		
 		IF(@Vendor IS NOT NULL AND @Vendor != '')
@@ -137,7 +141,9 @@ BEGIN TRY
 				INSERT INTO #tmpUpdateItemPricingForCStore_Vendor (
 					intVendorId
 				)
-				SELECT intVendorId = CAST(@Vendor AS INT)
+				--SELECT intVendorId = CAST(@Vendor AS INT)
+				SELECT [intID] AS intVendorId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Vendor)
 			END
 
 		IF(@Category IS NOT NULL AND @Category != '')
@@ -145,7 +151,9 @@ BEGIN TRY
 				INSERT INTO #tmpUpdateItemPricingForCStore_Category (
 					intCategoryId
 				)
-				SELECT intCategoryId = CAST(@Category AS INT)
+				--SELECT intCategoryId = CAST(@Category AS INT)
+				SELECT [intID] AS intCategoryId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Category)
 			END
 
 		IF(@Family IS NOT NULL AND @Family != '')
@@ -153,7 +161,9 @@ BEGIN TRY
 				INSERT INTO #tmpUpdateItemPricingForCStore_Family (
 					intFamilyId
 				)
-				SELECT intFamilyId = CAST(@Family AS INT)
+				--SELECT intFamilyId = CAST(@Family AS INT)
+				SELECT [intID] AS intFamilyId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Family)
 			END
 
 		IF(@Class IS NOT NULL AND @Class != '')
@@ -161,19 +171,36 @@ BEGIN TRY
 				INSERT INTO #tmpUpdateItemPricingForCStore_Class (
 					intClassId
 				)
-				SELECT intClassId = CAST(@Class AS INT)
+				--SELECT intClassId = CAST(@Class AS INT)
+				SELECT [intID] AS intClassId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
 	END
+
+
+
+	-- Get strUpcCode
+	DECLARE @strUpcCode AS NVARCHAR(20) = (
+											SELECT CASE
+													WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
+											END AS strUpcCode
+											FROM tblICItemUOM 
+											WHERE intItemUOMId = CAST(@UpcCode AS INT)
+											)
 
 	DECLARE @dblStandardCostConv AS DECIMAL(18, 6) = CAST(@StandardCost AS DECIMAL(18, 6))
 	DECLARE @dblRetailPriceConv AS DECIMAL(18, 6) = CAST(@RetailPrice AS DECIMAL(18, 6))
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
 
+
 	-- ITEM PRICING
 	EXEC [uspICUpdateItemPricingForCStore]
-		@dblStandardCost = @dblStandardCostConv
-		,@dblRetailPrice = @dblRetailPriceConv
-		,@intEntityUserSecurityId = @intCurrentUserIdConv
+		  @strUpcCode = @strUpcCode
+		, @strDescription = @Description
+		, @intItemId = NULL
+		, @dblStandardCost = @dblStandardCostConv
+		, @dblRetailPrice = @dblRetailPriceConv
+		, @intEntityUserSecurityId = @intCurrentUserIdConv
 
 
 
@@ -183,10 +210,173 @@ BEGIN TRY
 
 	-- ITEM SPECIAL PRICING
 	EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
-		@dblPromotionalSalesPrice = @dblSalesPriceConv 
+		 @dblPromotionalSalesPrice = @dblSalesPriceConv 
 		,@dtmBeginDate = @dtmSalesStartingDateConv
 		,@dtmEndDate = @dtmSalesEndingDateConv 
 		,@intEntityUserSecurityId = @intCurrentUserIdConv
+
+
+	
+	-------------------------------------------------------------------------------------------------
+	----------- Count Items -------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------
+	BEGIN
+		-- Handle preview using Table variable
+		DECLARE @tblPreview TABLE (
+			intCompanyLocationId INT
+			, strLocation NVARCHAR(250)
+			, strUpc NVARCHAR(50)
+			, strItemDescription NVARCHAR(250)
+			, strChangeDescription NVARCHAR(100)
+			, strOldData NVARCHAR(MAX)
+			, strNewData NVARCHAR(MAX)
+			, intParentId INT
+			, intChildId INT
+		)
+
+
+
+		-- ITEM PRICING
+		INSERT INTO @tblPreview (
+			intCompanyLocationId
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strOldData
+			, strNewData
+			, intParentId
+			, intChildId
+		)
+		SELECT	CL.intCompanyLocationId
+				,CL.strLocationName
+				,UOM.strLongUPCCode
+				,I.strDescription
+				,CASE
+					WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
+					WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
+					WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
+				END
+				,[Changes].strOldData
+				,[Changes].strNewData
+				,[Changes].intItemId 
+				,[Changes].intItemPricingId
+		FROM 
+		(
+			SELECT DISTINCT intItemId, intItemPricingId, oldColumnName, strOldData, strNewData
+			FROM 
+			(
+				SELECT intItemId
+				   , intItemPricingId
+				   , CAST(CAST(dblOldStandardCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strStandardCost_Original
+				   , CAST(CAST(dblOldSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_Original
+				   , CAST(CAST(dblOldLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_Original
+				   , CAST(CAST(dblNewStandardCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strStandardCost_New
+				   , CAST(CAST(dblNewSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_New
+				   , CAST(CAST(dblNewLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_New
+				FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+			) t
+			unpivot
+			(
+				strOldData for oldColumnName in (strStandardCost_Original, strSalePrice_Original, strLastCost_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (strStandardCost_New, strSalePrice_New, strLastCost_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+		) [Changes]
+		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
+		JOIN tblICItemPricing IP ON [Changes].intItemPricingId = IP.intItemPricingId
+		JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
+		JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
+		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+		WHERE 
+		(
+			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+		)
+		AND 
+		(
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+		)
+
+
+		-- ITEM SPECIAL PRICING
+		INSERT INTO @tblPreview (
+			intCompanyLocationId
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strOldData
+			, strNewData
+			, intParentId
+			, intChildId
+		)
+		SELECT	CL.intCompanyLocationId
+				,CL.strLocationName
+				,UOM.strLongUPCCode
+				,I.strDescription
+				,CASE
+					WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'Unit After Discount'
+					WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
+					WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
+				END
+				,[Changes].strOldData
+				,[Changes].strNewData
+				,[Changes].intItemId 
+				,[Changes].intItemSpecialPricingId
+		FROM 
+		(
+			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
+			FROM 
+			(
+				SELECT intItemId 
+					,intItemSpecialPricingId 
+					,CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_Original
+					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
+					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
+					,CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_New
+					,CAST(CAST(dtmNewBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
+					,CAST(CAST(dtmNewEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_New
+				FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
+			) t
+			unpivot
+			(
+				strOldData for oldColumnName in (strUnitAfterDiscount_Original, strBeginDate_Original, strEndDate_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (strUnitAfterDiscount_New, strBeginDate_New, strEndDate_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+		
+		) [Changes]
+		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
+		JOIN tblICItemSpecialPricing IP ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
+		JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
+		JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
+		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+		WHERE 
+		(
+			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+		)
+		AND 
+		(
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+		)
+
+
+
+	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+	END
+   -------------------------------------------------------------------------------------------------
+	----------- Count Items -------------------------------------------------------------------------
+	-------------------------------------------------------------------------------------------------
 
 
 
@@ -194,11 +384,14 @@ BEGIN TRY
 	DECLARE @RecCount AS INT = 0
 	DECLARE @UpdateCount AS INT = 0
 
-	SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE dblOldSalePrice != dblNewSalePrice AND dblOldStandardCost != dblNewStandardCost)
-	SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog WHERE dblOldUnitAfterDiscount != dblNewUnitAfterDiscount AND dtmOldBeginDate != dtmNewBeginDate AND dtmOldEndDate != dtmNewEndDate)
+	--SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE dblOldSalePrice != dblNewSalePrice OR dblOldStandardCost != dblNewStandardCost)
+	--SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog WHERE dblOldUnitAfterDiscount != dblNewUnitAfterDiscount OR dtmOldBeginDate != dtmNewBeginDate OR dtmOldEndDate != dtmNewEndDate)
 
-	SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemPricingId) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog)
-	SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemSpecialPricingId) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog)
+	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemPricingId) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog)
+	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemSpecialPricingId) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog)
+
+	SET @UpdateCount = (SELECT COUNT(*) FROM @tblPreview)
+	SET @RecCount = (SELECT COUNT(DISTINCT intChildId) FROM @tblPreview)
 
 	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
 

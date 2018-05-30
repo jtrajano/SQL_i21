@@ -187,8 +187,10 @@ BEGIN TRANSACTION
 				,intItemPricingId INT 
 				,dblOldStandardCost NUMERIC(38, 20) NULL
 				,dblOldSalePrice NUMERIC(38, 20) NULL
+				,dblOldLastCost NUMERIC(38, 20) NULL
 				,dblNewStandardCost NUMERIC(38, 20) NULL
 				,dblNewSalePrice NUMERIC(38, 20) NULL
+				,dblNewLastCost NUMERIC(38, 20) NULL
 			)
 		;
 
@@ -216,7 +218,9 @@ BEGIN TRANSACTION
 				INSERT INTO #tmpUpdateItemPricingForCStore_Location (
 					intLocationId
 				)
-				SELECT intLocationId = CAST(@strCompanyLocationId AS INT)
+				--SELECT intLocationId = CAST(@strCompanyLocationId AS INT)
+				SELECT [intID] AS intLocationId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@strCompanyLocationId)
 			END
 		
 		IF(@strVendorId IS NOT NULL AND @strVendorId != '')
@@ -224,7 +228,9 @@ BEGIN TRANSACTION
 				INSERT INTO #tmpUpdateItemPricingForCStore_Vendor (
 					intVendorId
 				)
-				SELECT intVendorId = CAST(@strVendorId AS INT)
+				--SELECT intVendorId = CAST(@strVendorId AS INT)
+				SELECT [intID] AS intVendorId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@strVendorId)
 			END
 
 		IF(@strCategoryId IS NOT NULL AND @strCategoryId != '')
@@ -232,7 +238,9 @@ BEGIN TRANSACTION
 				INSERT INTO #tmpUpdateItemPricingForCStore_Category (
 					intCategoryId
 				)
-				SELECT intCategoryId = CAST(@strCategoryId AS INT)
+				--SELECT intCategoryId = CAST(@strCategoryId AS INT)
+				SELECT [intID] AS intCategoryId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryId)
 			END
 
 		IF(@strFamilyId IS NOT NULL AND @strFamilyId != '')
@@ -240,7 +248,9 @@ BEGIN TRANSACTION
 				INSERT INTO #tmpUpdateItemPricingForCStore_Family (
 					intFamilyId
 				)
-				SELECT intFamilyId = CAST(@strFamilyId AS INT)
+				--SELECT intFamilyId = CAST(@strFamilyId AS INT)
+				SELECT [intID] AS intFamilyId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@strFamilyId)
 			END
 
 		IF(@strClassId IS NOT NULL AND @strClassId != '')
@@ -248,19 +258,34 @@ BEGIN TRANSACTION
 				INSERT INTO #tmpUpdateItemPricingForCStore_Class (
 					intClassId
 				)
-				SELECT intClassId = CAST(@strClassId AS INT)
+				--SELECT intClassId = CAST(@strClassId AS INT)
+				SELECT [intID] AS intClassId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@strClassId)
 			END
 	END
 
-	DECLARE @dblStandardCostConv AS DECIMAL(18, 6) = CAST(@dblStandardCost AS DECIMAL(18, 6))
-	DECLARE @dblRetailPriceConv AS DECIMAL(18, 6) = CAST(@dblRetailPrice AS DECIMAL(18, 6))
-	DECLARE @intCurrentUserIdConv AS INT = CAST(@intCurrentUserId AS INT)
+
+	-- Get strUpcCode
+	DECLARE @strUpcCode AS NVARCHAR(20) = (
+											SELECT CASE
+													WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
+											END AS strUpcCode
+											FROM tblICItemUOM 
+											WHERE intItemUOMId = @intUpcCode
+										  )
+
+
+	DECLARE @dblStandardCostConv AS NUMERIC(38, 20) = CAST(@dblStandardCost AS NUMERIC(38, 20))
+	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
 
 	-- ITEM PRICING
 	EXEC [uspICUpdateItemPricingForCStore]
-		@dblStandardCost = @dblStandardCostConv
-		,@dblRetailPrice = @dblRetailPriceConv
-		,@intEntityUserSecurityId = @intCurrentUserIdConv
+	    @strUpcCode = @strUpcCode
+		, @strDescription = @strDescription
+		, @intItemId = NULL
+		, @dblStandardCost = @dblStandardCostConv
+		, @dblRetailPrice = @dblRetailPriceConv
+		,@intEntityUserSecurityId = @intCurrentUserId
 
 
 
@@ -273,7 +298,7 @@ BEGIN TRANSACTION
 		@dblPromotionalSalesPrice = @dblSalesPriceConv 
 		,@dtmBeginDate = @dtmSalesStartingDateConv
 		,@dtmEndDate = @dtmSalesEndingDateConv 
-		,@intEntityUserSecurityId = @intCurrentUserIdConv
+		,@intEntityUserSecurityId = @intCurrentUserId
 
 
 	-- Handle preview using Table variable
@@ -289,6 +314,8 @@ BEGIN TRANSACTION
 		, intChildId INT
 	)
 
+
+
 	-- ITEM PRICING
 	INSERT INTO @tblPreview (
 		intCompanyLocationId
@@ -306,26 +333,54 @@ BEGIN TRANSACTION
 			,UOM.strLongUPCCode
 			,I.strDescription
 			,CASE
-				WHEN [Changes].dblOldStandardCost IS NOT NULL AND ISNULL([Changes].dblOldStandardCost, 0) != ISNULL([Changes].dblNewStandardCost, 0) THEN 'Standard Cost'
-				WHEN [Changes].dblOldSalePrice IS NOT NULL AND ISNULL([Changes].dblOldSalePrice, 0) != ISNULL([Changes].dblNewSalePrice, 0) THEN 'Retail Price'
-			 END
-			,CASE
-				WHEN [Changes].dblOldStandardCost IS NOT NULL AND ISNULL([Changes].dblOldStandardCost, 0) != ISNULL([Changes].dblNewStandardCost, 0) THEN CAST(CAST(ISNULL([Changes].dblOldStandardCost, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dblOldSalePrice IS NOT NULL AND ISNULL([Changes].dblOldSalePrice, 0) != ISNULL([Changes].dblNewSalePrice, 0) THEN CAST(CAST(ISNULL([Changes].dblOldSalePrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
-			 END
-			,CASE
-				WHEN [Changes].dblNewStandardCost IS NOT NULL AND ISNULL([Changes].dblOldStandardCost, 0) != ISNULL([Changes].dblNewStandardCost, 0) THEN CAST(CAST(ISNULL([Changes].dblNewStandardCost, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dblNewSalePrice IS NOT NULL AND ISNULL([Changes].dblOldSalePrice, 0) != ISNULL([Changes].dblNewSalePrice, 0) THEN CAST(CAST(ISNULL([Changes].dblNewSalePrice, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
-			 END
+				WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
+				WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
+				WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
+			END
+			,[Changes].strOldData
+			,[Changes].strNewData
 	        ,[Changes].intItemId 
 			,[Changes].intItemPricingId
-	FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog [Changes]
+	FROM 
+	(
+		SELECT DISTINCT intItemId, intItemPricingId, oldColumnName, strOldData, strNewData
+		FROM 
+		(
+			SELECT intItemId
+			   , intItemPricingId
+			   , CAST(CAST(dblOldStandardCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strStandardCost_Original
+			   , CAST(CAST(dblOldSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_Original
+			   , CAST(CAST(dblOldLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_Original
+			   , CAST(CAST(dblNewStandardCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strStandardCost_New
+			   , CAST(CAST(dblNewSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_New
+			   , CAST(CAST(dblNewLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_New
+			FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+		) t
+		unpivot
+		(
+			strOldData for oldColumnName in (strStandardCost_Original, strSalePrice_Original, strLastCost_Original)
+		) o
+		unpivot
+		(
+			strNewData for newColumnName in (strStandardCost_New, strSalePrice_New, strLastCost_New)
+		) n
+		WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+	) [Changes]
 	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
 	JOIN tblICItemPricing IP ON [Changes].intItemPricingId = IP.intItemPricingId
 	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
 	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
-
+	WHERE 
+	(
+		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+	)
+	AND 
+	(
+		NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+		OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+	)
 
 
 	-- ITEM SPECIAL PRICING
@@ -345,28 +400,56 @@ BEGIN TRANSACTION
 			,UOM.strLongUPCCode
 			,I.strDescription
 			,CASE
-				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND ISNULL([Changes].dblOldUnitAfterDiscount, 0) != ISNULL([Changes].dblNewUnitAfterDiscount, 0) THEN 'Sales Price'
-				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND CAST([Changes].dtmOldBeginDate AS DATE) != CAST([Changes].dtmNewBeginDate AS DATE) THEN 'Sales Starting Date'
-				WHEN [Changes].dtmOldEndDate IS NOT NULL AND CAST([Changes].dtmOldEndDate AS DATE) != CAST([Changes].dtmNewEndDate AS DATE) THEN 'Sales Ending Date'
-			 END
-			,CASE
-				WHEN [Changes].dblOldUnitAfterDiscount IS NOT NULL AND ISNULL([Changes].dblOldUnitAfterDiscount, 0) != ISNULL([Changes].dblNewUnitAfterDiscount, 0) THEN CAST(CAST(ISNULL([Changes].dblOldUnitAfterDiscount, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dtmOldBeginDate IS NOT NULL AND CAST([Changes].dtmOldBeginDate AS DATE) != CAST([Changes].dtmNewBeginDate AS DATE) THEN CAST(CAST([Changes].dtmOldBeginDate AS DATE) AS NVARCHAR(50))
-				WHEN [Changes].dtmOldEndDate IS NOT NULL AND CAST([Changes].dtmOldEndDate AS DATE) != CAST([Changes].dtmNewEndDate AS DATE) THEN CAST(CAST([Changes].dtmOldEndDate AS DATE) AS NVARCHAR(50))
-			 END
-			,CASE
-				WHEN [Changes].dblNewUnitAfterDiscount IS NOT NULL AND ISNULL([Changes].dblOldUnitAfterDiscount, 0) != ISNULL([Changes].dblNewUnitAfterDiscount, 0) THEN CAST(CAST(ISNULL([Changes].dblNewUnitAfterDiscount, 0) AS DECIMAL(18,2)) AS NVARCHAR(50))
-				WHEN [Changes].dtmNewBeginDate IS NOT NULL AND CAST([Changes].dtmOldBeginDate AS DATE) != CAST([Changes].dtmNewBeginDate AS DATE) THEN CAST(CAST([Changes].dtmNewBeginDate AS DATE) AS NVARCHAR(50))
-				WHEN [Changes].dtmNewEndDate IS NOT NULL AND CAST([Changes].dtmOldEndDate AS DATE) != CAST([Changes].dtmNewEndDate AS DATE) THEN CAST(CAST([Changes].dtmNewEndDate AS DATE) AS NVARCHAR(50))
-			 END
+				WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'Unit After Discount'
+				WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
+				WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
+			END
+			,[Changes].strOldData
+			,[Changes].strNewData
 	        ,[Changes].intItemId 
 			,[Changes].intItemSpecialPricingId
-	FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog [Changes]
+	FROM 
+	(
+		SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
+		FROM 
+		(
+			SELECT intItemId 
+				,intItemSpecialPricingId 
+				,CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_Original
+				,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
+				,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
+				,CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_New
+				,CAST(CAST(dtmNewBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
+				,CAST(CAST(dtmNewEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_New
+			FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
+		) t
+		unpivot
+		(
+			strOldData for oldColumnName in (strUnitAfterDiscount_Original, strBeginDate_Original, strEndDate_Original)
+		) o
+		unpivot
+		(
+			strNewData for newColumnName in (strUnitAfterDiscount_New, strBeginDate_New, strEndDate_New)
+		) n
+		WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+		
+	) [Changes]
 	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
 	JOIN tblICItemSpecialPricing IP ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
 	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
 	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+	WHERE 
+	(
+		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+	)
+	AND 
+	(
+		NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+		OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+	)
+
 
 
    DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
@@ -382,5 +465,29 @@ BEGIN TRANSACTION
    ORDER BY strItemDescription, strChangeDescription ASC
     
    DELETE FROM @tblPreview
+
+   -- Clean up 
+	BEGIN
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Location 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Vendor 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Category 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Family 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Class 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+	END
 
 ROLLBACK TRANSACTION

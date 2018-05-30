@@ -867,7 +867,7 @@ BEGIN TRY
 			, CAST([Changes].intFamilyId_New AS NVARCHAR(1000))
 			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_New), '')
 			, CAST([Changes].intClassId_New AS NVARCHAR(1000))
-			, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intClassId_New), '')
+			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_New), '')
 			, [Changes].intProductCodeId_New
 			, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_New), '')
 			, [Changes].intVendorId_New
