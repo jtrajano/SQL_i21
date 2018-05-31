@@ -6693,6 +6693,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetMarkUpDownBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMarkUpDownPosting.sql" />
+    <Build Include="dbo\Views\vyuLGWeightClaimOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
