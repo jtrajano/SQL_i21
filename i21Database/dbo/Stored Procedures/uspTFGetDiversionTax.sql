@@ -240,6 +240,7 @@ BEGIN TRY
 					LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
 				WHERE tblARInvoice.ysnPosted = 1 
+					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
@@ -413,6 +414,7 @@ BEGIN TRY
 					LEFT JOIN tblTFTaxAuthorityCustomerLicense ON tblTFTaxAuthorityCustomerLicense.intEntityId = tblARInvoice.intEntityCustomerId AND tblTFTaxAuthorityCustomerLicense.intTaxAuthorityId = tblTFReportingComponent.intTaxAuthorityId
 				CROSS JOIN tblSMCompanySetup
 				WHERE tblARInvoice.ysnPosted = 1 
+					AND tblTRLoadHeader.ysnDiversion = 1
 					AND tblTFReportingComponent.intReportingComponentId = @RCId
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) >= CAST(FLOOR(CAST(@DateFrom AS FLOAT))AS DATETIME)
 					AND CAST(FLOOR(CAST(tblARInvoice.dtmDate AS FLOAT))AS DATETIME) <= CAST(FLOOR(CAST(@DateTo AS FLOAT))AS DATETIME)
