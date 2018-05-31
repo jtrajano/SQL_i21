@@ -100,7 +100,7 @@ BEGIN TRY
 				CQ.strContainerType,
 				DY.strCity						AS	strDestinationCity,
 				IY.strCurrency AS strInvoiceCurrency,
-				FY.strCurrency + '/' + TY.strCurrency AS strExchangeRate,
+				'From ' + FY.strCurrency + ' To ' + TY.strCurrency AS strExchangeRate,
 				PG.strName						AS	strPurchasingGroup,
 				FM.strUnitMeasure				AS	strFXPriceUOM,
 				RT.strCurrencyExchangeRateType,
