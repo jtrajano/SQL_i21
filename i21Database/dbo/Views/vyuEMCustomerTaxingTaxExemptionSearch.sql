@@ -9,6 +9,7 @@
 		tax_code.strTaxCode,
 		tax_class.strTaxClass,
 		tax_exemption.strException,
+		tax_exemption.strExceptionReason,
 		tax_exemption.dtmStartDate,
 		tax_exemption.dtmEndDate,
 		tax_exemption.strState,
