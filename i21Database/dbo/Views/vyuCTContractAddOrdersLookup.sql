@@ -47,37 +47,7 @@ SELECT	  CD.intContractDetailId
 		, CH.strEntityNumber
 		, dblItemUOMCF = ISNULL(IU.dblUnitQty, 0)
 		, dblAllocatedQty = ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0)	
-		, dblPricePerUnit = 
-					-- AD.dblSeqPrice
-					CASE 
-						WHEN	CD.ysnUseFXPrice = 1 
-								AND CD.intCurrencyExchangeRateId IS NOT NULL 
-								AND CD.dblRate IS NOT NULL 
-								AND CD.intFXPriceUOMId IS NOT NULL 
-						THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(
-								CD.intFXPriceUOMId
-								,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
-								,(
-									CD.dblCashPrice / CASE WHEN CU.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(intCent,0) = 0 THEN 1 ELSE intCent END ELSE 1 END			
-								)
-							) * CD.dblRate
-
-						ELSE
-							CD.dblCashPrice
-					END 
-					* 
-					-- AD.dblQtyToPriceUOMConvFactor
-					CASE 
-						WHEN	CD.ysnUseFXPrice = 1 
-								AND CD.intCurrencyExchangeRateId IS NOT NULL 
-								AND CD.dblRate IS NOT NULL 
-								AND CD.intFXPriceUOMId IS NOT NULL 
-						THEN 
-							dbo.fnCTConvertQtyToTargetItemUOM(UM.intItemUOMId,CD.intFXPriceUOMId,1)
-						ELSE
-							dbo.fnCTConvertQtyToTargetItemUOM(UM.intItemUOMId,ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId),1)
-					END 
+		, dblPricePerUnit = AD.dblSeqPrice
 		, CH.strGrade
 		, CH.intGradeId
 		, CH.strWeight
