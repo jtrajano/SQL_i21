@@ -308,6 +308,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\29_Inventory_Constraints.sql
 :r .\IC\30_Populate_Shipment_LineTotal.sql
 :r .\IC\31_RemoveAfter18.3_DataFix.sql 
+:r .\IC\31_Add_Default_Edi_Mapping_Template.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 
