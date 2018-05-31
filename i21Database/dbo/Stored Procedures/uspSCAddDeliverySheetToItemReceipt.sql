@@ -92,6 +92,7 @@ INSERT into @ReceiptStagingTable(
 		,strChargesLink
 		,dblGross
 		,dblNet
+		,intFreightTermId
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -141,8 +142,12 @@ SELECT
 		,dtmDate					= LI.dtmDate
 		,dblQty						= LI.dblQty
 		,dblCost					= CASE
-										--WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetFutureAndBasisPriceForDate(IC.intCommodityId,SCD.intCompanyLocationId,SCD.dtmDeliverySheetDate,2,LI.dblCost),0)
-										WHEN CNT.intPricingTypeId = 2 THEN ISNULL(dbo.fnRKGetLatestClosingPrice(CNT.intFutureMarketId,CNT.intFutureMonthId,GETDATE()),0) + LI.dblCost
+										WHEN CNT.intPricingTypeId = 2 THEN 
+										(
+											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(UOM.intItemUOMId,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
+											FROM dbo.fnRKGetFutureAndBasisPrice (1,IC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SCD.intItemId,SCD.intCurrencyId)
+											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
+										)
 										ELSE LI.dblCost
 									END
 		,dblExchangeRate			= 1 -- Need to check this
@@ -157,10 +162,38 @@ SELECT
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					= (LI.dblQty / SCD.dblNet) * SCD.dblGross
 		,dblNet						= LI.dblQty
+		,intFreightTermId			= CNT.intFreightTermId
 FROM	@Items LI 
 		INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = LI.intTransactionId
 		INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
-		LEFT JOIN dbo.vyuCTContractDetailView CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+		INNER JOIN tblICItemUOM UOM ON UOM.intItemId = IC.intItemId AND UOM.ysnStockUnit = 1
+		LEFT JOIN (
+			SELECT CTD.intContractHeaderId
+			,CTD.intContractDetailId
+			,CTD.intItemId
+			,CTD.intItemUOMId
+			,CTD.intFutureMarketId
+			,CTD.intFutureMonthId
+			,CTD.intRateTypeId 
+			,CTD.intPriceItemUOMId
+			,CTD.ysnUseFXPrice
+			,CTD.intCurrencyExchangeRateId 
+			,CTD.dblRate 
+			,CTD.intFXPriceUOMId 
+			,CTD.intInvoiceCurrencyId 
+			,CTD.intCurrencyId
+			,CTD.intAdjItemUOMId
+			,CTD.intPricingTypeId
+			,CTD.intBasisUOMId
+			,CTD.dtmEndDate
+			,CTD.intFreightTermId
+			,AD.dblSeqPrice
+			,CU.intCent
+			,CU.ysnSubCurrency
+			FROM tblCTContractDetail CTD 
+			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SCD.intDeliverySheetId = @intDeliverySheetId
 
 -- Get the identity value from tblICInventoryReceipt
