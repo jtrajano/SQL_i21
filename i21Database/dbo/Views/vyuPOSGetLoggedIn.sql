@@ -16,7 +16,7 @@
 	 ,dblEndingBalance		= ISNULL(pos.dblEndingBalance,0)
 	 ,dblOpeningBalance		= ISNULL(pos.dblOpeningBalance,0)
 	 ,dtmLogin				= pos.dtmLogin
-	 ,dtmLogout				= pos.dtmLogout
+	 ,dtmLogout				= ISNULL(pos.dtmLogout, GETDATE())
 	 ,ysnLoggedIn			= pos.ysnLoggedIn
 FROM tblEMEntity entity
 LEFT JOIN tblARPOSLog pos ON pos.intEntityUserId = entity.intEntityId
