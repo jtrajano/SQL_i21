@@ -150,8 +150,8 @@
 	,ISNULL(GRStorage.ysnCustomerStorage, CAST(0 AS BIT)) AS ysnCustomerStorage
 
 	,EMSplit.strSplitNumber
-	,EMEntityFarm.strFarmDescription
-	,EMEntityFarm.strFieldNumber AS strFarmField
+	,EMEntityFarm.strLocationDescription
+	,EMEntityFarm.strLocationName AS strFarmField
 	,EMEntity.strName AS strCustomerNumber
 	,EMEntity.strName AS strCustomerName
 
@@ -228,7 +228,7 @@
 
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on EMSplit.intSplitId = SCT.intSplitId
-	LEFT JOIN tblEMEntityFarm EMEntityFarm on EMEntityFarm.intFarmFieldId = SCT.intFarmFieldId
+	LEFT JOIN tblEMEntityLocation EMEntityFarm on EMEntityFarm.intEntityLocationId = SCT.intFarmFieldId
 
 	LEFT JOIN tblICItem ICItem on ICItem.intItemId = SCT.intItemId
 	LEFT JOIN tblICCommodity ICCommodity on ICCommodity.intCommodityId = SCT.intCommodityId

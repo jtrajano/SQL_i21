@@ -83,7 +83,8 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intLotType INT
 		,@intLotId INT
 		,@intContractDetailId INT
-		,@shipFromEntityId INT;
+		,@shipFromEntityId INT
+		,@intFarmFieldId INT;
 
 	SELECT TOP 1 @intLoadId = ST.intLoadId
 	, @dblTicketFreightRate = ST.dblFreightRate
@@ -95,6 +96,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 	, @intItemId = ST.intItemId
 	, @intTicketItemUOMId = ST.intItemUOMIdTo
 	, @shipFromEntityId = ST.intEntityId
+	, @intFarmFieldId = ST.intFarmFieldId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 
@@ -678,6 +680,7 @@ BEGIN TRY
 		SELECT @total = COUNT(*) FROM @voucherItems;
 		IF (@total > 0)
 		BEGIN
+		SET @intShipFrom = COALESCE(@intFarmFieldId, @intShipFrom);
 		EXEC [dbo].[uspAPCreateBillData]
 				@userId = @intUserId
 				,@vendorId = @intEntityId
