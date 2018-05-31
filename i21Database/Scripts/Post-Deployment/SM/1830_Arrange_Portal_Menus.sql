@@ -28,6 +28,7 @@
 		)
 
 		DELETE FROM tblSMUserRole WHERE strRoleType IN ('Contact Admin', 'Contact')
+		DELETE FROM tblEMEntityToRole
 
 		DECLARE @currentRow INT
 		DECLARE @totalRows INT
