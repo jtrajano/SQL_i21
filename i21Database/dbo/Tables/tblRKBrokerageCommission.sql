@@ -17,6 +17,7 @@
 	[dblMinAmount] NUMERIC(18, 6) NULL, 
 	[dblMaxAmount] NUMERIC(18, 6) NULL,
 	[dblPercenatage] NUMERIC(18, 6) NULL,	
+    [dblPerFutureContract] NUMERIC(18, 6) NULL, 
     CONSTRAINT [PK_tblRKBrokerageCommission_intBrokerageCommissionId] PRIMARY KEY ([intBrokerageCommissionId]), 
 	CONSTRAINT [FK_tblRKBrokerageCommission_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblRKBrokerageCommission_tblSMCurrency_intFutCurrencyId] FOREIGN KEY ([intFutCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
