@@ -813,6 +813,7 @@ BEGIN
 				,intContainerId 
 				,strChargesLink
 				,intLoadReceive
+				,intCostingMethod
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -890,7 +891,13 @@ BEGIN
 				,intContainerId			= RawData.intContainerId 
 				,strChargesLink			= RawData.strChargesLink
 				,intLoadReceive			= RawData.intLoadReceive
-
+				,intCostingMethod		= 
+										CASE 
+											WHEN ISNULL(Item.strLotTracking, 'No') <> 'No' THEN 
+												4 -- 4 is for Lot Costing
+											ELSE
+												ItemLocation.intCostingMethod
+										END
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -899,6 +906,8 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+				INNER JOIN tblICItem Item
+					ON Item.intItemId = RawData.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intItemId  
 					AND ItemUOM.intItemUOMId = RawData.intItemUOMId			
@@ -910,8 +919,10 @@ BEGIN
                     ON GrossNetUOM.intUnitMeasureId = GrossNetUnitMeasure.intUnitMeasureId
                     AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemLocation.intItemId = RawData.intItemId AND ItemLocation.intLocationId = RawData.intLocationId
-
+					ON ItemLocation.intItemId = RawData.intItemId 
+					AND ItemLocation.intLocationId = RawData.intLocationId
+				LEFT JOIN tblICCostingMethod CostingMethod
+					ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod
 				-- Get the SM forex rate. 
 				OUTER APPLY dbo.fnSMGetForexRate(
 					ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId)
