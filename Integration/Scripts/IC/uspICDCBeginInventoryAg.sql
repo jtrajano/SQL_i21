@@ -36,6 +36,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+		,@ADJUSTMENT_TYPE_OpeningInventory AS INT = 10
 
 SET @adjdt = ISNULL(GETDATE(),@adjdt)
 
@@ -107,7 +108,7 @@ BEGIN
 			VALUES (
 				(SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @adjLoc)
 				, @adjdt
-				, @ADJUSTMENT_TYPE_QuantityChange
+				, @ADJUSTMENT_TYPE_OpeningInventory
 				, @strAdjustmentNo
 				, 'Begin Inventory imported by iRely'
 				, 0
@@ -234,21 +235,21 @@ BEGIN
 				AND agitm_loc_no = @adjLoc
 				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 
-			-- Tweak the contra-gl account used. 
-			BEGIN 
-				-- Update the GL credit entries to use Inventory account id
-				UPDATE	gd
-				SET		gd.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory') 
-				FROM	tblGLDetail gd INNER JOIN  tblICInventoryTransaction t 
-							ON gd.intJournalLineNo = t.intInventoryTransactionId
-							AND gd.strTransactionId = t.strTransactionId
-							AND gd.intTransactionId = t.intTransactionId
-							AND gd.strBatchId = t.strBatchId	
-				WHERE	t.strTransactionId = @strAdjustmentNo
-						AND t.intTransactionId = @intAdjustmentNo
-						AND gd.ysnIsUnposted = 0 
-						AND gd.dblCredit <> 0 
-			END 
+			---- Tweak the contra-gl account used. 
+			--BEGIN 
+			--	-- Update the GL credit entries to use Inventory account id
+			--	UPDATE	gd
+			--	SET		gd.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory') 
+			--	FROM	tblGLDetail gd INNER JOIN  tblICInventoryTransaction t 
+			--				ON gd.intJournalLineNo = t.intInventoryTransactionId
+			--				AND gd.strTransactionId = t.strTransactionId
+			--				AND gd.intTransactionId = t.intTransactionId
+			--				AND gd.strBatchId = t.strBatchId	
+			--	WHERE	t.strTransactionId = @strAdjustmentNo
+			--			AND t.intTransactionId = @intAdjustmentNo
+			--			AND gd.ysnIsUnposted = 0 
+			--			AND gd.dblCredit <> 0 
+			--END 
 		END
 		FETCH NEXT
 		FROM loc_cursor
