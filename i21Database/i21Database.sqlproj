@@ -6690,6 +6690,7 @@
     <Build Include="dbo\Tables\tblICEdiMapTemplate.sql" />
     <Build Include="dbo\Tables\tblICEdiMapTemplateSegment.sql" />
     <Build Include="dbo\Tables\tblICEdiMapTemplateSegmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
