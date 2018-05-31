@@ -66,6 +66,7 @@ SELECT
 	, Item.ysnBillable
 	, Item.ysnSupported
 	, Item.ysnDisplayInHelpdesk
+	, Module.strModule
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
@@ -105,3 +106,5 @@ LEFT JOIN (
 )
 	ON mfgWeightItemUOM.intItemId = Item.intItemId	
 	AND mfgWeightUOM.intUnitMeasureId = Item.intWeightUOMId
+LEFT JOIN tblSMModule Module
+	ON Module.intModuleId = Item.intModuleId
