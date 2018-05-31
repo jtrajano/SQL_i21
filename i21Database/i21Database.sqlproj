@@ -6507,6 +6507,7 @@
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
+    <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
