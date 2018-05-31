@@ -102,7 +102,7 @@ BEGIN
 		,dtmPeriodFrom = ISNULL(@dtmTransactionFrom,'1/1/1900')
 		,dtmPeriodTo = ISNULL(@dtmTransactionTo,'1/1/1900')
 		,blbMessageBody = (SELECT TOP 1 blbMessage 
-						  FROM [dbo].[fnCFGetDefaultCommentTable](NULL, B.intEntityId, 'CF Alert', NULL, 'Header', NULL, 1))
+						  FROM [dbo].[fnCFGetDefaultCommentTable](NULL, B.intEntityId, 'CF Alerts', NULL, 'Header', NULL, 1))
 		,strFullAddress = B.strAddress
 		,intEntityId = B.intEntityId
 	FROM #tblCFTransactionList A
