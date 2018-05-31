@@ -19,11 +19,12 @@ BEGIN
 
 		SELECT DISTINCT PR.strPropertyName
 			,PR.intPropertyId
-			,CASE 
-				WHEN LOWER(PPV.strPropertyRangeText) = 'true'
-					THEN 'true'
-				ELSE 'false'
-				END AS strPropertyValue
+			--,CASE 
+			--	WHEN LOWER(PPV.strPropertyRangeText) = 'true'
+			--		THEN 'true'
+			--	ELSE 'false'
+			--	END AS strPropertyValue
+			,'false' AS strPropertyValue
 			,PP.intSequenceNo
 			,'' AS strComment
 		FROM dbo.tblQMProduct AS P
