@@ -21,6 +21,7 @@ AS
 			FD.dblCashPrice,
 			FD.intPricingUOMId,
 			FD.ysnHedge,
+			FD.ysnAA,
 			FD.dblHedgePrice,
 			FD.intHedgeFutureMonthId,
 			FD.intBrokerId,
