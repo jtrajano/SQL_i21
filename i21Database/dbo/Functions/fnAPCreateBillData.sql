@@ -108,7 +108,7 @@ BEGIN
 	FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 
 	SELECT TOP 1
-		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE ISNULL(B.intTermsId, B2.intTermsId) END),
+		@term = ISNULL((CASE WHEN ISNULL(@termId,0) > 0 THEN @termId ELSE ISNULL(B2.intTermsId, B.intTermsId) END),
 						(SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm like '%due on receipt%')),
 		@contact = C.intEntityContactId,
 		@shipFrom = ISNULL(@shipFromId, B.intEntityLocationId),
@@ -126,10 +126,11 @@ BEGIN
 	LEFT JOIN [tblEMEntityLocation] B2 ON B2.intEntityLocationId = @shipFromId
 	LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
 	WHERE A.[intEntityId]= @vendorId 
-	AND 1 = (CASE WHEN @shipFromId IS NOT NULL THEN 
-					(CASE WHEN B.intEntityLocationId = @shipFromId THEN 1 ELSE 0 END)
-				ELSE (CASE WHEN B.ysnDefaultLocation = 1 THEN 1 ELSE 0 END) END)
-	AND C.ysnDefaultContact = 1
+	 AND 1 = (CASE WHEN @shipFromId IS NOT NULL THEN 
+     				(CASE WHEN @shipFromId = ISNULL(B2.intEntityLocationId,B.intEntityLocationId)
+    			THEN 1 ELSE 0 END)
+    ELSE (CASE WHEN B.ysnDefaultLocation = 1 THEN 1 ELSE 0 END) END)
+ 	AND C.ysnDefaultContact = 1
 
 	SELECT
 		@apAccount = CASE WHEN ISNULL(@apAccountId,0) > 0 THEN @apAccountId ELSE intAPAccount END,
