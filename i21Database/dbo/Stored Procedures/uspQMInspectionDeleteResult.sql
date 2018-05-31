@@ -8,11 +8,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
-	-- Remove values from Quality Table for Incoming Inspection Result
 	DELETE
-	FROM tblQMTestResult
-	WHERE intSampleId IS NULL
-		AND intControlPointId = 3
-		AND intProductTypeId = @intProductTypeId
+	FROM tblQMSample
+	WHERE intProductTypeId = @intProductTypeId
 		AND intProductValueId = @intProductValueId
 END
