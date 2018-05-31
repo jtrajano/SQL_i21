@@ -46,7 +46,6 @@
 	,SCT.intTareUserId
 	,SCT.dblGrossUnits
 	,SCT.dblNetUnits
-	,SCT.strItemNumber
 	,SCT.strItemUOM
 	,SCT.intCustomerId
 	,SCT.intSplitId
@@ -131,7 +130,8 @@
 	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     ,SCT.intLotId
     ,SCT.strLotNumber
-    ,SCT.intSalesOrderDetailId
+    ,SCT.intSalesOrderId
+
 
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
@@ -211,9 +211,8 @@
 	,SCT.intConcurrencyId
 	,SCT.strOfflineGuid
 	,SO.strSalesOrderNumber
-	,SMC.strLocationName as strSOCompanyLocation
+	,(CASE WHEN SO.intCompanyLocationId > 0 THEN SMC.strLocationName ELSE '' END) AS strSOCompanyLocation
 	,SO.intCompanyLocationId AS intSOCompanyLocation
-	,SO.intSalesOrderId
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -280,6 +279,4 @@
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId
-	LEFT JOIN tblSOSalesOrderDetail SOD on SOD.intSalesOrderDetailId = SCT.intSalesOrderDetailId
-	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SOD.intSalesOrderId
-	
+	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
