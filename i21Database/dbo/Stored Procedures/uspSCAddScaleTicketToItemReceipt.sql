@@ -106,6 +106,7 @@ INSERT into @ReceiptStagingTable(
 		,strChargesLink
 		,dblGross
 		,dblNet
+		,intFreightTermId
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -197,6 +198,7 @@ SELECT
 										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
 										ELSE LI.dblQty 
 									END
+		,intFreightTermId			= CNT.intFreightTermId
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -217,6 +219,7 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			,CTD.intPricingTypeId
 			,CTD.intBasisUOMId
 			,CTD.dtmEndDate
+			,CTD.intFreightTermId
 			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
