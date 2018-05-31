@@ -101,7 +101,8 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId					INT,
 							intCurrencyExchangeRateTypeId	INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
 							intSalesOrderId				INT NULL,
-							intStorageLocationId		INT NULL)
+							intStorageLocationId		INT NULL,
+							intCompanyLocationSubLocationId INT NULL)
 
 DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intItemId					INT, 
@@ -152,7 +153,8 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId	INT IDENTITY (1, 1),
 							intCurrencyExchangeRateTypeId	INT,
 							dblCurrencyExchangeRate		    NUMERIC(18,6),
 							intSalesOrderId				INT NULL,
-							intStorageLocationId		INT NULL)
+							intStorageLocationId		INT NULL,
+							intCompanyLocationSubLocationId INT NULL)
 									
 DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							intInventoryShipmentItemId	INT,
@@ -216,6 +218,7 @@ SELECT intItemId					= SI.intItemId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SI.intSalesOrderId
 	 , intStorageLocationId			= SOD.intStorageLocationId
+	 , intCompanyLocationSubLocationId = SOD.intSubLocationId
 FROM tblSOSalesOrder SO 
 	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
@@ -278,6 +281,7 @@ SELECT intItemId					= SOD.intItemId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= NULL
 	 , intStorageLocationId			= SOD.intStorageLocationId
+	 , intCompanyLocationSubLocationId = SOD.intSubLocationId
 FROM tblSOSalesOrderDetail SOD
 INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 WHERE SO.intSalesOrderId = @SalesOrderId 
@@ -334,6 +338,7 @@ SELECT intItemId					= ICSI.intItemId
 	 , dblCurrencyExchangeRate		= SOD.dblCurrencyExchangeRate
 	 , intSalesOrderId				= SO.intSalesOrderId
 	 , intStorageLocationId			= SOD.intStorageLocationId
+	 , intCompanyLocationSubLocationId = SOD.intSubLocationId
 FROM tblSOSalesOrder SO 
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
@@ -393,6 +398,7 @@ SELECT intItemId					= ARSI.intItemId
 	 , dblCurrencyExchangeRate		= ARSI.dblCurrencyExchangeRate
 	 , intSalesOrderId				= ARSI.intSalesOrderId
 	 , intStorageLocationId			= ARSI.intStorageLocationId
+	 , intCompanyLocationSubLocationId = NULL
 FROM vyuARGetSalesOrderItems ARSI
 LEFT JOIN tblICItem I ON ARSI.intItemId = I.intItemId
 WHERE
@@ -915,7 +921,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemSubCurrencyId		INT,
 						@ItemSubCurrencyRate	NUMERIC(18,6),
 						@ItemCurrencyExchangeRateTypeId		INT,
-						@ItemCurrencyExchangeRate	NUMERIC(18, 6)					
+						@ItemCurrencyExchangeRate	NUMERIC(18, 6),					
+						@ItemStorageLocationId    INT					
 
 				SELECT TOP 1
 						@intItemToInvoiceId		= intItemToInvoiceId,
@@ -960,7 +967,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemSubCurrencyId		= intSubCurrencyId,
 						@ItemSubCurrencyRate	= dblSubCurrencyRate,
 						@ItemCurrencyExchangeRateTypeId	= intCurrencyExchangeRateTypeId,
-						@ItemCurrencyExchangeRate	=dblCurrencyExchangeRate
+						@ItemCurrencyExchangeRate	= dblCurrencyExchangeRate,
+						@ItemStorageLocationId  = intStorageLocationId
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
 				EXEC [dbo].[uspARAddItemToInvoice]
@@ -1010,6 +1018,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemSubCurrencyRate			= @ItemSubCurrencyRate
 							,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
 							,@ItemCurrencyExchangeRate		= @ItemCurrencyExchangeRate
+							,@ItemCompanyLocationSubLocationId = @ItemSublocationId
+							,@ItemStorageLocationId = @ItemStorageLocationId
 
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN
