@@ -6339,6 +6339,7 @@
     <Build Include="dbo\Functions\fnARGenerateGLEntriesForPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidatePaymentPosting.sql" />
     <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
