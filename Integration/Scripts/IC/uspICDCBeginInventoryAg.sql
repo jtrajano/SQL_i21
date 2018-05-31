@@ -129,14 +129,16 @@ BEGIN
 		,intSubLocationId
 		,intStorageLocationId
         ,intConcurrencyId
+		,strNewLotNumber 
+		,dtmNewExpiryDate
 	)
      
 	SELECT 
 		@intAdjustmentNo
 		,inv.intItemId
 		,0
-		,agitm_un_on_hand
-		,agitm_un_on_hand
+		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
+		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
 		,uom.intItemUOMId
 		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
 		,(select sl.intSubLocationId 
@@ -157,18 +159,25 @@ BEGIN
 				--,sl.intSubLocationId
 				--,sl.intStorageLocationId
 		,1
+		,lot.aglot_lot_no
+		,aglot_expire_date
+
 	FROM	tblICItem inv INNER JOIN agitmmst itm 
 				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblICItemUOM uom 
 				on uom.intItemId = inv.intItemId 
+			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
+					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+			LEFT JOIN aglotmst lot ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
 					--created duplicate storage location entries. converted into an inline sub query.	
 			--left join tblICStorageLocation sl 
 			--	on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
 	WHERE	agitm_un_on_hand <> 0 
 	AND agitm_loc_no = @adjLoc
+	AND aglot_loc_no = @adjLoc
+	AND aglot_un_on_hand <> 0
 	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
-
-
+	
 	-- Create an Audit Log
 	BEGIN 
 		DECLARE @strDescription AS NVARCHAR(100) 
