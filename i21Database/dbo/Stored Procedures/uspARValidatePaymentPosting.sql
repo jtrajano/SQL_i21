@@ -15,9 +15,12 @@ IF @PostDate IS NULL
 IF @BatchId IS NULL
     SET @BatchId = 'TestBatchId'
 
+SET @Post = (SELECT TOP 1 CASE WHEN ysnPosted = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END FROM tblARPayment WHERE intPaymentId = @PaymentId)
+SET @Post = ISNULL(@Post, 1)
+
+DECLARE @UserEntityID INT = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId)
 DECLARE @PaymentIds AS [dbo].[Id]
 INSERT INTO @PaymentIds SELECT @PaymentId
-
 
 DECLARE @PaymentData AS [dbo].[ReceivePaymentPostingTable]
 INSERT INTO @PaymentData
@@ -52,6 +55,7 @@ END
 
 DECLARE @Overpayment AS [dbo].[Id]
 DECLARE @Prepayment  AS [dbo].[Id]
+DECLARE @GLEntries AS RecapTableType
 
 IF @Post = 1
     BEGIN
@@ -119,94 +123,176 @@ ELSE
                 I.strTransactionType = 'Customer Prepayment'
     END
 
-DECLARE @GLEntries AS RecapTableType
-INSERT INTO @GLEntries
-	([dtmDate]
-	,[strBatchId]
-	,[intAccountId]
-	,[dblDebit]
-	,[dblCredit]
-	,[dblDebitUnit]
-	,[dblCreditUnit]
-	,[strDescription]
-	,[strCode]
-	,[strReference]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[dtmDateEntered]
-	,[dtmTransactionDate]
-	,[strJournalLineDescription]
-	,[intJournalLineNo]
-	,[ysnIsUnposted]
-	,[intUserId]
-	,[intEntityId]
-	,[strTransactionId]
-	,[intTransactionId]
-	,[strTransactionType]
-	,[strTransactionForm]
-	,[strModuleName]
-	,[intConcurrencyId]
-	,[dblDebitForeign]
-	,[dblDebitReport]
-	,[dblCreditForeign]
-	,[dblCreditReport]
-	,[dblReportingRate]
-	,[dblForeignRate]
-	,[strRateType]
-	,[strDocument]
-	,[strComments]
-	,[strSourceDocumentId]
-	,[intSourceLocationId]
-	,[intSourceUOMId]
-	,[dblSourceUnitDebit]
-	,[dblSourceUnitCredit]
-	,[intCommodityId]
-	,[intSourceEntityId]
-	,[ysnRebuild])
-SELECT
-     [dtmDate]
-    ,[strBatchId]
-    ,[intAccountId]
-    ,[dblDebit]
-    ,[dblCredit]
-    ,[dblDebitUnit]
-    ,[dblCreditUnit]
-    ,[strDescription]
-    ,[strCode]
-    ,[strReference]
-    ,[intCurrencyId]
-    ,[dblExchangeRate]
-    ,[dtmDateEntered]
-    ,[dtmTransactionDate]
-    ,[strJournalLineDescription]
-    ,[intJournalLineNo]
-    ,[ysnIsUnposted]
-    ,[intUserId]
-    ,[intEntityId]
-    ,[strTransactionId]
-    ,[intTransactionId]
-    ,[strTransactionType]
-    ,[strTransactionForm]
-    ,[strModuleName]
-    ,[intConcurrencyId]
-    ,[dblDebitForeign]
-    ,[dblDebitReport]
-    ,[dblCreditForeign]
-    ,[dblCreditReport]
-    ,[dblReportingRate]
-    ,[dblForeignRate]
-    ,[strRateType]
-    ,[strDocument]
-    ,[strComments]
-    ,[strSourceDocumentId]
-    ,[intSourceLocationId]
-    ,[intSourceUOMId]
-    ,[dblSourceUnitDebit]
-    ,[dblSourceUnitCredit]
-    ,[intCommodityId]
-    ,[intSourceEntityId]
-    ,[ysnRebuild]
-FROM [dbo].[fnARGenerateGLEntriesForPayments] (@PaymentData, @Overpayment, @Prepayment)
+IF @Post = 1
+	BEGIN
+		INSERT INTO @GLEntries
+			([dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[strDocument]
+			,[strComments]
+			,[strSourceDocumentId]
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+			,[dblSourceUnitDebit]
+			,[dblSourceUnitCredit]
+			,[intCommodityId]
+			,[intSourceEntityId]
+			,[ysnRebuild])
+		SELECT
+			 [dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[strDocument]
+			,[strComments]
+			,[strSourceDocumentId]
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+			,[dblSourceUnitDebit]
+			,[dblSourceUnitCredit]
+			,[intCommodityId]
+			,[intSourceEntityId]
+			,[ysnRebuild]
+		FROM [dbo].[fnARGenerateGLEntriesForPayments] (@PaymentData, @Overpayment, @Prepayment)
+	END
+ELSE
+	BEGIN
+		INSERT INTO @GLEntries(
+			 [dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+		)
+		SELECT	
+			 GL.dtmDate
+			,@BatchId
+			,GL.intAccountId
+			,dblDebit						= GL.dblCredit
+			,dblCredit						= GL.dblDebit
+			,dblDebitUnit					= GL.dblCreditUnit
+			,dblCreditUnit					= GL.dblDebitUnit				
+			,GL.strDescription
+			,GL.strCode
+			,GL.strReference
+			,GL.intCurrencyId
+			,GL.dblExchangeRate
+			,dtmDateEntered					= @PostDate
+			,GL.dtmTransactionDate
+			,strJournalLineDescription		= REPLACE(GL.strJournalLineDescription, 'Posted', 'Unposted ')
+			,GL.intJournalLineNo 
+			,ysnIsUnposted					= 1
+			,intUserId						= @UserId
+			,intEntityId					= @UserEntityID
+			,GL.strTransactionId
+			,GL.intTransactionId
+			,GL.strTransactionType
+			,GL.strTransactionForm
+			,GL.strModuleName
+			,GL.intConcurrencyId
+			,[dblDebitForeign]				= GL.dblCreditForeign
+			,[dblDebitReport]				= GL.dblCreditReport
+			,[dblCreditForeign]				= GL.dblDebitForeign
+			,[dblCreditReport]				= GL.dblDebitReport
+			,[dblReportingRate]				= GL.dblReportingRate 
+			,[dblForeignRate]				= GL.dblForeignRate 
+			,[strRateType]					= ''
+		FROM tblGLDetail GL
+		INNER JOIN (
+			SELECT intTransactionId
+				 , strTransactionId
+			FROM @PaymentData P
+			GROUP BY intTransactionId, strTransactionId
+		) P ON GL.intTransactionId = P.[intTransactionId]  
+			AND GL.strTransactionId = P.strTransactionId
+		WHERE GL.ysnIsUnposted = 0
+		ORDER BY GL.intGLDetailId
+	END
 
 DECLARE @InvalidGLEntries AS TABLE
     (strTransactionId   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

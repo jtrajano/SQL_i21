@@ -771,6 +771,7 @@ BEGIN
             P.[ysnPost] = 0
         AND P.[intTransactionDetailId] IS NULL
         AND CMUF.[strSourceSystem] = 'AR'
+		AND @Recap = 0
 
     UNION
 
