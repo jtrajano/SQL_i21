@@ -12,7 +12,7 @@ SELECT
 	,entity.strName
 	,patron.strStockStatus
 	,voucher.strVendorOrderNumber
-	,(voucherDetail.dblTotal / voucher.dblTotal) * ISNULL(voucher.dblPayment,0) AS dblPayment
+	,(voucherDetail.dblTotal / ISNUL(voucher.dblTotal,0)) * ISNULL(voucher.dblPayment,0) AS dblPayment
 	,voucherDetail.dbl1099 AS dbl1099Amount
 	,voucher.strComment
 	,item.strItemNo
