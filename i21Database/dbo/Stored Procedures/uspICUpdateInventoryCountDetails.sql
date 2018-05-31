@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICUpdateInventoryCountDetails]
+CREATE PROCEDURE [dbo].[uspICUpdateInventoryCountDetails]
 	  @intInventoryCountId INT
 	, @intEntityUserSecurityId INT
 	, @strHeaderNo NVARCHAR(50)
@@ -45,52 +45,58 @@ BEGIN
 		, ysnFetched
 		, intEntityUserSecurityId
 		, intConcurrencyId
-		, intSort)
-	SELECT 
-		  @intInventoryCountId
-		, intItemId
-		, intItemLocationId
-		, intSubLocationId
-		, intStorageLocationId
-		, intParentLotId
-		, strParentLotNumber
-		, strParentLotAlias
-		--, dtmDate = MAX(dtmDate)
-		, intLotId
-		, strLotNumber
-		, strLotAlias
-		, dblSystemCount = SUM(dblOnHand)
-		, dblLastCost = MAX(dblLastCost)
-		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intItemId ASC) AS NVARCHAR(50))
-		, intItemUOMId
-		, intWeightUOMId
-		, ysnRecount = 0
-		, ysnFetched = 1
-		, intEntityUserSecurityId = @intEntityUserSecurityId
-		, intConcurrencyId = 1
-		, intSort = 1
-	FROM vyuICGetItemStockSummaryByLot
-	WHERE (intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
-		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
-		AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
-		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
-		AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
-		AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
-		AND ((dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
-		AND strLotTracking <> 'No'	
-		AND dtmDate	<= @AsOfDate
-	GROUP BY intItemId,
-			intItemLocationId,
-			intSubLocationId,
-			intStorageLocationId,
-			intParentLotId,
-			intLotId,
-			strLotNumber,
-			strLotAlias,
-			strParentLotNumber,
-			strParentLotAlias,
-			intItemUOMId,
-			intWeightUOMId
+		, intSort
+		, dblPhysicalCount
+	)
+	SELECT * 
+	FROM (
+		SELECT 
+			  intInventoryCountId = @intInventoryCountId
+			, intItemId
+			, intItemLocationId
+			, intSubLocationId
+			, intStorageLocationId
+			, intParentLotId
+			, strParentLotNumber
+			, strParentLotAlias
+			, intLotId
+			, strLotNumber
+			, strLotAlias
+			, dblSystemCount = SUM(dblOnHand)
+			, dblLastCost = MAX(dblLastCost)
+			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intItemId ASC) AS NVARCHAR(50))
+			, intItemUOMId
+			, intWeightUOMId
+			, ysnRecount = 0
+			, ysnFetched = 1
+			, intEntityUserSecurityId = @intEntityUserSecurityId
+			, intConcurrencyId = 1
+			, intSort = 1
+			, dblPhysicalCount = NULL
+		FROM vyuICGetItemStockSummaryByLot
+		WHERE (intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
+			AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
+			AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
+			AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+			AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
+			AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
+			AND strLotTracking <> 'No'				
+			AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 0 --AND dtmDate	<= @AsOfDate
+		GROUP BY intItemId,
+				intItemLocationId,
+				intSubLocationId,
+				intStorageLocationId,
+				intParentLotId,
+				intLotId,
+				strLotNumber,
+				strLotAlias,
+				strParentLotNumber,
+				strParentLotAlias,
+				intItemUOMId,
+				intWeightUOMId
+	) query
+	WHERE ((dblSystemCount > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+
 END
 ELSE
 BEGIN
@@ -116,7 +122,6 @@ BEGIN
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
 		, intSubLocationId = COALESCE(stock.intSubLocationId, il.intSubLocationId)
 		, intStorageLocationId = COALESCE(stock.intStorageLocationId, il.intStorageLocationId)
-		--, dtmDate = MAX(stock.dtmDate)
 		, intLotId = NULL
 		, dblSystemCount = dblOnHand-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost = COALESCE(stock.dblLastCost, p.dblLastCost)
