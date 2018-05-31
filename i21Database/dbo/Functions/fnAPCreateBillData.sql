@@ -123,7 +123,7 @@ BEGIN
 		@vendorCurrency	= A.intCurrencyId
 	FROM tblAPVendor A
 	LEFT JOIN [tblEMEntityLocation] B ON A.[intEntityId] = B.intEntityId
-	LEFT JOIN [tblEMEntityLocation] B2 ON A.intEntityLocationId = @shipFromId
+	LEFT JOIN [tblEMEntityLocation] B2 ON B2.intEntityLocationId = @shipFromId
 	LEFT JOIN [tblEMEntityToContact] C ON A.[intEntityId] = C.intEntityId 
 	WHERE A.[intEntityId]= @vendorId 
 	AND 1 = (CASE WHEN @shipFromId IS NOT NULL THEN 
