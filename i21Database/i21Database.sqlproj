@@ -6691,6 +6691,8 @@
     <Build Include="dbo\Tables\tblICEdiMapTemplateSegment.sql" />
     <Build Include="dbo\Tables\tblICEdiMapTemplateSegmentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetMarkUpDownBatchId.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTMarkUpDownPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
