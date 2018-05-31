@@ -40,8 +40,8 @@
     [dblOriginalNetPrice]        NUMERIC (18, 6) NULL,
     [dblCalculatedPumpPrice]     NUMERIC (18, 6) NULL,
     [dblOriginalPumpPrice]       NUMERIC (18, 6) NULL,
-    [dblCalculatedTotalTax]		 NUMERIC (18, 6) NULL,
-	[dblOriginalTotalTax]		 NUMERIC (18, 6) NULL,
+    [dblCalculatedTotalTax]      NUMERIC (18, 6) NULL,
+    [dblOriginalTotalTax]        NUMERIC (18, 6) NULL,
     [intSalesPersonId]           INT             NULL,
     [ysnInvalid]                 BIT             NULL,
     [ysnCreditCardUsed]          BIT             NULL,
@@ -69,6 +69,8 @@
     [ysnOnHold]                  BIT             NULL,
     [intFreightTermId]           INT             NULL,
     [intForDeleteTransId]        INT             NULL,
+    [intCustomerId]              INT             NULL,
+    [ysnInvoiced]                  BIT             NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
@@ -80,6 +82,8 @@
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
     CONSTRAINT [UC_UTransactionId] UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
+
+
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_ysnPosted_dtmTransactionDate_intProductId] ON [dbo].[tblCFTransaction]

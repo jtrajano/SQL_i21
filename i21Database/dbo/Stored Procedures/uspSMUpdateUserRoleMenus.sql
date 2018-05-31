@@ -26,7 +26,7 @@ BEGIN TRY
 
 	-- Get whether User Role has administrative rights
 	SELECT @IsAdmin = ysnAdmin FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
-	SELECT @isContact = CASE strRoleType WHEN 'Portal Default' THEN 1 ELSE (CASE strRoleType WHEN 'Contact Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Contact' THEN 1 ELSE 0 END) END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
+	SELECT @isContact = CASE strRoleType WHEN 'Portal Admin' THEN 1 ELSE (CASE strRoleType WHEN 'Portal User' THEN 1 ELSE 0 END) END FROM tblSMUserRole WHERE intUserRoleID = @UserRoleID
 
 	-- Check whether or not to build the specified user role according to the Master Menus
 	IF (@BuildUserRole = 1)
@@ -134,14 +134,33 @@ BEGIN TRY
 
 	END
 
-	-- Update group if role is for contact admin.
-	EXEC uspSMResolveContactRoleMenus @UserRoleID
+	---- Update group if role is for contact admin.
+	--EXEC uspSMResolveContactRoleMenus @UserRoleID
 
 	-- Make Dashboards menu visible
 	UPDATE rolemenu SET ysnVisible = 1
 	FROM tblSMUserRoleMenu rolemenu
 	INNER JOIN tblSMMasterMenu mastermenu ON rolemenu.intMenuId = mastermenu.intMenuID
 	AND mastermenu.strMenuName = 'Dashboards'
+
+	-- Assigned Default Control Permission
+	IF @isContact = 1
+	BEGIN
+		DECLARE @entityCustomerId INT
+		SELECT @entityCustomerId = intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.EntityCustomer' AND strScreenName = 'My Company (Portal)'
+
+		DECLARE @controlId INT
+		SELECT @controlId = intControlId FROM tblSMControl WHERE intScreenId = @entityCustomerId AND strControlId = 'btnDeleteLoc'
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserRoleControlPermission WHERE intUserRoleId = @UserRoleID AND intControlId = @controlId AND strPermission = 'Disable')
+		BEGIN
+			IF @controlId IS NOT NULL
+			BEGIN
+				INSERT INTO tblSMUserRoleControlPermission ([intUserRoleId],[intControlId],[strPermission])
+				VALUES (@UserRoleID, @controlId, 'Disable')
+			END
+		END
+	END
 	
 	---- Iterate through all affected user securities and apply Master Menus
 	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)

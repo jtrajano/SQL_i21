@@ -5,6 +5,9 @@
 RETURNS BIT
 AS 
 BEGIN 
+	--DEV NOTE
+	--any modification here with regards to what are the stock tracking item
+	--please update fnARIsStockTrackingItem as well	
 	DECLARE @isStockTracking BIT 
 
 	SELECT	@isStockTracking = 

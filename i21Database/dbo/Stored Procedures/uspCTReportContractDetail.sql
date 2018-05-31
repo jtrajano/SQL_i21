@@ -28,7 +28,7 @@ BEGIN TRY
 
 	SELECT  @dblNoOfLots = dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
 	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
-	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId
+	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
 
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
@@ -132,6 +132,7 @@ BEGIN TRY
 	JOIN	@Amend				AM	ON	AM.intContractDetailId	=	CD.intContractDetailId	LEFT
 	JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		CD.intContractStatusId <> 3
 
 END TRY
 

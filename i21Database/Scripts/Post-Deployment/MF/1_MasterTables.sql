@@ -3474,5 +3474,16 @@ WHERE NOT EXISTS (
 		WHERE intPatternId = @intPatternId
 			AND strSubPatternName = 'Sequence'
 		)
+GO
 
-	Go
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 103
+		) --Lot Due Date
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 103
+		,0
+		,0
+END

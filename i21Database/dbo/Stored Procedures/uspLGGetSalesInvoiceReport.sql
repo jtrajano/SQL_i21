@@ -219,21 +219,21 @@ BEGIN
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
 		
-	left join tblSMScreen				rtWUOMScreen on rtWUOMScreen.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rtWUOMScreen on rtWUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtWUOMTransaction on rtWUOMTransaction.intScreenId = rtWUOMScreen.intScreenId and rtWUOMTransaction.intRecordId = WUOM.intUnitMeasureId
-	left join tblSMReportTranslation	rtWUOMTranslation on rtWUOMTranslation.intLanguageId = @intLaguageId and rtWUOMTranslation.intTransactionId = rtWUOMTransaction.intTransactionId and rtWUOMTranslation.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtWUOMTranslation on rtWUOMTranslation.intLanguageId = @intLaguageId and rtWUOMTranslation.intTransactionId = rtWUOMTransaction.intTransactionId and rtWUOMTranslation.strFieldName = 'Name'
 			
-	left join tblSMScreen				rtPriceUOMScreen on rtPriceUOMScreen.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rtPriceUOMScreen on rtPriceUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtPriceUOMTransaction on rtPriceUOMTransaction.intScreenId = rtPriceUOMScreen.intScreenId and rtPriceUOMTransaction.intRecordId = PriceUOM.intUnitMeasureId
-	left join tblSMReportTranslation	rtPriceUOMTranslation on rtPriceUOMTranslation.intLanguageId = @intLaguageId and rtPriceUOMTranslation.intTransactionId = rtPriceUOMTransaction.intTransactionId and rtPriceUOMTranslation.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtPriceUOMTranslation on rtPriceUOMTranslation.intLanguageId = @intLaguageId and rtPriceUOMTranslation.intTransactionId = rtPriceUOMTransaction.intTransactionId and rtPriceUOMTranslation.strFieldName = 'Name'
 				
-	left join tblSMScreen				rtSUOMScreen on rtSUOMScreen.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rtSUOMScreen on rtSUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtSUOMTransaction on rtSUOMTransaction.intScreenId = rtSUOMScreen.intScreenId and rtSUOMTransaction.intRecordId = SUOM.intUnitMeasureId
-	left join tblSMReportTranslation	rtSUOMTranslation on rtSUOMTranslation.intLanguageId = @intLaguageId and rtSUOMTranslation.intTransactionId = rtSUOMTransaction.intTransactionId and rtSUOMTranslation.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtSUOMTranslation on rtSUOMTranslation.intLanguageId = @intLaguageId and rtSUOMTranslation.intTransactionId = rtSUOMTransaction.intTransactionId and rtSUOMTranslation.strFieldName = 'Name'
 					
-	left join tblSMScreen				rtWtUOMScreen on rtWtUOMScreen.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rtWtUOMScreen on rtWtUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtWtUOMTransaction on rtWtUOMTransaction.intScreenId = rtWtUOMScreen.intScreenId and rtWtUOMTransaction.intRecordId = WtUOM.intUnitMeasureId
-	left join tblSMReportTranslation	rtWtUOMTranslation on rtWtUOMTranslation.intLanguageId = @intLaguageId and rtWtUOMTranslation.intTransactionId = rtSUOMTransaction.intTransactionId and rtWtUOMTranslation.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtWtUOMTranslation on rtWtUOMTranslation.intLanguageId = @intLaguageId and rtWtUOMTranslation.intTransactionId = rtSUOMTransaction.intTransactionId and rtWtUOMTranslation.strFieldName = 'Name'
 	
 	WHERE Inv.intInvoiceId = @intInvoiceId
 END

@@ -3,6 +3,7 @@
 	@billBatchId		AS NVARCHAR(40)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
+	@repost				AS BIT				= 0, -- do not validate if repost
 	@recap				AS BIT				= 0,
 	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
@@ -138,7 +139,7 @@ EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
 ---------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@recap, 0) = 0)
+IF (ISNULL(@recap, 0) = 0 AND @repost = 0)
 BEGIN
 
 	--VALIDATIONS
@@ -1024,6 +1025,19 @@ BEGIN
 					AND Charge.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	BillDetail.dblTotal > 0 
 
+		--UPDATE CONTRACT COST
+		UPDATE  CC
+			SET     CC.dblActualAmount = CC.dblActualAmount + tblBilled.dblTotal
+		FROM tblCTContractCost CC
+		JOIN ( 
+			SELECT Bill.intContractCostId, SUM(Bill.dblTotal) dblTotal 
+			FROM tblAPBillDetail Bill
+			INNER JOIN #tmpPostBillData
+						ON #tmpPostBillData.intBillId = Bill.intBillId
+			WHERE Bill.intContractCostId > 0 
+			GROUP BY intContractCostId
+		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
+
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -1142,6 +1156,18 @@ BEGIN
 					AND Charge.intEntityVendorId = Bill.intEntityVendorId
 		WHERE	BillDetail.dblTotal > 0 				
 		
+		UPDATE  CC
+			SET     CC.dblActualAmount = CC.dblActualAmount - tblBilled.dblTotal
+		FROM tblCTContractCost CC
+		JOIN ( 
+			SELECT Bill.intContractCostId, SUM(Bill.dblTotal) dblTotal 
+			FROM tblAPBillDetail Bill
+			INNER JOIN #tmpPostBillData
+						ON #tmpPostBillData.intBillId = Bill.intBillId
+			WHERE Bill.intContractCostId > 0 
+			GROUP BY intContractCostId
+		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
+
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 

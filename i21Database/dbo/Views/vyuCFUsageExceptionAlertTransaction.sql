@@ -28,7 +28,7 @@ LEFT OUTER JOIN (SELECT
 					cfiCard.intCardId
 					,cfiCard.strCardNumber
 					,cfiCard.strCardDescription 
-					,cfiCard.intDailyTransactionCount
+					,cfiAccount.intDailyTransactionCount
 					,cfiAccount.intCustomerId
 					FROM dbo.tblCFAccount AS cfiAccount 
 					INNER JOIN dbo.tblCFCard AS cfiCard 

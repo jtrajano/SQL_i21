@@ -3,6 +3,7 @@
 SELECT	CAST(ROW_NUMBER() OVER (ORDER BY EP.intEquityPayId) AS INT) as id,
 		EP.intEquityPayId,
 		EP.strPaymentNumber,
+		EP.strPayoutType,
 		EP.dblPayoutPercent,
 		EP.dtmPaymentDate,
 		EP.strDistributionMethod,

@@ -110,7 +110,7 @@ AS
 				strSourceScreenName			=	'Contract',
 				ysnSubCurrency				=	SY.ysnSubCurrency,
 				intForexRateTypeId			=	CD.intRateTypeId,
-				dblForexRate				=	CD.dblRate,
+				dblForexRate				=	NULL,
 				intFreightTermId			=	CD.intFreightTermId,
 				intBookId					=	CD.intBookId,
 				intSubBookId				=	CD.intSubBookId
@@ -212,6 +212,8 @@ AS
 				,[strCertificateId]
 				,[strTrackingNumber]
 				,[intSourceType]
+				,[intContractHeaderId]
+				,[intContractDetailId]
 			)
 
 			SELECT	 [strReceiptType]		=   'Purchase Contract'
@@ -234,7 +236,7 @@ AS
 					,[dblCost]				=   CASE	WHEN	CD.intPricingTypeId = 2 
 														THEN	(
 																	SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CD.intBasisUOMId,CD.dblBasis),0)),0) 
-																	FROM dbo.fnRKGetFutureAndBasisPrice (1,CH.intCommodityId,right(convert(varchar, CD.dtmEndDate, 106),8),2,CD.intFutureMarketId,CD.intFutureMonthId,NULL,NULL,0 ,CD.intItemId)
+																	FROM dbo.fnRKGetFutureAndBasisPrice (1,CH.intCommodityId,right(convert(varchar, CD.dtmEndDate, 106),8),2,CD.intFutureMarketId,CD.intFutureMonthId,NULL,NULL,0 ,CD.intItemId,AD.intSeqCurrencyId)
 																	LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = CD.intItemId
 																)
 														ELSE	AD.dblSeqPrice
@@ -248,6 +250,8 @@ AS
 					,[strCertificateId]		=   CC.strCertificationId
 					,[strTrackingNumber]	=   CC.strTrackingNumber
 					,[intSourceType]		=   0
+					,[intContractHeaderId]	=   CD.intContractHeaderId
+					,[intContractDetailId]	=   CD.intContractDetailId
 
 			FROM	tblCTContractDetail			CD 
 			JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId

@@ -13,6 +13,8 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
+:r .\EncryptionDataFix.sql
+
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
 :r .\SM\DefaultData\2_UserRole.sql
@@ -74,7 +76,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\36_Control_Persmission.sql
 :r .\SM\DefaultData\37_ReplicationConfiguration.sql
 :r .\SM\DefaultData\38_ReplicationConfigurationTable.sql
+:r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
+:r .\SM\1830_Arrange_Portal_Menus.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -312,6 +316,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\2_MigrateStockRecords.sql
 :r .\PAT\3_UpdateIssueStockNo.sql
 :r .\PAT\4_UpdateRetiredStockNo.sql
+:r .\PAT\5_UpdatePayoutType.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
@@ -394,7 +399,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\034_UpdateEntityEmail.sql
 :r .\EM\036_MoveTheTermsPerType.sql
 :r .\EM\037_DefaultDataLocationPayee.sql
-:r .\EM\038_UpdateEncryptionUsed.sql
+--:r .\EM\038_UpdateEncryptionUsed.sql
 :r .\EM\039_MoveDefaultTermsToVendorTerm.sql
 :r .\EM\Migrate_Data_1710_Moving_Format_UserSec_Ent.sql
 :r .\EM\1730_Fix_SplitTypeEntry.sql

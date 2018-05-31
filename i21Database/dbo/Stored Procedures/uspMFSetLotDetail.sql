@@ -12,6 +12,7 @@
 	,@ysnBulkChange BIT = 0
 	,@strNewLotAlias NVARCHAR(50) = NULL
 	,@strNewVendorLotNumber NVARCHAR(50) = NULL
+	,@dtmNewDueDate DATETIME=NULL
 AS
 BEGIN TRY
 	DECLARE @intTransactionCount INT
@@ -58,6 +59,7 @@ BEGIN TRY
 			,@ysnBulkChange = @ysnBulkChange
 			,@strNewLotAlias = @strNewLotAlias
 			,@strNewVendorLotNumber = @strNewVendorLotNumber
+			,@dtmNewDueDate=@dtmNewDueDate
 
 		SELECT @intLotId = Min(intLotId)
 		FROM @tblMFLot

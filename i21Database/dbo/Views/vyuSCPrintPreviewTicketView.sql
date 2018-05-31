@@ -152,7 +152,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblSCTicketFormat.ysnSuppressCompanyName,
 	tblSCTicketFormat.intSuppressDiscountOptionId,
 	tblSCTicketFormat.ysnSuppressSplit,
-	SMS.blbDetail
+	SMS.blbDetail AS blbSignature
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId

@@ -23,7 +23,16 @@ BEGIN TRY
 				@dblQty							NUMERIC(18,6),
 				@dblConvertedQty				NUMERIC(18,6),
 				@ErrMsg							NVARCHAR(MAX),
-				@dblSchQuantityToUpdate			NUMERIC(18,6)
+				@dblSchQuantityToUpdate			NUMERIC(18,6),
+				@intContractHeaderId			INT,
+				@intItemId						INT,
+				@intCompanyLocationId			INT,
+				@intEntityId					INT,
+				@intPriceItemUOMId				INT,
+				@ysnBestPriceOnly					BIT,
+				@dblLowestPrice					NUMERIC(18,6),
+				@dblCashPrice					NUMERIC(18,6),
+				@ReduceBalance					BIT	=	1
 
 	--SELECT @strReceiptType = strReceiptType FROM @ItemsFromInvoice
 
@@ -35,6 +44,7 @@ BEGIN TRY
 		intUniqueId					INT IDENTITY,
 		intInvoiceDetailId			INT,
 		intContractDetailId			INT,
+		intContractHeaderId			INT,
 		intItemUOMId				INT,
 		intTicketId					INT,
 		dblQty						NUMERIC(18,6)	
@@ -43,12 +53,14 @@ BEGIN TRY
 	INSERT INTO @tblToProcess(
 		 [intInvoiceDetailId]
 		,[intContractDetailId]
+		,[intContractHeaderId]
 		,[intItemUOMId]
 		,[dblQty]
 		,[intTicketId])
 	SELECT
 		 I.[intInvoiceDetailId]
 		,I.[intContractDetailId]
+		,I.[intContractHeaderId]
 		,I.[intItemUOMId]
 		,I.[dblQtyShipped]
 		,I.[intTicketId]
@@ -75,15 +87,26 @@ BEGIN TRY
 				@intTicketType					=   NULL,
 				@strInOutFlag					=   NULL
 
-		SELECT	@intContractDetailId			=	[intContractDetailId],
-				@intFromItemUOMId				=	[intItemUOMId],
-				@dblQty							=	[dblQty],
-				@intInvoiceDetailId				=	[intInvoiceDetailId],
+		SELECT	@intContractDetailId			=	P.[intContractDetailId],
+				@intFromItemUOMId				=	P.[intItemUOMId],
+				@dblQty							=	P.[dblQty],
+				@intInvoiceDetailId				=	P.[intInvoiceDetailId],
 				@intTicketId					=   T.[intTicketId],
 				@intTicketTypeId				=   T.[intTicketTypeId],
 				@intTicketType					=   T.[intTicketType],
-				@strInOutFlag					=   T.[strInOutFlag]
+				@strInOutFlag					=   T.[strInOutFlag],
+
+				@intContractHeaderId			=	CD.intContractHeaderId,
+				@intItemId						=	CD.intItemId,
+				@intCompanyLocationId			=	CD.intCompanyLocationId,
+				@intEntityId					=	CH.intEntityId,
+				@intPriceItemUOMId				=	CD.intPriceItemUOMId,
+				@ysnBestPriceOnly					=	CH.ysnBestPriceOnly,
+				@dblCashPrice					=	CD.dblCashPrice
+
 		FROM	@tblToProcess P
+		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	P.intContractDetailId
+		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		LEFT JOIN  tblSCTicket T ON T.intTicketId = P.intTicketId
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
@@ -96,17 +119,27 @@ BEGIN TRY
 
 		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
 
+		IF @ysnBestPriceOnly = 1
+		BEGIN
+			EXEC uspARGetBestItemPrice @intItemId, @intCompanyLocationId, @intEntityId, @intPriceItemUOMId, @dblLowestPrice OUTPUT
+
+			IF	ISNULL(@dblLowestPrice,0) <> 0 AND @dblLowestPrice < @dblCashPrice
+				SET	@ReduceBalance	=	0
+				
+		END
 		-- IF ISNULL(@dblConvertedQty,0) = 0
 		-- BEGIN
 		-- 	RAISERROR('UOM does not exist.',16,1)
 		-- END
-
-		EXEC	uspCTUpdateSequenceBalance
-				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty,
-				@intUserId				=	@intUserId,
-				@intExternalId			=	@intInvoiceDetailId,
-				@strScreenName			=	'Invoice' 
+		IF	@ReduceBalance	=	1
+		BEGIN
+			EXEC	uspCTUpdateSequenceBalance
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblConvertedQty,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intInvoiceDetailId,
+					@strScreenName			=	'Invoice' 
+		END
 
 		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 					

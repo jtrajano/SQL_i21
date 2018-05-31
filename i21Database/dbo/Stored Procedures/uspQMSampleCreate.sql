@@ -21,6 +21,7 @@ BEGIN TRY
 	DECLARE @dtmBusinessDate DATETIME
 	DECLARE @dtmCreated DATETIME = GETDATE()
 	DECLARE @intInventoryReceiptId INT
+	DECLARE @intInventoryShipmentId INT
 	DECLARE @intWorkOrderId INT
 	DECLARE @ysnEnableParentLot BIT
 	DECLARE @strMarks NVARCHAR(100)
@@ -42,6 +43,7 @@ BEGIN TRY
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
 		,@intInventoryReceiptId = intInventoryReceiptId
+		,@intInventoryShipmentId = intInventoryShipmentId
 		,@intWorkOrderId = intWorkOrderId
 		,@strMarks = strMarks
 		,@intSampleTypeId = intSampleTypeId
@@ -55,6 +57,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,intLocationId INT
 			,intInventoryReceiptId INT
+			,intInventoryShipmentId INT
 			,intWorkOrderId INT
 			,strMarks NVARCHAR(100)
 			,intSampleTypeId INT
@@ -287,6 +290,7 @@ BEGIN TRY
 		,intShiftId
 		,intLocationId
 		,intInventoryReceiptId
+		,intInventoryShipmentId
 		,intWorkOrderId
 		,intCreatedUserId
 		,dtmCreated
@@ -347,6 +351,7 @@ BEGIN TRY
 		,@intShiftId
 		,intLocationId
 		,@intInventoryReceiptId
+		,@intInventoryShipmentId
 		,@intWorkOrderId
 		,intCreatedUserId
 		,dtmCreated

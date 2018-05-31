@@ -150,7 +150,7 @@ BEGIN
 									END
 		
 		,intItemId					= LI.intItemId
-		,intLineNo					= LI.intTransactionDetailId
+		,intLineNo					= CNT.intContractDetailId
 		,intOwnershipType			= CASE
 									  WHEN LI.ysnIsStorage = 0 THEN 1
 									  WHEN LI.ysnIsStorage = 1 THEN 2
@@ -180,6 +180,7 @@ BEGIN
 													 AND CNT.dblRate IS NOT NULL 
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
 												THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
+												WHEN CNT.intPricingTypeId = 5 THEN 1
 												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
 											END
 										END
@@ -206,19 +207,13 @@ BEGIN
 		,intItemLotGroup			= LI.intItemId
 		,intDestinationGradeId		= SC.intGradeId
 		,intDestinationWeightId		= SC.intWeightId
-
-		,intOrderId					= CASE 
-										WHEN LI.intTransactionDetailId IS NULL THEN NULL
-										WHEN LI.intTransactionDetailId IS NOT NULL THEN CNT.intContractHeaderId
-									  END
+		,intOrderId					= CNT.intContractHeaderId
 		,dtmShipDate				= SC.dtmTicketDateTime
 		,intSourceId				= SC.intTicketId
 		,intSourceType				= 1
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
-		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId AND ItemUOM.intItemUOMId = @intTicketItemUOMId
-		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
 			,CTD.intContractDetailId

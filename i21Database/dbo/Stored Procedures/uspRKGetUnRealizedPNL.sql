@@ -15,6 +15,7 @@ BEGIN TRY
 			1 - Contract
 			2 - InTransit
 			3 - Inventory
+			4 - FG Lots
 
   */
 
@@ -341,9 +342,8 @@ BEGIN TRY
 		,dtmEndDate									= CD.dtmEndDate
 		,strBLNumber								= NULL
 		,dtmBLDate									= NULL
-		,strAllocationRefNo							= AD.strAllocationDetailRefNo
-		,strAllocationStatus						= CASE 
-													  	WHEN ISNULL(AD.strAllocationDetailRefNo,'')  <> ''  THEN 'A'
+		,strAllocationRefNo							= NULL
+		,strAllocationStatus						= CASE
 													  	WHEN CH.intContractTypeId					 =   1	THEN 'L'
 													  	WHEN CH.intContractTypeId					 =   2	THEN 'S'
 													  END
@@ -419,7 +419,6 @@ BEGIN TRY
 		LEFT JOIN tblCTBookVsEntity				BVE				 ON BVE.intBookId					 = Book.intBookId	AND BVE.intEntityId = CH.intEntityId
 		LEFT JOIN tblCTCropYear					CropYear		 ON CropYear.intCropYearId			 = CH.intCropYearId		
 		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId 
-		LEFT JOIN tblLGAllocationDetail			AD				 ON CD.intContractDetailId			 = CASE WHEN CH.intContractTypeId=1 THEN AD.intPContractDetailId ELSE AD.intSContractDetailId END           
 		LEFT JOIN tblSMCurrency					BCY				 ON	BCY.intCurrencyID				 = CD.intBasisCurrencyId
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
@@ -517,9 +516,8 @@ BEGIN TRY
 		,dtmEndDate									= CD.dtmEndDate
 		,strBLNumber								= L.strBLNumber
 		,dtmBLDate									= L.dtmBLDate
-		,strAllocationRefNo							= AD.strAllocationDetailRefNo
-		,strAllocationStatus						= CASE 
-													  	WHEN ISNULL(AD.strAllocationDetailRefNo,'')  <> ''  THEN 'A'
+		,strAllocationRefNo							= NULL
+		,strAllocationStatus						= CASE
 													  	WHEN CH.intContractTypeId					 =   1	THEN 'L'
 													  	WHEN CH.intContractTypeId					 =   2	THEN 'S'
 													  END
@@ -601,7 +599,6 @@ BEGIN TRY
 		LEFT JOIN tblCTBookVsEntity				BVE				 ON BVE.intBookId					 = Book.intBookId	AND BVE.intEntityId = CH.intEntityId
 		LEFT JOIN tblCTCropYear					CropYear		 ON CropYear.intCropYearId			 = CH.intCropYearId	
 		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId 
-		LEFT JOIN tblLGAllocationDetail			AD				 ON AD.intAllocationDetailId		 = LD.intAllocationDetailId
 		LEFT JOIN tblSMCurrency					BCY				 ON	BCY.intCurrencyID				 = CD.intBasisCurrencyId
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
@@ -623,7 +620,6 @@ BEGIN TRY
 								  	WHEN ISNULL(@intCommodityId, 0) = 0 THEN CH.intCommodityId
 								  	ELSE @intCommodityId
 								  END
-		AND   CD.dblQuantity		> ISNULL(CD.dblInvoicedQty, 0)
 		AND CL.intCompanyLocationId = CASE 
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
@@ -672,7 +668,7 @@ BEGIN TRY
 		,intQuantityUOMId							= CD.intItemUOMId
 		,intQuantityUnitMeasureId					= IUM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
-		,dblWeight									= CD.dblNetWeight
+		,dblWeight									= l.dblWeight
 		,intWeightUOMId								= CD.intNetWeightUOMId
 		,intWeightUnitMeasureId						= WUM.intUnitMeasureId
 		,strWeightUOM								= WUM.strUnitMeasure
@@ -697,9 +693,8 @@ BEGIN TRY
 		,dtmEndDate									= CD.dtmEndDate
 		,strBLNumber								= NULL
 		,dtmBLDate									= NULL
-		,strAllocationRefNo							= AD.strAllocationDetailRefNo
+		,strAllocationRefNo							= NULL
 		,strAllocationStatus						= CASE 
-													  	WHEN ISNULL(AD.strAllocationDetailRefNo,'')  <> ''  THEN 'A'
 													  	WHEN CH.intContractTypeId					 =   1	THEN 'L'
 													  	WHEN CH.intContractTypeId					 =   2	THEN 'S'
 													  END
@@ -750,9 +745,10 @@ BEGIN TRY
 		FROM 
 		(
 		  SELECT 
-				CTDetail.intContractDetailId
+				 CTDetail.intContractDetailId
 				,Lot.intSubLocationId
 				,SUM(Lot.dblQty) dblLotQty
+				,SUM(Lot.dblQty * Lot.dblWeightPerQty) dblWeight
 				FROM tblICLot Lot
 				LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 				LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
@@ -789,7 +785,6 @@ BEGIN TRY
 		LEFT JOIN tblCTBookVsEntity				BVE				 ON BVE.intBookId					 = Book.intBookId	AND BVE.intEntityId = CH.intEntityId
 		LEFT JOIN tblCTCropYear					CropYear		 ON CropYear.intCropYearId			 = CH.intCropYearId		
 		LEFT JOIN tblICCommodityProductLine		CPL				 ON	CPL.intCommodityProductLineId	 = Item.intProductLineId 
-		LEFT JOIN tblLGAllocationDetail			AD				 ON CD.intContractDetailId			 = CASE WHEN CH.intContractTypeId=1 THEN AD.intPContractDetailId ELSE AD.intSContractDetailId END           
 		LEFT JOIN tblSMCurrency					BCY				 ON	BCY.intCurrencyID				 = CD.intBasisCurrencyId
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
@@ -812,7 +807,6 @@ BEGIN TRY
 								  	ELSE @intCommodityId
 								  END		
 		AND Item.strLotTracking <> 'No'
-		--AND   CD.dblQuantity		> ISNULL(CD.dblInvoicedQty, 0)
 		AND CL.intCompanyLocationId = CASE 
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
@@ -980,19 +974,7 @@ BEGIN TRY
 				FROM tblRKFutSettlementPriceMarketMap MarketMap
 				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
 				WHERE SettlementPrice.intFutureSettlementPriceId = @intFutureSettlementPriceId
-   
-			UNION
-
-			SELECT 
-			     intFutureMarketId  = SettlementPrice.intFutureMarketId
-				,intFutureMonthId	= MarketMap.intFutureMonthId
-				,dblSettlementPrice	= ISNULL(MarketMap.dblLastSettle,0)
-				FROM tblRKFutSettlementPriceMarketMap MarketMap
-				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
-				WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId <> @intFutureSettlementPriceId)
-	END
-	ELSE
-	BEGIN
+			
 			INSERT INTO @tblSettlementPrice(intFutureMarketId,intFutureMonthId,dblSettlementPrice)
 			SELECT 
 			     intFutureMarketId  = SettlementPrice.intFutureMarketId
@@ -1000,7 +982,21 @@ BEGIN TRY
 				,dblSettlementPrice	= ISNULL(MarketMap.dblLastSettle,0)
 				FROM tblRKFutSettlementPriceMarketMap MarketMap
 				JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureSettlementPriceId =MarketMap.intFutureSettlementPriceId
-				WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice)
+				WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId <> @intFutureSettlementPriceId)
+				--AND intFutureMarketId NOT IN(SELECT intFutureMarketId FROM @tblSettlementPrice)
+				AND intFutureMonthId  NOT IN(SELECT intFutureMonthId  FROM @tblSettlementPrice)
+	END
+	ELSE
+	BEGIN
+			INSERT INTO @tblSettlementPrice(intFutureMarketId,intFutureMonthId,dblSettlementPrice)
+			SELECT 
+				 intFutureMarketId  = SettlementPrice.intFutureMarketId
+				,intFutureMonthId = MarketMap.intFutureMonthId
+				,dblSettlementPrice = ISNULL(MarketMap.dblLastSettle,0)
+				 FROM tblRKFutureMarket Market
+				 JOIN tblRKFuturesSettlementPrice SettlementPrice ON SettlementPrice.intFutureMarketId = Market.intFutureMarketId
+				 JOIN tblRKFutSettlementPriceMarketMap MarketMap ON MarketMap.intFutureSettlementPriceId = SettlementPrice.intFutureSettlementPriceId    
+				 WHERE SettlementPrice.intFutureSettlementPriceId = (SELECT MAX(intFutureSettlementPriceId) FROM tblRKFuturesSettlementPrice WHERE intFutureMarketId = Market.intFutureMarketId)
 
 	END 
 
@@ -1070,23 +1066,39 @@ BEGIN TRY
 	JOIN @tblContractCost CC ON CC.intContractDetailId = RealizedPNL.intContractDetailId	
 	-----------------------------------------------------ContractInvoiceValue Updation--------------------------------------------
 	UPDATE CD
-	SET 
-	 CD.dblContractInvoiceValue	= CASE 
-											  WHEN ISNULL(CD.dblCashPrice,0.0)<> 0.0 THEN
-													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
-													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intPriceUnitMeasureId,CD.intFutureMarketUnitMeasureId, CD.dblCashPrice)
-													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+	SET CD.dblContractInvoiceValue	
+	  =	  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+		* dbo.fnCTConvertQuantityToTargetItemUOM(
+												 CD.intItemId
+												,CD.intFutureMarketUnitMeasureId
+												,CD.intPriceUnitMeasureId
+												,[dbo].[fnCTGetSequencePrice](CD.intContractDetailId,ISNULL(SP.dblSettlementPrice,0))
+												)
 
-											  WHEN ISNULL(CD.dblCashPrice,0.0)= 0.0 THEN
-													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
-													*(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intBasisUnitMeasureId,CD.intFutureMarketUnitMeasureId, CD.dblBasis)+
-													  ISNULL(SP.dblSettlementPrice,0))
-													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
-								  END
    ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
 	FROM @tblUnRealizedPNL CD
 	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
 	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
+	WHERE CD.intTransactionType <> 4
+
+	UPDATE CD
+	SET 
+	 CD.dblContractInvoiceValue	= CASE 
+											  WHEN ISNULL(CD.dblCashPrice,0.0)<> 0.0 THEN
+													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intPriceUnitMeasureId, CD.dblCashPrice)
+													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+
+											  WHEN ISNULL(CD.dblCashPrice,0.0)= 0.0 THEN
+													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intQuantityUnitMeasureId,CD.dblQuantity)
+													 * ISNULL(SP.dblSettlementPrice,0)
+													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
+								 END
+   ,CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,0)        
+	FROM @tblUnRealizedPNL CD
+	JOIN @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId
+	JOIN tblSMCurrency		    FCY	     ON	FCY.intCurrencyID	    = CD.intMarketCurrencyId
+	WHERE CD.intTransactionType = 4
 	-----------------------------------------------------Net Market Updation--------------------------------------------	
 		 UPDATE @tblUnRealizedPNL 
 		 SET  

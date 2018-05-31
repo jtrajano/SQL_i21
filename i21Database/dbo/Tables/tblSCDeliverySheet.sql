@@ -15,6 +15,7 @@
     [dblGross] NUMERIC(38, 20) NULL DEFAULT ((0)),
 	[dblShrink] NUMERIC(38, 20) NULL DEFAULT ((0)),
 	[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)),
+	[intCompanyId] INT NULL,
     [ysnPost] BIT NULL DEFAULT (0),
 	[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)), 

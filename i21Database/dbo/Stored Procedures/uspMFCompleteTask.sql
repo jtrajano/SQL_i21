@@ -107,6 +107,16 @@ BEGIN TRY
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
+	SELECT @intDefaultShipmentDockDoorLocation = intDefaultInboundDockDoorUnitId--intDefaultOutboundDockDoorUnitId
+	FROM tblSMCompanyLocation
+	Where intCompanyLocationId =@intLocationId
+
+	if @intDefaultShipmentDockDoorLocation is null
+	Begin
+		SELECT @intDefaultShipmentDockDoorLocation = intDefaultShipmentDockDoorLocation
+		FROM tblMFCompanyPreference
+	end
+
 	SELECT @intEntityCustomerId = intEntityCustomerId
 		,@intInventoryShipmentId = intInventoryShipmentId
 	FROM tblICInventoryShipment

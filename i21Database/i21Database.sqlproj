@@ -6640,6 +6640,7 @@
     <Build Include="dbo\Views\vyuLGInsuranceCalculatorNotMapped.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\37_ReplicationConfiguration.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\38_ReplicationConfigurationTable.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1830_Arrange_Portal_Menus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucherStatus.sql" />
     <None Include="Scripts\Post-Deployment\IC\31_RemoveAfter18.3_DataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStockControlReport.sql" />
@@ -6659,6 +6660,29 @@
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWOPickListDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemSpecialPricingForCStore.sql" />
+    <Build Include="dbo\Functions\fnAPCreateClaimARGLEntries.sql" />
+    <Build Include="dbo\Functions\fnARGenerateGLEntriesForPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARValidatePaymentPosting.sql" />
+    <Build Include="dbo\User Defined Types\ReceivePaymentPostingTable.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidPaymentsForPosting.sql" />
+    <Build Include="dbo\Functions\fnARGetPaymentDetailsForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveAmendmentLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSetLotDueDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetBestItemPrice.sql" />
+    <Build Include="dbo\Tables\tblMBILOrderItem.sql" />
+    <Build Include="dbo\Tables\tblMBILOrderSite.sql" />
+    <Build Include="dbo\Tables\tblMBILOrderTaxCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILBuildOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentChangeLotWeight.sql" />
+    <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
+    <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
+    <Build Include="dbo\Views\vyuRKM2MBasisDateList.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql" />
+    <Build Include="dbo\Views\vyuAPVouchersForARPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddInventoryCount.sql" />
+    <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\5_UpdatePayoutType.sql" />
+    <Build Include="dbo\Tables\tblLGWeightClaimOtherCharges.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScanner.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScannerExportPricebook.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScannerImportReceipt.sql" />
@@ -6840,11 +6864,12 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\33_InterCompanyTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOPendingStatus.sql" />
-    <None Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
-    <None Include="dbo\Functions\fnCFGetDefaultComment.sql" />
+    <Build Include="dbo\Functions\fnCFGetDefaultCommentTable.sql" />
+    <Build Include="dbo\Functions\fnCFGetDefaultComment.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099PATR.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099DIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateNewShipFromEntity.sql" />
+    <None Include="Scripts\Post-Deployment\EncryptionDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

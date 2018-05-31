@@ -27,7 +27,7 @@
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 		INNER JOIN tblSMReplicationTable AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
+		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 AND (ysnInitOnly != 1 OR ysnInitOnly IS null) '
 
 		
 		--SET @insertSQL = 'Exec('' ' + Replace(@insertSQL, 'parentDB', @parentDB) + ' '')'

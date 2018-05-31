@@ -25,6 +25,10 @@ CREATE FUNCTION [dbo].[fnCalculateQtyBetweenUOM](
 RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
+	
+	--DEV NOTE
+	--any modification here with regards to what are parameters
+	--please update fnARCalculateQtyBetweenUOM as well
 	DECLARE	@result AS NUMERIC(38,20)
 
 	IF @dblQty = 0 

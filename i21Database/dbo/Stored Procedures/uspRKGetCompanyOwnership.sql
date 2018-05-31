@@ -4,6 +4,7 @@
 	,@intCommodityId INT = NULL
 	,@intItemId INT = NULL
 	,@strPositionIncludes NVARCHAR(100) = NULL
+	,@intLocationId int = null
 AS
 DECLARE @tblResult TABLE (
 	Id INT identity(1, 1)
@@ -36,6 +37,7 @@ FROM (
 					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 					)
 			WHERE intCommodityId = @intCommodityId AND convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(i.strType, '') <> 'Other Charge'
+			AND it.intItemLocationId = @intLocationId
 			) InventoryBalanceCarryForward
 	FROM (
 		SELECT dblInQty dblUnpaidIn
@@ -66,6 +68,7 @@ FROM (
 					FROM tblSMCompanyLocation
 					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 					)
+					AND b.intShipToId = @intLocationId
 			) t
 		) t2
 	
@@ -84,6 +87,7 @@ FROM (
 	JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 	JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
 	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge' AND i.intCommodityId = @intCommodityId
+		AND ir.intSubLocationId = @intLocationId 
 	) t3
 
 INSERT INTO @tblResult (
@@ -134,6 +138,7 @@ FROM (
 		LEFT JOIN tblICItem i ON i.intItemId = bd.intItemId
 		LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 		WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
+			AND b.intShipToId = @intLocationId
 		) t
 	) t2
 
@@ -158,6 +163,7 @@ JOIN tblICItem i ON i.intItemId = ir.intItemId
 JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
 JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
 WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110)) AND i.intCommodityId = @intCommodityId AND i.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN i.intItemId ELSE @intItemId END AND isnull(strType, '') <> 'Other Charge'
+	AND ir.intSubLocationId = @intLocationId
 ORDER BY dtmDate
 
 SELECT convert(INT, ROW_NUMBER() OVER (

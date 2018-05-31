@@ -800,7 +800,7 @@ BEGIN TRY
 				,dblCostRate
 				,ysnLock
 				)
-			SELECT intRecipeItemId = @intWorkOrderId + @intRecipeItemId
+			SELECT intRecipeItemId = @intRecipeItemId
 				,intRecipeId = @intRecipeId
 				,intItemId = @intItemId
 				,dblQuantity = 1

@@ -10,81 +10,65 @@ Post-Deployment Script Template
 --------------------------------------------------------------------------------------
 */
 
-PRINT ('Begin updating module in tblGLAccountCategory table');
+PRINT ('Begin updating module in tblGLRequiredPrimaryCategory table');
 GO
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Purchasing'
-    )
-WHERE strAccountCategory IN ( 'AP Account', 'Unrealized Gain or Loss Accounts Payable', 'AP Clearing',
-                              'Purchase Tax Account', 'Vendor Prepayments','Other Charge Expense', 
-							  'Other Charge Income', 'Unrealized Gain or Loss Offset AP',
-                              'Realized Gain or Loss Payables', 'Realized Gain or Loss Receivables'
-                            );
+DECLARE @tblCategoryModule TABLE ( 
+strAccountCategory nvarchar(100)  COLLATE Latin1_General_CI_AS,
+strModule nvarchar(100)  COLLATE Latin1_General_CI_AS,
+strScreen nvarchar(100)  COLLATE Latin1_General_CI_AS NULL,
+strView nvarchar(100)  COLLATE Latin1_General_CI_AS NULL,
+strTab nvarchar(100)  COLLATE Latin1_General_CI_AS NULL
 
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Sales'
-    )
-WHERE strAccountCategory IN ( 'AR Account', 'Unrealized Gain or Loss Accounts Payable', 'Sales Tax Account',
-                              'Cost of Goods', 'Sales Account', 'Sales Discount', 'Unrealized Gain or Loss Offset AR',
-                              'Unrealized Gain or Loss Accounts Receivable', 'Maintenance Sales','Deferred Revenue',
-							  'Sales Discount','Customer Prepayments'
-                            );
+)
 
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Cash Management'
-    )
-WHERE strAccountCategory IN ( 'Cash Account', 'Unrealized Gain or Loss Cash Management', 'Undeposited Funds',
-                              'Unrealized Gain or Loss Offset CM'
-                            );
-
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Inventory'
-    )
-WHERE strAccountCategory IN ( 'Inventory', 'Unrealized Gain or Loss Offset Inventory', 'Work In Progress',
-                              'Inventory In-Transit', 'Inventory Adjustment',
-                              'Unrealized Gain or Loss Offset Inventory', 'Unrealized Gain or Loss Inventory'
-                            );
-
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Manufacturing'
-    )
-WHERE strAccountCategory IN ( 'Work In Progress' );
-
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Contract Management'
-    )
-WHERE strAccountCategory IN ( 'Unrealized Gain or Loss Contract Purchase', 'Unrealized Gain or Loss Contract Sales',
-                              'Unrealized Gain or Loss Offset Contract Purchase',
-                              'Unrealized Gain or Loss Offset Contract Sales'
-                            );
-
-UPDATE dbo.tblGLAccountCategory
-SET intModuleId =
-    (
-        SELECT TOP 1 intModuleId FROM dbo.tblSMModule WHERE strModule = 'Risk Management'
-    )
-WHERE strAccountCategory IN ( 'Futures Trade Equity', 'Futures Gain or Loss Realized' );
-
-GO
-PRINT ('Finished updating module in tblGLAccountCategory table');
-
-GO
+INSERT INTO @tblCategoryModule 
+SELECT 'Cash Account' strAccountCategory,'Cash Management' strModule, 'Bank Accounts' strScreen, 'CashManagement.view.BankAccounts' strView, NULL strTab UNION
+SELECT 'Undeposited Funds' strAccountCategory,'Cash Management' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Unrealized Gain or Loss Cash Management' strAccountCategory,'Cash Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Offset CM' strAccountCategory,'Cash Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Contract Purchase' strAccountCategory,'Contract Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Contract Sales' strAccountCategory,'Contract Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Offset Contract Purchase' strAccountCategory,'Contract Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Offset Contract Sales' strAccountCategory,'Contract Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Inventory' strAccountCategory,'Inventory' strModule, 'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab UNION
+SELECT 'Inventory Adjustment' strAccountCategory,'Inventory' strModule, 'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab UNION
+SELECT 'Inventory In-Transit' strAccountCategory,'Inventory' strModule, 'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab UNION
+SELECT 'Unrealized Gain or Loss Inventory' strAccountCategory,'Inventory' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Offset Inventory' strAccountCategory,'Inventory' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Work In Progress' strAccountCategory,'Inventory' strModule, 'Bag Off' strScreen, 'Manufacturing.view.BagOff' strView, NULL strTab UNION
+SELECT 'Work In Progress' strAccountCategory,'Manufacturing' strModule, 'Bag Off' strScreen, 'Manufacturing.view.BagOff' strView, NULL strTab UNION
+SELECT 'AP Account' strAccountCategory,'Purchasing' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'AP Clearing' strAccountCategory,'Inventory' strModule,'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab UNION
+SELECT 'Other Charge Expense' strAccountCategory,'Purchasing' strModule, 'Voucher' strScreen, 'AccountsPayable.view.Voucher' strView, NULL strTab UNION
+SELECT 'Other Charge Income' strAccountCategory,'Purchasing' strModule, 'Voucher' strScreen, 'AccountsPayable.view.Voucher' strView, NULL strTab UNION
+SELECT 'Purchase Tax Account' strAccountCategory,'Purchasing' strModule, 'Tax Code' strScreen, 'i21.view.TaxCode' strView, 'Details' strTab UNION
+SELECT 'Realized Gain or Loss Payables' strAccountCategory,'Purchasing' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Accounts Payable' strAccountCategory,'Purchasing' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Offset AP' strAccountCategory,'Purchasing' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Vendor Prepayments' strAccountCategory,'Purchasing' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Futures Gain or Loss Realized' strAccountCategory,'Risk Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Futures Trade Equity' strAccountCategory,'Risk Management' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'AR Account' strAccountCategory,'Sales' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Cost of Goods' strAccountCategory,'Inventory' strModule, 'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab UNION
+SELECT 'Customer Prepayments' strAccountCategory,'Sales' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Deferred Revenue' strAccountCategory,'Sales' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Maintenance Sales' strAccountCategory,'Inventory' strModule, 'Item' strScreen, 'Inventory.view.Item' strView, 'Setup' strTab UNION
+SELECT 'Realized Gain or Loss Receivables' strAccountCategory,'Sales' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Sales Account' strAccountCategory,'Sales' strModule, 'Invoice' strScreen, 'AccountsReceivable.view.Invoice' strView, NULL strTab UNION
+SELECT 'Sales Discount' strAccountCategory,'Sales' strModule, 'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Sales Tax Account' strAccountCategory,'Sales' strModule, 'Tax Code' strScreen, 'i21.view.TaxCode' strView, 'Details' strTab UNION
+SELECT 'Service Charges' strAccountCategory,'Sales' strModule,  'Company Location' strScreen, 'i21.view.CompanyLocation' strView, 'GL Accounts' strTab UNION
+SELECT 'Unrealized Gain or Loss Accounts Receivable' strAccountCategory,'Sales' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab UNION
+SELECT 'Unrealized Gain or Loss Offset AR' strAccountCategory,'Sales' strModule, 'Company Configuration' strScreen, 'i21.view.CompanyPreference' strView, 'System Manager' strTab 
 
 
-PRINT ('Begin inserting to tblGLRequiredPrimaryCategory');
-GO
+UPDATE cat 
+SET intModuleId = sm.intModuleId
+FROM dbo.tblGLAccountCategory cat
+JOIN @tblCategoryModule catmod ON catmod.strAccountCategory = cat.strAccountCategory
+JOIN tblSMModule sm ON sm.strModule = catmod.strModule
+
+
 	MERGE 
 		dbo.tblGLRequiredPrimaryCategory AS Target
 	USING	(
@@ -107,37 +91,16 @@ GO
 		VALUES (Source.intAccountCategoryId,Source.intModuleId)
 	WHEN NOT MATCHED BY SOURCE THEN
 		DELETE;
+
+UPDATE rpc SET strView = catmod.strView, strTab = catmod.strTab, strScreen = catmod.strScreen
+FROM dbo.tblGLRequiredPrimaryCategory rpc
+JOIN tblGLAccountCategory cat ON  rpc.intAccountCategoryId = cat.intAccountCategoryId
+JOIN @tblCategoryModule catmod ON catmod.strAccountCategory = cat.strAccountCategory
+
+
 GO
-
-
-UPDATE  dbo.tblGLRequiredPrimaryCategory
-SET strView = 'i21.view.CompanyLocation', strTab = 'GL Accounts', strScreen = 'Company Location'
-WHERE intAccountCategoryId IN (
-	SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory IN(
-	 'AP Account', 'Vendor Prepayments','Customer Prepayments','Undeposited Funds',
-	 'Sales Discount','Service Charges','Deferred Revenue','AR Account','Write Off'))
-
-
-UPDATE  dbo.tblGLRequiredPrimaryCategory
-SET strView = 'Manufacturing.view.BagOff', strScreen= 'Bag Off'
-WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory ='Work In Progress')
-
-UPDATE  dbo.tblGLRequiredPrimaryCategory
-SET strView = 'AccountsPayable.view.Voucher', strScreen ='Voucher'
-WHERE intAccountCategoryId IN(
-SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory in ('Other Charge Expense','Other Charge Income'))
-	
-
-UPDATE  dbo.tblGLRequiredPrimaryCategory
-SET strView = 'i21.view.CompanyPreference', strTab = 'System Manager', strScreen = 'Company Configuration'
-WHERE intAccountCategoryId between 60 and 77 -- gain / loss category
-
-UPDATE  dbo.tblGLRequiredPrimaryCategory
-SET strView = 'i21.view.TaxCode', strTab = 'Details', strScreen = 'Tax Code'
-WHERE intAccountCategoryId IN (48,49) --sales / purchase tax account category
-
-
-PRINT ('Finished inserting to tblGLRequiredPrimaryCategory');
+PRINT ('Finished updating to tblGLRequiredPrimaryCategory table');
+GO
 
 
 

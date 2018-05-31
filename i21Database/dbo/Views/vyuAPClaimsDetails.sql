@@ -20,6 +20,7 @@ AS
 			,ISNULL(B.dblUnitQty,1) AS dblUnitQty 
 			,G.strItemNo
 			,G.intItemId
+			,J.intTransactionId AS intPrepayTransactionId
 			,E.intContractDetailId
 			,E.intContractHeaderId
 			,E.intContractSeq
@@ -117,6 +118,7 @@ AS
 				 ,E.dblQuantity
 				 ,H.strContractNumber
 				 ,I.dblFranchise
+				 ,J.intTransactionId
 				 ,A.intEntityVendorId
 				 ,A.intShipToId
 				 ,L.dblTotal 

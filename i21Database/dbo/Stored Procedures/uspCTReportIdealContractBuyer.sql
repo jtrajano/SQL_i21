@@ -175,9 +175,9 @@ BEGIN TRY
 	left join tblSMTransaction			rtt1 on rtt1.intScreenId = rts1.intScreenId and rtt1.intRecordId = AN.intAssociationId
 	left join tblSMReportTranslation	rtrt1 on rtrt1.intLanguageId = @intLaguageId and rtrt1.intTransactionId = rtt1.intTransactionId and rtrt1.strFieldName = 'Name'
 	
-	left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = UOM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
 	
 	left join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.Item'
 	left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = IM.intItemId
@@ -191,9 +191,9 @@ BEGIN TRY
 	left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = FuturesMonth.intFutureMonthId
 	left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Future Trading Month'
 	
-	left join tblSMScreen				rts6 on rts6.strNamespace = 'Inventory.view.InventoryUOM'
+	left join tblSMScreen				rts6 on rts6.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = BasisUOM.intUnitMeasureId
-	left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'UOM'
+	left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Name'
 	
 	left join tblSMScreen				rts7 on rts7.strNamespace = 'i21.view.Term'
 	left join tblSMTransaction			rtt7 on rtt7.intScreenId = rts7.intScreenId and rtt7.intRecordId = TM.intTermID

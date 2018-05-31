@@ -337,8 +337,479 @@ BEGIN
 			[strInvoiceNumber]	NVARCHAR(MAX)
 		)
 
+		CREATE TABLE #tblCFTempInvoiceReport 
+		(
+			 intCustomerId					INT
+			,intTransactionId				INT
+			,intOdometer					INT
+			,intProductId					INT
+			,intCardId						INT
+			,intAccountId					INT
+			,intInvoiceCycle				INT
+			,intInvoiceId					INT
+			,intCustomerGroupId				INT
+			,intOdometerAging				INT
+			----------------------------------------------------
+			,dtmTransactionDate				DATETIME
+			,dtmInvoiceDate					DATETIME
+			,dtmPostedDate					DATETIME
+			,dtmCreatedDate					DATETIME
+			,dtmDate						DATETIME
+			----------------------------------------------------
+			,strTransactionId				NVARCHAR(MAX)
+			,strTransactionType				NVARCHAR(MAX)
+			,strInvoiceReportNumber			NVARCHAR(MAX)
+			,strTempInvoiceReportNumber		NVARCHAR(MAX)
+			,strMiscellaneous				NVARCHAR(MAX)
+			,strPrintTimeStamp				NVARCHAR(MAX)
+			,strPrimarySortOptions			NVARCHAR(MAX)
+			,strSecondarySortOptions		NVARCHAR(MAX)
+			,strPrintRemittancePage			NVARCHAR(MAX)
+			,strPrintPricePerGallon			NVARCHAR(MAX)
+			,strPrintSiteAddress			NVARCHAR(MAX)
+			,strPrimaryDepartment			NVARCHAR(MAX)
+			,strName						NVARCHAR(MAX)
+			,strCustomerNumber				NVARCHAR(MAX)
+			,strBillTo						NVARCHAR(MAX)
+			,strShipTo						NVARCHAR(MAX)
+			,strType						NVARCHAR(MAX)
+			,strLocationName				NVARCHAR(MAX)
+			,strInvoiceNumber				NVARCHAR(MAX)
+			,strNetwork						NVARCHAR(MAX)
+			,strGroupName					NVARCHAR(MAX)
+			,strInvoiceCycle				NVARCHAR(MAX)
+			,strCardNumber					NVARCHAR(MAX)
+			,strCardDescription				NVARCHAR(MAX)
+			,strSiteNumber					NVARCHAR(MAX)
+			,strSiteName					NVARCHAR(MAX)
+			,strTaxState					NVARCHAR(MAX)
+			,strSiteType					NVARCHAR(MAX)
+			,strState						NVARCHAR(MAX)
+			,strSiteAddress					NVARCHAR(MAX)
+			,strSiteCity					NVARCHAR(MAX)
+			,strProductNumber				NVARCHAR(MAX)
+			,strItemNo						NVARCHAR(MAX)
+			,strDescription					NVARCHAR(MAX)
+			,strVehicleNumber				NVARCHAR(MAX)
+			,strVehicleDescription			NVARCHAR(MAX)
+			,strDepartment					NVARCHAR(MAX)
+			,strDepartmentDescription		NVARCHAR(MAX)
+			,strCompanyName					NVARCHAR(MAX)
+			,strCompanyAddress				NVARCHAR(MAX)
+			,strEmailDistributionOption		NVARCHAR(MAX)
+			,strEmail						NVARCHAR(MAX)
+			,strCustomerName				NVARCHAR(MAX)
+			----------------------------------------------------
+			,dblQuantity					NUMERIC(18,6)
+			,dblCalculatedTotalAmount		NUMERIC(18,6)
+			,dblOriginalTotalAmount			NUMERIC(18,6)
+			,dblCalculatedGrossAmount		NUMERIC(18,6)
+			,dblOriginalGrossAmount			NUMERIC(18,6)
+			,dblCalculatedNetAmount			NUMERIC(18,6)
+			,dblOriginalNetAmount			NUMERIC(18,6)
+			,dblMargin						NUMERIC(18,6)
+			,dblTotalMiles					NUMERIC(18,6)
+			,dblTotalTax					NUMERIC(18,6)
+			,dblTotalSST					NUMERIC(18,6)
+			,dblTaxExceptSST				NUMERIC(18,6)
+			----------------------------------------------------
+			,ysnInvalid						BIT
+			,ysnPosted						BIT
+			,ysnPostedCSV					BIT
+			,ysnPrintMiscellaneous			BIT
+			,ysnSummaryByCard				BIT
+			,ysnSummaryByDepartment			BIT
+			,ysnSummaryByMiscellaneous		BIT
+			,ysnSummaryByProduct			BIT
+			,ysnSummaryByVehicle			BIT
+			,ysnSummaryByCardProd			BIT
+			,ysnSummaryByDeptCardProd		BIT
+			,ysnPrintTimeOnInvoices			BIT
+			,ysnPrintTimeOnReports			BIT
+			,ysnSummaryByDeptVehicleProd	BIT
+			,ysnDepartmentGrouping			BIT
+			,ysnPostForeignSales			BIT
 
-		SELECT * INTO #tblCFTempInvoiceReport FROM vyuCFInvoiceReport
+		)
+
+
+		IF(ISNULL(@ysnReprintInvoice,0) = 1 OR ISNULL(@From,0) = 1)
+		BEGIN
+			INSERT INTO #tblCFTempInvoiceReport(
+			 intCustomerId				
+			,intTransactionId			
+			,intOdometer				
+			,intProductId				
+			,intCardId					
+			,intAccountId				
+			,intInvoiceCycle			
+			,intInvoiceId				
+			,intCustomerGroupId			
+			,intOdometerAging			
+			----------------------------
+			,dtmTransactionDate			
+			,dtmInvoiceDate				
+			,dtmPostedDate				
+			,dtmCreatedDate				
+			,dtmDate					
+			----------------------------
+			,strTransactionId			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strTempInvoiceReportNumber	
+			,strMiscellaneous			
+			,strPrintTimeStamp			
+			,strPrimarySortOptions		
+			,strSecondarySortOptions	
+			,strPrintRemittancePage		
+			,strPrintPricePerGallon		
+			,strPrintSiteAddress		
+			,strPrimaryDepartment		
+			,strName					
+			,strCustomerNumber			
+			,strBillTo					
+			,strShipTo					
+			,strType					
+			,strLocationName			
+			,strInvoiceNumber			
+			,strNetwork					
+			,strGroupName				
+			,strInvoiceCycle			
+			,strCardNumber				
+			,strCardDescription			
+			,strSiteNumber				
+			,strSiteName				
+			,strTaxState				
+			,strSiteType				
+			,strState					
+			,strSiteAddress				
+			,strSiteCity				
+			,strProductNumber			
+			,strItemNo					
+			,strDescription				
+			,strVehicleNumber			
+			,strVehicleDescription		
+			,strDepartment				
+			,strDepartmentDescription	
+			,strCompanyName				
+			,strCompanyAddress			
+			,strEmailDistributionOption	
+			,strEmail				
+			,strCustomerName	
+			----------------------------
+			,dblQuantity				
+			,dblCalculatedTotalAmount	
+			,dblOriginalTotalAmount		
+			,dblCalculatedGrossAmount	
+			,dblOriginalGrossAmount		
+			,dblCalculatedNetAmount		
+			,dblOriginalNetAmount		
+			,dblMargin					
+			,dblTotalMiles				
+			,dblTotalTax				
+			,dblTotalSST				
+			,dblTaxExceptSST			
+			----------------------------
+			,ysnInvalid					
+			,ysnPosted					
+			,ysnPostedCSV				
+			,ysnPrintMiscellaneous		
+			,ysnSummaryByCard			
+			,ysnSummaryByDepartment		
+			,ysnSummaryByMiscellaneous	
+			,ysnSummaryByProduct		
+			,ysnSummaryByVehicle		
+			,ysnSummaryByCardProd		
+			,ysnSummaryByDeptCardProd	
+			,ysnPrintTimeOnInvoices		
+			,ysnPrintTimeOnReports		
+			,ysnSummaryByDeptVehicleProd
+			,ysnDepartmentGrouping		
+			,ysnPostForeignSales		
+			)
+			SELECT 
+			 intCustomerId				
+			,intTransactionId			
+			,intOdometer				
+			,intProductId				
+			,intCardId					
+			,intAccountId				
+			,intInvoiceCycle			
+			,intInvoiceId				
+			,intCustomerGroupId			
+			,intOdometerAging			
+			----------------------------
+			,dtmTransactionDate			
+			,dtmInvoiceDate				
+			,dtmPostedDate				
+			,dtmCreatedDate				
+			,dtmDate					
+			----------------------------
+			,strTransactionId			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strTempInvoiceReportNumber	
+			,strMiscellaneous			
+			,strPrintTimeStamp			
+			,strPrimarySortOptions		
+			,strSecondarySortOptions	
+			,strPrintRemittancePage		
+			,strPrintPricePerGallon		
+			,strPrintSiteAddress		
+			,strPrimaryDepartment		
+			,strName					
+			,strCustomerNumber			
+			,strBillTo					
+			,strShipTo					
+			,strType					
+			,strLocationName			
+			,strInvoiceNumber			
+			,strNetwork					
+			,strGroupName				
+			,strInvoiceCycle			
+			,strCardNumber				
+			,strCardDescription			
+			,strSiteNumber				
+			,strSiteName				
+			,strTaxState				
+			,strSiteType				
+			,strState					
+			,strSiteAddress				
+			,strSiteCity				
+			,strProductNumber			
+			,strItemNo					
+			,strDescription				
+			,strVehicleNumber			
+			,strVehicleDescription		
+			,strDepartment				
+			,strDepartmentDescription	
+			,strCompanyName				
+			,strCompanyAddress			
+			,strEmailDistributionOption	
+			,strEmail		
+			,strCustomerName			
+			----------------------------
+			,dblQuantity				
+			,dblCalculatedTotalAmount	
+			,dblOriginalTotalAmount		
+			,dblCalculatedGrossAmount	
+			,dblOriginalGrossAmount		
+			,dblCalculatedNetAmount		
+			,dblOriginalNetAmount		
+			,dblMargin					
+			,dblTotalMiles				
+			,dblTotalTax				
+			,dblTotalSST				
+			,dblTaxExceptSST			
+			----------------------------
+			,ysnInvalid					
+			,ysnPosted					
+			,ysnPostedCSV				
+			,ysnPrintMiscellaneous		
+			,ysnSummaryByCard			
+			,ysnSummaryByDepartment		
+			,ysnSummaryByMiscellaneous	
+			,ysnSummaryByProduct		
+			,ysnSummaryByVehicle		
+			,ysnSummaryByCardProd		
+			,ysnSummaryByDeptCardProd	
+			,ysnPrintTimeOnInvoices		
+			,ysnPrintTimeOnReports		
+			,ysnSummaryByDeptVehicleProd
+			,ysnDepartmentGrouping		
+			,ysnPostForeignSales		
+			FROM vyuCFInvoiceReport
+		END
+		ELSE
+		BEGIN
+			INSERT INTO #tblCFTempInvoiceReport(
+			 intCustomerId				
+			,intTransactionId			
+			,intOdometer				
+			,intProductId				
+			,intCardId					
+			,intAccountId				
+			,intInvoiceCycle			
+			,intInvoiceId				
+			,intCustomerGroupId			
+			,intOdometerAging			
+			----------------------------
+			,dtmTransactionDate			
+			,dtmInvoiceDate				
+			,dtmPostedDate				
+			,dtmCreatedDate				
+			,dtmDate					
+			----------------------------
+			,strTransactionId			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strTempInvoiceReportNumber	
+			,strMiscellaneous			
+			,strPrintTimeStamp			
+			,strPrimarySortOptions		
+			,strSecondarySortOptions	
+			,strPrintRemittancePage		
+			,strPrintPricePerGallon		
+			,strPrintSiteAddress		
+			,strPrimaryDepartment		
+			,strName					
+			,strCustomerNumber			
+			,strBillTo					
+			,strShipTo					
+			,strType					
+			,strLocationName			
+			,strInvoiceNumber			
+			,strNetwork					
+			,strGroupName				
+			,strInvoiceCycle			
+			,strCardNumber				
+			,strCardDescription			
+			,strSiteNumber				
+			,strSiteName				
+			,strTaxState				
+			,strSiteType				
+			,strState					
+			,strSiteAddress				
+			,strSiteCity				
+			,strProductNumber			
+			,strItemNo					
+			,strDescription				
+			,strVehicleNumber			
+			,strVehicleDescription		
+			,strDepartment				
+			,strDepartmentDescription	
+			,strCompanyName				
+			,strCompanyAddress			
+			,strEmailDistributionOption	
+			,strEmail		
+			,strCustomerName				
+			----------------------------
+			,dblQuantity				
+			,dblCalculatedTotalAmount	
+			,dblOriginalTotalAmount		
+			,dblCalculatedGrossAmount	
+			,dblOriginalGrossAmount		
+			,dblCalculatedNetAmount		
+			,dblOriginalNetAmount		
+			,dblMargin					
+			,dblTotalMiles				
+			,dblTotalTax				
+			,dblTotalSST				
+			,dblTaxExceptSST			
+			----------------------------
+			,ysnInvalid					
+			,ysnPosted					
+			,ysnPostedCSV				
+			,ysnPrintMiscellaneous		
+			,ysnSummaryByCard			
+			,ysnSummaryByDepartment		
+			,ysnSummaryByMiscellaneous	
+			,ysnSummaryByProduct		
+			,ysnSummaryByVehicle		
+			,ysnSummaryByCardProd		
+			,ysnSummaryByDeptCardProd	
+			,ysnPrintTimeOnInvoices		
+			,ysnPrintTimeOnReports		
+			,ysnSummaryByDeptVehicleProd
+			,ysnDepartmentGrouping		
+			,ysnPostForeignSales		
+			)
+			SELECT 
+			 intCustomerId				
+			,intTransactionId			
+			,intOdometer				
+			,intProductId				
+			,intCardId					
+			,intAccountId				
+			,intInvoiceCycle			
+			,intInvoiceId				
+			,intCustomerGroupId			
+			,intOdometerAging			
+			----------------------------
+			,dtmTransactionDate			
+			,dtmInvoiceDate				
+			,dtmPostedDate				
+			,dtmCreatedDate				
+			,dtmDate					
+			----------------------------
+			,strTransactionId			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strTempInvoiceReportNumber	
+			,strMiscellaneous			
+			,strPrintTimeStamp			
+			,strPrimarySortOptions		
+			,strSecondarySortOptions	
+			,strPrintRemittancePage		
+			,strPrintPricePerGallon		
+			,strPrintSiteAddress		
+			,strPrimaryDepartment		
+			,strName					
+			,strCustomerNumber			
+			,strBillTo					
+			,strShipTo					
+			,strType					
+			,strLocationName			
+			,strInvoiceNumber			
+			,strNetwork					
+			,strGroupName				
+			,strInvoiceCycle			
+			,strCardNumber				
+			,strCardDescription			
+			,strSiteNumber				
+			,strSiteName				
+			,strTaxState				
+			,strSiteType				
+			,strState					
+			,strSiteAddress				
+			,strSiteCity				
+			,strProductNumber			
+			,strItemNo					
+			,strDescription				
+			,strVehicleNumber			
+			,strVehicleDescription		
+			,strDepartment				
+			,strDepartmentDescription	
+			,strCompanyName				
+			,strCompanyAddress			
+			,strEmailDistributionOption	
+			,strEmail			
+			,strCustomerName			
+			----------------------------
+			,dblQuantity				
+			,dblCalculatedTotalAmount	
+			,dblOriginalTotalAmount		
+			,dblCalculatedGrossAmount	
+			,dblOriginalGrossAmount		
+			,dblCalculatedNetAmount		
+			,dblOriginalNetAmount		
+			,dblMargin					
+			,dblTotalMiles				
+			,dblTotalTax				
+			,dblTotalSST				
+			,dblTaxExceptSST			
+			----------------------------
+			,ysnInvalid					
+			,ysnPosted					
+			,ysnPostedCSV				
+			,ysnPrintMiscellaneous		
+			,ysnSummaryByCard			
+			,ysnSummaryByDepartment		
+			,ysnSummaryByMiscellaneous	
+			,ysnSummaryByProduct		
+			,ysnSummaryByVehicle		
+			,ysnSummaryByCardProd		
+			,ysnSummaryByDeptCardProd	
+			,ysnPrintTimeOnInvoices		
+			,ysnPrintTimeOnReports		
+			,ysnSummaryByDeptVehicleProd
+			,ysnDepartmentGrouping		
+			,ysnPostForeignSales		
+			FROM vyuCFInvoiceReport
+			WHERE  ISNULL(ysnInvoiced,0) = 0
+		END
+
+		--SELECT * INTO #tblCFTempInvoiceReport FROM vyuCFInvoiceReport
 
 		---------GET DISTINCT CARD ID---------
 		SET @tblCFTempTableQuery = 'SELECT DISTINCT ISNULL(intAccountId,0) FROM #tblCFTempInvoiceReport ' + @whereClause
@@ -404,7 +875,7 @@ BEGIN
 			EXEC (@tblCFTempTableQuery)
 
 			--SELECT '@tblCFTableTransationIds',* FROM @tblCFTableTransationIds
-			--SELECT '@tblCFFilterIds',* FROM @tblCFFilterIds
+			SELECT '@tblCFFilterIds',* FROM @tblCFFilterIds -- HERE
 
 			---------GET DISTINCT TRANSACTION ID---------
 
@@ -618,8 +1089,8 @@ BEGIN
 		on main.intAccountId = cfInvRptNo.intAccountId
 
 
-		--SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary 
-		--SELECT * FROM tblCFInvoiceReportTempTable
+		SELECT '#tblCFTempInvoiceReportSummary',* FROM #tblCFTempInvoiceReportSummary -- HERE
+		SELECT * FROM tblCFInvoiceReportTempTable -- HERE
 
 
 		INSERT INTO tblCFInvoiceReportTempTable (
@@ -798,7 +1269,7 @@ BEGIN
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 
-		--SELECT * FROM tblCFInvoiceReportTempTable
+		SELECT * FROM tblCFInvoiceReportTempTable -- HERE
 
 	END
     

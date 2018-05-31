@@ -253,9 +253,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strFixedBy									= CD.strFixationBy
 		,strPricingType								= PT.strPricingType
 		,strInvoiceStatus							= Invoice.strType
-		,dblNetFuturesValue							= NULL
-		,dblRealizedFuturesPNLValue					= NULL
-		,dblNetPNLValue								= NULL
+		,dblNetFuturesValue							= 0
+		,dblRealizedFuturesPNLValue					= 0
+		,dblNetPNLValue								= 0
 		,dblFXValue									= NULL
 		,dblFXConvertedValue						= InvoiceDetail.dblTotal * InvoiceDetail.dblCurrencyExchangeRate
 		,strSalesReturnAdjustment					= NULL
@@ -420,9 +420,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strFixedBy									= CD.strFixationBy
 		,strPricingType								= PT.strPricingType
 		,strInvoiceStatus							= Invoice.strType
-		,dblNetFuturesValue							= NULL
-		,dblRealizedFuturesPNLValue					= NULL
-		,dblNetPNLValue								= NULL
+		,dblNetFuturesValue							= 0
+		,dblRealizedFuturesPNLValue					= 0
+		,dblNetPNLValue								= 0
 		,dblFXValue									= NULL
 		,dblFXConvertedValue						= InvoiceDetail.dblTotal * InvoiceDetail.dblCurrencyExchangeRate
 		,strSalesReturnAdjustment					= NULL

@@ -165,7 +165,7 @@
 
 			--GL
 			('tblGLAccountSegment'), --1
-		--	('tblGLAccountSystem'), --2 init only
+			('tblGLAccountSystem'), --2 init only
 			('tblGLAccountSegmentMapping'), --3
 			('tblGLAccount'), --4
 			('tblGLAccountCategory'), --5
@@ -173,21 +173,32 @@
 			('tblGLSegmentType'), --7
 			('tblGLAccountGroup'), --8
 			('tblGLAccountRange'), --9
-		--	('tblGLAccountReallocation'), --10 init only
-		--	('tblGLAccountTemplate'), --11 init only
-		--	('tblGLAccountTemplateDetail'), --12 init only
+			('tblGLAccountReallocation'), --10 init only
+			('tblGLAccountTemplate'), --11 init only
+			('tblGLAccountTemplateDetail'), --12 init only
 			('tblGLAccountUnit'), --13
 			('tblGLCOACrossReference'),	--14
-		--	('tblGLAccountSystem'), -- initialization only	
-		--	('tblGLCrossReferenceMapping'), -- initialization only	
-		--	('tblGLCOATemplate'), -- initialization only	
-		--	('tblGLCOATemplateDetail'), -- initialization only	
-		--	('tblGLCompanyPreferenceOption'), --19 init only
+			('tblGLCrossReferenceMapping'), -- initialization only	
+			('tblGLCOATemplate'), -- initialization only	
+			('tblGLCOATemplateDetail'), -- initialization only	
+			('tblGLCompanyPreferenceOption'), --19 init only
 			('tblGLCurrentFiscalYear'), --20
 			('tblGLDeletedAccount'), --21
 			('tblGLFiscalYear'), --(exclude ysnStatus, intConcurrency columns)
 			('tblGLFiscalYearPeriod'), --(exclude all ysn* and intConcurrencyId columns)
 			('tblGLAccountAdjustmentLog'), --24
+
+
+		
+
+
+
+
+
+
+
+
+
 		
 			--CM Banks
 			('tblCMBank'),

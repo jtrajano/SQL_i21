@@ -55,6 +55,20 @@ BEGIN TRY
 
 	IF @intStageLocationId IS NULL
 	BEGIN
+		SELECT @intStageLocationId = intDefaultBlendProductionLocationId--intDefaultOutboundStagingUnitId
+		FROM tblSMCompanyLocation 
+		Where intCompanyLocationId =@intShipFromLocationId
+	END
+
+	IF @intDockDoorId IS NULL
+	BEGIN
+		SELECT @intDockDoorId = intDefaultInboundDockDoorUnitId--intDefaultOutboundDockDoorUnitId
+		FROM tblSMCompanyLocation
+		Where intCompanyLocationId =@intShipFromLocationId
+	END
+
+	IF @intStageLocationId IS NULL
+	BEGIN
 		SELECT @intStageLocationId = intDefaultShipmentStagingLocation
 		FROM tblMFCompanyPreference
 	END

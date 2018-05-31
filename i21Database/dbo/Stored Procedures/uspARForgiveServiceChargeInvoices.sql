@@ -67,34 +67,37 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			DECLARE @InvoicesToForgive TABLE (intInvoiceId INT)
 			DECLARE @BudgetToForgive TABLE (intBudgetId INT)
 
-			INSERT INTO @InvoicesToForgive
-			SELECT ID.intSCInvoiceId
-			FROM @ServiceChargeToForgive SCI
-			INNER JOIN dbo.tblARInvoiceDetail ID ON SCI.intInvoiceId = ID.intInvoiceId
-			WHERE intSCInvoiceId IS NOT NULL
+			--do not delete yet
+			--INSERT INTO @InvoicesToForgive
+			--SELECT ID.intSCInvoiceId
+			--FROM @ServiceChargeToForgive SCI
+			--INNER JOIN dbo.tblARInvoiceDetail ID ON SCI.intInvoiceId = ID.intInvoiceId
+			--WHERE intSCInvoiceId IS NOT NULL
 
-			INSERT INTO @BudgetToForgive
-			SELECT ID.intSCBudgetId
-			FROM @ServiceChargeToForgive SCI
-			INNER JOIN dbo.tblARInvoiceDetail ID ON SCI.intInvoiceId = ID.intInvoiceId
-			WHERE ID.intSCBudgetId IS NOT NULL
+			--INSERT INTO @BudgetToForgive
+			--SELECT ID.intSCBudgetId
+			--FROM @ServiceChargeToForgive SCI
+			--INNER JOIN dbo.tblARInvoiceDetail ID ON SCI.intInvoiceId = ID.intInvoiceId
+			--WHERE ID.intSCBudgetId IS NOT NULL
 
-			IF EXISTS(SELECT NULL FROM @InvoicesToForgive)
-				BEGIN
-					UPDATE INV
-					SET INV.ysnForgiven = @ysnForgive
-					FROM tblARInvoice INV
-					INNER JOIN @InvoicesToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
-					WHERE INV.ysnPosted = 1
-				END
+			--IF EXISTS(SELECT NULL FROM @InvoicesToForgive)
+			--	BEGIN
+			--		UPDATE INV
+			--		SET INV.ysnForgiven = @ysnForgive
+			--		FROM tblARInvoice INV
+			--		INNER JOIN @InvoicesToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
+			--		WHERE INV.ysnPosted = 1
+			--	END
 			
-			IF EXISTS(SELECT NULL FROM @BudgetToForgive)
-				BEGIN
-					UPDATE CB
-					SET CB.ysnForgiven = @ysnForgive
-					FROM tblARCustomerBudget CB
-					INNER JOIN @BudgetToForgive SCI ON CB.intCustomerBudgetId = SCI.intBudgetId
-				END
+			--IF EXISTS(SELECT NULL FROM @BudgetToForgive)
+			--	BEGIN
+			--		UPDATE CB
+			--		SET CB.ysnForgiven = @ysnForgive
+			--		FROM tblARCustomerBudget CB
+			--		INNER JOIN @BudgetToForgive SCI ON CB.intCustomerBudgetId = SCI.intBudgetId
+			--	END
+			-- end of do not delete yet
+
 
 			/****************** AUDIT LOG ******************/
 			BEGIN TRANSACTION [AUDITLOG]

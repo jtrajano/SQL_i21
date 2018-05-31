@@ -349,9 +349,9 @@ BEGIN
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		CROSS APPLY tblLGCompanyPreference CP
 	
-		left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.InventoryUOM'
+		left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
 		left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = WUM.intUnitMeasureId
-		left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'UOM'
+		left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
 	
 		left join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.Item'
 		left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = I.intItemId
@@ -382,9 +382,9 @@ BEGIN
 		left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = rtc8.intCountryID
 		left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
 
-		left join tblSMScreen				rtUMScreen on rtUMScreen.strNamespace = 'Inventory.view.InventoryUOM'
+		left join tblSMScreen				rtUMScreen on rtUMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 		left join tblSMTransaction			rtUMTransaction on rtUMTransaction.intScreenId = rtUMScreen.intScreenId and rtUMTransaction.intRecordId = WUM.intUnitMeasureId
-		left join tblSMReportTranslation	rtUMTranslation on rtUMTranslation.intLanguageId = @intLaguageId and rtUMTranslation.intTransactionId = rtUMTransaction.intTransactionId and rtUMTranslation.strFieldName = 'UOM'
+		left join tblSMReportTranslation	rtUMTranslation on rtUMTranslation.intLanguageId = @intLaguageId and rtUMTranslation.intTransactionId = rtUMTransaction.intTransactionId and rtUMTranslation.strFieldName = 'Name'
 	
 		--
 		WHERE L.strLoadNumber = @strTrackingNumber

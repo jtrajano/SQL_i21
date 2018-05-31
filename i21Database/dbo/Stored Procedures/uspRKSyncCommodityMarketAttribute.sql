@@ -1,8 +1,21 @@
-﻿CREATE PROCEDURE uspRKSyncCommodityMarketAttribute
+﻿CREATE PROCEDURE [dbo].[uspRKSyncCommodityMarketAttribute]
 AS
 DECLARE @List NVARCHAR(800)
+;WITH CommaTrimmed AS (
+	SELECT 
+	CASE when right(RTRIM(strCommodityAttributeId),1) = ',' then SUBSTRING(RTRIM(strCommodityAttributeId),1,LEN(RTRIM(strCommodityAttributeId))-1)
+	ELSE strCommodityAttributeId END strCommodityAttributeId
+	FROM tblRKCommodityMarketMapping WHERE strCommodityAttributeId is not null
+)
 SELECT @List= COALESCE(@List + CASE WHEN strCommodityAttributeId <> '' THEN ',' ELSE '' END, '') + LTRIM(strCommodityAttributeId) 
-FROM tblRKCommodityMarketMapping WHERE strCommodityAttributeId is not null
+FROM CommaTrimmed 
+SELECT @List = RTRIM(LTRIM(@List))
+IF LEN(ISNULL(@List,'') )= 0  
+BEGIN
+	DELETE FROM tblRKCommodityMarketMappingAttribute
+	RETURN
+END
+
 MERGE INTO tblRKCommodityMarketMappingAttribute
 WITH (HOLDLOCK)
 AS RMAttributeTable
@@ -14,5 +27,4 @@ RMAttributeTable.intCommodityAttributeId = Source.Value
 WHEN NOT MATCHED BY Target
 THEN INSERT (intCommodityAttributeId) VALUES(Source.Value)
 WHEN NOT MATCHED BY SOURCE THEN DELETE;
-
 

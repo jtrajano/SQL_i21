@@ -17,8 +17,9 @@ CREATE TABLE #tmpPayables (
 INSERT INTO #tmpPayables SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
 UPDATE A
-	SET A.dbl1099 = CASE WHEN C.ysnPosted = 1 THEN A.dbl1099 + (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) 
-									ELSE A.dbl1099 - (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) END
+	SET A.dbl1099 = (CASE WHEN C.ysnPosted = 1 THEN A.dbl1099 + (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) 
+									ELSE A.dbl1099 - (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) END)
+						* (CASE WHEN B.intTransactionType NOT IN (1, 14) THEN -1 ELSE 1 END)
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 INNER JOIN (tblAPPayment C INNER JOIN tblAPPaymentDetail C2 ON C.intPaymentId = C2.intPaymentId)

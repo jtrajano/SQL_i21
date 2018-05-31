@@ -37,6 +37,9 @@ SELECT Item.intItemId
 , strAdjustInventorySales = AdjustInventorySales.strTerms
 , Commodity.intAdjustInventoryTransfer
 , strAdjustInventoryTransfer = AdjustInventoryTransfer.strTerms
+, Commodity.intLineOfBusinessId
+, strLineOfBusiness = LineOfBusiness.strLineOfBusiness
+
 FROM tblICItem Item
 	LEFT JOIN tblICBrand Brand ON Brand.intBrandId = Item.intBrandId
 	LEFT JOIN tblICManufacturer Manufacturer ON Manufacturer.intManufacturerId = Item.intManufacturerId
@@ -52,3 +55,4 @@ FROM tblICItem Item
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
 	LEFT JOIN tblICAdjustInventoryTerms AdjustInventorySales ON AdjustInventorySales.intAdjustInventoryTermsId = Commodity.intAdjustInventorySales
 	LEFT JOIN tblICAdjustInventoryTerms AdjustInventoryTransfer ON AdjustInventoryTransfer.intAdjustInventoryTermsId = Commodity.intAdjustInventoryTransfer
+	LEFT JOIN tblSMLineOfBusiness LineOfBusiness ON LineOfBusiness.intLineOfBusinessId = Commodity.intLineOfBusinessId

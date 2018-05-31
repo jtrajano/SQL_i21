@@ -877,6 +877,11 @@ BEGIN TRY
 
 	-------HISTORY----------
 
+	
+	UPDATE tblCFTransaction 
+	SET ysnInvoiced = 1
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username) 
+
 
 	----------DROP TEMPORARY TABLE----------
 	IF OBJECT_ID(N'tempdb..#tblCFInvoice', N'U') IS NOT NULL 

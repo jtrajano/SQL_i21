@@ -181,7 +181,7 @@ FROM
 			) INV (strCustomerReference)
 		) CUSTOMERREFERENCES
 		WHERE
-			[ysnPosted] = 1
+			ARI.[ysnPosted] = 1
 			AND ysnCancelled = 0
 			AND ysnExcludeFromPayment = 0
 			AND strTransactionType != 'Credit Note'
@@ -197,90 +197,51 @@ FROM
 
 
 		SELECT 
-			 [intTransactionId]			= APB.[intBillId]
-			,[strTransactionNumber]		= APB.[strBillId]
-			,[intInvoiceId]				= NULL
-			,[strInvoiceNumber]			= ''
+			 [intTransactionId]			= APB.[intTransactionId]
+			,[strTransactionNumber]		= APB.[strTransactionNumber]
+			,[intInvoiceId]				= APB.[intInvoiceId]
+			,[strInvoiceNumber]			= APB.[strInvoiceNumber]
 			,[intBillId]				= APB.[intBillId]
 			,[strBillId]				= APB.[strBillId]
-			,[strTransactionType]		= (CASE WHEN APB.[intTransactionType] = 1 THEN 'Voucher'
-												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment'
-												WHEN APB.[intTransactionType] = 3 THEN 'Debit Memo'
-												WHEN APB.[intTransactionType] = 7 THEN 'Invalid Type'
-												WHEN APB.[intTransactionType] = 9 THEN '1099 Adjustment'
-												WHEN APB.[intTransactionType] = 11 THEN 'Claim'
-												WHEN APB.[intTransactionType] = 13 THEN 'Basis Advance'
-												WHEN APB.[intTransactionType] = 14 THEN 'Deferred Interest'
-												ELSE 'Invalid Type'
-										   END)
-			,[strType]					= 'Voucher'
-			,[intEntityCustomerId]		= APB.[intEntityVendorId]
-			,[strCustomerName]			= CE.[strName]
-			,[strCustomerNumber]		= APV.[strVendorId]
-			,[intCompanyLocationId]		= APB.intShipToId
+			,[strTransactionType]		= APB.[strTransactionType]
+			,[strType]					= APB.[strType]
+			,[intEntityCustomerId]		= APB.[intEntityCustomerId]
+			,[strCustomerName]			= APB.[strCustomerName]
+			,[strCustomerNumber]		= APB.[strCustomerNumber]
+			,[intCompanyLocationId]		= APB.[intCompanyLocationId]
 			,[intAccountId]				= APB.[intAccountId]
 			,[intCurrencyId]			= APB.[intCurrencyId]
 			,[dtmDate]					= APB.[dtmDate]
 			,[dtmDueDate]				= APB.[dtmDueDate]
-			,[dtmPostDate]				= APB.[dtmBillDate]
-			,[dblInvoiceTotal]			= APB.[dblTotal]
-			,[dblBaseInvoiceTotal]		= APB.[dblTotal]
+			,[dtmPostDate]				= APB.[dtmPostDate]
+			,[dblInvoiceTotal]			= APB.[dblInvoiceTotal]
+			,[dblBaseInvoiceTotal]		= APB.[dblBaseInvoiceTotal]
 			,[dblDiscount]				= APB.[dblDiscount]
 			,[dblBaseDiscount]			= APB.[dblDiscount]
-			,[dblDiscountAvailable]		= CAST(0 AS DECIMAL(18,6))
-			,[dblBaseDiscountAvailable]	= CAST(0 AS DECIMAL(18,6))
+			,[dblDiscountAvailable]		= APB.[dblDiscountAvailable]
+			,[dblBaseDiscountAvailable]	= APB.[dblDiscountAvailable]
 			,[dblInterest]				= APB.[dblInterest]
-			,[dblBaseInterest]			= APB.[dblInterest]
+			,[dblBaseInterest]			= APB.[dblBaseInterest]
 			,[dblAmountDue]				= APB.[dblAmountDue]
-			,[dblBaseAmountDue]			= APB.[dblAmountDue]
+			,[dblBaseAmountDue]			= APB.[dblBaseAmountDue]
 			,[dblPayment]				= APB.[dblPayment]
-			,[dblBasePayment]			= APB.[dblPayment]
+			,[dblBasePayment]			= APB.[dblBasePayment]
 			,[ysnPosted]				= APB.[ysnPosted]
 			,[ysnPaid]					= APB.[ysnPaid]
-			,[intPaymentId]				= NULL
-			,[dblTotalTermDiscount]		= CAST(0 AS DECIMAL(18,6))
-			,[strInvoiceReportNumber]	= ''
-			,[strTicketNumbers]			= ''
-			,[strCustomerReferences]	= ''
-			,[intTermId]				= APB.[intTermsId]
-			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
-			,intPaymentMethodId			= APV.intPaymentMethodId	
-			,strPaymentMethod			= SMP.strPaymentMethod
-			,ysnACHActive				= EFT.ysnActive
-			,dblInvoiceDiscountAvailable= CAST(0 AS DECIMAL(18,6))
+			,[intPaymentId]				= APB.[intPaymentId]
+			,[dblTotalTermDiscount]		= APB.[dblTotalTermDiscount]
+			,[strInvoiceReportNumber]	= APB.[strInvoiceReportNumber]
+			,[strTicketNumbers]			= APB.[strTicketNumbers]
+			,[strCustomerReferences]	= APB.[strCustomerReferences]
+			,[intTermId]				= APB.[intTermId]
+			,[ysnExcludeForPayment]		= APB.[ysnExcludeForPayment]
+			,[intPaymentMethodId]		= APB.[intPaymentMethodId]
+			,[strPaymentMethod]			= APB.[strPaymentMethod]
+			,[ysnACHActive]				= APB.[ysnACHActive]
+			,[dblInvoiceDiscountAvailable]= APB.[dblInvoiceDiscountAvailable]
 		FROM
-			tblAPBill APB
-		INNER JOIN
-			tblEMEntityType EMET
-				ON APB.[intEntityVendorId] = EMET.[intEntityId]
-				AND EMET.[strType] = 'Customer'	
-		INNER JOIN
-			(SELECT 				
-				[intEntityId],
-				intPaymentMethodId,
-				strVendorId
-			 FROM 
-				dbo.tblAPVendor) AS APV ON APV.[intEntityId] = APB.[intEntityVendorId] 
-		INNER JOIN
-			(SELECT	
-				intEntityId,
-				strName
-			 FROM
-				dbo.tblEMEntity) AS CE ON APV.[intEntityId] = CE.intEntityId 	
-		LEFT OUTER JOIN
-			(SELECT 
-				intPaymentMethodID,
-				strPaymentMethod
-			 FROM
-				dbo.tblSMPaymentMethod) AS SMP ON APV.intPaymentMethodId = SMP.intPaymentMethodID	
-		LEFT OUTER JOIN
-			(
-				SELECT
-				intEntityId,
-				ysnActive
-				FROM tblEMEntityEFTInformation
-				) AS EFT ON CE.intEntityId = EFT.intEntityId								
-		WHERE [ysnPosted] = 1 AND APB.intTransactionType IN (1,2,3,11) 
+			[vyuAPVouchersForARPayment] APB
+			
 	) ARIFP
 LEFT OUTER JOIN 
 	(

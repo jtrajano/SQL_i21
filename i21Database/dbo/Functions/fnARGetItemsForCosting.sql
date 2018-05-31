@@ -31,6 +31,11 @@ RETURNS @returntable TABLE
 	,[intInTransitSourceLocationId]		INT											NULL
 	,[intForexRateTypeId]				INT											NULL
 	,[dblForexRate]						NUMERIC(38, 20)								NULL DEFAULT 1
+	,[intStorageScheduleTypeId]			INT											NULL
+    ,[dblUnitRetail]					NUMERIC(38, 20)								NULL
+	,[intCategoryId]					INT											NULL 
+	,[dblAdjustRetailValue]				NUMERIC(38, 20)								NULL
+	,[intCategoryAdjustmentType]		INT											NULL 
 )
 AS
 BEGIN
@@ -79,7 +84,12 @@ INSERT INTO @returntable
 	,[intStorageLocationId]
 	,[strActualCostId]
 	,[intForexRateTypeId]
-	,[dblForexRate]) 
+	,[dblForexRate]
+	,[intStorageScheduleTypeId]
+    ,[dblUnitRetail]
+	,[intCategoryId]
+	,[dblAdjustRetailValue]
+	,[intCategoryAdjustmentType]) 
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= IST.[intItemLocationId]
@@ -130,6 +140,11 @@ SELECT
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARI.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARI.[intLoadDistributionHeaderId],0) <> 0) THEN ARI.[strActualCostId] ELSE NULL END
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
+	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
+    ,[dblUnitRetail]			= NULL
+	,[intCategoryId]			= IST.[intCategoryId]
+	,[dblAdjustRetailValue]		= NULL
+	,[intCategoryAdjustmentType]	= NULL
 FROM 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblPrice], [intCompanyLocationSubLocationId], [intStorageLocationId], [intItemUOMId], [intLoadDetailId], [dblTotal], [ysnBlended],
 			[dblQtyShipped], [intInventoryShipmentItemId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId], [intTicketId]
@@ -155,7 +170,7 @@ LEFT OUTER JOIN
 	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
-	(SELECT [intItemId], [intLocationId], [intItemLocationId], [strType], [dblLastCost] FROM vyuICGetItemStock WITH (NOLOCK)) IST
+	(SELECT [intItemId], [intLocationId], [intItemLocationId], [strType], [dblLastCost], [intCategoryId] FROM vyuICGetItemStock WITH (NOLOCK)) IST
 		ON ARID.[intItemId] = IST.[intItemId]
 		AND ARI.[intCompanyLocationId] = IST.[intLocationId]
 LEFT OUTER JOIN
@@ -209,6 +224,11 @@ SELECT
 	,[strActualCostId]			= CASE WHEN (ISNULL(ARI.[intDistributionHeaderId],0) <> 0 OR ISNULL(ARI.[intLoadDistributionHeaderId],0) <> 0) THEN ARI.[strActualCostId] ELSE NULL END
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
+	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
+    ,[dblUnitRetail]			= NULL
+	,[intCategoryId]			= IST.[intCategoryId]
+	,[dblAdjustRetailValue]		= NULL
+	,[intCategoryAdjustmentType]	= NULL
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
@@ -226,7 +246,7 @@ LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
 		ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
 LEFT OUTER JOIN
-	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost FROM vyuICGetItemStock WITH (NOLOCK)) IST
+	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost, [intCategoryId] FROM vyuICGetItemStock WITH (NOLOCK)) IST
 		ON ARIC.[intComponentItemId] = IST.[intItemId]
 		AND ARI.[intCompanyLocationId] = IST.[intLocationId]	
 LEFT OUTER JOIN

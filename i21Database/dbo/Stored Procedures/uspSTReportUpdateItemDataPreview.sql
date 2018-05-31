@@ -166,7 +166,7 @@ BEGIN TRANSACTION
 	WHERE [fieldname] = 'intDepositPLU'
 
 	--strQuantityRequiredysn
-	SELECT @strQuantityRequiredysn = [from]
+	SELECT @strQuantityRequiredysn = [from] 
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'strQuantityRequiredysn'
 
@@ -369,9 +369,11 @@ BEGIN TRANSACTION
 				-- Original Fields
 				,intCategoryId_Original INT NULL
 				,strCountCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
 				,intCategoryId_New INT NULL
 				,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 			)
 		;
 
@@ -425,6 +427,7 @@ BEGIN TRANSACTION
 				,intCountGroupId_Original INT NULL 
 				,intStorageLocationId_Original INT NULL 
 				,dblReorderPoint_Original NUMERIC(18, 6) NULL
+				,strDescription_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
 				,ysnTaxFlag1_New BIT NULL
 				,ysnTaxFlag2_New BIT NULL
@@ -456,8 +459,128 @@ BEGIN TRANSACTION
 				,intCountGroupId_New INT NULL 
 				,intStorageLocationId_New INT NULL 
 				,dblReorderPoint_New NUMERIC(18, 6) NULL
+				,strDescription_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 			)
 		;
+
+
+
+		---------------------------------------------------------------
+		---------- Table to handle different data types ---------------
+		---------------------------------------------------------------
+		-- ITEM
+		DECLARE @tblUpdateItemForCStore TABLE (
+				intItemId INT
+				-- Original Fields
+				,strCategoryCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				,strCountCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				-- Modified Fields
+				,strCategoryCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				,strCountCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+		)
+
+		-- ITEM ACCOUNT
+		DECLARE @tblItemAccountForCStore TABLE (
+				intItemId INT
+				, intItemAccountId INT		
+				, intAccountCategoryId INT 
+				, strAction NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+				-- Original Fields	
+				, strAccountId_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+				, intAccountId_Original INT NULL	
+				-- Modified Fields	
+				, strAccountId_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+				, intAccountId_New INT NULL	
+		)
+
+		-- ITEM LOCATION
+		DECLARE @tblItemLocationForCStore TABLE (
+				intItemId INT
+				,intItemLocationId INT 
+				-- Original Fields
+				,strTaxFlag1_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strTaxFlag2_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strTaxFlag3_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strTaxFlag4_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strDepositRequired_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intDepositPLUId_Original INT NULL 
+				,strDepositPLUId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strQuantityRequired_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strScaleItem_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strFoodStampable_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strReturnable_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strSaleable_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strIdRequiredLiquor_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strIdRequiredCigarette_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strPromotionalItem_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strPrePriced_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strApplyBlueLaw1_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strApplyBlueLaw2_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strCountedDaily_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strCounted_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strCountBySINo_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intFamilyId_Original INT NULL 
+				,strFamilyId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intClassId_Original INT NULL 
+				,strClassId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intProductCodeId_Original INT NULL 
+				,strProductCodeId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intVendorId_Original INT NULL 
+				,strVendorId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strMinimumAge_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strMinOrder_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strSuggestedQty_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intCountGroupId_Original INT NULL 
+				,intStorageLocationId_Original INT NULL 
+				,strStorageLocationId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,dblReorderPoint_Original NUMERIC(18, 6) NULL
+				,strDescription_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				-- Modified Fields
+				,strTaxFlag1_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strTaxFlag2_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strTaxFlag3_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strTaxFlag4_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strDepositRequired_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intDepositPLUId_New INT NULL 
+				,strDepositPLUId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strQuantityRequired_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strScaleItem_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strFoodStampable_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strReturnable_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strSaleable_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strIdRequiredLiquor_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strIdRequiredCigarette_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strPromotionalItem_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strPrePriced_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strApplyBlueLaw1_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strApplyBlueLaw2_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strCountedDaily_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strCounted_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strCountBySINo_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,intFamilyId_New INT NULL 
+				,strFamilyId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intClassId_New INT NULL 
+				,strClassId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intProductCodeId_New INT NULL 
+				,strProductCodeId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intVendorId_New INT NULL 
+				,strVendorId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strMinimumAge_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strMinOrder_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strSuggestedQty_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,intCountGroupId_New INT NULL 
+				,intStorageLocationId_New INT NULL 
+				,strStorageLocationId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,dblReorderPoint_New NUMERIC(18, 6) NULL
+				,strDescription_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+		)
+		---------------------------------------------------------------
+		------- END Table to handle different data types --------------
+		---------------------------------------------------------------
+
+
 
 
 		-- Add the filter records
@@ -533,6 +656,7 @@ BEGIN TRANSACTION
 
 					,@intCategoryId = @intNewCategory
 					,@strCountCode = @strNewCountCode
+					,@strItemDescription = NULL
 
 					,@intEntityUserSecurityId = @intCurrentUserId
 		END
@@ -561,46 +685,378 @@ BEGIN TRANSACTION
 			DECLARE @ysnTaxFlag2 AS BIT = CAST(@strTaxFlag2ysn AS BIT)
 			DECLARE @ysnTaxFlag3 AS BIT = CAST(@strTaxFlag3ysn AS BIT)
 			DECLARE @ysnTaxFlag4 AS BIT = CAST(@strTaxFlag4ysn AS BIT)
+			DECLARE @ysnDepositRequired AS BIT = CAST(@strDepositRequiredysn AS BIT)
+			--@intDepositPLU
+			DECLARE @ysnQuantityRequired AS BIT = CAST(@strQuantityRequiredysn AS BIT)
+			DECLARE @ysnScaleItem AS BIT = CAST(@strScaleItemysn AS BIT)
+			DECLARE @ysnFoodStampable AS BIT = CAST(@strFoodStampableysn AS BIT)
+			DECLARE @ysnReturnable AS BIT = CAST(@strReturnableysn AS BIT)
+			DECLARE @ysnSaleable AS BIT = CAST(@strSaleableysn AS BIT)
+			DECLARE @ysnIdRequiredCigarette AS BIT = CAST(@strID1Requiredysn AS BIT)
+			DECLARE @ysnIdRequiredLiquor AS BIT = CAST(@strID2Requiredysn AS BIT)
+			DECLARE @ysnPromotionalItem AS BIT = CAST(@strPromotionalItemysn AS BIT)
+			DECLARE @ysnPrePriced AS BIT = CAST(@strPrePricedysn AS BIT)
+			DECLARE @ysnApplyBlueLaw1 AS BIT = CAST(@strBlueLaw1ysn AS BIT)
+			DECLARE @ysnApplyBlueLaw2 AS BIT = CAST(@strBlueLaw2ysn AS BIT)
+			DECLARE @ysnCountedDaily AS BIT = CAST(@strCountedDailyysn AS BIT)
+			DECLARE @ysnCountBySINo AS BIT = CAST(@strCountSerialysn AS BIT)
+			DECLARE @intFamilyId AS INT = CAST(@intNewFamily AS INT)
+			DECLARE @intClassId AS INT = CAST(@intNewClass AS INT)
+			DECLARE @intVendorId AS INT = CAST(@intNewVendor AS INT)
+
 
 			EXEC [dbo].[uspICUpdateItemLocationForCStore]
+			    -- filter params
 				@strUpcCode = @strUpcCode 
 				,@strDescription = @strDescription 
 				,@dblRetailPriceFrom = NULL  
 				,@dblRetailPriceTo = NULL 
-
+				,@intItemLocationId = NULL 
+				-- update params 
 				,@ysnTaxFlag1 = @ysnTaxFlag1
 				,@ysnTaxFlag2 = @ysnTaxFlag2
 				,@ysnTaxFlag3 = @ysnTaxFlag3
 				,@ysnTaxFlag4 = @ysnTaxFlag4
-				,@ysnDepositRequired = NULL
-				,@intDepositPLUId = NULL
-				,@ysnQuantityRequired = NULL
-				,@ysnScaleItem = NULL
-				,@ysnFoodStampable = NULL
-				,@ysnReturnable = NULL
-				,@ysnSaleable = NULL
-				,@ysnIdRequiredLiquor = NULL
-				,@ysnIdRequiredCigarette = NULL
-				,@ysnPromotionalItem = NULL
-				,@ysnPrePriced = NULL
-				,@ysnApplyBlueLaw1 = NULL
-				,@ysnApplyBlueLaw2 = NULL		
-				,@ysnCountedDaily = NULL
-				,@strCounted = NULL
-				,@ysnCountBySINo = NULL
-				,@intFamilyId = NULL
-				,@intClassId = NULL
-				,@intProductCodeId = NULL
-				,@intVendorId = NULL
-				,@intMinimumAge = NULL
-				,@dblMinOrder = NULL
-				,@dblSuggestedQty = NULL
-				,@intCountGroupId = NULL
-				,@intStorageLocationId = NULL
-				,@dblReorderPoint = 1
+				,@ysnDepositRequired = @ysnDepositRequired
+				,@intDepositPLUId = @intDepositPLU 
+				,@ysnQuantityRequired = @ysnQuantityRequired 
+				,@ysnScaleItem = @ysnScaleItem 
+				,@ysnFoodStampable = @ysnFoodStampable 
+				,@ysnReturnable = @ysnReturnable 
+				,@ysnSaleable = @ysnSaleable 
+				,@ysnIdRequiredLiquor = @ysnIdRequiredLiquor 
+				,@ysnIdRequiredCigarette = @ysnIdRequiredCigarette 
+				,@ysnPromotionalItem = @ysnPromotionalItem 
+				,@ysnPrePriced = @ysnPrePriced 
+				,@ysnApplyBlueLaw1 = @ysnApplyBlueLaw1 
+				,@ysnApplyBlueLaw2 = @ysnApplyBlueLaw2 
+				,@ysnCountedDaily = @ysnCountedDaily 
+				,@strCounted = @strCounted
+				,@ysnCountBySINo = @ysnCountBySINo 
+				,@intFamilyId = @intFamilyId 
+				,@intClassId = @intClassId 
+				,@intProductCodeId = @intNewProductCode 
+				,@intVendorId =  @intVendorId
+				,@intMinimumAge = @intNewMinAge 
+				,@dblMinOrder = @dblNewMinVendorOrderQty 
+				,@dblSuggestedQty  = @dblNewVendorSuggestedQty
+				,@intCountGroupId =  NULL
+				,@intStorageLocationId = @intNewBinLocation 
+				,@dblReorderPoint = NULL
+				,@strItemLocationDescription = NULL 
 
 				,@intEntityUserSecurityId = @intCurrentUserId
 		END
+
+
+
+		---------------------------------------------------------------
+		-------- Insert to temp Table handle all Data types -----------
+		---------------------------------------------------------------
+		-- ITEM
+		INSERT INTO @tblUpdateItemForCStore
+		(
+			intItemId 
+			-- Original Fields
+			,strCategoryCode_Original
+			,strCountCode_Original
+			,strDescription_Original
+			-- Modified Fields
+			,strCategoryCode_New 
+			,strCountCode_New 
+			,strDescription_New
+		)
+		SELECT  
+			I.intItemId
+			-- Original Fields
+			, CatOld.strCategoryCode AS strCategoryCode_Original
+			, [Changes].strCountCode_Original
+			, [Changes].strDescription_Original
+			-- Modified Fields
+			, CatNew.strCategoryCode AS  strCategoryCode_New
+			, [Changes].strCountCode_New
+			, [Changes].strDescription_New
+		FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
+		JOIN tblICCategory CatOld ON [Changes].intCategoryId_Original = CatOld.intCategoryId
+		JOIN tblICCategory CatNew ON [Changes].intCategoryId_New = CatNew.intCategoryId
+		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
+		JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
+		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
+		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+
+		-- ITEM ACCOUNT
+		INSERT INTO @tblItemAccountForCStore
+		(
+				intItemId 
+				, intItemAccountId 		
+				, intAccountCategoryId  
+				, strAction
+				-- Original Fields	
+				, strAccountId_Original	
+				, intAccountId_Original
+				-- Modified Fields	
+				, strAccountId_New
+				, intAccountId_New
+		)
+		SELECT 
+			I.intItemId
+			, IA.intItemAccountId
+			, AC.intAccountCategoryId
+			, ''
+			-- Original Fields
+			, GL_Old.strAccountId
+			, GL_Old.intAccountId
+			-- Modified Fields
+			, GL_New.strAccountId
+			, GL_New.intAccountId
+		FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
+		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
+		JOIN tblICItemAccount IA ON [Changes].intItemAccountId = IA.intItemAccountId
+		JOIN tblGLAccountCategory AC ON IA.intAccountCategoryId = AC.intAccountCategoryId
+		JOIN tblGLAccount GL_Old ON [Changes].intAccountId_Original = GL_Old.intAccountId
+		JOIN tblGLAccount GL_New ON [Changes].intAccountId_New = GL_New.intAccountId
+		JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
+		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
+		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+
+		-- ITEM LOCATION
+		INSERT INTO @tblItemLocationForCStore
+		(
+				intItemId 
+				,intItemLocationId 
+				-- Original Fields
+				,strTaxFlag1_Original
+				,strTaxFlag2_Original
+				,strTaxFlag3_Original
+				,strTaxFlag4_Original
+				,strDepositRequired_Original
+				,intDepositPLUId_Original
+				,strDepositPLUId_Original
+				,strQuantityRequired_Original
+				,strScaleItem_Original
+				,strFoodStampable_Original
+				,strReturnable_Original
+				,strSaleable_Original
+				,strIdRequiredLiquor_Original
+				,strIdRequiredCigarette_Original
+				,strPromotionalItem_Original
+				,strPrePriced_Original
+				,strApplyBlueLaw1_Original
+				,strApplyBlueLaw2_Original
+				,strCountedDaily_Original
+				,strCounted_Original
+				,strCountBySINo_Original
+				,intFamilyId_Original
+				,strFamilyId_Original
+				,intClassId_Original
+				,strClassId_Original
+				,intProductCodeId_Original
+				,strProductCodeId_Original
+				,intVendorId_Original
+				,strVendorId_Original
+				,strMinimumAge_Original
+				,strMinOrder_Original
+				,strSuggestedQty_Original
+				,strStorageLocationId_Original
+				-- Modified Fields
+				,strTaxFlag1_New
+				,strTaxFlag2_New
+				,strTaxFlag3_New
+				,strTaxFlag4_New
+				,strDepositRequired_New
+				,intDepositPLUId_New
+				,strDepositPLUId_New
+				,strQuantityRequired_New
+				,strScaleItem_New
+				,strFoodStampable_New
+				,strReturnable_New
+				,strSaleable_New
+				,strIdRequiredLiquor_New
+				,strIdRequiredCigarette_New
+				,strPromotionalItem_New
+				,strPrePriced_New
+				,strApplyBlueLaw1_New
+				,strApplyBlueLaw2_New
+				,strCountedDaily_New
+				,strCounted_New
+				,strCountBySINo_New
+				,intFamilyId_New
+				,strFamilyId_New
+				,intClassId_New
+				,strClassId_New
+				,intProductCodeId_New
+				,strProductCodeId_New
+				,intVendorId_New
+				,strVendorId_New
+				,strMinimumAge_New
+				,strMinOrder_New
+				,strSuggestedQty_New
+				,strStorageLocationId_New
+		)
+		SELECT 
+			I.intItemId
+			, IL.intItemLocationId
+
+			-- Original Fields
+			, CASE 
+					WHEN [Changes].ysnTaxFlag1_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnTaxFlag2_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnTaxFlag3_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnTaxFlag4_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnDepositRequired_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CAST([Changes].intDepositPLUId_Original AS NVARCHAR(1000))
+			, ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
+			, CASE 
+					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnScaleItem_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnFoodStampable_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnReturnable_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnSaleable_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnIdRequiredLiquor_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnIdRequiredCigarette_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnPromotionalItem_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnPrePriced_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnApplyBlueLaw1_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnApplyBlueLaw2_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnCountedDaily_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, strCounted_Original
+			, CASE 
+					WHEN [Changes].ysnCountBySINo_Original = 1 THEN 'true' ELSE 'false'
+			  END
+			, CAST([Changes].intFamilyId_Original AS NVARCHAR(1000))
+			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_Original), '')
+			, CAST([Changes].intClassId_Original AS NVARCHAR(1000))
+			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_Original), '')
+			, [Changes].intProductCodeId_Original
+			, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_Original), '')
+			, [Changes].intVendorId_Original
+			, ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_Original), '')
+			, CAST((ISNULL([Changes].intMinimumAge_Original, '')) AS NVARCHAR(1000))--ISNULL((, '')
+			, ISNULL(CAST([Changes].dblMinOrder_Original AS NVARCHAR(1000)), '')
+			, ISNULL(CAST([Changes].dblSuggestedQty_Original AS NVARCHAR(1000)), '')
+			, ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_Original), '')
+
+
+			-- Modified Fields
+			, CASE 
+					WHEN [Changes].ysnTaxFlag1_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnTaxFlag2_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnTaxFlag3_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnTaxFlag4_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnDepositRequired_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CAST([Changes].intDepositPLUId_New AS NVARCHAR(1000))
+			, ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
+			, CASE 
+					WHEN [Changes].ysnQuantityRequired_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnScaleItem_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnFoodStampable_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnReturnable_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnSaleable_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnIdRequiredLiquor_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnIdRequiredCigarette_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnPromotionalItem_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnPrePriced_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnApplyBlueLaw1_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnApplyBlueLaw2_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CASE 
+					WHEN [Changes].ysnCountedDaily_New = 1 THEN 'true' ELSE 'false'
+			  END
+			,strCounted_New
+			, CASE 
+					WHEN [Changes].ysnCountBySINo_New = 1 THEN 'true' ELSE 'false'
+			  END
+			, CAST([Changes].intFamilyId_New AS NVARCHAR(1000))
+			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_New), '')
+			, CAST([Changes].intClassId_New AS NVARCHAR(1000))
+			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_New), '')
+			, [Changes].intProductCodeId_New
+			, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_New), '')
+			, [Changes].intVendorId_New
+			, ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_New), '')
+			, CAST((ISNULL([Changes].intMinimumAge_New, '')) AS NVARCHAR(1000))
+			, ISNULL(CAST([Changes].dblMinOrder_New AS NVARCHAR(1000)), '')
+			, ISNULL(CAST([Changes].dblSuggestedQty_New AS NVARCHAR(1000)), '')
+			, ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_New), '')
+
+		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
+		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
+		JOIN 
+		(
+			SELECT TOP 1 UOMM.strUpcCode, ILL.intItemId, ILL.intLocationId, ILL.intItemLocationId, ILL.intDepositPLUId, ILL.intFamilyId
+			FROM tblICItemLocation ILL
+			JOIN tblICItemUOM UOMM ON ILL.intDepositPLUId = UOMM.intItemUOMId
+		) IL ON I.intItemId = IL.intItemId 
+		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
+		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+		---------------------------------------------------------------
+		------ END Insert to temp Table handle all Data types ---------
+		---------------------------------------------------------------
+
+
 
 	
 		-- Handle preview using Table variable
@@ -615,6 +1071,8 @@ BEGIN TRANSACTION
 			, intParentId INT
 			, intChildId INT
 		)
+
+
 
 		-- ITEM Preview
 		DECLARE @strCategoryCode_New AS NVARCHAR(50) = (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = @intNewCategory)
@@ -636,25 +1094,34 @@ BEGIN TRANSACTION
 				END
 				,I.strDescription
 				,CASE
-					WHEN [Changes].intCategoryId_Original IS NOT NULL AND [Changes].intCategoryId_Original != [Changes].intCategoryId_New THEN 'Category'
-					WHEN [Changes].strCountCode_Original IS NOT NULL AND [Changes].strCountCode_Original != ISNULL([Changes].strCountCode_New, 0) THEN 'Count Code'
+					WHEN [Changes].oldColumnName = 'strCategoryCode_Original' THEN 'Category'
+					WHEN [Changes].oldColumnName = 'strCountCode_Original' THEN 'Count Code'
+					WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Description'
 				 END
-				,CASE
-					WHEN [Changes].intCategoryId_Original IS NOT NULL AND [Changes].intCategoryId_Original != [Changes].intCategoryId_New THEN CAST(ISNULL(Cat.strCategoryCode, '') AS NVARCHAR(50)) --CAST(ISNULL(intCategoryId_Original, '') AS NVARCHAR(50))
-					WHEN [Changes].strCountCode_Original IS NOT NULL AND [Changes].strCountCode_Original != [Changes].strCountCode_New THEN CAST(ISNULL([Changes].strCountCode_Original, '') AS NVARCHAR(50))
-				 END
-				,CASE
-					WHEN [Changes].intCategoryId_New IS NOT NULL AND [Changes].intCategoryId_Original != [Changes].intCategoryId_New THEN CAST(ISNULL(@strCategoryCode_New, '') AS NVARCHAR(50)) --CAST(ISNULL(intCategoryId_New, '') AS NVARCHAR(50))
-					WHEN [Changes].strCountCode_New IS NOT NULL AND [Changes].strCountCode_Original != [Changes].strCountCode_New THEN CAST(ISNULL([Changes].strCountCode_New, '') AS NVARCHAR(50))
-				 END
+				,[Changes].strOldData
+				,[Changes].strNewData
 				,[Changes].intItemId 
 				,[Changes].intItemId
-		FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
+		FROM 
+		(
+			SELECT DISTINCT intItemId, oldColumnName, strOldData, strNewData
+			FROM @tblUpdateItemForCStore
+			unpivot
+			(
+				strOldData for oldColumnName in (strCategoryCode_Original, strCountCode_Original, strDescription_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (strCategoryCode_New, strCountCode_New, strDescription_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
+		) [Changes]
+		--FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
 		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
 		JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
 		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
 		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
-		JOIN tblICCategory Cat ON [Changes].intCategoryId_Original = Cat.intCategoryId
+		JOIN tblICCategory Cat ON I.intCategoryId = Cat.intCategoryId
 		WHERE 
 		(
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
@@ -662,15 +1129,9 @@ BEGIN TRANSACTION
 		)
 		AND 
 		(
-				strUpcCode IS NULL 
-				OR EXISTS (
-							SELECT TOP 1 1 
-							FROM	tblICItemUOM uom 
-							WHERE	uom.intItemId = @intUpcCode
-							AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
-						)
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
 		)
-
 
 
 
@@ -694,14 +1155,30 @@ BEGIN TRANSACTION
 				END
 				,I.strDescription
 				,AC.strAccountCategory
-				,CAST(ISNULL([Changes].intAccountId_Original, '') AS NVARCHAR(50))
-				,CAST(ISNULL([Changes].intAccountId_New, '') AS NVARCHAR(50))
+				,[Changes].strOldData
+				,[Changes].strNewData
 				,[Changes].intItemId 
 				,[Changes].intItemAccountId
-		FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
+		--FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
+		FROM 
+		(
+			SELECT DISTINCT intItemId,intItemAccountId,intAccountId_Original,intAccountId_New, oldColumnName, strOldData, strNewData
+			FROM @tblItemAccountForCStore
+			unpivot
+			(
+				strOldData for oldColumnName in (strAccountId_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (strAccountId_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
+		) [Changes]
 		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
 		JOIN tblICItemAccount IA ON [Changes].intItemAccountId = IA.intItemAccountId
 		JOIN tblGLAccountCategory AC ON IA.intAccountCategoryId = AC.intAccountCategoryId
+		JOIN tblGLAccount GL_Old ON [Changes].intAccountId_Original = GL_Old.intAccountId
+		JOIN tblGLAccount GL_New ON [Changes].intAccountId_New = GL_New.intAccountId
 		JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
 		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
 		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
@@ -712,13 +1189,8 @@ BEGIN TRANSACTION
 		)
 		AND 
 		(
-				strUpcCode IS NULL 
-				OR EXISTS (
-							SELECT TOP 1 1 
-							FROM	tblICItemUOM uom 
-							WHERE	uom.intItemId = @intUpcCode
-							AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
-						)
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
 		)
 
 
@@ -743,26 +1215,59 @@ BEGIN TRANSACTION
 				END
 				,I.strDescription
 				,CASE
-					WHEN [Changes].ysnTaxFlag1_Original IS NOT NULL AND [Changes].ysnTaxFlag1_Original != [Changes].ysnTaxFlag1_New THEN 'Tax Flag 1'
-					WHEN [Changes].ysnTaxFlag2_Original IS NOT NULL AND [Changes].ysnTaxFlag2_Original != [Changes].ysnTaxFlag2_New THEN 'Tax Flag 2'
-					WHEN [Changes].ysnTaxFlag3_Original IS NOT NULL AND [Changes].ysnTaxFlag3_Original != [Changes].ysnTaxFlag3_New THEN 'Tax Flag 3'
-					WHEN [Changes].ysnTaxFlag4_Original IS NOT NULL AND [Changes].ysnTaxFlag4_Original != [Changes].ysnTaxFlag4_New THEN 'Tax Flag 4'
+					WHEN [Changes].oldColumnName = 'strTaxFlag1_Original' THEN 'Tax Flag 1'
+					WHEN [Changes].oldColumnName = 'strTaxFlag2_Original' THEN 'Tax Flag 2'
+					WHEN [Changes].oldColumnName = 'strTaxFlag3_Original' THEN 'Tax Flag 3'
+					WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'Tax Flag 4'
+					WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'Deposit Required'
+					WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'Deposit PLU'
+					WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'Quantity Required' 
+					WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'Scale Item' 
+					WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'Stampable' 
+					WHEN [Changes].oldColumnName = 'strReturnable_Original' THEN 'Returnable' 
+					WHEN [Changes].oldColumnName = 'strSaleable_Original' THEN 'Saleable'
+					WHEN [Changes].oldColumnName = 'strIdRequiredLiquor_Original' THEN 'Required Liquor' 
+					WHEN [Changes].oldColumnName = 'strIdRequiredCigarette_Original' THEN 'Required Cigarette' 
+					WHEN [Changes].oldColumnName = 'strPromotionalItem_Original' THEN 'Promotional Item'
+					WHEN [Changes].oldColumnName = 'strPrePriced_Original' THEN 'Pre Priced'
+					WHEN [Changes].oldColumnName = 'strApplyBlueLaw1_Original' THEN 'Apply Blue Law 1'
+					WHEN [Changes].oldColumnName = 'strApplyBlueLaw2_Original' THEN 'Apply Blue Law 2'
+					WHEN [Changes].oldColumnName = 'strCountedDaily_Original' THEN 'Counted Daily' 
+					WHEN [Changes].oldColumnName = 'strCounted_Original' THEN 'Counted'
+					WHEN [Changes].oldColumnName = 'strCountBySINo_Original' THEN 'Count by SI No'
+					WHEN [Changes].oldColumnName = 'strFamilyId_Original' THEN 'Family'
+					WHEN [Changes].oldColumnName = 'strClassId_Original' THEN 'Class'
+					WHEN [Changes].oldColumnName = 'strProductCodeId_Original' THEN 'Product Code'
+					WHEN [Changes].oldColumnName = 'strVendorId_Original' THEN 'Vendor' 
+					WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'Minimum Age' 
+					WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'Minimum Order' 
+					WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'Suggested Quantity' 
+					WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'Storage Location'
 				 END
-				,CASE
-					WHEN [Changes].ysnTaxFlag1_Original IS NOT NULL AND [Changes].ysnTaxFlag1_Original != [Changes].ysnTaxFlag1_New THEN CAST(CAST([Changes].ysnTaxFlag1_Original AS BIT) AS NVARCHAR(10))
-					WHEN [Changes].ysnTaxFlag2_Original IS NOT NULL AND [Changes].ysnTaxFlag2_Original != [Changes].ysnTaxFlag2_New THEN CAST([Changes].ysnTaxFlag2_Original AS NVARCHAR(10))
-					WHEN [Changes].ysnTaxFlag3_Original IS NOT NULL AND [Changes].ysnTaxFlag3_Original != [Changes].ysnTaxFlag3_New THEN CAST([Changes].ysnTaxFlag3_Original AS NVARCHAR(10))
-					WHEN [Changes].ysnTaxFlag4_Original IS NOT NULL AND [Changes].ysnTaxFlag4_Original != [Changes].ysnTaxFlag4_New THEN CAST([Changes].ysnTaxFlag4_Original AS NVARCHAR(10))
-				 END
-				,CASE
-					WHEN [Changes].ysnTaxFlag1_Original IS NOT NULL AND [Changes].ysnTaxFlag1_Original != [Changes].ysnTaxFlag1_New THEN CAST([Changes].ysnTaxFlag1_New AS NVARCHAR(10))
-					WHEN [Changes].ysnTaxFlag2_Original IS NOT NULL AND [Changes].ysnTaxFlag2_Original != [Changes].ysnTaxFlag2_New THEN CAST([Changes].ysnTaxFlag2_New AS NVARCHAR(10))
-					WHEN [Changes].ysnTaxFlag3_Original IS NOT NULL AND [Changes].ysnTaxFlag3_Original != [Changes].ysnTaxFlag3_New THEN CAST([Changes].ysnTaxFlag3_New AS NVARCHAR(10))
-					WHEN [Changes].ysnTaxFlag4_Original IS NOT NULL AND [Changes].ysnTaxFlag4_Original != [Changes].ysnTaxFlag4_New THEN CAST([Changes].ysnTaxFlag4_New AS NVARCHAR(10))
-				 END
+				,[Changes].strOldData
+				,[Changes].strNewData
 				,[Changes].intItemId 
 				,[Changes].intItemLocationId
-		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
+		FROM 
+		(
+			SELECT DISTINCT intItemId,intItemLocationId, oldColumnName, strOldData, strNewData
+			FROM @tblItemLocationForCStore
+			unpivot
+			(
+				strOldData for oldColumnName in (strTaxFlag1_Original, strTaxFlag2_Original, strTaxFlag3_Original, strTaxFlag4_Original, strDepositRequired_Original, strDepositPLUId_Original, strQuantityRequired_Original, strScaleItem_Original, strFoodStampable_Original
+				                                 ,strReturnable_Original, strSaleable_Original, strIdRequiredLiquor_Original,strIdRequiredCigarette_Original, strPromotionalItem_Original, strPrePriced_Original, strApplyBlueLaw1_Original, strApplyBlueLaw2_Original
+												 , strCountedDaily_Original, strCounted_Original, strCountBySINo_Original, strFamilyId_Original, strClassId_Original, strProductCodeId_Original, strVendorId_Original, strMinimumAge_Original, strMinOrder_Original
+												 , strSuggestedQty_Original, strStorageLocationId_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (strTaxFlag1_New, strTaxFlag2_New, strTaxFlag3_New, strTaxFlag4_New, strDepositRequired_New, strDepositPLUId_New, strQuantityRequired_New, strScaleItem_New, strFoodStampable_New
+				                                 ,strReturnable_New, strSaleable_New, strIdRequiredLiquor_New,strIdRequiredCigarette_New, strPromotionalItem_New, strPrePriced_New, strApplyBlueLaw1_New, strApplyBlueLaw2_New
+												 , strCountedDaily_New, strCounted_New, strCountBySINo_New, strFamilyId_New,strClassId_New, strProductCodeId_New, strVendorId_New, strMinimumAge_New, strMinOrder_New
+												 ,strSuggestedQty_New, strStorageLocationId_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
+		) [Changes]
 		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
 		JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
 		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
@@ -774,13 +1279,8 @@ BEGIN TRANSACTION
 		)
 		AND 
 		(
-				strUpcCode IS NULL 
-				OR EXISTS (
-							SELECT TOP 1 1 
-							FROM	tblICItemUOM uom 
-							WHERE	uom.intItemId = @intUpcCode
-							AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
-						)
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
 		)
 
 
@@ -788,7 +1288,7 @@ BEGIN TRANSACTION
 
 
 
-	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '') --AND strNewData = ''
 
 	   -- Query Preview display
 	   SELECT DISTINCT 

@@ -4,6 +4,7 @@ SELECT S.intSampleId
 	,ST.intControlPointId
 	,I.strDescription
 	,IR.strReceiptNumber
+	,INVS.strShipmentNumber
 	,CH.intContractTypeId
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber
@@ -29,6 +30,7 @@ JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
+LEFT JOIN tblICInventoryShipment INVS ON INVS.intInventoryShipmentId = S.intInventoryShipmentId
 LEFT JOIN tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId

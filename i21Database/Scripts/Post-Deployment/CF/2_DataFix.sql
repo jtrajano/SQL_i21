@@ -63,3 +63,29 @@ GROUP BY tax.intTransactionId)
 
 
 --CF-1124
+
+
+
+--CF-1376
+
+UPDATE tblCFTransaction 
+SET intCustomerId = (SELECT TOP 1 intCustomerId FROM tblCFNetwork WHERE intNetworkId = tblCFTransaction.intNetworkId)
+WHERE strTransactionType = 'Foreign Sale'
+AND ISNULL(tblCFTransaction.intCustomerId,0) = 0
+
+
+UPDATE tblCFTransaction 
+SET intCustomerId = (
+SELECT TOP 1 cfAccnt.intCustomerId
+FROM tblCFCard AS cfCard
+INNER JOIN tblCFAccount AS cfAccnt
+ON cfCard.intAccountId = cfAccnt.intAccountId
+WHERE intCardId = tblCFTransaction.intCardId
+)
+WHERE strTransactionType != 'Foreign Sale'
+AND ISNULL(tblCFTransaction.intCustomerId,0) = 0
+
+
+ UPDATE tblCFTransaction SET ysnInvoiced = 1 WHERE strInvoiceReportNumber IS NOT NULL
+
+

@@ -490,7 +490,66 @@ BEGIN TRY
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
 
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
+		
+		
+				INSERT INTO tblCTSequenceAmendmentLog
+				(
+					 intSequenceHistoryId
+					,dtmHistoryCreated	
+					,intContractHeaderId	
+					,intContractDetailId
+					,intAmendmentApprovalId
+					,strItemChanged		
+					,strOldValue		  	
+					,strNewValue
+					,intConcurrencyId				
+				)
+			   SELECT 
+			   intSequenceHistoryId   = NULL
+			  ,dtmHistoryCreated	  = GETDATE()
+			  ,intContractHeaderId	  = @intContractHeaderId
+			  ,intContractDetailId	  = @intContractDetailId
+			  ,intAmendmentApprovalId = 1
+			  ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Qty' ELSE 'Full Price Qty' END
+			  ,strOldValue			  =  0
+			  ,strNewValue		      =  PFD.dblQuantity
+			  ,intConcurrencyId		  =  1 
+			  FROM 
+			  tblCTPriceFixationDetail PFD
+			  JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
+			  JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
+			  JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			  LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
+			  WHERE (
+						ISNULL(CH.ysnPrinted, 0) = 1
+						OR ISNULL(CH.ysnSigned, 0) = 1
+						)
+					AND CD.intContractDetailId = @intContractDetailId
+           UNION
 
+			  SELECT 
+			  intSequenceHistoryId   = NULL
+			 ,dtmHistoryCreated	  = GETDATE()
+			 ,intContractHeaderId	  = @intContractHeaderId
+			 ,intContractDetailId	  = @intContractDetailId
+			 ,intAmendmentApprovalId = 1
+			 ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Fixation' ELSE 'Full Price Fixation' END
+			 ,strOldValue			  =  0
+			 ,strNewValue		      =  PFD.dblFutures
+			 ,intConcurrencyId		  =  1 
+			 FROM 
+			 tblCTPriceFixationDetail PFD
+			 JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
+			 JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
+			 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			 LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
+			 WHERE (
+					ISNULL(CH.ysnPrinted, 0) = 1
+					OR ISNULL(CH.ysnSigned, 0) = 1
+					)
+				AND CD.intContractDetailId = @intContractDetailId
+
+		
 		IF	@ysnMultiplePriceFixation = 1
 		BEGIN
 			SELECT	@intContractDetailId = MIN(intContractDetailId)

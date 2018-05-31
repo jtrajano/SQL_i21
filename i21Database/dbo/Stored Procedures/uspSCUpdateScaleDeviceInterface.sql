@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCUpdateScaleDeviceInterface]
        @intScaleDeviceId INT,
 	   @strDeviceData NVARCHAR(256),
+	   @intDeviceType INT,
 	   @ReturnValue INT OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -16,14 +17,14 @@ BEGIN
        WHERE intScaleDeviceId = @intScaleDeviceId
        IF @intDeviceInterfaceFileId IS NULL
        BEGIN
-              INSERT INTO tblSCDeviceInterfaceFile (intScaleDeviceId, strDeviceData, intConcurrencyId, dtmScaleTime) 
-              VALUES (@intScaleDeviceId, @strDeviceData, 1, GETDATE())
+              INSERT INTO tblSCDeviceInterfaceFile (intScaleDeviceId, strDeviceData, intDeviceType, intConcurrencyId, dtmScaleTime) 
+              VALUES (@intScaleDeviceId, @strDeviceData, @intDeviceType, 1, GETDATE())
 
 			  SET @ReturnValue = SCOPE_IDENTITY()
        END
        ELSE
        BEGIN
-              UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData , dtmScaleTime = GETDATE()
+              UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData , dtmScaleTime = GETDATE(), intDeviceType = @intDeviceType
               WHERE intDeviceInterfaceFileId = @intDeviceInterfaceFileId
 
 			  SET @ReturnValue = @intDeviceInterfaceFileId

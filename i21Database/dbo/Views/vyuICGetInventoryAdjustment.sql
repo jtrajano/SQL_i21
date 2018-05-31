@@ -18,6 +18,7 @@ SELECT
 			WHEN Adj.intAdjustmentType = 8 THEN 'Lot Move'
 			WHEN Adj.intAdjustmentType = 9 THEN 'Lot Owner Change'
 			WHEN Adj.intAdjustmentType = 10 THEN 'Opening Inventory'
+			WHEN Adj.intAdjustmentType = 11 THEN 'Change Lot Weight'
 		END)
 	, Adj.strAdjustmentNo
 	, Adj.strDescription

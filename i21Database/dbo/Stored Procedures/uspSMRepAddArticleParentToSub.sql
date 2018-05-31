@@ -14,7 +14,7 @@
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 		INNER JOIN tblSMReplicationTable AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = 'Parent' AND ysnCommitted = 1 AND ysnEnabled = 1
+		WHERE strType = 'Parent' AND ysnEnabled = 1 AND (ysnInitOnly != 1 OR ysnInitOnly IS null)
 
 			
 

@@ -28,16 +28,16 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 			ON [dbo].tblCMBank
 			INSTEAD OF INSERT
 			AS
-			BEGIN 
+			BEGIN
 
-			SET NOCOUNT ON 
+			SET NOCOUNT ON
 
 			 --For Encryption and Decryption
-			OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
-			DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
-			WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+			-- OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+			-- DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd
+			-- WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
-				-- Proceed in inserting the record the base table (tblCMBank)			
+				-- Proceed in inserting the record the base table (tblCMBank)
 				INSERT INTO tblCMBank (
 					[strBankName]
 				   ,[strContact]
@@ -79,28 +79,28 @@ CREATE TRIGGER trgInsteadOfInsertCMBank
 						,[ysnDelete]			= i.ysnDelete
 						,[dtmDateDeleted]		= i.dtmDateDeleted
 						,[intConcurrencyId]		= i.intConcurrencyId
-				FROM	inserted i 
+				FROM	inserted i
 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
-			EXIT_TRIGGER: 
+			EXIT_TRIGGER:
 
-			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+			-- CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 END
 
 GO
 CREATE TRIGGER trgInsteadOfUpdateCMBank
    ON  dbo.tblCMBank
    INSTEAD OF UPDATE
-AS 
+AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
 
     --For Encryption and Decryption
-	OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
-	DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd 
-	WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
+	-- OPEN SYMMETRIC KEY i21EncryptionSymKeyByASym
+	-- DECRYPTION BY ASYMMETRIC KEY i21EncryptionASymKeyPwd
+	-- WITH PASSWORD = 'neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='
 
     UPDATE tblCMBank SET
     strBankName           = i.strBankName
@@ -140,7 +140,7 @@ BEGIN
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 
-	CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
+	-- CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 
 END
 GO

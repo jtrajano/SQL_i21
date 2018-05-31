@@ -1645,7 +1645,7 @@ IF @post = 1
 				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN  
 																								(
 																									SELECT
-																										SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ISNULL(ICIS.intStockUOMId, ARID.intItemUOMId), ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
+																										SUM(dbo.fnARCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped, null, I.strType))
 																									FROM
 																										(SELECT intInvoiceId, intItemId, intItemUOMId, dblQtyShipped 
 																										 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
@@ -1653,7 +1653,7 @@ IF @post = 1
 																										(SELECT intInvoiceId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
 																											ON ARID.intInvoiceId = ARI.intInvoiceId	
 																									LEFT OUTER JOIN
-																										(SELECT intItemId FROM tblICItem WITH (NOLOCK)) I
+																										(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
 																											ON ARID.intItemId = I.intItemId
 																									LEFT OUTER JOIN
 																										(SELECT intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) IST
@@ -1674,7 +1674,7 @@ IF @post = 1
 																							ELSE 
 																								(
 																								SELECT
-																									SUM(ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ISNULL(ICIS.intStockUOMId, ARID.intItemUOMId), ARID.dblQtyShipped),ISNULL(ARID.dblQtyShipped, @ZeroDecimal)))
+																									SUM(dbo.fnARCalculateQtyBetweenUOM(ARID.intItemUOMId, ICIS.intStockUOMId, ARID.dblQtyShipped, null, I.strType))
 																								FROM
 																									(SELECT intInvoiceId, intItemId, intItemUOMId, dblQtyShipped 
 																									 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID 
@@ -1682,7 +1682,7 @@ IF @post = 1
 																									(SELECT intInvoiceId, intCompanyLocationId FROM tblARInvoice WITH (NOLOCK)) ARI
 																										ON ARID.intInvoiceId = ARI.intInvoiceId	
 																								LEFT OUTER JOIN
-																									(SELECT intItemId FROM tblICItem WITH (NOLOCK)) I
+																									(SELECT intItemId, strType FROM tblICItem WITH (NOLOCK)) I
 																										ON ARID.intItemId = I.intItemId
 																								LEFT OUTER JOIN
 																									(SELECT intItemId, intLocationId FROM vyuARGetItemAccount WITH (NOLOCK)) IST
@@ -2069,8 +2069,8 @@ IF @post = 1
 				,intAccountId				= B.intAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal())  END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN 0 ELSE dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, ICIS.strType) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') OR (A.strTransactionType = 'Debit Memo' AND A.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, ICIS.strType) ELSE 0 END				
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2108,7 +2108,7 @@ IF @post = 1
 				(SELECT intInvoiceId, [strDescription] FROM @PostInvoiceData)	P ON A.intInvoiceId = P.intInvoiceId 	
 			INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intCompanyLocationId
 			LEFT OUTER JOIN 
-				(SELECT intItemId, intLocationId, intStockUOMId FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId AND A.intCompanyLocationId = ICIS.intLocationId 
+				(SELECT intItemId, intLocationId, intStockUOMId, strType FROM vyuICGetItemStock WITH (NOLOCK)) ICIS ON B.intItemId = ICIS.intItemId AND A.intCompanyLocationId = ICIS.intLocationId 
 			LEFT OUTER JOIN
 				(
 					SELECT
@@ -2159,8 +2159,8 @@ IF @post = 1
 																													
 																										 END)
 											  ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2298,8 +2298,8 @@ IF @post = 1
 																													END)
 																										 END)
 											  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END				
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END				
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType)  ELSE 0 END				
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType) END				
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2435,8 +2435,8 @@ IF @post = 1
 																													END)
 																												END) 
 											  ELSE 0  END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL([dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped),ISNULL(B.dblQtyShipped, @ZeroDecimal)) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE (dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType)) END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN (dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType)) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2546,8 +2546,8 @@ IF @post = 1
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType)  END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2626,8 +2626,8 @@ IF @post = 1
 				,intAccountId				= B.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) END
 				,dblCredit					= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(B.dblBaseTotal, @ZeroDecimal) + [dbo].fnRoundBanker(((B.dblDiscount/100.00) * [dbo].fnRoundBanker((B.dblQtyShipped * B.dblBasePrice), dbo.fnARGetDefaultDecimal())), dbo.fnARGetDefaultDecimal()) ELSE  0 END
-				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) END
-				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId, ISNULL(ICIS.intStockUOMId, B.intItemUOMId), B.dblQtyShipped) ELSE 0 END							
+				,dblDebitUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN 0 ELSE dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType)  END
+				,dblCreditUnit				= CASE WHEN A.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash') THEN dbo.fnARCalculateQtyBetweenUOM(B.intItemUOMId, ICIS.intStockUOMId, B.dblQtyShipped, null, I.strType) ELSE 0 END							
 				,strDescription				= P.[strDescription]
 				,strCode					= @CODE
 				,strReference				= C.strCustomerNumber
@@ -2923,48 +2923,68 @@ IF @post = 1
 			DECLARE @ItemsForPost AS ItemCostingTableType  			
 
 			INSERT INTO @ItemsForPost (  
-				 [intItemId]  
-				,[intItemLocationId] 
-				,[intItemUOMId]  
-				,[dtmDate]  
-				,[dblQty]  
-				,[dblUOMQty]  
-				,[dblCost] 
-				,[dblSalesPrice]  
-				,[intCurrencyId]  
-				,[dblExchangeRate]  
-				,[intTransactionId] 
+				 [intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblUOMQty]
+				,[dblCost]
+				,[dblValue]
+				,[dblSalesPrice]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intTransactionId]
 				,[intTransactionDetailId]
-				,[strTransactionId]  
-				,[intTransactionTypeId]  
-				,[intLotId] 
+				,[strTransactionId]
+				,[intTransactionTypeId]
+				,[intLotId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				,[ysnIsStorage]
 				,[strActualCostId]
+				,[intSourceTransactionId]
+				,[strSourceTransactionId]
+				,[intInTransitSourceLocationId]
 				,[intForexRateTypeId]
 				,[dblForexRate]
+				,[intStorageScheduleTypeId]
+				,[dblUnitRetail]
+				,[intCategoryId]
+				,[dblAdjustRetailValue]
+				,[intCategoryAdjustmentType]
 			) 
 			SELECT 
-				 [intItemId]  
-				,[intItemLocationId] 
-				,[intItemUOMId]  
-				,[dtmDate]  
-				,[dblQty]  
-				,[dblUOMQty]  
-				,[dblCost] 
-				,[dblSalesPrice]  
-				,[intCurrencyId]  
-				,[dblExchangeRate]  
-				,[intTransactionId] 
+				 [intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[dtmDate]
+				,[dblQty]
+				,[dblUOMQty]
+				,[dblCost]
+				,[dblValue]
+				,[dblSalesPrice]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intTransactionId]
 				,[intTransactionDetailId]
-				,[strTransactionId]  
-				,[intTransactionTypeId]  
-				,[intLotId] 
+				,[strTransactionId]
+				,[intTransactionTypeId]
+				,[intLotId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
+				,[ysnIsStorage]
 				,[strActualCostId]
+				,[intSourceTransactionId]
+				,[strSourceTransactionId]
+				,[intInTransitSourceLocationId]
 				,[intForexRateTypeId]
 				,[dblForexRate]
+				,[intStorageScheduleTypeId]
+				,[dblUnitRetail]
+				,[intCategoryId]
+				,[dblAdjustRetailValue]
+				,[intCategoryAdjustmentType]
 			FROM 
 				[fnARGetItemsForCosting](@PostInvoiceData, @post, 0)
 			

@@ -10,8 +10,9 @@
 	,@strReasonCode NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
 	,@ysnBulkChange BIT = 0
-	,@strNewLotAlias nvarchar(50)=NULL
-	,@strNewVendorLotNumber nvarchar(50)=NULL
+	,@strNewLotAlias NVARCHAR(50) = NULL
+	,@strNewVendorLotNumber NVARCHAR(50) = NULL
+	,@dtmNewDueDate DATETime=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -38,8 +39,9 @@ BEGIN TRY
 		,@strOldNotes NVARCHAR(MAX)
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
-		,@strLotAlias nvarchar(50)
-		,@strVendorLotNumber nvarchar(50)
+		,@strLotAlias NVARCHAR(50)
+		,@strVendorLotNumber NVARCHAR(50)
+		,@dtmOldDueDate datetime
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -52,8 +54,8 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intLotStatusId = intLotStatusId
 		,@dtmExpiryDate = dtmExpiryDate
-		,@strLotAlias=strLotAlias 
-		,@strVendorLotNumber=strVendorLotNo 
+		,@strLotAlias = strLotAlias
+		,@strVendorLotNumber = strVendorLotNo
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -235,6 +237,7 @@ BEGIN TRY
 		-- Vendor & Warehouse ref no update
 		SELECT @strOldVendorRefNo = strVendorRefNo
 			,@strOldWarehouseRefNo = strWarehouseRefNo
+			,@dtmOldDueDate=dtmDueDate
 		FROM tblMFLotInventory
 		WHERE intLotId = @intLotId
 
@@ -289,29 +292,39 @@ BEGIN TRY
 			SET strContainerNo = @strContainerNo
 			WHERE intLotId = @intLotId
 		END
+
+		IF IsNULL(@strLotAlias, '') <> IsNULL(@strNewLotAlias, '')
+		BEGIN
+			EXEC dbo.uspMFSetLotAlias @intLotId = @intLotId
+				,@strNewLotAlias = @strNewLotAlias
+				,@intUserId = @intUserId
+				,@strReasonCode = NULL
+				,@strNotes = NULL
+				,@dtmDate = NULL
+				,@ysnBulkChange = 0
+		END
+
+		IF IsNULL(@strVendorLotNumber, '') <> IsNULL(@strNewVendorLotNumber, '')
+		BEGIN
+			EXEC dbo.uspMFSetVendorLotNumber @intLotId = @intLotId
+				,@strNewVendorLotNumber = @strNewVendorLotNumber
+				,@intUserId = @intUserId
+				,@strReasonCode = NULL
+				,@strNotes = NULL
+				,@dtmDate = NULL
+				,@ysnBulkChange = 0
+		END
+		IF IsNULL(@dtmOldDueDate, '1900-01-01') <> IsNULL(@dtmNewDueDate, '1900-01-01')
+		BEGIN
+			EXEC dbo.uspMFSetLotDueDate @intLotId = @intLotId
+				,@dtmNewDueDate = @dtmNewDueDate
+				,@intUserId = @intUserId
+				,@strReasonCode = NULL
+				,@strNotes = NULL
+				,@dtmDate = NULL
+				,@ysnBulkChange = 0
+		END
 	END
-
-	if IsNULL(@strLotAlias,'') <>IsNULL(@strNewLotAlias,'') 
-	Begin
-		EXEC dbo.uspMFSetLotAlias @intLotId =@intLotId
-				,@strNewLotAlias =@strNewLotAlias
-				,@intUserId =@intUserId
-				,@strReasonCode  = NULL
-				,@strNotes = NULL
-				,@dtmDate = NULL
-				,@ysnBulkChange = 0
-	End
-
-	if IsNULL(@strVendorLotNumber,'') <>IsNULL(@strNewVendorLotNumber,'') 
-	Begin
-		EXEC dbo.uspMFSetVendorLotNumber @intLotId =@intLotId
-				,@strNewVendorLotNumber =@strNewVendorLotNumber
-				,@intUserId =@intUserId
-				,@strReasonCode  = NULL
-				,@strNotes = NULL
-				,@dtmDate = NULL
-				,@ysnBulkChange = 0
-	End
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

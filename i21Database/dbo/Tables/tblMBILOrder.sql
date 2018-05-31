@@ -37,4 +37,4 @@
 	[dblTankCapacity]		NUMERIC (18, 6) NULL,
 	[intConcurrencyId]		INT				DEFAULT 1 NOT NULL,
 	CONSTRAINT [PK_tblMBILOrder] PRIMARY KEY CLUSTERED ([intMBILOrderId] ASC)
-);
+)

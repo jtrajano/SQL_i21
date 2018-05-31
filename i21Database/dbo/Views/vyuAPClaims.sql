@@ -4,8 +4,14 @@ AS
 SELECT 
 CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 * ,
-CASE WHEN ysnSubCurrency > 0 THEN (dblWeightLoss - dblFranchiseWeight) * dblCost / ISNULL(intCent,1)  ELSE (dblWeightLoss - dblFranchiseWeight) * dblCost END AS dblClaim,
-(dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill 
+CASE WHEN ysnSubCurrency > 0 
+	THEN (dblWeightLoss - dblFranchiseWeight) * dblCost / ISNULL(intCent,1)  
+ELSE (dblWeightLoss - dblFranchiseWeight) * dblCost 
+END AS dblClaim,
+(dblWeightLoss - dblFranchiseWeight) AS dblQtyToBill,
+dblFranchiseWeight * (CASE WHEN ysnSubCurrency > 0 
+							THEN dblCost / ISNULL(intCent,1)
+							ELSE dblCost END) AS dblFranchiseAmount
 FROM (
 	SELECT
 		SUM(dblNetQtyReceived) AS dblNetQtyReceived,
@@ -36,6 +42,7 @@ FROM (
 		strContractNumber,
 		strDescription,
 		intItemId,
+		intPrepayTransactionId,
 		intContractDetailId,
 		intContractHeaderId,
 		dblAmountPaid,
@@ -74,6 +81,7 @@ FROM (
 			,A.dblUnitQty 
 			,A.strItemNo
 			,A.intItemId
+			,A.intPrepayTransactionId
 			,A.intContractDetailId
 			,A.intContractHeaderId
 			,A.intContractSeq
@@ -116,6 +124,7 @@ FROM (
 		strItemNo,
 		strContractNumber,
 		intItemId,
+		intPrepayTransactionId,
 		intContractDetailId,
 		intContractHeaderId,
 		dblContractItemQty,

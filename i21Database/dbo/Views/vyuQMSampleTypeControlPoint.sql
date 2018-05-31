@@ -14,7 +14,7 @@ AS (
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 	JOIN tblQMProduct P ON P.intProductId = PC.intProductId
-		AND P.intProductTypeId = 2
+		AND P.intProductTypeId IN (2, 3, 4)
 	)
 SELECT CAST(ROW_NUMBER() OVER (
 			ORDER BY intProductId

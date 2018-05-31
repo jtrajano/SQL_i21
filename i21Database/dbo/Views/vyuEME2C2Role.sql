@@ -11,6 +11,7 @@
 		intEntityRoleId			=	a.intEntityRoleId, 
 		strRoleName				=	b.strName,
 		ysnAdmin				=	b.ysnAdmin,
+		ysnPortalAdmin			=	a.ysnPortalAdmin,
 		strPassword				=	e.strPassword
 	from [tblEMEntityToContact] a
 		join tblSMUserRole b

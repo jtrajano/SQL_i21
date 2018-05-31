@@ -130,5 +130,29 @@ BEGIN
     --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Future Settlement Price','1')
 END   
-
+GO
+-- Fix invalid accounts set in company preference (not in correct category)
+UPDATE pref SET intUnrealizedGainOnBasisId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnBasisId AND strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedGainOnFuturesId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnFuturesId AND strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedGainOnCashId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnCashId AND strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedLossOnBasisId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnBasisId AND strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedLossOnFuturesId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnFuturesId AND strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedLossOnCashId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnCashId AND strAccountCategory = 'Mark to Market P&L'
+UPDATE pref SET intUnrealizedGainOnInventoryBasisIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryBasisIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedGainOnInventoryFuturesIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryFuturesIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedGainOnInventoryCashIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryCashIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryBasisIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryBasisIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryFuturesIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryFuturesIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryCashIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryCashIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedGainOnInventoryIntransitIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnInventoryIntransitIOSId AND strAccountCategory = 'Mark to Market Offset'
+UPDATE pref SET intUnrealizedLossOnInventoryIntransitIOSId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedLossOnInventoryIntransitIOSId AND strAccountCategory = 'Mark to Market Offset'
+GO
+--REMOVES TRAILING COMMA (,) IN tblRKCommodityMarketMapping.strCommodityAttributeId TO AVOID ERROR IN uspRKSyncCommodityMarketAttribute
+UPDATE tblRKCommodityMarketMapping 
+SET strCommodityAttributeId = SUBSTRING(RTRIM(strCommodityAttributeId),1,LEN(RTRIM(strCommodityAttributeId))-1)
+FROM tblRKCommodityMarketMapping 
+WHERE strCommodityAttributeId IS NOT NULL
+AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
+GO
 print('/*******************  END Risk Management Data Fixess *******************/')
+GO
