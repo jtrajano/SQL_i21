@@ -32,7 +32,7 @@ BEGIN
 		IF( @type = 1)
 			BEGIN
 				SET @insertSQL = N'INSERT INTO #ListOfArticles
-								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM tblSMReplicationConfiguration AS Con
+								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM [parentDB].[dbo].tblSMReplicationConfiguration AS Con
 								INNER JOIN tblSMReplicationConfigurationTable AS ConTab
 								ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 								INNER JOIN tblSMReplicationTable AS Tab
