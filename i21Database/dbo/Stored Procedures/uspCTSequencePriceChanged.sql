@@ -45,18 +45,26 @@ BEGIN TRY
 			@prePayId						Id,
 			@intTicketId					INT,
 			@intInvoiceDetailId				INT,
-			@ysnInvoicePosted				BIT
+			@ysnInvoicePosted				BIT,
+			@intSeqPriceUOMId				INT,
+			@intCommodityId					INT,
+			@intStockUOMId					INT,
+			@intItemId						INT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
 			@intContractHeaderId	=	intContractHeaderId,
-			@intCompanyLocationId	=	intCompanyLocationId
+			@intCompanyLocationId	=	intCompanyLocationId,
+			@intItemId				=	intItemId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
 	
-	SELECT @dblCashPrice = dblSeqPrice FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
-		
+	SELECT @dblCashPrice = dblSeqPrice,@intSeqPriceUOMId = intSeqPriceUOMId FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
+	SELECT @intCommodityId = intCommodityId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intStockUOMId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND ysnStockUOM = 1
+	SELECT @intStockUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intStockUOMId
+			
 	SELECT	@intEntityId		=	intEntityId,
 			@intContractTypeId	=	intContractTypeId
 	FROM	tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
@@ -253,6 +261,8 @@ BEGIN TRY
 		END
 	END
 	
+	SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
+	EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
 
 END TRY
 
