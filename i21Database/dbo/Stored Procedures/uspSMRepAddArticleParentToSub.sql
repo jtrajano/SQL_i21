@@ -42,10 +42,7 @@
 					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'	
 		
 											
-					FROM sys.tables as systables
-					INNER JOIN @ListOfArticles as articles
-					ON systables.name = articles.strArticle
-					WHERE is_replicated = 0;
+					FROM @ListOfArticles; 
 
 				--Executed Created Query
 				exec @result = sp_executesql @sql;

@@ -38,9 +38,9 @@ CREATE PROCEDURE [dbo].[uspSMReplicationSetRangeStart]
 
 	    SET @insertSQL = N'INSERT INTO #ListOfArticles
 		SELECT DISTINCT Tab.strTableName FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
-		INNER JOIN tblSMReplicationConfigurationTable AS ConTab
+		INNER JOIN [parentDB].[dbo].[tblSMReplicationConfigurationTable] AS ConTab
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
-		INNER JOIN tblSMReplicationTable AS Tab
+		INNER JOIN [parentDB].[dbo].[tblSMReplicationTable] AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
 		WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
 
