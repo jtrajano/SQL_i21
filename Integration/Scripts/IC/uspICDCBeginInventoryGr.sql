@@ -62,22 +62,20 @@ BEGIN
 
 		OPEN loc_cursor
 
-		FETCH NEXT
-		FROM loc_cursor
-		INTO @adjLoc
+		FETCH NEXT	FROM loc_cursor	INTO @adjLoc
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 	
-	SELECT @cnt = COUNT(*)
-		FROM	tblICItem inv INNER JOIN agitmmst itm 
-					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+	    SELECT @cnt = COUNT(*)
+		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
+					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itmGr.gapos_com_cd COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICItemUOM uom 
 					on uom.intItemId = inv.intItemId 
 				left join tblICStorageLocation sl 
-					on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
-		WHERE	agitm_un_on_hand <> 0 
-		AND agitm_loc_no = @adjLoc
+					on sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS	
+		WHERE	((gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0 OR (gapos_stor_1 + gapos_stor_2 + gapos_stor_3 + gapos_stor_4 + gapos_stor_5 + gapos_stor_6 + gapos_stor_7 + gapos_stor_8 <> 0))
+		AND  gapos_loc_no = @adjLoc
 		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 	
 		IF @cnt > 0
@@ -117,67 +115,129 @@ BEGIN
 			)
 
 			SELECT @intAdjustmentNo = @@IDENTITY
+		
+		--OWN STORAGE TYPE ---- >> (gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0
+		-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		INSERT INTO tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId
+				,intItemId
+				,dblQuantity
+				,dblNewQuantity
+				,dblAdjustByQuantity
+				,intItemUOMId
+				,dblCost
+				,intSubLocationId
+				,intStorageLocationId
+				,intConcurrencyId
+				--,strNewLotNumber 
+				--,dtmNewExpiryDate
+				,dblNewCost
+				,intOwnershipType)
+		SELECT 
+			@intAdjustmentNo
+			,inv.intItemId
+			,0
+			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
+			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
+			,uom.intItemUOMId
+			,0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
+										join tblSMCompanyLocationSubLocation cls ON sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+										join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+										WHERE sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS 
+										and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS) intSubLocationId
+			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
+										join tblSMCompanyLocationSubLocation cls ON sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+										join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+										WHERE sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS 
+										and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
+					--,sl.intSubLocationId
+					--,sl.intStorageLocationId
+			,1
+			--,lot.aglot_lot_no
+			--,aglot_expire_date
+			,(select TOP 1 dblLastCost from vyuICGetItemPricing P WHERE uom.intItemUOMId = P.intItemUOMId AND inv.intItemId = P.intItemId AND inv.intItemId = P.intItemLocationId) lastcost
+			,1
+		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
+					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itmGr.gapos_com_cd COLLATE Latin1_General_CI_AS
+				LEFT JOIN tblICItemUOM uom 
+					on uom.intItemId = inv.intItemId 
+				left join tblICStorageLocation sl 
+					on sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS	
+		WHERE	(gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0
+		AND  gapos_loc_no = @adjLoc
+		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	INSERT INTO tblICInventoryAdjustmentDetail (
-		intInventoryAdjustmentId
-        ,intItemId
-        ,dblQuantity
-        ,dblNewQuantity
-        ,dblAdjustByQuantity
-		,intItemUOMId
-        ,dblCost
-		,intSubLocationId
-		,intStorageLocationId
-        ,intConcurrencyId
-		,strNewLotNumber 
-		,dtmNewExpiryDate
-	)
-     
-	SELECT 
-		@intAdjustmentNo
-		,inv.intItemId
-		,0
-		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
-		,ISNULL(aglot_un_on_hand, agitm_un_on_hand)
-		,uom.intItemUOMId
-		,case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
-		,(select sl.intSubLocationId 
-			from 
-				tblICStorageLocation sl 
-				join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
-				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
-				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
-				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intSubLocationId
-		,(select sl.intSubLocationId 
-			from 
-				tblICStorageLocation sl 
-				join tblSMCompanyLocationSubLocation cls on sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
-				join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
-				where sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS 
-				and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itm.agitm_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
+		--Ownership type: Storage ---- >> (gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0
+		-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		INSERT INTO tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId
+				,intItemId
+				,dblQuantity
+				,dblNewQuantity
+				,dblAdjustByQuantity
+				,intItemUOMId
+				,dblCost
+				,intSubLocationId
+				,intStorageLocationId
+				,intConcurrencyId
+				--,strNewLotNumber 
+				--,dtmNewExpiryDate
+				,dblNewCost
+				,intOwnershipType)
+		SELECT 
+			@intAdjustmentNo
+			,inv.intItemId
+			,0
+			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
+			,(gapos_in_house + gapos_offsite + + gapos_offsite_dp)
+			,uom.intItemUOMId
+			,0 --case when @strAvgLast = 'A' then agitm_avg_un_cost else agitm_last_un_cost end
+			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
+										join tblSMCompanyLocationSubLocation cls ON sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+										join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+										WHERE sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS 
+										and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS) intSubLocationId
+			,(SELECT sl.intSubLocationId FROM tblICStorageLocation sl 
+										join tblSMCompanyLocationSubLocation cls ON sl.intSubLocationId = cls.intCompanyLocationSubLocationId 
+										join tblSMCompanyLocation cl on cl.intCompanyLocationId = cls.intCompanyLocationId
+										WHERE sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS 
+										and cl.strLocationNumber COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS) intStorageLocationId	
+					--,sl.intSubLocationId
+					--,sl.intStorageLocationId
+			,1
+			--,lot.aglot_lot_no
+			--,aglot_expire_date
+			,(select TOP 1 dblLastCost from vyuICGetItemPricing P WHERE uom.intItemUOMId = P.intItemUOMId AND inv.intItemId = P.intItemId AND inv.intItemId = P.intItemLocationId   )  lastcost
+			,2
+		FROM	tblICItem inv INNER JOIN gaposmst itmGr 
+					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itmGr.gapos_com_cd COLLATE Latin1_General_CI_AS
+				LEFT JOIN tblICItemUOM uom 
+					on uom.intItemId = inv.intItemId 
+				left join tblICStorageLocation sl 
+					on sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS	
+		WHERE	(gapos_stor_1 + gapos_stor_2 + gapos_stor_3 + gapos_stor_4 + gapos_stor_5 + gapos_stor_6 + gapos_stor_7 + gapos_stor_8) <> 0
+		AND  gapos_loc_no = @adjLoc
+		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-				--,sl.intSubLocationId
-				--,sl.intStorageLocationId
-		,1
-		,lot.aglot_lot_no
-		,aglot_expire_date
-
-	FROM	tblICItem inv INNER JOIN agitmmst itm 
-				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
-			LEFT JOIN tblICItemUOM uom 
-				on uom.intItemId = inv.intItemId 
-			INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
-					AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-			LEFT JOIN aglotmst lot ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
-					--created duplicate storage location entries. converted into an inline sub query.	
-			--left join tblICStorageLocation sl 
-			--	on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
-	WHERE	agitm_un_on_hand <> 0 
-	AND agitm_loc_no = @adjLoc
-	AND aglot_loc_no = @adjLoc
-	AND aglot_un_on_hand <> 0
-	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
-	
+	--FROM	tblICItem inv INNER JOIN agitmmst itm 
+	--			ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
+	--		LEFT JOIN tblICItemUOM uom 
+	--			on uom.intItemId = inv.intItemId 
+	--		INNER JOIN tblICUnitMeasure B ON uom.intUnitMeasureId = B.intUnitMeasureId 
+	--				AND UPPER(B.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)  = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+	--		LEFT JOIN aglotmst lot ON itm.agitm_no COLLATE Latin1_General_CI_AS = lot.aglot_itm_no COLLATE Latin1_General_CI_AS
+	--				--created duplicate storage location entries. converted into an inline sub query.	
+	--		--left join tblICStorageLocation sl 
+	--		--	on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
+	--WHERE	agitm_un_on_hand <> 0 
+	--AND agitm_loc_no = @adjLoc
+	--AND aglot_loc_no = @adjLoc
+	--AND aglot_un_on_hand <> 0
+	--AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		
 	-- Create an Audit Log
 	BEGIN 
 		DECLARE @strDescription AS NVARCHAR(100) 
@@ -195,16 +255,14 @@ BEGIN
 				,@toValue = ''											-- New Value
 	END
 
-
 	--Adjustment has to be posted. it will book inventory account. However amount is already imported during the gl import.
 	--adjustment posting will book the amount again. This has to be handled with the following steps. 
 	--post the adjustment. This will debit inventory and credit the inventory adjustment account.
 	--update the credit also to inventory account to washout the debit.
 
-		   --Call IC posting code here
-
---------------------------------------------------------------------------------------------------------------------------------------------
--- Auto post the inventory adjustment
+	--Call IC posting code here
+	--------------------------------------------------------------------------------------------------------------------------------------------
+	-- Auto post the inventory adjustment
 			BEGIN TRY
 				EXEC dbo.uspICPostInventoryAdjustment
 					@ysnPost = 1
@@ -262,8 +320,6 @@ BEGIN
 
 END
 
-
-
 -- Rebuild the G/L Summary for that day. 
 BEGIN 
 	DELETE [dbo].[tblGLSummary] WHERE dbo.fnDateEquals(dtmDate, @adjdt) = 1
@@ -296,5 +352,3 @@ BEGIN
 END
 
 Post_Exit:
-
-
