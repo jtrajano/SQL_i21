@@ -86,6 +86,7 @@
     <Folder Include="Scripts\Pre-Deployment\23_MFT" />
     <Folder Include="Scripts\Pre-Deployment\11_IC\" />
     <Folder Include="Scripts\Pre-Deployment\24_SC" />
+    <Folder Include="Scripts\Pre-Deployment\25_ST" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -342,5 +343,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1810_Delete_Duplicate_Tax_Code_Rate.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\25_ST\0_CleanUp.sql" />
   </ItemGroup>
 </Project>
