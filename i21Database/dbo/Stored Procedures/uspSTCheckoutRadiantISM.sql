@@ -103,7 +103,8 @@ BEGIN
 
 		-- Get MUD- next Batch number
 		DECLARE @strMUDbatchId AS NVARCHAR(100)
-		EXEC uspSTGetMarkUpDownBatchId @strMUDbatchId, @intLocationId
+		EXEC uspSTGetMarkUpDownBatchId @strMUDbatchId OUT, @intLocationId
+
 
 		INSERT INTO dbo.tblSTMarkUpDown
 		(
@@ -130,8 +131,10 @@ BEGIN
 		FROM tblSTStore S 
 		WHERE intStoreId = @intStoreId
 
-
 		SET @intMarkUpDownId = @@IDENTITY
+
+		
+
 
 		--INSERT INTO dbo.tblSTMarkUpDownDetail
 		--SELECT @intMarkUpDownId
@@ -160,6 +163,8 @@ BEGIN
 		--JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
 		--WHERE S.intStoreId = @intStoreId
 
+
+
 		INSERT INTO dbo.tblSTMarkUpDownDetail
 		(
 			intMarkUpDownId
@@ -185,7 +190,7 @@ BEGIN
 										WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) > Pr.dblSalePrice THEN 'Mark Up'
 										WHEN ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) < Pr.dblSalePrice THEN 'Mark Down' 
 									  END)
-			, strRetailShrinkRS		= ISNULL(Chk.DiscountAmount, '')
+			, strRetailShrinkRS		= CAST(ISNULL(Chk.DiscountAmount, '') AS NVARCHAR(100))
 			, intQty				= CAST(Chk.SalesQuantity as int)
 			, dblRetailPerUnit		= (CASE 
 										WHEN (SP.dtmBeginDate < GETDATE() AND SP.dtmEndDate > GETDATE()) THEN (ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)), 0) - (ISNULL(SP.dblUnit ,0) / ISNULL(UOM.dblUnitQty, 1)) )
@@ -207,7 +212,6 @@ BEGIN
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
 		JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
 		WHERE S.intStoreId = @intStoreId
-
 
 
 		UPDATE dbo.tblSTMarkUpDownDetail
