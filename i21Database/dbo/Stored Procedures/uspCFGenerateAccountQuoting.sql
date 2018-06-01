@@ -17,7 +17,7 @@ BEGIN
 	BEGIN
 		INSERT INTO @tblCFAccountList(
 			 intAccountId  
-			,intCustomerid 
+			,intCustomerId 
 		)
 		SELECT 
 			intAccountId  
@@ -31,7 +31,7 @@ BEGIN
 	BEGIN
 		INSERT INTO @tblCFAccountList(
 			 intAccountId  
-			,intCustomerid 
+			,intCustomerId 
 		)
 		SELECT 
 			intAccountId  
