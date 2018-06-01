@@ -27,7 +27,8 @@ IRI.intInventoryReceiptItemId
 	END
 ) AS strDistributionType
 ,CTD.intContractDetailId
-,CTD.intPricingTypeId  
+,CTD.intPricingTypeId 
+,GRS.intCustomerStorageId
 from tblICInventoryReceiptItem IRI 
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 LEFT JOIN tblSCTicket SC ON SC.intTicketId = IRI.intSourceId
