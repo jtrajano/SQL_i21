@@ -288,7 +288,7 @@ BEGIN
 
 	--Get Earning Department Distribution Percentage For Deduction and Tax Distribution
 	SELECT intDepartmentId, dblAmount = SUM(dblAmount), dblPercent = 0 INTO #tmpEarningDepartmentPercentage FROM #tmpEarning GROUP BY intDepartmentId
-	UPDATE #tmpEarningDepartmentPercentage SET dblPercent = dblAmount / dblTotalAmount FROM (SELECT dblTotalAmount = SUM(dblAmount) FROM #tmpEarningDepartmentPercentage) T
+	UPDATE #tmpEarningDepartmentPercentage SET dblPercent = (dblAmount / dblTotalAmount) * 100 FROM (SELECT dblTotalAmount = SUM(dblAmount) FROM #tmpEarningDepartmentPercentage) T
 
 	/********************************************
 	  INSERT BANK TRANSACTION DETAIL - DEDUCTIONS
