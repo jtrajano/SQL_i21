@@ -2,7 +2,7 @@
 AS
 -------------------------- BUSINESS -----------------------------------------------------------
 DECLARE @Stores TABLE(FileIndex INT, RecordIndex INT, RecordType NVARCHAR(50), StoreNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
-DECLARE @Items TABLE(FileIndex INT, RecordIndex INT, ItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS, ItemUpc NVARCHAR(100), 
+DECLARE @Items TABLE(FileIndex INT, RecordIndex INT, ItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS, ItemUpc NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	ParentItemCode NVARCHAR(100), [PriceMulti-pack] NUMERIC(38, 20), Quantity NUMERIC(38, 20), 
 	RecordType NVARCHAR(50), RetailPrice NUMERIC(38, 20), UnitCost NUMERIC(38, 20),
 	UnitMultiplier NUMERIC(38, 20), UnitOfMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS, VendorItemCode NVARCHAR(50) COLLATE Latin1_General_CI_AS)
@@ -55,7 +55,8 @@ SELECT
 FROM @Invoices inv
 	INNER JOIN @ReceiptStore st ON inv.FileIndex = st.FileIndex
 	INNER JOIN @Items i ON i.FileIndex = inv.FileIndex
-	INNER JOIN tblICItem it ON it.strItemNo = i.VendorItemCode
+	INNER JOIN tblICItemUOM lookupUom ON ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode) = i.ItemUpc 
+	INNER JOIN tblICItem it ON it.intItemId = lookupUom.intItemId
 	INNER JOIN vyuAPVendor v ON v.intEntityId = @VendorId
 	LEFT OUTER JOIN tblEMEntityLocation el ON el.intEntityId = @VendorId
 		AND el.ysnActive = 1
