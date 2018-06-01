@@ -263,7 +263,7 @@ BEGIN TRY
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
 					,dtmDate					= GETDATE()
-					,dblQty						= SH.dblUnits
+					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN SH.dblUnits ELSE 0 END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= SH.dblPaidAmount
 					,dblSalesPrice				= 0.00
@@ -306,9 +306,9 @@ BEGIN TRY
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
 					,dtmDate					= GETDATE()
-					,dblQty						= - SH.dblUnits
+					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN SH.dblUnits ELSE 0 END
 					,dblUOMQty					= @dblUOMQty
-					,dblCost					= SH.dblPaidAmount
+					,dblCost					= SH.dblPaidAmount + ISNULL(OtherCharge.dblCashPrice,0) 
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -322,6 +322,19 @@ BEGIN TRY
 				FROM tblGRStorageHistory SH
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
 				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				JOIN
+				(
+					SELECT 
+					CS.intCustomerStorageId
+					,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))) AS dblCashPrice
+					FROM tblGRCustomerStorage CS
+					JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId AND SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
+					JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
+					JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
+					WHERE ISNULL(CS.strStorageType, '') <> 'ITR' AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+					GROUP BY CS.intCustomerStorageId
+				)OtherCharge ON OtherCharge.intCustomerStorageId = CS.intCustomerStorageId
+
 				WHERE SH.intSettleStorageId = @intSettleStorageId
 
 				BEGIN
@@ -384,6 +397,10 @@ BEGIN TRY
 					
 					IF @intReturnValue < 0
 						GOTO SettleStorage_Exit;
+					
+					UPDATE @GLEntries 
+					SET dblDebit = CASE WHEN dblCredit > 0 THEN dblCredit ELSE 0 END
+					,dblCredit   = CASE WHEN dblDebit > 0  THEN dblDebit ELSE 0 END
 
 					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 					BEGIN 
