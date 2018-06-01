@@ -2,7 +2,8 @@
 	@intEntityId INT,
 	@strNetworks NVARCHAR(MAX) = '',
 	@dtmTransactionFrom DATETIME = NULL,
-	@dtmTransactionTo DATETIME = NULL
+	@dtmTransactionTo DATETIME = NULL,
+	@intCustomerEntityId INT = NULL
 )
 AS
 BEGIN
@@ -15,6 +16,7 @@ BEGIN
 	DECLARE @networkWhereClause NVARCHAR(MAX) = ''
 	DECLARE @strTransactionFrom NVARCHAR(25)
 	DECLARE @strTransactionTo NVARCHAR(25)
+	DECLARE @customerWhereClause NVARCHAR(MAX) = ''
 
 
 	-------Convert date to string 
@@ -25,6 +27,11 @@ BEGIN
 	IF(ISNULL(@strNetworks,'') <> '')
 	BEGIN
 		SET @networkWhereClause =  ' AND strNetwork IN (''' + REPLACE(@strNetworks,',',''',''') + ''')'
+	END
+
+	IF(ISNULL(@intCustomerEntityId,0) <> 0)
+	BEGIN
+		SET @customerWhereClause = ' AND intEntityId = ' + CAST(@intCustomerEntityId AS NVARCHAR(10))
 	END
 
 	DELETE FROM tblCFUsageExceptionAlertStaging WHERE intUserId = @intEntityId
@@ -41,6 +48,7 @@ BEGIN
 			AND DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0) >= ''' + @strTransactionFrom + ''' 
 			AND DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0) <= ''' + @strTransactionTo + '''' 
 			+ @networkWhereClause 
+			+ @customerWhereClause
 		)
 	
 	IF OBJECT_ID('tempdb..#CustomerTransactionCount') IS NOT NULL DROP TABLE #CustomerTransactionCount
