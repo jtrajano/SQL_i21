@@ -81,7 +81,7 @@ BEGIN
 			AND (intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 			AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
 			AND strLotTracking <> 'No'				
-			AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 0 --AND dtmDate	<= @AsOfDate
+			AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 --AND dtmDate	<= @AsOfDate
 		GROUP BY intItemId,
 				intItemLocationId,
 				intSubLocationId,
