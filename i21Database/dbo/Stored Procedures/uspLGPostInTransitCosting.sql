@@ -79,7 +79,7 @@ BEGIN TRY
 			,L.intLoadId
 			,intLoadDetailId
 			,L.strLoadNumber
-			,44 intTransactionTypeId
+			,22 intTransactionTypeId
 			,NULL
 			,L.intLoadId
 			,strLoadNumber
@@ -155,7 +155,6 @@ BEGIN TRY
 				,@strBatchId = @strBatchIdUsed
 				,@strAccountToCounterInventory = 'AP Clearing'
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@strGLDescription = ''
 
 			UPDATE @GLEntries
 			SET strCode = 'LG', strModuleName = 'Logistics'
