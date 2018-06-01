@@ -83,7 +83,7 @@
 	[dtmExportedDate] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [PK_dbo.tblAPBill] PRIMARY KEY CLUSTERED ([intBillId] ASC),
-    CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
+    -- CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo_tblEMEntity_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEMEntity(intEntityId),
@@ -240,4 +240,30 @@ GO
 CREATE STATISTICS [ST_rptAging_14] ON [dbo].[tblAPBill]([intBillId], [intEntityVendorId], [ysnPosted], [intTransactionType], [ysnPaid], [dtmDate], [strBillId], [dtmDueDate], [intAccountId])
 GO
 CREATE STATISTICS [ST_rptAging_15] ON [dbo].[tblAPBill]([intBillId], [intEntityVendorId], [ysnPosted], [dtmDate], [strBillId], [dtmDueDate], [intAccountId], [ysnPaid])
+GO
+GO
+CREATE TRIGGER trg_tblAPBill
+ON dbo.tblAPBill
+INSTEAD OF DELETE 
+AS
+BEGIN
+	DECLARE @billRecord NVARCHAR(50);
+	DECLARE @billId INT;
+	DECLARE @error NVARCHAR(500);
+	SELECT TOP 1 @billRecord = del.strBillId, @billId = del.intBillId FROM tblGLDetail glDetail
+					INNER JOIN DELETED del ON glDetail.strTransactionId = del.strBillId AND glDetail.intTransactionId = del.intBillId
+				WHERE glDetail.ysnIsUnposted = 0
+
+	IF @billId > 0
+	BEGIN
+		SET @error = 'You cannot delete posted voucher (' + @billRecord + ')';
+		RAISERROR(@error, 16, 1);
+	END
+	ELSE
+	BEGIN
+		DELETE A
+		FROM tblAPBill A
+		INNER JOIN DELETED B ON A.intBillId = B.intBillId
+	END
+END
 GO

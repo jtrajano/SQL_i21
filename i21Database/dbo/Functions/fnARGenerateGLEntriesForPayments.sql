@@ -170,7 +170,7 @@ SELECT
     --                                        ELSE P.[dblBasePayment]
     --                                   END)
     --                                        * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblDebit]                     = (P.[dblBaseAmountPaid] - P1.[dblBaseClaim]) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebit]                     = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
@@ -192,8 +192,8 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @SCREEN_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = (P.[dblAmountPaid] - P1.[dblClaim]) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblDebitReport]               = (P.[dblBaseAmountPaid] - P1.[dblBaseClaim]) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebitForeign]              = (P.[dblAmountPaid] - ISNULL(P1.[dblClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebitReport]               = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCreditForeign]             = @ZeroDecimal
     ,[dblCreditReport]              = @ZeroDecimal
     ,[dblReportingRate]             = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])

@@ -35,7 +35,8 @@ BEGIN TRY
 			@strAction					NVARCHAR(50) = '',
 			@intOutputId				INT,
 			@dtmFixationDate			DATETIME,
-			@ysnFreezed					BIT
+			@ysnFreezed					BIT,
+			@ysnAA						BIT
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -72,7 +73,8 @@ BEGIN TRY
 					@intCurrencyId			=	TS.intCurrencyId,
 					@intBookId				=	TS.intBookId,
 					@intSubBookId			=	TS.intSubBookId,
-					@intLocationId			=	TS.intCompanyLocationId
+					@intLocationId			=	TS.intCompanyLocationId,
+					@ysnAA					=	FD.ysnAA
 						
 			FROM	tblCTPriceFixationDetail	FD
 			JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
@@ -110,6 +112,7 @@ BEGIN TRY
 					SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
 					SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'
 					SET @strXML = @strXML +  '<dtmFilledDate>' + LTRIM(@dtmFixationDate) + '</dtmFilledDate>'
+					SET @strXML = @strXML +  '<ysnAA>' + LTRIM(ISNULL(@ysnAA,0)) + '</ysnAA>'
 					if ISNULL(@intBookId,0) > 0
 						SET @strXML = @strXML +  '<intBookId>' + LTRIM(@intBookId) + '</intBookId>'
 					if ISNULL(@intSubBookId,0) > 0

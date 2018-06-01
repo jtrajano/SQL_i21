@@ -14,7 +14,7 @@
 		ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
 		INNER JOIN tblSMReplicationTable AS Tab
 		ON ConTab.intReplicationTableId = Tab.intReplicationTableId
-		WHERE strType = 'Parent' AND ysnEnabled = 1 AND (ysnInitOnly != 1 OR ysnInitOnly IS null)
+		WHERE strType = 'Parent' AND ysnEnabled = 1 AND (ysnInitOnly = 0 OR ysnInitOnly IS null)
 
 			
 
@@ -42,10 +42,7 @@
 					+ N'@upd_cmd = ''SCALL [sp_MSupd_dbo'+strArticle+N']'';'	
 		
 											
-					FROM sys.tables as systables
-					INNER JOIN @ListOfArticles as articles
-					ON systables.name = articles.strArticle
-					WHERE is_replicated = 0;
+					FROM @ListOfArticles; 
 
 				--Executed Created Query
 				exec @result = sp_executesql @sql;

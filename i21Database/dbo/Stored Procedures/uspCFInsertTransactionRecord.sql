@@ -1360,7 +1360,7 @@ BEGIN
 		--IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND @strTransactionType != 'Foreign Sale')
 		IF((@intVehicleId = 0 OR @intVehicleId IS NULL) AND (@ysnDualCard = 1 OR (@intCardTypeId = 0 OR @intCardTypeId IS NULL)) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
-			IF(@ysnVehicleRequire = 1)
+			IF(@ysnVehicleRequire = 1 AND @strVehicleId <> '0')
 			BEGIN
 				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 				VALUES ('Import',@strProcessDate,@strGUID, @Pk,'Unable to find vehicle number '+ @strVehicleId +' into i21 vehicle list')

@@ -161,7 +161,6 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_LotMove
 			, @ADJUSTMENT_TYPE_ItemChange
 			, @ADJUSTMENT_TYPE_UOMChange
-			, @ADJUSTMENT_TYPE_OpeningInventory
 			, @ADJUSTMENT_TYPE_ChangeLotWeight
 		)
 
@@ -617,19 +616,6 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
-	
-	--IF @adjustmentType = @ADJUSTMENT_TYPE_ChangeLotWeight
-	--BEGIN 
-	--	EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentChangeLotWeight
-	--			@intTransactionId
-	--			,@ysnPost
-	--			,@strBatchId  
-	--			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-	--			,@intEntityUserSecurityId
-	--			,@strAdjustmentDescription
-
-	--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	--END 
 
 END   
 

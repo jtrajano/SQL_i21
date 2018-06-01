@@ -83,8 +83,22 @@ SELECT
 	strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
 							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END),
-	ItemLocation.intCostingMethod,
-	strCostingMethod = CostingMethod.strCostingMethod,
+	intCostingMethod = 
+		CASE 
+			WHEN ISNULL(Item.strLotTracking, 'No') <> 'No' THEN 
+				4 -- 4 is for Lot Costing
+			ELSE
+				ItemLocation.intCostingMethod
+		END,
+
+	strCostingMethod = 
+		CASE 
+			WHEN ISNULL(Item.strLotTracking, 'No') <> 'No' THEN 
+				'LOT'
+			ELSE
+				CostingMethod.strCostingMethod
+		END,
+
 	dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0),
 	dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0),
 	dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0),

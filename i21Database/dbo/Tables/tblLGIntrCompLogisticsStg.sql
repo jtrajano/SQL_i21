@@ -18,7 +18,7 @@
 		[strReference] NVARCHAR(512) COLLATE Latin1_General_CI_AS NULL,
 		[strRowState] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strFeedStatus] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
-		[dtmFeedDate] DATETIME,
+		[dtmFeedDate] DATETIME DEFAULT(GETDATE()),
 		[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		[intMultiCompanyId] INT,
 		[intToCompanyLocationId] INT,

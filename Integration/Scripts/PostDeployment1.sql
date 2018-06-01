@@ -65,6 +65,8 @@ GO
 GO
 :r "..\Scripts\IC\uspICDCBeginInventoryPt.sql"
 GO
+:r "..\Scripts\IC\uspICDCBeginInventoryGr.sql"
+GO
 :r "..\Scripts\IC\uspICDCCatExtraGLAccounts.sql"
 GO
 :r "..\Scripts\IC\uspICDCCatGLAcctsMigrationAg.sql"

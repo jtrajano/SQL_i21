@@ -3874,7 +3874,7 @@ BEGIN
 			ELSE
 			BEGIN
 
-					SET @dblCalculatedGrossPrice	 =	   @dblPrice + Round((@totalCalculatedTaxZeroQuantity / @dblQuantity) ,6)
+					SET @dblCalculatedGrossPrice	 =	   @dblPrice + Round((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity) ,6)
 					SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
 					SET @dblCalculatedNetPrice		 =	   @dblPrice
 					SET @dblOriginalNetPrice		 =	   Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)

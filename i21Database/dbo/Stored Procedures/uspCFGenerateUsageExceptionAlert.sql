@@ -1,9 +1,9 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFGenerateUsageExceptionAlert](
+﻿CREATE PROCEDURE [dbo].[uspCFGenerateUsageExceptionAlert](
 	@intEntityId INT,
 	@strNetworks NVARCHAR(MAX) = '',
 	@dtmTransactionFrom DATETIME = NULL,
-	@dtmTransactionTo DATETIME = NULL
+	@dtmTransactionTo DATETIME = NULL,
+	@intCustomerEntityId INT = NULL
 )
 AS
 BEGIN
@@ -16,6 +16,7 @@ BEGIN
 	DECLARE @networkWhereClause NVARCHAR(MAX) = ''
 	DECLARE @strTransactionFrom NVARCHAR(25)
 	DECLARE @strTransactionTo NVARCHAR(25)
+	DECLARE @customerWhereClause NVARCHAR(MAX) = ''
 
 
 	-------Convert date to string 
@@ -26,6 +27,11 @@ BEGIN
 	IF(ISNULL(@strNetworks,'') <> '')
 	BEGIN
 		SET @networkWhereClause =  ' AND strNetwork IN (''' + REPLACE(@strNetworks,',',''',''') + ''')'
+	END
+
+	IF(ISNULL(@intCustomerEntityId,0) <> 0)
+	BEGIN
+		SET @customerWhereClause = ' AND intEntityId = ' + CAST(@intCustomerEntityId AS NVARCHAR(10))
 	END
 
 	DELETE FROM tblCFUsageExceptionAlertStaging WHERE intUserId = @intEntityId
@@ -42,16 +48,18 @@ BEGIN
 			AND DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0) >= ''' + @strTransactionFrom + ''' 
 			AND DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0) <= ''' + @strTransactionTo + '''' 
 			+ @networkWhereClause 
+			+ @customerWhereClause
 		)
 	
+	IF OBJECT_ID('tempdb..#CustomerTransactionCount') IS NOT NULL DROP TABLE #CustomerTransactionCount
 	SELECT 
 		strCustomerNumber
 		,intTransactionCount = COUNT(strCustomerNumber)
-		,dtmTransactionDate
+		,dtmTransactionDate = DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0)
 	INTO #CustomerTransactionCount
 	FROM  vyuCFUsageExceptionAlertTransaction
 	WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFTransactionList)
-	GROUP BY strCustomerNumber,dtmTransactionDate
+	GROUP BY strCustomerNumber,DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0)
 
 	INSERT INTO tblCFUsageExceptionAlertStaging(
 		strCustomerNumber
@@ -102,16 +110,16 @@ BEGIN
 		,dtmPeriodFrom = ISNULL(@dtmTransactionFrom,'1/1/1900')
 		,dtmPeriodTo = ISNULL(@dtmTransactionTo,'1/1/1900')
 		,blbMessageBody = (SELECT TOP 1 blbMessage 
-						  FROM [dbo].[fnCFGetDefaultCommentTable](NULL, B.intEntityId, 'CF Alert', NULL, 'Header', NULL, 1))
+						  FROM [dbo].[fnCFGetDefaultCommentTable](NULL, B.intEntityId, 'CF Alerts', NULL, 'Header', NULL, 1))
 		,strFullAddress = B.strAddress
 		,intEntityId = B.intEntityId
-	FROM #tblCFTransactionList A
-	INNER JOIN vyuCFUsageExceptionAlertTransaction B
-		ON A.intTransactionId = B.intTransactionId
+	FROM vyuCFUsageExceptionAlertTransaction B
 	INNER JOIN #CustomerTransactionCount C
 		ON B.strCustomerNumber = C.strCustomerNumber
-			AND B.dtmTransactionDate = C.dtmTransactionDate
+			AND DATEADD(dd, DATEDIFF(dd, 0, B.dtmTransactionDate), 0) = DATEADD(dd, DATEDIFF(dd, 0, C.dtmTransactionDate), 0)
 	WHERE C.intTransactionCount > B.intTransactionLimit
+		AND B.intTransactionId IN (SELECT intTransactionId FROM #tblCFTransactionList)
+		AND C.strCustomerNumber IS NOT NULL
 	--GROUP BY strCustomerNumber
 	--	,strName
 	--	,intTransactionLimit

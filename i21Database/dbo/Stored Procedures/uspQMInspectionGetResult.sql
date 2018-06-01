@@ -9,6 +9,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
+	DECLARE @intSampleId INT
+
 	IF ISNULL(@intProductValueId, 0) = 0
 	BEGIN
 		DECLARE @intValidDate INT
@@ -19,19 +21,15 @@ BEGIN
 
 		SELECT DISTINCT PR.strPropertyName
 			,PR.intPropertyId
-			,CASE 
-				WHEN LOWER(PPV.strPropertyRangeText) = 'true'
-					THEN 'true'
-				ELSE 'false'
-				END AS strPropertyValue
+			,'false' AS strPropertyValue
 			,PP.intSequenceNo
 			,'' AS strComment
-		FROM dbo.tblQMProduct AS P
-		JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
-		JOIN dbo.tblQMProductTest PT ON PT.intProductId = P.intProductId
-		JOIN dbo.tblQMProductProperty PP ON PP.intProductId = P.intProductId
-		JOIN dbo.tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
-		JOIN dbo.tblQMProperty PR ON PR.intPropertyId = PP.intPropertyId
+		FROM tblQMProduct AS P
+		JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+		JOIN tblQMProductTest PT ON PT.intProductId = P.intProductId
+		JOIN tblQMProductProperty PP ON PP.intProductId = P.intProductId
+		JOIN tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+		JOIN tblQMProperty PR ON PR.intPropertyId = PP.intPropertyId
 		WHERE P.intProductTypeId = @intProductTypeId
 			AND PC.intControlPointId = @intControlPointId
 			AND P.ysnActive = 1
@@ -43,17 +41,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		SELECT @intSampleId = ISNULL(MIN(S.intSampleId), 0)
+		FROM tblQMTestResult TR
+		JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
+		WHERE S.intProductTypeId = @intProductTypeId
+			AND S.intProductValueId = @intProductValueId
+			AND TR.intControlPointId = @intControlPointId
+
 		SELECT DISTINCT P.strPropertyName
 			,TR.intPropertyId
 			,TR.strPropertyValue
 			,TR.intTestResultId AS intSequenceNo
 			,ISNULL(TR.strComment, '') AS strComment
-		FROM dbo.tblQMTestResult TR
-		JOIN dbo.tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-		JOIN dbo.tblQMTest T ON T.intTestId = TR.intTestId
-		WHERE TR.intProductTypeId = @intProductTypeId
-			AND TR.intProductValueId = @intProductValueId
-			AND TR.intControlPointId = @intControlPointId
+		FROM tblQMTestResult TR
+		JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		JOIN tblQMTest T ON T.intTestId = TR.intTestId
+		WHERE TR.intSampleId = @intSampleId
 			AND P.intDataTypeId = 4 -- Bit
 		ORDER BY TR.intTestResultId
 	END

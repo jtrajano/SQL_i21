@@ -30,40 +30,41 @@ BEGIN
 	
 	   --PARENT
 		IF( @type = 1)
-			BEGIN
+		 BEGIN
 				SET @insertSQL = N'INSERT INTO #ListOfArticles
-								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM tblSMReplicationConfiguration AS Con
-								INNER JOIN tblSMReplicationConfigurationTable AS ConTab
+								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
+								INNER JOIN [parentDB].[dbo].[tblSMReplicationConfigurationTable] AS ConTab
 								ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
-								INNER JOIN tblSMReplicationTable AS Tab
+								INNER JOIN [parentDB].[dbo].[tblSMReplicationTable] AS Tab
 								ON ConTab.intReplicationTableId = Tab.intReplicationTableId
 								WHERE strType = ''Parent'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
+			
+	    END
 
-			END
 	   ELSE 
-			BEGIN
+	    BEGIN
 			    SET @insertSQL = N'INSERT INTO #ListOfArticles
 								SELECT DISTINCT Tab.strTableName, object_id(Tab.strTableName) FROM [parentDB].[dbo].[tblSMReplicationConfiguration] AS Con
-								INNER JOIN tblSMReplicationConfigurationTable AS ConTab
+								INNER JOIN [parentDB].[dbo].[tblSMReplicationConfigurationTable] AS ConTab
 								ON Con.intReplicationConfigurationId = ConTab.intReplicationConfigurationId
-								INNER JOIN tblSMReplicationTable AS Tab
+								INNER JOIN [parentDB].[dbo].[tblSMReplicationTable] AS Tab
 								ON ConTab.intReplicationTableId = Tab.intReplicationTableId
 								WHERE strType = ''Subsidiary'' AND ysnCommitted = 1 AND ysnEnabled = 1 '
 
-				SET @insertSQL =  Replace(@insertSQL, 'parentDB', @parentDB)
-			END	
+	    END	
+
+	   SET @insertSQL =  Replace(@insertSQL, 'parentDB', @parentDB)
+	      
+	   EXECUTE sp_executesql @insertSQL;
 
 
-	    EXECUTE sp_executesql @insertSQL;
 
-
-
-		SELECT @sql += N'exec sys.sp_identitycolumnforreplication '
+	   SELECT @sql += N'exec sys.sp_identitycolumnforreplication '
 				    + N''+CAST(intId AS NVARCHAR(MAX))+ ', 1 '
 					FROM #ListOfArticles
 		
 				
-    	EXEC  sp_executesql @sql;
+       EXEC  sp_executesql @sql;
 
 
 

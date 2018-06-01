@@ -86,7 +86,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = Detail.intItemId
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
-				ON ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
+				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
@@ -125,7 +125,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = Detail.intItemId
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
-				ON ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
+				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
@@ -195,7 +195,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = Detail.intItemId
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
-				ON ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
+				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId
@@ -234,7 +234,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = Detail.intItemId
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
-				ON ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
+				ON ItemLocation.intLocationId = Header.intLocationId
 				AND ItemLocation.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intNewItemUOMId = ItemUOM.intItemUOMId

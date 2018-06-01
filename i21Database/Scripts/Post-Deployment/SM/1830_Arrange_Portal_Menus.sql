@@ -20,7 +20,15 @@
 		UPDATE tblEMEntityToRole SET intEntityRoleId = 999
 		UPDATE tblSMUserRoleMenu SET ysnVisible = 1 WHERE intUserRoleId = 999
 
+		UPDATE t set intUserRoleID = 2 
+		FROM tblSMUserSecurity t 
+		WHERE intUserRoleID IN 
+		(
+			SELECT intUserRoleID FROM tblSMUserRole WHERE strRoleType IN ('Contact Admin', 'Contact')
+		)
+
 		DELETE FROM tblSMUserRole WHERE strRoleType IN ('Contact Admin', 'Contact')
+		DELETE FROM tblEMEntityToRole
 
 		DECLARE @currentRow INT
 		DECLARE @totalRows INT

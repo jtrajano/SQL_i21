@@ -10,6 +10,7 @@
     [intCurrencyId]       INT             NOT NULL,
     [strPaymentInfo]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strNotes]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strCheckMessage]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDatePaid]         DATETIME        NOT NULL,
     [dblAmountPaid]       DECIMAL (18, 6) NOT NULL,
 	[dblUnapplied]       DECIMAL (18, 6) NOT NULL,

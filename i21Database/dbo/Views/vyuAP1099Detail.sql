@@ -12,7 +12,8 @@ SELECT
 	,entity.strName
 	,patron.strStockStatus
 	,voucher.strVendorOrderNumber
-	,(voucherDetail.dblTotal / voucher.dblTotal) * ISNULL(voucher.dblPayment,0) AS dblPayment
+	,(voucherDetail.dblTotal / ISNULL(NULLIF(voucher.dblTotal, 0),1)) * ISNULL(voucher.dblPayment,0) AS dblPayment
+	,voucherDetail.dbl1099 AS dbl1099Amount
 	,voucher.strComment
 	,item.strItemNo
 	,item.strDescription AS strItemDescription
@@ -37,7 +38,7 @@ FROM tblAPBill voucher
 INNER JOIN tblAPBillDetail voucherDetail
 	ON voucher.intBillId = voucherDetail.intBillId
 INNER JOIN tblEMEntity entity ON voucher.intEntityVendorId = entity.intEntityId
-INNER JOIN vyuPATEntityPatron patron
+LEFT JOIN vyuPATEntityPatron patron
 	ON voucher.intEntityVendorId = patron.intEntityId
 LEFT JOIN dbo.tblICItem item ON voucherDetail.intItemId = item.intItemId
 LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId

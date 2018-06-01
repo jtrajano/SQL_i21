@@ -49,6 +49,8 @@ BEGIN
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 END
 
+SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@ReceiptItemLotStagingTable AS ReceiptItemLotStagingTable,
 		@OtherCharges AS ReceiptOtherChargesTableType, 
@@ -148,7 +150,7 @@ SELECT
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
 		,intGrossNetUOMId			= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN SC.intItemUOMIdFrom
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
 										ELSE LI.intItemUOMId
 									END
 		,intCostUOMId				= LI.intItemUOMId
@@ -163,7 +165,7 @@ SELECT
 			                            WHEN CNT.intPricingTypeId = 2 THEN 
 										(
 											SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
-											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,SC.intCurrencyId)
+											FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,CNT.intCurrencyId)
 											LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = LI.intItemId
 										)
 										ELSE
@@ -197,11 +199,11 @@ SELECT
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN SC.dblGrossWeight - SC.dblTareWeight
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
 										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 									END
 		,dblNet						= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
 										ELSE LI.dblQty 
 									END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
@@ -1190,7 +1192,6 @@ SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)
 	RETURN;
 
-SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 IF @intLotType != 0
 BEGIN 
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
@@ -1223,7 +1224,6 @@ BEGIN
 			,[intSourceType]
 			,[intContractHeaderId]
 			,[intContractDetailId]
-
 		)
 		SELECT 
 			[strReceiptType]		= RE.strReceiptType
@@ -1247,8 +1247,8 @@ BEGIN
 			,[dblGrossWeight]		= CASE
 										WHEN IC.ysnLotWeightsRequired = 1 THEN 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblGrossUnits)
-												ELSE dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblGross
+												ELSE RE.dblGross
 											END
 										ELSE 
 											CASE 
@@ -1259,13 +1259,13 @@ BEGIN
 			,[dblTareWeight]		= CASE
 										WHEN IC.ysnLotWeightsRequired = 1 THEN 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblShrink)
-												ELSE dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * (RE.dblGross - RE.dblNet)
+												ELSE (RE.dblGross - RE.dblNet)
 											END
 										ELSE 
 											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblShrink)
-												ELSE SC.dblShrink
+												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity) * (SC.dblGrossUnits - SC.dblNetUnits))
+												ELSE (SC.dblGrossUnits - SC.dblNetUnits)
 											END
 									END
 			,[dblCost]				= RE.dblCost
@@ -1280,7 +1280,6 @@ BEGIN
 			,[intSourceType]		= RE.intSourceType
 			,[intContractHeaderId]	= RE.intContractHeaderId
 			,[intContractDetailId]	= RE.intContractDetailId
-
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
@@ -1332,12 +1331,12 @@ BEGIN
 			,[intItemUnitMeasureId] = RE.intItemUOMId
 			,[dblQuantity]			= RE.dblQty
 			,[dblGrossWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits)
+										WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross
 										ELSE SC.dblGrossUnits
 									END
 			,[dblTareWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
-										ELSE SC.dblShrink
+										WHEN IC.ysnLotWeightsRequired = 1 THEN (RE.dblGross - RE.dblNet)
+										ELSE (SC.dblGrossUnits - SC.dblNetUnits)
 									END
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
@@ -1347,7 +1346,6 @@ BEGIN
 			,[intSourceType]		= RE.intSourceType
 			,[intContractHeaderId]	= RE.intContractHeaderId
 			,[intContractDetailId]	= RE.intContractDetailId
-
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId

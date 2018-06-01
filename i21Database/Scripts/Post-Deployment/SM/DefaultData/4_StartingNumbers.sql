@@ -1310,6 +1310,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Commission')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 136
+			,[strTransactionType]	= N'Mark Up/Down'
+			,[strPrefix]			= N'MUD-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Store'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Mark Up/Down')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

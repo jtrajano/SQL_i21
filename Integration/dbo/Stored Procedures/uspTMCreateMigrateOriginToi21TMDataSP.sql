@@ -42,7 +42,68 @@ BEGIN
 
 					BEGIN TRANSACTION
 
-					PRINT ''START UPDATE CUSTOMER RELATED RECORDS''				
+
+					PRINT  ''START UPDATE CUSTOMER AND SHIPTO RELATED RECORDS''
+					----------------------------------------------------------------------------
+					--- BEGIN Shipto CHecking
+					
+					----Prepare staging
+					SELECT 
+						VC.vwcus_bill_to
+						, vwcus_key
+						, VC.A4GLIdentity
+						, CustomerA4GLIdentity = Z.A4GLIdentity
+						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+						, TC.intCustomerID
+						, CustomerID = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = Z.A4GLIdentity)
+					INTO #tmpOriginCustomerWithShipto
+					FROM tblTMSite S
+					INNER JOIN tblTMCustomer TC 
+						ON TC.intCustomerID = S.intCustomerID
+					INNER JOIN vwcusmst VC 
+						ON VC.A4GLIdentity=TC.intCustomerNumber
+					CROSS APPLY (
+						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+					)Z
+					WHERE vwcus_bill_to  <> vwcus_key collate SQL_Latin1_General_CP1_CS_AS 
+						
+
+					
+
+					--- update tblTMLease
+					UPDATE tblTMLease
+					SET intBillToCustomerId =  A.CustomerA4GLIdentity
+					FROM #tmpOriginCustomerWithShipto A
+					WHERE tblTMLease.intBillToCustomerId = A.A4GLIdentity
+
+					--- update tblTMCustomer
+					UPDATE tblTMCustomer
+					SET intCustomerNumber =  A.CustomerA4GLIdentity
+					FROM #tmpOriginCustomerWithShipto A
+					WHERE tblTMCustomer.intCustomerNumber = A.A4GLIdentity
+						AND A.CustomerID IS NULL
+
+					--Update tblTMSite
+					UPDATE tblTMSite
+					SET intCustomerID = A.CustomerID
+					FROM #tmpOriginCustomerWithShipto A
+					WHERE tblTMSite.intCustomerID = A.intCustomerID
+						AND A.CustomerID IS NOT NULL
+
+					---TODO correction of current sitenumber for customer and sitenumber of sites
+
+					----Delete tblTMCustomer record
+					DELETE FROM tblTMCustomer
+					WHERE intCustomerNumber IN (SELECT A4GLIdentity FROM #tmpOriginCustomerWithShipto WHERE CustomerID IS NOT NULL)
+
+					----------- End Customer Shipto
+					-----------------------------------------------------------------------------------------
+
+					PRINT  ''END UPDATE CUSTOMER AND SHIPTO RELATED RECORDS''
+
+
+					PRINT ''START UPDATE CUSTOMER RELATED RECORDS''		
+							
 
 					---Check for the non existing record in origin
 					IF OBJECT_ID(''tempdb..#NoOriginRecord'') IS NOT NULL DROP TABLE #NoOriginRecord

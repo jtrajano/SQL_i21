@@ -90,7 +90,7 @@ BEGIN
 				ON Item.intItemId = Detail.intItemId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON ItemLocation.intItemId = Detail.intItemId
-				AND ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
+				AND ItemLocation.intLocationId = Header.intLocationId
 			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId

@@ -57,12 +57,14 @@ DECLARE @intStorageScheduleId AS INT
 		,@voucherDate DATETIME
 		,@createVoucher AS BIT
 		,@postVoucher AS BIT
-		,@shipFromEntityId INT;
+		,@shipFromEntityId INT
+		,@intFarmFieldId INT;
 
 BEGIN 
 	SELECT @intTicketItemUOMId = UM.intItemUOMId
 	, @intItemId = SCD.intItemId 
 	, @shipFromEntityId = SCD.intEntityId 
+	, @intFarmFieldId = SCD.intFarmFieldId
 	FROM tblSCDeliverySheet SCD 
 	INNER JOIN dbo.tblICItemUOM UM	ON UM.intItemId = SCD.intItemId AND UM.ysnStockUnit = 1
 	WHERE SCD.intDeliverySheetId = @intDeliverySheetId
@@ -450,6 +452,7 @@ END
 		SELECT @total = COUNT(*) FROM @voucherItems;
 		IF (@total > 0)
 		BEGIN
+		SET @intShipFrom = COALESCE(@intFarmFieldId, @intShipFrom);
 		EXEC [dbo].[uspAPCreateBillData]
 				@userId = @intUserId
 				,@vendorId = @intEntityId

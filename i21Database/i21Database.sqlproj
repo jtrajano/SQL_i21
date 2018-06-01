@@ -3800,7 +3800,6 @@
     <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
     <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
-    <None Include="Scripts\Post-Deployment\SM\CreateEncryptionCertificateAndSymmetricKey.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuCCSiteDetail.sql" />
@@ -6683,6 +6682,20 @@
     <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
     <None Include="Scripts\Post-Deployment\PAT\5_UpdatePayoutType.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimOtherCharges.sql" />
+    <Build Include="dbo\Tables\tblICEdiMapObject.sql" />
+    <Build Include="dbo\Tables\tblICEdiMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateMappingObjects.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateReceipt.sql" />
+    <Build Include="dbo\Tables\tblICEdiMapTemplate.sql" />
+    <Build Include="dbo\Tables\tblICEdiMapTemplateSegment.sql" />
+    <Build Include="dbo\Tables\tblICEdiMapTemplateSegmentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetMarkUpDownBatchId.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTMarkUpDownPosting.sql" />
+    <Build Include="dbo\Views\vyuLGWeightClaimOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepSnapshotAddArticleParentToSub.sql" />
+    <None Include="Scripts\Post-Deployment\CreateEncryptionCertificateAndSymmetricKey.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFSyncInvoiceFormat.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScanner.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScannerExportPricebook.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScannerImportReceipt.sql" />
@@ -6870,6 +6883,7 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099DIV.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateNewShipFromEntity.sql" />
     <None Include="Scripts\Post-Deployment\EncryptionDataFix.sql" />
+    <None Include="Scripts\Post-Deployment\IC\31_Add_Default_Edi_Mapping_Template.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

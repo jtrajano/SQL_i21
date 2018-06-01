@@ -13,6 +13,7 @@ Post-Deployment Script Template
 print 'BEGIN POST DEPLOYMENT'
 
 
+:r .\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\EncryptionDataFix.sql
 
 -- System Manager Default Data
@@ -48,7 +49,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\30_ImportFileHeader.sql
 :r .\SM\DefaultData\31_Calendar.sql
 :r .\SM\DefaultData\32_DynamicCSV.sql
-:r .\SM\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SM\CustomField.sql
 :r .\SM\1730_UpdateOriginSubMenusSorting.sql
 :r .\SM\1730_PortalMenus.sql
@@ -308,6 +308,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\29_Inventory_Constraints.sql
 :r .\IC\30_Populate_Shipment_LineTotal.sql
 :r .\IC\31_RemoveAfter18.3_DataFix.sql 
+:r .\IC\31_Add_Default_Edi_Mapping_Template.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

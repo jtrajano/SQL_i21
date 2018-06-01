@@ -273,7 +273,7 @@ BEGIN
 			ELSE
 			BEGIN	
 
-					IF NOT EXISTS(SELECT 1 FROM tblCFAccountQuote WHERE intSiteId = @loopSiteId) 
+					IF NOT EXISTS(SELECT 1 FROM tblCFAccountQuote WHERE intSiteId = @loopSiteId AND intEntityCustomerId = @intCustomerId) 
 					BEGIN 
 						INSERT INTO tblCFAccountQuote
 						(
@@ -318,6 +318,7 @@ BEGIN
 						UPDATE tblCFAccountQuote
 						SET dblItem1Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
+						AND intEntityCustomerId = @intCustomerId
 
 					END
 
@@ -339,6 +340,7 @@ BEGIN
 						UPDATE tblCFAccountQuote
 						SET dblItem2Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
+						AND intEntityCustomerId = @intCustomerId
 
 					END
 
@@ -360,6 +362,7 @@ BEGIN
 						UPDATE tblCFAccountQuote
 						SET dblItem3Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
+						AND intEntityCustomerId = @intCustomerId
 
 					END
 
@@ -381,6 +384,7 @@ BEGIN
 						UPDATE tblCFAccountQuote
 						SET dblItem4Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
+						AND intEntityCustomerId = @intCustomerId
 
 					END
 
@@ -402,6 +406,7 @@ BEGIN
 						UPDATE tblCFAccountQuote
 						SET dblItem5Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
+						AND intEntityCustomerId = @intCustomerId
 
 					END
 			END
