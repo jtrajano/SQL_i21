@@ -67,6 +67,7 @@ BEGIN TRY
         ,[intLotId]
         ,[intItemUOMId]
         ,[dblQuantityToTransfer]
+		,[dblCost]
         ,[strNewLotId]
         ,[intFromSubLocationId]
         ,[intToSubLocationId]
@@ -111,6 +112,7 @@ BEGIN TRY
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
 		,[dblQuantityToTransfer]    = SUM(DD.dblUnits)
+		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = NULL
 		,[intToSubLocationId]       = NULL
@@ -177,6 +179,7 @@ BEGIN TRY
 		,[intLotId]                 = NULL
 		,[intItemUOMId]             = MIN(ItemUOM.intItemUOMId)
 		,[dblQuantityToTransfer]    = SUM(Blend.dblQuantity)
+		,[dblCost]					= MIN(TR.dblUnitCost)
 		,[strNewLotId]              = NULL
 		,[intFromSubLocationId]     = NULL
 		,[intToSubLocationId]       = NULL

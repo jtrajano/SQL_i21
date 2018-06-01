@@ -10,19 +10,265 @@ SET XACT_ABORT ON
 DECLARE @SQLString NVARCHAR(MAX) = '';
 
 BEGIN
-
     -- tblSCScaleSetup
     SET @SQLString = N'MERGE tblSCScaleSetup AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCScaleSetup]) AS Source
         ON (Target.intScaleSetupId = Source.intScaleSetupId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strStationShortDescription = Source.strStationShortDescription, Target.strStationDescription = Source.strStationDescription, Target.intStationType = Source.intStationType, Target.intTicketPoolId = Source.intTicketPoolId, Target.strAddress = Source.strAddress, Target.strZipCode = Source.strZipCode, Target.strCity = Source.strCity, Target.strState = Source.strState, Target.strCountry = Source.strCountry, Target.strPhone = Source.strPhone, Target.intLocationId = Source.intLocationId, Target.ysnAllowManualTicketNumber = Source.ysnAllowManualTicketNumber, Target.strScaleOperator = Source.strScaleOperator, Target.intScaleProcessing = Source.intScaleProcessing, Target.intTransferDelayMinutes = Source.intTransferDelayMinutes, Target.intBatchTransferInterval = Source.intBatchTransferInterval, Target.strLocalFilePath = Source.strLocalFilePath, Target.strServerPath = Source.strServerPath, Target.strWebServicePath = Source.strWebServicePath, Target.intMinimumPurgeDays = Source.intMinimumPurgeDays, Target.dtmLastPurgeDate = Source.dtmLastPurgeDate, Target.intLastPurgeUserId = Source.intLastPurgeUserId, Target.intInScaleDeviceId = Source.intInScaleDeviceId, Target.ysnDisableInScale = Source.ysnDisableInScale, Target.intOutScaleDeviceId = Source.intOutScaleDeviceId, Target.ysnDisableOutScale = Source.ysnDisableOutScale, Target.ysnShowOutScale = Source.ysnShowOutScale, Target.ysnAllowZeroWeights = Source.ysnAllowZeroWeights, Target.strWeightDescription = Source.strWeightDescription, Target.intUnitMeasureId = Source.intUnitMeasureId, Target.intGraderDeviceId = Source.intGraderDeviceId, Target.intAlternateGraderDeviceId = Source.intAlternateGraderDeviceId, Target.intLEDDeviceId = Source.intLEDDeviceId, Target.ysnCustomerFirst = Source.ysnCustomerFirst, Target.intAllowOtherLocationContracts = Source.intAllowOtherLocationContracts, Target.intWeightDisplayDelay = Source.intWeightDisplayDelay, Target.intTicketSelectionDelay = Source.intTicketSelectionDelay, Target.intFreightHaulerIDRequired = Source.intFreightHaulerIDRequired, Target.intBinNumberRequired = Source.intBinNumberRequired, Target.intDriverNameRequired = Source.intDriverNameRequired, Target.intTruckIDRequired = Source.intTruckIDRequired, Target.intTrackAxleCount = Source.intTrackAxleCount, Target.intRequireSpotSalePrice = Source.intRequireSpotSalePrice, Target.ysnTicketCommentRequired = Source.ysnTicketCommentRequired, Target.ysnAllowElectronicSpotPrice = Source.ysnAllowElectronicSpotPrice, Target.ysnRefreshContractsOnOpen = Source.ysnRefreshContractsOnOpen, Target.ysnTrackVariety = Source.ysnTrackVariety, Target.ysnManualGrading = Source.ysnManualGrading, Target.ysnLockStoredGrade = Source.ysnLockStoredGrade, Target.ysnAllowManualWeight = Source.ysnAllowManualWeight, Target.intStorePitInformation = Source.intStorePitInformation, Target.ysnReferenceNumberRequired = Source.ysnReferenceNumberRequired, Target.ysnDefaultDriverOffTruck = Source.ysnDefaultDriverOffTruck, Target.ysnAutomateTakeOutTicket = Source.ysnAutomateTakeOutTicket, Target.ysnDefaultDeductFreightFromFarmer = Source.ysnDefaultDeductFreightFromFarmer, Target.intStoreScaleOperator = Source.intStoreScaleOperator, Target.intDefaultStorageTypeId = Source.intDefaultStorageTypeId, Target.intGrainBankStorageTypeId = Source.intGrainBankStorageTypeId, Target.ysnRefreshLoadsOnOpen = Source.ysnRefreshLoadsOnOpen, Target.ysnRequireContractForInTransitTicket = Source.ysnRequireContractForInTransitTicket, Target.intDefaultFeeItemId = Source.intDefaultFeeItemId, Target.intFreightItemId = Source.intFreightItemId, Target.intConcurrencyId = Source.intConcurrencyId, Target.ysnMultipleWeights = Source.ysnMultipleWeights
+            UPDATE SET Target.strStationShortDescription= Source.strStationShortDescription , Target.strStationDescription= Source.strStationDescription, Target.intStationType= Source.intStationType
+			, Target.intTicketPoolId= Source.intTicketPoolId, Target.strAddress= Source.strAddress, Target.strZipCode= Source.strZipCode
+			, Target.strCity= Source.strCity, Target.strState= Source.strState, Target.strCountry= Source.strCountry
+			, Target.strPhone= Source.strPhone, Target.intLocationId= Source.intLocationId, Target.ysnAllowManualTicketNumber= Source.ysnAllowManualTicketNumber, Target.strScaleOperator= Source.strScaleOperator
+			, Target.intScaleProcessing= Source.intScaleProcessing, Target.intTransferDelayMinutes= Source.intTransferDelayMinutes, Target.intBatchTransferInterval= Source.intBatchTransferInterval
+			, Target.strLocalFilePath= Source.strLocalFilePath, Target.strServerPath= Source.strServerPath, Target.strWebServicePath= Source.strServerPath
+			, Target.intMinimumPurgeDays= Source.intMinimumPurgeDays, Target.dtmLastPurgeDate= Source.dtmLastPurgeDate, Target.intLastPurgeUserId= Source.intLastPurgeUserId
+			, Target.intInScaleDeviceId= Source.intInScaleDeviceId, Target.ysnDisableInScale= Source.ysnDisableInScale, Target.intOutScaleDeviceId= Source.intOutScaleDeviceId
+			, Target.ysnDisableOutScale= Source.ysnDisableOutScale, Target.ysnShowOutScale= Source.ysnShowOutScale, Target.ysnAllowZeroWeights= Source.ysnAllowZeroWeights
+			, Target.strWeightDescription= Source.strWeightDescription, Target.intUnitMeasureId= Source.intUnitMeasureId, Target.intGraderDeviceId= Source.intGraderDeviceId
+			, Target.intAlternateGraderDeviceId= Source.intAlternateGraderDeviceId, Target.intLEDDeviceId= Source.intLEDDeviceId, Target.ysnCustomerFirst= Source.ysnCustomerFirst
+			, Target.intAllowOtherLocationContracts= Source.intAllowOtherLocationContracts, Target.intWeightDisplayDelay= Source.intWeightDisplayDelay, Target.intTicketSelectionDelay= Source.intTicketSelectionDelay
+			, Target.intFreightHaulerIDRequired= Source.intFreightHaulerIDRequired, Target.intBinNumberRequired= Source.intBinNumberRequired, Target.intDriverNameRequired= Source.intDriverNameRequired
+			, Target.intTruckIDRequired= Source.intTruckIDRequired, Target.intTrackAxleCount= Source.intTrackAxleCount, Target.intRequireSpotSalePrice= Source.intRequireSpotSalePrice
+			, Target.ysnTicketCommentRequired= Source.ysnTicketCommentRequired, Target.ysnAllowElectronicSpotPrice= Source.ysnAllowElectronicSpotPrice, Target.ysnRefreshContractsOnOpen= Source.ysnRefreshContractsOnOpen
+			, Target.ysnTrackVariety= Source.ysnTrackVariety, Target.ysnManualGrading= Source.ysnManualGrading, Target.ysnLockStoredGrade= Source.ysnLockStoredGrade
+			, Target.ysnAllowManualWeight= Source.ysnAllowManualWeight, Target.intStorePitInformation= Source.intStorePitInformation, Target.ysnReferenceNumberRequired= Source.ysnReferenceNumberRequired
+			, Target.ysnDefaultDriverOffTruck= Source.ysnDefaultDriverOffTruck, Target.ysnAutomateTakeOutTicket= Source.ysnAutomateTakeOutTicket, Target.ysnDefaultDeductFreightFromFarmer= Source.ysnDefaultDeductFreightFromFarmer
+			, Target.ysnDefaultDeductFeeFromCusVen= Source.ysnDefaultDeductFeeFromCusVen, Target.intStoreScaleOperator= Source.intStoreScaleOperator, Target.intDefaultStorageTypeId= Source.intDefaultStorageTypeId
+			, Target.intGrainBankStorageTypeId= Source.intGrainBankStorageTypeId, Target.ysnRefreshLoadsOnOpen= Source.ysnRefreshLoadsOnOpen, Target.ysnRequireContractForInTransitTicket= Source.ysnRequireContractForInTransitTicket
+			, Target.intDefaultFeeItemId= Source.intDefaultFeeItemId, Target.intFreightItemId= Source.intFreightItemId, Target.intEntityId= Source.intEntityId
+			, Target.ysnActive= Source.ysnActive, Target.ysnMultipleWeights= Source.ysnMultipleWeights, Target.intConcurrencyId= Source.intConcurrencyId
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				intScaleSetupId
+				,strStationShortDescription
+				,strStationDescription
+				,intStationType
+				,intTicketPoolId
+				,strAddress
+				,strZipCode
+				,strCity
+				,strState
+				,strCountry
+				,strPhone
+				,intLocationId
+				,ysnAllowManualTicketNumber
+				,strScaleOperator
+				,intScaleProcessing
+				,intTransferDelayMinutes
+				,intBatchTransferInterval
+				,strLocalFilePath
+				,strServerPath
+				,strWebServicePath
+				,intMinimumPurgeDays
+				,dtmLastPurgeDate
+				,intLastPurgeUserId
+				,intInScaleDeviceId
+				,ysnDisableInScale
+				,intOutScaleDeviceId
+				,ysnDisableOutScale
+				,ysnShowOutScale
+				,ysnAllowZeroWeights
+				,strWeightDescription
+				,intUnitMeasureId
+				,intGraderDeviceId
+				,intAlternateGraderDeviceId
+				,intLEDDeviceId
+				,ysnCustomerFirst
+				,intAllowOtherLocationContracts
+				,intWeightDisplayDelay
+				,intTicketSelectionDelay
+				,intFreightHaulerIDRequired
+				,intBinNumberRequired
+				,intDriverNameRequired
+				,intTruckIDRequired
+				,intTrackAxleCount
+				,intRequireSpotSalePrice
+				,ysnTicketCommentRequired
+				,ysnAllowElectronicSpotPrice
+				,ysnRefreshContractsOnOpen
+				,ysnTrackVariety
+				,ysnManualGrading
+				,ysnLockStoredGrade
+				,ysnAllowManualWeight
+				,intStorePitInformation
+				,ysnReferenceNumberRequired
+				,ysnDefaultDriverOffTruck
+				,ysnAutomateTakeOutTicket
+				,ysnDefaultDeductFreightFromFarmer
+				,ysnDefaultDeductFeeFromCusVen
+				,intStoreScaleOperator
+				,intDefaultStorageTypeId
+				,intGrainBankStorageTypeId
+				,ysnRefreshLoadsOnOpen
+				,ysnRequireContractForInTransitTicket
+				,intDefaultFeeItemId
+				,intFreightItemId
+				,intEntityId
+				,ysnActive
+				,ysnMultipleWeights
+				,intConcurrencyId
+			)
+			VALUES(
+				Source.intScaleSetupId
+				,Source.strStationShortDescription
+				,Source.strStationDescription
+				,Source.intStationType
+				,Source.intTicketPoolId
+				,Source.strAddress
+				,Source.strZipCode
+				,Source.strCity
+				,Source.strState
+				,Source.strCountry
+				,Source.strPhone
+				,Source.intLocationId
+				,Source.ysnAllowManualTicketNumber
+				,Source.strScaleOperator
+				,Source.intScaleProcessing
+				,Source.intTransferDelayMinutes
+				,Source.intBatchTransferInterval
+				,Source.strLocalFilePath
+				,Source.strServerPath
+				,Source.strWebServicePath
+				,Source.intMinimumPurgeDays
+				,Source.dtmLastPurgeDate
+				,Source.intLastPurgeUserId
+				,Source.intInScaleDeviceId
+				,Source.ysnDisableInScale
+				,Source.intOutScaleDeviceId
+				,Source.ysnDisableOutScale
+				,Source.ysnShowOutScale
+				,Source.ysnAllowZeroWeights
+				,Source.strWeightDescription
+				,Source.intUnitMeasureId
+				,Source.intGraderDeviceId
+				,Source.intAlternateGraderDeviceId
+				,Source.intLEDDeviceId
+				,Source.ysnCustomerFirst
+				,Source.intAllowOtherLocationContracts
+				,Source.intWeightDisplayDelay
+				,Source.intTicketSelectionDelay
+				,Source.intFreightHaulerIDRequired
+				,Source.intBinNumberRequired
+				,Source.intDriverNameRequired
+				,Source.intTruckIDRequired
+				,Source.intTrackAxleCount
+				,Source.intRequireSpotSalePrice
+				,Source.ysnTicketCommentRequired
+				,Source.ysnAllowElectronicSpotPrice
+				,Source.ysnRefreshContractsOnOpen
+				,Source.ysnTrackVariety
+				,Source.ysnManualGrading
+				,Source.ysnLockStoredGrade
+				,Source.ysnAllowManualWeight
+				,Source.intStorePitInformation
+				,Source.ysnReferenceNumberRequired
+				,Source.ysnDefaultDriverOffTruck
+				,Source.ysnAutomateTakeOutTicket
+				,Source.ysnDefaultDeductFreightFromFarmer
+				,Source.ysnDefaultDeductFeeFromCusVen
+				,Source.intStoreScaleOperator
+				,Source.intDefaultStorageTypeId
+				,Source.intGrainBankStorageTypeId
+				,Source.ysnRefreshLoadsOnOpen
+				,Source.ysnRequireContractForInTransitTicket
+				,Source.intDefaultFeeItemId
+				,Source.intFreightItemId
+				,Source.intEntityId
+				,Source.ysnActive
+				,Source.ysnMultipleWeights
+				,Source.intConcurrencyId)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-    SET @SQLString = 'Exec('' '  + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCScaleSetup ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCScaleSetup OFF
+
+	-- tblSCTicketPrintOption
+    SET @SQLString = N'MERGE tblSCTicketPrintOption AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketPrintOption]) AS Source
+        ON (Target.intTicketPrintOptionId = Source.intTicketPrintOptionId)
+        WHEN MATCHED THEN
+            UPDATE SET 	Target.intScaleSetupId = Source.intScaleSetupId, Target.intTicketFormatId = Source.intTicketFormatId, Target.strTicketPrintDescription = Source.strTicketPrintDescription
+			, Target.ysnPrintCustomerCopy = Source.ysnPrintCustomerCopy, Target.ysnPrintEachSplit = Source.ysnPrintEachSplit, Target.intTicketPrintCopies = Source.intTicketPrintCopies
+			, Target.intIssueCutCode = Source.intIssueCutCode, Target.strTicketPrinter = Source.strTicketPrinter, Target.intTicketTypeOption = Source.intTicketTypeOption
+			, Target.strInOutIndicator = Source.strInOutIndicator, Target.intPrintingOption = Source.intPrintingOption, Target.intListTicketTypeId = Source.intListTicketTypeId
+			, Target.intConcurrencyId = Source.intConcurrencyId
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (
+				intTicketPrintOptionId
+				,intScaleSetupId
+				,intTicketFormatId
+				,strTicketPrintDescription
+				,ysnPrintCustomerCopy
+				,ysnPrintEachSplit
+				,intTicketPrintCopies
+				,intIssueCutCode
+				,strTicketPrinter
+				,intTicketTypeOption
+				,strInOutIndicator
+				,intPrintingOption
+				,intListTicketTypeId
+				,intConcurrencyId
+			)
+			VALUES(
+				Source.intTicketPrintOptionId
+				,Source.intScaleSetupId
+				,Source.intTicketFormatId
+				,Source.strTicketPrintDescription
+				,Source.ysnPrintCustomerCopy
+				,Source.ysnPrintEachSplit
+				,Source.intTicketPrintCopies
+				,Source.intIssueCutCode
+				,Source.strTicketPrinter
+				,Source.intTicketTypeOption
+				,Source.strInOutIndicator
+				,Source.intPrintingOption
+				,Source.intListTicketTypeId
+				,Source.intConcurrencyId
+			)
+        WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCTicketPrintOption ON
+    EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCTicketPrintOption OFF
+
+	-- tblSCTicketEmailOption
+    SET @SQLString = N'MERGE tblSCTicketEmailOption AS Target
+        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketEmailOption]) AS Source
+        ON (Target.intTicketEmailOptionId = Source.intTicketEmailOptionId)
+        WHEN MATCHED THEN
+            UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.strEmailSubject = Source.strEmailSubject, Target.strEmailBody = Source.strEmailBody
+			, Target.ysnEnabledEmailOption = Source.ysnEnabledEmailOption, Target.ysnEmailEachSplit = Source.ysnEmailEachSplit, Target.intConcurrencyId = Source.intConcurrencyId
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (
+				intTicketEmailOptionId
+				,intScaleSetupId
+				,strEmailSubject
+				,strEmailBody
+				,ysnEnabledEmailOption
+				,ysnEmailEachSplit
+				,intConcurrencyId
+			)
+			VALUES(
+				Source.intTicketEmailOptionId
+				,Source.intScaleSetupId
+				,Source.strEmailSubject
+				,Source.strEmailBody
+				,Source.ysnEnabledEmailOption
+				,Source.ysnEmailEachSplit
+				,Source.intConcurrencyId
+			)
+        WHEN NOT MATCHED BY SOURCE THEN
+            DELETE;';
+
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCTicketEmailOption ON
+    EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCTicketEmailOption OFF
 
     -- tblSCLastScaleSetup
     SET @SQLString = N'MERGE tblSCLastScaleSetup AS Target

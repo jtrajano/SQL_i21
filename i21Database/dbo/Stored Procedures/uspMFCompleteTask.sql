@@ -73,6 +73,9 @@ BEGIN TRY
 	IF @strTaskId = ''
 		SELECT @strTaskId = NULL
 
+	If @strTaskId =''
+	Select @strTaskId=NULL
+
 	SELECT @dtmDate = GETDATE()
 
 	DECLARE @tblTasks TABLE (
