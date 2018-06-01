@@ -357,7 +357,9 @@ BEGIN
 				AND ISNULL(intLOB, 0) = ISNULL(@intDeductionTempLOB, 0)
 		ELSE
 			SELECT @strMsg = 'Deduction Type ''' + (SELECT TOP 1 strDeduction FROM tblPRTypeDeduction WHERE intTypeDeductionId = @intDeductionTempDeductionId) + ''''
-				+ ' with Account ID ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intDeductionTempAccountId) + ''''
+				+ ' with Liability Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intDeductionTempAccountId) + ''''
+				+ CASE WHEN (@intDeductionTempExpenseAccountId IS NOT NULL) THEN 
+					' or Expense Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intDeductionTempExpenseAccountId) + '''' ELSE '' END
 				+ ' does not have a corresponding Account' + 
 				+ ' for Location ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intDeductionTempProfitCenter) + '''' 
 				+ CASE WHEN (@intDeductionTempLOB IS NOT NULL) THEN 
@@ -538,7 +540,9 @@ BEGIN
 				AND ISNULL(intLOB, 0) = ISNULL(@intTaxTempLOB, 0)
 		ELSE
 			SELECT @strMsg = 'Tax Type ''' + (SELECT TOP 1 strTax FROM tblPRTypeTax WHERE intTypeTaxId = @intTaxTempTaxId) + ''''
-				+ ' with Account ID ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intTaxTempAccountId) + ''''
+				+ ' with Liability Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intTaxTempAccountId) + ''''
+				+ CASE WHEN (@intTaxTempExpenseAccountId IS NOT NULL) THEN 
+					' or Expense Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intTaxTempExpenseAccountId) + '''' ELSE '' END
 				+ ' does not have a corresponding Account' + 
 				+ ' for Location ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intTaxTempProfitCenter) + '''' 
 				+ CASE WHEN (@intTaxTempLOB IS NOT NULL) THEN 
