@@ -1315,6 +1315,9 @@ BEGIN TRY
 					
 					END
 					*/	
+						IF @strOwnedPhysicalStock ='Customer' 
+						BEGIN
+
 						DELETE FROM @GLEntries
 						
 						INSERT INTO @GLEntries (
@@ -1357,13 +1360,14 @@ BEGIN TRY
 							,'AP Clearing'
 							,@intCreatedUserId
 					
-					IF @intReturnValue < 0
-						GOTO SettleStorage_Exit;
+						IF @intReturnValue < 0
+							GOTO SettleStorage_Exit;
 
-					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) AND @strOwnedPhysicalStock ='Customer' 
-					BEGIN 
-							EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
-					END 
+						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+						BEGIN 
+								EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
+						END 
+					END
 				END
 			END
 
