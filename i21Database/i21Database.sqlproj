@@ -6694,6 +6694,8 @@
     <Build Include="dbo\Stored Procedures\uspSTGetMarkUpDownBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMarkUpDownPosting.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMRepSnapshotAddArticleParentToSub.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
