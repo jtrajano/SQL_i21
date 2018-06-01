@@ -50,7 +50,7 @@ BEGIN
                             JOIN tblEMEntityLocation B
                                 ON A.intEntityId = B.intEntityId and B.intEntityLocationId = @EntityLocationId
                     
-                    SELECT @CusNo, @CusLastName, @CusFirstName, @CusMidInit, @CusSuffix, @CusZip, @CusPhone
+                    --SELECT @CusNo, @CusLastName, @CusFirstName, @CusMidInit, @CusSuffix, @CusZip, @CusPhone
 
                     DECLARE @Count INT
                     SET @Count = 1
@@ -129,7 +129,7 @@ BEGIN
                             JOIN tblEMEntityLocation B
                                 ON A.intEntityId = B.intEntityId and B.intEntityLocationId = @EntityLocationId
                     
-                    SELECT @CusNo, @CusLastName, @CusFirstName, @CusMidInit, @CusSuffix, @CusZip, @CusPhone
+                    --SELECT @CusNo, @CusLastName, @CusFirstName, @CusMidInit, @CusSuffix, @CusZip, @CusPhone
 
                     DECLARE @Count INT
                     SET @Count = 1

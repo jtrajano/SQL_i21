@@ -1177,7 +1177,10 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			--Import only those are not yet imported
 			SELECT ptcus_cus_no INTO #tmpptcusmst
 				FROM ptcusmst
-					where ptcus_cus_no COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer) 
+					where ptcus_co_per_ind_cp is not null and  ptcus_cus_no COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer)  --in (''0026630604'', ''0037010020'',''0037044910'',''0040010038'',''0040010051'',''0040180300'',''0040267930'')
+					
+					
+					--= ''0026630604'' --not in ( select strCustomerNumber from tblARCustomer) 
 			ORDER BY ptcusmst.ptcus_cus_no
 			DECLARE @TransName NVARCHAR(100)
 			SET @TransName = ''CustomerImport''
@@ -1192,7 +1195,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					SAVE TRAN @TransName
 					SELECT TOP 1
 						--Entity
-						@strName = CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ptcus_last_name + ptcus_first_name WHEN ptcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))END,
+						@strName = CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ptcus_last_name + ptcus_first_name WHEN ptcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))  END,
 						@strWebsite = '''',
 						@strInternalNotes = ptcus_comment,
 						@ysnPrint1099   = 0,--To Map
@@ -1485,7 +1488,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation where intEntityId = @EntityId and strLocationName = @strLocationName)
 					BEGIN
 						SET @LocCount = @LocCount + 1 
-						SET @strLocationName = LTRIM(RTRIM(@strLocationName)) + CAST(@LocCount as Nvarchar(2))
+						SET @strLocationName = LTRIM(RTRIM(@strLocationName))  + '' '' + CAST(@LocCount as Nvarchar(2))
 						
 					END
 
@@ -1509,14 +1512,15 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							 [intShipViaId], 
 							 [intTermsId], 
 							 [intWarehouseId], 
-							 [ysnDefaultLocation])
+							 [ysnDefaultLocation],
+							 [strOriginLinkCustomer])
 							select 				
-										ENT.intEntityId, 
+										@EntityId, 
 										(RTRIM (CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN 
 												   ptcus_last_name + ptcus_first_name 
 											  WHEN ptcus_co_per_ind_cp = ''P'' THEN 
 													RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))
-										 END))  + cast(cast(newid() as nvarchar(40)) as nvarchar(2))+ ''_'' + CAST(A4GLIdentity AS NVARCHAR),
+										 END)) + '' '' + cast(cast(newid() as nvarchar(40)) as nvarchar(2))+ ''_'' + CAST(A4GLIdentity AS NVARCHAR),
 										ISNULL(ptcus_addr,'''') + CHAR(10) + ISNULL(ptcus_addr2,''''),
 										LTRIM(RTRIM(ptcus_city)),
 										LTRIM(RTRIM(ptcus_country)),
@@ -1526,12 +1530,13 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 										NULL,
 										NULL,
 										NULL,
-										0
+										0,
+										LTRIM(RTRIM(ptcus_cus_no))
 						 from ptcusmst  
-						 INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-						 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-						 WHERE ptcus_cus_no = @originCustomer AND 
-						 ptcus_bill_to is not null and ptcus_cus_no <> ptcus_bill_to AND ETYP.strType = ''Customer''
+						 --INNER JOIN tblEMEntity ENT ON ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
+						 --INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
+						 WHERE ptcus_bill_to = @originCustomer and ptcus_cus_no <> ptcus_bill_to --AND 
+						 --ptcus_bill_to is not null  --AND ETYP.strType = ''Customer''
 
 					--INSERT BILL TO ADDRESS LOCATIONS (ptadrmst)
 						INSERT [dbo].[tblEMEntityLocation]	
@@ -1548,8 +1553,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							 [intWarehouseId], 
 							 [ysnDefaultLocation])
 						SELECT 
-							 EM.intEntityId,
-							 ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO'',
+							 @EntityId,
+							 ISNULL(LTRIM(RTRIM( ptcus_cus_no)),'''')+ '' BILL TO'',
 							 ISNULL(LTRIM(RTRIM(ptadr_addr)),'''') + CHAR(10) + ISNULL(LTRIM(RTRIM(ptadr_addr2)),''''),
 							 LTRIM(RTRIM(ptadr_city)),
 							 LTRIM(RTRIM(ptcus_country)),
@@ -1562,10 +1567,10 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							 0
 						 FROM ptadrmst ADR 
 						INNER JOIN ptcusmst ON ptcus_cus_no = ptadr_key
-						INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = ADR.ptadr_key COLLATE SQL_Latin1_General_CP1_CS_AS
-						INNER JOIN tblEMEntity EM ON EM.intEntityId = CUS.intEntityId
-						LEFT JOIN tblEMEntityLocation LOC ON LOC.intEntityId = EM.intEntityId AND LOC.strLocationName =ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO''
-						WHERE ADR.ptadr_key = @originCustomer AND LOC.intEntityLocationId IS NULL
+						--INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = ADR.ptadr_key COLLATE SQL_Latin1_General_CP1_CS_AS
+						--INNER JOIN tblEMEntity EM ON EM.intEntityId = CUS.intEntityId
+						--LEFT JOIN tblEMEntityLocation LOC ON LOC.intEntityId = EM.intEntityId AND LOC.strLocationName =ISNULL(LTRIM(RTRIM(EM.strEntityNo)),'''')+ '' BILL TO''
+						WHERE ADR.ptadr_key = @originCustomer --AND LOC.intEntityLocationId IS NULL
 
 
 						DECLARE @EntityLocationIdTable TABLE(
