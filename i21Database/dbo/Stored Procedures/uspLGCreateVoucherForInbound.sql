@@ -27,6 +27,7 @@ BEGIN TRY
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
 		,dblCost NUMERIC(18, 6)
+		,intCostUOMId INT
 		,intItemUOMId INT)
 
 	DECLARE @distinctVendor TABLE 
@@ -99,6 +100,7 @@ BEGIN TRY
 		,intAccountId
 		,dblQtyReceived
 		,dblCost
+		,intCostUOMId
 		,intItemUOMId
 		)
 	SELECT LD.intVendorEntityId
@@ -114,6 +116,7 @@ BEGIN TRY
 				THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 			ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 			END
+		,AD.intSeqPriceUOMId
 		,LD.intItemUOMId
 		--,dblCost = CASE 
 		--	WHEN AD.ysnSeqSubCurrency = 1
@@ -144,6 +147,7 @@ BEGIN TRY
 		,AD.dblSeqPrice
 		,LD.dblQuantity
 		,LD.intItemUOMId
+		,AD.intSeqPriceUOMId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -201,6 +205,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intCostUOMId
 			,intItemUOMId
 			)
 		SELECT intContractHeaderId
@@ -210,6 +215,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intCostUOMId
 			,intItemUOMId
 		FROM @voucherDetailData
 		WHERE intVendorEntityId = @intVendorEntityId
