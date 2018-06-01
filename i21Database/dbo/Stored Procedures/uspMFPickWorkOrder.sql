@@ -81,6 +81,7 @@ BEGIN TRY
 		,@intStageLocationId INT
 		,@ysnLifeTimeByEndOfMonth BIT
 		,@intRecipeTypeId int
+		,@ItemsToReserve AS dbo.ItemReservationTableType
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -276,10 +277,9 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe a
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	DELETE
-	FROM tblICStockReservation
-	WHERE intTransactionId = @intWorkOrderId
-		AND strTransactionId = @strWorkOrderNo
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+	,@intWorkOrderId
+	,8
 
 	UPDATE WC
 	SET intBatchId = @intBatchId

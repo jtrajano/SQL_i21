@@ -45,8 +45,22 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intAlternateOwnershipType INT
 		,@intOwnershipType INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intInventoryTransactionType AS INT = 5
+		,@intTransactionId INT
+		,@strTransactionId NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
+		,@intOrderId INT
+		,@intInventoryShipmentId INT
+		,@strOrderNo NVARCHAR(50)
+		,@ysnReservationRequired BIT
+
+	SELECT @ysnReservationRequired = 1
 
 	SELECT @strOrderType = OT.strOrderType
+		,@intOrderId = intOrderHeaderId
+		,@strOrderNo = strOrderNo
+		,@strReferenceNo = oh.strReferenceNo
 	FROM tblMFOrderHeader oh
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = oh.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -199,12 +213,8 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @strReferenceNo = strReferenceNo
-	FROM tblMFOrderHeader OH
-	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
-	WHERE intOrderHeaderId = @intOrderHeaderId
-
 	SELECT @intEntityCustomerId = intEntityCustomerId
+		,@intInventoryShipmentId = intInventoryShipmentId
 	FROM tblICInventoryShipment
 	WHERE strShipmentNumber = @strReferenceNo
 
@@ -339,6 +349,8 @@ BEGIN TRY
 		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
 			,@intEntityUserSecurityId = @intUserId
 			,@ysnAllTasksNotGenerated = 0
+
+		SELECT @ysnReservationRequired = 0
 	END
 
 	SELECT @dblAlternatePickQty = SUM(dblPickQty)
@@ -392,6 +404,8 @@ BEGIN TRY
 				,@intEntityUserSecurityId = @intUserId
 				,@ysnAllTasksNotGenerated = 0
 
+			SELECT @ysnReservationRequired = 0
+
 			SELECT @dblShort = @dblShort - @dblAlternateTaskQty
 
 			IF @dblShort <= 0
@@ -410,10 +424,18 @@ BEGIN TRY
 		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
 			,@intEntityUserSecurityId = @intUserId
 			,@ysnAllTasksNotGenerated = 0
+
+		SELECT @ysnReservationRequired = 0
 	END
 
 	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
 	BEGIN
+		SELECT @intTransactionId = @intInventoryShipmentId
+
+		SELECT @strTransactionId = @strReferenceNo
+
+		SELECT @intInventoryTransactionType = 5
+
 		IF EXISTS (
 				SELECT 1
 				FROM tblMFOrderDetail OD
@@ -442,8 +464,15 @@ BEGIN TRY
 		WHERE intOrderHeaderId = @intOrderHeaderId
 
 		SELECT @intManufacturingProcessId = intManufacturingProcessId
+			,@strWorkOrderNo = strWorkOrderNo
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @intTransactionId = @intWorkOrderId
+
+		SELECT @strTransactionId = @strWorkOrderNo
+
+		SELECT @intInventoryTransactionType = 9
 
 		SELECT @strPickByFullPallet = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
@@ -479,6 +508,90 @@ BEGIN TRY
 				RETURN
 			END
 		END
+	END
+
+	IF (
+			@strOrderType = 'INVENTORY SHIPMENT STAGING'
+			OR @strOrderType = 'WO PROD STAGING'
+			)
+		AND @ysnReservationRequired = 1
+	BEGIN
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = NULL --We need to set this to NULL otherwise available Qty becomes zero in the inventoryshipment screen
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intTransactionId
+			,strTransactionId = @strTransactionId
+			,intTransactionTypeId = @intInventoryTransactionType
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId = 4
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+
+		DELETE
+		FROM @ItemsToReserve
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderId
+			,34
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId = T.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = T.intItemUOMId
+			,intLotId = T.intLotId
+			,intSubLocationId = SL.intSubLocationId
+			,intStorageLocationId = T.intFromStorageLocationId
+			,dblQty = T.dblPickQty
+			,intTransactionId = @intOrderId
+			,strTransactionId = @strTransactionId + ' / ' + @strOrderNo
+			,intTransactionTypeId = 34
+		FROM tblMFTask T
+		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = T.intItemId
+			AND IL.intLocationId = SL.intLocationId
+		WHERE T.intOrderHeaderId = @intOrderHeaderId
+			AND T.intTaskStateId <> 4
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderId
+			,34
 	END
 
 	IF @intTransactionCount = 0
