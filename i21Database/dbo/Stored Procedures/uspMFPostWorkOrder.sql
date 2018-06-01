@@ -857,6 +857,10 @@ BEGIN TRY
 		,@intTransactionTypeId = 8
 		,@ysnPosted = 1
 
+	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intWorkOrderId
+		,@intTransactionTypeId = 9
+		,@ysnPosted = 1
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 

@@ -331,7 +331,9 @@ Begin
 								@intNewStorageLocationId=@intKitStagingLocationId,
 								@dblMoveQty=@dblPickQuantity,
 								@intMoveItemUOMId=@intPickUOMId,
-								@intUserId=@intUserId
+								@intUserId=@intUserId,
+								@blnInventoryMove=1
+
 
 			Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intLocationId 
 			And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intKitStagingLocationId --And dblQty > 0

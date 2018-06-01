@@ -48,7 +48,8 @@ BEGIN TRY
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
 		,@strRestrictPickQtyByRequiredQty NVARCHAR(50)
-		,@intToStorageLocationId2 int
+		,@intToStorageLocationId2 INT
+		,@strWorkOrderNo NVARCHAR(50)
 	DECLARE @tblMFTask TABLE (
 		intAlternateTaskId INT
 		,dblAlternateTaskQty NUMERIC(18, 6)
@@ -68,7 +69,7 @@ BEGIN TRY
 		,@intLocationId = intLocationId
 		,@intUserId = intUserId
 		,@intOrderDetailId = intOrderDetailId
-		,@intToStorageLocationId2=intToStorageLocationId
+		,@intToStorageLocationId2 = intToStorageLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intTaskId INT
 			,intLotId INT
@@ -78,7 +79,7 @@ BEGIN TRY
 			,intLocationId INT
 			,intUserId INT
 			,intOrderDetailId INT
-			,intToStorageLocationId int
+			,intToStorageLocationId INT
 			)
 
 	SELECT @strTaskNo = strOrderNo
@@ -117,7 +118,7 @@ BEGIN TRY
 		SELECT @dblLotWeight = @dblTaskQty
 	END
 
-	SELECT @intToStorageLocationId = IsNULL(@intToStorageLocationId2,IsNULL(intStagingLocationId, @intToStorageLocationId))
+	SELECT @intToStorageLocationId = IsNULL(@intToStorageLocationId2, IsNULL(intStagingLocationId, @intToStorageLocationId))
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intItemId = @intItemId
@@ -141,6 +142,29 @@ BEGIN TRY
 			FROM tblMFItemOwner
 			WHERE intOwnerId = @intEntityCustomerId
 		END
+
+		SELECT @intTransactionId = @intInventoryShipmentId
+
+		SELECT @strTransactionId = @strReferenceNo
+
+		SELECT @intInventoryTransactionType = 5
+	END
+	ELSE
+	BEGIN
+		SELECT @intWorkOrderId = intWorkOrderId
+		FROM tblMFStageWorkOrder SW
+		WHERE SW.intOrderHeaderId = @intOrderHeaderId
+
+		SELECT @strWorkOrderNo = strWorkOrderNo
+			,@intManufacturingProcessId = intManufacturingProcessId
+		FROM tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @intTransactionId = @intWorkOrderId
+
+		SELECT @strTransactionId = @strWorkOrderNo
+
+		SELECT @intInventoryTransactionType = 9
 	END
 
 	SELECT @intTransactionCount = @@TRANCOUNT
@@ -250,7 +274,7 @@ BEGIN TRY
 			,intLastModifiedUserId = @intUserId
 			,dtmLastModified = @dtmCurrentDate
 			,strComment = 'Manullay Updated.'
-			,intToStorageLocationId=@intToStorageLocationId
+			,intToStorageLocationId = @intToStorageLocationId
 		WHERE intTaskId = @intTaskId
 	END
 
@@ -330,7 +354,7 @@ BEGIN TRY
 					AND OD.intOrderHeaderId = T.intOrderHeaderId
 				WHERE OD.intOrderHeaderId = @intOrderHeaderId
 					--AND OD.intOrderDetailId = @intOrderDetailId
-					and OD.intItemId=@intItemId
+					AND OD.intItemId = @intItemId
 					AND OD.dblQty > 0
 				GROUP BY OD.dblQty
 				HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intItemUOMId, OD.intItemUOMId, T.dblQty)), 0) > OD.dblQty
@@ -347,14 +371,6 @@ BEGIN TRY
 	END
 	ELSE IF @strOrderType = 'WO PROD STAGING'
 	BEGIN
-		SELECT @intWorkOrderId = intWorkOrderId
-		FROM tblMFStageWorkOrder
-		WHERE intOrderHeaderId = @intOrderHeaderId
-
-		SELECT @intManufacturingProcessId = intManufacturingProcessId
-		FROM tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
-
 		SELECT @strPickByFullPallet = strAttributeValue
 		FROM tblMFManufacturingProcessAttribute
 		WHERE intManufacturingProcessId = @intManufacturingProcessId
@@ -372,12 +388,14 @@ BEGIN TRY
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 106 --Restrict Pick Qty By RequiredQty
 
-		IF @strRestrictPickQtyByRequiredQty IS NULL or @strRestrictPickQtyByRequiredQty=''
+		IF @strRestrictPickQtyByRequiredQty IS NULL
+			OR @strRestrictPickQtyByRequiredQty = ''
 		BEGIN
 			SELECT @strRestrictPickQtyByRequiredQty = 'True'
 		END
 
-		IF @strPickByFullPallet = 'False' and @strRestrictPickQtyByRequiredQty='True'
+		IF @strPickByFullPallet = 'False'
+			AND @strRestrictPickQtyByRequiredQty = 'True'
 		BEGIN
 			IF EXISTS (
 					SELECT 1
@@ -385,7 +403,7 @@ BEGIN TRY
 					LEFT JOIN tblMFTask T ON OD.intItemId = T.intItemId
 						AND OD.intOrderHeaderId = T.intOrderHeaderId
 					WHERE OD.intOrderHeaderId = @intOrderHeaderId
-					and OD.intItemId=@intItemId
+						AND OD.intItemId = @intItemId
 						AND OD.dblQty > 0
 					GROUP BY OD.dblWeight
 					HAVING ISNULL(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(T.intWeightUOMId, OD.intWeightUOMId, T.dblWeight)), 0) > OD.dblWeight
@@ -449,11 +467,8 @@ BEGIN TRY
 	END
 
 	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+		OR @strOrderType = 'WO PROD STAGING'
 	BEGIN
-		SELECT @intTransactionId = @intInventoryShipmentId
-
-		SELECT @strTransactionId = @strReferenceNo
-
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
@@ -518,7 +533,7 @@ BEGIN TRY
 			,intStorageLocationId = T.intFromStorageLocationId
 			,dblQty = T.dblPickQty
 			,intTransactionId = @intOrderId
-			,strTransactionId = @strReferenceNo + ' / ' + @strOrderNo
+			,strTransactionId = @strTransactionId + ' / ' + @strOrderNo
 			,intTransactionTypeId = 34
 		FROM tblMFTask T
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId
