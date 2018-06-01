@@ -112,7 +112,7 @@ BEGIN
 
       DECLARE @DecryptionTable TABLE (
         intEntityEFTInfoId INT,
-        strAccountNumber NVARCHAR(MAX)
+        strAccountNumber VARCHAR(MAX) NULL
       )
 
       DECLARE @EncryptionTable TABLE (
@@ -122,12 +122,12 @@ BEGIN
 
       PRINT(''*** Decrypting account number (asymmetric) ***'')
       INSERT INTO @DecryptionTable
-        SELECT intEntityEFTInfoId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strAccountNumber''''))'', ''varbinary(256)''))
+        SELECT intEntityEFTInfoId, ISNULL(CONVERT(VARCHAR(MAX), DECRYPTBYKEYAUTOASYMKEY(ASYMKEY_ID(''i21EncryptionASymKeyPwd''), N''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='', CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strAccountNumber''''))'', ''varbinary(256)'')))), strAccountNumber)
         FROM tblEMEntityEFTInformation
 
       PRINT(''*** Encrypting account number using certificate ***'')
       INSERT INTO @EncryptionTable
-        SELECT intEntityEFTInfoId, ENCRYPTBYCERT(CERT_ID(''iRelyi21Certificate''), CONVERT(VARCHAR(MAX), DECRYPTBYKEYAUTOASYMKEY(ASYMKEY_ID(''i21EncryptionASymKeyPwd''), N''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='', strAccountNumber)))
+        SELECT intEntityEFTInfoId, ENCRYPTBYCERT(CERT_ID(''iRelyi21Certificate''), strAccountNumber)
         FROM @DecryptionTable
 
       PRINT(''*** Saving certificate encrypted account number ***'')
