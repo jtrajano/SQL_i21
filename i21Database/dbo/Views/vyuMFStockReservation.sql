@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuMFStockReservation
 AS
 SELECT S.intLotId
+	,S.intTransactionId As intWorkOrderId
 	,SUM(CASE 
 			WHEN S.intItemUOMId = L.intItemUOMId
 				THEN ISNULL(S.dblQty, 0)
@@ -13,5 +14,5 @@ SELECT S.intLotId
 			END) AS dblWeight
 FROM dbo.tblICStockReservation S
 JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
-	AND S.ysnPosted = 0
-GROUP BY S.intLotId
+	AND S.ysnPosted = 0 and S.intInventoryTransactionType =9
+GROUP BY S.intLotId,S.intTransactionId 
