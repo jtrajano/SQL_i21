@@ -85,6 +85,12 @@ ELSE IF @strLineOfBusiness = 'Grain'
 BEGIN
 	IF		@strType = 'UOM'				EXEC dbo.uspICDCUomMigrationGr
 	ELSE IF @strType = 'Locations'			BEGIN EXEC dbo.uspICDCStorageMigrationGr END
+	ELSE IF @strType = 'Balance'			
+		BEGIN
+			SELECT @Location = Value FROM @options WHERE Name = 'adjLoc'
+			SELECT @StartDate = Value FROM @options WHERE Name = 'adjdt'
+			EXEC dbo.uspICDCBeginInventoryGr @Location, @StartDate, @intEntityUserSecurityId
+		END
 	ELSE IF @strType = 'Commodity'			
 		BEGIN
 			ALTER INDEX [AK_tblICItemUOM_strUpcCode] ON [dbo].[tblICItemUOM] DISABLE

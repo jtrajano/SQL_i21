@@ -465,5 +465,6 @@
     <None Include="dbo\Stored Procedures\uspGRImportFreightSettlement.sql" />
     <None Include="dbo\Stored Procedures\uspARUpdateTaxGroup.sql" />
     <None Include="Scripts\IC\uspICDCCommoditySetupAg.sql" />
+    <None Include="Scripts\IC\uspICDCBeginInventoryGr.sql" />
   </ItemGroup>
 </Project>
