@@ -6695,6 +6695,7 @@
     <Build Include="dbo\Views\vyuLGWeightClaimOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepSnapshotAddArticleParentToSub.sql" />
     <None Include="Scripts\Post-Deployment\CreateEncryptionCertificateAndSymmetricKey.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFSyncInvoiceFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
