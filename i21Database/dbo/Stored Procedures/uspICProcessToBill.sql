@@ -279,6 +279,8 @@ BEGIN
 
 	-- Call the AP sp to convert the IR to Voucher. 
 	BEGIN 
+		DECLARE @throwedError AS NVARCHAR(1000);
+
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId = @intUserId
 			,@vendorId = @intEntityVendorId
@@ -291,7 +293,14 @@ BEGIN
 			,@currencyId = @intCurrencyId
 			,@throwError = 0
 			,@error = NULL 			
+			,@error = @throwedError OUTPUT
 			,@billId = @intBillId OUTPUT
+
+		IF(@throwedError <> '')
+		BEGIN
+			RAISERROR(@throwedError,16,1);
+			GOTO Post_Exit;
+		END
 	END 
 
 	SELECT @strBillIds = 
@@ -312,5 +321,6 @@ END
 
 
 -- Drop the temp table. 
+Post_Exit:
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpReturnVendors')) 
 	DROP TABLE #tmpReturnVendors 
