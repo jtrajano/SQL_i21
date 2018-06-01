@@ -27,6 +27,8 @@ BEGIN TRY
 	DECLARE @dtmPickupDate DATETIME
 	DECLARE @dtmDeliveryDate DATETIME
 	DECLARE @strDeliveryNoticeNumber NVARCHAR(100)
+	DECLARE @intBookId INT
+	DECLARE @intSubBookId INT
 
 	SELECT @intTransportationMode = intDefaultTransportationMode
 		,@intTransUsedBy = intTransUsedBy
@@ -37,7 +39,9 @@ BEGIN TRY
 	FROM tblSMCompanyPreference
 
 	SELECT @strPickLotNumber = strPickLotNumber,
-		   @intWeightUnitMeasureId = intWeightUnitMeasureId
+		   @intWeightUnitMeasureId = intWeightUnitMeasureId,
+		   @intBookId = intBookId,
+		   @intSubBookId = intSubBookId
 	FROM tblLGPickLotHeader
 	WHERE intPickLotHeaderId = @intPickLotHeaderId
 
@@ -89,6 +93,8 @@ BEGIN TRY
 		,intUserSecurityId
 		,intWeightUnitMeasureId
 		,strLoadNumber
+		,intBookId
+		,intSubBookId
 		)
 	SELECT GETDATE()
 		,1
@@ -103,6 +109,8 @@ BEGIN TRY
 		,@intEntityUserSecurityId
 		,@intWeightUnitMeasureId
 		,@strLoadNumber
+		,@intBookId
+		,@intSubBookId
 
 	SELECT @intLoadId = SCOPE_IDENTITY()
 

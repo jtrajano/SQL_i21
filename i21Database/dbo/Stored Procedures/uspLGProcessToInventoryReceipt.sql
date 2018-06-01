@@ -605,6 +605,8 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT strReceiptType = 'Purchase Contract'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -640,6 +642,8 @@ BEGIN TRY
 				,dblForexRate = CD.dblRate
 				,ISNULL(LC.intLoadContainerId, - 1) --
 				,L.intFreightTermId
+				,L.intBookId
+				,L.intSubBookId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -712,6 +716,8 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT strReceiptType = 'Purchase Contract'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -747,6 +753,8 @@ BEGIN TRY
 				,dblForexRate = CD.dblRate
 				,- 1 --
 				,L.intFreightTermId
+				,L.intBookId
+				,L.intSubBookId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
