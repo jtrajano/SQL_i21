@@ -3800,7 +3800,6 @@
     <Build Include="dbo\Views\vyuCTAssociatedFutOptTransaction.sql" />
     <Build Include="dbo\Index\IX_tblGLJournal_strJournalId_strTransactionType.sql" />
     <Build Include="dbo\Views\vyuGLSearchGJ.sql" />
-    <None Include="Scripts\Post-Deployment\SM\CreateEncryptionCertificateAndSymmetricKey.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleSubRole.sql" />
     <Build Include="dbo\Views\vyuCCSiteDetail.sql" />
@@ -6695,7 +6694,7 @@
     <Build Include="dbo\Stored Procedures\uspSTMarkUpDownPosting.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMRepSnapshotAddArticleParentToSub.sql" />
-
+    <None Include="Scripts\Post-Deployment\CreateEncryptionCertificateAndSymmetricKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
