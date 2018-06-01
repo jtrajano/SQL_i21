@@ -199,7 +199,8 @@ SELECT	CASE WHEN @isCAD = 1 THEN
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId
 		--Use to display the MICR
-		,BNKACCNT.ysnCheckEnableMICRPrint		
+		,BNKACCNT.ysnCheckEnableMICRPrint
+		,strCheckMessage = ISNULL(PYMT.strCheckMessage,'') 
 FROM	dbo.tblCMBankTransaction CHK 
 			--INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL
 			--ON CHK.strTransactionId = PRINTSPOOL.strTransactionId
