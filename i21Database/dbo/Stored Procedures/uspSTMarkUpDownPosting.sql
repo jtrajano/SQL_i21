@@ -5,6 +5,7 @@
 ,@ysnPost BIT
 ,@strStatusMsg NVARCHAR(1000) OUTPUT
 ,@strBatchId NVARCHAR(1000) OUTPUT
+,@ysnIsPosted BIT OUTPUT
 AS
 BEGIN TRY
 	
@@ -165,6 +166,7 @@ BEGIN TRY
 			SET ysnIsPosted = 1
 			WHERE intMarkUpDownId = @intMarkUpDownId
 
+			SET @ysnIsPosted = 1
 			SET @strStatusMsg = 'Success'
 
 			-- NOTE: 
@@ -192,6 +194,7 @@ BEGIN TRY
 			SET ysnIsPosted = 0
 			WHERE intMarkUpDownId = @intMarkUpDownId
 
+			SET @ysnIsPosted = 0
 			SET @strStatusMsg = 'Success'
 
 		 END
