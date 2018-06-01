@@ -218,7 +218,7 @@ BEGIN
 		IF @intCurrencyId <> @intInvoiceCurrencyId
 		BEGIN
 			SELECT	intCurrencyExchangeRateId ,
-					FC.strCurrency +'/' + TC.strCurrency strExchangeRate,
+					'From ' + FC.strCurrency +' To ' + TC.strCurrency strExchangeRate,
 					(SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
 			FROM	tblSMCurrencyExchangeRate ER
 			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId

@@ -17,12 +17,18 @@ AS
 			@ErrMsg					NVARCHAR(MAX),
 			@intInventoryReceiptId	INT,
 			@ysnRequireProducerQty	BIT,
+			@ysnLoad				BIT,
 
 			@ReceiptStagingTable		ReceiptStagingTable,
 			@OtherCharges				ReceiptOtherChargesTableType,
 			@ReceiptItemLotStagingTable	ReceiptItemLotStagingTable
 	
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
+
+	SELECT	@ysnLoad	=	CH.ysnLoad 
+	FROM	tblCTContractDetail CD 
+	JOIN	tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	WHERE	CD.intContractDetailId	= @intContractDetailId
 
 	IF EXISTS (SELECT 1 FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId AND dblAvailableQty <= 0) 
 	BEGIN 
@@ -74,7 +80,8 @@ AS
 				dblForexRate,
 				intFreightTermId,
 				intBookId,
-				intSubBookId
+				intSubBookId,
+				intLoadReceive
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -113,7 +120,8 @@ AS
 				dblForexRate				=	NULL,
 				intFreightTermId			=	CD.intFreightTermId,
 				intBookId					=	CD.intBookId,
-				intSubBookId				=	CD.intSubBookId
+				intSubBookId				=	CD.intSubBookId,
+				intLoadReceive				=	ISNULL(CD.dblBalanceLoad,0)		-	ISNULL(CD.dblScheduleLoad,0)
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -285,7 +293,7 @@ AS
 
 			WHILE ISNULL(@intInventoryReceiptItemId,0) > 0
 			BEGIN
-				SELECT	@dblQty						=	dblOpenReceive
+				SELECT	@dblQty						=	CASE WHEN @ysnLoad = 1 THEN intLoadReceive ELSE dblOpenReceive END
 				FROM	tblICInventoryReceiptItem 
 				WHERE	intInventoryReceiptItemId	=	 @intInventoryReceiptItemId
 									

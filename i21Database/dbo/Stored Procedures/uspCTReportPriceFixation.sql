@@ -198,7 +198,8 @@ BEGIN TRY
 			strCompanyCityAndDate = ISNULL(@strCity + ', ', '') + datename(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,getdate())),datename(mm,getdate())) + ' ' + datename(yyyy,getdate()),
 			strCompanyName = @strCompanyName,
 			strCPContract  = CH.strCPContract,
-			intLanguageId = @intLaguageId
+			intLanguageId = @intLaguageId,
+			xmlParam = @xmlParam
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
