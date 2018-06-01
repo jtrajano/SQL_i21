@@ -42,7 +42,43 @@ BEGIN
 
 					BEGIN TRANSACTION
 
-					PRINT ''START UPDATE CUSTOMER RELATED RECORDS''				
+					PRINT ''START UPDATE CUSTOMER RELATED RECORDS''		
+					
+					
+					----------------------------------------------------------------------------
+					--- BEGIN Shipto CHecking
+					
+					----Check origin customer ship to and get list that have records in TM
+					SELECT 
+						VC.vwcus_bill_to
+						, vwcus_key
+						, A4GLIdentity
+						, CustomerA4GLIdentity = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+					INTO #tmpOriginCustomerWithShipto
+					FROM tblTMSite S
+					INNER JOIN tblTMCustomer TC 
+						ON TC.intCustomerID = S.intCustomerID
+					INNER JOIN vwcusmst VC 
+						ON VC.A4GLIdentity=TC.intCustomerNumber
+					WHERE vwcus_bill_to  <> vwcus_key collate SQL_Latin1_General_CP1_CS_AS 
+
+
+					--Update tblTMCustomer
+					-----------------------------------------------
+					UPDATE tblTMCustomer
+					SET intCustomerNumber = A.CustomerA4GLIdentity
+					FROM #tmpOriginCustomerWithShipto A
+					WHERE tblTMCustomer.intCustomerNumber = A.A4GLIdentity
+									
+					--- update tblTMLease
+					UPDATE tblTMLease
+					SET intBillToCustomerId =  A.CustomerA4GLIdentity
+					FROM #tmpOriginCustomerWithShipto A
+					WHERE tblTMLease.intBillToCustomerId = A.A4GLIdentity
+
+					----------- End Customer Shipto
+					-----------------------------------------------------------------------------------------
+							
 
 					---Check for the non existing record in origin
 					IF OBJECT_ID(''tempdb..#NoOriginRecord'') IS NOT NULL DROP TABLE #NoOriginRecord
