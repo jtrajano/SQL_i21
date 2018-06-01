@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPVendors]
 @strSessionId NVARCHAR(50)='',
 @strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT
+@strInfo2 NVARCHAR(MAX)='' OUT,
+@intNoOfRowsAffected INT=0 OUT
 AS
 BEGIN TRY
 
@@ -45,6 +46,8 @@ DECLARE @tblEntityContactIdOutput table (intEntityId int)
 
 If ISNULL(@strSessionId,'')=''
 	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
+Else If @strSessionId='ProcessOneByOne'
+	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor'
 Else
 	Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND strSessionId=@strSessionId
 
@@ -52,6 +55,7 @@ While(@intMinVendor is not null)
 Begin
 Begin Try
 
+Set @intNoOfRowsAffected=1
 Set @strVendorName = NULL
 Set @intEntityId = NULL
 Set @strEntityNo = NULL
@@ -336,6 +340,8 @@ END CATCH
 
 	If ISNULL(@strSessionId,'')=''
 		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor
+	Else If @strSessionId='ProcessOneByOne'
+		Select @intMinVendor=NULL
 	Else
 		Select @intMinVendor=MIN(intStageEntityId) From tblIPEntityStage Where strEntityType='Vendor' AND intStageEntityId>@intMinVendor AND strSessionId=@strSessionId
 End

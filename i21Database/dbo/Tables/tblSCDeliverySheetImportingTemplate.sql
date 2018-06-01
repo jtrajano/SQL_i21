@@ -5,6 +5,7 @@
     [strTemplateDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intDelimiterId] INT NULL,
 	[strDelimiterType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnLastTemplateUsed] BIT NOT NULL DEFAULT 0, 
 	[ysnActive] BIT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCDeliverySheetImportingTemplate_intImportingTemplateId] PRIMARY KEY ([intImportingTemplateId]), 

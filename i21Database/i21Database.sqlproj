@@ -6352,6 +6352,8 @@
     <Build Include="dbo\Tables\tblRKCollateralHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCollateralHistoryInsert.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransactionConfiguration.sql" />
+    <Build Include="dbo\Tables\tblPRElectronicFilingSUI.sql" />
+    <Build Include="dbo\Views\vyuPRElectronicFilingSUIDetail.sql" />
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeCategory.sql" />
     <Build Include="dbo\Tables\tblSCTicketHistory.sql" />
@@ -6575,6 +6577,7 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateUsageExceptionAlert.sql" />
     <Build Include="dbo\Views\vyuCFUsageExceptionAlertTransaction.sql" />
     <Build Include="dbo\Tables\tblCFTransactionTaxType.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceReport.sql" />
@@ -6703,6 +6706,7 @@
     <Build Include="dbo\Views\vyuSTGetHandheldScannerExportPricebook.sql" />
     <Build Include="dbo\Views\vyuSTGetPricebookExport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateHandheldScannerExportPricebook.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6884,6 +6888,8 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateNewShipFromEntity.sql" />
     <None Include="Scripts\Post-Deployment\EncryptionDataFix.sql" />
     <None Include="Scripts\Post-Deployment\IC\31_Add_Default_Edi_Mapping_Template.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
+    <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -208,3 +208,43 @@ EXEC ('
 ')
 
 END
+
+/*
+* Employee Location Distribution
+* 1. Attempt to Populate Location Distribution table with data from Earning Distribution table
+* 2...
+*/
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPREmployeeLocationDistribution'))
+BEGIN
+EXEC ('
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblPREmployeeLocationDistribution)
+	BEGIN
+		INSERT INTO tblPREmployeeLocationDistribution (
+			intEntityEmployeeId
+			,intProfitCenter
+			,dblPercentage
+			,intConcurrencyId
+		)
+		SELECT DISTINCT 
+			intEntityEmployeeId, 
+			intProfitCenter = ASM.intAccountSegmentId, 
+			dblPercentage, 
+			intConcurrencyId = 1 
+		FROM tblPREmployeeEarningDistribution EED
+		INNER JOIN tblPREmployeeEarning EE 
+			ON EED.intEmployeeEarningId = EE.intEmployeeEarningId
+		INNER JOIN 
+			(SELECT * FROM tblGLAccountSegmentMapping WHERE intAccountSegmentId IN 
+				(SELECT intAccountSegmentId FROM tblGLAccountSegment WHERE intAccountStructureId IN 
+					(SELECT intAccountStructureId FROM tblGLAccountStructure 
+						WHERE LOWER(strStructureName) IN (''location'', ''profit center'')))) ASM 
+			ON EED.intAccountId = ASM.intAccountId
+		WHERE dblPercentage <> 100
+			AND intEntityEmployeeId IN (
+				SELECT DISTINCT intEntityEmployeeId FROM tblPREmployeeEarning WHERE intEmployeeEarningId IN (
+					SELECT DISTINCT intEmployeeEarningId FROM tblPREmployeeEarningDistribution 
+					WHERE dblPercentage <> 100 
+					GROUP BY intEmployeeEarningId HAVING SUM(dblPercentage) = 100))
+	END
+')
+END

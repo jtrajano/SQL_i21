@@ -11,7 +11,7 @@ SELECT
 	Item.strInventoryTracking,
 	Item.strStatus,
 	ItemLocation.intLocationId,
-	ItemLocation.ysnStorageUnitRequired,
+	ysnStorageUnitRequired = CAST(0 AS BIT),
 	ItemLocation.intItemLocationId,
 	ItemLocation.intSubLocationId,
 	Item.intCategoryId,
@@ -141,7 +141,7 @@ SELECT
 	strTonnageTaxUOM = TonnageUOM.strUnitMeasure,
 	Item.intModuleId,
 	m.strModule,
-	Item.ysn1099Box3,
+	ysn1099Box3 = CAST(0 AS BIT),
 	Item.ysnUseWeighScales,
 	Item.ysnLotWeightsRequired	
 FROM	

@@ -60,7 +60,9 @@ END
 
 IF (@ysnPost = 1)
 BEGIN
-	--PRINT 'Insert Paycheck data into tblCMBankTransaction'
+	/****************************************
+	   INSERT BANK TRANSACTION HEADER
+	*****************************************/
 	INSERT INTO @BankTransactionTable
 		([strTransactionId]
 		,[intBankTransactionTypeId] 
@@ -138,7 +140,11 @@ END
 
 IF (@ysnPost = 1)
 BEGIN
-	--Insert Earning Distribution to Temporary Table
+	/********************************************
+	  INSERT BANK TRANSACTION DETAIL - EARNINGS
+	*********************************************/
+
+	--Create Earning Distribution Temporary Table
 	CREATE TABLE #tmpEarning (
 		intTmpEarningId			INT IDENTITY(1, 1)
 		,intPaycheckId			INT
@@ -148,117 +154,41 @@ BEGIN
 		,dblAmount				NUMERIC (18, 6)
 		,dblPercentage			NUMERIC (18, 6)
 		,intDepartmentId		INT
-		,strDepartment			NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,intProfitCenter		INT
 		,intLOB					INT
 	)
 
-	INSERT INTO #tmpEarning 
-	(
-		intPaycheckId
-		,intEmployeeEarningId
-		,intTypeEarningId
-		,intAccountId
-		,dblAmount
-		,dblPercentage
-		,intDepartmentId
-		,strDepartment
-		,intProfitCenter
-		,intLOB
-	)
-	SELECT 
-		A.intPaycheckId
-		,A.intEmployeeEarningId
-		,A.intTypeEarningId
-		,B.intAccountId
-		,A.dblTotal
-		,B.dblPercentage
-		,C.intDepartmentId
-		,C.strDepartment
-		,C.intProfitCenter
-		,C.intLOB
-	FROM (
-		SELECT intPaycheckId, intEmployeeEarningId, intTypeEarningId, strCalculationType, intEmployeeDepartmentId, dblTotal FROM tblPRPaycheckEarning) A 
-		LEFT JOIN tblPREmployeeEarningDistribution B
-				ON A.intEmployeeEarningId = B.intEmployeeEarningId
+	--Insert Earning Distribution to Temporary Table
+	INSERT INTO #tmpEarning (intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
+	SELECT A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, A.dblTotal, B.dblPercentage, C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+	FROM (SELECT tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
+			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, dblTotal 
+		  FROM tblPRPaycheckEarning INNER JOIN tblPRPaycheck ON tblPRPaycheckEarning.intPaycheckId = tblPRPaycheck.intPaycheckId) A 
+		LEFT JOIN tblPREmployeeLocationDistribution B
+				ON A.intEntityEmployeeId = B.intEntityEmployeeId
 		LEFT JOIN tblPRDepartment C 
 	ON A.intEmployeeDepartmentId = C.intDepartmentId
 	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
 	AND intPaycheckId = @intPaycheckId
-		
+
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
-	--Place Earning to Temporary Table to Validate Earning GL Distribution
-	SELECT * INTO #tmpEarningTemp FROM #tmpEarning WHERE intDepartmentId IS NOT NULL
-	AND intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarningDistribution 
-									WHERE intEmployeeEarningId = #tmpEarning.intEmployeeEarningId
-									GROUP BY intEmployeeEarningId HAVING COUNT(intAccountId) = 1)
+	--Place Earning to Temporary Table to Validate Account ID Distribution
+	SELECT * INTO #tmpEarningValidateAccounts 
+	FROM #tmpEarning WHERE intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
+	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
 
-	DECLARE @intEarningTempEarningId INT
-	DECLARE @intEarningTempDepartmentId INT
-	DECLARE @intEarningTempAccountId INT
-	DECLARE @intEarningTempProfitCenter INT
-	DECLARE @intEarningTempLOB INT
-	DECLARE @intEarningTempFinalAccountId INT
-	DECLARE @strMsg NVARCHAR(MAX) = ''
-
-	DECLARE @intEarningTempOrigPrimaryAccount INT
-	DECLARE @intEarningTempOrigProfitCenter INT
-	DECLARE @intEarningTempOrigLOB INT
+	DECLARE @intEarningTempEarningId INT, @intEarningTempDepartmentId INT, @intEarningTempAccountId INT,
+		@intEarningTempProfitCenter INT, @intEarningTempLOB INT, @intEarningTempFinalAccountId INT, @strMsg NVARCHAR(MAX) = ''
 
 	--Validate Earning GL Distribution
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningTemp)
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningValidateAccounts)
 	BEGIN
-		SELECT TOP 1 @intEarningTempEarningId = intTypeEarningId
-					,@intEarningTempDepartmentId = intDepartmentId
-					,@intEarningTempAccountId = intAccountId
-				    ,@intEarningTempProfitCenter = intProfitCenter
-					,@intEarningTempLOB = intLOB
-					,@intEarningTempFinalAccountId = NULL
-					FROM #tmpEarningTemp
+		SELECT TOP 1 @intEarningTempEarningId = intTypeEarningId, @intEarningTempDepartmentId = intDepartmentId
+					,@intEarningTempAccountId = intAccountId, @intEarningTempProfitCenter = intProfitCenter, @intEarningTempLOB = intLOB
+					,@intEarningTempFinalAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
+					FROM #tmpEarningValidateAccounts
 
-		--Step 1: Get the original Segments of the Account
-		SELECT TOP 1 @intEarningTempOrigPrimaryAccount = [Primary Account], @intEarningTempOrigProfitCenter = [Location], @intEarningTempOrigLOB = [LOB]
-		FROM (
-			SELECT 
-				A.intAccountId
-				,D.strAccountId
-				,B.intAccountSegmentId
-				,strStructureName = CASE WHEN (LOWER(C.strStructureName) IN ('lob', 'line of business')) THEN 'LOB' ELSE C.strStructureName END
-			FROM tblGLAccountSegmentMapping A
-			INNER JOIN tblGLAccountSegment B ON B.intAccountSegmentId = A.intAccountSegmentId
-			INNER JOIN tblGLAccountStructure C ON C.intAccountStructureId = B.intAccountStructureId
-			INNER JOIN tblGLAccount D ON A.intAccountId = D.intAccountId
-		) AS S
-		PIVOT
-		(
-			MAX(intAccountSegmentId)
-			FOR [strStructureName] IN ([Primary Account], [Location], [LOB])
-		) AS PVT
-		WHERE [intAccountId] = @intEarningTempAccountId
-
-		--Step 2: Get the Account that uses the acquired Primary Account, Profit Center, and LOB
-		SELECT TOP 1 @intEarningTempFinalAccountId = intAccountId
-		FROM (
-			SELECT 
-				A.intAccountId
-				,D.strAccountId
-				,B.intAccountSegmentId
-				,strStructureName = CASE WHEN (LOWER(C.strStructureName) IN ('lob', 'line of business')) THEN 'LOB' ELSE C.strStructureName END
-			FROM tblGLAccountSegmentMapping A
-			INNER JOIN tblGLAccountSegment B ON B.intAccountSegmentId = A.intAccountSegmentId
-			INNER JOIN tblGLAccountStructure C ON C.intAccountStructureId = B.intAccountStructureId
-			INNER JOIN tblGLAccount D ON A.intAccountId = D.intAccountId
-		) AS S
-		PIVOT
-		(
-			MAX(intAccountSegmentId)
-			FOR [strStructureName] IN ([Primary Account], [Location], [LOB])
-		) AS PVT
-		WHERE [Primary Account] = @intEarningTempOrigPrimaryAccount
-			AND ISNULL([Location], 0) = ISNULL(@intEarningTempProfitCenter, ISNULL(@intEarningTempOrigProfitCenter, 0))
-			AND ISNULL([LOB], 0) = ISNULL(@intEarningTempLOB, ISNULL(@intEarningTempOrigLOB, 0))
-
-		--Step 3: Replace the Earning Account with the Distribution Account
+		--Replace the Earning Account with the Distribution Account
 		IF (@intEarningTempFinalAccountId IS NOT NULL) 
 			UPDATE #tmpEarning SET intAccountId = @intEarningTempFinalAccountId 
 			WHERE intTypeEarningId = @intEarningTempEarningId 
@@ -267,11 +197,14 @@ BEGIN
 				AND ISNULL(intProfitCenter, 0) = ISNULL(@intEarningTempProfitCenter, 0)
 				AND ISNULL(intLOB, 0) = ISNULL(@intEarningTempLOB, 0)
 		ELSE
-			SELECT @strMsg = 'One or more accounts for ''' 
-				+ (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = @intEarningTempEarningId) + ''''
-				+ ' Earning GL Distribution does not have a corresponding account for Department ''' 
-				+ (SELECT TOP 1 strDepartment FROM tblPRDepartment WHERE intDepartmentId = @intEarningTempDepartmentId) + '''.'
-				+ ' Make sure all accounts for this Earning GL Distribution and Department exists.'
+			SELECT @strMsg = 'Earning Type ''' + (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = @intEarningTempEarningId) + ''''
+				+ ' with Account ID ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intEarningTempAccountId) + ''''
+				+ ' does not have a corresponding Account' + 
+				+ ' for Location ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intEarningTempProfitCenter) + '''' 
+				+ CASE WHEN (@intEarningTempLOB IS NOT NULL) THEN 
+					'and LOB ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intEarningTempLOB) + '''' ELSE '' END
+				+ '. Make sure all accounts for this employee''s GL Location Distribution and Department exists.'
+			
 
 		--Immediately end the process once an invalid account combination has been found
 		IF (LEN(@strMsg) > 0) 
@@ -281,7 +214,7 @@ BEGIN
 			GOTO Post_Exit
 		END
 
-		DELETE FROM #tmpEarningTemp 
+		DELETE FROM #tmpEarningValidateAccounts 
 			WHERE intTypeEarningId = @intEarningTempEarningId
 			AND intAccountId = @intEarningTempAccountId
 			AND ISNULL(intDepartmentId, 0) = ISNULL(@intEarningTempDepartmentId, 0)
@@ -291,38 +224,35 @@ BEGIN
 
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Earning to Temporary Table to Distribute Amounts
-	SELECT * INTO #tmpEarningAmount FROM #tmpEarning
-	SELECT DISTINCT intTypeEarningId INTO #tmpEarningType FROM #tmpEarning
+	SELECT intTmpEarningId, intTypeEarningId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
+	DECLARE @intTypeEarningId INT, @dblEarningFullAmount NUMERIC(18, 6), @intTmpEarningId INT
 
-	DECLARE @intTypeEarningId INT
-	DECLARE @dblFullAmount NUMERIC(18, 6)
-	DECLARE @intTmpEarningId INT
-
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningType)
+	--Distribute Amounts
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningAmount)
 	BEGIN
-		SELECT TOP 1 @dblFullAmount = dblAmount
+		SELECT TOP 1 @dblEarningFullAmount = dblAmount
 					,@intTypeEarningId = intTypeEarningId
 		FROM #tmpEarningAmount
 
-		WHILE (@dblFullAmount <> 0)
+		WHILE (@dblEarningFullAmount <> 0)
 		BEGIN
 			SELECT TOP 1 @intTmpEarningId = intTmpEarningId FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
 
 			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId) = 1) 
 				BEGIN
-					UPDATE #tmpEarning SET dblAmount = @dblFullAmount WHERE intTmpEarningId = @intTmpEarningId
-					SELECT @dblFullAmount = 0.000000
+					UPDATE #tmpEarning SET dblAmount = @dblEarningFullAmount WHERE intTmpEarningId = @intTmpEarningId
+					SELECT @dblEarningFullAmount = 0.000000
 				END
 			ELSE
 				BEGIN
-					SELECT @dblFullAmount = @dblFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTmpEarningId = @intTmpEarningId
+					SELECT @dblEarningFullAmount = @dblEarningFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpEarning WHERE intTmpEarningId = @intTmpEarningId
 					UPDATE #tmpEarning SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpEarningId = @intTmpEarningId
 				END
 
 			DELETE FROM #tmpEarningAmount WHERE intTmpEarningId = @intTmpEarningId
 		END
 
-		DELETE FROM #tmpEarningType WHERE intTypeEarningId = @intTypeEarningId
+		DELETE FROM #tmpEarningAmount WHERE intTypeEarningId = @intTypeEarningId
 	END
 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
@@ -343,8 +273,8 @@ BEGIN
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= E.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
-		,[dblDebit]					= CASE WHEN (E.dblAmount > 0) THEN E.dblAmount ELSE 0 END
-		,[dblCredit]				= CASE WHEN (E.dblAmount < 0) THEN ABS(E.dblAmount) ELSE 0 END
+		,[dblDebit]					= CASE WHEN (SUM(E.dblAmount) > 0) THEN SUM(E.dblAmount) ELSE 0 END
+		,[dblCredit]				= CASE WHEN (SUM(E.dblAmount) < 0) THEN ABS(SUM(E.dblAmount)) ELSE 0 END
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -353,8 +283,138 @@ BEGIN
 		,[dtmLastModified]			= GETDATE()
 		,[intConcurrencyId]			= 1
 	FROM #tmpEarning E
+	GROUP BY
+		E.intAccountId
 
-	--PRINT 'Insert Employee Paid Deductions into tblCMBankTransactionDetail'
+	--Get Earning Department Distribution Percentage For Deduction and Tax Distribution
+	SELECT intDepartmentId, dblAmount = SUM(dblAmount), dblPercent = 0 INTO #tmpEarningDepartmentPercentage FROM #tmpEarning GROUP BY intDepartmentId
+	UPDATE #tmpEarningDepartmentPercentage SET dblPercent = (dblAmount / dblTotalAmount) * 100 FROM (SELECT dblTotalAmount = SUM(dblAmount) FROM #tmpEarningDepartmentPercentage) T
+
+	/********************************************
+	  INSERT BANK TRANSACTION DETAIL - DEDUCTIONS
+	*********************************************/
+
+	--Create Deduction Distribution Temporary Table
+	CREATE TABLE #tmpDeduction (
+		intTmpDeductionId		INT IDENTITY(1, 1)
+		,intPaycheckId			INT
+		,intEmployeeDeductionId	INT
+		,intTypeDeductionId		INT
+		,strPaidBy				NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL
+		,intAccountId			INT
+		,intExpenseAccountId	INT
+		,dblAmount				NUMERIC (18, 6)
+		,dblPercentage			NUMERIC (18, 6)
+		,intDepartmentId		INT
+		,intProfitCenter		INT
+		,intLOB					INT
+	)
+
+	--Insert Deduction Distribution to Temporary Table
+	INSERT INTO #tmpDeduction (intPaycheckId, intEmployeeDeductionId, intTypeDeductionId, strPaidBy, intAccountId, intExpenseAccountId, 
+								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
+	SELECT A.intPaycheckId, A.intEmployeeDeductionId, A.intTypeDeductionId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId,
+			A.dblTotal, ISNULL(B.dblPercentage, A.dblDepartmentPercent), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+	FROM (SELECT PD.intPaycheckId, intEmployeeDeductionId, intEntityEmployeeId, strPaidBy, intAccountId, intExpenseAccountId,
+			intTypeDeductionId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
+		  FROM tblPRPaycheckDeduction PD
+			INNER JOIN tblPRPaycheck PC ON PD.intPaycheckId = PC.intPaycheckId
+			OUTER APPLY (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) DP
+			) A 
+		LEFT JOIN tblPREmployeeLocationDistribution B
+				ON A.intEntityEmployeeId = B.intEntityEmployeeId
+		LEFT JOIN tblPRDepartment C 
+	ON A.intEmployeeDepartmentId = C.intDepartmentId
+	WHERE A.dblTotal <> 0
+	AND intPaycheckId = @intPaycheckId
+
+	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
+	--Place Deduction to Temporary Table to Validate Account ID Distribution
+	SELECT * INTO #tmpDeductionValidateAccounts 
+	FROM #tmpDeduction WHERE intEmployeeDeductionId IN (SELECT intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
+	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
+
+	DECLARE @intDeductionTempDeductionId INT, @intDeductionTempDepartmentId INT, @intDeductionTempAccountId INT, @intDeductionTempExpenseAccountId INT,
+		@intDeductionTempProfitCenter INT, @intDeductionTempLOB INT, @intDeductionTempFinalAccountId INT, @intDeductionTempFinalExpenseAccountId INT
+
+	--Validate Deduction GL Distribution
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDeductionValidateAccounts)
+	BEGIN
+		SELECT TOP 1 @intDeductionTempDeductionId = intTypeDeductionId, @intDeductionTempDepartmentId = intDepartmentId
+					,@intDeductionTempAccountId = intAccountId, @intDeductionTempExpenseAccountId = intExpenseAccountId 
+					,@intDeductionTempProfitCenter = intProfitCenter, @intDeductionTempLOB = intLOB
+					,@intDeductionTempFinalAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
+					,@intDeductionTempFinalExpenseAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intExpenseAccountId, intProfitCenter, intLOB)
+					FROM #tmpDeductionValidateAccounts
+
+		--Replace the Deduction Account with the Distribution Account
+		IF (@intDeductionTempFinalAccountId IS NOT NULL AND (@intDeductionTempExpenseAccountId IS NULL OR @intDeductionTempFinalExpenseAccountId IS NOT NULL)) 
+			UPDATE #tmpDeduction SET intAccountId = @intDeductionTempFinalAccountId, intExpenseAccountId = @intDeductionTempFinalExpenseAccountId
+			WHERE intTypeDeductionId = @intDeductionTempDeductionId 
+				AND intAccountId = @intDeductionTempAccountId AND ISNULL(intExpenseAccountId, 0) = ISNULL(@intDeductionTempExpenseAccountId, 0)
+				AND ISNULL(intDepartmentId, 0) = ISNULL(@intDeductionTempDepartmentId, 0)
+				AND ISNULL(intProfitCenter, 0) = ISNULL(@intDeductionTempProfitCenter, 0)
+				AND ISNULL(intLOB, 0) = ISNULL(@intDeductionTempLOB, 0)
+		ELSE
+			SELECT @strMsg = 'Deduction Type ''' + (SELECT TOP 1 strDeduction FROM tblPRTypeDeduction WHERE intTypeDeductionId = @intDeductionTempDeductionId) + ''''
+				+ ' with Liability Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intDeductionTempAccountId) + ''''
+				+ CASE WHEN (@intDeductionTempExpenseAccountId IS NOT NULL) THEN 
+					' or Expense Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intDeductionTempExpenseAccountId) + '''' ELSE '' END
+				+ ' does not have a corresponding Account' + 
+				+ ' for Location ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intDeductionTempProfitCenter) + '''' 
+				+ CASE WHEN (@intDeductionTempLOB IS NOT NULL) THEN 
+					'and LOB ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intDeductionTempLOB) + '''' ELSE '' END
+				+ '. Make sure all accounts for this employee''s GL Location Distribution and Department exists.'
+
+		--Immediately end the process once an invalid account combination has been found
+		IF (LEN(@strMsg) > 0) 
+		BEGIN 
+			RAISERROR(@strMsg, 11, 1)
+			SET @isSuccessful = 0
+			GOTO Post_Exit
+		END
+
+		DELETE FROM #tmpDeductionValidateAccounts 
+			WHERE intTypeDeductionId = @intDeductionTempDeductionId
+			AND intAccountId = @intDeductionTempAccountId AND ISNULL(intExpenseAccountId, 0) = ISNULL(@intDeductionTempExpenseAccountId, 0)
+			AND ISNULL(intDepartmentId, 0) = ISNULL(@intDeductionTempDepartmentId, 0)
+			AND ISNULL(intProfitCenter, 0) = ISNULL(@intDeductionTempProfitCenter, 0)
+			AND ISNULL(intLOB, 0) = ISNULL(@intDeductionTempLOB, 0)
+	END
+
+	--PERFORM AMOUNT DISTRIBUTION
+	--Place Deduction to Temporary Table to Distribute Amounts
+	SELECT intTmpDeductionId, intTypeDeductionId, dblAmount INTO #tmpDeductionAmount FROM #tmpDeduction
+	DECLARE @intTypeDeductionId INT, @dblDeductionFullAmount NUMERIC(18, 6), @intTmpDeductionId INT
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDeductionAmount)
+	BEGIN
+		SELECT TOP 1 @dblDeductionFullAmount = dblAmount
+					,@intTypeDeductionId = intTypeDeductionId
+		FROM #tmpDeductionAmount
+
+		WHILE (@dblDeductionFullAmount <> 0)
+		BEGIN
+			SELECT TOP 1 @intTmpDeductionId = intTmpDeductionId FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId
+
+			IF ((SELECT COUNT(1) FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId) = 1) 
+				BEGIN
+					UPDATE #tmpDeduction SET dblAmount = @dblDeductionFullAmount WHERE intTmpDeductionId = @intTmpDeductionId
+					SELECT @dblDeductionFullAmount = 0.000000
+				END
+			ELSE
+				BEGIN
+					SELECT @dblDeductionFullAmount = @dblDeductionFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpDeduction WHERE intTmpDeductionId = @intTmpDeductionId
+					UPDATE #tmpDeduction SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpDeductionId = @intTmpDeductionId
+				END
+
+			DELETE FROM #tmpDeductionAmount WHERE intTmpDeductionId = @intTmpDeductionId
+		END
+
+		DELETE FROM #tmpDeductionAmount WHERE intTypeDeductionId = @intTypeDeductionId
+	END
+
+	--PRINT 'Insert Deductions into tblCMBankTransactionDetail'
 	INSERT INTO @BankTransactionDetail
 		([dtmDate]
 		,[intGLAccountId]
@@ -373,7 +433,7 @@ BEGIN
 		,[intGLAccountId]			= D.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
 		,[dblDebit]					= 0
-		,[dblCredit]				= D.dblTotal
+		,[dblCredit]				= SUM(D.dblAmount)
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -381,48 +441,21 @@ BEGIN
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
 		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckDeduction D
-	WHERE D.strPaidBy = 'Employee'
-		AND D.dblTotal > 0 
+	FROM #tmpDeduction D
+		LEFT JOIN tblPRPaycheckDeduction D2
+		ON D.intPaycheckId = D2.intPaycheckId
+		AND D.intEmployeeDeductionId = D2.intEmployeeDeductionId
+	WHERE D2.strPaidBy IN ('Company', 'Employee')
+		AND D2.dblTotal > 0 
 		AND D.intPaycheckId = @intPaycheckId
-
-	--PRINT 'Insert Company Paid Deductions into tblCMBankTransactionDetail'
-	INSERT INTO @BankTransactionDetail
-		([dtmDate]
-		,[intGLAccountId]
-		,[strDescription]
-		,[dblDebit]
-		,[dblCredit]
-		,[intUndepositedFundId]
-		,[intEntityId]
-		,[intCreatedUserId]
-		,[dtmCreated]
-		,[intLastModifiedUserId]
-		,[dtmLastModified]
-		,[intConcurrencyId])
-	SELECT
-		[dtmDate]					= @dtmPayDate
-		,[intGLAccountId]			= D.intAccountId
-		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
-		,[dblDebit]					= 0
-		,[dblCredit]				= D.dblTotal
-		,[intUndepositedFundId]		= NULL
-		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intCreatedEntityId
-		,[dtmCreated]				= GETDATE()
-		,[intLastModifiedUserId]	= @intUserId
-		,[dtmLastModified]			= GETDATE()
-		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckDeduction D
-	WHERE D.strPaidBy = 'Company'
-		AND D.dblTotal > 0 
-		AND D.intPaycheckId = @intPaycheckId
+	GROUP BY
+		D.intAccountId
 	UNION ALL
 	SELECT
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= D.intExpenseAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intExpenseAccountId)
-		,[dblDebit]					= D.dblTotal
+		,[dblDebit]					= SUM(D.dblAmount)
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
@@ -431,12 +464,140 @@ BEGIN
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
 		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckDeduction D
-	WHERE D.strPaidBy = 'Company'
-		AND D.dblTotal > 0 
+	FROM #tmpDeduction D
+		LEFT JOIN tblPRPaycheckDeduction D2
+		ON D.intPaycheckId = D2.intPaycheckId
+		AND D.intEmployeeDeductionId = D2.intEmployeeDeductionId
+	WHERE D2.strPaidBy = 'Company'
+		AND D2.dblTotal > 0 
 		AND D.intPaycheckId = @intPaycheckId
+	GROUP BY
+		D.intExpenseAccountId
 
-	--PRINT 'Insert Employee Taxes into tblCMBankTransactionDetail'
+	/********************************************
+	  INSERT BANK TRANSACTION DETAIL - TAXES
+	*********************************************/
+
+	--Create Tax Distribution Temporary Table
+	CREATE TABLE #tmpTax (
+		intTmpTaxId				INT IDENTITY(1, 1)
+		,intPaycheckId			INT
+		,intTypeTaxId			INT
+		,strPaidBy				NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL
+		,intAccountId			INT
+		,intExpenseAccountId	INT
+		,dblAmount				NUMERIC (18, 6)
+		,dblPercentage			NUMERIC (18, 6)
+		,intDepartmentId		INT
+		,intProfitCenter		INT
+		,intLOB					INT
+	)
+
+	--Insert Tax Distribution to Temporary Table
+	INSERT INTO #tmpTax (intPaycheckId, intTypeTaxId, strPaidBy, intAccountId, intExpenseAccountId, 
+								dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB)
+	SELECT A.intPaycheckId, A.intTypeTaxId, A.strPaidBy, A.intAccountId, A.intExpenseAccountId,
+			A.dblTotal, ISNULL(B.dblPercentage, A.dblDepartmentPercent), C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB
+	FROM (SELECT PD.intPaycheckId, intEntityEmployeeId, strPaidBy, intAccountId, intExpenseAccountId,
+			intTypeTaxId, dblTotal, intEmployeeDepartmentId, dblDepartmentPercent
+		  FROM tblPRPaycheckTax PD
+			INNER JOIN tblPRPaycheck PC ON PD.intPaycheckId = PC.intPaycheckId
+			OUTER APPLY (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) DP
+			) A 
+		LEFT JOIN tblPREmployeeLocationDistribution B
+				ON A.intEntityEmployeeId = B.intEntityEmployeeId
+		LEFT JOIN tblPRDepartment C 
+	ON A.intEmployeeDepartmentId = C.intDepartmentId
+	WHERE A.dblTotal <> 0
+	AND intPaycheckId = @intPaycheckId
+
+	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
+	--Place Tax to Temporary Table to Validate Account ID Distribution
+	SELECT * INTO #tmpTaxValidateAccounts 
+	FROM #tmpTax WHERE intTypeTaxId IN (SELECT intTypeTaxId FROM tblPREmployeeTax WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
+	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
+
+	DECLARE @intTaxTempTaxId INT, @intTaxTempDepartmentId INT, @intTaxTempAccountId INT, @intTaxTempExpenseAccountId INT,
+		@intTaxTempProfitCenter INT, @intTaxTempLOB INT, @intTaxTempFinalAccountId INT, @intTaxTempFinalExpenseAccountId INT
+
+	--Validate Tax GL Distribution
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTaxValidateAccounts)
+	BEGIN
+		SELECT TOP 1 @intTaxTempTaxId = intTypeTaxId, @intTaxTempDepartmentId = intDepartmentId
+					,@intTaxTempAccountId = intAccountId, @intTaxTempExpenseAccountId = intExpenseAccountId 
+					,@intTaxTempProfitCenter = intProfitCenter, @intTaxTempLOB = intLOB
+					,@intTaxTempFinalAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intAccountId, intProfitCenter, intLOB)
+					,@intTaxTempFinalExpenseAccountId = dbo.fnPRGetAccountIdWithThisLocationLOB(intExpenseAccountId, intProfitCenter, intLOB)
+					FROM #tmpTaxValidateAccounts
+
+		--Replace the Tax Account with the Distribution Account
+		IF (@intTaxTempFinalAccountId IS NOT NULL AND (@intTaxTempExpenseAccountId IS NULL OR @intTaxTempFinalExpenseAccountId IS NOT NULL)) 
+			UPDATE #tmpTax SET intAccountId = @intTaxTempFinalAccountId, intExpenseAccountId = @intTaxTempFinalExpenseAccountId
+			WHERE intTypeTaxId = @intTaxTempTaxId 
+				AND intAccountId = @intTaxTempAccountId AND ISNULL(intExpenseAccountId, 0) = ISNULL(@intTaxTempExpenseAccountId, 0)
+				AND ISNULL(intDepartmentId, 0) = ISNULL(@intTaxTempDepartmentId, 0)
+				AND ISNULL(intProfitCenter, 0) = ISNULL(@intTaxTempProfitCenter, 0)
+				AND ISNULL(intLOB, 0) = ISNULL(@intTaxTempLOB, 0)
+		ELSE
+			SELECT @strMsg = 'Tax Type ''' + (SELECT TOP 1 strTax FROM tblPRTypeTax WHERE intTypeTaxId = @intTaxTempTaxId) + ''''
+				+ ' with Liability Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intTaxTempAccountId) + ''''
+				+ CASE WHEN (@intTaxTempExpenseAccountId IS NOT NULL) THEN 
+					' or Expense Account ''' + (SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = @intTaxTempExpenseAccountId) + '''' ELSE '' END
+				+ ' does not have a corresponding Account' + 
+				+ ' for Location ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intTaxTempProfitCenter) + '''' 
+				+ CASE WHEN (@intTaxTempLOB IS NOT NULL) THEN 
+					'and LOB ''' + (SELECT TOP 1 strCode FROM tblGLAccountSegment WHERE intAccountSegmentId = @intTaxTempLOB) + '''' ELSE '' END
+				+ '. Make sure all accounts for this employee''s GL Location Distribution and Department exists.'
+
+		--Immediately end the process once an invalid account combination has been found
+		IF (LEN(@strMsg) > 0) 
+		BEGIN 
+			RAISERROR(@strMsg, 11, 1)
+			SET @isSuccessful = 0
+			GOTO Post_Exit
+		END
+
+		DELETE FROM #tmpTaxValidateAccounts 
+			WHERE intTypeTaxId = @intTaxTempTaxId
+			AND intAccountId = @intTaxTempAccountId AND ISNULL(intExpenseAccountId, 0) = ISNULL(@intTaxTempExpenseAccountId, 0)
+			AND ISNULL(intDepartmentId, 0) = ISNULL(@intTaxTempDepartmentId, 0)
+			AND ISNULL(intProfitCenter, 0) = ISNULL(@intTaxTempProfitCenter, 0)
+			AND ISNULL(intLOB, 0) = ISNULL(@intTaxTempLOB, 0)
+	END
+
+	--PERFORM AMOUNT DISTRIBUTION
+	--Place Tax to Temporary Table to Distribute Amounts
+	SELECT intTmpTaxId, intTypeTaxId, dblAmount INTO #tmpTaxAmount FROM #tmpTax
+	DECLARE @intTypeTaxId INT, @dblTaxFullAmount NUMERIC(18, 6), @intTmpTaxId INT
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpTaxAmount)
+	BEGIN
+		SELECT TOP 1 @dblTaxFullAmount = dblAmount
+					,@intTypeTaxId = intTypeTaxId
+		FROM #tmpTaxAmount
+
+		WHILE (@dblTaxFullAmount <> 0)
+		BEGIN
+			SELECT TOP 1 @intTmpTaxId = intTmpTaxId FROM #tmpTaxAmount WHERE intTypeTaxId = @intTypeTaxId
+
+			IF ((SELECT COUNT(1) FROM #tmpTaxAmount WHERE intTypeTaxId = @intTypeTaxId) = 1) 
+				BEGIN
+					UPDATE #tmpTax SET dblAmount = @dblTaxFullAmount WHERE intTmpTaxId = @intTmpTaxId
+					SELECT @dblTaxFullAmount = 0.000000
+				END
+			ELSE
+				BEGIN
+					SELECT @dblTaxFullAmount = @dblTaxFullAmount - ROUND(dblAmount * (dblPercentage / 100.000000), 2) FROM #tmpTax WHERE intTmpTaxId = @intTmpTaxId
+					UPDATE #tmpTax SET dblAmount = ROUND(dblAmount * (dblPercentage / 100.000000), 2) WHERE intTmpTaxId = @intTmpTaxId
+				END
+
+			DELETE FROM #tmpTaxAmount WHERE intTmpTaxId = @intTmpTaxId
+		END
+
+		DELETE FROM #tmpTaxAmount WHERE intTypeTaxId = @intTypeTaxId
+	END
+
+	--PRINT 'Insert Taxes into tblCMBankTransactionDetail'
 	INSERT INTO @BankTransactionDetail
 		([dtmDate]
 		,[intGLAccountId]
@@ -455,7 +616,7 @@ BEGIN
 		,[intGLAccountId]			= T.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
 		,[dblDebit]					= 0
-		,[dblCredit]				= T.dblTotal
+		,[dblCredit]				= SUM(T.dblAmount)
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
 		,[intCreatedUserId]			= @intCreatedEntityId
@@ -463,48 +624,21 @@ BEGIN
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
 		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckTax T
-	WHERE T.strPaidBy = 'Employee'
-		AND T.dblTotal > 0
+	FROM #tmpTax T
+		LEFT JOIN tblPRPaycheckTax T2
+		ON T.intPaycheckId = T2.intPaycheckId
+		AND T.intTypeTaxId = T2.intTypeTaxId
+	WHERE T.strPaidBy IN ('Company', 'Employee')
+		AND T2.dblTotal > 0
 		AND T.intPaycheckId = @intPaycheckId
-
-	--PRINT 'Insert Company Taxes into tblCMBankTransactionDetail'
-	INSERT INTO @BankTransactionDetail
-		([dtmDate]
-		,[intGLAccountId]
-		,[strDescription]
-		,[dblDebit]
-		,[dblCredit]
-		,[intUndepositedFundId]
-		,[intEntityId]
-		,[intCreatedUserId]
-		,[dtmCreated]
-		,[intLastModifiedUserId]
-		,[dtmLastModified]
-		,[intConcurrencyId])
-	SELECT
-		[dtmDate]					= @dtmPayDate
-		,[intGLAccountId]			= T.intAccountId
-		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
-		,[dblDebit]					= 0
-		,[dblCredit]				= T.dblTotal
-		,[intUndepositedFundId]		= NULL
-		,[intEntityId]				= NULL
-		,[intCreatedUserId]			= @intCreatedEntityId
-		,[dtmCreated]				= GETDATE()
-		,[intLastModifiedUserId]	= @intUserId
-		,[dtmLastModified]			= GETDATE()
-		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckTax T
-	WHERE T.strPaidBy = 'Company'
-		AND T.dblTotal > 0
-		AND intPaycheckId = @intPaycheckId
+	GROUP BY
+		T.intAccountId
 	UNION ALL
 	SELECT
 		[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= T.intExpenseAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intExpenseAccountId)
-		,[dblDebit]					= T.dblTotal
+		,[dblDebit]					= SUM(T.dblAmount)
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
@@ -513,10 +647,15 @@ BEGIN
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
 		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckTax T
+	FROM #tmpTax T
+		LEFT JOIN tblPRPaycheckTax T2
+		ON T.intPaycheckId = T2.intPaycheckId
+		AND T.intTypeTaxId = T2.intTypeTaxId
 	WHERE T.strPaidBy = 'Company'
-		AND T.dblTotal > 0
+		AND T2.dblTotal > 0
 		AND T.intPaycheckId = @intPaycheckId
+	GROUP BY
+		T.intExpenseAccountId
 END
 
 IF (@ysnPost = 1) 
@@ -1227,7 +1366,19 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarning')) DROP TABLE #tmpEarning
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarningAmount')) DROP TABLE #tmpEarningAmount
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarningValidateAccounts')) DROP TABLE #tmpEarningValidateAccounts
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarningDepartmentPercentage')) DROP TABLE #tmpEarningDepartmentPercentage
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDeduction')) DROP TABLE #tmpDeduction
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDeductionAmount')) DROP TABLE #tmpDeductionAmount
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDeductionValidateAccounts')) DROP TABLE #tmpDeductionValidateAccounts
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTax')) DROP TABLE #tmpTax
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTaxAmount')) DROP TABLE #tmpTaxAmount
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTaxValidateAccounts')) DROP TABLE #tmpTaxValidateAccounts
 
 
 /****************************************
