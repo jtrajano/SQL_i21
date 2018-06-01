@@ -1,5 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuHDProjectLink]
 	AS
+		with parentproject as (
+			select intProjectId = a.intDetailProjectId, intParentProjectId = a.intProjectId, strParentProjectName = b.strProjectName from tblHDProjectDetail a, tblHDProject b where b.intProjectId = a.intProjectId
+		)
 		select
 			a.*
 			,strEntityName = b.strName
@@ -12,6 +15,8 @@
 			,strCustomerLeadershipSponsor = m.strName
 			,strTargetVersion = n.strVersionNo
 			,intTicketProductId = (select top 1 o.intProductId from tblARCustomerProductVersion o where o.intCustomerId = a.intCustomerId)
+			,intParentProjectId = (select top 1 intParentProjectId from parentproject where intProjectId = a.intProjectId)
+			,strParentProjectName = (select top 1 strParentProjectName from parentproject where intProjectId = a.intProjectId)
 		from
 			tblHDProject a
 			left join tblEMEntity b on b.intEntityId = a.intCustomerId
@@ -23,4 +28,3 @@
 			left join tblEMEntity l on l.intEntityId = a.intCustomerProjectManager
 			left join tblEMEntity m on m.intEntityId = a.intCustomerLeadershipSponsor
 			left join tblHDVersion n on n.intVersionId = a.intTargetVersionId
-			
