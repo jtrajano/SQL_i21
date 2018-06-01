@@ -171,4 +171,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
-  LEFT JOIN tblSMSignature SMS ON SMS.intEntityId = SC.intEntityScaleOperatorId
+  OUTER APPLY(
+		SELECT SM.* FROM tblSMSignature SM
+		INNER JOIN tblEMEntitySignature EM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
+		where SM.intEntityId = SC.intEntityScaleOperatorId
+  ) SMS
