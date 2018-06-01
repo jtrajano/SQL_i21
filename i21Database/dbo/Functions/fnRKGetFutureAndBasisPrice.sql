@@ -140,7 +140,7 @@ BEGIN
 					isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0)
 					ELSE
 						--Convert
-						ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0) * (SELECT TOP 1 
+						ISNULL((isnull(dblLastSettle, 0) * (SELECT TOP 1 
 							[dblRate]
 						FROM 
 							[vyuSMForex] 
@@ -149,23 +149,23 @@ BEGIN
 							AND [intToCurrencyId] = @intDefaultCurrencyId 
 							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
 						ORDER BY
-							[dtmValidFromDate] DESC)
+							[dtmValidFromDate] DESC)),0) + isnull(@dblBasisCost,0)
 				END
-				WHEN @intCurrencyId = m.intCurrencyId THEN
-					ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0)
-				ELSE
-					--Convert
-						ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0) * (SELECT TOP 1 
-							[dblRate]
-						FROM 
-							[vyuSMForex] 
-						WHERE 
-							[intFromCurrencyId] = m.intCurrencyId 
-							AND [intToCurrencyId] = @intCurrencyId 
-							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
-						ORDER BY
-							[dtmValidFromDate] DESC)
-			 END)
+			WHEN @intCurrencyId = m.intCurrencyId THEN
+				ISNULL(isnull(dblLastSettle, 0) + isnull(@dblBasisCost,0), 0)
+			ELSE
+				--Convert
+					ISNULL((isnull(dblLastSettle, 0) * (SELECT TOP 1 
+						[dblRate]
+					FROM 
+						[vyuSMForex] 
+					WHERE 
+						[intFromCurrencyId] = m.intCurrencyId 
+						AND [intToCurrencyId] = @intCurrencyId 
+						AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+					ORDER BY
+						[dtmValidFromDate] DESC)),0) + isnull(@dblBasisCost,0)
+			END)
 		,@intSettlementUOMId=isnull(m.intUnitMeasureId,0) 
 		FROM tblRKFuturesSettlementPrice sp
 		INNER JOIN tblRKFutSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
