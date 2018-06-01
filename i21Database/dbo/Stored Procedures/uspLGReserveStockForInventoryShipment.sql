@@ -39,7 +39,7 @@ BEGIN
 	SELECT TOP 1 
 			@intInventoryShipmentTransactionType = intTransactionTypeId
 	FROM	dbo.tblICInventoryTransactionType
-	WHERE	strName = 'Inventory Shipment'
+	WHERE	strName = 'Outbound Shipment'
 END
 
 
