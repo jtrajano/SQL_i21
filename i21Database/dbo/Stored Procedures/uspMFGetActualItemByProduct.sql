@@ -25,7 +25,7 @@ BEGIN
 	IF ISNULL(@strDefaultConsumptionUOM, '') = ''
 		SELECT @strDefaultConsumptionUOM = '1'
 
-	SELECT I.intItemId
+	SELECT Distinct I.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,CASE 
