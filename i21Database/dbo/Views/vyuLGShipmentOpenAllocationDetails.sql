@@ -25,7 +25,7 @@ FROM (
 		,CP.strCountry AS strPOrigin
 		,CHP.intCommodityId AS intPCommodityId
 		,CDP.intItemUOMId AS intPItemUOMId
-		,ITP.intOriginId AS intPOriginId
+		,CP.intCountryID AS intPOriginId
 		,UP.strUnitType AS strPUnitType
 		,AD.intSContractDetailId
 		,CHS.strContractNumber AS strSalesContractNumber
@@ -47,7 +47,7 @@ FROM (
 		,CS.strCountry AS strSOrigin
 		,CHS.intCommodityId AS intSCommodityId
 		,CDS.intItemUOMId AS intSItemUOMId
-		,ITS.intOriginId AS intSOriginId
+		,CS.intCountryID AS intSOriginId
 		,US.strUnitType AS strSUnitType
 		,ITP.strType AS strPItemType
 		,ITP.strType AS strSItemType
