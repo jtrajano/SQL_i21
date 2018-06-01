@@ -32,7 +32,8 @@ CASE WHEN ISDATE(gacom_crop_curr_rev_dt) = 1 THEN CONVERT(DATE, CAST(gacom_crop_
 CASE WHEN ISDATE(gacom_crop_new_rev_dt) = 1 THEN CONVERT(DATE, CAST(gacom_crop_new_rev_dt AS CHAR(12)), 112) END gacom_crop_new_rev_dt,
 gacom_edi_cd,null,null,null,case gacom_allow_load_cnt_yn when 'Y' then 1 else 0 end gacom_allow_load_cnt_yn,
 gacom_load_cnt_under_un,gacom_load_cnt_over_un,1 ConcurrencyId
- from gacommst
+ from gacommst 
+ WHERE NOT EXISTS (SELECT * FROM tblICCommodity WHERE strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 
  ----=====================================STEP 2=========================================
@@ -49,7 +50,7 @@ case iu.strUnitMeasure when 'BU' then 1 When 'TON' then 1 else 0 end 'ysnDefault
 from gacommst oc 
 join tblICCommodity ic on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICUnitMeasure iu on upper(iu.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = upper(rtrim(oc.gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-
+where NOT EXISTS (select * from tblICCommodityUnitMeasure where intCommodityId = ic.intCommodityId and intUnitMeasureId = iu.intUnitMeasureId)
 ----=====================================STEP 3===========================
 --origin stores the wgt factor to lb. There is no lb uom in origin setup for this. In i21 lb needs to be setup as a uom to receive commodity in lb
 --insert an record in commodity uom for lb for each commodity
@@ -63,6 +64,8 @@ Case iu.strUnitMeasure When 'BU' then 1/gacom_un_wgt When 'TON' then 1/gacom_un_
 from gacommst oc 
 join tblICCommodity ic on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICUnitMeasure iu on upper(iu.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = upper(rtrim(oc.gacom_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
+where upper(rtrim(oc.gacom_un_desc)) <> 'LB'
+ AND NOT EXISTS (select * from tblICCommodityUnitMeasure where intCommodityId = ic.intCommodityId and intUnitMeasureId = iu.intUnitMeasureId)
 
 
 ----====================================STEP 4======================================
@@ -72,6 +75,7 @@ insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, in
 select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
+AND NOT EXISTS (select * from tblICCategory where strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 
 ----===============================STEP 5===================================
@@ -89,7 +93,8 @@ ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1
 from gacommst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd))
+where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
+AND NOT EXISTS (select * from tblICItem where strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS))
 
 
 ----=======================STEP 7===========================================
@@ -118,7 +123,7 @@ join tblICCommodity C on I.intCommodityId = C.intCommodityId
 join gacommst oc on C.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICItemUOM U on I.intItemId = U.intItemId
 left join tblSMCompanyLocation L on 1 = 1
-where U.ysnStockUnit = 1)
+where U.ysnStockUnit = 1 and NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId and intLocationId = L.intCompanyLocationId))
 
 
 ----====================================STEP 9======================================
@@ -127,6 +132,7 @@ insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, in
 select distinct rtrim(gacom_com_cd)+'Discount', rtrim(gacom_desc)+' Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(od.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
+where NOT EXISTS (SELECT * FROM tblICCategory WHERE strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd)+'Discount' COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 ----====================================STEP 10======================================
 --convert discount codes as other charge items from discount code table. 
@@ -140,7 +146,7 @@ ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Discount
 from gacdcmst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd)+'Discount' COLLATE SQL_Latin1_General_CP1_CS_AS
-
+where NOT EXISTS (SELECT * FROM tblICItem WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd) COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 ----=======================STEP 11===========================================
 ----insert uom for discount items from the commodity table
@@ -169,14 +175,14 @@ from tblICItemLocation IL
 join tblICItem I on IL.intItemId = I.intItemId
 where I.intCommodityId is not null) CL
 on CL.intCommodityId = I.intCommodityId
-
+WHERE NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId and intLocationId = CL.intLocationId)
 ----====================================STEP 13======================================
 --Setup a grain Freight category for each commodity 
 insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
 select rtrim(gacom_com_cd)+'Freight', rtrim(gacom_desc)+' Freight', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 left join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd)+'Freight' COLLATE SQL_Latin1_General_CP1_CS_AS
-where icat.intCategoryId IS NULL
+where icat.intCategoryId IS NULL 
 
 ----====================================STEP 14======================================
 --convert Freight as other charge items from each Commodity. 
@@ -219,7 +225,7 @@ from tblICItemLocation IL
 join tblICItem I on IL.intItemId = I.intItemId
 where I.intCommodityId is not null) CL
 on CL.intCommodityId = I.intCommodityId	
-
+WHERE NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId and intLocationId = CL.intLocationId)
 
 ----============================STEP xx==============================================
 ----find the look up values from i21 setup tables and update i21 commodity table

@@ -19,6 +19,7 @@
 	,@raiseError		AS BIT				= 0
 AS
   
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
@@ -3668,6 +3669,7 @@ IF @recap = 1
 			OUTER APPLY (
 				SELECT TOP 1 intCurrencyExchangeRateTypeId
 				FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+				WHERE intInvoiceId = I.intInvoiceId
 			) ID
 			INNER JOIN (
 				SELECT intCurrencyExchangeRateTypeId

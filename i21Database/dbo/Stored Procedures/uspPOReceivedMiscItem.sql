@@ -29,6 +29,7 @@ BEGIN
 					ON D.intPurchaseDetailId = B.intPurchaseDetailId
 	WHERE	A.intBillId= @billId
 	AND (C.strType IN ('Service','Software','Non-Inventory','Other Charge') OR C.intItemId IS NULL)
+	AND D.intPurchaseDetailId IS NOT NULL
 	
 	--UPDATING ON ORDER QUANTITY
 	DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType

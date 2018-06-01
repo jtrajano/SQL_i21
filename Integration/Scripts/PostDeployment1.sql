@@ -81,6 +81,8 @@ GO
 GO
 :r "..\Scripts\IC\uspICDCCommoditySetupPt.sql"
 GO
+:r "..\Scripts\IC\uspICDCCommoditySetupAg.sql"
+GO
 :r "..\Scripts\IC\uspICDCItmGLAcctsMigrationAg.sql"
 GO
 :r "..\Scripts\IC\uspICDCItmGLAcctsMigrationPt.sql"

@@ -668,6 +668,61 @@ BEGIN TRY
 			END
 
 			IF NOT EXISTS (
+					SELECT *
+					FROM tblEMEntityType
+					WHERE intEntityId = @intEntityId
+						AND strType = 'Vendor'
+					)
+			BEGIN
+				INSERT INTO tblEMEntityType (
+					intEntityId
+					,strType
+					,intConcurrencyId
+					)
+				SELECT @intEntityId
+					,'Vendor'
+					,1
+			END
+
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblAPVendor
+					WHERE intEntityId = @intEntityId
+					)
+			BEGIN
+				SELECT @strEntityNo = strEntityNo
+				FROM tblEMEntity
+				WHERE intEntityId = @intEntityId
+
+				INSERT INTO tblAPVendor (
+					intEntityId
+					,strVendorPayToId
+					,intVendorType
+					,strVendorId
+					,strVendorAccountNum
+					,ysnPymtCtrlActive
+					,ysnPymtCtrlAlwaysDiscount
+					,ysnPymtCtrlEFTActive
+					,ysnPymtCtrlHold
+					,ysnWithholding
+					,dblCreditLimit
+					,intConcurrencyId
+					)
+				SELECT DISTINCT @intEntityId
+					,''
+					,0
+					,@strEntityNo
+					,''
+					,1
+					,0
+					,0
+					,0
+					,0
+					,0
+					,1
+			END
+
+			IF NOT EXISTS (
 					SELECT 1
 					FROM tempdb..sysobjects
 					WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')
