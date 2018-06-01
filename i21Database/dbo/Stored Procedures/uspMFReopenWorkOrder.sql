@@ -52,44 +52,43 @@ BEGIN TRY
 		WHERE strBatchId = @strCostAdjustmentBatchId
 
 		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
+			dtmDate
+			,strBatchId
+			,intAccountId
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,strReference
+			,intCurrencyId
+			,dblExchangeRate
+			,dtmDateEntered
+			,dtmTransactionDate
+			,strJournalLineDescription
+			,intJournalLineNo
+			,ysnIsUnposted
+			,intUserId
+			,intEntityId
+			,strTransactionId
+			,intTransactionId
+			,strTransactionType
+			,strTransactionForm
+			,strModuleName
+			,intConcurrencyId
+			,dblDebitForeign
+			,dblDebitReport
+			,dblCreditForeign
+			,dblCreditReport
+			,dblReportingRate
+			,dblForeignRate
 			)
-		--,strRateType
-		EXEC dbo.uspICUnpostCostAdjustment @intTransactionId
-			,@strTransactionId
-			,@strCostAdjustmentBatchId
-			,@intUserId
-			,'Work In Progress'
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strCostAdjustmentBatchId
+			,@intEntityUserSecurityId = @intUserId
+			,@strGLDescription = ''
+			,@ysnPost = 0
+			,@AccountCategory_Cost_Adjustment = 'Work In Progress'
 
 		IF EXISTS (
 				SELECT *
