@@ -202,125 +202,6 @@ BEGIN
 	DECLARE @ItemsForPost AS ItemCostingTableType
 	DECLARE @StorageItemsForPost AS ItemCostingTableType
 
-	IF @strFOBPoint = 'Origin'
-		-- Get company owned items to post. 
-	BEGIN
-		INSERT INTO @ItemsForPost (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			)
-		SELECT intItemId = LoadDetail.intItemId
-			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ItemUOM.intItemUOMId
-			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
-			,dblQty = - 1 * CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ISNULL(LoadDetail.dblQuantity, 0)
-				ELSE ISNULL(DetailLot.dblLotQuantity, 0)
-				END
-			,dblUOMQty = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
-				END
-			,dblCost = ISNULL(CASE 
-					WHEN Lot.dblLastCost IS NULL
-						THEN (
-								SELECT TOP 1 dblLastCost
-								FROM tblICItemPricing
-								WHERE intItemId = LoadDetail.intItemId
-									AND intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-								)
-					ELSE Lot.dblLastCost
-					END, 0) * CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
-				END
-			,dblSalesPrice = 0.00
-			,intCurrencyId = @DefaultCurrencyId
-			,dblExchangeRate = 1
-			,intTransactionId = LOAD.intLoadId
-			,intTransactionDetailId = LoadDetail.intLoadDetailId
-			,strTransactionId = LOAD.strLoadNumber
-			,intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
-			,intLotId = Lot.intLotId
-			,intSubLocationId = Lot.intSubLocationId --, DetailLot.intSubLocationId)
-			,intStorageLocationId = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
-		FROM tblLGLoad LOAD --Header 
-		INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
-		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
-		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
-		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-		WHERE LOAD.intLoadId = @intTransactionId
-
-		-- Call the post routine 
-		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
-		BEGIN
-			SET @ysnAllowBlankGLEntries = 0
-
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[strRateType]
-				)
-			EXEC @intReturnValue = dbo.uspICPostCosting @ItemsForPost
-				,@strBatchId
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intEntityUserSecurityId
-
-			IF @intReturnValue < 0
-				GOTO With_Rollback_Exit
-		END
-	END
-
-	IF @strFOBPoint = 'Destination'
 	BEGIN
 		-- Get company owned items to post. 
 		INSERT INTO @ItemsForPost (
@@ -577,180 +458,23 @@ BEGIN
 				,@strBatchId = @strBatchId
 				,@strAccountToCounterInventory = NULL
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@strGLDescription = ''
-
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
 
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
 		END
-	END
-END
-
--- Process Storage items
-BEGIN
-	INSERT INTO @StorageItemsForPost (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		)
-	SELECT intItemId = LoadDetail.intItemId
-		,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-		,intItemUOMId = ItemUOM.intItemUOMId
-		,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
-		,dblQty = - 1 * CASE 
-			WHEN Lot.intLotId IS NULL
-				THEN ISNULL(LoadDetail.dblQuantity, 0)
-			ELSE ISNULL(DetailLot.dblLotQuantity, 0)
-			END
-		,dblUOMQty = CASE 
-			WHEN Lot.intLotId IS NULL
-				THEN ItemUOM.dblUnitQty
-			ELSE LotItemUOM.dblUnitQty
-			END
-		,dblCost = ISNULL(CASE 
-				WHEN Lot.dblLastCost IS NULL
-					THEN (
-							SELECT TOP 1 dblLastCost
-							FROM tblICItemPricing
-							WHERE intItemId = LoadDetail.intItemId
-								AND intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-							)
-				ELSE Lot.dblLastCost
-				END, 0)
-		,dblSalesPrice = 0.00
-		,intCurrencyId = @DefaultCurrencyId
-		,dblExchangeRate = 1
-		,intTransactionId = LOAD.intLoadId
-		,intTransactionDetailId = LoadDetail.intLoadDetailId
-		,strTransactionId = LOAD.strLoadNumber
-		,intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
-		,intLotId = Lot.intLotId
-		,intSubLocationId = Lot.intSubLocationId --, DetailLot.intSubLocationId)
-		,intStorageLocationId = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
-	FROM tblLGLoad LOAD --Header 
-	INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
-	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
-	LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-	LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-	WHERE LOAD.intLoadId = @intTransactionId
-		AND 1 = 2
-
-	-- Call the post routine 
-	IF EXISTS (
-			SELECT TOP 1 1
-			FROM @StorageItemsForPost
-			)
-	BEGIN
-		EXEC @intReturnValue = dbo.uspICPostStorage @StorageItemsForPost
-			,@strBatchId
-			,@intEntityUserSecurityId
-
-		IF @intReturnValue < 0
-			GOTO With_Rollback_Exit
 	END
 END
 
 --------------------------------------------------------------------------------------------  
 -- If UNPOST, call the Unpost routines  
 --------------------------------------------------------------------------------------------  
-IF @ysnPost = 0
-BEGIN
-	IF @strFOBPoint = 'Origin'
-	BEGIN
-		INSERT INTO @ItemsForPost (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			)
-		SELECT intItemId = LoadDetail.intItemId
-			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ItemUOM.intItemUOMId
-			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
-			,dblQty = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ISNULL(LoadDetail.dblQuantity, 0)
-				ELSE ISNULL(DetailLot.dblLotQuantity, 0)
-				END
-			,dblUOMQty = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
-				END
-			,dblCost = ISNULL(CASE 
-					WHEN Lot.dblLastCost IS NULL
-						THEN (
-								SELECT TOP 1 dblLastCost
-								FROM tblICItemPricing
-								WHERE intItemId = LoadDetail.intItemId
-									AND intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-								)
-					ELSE Lot.dblLastCost
-					END, 0) * CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
-				END
-			,dblSalesPrice = 0.00
-			,intCurrencyId = @DefaultCurrencyId
-			,dblExchangeRate = 1
-			,intTransactionId = LOAD.intLoadId
-			,intTransactionDetailId = LoadDetail.intLoadDetailId
-			,strTransactionId = LOAD.strLoadNumber
-			,intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
-			,intLotId = Lot.intLotId
-			,intSubLocationId = Lot.intSubLocationId --, DetailLot.intSubLocationId)
-			,intStorageLocationId = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
-		FROM tblLGLoad LOAD --Header 
-		INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
-		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
-		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
-		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-		WHERE LOAD.intLoadId = @intTransactionId
-
-		-- Call the post routine 
-		IF EXISTS (
-				SELECT TOP 1 1
-				FROM @ItemsForPost
-				)
-		BEGIN
-			SET @ysnAllowBlankGLEntries = 0
-
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate]
+IF @ysnPost = 0   
+BEGIN   
+	-- Call the unpost routine 
+	BEGIN 
+		-- Unpost the company owned stocks. 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
 				,[strBatchId]
 				,[intAccountId]
 				,[dblDebit]
@@ -775,145 +499,37 @@ BEGIN
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
-				)
-			EXEC @intReturnValue = dbo.uspICPostCosting @ItemsForPost
+		)
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
+				@intTransactionId
+				,@strTransactionId
 				,@strBatchId
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intEntityUserSecurityId
+				,@intEntityUserSecurityId	
+				,@ysnRecap
 
-			IF @intReturnValue < 0
-				GOTO With_Rollback_Exit
-		END
-	END
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
-	IF @strFOBPoint = 'Destination'
-	BEGIN
-		-- Get company owned items to post. 
-		INSERT INTO @ItemsForPost (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			)
-		SELECT intItemId = LoadDetail.intItemId
-			,intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-			,intItemUOMId = ItemUOM.intItemUOMId
-			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
-			,dblQty = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ISNULL(LoadDetail.dblQuantity, 0)
-				ELSE ISNULL(DetailLot.dblLotQuantity, 0)
-				END
-			,dblUOMQty = CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
-				END
-			,dblCost = ISNULL(CASE 
-					WHEN Lot.dblLastCost IS NULL
-						THEN (
-								SELECT TOP 1 dblLastCost
-								FROM tblICItemPricing
-								WHERE intItemId = LoadDetail.intItemId
-									AND intItemLocationId = dbo.fnICGetItemLocation(LoadDetail.intItemId, LoadDetail.intSCompanyLocationId)
-								)
-					ELSE Lot.dblLastCost
-					END, 0) * CASE 
-				WHEN Lot.intLotId IS NULL
-					THEN ItemUOM.dblUnitQty
-				ELSE LotItemUOM.dblUnitQty
-				END
-			,dblSalesPrice = 0.00
-			,intCurrencyId = @DefaultCurrencyId
-			,dblExchangeRate = 1
-			,intTransactionId = LOAD.intLoadId
-			,intTransactionDetailId = LoadDetail.intLoadDetailId
-			,strTransactionId = LOAD.strLoadNumber
-			,intTransactionTypeId = @INVENTORY_SHIPMENT_TYPE
-			,intLotId = Lot.intLotId
-			,intSubLocationId = Lot.intSubLocationId --, DetailLot.intSubLocationId)
-			,intStorageLocationId = Lot.intStorageLocationId --, DetailLot.intStorageLocationId) 
-		FROM tblLGLoad LOAD --Header 
-		INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
-		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
-		LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
-		LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-		LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-		WHERE LOAD.intLoadId = @intTransactionId
-
-		-- Call the post routine 
-		IF EXISTS (
-				SELECT TOP 1 1
-				FROM @ItemsForPost
-				)
-		BEGIN
-			SET @ysnAllowBlankGLEntries = 0
-
-			-- Call the post routine 
-			INSERT INTO @dummyGLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[strRateType]
-				)
-			EXEC @intReturnValue = dbo.uspICPostCosting @ItemsForPost
+		-- Unpost storage stocks. 
+		EXEC	@intReturnValue = dbo.uspICUnpostStorage
+				@intTransactionId
+				,@strTransactionId
 				,@strBatchId
-				,NULL
 				,@intEntityUserSecurityId
+				,@ysnRecap
+		
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
-			IF @intReturnValue < 0
-				GOTO With_Rollback_Exit
-
+		-- Unpost the Other Charges
+		BEGIN 
 			INSERT INTO @GLEntries (
-				[dtmDate]
+				[dtmDate] 
 				,[strBatchId]
 				,[intAccountId]
 				,[dblDebit]
@@ -938,86 +554,28 @@ BEGIN
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
-				)
-			EXEC @intReturnValue = dbo.uspICCreateGLEntries @strBatchId
-				,NULL
+			)	
+			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
+				@intTransactionId
+				,@strBatchId
 				,@intEntityUserSecurityId
-
-			IF @intReturnValue < 0
-				GOTO With_Rollback_Exit
+				,@INVENTORY_SHIPMENT_TYPE
+				,@ysnPost
+				
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
-		INSERT INTO @ItemsToPost (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblValue
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,intLotId
-			,intSourceTransactionId
-			,strSourceTransactionId
-			,intSourceTransactionDetailId
-			,intFobPointId
-			,intInTransitSourceLocationId
-			,intForexRateTypeId
-			,dblForexRate
-			)
-		SELECT [intItemId]
-			,[intItemLocationId]
-			,[intItemUOMId]
-			,[dtmDate]
-			,- [dblQty]
-			,[dblUOMQty]
-			,[dblCost]
-			,[dblValue]
-			,[dblSalesPrice]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intTransactionId]
-			,[intTransactionDetailId]
-			,[strTransactionId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[intTransactionId]
-			,[strTransactionId]
-			,[intTransactionDetailId]
-			,[intFobPointId] = @intFOBPointId
-			,[intInTransitSourceLocationId] = t.intItemLocationId
-			,[intForexRateTypeId] = t.intForexRateTypeId
-			,[dblForexRate] = t.dblForexRate
-		FROM tblICInventoryTransaction t
-		WHERE t.strTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
-			AND t.strBatchId = @strBatchId
-			AND @intFOBPointId = 2
-
-		--AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
-		IF EXISTS (
-				SELECT TOP 1 1
-				FROM @ItemsToPost
-				)
-		BEGIN
-			SET @ysnAllowBlankGLEntries = 0
-
+		-- Unpost the Taxes from the Other Charges
+		BEGIN 
 			INSERT INTO @GLEntries (
-				[dtmDate]
+				[dtmDate] 
 				,[strBatchId]
 				,[intAccountId]
 				,[dblDebit]
@@ -1042,28 +600,26 @@ BEGIN
 				,[strTransactionForm]
 				,[strModuleName]
 				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
 				,[dblForeignRate]
-				)
-			EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
-				,@strBatchId = @strBatchId
-				,@strAccountToCounterInventory = NULL
-				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@strGLDescription = ''
+				,[strRateType]
+			)	
+			EXEC dbo.uspICPostInventoryShipmentTaxes 
+				@intTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@INVENTORY_SHIPMENT_TYPE
+				,0
 
-			SELECT '@GLEntries'
-				,*
-			FROM @GLEntries
-
-			IF @intReturnValue < 0
-				GOTO With_Rollback_Exit
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
-	END
-END
+
+	END 
+END   
 
 DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType
 	,@total AS INT;
@@ -1079,6 +635,7 @@ INSERT INTO @ItemsToIncreaseInTransitInBound (
 	,[intTransactionId]
 	,[strTransactionId]
 	,[intTransactionTypeId]
+	,[intFOBPointId]
 	)
 SELECT LD.intItemId
 	,intItemLocationId = (
@@ -1098,7 +655,8 @@ SELECT LD.intItemId
 		END
 	,LD.intLoadId
 	,CAST(L.strLoadNumber AS VARCHAR(100))
-	,5
+	,@INVENTORY_SHIPMENT_TYPE
+	,2
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailLot LDL ON LD.intLoadDetailId = LDL.intLoadDetailId
@@ -1124,22 +682,6 @@ BEGIN
 END
 
 --------------------------------------------------------------------------------------------  
--- If RECAP is TRUE, 
--- 1.	Store all the GL entries in a holding table. It will be used later as data  
---		for the recap screen.
---
--- 2.	Rollback the save point 
---------------------------------------------------------------------------------------------  
-IF @ysnRecap = 1
-BEGIN
-	ROLLBACK TRAN @TransactionName
-
-	EXEC dbo.uspCMPostRecap @GLEntries
-
-	COMMIT TRAN @TransactionName
-END
-
---------------------------------------------------------------------------------------------  
 -- If RECAP is FALSE,
 -- 1. Book the G/L entries
 -- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
@@ -1148,6 +690,18 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN
+
+	SELECT TOP 1 @ysnAllowBlankGLEntries = 0
+	FROM tblLGLoad LOAD --Header 
+	INNER JOIN tblLGLoadDetail LoadDetail ON LOAD.intLoadId = LoadDetail.intLoadId -- DetailItem
+	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
+	INNER JOIN dbo.tblICItemLocation ItemLocation ON LoadDetail.intSCompanyLocationId = ItemLocation.intLocationId
+		AND ItemLocation.intItemId = LoadDetail.intItemId
+	LEFT JOIN tblLGLoadDetailLot DetailLot ON DetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
+	LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+	WHERE LOAD.intLoadId = @intTransactionId
+
 	IF @ysnAllowBlankGLEntries = 0
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
