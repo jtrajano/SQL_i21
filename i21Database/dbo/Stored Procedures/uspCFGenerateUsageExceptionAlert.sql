@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFGenerateUsageExceptionAlert](
+﻿CREATE PROCEDURE [dbo].[uspCFGenerateUsageExceptionAlert](
 	@intEntityId INT,
 	@strNetworks NVARCHAR(MAX) = '',
 	@dtmTransactionFrom DATETIME = NULL,
@@ -44,14 +43,15 @@ BEGIN
 			+ @networkWhereClause 
 		)
 	
+	IF OBJECT_ID('tempdb..#CustomerTransactionCount') IS NOT NULL DROP TABLE #CustomerTransactionCount
 	SELECT 
 		strCustomerNumber
 		,intTransactionCount = COUNT(strCustomerNumber)
-		,dtmTransactionDate
+		,dtmTransactionDate = DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0)
 	INTO #CustomerTransactionCount
 	FROM  vyuCFUsageExceptionAlertTransaction
 	WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFTransactionList)
-	GROUP BY strCustomerNumber,dtmTransactionDate
+	GROUP BY strCustomerNumber,DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0)
 
 	INSERT INTO tblCFUsageExceptionAlertStaging(
 		strCustomerNumber
@@ -105,13 +105,13 @@ BEGIN
 						  FROM [dbo].[fnCFGetDefaultCommentTable](NULL, B.intEntityId, 'CF Alerts', NULL, 'Header', NULL, 1))
 		,strFullAddress = B.strAddress
 		,intEntityId = B.intEntityId
-	FROM #tblCFTransactionList A
-	INNER JOIN vyuCFUsageExceptionAlertTransaction B
-		ON A.intTransactionId = B.intTransactionId
+	FROM vyuCFUsageExceptionAlertTransaction B
 	INNER JOIN #CustomerTransactionCount C
 		ON B.strCustomerNumber = C.strCustomerNumber
-			AND B.dtmTransactionDate = C.dtmTransactionDate
+			AND DATEADD(dd, DATEDIFF(dd, 0, B.dtmTransactionDate), 0) = DATEADD(dd, DATEDIFF(dd, 0, C.dtmTransactionDate), 0)
 	WHERE C.intTransactionCount > B.intTransactionLimit
+		AND B.intTransactionId IN (SELECT intTransactionId FROM #tblCFTransactionList)
+		AND C.strCustomerNumber IS NOT NULL
 	--GROUP BY strCustomerNumber
 	--	,strName
 	--	,intTransactionLimit
