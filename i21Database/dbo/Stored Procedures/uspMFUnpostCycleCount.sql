@@ -66,58 +66,52 @@ BEGIN TRY
 
 	IF @strCostAdjustmentBatchId IS NOT NULL
 	BEGIN
-		SELECT @intTransactionId = intTransactionId
-			,@strTransactionId = strTransactionId
-		FROM tblICInventoryTransaction
-		WHERE strBatchId = @strCostAdjustmentBatchId
-
 		INSERT INTO @GLEntries (
-			[dtmDate]
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
+			dtmDate
+			,strBatchId
+			,intAccountId
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,strReference
+			,intCurrencyId
+			,dblExchangeRate
+			,dtmDateEntered
+			,dtmTransactionDate
+			,strJournalLineDescription
+			,intJournalLineNo
+			,ysnIsUnposted
+			,intUserId
+			,intEntityId
+			,strTransactionId
+			,intTransactionId
+			,strTransactionType
+			,strTransactionForm
+			,strModuleName
+			,intConcurrencyId
+			,dblDebitForeign
+			,dblDebitReport
+			,dblCreditForeign
+			,dblCreditReport
+			,dblReportingRate
+			,dblForeignRate
 			)
-		--,strRateType
-		EXEC dbo.uspICUnpostCostAdjustment @intTransactionId
-			,@strTransactionId
-			,@strCostAdjustmentBatchId
-			,@intUserId
-			,'Work In Progress'
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
+			,@intEntityUserSecurityId = @intUserId
+			,@strGLDescription = ''
+			,@ysnPost = 0
+			,@AccountCategory_Cost_Adjustment = 'Work In Progress'
 
 		IF EXISTS (
-				SELECT *
+				SELECT TOP 1 1
 				FROM @GLEntries
 				)
 		BEGIN
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,0
+			EXEC uspGLBookEntries @GLEntries
+				,1
 		END
 	END
 
