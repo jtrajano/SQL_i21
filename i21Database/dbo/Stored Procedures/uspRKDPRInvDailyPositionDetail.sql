@@ -1078,7 +1078,7 @@ SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUni
 					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
-FROM @FinalTable WHERE ROUND(dblTotal,0) <> 0
+FROM @FinalTable WHERE ROUND(dblTotal,0) <> 0 AND ISNULL(strTicket,'') <> ''
  ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END
 ELSE
@@ -1087,6 +1087,6 @@ SELECT intRow,intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTotal ,strUni
 					intReceiptNo,intContractHeaderId,strContractNumber ,dtmOpenDate,dblOriginalQuantity ,dblRemainingQuantity ,intCommodityId,
 					strCustomerReference ,strDistributionOption ,strDPAReceiptNo,dblDiscDue ,[Storage Due] as dblStorageDue ,dtmLastStorageAccrueDate ,strScheduleId ,strTicket ,
 					dtmDeliveryDate ,dtmTicketDateTime,strItemNo,strTruckName,strDriverName			
-FROM @FinalTable WHERE ROUND(dblTotal,0) <> 0 and strType <> 'Company Titled Stock' and strType not like '%'+@strPurchaseSales+'%'
+FROM @FinalTable WHERE ROUND(dblTotal,0) <> 0 and strType <> 'Company Titled Stock' and strType not like '%'+@strPurchaseSales+'%' AND ISNULL(strTicket,'') <> ''
  ORDER BY strCommodityCode,intSeqId ASC,intContractHeaderId DESC
 END
