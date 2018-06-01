@@ -239,8 +239,8 @@ BEGIN
 					SELECT 
 						intDeliveryHistoryID = @intNewDeliveryHistoryId
 						,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
-						,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) ELSE ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0) END
-						,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - dblQtyShipped ELSE dblQtyShipped END
+						,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - (ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) ELSE ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0) END
+						,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - dblQtyShipped ELSE dblQtyShipped END
 						,strInvoiceNumber = B.strInvoiceNumber
 						,strItemNumber = C.strItemNo
 						,intInvoiceDetailId
@@ -414,8 +414,8 @@ BEGIN
 						SELECT 
 							intDeliveryHistoryID = @intNewDeliveryHistoryId
 							,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
-							,dblExtendedAmount = (CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)) ELSE ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0) END)
-							,dblQuantityDelivered = (CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - A.dblQtyShipped ELSE A.dblQtyShipped END)
+							,dblExtendedAmount = (CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - (ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)) ELSE ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0) END)
+							,dblQuantityDelivered = (CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - A.dblQtyShipped ELSE A.dblQtyShipped END)
 							,strInvoiceNumber = B.strInvoiceNumber
 							,strItemNumber = C.strItemNo
 							,intInvoiceDetailId
@@ -537,7 +537,7 @@ BEGIN
 							,strBulkPlantNumber = D.strLocationName
 							,dtmInvoiceDate = C.dtmDate
 							,strProductDelivered = E.strItemNo
-							,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) END
+							,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems) END
 							,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
 							,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
 							,dblBurnRateAfterDelivery = A.dblBurnRate
@@ -558,7 +558,7 @@ BEGIN
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,intSiteID = A.intSiteID
 							,strSalesPersonID = I.strEntityNo
-							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) END
+							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) ELSE (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems) END
 							,ysnForReview = 1
 							,dtmMarkForReviewDate = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,dblWillCallCalculatedQuantity  = NULL
@@ -617,8 +617,8 @@ BEGIN
 						SELECT 
 							intDeliveryHistoryID = @intNewDeliveryHistoryId
 							,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
-							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - (ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) ELSE ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0) END
-							,dblQuantityDelivered =  CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - dblQtyShipped ELSE dblQtyShipped END
+							,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - (ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) ELSE ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0) END
+							,dblQuantityDelivered =  CASE WHEN @strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund' THEN 0 - dblQtyShipped ELSE dblQtyShipped END
 							,strInvoiceNumber = B.strInvoiceNumber
 							,strItemNumber = C.strItemNo
 							,intInvoiceDetailId
@@ -659,7 +659,7 @@ BEGIN
 				FROM dbo.fnTMComputeNewBurnRateTable(@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
 
 
-				IF(@strTransactionType = 'Invoice')
+				IF(@strTransactionType = 'Invoice' OR @strTransactionType = 'Cash')
 				BEGIN
 					PRINT 'Invoice'
 					INSERT INTO tblTMDeliveryHistory(
@@ -1137,7 +1137,7 @@ BEGIN
 			,strBulkPlantNumber = D.strLocationName
 			,dtmInvoiceDate = C.dtmDate
 			,strProductDelivered = E.strItemNo
-			,dblQuantityDelivered = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(B.dblQtyShipped,0.0) ELSE ISNULL(B.dblQtyShipped,0.0) END
+			,dblQuantityDelivered = CASE WHEN (@strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund') THEN 0 - ISNULL(B.dblQtyShipped,0.0) ELSE ISNULL(B.dblQtyShipped,0.0) END
 			,intDegreeDayOnDeliveryDate = NULL
 			,intDegreeDayOnLastDeliveryDate = NULL
 			,dblBurnRateAfterDelivery = A.dblBurnRate
@@ -1158,7 +1158,7 @@ BEGIN
 			,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 			,intSiteID = A.intSiteID
 			,strSalesPersonID = I.strEntityNo
-			,dblExtendedAmount = CASE WHEN @strTransactionType = 'Credit Memo' THEN 0 - ISNULL(B.dblTotal,0.0) ELSE ISNULL(B.dblTotal,0.0) END
+			,dblExtendedAmount = CASE WHEN (@strTransactionType = 'Credit Memo' OR @strTransactionType = 'Cash Refund') THEN 0 - ISNULL(B.dblTotal,0.0) ELSE ISNULL(B.dblTotal,0.0) END
 			,ysnForReview = 0
 			,dtmMarkForReviewDate = NULL
 			,dblWillCallCalculatedQuantity  = NULL
