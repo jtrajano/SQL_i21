@@ -219,8 +219,8 @@ UNION ALL
 SELECT @intM2MInquiryId intM2MInquiryId, @dtmGLPostDate AS dtmPostDate,
 CASE WHEN isnull(dblResultRatio,0) >= 0 then @intUnrealizedGainOnInventoryRatioIOSId else @intUnrealizedLossOnInventoryRatioIOSId end intAccountId,
 CASE WHEN isnull(dblResultRatio,0) >= 0 then @strUnrealizedGainOnInventoryRatioIOSId else @strUnrealizedLossOnInventoryRatioIOSId end strAccountId
-,0.0,dblResultRatio,dblOpenQty,0.0,'Mark To Market-Ratio',@intCurrencyId,@dtmGLPostDate, strContractSeq,intContractDetailId,
-'Mark To Market-Ratio','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
+,0.0,dblResultRatio,dblOpenQty,0.0,'Mark To Market-Ratio Offset',@intCurrencyId,@dtmGLPostDate, strContractSeq,intContractDetailId,
+'Mark To Market-Ratio Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
 FROM tblRKM2MInquiryTransaction 
 where intM2MInquiryId=@intM2MInquiryId and strContractOrInventoryType in('Contract(P)','Contract(S)') and isnull(dblResultRatio,0)<>0
 

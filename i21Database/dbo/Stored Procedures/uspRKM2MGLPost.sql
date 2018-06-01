@@ -148,6 +148,10 @@ BEGIN
 												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnCashId else compPref.intUnrealizedLossOnCashId end
 											 WHEN @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset' THEN
 												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryCashIOSId else compPref.intUnrealizedLossOnInventoryCashIOSId end
+											 WHEN @strTransactionType = 'Mark To Market-Ratio' THEN
+												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnRatioId else compPref.intUnrealizedLossOnRatioId end
+											 WHEN @strTransactionType = 'Mark To Market-Ratio Offset' THEN
+												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryRatioIOSId else compPref.intUnrealizedLossOnInventoryRatioIOSId end
 											 ELSE
 												0
 										END)
@@ -294,11 +298,33 @@ No_GL_Setup_In_Comp_Pref:
 	BEGIN
 		IF isnull(@dblAmount,0) >= 0 
 		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Futures (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+			SET @strErrorMessage = 'Unrealized Gain On Cash (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
 		END
 		ELSE
 		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Futures (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+			SET @strErrorMessage = 'Unrealized Loss On Cash (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+		END
+	END	
+	IF @strTransactionType = 'Mark To Market-Ratio'
+	BEGIN
+		IF isnull(@dblAmount,0) >= 0 
+		BEGIN 
+			SET @strErrorMessage = 'Unrealized Gain On Ratio cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+		END
+		ELSE
+		BEGIN
+			SET @strErrorMessage = 'Unrealized Loss On Ratio cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+		END
+	END
+	IF @strTransactionType = 'Mark To Market-Ratio Offset' 
+	BEGIN
+		IF isnull(@dblAmount,0) >= 0 
+		BEGIN 
+			SET @strErrorMessage = 'Unrealized Gain On Ratio (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+		END
+		ELSE
+		BEGIN
+			SET @strErrorMessage = 'Unrealized Loss On Ratio (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
 		END
 	END	
 
