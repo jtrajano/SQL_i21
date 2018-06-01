@@ -196,7 +196,7 @@ INNER JOIN (
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND ysnCancelled = 0
-	AND ((strType = 'Service Charge' AND ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
+	AND ((strType = 'Service Charge' AND  @dtmDateToLocal < I.dtmForgiveDate) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
 		FROM dbo.tblGLAccount A WITH (NOLOCK)
