@@ -620,16 +620,13 @@ BEGIN TRY
 					AND WP.intWorkOrderId = @intWorkOrderId
 				)
 	END
-
-	IF @strCycleCountMandatory = 'False'
-	BEGIN
-		DELETE T
-		FROM dbo.tblMFTask T
-		JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
-		JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
-		WHERE SW.intWorkOrderId = @intWorkOrderId
-	END
-
+	
+	DELETE T
+	FROM dbo.tblMFTask T
+	JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+	JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
+	WHERE SW.intWorkOrderId = @intWorkOrderId
+	
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 

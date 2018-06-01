@@ -60,3 +60,16 @@ GO
 	UPDATE tblGLJournal set intCompanyId = @intMultCompanyId WHERE intCompanyId IS NULL
 	UPDATE tblGLJournalDetail set intCompanyId = @intMultCompanyId WHERE intCompanyId IS NULL
 GO
+
+
+PRINT 'Started Update tblGLAccountGroup strAccountType' --http://jira.irelyserver.com/browse/GL-6310
+GO
+UPDATE A SET A.strAccountType= B.strAccountType 
+FROM tblGLAccountGroup A
+JOIN tblGLAccountGroup B ON A.intParentGroupId =B.intAccountGroupId
+WHERE (A.strAccountType is null OR LEN(RTRIM(A.strAccountType)) = 0) and (B.strAccountType IS NOT NULL 
+AND LEN(RTRIM(B.strAccountType)) > 0)
+
+GO
+PRINT 'Finished Update tblGLAccountGroup strAccountType'
+GO

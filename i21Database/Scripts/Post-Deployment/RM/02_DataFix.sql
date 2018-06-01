@@ -131,4 +131,11 @@ BEGIN
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Future Settlement Price','1')
 END   
 
+-- Removes trailing comma (,) in tblRKCommodityMarketMapping.strCommodityAttributeId to avoid error in uspRKSyncCommodityMarketAttribute
+UPDATE tblRKCommodityMarketMapping 
+SET strCommodityAttributeId = SUBSTRING(RTRIM(strCommodityAttributeId),1,LEN(RTRIM(strCommodityAttributeId))-1)
+FROM tblRKCommodityMarketMapping 
+WHERE strCommodityAttributeId IS NOT NULL
+AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
+
 print('/*******************  END Risk Management Data Fixess *******************/')

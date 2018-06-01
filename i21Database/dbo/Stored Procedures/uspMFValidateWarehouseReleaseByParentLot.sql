@@ -66,7 +66,7 @@ BEGIN TRY
 		FROM dbo.tblICLot L
 		JOIN dbo.tblICParentLot PL ON L.intParentLotId = PL.intParentLotId
 		WHERE PL.strParentLotNumber = @strParentLotNumber
-			AND L.intLotStatusId = 3
+			AND L.intLotStatusId <> 1
 			AND L.dblQty>0 
 	END
 	ELSE
@@ -75,7 +75,7 @@ BEGIN TRY
 		SELECT L.strLotNumber
 		FROM dbo.tblICLot L
 		WHERE L.strLotNumber = @strParentLotNumber
-			AND L.intLotStatusId = 3
+			AND L.intLotStatusId <> 1
 			AND L.dblQty>0 
 	END
 

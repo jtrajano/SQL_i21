@@ -6315,13 +6315,14 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStorageLocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
     <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Views\vyuARInvoicePaymentInformation.sql" />
-    <Build Include="dbo\Views\vyuGRGetSettleContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSendNotificationEDI944.sql" />
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
     <Build Include="dbo\Views\vyuICItemStockDetailLookup.sql" />
     <Build Include="dbo\Tables\tblCFTransactionTaxType.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
     <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
@@ -6340,6 +6341,10 @@
     <Build Include="dbo\Stored Procedures\uspARValidatePaymentPosting.sql" />
     <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
+    <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
+    <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

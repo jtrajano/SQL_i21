@@ -62,23 +62,23 @@ BEGIN
 											ELSE NULL END
 			,EE.strCalculationType
 			,dblDefaultHours = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-									ELSE (CASE WHEN (EE.dblDefaultHours > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblDefaultHours) END					
+									ELSE (CASE WHEN (EE.dblDefaultHours <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblDefaultHours) END					
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-									ELSE (CASE WHEN (EE.dblDefaultHours > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess) END
+									ELSE (CASE WHEN (EE.dblDefaultHours <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess) END
 			,EE.dblRateAmount
 			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime')) THEN
 									CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-										ELSE (CASE WHEN (EE.dblHoursToProcess > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
+										ELSE (CASE WHEN (EE.dblHoursToProcess <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 										END * EE.dblRateAmount
 								WHEN (EE.strCalculationType IN ('Rate Factor')) THEN 
 									CASE WHEN (ELink.strCalculationType = 'Hourly Rate') THEN
 											CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-											ELSE (CASE WHEN (EE.dblHoursToProcess > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
+											ELSE (CASE WHEN (EE.dblHoursToProcess <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 											END * EE.dblRateAmount
 										WHEN (ELink.strCalculationType IN ('Fixed Amount', 'Salary')) THEN
-											CASE WHEN (ELink.dblDefaultHours > 0) THEN
+											CASE WHEN (ELink.dblDefaultHours <> 0) THEN
 													CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
-													ELSE (CASE WHEN (EE.dblHoursToProcess > 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
+													ELSE (CASE WHEN (EE.dblHoursToProcess <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 													END * EE.dblRateAmount
 												ELSE 
 													EE.dblRateAmount
@@ -96,9 +96,9 @@ BEGIN
 		FROM tblPREmployeeEarning EE
 			LEFT JOIN tblPREmployeeEarning ELink 
 				ON EE.intEntityEmployeeId = ELink.intEntityEmployeeId
-				 AND EE.intTypeEarningId = ELink.intTypeEarningId
+				 AND EE.intEmployeeEarningLinkId = ELink.intTypeEarningId
 		WHERE EE.intPayGroupId = @intPayGroupId
-			AND (EE.ysnDefault = 1 OR EE.dblDefaultHours > 0)
+			AND (EE.ysnDefault = 1 OR EE.dblDefaultHours <> 0)
 			AND EE.intEmployeeEarningId NOT IN (SELECT intEmployeeEarningId FROM tblPRPayGroupDetail 
 												WHERE intPayGroupId = @intPayGroupId
 												AND dtmDateFrom >= ISNULL(@dtmDateFrom, dtmDateFrom) AND dtmDateFrom <= ISNULL(@dtmDateTo, dtmDateTo))
