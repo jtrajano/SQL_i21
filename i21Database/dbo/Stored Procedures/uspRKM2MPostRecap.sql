@@ -397,6 +397,10 @@ BEGIN
 												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnCashId else compPref.intUnrealizedLossOnCashId end
 											 WHEN @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset' THEN
 												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryCashIOSId else compPref.intUnrealizedLossOnInventoryCashIOSId end
+											 WHEN @strTransactionType = 'Mark To Market-Ratio' THEN
+												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnRatioId else compPref.intUnrealizedLossOnRatioId end
+											 WHEN @strTransactionType = 'Mark To Market-Ratio Offset' THEN
+												case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryRatioIOSId else compPref.intUnrealizedLossOnInventoryRatioIOSId end
 											 ELSE
 												0
 										END)
