@@ -292,7 +292,6 @@ BEGIN
 			,@vendorOrderNumber = @strVendorRefNo
 			,@currencyId = @intCurrencyId
 			,@throwError = 0
-			,@error = NULL 			
 			,@error = @throwedError OUTPUT
 			,@billId = @intBillId OUTPUT
 
