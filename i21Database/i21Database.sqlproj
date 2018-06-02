@@ -6707,6 +6707,7 @@
     <Build Include="dbo\Views\vyuSTGetPricebookExport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateHandheldScannerExportPricebook.sql" />
     <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
+    <Build Include="dbo\Views\vyuSTSearchStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

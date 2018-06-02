@@ -11,11 +11,13 @@ SELECT ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId
 	  , TRR.dtmDate
 	  , TRR.strCashier
 	  , TRR.dblTrValueTrTotWTax
+	  , TRR.intCompanyLocationId
 FROM
 (   
 	SELECT TR.*
 	       , ST.intStoreNo
 		   , ST.strDescription AS strStoreDescription
+		   , ST.intCompanyLocationId
 		   , CH.dtmCheckoutDate
 		   , ROW_NUMBER() OVER (PARTITION BY TR.intTermMsgSN, TR.intStoreId, TR.intCheckoutId ORDER BY TR.intTermMsgSN ASC) AS rn
 	FROM tblSTTranslogRebates TR

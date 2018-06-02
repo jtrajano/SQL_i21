@@ -62,6 +62,7 @@
     [intSort] INT NULL,
     [intInvoiceId] INT NULL,
 	[strAllInvoiceIdList] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
+	[strXml] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),
