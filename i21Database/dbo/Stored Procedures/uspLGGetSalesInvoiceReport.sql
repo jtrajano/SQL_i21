@@ -135,6 +135,7 @@ BEGIN
 			)
 		,Inv.strInvoiceNumber
 		,strCustomer = EN.strName
+		,CUS.strVatNumber
 		,Inv.strBillToAddress
 		,Inv.strBillToCity
 		,Inv.strBillToState
@@ -165,7 +166,8 @@ BEGIN
 		,@strZip AS strCompanyZip
 		,@strCountry AS strCompanyCountry
 		,@strPhone AS strCompanyPhone
-		,LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentGrossWt, 2))) + '' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentTareWt, 2))) + '' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + '' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) AS strWtInfo
+		,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+		,'Gross - ' + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentGrossWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Tare - ' + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentTareWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Net - ' + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) AS strWtInfo
 		,LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + PriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,PriceUOM.strUnitMeasure) AS strPriceInfo
 		,InvDet.dblTotal
 		,LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyShipped, 2))) + ' ' + isnull(rtSUOMTranslation.strTranslation,SUOM.strUnitMeasure) AS strQtyShippedInfo
@@ -187,12 +189,14 @@ BEGIN
 		,L.strMVessel
 		,L.strBLNumber
 		,L.dtmBLDate
+		,L.strBLNumber + ' dated ' + CONVERT(NVARCHAR,L.dtmBLDate,106) strBLNoDated
 		,@strContractDocuments strDocument
 		,@strContractConditions strCondition
 		,Inv.dtmDate AS dtmInvoiceDate
 		,@strPaymentInfo strInvoicePaymentInformation
 	FROM tblARInvoice Inv
 	JOIN tblEMEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
+	JOIN tblARCustomer CUS ON CUS.intEntityId = EN.intEntityId
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
 	JOIN tblICItem Item ON Item.intItemId = InvDet.intItemId
 	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId
