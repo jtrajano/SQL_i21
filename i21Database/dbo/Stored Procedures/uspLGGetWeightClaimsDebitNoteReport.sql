@@ -143,7 +143,7 @@ SELECT DISTINCT WC.intWeightClaimId
 		WHEN WCD.intInvoiceId IS NOT NULL
 			THEN @Invoice
 		END strMemoType
-	,@strVoucherBankInfo1 + ': ' + CHAR(13) + BA.strBankName + CHAR(13) + @strVoucherBankInfo2 + ' : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + @strVoucherBankInfo3 + ' : ' + ISNULL(BA.strSWIFT, '') AS	strVoucherBankInfo
+	,@strVoucherBankInfo1 + ': ' + CHAR(13) + CHAR(13) + BA.strBankName + CHAR(13) + @strVoucherBankInfo2 + ' : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + @strVoucherBankInfo3 + ' : ' + ISNULL(BA.strSWIFT, '') AS	strVoucherBankInfo
 	,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 	,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
 	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
