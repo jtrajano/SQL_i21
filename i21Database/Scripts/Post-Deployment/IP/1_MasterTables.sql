@@ -226,3 +226,9 @@ BEGIN
     VALUES(14,'Web Service Call')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 15)
+BEGIN
+    INSERT INTO tblIPStepType(intStepTypeId,strName)
+    VALUES(15,'Web API Endpoint')
+END
+GO
