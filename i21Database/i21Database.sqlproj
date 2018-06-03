@@ -6708,6 +6708,10 @@
     <Build Include="dbo\Stored Procedures\uspSTGenerateHandheldScannerExportPricebook.sql" />
     <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
     <Build Include="dbo\Views\vyuSTSearchStore.sql" />
+    <Build Include="dbo\Views\vyuGRImportSession.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGetImportedSessionSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessScaleTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateScaleTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

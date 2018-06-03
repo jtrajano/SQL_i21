@@ -51,7 +51,7 @@
 	[strItemUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intCustomerId] INT NULL, 
     [intSplitId] INT NULL, 
-    [strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
+    [strDistributionOption] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [intDiscountSchedule] INT NULL, 
     [strDiscountLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDeferDate] DATETIME NULL, 
