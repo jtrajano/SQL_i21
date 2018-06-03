@@ -6345,6 +6345,7 @@
     <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
