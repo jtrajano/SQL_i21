@@ -6712,6 +6712,7 @@
     <Build Include="dbo\Stored Procedures\uspGRGetImportedSessionSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessScaleTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateScaleTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
