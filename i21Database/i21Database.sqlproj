@@ -6251,6 +6251,7 @@
     <Build Include="dbo\Functions\fnGetLotUnitCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageQuantity.sql" />
     <None Include="Scripts\Post-Deployment\IC\31_RemoveAfter18.3_DataFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
