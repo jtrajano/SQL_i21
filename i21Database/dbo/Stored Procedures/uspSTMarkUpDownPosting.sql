@@ -23,6 +23,7 @@ BEGIN TRY
 
 
 	SET @strStatusMsg = ''
+	SET @ysnIsPosted = 0
 
 	DECLARE @strMarkUpDownBatchId AS NVARCHAR(200)
 	DECLARE @intStoreId AS INT
@@ -48,7 +49,6 @@ BEGIN TRY
 	-- If recap dont create batch, create onlu guid
 	DECLARE @STARTING_NUMBER_BATCH AS INT = (SELECT intStartingNumberId FROM tblSMStartingNumber WHERE strModule = 'Posting' AND strTransactionType = 'Batch Post' AND strPrefix = 'BATCH-')
 
-	
 
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 			,@intReturnValue AS INT 
@@ -153,6 +153,7 @@ BEGIN TRY
 
 			-- Generate New Batch Id
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+
 
 			-- Post
 			EXEC @intReturnValue = dbo.uspICPostCosting  

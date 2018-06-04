@@ -51,9 +51,11 @@ BEGIN
 
 		DECLARE @intCurrentInvoiceId INT
 		DECLARE @strCurrentAllInvoiceIdList NVARCHAR(1000)
+		DECLARE @dtmCheckoutDate AS DATETIME
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
 				, @strCurrentAllInvoiceIdList = strAllInvoiceIdList
+				, @dtmCheckoutDate = dtmCheckoutDate 
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -252,11 +254,11 @@ BEGIN
 										,[intCompanyLocationId]		= @intCompanyLocationId
 										,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 										,[intTermId]				= NULL
-										,[dtmDate]					= GETDATE()
-										,[dtmDueDate]				= GETDATE()
-										,[dtmShipDate]				= GETDATE()
-										,[dtmCalculated]			= GETDATE()
-										,[dtmPostDate]				= GETDATE()
+										,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+										,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+										,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+										,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+										,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 										,[intEntitySalespersonId]	= NULL
 										,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 										,[intShipViaId]				= NULL --@intShipViaId
@@ -492,11 +494,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -704,11 +706,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -951,11 +953,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -1159,11 +1161,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -1367,11 +1369,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -1575,11 +1577,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -1783,11 +1785,11 @@ BEGIN
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 											,[intTermId]				= NULL
-											,[dtmDate]					= GETDATE()
-											,[dtmDueDate]				= GETDATE()
-											,[dtmShipDate]				= GETDATE()
-											,[dtmCalculated]			= GETDATE()
-											,[dtmPostDate]				= GETDATE()
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 											,[intEntitySalespersonId]	= NULL
 											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 											,[intShipViaId]				= NULL --@intShipViaId
@@ -1990,11 +1992,11 @@ BEGIN
 															,[intCompanyLocationId]		= @intCompanyLocationId
 															,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
 															,[intTermId]				= NULL
-															,[dtmDate]					= GETDATE()
-															,[dtmDueDate]				= GETDATE()
-															,[dtmShipDate]				= GETDATE()
-															,[dtmCalculated]			= GETDATE()
-															,[dtmPostDate]				= GETDATE()
+															,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+															,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+															,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+															,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+															,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
 															,[intEntitySalespersonId]	= NULL
 															,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
 															,[intShipViaId]				= NULL --@intShipViaId
