@@ -3951,7 +3951,7 @@ BEGIN
 
 		IF(ISNULL(@dblInventoryCost,0) = 0)
 		BEGIN
-			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@TransferCost,0)
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 		END
 		ELSE
 		BEGIN
