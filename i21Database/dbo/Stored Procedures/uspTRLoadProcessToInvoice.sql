@@ -51,7 +51,7 @@ BEGIN TRY
 		,[dtmDueDate]							= NULL
 		,[dtmShipDate]							= DH.dtmInvoiceDateTime
 		,[intEntitySalespersonId]				= DH.intEntitySalespersonId
-		,[intFreightTermId]						= NULL 
+		,[intFreightTermId]						= EL.intFreightTermId
 		,[intShipViaId]							= ISNULL(TL.intShipViaId, EL.intShipViaId) 
 		,[intPaymentMethodId]					= 0
 		,[strInvoiceOriginId]					= ''
