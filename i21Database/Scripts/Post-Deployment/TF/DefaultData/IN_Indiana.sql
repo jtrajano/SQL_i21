@@ -189,7 +189,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'GT-103', strFormName = 'Recap of Gasoline Use Tax by Distributors', strScheduleCode = '2D', strScheduleName = 'Disbursement Schedule', strType = 'Gasoline', strNote = '', strTransactionType = 'Invoice', intSort = 541, strStoredProcedure = 'uspTFGT103InvoiceTax', intMasterId = 1443, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'GT-103', strFormName = 'Recap of Gasoline Use Tax by Distributors', strScheduleCode = '2D', strScheduleName = 'Disbursement Schedule', strType = 'Gasohol', strNote = '', strTransactionType = 'Invoice', intSort = 542, strStoredProcedure = 'uspTFGT103InvoiceTax', intMasterId = 1444, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'GT-103', strFormName = 'Recap of Gasoline Use Tax by Distributors', strScheduleCode = '', strScheduleName = 'Main Form', strType = '', strNote = 'Form GT-103', strTransactionType = '', intSort = 550, strStoredProcedure = 'uspTFGenerateGT103', intMasterId = 1445, intComponentTypeId = 2
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '1', strScheduleName = 'Gallons Received Tax Paid (Special Fuel Returns Only)', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 560, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 1446, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '1', strScheduleName = 'Gallons Received Tax Paid (Special Fuel Returns Only)', strType = 'Clear Diesel', strNote = '', strTransactionType = 'Inventory', intSort = 560, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 1446, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '2E', strScheduleName = 'Gallons Received for Export (Special Fuel Exporters Only)', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 570, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 1447, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '2K', strScheduleName = 'Gallons of Non-Taxable Fuel Received and Sold or Used for a Taxable Purpose', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 580, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 1448, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '3', strScheduleName = 'Gallons Imported Via Truck, Barge, or Rail, Tax Unpaid', strType = '', strNote = '', strTransactionType = 'Inventory', intSort = 590, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 1449, intComponentTypeId = 1
@@ -236,6 +236,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF-360', strFormName = 'Consolidated Gasoline Monthly Tax Return', strScheduleCode = '11', strScheduleName = 'Diversion Corrections', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 500, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 141120, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'SF-900', strFormName = 'Consolidated Special Fuel Monthly Tax Return', strScheduleCode = '1', strScheduleName = 'Gallons Received Tax Paid (Special Fuel Returns Only)', strType = 'Dyed Diesel', strNote = '', strTransactionType = 'Inventory', intSort = 561, strStoredProcedure = 'uspTFGetInventoryTax', intMasterId = 141121, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'GT-103', strFormName = 'Recap of Gasoline Use Tax by Distributors', strScheduleCode = 'XML', strScheduleName = 'GT-103 XML File', strType = '', strNote = '', strTransactionType = '', intSort = 555, strStoredProcedure = 'uspTFGenerateGT103', intMasterId = 141122, intComponentTypeId = 6
+
 	
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -286,12 +287,13 @@ where RC.intTaxAuthorityId = @TaxAuthorityId and TaxCat.intTaxAuthorityId = @Tax
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'Gasoline / Aviation Gasoline / Gasohol', strCriteria = '= 0', intMasterId = 1416
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'K-1 / K-2 Kerosene', strCriteria = '= 0', intMasterId = 1417
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'MF-360', strScheduleCode = '6D', strType = 'All Other Products', strCriteria = '= 0', intMasterId = 1418
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strCriteria = '<> 0', intMasterId = 1419
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strCriteria = '<> 0', intMasterId = 1419
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '3', strType = '', strCriteria = '<> 0', intMasterId = 1420
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '5', strType = 'Clear Diesel', strCriteria = '<> 0', intMasterId = 1421
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '6', strType = '', strCriteria = '= 0', intMasterId = 1422
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '8', strType = '', strCriteria = '= 0', intMasterId = 1423
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Dyed', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '5', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 14399
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Dyed', strState = 'IN', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strCriteria = '<> 0', intMasterId = 14400
 
 	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
@@ -743,25 +745,18 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', intMasterId = 14377
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', intMasterId = 14378
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'GT-103', strScheduleCode = '2D', strType = 'Gasohol', intMasterId = 141184
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14379
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14380
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14381
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14382
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14383
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14384
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14385
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14386
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14387
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14388
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14389
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14390
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14391
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14392
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14393
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14394
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14395
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14396
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '1', strType = '', intMasterId = 14397
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14397
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14379
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14380
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14387
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14388
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14389
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14390
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14391
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14392
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '146', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14393
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '148', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14394
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '285', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 14395
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', intMasterId = 14398
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', intMasterId = 14399
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', intMasterId = 14400
@@ -1418,6 +1413,13 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '285', strFormCode = 'MF-360', strScheduleCode = '11', strType = '', intMasterId = 146620
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '101', strFormCode = 'MF-360', strScheduleCode = '11', strType = '', intMasterId = 146621
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'MF-360', strScheduleCode = '11', strType = '', intMasterId = 146622
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146623
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D11', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146624
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146625
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146626
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '232', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146627
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146628
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '101', strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', intMasterId = 146629
 
 	INSERT INTO @ValidOriginStates(
 		intValidOriginStateId
@@ -1519,7 +1521,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Gasoline', strState = 'IN', strStatus = 'Include', intMasterId = 14133
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', strState = 'IN', strStatus = 'Include', intMasterId = 14134
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strState = 'IN', strStatus = 'Include', intMasterId = 14132
-	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strState = 'IN', strStatus = 'Include', intMasterId = 14112
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strState = 'IN', strStatus = 'Include', intMasterId = 14112
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = 'Include', intMasterId = 14128
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '2E', strType = '', strState = 'IN', strStatus = 'Include', intMasterId = 14113
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '2K', strType = '', strState = 'IN', strStatus = 'Include', intMasterId = 14114
@@ -1537,6 +1539,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '7MI', strType = '', strState = 'MI', strStatus = 'Include', intMasterId = 14118
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '7OH', strType = '', strState = 'OH', strStatus = 'Include', intMasterId = 14119
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'MF-360', strScheduleCode = '11', strType = '', strState = 'IN', strStatus = 'Include', intMasterId = 14574
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strState = 'IN', strStatus = 'Include', intMasterId = 14575
 
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
@@ -2558,19 +2561,19 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14975
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dblGross', strCaption = 'Gross', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14976
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', strColumn = 'dblNet', strCaption = 'Net', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14977
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14235
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14236
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14237
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14238
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14239
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14240
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14241
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14242
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14243
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14244
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14245
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14246
-	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14247
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14235
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14236
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14237
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14238
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14239
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14240
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14241
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14242
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14243
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14244
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14245
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14246
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14247
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14623
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14624
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 14625
@@ -2883,7 +2886,20 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'MF-360', strScheduleCode = '11', strType = '', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415334
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'MF-360', strScheduleCode = '11', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415335
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'MF-360', strScheduleCode = '11', strType = '', strColumn = 'strDiversionNumber', strCaption = 'Diversion Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415336
-	
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415337
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strTransporterName', strCaption = 'Transporter Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415338
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strTransporterFederalTaxId', strCaption = 'Transporter FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415339
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415340
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415341
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415342
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strVendorName', strCaption = 'Vendor Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415343
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strVendorFederalTaxId', strCaption = 'Vendor FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415344
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415345
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'strBillOfLading', strCaption = 'Document Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415346
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415347
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415348
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 1415349
+
 	EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
 
@@ -2976,7 +2992,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Other Products', ysnStatus = 1, intFrequency = 1, intMasterId = 142426
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-401', strScheduleCode = '3A', strType = 'Special Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 142424
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-900', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 142417
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 142404
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 142404
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-900', strScheduleCode = '1', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 141726
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-900', strScheduleCode = '10', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 142415
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'SF-900', strScheduleCode = '11', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 142416
