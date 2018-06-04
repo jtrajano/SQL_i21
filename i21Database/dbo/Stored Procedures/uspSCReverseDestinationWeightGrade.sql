@@ -47,7 +47,7 @@ BEGIN TRY
 			FROM tblSCTicket WHERE intTicketId = @intTicketId
 		END
 
-		SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId AND intContractDetailId > 0
+		SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId
 		SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 		IF @ysnPosted = 1
 		BEGIN

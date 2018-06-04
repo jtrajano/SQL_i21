@@ -76,7 +76,7 @@ BEGIN TRY
 		,[intEntityCustomerId] = @intEntityId
 		,[intCompanyLocationId] = SC.intProcessingLocationId
 		,[intCurrencyId] = SC.intCurrencyId
-		,[intTermId] = EM.intFreightTermId
+		,[intTermId] = EM.intTermsId
 		,[dtmDate] = SC.dtmTicketDateTime
 		,[ysnTemplate] = 0
 		,[ysnForgiven] = 0
@@ -150,7 +150,7 @@ BEGIN TRY
 		,[intEntityCustomerId] = @intEntityId
 		,[intCompanyLocationId] = SC.intProcessingLocationId
 		,[intCurrencyId] = SC.intCurrencyId
-		,[intTermId] = EM.intFreightTermId
+		,[intTermId] = EM.intTermsId
 		,[dtmDate] = SC.dtmTicketDateTime
 		,[ysnTemplate] = 0
 		,[ysnForgiven] = 0
@@ -225,7 +225,7 @@ BEGIN TRY
 		,[intEntityCustomerId] = @intEntityId
 		,[intCompanyLocationId] = SC.intProcessingLocationId
 		,[intCurrencyId] = SC.intCurrencyId
-		,[intTermId] = EM.intFreightTermId
+		,[intTermId] = EM.intTermsId
 		,[dtmDate] = SC.dtmTicketDateTime
 		,[ysnTemplate] = 0
 		,[ysnForgiven] = 0
@@ -300,7 +300,7 @@ BEGIN TRY
 		,[intEntityCustomerId] = @intEntityId
 		,[intCompanyLocationId] = SC.intProcessingLocationId
 		,[intCurrencyId] = SC.intCurrencyId
-		,[intTermId] = EM.intFreightTermId
+		,[intTermId] = EM.intTermsId
 		,[dtmDate] = SC.dtmTicketDateTime
 		,[ysnTemplate] = 0
 		,[ysnForgiven] = 0

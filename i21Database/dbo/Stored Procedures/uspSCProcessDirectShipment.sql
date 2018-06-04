@@ -58,7 +58,7 @@ BEGIN TRY
 				, @dblMatchContractUnits = dblNetUnits
 			FROM vyuSCTicketScreenView where intTicketId = @intMatchTicketId 
 
-			IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination' AND ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
+			IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination'
 			BEGIN
 				UPDATE	MatchTicket SET
 					MatchTicket.dblGrossWeight = SC.dblGrossWeight
@@ -84,7 +84,10 @@ BEGIN TRY
 						FROM tblSCTicket where intTicketId = SC.intMatchTicketId
 					) MatchTicket
 				WHERE SC.intTicketId = @intTicketId
+			END
 
+			IF ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
+			BEGIN
 				UPDATE	MatchDiscount SET
 					MatchDiscount.dblShrinkPercent = QM.dblShrinkPercent
 					,MatchDiscount.dblDiscountAmount = QM.dblDiscountAmount
@@ -97,15 +100,15 @@ BEGIN TRY
 						where intTicketId = SC.intMatchTicketId AND strSourceType = 'Scale'
 					) MatchDiscount
 				WHERE SC.intTicketId = @intTicketId
+			END
 
+			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
+			BEGIN
 				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
 
 				IF ISNULL(@intContractDetailId,0) != 0
 					EXEC uspCTUpdateScheduleQuantityUsingUOM @intMatchContractDetailId, @dblMatchContractUnits, @intUserId, @intMatchTicketId, 'Scale', @intTicketItemUOMId
-			END
 
-			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
-			BEGIN
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 			END
 		END
