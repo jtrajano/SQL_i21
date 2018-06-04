@@ -22,6 +22,8 @@
 		,strLocationNumber = D.strLocationNumber
 		,strCurrency = E.strCurrency
 		,ysnPost = A.ysnPost
+		,A.intCommodityId
+		,CM.strCommodityCode
 	FROM
 		tblARInvoiceTransactionHistory A
 	INNER JOIN tblARInvoice B
@@ -33,3 +35,5 @@
 		ON A.intCompanyLocationId = D.intCompanyLocationId
 	LEFT JOIN tblSMCurrency E
 		ON A.intCurrencyId = E.intCurrencyID
+	LEFT JOIN (select intCommodityId, strCommodityCode from tblICCommodity with(nolock)) CM
+		on CM.intCommodityId = A.intCommodityId

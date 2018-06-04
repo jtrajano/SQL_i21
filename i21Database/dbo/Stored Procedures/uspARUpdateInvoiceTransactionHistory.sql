@@ -6,50 +6,114 @@ AS
 
 	IF @Post IS NULL
 	BEGIN
-		INSERT INTO tblARInvoiceTransactionHistory
-		(
-			intInvoiceId
-			,intInvoiceDetailId
-			,dblQtyReceived
-			,dblPrice
-			,dblAmountDue
-			,intItemId
-			,intItemUOMId
-			,intCompanyLocationId
-			,intTicketId
-			,dtmTicketDate
-			,dtmTransactionDate
-			,intCurrencyId
-		)
-		SELECT
-			ARID.intInvoiceId,
-			ARID.intInvoiceDetailId,
-			ATD.dblQtyOrdered,
-			ATD.dblPrice,
-			ATD.dblAmountDue,
-			ATD.intItemId,
-			ATD.intItemUOMId,
-			ATD.intCompanyLocationId,
-			NULL,
-			NULL,
-			GETDATE(),
-			ATD.intCurrencyId
-		FROM
-			tblARInvoiceDetail ARID
-		INNER JOIN
-			(SELECT [intInvoiceId], [intCompanyLocationId], [intCurrencyId] FROM tblARInvoice WITH (NOLOCK)) ARI
-				ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-		INNER JOIN tblARTransactionDetail ATD
-			ON ATD.intTransactionDetailId = ARID.intInvoiceDetailId
-		INNER JOIN
-			@InvoiceIds II
-				ON ARI.[intInvoiceId] = II.[intHeaderId]
-		WHERE ATD.dblQtyShipped				<> ARID.dblQtyShipped OR
-			ATD.dblPrice					<> ARID.dblPrice OR
-			ATD.intItemId					<> ARID.intItemId OR
-			ATD.intItemUOMId				<> ARID.intItemUOMId OR
-			ATD.intCompanyLocationId		<> ARI.intCompanyLocationId OR
-			ATD.intCurrencyId				<> ARI.intCurrencyId
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblARTransactionDetail a
+							join @InvoiceIds b
+								ON a.intTransactionId = b.intHeaderId)
+		BEGIN
+			INSERT INTO tblARInvoiceTransactionHistory
+			(
+				intInvoiceId
+				,intInvoiceDetailId
+				,dblQtyReceived
+				,dblPrice
+				,dblAmountDue
+				,intItemId
+				,intItemUOMId
+				,intCompanyLocationId
+				,intTicketId
+				,dtmTicketDate
+				,dtmTransactionDate
+				,intCurrencyId
+				,intCommodityId
+				,dblCost
+			)			
+			SELECT
+				ARID.intInvoiceId,
+				ARID.intInvoiceDetailId,
+				ARID.dblQtyOrdered,
+				ARID.dblPrice,
+				ARID.dblTotal,
+				ARID.intItemId,
+				ARID.intItemUOMId,
+				ARI.intCompanyLocationId,
+				ARID.intTicketId,
+				ARI.dtmDate,
+				GETDATE(),
+				ARID.intSubCurrencyId,
+				ITM.intCommodityId,
+				ICT.dblCost
+			FROM
+				tblARInvoiceDetail ARID
+			INNER JOIN
+				(SELECT [intInvoiceId], [intCompanyLocationId], [intCurrencyId], dtmDate FROM tblARInvoice WITH (NOLOCK)) ARI
+					ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+			INNER JOIN
+				@InvoiceIds II
+					ON ARI.[intInvoiceId] = II.[intHeaderId]
+			LEFT JOIN (select intItemId, intCommodityId from tblICItem with(nolock)) ITM
+				on ITM.intItemId = ARID.intItemId
+			left join tblICInventoryTransaction ICT
+				on ARID.intInvoiceDetailId = ICT.intTransactionId
+
+		END
+		ELSE
+		BEGIN
+
+			INSERT INTO tblARInvoiceTransactionHistory
+			(
+				intInvoiceId
+				,intInvoiceDetailId
+				,dblQtyReceived
+				,dblPrice
+				,dblAmountDue
+				,intItemId
+				,intItemUOMId
+				,intCompanyLocationId
+				,intTicketId
+				,dtmTicketDate
+				,dtmTransactionDate
+				,intCurrencyId
+				,intCommodityId
+				,dblCost
+			)
+			SELECT
+				ARID.intInvoiceId,
+				ARID.intInvoiceDetailId,
+				ATD.dblQtyOrdered,
+				ATD.dblPrice,
+				ATD.dblAmountDue,
+				ATD.intItemId,
+				ATD.intItemUOMId,
+				ATD.intCompanyLocationId,
+				ATD.intTicketId,
+				NULL,
+				GETDATE(),
+				ATD.intCurrencyId,
+				CASE WHEN ATD.intItemId IS NOT NULL THEN ITM.intCommodityId ELSE NULL END,
+				CASE WHEN ATD.dblPrice IS NOT NULL THEN ICT.dblCost ELSE NULL END
+			FROM
+				tblARInvoiceDetail ARID
+			INNER JOIN
+				(SELECT [intInvoiceId], [intCompanyLocationId], [intCurrencyId] FROM tblARInvoice WITH (NOLOCK)) ARI
+					ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+			INNER JOIN tblARTransactionDetail ATD
+				ON ATD.intTransactionDetailId = ARID.intInvoiceDetailId
+			INNER JOIN
+				@InvoiceIds II
+					ON ARI.[intInvoiceId] = II.[intHeaderId]
+			LEFT JOIN (select intItemId, intCommodityId from tblICItem with(nolock)) ITM
+				on ITM.intItemId = ARID.intItemId
+			left join tblICInventoryTransaction ICT
+				on ARID.intInvoiceDetailId = ICT.intTransactionId
+			WHERE ATD.dblQtyShipped				<> ARID.dblQtyShipped OR
+				ATD.dblPrice					<> ARID.dblPrice OR
+				ATD.intItemId					<> ARID.intItemId OR
+				ATD.intItemUOMId				<> ARID.intItemUOMId OR
+				ATD.intCompanyLocationId		<> ARI.intCompanyLocationId OR
+				ATD.intCurrencyId				<> ARI.intCurrencyId OR
+				ATD.intTicketId					<> ARID.intTicketId
+		END
 	END
 	ELSE
 		INSERT INTO tblARInvoiceTransactionHistory
