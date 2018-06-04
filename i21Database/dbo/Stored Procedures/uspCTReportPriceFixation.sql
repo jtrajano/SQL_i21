@@ -144,7 +144,15 @@ BEGIN TRY
 			strTotal = dbo.fnRemoveTrailingZeroes(PF.dblPriceWORollArb) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),
 			strDifferential = dbo.fnRemoveTrailingZeroes(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice = dbo.fnRemoveTrailingZeroes(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice =	dbo.fnRemoveTrailingZeroes(PF.dblFinalPrice) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(
+								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
+										THEN	NULL
+										ELSE	CASE	WHEN	CY.intMainCurrencyId	=	CD.intInvoiceCurrencyId
+														THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) / 100
+														ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intFXPriceUOMId,CD.intPriceItemUOMId,CD.dblCashPrice) * CD.dblRate
+												END
+								END) + ' ' + IY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,FN.strUnitMeasure) ,
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strSummary
 								ELSE	''
@@ -190,7 +198,7 @@ BEGIN TRY
 									) +  ' ' + 
 									CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
 									' '+@per+' ' + isnull(rtrt5.strTranslation,FM.strUnitMeasure),
-			strLastModifiedUserSign = @LastModifiedUserSign,
+			strLastModifiedUserSign = CASE WHEN @LastModifiedUserSign = '' THEN NULL ELSE @LastModifiedUserSign END,
 			strTotalLots = dbo.fnRemoveTrailingZeroes(ISNULL(PF.dblTotalLots,0)),
 			strMarketMonth = isnull(rtrt6.strTranslation,MA.strFutMarketName) +  ' '  + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate),
 			--strMarketMonth = isnull(rtrt6.strTranslation,MA.strFutMarketName) +  ' '  + isnull(rtrt1.strTranslation,MO.strFutureMonth),
@@ -235,6 +243,10 @@ BEGIN TRY
 	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
 	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	CD.intFutureMarketId	LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId
+
+	JOIN	tblSMCurrency				IY	ON	IY.intCurrencyID				=	CD.intInvoiceCurrencyId	LEFT
+	JOIN	tblICItemUOM				FO	ON	FO.intItemUOMId					=	CD.intFXPriceUOMId		LEFT	
+	JOIN	tblICUnitMeasure			FN	ON	FN.intUnitMeasureId				=	FO.intUnitMeasureId		
 
 	left join tblSMScreen				rts on rts.strNamespace = 'Inventory.view.Item'
 	left join tblSMTransaction			rtt on rtt.intScreenId = rts.intScreenId and rtt.intRecordId = IM.intItemId
