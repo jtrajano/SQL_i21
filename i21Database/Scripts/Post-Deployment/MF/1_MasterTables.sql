@@ -3493,3 +3493,9 @@ UPDATE tblMFWorkOrder
 SET intRecipeTypeId = 1
 WHERE intRecipeTypeId IS NULL
 GO
+UPDATE SW
+SET SW.dblPlannedQty = W.dblQuantity
+FROM tblMFWorkOrder W
+JOIN tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
+WHERE SW.dblPlannedQty IS NULL
+Go

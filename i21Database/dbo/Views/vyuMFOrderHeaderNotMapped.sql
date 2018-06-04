@@ -14,7 +14,7 @@ SELECT SW.intOrderHeaderId
 	,S1.strName AS strStagingLocationName
 	,S2.strName AS strDockDoorLocationName
 	,I.strItemNo + ' - ' + I.strDescription AS strItemDescription
-	,W.dblQuantity
+	,SW.dblPlannedQty AS dblQuantity
 	,UOM.strUnitMeasure
 FROM tblMFOrderHeader OH
 JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId

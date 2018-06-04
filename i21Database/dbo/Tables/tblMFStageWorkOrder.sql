@@ -2,6 +2,7 @@
 	intStageId INT NOT NULL identity(1, 1)
 	,intWorkOrderId INT NOT NULL
 	,intItemId int
+	,dblPlannedQty Numeric(38,20) 
 	,dtmPlannedDate DATETIME NULL
 	,intPlannnedShiftId INT NULL
 	,intOrderHeaderId INT NOT NULL

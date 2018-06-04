@@ -975,6 +975,7 @@ BEGIN TRY
 	INSERT INTO tblMFStageWorkOrder (
 		intWorkOrderId
 		,intItemId
+		,dblPlannedQty
 		,dtmPlannedDate
 		,intPlannnedShiftId
 		,intOrderHeaderId
@@ -986,6 +987,7 @@ BEGIN TRY
 		)
 	SELECT intWorkOrderId
 		,intItemId
+		,dblPlannedQty
 		,dtmPlannedDate
 		,intPlannedShift
 		,@intOrderHeaderId
