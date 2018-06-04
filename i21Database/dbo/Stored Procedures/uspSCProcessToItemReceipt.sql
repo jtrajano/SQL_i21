@@ -612,7 +612,7 @@ BEGIN TRY
 			,ri.dblUnitCost
 			,ri.intOwnershipType
 		FROM tblICInventoryReceipt r 
-		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId AND ri.dblUnitCost > 0
 		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
 		LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 AND CTP.intPriceFixationId IS NULL
