@@ -12,6 +12,7 @@ SELECT DISTINCT
 ,LC.ysnDiscountLocationActive
 ,DSch.intCommodityId
 ,Com.strCommodityCode
+,DSch.intDiscountScheduleId
 FROM tblGRDiscountId DId
 JOIN tblSMCurrency Cur ON Cur.intCurrencyID = DId.intCurrencyId
 JOIN tblGRDiscountLocationUse LC ON LC.intDiscountId=DId.intDiscountId
