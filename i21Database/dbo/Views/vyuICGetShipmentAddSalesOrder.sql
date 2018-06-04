@@ -24,14 +24,14 @@ SELECT
 	, SubLocation.strSubLocationName
 	, DefaultFromItemLocation.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
-	, intOrderUOMId = intItemUOMId
-	, strOrderUOM = strUnitMeasure
+	, intOrderUOMId = SODetail.intItemUOMId
+	, strOrderUOM = SODetail.strUnitMeasure
 	, dblOrderUOMConvFactor = dblUOMConversion
-	, intItemUOMId
-	, strItemUOM = strUnitMeasure
-	, dblItemUOMConv = dblUOMConversion
-	, intWeightUOMId = intItemUOMId
-	, strWeightUOM = strUnitMeasure
+	, SODetail.intItemUOMId
+	, strItemUOM = SODetail.strUnitMeasure
+	, dblItemUOMConv = SODetail.dblUOMConversion
+	, intWeightUOMId = SODetail.intItemUOMId
+	, strWeightUOM = SODetail.strUnitMeasure
 	, dblWeightItemUOMConv = dblUOMConversion
 	, dblQtyOrdered = ISNULL(dblQtyOrdered, 0)
 	, dblQtyAllocated = ISNULL(dblQtyAllocated, 0)
@@ -41,7 +41,16 @@ SELECT
 	, dblTotal = ISNULL(dblTotal, 0)
 	, dblQtyToShip = ISNULL(dblQtyOrdered, 0) - ISNULL(dblQtyShipped, 0)
 	, dblPrice = ISNULL(dblPrice, 0)
-	, dblLineTotal = ISNULL(dblQtyShipped, 0) * ISNULL(dblPrice, 0)
+	, dblLineTotal = 
+			(
+				ISNULL(dblQtyOrdered, 0) 
+				- ISNULL(dblQtyShipped, 0)
+			) 
+			* dbo.fnCalculateCostBetweenUOM (
+				ISNULL(ItemPriceUOM.intItemUOMId, SODetail.intItemUOMId) 
+				,SODetail.intItemUOMId
+				,ISNULL(dblPrice, 0)
+			)
 	, intGradeId = NULL
 	, strGrade = NULL
 	, strDestinationGrades = NULL
@@ -77,6 +86,7 @@ SELECT
 					)
 	, intPriceUOMId = ISNULL(SODetail.intPriceUOMId, SODetail.intItemUOMId) 
 	, strPriceUOM = ISNULL(SODetail.strPriceUOM, SODetail.strUnitMeasure) 
+	, dblPriceUOMConv = ISNULL(ItemPriceUOM.dblUnitQty, SODetail.dblUOMConversion)
 FROM vyuSOSalesOrderDetail SODetail
 	INNER JOIN vyuSOSalesOrderSearch SO ON SODetail.intSalesOrderId = SO.intSalesOrderId
 	INNER JOIN tblSOSalesOrder OSO ON OSO.intSalesOrderId = SO.intSalesOrderId
@@ -95,6 +105,11 @@ FROM vyuSOSalesOrderDetail SODetail
 		ON ShipToLocation.intEntityLocationId = OSO.intShipToLocationId
 	LEFT JOIN tblSMCurrency Currency 
 		ON Currency.intCurrencyID = SO.intCurrencyId
+	LEFT JOIN (
+		tblICItemUOM ItemPriceUOM INNER JOIN tblICUnitMeasure PriceUOM
+			ON ItemPriceUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
+	)
+		ON ItemPriceUOM.intItemUOMId = SODetail.intPriceUOMId
 
 WHERE	ISNULL(SODetail.dblQtyShipped, 0) < ISNULL(SODetail.dblQtyOrdered, 0) 
 		AND ISNULL(SO.strOrderStatus, '') IN ('Open', 'Partial', 'Pending')
