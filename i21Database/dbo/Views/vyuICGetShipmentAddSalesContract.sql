@@ -39,11 +39,26 @@ SELECT	strOrderType = 'Sales Contract'
 		, dblUnitPrice = ISNULL(dblPricePerUnit, 0)
 		, dblDiscount = CAST(0 AS NUMERIC(18, 6))
 		, dblTotal = CAST(0 AS NUMERIC(18, 6))
-		, dblQtyToShip = CASE WHEN ContractView.ysnLoad = 1 THEN dbo.fnMultiply(ContractView.dblAvailableQty, ContractView.dblQuantityPerLoad)
-					ELSE ISNULL(dblAvailableQty, 0) END
+		, dblQtyToShip = 
+				CASE 
+					WHEN ContractView.ysnLoad = 1 THEN 
+						dbo.fnMultiply(ContractView.dblAvailableQty, ContractView.dblQuantityPerLoad)
+					ELSE 
+						ISNULL(dblAvailableQty, 0) 
+				END
 		, dblPrice = ISNULL(dblSeqPrice, 0)
-		, dblLineTotal = CASE WHEN ContractView.ysnLoad = 1 THEN dbo.fnMultiply(ContractView.dblAvailableQty, ContractView.dblQuantityPerLoad) 
-						ELSE ISNULL(ContractView.dblAvailableQty, 0) END * ISNULL(dblPricePerUnit, 0)
+		, dblLineTotal = 
+				CASE 
+					WHEN ContractView.ysnLoad = 1 THEN 
+						dbo.fnMultiply(ContractView.dblAvailableQty, ContractView.dblQuantityPerLoad) 
+					ELSE 
+						ISNULL(ContractView.dblAvailableQty, 0) 
+				END 
+				* dbo.fnCalculateCostBetweenUOM (
+					ISNULL(ItemPriceUOM.intItemUOMId, ContractView.intItemUOMId) 
+					,ContractView.intItemUOMId
+					,ISNULL(dblPricePerUnit, 0)	
+				)							
 		, intGradeId = NULL
 		, strGrade = NULL
 		, strDestinationGrades = ContractView.strGrade
@@ -64,6 +79,7 @@ SELECT	strOrderType = 'Sales Contract'
 		, ContractView.intContractSeq
 		, intPriceUOMId = ISNULL(ItemPriceUOM.intItemUOMId, ContractView.intItemUOMId) 
 		, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, ContractView.strItemUOM) 
+		, dblPriceUOMConv = ISNULL(ItemPriceUOM.dblUnitQty, ContractView.dblItemUOMCF)
 FROM	vyuCTContractAddOrdersLookup ContractView
 		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
 		LEFT JOIN (

@@ -71,7 +71,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strDockDoor = DockDoor.strName
 	, ShipmentItem.dblDestinationQuantity
 	, strPriceUOM = ISNULL(PriceUOM.strUnitMeasure, UOM.strUnitMeasure) 
-	, dblCostUOMConv = ItemPriceUOM.dblUnitQty
+	, dblPriceUOMConv = ISNULL(ItemPriceUOM.dblUnitQty, ItemUOM.dblUnitQty)
 	, ShipmentItemSource.strFieldNo
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
