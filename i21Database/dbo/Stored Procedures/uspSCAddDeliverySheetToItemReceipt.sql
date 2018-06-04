@@ -364,7 +364,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 												WHEN IC.strCostMethod = 'Amount' THEN 
 												CASE
 													WHEN RE.ysnIsStorage = 1 THEN 0
-													WHEN RE.ysnIsStorage = 0 THEN SC.dblTicketFees
+													WHEN RE.ysnIsStorage = 0 THEN (RE.dblQty / SCD.dblNet * SC.dblTicketFees)
 												END
 											END
 		,[intContractHeaderId]				= RE.intContractHeaderId
@@ -376,6 +376,7 @@ WHERE SCTicket.intDeliverySheetId = @intDeliverySheetId
 		,[ysnPrice]							= @ysnDeductFeesCusVen
 		,[strChargesLink]					= RE.strChargesLink
 		FROM @ReceiptStagingTable RE
+		INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = RE.intSourceId
 		OUTER APPLY(
 			SELECT SUM(dblTicketFees) AS dblTicketFees,intScaleSetupId FROM tblSCTicket WHERE intDeliverySheetId = RE.intSourceId GROUP BY intScaleSetupId
 		) SC
