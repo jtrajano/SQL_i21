@@ -81,7 +81,6 @@ END
 	DECLARE @intCreatedBillId INT;
 	DECLARE @batchId AS NVARCHAR(40);
 	DECLARE @qualified BIT;
-	DECLARE @TransactionName AS VARCHAR(500) = 'CREATE VOUCHER' + CAST(NEWID() AS NVARCHAR(100));
 	DECLARE @shipToLocation INT = [dbo].[fnGetUserDefaultLocation](@intUserId);
 
 	DECLARE @equityPayments AS Id;
@@ -104,8 +103,8 @@ END
 	
 	DECLARE @voucherId AS Id;
 	
-	BEGIN TRAN @TransactionName;
-	SAVE TRAN @TransactionName;
+	BEGIN TRAN;
+
 	BEGIN TRY 
 	WHILE EXISTS(SELECT 1 FROM @equityPayments)
 	BEGIN 
@@ -192,15 +191,15 @@ END CATCH
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 Post_Commit:
-	COMMIT TRAN @TransactionName;
+	COMMIT TRAN;
 	SET @bitSuccess = 1
 	SET @successfulCount = @totalRecords
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRAN @TransactionName;	
+	IF(@@TRANCOUNT > 0)
+		ROLLBACK TRAN;	
 	SET @bitSuccess = 0
 	GOTO Post_Exit
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempEquityPayments')) DROP TABLE #tempEquityPayments
 END
