@@ -3487,3 +3487,9 @@ BEGIN
 		,0
 		,0
 END
+GO
+
+UPDATE tblMFWorkOrder
+SET intRecipeTypeId = 1
+WHERE intRecipeTypeId IS NULL
+GO
