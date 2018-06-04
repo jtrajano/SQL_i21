@@ -303,6 +303,8 @@ ELSE IF @strBasis = @BASIS_REVENUE
 		ELSE IF @strCalculationType = @CALCTYPE_FLAT
 			SET @dblLineTotal = @dblCalculationAmount
 
+		DELETE FROM tblARCommissionRecapDetail WHERE dblAmount <= 0.000000
+
 	END
 ELSE IF @strBasis = @BASIS_UNITS
 	BEGIN
