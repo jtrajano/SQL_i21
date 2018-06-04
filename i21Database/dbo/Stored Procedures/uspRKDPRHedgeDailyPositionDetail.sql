@@ -385,17 +385,21 @@ BEGIN
 		intOpenContract intNoOfContract
 	FROM (select sum(intOpenContract)intOpenContract
 			 from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId, intOpenContract*dblContractSize) as intOpenContract 
-		from vyuRKGetOpenContract otr  
-		JOIN tblRKFutOptTransaction t on otr.intFutOptTransactionId=t.intFutOptTransactionId
-				  		  			AND  intLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-									ELSE isnull(ysnLicensed, 0) END
-									)
-		JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
-		JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
-		WHERE t.intCommodityId=@intCommodityId
-		AND t.intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end
+		from vyuRKGetOpenContract oc  
+		JOIN tblRKFutOptTransaction f ON oc.intFutOptTransactionId = f.intFutOptTransactionId AND oc.intOpenContract <> 0
+			INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId AND f.intLocationId IN (
+					SELECT intCompanyLocationId
+					FROM tblSMCompanyLocation
+					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+					)
+			INNER JOIN tblICCommodity ic ON f.intCommodityId = ic.intCommodityId
+			JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
+			INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
+			INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
+			INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
+			INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+		WHERE f.intCommodityId=@intCommodityId
+		AND f.intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end
 		 )t) intOpenContract   
 		
 ----	-- Option NetHedge
