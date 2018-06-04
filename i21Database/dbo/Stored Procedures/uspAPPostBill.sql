@@ -376,7 +376,7 @@ WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
 		) 
-
+		AND A.intTransactionReversed IS NULL
 -- Remove zero cost adjustments. 
 DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0 
 
@@ -441,6 +441,7 @@ AND (
 	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 )
+AND A.intTransactionReversed IS NULL
 -- SELECT 
 -- 	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
 -- 	,[dblNewValue]					= B.dblCost - B.dblOldCost
