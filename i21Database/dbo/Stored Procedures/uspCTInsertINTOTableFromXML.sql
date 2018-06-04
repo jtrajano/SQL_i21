@@ -98,7 +98,7 @@ BEGIN TRY
 				   (SELECT											
 						', ' + COLUMN_NAME +' ' + DATA_TYPE	+
 						CASE WHEN DATA_TYPE	= 'nvarchar' THEN '('+CASE WHEN LTRIM(CHARACTER_MAXIMUM_LENGTH) = '-1' THEN 'MAX' ELSE LTRIM(CHARACTER_MAXIMUM_LENGTH) END+')'
-							 WHEN DATA_TYPE	= 'numeric' THEN '('+LTRIM(NUMERIC_PRECISION)+','+LTRIM(NUMERIC_SCALE)+')'
+							 WHEN DATA_TYPE	IN('numeric','DECIMAL') THEN '('+LTRIM(NUMERIC_PRECISION)+','+LTRIM(NUMERIC_SCALE)+')'
 							 ELSE ''
 						END + ' '+ ''''+COLUMN_NAME+'[not(@xsi:nil = "true")]'''
 						FROM ##tblColumns	

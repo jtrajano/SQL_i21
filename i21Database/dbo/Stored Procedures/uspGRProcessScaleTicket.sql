@@ -7,8 +7,9 @@
 			@intTicketLVStagingId	INT,
 			@intTicketId	INT
 
-	DELETE tblSCTicketLVStaging WHERE strTicketNumber IS NULL
-	
+	DELETE tblSCTicketLVStaging WHERE strTicketNumber IS NULL	
+	UPDATE tblSCTicketLVStaging SET intOriginTicketId = 0  WHERE intOriginTicketId IS NULL
+
 	SELECT @intTicketLVStagingId = MIN(intTicketLVStagingId) FROM tblSCTicketLVStaging 
 	WHERE ysnImported IS NULL
 

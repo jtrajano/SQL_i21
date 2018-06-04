@@ -79,6 +79,7 @@ BEGIN TRY
 			,[dblShrink]				 DECIMAL(13, 3)
 			,[dblNetUnits]				 DECIMAL(13, 3)
 			,[intSplitId]				 INT
+			,[intStorageScheduleTypeId]	 INT
 			,[strDistributionOption]	 NVARCHAR(40)
 			,[intDiscountSchedule]		 INT
 			,[strContractNumber]	     NVARCHAR(40)
@@ -108,7 +109,6 @@ BEGIN TRY
 			,[intItemUOMIdFrom]			 INT
 			,[intItemUOMIdTo]			 INT
 			,[intTicketTypeId]			 INT
-			,[intStorageScheduleTypeId]	 INT
 			,ysnRailCar					 BIT 
 			,strOfflineGuid				 NVARCHAR(100)
 			,ysnDeliverySheetPost		 BIT
@@ -158,6 +158,7 @@ BEGIN TRY
 			,[dblShrink]
 			,[dblNetUnits] 
 			,[intSplitId]
+			,intStorageScheduleTypeId
 			,[strDistributionOption]
 			,[intDiscountSchedule]    
 			,[strContractNumber]
@@ -186,8 +187,7 @@ BEGIN TRY
 			,[intConcurrencyId]
 			,[intItemUOMIdFrom]
 			,[intItemUOMIdTo]
-			,[intTicketTypeId]
-			,[intStorageScheduleTypeId]
+			,[intTicketTypeId]			
 			,ysnRailCar
 			,strOfflineGuid
 			,ysnDeliverySheetPost
@@ -226,6 +226,7 @@ BEGIN TRY
 				,[dblShrink]				 = CI.dblShrink
 				,[dblNetUnits] 				 = CI.dblNetUnits
 				,[intSplitId]				 = CI.intSplitId
+				,intStorageScheduleTypeId	 = ST.intStorageScheduleTypeId
 				,[strDistributionOption]	 = CI.strDistributionOption
 				,[intDiscountSchedule]    	 = DiscountSchedule.intDiscountScheduleId
 				,[strContractNumber]		 = CI.strContractNumber
@@ -258,7 +259,6 @@ BEGIN TRY
 													WHEN CI.strTicketType = 'Load In'  THEN 1
 													WHEN CI.strTicketType = 'Load Out' THEN 2
 											   END
-				,[intStorageScheduleTypeId]	 = SS.intStorageScheduleRuleId
 				,ysnRailCar					 = 0
 				,strOfflineGuid				 = ''
 				,ysnDeliverySheetPost		 = 0
@@ -280,6 +280,7 @@ BEGIN TRY
 														AND DiscountSchedule.intCommodityId = IM.intCommodityId 
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.strSubLocationName = CI.strStorageLocation
 		LEFT JOIN tblICStorageLocation Bin ON Bin.strName = CI.strBinNumber
+		LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CI.strDistributionOption
 		LEFT JOIN tblGRStorageScheduleRule SS ON SS.strScheduleId = CI.strStorageSchedule
 		LEFT JOIN tblCTContractHeader CH ON CH.strContractNumber = CI.strContractNumber
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId AND CD.intContractSeq = CI.intContractSequence
@@ -334,6 +335,7 @@ BEGIN TRY
 			,[dblShrink]
 			,[dblNetUnits] 
 			,[intSplitId]
+			,intStorageScheduleTypeId
 			,[strDistributionOption]
 			,[intDiscountSchedule]    
 			,[strContractNumber]
@@ -362,8 +364,7 @@ BEGIN TRY
 			,[intConcurrencyId]
 			,[intItemUOMIdFrom]
 			,[intItemUOMIdTo]
-			,[intTicketTypeId]
-			,[intStorageScheduleTypeId]
+			,[intTicketTypeId]			
 			,ysnRailCar		
 			,strOfflineGuid
 			,ysnDeliverySheetPost
@@ -390,6 +391,7 @@ BEGIN TRY
 		,[dblShrink]
 		,[dblNetUnits] 
 		,[intSplitId]
+		,intStorageScheduleTypeId
 		,[strDistributionOption]
 		,[intDiscountSchedule]    
 		,[strContractNumber]
@@ -418,8 +420,7 @@ BEGIN TRY
 		,[intConcurrencyId]
 		,[intItemUOMIdFrom]
 		,[intItemUOMIdTo]
-		,[intTicketTypeId]
-		,[intStorageScheduleTypeId]
+		,[intTicketTypeId]		
 		,ysnRailCar		
 		,strOfflineGuid
 		,ysnDeliverySheetPost
