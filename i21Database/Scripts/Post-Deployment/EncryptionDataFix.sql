@@ -68,7 +68,7 @@ BEGIN
 
       DECLARE @DecryptionTable TABLE (
         intEntityCredentialId INT,
-        strPassword NVARCHAR(MAX)
+        strPassword VARCHAR(MAX) NULL
       )
 
       DECLARE @EncryptionTable TABLE (
@@ -78,12 +78,12 @@ BEGIN
 
       PRINT(''*** Decrypting password (asymmetric) ***'')
       INSERT INTO @DecryptionTable
-        SELECT intEntityCredentialId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strPassword''''))'', ''varbinary(256)''))
+        SELECT intEntityCredentialId, ISNULL(CONVERT(VARCHAR(MAX), DECRYPTBYKEYAUTOASYMKEY(ASYMKEY_ID(''i21EncryptionASymKeyPwd''), N''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='', CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strPassword''''))'', ''varbinary(256)'')))), strPassword)
         FROM tblEMEntityCredential
 
       PRINT(''*** Encrypting password using certificate ***'')
       INSERT INTO @EncryptionTable
-        SELECT intEntityCredentialId, ENCRYPTBYCERT(CERT_ID(''iRelyi21Certificate''), CONVERT(VARCHAR(MAX), DECRYPTBYKEYAUTOASYMKEY(ASYMKEY_ID(''i21EncryptionASymKeyPwd''), N''neYwLw+SCUq84dAAd9xuM1AFotK5QzL4Vx4VjYUemUY='', strPassword)))
+        SELECT intEntityCredentialId, ENCRYPTBYCERT(CERT_ID(''iRelyi21Certificate''), strPassword)
         FROM @DecryptionTable
 
       PRINT(''*** Saving certificate encrypted password ***'')
