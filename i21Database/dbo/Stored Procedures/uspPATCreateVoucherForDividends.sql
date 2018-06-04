@@ -171,9 +171,9 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRANSACTION	
+	IF(@@TRANCOUNT > 0)
+		ROLLBACK TRANSACTION	
 	SET @bitSuccess = 0
 	GOTO Post_Exit
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempDivCust')) DROP TABLE #tempDivCust
 GO

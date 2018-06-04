@@ -465,11 +465,10 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
-	ROLLBACK TRANSACTION	
+	IF(@@TRANCOUNT > 0)
+		ROLLBACK TRANSACTION	
 	SET @success = 0
 	GOTO Post_Exit
 
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempCustomerStock')) DROP TABLE #tempCustomerStock
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempValidateTable')) DROP TABLE #tempValidateTable
 END
