@@ -42,6 +42,7 @@ DECLARE @error NVARCHAR(200);
 CREATE TABLE #tempBillDetail (
     [intBillId]       				INT             NOT NULL,
     [intItemId]    					INT             NULL,
+	[strMiscDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[intInventoryReceiptItemId]    	INT             NULL,
 	[intInventoryReceiptChargeId]   INT             NULL,
 	[intPurchaseDetailId]    		INT             NULL,
@@ -245,6 +246,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INSERT INTO #tempBillDetail(
 			[intBillId],
 			[intItemId],
+			[strMiscDescription],
 			[intInventoryReceiptItemId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
@@ -282,6 +284,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT 
 			[intBillId]						=	@voucherId,
 			[intItemId]						=	B.intItemId,
+			[strMiscDescription]			=	C.strDescription,
 			[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]					=	voucherDetailReceipt.dblQtyReceived,
 			[dblQtyReceived]				=	voucherDetailReceipt.dblQtyReceived,
@@ -383,6 +386,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INSERT INTO #tempBillDetail(
 			[intBillId],
 			[intItemId],
+			[strMiscDescription],
 			[intInventoryReceiptItemId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
@@ -426,6 +430,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT 
 			[intBillId]					=	@voucherId,
 			[intItemId]					=	B.intItemId,
+			[strMiscDescription]		=	C.strDescription,
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
@@ -539,6 +544,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INSERT INTO #tempBillDetail(
 			[intBillId],
 			[intItemId],
+			[strMiscDescription],
 			[intInventoryReceiptItemId],
 			[intPurchaseDetailId],
 			[dblQtyOrdered],
@@ -581,6 +587,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT 
 			[intBillId]					=	@voucherId,
 			[intItemId]					=	B.intItemId,
+			[strMiscDescription]		=	C.strDescription,
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
 			[intPODetailId]				=	(CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END),
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
@@ -700,6 +707,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		INSERT INTO #tempBillDetail(
 			[intBillId],
 			[intItemId],
+			[strMiscDescription],
 			[intInventoryReceiptItemId],
 			[dblQtyOrdered],
 			[dblQtyReceived],
@@ -743,6 +751,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		SELECT 
 			[intBillId]					=	@voucherId,
 			[intItemId]					=	B.intItemId,
+			[strMiscDescription]		=	C.strDescription,
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
@@ -859,6 +868,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
 		[intItemId],
+		[strMiscDescription],
 		[intInventoryReceiptItemId],
 		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
@@ -905,6 +915,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SELECT
 		[intBillId],
 		[intItemId],
+		[strMiscDescription],
 		[intInventoryReceiptItemId],
 		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],

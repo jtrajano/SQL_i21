@@ -43,6 +43,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
 		[intItemId],
+		[strMiscDescription],
 		[intInventoryReceiptItemId],
 		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
@@ -83,6 +84,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SELECT DISTINCT
 		[intBillId]						=	@voucherId,
 		[intItemId]						=	A.intItemId,
+		[strMiscDescription]			=	item.strDescription,
 		[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
 		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]					=	NULL,
