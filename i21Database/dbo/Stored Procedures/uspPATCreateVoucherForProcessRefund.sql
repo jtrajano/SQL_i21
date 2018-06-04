@@ -88,7 +88,6 @@ BEGIN
 	DECLARE @dblCashRefund NUMERIC(18,6);
 	DECLARE @dbl1099Amount NUMERIC(18,6);
 	DECLARE @batchId AS NVARCHAR(40);
-	DECLARE @TransactionName AS VARCHAR(500) = 'CREATE VOUCHER' + CAST(NEWID() AS NVARCHAR(100));
 	DECLARE @shipToLocation INT = [dbo].[fnGetUserDefaultLocation](@intUserId);
 
 	DECLARE @refundProcessed AS Id;
@@ -130,8 +129,7 @@ BEGIN
 		GOTO Post_Exit;
 	END
 	
-	BEGIN TRAN @TransactionName;
-	SAVE TRAN @TransactionName;
+	BEGIN TRAN;
 
 	BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM @refundProcessed)
@@ -234,17 +232,16 @@ BEGIN
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 Post_Commit:
-	COMMIT TRAN @TransactionName;
+	COMMIT TRAN;
 	SET @bitSuccess = 1
 	SET @successfulCount = @totalRecords
 	GOTO Post_Exit
 
 Post_Rollback:
 	IF(@@TRANCOUNT > 0)
-		ROLLBACK TRAN @TransactionName;	
+		ROLLBACK TRAN;	
 
 	SET @bitSuccess = 0
 	GOTO Post_Exit
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tempRefundCustomer')) DROP TABLE #tempRefundCustomer
 END
