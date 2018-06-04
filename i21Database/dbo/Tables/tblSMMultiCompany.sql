@@ -12,6 +12,7 @@
 	[intMultiCompanyParentId]	INT NULL,
 	[intRange]				    INT NULL	 DEFAULT 0,
 	[ysnStatus]					BIT NULL     DEFAULT 0,
+	[ysnInit]					BIT NULL     DEFAULT 0,
     [intConcurrencyId]			INT NOT NULL DEFAULT 1
    
 )
