@@ -39,6 +39,7 @@ FROM (
 					AND UM.strUnitMeasure IN (
 						'Metric Ton'
 						,'MT'
+						,'matricton'
 						)
 				), 1) * CASE 
 			WHEN CH.intContractTypeId = 1
@@ -53,6 +54,7 @@ FROM (
 					AND UM.strUnitMeasure IN (
 						'Metric Ton'
 						,'MT'
+						,'matricton'
 						)
 				), 1) * ISNULL(CD.dblAllocatedQty, 0) AS Total_Sold_Qty_In_MT
 		,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, (
@@ -63,6 +65,7 @@ FROM (
 					AND UM.strUnitMeasure IN (
 						'Metric Ton'
 						,'MT'
+						,'matricton'
 						)
 				), 1) * (CD.dblQuantity - ISNULL(CD.dblInvoicedQty, 0)) AS Sold_And_To__Be_Invoiced
 		,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, (
@@ -73,6 +76,7 @@ FROM (
 					AND UM.strUnitMeasure IN (
 						'Metric Ton'
 						,'MT'
+						,'matricton'
 						)
 				), 1) * (CD.dblQuantity - ISNULL(CD.dblAllocatedQty, 0)) * (
 			CASE 
@@ -89,6 +93,7 @@ FROM (
 					AND UM.strUnitMeasure IN (
 						'Metric Ton'
 						,'MT'
+						,'matricton'
 						)
 				), 1) * SUM(LOT.dblQty) Physical_Stock_MT
 		,SUM(LOT.dblQty) Physical_Stock_With_Packing_Type
