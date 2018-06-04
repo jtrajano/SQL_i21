@@ -5,7 +5,6 @@
 	[intCommissionPlanId]		INT NULL,
 	[intEntityId]				INT NULL,
 	[intApproverEntityId]		INT NULL,
-	[intBillId]					INT NULL,
 	[intPaymentId]				INT NULL,
 	[intPaycheckId]				INT NULL,
 	[dtmStartDate]				DATETIME NULL,
@@ -22,7 +21,6 @@
 	[strReason]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]			INT NOT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblARCommission_intCommissionId] PRIMARY KEY CLUSTERED ([intCommissionId] ASC),
-	CONSTRAINT [FK_tblARCommission_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 	CONSTRAINT [FK_tblARCommission_tblAPPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [tblAPPayment]([intPaymentId]),
 	CONSTRAINT [FK_tblARCommission_tblPRPaycheck_intPaycheckId] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId])
 );

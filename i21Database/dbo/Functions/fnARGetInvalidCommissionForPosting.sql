@@ -59,17 +59,27 @@ BEGIN
 		 ,strBatchId
 		 ,'Commission Expense Account was not set in Sales > Company Configuration!'
 	FROM @Commissions
-	WHERE ISNULL(intCommissionExpenseAccountId, 0) = 1
+	WHERE ISNULL(intCommissionExpenseAccountId, 0) = 0
 
 	UNION ALL
 
-	--INVALID AP CLEARING ACCOUNT
+	--INVALID AP ACCOUNT
 	SELECT intCommissionId
 		 ,strCommissionNumber
 		 ,strBatchId
-		 ,'AP Clearing Account was not set in Sales > Company Configuration!'
+		 ,'AP Account was not set in Common Info > Company Location > GL Accounts'
 	FROM @Commissions
-	WHERE ISNULL(intAPClearingAccountId, 0) = 1
+	WHERE ISNULL(intAPAccountId, 0) = 0
+
+	UNION ALL
+
+	--INVALID CURRENT COMPANY LOCATION ID
+	SELECT intCommissionId
+		 ,strCommissionNumber
+		 ,strBatchId
+		 ,'Current Company Location was not set.'
+	FROM @Commissions
+	WHERE ISNULL(intCompanyLocationId, 0) = 0
 	
 	RETURN
 END

@@ -16,6 +16,7 @@
 	,@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@raiseError		AS BIT				= 0
+	,@companyLocationId	AS INT				= NULL
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -41,14 +42,17 @@ DECLARE @intDefaultCurrencyId			INT = (SELECT TOP 1 intDefaultCurrencyId FROM tb
 DECLARE @strCurrencyExchangeRateType	NVARCHAR(100) = (SELECT TOP 1 SMC.strCurrencyExchangeRateType FROM tblSMMultiCurrency SM INNER JOIN tblSMCurrencyExchangeRateType SMC ON SM.intAccountsReceivableRateTypeId = SMC.intCurrencyExchangeRateTypeId)
 DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 DECLARE @intCommissionExpenseAccountId  INT = NULL
-DECLARE @intAPClearingAccountId			INT = NULL
+DECLARE @intAPAccountId					INT = NULL
 DECLARE @totalRecords					INT = 0
 DECLARE @totalInvalid					INT = 0
 DECLARE @ErrorMerssage					NVARCHAR(MAX)
 
 SELECT TOP 1 @intCommissionExpenseAccountId = intCommissionExpenseAccountId
-		   , @intAPClearingAccountId		= NULL
 FROM dbo.tblARCompanyPreference
+
+SELECT TOP 1 @intAPAccountId = intAPAccount 
+FROM dbo.tblSMCompanyLocation 
+WHERE intCompanyLocationId = @companyLocationId
 
 SET @post		= ISNULL(@post, 0)
 SET @recap		= ISNULL(@recap, 0)
@@ -68,7 +72,8 @@ IF @param IS NOT NULL
 		INSERT INTO @PostCommissionData (
 			 [intCommissionId]
 			,[intCommissionExpenseAccountId]
-			,[intAPClearingAccountId]
+			,[intAPAccountId]
+			,[intCompanyLocationId]
 			,[strCommissionNumber]
 			,[strBatchId]
 			,[dblTotalAmount]
@@ -77,7 +82,8 @@ IF @param IS NOT NULL
 		)
 		SELECT [intCommissionId]				= [intCommissionId]	
 			,[intCommissionExpenseAccountId]	= @intCommissionExpenseAccountId
-			,[intAPClearingAccountId]			= @intAPClearingAccountId		
+			,[intAPAccountId]					= @intAPAccountId
+			,[intCompanyLocationId]				= @companyLocationId
 			,[strCommissionNumber]				= [strCommissionNumber]
 			,[strBatchId]						= @batchIdUsed
 			,[dblTotalAmount]					= [dblTotalAmount]
@@ -94,7 +100,8 @@ ELSE
 		INSERT INTO @PostCommissionData (
 			 [intCommissionId]
 			,[intCommissionExpenseAccountId]
-			,[intAPClearingAccountId]
+			,[intAPAccountId]
+			,[intCompanyLocationId]
 			,[strCommissionNumber]
 			,[strBatchId]
 			,[dblTotalAmount]
@@ -103,7 +110,8 @@ ELSE
 		)
 		SELECT [intCommissionId]				= [intCommissionId]	
 			,[intCommissionExpenseAccountId]	= @intCommissionExpenseAccountId
-			,[intAPClearingAccountId]			= @intAPClearingAccountId		
+			,[intAPAccountId]					= @intAPAccountId
+			,[intCompanyLocationId]				= @companyLocationId
 			,[strCommissionNumber]				= [strCommissionNumber]
 			,[strBatchId]						= @batchIdUsed
 			,[dblTotalAmount]					= [dblTotalAmount]
@@ -220,7 +228,7 @@ IF @post = 1
 		SELECT
 			 [dtmDate]					= @PostDate
 			,[strBatchID]				= @batchIdUsed
-			,[intAccountId]				= @intCommissionExpenseAccountId
+			,[intAccountId]				= @intAPAccountId
 			,[dblDebit]					= COMM.dblTotalAmount
 			,[dblCredit]				= @ZeroDecimal
 			,[dblDebitUnit]				= @ZeroDecimal
@@ -263,7 +271,7 @@ IF @post = 1
 		SELECT
 			 [dtmDate]					= @PostDate
 			,[strBatchID]				= @batchIdUsed
-			,[intAccountId]				= @intAPClearingAccountId
+			,[intAccountId]				= @intCommissionExpenseAccountId
 			,[dblDebit]					= @ZeroDecimal
 			,[dblCredit]				= COMM.dblTotalAmount
 			,[dblDebitUnit]				= @ZeroDecimal

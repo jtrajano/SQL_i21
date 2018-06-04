@@ -5,7 +5,6 @@ SELECT intCommissionId				= C.intCommissionId
 	 , intCommissionPlanId			= C.intCommissionPlanId
 	 , intEntityId					= C.intEntityId
 	 , intApproverEntityId			= C.intApproverEntityId
-	 , intBillId					= C.intBillId
 	 , intPaymentId					= C.intPaymentId
 	 , intPaycheckId				= C.intPaycheckId
 	 , dtmStartDate					= C.dtmStartDate
@@ -30,7 +29,6 @@ SELECT intCommissionId				= C.intCommissionId
 	 , strDateRange					= CONVERT(NVARCHAR(20), C.dtmStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), C.dtmEndDate, 101)
 	 , strBasis						= CP.strBasis
 	 , strCalculationType			= CP.strCalculationType	 
-	 , strBillId					= BILL.strBillId
 	 , strPaymentRecordNum			= PAYMENT.strPaymentRecordNum
 	 , strPaycheckId				= PAYCHECK.strPaycheckId
 	 , strCompanyName				= COMPANY.strCompanyName
@@ -55,11 +53,6 @@ LEFT JOIN (
 		 , strCommissionScheduleName
 	FROM dbo.tblARCommissionSchedule WITH (NOLOCK)
 ) CS ON C.intCommissionScheduleId = CS.intCommissionScheduleId
-LEFT JOIN (
-	SELECT intBillId
-		 , strBillId
-	FROM dbo.tblAPBill WITH (NOLOCK)
-) BILL ON C.intBillId = BILL.intBillId
 LEFT JOIN (
 	SELECT intPaymentId
 		 , strPaymentRecordNum 

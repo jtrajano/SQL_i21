@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPayCommission]
 	@strCommissionIds		NVARCHAR(MAX),
+	@intCompanyLocationId	INT,
 	@intUserId				INT
 AS
 
@@ -17,7 +18,7 @@ DECLARE @tblCommissions TABLE (
 	, ysnPayables			BIT
 	, dblTotalAmount		NUMERIC(18, 6)
 )
---DECLARE @intAPClearingAccountId		INT = (SELECT TOP 1 intAPClearingAccountId FROM dbo.tblARCompanyPreference)
+DECLARE @intAPAccountId				INT = (SELECT TOP 1 intAPAccount FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId)
 DECLARE @intDefaultCurrencyId		INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 
 INSERT INTO @tblCommissions (
@@ -46,17 +47,23 @@ WHERE COMM.ysnPosted = 1
 	AND (COMM.ysnConditional = 0 OR (COMM.ysnConditional = 1 AND COMM.ysnApproved = 1))
 	--AND (COMM.ysnPayroll = 1 AND COMM.ysnPayables = 1)
 
+IF ISNULL(@intCompanyLocationId, 0) = 0
+	BEGIN
+		RAISERROR('Company Location is required when paying Commissions.', 16, 1)
+		RETURN;
+	END
+
 IF ISNULL(@intUserId, 0) = 0
 	BEGIN
 		RAISERROR('User is required when paying Commissions.', 16, 1)
 		RETURN;
 	END
 
---IF ISNULL(@intAPClearingAccountId, 0) = 0
---	BEGIN
---		RAISERROR('AP Clearing Account was not set in Company Configuration.', 16, 1)
---		RETURN;
---	END
+IF ISNULL(@intAPAccountId, 0) = 0
+	BEGIN
+		RAISERROR('AP Account was not set in Company Location setup.', 16, 1)
+		RETURN;
+	END
 
 IF ISNULL(@intDefaultCurrencyId, 0) = 0
 	BEGIN
@@ -71,17 +78,16 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM @tblCommissions)
 	END
 ELSE
 	BEGIN
-		--CREATE VOUCHER AND PAY VOUCHER
+		--CREATE PAY VOUCHER
 		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnPayables = 1)
 			BEGIN
 				DECLARE @intCommissionPayableId INT = NULL
-					  , @intNewBillId			INT = NULL
 					  , @intNewPaymentId		INT = NULL
 					  , @intVendorId			INT = NULL
 					  , @strCommissionNumber	NVARCHAR(25) = ''
 					  , @dblTotalAmount			NUMERIC(18, 6) = 0
-					  , @ysnSuccess				BIT = 0
-					  , @tblVoucherDetail		VoucherDetailNonInventory
+					  , @dtmDatePaid			DATETIME = GETDATE()
+					  , @tblPaymentDetail		PaymentDetailStaging
 
 				SELECT TOP 1 @intCommissionPayableId = intCommissionId
 						   , @intVendorId			 = intEntityId
@@ -90,70 +96,46 @@ ELSE
 				FROM @tblCommissions 
 				WHERE ysnPayables = 1 ORDER BY intCommissionId ASC
 
-				INSERT INTO @tblVoucherDetail (
-					  [intAccountId]
-					, [intItemId]
-					, [strMiscDescription]
-					, [dblQtyReceived]
-					, [dblDiscount]
-					, [dblCost]
-					, [intTaxGroupId]
-					, [intInvoiceId]
+				INSERT INTO @tblPaymentDetail (
+					  intAccountId
+					, dblDiscount
+					, dblAmountDue
+					, dblPayment
+					, dblInterest
+					, dblTotal
+					, dblWithheld
 				)
-				SELECT [intAccountId]		= NULL
-					 , [intItemId]			= NULL
-					 , [strMiscDescription] = @strCommissionNumber
-					 , [dblQtyReceived]		= 1.00
-					 , [dblDiscount]		= 0.00
-					 , [dblCost]			= @dblTotalAmount
-					 , [intTaxGroupId]		= NULL
-					 , [intInvoiceId]		= NULL
+				SELECT intAccountId	= @intAPAccountId
+					, dblDiscount	= 0.00000
+					, dblAmountDue	= 0.00000
+					, dblPayment	= @dblTotalAmount
+					, dblInterest	= 0.00000
+					, dblTotal		= @dblTotalAmount
+					, dblWithheld	= 0.00000
 
-				--CREATE VOUCHER
-				EXEC dbo.[uspAPCreateBillData] @userId					= @intUserId
-											 , @vendorId				= @intVendorId
-											 , @type					= 1
-											 , @currencyId				= @intDefaultCurrencyId
-											 , @vendorOrderNumber		= @strCommissionNumber
-											 , @voucherNonInvDetails	= @tblVoucherDetail
-											 , @billId					= @intNewBillId OUT
-				
-				IF ISNULL(@intNewBillId, 0) > 0
+				--CREATE AND POST PAYMENT
+				EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
+												  , @notes				= @strCommissionNumber
+												  , @payment			= @dblTotalAmount
+												  , @datePaid			= @dtmDatePaid
+												  , @paymentDetail		= @tblPaymentDetail
+												  , @createdPaymentId	= @intNewPaymentId OUT
+
+				IF ISNULL(@intNewPaymentId, 0) <> 0
 					BEGIN
-						DECLARE @strNewBillId NVARCHAR(MAX) = CONVERT(NVARCHAR(50), @intNewBillId)
-
-						--POST VOUCHER
-						EXEC dbo.[uspAPPostBill] @param		= @strNewBillId
-											   , @post		= 1
-											   , @recap		= 0
-											   , @userId	= @intUserId
-											   , @success	= @ysnSuccess OUT
-
-						IF @ysnSuccess = 1
-							BEGIN
-								--CREATE AND POST PAYMENT
-								EXEC [dbo].[uspAPCreatePayment] @userId				= @intUserId
-															  , @payment			= @dblTotalAmount
-															  , @post				= 1
-															  , @billId				= @strNewBillId
-															  , @createdPaymentId	= @intNewPaymentId OUT
-							END
-
 						UPDATE dbo.tblARCommission
 						SET ysnPaid			= 1
-						  , intBillId		 = @intNewBillId
 						  , intPaymentId	= @intNewPaymentId
 						WHERE intCommissionId = @intCommissionPayableId
-					END
+					END				
 
 				DELETE FROM @tblCommissions WHERE intCommissionId = @intCommissionPayableId AND ysnPayables = 1
 			END		
 
-		--TODO: CREATE PAYCHECK
+		--CREATE PAYCHECK
 		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnPayroll = 1)
 			BEGIN
 				DECLARE @intCommissionPayrollId INT = NULL
-					  , @intNewPaygroupId		INT = NULL
 					  , @ysnSuccessPayroll		BIT = 0
 
 				SELECT TOP 1 @intCommissionPayrollId = intCommissionId 
@@ -164,11 +146,10 @@ ELSE
 													     , @intUserId = @intUserId
 														 , @isSuccessful = @ysnSuccessPayroll OUT
 
-				IF @ysnSuccessPayroll = 1 --AND @intNewPaygroupId IS NOT NULL
+				IF @ysnSuccessPayroll = 1
 					BEGIN
 						UPDATE dbo.tblARCommission
 						SET ysnPaid			= 1
-						  , intPaycheckId	= @intNewPaygroupId
 						WHERE intCommissionId = @intCommissionPayrollId
 					END
 

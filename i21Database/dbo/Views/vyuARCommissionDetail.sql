@@ -7,7 +7,7 @@ SELECT C.*
 	 , dblLineItemAmount		= ISNULL(CD.dblAmount, 0.00)
 	 , dtmSourceDate			= CD.dtmSourceDate
 	 , strSourceType			= CD.strSourceType
-	 , strDocumentNumber		= CASE WHEN CD.strSourceType = 'tblARInvoiceDetail'
+	 , strDocumentNumber		= CASE WHEN CD.strSourceType = 'tblARInvoice'
 											THEN INVOICE.strInvoiceNumber
 									   WHEN CD.strSourceType = 'tblHDTicketHoursWorked'
 											THEN HELPDESK.strTicketNumber
@@ -22,14 +22,10 @@ LEFT JOIN (
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) E ON CD.intEntityId = E.intEntityId
 OUTER APPLY (
-	SELECT TOP 1 I.strInvoiceNumber 
-	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intInvoiceId
-			 , strInvoiceNumber
-		FROM dbo.tblARInvoice WITH (NOLOCK) 
-	) I ON ID.intInvoiceId = I.intInvoiceId 
-	  AND ID.intInvoiceDetailId = CD.intSourceId
+	SELECT TOP 1intInvoiceId
+			, strInvoiceNumber
+	FROM dbo.tblARInvoice WITH (NOLOCK) 
+	WHERE I.intInvoiceId = CD.intSourceId
 ) INVOICE
 OUTER APPLY (
 	SELECT TOP 1 T.strTicketNumber 
