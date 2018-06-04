@@ -398,10 +398,12 @@ BEGIN
 			OUTER APPLY( --	AP-4269 TIMEOUT ISSUE
 					SELECT
 							(CASE WHEN item.intItemId IS NULL THEN billDetails.dblQtyReceived ELSE
-														dbo.fnCalculateQtyBetweenUOM(CASE WHEN billDetails.intWeightUOMId > 0 
-																THEN billDetails.intWeightUOMId ELSE billDetails.intUnitOfMeasureId 
-														END, 
-														itemUOM.intItemUOMId, CASE WHEN billDetails.intWeightUOMId > 0 THEN billDetails.dblNetWeight ELSE billDetails.dblQtyReceived END)
+														CASE WHEN item.strType = 'Inventory' THEN --units is only of inventory item
+															dbo.fnCalculateQtyBetweenUOM((CASE WHEN billDetails.intWeightUOMId > 0 
+																							THEN billDetails.intWeightUOMId ELSE billDetails.intUnitOfMeasureId END), 
+																						itemUOM.intItemUOMId,
+																						CASE WHEN billDetails.intWeightUOMId > 0 THEN billDetails.dblNetWeight ELSE billDetails.dblQtyReceived END)
+														ELSE 0 END
 									END) as dblTotalUnits
 						FROM tblAPBillDetail billDetails
 						LEFT JOIN tblICItem item ON F.intItemId = item.intItemId
