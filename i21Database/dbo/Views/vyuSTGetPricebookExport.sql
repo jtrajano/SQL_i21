@@ -17,13 +17,13 @@ SELECT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM
 	, UOM.strUnitMeasure
 	, ItemUOM.strUpcCode
 	, ItemUOM.strLongUPCCode
-	, ItemPricing.dblLastCost
-	, ItemPricing.dblSalePrice
-	, ItemUOM.dblUnitQty
-	, dblUOMCost = ItemUOM.dblUnitQty * ItemPricing.dblLastCost
+	, dblLastCost = CAST(ItemPricing.dblLastCost AS NUMERIC(18, 6))
+	, dblSalePrice = CAST(ItemPricing.dblSalePrice AS NUMERIC(18, 6))
+	, dblUnitQty = CAST(ItemUOM.dblUnitQty AS NUMERIC(18, 6))
+	, dblUOMCost = CAST(ItemUOM.dblUnitQty * ItemPricing.dblLastCost AS NUMERIC(18, 6))
 	, ItemUOM.ysnStockUnit
-	, ItemStock.dblAvailableQty
-	, ItemStock.dblOnHand
+	, dblAvailableQty = CAST(ItemStock.dblAvailableQty AS NUMERIC(18, 6))
+	, dblOnHand = CAST(ItemStock.dblOnHand AS NUMERIC(18, 6))
 	, CategoryLocation.intRegisterDepartmentId
 FROM tblICItemPricing ItemPricing
 LEFT JOIN tblICItem Item ON Item.intItemId = ItemPricing.intItemId
