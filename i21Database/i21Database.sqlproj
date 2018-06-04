@@ -6713,6 +6713,10 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessScaleTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateScaleTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
+    <Build Include="dbo\Tables\tblMBILInvoice.sql" />
+    <Build Include="dbo\Tables\tblMBILInvoiceItem.sql" />
+    <Build Include="dbo\Tables\tblMBILInvoiceSite.sql" />
+    <Build Include="dbo\Tables\tblMBILInvoiceTaxCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
