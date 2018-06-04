@@ -26,6 +26,7 @@
 	[intForexRateTypeId] INT NULL,
 	[dblForexRate] NUMERIC(18,6) NULL,
 	[intForexCurrencyId] INT NULL,
+	[dblForexAmount] NUMERIC(18,6) NULL,
 	[dblDeliveredQuantity] NUMERIC(18, 6) NULL,
 	[dblDeliveredGross] NUMERIC(18, 6) NULL,
 	[dblDeliveredTare] NUMERIC(18, 6) NULL,
