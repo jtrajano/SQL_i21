@@ -202,7 +202,7 @@ SELECT
 FROM @voucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
-INNER JOIN tblEMEntity entity ON C.[intEntityId] = entity.intEntityId
+INNER JOIN tblEMEntity entity ON C.[intEntityVendorId] = entity.intEntityId
 INNER JOIN tblICItem item ON B.intItemId = item.intItemId
 LEFT JOIN tblICItemBundle itemBundle ON itemBundle.intItemBundleId = A.intItemBundleId
 LEFT JOIN vyuSCGetScaleDistribution D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
@@ -996,7 +996,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE voucherDetails
 		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0) / (CASE WHEN voucherDetails.ysnSubCurrency = 1 THEN ISNULL(currency.intSubCurrencyCents,1) ELSE 1 END)
-		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
+		-- ,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
 		SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId

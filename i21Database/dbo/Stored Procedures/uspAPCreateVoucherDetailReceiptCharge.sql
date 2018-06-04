@@ -216,7 +216,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--recalculate tax if partial
 	UPDATE voucherDetails
 		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
-		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
+		-- ,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
 		SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
