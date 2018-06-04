@@ -134,9 +134,12 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
-		,@intTransactionTypeId = 34
-		,@ysnPosted = 1
+	--EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
+	--	,@intTransactionTypeId = 34
+	--	,@ysnPosted = 1
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderHeaderId
+			,34
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -749,9 +752,9 @@ BEGIN TRY
 		WHERE intTaskRecordId > @intMinTaskRecordId
 	END
 
-	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
-		,@intTransactionTypeId = 34
-		,@ysnPosted = 0
+	--EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
+	--	,@intTransactionTypeId = 34
+	--	,@ysnPosted = 0
 
 	IF @ysnLoad = 0
 	BEGIN
@@ -853,9 +856,9 @@ BEGIN TRY
 		DELETE
 		FROM @ItemsToReserve
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intOrderId
-			,34
+		--EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+		--	,@intOrderId
+		--	,34
 
 		INSERT INTO @ItemsToReserve (
 			intItemId

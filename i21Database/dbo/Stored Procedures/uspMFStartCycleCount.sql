@@ -757,14 +757,14 @@ BEGIN TRY
 					THEN ri.intStorageLocationId
 				ELSE (
 						CASE 
-							WHEN C.strCategoryCode = @strPackagingCategory
+							WHEN I.intCategoryId = @intPMCategoryId
 								THEN @intPMStageLocationId
 							ELSE M.intStagingLocationId
 							END
 						)
 				END
 			,CASE 
-				WHEN C.strCategoryCode = @strPackagingCategory
+				WHEN I.intCategoryId = @intPMCategoryId
 					AND P.dblMaxWeightPerPack > 0
 					THEN (
 							CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
@@ -773,7 +773,7 @@ BEGIN TRY
 										ELSE 0
 										END) AS NUMERIC(38, 20))
 							)
-				WHEN C.strCategoryCode = @strPackagingCategory
+				WHEN I.intCategoryId = @intPMCategoryId
 					THEN CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / r.dblQuantity)) + CASE 
 									WHEN ri.ysnPartialFillConsumption = 1
 										THEN (ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / r.dblQuantity))
@@ -814,7 +814,7 @@ BEGIN TRY
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
-		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		--JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 		JOIN @tblMFFinalProducedQtyByMachine M ON 1 = 1
 		WHERE ri.intWorkOrderId = @intWorkOrderId
@@ -845,14 +845,14 @@ BEGIN TRY
 					THEN RI.intStorageLocationId
 				ELSE (
 						CASE 
-							WHEN C.strCategoryCode = @strPackagingCategory
+							WHEN I.intCategoryId = @intPMCategoryId
 								THEN @intPMStageLocationId
 							ELSE M.intStagingLocationId
 							END
 						)
 				END
 			,CASE 
-				WHEN C.strCategoryCode = @strPackagingCategory
+				WHEN I.intCategoryId = @intPMCategoryId
 					AND P.dblMaxWeightPerPack > 0
 					THEN (
 							CAST(CEILING((RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
@@ -861,7 +861,7 @@ BEGIN TRY
 										ELSE 0
 										END) AS NUMERIC(38, 20))
 							)
-				WHEN C.strCategoryCode = @strPackagingCategory
+				WHEN I.intCategoryId = @intPMCategoryId
 					THEN CAST(CEILING((RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProduceQty) / r.dblQuantity)) + CASE 
 									WHEN RI.ysnPartialFillConsumption = 1
 										THEN (RI.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(M.intProduceUOMId, r.intItemUOMId, M.dblProducePartialQty) / r.dblQuantity))
@@ -904,7 +904,7 @@ BEGIN TRY
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = RI.intRecipeId
 			AND r.intWorkOrderId = RI.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		--JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
 		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = RSI.intItemUOMId
 		JOIN @tblMFFinalProducedQtyByMachine M ON 1 = 1
