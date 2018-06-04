@@ -68,7 +68,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	END
 
 	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
-	IF @APAccount IS NULL OR @APAccount <= 0
+	IF (@APAccount IS NULL OR @APAccount <= 0) AND @type NOT IN (2, 11)
 	BEGIN
 		SET @error =  'Please setup default AP Account.';
 		IF @throwError = 1

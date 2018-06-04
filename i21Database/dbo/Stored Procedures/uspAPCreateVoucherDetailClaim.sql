@@ -58,12 +58,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblCostUnitQty]				=	A.dblCostUnitQty				,
 		[dblWeightUnitQty]				=	A.dblWeightUnitQty				,
 		[dblUnitQty]					=	A.dblUnitQty					,
-		[dblTotal]						=	A.dblCost * A.dblQtyReceived	,
+		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived AS DECIMAL(18,2)),
 		[dblNetShippedWeight]			=	A.dblNetShippedWeight			,
 		[dblFranchiseWeight]			=	A.dblFranchiseWeight			,
 		[dblFranchiseAmount]			=	A.dblFranchiseAmount			,
 		[dblWeightLoss]					=	A.dblWeightLoss					,
-		[dblClaimAmount]				=	A.dblCost * A.dblQtyReceived	,
+		[dblClaimAmount]				=	CAST(A.dblCost * A.dblQtyReceived AS DECIMAL(18,2)),
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]				=	A.dblQtyReceived,
 		[dblCost]						=	A.dblCost,
@@ -87,13 +87,27 @@ IF @transCount = 0 BEGIN TRANSACTION
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
-	INNER JOIN (tblAPBill prepayTransaction 
+	LEFT JOIN (tblAPBill prepayTransaction 
 					INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2)
 			ON prepayDetail.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
 	WHERE B.intBillId = @voucherId
+
+	--UPDATE VOUCHER AP ACCOUNT WITH THE CORRECT PREPAID ACCOUNT USED ON THE PREPAYMENT
+	UPDATE A
+		SET A.intAccountId = ISNULL(prepay.intAccountId, A.intAccountId)
+	FROM tblAPBill A
+	CROSS APPLY (
+		SELECT TOP 1
+			B.intAccountId
+		FROM tblAPBill B
+		INNER JOIN tblAPBillDetail C ON C.intPrepayTransactionId = B.intBillId
+		WHERE C.intBillId = A.intBillId
+	) prepay
+
+	WHERE A.intBillId = @voucherId
 	
 	INSERT INTO @voucherIds
 	SELECT @voucherId
