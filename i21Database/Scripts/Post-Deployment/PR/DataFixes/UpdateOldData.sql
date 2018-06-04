@@ -123,6 +123,31 @@ EXEC('
 END
 
 /*
+* Template Earnings
+* 1. Add default sorting to Template Earnings
+* 2...
+*/
+
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRTemplateEarning'))
+BEGIN
+
+EXEC('
+	--Check if Sorting has never been applied (no intSort greater than 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intSort > 1)
+
+	UPDATE tblPRTemplateEarning
+		SET intSort = intRank
+	FROM 
+		tblPRTemplateEarning
+		INNER JOIN (SELECT intTemplateEarningId, 
+						DENSE_RANK() OVER(PARTITION BY intTemplateId ORDER BY intTypeEarningId) intRank 
+					FROM tblPRTemplateEarning) tblPRTemplateEarning_Ranked
+						ON tblPRTemplateEarning.intTemplateEarningId = tblPRTemplateEarning_Ranked.intTemplateEarningId')
+
+
+END
+
+/*
 * Tax Types
 * 1. Add default Employer State Tax ID to USA State and USA Local types
 * 2...
