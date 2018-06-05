@@ -31,7 +31,7 @@ SELECT
 	 , B.strPONumber
 	 , B.intLineNo
 	 , C.strVendorId
-	 , C.[intEntityId]
+	 , A.[intEntityVendorId]
 	 , C2.strName
 	 , D.strItemNo
 	 , D.strLotTracking
