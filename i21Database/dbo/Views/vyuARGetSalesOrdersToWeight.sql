@@ -50,6 +50,7 @@ INNER JOIN (
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)	
 	WHERE SO.strOrderStatus NOT IN ('Closed', 'Short Closed', 'Cancelled')
 	  AND SO.strTransactionType = 'Order'
+	  AND SO.ysnRejected = 0
 ) SO ON SOD.intSalesOrderId = SO.intSalesOrderId
 INNER JOIN (
 	SELECT intCompanyLocationId

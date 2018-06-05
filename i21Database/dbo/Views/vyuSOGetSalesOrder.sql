@@ -1,10 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSOGetSalesOrder]
-	AS 
-	
-	
-	
+AS 
 SELECT 
-
 	SO.intSalesOrderId,
     SO.strSalesOrderNumber,
     SO.intEntityCustomerId,
@@ -63,6 +59,7 @@ SELECT
     SO.ysnRecurring,
     SO.ysnQuote,
     SO.ysnPreliminaryQuote,
+	SO.ysnRejected,
     SO.intOrderedById,
     SO.intSplitId,
     SO.strLostQuoteCompetitor,

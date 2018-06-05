@@ -1,9 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARGetInvoice]
-	AS 
-	
-	
+AS 
 SELECT 
-	
 	INV.intInvoiceId,
     INV.strInvoiceNumber,
     INV.strTransactionType,
@@ -96,7 +93,8 @@ SELECT
     INV.intTruckDriverId,
     INV.intTruckDriverReferenceId,
     INV.intConcurrencyId,
-    INV.ysnCancelled,                                      
+    INV.ysnCancelled,    
+	INV.ysnRejected,                                  
     INV.intLineOfBusinessId,
 	INV.strBOLNumber,
 	INV.intICTId,
