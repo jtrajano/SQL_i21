@@ -24,12 +24,23 @@ FROM (
 		, intItemId					= ContractView.intItemId
 		, strItemNo					= ContractView.strItemNo
 		, strItemDescription		= ContractView.strItemDescription
-		, dblQtyToReceive			= CASE WHEN ContractView.ysnLoad = 1 THEN dbo.fnMultiply((ContractView.intNoOfLoad - ContractView.intLoadReceived), ContractView.dblQuantityPerLoad)
-											ELSE ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance) END
+		, dblQtyToReceive			= 
+					CASE	
+						WHEN ContractView.ysnLoad = 1 THEN 
+							dbo.fnMultiply((ContractView.intNoOfLoad - ContractView.intLoadReceived), ContractView.dblQuantityPerLoad)
+						ELSE 
+							ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance) 
+					END
 		, ysnLoad					= CAST(ContractView.ysnLoad AS BIT)
 		, dblAvailableQty			= ContractView.dblAvailableQty
 		, intNoOfLoad				= ContractView.intNoOfLoad
-		, intLoadReceive			= CASE WHEN ContractView.ysnLoad = 1 THEN ContractView.intLoadReceived ELSE CAST(0 AS INT) END
+		, intLoadReceive			= 
+					CASE 
+						WHEN ContractView.ysnLoad = 1 THEN 
+							ISNULL(ContractView.intNoOfLoad, 0) - ISNULL(ContractView.intLoadReceived, 0)
+						ELSE 
+							CAST(0 AS INT) 
+					END
 		, dblQuantityPerLoad		= ISNULL(ContractView.dblQuantityPerLoad, 0)
 		, dblUnitCost				= ContractView.dblSeqPrice
 		, dblTax					= CAST(0 AS NUMERIC(18, 6))
