@@ -1215,8 +1215,8 @@ BEGIN
 	SELECT 
 		[strReceiptType]		= RE.strReceiptType
 		,[intItemId]			= RE.intItemId
-		,[intLotId]				= NULL --RE.intLotId
-		,[strLotNumber]			= NULL --SC.strLotNumber
+		,[intLotId]				= RE.intLotId
+		,[strLotNumber]			= SC.strLotNumber
 		,[intLocationId]		= RE.intLocationId
 		,[intShipFromId]		= RE.intShipFromId
 		,[intShipViaId]			= RE.intShipViaId
