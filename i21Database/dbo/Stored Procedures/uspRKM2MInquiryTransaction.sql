@@ -1886,18 +1886,19 @@ FROM (
 										+ 
 										isnull(dblCash,0) 
 										) 
-										/ ISNULL((SELECT TOP 1 
-											FX.[dblRate]
-										FROM 
-											[vyuSMForex]  FX
-										INNER JOIN [tblCTContractDetail] DTL ON FX.intCurrencyExchangeRateId = DTL.intCurrencyExchangeRateId
-										WHERE 
-											[intFromCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'CAD')
-											AND [intToCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') 
-											AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
-											AND DTL.intContractDetailId = #Temp.intContractDetailId
-										ORDER BY
-												[dtmValidFromDate] DESC),@dblRateConfiguration))
+										/ ISNULL((SELECT dblRate 
+												FROM tblCTContractDetail
+												WHERE dtmFXValidFrom < GETDATE() ANd dtmFXValidTo > GETDATE()
+												AND ISNULL(dblRate,0)  <> 0
+												AND intCurrencyExchangeRateId = (
+													select top 1 intCurrencyExchangeRateId 
+													from tblSMCurrencyExchangeRate CER
+														inner join tblSMCurrency Cur1 ON CER.intFromCurrencyId = Cur1.intCurrencyID
+														inner join tblSMCurrency Cur2 on CER.intToCurrencyId = Cur2.intCurrencyID
+													where Cur1.strCurrency = 'CAD' 
+														and Cur2.strCurrency = 'USD'
+												)
+												AND intContractDetailId = #Temp.intContractDetailId),@dblRateConfiguration))
 										-
 										case when strPricingType = 'Ratio' and strPriOrNotPriOrParPriced = 'Unpriced' then 
 												dblFuturePrice 
@@ -1961,18 +1962,19 @@ FROM (
 										((
 										isnull(dblMarketBasis,0)+(isnull(dblFuturePrice,0) * isnull(dblMarketRatio,1))+isnull(dblCashPrice,0)
 										) 
-										/ ISNULL((SELECT TOP 1 
-											FX.[dblRate]
-										FROM 
-											[vyuSMForex]  FX
-										INNER JOIN [tblCTContractDetail] DTL ON FX.intCurrencyExchangeRateId = DTL.intCurrencyExchangeRateId
-										WHERE 
-											[intFromCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'CAD')
-											AND [intToCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') 
-											AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
-											AND DTL.intContractDetailId = #Temp.intContractDetailId
-										ORDER BY
-												[dtmValidFromDate] DESC),@dblRateConfiguration))
+										/ ISNULL((SELECT dblRate 
+												FROM tblCTContractDetail
+												WHERE dtmFXValidFrom < GETDATE() ANd dtmFXValidTo > GETDATE()
+												AND ISNULL(dblRate,0)  <> 0
+												AND intCurrencyExchangeRateId = (
+													select top 1 intCurrencyExchangeRateId 
+													from tblSMCurrencyExchangeRate CER
+														inner join tblSMCurrency Cur1 ON CER.intFromCurrencyId = Cur1.intCurrencyID
+														inner join tblSMCurrency Cur2 on CER.intToCurrencyId = Cur2.intCurrencyID
+													where Cur1.strCurrency = 'CAD' 
+														and Cur2.strCurrency = 'USD'
+												)
+												AND intContractDetailId = #Temp.intContractDetailId),@dblRateConfiguration))
 										-
 										isnull(dblFuturePrice,0)
 									ELSE --Configuration
@@ -2025,18 +2027,19 @@ FROM (
 										+ 
 										dblCosts
 										) 
-										/ ISNULL((SELECT TOP 1 
-											FX.[dblRate]
-										FROM 
-											[vyuSMForex]  FX
-										INNER JOIN [tblCTContractDetail] DTL ON FX.intCurrencyExchangeRateId = DTL.intCurrencyExchangeRateId
-										WHERE 
-											[intFromCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'CAD')
-											AND [intToCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') 
-											AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
-											AND DTL.intContractDetailId = #Temp.intContractDetailId
-										ORDER BY
-												[dtmValidFromDate] DESC),@dblRateConfiguration)
+										/ ISNULL((SELECT dblRate 
+												FROM tblCTContractDetail
+												WHERE dtmFXValidFrom < GETDATE() ANd dtmFXValidTo > GETDATE()
+												AND ISNULL(dblRate,0)  <> 0
+												AND intCurrencyExchangeRateId = (
+													select top 1 intCurrencyExchangeRateId 
+													from tblSMCurrencyExchangeRate CER
+														inner join tblSMCurrency Cur1 ON CER.intFromCurrencyId = Cur1.intCurrencyID
+														inner join tblSMCurrency Cur2 on CER.intToCurrencyId = Cur2.intCurrencyID
+													where Cur1.strCurrency = 'CAD' 
+														and Cur2.strCurrency = 'USD'
+												)
+												AND intContractDetailId = #Temp.intContractDetailId),@dblRateConfiguration)
 									ELSE --Configuration
 										(isnull(dblContractBasis,0) 
 										+ 
@@ -2102,18 +2105,19 @@ FROM (
 										(
 										isnull(dblMarketBasis,0)+(isnull(dblFuturePrice,0) * isnull(dblMarketRatio,1))+isnull(dblCashPrice,0)
 										) 
-										/ ISNULL((SELECT TOP 1 
-											FX.[dblRate]
-										FROM 
-											[vyuSMForex]  FX
-										INNER JOIN [tblCTContractDetail] DTL ON FX.intCurrencyExchangeRateId = DTL.intCurrencyExchangeRateId
-										WHERE 
-											[intFromCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'CAD')
-											AND [intToCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') 
-											AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
-											AND DTL.intContractDetailId = #Temp.intContractDetailId
-										ORDER BY
-												[dtmValidFromDate] DESC),@dblRateConfiguration)
+										/ ISNULL((SELECT dblRate 
+												FROM tblCTContractDetail
+												WHERE dtmFXValidFrom < GETDATE() ANd dtmFXValidTo > GETDATE()
+												AND ISNULL(dblRate,0)  <> 0
+												AND intCurrencyExchangeRateId = (
+													select top 1 intCurrencyExchangeRateId 
+													from tblSMCurrencyExchangeRate CER
+														inner join tblSMCurrency Cur1 ON CER.intFromCurrencyId = Cur1.intCurrencyID
+														inner join tblSMCurrency Cur2 on CER.intToCurrencyId = Cur2.intCurrencyID
+													where Cur1.strCurrency = 'CAD' 
+														and Cur2.strCurrency = 'USD'
+												)
+												AND intContractDetailId = #Temp.intContractDetailId),@dblRateConfiguration)
 									ELSE --Configuration
 										(
 										isnull(dblMarketBasis,0)+(isnull(dblFuturePrice,0) * isnull(dblMarketRatio,1))+isnull(dblCashPrice,0)
@@ -2156,18 +2160,19 @@ FROM (
 										+ 
 										isnull(dblCash,0) 
 										) 
-										/ ISNULL((SELECT TOP 1 
-											FX.[dblRate]
-										FROM 
-											[vyuSMForex]  FX
-										INNER JOIN [tblCTContractDetail] DTL ON FX.intCurrencyExchangeRateId = DTL.intCurrencyExchangeRateId
-										WHERE 
-											[intFromCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'CAD')
-											AND [intToCurrencyId] = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD') 
-											AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
-											AND DTL.intContractDetailId = #Temp.intContractDetailId
-										ORDER BY
-												[dtmValidFromDate] DESC),@dblRateConfiguration)
+										/ ISNULL((SELECT dblRate 
+												FROM tblCTContractDetail
+												WHERE dtmFXValidFrom < GETDATE() ANd dtmFXValidTo > GETDATE()
+												AND ISNULL(dblRate,0)  <> 0
+												AND intCurrencyExchangeRateId = (
+													select top 1 intCurrencyExchangeRateId 
+													from tblSMCurrencyExchangeRate CER
+														inner join tblSMCurrency Cur1 ON CER.intFromCurrencyId = Cur1.intCurrencyID
+														inner join tblSMCurrency Cur2 on CER.intToCurrencyId = Cur2.intCurrencyID
+													where Cur1.strCurrency = 'CAD' 
+														and Cur2.strCurrency = 'USD'
+												)
+												AND intContractDetailId = #Temp.intContractDetailId),@dblRateConfiguration)
 									ELSE --Configuration
 										(isnull(dblContractBasis,0) 
 										+ 
