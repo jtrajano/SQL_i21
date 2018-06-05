@@ -460,10 +460,10 @@ BEGIN TRANSACTION
 			SELECT intItemId
 					-- Original Fields
 					,CAST((SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = intCategoryId_Original) AS NVARCHAR(100)) AS strCategoryId_Original
-					,CAST(strDescription_Original AS NVARCHAR(100)) AS strDescription_Original
+					,CAST(ISNULL(strDescription_Original, '') AS NVARCHAR(100)) AS strDescription_Original
 					-- Modified Fields
 					,CAST((SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = intCategoryId_New) AS NVARCHAR(100)) AS strCategoryId_New
-					,CAST(strDescription_New AS NVARCHAR(100)) AS strDescription_New
+					,CAST(ISNULL(strDescription_New, '') AS NVARCHAR(100)) AS strDescription_New
 			FROM #tmpUpdateItemForCStore_itemAuditLog
 		) t
 		unpivot
@@ -478,7 +478,7 @@ BEGIN TRANSACTION
 		
 	) [Changes]
 	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-	JOIN tblICItemSpecialPricing IP ON I.intItemId = IP.intItemId
+	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
 	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
@@ -542,7 +542,7 @@ BEGIN TRANSACTION
 		
 	) [Changes]
 	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-	JOIN tblICItemSpecialPricing IP ON I.intItemId = IP.intItemId
+	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
 	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
@@ -608,7 +608,7 @@ BEGIN TRANSACTION
 		
 	) [Changes]
 	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-	JOIN tblICItemSpecialPricing IP ON I.intItemId = IP.intItemId
+	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
 	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
@@ -656,11 +656,11 @@ BEGIN TRANSACTION
 					-- Original Fields 
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intFamilyId_Original) AS NVARCHAR(1000)) AS strFamilyId_Original
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intClassId_Original) AS NVARCHAR(1000)) AS strClassId_Original
-					,strDescription_Original
+					,CAST(ISNULL(strDescription_Original, '') AS NVARCHAR(1000)) AS strDescription_Original
 					-- Modified Fields
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intFamilyId_New) AS NVARCHAR(1000)) AS strFamilyId_New
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intClassId_New) AS NVARCHAR(1000)) AS strClassId_New
-					,strDescription_New
+					,CAST(ISNULL(strDescription_New, '') AS NVARCHAR(1000)) AS strDescription_New
 			FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog
 		) t
 		unpivot
@@ -675,7 +675,7 @@ BEGIN TRANSACTION
 		
 	) [Changes]
 	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-	JOIN tblICItemSpecialPricing IP ON I.intItemId = IP.intItemId
+	JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
 	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
 	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId

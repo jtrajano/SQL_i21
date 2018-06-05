@@ -132,8 +132,8 @@ BEGIN TRY
 												WHEN @strType = 'Item Level' THEN MUD.dblRetailPerUnit ELSE 0
 											END -- Required field so specify zero or the sales price used when selling the item. 
 			
-					,intTransactionId		= @intMarkUpDownId
-					,intTransactionDetailId	= NULL
+					,intTransactionId		= @intMarkUpDownId -- Parent Id
+					,intTransactionDetailId	= MUD.intMarkUpDownDetailId -- Child Id
 					,strTransactionId		= @strMarkUpDownBatchId -- 'POS-10001'
 					,intTransactionTypeId	= @intCategoryAdjustmentType -- 49 50 33 -- For demo purposes, use 33, the transaction type for Invoice. 
 					,intSubLocationId		= NULL -- Optional
