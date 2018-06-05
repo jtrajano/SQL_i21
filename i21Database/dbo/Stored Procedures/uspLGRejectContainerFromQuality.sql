@@ -106,7 +106,7 @@ BEGIN TRY
 							@dblQuantityToUpdate	= @dblContainerLinkQty,
 							@intUserId				= @intEntityUserId,
 							@intExternalId			= @intLoadDetailId,
-							@strScreenName			= 'Sample / Load Schedule',
+							@strScreenName			= 'Load Schedule',
 							@intSourceItemUOMId		= @intLoadDetailItemUOMId
 				
 			SELECT @intRecordId = MIN(intRecordId) FROM @tblLoadContract WHERE intRecordId > @intRecordId
