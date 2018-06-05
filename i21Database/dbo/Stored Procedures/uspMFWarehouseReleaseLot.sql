@@ -52,6 +52,7 @@ BEGIN TRY
 		,@strAttributeValueByBatch NVARCHAR(50)
 		,@intCategoryId INT
 		,@intReleaseStatusId INT
+		,@strRestrictProduceQtybyCasesperPallet nvarchar(50)
 	DECLARE @intManufacturingCellId INT
 		,@intLotCreatedShiftId INT
 		,@dtmBusinessDate DATETIME
@@ -116,6 +117,17 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeIdByBatch
+
+	SELECT @strRestrictProduceQtybyCasesperPallet = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 93--Restrict Produce Qty by Cases per Pallet
+
+		if @strRestrictProduceQtybyCasesperPallet ='' or @strRestrictProduceQtybyCasesperPallet is null
+		Begin
+			Select @strRestrictProduceQtybyCasesperPallet='False'
+		End
 
 	IF @strAttributeValueByBatch = 'True'
 	BEGIN
@@ -189,7 +201,7 @@ BEGIN TRY
 		--	)
 	BEGIN
 		RAISERROR (
-				'The pallet lot quantity cannot exceed more than  item''s cases per pallet. Please check produce quantity.'
+				'Lot has already been released!.'
 				,11
 				,1
 				)
@@ -205,7 +217,7 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 
 	IF @CasesPerPallet > 0
-		AND @dblReleaseQty > @CasesPerPallet
+		AND @dblReleaseQty > @CasesPerPallet and @strRestrictProduceQtybyCasesperPallet='True'
 	BEGIN
 		RAISERROR (
 				'The pallet lot quantity cannot exceed more than  item''s cases per pallet. Please check produce quantity.'
