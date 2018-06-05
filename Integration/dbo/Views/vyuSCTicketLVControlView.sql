@@ -40,10 +40,11 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 					ELSE NULL
 				END ) AS dtmTareDateTime
 				,LTRIM(RTRIM(gasct_comment)) COLLATE Latin1_General_CI_AS AS strTicketComment
-				,(CASE WHEN gasct_disc_schd_no > 0 
+				,CAST((CASE WHEN gasct_disc_schd_no > 0 
 					THEN gasct_disc_schd_no 
 					ELSE NULL
-					END) AS strDiscountId
+					END
+				) AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS AS strDiscountId
 				,gasct_trkr_un_rt AS dblFreightRate
 				,gasct_trkr_no COLLATE Latin1_General_CI_AS AS strHaulerName
 				,gasct_fees AS dblTicketFees
@@ -348,7 +349,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 							SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
 							FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
 				)b 
-				INNER JOIN tblSCTicketLVStaging k ON	k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
+				INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
 				INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  CONCAT((ic.strDescription COLLATE Latin1_General_CI_AS), ('' Discount'' COLLATE Latin1_General_CI_AS))
 				INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
