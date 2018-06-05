@@ -282,6 +282,7 @@ BEGIN TRY
 						,@ysnPostConsumption = 1
 						,@intBatchId = @intBatchId
 						,@ysnPostGL = @ysnPostGL
+						,@dtmDate=@dtmCurrentDateTime
 				END
 				ELSE
 				BEGIN
@@ -371,6 +372,7 @@ BEGIN TRY
 						,@ysnPostConsumption = 1
 						,@intBatchId = @intBatchId
 						,@ysnPostGL = @ysnPostGL
+						,@dtmDate=@dtmCurrentDateTime
 				END
 
 				SELECT @intMachineId = MIN(intMachineId)
