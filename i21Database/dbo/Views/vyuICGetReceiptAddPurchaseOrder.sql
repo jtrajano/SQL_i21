@@ -6,7 +6,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 FROM (
 	SELECT 	
 		intLocationId
-		, [intEntityId]
+		, intEntityId = POView.intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
 		, strReceiptType = 'Purchase Order'
