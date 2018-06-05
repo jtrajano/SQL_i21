@@ -864,7 +864,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@ysnRegenerateBillGLEntries
 			END
-			IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
+
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
 			BEGIN 
 				--PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
 				
@@ -872,6 +873,16 @@ BEGIN
 				EXEC uspICRepostSettleStorageCostAdjustment
 					@strTransactionId
 					,@strBatchId
+					,@intEntityUserSecurityId
+			END
+
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Produce', 'Consume'))
+			BEGIN 
+				--PRINT 'Reposting MFG Cost Adjustments: ' + @strTransactionId
+				
+				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
+				EXEC uspMFRepostCostAdjustment
+					@strBatchId
 					,@intEntityUserSecurityId
 			END
 
@@ -1649,7 +1660,7 @@ BEGIN
 							,intStorageLocationId	= ISNULL(AdjDetail.intNewStorageLocationId, AdjDetail.intStorageLocationId)
 							,strActualCostId		= FromStock.strActualCostId 
 							,intForexRateTypeId		= NULL
-							,dblForexRate			= NULL 
+							,dblForexRate			= 1 
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
