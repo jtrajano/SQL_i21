@@ -24,7 +24,7 @@ BEGIN
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	JOIN tblLGLoadStorageCost SC ON SC.intLoadDetailLotId = LDL.intLoadDetailLotId
 	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId	
-	JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = SC.intCurrency
+	JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = SC.intPriceCurrencyId
 	JOIN tblICItemUOM PriceItemUOM ON PriceItemUOM.intItemUOMId = SC.intPriceUOMId
 	JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = PriceItemUOM.intUnitMeasureId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
