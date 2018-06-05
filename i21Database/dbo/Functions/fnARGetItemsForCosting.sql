@@ -189,7 +189,7 @@ WHERE
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	AND ((@ForValidation = 1 AND ISNULL(IST.[strType],'') <> 'Finished Good') OR (@ForValidation = 0))
-	AND (((ISNULL(T.[intTicketTypeId], 0) = 9 OR (ISNULL(T.[intTicketType], 0) = 6 AND ISNULL(T.[strInOutFlag], '') = 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
+	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 0)
 
 UNION ALL
