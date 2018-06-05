@@ -49,11 +49,20 @@ BEGIN
 		,@ysnPickAllowed BIT
 		,@ysnSendEDIOnRepost BIT
 
+		SELECT @strLifeTimeType = strLifeTimeType
+			,@intLifeTime = intLifeTime
+			,@intCategoryId = intCategoryId
+			,@strLotTracking = strLotTracking
+			,@ysnRequireCustomerApproval = ysnRequireCustomerApproval
+			,@intLotDueDays=dblCaseWeight
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+
 	SELECT @ysnPickByLotCode = ysnPickByLotCode
 		,@intLotCodeStartingPosition = intLotCodeStartingPosition
 		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
 		,@intDamagedStatusId = intDamagedStatusId
-		,@intLotDueDays = intLotDueDays
+		,@intLotDueDays = IsNULL(@intLotDueDays,intLotDueDays)
 		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 		,@ysnSendEDIOnRepost=ysnSendEDIOnRepost
 	FROM tblMFCompanyPreference
@@ -67,10 +76,7 @@ BEGIN
 
 	If @intSplitFromLotId is null and @ysnLifeTimeByEndOfMonth=1
 	Begin
-		SELECT @strLifeTimeType = strLifeTimeType
-			,@intLifeTime = intLifeTime
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
+
 
 		If @strLifeTimeType = 'Months'
 		Begin
@@ -89,9 +95,7 @@ BEGIN
 	IF @strParentLotNumber IS NULL
 		OR @strParentLotNumber = ''
 	BEGIN
-		SELECT @intCategoryId = intCategoryId
-		FROM tblICItem
-		WHERE intItemId = @intItemId
+
 
 		IF @intShiftId IS NULL
 		BEGIN
@@ -175,10 +179,7 @@ BEGIN
 		BEGIN
 			SELECT @dtmManufacturedDate = DATEADD(day, CAST(RIGHT(@strLotCode, 3) AS INT) - 1, CONVERT(DATETIME, LEFT(@strLotCode, 2) + '0101', 112))
 
-			SELECT @strLifeTimeType = strLifeTimeType
-				,@intLifeTime = intLifeTime
-			FROM dbo.tblICItem
-			WHERE intItemId = @intItemId
+
 
 			IF @strLifeTimeType = 'Years'
 				SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmManufacturedDate)
@@ -263,9 +264,7 @@ BEGIN
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'
 	BEGIN
-		SELECT @strLotTracking = strLotTracking
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
+
 
 		IF @intDamagedStatusId IS NOT NULL
 			AND NOT EXISTS (
@@ -306,9 +305,7 @@ BEGIN
 			SELECT @dtmDueDate = DateAdd(dd, @intLotDueDays, @dtmCurrentDateTime)
 		END
 
-		SELECT @ysnRequireCustomerApproval = ysnRequireCustomerApproval
-		FROM tblICItem
-		WHERE intItemId = @intItemId
+
 
 		SELECT @intInventoryReceiptId = intInventoryReceiptId
 		FROM tblICInventoryReceipt
