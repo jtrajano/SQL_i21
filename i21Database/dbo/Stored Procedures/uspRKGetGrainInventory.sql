@@ -205,14 +205,14 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 UNION ALL --Delivery Sheet
 SELECT
 	CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,
-	'' strDistributionOption,
+	DSS.strDistributionOption,
 	'' strShipDistributionOption,
 	'' as strAdjDistributionOption,
 	'' as strCountDistributionOption,
 	'' as tranShipmentNumber,
-	(CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END)  tranShipQty,
+	(CASE WHEN strInOutFlag='O' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END)  tranShipQty,
 	'' tranReceiptNumber,
-	(CASE WHEN strInOutFlag='I' THEN dblNetUnits  ELSE 0 END) tranRecQty,
+	(CASE WHEN strInOutFlag='I' THEN dblNetUnits * (DSS.dblSplitPercent/100) ELSE 0 END) tranRecQty,
 	'' tranAdjNumber,
 	0.0 dblAdjustmentQty,
 	'' tranCountNumber,
@@ -231,6 +231,7 @@ SELECT
 FROM tblSCTicket st
 	JOIN tblICItem i on i.intItemId=st.intItemId
 	JOIN tblSCDeliverySheet DS ON st.intDeliverySheetId = DS.intDeliverySheetId
+	JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId
 WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
