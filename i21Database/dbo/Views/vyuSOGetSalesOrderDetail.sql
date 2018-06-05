@@ -80,6 +80,7 @@ SELECT
 
         strWeightUnitMeasure = ITMWUOM.strUnitMeasure,
         strStorageLocation = SLOC.strName,
+    	strSubLocation = isnull(SMSLOC.strSubLocationName, ''),
         strContractNumber = CDET.strContractNumber,
         intContractSeq = CDET.intContractSeq,
         strItemType = ITMNO.strType,
@@ -150,7 +151,9 @@ SELECT
 		LEFT JOIN ( SELECT		intStorageLocationId,	strName 
 			FROM tblICStorageLocation  WITH(NOLOCK)) SLOC
 		ON SO.intStorageLocationId = SLOC.intStorageLocationId
-
+		LEFT JOIN ( SELECT intCompanyLocationSubLocationId, strSubLocationName
+				FROM tblSMCompanyLocationSubLocation WITH(NOLOCK)) SMSLOC
+		ON SO.intSubLocationId = SMSLOC.intCompanyLocationSubLocationId
 		LEFT JOIN ( SELECT		intContractDetailId,	strContractNumber,
 								intContractSeq,			intPricingTypeId,
 								strPricingType,			ysnLoad
