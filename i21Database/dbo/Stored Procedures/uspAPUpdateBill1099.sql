@@ -17,14 +17,17 @@ CREATE TABLE #tmpPayables (
 INSERT INTO #tmpPayables SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
 UPDATE A
-	SET A.dbl1099 = (CASE WHEN C.ysnPosted = 1 THEN A.dbl1099 + (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) 
-									ELSE A.dbl1099 - (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) END)
-						* (CASE WHEN B.intTransactionType NOT IN (1, 14) THEN -1 ELSE 1 END)
+	SET A.dbl1099 = CASE WHEN patRef.intBillId IS NOT NULL THEN A.dbl1099 ELSE
+						(CASE WHEN C.ysnPosted = 1 THEN A.dbl1099 + (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) 
+										ELSE A.dbl1099 - (((A.dblTotal + A.dblTax) / B.dblTotal) * C2.dblPayment) END)
+							* (CASE WHEN B.intTransactionType NOT IN (1, 14) THEN -1 ELSE 1 END)
+					END
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 INNER JOIN (tblAPPayment C INNER JOIN tblAPPaymentDetail C2 ON C.intPaymentId = C2.intPaymentId)
 ON B.intBillId = C2.intBillId
 INNER JOIN #tmpPayables D ON C.intPaymentId = D.intPaymentId
+LEFT JOIN tblPATRefundCustomer patRef ON patRef.intBillId = B.intBillId
 WHERE A.int1099Form > 0
 
 IF @transCount = 0 COMMIT TRANSACTION

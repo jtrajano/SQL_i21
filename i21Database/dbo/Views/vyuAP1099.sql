@@ -125,5 +125,6 @@ LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEn
     ON C.[intEntityId] = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D
 	ON C.[intEntityId] = D.intEntityId AND D.ysnDefaultLocation = 1     
+LEFT JOIN tblPATRefundCustomer patRef ON patRef.intBillId = B.intBillId
 WHERE ((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) OR B.intTransactionType = 9) AND A.int1099Form <> 0
-AND C2.ysnPrint1099 = 1
+AND C2.ysnPrint1099 = 1 OR patRef.intBillId IS NOT NULL
