@@ -44,7 +44,7 @@ BEGIN
 			, I.strItemNo AS strItemNo
 			, I.strDescription AS strItemDescription
 	FROM tblSTStoreTaxTotals STT
-	JOIN tblSTStore ST ON STT.intStoreId = ST.intStoreNo
+	JOIN tblSTStore ST ON STT.intStoreId = ST.intStoreId
 	JOIN tblSMTaxCode TC ON STT.intTaxCodeId = TC.intTaxCodeId
 	JOIN tblICItem I ON STT.intItemId = I.intItemId
 	WHERE STT.intStoreId = @intStoreId
