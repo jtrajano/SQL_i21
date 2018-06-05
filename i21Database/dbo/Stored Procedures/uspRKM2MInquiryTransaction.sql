@@ -27,6 +27,8 @@ SELECT @strLocationName=strLocationName from tblSMCompanyLocation where intCompa
 SELECT @ysnIncludeInventoryM2M= ysnIncludeInventoryM2M from tblRKCompanyPreference
 SELECT @ysnCanadianCustomer = isnull(ysnCanadianCustomer,0) FROM tblRKCompanyPreference
 
+
+
 DECLARE @tblFinalDetail TABLE (
        intContractHeaderId int,   
        intContractDetailId int
@@ -117,23 +119,36 @@ DECLARE @tblSettlementPrice TABLE (
 INSERT INTO @tblSettlementPrice 
 SELECT intContractDetailId, 
 dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId,
-dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,cd.intFutureMonthId,@dtmSettlemntPriceDate)/
+		(	SELECT TOP 1  dblLastSettle
+			FROM tblRKFuturesSettlementPrice p
+			INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+			WHERE p.intFutureMarketId = cd.intFutureMarketId AND pm.intFutureMonthId = cd.intFutureMonthId
+				AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)
+			ORDER BY dtmPriceDate DESC)/
 CASE WHEN c.ysnSubCurrency = 1 then 100 else 1 end),
+
 dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cuc.intCommodityUnitMeasureId,
-dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId,(CASE WHEN ffm.ysnExpired= 0 THEN cd.intFutureMonthId  
-        ELSE (SELECT TOP 1  intFutureMonthId FROM tblRKFuturesMonth FuMo WHERE dtmFutureMonthsDate > 
-        (SELECT dtmFutureMonthsDate from tblRKFuturesMonth mo 
-WHERE mo.intFutureMonthId = cd.intFutureMonthId ) AND FuMo.ysnExpired = 0 AND FuMo.intFutureMarketId = cd.intFutureMarketId 
-ORDER BY intFutureMarketId,dtmFutureMonthsDate asc)
-end) ,@dtmSettlemntPriceDate) /CASE WHEN c.ysnSubCurrency = 1 then 100 else 1 end ),
+case WHEN ffm.ysnExpired = 0 THEN cd.intFutureMonthId else (
+									SELECT TOP 1 intFutureMonthId
+									FROM tblRKFuturesMonth FuMo
+									WHERE dtmFutureMonthsDate > (
+											SELECT top 1 dtmFutureMonthsDate
+											FROM tblRKFuturesMonth mo
+											WHERE mo.intFutureMonthId = ffm.intFutureMonthId AND ffm.ysnExpired = 0 AND mo.intFutureMarketId = cd.intFutureMarketId
+											) AND FuMo.ysnExpired = 0 AND FuMo.intFutureMarketId = cd.intFutureMarketId
+									ORDER BY intFutureMarketId,dtmFutureMonthsDate ASC
+									) end /CASE WHEN c.ysnSubCurrency = 1 then 100 else 1 end ),
+
 dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,PUOM.intCommodityUnitMeasureId,cd.dblFutures/CASE WHEN c1.ysnSubCurrency = 1 then 100 else 1 end)
+
 FROM vyuRKM2MGetContractDetailView cd
+JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId 
 JOIN tblSMCurrency c on cd.intMarketCurrencyId=c.intCurrencyID and  cd.intCommodityId= @intCommodityId
 JOIN tblSMCurrency c1 on cd.intCurrencyId=c1.intCurrencyID and dblBalance >0
 JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intMarketUOMId 
 JOIN tblICCommodityUnitMeasure PUOM on cd.intCommodityId=PUOM.intCommodityId and PUOM.intUnitMeasureId=cd.intPriceUnitMeasureId 
 JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId   
-JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId 
+
 WHERE   cd.intCommodityId= @intCommodityId 
             AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
             AND isnull(intMarketZoneId,0)= case when isnull(@intMarketZoneId,0)=0 then isnull(intMarketZoneId,0) else @intMarketZoneId end
