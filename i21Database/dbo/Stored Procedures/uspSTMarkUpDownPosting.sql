@@ -69,6 +69,8 @@ BEGIN TRY
 						BEGIN
 							SET @intCategoryAdjustmentType = (SELECT intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = 'Retail Mark Ups/Downs')
 						END
+
+					-- Note: Mark Up/Down should not have entry on Inventory Adjustments
 			
 				END
 			ELSE IF(@strAdjustmentType = 'Write Off')
@@ -78,6 +80,8 @@ BEGIN TRY
 						BEGIN
 							SET @intCategoryAdjustmentType = (SELECT intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = 'Retail Write Offs')
 						END
+
+				    -- Note: Write off should have entry on Inventory Adjustments
 				END
 
 
@@ -146,11 +150,12 @@ BEGIN TRY
 
 					,intCategoryAdjustmentType = NULL -- @intCategoryAdjustmentType -- Specify the adjustment type. 
 
-			FROM	tblICItem i 
-			INNER JOIN tblSTMarkUpDownDetail MUD ON i.intItemId = MUD.intItemId
+			FROM tblSTMarkUpDownDetail MUD
+			INNER JOIN tblICItem i ON MUD.intItemId = i.intItemId
 			INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId 
 			LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId 
 			INNER JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+			WHERE intMarkUpDownId = @intMarkUpDownId
 
 			-- Generate New Batch Id
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
