@@ -283,7 +283,7 @@ BEGIN TRY
 			@strOutputLotNumber = ''
 			OR @strOutputLotNumber IS NULL
 			)
-		AND @strLotTracking = 'Yes - Manual'
+		AND (@strLotTracking = 'Yes - Manual' or  @strLotTracking ='Yes - Manual/Serial Number')
 	BEGIN
 		--EXEC dbo.uspSMGetStartingNumber 24
 		--	,@strOutputLotNumber OUTPUT
