@@ -35,6 +35,7 @@ BEGIN TRY
 	       ,@intStoreId = intStoreId
 		   ,@strAdjustmentType = strAdjustmentType
 		   ,@strType = strType
+		   ,@ysnIsPosted = ysnIsPosted
 	FROM tblSTMarkUpDown
 	WHERE intMarkUpDownId = @intMarkUpDownId
 

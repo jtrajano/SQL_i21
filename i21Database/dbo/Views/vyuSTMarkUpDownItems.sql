@@ -1,20 +1,18 @@
 ﻿CREATE VIEW [dbo].[vyuSTMarkUpDownItems]
 AS
-
-select A.strItemNo
-,A.strDescription
-,A.strUpcCode
-,A.strLongUPCCode
-,A.intItemId
-,A.intLocationId
-,B.intStoreId
-,B.intStoreNo
-,A.dblSalePrice 
-from vyuICGetItemPricing A
-inner join tblSTStore  B
-on A.intLocationId  = B.intCompanyLocationId
-
-inner join vyuICGetItemLocation C
-on A.intItemUOMId = C.intIssueUOMId
-
-where C.intItemLocationId =  A.intItemLocationId
+SELECT 
+IP.strItemNo
+,IP.strDescription
+,IP.strUpcCode
+,IP.strLongUPCCode
+,IP.intItemId
+,IP.intLocationId
+,ST.intStoreId
+,ST.intStoreNo
+,IP.dblSalePrice 
+FROM vyuICGetItemPricing IP
+INNER JOIN tblICItem I ON IP.intItemId = I.intItemId
+INNER JOIN tblSTStore ST ON IP.intLocationId = ST.intCompanyLocationId
+INNER JOIN vyuICGetItemLocation GIL ON IP.intItemUOMId = GIL.intIssueUOMId
+WHERE GIL.intItemLocationId = IP.intItemLocationId
+AND I.strLotTracking = 'No'
