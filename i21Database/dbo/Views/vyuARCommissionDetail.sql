@@ -24,7 +24,7 @@ LEFT JOIN (
 OUTER APPLY (
 	SELECT TOP 1intInvoiceId
 			, strInvoiceNumber
-	FROM dbo.tblARInvoice WITH (NOLOCK) 
+	FROM dbo.tblARInvoice I WITH (NOLOCK) 
 	WHERE I.intInvoiceId = CD.intSourceId
 ) INVOICE
 OUTER APPLY (
