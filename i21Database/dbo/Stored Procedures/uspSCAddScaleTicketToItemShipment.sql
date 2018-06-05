@@ -1181,41 +1181,50 @@ SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 IF (@total = 0)
 	RETURN;
 
---SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
---IF @intLotType != 0
---BEGIN 
---	INSERT INTO @ShipmentItemLotStagingTable(
---		intOrderType
---		, intSourceType
---		, intEntityCustomerId
---		, dtmShipDate
---		, intShipFromLocationId
---		, intShipToLocationId
---		, intFreightTermId
---		, intItemLotGroup
---		, intLotId
---		, dblQuantityShipped
---		, dblGrossWeight
---		, dblTareWeight
---		, dblWeightPerQty
---		, strWarehouseCargoNumber)
---	SELECT 
---		intOrderType				= SE.intOrderType
---		, intSourceType 			= SE.intSourceType
---		, intEntityCustomerId		= SE.intEntityCustomerId
---		, dtmShipDate				= SE.dtmShipDate
---		, intShipFromLocationId		= SE.intShipFromLocationId
---		, intShipToLocationId		= SE.intShipToLocationId
---		, intFreightTermId			= SE.intFreightTermId
---		, intItemLotGroup			= SE.intItemLotGroup
---		, intLotId					= NULL
---		, dblQuantityShipped		= SE.dblQuantity
---		, dblGrossWeight			= SC.dblGrossWeight
---		, dblTareWeight				= SC.dblTareWeight
---		, dblWeightPerQty			= 0
---		, strWarehouseCargoNumber	= SC.strTicketNumber
---		FROM @ShipmentStagingTable SE INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
---END
+SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+IF @intLotType != 0
+BEGIN 
+	INSERT INTO @ShipmentItemLotStagingTable(
+		intOrderType
+		, intSourceType
+		, intEntityCustomerId
+		, dtmShipDate
+		, intShipFromLocationId
+		, intShipToLocationId
+		, intFreightTermId
+		, intItemLotGroup
+		, intLotId
+		, dblQuantityShipped
+		, dblGrossWeight
+		, dblTareWeight
+		, dblWeightPerQty
+		, strWarehouseCargoNumber
+	)
+	SELECT 
+		intOrderType				= SE.intOrderType
+		, intSourceType 			= SE.intSourceType
+		, intEntityCustomerId		= SE.intEntityCustomerId
+		, dtmShipDate				= SE.dtmShipDate
+		, intShipFromLocationId		= SE.intShipFromLocationId
+		, intShipToLocationId		= SE.intShipToLocationId
+		, intFreightTermId			= SE.intFreightTermId
+		, intItemLotGroup			= SE.intItemLotGroup
+		, intLotId					= SC.intLotId
+		, dblQuantity				= SE.dblQuantity
+		, dblGrossWeight			= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 THEN (SE.dblQuantity /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
+										ELSE (SE.dblQuantity / SC.dblNetUnits) * SC.dblGrossUnits
+									END
+		, dblTareWeight				= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SE.dblQuantity)
+										ELSE ((SE.dblQuantity / SC.dblNetUnits) * SC.dblGrossUnits) - SE.dblQuantity 
+									END
+		, dblWeightPerQty			= 0
+		, strWarehouseCargoNumber	= SC.strTicketNumber
+		FROM @ShipmentStagingTable SE 
+		INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
+		INNER JOIN tblICItem IC ON IC.intItemId = SE.intItemId
+END
 
 EXEC dbo.uspICAddItemShipment
 		@ShipmentStagingTable
