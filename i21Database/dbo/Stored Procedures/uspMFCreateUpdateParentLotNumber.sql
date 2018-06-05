@@ -108,6 +108,7 @@ BEGIN
 			FROM tblICLot
 			WHERE strLotNumber=@strLotNumber and intItemId<>@intItemId
 			and dblQty>0
+			and intLocationId=@intLocationId
 			)
 	BEGIN
 		RAISERROR (
