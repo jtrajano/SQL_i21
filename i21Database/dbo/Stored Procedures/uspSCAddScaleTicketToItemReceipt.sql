@@ -190,7 +190,7 @@ SELECT
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= NULL --SC.intLotId
+		,intLotId					= SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
@@ -1247,29 +1247,13 @@ BEGIN
 										WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblQty
 										ELSE RE.dblQty
 									END
-			,[dblGrossWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN 
-											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblGross
-												ELSE RE.dblGross
-											END
-										ELSE 
-											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity) * SC.dblGrossUnits)
-												ELSE SC.dblGrossUnits
-											END
+			,[dblGrossWeight]		= CASE 
+										WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * RE.dblGross
+										ELSE RE.dblGross
 									END
-			,[dblTareWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN 
-											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * (RE.dblGross - RE.dblNet)
-												ELSE (RE.dblGross - RE.dblNet)
-											END
-										ELSE 
-											CASE 
-												WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN dbo.fnCalculateQtyBetweenUOM(CTD.intItemUOMId, SC.intItemUOMIdTo, (CTC.dblQuantity / CTD.dblQuantity) * (SC.dblGrossUnits - SC.dblNetUnits))
-												ELSE (SC.dblGrossUnits - SC.dblNetUnits)
-											END
+			,[dblTareWeight]		= CASE 
+										WHEN ISNULL(CTC.dblQuantity, 0) > 0 THEN (CTC.dblQuantity / CTD.dblQuantity) * (RE.dblGross - RE.dblNet)
+										ELSE (RE.dblGross - RE.dblNet)
 									END
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
@@ -1333,14 +1317,8 @@ BEGIN
 			,[intCurrencyId]		= RE.intCurrencyId
 			,[intItemUnitMeasureId] = RE.intItemUOMId
 			,[dblQuantity]			= RE.dblQty
-			,[dblGrossWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross
-										ELSE SC.dblGrossUnits
-									END
-			,[dblTareWeight]		= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN (RE.dblGross - RE.dblNet)
-										ELSE (SC.dblGrossUnits - SC.dblNetUnits)
-									END
+			,[dblGrossWeight]		= RE.dblGross 
+			,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
 			,[dblCost]				= RE.dblCost
 			,[intEntityVendorId]	= RE.intEntityVendorId
 			,[dtmManufacturedDate]	= RE.dtmDate
