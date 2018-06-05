@@ -145,6 +145,7 @@ SELECT TOP 100 PERCENT * FROM (
         FROM tblAPBill voucher
         INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
         WHERE voucherDetail.intContractDetailId = ctd.intContractDetailId AND voucherDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+        AND voucherDetail.intItemId = ctd.intItemId
         AND voucher.intTransactionType = 1
     ) pricedSequence
     OUTER APPLY (
