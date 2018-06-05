@@ -8,6 +8,7 @@
 	 ,ysnEmailConfirmed		= EC.ysnEmailConfirmed
 	 ,intEntityUserId		= pos.intEntityUserId
 	 ,intPOSLogId			= pos.intPOSLogId
+	 ,intPOSLogOriginId		= pos.intPOSLogOriginId
 	 ,intStoreId			= pos.intStoreId
 	 ,intStoreNo			= STORE.intStoreNo
 	 ,strStoreDescription	= STORE.strDescription
