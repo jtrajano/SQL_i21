@@ -275,7 +275,7 @@ AS
 
 		IF NOT EXISTS(SELECT * FROM  @ReceiptStagingTable)
 		BEGIN
-			RETURN
+			RETURN 0
 		END
 
 		EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@OtherCharges,@intUserId, @ReceiptItemLotStagingTable;

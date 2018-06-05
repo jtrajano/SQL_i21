@@ -9,6 +9,7 @@ AS
 			CD.dblFutures,			
 			CD.dblBasis,									
 			CD.dblCashPrice,			
+			CD.dblScheduleQty,
 
 			--Detail Join
 			IM.strItemNo,			
