@@ -1273,6 +1273,24 @@ ELSE
 		WHERE  
 			ARI.[ysnPosted] = 0
 
+		union
+		select
+			 [intInvoiceId]			= c.[intInvoiceId]
+			,[strInvoiceNumber]		= c.[strInvoiceNumber]		
+			,[strTransactionType]	= c.[strTransactionType]
+			,[intInvoiceDetailId]	= c.[intInvoiceDetailId]
+			,[intItemId]			= c.[intItemId]
+			,[strBatchId]			= c.[strBatchId]
+			,[strPostingError]		= 'You cannot unpost an Invoice with Service Charge Invoice created-' + b.strInvoiceNumber +  '.'
+
+			from (select intInvoiceDetailId, intItemId, 
+						intSCInvoiceId, intInvoiceId from 
+							tblARInvoiceDetail) a
+				join (select intInvoiceId, strInvoiceNumber,
+						strTransactionType from tblARInvoice with (nolock)
+					) b on a.intInvoiceId = b.intInvoiceId
+				join @Invoices c
+					on a.intSCInvoiceId = c.intInvoiceId			
 		UNION
 		--Fiscal Year
 		SELECT
