@@ -6718,6 +6718,20 @@
     <Build Include="dbo\Tables\tblMBILInvoiceSite.sql" />
     <Build Include="dbo\Tables\tblMBILInvoiceTaxCode.sql" />
     <Build Include="dbo\Views\vyuCTScheduledSequence.sql" />
+    <Build Include="dbo\Tables\tblRKCurrencyExposure.sql" />
+    <Build Include="dbo\Tables\tblRKCurExpBankBalance.sql" />
+    <Build Include="dbo\Tables\tblRKCurExpMoneyMarket.sql" />
+    <Build Include="dbo\Tables\tblRKCurExpCurrencyContract.sql" />
+    <Build Include="dbo\Tables\tblRKCurExpStock.sql" />
+    <Build Include="dbo\Tables\tblRKCurExpNonOpenSales.sql" />
+    <Build Include="dbo\Tables\tblRKCurExpSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCurrencyExposureSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCurrencyExposureForStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCurExpForNonSelectedCurrency.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCurExpBankBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCurExpMoneyMarket.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKCurrencyExposureForOTC.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyExposureSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
