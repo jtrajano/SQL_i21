@@ -154,6 +154,56 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
 		AND st.intProcessingLocationId = @intLocationId)a
 
+UNION ALL--IR came from Delivery Sheet
+SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
+		'' as strAdjDistributionOption,
+		'' as strCountDistributionOption,
+		'' tranShipmentNumber,
+		0.0 tranShipQty,
+		strReceiptNumber tranReceiptNumber,
+		dblInQty tranRecQty,
+		'' tranAdjNumber,
+		0.0 dblAdjustmentQty,
+		'' tranCountNumber,
+		0.0 dblCountQty,
+		'' tranInvoiceNumber,
+		0.0 dblInvoiceQty,
+		intInventoryReceiptId,
+		null intInventoryShipmentId,
+		null intInventoryAdjustmentId,
+		null intInventoryCountId,
+		null intInvoiceId,
+		null intDeliverySheetId,
+		'' AS deliverySheetNumber,
+		null intTicketId,
+		'' AS ticketNumber    
+FROM(
+SELECT  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) ,6) dblInQty,
+r.strReceiptNumber,
+		strDistributionOption ,r.intInventoryReceiptId
+FROM tblSCDeliverySheet DS
+		JOIN tblICItem i on i.intItemId=DS.intItemId 
+		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=DS.intDeliverySheetId
+									AND  DS.intCompanyLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
+		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityVendorId
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId 
+		join tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId   
+WHERE 
+convert(datetime,CONVERT(VARCHAR(10),r.dtmReceiptDate,110),110) BETWEEN
+		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		AND i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
+		AND DS.intCompanyLocationId = @intLocationId
+		AND DS.ysnPost = 1)a
+
 
 Union
 SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributionOption,
@@ -201,6 +251,55 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.strOwnedPhysicalStock='Customer'
 		AND st.intProcessingLocationId = @intLocationId )a
+
+UNION ALL --IS came from Delivery Sheet
+SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributionOption,
+		'' as strAdjDistributionOption,
+		'' as strCountDistributionOption,
+		strShipmentNumber tranShipmentNumber,
+		dblOutQty tranShipQty,
+		'' tranReceiptNumber,
+		0.0 tranRecQty,
+		'' tranAdjNumber,
+		0.0 dblAdjustmentQty,
+		'' tranCountNumber,
+		0.0 dblCountQty,
+		'' tranInvoiceNumber,
+		0.0 dblInvoiceQty,
+		null intInventoryReceiptId,
+		intInventoryShipmentId intInventoryShipmentId,
+		null intInventoryAdjustmentId,
+		null intInventoryCountId,
+		null intInvoiceId,
+		null intDeliverySheetId,
+		'' AS deliverySheetNumber,
+		null intTicketId,
+		'' AS ticketNumber    
+FROM(
+SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate,
+round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) ,6) dblOutQty,
+r.strShipmentNumber,
+		strDistributionOption ,r.intInventoryShipmentId
+FROM tblSCDeliverySheet DS
+		JOIN tblICItem i on i.intItemId=DS.intItemId 
+									AND DS.intCompanyLocationId IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=DS.intDeliverySheetId
+		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
+		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityId 
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
+		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+WHERE convert(datetime,CONVERT(VARCHAR(10),r.dtmShipDate,110),110) BETWEEN
+		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		AND i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		and  gs.strOwnedPhysicalStock='Customer'
+		AND DS.intCompanyLocationId = @intLocationId
+		AND DS.ysnPost = 1)a
 
 UNION ALL --Delivery Sheet
 SELECT

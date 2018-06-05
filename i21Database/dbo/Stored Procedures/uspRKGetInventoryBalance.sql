@@ -82,6 +82,29 @@ WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
 		 and st.intProcessingLocationId = @intLocationId)a
+
+UNION --IR came from Delivery Sheet
+SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
+		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty,0.0 dblSalesInTransit from(
+select  CONVERT(VARCHAR(10),r.dtmReceiptDate,110) dtmDate,dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) dblInQty,r.strReceiptNumber  
+FROM tblSCDeliverySheet DS
+		JOIN tblICItem i on i.intItemId=DS.intItemId 
+												AND  DS.intCompanyLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=DS.intDeliverySheetId
+		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
+		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityVendorId
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
+			JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
+	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId   
+WHERE  i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
+		 and DS.intCompanyLocationId = @intLocationId
+		 AND DS.ysnPost = 1)a
 		 
 
 union
@@ -107,6 +130,31 @@ WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and gs.strOwnedPhysicalStock='Customer'
 		and st.intProcessingLocationId = @intLocationId)a
+
+union --IS came from Delivery Sheet
+SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
+		0.0 dblAdjustmentQty,'' tranCountNumber,0.0 dblCountQty,'' tranInvoiceNumber,0.0 dblInvoiceQty, ISNULL(dblSalesInTransit,0) dblSalesInTransit from(
+SELECT  CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty,r.strShipmentNumber  
+,ROUND((SELECT TOP 1 dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ad.dblQtyShipped) FROM tblARInvoice ia
+	JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId
+	WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 0),6) dblSalesInTransit
+FROM tblSCDeliverySheet DS
+		JOIN tblICItem i on i.intItemId=DS.intItemId 
+												AND  DS.intCompanyLocationId  IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=DS.intDeliverySheetId
+		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
+		JOIN tblSCDeliverySheetSplit DSS ON DS.intDeliverySheetId = DSS.intDeliverySheetId  AND DSS.intEntityId = r.intEntityId 
+		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=DSS.intStorageScheduleTypeId  
+		JOIN tblICItemUOM u on DS.intItemId=u.intItemId and u.ysnStockUnit=1
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+WHERE  i.intCommodityId= @intCommodityId
+		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
+		and gs.strOwnedPhysicalStock='Customer'
+		and DS.intCompanyLocationId = @intLocationId)a
 )t
 
 --Previous value start 
