@@ -74,8 +74,9 @@ where upper(rtrim(oc.gacom_un_desc)) <> 'LB'
 insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
 select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
-where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
-AND NOT EXISTS (select * from tblICCategory where strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS)
+left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)  COLLATE SQL_Latin1_General_CP1_CS_AS
+where C.intCategoryId is null AND  NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
+
 
 
 ----===============================STEP 5===================================
@@ -93,8 +94,8 @@ ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1
 from gacommst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-where NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)
-AND NOT EXISTS (select * from tblICItem where strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS))
+left join tblICItem I on I.strItemNo = rtrim(gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
+where I.intItemId is null and  NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd))
 
 
 ----=======================STEP 7===========================================
@@ -132,7 +133,9 @@ insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, in
 select distinct rtrim(gacom_com_cd)+'Discount', rtrim(gacom_desc)+' Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(od.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-where NOT EXISTS (SELECT * FROM tblICCategory WHERE strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacom_com_cd)+'Discount' COLLATE SQL_Latin1_General_CP1_CS_AS)
+left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)+'Discount'  COLLATE SQL_Latin1_General_CP1_CS_AS
+where C.intCategoryId is null
+
 
 ----====================================STEP 10======================================
 --convert discount codes as other charge items from discount code table. 
@@ -146,7 +149,8 @@ ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Discount
 from gacdcmst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
 join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd)+'Discount' COLLATE SQL_Latin1_General_CP1_CS_AS
-where NOT EXISTS (SELECT * FROM tblICItem WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd) COLLATE SQL_Latin1_General_CP1_CS_AS)
+left join tblICItem  I on I.strItemNo = rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd)  COLLATE SQL_Latin1_General_CP1_CS_AS
+where I.intItemId is null
 
 ----=======================STEP 11===========================================
 ----insert uom for discount items from the commodity table
@@ -156,7 +160,8 @@ select I.intItemId, CM.intUnitMeasureId, 1 dblUnitQty, 0 ysnStockUnit,1 AllowPur
 from tblICCommodityUnitMeasure CM
 join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
-where I.strCostType = 'Discount' AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = CM.intUnitMeasureId)
+where I.strCostType = 'Discount'
+and  NOT EXISTS (select intItemId from tblICItemUOM where intItemId = I.intItemId and intUnitMeasureId = CM.intUnitMeasureId)
 
 
 ---================================STEP 12=============================================
@@ -207,7 +212,8 @@ select I.intItemId, CM.intUnitMeasureId, 1 dblUnitQty, 0 ysnStockUnit,1 AllowPur
 from tblICCommodityUnitMeasure CM
 join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
-where I.strCostType = 'Freight'	AND NOT EXISTS (SELECT * FROM tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = CM.intUnitMeasureId)
+where I.strCostType = 'Freight'	and  NOT EXISTS (select intItemId from tblICItemUOM where intItemId = I.intItemId and intUnitMeasureId = CM.intUnitMeasureId)
+
 
 ---=====================================STEP 16=============================================
 --Add locations for discount items
