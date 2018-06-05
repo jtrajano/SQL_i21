@@ -1044,14 +1044,16 @@ BEGIN TRANSACTION
 
 		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
 		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-		JOIN 
-		(
-			SELECT TOP 1 UOMM.strUpcCode, ILL.intItemId, ILL.intLocationId, ILL.intItemLocationId, ILL.intDepositPLUId, ILL.intFamilyId
-			FROM tblICItemLocation ILL
-			JOIN tblICItemUOM UOMM ON ILL.intDepositPLUId = UOMM.intItemUOMId
-		) IL ON I.intItemId = IL.intItemId 
-		JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+		JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+
+		--JOIN 
+		--(
+		--	SELECT TOP 1 UOMM.strUpcCode, ILL.intItemId, ILL.intLocationId, ILL.intItemLocationId, ILL.intDepositPLUId, ILL.intFamilyId
+		--	FROM tblICItemLocation ILL
+		--	JOIN tblICItemUOM UOMM ON ILL.intDepositPLUId = UOMM.intItemUOMId
+		--) IL ON I.intItemId = IL.intItemId 
+		--JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
+		--JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 		---------------------------------------------------------------
 		------ END Insert to temp Table handle all Data types ---------
 		---------------------------------------------------------------
@@ -1127,11 +1129,11 @@ BEGIN TRANSACTION
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 		)
-		AND 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
-		)
+		--AND 
+		--(
+		--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+		--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+		--)
 
 
 
@@ -1187,11 +1189,11 @@ BEGIN TRANSACTION
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 		)
-		AND 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
-		)
+		--AND 
+		--(
+		--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+		--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+		--)
 
 
 
@@ -1277,11 +1279,11 @@ BEGIN TRANSACTION
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 		)
-		AND 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
-		)
+		--AND 
+		--(
+		--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
+		--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+		--)
 
 
 
