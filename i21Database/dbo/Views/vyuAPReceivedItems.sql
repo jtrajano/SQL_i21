@@ -252,12 +252,12 @@ FROM
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	0
 	,[intSubCurrencyCents]		=	0
-	,[intAccountId]				=	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
+	,[intAccountId]				=	CASE WHEN B.intItemId IS NULL THEN  B.intAccountId  ELSE  ISNULL(B.intAccountId, [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')) END
 	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = 
-										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
+										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE ISNULL(B.intAccountId, dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense')) END
 									)
 	,[strAccountDesc]			=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = 
-										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
+										CASE WHEN B.intItemId IS NULL THEN B.intAccountId ELSE ISNULL(B.intAccountId, dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense')) END
 									)
 	,[strName]					=	D2.strName
 	,[strVendorId]				=	D1.strVendorId
