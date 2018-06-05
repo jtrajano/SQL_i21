@@ -97,9 +97,49 @@ BEGIN TRY
 					OUTER APPLY(
 						SELECT dblShrinkPercent, dblDiscountAmount, dblGradeReading
 						FROM tblQMTicketDiscount
-						where intTicketId = SC.intMatchTicketId AND strSourceType = 'Scale'
+						where intTicketId = SC.intMatchTicketId AND intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+						 AND strSourceType = 'Scale'
 					) MatchDiscount
 				WHERE SC.intTicketId = @intTicketId
+				IF EXISTS (SELECT intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
+				AND intDiscountScheduleCodeId NOT IN(SELECT intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId))
+				BEGIN
+					INSERT INTO tblQMTicketDiscount (
+						dblGradeReading
+						,strCalcMethod
+						,strShrinkWhat
+						,dblShrinkPercent
+						,dblDiscountAmount
+						,dblDiscountDue
+						,dblDiscountPaid
+						,ysnGraderAutoEntry
+						,intDiscountScheduleCodeId
+						,dtmDiscountPaidDate
+						,intTicketId
+						,intTicketFileId
+						,strSourceType
+						,intSort
+						,strDiscountChargeType
+					)
+					SELECT 
+						dblGradeReading
+						,strCalcMethod
+						,strShrinkWhat
+						,dblShrinkPercent
+						,dblDiscountAmount
+						,dblDiscountDue
+						,dblDiscountPaid
+						,ysnGraderAutoEntry
+						,intDiscountScheduleCodeId
+						,dtmDiscountPaidDate
+						,intTicketId
+						,intTicketFileId
+						,strSourceType
+						,intSort
+						,strDiscountChargeType
+					FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
+					AND intDiscountScheduleCodeId NOT IN(SELECT intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId)
+				END
 			END
 
 			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
