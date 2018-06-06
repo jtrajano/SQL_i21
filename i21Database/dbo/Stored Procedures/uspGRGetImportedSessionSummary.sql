@@ -8,8 +8,8 @@ BEGIN TRY
 		  @intTotalCount	  INT,
 		  @intSuccessCount	  INT
 
-    SELECT @intTotalCount = COUNT(1) FROM tblSCTicketLVStaging WHERE intSession = @intSession
-    SELECT @intSuccessCount = COUNT(1) FROM tblSCTicketLVStaging WHERE intSession = @intSession AND strErrorMsg IS NULL
+    SELECT @intTotalCount = COUNT(1) FROM tblSCTicketLVStaging WHERE intSession = @intSession AND strData = 'Header'
+    SELECT @intSuccessCount = COUNT(1) FROM tblSCTicketLVStaging WHERE intSession = @intSession AND strErrorMsg IS NULL AND strData = 'Header'
 
     SELECT  strErrorMsg     = strErrorMsg
 		   ,strTicketNumber	= strTicketNumber
