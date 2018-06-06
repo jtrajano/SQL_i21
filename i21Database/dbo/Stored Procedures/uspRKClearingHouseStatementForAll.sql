@@ -43,7 +43,7 @@ SELECT @dtmTransactionFromDate = [from] FROM @temp_xml_table WHERE [fieldname] =
 SELECT @dtmTransactionToDate = [from] FROM @temp_xml_table WHERE [fieldname] = 'dtmTransactionToDate'
 
 SELECT *,'Trades between ''' +Left(replace(convert(varchar(9), @dtmTransactionFromDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionFromDate, 8),9) + ''' and ''' + Left(replace(convert(varchar(9), @dtmTransactionToDate, 6), ' ', '-') + ' ' + convert(varchar(8), @dtmTransactionToDate, 8),9)+'''' as strDateHeading,
-@strAccountNumber strAccountNumber,@strName strBroker,@dtmTransactionFromDate dtmTransactionFromDate ,@dtmTransactionToDate as dtmTransactionToDate FROM 
+@strAccountNumber strAccountNumber,@strName strBroker,isnull(@dtmTransactionFromDate,min(dtmTransactionDate) over(partition by strFutMarketName)) dtmTransactionFromDate ,isnull(@dtmTransactionToDate,max(dtmTransactionDate) over(partition by strFutMarketName)) as dtmTransactionToDate FROM 
 (
 SELECT strInternalTradeNo,strFutMarketName,dtmTransactionDate,Left(replace(convert(varchar(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) LdtmTransactionDate,
 	   intNoOfContract LintNoOfContract,strFutureMonth LstrFutureMonth,dblPrice LdblPrice,
@@ -55,11 +55,12 @@ JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelec
 JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId  
-WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND 
-convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionToDate,110),110)
+WHERE  strName=ISNULL(@strName ,strName)
+AND strAccountNumber = ISNULL(@strAccountNumber ,strAccountNumber)
+AND convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),isnull(@dtmTransactionFromDate,dtmTransactionDate),110),110) and  convert(datetime,CONVERT(VARCHAR(10),isnull(@dtmTransactionToDate,dtmTransactionDate),110),110)
 
 
-UNION
+UNION 
 
 SELECT strInternalTradeNo,strFutMarketName,dtmTransactionDate,null LdtmTransactionDate,null LintNoOfContract,null LstrFutureMonth,null LdblPrice,
 LEFT(REPLACE(CONVERT(VARCHAR(9), dtmTransactionDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTransactionDate, 8),9) SdtmTransactionDate,
@@ -70,6 +71,21 @@ JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelec
 JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId 
-WHERE  strName=@strName AND strAccountNumber = @strAccountNumber AND 
-convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionFromDate,110),110) and  convert(datetime,CONVERT(VARCHAR(10),@dtmTransactionToDate,110),110) )t 
+WHERE  strName=ISNULL(@strName ,strName)
+AND strAccountNumber = ISNULL(@strAccountNumber ,strAccountNumber)
+AND convert(datetime,CONVERT(VARCHAR(10),dtmTransactionDate,110),110) between convert(datetime,CONVERT(VARCHAR(10),isnull(@dtmTransactionFromDate,dtmTransactionDate),110),110) and  convert(datetime,CONVERT(VARCHAR(10),isnull(@dtmTransactionToDate,dtmTransactionDate),110),110) 
+)t 
+GROUP BY
+strInternalTradeNo
+,strFutMarketName
+,dtmTransactionDate
+,LdtmTransactionDate
+,LintNoOfContract
+,LstrFutureMonth
+,LdblPrice
+,SdtmTransactionDate
+,SintNoOfContract
+,SstrFutureMonth
+,SdblPrice
+,dblFutCommission
 ORDER BY dtmTransactionDate
