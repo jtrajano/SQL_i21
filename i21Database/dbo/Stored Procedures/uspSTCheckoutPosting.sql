@@ -43,6 +43,12 @@ BEGIN
 				WHERE intCheckoutId = @intCheckoutId
 		)
 
+		-- For Mark Up Down Posting
+		DECLARE @intMarkUpDownId AS INT = (SELECT intMarkUpDownId FROM tblSTMarkUpDown WHERE intCheckoutId = @intCheckoutId)
+		DECLARE @strMarkUpDownPostingStatusMsg AS NVARCHAR(1000) = ''
+		DECLARE @strBatchId AS NVARCHAR(1000) = ''
+		DECLARE @ysnIsPosted AS BIT
+
 		DECLARE @intCurrencyId INT = (SELECT intDefaultCurrencyId FROM tblSMCompanyPreference)
 		DECLARE @intShipViaId INT = (SELECT TOP 1 1 intShipViaId FROM tblEMEntityLocation WHERE intEntityId = @intEntityCustomerId AND intShipViaId IS NOT NULL)
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
@@ -2143,6 +2149,43 @@ BEGIN
 								-- CUSTOMER CHARGES
 								SET @strAllCreatedInvoiceIdList = @CreatedIvoices
 
+
+								-----------------------------------------------------------------------
+								------------- START POST MArk Up / Down -------------------------------
+								-----------------------------------------------------------------------
+								--DECLARE @intMarkUpDownId AS INT = (SELECT intMarkUpDownId FROM tblSTMarkUpDown WHERE intCheckoutId = @intCheckoutId)
+								--IF(@intMarkUpDownId IS NOT NULL AND @intMarkUpDownId <> 0)
+								--	BEGIN
+										
+								--	END
+
+								-- POST
+										EXEC uspSTMarkUpDownCheckoutPosting
+											@intCheckoutId		= @intCheckoutId
+											,@intCurrentUserId	= @intCurrentUserId
+											,@ysnPost			= 1 -- POST
+											,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUTPUT
+											,@strBatchId		= @strBatchId OUTPUT
+											,@ysnIsPosted		= @ysnIsPosted OUTPUT
+
+										--EXEC uspSTMarkUpDownPosting 
+										--	@intMarkUpDownId	= @intMarkUpDownId
+										--	,@intCurrentUserId	= @intCurrentUserId 
+										--	,@ysnRecap			= 0
+										--	,@ysnPost			= 1 -- POST
+										--	,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUT
+										--	,@strBatchId		= @strBatchId OUT
+										--	,@ysnIsPosted		= @ysnIsPosted OUT
+										
+										--IF(@strMarkUpDownPostingStatusMsg = 'Success')
+										--	BEGIN
+												
+										--	END
+								-----------------------------------------------------------------------
+								------------- END POST MArk Up / Down ---------------------------------
+								-----------------------------------------------------------------------
+
+
 								SET @ysnUpdateCheckoutStatus = 1
 								SET @strStatusMsg = 'Success'
 								SET @ysnInvoiceStatus = 1
@@ -2208,6 +2251,30 @@ BEGIN
 							BEGIN
 								SET @ysnInvoiceStatus = 0
 
+								-----------------------------------------------------------------------
+								------------- START UNPOST MArk Up / Down -------------------------------
+								-----------------------------------------------------------------------
+								--IF(@intMarkUpDownId IS NOT NULL AND @intMarkUpDownId <> 0)
+								--	BEGIN
+										
+								--	END
+
+								-- UNPOST	
+										EXEC uspSTMarkUpDownCheckoutPosting
+											@intCheckoutId		= @intCheckoutId
+											,@intCurrentUserId	= @intCurrentUserId
+											,@ysnPost			= 0 -- UNPOST
+											,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUTPUT
+											,@strBatchId		= @strBatchId OUTPUT
+											,@ysnIsPosted		= @ysnIsPosted OUTPUT
+										
+										--IF(@strMarkUpDownPostingStatusMsg = 'Success')
+										--	BEGIN
+												
+										--	END
+								-----------------------------------------------------------------------
+								------------- END UNPOST MArk Up / Down ---------------------------------
+								-----------------------------------------------------------------------
 							END
 						ELSE IF(@ysnSuccess = CAST(0 AS BIT))
 							BEGIN
