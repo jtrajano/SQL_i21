@@ -61,7 +61,7 @@ BEGIN
 		, intLotId
 		, strLotNumber
 		, strLotAlias
-		, dblSystemCount = dblOnHand
+		, dblSystemCount = dblLotQty
 		, dblLastCost
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intKey ASC) AS NVARCHAR(50))
 		, intItemUOMId
@@ -78,7 +78,7 @@ BEGIN
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (intSubLocationId = @intCompanyLocationSubLocationId OR ISNULL(@intCompanyLocationSubLocationId, 0) = 0)
 		AND (intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
-		AND ((dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND ((dblLotQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND strLotTracking <> 'No'		
 END
 

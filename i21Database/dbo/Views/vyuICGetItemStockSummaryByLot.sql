@@ -24,7 +24,7 @@ SELECT
 	, SubLocation.strSubLocationName
 	, ItemStock.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
-	, ItemStock.intItemUOMId
+	, Lot.intItemUOMId
 	, Lot.intWeightUOMId
 	, UOM.strUnitMeasure
 	, ItemStock.intLotId
@@ -33,9 +33,16 @@ SELECT
 	, ItemStock.dtmDate
 	--, ItemStock.dblStockIn
 	--, ItemStock.dblStockOut
-	, ItemStock.dblOnHand
-	, dblSystemCount = dblOnHand
+	, dblLotQty  = CASE 
+					WHEN Item.ysnLotWeightsRequired = 1 THEN ISNULL(dbo.fnDivide(ItemStock.dblOnHand, Lot.dblWeightPerQty), 0)
+					ELSE ItemStock.dblOnHand
+				END
+	, dblLotWeight = CASE 
+						WHEN Item.ysnLotWeightsRequired = 1 THEN dblOnHand
+						ELSE 0
+					END
 	, dblConversionFactor = ItemUOM.dblUnitQty
+	, Lot.dblWeightPerQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
 	, Lot.intParentLotId
