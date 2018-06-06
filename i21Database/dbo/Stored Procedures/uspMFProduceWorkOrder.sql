@@ -472,6 +472,7 @@ BEGIN
 	UPDATE tblMFWorkOrderProducedLot
 	SET intLotId = @intLotId
 		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
+		,intProducedLotId=@intLotId
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
 	IF @intSpecialPalletLotId IS NOT NULL

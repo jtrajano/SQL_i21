@@ -3352,3 +3352,15 @@ GO
 
 
 
+Go
+UPDATE tblMFWorkOrderProducedLot
+SET intProducedLotId = (
+		SELECT L1.intLotId
+		FROM tblICLot L1
+		WHERE L1.strLotNumber = L.strLotNumber
+			AND L1.intStorageLocationId = WP.intStorageLocationId
+		)
+FROM tblMFWorkOrderProducedLot WP
+JOIN tblICLot L ON L.intLotId = WP.intLotId
+Where WP.intProducedLotId is null
+Go

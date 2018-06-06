@@ -45,6 +45,7 @@
 	ysnFillPartialPallet bit Constraint DF_tblMFWorkOrderProducedLot_ysnFillPartialPallet Default (0),
 	intSpecialPalletLotId  int NULL,
 	intItemTypeId INT NULL,
+	intProducedLotId int,
     CONSTRAINT [PK_tblMFWorkOrderProducedLot_intWorkOrderProducedLotId] PRIMARY KEY ([intWorkOrderProducedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
