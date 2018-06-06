@@ -173,6 +173,7 @@ BEGIN TRY
 	,dblAccountTotalAmount
 	,dblAccountTotalDiscount
 	,dblAccountTotalLessDiscount
+	,dblAccountTotalDiscountQuantity
 	,dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
@@ -303,12 +304,13 @@ BEGIN TRY
 	,TotalSET
 	,TotalSST
 	,TotalLC
-	,ISNULL(dblDiscountRate				  ,0) AS dblDiscountRate
-	,ISNULL(dblDiscount					  ,0) AS dblDiscount
-	,ISNULL(dblAccountTotalAmount		  ,0) AS dblAccountTotalAmount
-	,ISNULL(dblAccountTotalDiscount		  ,0) AS dblAccountTotalDiscount
-	,ISNULL(dblAccountTotalLessDiscount	  ,0) AS dblAccountTotalLessDiscount
-	,ISNULL(dblDiscountEP				  ,0) AS dblDiscountEP
+	,ISNULL(dblDiscountRate						,0) AS dblDiscountRate
+	,ISNULL(dblDiscount							,0) AS dblDiscount
+	,ISNULL(dblAccountTotalAmount				,0) AS dblAccountTotalAmount
+	,ISNULL(dblAccountTotalDiscount				,0) AS dblAccountTotalDiscount
+	,ISNULL(dblAccountTotalLessDiscount			,0) AS dblAccountTotalLessDiscount
+	,ISNULL(dblAccountTotalDiscountQuantity		,0) AS dblAccountTotalDiscountQuantity
+	,ISNULL(dblDiscountEP						,0) AS dblDiscountEP
 	,dblAPR
 	,ysnPrintMiscellaneous
 	,ysnSummaryByCard			

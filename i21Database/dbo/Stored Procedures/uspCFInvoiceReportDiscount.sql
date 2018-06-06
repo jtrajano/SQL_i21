@@ -402,48 +402,49 @@ BEGIN
 		)
 		CREATE TABLE ##tblCFInvoiceDiscount	
 		(
-			  intAccountId					INT
-			 ,intSalesPersonId			    INT
-			 ,dtmInvoiceDate			    DATETIME
-			 ,intCustomerId					INT
-			 ,intInvoiceId					INT
-			 ,intTransactionId				INT
-			 ,intCustomerGroupId			INT
-			 ,intTermID						INT
-			 ,intBalanceDue					INT
-			 ,intDiscountDay				INT	
-			 ,intDayofMonthDue				INT
-			 ,intDueNextMonth				INT
-			 ,intSort						INT
-			 ,intConcurrencyId				INT
-			 ,ysnAllowEFT					BIT
-			 ,ysnActive						BIT
-			 ,ysnEnergyTrac					BIT	
-			 ,strDiscountSchedule		    NVARCHAR(100)	
-			 ,ysnShowOnCFInvoice		    BIT
-			 ,dblQuantity					NUMERIC(18,6)
-			 ,dblTotalQuantity				NUMERIC(18,6)
-			 ,dblDiscountRate				NUMERIC(18,6)
-			 ,dblDiscount					NUMERIC(18,6)
-			 ,dblTotalAmount				NUMERIC(18,6)
-			 ,dblAccountTotalAmount			NUMERIC(18,6)
-			 ,dblAccountTotalDiscount		NUMERIC(18,6)
-			 ,dblAccountTotalLessDiscount	NUMERIC(18,6)
-			 ,dblDiscountEP					NUMERIC(18,6)
-			 ,dblAPR						NUMERIC(18,6)	
-			 ,strTerm						NVARCHAR(MAX)
-			 ,strType						NVARCHAR(MAX)
-			 ,strTermCode					NVARCHAR(MAX)	
-			 ,strNetwork					NVARCHAR(MAX)	
-			 ,strCustomerName				NVARCHAR(MAX)
-			 ,strInvoiceCycle				NVARCHAR(MAX)
-			 ,strGroupName					NVARCHAR(MAX)
-			 ,strInvoiceNumber				NVARCHAR(MAX)
-			 ,strInvoiceReportNumber		NVARCHAR(MAX)
-			 ,dtmDiscountDate				DATETIME
-			 ,dtmDueDate					DATETIME
-			 ,dtmTransactionDate			DATETIME
-			 ,dtmPostedDate					DATETIME
+			  intAccountId						INT
+			 ,intSalesPersonId					INT
+			 ,dtmInvoiceDate					DATETIME
+			 ,intCustomerId						INT
+			 ,intInvoiceId						INT
+			 ,intTransactionId					INT
+			 ,intCustomerGroupId				INT
+			 ,intTermID							INT
+			 ,intBalanceDue						INT
+			 ,intDiscountDay					INT	
+			 ,intDayofMonthDue					INT
+			 ,intDueNextMonth					INT
+			 ,intSort							INT
+			 ,intConcurrencyId					INT
+			 ,ysnAllowEFT						BIT
+			 ,ysnActive							BIT
+			 ,ysnEnergyTrac						BIT	
+			 ,strDiscountSchedule				NVARCHAR(100)	
+			 ,ysnShowOnCFInvoice				BIT
+			 ,dblQuantity						NUMERIC(18,6)
+			 ,dblTotalQuantity					NUMERIC(18,6)
+			 ,dblDiscountRate					NUMERIC(18,6)
+			 ,dblDiscount						NUMERIC(18,6)
+			 ,dblTotalAmount					NUMERIC(18,6)
+			 ,dblAccountTotalAmount				NUMERIC(18,6)
+			 ,dblAccountTotalDiscount			NUMERIC(18,6)
+			 ,dblAccountTotalLessDiscount		NUMERIC(18,6)
+			 ,dblAccountTotalDiscountQuantity	NUMERIC(18,6)
+			 ,dblDiscountEP						NUMERIC(18,6)
+			 ,dblAPR							NUMERIC(18,6)	
+			 ,strTerm							NVARCHAR(MAX)
+			 ,strType							NVARCHAR(MAX)
+			 ,strTermCode						NVARCHAR(MAX)	
+			 ,strNetwork						NVARCHAR(MAX)	
+			 ,strCustomerName					NVARCHAR(MAX)
+			 ,strInvoiceCycle					NVARCHAR(MAX)
+			 ,strGroupName						NVARCHAR(MAX)
+			 ,strInvoiceNumber					NVARCHAR(MAX)
+			 ,strInvoiceReportNumber			NVARCHAR(MAX)
+			 ,dtmDiscountDate					DATETIME
+			 ,dtmDueDate						DATETIME
+			 ,dtmTransactionDate				DATETIME
+			 ,dtmPostedDate						DATETIME
 
 		)
 		-------------VARIABLES------------
@@ -700,9 +701,11 @@ BEGIN
 		
 		-------------MERGE ACCOUNT & GROUP VOLUME DISCOUNT---------------
 
-		DECLARE @totalAccountDiscount				NUMERIC(18,6)
-		DECLARE @totalAccountAmount					NUMERIC(18,6)
-		DECLARE @totalAccountAmountLessDiscount		NUMERIC(18,6)
+		DECLARE @totalAccountDiscount					NUMERIC(18,6)
+		DECLARE @totalAccountAmount						NUMERIC(18,6)
+		DECLARE @totalAccountAmountLessDiscount			NUMERIC(18,6)
+		DECLARE @totalAccountTotalDiscountQuantity		NUMERIC(18,6)
+		
 
 		-------------SET GROUP VOLUME TO OUTPUT---------------
 		INSERT @tblCFMergeVolumeDisctinct
@@ -720,6 +723,7 @@ BEGIN
 			 @totalAccountDiscount				= ROUND(ISNULL(SUM(dblDiscount),0),2)
 			,@totalAccountAmount				= ISNULL(SUM(dblTotalAmount),0)
 			,@totalAccountAmountLessDiscount	= ISNULL(ISNULL(SUM(dblTotalAmount),0) - ISNULL(SUM(dblDiscount),0),0)
+			,@totalAccountTotalDiscountQuantity	= ISNULL(SUM(dblQuantity),0)
 			FROM @tblCFGroupVolumeTemp
 			WHERE intAccountId = @intDistinctDiscountLoop
 
@@ -763,7 +767,8 @@ BEGIN
 				,dtmPostedDate		
 				,dblAccountTotalAmount		
 				,dblAccountTotalDiscount
-				,dblAccountTotalLessDiscount	
+				,dblAccountTotalLessDiscount
+				,dblAccountTotalDiscountQuantity	
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			)
@@ -808,6 +813,7 @@ BEGIN
 				,@totalAccountAmount		
 				,@totalAccountDiscount				
 				,@totalAccountAmountLessDiscount
+				,@totalAccountTotalDiscountQuantity
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			FROM @tblCFGroupVolumeTemp as cfGroupVolumeDiscount
@@ -836,6 +842,7 @@ BEGIN
 			 @totalAccountDiscount				= ROUND(ISNULL(SUM(dblDiscount),0),2)
 			,@totalAccountAmount				= ISNULL(SUM(dblTotalAmount),0)
 			,@totalAccountAmountLessDiscount	= ISNULL(ISNULL(SUM(dblTotalAmount),0) - ISNULL(SUM(dblDiscount),0),0)
+			,@totalAccountTotalDiscountQuantity	= ISNULL(SUM(dblQuantity),0)
 			FROM @tblCFAccountVolumeTemp
 			WHERE intAccountId = @intDistinctDiscountLoop
 
@@ -880,6 +887,7 @@ BEGIN
 				,dblAccountTotalAmount		
 				,dblAccountTotalDiscount
 				,dblAccountTotalLessDiscount	
+				,dblAccountTotalDiscountQuantity
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			)
@@ -924,6 +932,7 @@ BEGIN
 				,@totalAccountAmount		
 				,@totalAccountDiscount				
 				,@totalAccountAmountLessDiscount
+				,@totalAccountTotalDiscountQuantity
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			FROM @tblCFAccountVolumeTemp as cfAccountVolumeDiscount
@@ -963,6 +972,7 @@ BEGIN
 			,dblAccountTotalAmount
 			,dblAccountTotalDiscount
 			,dblAccountTotalLessDiscount
+			,dblAccountTotalDiscountQuantity
 			,dblEligableGallon
 			,dblDiscountEP
 			,dblAPR
@@ -990,6 +1000,7 @@ BEGIN
 			,dblAccountTotalAmount
 			,dblAccountTotalDiscount
 			,dblAccountTotalLessDiscount
+			,dblAccountTotalDiscountQuantity
 			,dblTotalQuantity
 			,dblDiscountEP
 			,dblAPR
