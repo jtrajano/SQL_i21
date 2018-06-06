@@ -175,7 +175,7 @@ BEGIN
 				)
 			AND RI.ysnConsumptionRequired = (
 				CASE 
-					WHEN @strAutoProduceBiProducts = 'True'
+					WHEN @strAutoProduceBiProducts = 'True' AND @intRecipeItemTypeId = 2
 						THEN 1
 					ELSE RI.ysnConsumptionRequired
 					END
