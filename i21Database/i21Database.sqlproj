@@ -6732,6 +6732,7 @@
     <Build Include="dbo\Stored Procedures\uspRKCurExpMoneyMarket.sql" />
     <Build Include="dbo\Stored Procedures\uspRKCurrencyExposureForOTC.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyExposureSearch.sql" />
+    <Build Include="dbo\Views\vyuHDProjectParentSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
