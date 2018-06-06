@@ -178,6 +178,47 @@ BEGIN TRY
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
+	UNION
+	SELECT WC.intWeightClaimId
+		,WC.strReferenceNumber
+		,NULL
+		,WCOC.intVendorId
+		,WCOC.dblQuantity AS dblNetShippedWeight
+		,ABS(0) AS dblWeightLoss
+		,ABS(WCOC.dblWeight) AS dblNetWeight
+		,0 AS dblFranchiseWeight
+		,WCOC.dblQuantity AS dblQtyReceived
+		,WCOC.dblRate
+		,1 AS dblCostUnitQty
+		,1 AS dblWeightUnitQty
+		,WCOC.dblAmount
+		,1 AS dblUnitQty
+		,(
+			SELECT TOP (1) IU.intItemUOMId
+			FROM tblICItemUOM IU
+			WHERE IU.intItemId = WCOC.intItemId
+				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+			) AS intWeightUOMId
+		,(
+			SELECT TOP (1) IU.intItemUOMId
+			FROM tblICItemUOM IU
+			WHERE IU.intItemId = WCOC.intItemId
+				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+			) AS intUOMId
+		,WCOC.intRateUOMId AS intCostUOMId
+		,WCOC.intItemId
+		,NULL
+		,NULL AS intInventoryReceiptItemId
+		,NULL
+		,0
+	FROM tblLGWeightClaim WC
+	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
+	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
+	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCOC.intRateUOMId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCOC.intRateCurrencyId
+	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	SELECT @intVoucherType = CASE 
 							 WHEN WCD.dblWeightLoss < 0
@@ -244,7 +285,7 @@ BEGIN TRY
 		SELECT dblNetShippedWeight
 			,dblWeightLoss
 			,dblFranchiseWeight
-			,(dblWeightLoss-dblFranchiseWeight)
+			,(dblWeightLoss-ISNULL(dblFranchiseWeight,0))
 			,dblCost
 			,dblCostUnitQty
 			,dblWeightUnitQty
@@ -304,7 +345,8 @@ BEGIN TRY
 		DELETE
 		FROM @VoucherDetailClaim
 
-		SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
+		IF (ISNULL(@intWeightClaimDetailId,0) <> 0)
+			SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
