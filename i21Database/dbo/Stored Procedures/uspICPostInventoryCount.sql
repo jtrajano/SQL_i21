@@ -264,7 +264,10 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId) --CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ItemLot.intItemUOMId END
 			,dtmDate				= Header.dtmCountDate
-			,dblQty					= CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END
+			,dblQty					= CASE 
+										WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) 
+										ELSE Detail.dblNetQty - Detail.dblWeightQty 
+									END
 									--CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblPhysicalCount, 0) ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblPhysicalCount, 0)) END
 									--	- CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ItemLot.dblQty END
 			,dblUOMQty				= ItemUOM.dblUnitQty
@@ -293,7 +296,8 @@ BEGIN
 		LEFT JOIN dbo.tblICItemUOM StockUOM ON Detail.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
 	WHERE Header.intInventoryCountId = @intTransactionId
 				--AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
-			AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END <> 0)
+			--AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END <> 0)
+			AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblNetQty - Detail.dblWeightQty END <> 0)
 			AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
 	-----------------------------------
 	--  Call the costing routine 

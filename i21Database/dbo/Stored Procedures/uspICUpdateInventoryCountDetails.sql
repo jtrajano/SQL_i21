@@ -37,6 +37,7 @@ BEGIN
 		, strLotNo
 		, strLotAlias
 		, dblSystemCount
+		, dblWeightQty
 		, dblLastCost
 		, strCountLine
 		, intItemUOMId
@@ -62,7 +63,8 @@ BEGIN
 			, intLotId
 			, strLotNumber
 			, strLotAlias
-			, dblSystemCount = SUM(dblOnHand)
+			, dblSystemCount = SUM(dblLotQty)
+			, dblWeightQty = SUM(dblLotWeight)
 			, dblLastCost = MAX(dblLastCost)
 			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY intItemId ASC) AS NVARCHAR(50))
 			, intItemUOMId
