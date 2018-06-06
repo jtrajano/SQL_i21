@@ -1680,7 +1680,7 @@ IF @recap = 0
 			INSERT INTO @tblPaymentsToUpdateBudget
 			SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData
 
-			--Update Customer's AR Balance
+			--UPDATE tblARCustomer.dblARBalance
 			UPDATE CUSTOMER
 			SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
@@ -1694,6 +1694,19 @@ IF @recap = 0
 						WHERE PD.intPaymentId IN (SELECT intPaymentId FROM @tblPaymentsToUpdateBudget)
 						GROUP BY intEntityCustomerId
 			) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
+
+			--UPDATE tblARCustomer.dtmCreditLimitReached
+			UPDATE CUSTOMER
+			SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
+			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+			CROSS APPLY (
+				SELECT TOP 1 dtmDatePaid
+				FROM dbo.tblARPayment P
+				INNER JOIN @tblPaymentsToUpdateBudget U ON P.intPaymentId = U.intPaymentId
+				WHERE P.intEntityCustomerId = CUSTOMER.intEntityId
+				ORDER BY P.dtmDatePaid DESC
+			) PAYMENT
+			WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
 			--Update Customer's Budget 
 			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)

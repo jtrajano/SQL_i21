@@ -109,14 +109,16 @@ SELECT
 	intCreditStopDays = CUS.intCreditStopDays,
 	strCreditCode = CUS.strCreditCode,
 
-    ysnProspect = CTYPE.Prospect
-
+    ysnProspect = CTYPE.Prospect,
+	intCreditLimitReached = CUS.intCreditLimitReached,
+	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 	FROM tblSOSalesOrder SO
 		JOIN ( SELECT	intEntityId,			strCustomerNumber,
 						intEntityContactId,		strName,
 						dblCreditLimit,			dblARBalance,
 						ysnPORequired,			intEntityLineOfBusinessIds,
-						intCreditStopDays,		strCreditCode
+						intCreditStopDays,		strCreditCode,
+						intCreditLimitReached,  dtmCreditLimitReached
 			FROM vyuARCustomerSearch WITH (NOLOCK) ) CUS
 				ON CUS.intEntityId = SO.intEntityCustomerId 
         LEFT JOIN ( SELECT intEntityId,		Customer,       Prospect

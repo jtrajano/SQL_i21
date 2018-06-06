@@ -65,6 +65,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'')
 	 , intCreditStopDays		= CUSTOMER.intCreditStopDays
 	 , strCreditCode			= CUSTOMER.strCreditCode
+	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
+	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, GETDATE(), CUSTOMER.dtmCreditLimitReached)
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -99,6 +101,7 @@ INNER JOIN (
 		 , ysnCreditHold
 		 , intCreditStopDays
 		 , strCreditCode
+		 , dtmCreditLimitReached		 
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT S.intEntityId

@@ -100,6 +100,7 @@
 	[intTermsId]							INT NULL,
     [intPaymentMethodId]					INT NULL,
 	[dtmLastServiceCharge]					DATETIME NULL,
+	[dtmCreditLimitReached]					DATETIME NULL,
 	[intCompanyId]							INT NULL ,
     [intConcurrencyId]						INT CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
