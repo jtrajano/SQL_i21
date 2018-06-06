@@ -400,6 +400,18 @@ BEGIN
 		--BILL WAS POSTED FROM ORIGIN
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
+			'Voucher cannot be unpost because it is already unposted. Voucher will be refresh.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			33
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND A.ysnPosted = 0
+
+		--BILL WAS POSTED FROM ORIGIN
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
 			'Modification not allowed. Transaction is from Origin System.',
 			'Bill',
 			A.strBillId,
