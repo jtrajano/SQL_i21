@@ -728,8 +728,8 @@ BEGIN TRY
 			,[strTransactionId] = W.strWorkOrderNo
 			,[intTransactionTypeId] = 9
 			,[intLotId] = PL.intLotId
-			,[intSubLocationId] = SL.intSubLocationId
-			,[intStorageLocationId] = PL.intStorageLocationId
+			,[intSubLocationId] = L.intSubLocationId
+			,[intStorageLocationId] = L.intStorageLocationId
 			,[ysnIsStorage] = NULL
 			,[strActualCostId] = NULL
 			,[intSourceTransactionId] = intBatchId
@@ -738,8 +738,7 @@ BEGIN TRY
 			,intFobPointId = 2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-		JOIN tblICLot L ON L.intLotId = PL.intLotId
-		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+		JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
 			AND RI.intRecipeItemTypeId = 2
