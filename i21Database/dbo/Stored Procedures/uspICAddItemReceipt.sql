@@ -308,19 +308,21 @@ BEGIN
 			END
 
 		-- Check if there is an existing Inventory receipt 
-		SELECT	@inventoryReceiptId = RawData.intInventoryReceiptId
+		SELECT	TOP 1
+				@inventoryReceiptId = RawData.intInventoryReceiptId
 				,@strSourceScreenName = RawData.strSourceScreenName
 				,@strSourceId = RawData.strSourceId
 				,@intLocationId = RawData.intLocationId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
-					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
 					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
-					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
 		WHERE	RawHeaderData.intId = @intId
+		ORDER BY RawData.intInventoryReceiptId DESC
 
 		-- Block overwrite of a posted inventory receipt record.
 		IF EXISTS (SELECT 1 FROM dbo.tblICInventoryReceipt WHERE intInventoryReceiptId = @inventoryReceiptId AND ISNULL(ysnPosted, 0) = 1) 
