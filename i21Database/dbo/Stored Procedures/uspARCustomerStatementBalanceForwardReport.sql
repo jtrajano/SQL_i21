@@ -730,6 +730,14 @@ IF @ysnPrintFromCFLocal = 1
 					GROUP BY intCustomerId
 				) CF ON AGINGREPORT.intEntityCustomerId = CF.intCustomerId
 			END
+		ELSE
+			BEGIN
+				UPDATE AGINGREPORT
+				SET AGINGREPORT.dblFuture = 0.000000
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblFuture, 0)
+				FROM @temp_aging_table AGINGREPORT
+				WHERE ISNULL(AGINGREPORT.dblFuture, 0) <> 0
+			END
 	END
 ELSE 
 	BEGIN
