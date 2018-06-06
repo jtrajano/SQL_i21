@@ -51,16 +51,16 @@ AS
 	, A.strState
 	, A.strZipState
 	, A.intYear
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 1 THEN SUM(A.dbl1099) ELSE NULL END AS dblDividends
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 2 THEN SUM(A.dbl1099) ELSE NULL END AS dblNonpatronage
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 3 THEN SUM(A.dbl1099) ELSE NULL END AS dblPerUnit
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 4 THEN SUM(A.dbl1099) ELSE NULL END AS dblFederalTax
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 5 THEN SUM(A.dbl1099) ELSE NULL END AS dblRedemption
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 6 THEN SUM(A.dbl1099) ELSE NULL END AS dblDomestic
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 7 THEN SUM(A.dbl1099) ELSE NULL END AS dblInvestment
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 8 THEN SUM(A.dbl1099) ELSE NULL END AS dblOpportunity
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 9 THEN SUM(A.dbl1099) ELSE NULL END AS dblAMT
-	, CASE WHEN A.int1099Form = 4 AND A.int1099Category = 10 THEN SUM(A.dbl1099) ELSE NULL END AS dblOther
+	, CASE WHEN A.int1099Form = 4 AND  SUM(A.dblDividends)		!= 0 THEN SUM(A.dblDividends)	ELSE NULL END AS dblDividends
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblNonpatronage)	!= 0 THEN SUM(A.dblNonpatronage) ELSE NULL END AS dblNonpatronage
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblPerUnit)			!= 0 THEN SUM(A.dblPerUnit)		ELSE NULL END AS dblPerUnit
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblFederalTax)		!= 0 THEN SUM(A.dblFederalTax)	ELSE NULL END AS dblFederalTax
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblRedemption)		!= 0 THEN SUM(A.dblRedemption)	ELSE NULL END AS dblRedemption
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblDomestic)		!= 0 THEN SUM(A.dblDomestic)	ELSE NULL END AS dblDomestic
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblInvestments) 	!= 0 THEN SUM(A.dblInvestments) ELSE NULL END AS dblInvestment
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblOpportunity) 	!= 0 THEN SUM(A.dblOpportunity) ELSE NULL END AS dblOpportunity
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblAMT)				!= 0 THEN SUM(A.dblAMT)			ELSE NULL END AS dblAMT
+	, CASE WHEN A.int1099Form = 4 AND SUM(A.dblOther)			!= 0 THEN SUM(A.dblOther)		ELSE NULL END AS dblOther
 	, A.[intEntityId]
 FROM vyuAP1099 A
 CROSS JOIN tblSMCompanySetup B
@@ -69,7 +69,6 @@ WHERE A.int1099Form = 4
 GROUP BY intYear, [intEntityId]
 ,B.strCompanyName, B.strAddress, B.strCity, B.strState, B.strZip, B.strCountry, B.strPhone, B.strEin--B.strFederalTaxID
 ,A.int1099Form
-,A.int1099Category
 , A.strAddress
 , A.strVendorCompanyName
 , A.strPayeeName
