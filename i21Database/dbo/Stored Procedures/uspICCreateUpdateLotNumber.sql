@@ -127,6 +127,8 @@ DECLARE @intBlendRequirementId INT = NULL
 DECLARE @intPatternCode INT = 24
 DECLARE @ysnProposed INT = 0
 
+DECLARE @intSourceType_Scale AS INT = 1
+
 -- Check for redundant lot numbers 
 BEGIN 
 	SET @strReceiptNumber = NULL
@@ -138,7 +140,14 @@ BEGIN
 			,@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 	FROM	@ItemsForLot LotFromTransaction INNER JOIN dbo.tblICItem Item
 				ON LotFromTransaction.intItemId = Item.intItemId
-	GROUP BY LotFromTransaction.strLotNumber, LotFromTransaction.strReceiptNumber, Item.strItemNo, Item.intItemId, LotFromTransaction.intSubLocationId, LotFromTransaction.intStorageLocationId
+	WHERE	ISNULL(LotFromTransaction.intSourceType, 0) <> @intSourceType_Scale 
+	GROUP BY 
+		LotFromTransaction.strLotNumber
+		, LotFromTransaction.strReceiptNumber
+		, Item.strItemNo
+		, Item.intItemId
+		, LotFromTransaction.intSubLocationId
+		, LotFromTransaction.intStorageLocationId
 	HAVING COUNT(1) > 1
 
 	IF ISNULL(@strReceiptNumber, '') <> '' AND ISNULL(@strLotNumber, '') <> '' AND ISNULL(@strItemNo, '') <> ''
