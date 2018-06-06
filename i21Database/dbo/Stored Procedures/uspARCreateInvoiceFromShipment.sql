@@ -82,7 +82,7 @@ SELECT
 	,@ShipDate					= ICIS.[dtmShipDate]
 	,@PostDate					= @DateOnly
 	,@CalculatedDate			= @DateOnly
-	,@EntitySalespersonId		= ARC.[intSalespersonId]
+	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
 	,@PONumber					= SO.[strPONumber]
@@ -97,6 +97,12 @@ FROM
 INNER JOIN
 	[tblARCustomer] ARC
 		ON ICIS.[intEntityCustomerId] = ARC.[intEntityId] 
+LEFT JOIN
+	[tblICInventoryShipmentItem] ICISITEM
+		ON ICIS.[intInventoryShipmentId] = ICISITEM.[intInventoryShipmentId]
+LEFT JOIN
+	[tblCTContractHeader] CT
+		ON ICISITEM.[intOrderId] = CT.[intContractHeaderId]
 LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
