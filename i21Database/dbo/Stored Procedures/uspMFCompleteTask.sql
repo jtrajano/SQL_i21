@@ -51,13 +51,13 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@intTransactionCount INT
 		,@intTaskId INT
-		,@intOrderDirectionId int
+		,@intOrderDirectionId INT
 
-	If @strTaskId =''
-	Select @strTaskId=NULL
+	IF @strTaskId = ''
+		SELECT @strTaskId = NULL
 
-	If @strTaskId =''
-	Select @strTaskId=NULL
+	IF @strTaskId = ''
+		SELECT @strTaskId = NULL
 
 	SELECT @dtmDate = GETDATE()
 
@@ -88,7 +88,7 @@ BEGIN TRY
 		,@strReferenceNo = strReferenceNo
 		,@intOrderId = intOrderHeaderId
 		,@intLocationId = intLocationId
-		,@intOrderDirectionId=intOrderDirectionId
+		,@intOrderDirectionId = intOrderDirectionId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -240,6 +240,18 @@ BEGIN TRY
 				AND InvSI.intItemId = @intItemId
 
 			SELECT @strDescription = @strOrderNo + ' / ' + @strReferenceNo
+
+			SELECT @intTransactionId = @intInventoryShipmentId
+
+			SELECT @strTransactionId = @strReferenceNo
+
+			EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+				,@intTransactionId
+				,@intInventoryTransactionType
+
+			EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+				,@intOrderId
+				,34
 		END
 		ELSE
 		BEGIN
@@ -460,7 +472,8 @@ BEGIN TRY
 			)
 
 		IF @ysnLoad = 0
-			AND @intCustomerLabelTypeId <> 2 and @intOrderDirectionId=2
+			AND @intCustomerLabelTypeId <> 2
+			AND @intOrderDirectionId = 2
 		BEGIN
 			INSERT INTO tblMFOrderManifest (
 				intConcurrencyId
@@ -672,10 +685,6 @@ BEGIN TRY
 
 		SELECT @strTransactionId = @strReferenceNo
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intTransactionId
-			,@intInventoryTransactionType
-
 		INSERT INTO @ItemsToReserve (
 			intItemId
 			,intItemLocationId
@@ -711,10 +720,6 @@ BEGIN TRY
 
 		DELETE
 		FROM @ItemsToReserve
-
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intOrderId
-			,34
 
 		INSERT INTO @ItemsToReserve (
 			intItemId
