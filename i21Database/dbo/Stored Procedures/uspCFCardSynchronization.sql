@@ -112,7 +112,7 @@ BEGIN
 
 	IF(ISNULL(@intAccountId,0) = 0)
 	BEGIN
-		print 'Cannot account number'
+		print 'Cannot find account number'
 		INSERT INTO tblCFCSULog
 			(
 				 strAccountNumber
@@ -125,7 +125,7 @@ BEGIN
 			SELECT 
 				 @strAccountNumber
 				,@strCardNumber
-			,'Cannot account number ' + @strAccountNumber as strMessage
+			,'Cannot find account number ' + @strAccountNumber as strMessage
 			,@strErrorRecordId
 			,@dtmImportDate
 
