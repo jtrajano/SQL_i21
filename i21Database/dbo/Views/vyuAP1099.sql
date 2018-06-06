@@ -54,7 +54,37 @@ SELECT
      ELSE 0 END  
 	, dbl1099B = CASE WHEN A.int1099Form = 3--1099 B
 	    THEN (A.dbl1099 + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
-     ELSE 0 END   
+     ELSE 0 END
+	, dblDividends = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 1
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END 
+	, dblNonpatronage = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 2
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblPerUnit = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 3
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblFederalTax = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 4
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblRedemption = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 5
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblDomestic = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 6
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblInvestments = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 7
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblOpportunity = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 8
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblAMT = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 9
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END
+	, dblOther = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 10
+	    THEN (A.dbl1099 + A.dblTax) 
+     ELSE 0 END 	 	           
 	, dblOrdinaryDividends = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 0--'OrdinaryDividends'     
 		THEN  (A.dblTotal + A.dblTax)
      ELSE 0 END  
