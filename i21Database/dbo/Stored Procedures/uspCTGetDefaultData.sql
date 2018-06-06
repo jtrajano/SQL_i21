@@ -227,4 +227,12 @@ BEGIN
 		END
 	END
 
+	IF @strType = 'Commodity UOM'
+	BEGIN
+		SELECT	intCommodityUnitMeasureId,strUnitMeasure,UM.intUnitMeasureId 
+		FROM	tblICCommodityUnitMeasure	CU
+		JOIN	tblICUnitMeasure			UM ON UM.intUnitMeasureId = CU.intUnitMeasureId
+		WHERE	intCommodityId = @intCommodityId	
+	END
+
 END
