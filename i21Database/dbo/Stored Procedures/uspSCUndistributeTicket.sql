@@ -25,6 +25,7 @@ DECLARE @InventoryReceiptId INT
 		,@intInvoiceId INT
 		,@success INT
 		,@ysnPosted BIT
+		,@ysnIRPosted BIT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@batchIdUsed AS NVARCHAR(100)
@@ -50,7 +51,10 @@ DECLARE @InventoryReceiptId INT
 		,@strContractStatus NVARCHAR(40)
 		,@intContractSeq INT
 		,@intId INT
-		,@intTicketType INT;
+		,@intTicketType INT
+		,@intStorageScheduleTypeId INT
+		,@dblScheduleQty NUMERIC(38,20)
+		,@intMatchTicketItemUOMId INT;
 
 BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
@@ -90,27 +94,38 @@ BEGIN TRY
 
 		IF @strInOutFlag = 'I'
 			BEGIN
-				SELECT @intMatchTicketId = intMatchTicketId, @intTicketType = intTicketType FROM tblSCTicket WHERE intTicketId = @intTicketId
+				SELECT @intMatchTicketId = intMatchTicketId, @intTicketType = intTicketType
+				, @intStorageScheduleTypeId = intStorageScheduleTypeId, @intMatchTicketItemUOMId = intItemUOMIdTo
+				, @intContractDetailId = intContractId, @dblScheduleQty = (dblScheduleQty * -1)
+				FROM tblSCTicket WHERE intTicketId = @intTicketId
 				IF ISNULL(@intMatchTicketId, 0) > 0 AND @intTicketType = 6
 				BEGIN
-					SELECT @intMatchLoadId = LGLD.intLoadId 
-					,@intMatchLoadDetailId = LGLD.intLoadDetailId
-					, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
-					, @dblMatchLoadScheduledUnits = LGLD.dblQuantity
-					, @intMatchLoadContractId = LGLD.intSContractDetailId
-					FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
-					WHERE LGL.intTicketId = @intMatchTicketId
-
 					IF EXISTS (SELECT intMatchTicketId FROM tblSCTicket WHERE intTicketId = @intMatchTicketId AND strTicketStatus = 'C')
 					BEGIN
 						RAISERROR('Unable to un-distribute ticket, match ticket already completed', 11, 1);
 						RETURN;
 					END
-					IF ISNULL(@intMatchLoadDetailId, 0) > 0
-					BEGIN
-						EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
-						UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
+					IF @intStorageScheduleTypeId = -6
+					BEGin
+						SELECT @intMatchLoadId = LGLD.intLoadId 
+						,@intMatchLoadDetailId = LGLD.intLoadDetailId
+						, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
+						, @dblMatchLoadScheduledUnits = LGLD.dblQuantity
+						, @intMatchLoadContractId = LGLD.intSContractDetailId
+						FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
+						WHERE LGL.intTicketId = @intMatchTicketId
+
+						IF ISNULL(@intMatchLoadDetailId, 0) > 0
+						BEGIN
+							EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
+							UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
+						END
 					END
+					ELSE IF @intStorageScheduleTypeId = -2
+					BEGIN  
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+					END
+					
 					UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
 					DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 					DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
@@ -151,19 +166,20 @@ BEGIN TRY
 				CREATE TABLE #tmpItemReceiptIds (
 					[intInventoryReceiptId] [INT] PRIMARY KEY,
 					[strReceiptNumber] [VARCHAR](100),
+					[ysnPosted] [BIT],
 					UNIQUE ([intInventoryReceiptId])
 				);
-				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+				INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber,ysnPosted) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber,ysnPosted FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
-				SELECT intInventoryReceiptId,  strReceiptNumber
+				SELECT intInventoryReceiptId,  strReceiptNumber, ysnPosted
 				FROM #tmpItemReceiptIds
 
 				OPEN intListCursor;
 
 				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId;
+				FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId, @ysnIRPosted;
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
@@ -205,11 +221,12 @@ BEGIN TRY
 					CLOSE voucherCursor  
 					DEALLOCATE voucherCursor
 
-					EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
+					IF ISNULL(@ysnIRPosted, 0) = 1
+						EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 					EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 					EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 
-					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId;
+					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId, @ysnIRPosted;
 				END
 				CLOSE intListCursor  
 				DEALLOCATE intListCursor 
