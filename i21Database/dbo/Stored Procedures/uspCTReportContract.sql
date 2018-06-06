@@ -1,6 +1,4 @@
-﻿------------------------uspCTReportContract
-------------------------uspCTReportContract
-CREATE PROCEDURE [dbo].[uspCTReportContract]
+﻿CREATE PROCEDURE [dbo].[uspCTReportContract]
 	
 	@xmlParam NVARCHAR(MAX) = NULL  
 	
@@ -37,16 +35,16 @@ BEGIN TRY
 			@dtmApproved			DATETIME,
 			@ysnPrinted				BIT,
 
-			@intLastApprovedContractId INT,
-			@intPrevApprovedContractId INT,
-			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT,
-			@TotalAtlasLots		 INT,
-			@strSequenceHistoryId	     NVARCHAR(MAX),
-			@strDetailAmendedColumns	 NVARCHAR(MAX),
-			@intLaguageId			INT,
-			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
-			@strMonthLabelName		NVARCHAR(50) = 'Month'
+			@intLastApprovedContractId	INT,
+			@intPrevApprovedContractId	INT,
+			@strAmendedColumns			NVARCHAR(MAX),
+			@intContractDetailId		INT,
+			@TotalAtlasLots				INT,
+			@strSequenceHistoryId	    NVARCHAR(MAX),
+			@strDetailAmendedColumns	NVARCHAR(MAX),
+			@intLaguageId				INT,
+			@strExpressionLabelName		NVARCHAR(50) = 'Expression',
+			@strMonthLabelName			NVARCHAR(50) = 'Month'
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -181,7 +179,7 @@ BEGIN TRY
 
 	SELECT	@strContractConditions = STUFF(								
 			(
-					SELECT	CHAR(13)+CHAR(10) + DM.strConditionDesc
+					SELECT	CHAR(13)+CHAR(10) + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
 					FROM	tblCTContractCondition	CD	
 					JOIN	tblCTCondition			DM	ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
