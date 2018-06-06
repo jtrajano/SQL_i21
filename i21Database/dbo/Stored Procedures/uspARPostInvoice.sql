@@ -4352,6 +4352,19 @@ IF @recap = 0
 						GROUP BY intEntityCustomerId
 			) INVOICE ON CUSTOMER.intEntityId = INVOICE.intEntityCustomerId
 
+			--UPDATE tblARCustomer.dtmCreditLimitReached
+			UPDATE CUSTOMER
+			SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN INVOICE.dtmPostDate ELSE NULL END
+			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
+			CROSS APPLY (
+				SELECT TOP 1 dtmPostDate
+				FROM dbo.tblARInvoice I
+				INNER JOIN @InvoiceToUpdate U ON I.intInvoiceId = U.intInvoiceId
+				WHERE I.intEntityCustomerId = CUSTOMER.intEntityId
+				ORDER BY I.dtmPostDate DESC
+			) INVOICE
+			WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
+
 			--UPDATE BatchIds Used
 			UPDATE tblARInvoice 
 			SET strBatchId		= CASE WHEN @post = 1 THEN @batchIdUsed ELSE NULL END

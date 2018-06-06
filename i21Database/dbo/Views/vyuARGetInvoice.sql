@@ -142,7 +142,9 @@ SELECT
 	strSubBook = CSBOOK.strSubBook,
 	intCreditStopDays = CUS.intCreditStopDays,
 	strCreditCode = CUS.strCreditCode,
-	intPurchaseSale	= LG.intPurchaseSale
+	intPurchaseSale	= LG.intPurchaseSale,
+	intCreditLimitReached = CUS.intCreditLimitReached,
+	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 FROM 
 tblARInvoice INV
 JOIN (SELECT intEntityId,					strCustomerNumber, 
@@ -150,7 +152,8 @@ JOIN (SELECT intEntityId,					strCustomerNumber,
 				dblCreditLimit,				dblARBalance, 
 				ysnPORequired,					strName,
 				intCreditStopDays,		strCreditCode,
-				intEntityContactId
+				intEntityContactId,		intCreditLimitReached,
+				dtmCreditLimitReached
 				FROM vyuARCustomerSearch WITH ( NOLOCK) ) CUS
 	ON CUS.intEntityId = INV.intEntityCustomerId --AND INV.intEntityContactId = CUS.intEntityContactId
 JOIN (SELECT intCompanyLocationId, strLocationName 
