@@ -6735,6 +6735,7 @@
     <Build Include="dbo\Stored Procedures\uspSTMarkUpDownCheckoutPosting.sql" />
     <Build Include="dbo\Functions\fnCTGetTranslation.sql" />
     <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuHDProjectParentSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
