@@ -26,7 +26,7 @@ BEGIN TRY
 	-- Begin a transaction and immediately create a save point 
 	--------------------------------------------------------------------------------------------  
 	BEGIN TRAN @TransactionName
-	SAVE TRAN @TransactionName -- Save point
+	--SAVE TRAN @TransactionName -- Save point
 
 
 
@@ -288,14 +288,14 @@ BEGIN TRY
 
 			END
 
-
+		
 
 	---- Check if recap
 	IF(@ysnRecap = CAST(1 AS BIT))
 		BEGIN
-		IF @@TRANCOUNT > 1 
-			ROLLBACK TRAN @TransactionName
-			
+		
+			IF @@TRANCOUNT > 0 
+				ROLLBACK TRAN @TransactionName
 
 			SET @strBatchId = NEWID();
 
@@ -373,14 +373,18 @@ BEGIN TRY
 				,t.[strRateType]
 			FROM @GLEntries t
 
-			COMMIT TRAN @TransactionName
+			--COMMIT TRAN @TransactionName
 			--JOIN vyuGLAccountDetail GD ON t.intAccountId = GD.intAccountId
 
 			
 		END
 	ELSE
-		COMMIT TRAN @TransactionName
+		IF @@TRANCOUNT > 0 
+			COMMIT TRAN @TransactionName
 
+
+
+		
 
 		-- This is our immediate exit in case of exceptions controlled by this stored procedure
 		
@@ -390,10 +394,8 @@ END TRY
 
 BEGIN CATCH
 	SET @strStatusMsg = ERROR_MESSAGE()
-	IF @@TRANCOUNT > 1 
-		BEGIN 
+	IF @@TRANCOUNT > 0 
 			ROLLBACK TRAN @TransactionName
-			RETURN -1
-		END
+	RETURN -1
 
 END CATCH
