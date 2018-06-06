@@ -81,14 +81,14 @@ BEGIN TRY
 		,[intItemLocationId]			= SC.intProcessingLocationId
 		,[intItemUOMId]					= SC.intItemUOMIdTo
 		,[dtmDate]						= SC.dtmTicketDateTime
-		,[dblQty]						= ICSI.dblQuantity
+		,[dblQty]						= SC.dblNetUnits
 		,[dblUOMQty]					= SC.dblConvertedUOMQty
 		,[dblCost]						= ICSI.dblUnitPrice
 		,[intCurrencyId]				= SC.intCurrencyId
 		,[intContractHeaderId]			= ICSI.intOrderId
 		,[intContractDetailId]			= ICSI.intLineNo
-		,[intTransactionHeaderId]		= ICS.intInventoryShipmentId
-		,[intTransactionDetailId]		= ICSI.intInventoryShipmentId
+		,[intTransactionHeaderId]		= ICSI.intInventoryShipmentId
+		,[intTransactionDetailId]		= ICSI.intInventoryShipmentItemId
 		,[strCostMethod]				= SC.strCostMethod
 		,[intScaleSetupId]				= SC.intScaleSetupId
 		,[dblFreightRate]				= SC.dblFreightRate
@@ -137,7 +137,7 @@ BEGIN TRY
 	SELECT
 	--Charges
 	[intInventoryShipmentId]			= SC.intTransactionHeaderId
-	,[intContractId]					= SC.intContractDetailId
+	,[intContractId]					= SC.intContractHeaderId
 	,[intChargeId]						= SC.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
@@ -196,7 +196,7 @@ BEGIN TRY
 	)
 	SELECT	
 		intInventoryShipmentId = SC.intTransactionHeaderId 
-		,intContractId = NULL 
+		,intContractId = SC.intContractHeaderId 
 		,intChargeId = SCSetup.intDefaultFeeItemId
 		,strCostMethod = IC.strCostMethod 
 		,dblRate = CASE
@@ -297,7 +297,7 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
@@ -341,7 +341,7 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							WHERE LoadCost.intItemId != @intFreightItemId AND LoadDetail.intSContractDetailId = @intLoadContractId 
 							AND LoadCost.intLoadId = @intLoadId AND LoadCost.dblRate != 0 AND SC.intTicketId = @intTicketId
@@ -366,7 +366,7 @@ BEGIN TRY
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
-							,[intContractId]				= SC.intContractDetailId
+							,[intContractId]				= SC.intContractHeaderId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= SC.strCostMethod
 							,[dblRate]						= CASE
@@ -385,10 +385,10 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-							WHERE ContractCost.intItemId = @intFreightItemId AND SC.intContractDetailId = @intLoadContractId 
+							WHERE ContractCost.intItemId = @intFreightItemId AND SC.intContractHeaderId = @intLoadContractId 
 							AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 
 							INSERT INTO @ShipmentCharges
@@ -409,7 +409,7 @@ BEGIN TRY
 							)
 							SELECT	
 							[intInventoryShipmentId]		= SC.intTransactionHeaderId
-							,[intContractId]				= SC.intContractDetailId
+							,[intContractId]				= SC.intContractHeaderId
 							,[intChargeId]					= ContractCost.intItemId
 							,[strCostMethod]				= ContractCost.strCostMethod
 							,[dblRate]						= CASE
@@ -428,8 +428,8 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
-							WHERE ContractCost.intItemId != @intFreightItemId AND SC.intContractDetailId = @intLoadContractId 
+							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
+							WHERE ContractCost.intItemId != @intFreightItemId AND SC.intContractHeaderId = @intLoadContractId 
 							AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 						END
 				END
@@ -474,7 +474,7 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblLGLoadDetail LoadDetail
-							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = LoadDetail.intSContractDetailId
+							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = LoadDetail.intSContractDetailId
 							LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 							WHERE LoadCost.intLoadId = @intLoadId AND LoadDetail.intSContractDetailId = @intLoadContractId 
 							AND LoadCost.dblRate != 0 AND SC.intTicketId = @intTicketId
@@ -519,8 +519,8 @@ BEGIN TRY
 							,[intForexRateTypeId]			= NULL
 							,[dblForexRate]					= NULL
 							FROM tblCTContractCost ContractCost
-							LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
-							WHERE SC.intContractDetailId = @intLoadContractId AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
+							LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
+							WHERE SC.intContractHeaderId = @intLoadContractId AND ContractCost.dblRate != 0 AND SC.intTicketId = @intTicketId
 						END
 				END
 		END
@@ -594,7 +594,7 @@ BEGIN TRY
 						)
 						SELECT	
 						[intInventoryShipmentId]	= SC.intTransactionHeaderId
-						,[intContractId]			= SC.intContractDetailId
+						,[intContractId]			= SC.intContractHeaderId
 						,[intChargeId]				= SCS.intFreightItemId
 						,[strCostMethod]			= SC.strCostMethod
 						,[dblRate]					= CASE
@@ -623,7 +623,7 @@ BEGIN TRY
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						OUTER APPLY(
-							SELECT * FROM tblCTContractCost WHERE intContractDetailId = SC.intContractDetailId 
+							SELECT * FROM tblCTContractCost WHERE intContractDetailId = SC.intContractHeaderId 
 							AND dblRate != 0 
 							AND intItemId = @intFreightItemId
 						) CT
@@ -649,7 +649,7 @@ BEGIN TRY
 						)
 						SELECT	
 						[intInventoryShipmentId]		= SC.intTransactionHeaderId
-						,[intContractId]				= SC.intContractDetailId
+						,[intContractId]				= SC.intContractHeaderId
 						,[intChargeId]					= ContractCost.intItemId
 						,[strCostMethod]				= SC.strCostMethod
 						,[dblRate]						= CASE
@@ -668,7 +668,7 @@ BEGIN TRY
 						,[intForexRateTypeId]			= NULL
 						,[dblForexRate]					= NULL
 						FROM tblCTContractCost ContractCost
-						LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
+						LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
 						WHERE ContractCost.intItemId = @intFreightItemId 
@@ -739,7 +739,7 @@ BEGIN TRY
 			)
 			SELECT	
 			[intInventoryShipmentId]			= SC.intTransactionHeaderId
-			,[intContractId]					= SC.intContractDetailId
+			,[intContractId]					= SC.intContractHeaderId
 			,[intChargeId]						= ContractCost.intItemId
 			,[strCostMethod]					= ContractCost.strCostMethod
 			,[dblRate]							= CASE
@@ -758,7 +758,7 @@ BEGIN TRY
 			,[intForexRateTypeId]				= NULL
 			,[dblForexRate]						= NULL
 			FROM tblCTContractCost ContractCost
-			LEFT JOIN @scaleStaging SC ON SC.intContractDetailId = ContractCost.intContractDetailId
+			LEFT JOIN @scaleStaging SC ON SC.intContractHeaderId = ContractCost.intContractDetailId
 			WHERE ContractCost.intItemId != @intFreightItemId AND ContractCost.dblRate != 0 
 			AND SC.intTicketId = @intTicketId
 		END
