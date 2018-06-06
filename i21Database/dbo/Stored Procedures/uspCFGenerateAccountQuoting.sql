@@ -25,7 +25,7 @@ BEGIN
 		FROM
 		tblCFAccount 
 		WHERE intCustomerId = @intCustomerId
-		AND intCustomerGroupId = @intCustomerGroupId
+		--AND intCustomerGroupId = @intCustomerGroupId
 	END
 	ELSE
 	BEGIN
@@ -49,8 +49,6 @@ BEGIN
 
 		IF(ISNULL(@intAccounId,0) != 0)
 		BEGIN
-		
-			
 
 			DECLARE @tblCFTempAccountQuoteSite TABLE(
 				 intAccountQuoteSiteId		INT
@@ -77,7 +75,7 @@ BEGIN
 			,@intAccountId			= intAccountId
 			FROM tblCFAccount
 			WHERE intCustomerId = @intCustomerId 
-			AND  intCustomerGroupId = @intCustomerGroupId
+			--AND  intCustomerGroupId = @intCustomerGroupId
 
 			INSERT INTO @tblCFTempAccountQuoteSite(
 				 intAccountQuoteSiteId	
