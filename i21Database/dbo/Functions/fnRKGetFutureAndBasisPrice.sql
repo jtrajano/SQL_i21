@@ -22,11 +22,13 @@ AS
 BEGIN
 	
 	DECLARE @ysnEnterForwardCurveForMarketBasisDifferential BIT	
+	DECLARE @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT	
 	DECLARE @intSettlementUOMId int
 	DECLARE	@dblSettlementPrice NUMERIC(18,6)
 	DECLARE @intDefaultCurrencyId INT
 		
 	SELECT @ysnEnterForwardCurveForMarketBasisDifferential = isnull(ysnEnterForwardCurveForMarketBasisDifferential, 0)
+		  ,@ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = isnull(ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell,0)
 	FROM tblRKCompanyPreference
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
@@ -85,6 +87,49 @@ BEGIN
 				AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(@intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
 			ORDER BY dtmM2MBasisDate DESC	
 
+		END
+		ELSE IF @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 0 --Value 0 means that the intContractTypeId is set to null upon creation of Basis Entry, thus we don't need to filter it
+		BEGIN
+			INSERT INTO @returntable(dblBasis,intBasisUOMId)
+			SELECT TOP 1 
+			CASE WHEN @intCurrencyId IS NULL THEN
+				CASE WHEN @intDefaultCurrencyId = bd.intCurrencyId THEN
+					ISNULL(dblBasisOrDiscount, 0)
+					ELSE
+						--Convert
+						ISNULL(dblBasisOrDiscount, 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = bd.intCurrencyId 
+							AND [intToCurrencyId] = @intDefaultCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+				END
+				WHEN @intCurrencyId = bd.intCurrencyId THEN
+					ISNULL(dblBasisOrDiscount, 0)
+				ELSE
+					--Convert
+						ISNULL(dblBasisOrDiscount, 0) * (SELECT TOP 1 
+							[dblRate]
+						FROM 
+							[vyuSMForex] 
+						WHERE 
+							[intFromCurrencyId] = bd.intCurrencyId 
+							AND [intToCurrencyId] = @intCurrencyId 
+							AND dbo.fnDateLessThanEquals(dtmValidFromDate, GETDATE()) = 1
+						ORDER BY
+							[dtmValidFromDate] DESC)
+			 END AS dblBasisOrDiscount
+			,isnull(intUnitMeasureId,0)
+			FROM tblRKM2MBasis b
+			JOIN tblRKM2MBasisDetail bd ON b.intM2MBasisId = bd.intM2MBasisId
+			WHERE intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN intCommodityId ELSE @intCommodityId END AND strPeriodTo = @strSeqMonth AND bd.intFutureMarketId = @intFutureMarketId AND isnull(bd.intCompanyLocationId, 0) = CASE WHEN isnull(@intLocationId, 0) = 0 THEN isnull(bd.intCompanyLocationId, 0) ELSE @intLocationId END AND ISNULL(dblBasisOrDiscount, 0) <> 0 AND strContractInventory = 'Contract'
+			 AND isnull(bd.intMarketZoneId, 0) = CASE WHEN isnull(@intMarketZoneId, 0) = 0 THEN isnull(bd.intMarketZoneId, 0) ELSE @intMarketZoneId END
+			 AND strContractInventory = 'Contract'
+			ORDER BY dtmM2MBasisDate DESC
 		END
 		ELSE
 		BEGIN
