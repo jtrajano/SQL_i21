@@ -113,7 +113,10 @@ BEGIN
 
 	EXEC('UPDATE tblTFReportingComponentConfiguration SET strTemplateItemId = NEWID() WHERE strTemplateItemId IS NULL')
 
-	EXEC('DELETE tblTFReportingComponentConfiguration WHERE intMasterId IS NULL')
+	IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblTFReportingComponentConfiguration' AND COLUMN_NAME = 'intMasterId') 
+	BEGIN
+		EXEC('DELETE tblTFReportingComponentConfiguration WHERE intMasterId IS NULL')
+	END
 END
 
 IF NOT EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSMCleanupLog') 
