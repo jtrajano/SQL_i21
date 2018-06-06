@@ -49,7 +49,7 @@ BEGIN
 	SELECT @XMLGatewayVersion = dblXmlVersion FROM dbo.tblSTRegister WHERE intRegisterId = @Register
 
 	INSERT INTO [tblSTstgPromotionItemListSend]
-	SELECT 
+	SELECT DISTINCT
 	 ST.intStoreNo [StoreLocationID]
 		, 'iRely' [VendorName]  	
 		, 'Rel. 13.2.0' [VendorModelVersion]
