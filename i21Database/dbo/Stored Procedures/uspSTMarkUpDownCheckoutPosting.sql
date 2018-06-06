@@ -95,36 +95,43 @@ BEGIN TRY
 						INNER JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
 						WHERE MUD.intCheckoutId = @intCheckoutId
 						
-						-- Generate New Batch Id
-						EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+						IF EXISTS(SELECT * FROM @ItemsForPost)
+							BEGIN
+								-- Generate New Batch Id
+								EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 
-						EXEC @intReturnValue = dbo.uspICPostCosting  
-							 @ItemsForPost  
-							,@strBatchId  
-							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-							,@intCurrentUserId
+								EXEC @intReturnValue = dbo.uspICPostCosting  
+									 @ItemsForPost  
+									,@strBatchId  
+									,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+									,@intCurrentUserId
 
-						SET @ysnIsPosted = 1
-						SET @strStatusMsg = 'Success'
+								SET @ysnIsPosted = 1
+								SET @strStatusMsg = 'Success'
+							END
+						
 				END
 		END
 	ELSE IF(@ysnPost = CAST(0 AS BIT)) -- UNPOST
 		BEGIN
 			-- UNPOST
+			IF EXISTS(SELECT * FROM tblSTCheckoutMarkUpDowns WHERE intCheckoutId = @intCheckoutId)
+				BEGIN
+					---- Generate New Batch Id
+					EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 
-			---- Generate New Batch Id
-			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+					-- UnPost
+					EXEC @intReturnValue = dbo.uspICUnpostCosting  
+							@intCheckoutId  
+							,@strMarkUpDownBatchNo  
+							,@strBatchId --New BatchId
+							,@intCurrentUserId
+							,0
 
-			-- UnPost
-			EXEC @intReturnValue = dbo.uspICUnpostCosting  
-					@intCheckoutId  
-					,@strMarkUpDownBatchNo  
-					,@strBatchId --New BatchId
-					,@intCurrentUserId
-					,0
-
-			SET @ysnIsPosted = 0
-			SET @strStatusMsg = 'Success'
+					SET @ysnIsPosted = 0
+					SET @strStatusMsg = 'Success'
+				END
+			
 		END
 
 END TRY
