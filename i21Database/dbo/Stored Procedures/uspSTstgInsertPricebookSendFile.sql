@@ -147,7 +147,7 @@ BEGIN
 	IF(@ExportEntirePricebookFile = 1)
 	BEGIN
 		INSERT INTO tblSTstgPricebookSendFile
-		SELECT 
+		SELECT DISTINCT
 			ST.intStoreNo [StoreLocationID]
 			, 'iRely' [VendorName]  	
 			, 'Rel. 13.2.0' [VendorModelVersion]
@@ -259,7 +259,7 @@ BEGIN
 	ELSE IF(@ExportEntirePricebookFile = 0)
 	BEGIN
 		INSERT INTO tblSTstgPricebookSendFile
-		SELECT 
+		SELECT DISTINCT
 			ST.intStoreNo [StoreLocationID]
 			, 'iRely' [VendorName]  	
 			, 'Rel. 13.2.0' [VendorModelVersion]
