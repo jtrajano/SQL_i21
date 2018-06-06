@@ -205,11 +205,11 @@ USING	(
 		UNION ALL
 		SELECT id = 49
 				,name = 'Retail Mark Ups/Downs'
-				,form = NULL 
+				,form = 'Mark Up and Down' 
 		UNION ALL
 		SELECT id = 50
 				,name = 'Retail Write Offs'
-				,form = NULL 
+				,form = 'Mark Up and Down' 
 		UNION ALL
 		SELECT id = 51
 				,name = 'Sales Return'

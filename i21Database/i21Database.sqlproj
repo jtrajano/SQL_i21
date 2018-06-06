@@ -6733,6 +6733,7 @@
     <Build Include="dbo\Stored Procedures\uspRKCurrencyExposureForOTC.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyExposureSearch.sql" />
     <Build Include="dbo\Views\vyuHDProjectParentSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTMarkUpDownCheckoutPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
