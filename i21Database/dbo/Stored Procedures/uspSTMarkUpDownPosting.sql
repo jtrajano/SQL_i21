@@ -14,7 +14,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF 
 
---BEGIN TRY
+BEGIN TRY
 	
 	--------------------------------------------------------------------------------------------  
 	-- Initialize   
@@ -293,7 +293,9 @@ SET ANSI_WARNINGS OFF
 	---- Check if recap
 	IF(@ysnRecap = CAST(1 AS BIT))
 		BEGIN
+		IF @@TRANCOUNT > 1 
 			ROLLBACK TRAN @TransactionName
+			
 
 			SET @strBatchId = NEWID();
 
@@ -370,26 +372,28 @@ SET ANSI_WARNINGS OFF
 				--,[dblForeignRate]
 				,t.[strRateType]
 			FROM @GLEntries t
+
+			COMMIT TRAN @TransactionName
 			--JOIN vyuGLAccountDetail GD ON t.intAccountId = GD.intAccountId
 
-			COMMIT TRAN @TransactionName
+			
 		END
+	ELSE
+		COMMIT TRAN @TransactionName
 
-
-		GOTO Post_Exit
 
 		-- This is our immediate exit in case of exceptions controlled by this stored procedure
-		With_Rollback_Exit:
-		IF @@TRANCOUNT > 1 
+		
+		
+		
+END TRY
+
+BEGIN CATCH
+	SET @strStatusMsg = ERROR_MESSAGE()
+	IF @@TRANCOUNT > 1 
 		BEGIN 
 			ROLLBACK TRAN @TransactionName
-			COMMIT TRAN @TransactionName
 			RETURN -1
 		END
 
-		Post_Exit:
---END TRY
-
---BEGIN CATCH
---	SET @strStatusMsg = ERROR_MESSAGE()
---END CATCH
+END CATCH
