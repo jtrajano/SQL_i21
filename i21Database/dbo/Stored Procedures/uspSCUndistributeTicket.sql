@@ -39,7 +39,8 @@ DECLARE @InventoryReceiptId INT
 		,@intMatchTicketId AS INT
 		,@strXml NVARCHAR(MAX)
 		,@intSettleStorageId INT
-		,@ItemsToIncreaseInTransitDirect AS InTransitTableType;
+		,@ItemsToIncreaseInTransitDirect AS InTransitTableType
+		,@ysnIRPosted BIT;
 
 BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
@@ -91,9 +92,10 @@ BEGIN TRY
 					CREATE TABLE #tmpItemReceiptIds (
 						[intInventoryReceiptId] [INT] PRIMARY KEY,
 						[strReceiptNumber] [VARCHAR](100),
+						[ysnPosted] [BIT],
 						UNIQUE ([intInventoryReceiptId])
 					);
-					INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+					INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber,ysnPosted) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber,ysnPosted FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 				
 					DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 					FOR
@@ -103,7 +105,7 @@ BEGIN TRY
 					OPEN intListCursor;
 
 					-- Initial fetch attempt
-					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId;
+					FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId, @ysnIRPosted;
 
 					WHILE @@FETCH_STATUS = 0
 					BEGIN
@@ -144,8 +146,8 @@ BEGIN TRY
 
 						CLOSE voucherCursor  
 						DEALLOCATE voucherCursor
-
-						EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
+						IF ISNULL(@ysnIRPosted, 0) = 1
+							EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 						EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 						EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 

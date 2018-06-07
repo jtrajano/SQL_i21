@@ -62,7 +62,7 @@ BEGIN TRY
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionId = ISNULL(LI.intCurrencyId, ScaleTicket.intTicketId)
 						,intTransactionDetailId = LI.intContractDetailId
 						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
@@ -93,7 +93,7 @@ BEGIN TRY
 						,dblUOMQty = ItemUOM.dblUnitQty
 						,dblCost = @dblCost
 						,dblSalesPrice = 0
-						,intCurrencyId = ScaleTicket.intCurrencyId
+						,intCurrencyId = ISNULL(LI.intCurrencyId, ScaleTicket.intTicketId)
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
 						,intTransactionDetailId = NULL

@@ -153,7 +153,10 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblSCTicketFormat.intSuppressDiscountOptionId,
 	tblSCTicketFormat.ysnSuppressSplit,
 	SMS.blbDetail AS blbSignature,
-	SMS.intEntityId AS intUserId
+	SMS.intEntityId AS intUserId,
+	SCMatch.strStationShortDescription AS strScaleMatchTicket,
+	SCMatch.strTicketNumber AS strMatchTicketNumber,
+	SCMatch.strLocationName AS strMatchLocation
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -176,3 +179,12 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		SELECT EM.intEntityId,SM.blbDetail FROM tblEMEntitySignature EM
 		LEFT JOIN tblSMSignature SM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
   ) SMS
+  OUTER APPLY(
+		SELECT SCSM.strStationShortDescription
+		,SCM.strTicketNumber
+		,SMCompany.strLocationName
+		 FROM tblSCTicket SCM
+		INNER JOIN tblSCScaleSetup SCSM ON SCSM.intScaleSetupId = SCM.intScaleSetupId
+		INNER JOIN tblSMCompanyLocation SMCompany on SMCompany.intCompanyLocationId = SCSM.intLocationId
+		WHERE intTicketId = SC.intMatchTicketId
+  ) SCMatch
