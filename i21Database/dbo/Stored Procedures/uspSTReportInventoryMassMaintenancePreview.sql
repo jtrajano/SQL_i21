@@ -21,6 +21,16 @@ BEGIN TRANSACTION
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
+
+	IF(@strDescription = 'null' OR @strDescription IS NULL)
+		BEGIN
+			SET @strDescription = ''
+		END
+	IF(@strPosDescription = 'null' OR @strPosDescription IS NULL)
+		BEGIN
+			SET @strPosDescription = ''
+		END
+
 	-- Retail Price - @dblSalePrice
 	-- Last Cost - @dblLastCost
 
@@ -460,10 +470,10 @@ BEGIN TRANSACTION
 			SELECT intItemId
 					-- Original Fields
 					,CAST((SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = intCategoryId_Original) AS NVARCHAR(100)) AS strCategoryId_Original
-					,CAST(ISNULL(strDescription_Original, '') AS NVARCHAR(100)) AS strDescription_Original
+					,CAST(strDescription_Original AS NVARCHAR(100)) AS strDescription_Original --CAST(ISNULL(REPLACE(strDescription_Original, NULL, ''), '') AS NVARCHAR(100)) AS strDescription_Original
 					-- Modified Fields
 					,CAST((SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = intCategoryId_New) AS NVARCHAR(100)) AS strCategoryId_New
-					,CAST(ISNULL(strDescription_New, '') AS NVARCHAR(100)) AS strDescription_New
+					,CAST(strDescription_New AS NVARCHAR(100)) AS strDescription_New --CAST(ISNULL(REPLACE(strDescription_New, NULL, ''), '') AS NVARCHAR(100)) AS strDescription_New
 			FROM #tmpUpdateItemForCStore_itemAuditLog
 		) t
 		unpivot
@@ -487,7 +497,10 @@ BEGIN TRANSACTION
 		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 	)
-
+	AND UOM.intItemUOMId		= @intItemUOMId
+	AND I.intItemId				= @intItemId
+	AND IL.intItemLocationId	= @intItemLocationId
+	AND IP.intItemPricingId		=  @intItemPricingId
 
 	-- ITEM PRICING
 	INSERT INTO @tblPreview (
@@ -551,6 +564,10 @@ BEGIN TRANSACTION
 		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 	)
+	AND UOM.intItemUOMId		= @intItemUOMId
+	AND I.intItemId				= @intItemId
+	AND IL.intItemLocationId	= @intItemLocationId
+	AND IP.intItemPricingId		=  @intItemPricingId
 
 
 	-- ITEM VendorXref
@@ -617,6 +634,10 @@ BEGIN TRANSACTION
 		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 	)
+	AND UOM.intItemUOMId		= @intItemUOMId
+	AND I.intItemId				= @intItemId
+	AND IL.intItemLocationId	= @intItemLocationId
+	AND IP.intItemPricingId		=  @intItemPricingId
 
 
 	-- ITEM LOCATION
@@ -656,11 +677,11 @@ BEGIN TRANSACTION
 					-- Original Fields 
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intFamilyId_Original) AS NVARCHAR(1000)) AS strFamilyId_Original
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intClassId_Original) AS NVARCHAR(1000)) AS strClassId_Original
-					,CAST(ISNULL(strDescription_Original, '') AS NVARCHAR(1000)) AS strDescription_Original
+					,CAST(ISNULL(REPLACE(strDescription_Original, NULL, ''), '') AS NVARCHAR(1000)) AS strDescription_Original
 					-- Modified Fields
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intFamilyId_New) AS NVARCHAR(1000)) AS strFamilyId_New
 					,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intClassId_New) AS NVARCHAR(1000)) AS strClassId_New
-					,CAST(ISNULL(strDescription_New, '') AS NVARCHAR(1000)) AS strDescription_New
+					,CAST(ISNULL(REPLACE(strDescription_New, NULL, ''), '') AS NVARCHAR(1000)) AS strDescription_New
 			FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog
 		) t
 		unpivot
@@ -684,6 +705,10 @@ BEGIN TRANSACTION
 		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 		OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 	)
+	AND UOM.intItemUOMId = @intItemUOMId
+	AND I.intItemId				= @intItemId
+	AND IL.intItemLocationId	= @intItemLocationId
+	AND IP.intItemPricingId		=  @intItemPricingId
 	-------------------------------------------------------------------------------
 	------- Create Preview Table --------------------------------------------------
 	-------------------------------------------------------------------------------
