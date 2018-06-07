@@ -6734,6 +6734,7 @@
     <Build Include="dbo\Views\vyuRKCurrencyExposureSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMarkUpDownCheckoutPosting.sql" />
     <Build Include="dbo\Functions\fnCTGetTranslation.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

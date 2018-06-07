@@ -332,7 +332,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
-		LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId and SR.intWorkOrderId <>R.intWorkOrderId
+		LEFT JOIN vyuMFStockReservationByWorkOrder SR ON SR.intLotId = L.intLotId and SR.intWorkOrderId <>R.intWorkOrderId
 		WHERE LS.strPrimaryStatus = 'Active'
 			AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0

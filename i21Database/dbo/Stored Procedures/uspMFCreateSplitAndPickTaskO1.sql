@@ -5,25 +5,25 @@
 	,@intTaskTypeId INT
 	,@intAssigneeId INT = 0
 	,@intItemId INT = NULL
-	,@intOrderDetailId int=NULL
-		,@intFromStorageLocationId INT = NULL
+	,@intOrderDetailId INT = NULL
+	,@intFromStorageLocationId INT = NULL
 	,@intItemUOMId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @intTaskId INT
-	, @strTaskNo NVARCHAR(64)
-	, @intToStorageLocationId INT
-	, @dblLotWeight AS NUMERIC(18, 6)
-	, @intWeightUOMId INT
-	, @intDirectionId INT
-	, @intStatusId INT
-	, @dtmReleaseDate DATETIME
-	, @dblSplitAndPickWeight NUMERIC(18, 6)
-	, @dblWeightPerQty NUMERIC(18, 6)
-	, @strErrMsg NVARCHAR(MAX)
-	,@intDefaultConsumptionLocationId int
+		,@strTaskNo NVARCHAR(64)
+		,@intToStorageLocationId INT
+		,@dblLotWeight AS NUMERIC(18, 6)
+		,@intWeightUOMId INT
+		,@intDirectionId INT
+		,@intStatusId INT
+		,@dtmReleaseDate DATETIME
+		,@dblSplitAndPickWeight NUMERIC(18, 6)
+		,@dblWeightPerQty NUMERIC(18, 6)
+		,@strErrMsg NVARCHAR(MAX)
+		,@intDefaultConsumptionLocationId INT
 
 	SELECT @strTaskNo = strOrderNo
 		,@intToStorageLocationId = intStagingLocationId
@@ -31,26 +31,26 @@ BEGIN TRY
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
 	SELECT @intToStorageLocationId = IsNULL(intStagingLocationId, @intToStorageLocationId)
-		,@intDefaultConsumptionLocationId=intStorageLocationId
+		,@intDefaultConsumptionLocationId = intStorageLocationId
 	FROM tblMFOrderDetail
 	WHERE intOrderHeaderId = @intOrderHeaderId
 		AND intItemId = @intItemId
-		if @intLotId is not null
-		Begin
-	SELECT @dblSplitAndPickWeight = @dblSplitAndPickQty * CASE 
-			WHEN dblWeightPerQty = 0
-				THEN 1
-			ELSE dblWeightPerQty
-			END
-		,@intWeightUOMId = intWeightUOMId
-		,@dblWeightPerQty = dblWeightPerQty
-		,@intItemUOMId = intItemUOMId
-		,@intFromStorageLocationId = intStorageLocationId
-		,@intItemId = intItemId
-	FROM tblICLot
-	WHERE intLotId = @intLotId
-	end
 
+	IF @intLotId IS NOT NULL
+	BEGIN
+		SELECT @dblSplitAndPickWeight = @dblSplitAndPickQty * CASE 
+				WHEN dblWeightPerQty = 0
+					THEN 1
+				ELSE dblWeightPerQty
+				END
+			,@intWeightUOMId = intWeightUOMId
+			,@dblWeightPerQty = dblWeightPerQty
+			,@intItemUOMId = intItemUOMId
+			,@intFromStorageLocationId = intStorageLocationId
+			,@intItemId = intItemId
+		FROM tblICLot
+		WHERE intLotId = @intLotId
+	END
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId
@@ -82,11 +82,17 @@ BEGIN TRY
 		0
 		,@strTaskNo
 		,@intTaskTypeId
-		,Case When @intDefaultConsumptionLocationId is null Then (CASE 
-			WHEN @intAssigneeId > 0
-				THEN 2
-			ELSE 1
-			END) Else 4 End
+		,CASE 
+			WHEN @intDefaultConsumptionLocationId IS NULL
+				THEN (
+						CASE 
+							WHEN @intAssigneeId > 0
+								THEN 2
+							ELSE 1
+							END
+						)
+			ELSE 4
+			END
 		,@intOrderHeaderId
 		,@intOrderDetailId
 		,NULL
@@ -95,19 +101,11 @@ BEGIN TRY
 		,2
 		,ISNULL(@dtmReleaseDate, GETDATE())
 		,@intFromStorageLocationId
-		,IsNULL(@intDefaultConsumptionLocationId,@intToStorageLocationId)
+		,IsNULL(@intDefaultConsumptionLocationId, @intToStorageLocationId)
 		,@intItemId
 		,@intLotId
-		,CASE 
-			WHEN @intWeightUOMId IS NULL
-				THEN @dblSplitAndPickQty
-			ELSE @dblSplitAndPickQty
-			END
-		,CASE 
-			WHEN @intWeightUOMId IS NULL
-				THEN @intItemUOMId
-			ELSE @intItemUOMId
-			END
+		,@dblSplitAndPickQty
+		,@intItemUOMId
 		,CASE 
 			WHEN @intWeightUOMId IS NULL
 				THEN @dblSplitAndPickQty
@@ -130,8 +128,9 @@ BEGIN TRY
 		)
 
 	SET @intTaskId = SCOPE_IDENTITY()
-	If @intLotId is not null
-	Begin
+
+	IF @intLotId IS NOT NULL
+	BEGIN
 		UPDATE t
 		SET dblPickQty = CASE 
 				WHEN strTaskType = 'Put Back'
@@ -142,14 +141,14 @@ BEGIN TRY
 		JOIN tblICLot l ON l.intLotId = t.intLotId
 		JOIN tblMFTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
 		WHERE intTaskId = @intTaskId
-	End
-	Else
-	Begin
+	END
+	ELSE
+	BEGIN
 		UPDATE t
-	SET dblPickQty = t.dblQty
-	FROM tblMFTask t
-	WHERE intTaskId = @intTaskId
-	End
+		SET dblPickQty = t.dblQty
+		FROM tblMFTask t
+		WHERE intTaskId = @intTaskId
+	END
 
 	SELECT @intDirectionId = intOrderDirectionId
 	FROM tblMFOrderHeader
