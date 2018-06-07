@@ -6325,6 +6325,7 @@
     <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
