@@ -4815,7 +4815,6 @@
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
     <None Include="Scripts\Post-Deployment\TM\5_ObsoletingSeasonReset.sql" />
     <Build Include="dbo\Stored Procedures\uspICDuplicateStorageLocation.sql" />
@@ -5113,7 +5112,6 @@
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
@@ -6870,7 +6868,6 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\26_ActivitySource.sql" />
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
     <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
