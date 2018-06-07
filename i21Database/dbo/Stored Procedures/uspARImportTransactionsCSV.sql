@@ -95,6 +95,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@intStockUnit					INT				= NULL
 			,@intCostingMethod				INT				= NULL
 			,@ysnOrigin						BIT				= 0
+			,@ysnRecap						BIT			 	= 0
 
 		IF @IsTank = 1
 			BEGIN
@@ -129,6 +130,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@PerformerId					= NULL
 					,@PercentFull					= ISNULL(D.dblPercentFull, @ZeroDecimal)
 					,@NewMeterReading				= ISNULL(D.dblNewMeterReading, @ZeroDecimal)
+					,@ysnRecap						= H.ysnRecap	
 				FROM
 					[tblARImportLogDetail] D
 				INNER JOIN
@@ -217,8 +219,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
 					, @intStockUnit					= ICUOM.intItemUOMId
 					, @intCostingMethod				= ICIL.intCostingMethod
+					,@ysnRecap						= H.ysnRecap	
 				FROM
 					tblARImportLogDetail ILD
+				INNER JOIN
+					[tblARImportLog] H
+						ON ILD.[intImportLogId] = H.[intImportLogId] 
 				INNER JOIN
 					tblARImportLog IL
 						ON ILD.intImportLogId = IL.intImportLogId
@@ -298,7 +304,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@AmountDue						= CASE WHEN D.strTransactionType <> 'Sales Order' THEN ISNULL(D.dblAmountDue, @ZeroDecimal) ELSE @ZeroDecimal END
 					,@TaxAmount						= ISNULL(D.dblTax, @ZeroDecimal)
 					,@Total							= ISNULL(D.dblTotal, @ZeroDecimal)
-					,@ysnOrigin						= D.ysnOrigin			
+					,@ysnOrigin						= D.ysnOrigin
+					,@ysnRecap						= H.ysnRecap			
 				FROM
 					[tblARImportLogDetail] D
 				INNER JOIN
@@ -387,7 +394,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 
 		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE [intEntityId] = @EntityCustomerId
 
-		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
+		IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1 and @ysnRecap = 0
 			BEGIN TRY
 				IF @TransactionType <> 'Sales Order'
 					BEGIN
