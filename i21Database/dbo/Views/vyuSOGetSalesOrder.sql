@@ -108,10 +108,12 @@ SELECT
     strLineOfBusiness = SB.strLineOfBusiness,
 	intCreditStopDays = CUS.intCreditStopDays,
 	strCreditCode = CUS.strCreditCode,
+	
 
     ysnProspect = CTYPE.Prospect,
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
+
 	FROM tblSOSalesOrder SO
 		JOIN ( SELECT	intEntityId,			strCustomerNumber,
 						intEntityContactId,		strName,
