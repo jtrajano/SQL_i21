@@ -134,6 +134,8 @@ VALUES
 
 	--Users
 	--tblEM*
+	('tblSMMasterMenu', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
+	('tblSMContactMenu', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMUserSecurityScreenPermission', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMControl', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),
 	('tblSMControlStage', 'Users, User Roles, Security Policies, Line of Business, Company Location, Company Configuration (Multi Company) and Approval List', 'System Manager'),

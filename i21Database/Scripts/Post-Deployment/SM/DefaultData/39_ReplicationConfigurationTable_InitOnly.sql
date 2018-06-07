@@ -1,4 +1,5 @@
-﻿PRINT N'REPLICATION TABLE Initialization Only'
+﻿
+PRINT N'REPLICATION TABLE Initialization Only'
 GO
 
 UPDATE tblSMReplicationConfigurationTable SET ysnInitOnly = 1 
@@ -25,7 +26,11 @@ WHERE intReplicationConfigurationTableId in
 
 		'tblGLCOATemplateDetail',
 
-		'tblGLCompanyPreferenceOption'
+		'tblGLCompanyPreferenceOption',
+
+		'tblSMMasterMenu',
+
+		'tblSMContactMenu'
 	)
 )
 
