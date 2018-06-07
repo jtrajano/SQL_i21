@@ -66,7 +66,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intMatchTicketId = intMatchTicketId, @intTicketType = intTicketType
 				, @intStorageScheduleTypeId = intStorageScheduleTypeId, @intMatchTicketItemUOMId = intItemUOMIdTo
-				, @intContractDetailId = intContractId, @dblScheduleQty = (dblScheduleQty * -1)
+				, @intContractDetailId = intContractId, @dblScheduleQty = dblScheduleQty
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 				IF ISNULL(@intMatchTicketId, 0) > 0 AND @intTicketType = 6
 				BEGIN
@@ -93,7 +93,9 @@ BEGIN TRY
 					END
 					ELSE IF @intStorageScheduleTypeId = -2
 					BEGIN  
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+						SET @dblScheduleQty = (@dblScheduleQty * -1)
+						SELECT @intMatchLoadContractId = intContractId FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intMatchLoadContractId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 					END
 					
 					UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
