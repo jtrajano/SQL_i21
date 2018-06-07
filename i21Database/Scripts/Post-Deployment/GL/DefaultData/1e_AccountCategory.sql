@@ -84,7 +84,9 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 74,name = 'Unrealized Gain or Loss' UNION ALL --GL-3464
 			SELECT id = 75,name = 'Unrealized Futures Gain or Loss' UNION ALL --GL-3464
 			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
-			SELECT id = 77,name = 'Futures Gain or Loss Realized' --GL-3464
+			SELECT id = 77,name = 'Futures Gain or Loss Realized' UNION ALL --GL-3464
+			SELECT id = 100, name = 'Mark to Market P&L' UNION ALL
+			SELECT id = 101, name = 'Mark to Market Offset'
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
@@ -94,7 +96,7 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 		UPDATE 
 		SET 	CategoryTable.strAccountCategory = CategoryHardCodedValues.name
 	-- When id is missing, then do an insert. 
-	WHEN NOT MATCHED THEN
+	WHEN NOT MATCHED BY TARGET THEN
 		INSERT (
 			intAccountCategoryId
 			,strAccountCategory
@@ -105,6 +107,8 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			,CategoryHardCodedValues.name
 			,1
 		);
+	--WHEN NOT MATCHED BY SOURCE THEN
+	--DELETE;
 	SET  IDENTITY_INSERT tblGLAccountCategory OFF
 GO
 
