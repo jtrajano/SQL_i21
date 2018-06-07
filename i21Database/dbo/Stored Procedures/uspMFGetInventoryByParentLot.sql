@@ -146,7 +146,7 @@ BEGIN
 		WHERE L.intStorageLocationId NOT IN (
 			@intProdStageLocationId
 			,@intPMStageLocationId
-			) AND IO1.intOwnerId = @intOwnerId
+			) AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
 		) AS SourceTable
 	PIVOT(SUM(Quantity) FOR [Lot Status] IN (
 				[Active]
@@ -228,7 +228,7 @@ BEGIN
 		LEFT JOIN @tblMFMultipleLotCode MLC ON MLC.intLotId = L.intLotId
 		JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
-		JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId AND IO1.intOwnerId = @intOwnerId
+		JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
 		) AS SourceTable
 	PIVOT(SUM(Quantity) FOR [Lot Status] IN (
 				[Active]

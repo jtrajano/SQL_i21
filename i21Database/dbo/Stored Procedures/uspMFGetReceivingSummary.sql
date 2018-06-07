@@ -60,7 +60,7 @@ FROM (
 	Left JOIN vyuMFGetPutawayDate PD ON PD.intLotId=IRL.intLotId
 	WHERE IR.dtmReceiptDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-			AND IO1.intOwnerId = @intOwnerId
+			AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
 	) AS DT
 GROUP BY DT.strReceiptNumber
 	,DT.strBillOfLading
