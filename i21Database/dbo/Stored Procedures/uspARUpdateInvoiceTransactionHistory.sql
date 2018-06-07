@@ -117,6 +117,52 @@ AS
 	END
 	ELSE
 		INSERT INTO tblARInvoiceTransactionHistory
+			(
+				intInvoiceId
+				,intInvoiceDetailId
+				,dblQtyReceived
+				,dblPrice
+				,dblAmountDue
+				,intItemId
+				,intItemUOMId
+				,intCompanyLocationId
+				,intTicketId
+				,dtmTicketDate
+				,dtmTransactionDate
+				,intCurrencyId
+				,intCommodityId
+				,dblCost
+				,ysnPost
+			)			
+			SELECT
+				ARID.intInvoiceId,
+				ARID.intInvoiceDetailId,
+				ARID.dblQtyOrdered,
+				ARID.dblPrice,
+				ARID.dblTotal,
+				ARID.intItemId,
+				ARID.intItemUOMId,
+				ARI.intCompanyLocationId,
+				ARID.intTicketId,
+				ARI.dtmDate,
+				GETDATE(),
+				ARID.intSubCurrencyId,
+				ITM.intCommodityId,
+				ICT.dblCost,
+				@Post
+			FROM
+				tblARInvoiceDetail ARID
+			INNER JOIN
+				(SELECT [intInvoiceId], [intCompanyLocationId], [intCurrencyId], dtmDate FROM tblARInvoice WITH (NOLOCK)) ARI
+					ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+			INNER JOIN
+				@InvoiceIds II
+					ON ARI.[intInvoiceId] = II.[intHeaderId]
+			LEFT JOIN (select intItemId, intCommodityId from tblICItem with(nolock)) ITM
+				on ITM.intItemId = ARID.intItemId
+			left join tblICInventoryTransaction ICT
+				on ARID.intInvoiceDetailId = ICT.intTransactionId
+		/*INSERT INTO tblARInvoiceTransactionHistory
 		(
 			intInvoiceId
 			,dblAmountDue
@@ -132,6 +178,6 @@ AS
 			(SELECT [intInvoiceId], [dblAmountDue], [intCurrencyId] FROM tblARInvoice WITH (NOLOCK)) ARI		
 		INNER JOIN
 			@InvoiceIds II
-				ON ARI.[intInvoiceId] = II.[intHeaderId]
+				ON ARI.[intInvoiceId] = II.[intHeaderId]*/
 
 RETURN 0
