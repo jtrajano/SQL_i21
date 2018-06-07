@@ -567,7 +567,7 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 					AND UT.ysnAllowPick = 1
-				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
 				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -745,7 +745,7 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 					AND UT.ysnAllowPick = 1
-				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
 				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
