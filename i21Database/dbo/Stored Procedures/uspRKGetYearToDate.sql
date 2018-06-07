@@ -91,7 +91,7 @@ UNION ALL
 SELECT   IR.intEntityVendorId
 	,T.intCommodityId
 	,'Tax' as FieldName
-	, SUM(ISNULL(Bill.dblTax,0)) as dblTotal
+	, SUM(ISNULL(BD.dblTax,0)) as dblTotal
 	,5 as intSorting
 
 FROM tblICInventoryReceipt IR 
@@ -103,9 +103,10 @@ INNER JOIN tblAPBill Bill ON Bill.intBillId = BD.intBillId
 INNER JOIN tblSCTicket T ON T.intTicketId = SC.intTicketId
 LEFT JOIN tblICItem Itm ON INVRCPTITEM.intItemId = Itm.intItemId
 
-WHERE BD.intInventoryReceiptChargeId IS NULL
+WHERE 
+--BD.intInventoryReceiptChargeId IS NULL
 --AND Tax.ysnCheckOffTax = 1
-AND Bill.ysnPosted = 1
+Bill.ysnPosted = 1
 AND CAST(Bill.dtmDate AS date) BETWEEN @dtmFrom AND @dtmTo
 AND IR.intEntityVendorId = @intEntityId
 AND T.intCommodityId IN (SELECT Item from [dbo].[fnSplitString](@intCommodityIds, ','))
