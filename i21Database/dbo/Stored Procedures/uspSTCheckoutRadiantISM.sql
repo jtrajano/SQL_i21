@@ -96,6 +96,7 @@ BEGIN
     JOIN dbo.tblICCategory IC ON IC.intCategoryId = I.intCategoryId
     JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
     WHERE S.intStoreId = @intStoreId
+	AND I.strLotTracking = 'No'
     AND ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) <> P.dblSalePrice
 
 
