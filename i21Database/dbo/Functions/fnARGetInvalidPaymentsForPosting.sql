@@ -509,7 +509,7 @@ BEGIN
         ,P.[strTransactionNumber]
         ,P.[strBatchId]
     HAVING
-            ((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount])) > ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]))
+            ((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount])) < ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]))
 
     UNION
 
@@ -778,24 +778,24 @@ BEGIN
 
     --Payment with applied Prepayment
 	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'You cannot unpost payment with applied prepaids.'
+        [intTransactionId]         = P.[intTransactionId]
+		,[strTransactionId]         = P.[strTransactionId]
+		,[strTransactionType]       = @TransType
+		,[intTransactionDetailId]   = P.[intTransactionDetailId]
+		,[strBatchId]               = P.[strBatchId]
+		,[strError]                 = 'You cannot unpost this transaction: ' + P.strTransactionNumber + ' was already applied in ' + PREPAIDS.strInvoiceNumber 
 	FROM
 		@Payments P
-    INNER JOIN (SELECT [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [intInvoiceId] FROM tblARPrepaidAndCredit) ARPC
-        ON  P.[intInvoiceId] = ARPC.[intPrepaymentId]
-        AND ARPC.[ysnApplied] = 1
-        AND ARPC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
-    INNER JOIN (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
-        ON  ARPC.[intInvoiceId] = ARI.[intInvoiceId]
-        AND ARI.[ysnPosted] = 1
-    WHERE
-            P.[ysnPost] = 0
-        AND P.[intTransactionDetailId] IS NULL
+	CROSS APPLY (
+		SELECT TOP 1 I.strInvoiceNumber
+		FROM tblARPrepaidAndCredit ARPC
+		INNER JOIN tblARInvoice I ON ARPC.intInvoiceId = I.intInvoiceId
+		WHERE P.[intInvoiceId] = ARPC.[intPrepaymentId]
+		AND ARPC.[ysnApplied] = 1
+		AND ARPC.[dblAppliedInvoiceDetailAmount] <> 0
+	) PREPAIDS    
+	WHERE @Post = 0
+	 AND P.[intTransactionDetailId] IS NOT NULL
 
     UNION
 
@@ -817,9 +817,8 @@ BEGIN
         AND P.[intTransactionId] <> ARPD.[intPaymentId]
     INNER JOIN (SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
         ON  ARPD.[intPaymentId] =  ARP.[intPaymentId] 
-    WHERE
-            P.[ysnPost] = 0
-        AND P.[intTransactionDetailId] IS NULL
+    WHERE P.[ysnPost] = 0
+      AND P.[intTransactionDetailId] IS NULL
 
     UNION
 

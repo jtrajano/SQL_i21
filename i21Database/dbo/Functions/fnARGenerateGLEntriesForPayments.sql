@@ -173,7 +173,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
+    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblAmountPaid], 0) = 0 THEN 1 ELSE (P.[dblBaseAmountPaid] / P.[dblAmountPaid]) END
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -283,7 +283,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount])
+    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblUnappliedAmount], 0) = 0 THEN 1 ELSE (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount]) END
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -382,7 +382,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
+    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblAmountPaid], 0) = 0 THEN 1 ELSE (P.[dblBaseAmountPaid] / P.[dblAmountPaid]) END
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
