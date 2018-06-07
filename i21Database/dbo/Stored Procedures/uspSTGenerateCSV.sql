@@ -260,8 +260,9 @@ BEGIN
 				
 
 
+
 				INSERT INTO @tblTempPMM
-				SELECT DISTINCT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
+				SELECT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
 								--, replace(convert(NVARCHAR, DATEADD(DAY, (DATEDIFF(DAY, @NextDayID, @dtmBeginningDate) / 7) * 7 + 7, @NextDayID), 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, @dtmEndingDate, 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
@@ -275,10 +276,6 @@ BEGIN
 								, UPPER(LEFT(ST.strState, 2)) as strStoreState
 								, ST.strZipCode as intStoreZipCode
 
-								--, REPLACE(REPLACE(REPLACE(REPLACE(STMAP.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, ''), ',', '') as strStoreAddress
-								--, STMAP.strCity as strStoreCity
-								--, UPPER(LEFT(STMAP.strState, 2)) as strStoreState
-								--, STMAP.strZipCode as intStoreZipCode
 
 								, strTrlDept as strCategory
 								, EM.strName as strManufacturerName
@@ -286,12 +283,12 @@ BEGIN
 								, strTrlUPC as strUpcCode
 								, strTrlDesc as strSkuUpcDescription
 								, 'PACK' as strUnitOfMeasure
-								, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold
+
+								--, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold  ST-680
+								, CAST(CASE WHEN strTrpPaycode != 'Change' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold
+
 								, 1 as intConsumerUnits
 
-								--, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 'Y' ELSE 'N' END as strMultiPackIndicator
-								--, CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as intMultiPackRequiredQuantity
-								--, CASE WHEN strTrpPaycode = 'CASH' AND dblTrlQty >= 2 THEN 0.50 ELSE 0 END as dblMultiPackDiscountAmount
 								, 'N' as strMultiPackIndicator
 								, 0 as intMultiPackRequiredQuantity
 								, 0 as dblMultiPackDiscountAmount
@@ -304,10 +301,10 @@ BEGIN
 								, 0 as dblMFGDealDiscountAmountTWO
 								, '' as strMFGDealNameTHREE
 								, 0 as dblMFGDealDiscountAmountTHREE
-								, CASE WHEN CRP.strProgramName IS NOT NULL THEN 0
-										--WHEN strTrpPaycode = 'CASH' THEN dblTrlLineTot 
-										--ELSE 0 END as dblFinalSalesPrice
-										ELSE dblTrlLineTot END as dblFinalSalesPrice
+
+								--, CASE WHEN CRP.strProgramName IS NOT NULL THEN 0
+								--		ELSE dblTrlLineTot END as dblFinalSalesPrice ST-680
+								, dblTrpAmt as dblFinalSalesPrice
 
 								--Optional Fields
 								, NULL AS intStoreTelephone
@@ -320,7 +317,8 @@ BEGIN
 				(
 					SELECT * FROM
 						(   
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
+							--SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn  ST-680
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, intScanTransactionId, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
 						) TRR 
 						WHERE TRR.rn = 1
@@ -331,7 +329,7 @@ BEGIN
 				JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
 				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-						AND TR.strTrpPaycode IN ('Change', 'CREDIT')
+						--AND TR.strTrpPaycode IN ('Change', 'CREDIT') ST-680
 				LEFT JOIN
 				(
 					SELECT [intID] 
@@ -341,6 +339,7 @@ BEGIN
 				WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
 				AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 				AND ysnSubmitted = 0
+				AND TR.strTrpPaycode != 'Change' --ST-680
 				AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 
@@ -501,16 +500,11 @@ BEGIN
 					DECLARE @intSoldQuantity int = 0
 					DECLARE @dblFinalSales decimal(10, 2) = 0
 
-					--Get total number of records
-					SELECT @intNumberOfRecords = COUNT(*) FROM @tblTempPMM
-
-					--Get total quantity sold
-					SELECT @intSoldQuantity = SUM(intQuantitySold) FROM @tblTempPMM
-
-
-					--Get sum of the final sales price field
-					SELECT @dblFinalSales = SUM(dblFinalSalesPrice) FROM @tblTempPMM
-
+					
+					SELECT @intNumberOfRecords = COUNT(*)				--Get total number of records
+							, @intSoldQuantity = SUM(intQuantitySold)	--Get total quantity sold
+							, @dblFinalSales = SUM(dblFinalSalesPrice)	--Get sum of the final sales price field
+					FROM @tblTempPMM
 
 					SET @strCSVHeader = CAST(ISNULL(@intNumberOfRecords, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@intSoldQuantity, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@dblFinalSales, 0) as NVARCHAR(50)) + CHAR(13)
 				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
