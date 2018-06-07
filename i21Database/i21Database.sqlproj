@@ -6333,6 +6333,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
