@@ -69,7 +69,7 @@ BEGIN
 		,@action
 	FROM 
 	tblRKCollateral C
-	INNER JOIN tblRKCollateralAdjustment CA ON C.intCollateralId = CA.intCollateralId
+	LEFT JOIN tblRKCollateralAdjustment CA ON C.intCollateralId = CA.intCollateralId
 	WHERE C.intCollateralId = @intCollateralId
 
 	IF @@ERROR <> 0	GOTO _Rollback
@@ -202,7 +202,7 @@ BEGIN
 			,'UPDATE'
 		FROM 
 		tblRKCollateral C
-		INNER JOIN tblRKCollateralAdjustment CA ON C.intCollateralId = CA.intCollateralId
+		LEFT JOIN tblRKCollateralAdjustment CA ON C.intCollateralId = CA.intCollateralId
 		WHERE C.intCollateralId = @intCollateralId
 	
 		IF @@ERROR <> 0	GOTO _Rollback
