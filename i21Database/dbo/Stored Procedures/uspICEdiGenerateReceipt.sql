@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceipt] @VendorId INT, @LocationId INT, @UniqueId NVARCHAR(100), @UserId INT
+﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceipt] @VendorId INT, @LocationId INT, @UniqueId NVARCHAR(100), @UserId INT, @ErrorCount INT OUTPUT, @TotalRows INT OUTPUT
 AS
 -------------------------- BUSINESS -----------------------------------------------------------
 DECLARE @Stores TABLE(FileIndex INT, RecordIndex INT, RecordType NVARCHAR(50), StoreNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS)
@@ -13,6 +13,16 @@ INSERT INTO @Stores EXEC [dbo].[uspICEdiGenerateMappingObjects] '0', @UniqueId
 INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
 INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
 INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
+
+DECLARE @LogId INT
+SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICEdiPricebook)
+
+IF(@LogId IS NULL)
+BEGIN
+	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
+	SELECT 'Import Receipts successful', 'EDI', 'txt', '', GETDATE(), @UserId, 1
+	SET @LogId = @@IDENTITY
+END
 
 DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
 
@@ -93,3 +103,29 @@ WHERE st.intStoreId = @StoreId
 
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
 	EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable, @ReceiptOtherChargesTableType, @UserId, @ReceiptItemLotStagingTable
+
+-- Log UPCs that don't have corresponding items
+INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
+SELECT @LogId, 'Error', i.RecordIndex, 'Item UPC', i.ItemUpc, 'Cannot find the item that matches the UPC: ' + i.ItemUpc, 'Skipped', 'Record not imported.', 1
+FROM @Items i
+	LEFT OUTER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = i.ItemUpc
+	LEFT JOIN tblICItem it ON it.intItemId = u.intItemId
+WHERE it.intItemId IS NULL
+
+SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
+SELECT @TotalRows = COUNT(*) FROM @ReceiptStagingTable
+
+IF @ErrorCount > 0
+BEGIN
+	UPDATE tblICImportLog SET 
+		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).',
+		intTotalErrors = @ErrorCount,
+		intTotalRows = @TotalRows,
+		intRowsUpdated = CASE WHEN (@TotalRows - @ErrorCount) < 0 THEN 0 ELSE @TotalRows - @ErrorCount END
+	WHERE intImportLogId = @LogId
+END
+
+IF(@TotalRows <= 0 AND @ErrorCount <= 0)
+BEGIN
+	UPDATE tblICImportLog SET strDescription = 'There''s no record to import.' WHERE intImportLogId = @LogId	
+END

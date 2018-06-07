@@ -6733,6 +6733,8 @@
     <Build Include="dbo\Views\vyuHDProjectParentSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspSTMarkUpDownCheckoutPosting.sql" />
     <Build Include="dbo\Functions\fnCTGetTranslation.sql" />
+    <Build Include="dbo\Tables\tblICEdiPricebook.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiImportPricebook.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6915,6 +6917,7 @@
     <None Include="Scripts\Post-Deployment\IC\31_Add_Default_Edi_Mapping_Template.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
     <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
+    <Build Include="dbo\User Defined Types\UdtCompanyLocations.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
