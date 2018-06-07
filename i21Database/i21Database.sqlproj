@@ -6735,6 +6735,7 @@
     <Build Include="dbo\Functions\fnCTGetTranslation.sql" />
     <Build Include="dbo\Tables\tblICEdiPricebook.sql" />
     <Build Include="dbo\Stored Procedures\uspICEdiImportPricebook.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

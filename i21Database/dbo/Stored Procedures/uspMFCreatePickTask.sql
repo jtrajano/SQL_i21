@@ -46,15 +46,17 @@ BEGIN TRY
 
 	IF @intLotId IS NOT NULL
 	BEGIN
-		SELECT @intFromStorageLocationId = intStorageLocationId
-			,@dblLotQty = dblQty
-			,@intItemId = intItemId
-			,@dblLotWeight = dblWeight
-			,@intItemUOMId = intItemUOMId
-			,@intWeightUOMId = intWeightUOMId
-			,@dblWeightPerQty = dblWeightPerQty
-		FROM tblICLot
-		WHERE intLotId = @intLotId
+		SELECT @intFromStorageLocationId = L.intStorageLocationId
+			,@dblLotQty = L.dblQty- (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+			,@intItemId = L.intItemId
+			,@dblLotWeight = L.dblWeight -(SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
+			,@intItemUOMId = L.intItemUOMId
+			,@intWeightUOMId = L.intWeightUOMId
+			,@dblWeightPerQty = L.dblWeightPerQty
+		FROM tblICLot L
+		LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
+		WHERE  L.intLotId = @intLotId
+		Group by L.intStorageLocationId,L.dblQty,L.intItemId,L.dblWeight,L.intItemUOMId, L.intWeightUOMId,L.dblWeightPerQty
 	END
 
 	INSERT INTO tblMFTask (
@@ -99,16 +101,8 @@ BEGIN TRY
 		,IsNULL(@intDefaultConsumptionLocationId,@intToStorageLocationId)
 		,@intItemId
 		,@intLotId
-		,CASE 
-			WHEN @intWeightUOMId IS NULL
-				THEN @dblLotQty
-			ELSE @dblLotQty
-			END
-		,CASE 
-			WHEN @intWeightUOMId IS NULL
-				THEN @intItemUOMId
-			ELSE @intItemUOMId
-			END
+		,@dblLotQty
+		,@intItemUOMId
 		,CASE 
 			WHEN @intWeightUOMId IS NULL
 				THEN @dblLotQty
