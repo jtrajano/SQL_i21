@@ -296,7 +296,8 @@ BEGIN TRY
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,
 			PR.dblUnitsRemaining,
-			PR.dblCost
+			PR.dblCost,
+			CD.intInvoiceCurrencyId
 	FROM	@Processed	PR
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
 	WHERE	ISNULL(ysnIgnore,0) <> 1
