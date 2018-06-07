@@ -165,7 +165,8 @@ SELECT
                                             WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
                                             ELSE P.[intAccountId]
                                       END)
-    ,[dblDebit]                     = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    --,[dblDebit]                     = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+	,[dblDebit]                     = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
@@ -187,8 +188,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @SCREEN_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = (P.[dblAmountPaid] - ISNULL(P1.[dblClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblDebitReport]               = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    --,[dblDebitForeign]              = (P.[dblAmountPaid] - ISNULL(P1.[dblClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    --,[dblDebitReport]               = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+	,[dblDebitForeign]              = P.[dblAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblDebitReport]               = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCreditForeign]             = @ZeroDecimal
     ,[dblCreditReport]              = @ZeroDecimal
     ,[dblReportingRate]             = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
@@ -206,22 +209,22 @@ SELECT
     ,[ysnRebuild]                   = NULL
 FROM
     @Payments P
-LEFT OUTER JOIN
-    (
-    SELECT
-         [dblClaim]         = SUM(P1.[dblPayment])
-        ,[dblBaseClaim]     = SUM(P1.[dblBasePayment])
-        ,[intTransactionId] = P1.[intTransactionId]
-    FROM
-        @Payments P1
-    WHERE
-            P1.[intTransactionDetailId] IS NOT NULL
-        AND P1.[strTransactionType] = 'Claim'
-        AND P1.[dblPayment] <> @ZeroDecimal
-    GROUP BY
-        P1.[intTransactionId]
-    ) P1
-        ON P.[intTransactionId] = P1.[intTransactionId]
+--LEFT OUTER JOIN
+--    (
+--    SELECT
+--         [dblClaim]         = SUM(P1.[dblPayment])
+--        ,[dblBaseClaim]     = SUM(P1.[dblBasePayment])
+--        ,[intTransactionId] = P1.[intTransactionId]
+--    FROM
+--        @Payments P1
+--    WHERE
+--            P1.[intTransactionDetailId] IS NOT NULL
+--        AND P1.[strTransactionType] = 'Claim'
+--        AND P1.[dblPayment] <> @ZeroDecimal
+--    GROUP BY
+--        P1.[intTransactionId]
+--    ) P1
+--        ON P.[intTransactionId] = P1.[intTransactionId]
 WHERE
     P.[intTransactionDetailId] IS NULL
 
