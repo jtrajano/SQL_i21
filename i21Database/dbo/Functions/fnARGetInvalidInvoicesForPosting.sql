@@ -1243,7 +1243,29 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE ARID.dblQtyShipped <> ISNULL(LOT.[dblTotalQtyShipped], 0)
 		  AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
 		  AND ((ISNULL(I.[intLoadId], 0) IS NOT NULL AND ISNULL(LG.[intPurchaseSale], 0) <> 3) OR ISNULL(I.[intLoadId], 0) IS NULL)
-																																			
+
+		UNION
+		--CASH REFUND AMOUNT IS NOT EQUAL TO PREPAIDS
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Cash Refund amount is not equal to prepaids/credits applied.'
+		FROM 					
+			@Invoices I
+		OUTER APPLY (
+			SELECT dblAppliedInvoiceAmount	= SUM(ISNULL(dblAppliedInvoiceDetailAmount, 0))
+			FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
+			WHERE intInvoiceId = I.intInvoiceId 
+			  AND ysnApplied = 1
+			  AND ISNULL(dblAppliedInvoiceDetailAmount, 0) > 0			
+		) PREPAIDS
+		WHERE I.strTransactionType = 'Cash Refund'
+		AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
+
 	END
 ELSE
 	BEGIN
@@ -1382,7 +1404,7 @@ ELSE
 			CMUF.[strSourceSystem] = 'AR'
 
 		UNION
-
+		--INVOICE CREATED FROM PATRONAGE
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
 			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -1399,6 +1421,25 @@ ELSE
 			WHERE P.intInvoiceId = I.intInvoiceId
 			  AND P.ysnPosted = 1
 		) PAT
+
+		UNION
+		--CASH REFUND ALREADY APPLIED IN PAY VOUCHER
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'This ' + I.[strTransactionType] + ' was already applied in ' + ISNULL(VOUCHER.strPaymentRecordNum, '') + '.'
+		FROM 
+			@Invoices I
+		CROSS APPLY (
+			SELECT TOP 1 P.strPaymentRecordNum
+			FROM dbo.tblAPPayment P WITH (NOLOCK)
+			INNER JOIN tblAPPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
+			WHERE PD.intInvoiceId = I.intInvoiceId
+		) VOUCHER
 
 		--Don't allow Imported Invoice from Origin to be unposted
 		DECLARE @IsAG BIT = 0

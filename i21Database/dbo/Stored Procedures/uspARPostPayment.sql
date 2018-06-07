@@ -1395,13 +1395,13 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+						AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
 						AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
 					GROUP BY
 						A.intInvoiceId
 				) P
 			WHERE
 				tblARInvoice.intInvoiceId = P.intInvoiceId				
-				
 				
 			UPDATE 
 				tblARInvoice
@@ -1431,13 +1431,12 @@ IF @recap = 0
 			WHERE
 				A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
 				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
-					
+				AND ISNULL(A.[ysnInvoicePrepayment],0) = 0
 				
 			UPDATE 
 				tblARInvoice
 			SET 
 				tblARInvoice.ysnPaid = (CASE WHEN (C.dblAmountDue) = 0 THEN 1 ELSE 0 END)
-				--,tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN @PostDate ELSE C.dtmPostDate END)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1446,25 +1445,8 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
 				A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)	
-				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)						
-								
-
-			--UPDATE 
-			--	tblARPaymentDetail
-			--SET 
-			--	dblAmountDue = ISNULL(C.dblAmountDue, 0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)-- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
-			--	,dblBaseAmountDue = ISNULL(C.dblBaseAmountDue, 0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END)-- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
-			--FROM
-			--	tblARPaymentDetail A
-			--INNER JOIN
-			--	tblARPayment B
-			--		ON A.intPaymentId = B.intPaymentId
-			--		AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			--INNER JOIN 
-			--	tblARInvoice C
-			--		ON A.intInvoiceId = C.intInvoiceId
-			--WHERE
-			--	ISNULL(B.[ysnInvoicePrepayment],0) = 0					
+				AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = C.intInvoiceId AND ARI.intPaymentId = A.intPaymentId)
+				AND ISNULL(A.[ysnInvoicePrepayment],0) = 0							
 					
 			-- Delete zero payment temporarily
 			DELETE FROM A
