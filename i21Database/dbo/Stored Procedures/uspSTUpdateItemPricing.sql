@@ -17,7 +17,7 @@ BEGIN TRY
 			@Region             NVARCHAR(6),
 			@District           NVARCHAR(6),
 			@State              NVARCHAR(2),
-			@UpcCode            NVARCHAR(MAX),
+			@intItemUOMId       INT, --NVARCHAR(MAX),
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
@@ -39,7 +39,7 @@ BEGIN TRY
 			@Region          =   Region,
 			@District        =   District,
 			@State           =   States,
-			@UpcCode         =   UPCCode,
+			@intItemUOMId    =   UPCCode,
 			@StandardCost 	 = 	 Cost,
 			@RetailPrice   	 =	 Retail,
 			@SalesPrice		 =	 SalesPrice,
@@ -60,7 +60,7 @@ BEGIN TRY
 			Region                  NVARCHAR(6),
 			District                NVARCHAR(6),
 			States                  NVARCHAR(2),
-			UPCCode		            NVARCHAR(MAX),
+			UPCCode		            INT,
 			Cost		            DECIMAL (18,6),
 			Retail		            DECIMAL (18,6),
 			SalesPrice       		DECIMAL (18,6),
@@ -131,7 +131,7 @@ BEGIN TRY
 				INSERT INTO #tmpUpdateItemPricingForCStore_Location (
 					intLocationId
 				)
-				--SELECT intLocationId = CAST(@Location AS INT)
+				--SELECT intLocationId = 2
 				SELECT [intID] AS intLocationId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Location)
 			END
@@ -185,18 +185,18 @@ BEGIN TRY
 													WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
 											END AS strUpcCode
 											FROM tblICItemUOM 
-											WHERE intItemUOMId = CAST(@UpcCode AS INT)
+											WHERE intItemUOMId = @intItemUOMId
 											)
 
-	DECLARE @dblStandardCostConv AS DECIMAL(18, 6) = CAST(@StandardCost AS DECIMAL(18, 6))
-	DECLARE @dblRetailPriceConv AS DECIMAL(18, 6) = CAST(@RetailPrice AS DECIMAL(18, 6))
+	DECLARE @dblStandardCostConv AS NUMERIC(38, 20) = CAST(@StandardCost AS NUMERIC(38, 20))
+	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
 
 
 	-- ITEM PRICING
 	EXEC [uspICUpdateItemPricingForCStore]
 		  @strUpcCode = @strUpcCode
-		, @strDescription = @Description
+		, @strDescription = @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
 		, @intItemId = NULL
 		, @dblStandardCost = @dblStandardCostConv
 		, @dblRetailPrice = @dblRetailPriceConv
@@ -298,8 +298,8 @@ BEGIN TRY
 		)
 		AND 
 		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 		)
 
 
@@ -366,8 +366,8 @@ BEGIN TRY
 		)
 		AND 
 		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @UpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 		)
 
 
@@ -395,7 +395,29 @@ BEGIN TRY
 
 	SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
 
+	-- Clean up 
+	BEGIN
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Location 
 
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Vendor 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Category 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Family 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Class 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+	END
 END TRY
 
 BEGIN CATCH  

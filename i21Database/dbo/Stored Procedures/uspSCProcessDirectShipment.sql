@@ -153,7 +153,7 @@ BEGIN TRY
 		BEGIN
 			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
 
-			SELECT TOP 1 @InventoryShipmentId = intInventoryShipmentId FROM vyuICGetInventoryShipmentItem where intSourceId = 1056 and strSourceType = 'Scale'
+			SELECT TOP 1 @InventoryShipmentId = intInventoryShipmentId FROM vyuICGetInventoryShipmentItem where intSourceId = @intTicketId and strSourceType = 'Scale'
 			IF ISNULL(@InventoryShipmentId, 0) != 0
 			BEGIN
 				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
