@@ -37,7 +37,7 @@ FROM (
 	FROM tblCTSequenceHistory h
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE intPricingTypeId = 1 AND dtmHistoryCreated <= @dtmToDate AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
+	WHERE intPricingTypeId = 1 AND convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= convert(DATETIME, @dtmToDate) AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
 	) a
 WHERE a.intRowNum = 1
 
@@ -78,7 +78,7 @@ FROM (
 	FROM tblCTSequenceHistory h
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE dblQuantity >= (dblQuantity - dblBalance) AND dtmHistoryCreated <= @dtmToDate AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
+	WHERE dblQuantity >= (dblQuantity - dblBalance) AND convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= convert(DATETIME, @dtmToDate) AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
 	) a
 WHERE a.intRowNum = 1
 
@@ -119,7 +119,7 @@ FROM (
 	FROM tblCTSequenceHistory h
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE dblQuantity > (dblQuantity - dblBalance) AND dtmHistoryCreated <= @dtmToDate AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
+	WHERE dblQuantity > (dblQuantity - dblBalance) AND convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= convert(DATETIME, @dtmToDate) AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
 	) a
 WHERE a.intRowNum = 1
 
@@ -160,7 +160,7 @@ FROM (
 	FROM tblCTSequenceHistory h
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE dblQuantity < (dblQuantity - dblBalance) AND dtmHistoryCreated <= @dtmToDate AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
+	WHERE dblQuantity < (dblQuantity - dblBalance) AND convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= convert(DATETIME, @dtmToDate) AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
 	) a
 WHERE a.intRowNum = 1
 
@@ -203,7 +203,7 @@ FROM (
 	WHERE intContractDetailId NOT IN (
 			SELECT intContractDetailId
 			FROM tblCTPriceFixation
-			) AND dtmHistoryCreated <= @dtmToDate AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
+			) AND convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= convert(DATETIME, @dtmToDate) AND h.intCommodityId = @intCommodityId AND intContractStatusId NOT IN (2, 3, 6)
 	) a
 WHERE a.intRowNum = 1
 
