@@ -9,8 +9,8 @@
 	[intStorageScheduleTypeId] INT NULL,
 	[dtmTicketHistoryDate] DATE NULL, 
     [intConcurrencyId] INT NULL, 
-    CONSTRAINT [PK_tblSCTicketHistory_intDeliverySheetHistoryId] PRIMARY KEY ([intTicketHistoryId]) ,
-	CONSTRAINT [FK_tblSCTicketHistory_tblSCTicket_intDeliverySheetId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]) ON DELETE CASCADE,
+    CONSTRAINT [PK_tblSCTicketHistory_intTicketIdd] PRIMARY KEY ([intTicketHistoryId]) ,
+	CONSTRAINT [FK_tblSCTicketHistory_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSCTicketHistory_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblSCTicketHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId])
 )

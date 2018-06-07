@@ -152,7 +152,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	tblSCTicketFormat.ysnSuppressCompanyName,
 	tblSCTicketFormat.intSuppressDiscountOptionId,
 	tblSCTicketFormat.ysnSuppressSplit,
-	SMS.blbDetail AS blbSignature
+	SMS.blbDetail AS blbSignature,
+	SMS.intEntityId AS intUserId
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -172,7 +173,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   OUTER APPLY(
-		SELECT SM.* FROM tblSMSignature SM
-		INNER JOIN tblEMEntitySignature EM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
-		where SM.intEntityId = SC.intEntityScaleOperatorId
+		SELECT EM.intEntityId,SM.blbDetail FROM tblEMEntitySignature EM
+		LEFT JOIN tblSMSignature SM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
   ) SMS
