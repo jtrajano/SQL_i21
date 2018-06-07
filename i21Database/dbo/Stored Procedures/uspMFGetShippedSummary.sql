@@ -62,7 +62,7 @@ FROM (
 	LEFT JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId
 	WHERE InvS.dtmShipDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-				AND IO1.intOwnerId = @intOwnerId
+				AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
 	) AS DT
 GROUP BY DT.strReferenceNumber
 	,DT.strShipmentNumber
