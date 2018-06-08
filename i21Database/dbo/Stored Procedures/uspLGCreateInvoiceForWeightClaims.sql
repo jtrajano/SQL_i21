@@ -14,6 +14,7 @@ BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(4000);
 	DECLARE @intErrorSeverity INT;
 	DECLARE @intErrorState INT;
+	DECLARE @intCompanyLocationId INT;
 
 		SELECT @strWeightClaimNo = strReferenceNumber
 		FROM tblLGWeightClaim
@@ -103,6 +104,12 @@ BEGIN TRY
 		,@intARAccountId INT
 		,@strErrMsg NVARCHAR(MAX)
 		,@EntriesForInvoice AS InvoiceIntegrationStagingTable
+
+	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
+	FROM tblLGWeightClaim WC
+	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
+	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	INSERT INTO @EntriesForInvoice (
 		[strSourceTransaction]
@@ -327,6 +334,119 @@ BEGIN TRY
 		WHERE ISNULL(intLoadDetailId, 0) = 0
 		) ARID ON ARID.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = WCD.intCurrencyId
+	WHERE WC.intWeightClaimId = @intWeightClaimId
+
+	UNION
+
+	SELECT [strSourceTransaction] = 'Weight Claim'
+		,[strTransactionType] = 'Credit Memo'
+		,[strType] = 'Standard'
+		,[intSourceId] = WC.intWeightClaimId
+		,[strSourceId] = WC.strReferenceNumber
+		,[intInvoiceId] = NULL
+		,[intEntityCustomerId] = WCD.intVendorId
+		,[intCompanyLocationId] = @intCompanyLocationId
+		,[intCurrencyId] = @CurrencyId
+		,[intTermId] = @TermId
+		,[intPeriodsToAccrue] = @PeriodsToAccrue
+		,[dtmDate] = GETDATE()
+		,[dtmDueDate] = @DueDate
+		,[dtmShipDate] = @ShipDate
+		,[intEntitySalespersonId] = @EntitySalespersonId
+		,[intFreightTermId] = @FreightTermId
+		,[intShipViaId] = @ShipViaId
+		,[intPaymentMethodId] = @PaymentMethodId
+		,[strInvoiceOriginId] = @InvoiceOriginId
+		,[strPONumber] = @PONumber
+		,[strBOLNumber] = @BOLNumber
+		,[strComments] = @Comments
+		,[intShipToLocationId] = @ShipToLocationId
+		,[intBillToLocationId] = @BillToLocationId
+		,[ysnTemplate] = @Template
+		,[ysnForgiven] = @Forgiven
+		,[ysnCalculated] = @Calculated
+		,[ysnSplitted] = @Splitted
+		,[intPaymentId] = @PaymentId
+		,[intSplitId] = @SplitId
+		,[intDistributionHeaderId] = @DistributionHeaderId
+		,[strActualCostId] = @ActualCostId
+		,[intShipmentId] = NULL
+		,[intTransactionId] = @TransactionId
+		,[intOriginalInvoiceId] = @OriginalInvoiceId
+		,[intEntityId] = 1
+		,[ysnResetDetails] = 0
+		,[ysnRecap] = 0
+		,[ysnPost] = 0
+		,[intInvoiceDetailId] = NULL
+		,[intItemId] = WCD.[intItemId]
+		,[ysnInventory] = 1
+		,[strDocumentNumber] = @ShipmentNumber
+		,[strItemDescription] = CASE 
+			WHEN ISNULL(I.[strDescription], '') = ''
+				THEN I.strItemNo
+			ELSE I.strDescription
+			END
+		,[intOrderUOMId] = WCD.intItemUOMId
+		,[dblQtyOrdered] = WCD.dblQuantity
+		,[intItemUOMId] = WCD.intItemUOMId
+		,[dblQtyShipped] = WCD.dblQuantity
+		,[dblDiscount] = 0 
+		,[dblItemWeight] = WCD.dblQuantity
+		,[intItemWeightUOMId] = WCD.intItemUOMId
+		,[dblPrice] = CASE WHEN CUR.ysnSubCurrency = 1 THEN WCD.dblRate/100 ELSE WCD.dblRate END
+		,[dblUnitPrice] = CASE WHEN CUR.ysnSubCurrency = 1 THEN WCD.dblRate/100 ELSE WCD.dblRate END
+		,[strPricing] = 'Inventory Shipment Item Price'
+		,[ysnRefreshPrice] = 0
+		,[strMaintenanceType] = NULL
+		,[strFrequency] = NULL
+		,[dtmMaintenanceDate] = NULL
+		,[dblMaintenanceAmount] = @ZeroDecimal
+		,[dblLicenseAmount] = @ZeroDecimal
+		,[intTaxGroupId] = NULL
+		,[intStorageLocationId] = NULL
+		,[ysnRecomputeTax] = 1
+		,[intSCInvoiceId] = NULL
+		,[strSCInvoiceNumber] = NULL
+		,[intSCBudgetId] = NULL
+		,[strSCBudgetDescription] = NULL
+		,[intInventoryShipmentItemId] = NULL
+		,[intLoadDetailId] = NULL
+		,[intLoadId] = L.intLoadId
+		,[intLotId] = NULL
+		,[strShipmentNumber] = NULL
+		,[intRecipeItemId] = NULL
+		,[intSalesOrderDetailId] = NULL
+		,[strSalesOrderNumber] = NULL
+		,[intContractHeaderId] = NULL
+		,[intContractDetailId] = NULL
+		,[intShipmentPurchaseSalesContractId] = NULL
+		,[dblShipmentGrossWt] = 1
+		,[dblShipmentTareWt] = 1
+		,[dblShipmentNetWt] = 1
+		,[intTicketId] = NULL
+		,[intTicketHoursWorkedId] = NULL
+		,[intOriginalInvoiceDetailId] = NULL
+		,[intSiteId] = NULL
+		,[strBillingBy] = NULL
+		,[dblPercentFull] = NULL
+		,[dblNewMeterReading] = @ZeroDecimal
+		,[dblPreviousMeterReading] = @ZeroDecimal
+		,[dblConversionFactor] = @ZeroDecimal
+		,[intPerformerId] = NULL
+		,[ysnLeaseBilling] = 0
+		,[ysnVirtualMeterReading] = 0
+		,[ysnClearDetailTaxes] = 0
+		,[intTempDetailIdForTaxes] = NULL
+		,[intCurrencyExchangeRateTypeId] = NULL
+		,[intCurrencyExchangeRateId] = NULL
+		,[dblCurrencyExchangeRate] = NULL
+		,[intSubCurrencyId] = WCD.intCurrencyId
+		,[dblSubCurrencyRate] = CASE WHEN CUR.ysnSubCurrency = 1 THEN 100 ELSE 1 END
+	FROM tblLGWeightClaim WC
+	JOIN tblLGWeightClaimOtherCharges WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
+	JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId AND L.intShipmentType = 1
+	JOIN tblICItem I ON I.intItemId = WCD.intItemId
+	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = WCD.intRateCurrencyId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	DECLARE @LineItemTaxEntries LineItemTaxDetailStagingTable
