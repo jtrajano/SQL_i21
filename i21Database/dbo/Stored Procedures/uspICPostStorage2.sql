@@ -65,16 +65,16 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
 
+DECLARE @returnValue AS INT 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @returnValue AS INT 
-
 	EXEC @returnValue = dbo.uspICValidateCostingOnPostStorage
 		@ItemsToValidate = @ItemsToStorage
 
-	IF @returnValue < 0 RETURN -1;
+	IF @returnValue < 0 RETURN @returnValue;
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ BEGIN
 	-- FIFO 
 	IF (@CostingMethod IN (@AVERAGECOST, @FIFO))
 	BEGIN 
-		EXEC dbo.uspICPostFIFOStorage
+		EXEC @returnValue = dbo.uspICPostFIFOStorage
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -189,12 +189,13 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 
+		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LIFO 
 	IF (@CostingMethod = @LIFO)
 	BEGIN 
-		EXEC dbo.uspICPostLIFOStorage
+		EXEC @returnValue = dbo.uspICPostLIFOStorage
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -216,12 +217,14 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+
+		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LOT 
 	IF (@CostingMethod = @LOTCOST)
 	BEGIN 
-		EXEC dbo.uspICPostLotStorage
+		EXEC @returnValue = dbo.uspICPostLotStorage
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -244,13 +247,15 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+
+		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
 
 	------------------------------------------------------------
 	-- Update the Storage Quantity
 	------------------------------------------------------------
 	BEGIN 
-		EXEC [dbo].[uspICPostStorageQuantity]
+		EXEC @returnValue = [dbo].[uspICPostStorageQuantity]
 			@intItemId
 			,@intItemLocationId
 			,@intSubLocationId
@@ -259,6 +264,8 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@intLotId
+
+		IF @returnValue < 0 GOTO _TerminateLoop;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -289,5 +296,9 @@ END;
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
+_TerminateLoop:
+
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+IF @returnValue < 0 RETURN @returnValue;

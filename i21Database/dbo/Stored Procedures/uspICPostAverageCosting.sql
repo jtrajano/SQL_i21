@@ -95,6 +95,8 @@ DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
 
+DECLARE @intReturnValue AS INT 
+
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
@@ -127,7 +129,7 @@ BEGIN
 		-- Make sure the cost is not null. 
 		SET @dblCost = ISNULL(@dblCost, 0) 
 
-		EXEC [dbo].[uspICPostInventoryTransaction]
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@intItemUOMId = @intItemUOMId
@@ -158,11 +160,13 @@ BEGIN
 				,@dblForexRate = @dblForexRate
 				,@dblUnitRetail = @dblUnitRetail
 
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
 		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
 		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReduceStockInFIFO
+			EXEC @intReturnValue = dbo.uspICReduceStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -178,6 +182,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedFifoId OUTPUT 
 			
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
 			-- Insert the record to the fifo-out table
 			INSERT INTO dbo.tblICInventoryFIFOOut (
 					intInventoryTransactionId
@@ -204,7 +210,7 @@ BEGIN
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
 		
-		EXEC [dbo].[uspICPostInventoryTransaction]
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@intItemUOMId = @intItemUOMId
@@ -235,10 +241,12 @@ BEGIN
 				,@dblForexRate = @dblForexRate
 				,@dblUnitRetail = @dblUnitRetail
 
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC dbo.uspICIncreaseStockInFIFO
+			EXEC @intReturnValue = dbo.uspICIncreaseStockInFIFO
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId 
@@ -259,6 +267,8 @@ BEGIN
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
 
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
@@ -273,7 +283,7 @@ BEGIN
 						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
 						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
-					EXEC [dbo].[uspICPostInventoryTransaction]
+					EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 							@intItemId = @intItemId
 							,@intItemLocationId = @intItemLocationId
 							,@intItemUOMId = @intItemUOMId
@@ -350,7 +360,7 @@ BEGIN
 
 		IF ISNULL(@dblValue, 0) <> 0
 		BEGIN 
-			EXEC [dbo].[uspICPostInventoryTransaction]
+			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
 					,@intItemUOMId = @intItemUOMId
@@ -380,6 +390,8 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@dblUnitRetail = @dblUnitRetail
+
+			IF @intReturnValue < 0 RETURN @intReturnValue;
 		END 
 	END 
 END 

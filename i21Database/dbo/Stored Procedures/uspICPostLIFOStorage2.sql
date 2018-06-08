@@ -62,6 +62,8 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38, 20)
 
+DECLARE @intReturnValue AS INT 
+
 -------------------------------------------------
 -- 1. Process the LIFO Cost buckets
 -------------------------------------------------
@@ -74,7 +76,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInLIFOStorage until @dblReduceQty is completely distributed to all available LIFO buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReduceStockInLIFOStorage
+			EXEC @intReturnValue = dbo.uspICReduceStockInLIFOStorage
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -90,11 +92,13 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedLIFOStorageId OUTPUT 
 
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
 			---- Insert the inventory transaction record
 			DECLARE @dblComputedUnitQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
 
-			EXEC [dbo].[uspICPostInventoryTransactionStorage]
+			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransactionStorage]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
 					,@intItemUOMId = @intItemUOMId
@@ -123,6 +127,8 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+
+			IF @intReturnValue < 0 RETURN @intReturnValue;
 		
 			-- Insert the record the the LIFO-out table
 			INSERT INTO dbo.tblICInventoryLIFOStorageOut (
@@ -151,7 +157,7 @@ BEGIN
 		SET @TotalQtyOffset = 0;
 
 		-- Insert the inventory transaction record
-		EXEC [dbo].[uspICPostInventoryTransactionStorage]
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransactionStorage]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@intItemUOMId = @intItemUOMId
@@ -181,10 +187,12 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
 		-- Repeat call on uspICIncreaseStockInLIFO until @dblAddQty is completely distributed to the negative cost LIFO buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC dbo.uspICIncreaseStockInLIFOStorage
+			EXEC @intReturnValue = dbo.uspICIncreaseStockInLIFOStorage
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -205,6 +213,8 @@ BEGIN
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
 
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
@@ -219,35 +229,37 @@ BEGIN
 						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
 						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
-				EXEC [dbo].[uspICPostInventoryTransactionStorage]
-						@intItemId = @intItemId
-						,@intItemLocationId = @intItemLocationId
-						,@intItemUOMId = @intItemUOMId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId					 
-						,@dtmDate = @dtmDate
-						,@dblQty = 0
-						,@dblCost = 0
-						,@dblUOMQty = 0
-						,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
-						,@dblSalesPrice = @dblSalesPrice
-						,@intCurrencyId = @intCurrencyId
-						--,@dblExchangeRate = @dblExchangeRate
-						,@intTransactionId = @intTransactionId
-						,@intTransactionDetailId = @intTransactionDetailId
-						,@strTransactionId = @strTransactionId
-						,@strBatchId = @strBatchId
-						,@intTransactionTypeId = @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
-						,@intLotId = NULL 
-						,@intRelatedInventoryTransactionId = NULL 
-						,@intRelatedTransactionId = @intRelatedTransactionId
-						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @strTransactionForm
-						,@intEntityUserSecurityId = @intEntityUserSecurityId
-						,@intCostingMethod = @LIFO
-						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
-						,@intForexRateTypeId = @intForexRateTypeId
-						,@dblForexRate = @dblForexRate
+					EXEC @intReturnValue = [dbo].[uspICPostInventoryTransactionStorage]
+							@intItemId = @intItemId
+							,@intItemLocationId = @intItemLocationId
+							,@intItemUOMId = @intItemUOMId
+							,@intSubLocationId = @intSubLocationId
+							,@intStorageLocationId = @intStorageLocationId					 
+							,@dtmDate = @dtmDate
+							,@dblQty = 0
+							,@dblCost = 0
+							,@dblUOMQty = 0
+							,@dblValue = @dblAutoVarianceOnUsedOrSoldStock
+							,@dblSalesPrice = @dblSalesPrice
+							,@intCurrencyId = @intCurrencyId
+							--,@dblExchangeRate = @dblExchangeRate
+							,@intTransactionId = @intTransactionId
+							,@intTransactionDetailId = @intTransactionDetailId
+							,@strTransactionId = @strTransactionId
+							,@strBatchId = @strBatchId
+							,@intTransactionTypeId = @INVENTORY_AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
+							,@intLotId = NULL 
+							,@intRelatedInventoryTransactionId = NULL 
+							,@intRelatedTransactionId = @intRelatedTransactionId
+							,@strRelatedTransactionId = @strRelatedTransactionId 
+							,@strTransactionForm = @strTransactionForm
+							,@intEntityUserSecurityId = @intEntityUserSecurityId
+							,@intCostingMethod = @LIFO
+							,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
+							,@intForexRateTypeId = @intForexRateTypeId
+							,@dblForexRate = @dblForexRate
+
+					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END
 			END
 
