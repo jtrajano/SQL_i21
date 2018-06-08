@@ -196,7 +196,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 
-		IF @intReturnValue < 0 GOTO _Exit_With_Error
+		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
 
 	-- FIFO 
@@ -225,7 +225,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 
-		IF @intReturnValue < 0 GOTO _Exit_With_Error
+		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
 
 	-- LIFO 
@@ -254,7 +254,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 
-		IF @intReturnValue < 0 GOTO _Exit_With_Error
+		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
 
 	-- LOT 
@@ -284,7 +284,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 
-		IF @intReturnValue < 0 GOTO _Exit_With_Error
+		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
 
 	-- ACTUAL COST 
@@ -314,7 +314,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 
-		IF @intReturnValue < 0 GOTO _Exit_With_Error
+		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
 
 	--------------------------------------------------
@@ -334,9 +334,11 @@ BEGIN
 				AND @strActualCostId IS NULL 
 
 		-- Recalculate the sales price because of the new average cost. 
-		EXEC uspICUpdateItemPricing
+		EXEC @intReturnValue = uspICUpdateItemPricing
 			@intItemId
 			,@intItemLocationId
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -367,8 +369,12 @@ END;
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
+_TerminateLoop:
+
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+IF @intReturnValue < 0 RETURN @intReturnValue;
 
 -----------------------------------------------------------------------------------------
 ---- Create the AUTO-Negative if costing method is average costing
@@ -507,16 +513,15 @@ DEALLOCATE loopItems;
 -----------------------------------------
 IF @strAccountToCounterInventory IS NOT NULL 
 BEGIN 
-	EXEC dbo.uspICCreateReturnGLEntries 
+	EXEC @intReturnValue = dbo.uspICCreateReturnGLEntries 
 		@strBatchId
 		,@strAccountToCounterInventory
 		,@intEntityUserSecurityId
 		,@strGLDescription
 	;
+
+	IF @intReturnValue < 0 RETURN @intReturnValue;
 END 
 
 _Exit: 
 RETURN 1
-
-_Exit_With_Error: 
-RETURN @intReturnValue

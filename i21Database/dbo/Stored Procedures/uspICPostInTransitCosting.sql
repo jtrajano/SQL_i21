@@ -76,6 +76,8 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_VARIANCE AS INT = 1
 
+DECLARE @intReturnValue AS INT 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
@@ -171,7 +173,7 @@ BEGIN
 	-- LOT 
 	IF @intLotId IS NOT NULL 
 	BEGIN 
-		EXEC dbo.uspICPostLotInTransit
+		EXEC @intReturnValue = dbo.uspICPostLotInTransit
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -195,12 +197,14 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- ACTUAL COST 
 	ELSE 
 	BEGIN 
-		EXEC dbo.uspICPostActualCostInTransit
+		EXEC @intReturnValue = dbo.uspICPostActualCostInTransit
 			@strSourceTransactionId -- @strActualCostId 
 			,@intItemId 
 			,@intItemLocationId 
@@ -224,6 +228,8 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -256,9 +262,12 @@ END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
+_TerminateLoop:
 
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+IF @intReturnValue < 0 RETURN @intReturnValue; 
 
 ---------------------------------------------------------------------------------------
 -- Make sure valuation is zero if stock is going to be zero. 
@@ -402,8 +411,6 @@ END
 -----------------------------------------
 --IF @strAccountToCounterInventory IS NOT NULL 
 BEGIN 
-	DECLARE @intReturnValue INT
-
 	EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 		@strBatchId
 		,@strAccountToCounterInventory
@@ -411,5 +418,5 @@ BEGIN
 		,@strGLDescription
 		--,@intContraInventory_ItemLocationId
 
-	IF @intReturnValue < 0 RETURN -1
+	IF @intReturnValue < 0 RETURN @intReturnValue
 END 

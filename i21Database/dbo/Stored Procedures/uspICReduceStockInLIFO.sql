@@ -89,6 +89,7 @@ BEGIN
 
 			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, NULL, NULL)
 			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
+			RETURN -80096;
 		END 
 		ELSE 
 		BEGIN 
@@ -96,8 +97,8 @@ BEGIN
 
 			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
 			EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
-		END 
-		RETURN -1
+			RETURN -80003;
+		END 	
 	END 
 END 
 
