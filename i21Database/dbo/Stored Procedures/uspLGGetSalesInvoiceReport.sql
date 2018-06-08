@@ -167,7 +167,13 @@ BEGIN
 		,@strCountry AS strCompanyCountry
 		,@strPhone AS strCompanyPhone
 		,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
-		,'Gross - ' + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentGrossWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Tare - ' + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentTareWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Net - ' + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) AS strWtInfo
+		,'Gross ' + CHAR(9)+ LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentGrossWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Tare ' + CHAR(9) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentTareWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Net ' + CHAR(9) + CHAR(9) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) AS strWtInfo
+		,ROUND(InvDet.dblShipmentGrossWt, 2) dblGrossWt
+		,isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) strGrossUOM
+		,ROUND(InvDet.dblShipmentTareWt, 2) dblTareWt
+		,isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) strTareUOM
+		,ROUND(InvDet.dblShipmentNetWt, 2) dblNetWt
+		,isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) strNetUOM
 		,LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + PriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,PriceUOM.strUnitMeasure) AS strPriceInfo
 		,InvDet.dblTotal
 		,LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyShipped, 2))) + ' ' + isnull(rtSUOMTranslation.strTranslation,SUOM.strUnitMeasure) AS strQtyShippedInfo
