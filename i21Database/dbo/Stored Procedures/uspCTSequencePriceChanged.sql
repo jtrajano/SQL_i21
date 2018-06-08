@@ -261,8 +261,11 @@ BEGIN TRY
 		END
 	END
 	
-	SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
-	EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
+	IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
+	BEGIN
+		SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
+		EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
+	END
 
 END TRY
 
