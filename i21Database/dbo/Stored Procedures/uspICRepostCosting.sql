@@ -21,9 +21,8 @@ DECLARE @intId AS INT
 		,@dblQty AS NUMERIC(38, 20) 
 		,@dblUOMQty AS NUMERIC(38, 20)
 		,@dblCost AS NUMERIC(38, 20)
-		,@dblSalesPrice AS NUMERIC(38, 20)
+		,@dblSalesPrice AS NUMERIC(18, 6)
 		,@intCurrencyId AS INT 
-		,@dblExchangeRate AS NUMERIC (38, 20) 
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
@@ -40,7 +39,7 @@ DECLARE @intId AS INT
 		,@dblAdjustRetailValue NUMERIC(38, 20)
 
 DECLARE @CostingMethod AS INT 
-		,@strTransactionForm AS NVARCHAR(255)		
+		,@strTransactionForm AS NVARCHAR(255)
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -49,19 +48,23 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 		,@CATEGORY AS INT = 6
-				
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_VARIANCE AS INT = 1
-		,@WRITE_OFF_SOLD AS INT = 2
-		,@REVALUE_SOLD AS INT = 3
 
--------------------------------------------------------------------------------------------------------------------------------
----- Do the Validation
--------------------------------------------------------------------------------------------------------------------------------
---BEGIN 
---	EXEC dbo.uspICValidateCostingOnPost
---		@ItemsToValidate = @ItemsToPost
---END
+DECLARE @intReturnValue AS INT 
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Do the Validation
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	DECLARE @returnValue AS INT 
+
+	EXEC @returnValue = dbo.uspICValidateCostingOnPost
+		@ItemsToValidate = @ItemsToPost
+
+	IF @returnValue < 0 RETURN -1;
+END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
@@ -95,7 +98,7 @@ SELECT  intId
 		,intCategoryId
 		,dblAdjustCostValue
 		,dblAdjustRetailValue
-FROM	@ItemsToPost
+FROM	@ItemsToPost 
 
 OPEN loopItems;
 
@@ -126,16 +129,14 @@ FETCH NEXT FROM loopItems INTO
 	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
 ;
-
-
+	
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 
 	-- Initialize the costing method and negative inventory option. 
-	SET @CostingMethod = NULL
-	SET @strTransactionForm = NULL 
+	SET @CostingMethod = NULL;
 
 	-- Initialize the transaction form
 	SELECT	@strTransactionForm = strTransactionForm
@@ -147,14 +148,19 @@ BEGIN
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
+	-- Initialize the dblUOMQty
+	SELECT	@dblUOMQty = dblUnitQty
+	FROM	dbo.tblICItemUOM
+	WHERE	intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId
+
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
-
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostAverageCosting
+		EXEC @intReturnValue = dbo.uspICPostAverageCosting
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -173,16 +179,17 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId
-			,@intForexRateTypeId 
+			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
-			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- FIFO 
 	IF (@CostingMethod = @FIFO AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostFIFO
+		EXEC @intReturnValue = dbo.uspICPostFIFO
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -201,16 +208,17 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId
-			,@intForexRateTypeId 
+			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
-			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LIFO 
 	IF (@CostingMethod = @LIFO AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostLIFO
+		EXEC @intReturnValue = dbo.uspICPostLIFO
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -229,16 +237,17 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId
-			,@intForexRateTypeId 
+			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
-			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- LOT 
 	IF (@CostingMethod = @LOTCOST AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostLot
+		EXEC @intReturnValue = dbo.uspICPostLot
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
@@ -258,16 +267,17 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intEntityUserSecurityId
-			,@intForexRateTypeId 
+			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
-			;
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- CATEGORY 
 	IF (@CostingMethod = @CATEGORY AND @strActualCostId IS NULL)
 	BEGIN 
-		EXEC dbo.uspICPostCategory
+		EXEC @intReturnValue = dbo.uspICPostCategory
 			@intCategoryId
 			,@intItemId
 			,@intItemLocationId
@@ -292,6 +302,8 @@ BEGIN
 			,@dblForexRate
 			,@dblAdjustCostValue
 			,@dblAdjustRetailValue
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
 
 	-- ACTUAL COST 
@@ -315,7 +327,7 @@ BEGIN
 
 			IF @intCostingMethod = @AVERAGECOST
 			BEGIN 
-				EXEC dbo.uspICPostAverageCosting
+				EXEC @intReturnValue = dbo.uspICPostAverageCosting
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -334,15 +346,16 @@ BEGIN
 					,@intTransactionTypeId
 					,@strTransactionForm
 					,@intEntityUserSecurityId
-					,@intForexRateTypeId 
+					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
-					;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @FIFO
 			BEGIN 
-				EXEC dbo.uspICPostFIFO
+				EXEC @intReturnValue = dbo.uspICPostFIFO
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -361,15 +374,16 @@ BEGIN
 					,@intTransactionTypeId
 					,@strTransactionForm
 					,@intEntityUserSecurityId
-					,@intForexRateTypeId 
+					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
-					;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @LIFO
 			BEGIN
-				EXEC dbo.uspICPostLIFO
+				EXEC @intReturnValue = dbo.uspICPostLIFO
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -388,15 +402,16 @@ BEGIN
 					,@intTransactionTypeId
 					,@strTransactionForm
 					,@intEntityUserSecurityId
-					,@intForexRateTypeId 
+					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
-					;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @LOTCOST
 			BEGIN 
-				EXEC dbo.uspICPostLot
+				EXEC @intReturnValue = dbo.uspICPostLot
 					@intItemId
 					,@intItemLocationId
 					,@intItemUOMId
@@ -416,15 +431,16 @@ BEGIN
 					,@intTransactionTypeId
 					,@strTransactionForm
 					,@intEntityUserSecurityId
-					,@intForexRateTypeId 
+					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
-					;
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
 
 			ELSE IF @intCostingMethod = @CATEGORY
 			BEGIN 
-				EXEC dbo.uspICPostCategory
+				EXEC @intReturnValue = dbo.uspICPostCategory
 					@intCategoryId
 					,@intItemId
 					,@intItemLocationId
@@ -449,11 +465,13 @@ BEGIN
 					,@dblForexRate
 					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
+
+				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END
 		END 
 		ELSE 
 		BEGIN 
-			EXEC dbo.uspICPostActualCost
+			EXEC @intReturnValue = dbo.uspICPostActualCost
 				@strActualCostId 
 				,@intItemId 
 				,@intItemLocationId 
@@ -473,10 +491,12 @@ BEGIN
 				,@intTransactionTypeId 
 				,@strTransactionForm 
 				,@intEntityUserSecurityId 
-				,@intForexRateTypeId 
+				,@intForexRateTypeId
 				,@dblForexRate
 				,@dblUnitRetail
 				;
+
+			IF @intReturnValue < 0 GOTO _TerminateLoop;
 		END 
 	END
 
@@ -567,14 +587,16 @@ BEGIN
 		------------------------------------------------------------
 		-- Update the Item Pricing
 		------------------------------------------------------------
-		EXEC uspICUpdateItemPricing
+		EXEC @intReturnValue = uspICUpdateItemPricing
 			@intItemId
 			,@intItemLocationId
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 
 		------------------------------------------------------------
 		-- Update the Stock Quantity
 		------------------------------------------------------------
-		EXEC [dbo].[uspICPostStockQuantity]
+		EXEC @intReturnValue = [dbo].[uspICPostStockQuantity]
 			@intItemId
 			,@intItemLocationId
 			,@intSubLocationId
@@ -583,6 +605,8 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@intLotId
+
+		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
@@ -604,21 +628,25 @@ BEGIN
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId
-		,@strActualCostId
+		,@strActualCostId 
 		,@intForexRateTypeId
 		,@dblForexRate
 		,@dblUnitRetail
 		,@intCategoryId
 		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
-	;
+		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
+_TerminateLoop:
+
 CLOSE loopItems;
 DEALLOCATE loopItems;
+
+IF @intReturnValue < 0 RETURN @intReturnValue;
 
 ---------------------------------------------------------------------------------------
 -- Create the AUTO-Negative if costing method is average costing
@@ -626,69 +654,60 @@ DEALLOCATE loopItems;
 BEGIN 
 	DECLARE @ItemsForAutoNegative AS ItemCostingTableType
 			,@intInventoryTransactionId AS INT 
-			,@intIdAutoNegative AS INT 
 
 	-- Get the qualified items for auto-negative. 
 	INSERT INTO @ItemsForAutoNegative (
 			intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
 			,intLotId
+			,dblQty
 			,intSubLocationId
 			,intStorageLocationId
-			,strActualCostId
+			,dtmDate
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
 	)
-	SELECT  intItemId
+	SELECT 
+			intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
 			,intLotId
+			,dblQty
 			,intSubLocationId
 			,intStorageLocationId
-			,strActualCostId
+			,dtmDate
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
 	FROM	@ItemsToPost
 	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
 			AND dblQty > 0 
 
-	SET	@intInventoryTransactionId = NULL 
-	SET @strTransactionForm = NULL 
+	SET @intInventoryTransactionId = NULL 
 
 	SELECT	TOP 1 
-			@intInventoryTransactionId = intInventoryTransactionId
-			,@strTransactionForm = strTransactionForm
+			@intInventoryTransactionId	= intInventoryTransactionId
+			--,@intCurrencyId				= intCurrencyId
+			,@dtmDate					= dtmDate
+			--,@dblExchangeRate			= dblExchangeRate
+			,@intTransactionId			= intTransactionId
+			,@strTransactionId			= strTransactionId
+			,@strTransactionForm		= strTransactionForm
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
-			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
-			AND dblQty > 0
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM @ItemsForAutoNegative)
 	BEGIN 
 		SELECT TOP 1 
-				@intItemId			= intItemId 
-				,@intItemLocationId = intItemLocationId
-				,@intIdAutoNegative	= intId 
+				@intItemId				= intItemId 
+				,@intItemLocationId		= intItemLocationId
+				,@intItemUOMId			= intItemUOMId
+				,@intSubLocationId		= intSubLocationId
+				,@intStorageLocationId	= intStorageLocationId
+				,@intLotId				= intLotId
 		FROM	@ItemsForAutoNegative
 
 		INSERT INTO dbo.tblICInventoryTransaction (
@@ -716,7 +735,7 @@ BEGIN
 					,[strRelatedTransactionId]
 					,[strTransactionForm]
 					,[dtmCreated]
-					,[intCreatedUserId]
+					,[intCreatedEntityId]
 					,[intConcurrencyId]
 					,[intCostingMethod]
 					,[strDescription]
@@ -724,31 +743,31 @@ BEGIN
 					,[dblForexRate]
 			)			
 		SELECT	
-				[intItemId]								= AutoNegative.intItemId
-				,[intItemLocationId]					= AutoNegative.intItemLocationId
-				,[intItemUOMId]							= AutoNegative.intItemUOMId
-				,[intSubLocationId]						= AutoNegative.intSubLocationId
-				,[intStorageLocationId]					= AutoNegative.intStorageLocationId
-				,[dtmDate]								= AutoNegative.dtmDate
+				[intItemId]								= @intItemId
+				,[intItemLocationId]					= @intItemLocationId
+				,[intItemUOMId]							= NULL 
+				,[intSubLocationId]						= NULL 
+				,[intStorageLocationId]					= NULL 
+				,[dtmDate]								= @dtmDate
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
 				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
 				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= AutoNegative.intCurrencyId
-				,[dblExchangeRate]						= AutoNegative.dblExchangeRate
-				,[intTransactionId]						= AutoNegative.intTransactionId
-				,[strTransactionId]						= AutoNegative.strTransactionId
+				,[intCurrencyId]						= NULL -- @intCurrencyId
+				,[dblExchangeRate]						= 1 -- @dblExchangeRate
+				,[intTransactionId]						= @intTransactionId
+				,[strTransactionId]						= @strTransactionId
 				,[strBatchId]							= @strBatchId
 				,[intTransactionTypeId]					= @AUTO_VARIANCE
-				,[intLotId]								= AutoNegative.intLotId
+				,[intLotId]								= NULL 
 				,[ysnIsUnposted]						= 0
 				,[intRelatedInventoryTransactionId]		= NULL 
 				,[intRelatedTransactionId]				= NULL 
 				,[strRelatedTransactionId]				= NULL 
 				,[strTransactionForm]					= @strTransactionForm
 				,[dtmCreated]							= GETDATE()
-				,[intCreatedUserId]						= @intEntityUserSecurityId
+				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
 				,[intCostingMethod]						= @AVERAGECOST
 				,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
@@ -770,14 +789,10 @@ BEGIN
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
-				INNER JOIN @ItemsForAutoNegative AutoNegative
-					ON AutoNegative.intItemId = ItemPricing.intItemId
-					AND AutoNegative.intItemLocationId = ItemPricing.intItemLocationId
-				INNER JOIN dbo.tblICInventoryTransaction InvTrans
-					ON InvTrans.intInventoryTransactionId = @intInventoryTransactionId
-		WHERE	AutoNegative.intId = @intIdAutoNegative
+		WHERE	ItemPricing.intItemId = @intItemId
+				AND ItemPricing.intItemLocationId = @intItemLocationId			
 				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
-				
+
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
 		WHERE	intItemId = @intItemId 
@@ -808,16 +823,13 @@ BEGIN
 
 	SELECT	TOP 1 
 			@intInventoryTransactionId	= intInventoryTransactionId
-			,@intCurrencyId				= intCurrencyId
 			,@dtmDate					= dtmDate
-			,@dblExchangeRate			= dblExchangeRate
 			,@intTransactionId			= intTransactionId
 			,@strTransactionId			= strTransactionId
 			,@strTransactionForm		= strTransactionForm
 			,@intCostingMethod			= intCostingMethod
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	strBatchId = @strBatchId
-			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
@@ -851,6 +863,8 @@ BEGIN
 					,[intConcurrencyId]
 					,[intCostingMethod]
 					,[strDescription]
+					,[intForexRateTypeId]
+					,[dblForexRate]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -864,8 +878,8 @@ BEGIN
 				,[dblCost]								= 0
 				,[dblValue]								= -currentValuation.floatingValue
 				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= @intCurrencyId
-				,[dblExchangeRate]						= @dblExchangeRate
+				,[intCurrencyId]						= NULL -- @intCurrencyId
+				,[dblExchangeRate]						= 1 -- @dblExchangeRate
 				,[intTransactionId]						= @intTransactionId
 				,[strTransactionId]						= @strTransactionId
 				,[strBatchId]							= @strBatchId
@@ -879,12 +893,12 @@ BEGIN
 				,[dtmCreated]							= GETDATE()
 				,[intCreatedEntityId]					= @intEntityUserSecurityId
 				,[intConcurrencyId]						= 1
-				,[intCostingMethod]						= il.intCostingMethod --@intCostingMethod
+				,[intCostingMethod]						= il.intCostingMethod -- @intCostingMethod
 				,[strDescription]						=	-- Stock quantity is now zero on {Item} in {Location}. Auto variance is posted to zero out its inventory valuation.
-														dbo.fnFormatMessage (
+															dbo.fnFormatMessage(
 																dbo.fnICGetErrorMessage(80093) 
 																, i.strItemNo
-																, cl.strLocationName
+																, cl.strLocationName														
 																, DEFAULT
 																, DEFAULT
 																, DEFAULT
@@ -894,6 +908,8 @@ BEGIN
 																, DEFAULT
 																, DEFAULT
 														)
+				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
+				,[dblForexRate]							= 1 -- @dblForexRate
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
