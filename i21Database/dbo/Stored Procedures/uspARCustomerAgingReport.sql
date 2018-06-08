@@ -179,4 +179,25 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 										AND strAgingType = 'Summary'
 	END
 
+IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary')
+	BEGIN
+		INSERT INTO tblARCustomerAgingStagingTable (
+			  strCompanyName
+			, strCompanyAddress
+			, dtmAsOfDate
+			, intEntityUserId
+			, strAgingType
+		)
+		SELECT strCompanyName		= COMPANY.strCompanyName
+			 , strCompanyAddress	= COMPANY.strCompanyAddress
+			 , dtmAsOfDate			= @dtmDateTo
+			 , intEntityUserId		= @intEntityUserId
+			 , strAgingType			= 'Summary'
+		FROM (
+			SELECT TOP 1 strCompanyName
+					   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+			FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+		) COMPANY
+	END
+
 SELECT * FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
