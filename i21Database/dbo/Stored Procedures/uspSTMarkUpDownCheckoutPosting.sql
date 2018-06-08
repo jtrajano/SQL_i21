@@ -94,6 +94,7 @@ BEGIN TRY
 						LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId 
 						INNER JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
 						WHERE MUD.intCheckoutId = @intCheckoutId
+						AND il.intLocationId = @intLocationId
 						
 						IF EXISTS(SELECT * FROM @ItemsForPost)
 							BEGIN
