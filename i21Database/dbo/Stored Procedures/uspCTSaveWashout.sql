@@ -145,7 +145,9 @@ BEGIN TRY
 	   
 	   IF @strDocType = 'AP Voucher'
 	   BEGIN
-			UPDATE tblAPBill	  SET strComment = 'Washout' WHERE intBillId = @intBillInvoiceId
+			SELECT @strNumber = 'Washout, contracts ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
+			SELECT @strNumber = @strNumber + ' and ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
+			UPDATE tblAPBill	  SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
 	   END
     END
 
