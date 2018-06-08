@@ -56,10 +56,11 @@ BEGIN
 		strCustomerNumber
 		,intTransactionCount = COUNT(strCustomerNumber)
 		,dtmTransactionDate = DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0)
+		,strCardNumber
 	INTO #CustomerTransactionCount
 	FROM  vyuCFUsageExceptionAlertTransaction
 	WHERE intTransactionId IN (SELECT intTransactionId FROM #tblCFTransactionList)
-	GROUP BY strCustomerNumber,DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0)
+	GROUP BY strCustomerNumber,DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0),strCardNumber
 
 	INSERT INTO tblCFUsageExceptionAlertStaging(
 		strCustomerNumber
@@ -117,6 +118,7 @@ BEGIN
 	INNER JOIN #CustomerTransactionCount C
 		ON B.strCustomerNumber = C.strCustomerNumber
 			AND DATEADD(dd, DATEDIFF(dd, 0, B.dtmTransactionDate), 0) = DATEADD(dd, DATEDIFF(dd, 0, C.dtmTransactionDate), 0)
+			AND B.strCardNumber = C.strCardNumber
 	WHERE C.intTransactionCount > B.intTransactionLimit
 		AND B.intTransactionId IN (SELECT intTransactionId FROM #tblCFTransactionList)
 		AND C.strCustomerNumber IS NOT NULL
@@ -137,5 +139,3 @@ BEGIN
 	--HAVING B.intTransactionLimit < COUNT(B.strCustomerNumber)	
 
 END
-
-
