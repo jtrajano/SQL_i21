@@ -37,7 +37,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
 		,@ADJUSTMENT_TYPE_OpeningInventory AS INT = 10
 
-SET @adjdt = ISNULL(GETDATE(),@adjdt)
+SET @adjdt = ISNULL(@adjdt, GETDATE())
 
 -- Create the Adjustment header and detail record. 
 BEGIN 
@@ -122,6 +122,7 @@ BEGIN
 				,dblNewQuantity
 				,dblAdjustByQuantity
 				,intItemUOMId
+				,intNewItemUOMId
 				,dblNewCost
 				,intSubLocationId
 				,intStorageLocationId
@@ -134,6 +135,7 @@ BEGIN
 				,0
 				,ptitm_on_hand
 				,ptitm_on_hand
+				,uom.intItemUOMId
 				,uom.intItemUOMId
 				--,case when @strAvgLast = 'A' then ptitm_avg_cost else ptitm_cost1 end
 				,ptitm_avg_cost 
@@ -159,10 +161,11 @@ BEGIN
 						ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.ptitm_itm_no COLLATE Latin1_General_CI_AS
 					LEFT JOIN tblICItemUOM uom 
 						on uom.intItemId = inv.intItemId 
+					LEFT JOIN tblICItemLocation il ON il.intItemId = inv.intItemId
 					--created duplicate storage location entries. converted into an inline sub query.	
 					--left join tblICStorageLocation sl 
 					--	on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
-			WHERE	ptitm_on_hand <> 0 
+			WHERE	(ptitm_on_hand > 0 OR (ptitm_on_hand < 0 AND il.intAllowNegativeInventory))
 			AND ptitm_loc_no = @adjLoc
 			AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 
