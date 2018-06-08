@@ -1623,6 +1623,7 @@ IF @recap = 0
 			SET strBatchId		= CASE WHEN @post = 1 THEN @batchIdUsed ELSE NULL END
 			  , dtmBatchDate	= CASE WHEN @post = 1 THEN @PostDate ELSE NULL END
 			  , intPostedById	= CASE WHEN @post = 1 THEN @UserEntityID ELSE NULL END
+			  , ysnPosted       = @post
 			WHERE intPaymentId IN (SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData)
 			
 		END	
