@@ -4060,6 +4060,7 @@ IF @recap = 0
 								  , dblPayment			= dblPayment - ISNULL(dblAppliedInvoiceAmount, 0)
 								  , dblBasePayment		= dblBasePayment - ISNULL(dblAppliedInvoiceAmount, 0)
 								  , ysnPaid				= CASE WHEN dblInvoiceTotal = dblPayment - ISNULL(dblAppliedInvoiceAmount, 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+								  , ysnRefundProcessed	= CASE WHEN dblInvoiceTotal = dblPayment - ISNULL(dblAppliedInvoiceAmount, 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 								FROM tblARInvoice I
 								INNER JOIN (										
 									SELECT intPrepaymentId			= intPrepaymentId
@@ -4231,6 +4232,7 @@ IF @recap = 0
 										  , dblPayment			= dblPayment + ISNULL(dblAppliedInvoiceAmount, 0)
 										  , dblBasePayment		= dblBasePayment + ISNULL(dblAppliedInvoiceAmount, 0)
 										  , ysnPaid				= CASE WHEN dblInvoiceTotal = dblPayment + ISNULL(dblAppliedInvoiceAmount, 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+										  , ysnRefundProcessed	= CASE WHEN dblInvoiceTotal = dblPayment + ISNULL(dblAppliedInvoiceAmount, 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 										FROM tblARInvoice I
 										INNER JOIN (										
 											SELECT intPrepaymentId			= intPrepaymentId

@@ -200,7 +200,7 @@ ELSE
 	SET @ARAccountId = [dbo].[fnARGetInvoiceTypeAccount](@TransactionType, @CompanyLocationId)
 
 
-IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
+IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash')
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('There is no setup for AR Account in the Company Configuration.', 16, 1);
@@ -211,13 +211,13 @@ IF @ARAccountId IS NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cas
 IF @ARAccountId IS NOT NULL AND @TransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AR Account' AND [intAccountId] =  @ARAccountId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
-			RAISERROR('There account id provided is not a valid account of category "AR Account".', 16, 1);
-		SET @ErrorMessage = 'There account id provided is not a valid account of category "AR Account".'
+			RAISERROR('The account id provided is not a valid account of category "AR Account".', 16, 1);
+		SET @ErrorMessage = 'The account id provided is not a valid account of category "AR Account".'
 		RETURN 0;
 	END
 
 DECLARE @CompanyLocation NVARCHAR(250)
-IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
+IF @ARAccountId IS NULL AND @TransactionType = 'Cash'
 	BEGIN
 		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
 		IF ISNULL(@RaiseError,0) = 1
@@ -226,7 +226,16 @@ IF @ARAccountId IS NULL AND @TransactionType IN ('Cash', 'Cash Refund')
 		RETURN 0;
 	END
 
-IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Undeposited Funds' AND [intAccountId] =  @ARAccountId)
+IF @ARAccountId IS NULL AND @TransactionType = 'Cash Refund'
+	BEGIN
+		SELECT TOP 1 @CompanyLocation = [strLocationName] FROM tblSMCompanyLocation WHERE [intCompanyLocationId] = @CompanyLocationId		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('There is no AP account setup under Company Location - %s.', 16, 1, @CompanyLocation);
+		SET @ErrorMessage = [dbo].[fnARFormatMessage]('There is no AP account setup under Company Location - %s.', @CompanyLocation, DEFAULT)
+		RETURN 0;
+	END
+
+IF @ARAccountId IS NOT NULL AND @TransactionType = 'Cash' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'Undeposited Funds' AND [intAccountId] =  @ARAccountId)
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('There account id provided is not a valid account of category "Undeposited Funds".', 16, 1);
@@ -234,6 +243,13 @@ IF @ARAccountId IS NOT NULL AND @TransactionType IN ('Cash', 'Cash Refund') AND 
 		RETURN 0;
 	END
 
+IF @ARAccountId IS NOT NULL AND @TransactionType = 'Cash Refund' AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'AP Account' AND [intAccountId] =  @ARAccountId)
+	BEGIN		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('There account id provided is not a valid account of category "AP Account".', 16, 1);
+		SET @ErrorMessage = 'There account id provided is not a valid account of category "AP Account".'
+		RETURN 0;
+	END
 
 IF @ARAccountId IS NULL AND @TransactionType = 'Customer Prepayment'
 	BEGIN		

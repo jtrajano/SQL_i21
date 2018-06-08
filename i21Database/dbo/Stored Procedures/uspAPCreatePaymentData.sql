@@ -52,7 +52,7 @@ BEGIN
 		,@payToAddress = A.intShipToLocationId
 		,@currency = A.intCurrencyId
 		FROM tblARInvoice A
-		INNER JOIN  [PaymentDetailStaging] B
+		INNER JOIN  @paymentDetail B
 			ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityId] = C.[intEntityId]
