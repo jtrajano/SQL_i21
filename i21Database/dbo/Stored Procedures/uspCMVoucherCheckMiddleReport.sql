@@ -118,7 +118,7 @@ WHERE intBankAccountId = @intBankAccountId AND SMC.strCurrency = 'CAD'
 SELECT	CASE WHEN @isCAD = 1 THEN
 			REPLACE(CONVERT(NVARCHAR(10), CHK.dtmDate, 111), '/', '-')   
 		ELSE
-			CONVERT(NVARCHAR(10),CHK.dtmDate,111)
+			CHK.dtmDate
 		END
 		dtmDate
 		,strCheckNumber = CHK.strReferenceNo
