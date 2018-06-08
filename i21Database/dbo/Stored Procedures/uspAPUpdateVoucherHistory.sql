@@ -38,7 +38,7 @@ BEGIN
 		[strQtyUnitMeasure]		=	unitMeasure.strUnitMeasure,
 		[strCostUnitMeasure]	=	costUnitMeasure.strUnitMeasure,
 		[strCurrency]			=	cur.strCurrency,
-		[dtmTransactionDate]	=	A.dtmDate,
+		[dtmTransactionDate]	=	GETDATE(),
 		[dtmTicketDateTime]		=	ticket.dtmTicketDateTime,
 		[dtmDateEntered]		=	A.dtmDateCreated
 	INTO #tmpVoucherHistory
