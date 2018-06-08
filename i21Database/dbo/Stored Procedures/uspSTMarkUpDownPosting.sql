@@ -170,6 +170,7 @@ BEGIN TRY
 					LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId 
 					INNER JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
 					WHERE intMarkUpDownId = @intMarkUpDownId
+					AND il.intLocationId = @intLocationId
 
 				-- Generate New Batch Id
 				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
@@ -304,8 +305,6 @@ BEGIN TRY
 				[dtmDate] 
 				,[strBatchId]
 				,[intAccountId]
-				--,[strAccountId] -- Added
-				--,[strAccountGroup] -- Added
 				,[dblDebit]
 				,[dblCredit]
 				,[dblDebitUnit]
@@ -329,19 +328,13 @@ BEGIN TRY
 				,[strModuleName]
 				,[intConcurrencyId]
 				,[dblDebitForeign]	
-				--,[dblDebitReport]	
 				,[dblCreditForeign]	
-				--,[dblCreditReport]	
-				--,[dblReportingRate]	
-				--,[dblForeignRate]
 				,[strRateType]
 			)
 			SELECT 
 				t.[dtmDate] 
 				,@strBatchId
 				,t.[intAccountId]
-				--,GD.[strAccountId]
-				--,GD.strAccountGroup
 				,t.[dblDebit]
 				,t.[dblCredit]
 				,t.[dblDebitUnit]
@@ -364,31 +357,16 @@ BEGIN TRY
 				,t.[strTransactionForm]
 				,t.[strModuleName]
 				,t.[intConcurrencyId]
-				,t.[dblDebitForeign]	
-				--,[dblDebitReport]	
+				,t.[dblDebitForeign]		
 				,t.[dblCreditForeign]	
-				--,[dblCreditReport]	
-				--,[dblReportingRate]	
-				--,[dblForeignRate]
 				,t.[strRateType]
 			FROM @GLEntries t
 
-			--COMMIT TRAN @TransactionName
-			--JOIN vyuGLAccountDetail GD ON t.intAccountId = GD.intAccountId
-
-			
+			--COMMIT TRAN @TransactionName		
 		END
 	ELSE
 		IF @@TRANCOUNT > 0 
 			COMMIT TRAN @TransactionName
-
-
-
-		
-
-		-- This is our immediate exit in case of exceptions controlled by this stored procedure
-		
-		
 		
 END TRY
 
