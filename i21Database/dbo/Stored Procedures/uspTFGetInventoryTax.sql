@@ -730,8 +730,12 @@ BEGIN TRY
 		END
 		
 		DELETE FROM @TFTransaction
-		
 		DELETE FROM @tmpRC WHERE @RCId = intReportingComponentId
+
+		EXEC uspTFProcessBeforePreview @Guid = @Guid
+		, @ReportingComponentId = @ReportingComponentId
+		, @DateFrom = @DateFrom
+		, @DateTo = @DateTo
 	END
 	
 END TRY
