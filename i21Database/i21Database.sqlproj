@@ -6737,6 +6737,10 @@
     <Build Include="dbo\Stored Procedures\uspICEdiImportPricebook.sql" />
     <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetProcessedOpportunityQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTProcessHandheldScannerImportReceipt.sql" />
+    <Build Include="dbo\Views\vyuSTGetHandheldScannerImportReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTProcessHandheldScannerImportCount.sql" />
+    <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

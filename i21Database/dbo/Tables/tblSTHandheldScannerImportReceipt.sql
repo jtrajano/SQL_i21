@@ -6,6 +6,7 @@
     [intVendorId] INT NULL, 
     [strReceiptSequence] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strUPCNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intItemId] INT NULL,
     [dtmReceiptDate] DATETIME NULL, 
     [dblReceivedQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblCaseCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
