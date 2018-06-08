@@ -63,6 +63,8 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
+DECLARE @intReturnValue AS INT 
+
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
 -------------------------------------------------
@@ -117,7 +119,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInLot until @dblReduceQty is completely distributed to all available Lot buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReduceStockInLot
+			EXEC @intReturnValue = dbo.uspICReduceStockInLot
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -136,13 +138,15 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@UpdatedInventoryLotId OUTPUT 
 
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
 			-- Calculate the stock reduced
 			-- Get the cost used. It is usually the cost from the cost bucket or the last cost. 
 			DECLARE @dblReduceStockQty AS NUMERIC(38,20) = ISNULL(-@QtyOffset, @dblReduceQty - ISNULL(@RemainingQty, 0))
 			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
 
 			-- Insert the inventory transaction record
-			EXEC [dbo].[uspICPostInventoryTransaction]
+			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
 					,@intItemUOMId = @intItemUOMId
@@ -173,6 +177,8 @@ BEGIN
 					,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+
+			IF @intReturnValue < 0 RETURN @intReturnValue;
 
 			-- Insert the record the the Lot-out table
 			INSERT INTO dbo.tblICInventoryLotOut (
@@ -240,7 +246,7 @@ BEGIN
 		SET @TotalQtyOffset = 0;
 
 		-- Insert the inventory transaction record
-		EXEC [dbo].[uspICPostInventoryTransaction]
+		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@intItemUOMId = @intItemUOMId
@@ -272,10 +278,12 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 
+		IF @intReturnValue < 0 RETURN @intReturnValue;
+
 		-- Repeat call on uspICIncreaseStockInLot until @dblAddQty is completely distributed to the negative cost Lot buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC dbo.uspICIncreaseStockInLot
+			EXEC @intReturnValue = dbo.uspICIncreaseStockInLot
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -299,6 +307,8 @@ BEGIN
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
 
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
 			SET @dblAddQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 
@@ -314,7 +324,7 @@ BEGIN
 						- dbo.fnMultiply(@QtyOffset, @dblCost) -- Revalue Sold
 						+ dbo.fnMultiply(@QtyOffset, ISNULL(@CostUsed, 0))  -- Write Off Sold
 
-					EXEC [dbo].[uspICPostInventoryTransaction]
+					EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 							@intItemId = @intItemId
 							,@intItemLocationId = @intItemLocationId
 							,@intItemUOMId = @intItemUOMId
@@ -345,6 +355,8 @@ BEGIN
 							,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
+
+					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END 
 			END
 			
