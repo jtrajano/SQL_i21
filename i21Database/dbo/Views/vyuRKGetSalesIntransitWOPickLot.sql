@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKGetSalesIntransitWOPickLot
 AS
-SELECT strShipmentNumber as strTicket,strContractNumber,
+SELECT strShipmentNumber as strTicket,strContractNumber, dtmContractDate,
 		dblShipmentQty,
 		intCompanyLocationId,
 		strLocationName,
@@ -9,7 +9,7 @@ SELECT strShipmentNumber as strTicket,strContractNumber,
 		(isnull(dblShipmentQty,0)-isnull(dblInvoiceQty,0)) dblBalanceToInvoice,intCommodityId,strContractItemName as  strItemName, intCommodityUnitMeasureId as intUnitMeasureId
 		,intEntityId,strName as strCustomerReference	
 FROM(
-				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,
+				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber, d1.dtmContractDate,
 				c.dblQuantity dblShipmentQty,
 				il.intLocationId intCompanyLocationId,
 				cl.strLocationName strLocationName,

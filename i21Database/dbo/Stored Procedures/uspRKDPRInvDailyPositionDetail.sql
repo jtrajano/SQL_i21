@@ -816,7 +816,7 @@ BEGIN
 				FROM vyuRKGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 			    AND i.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then i.intCompanyLocationId else @intLocationId end	
-				AND i.intEntityId= @intVendorId 
+				AND i.intEntityId= @intVendorId AND convert(DATETIME, CONVERT(VARCHAR(10), i.dtmContractDate, 110), 110) <= convert(DATETIME, @dtmToDate)
 		) t WHERE intCompanyLocationId  IN (
 				SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
