@@ -128,12 +128,12 @@ BEGIN TRY
 
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
-	   INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost)
-	   SELECT	@intItemId, 1, 0, @dblAmount
+		INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost)
+		SELECT	@intItemId, 1, 0, ABS(@dblAmount)
 	   
-	   SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
+		SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
 
-	   EXEC		uspAPCreateBillData
+		EXEC		uspAPCreateBillData
 				@userId					=   @intCreatedById,
 				@vendorId				=   @intEntityId,
 				@type					=   @type,
@@ -141,20 +141,18 @@ BEGIN TRY
 				@shipTo					=	@intLocationId,
 				@billId					=   @intBillInvoiceId OUTPUT
 
-	   SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId
+		SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId	   
+
+		SELECT @strNumber = 'Washout, contracts ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
+		SELECT @strNumber = @strNumber + ' and ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
+		UPDATE tblAPBill	  SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
 	   
-	   IF @strDocType = 'AP Voucher'
-	   BEGIN
-			SELECT @strNumber = 'Washout, contracts ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intSourceHeaderId
-			SELECT @strNumber = @strNumber + ' and ' + strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = @intWashoutHeaderId
-			UPDATE tblAPBill	  SET strComment = @strNumber WHERE intBillId = @intBillInvoiceId
-	   END
     END
 
     IF @strDocType = 'AR Credit Memo' OR @strDocType = 'AR Invoice'
     BEGIN
 	   INSERT  INTO @InvoiceEntries(strTransactionType,strSourceTransaction,strSourceId,intEntityCustomerId,intCompanyLocationId,dtmDate,intEntityId,intItemId,dblQtyOrdered,dblQtyShipped,dblPrice,dblUnitPrice)
-	   SELECT	 REPLACE(@strDocType,'AR ',''), 'Direct', '', @intEntityId, @intCompanyLocationId, GETDATE(), @intEntityId, @intItemId,1, 1, @dblAmount, @dblAmount
+	   SELECT	 REPLACE(@strDocType,'AR ',''), 'Direct', '', @intEntityId, @intCompanyLocationId, GETDATE(), @intEntityId, @intItemId,1, 1, ABS(@dblAmount), ABS(@dblAmount)
 
 	   EXEC		uspARProcessInvoices
 				@InvoiceEntries		=   @InvoiceEntries,
