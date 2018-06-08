@@ -176,7 +176,7 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 		SELECT intID FROM fnGetRowsFromDelimitedValues(@strCreatedInvoices)
 
 		SELECT TOP 1 @intNewInvoiceId = intId FROM @tblInvoicesCreated
-		SET @intNewTransactionId = @intNewInvoiceId
+		--SET @intNewTransactionId = @intNewInvoiceId
 
 		INSERT INTO tblARPrepaidAndCredit (
 			 intInvoiceId
@@ -202,36 +202,45 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 									, @raiseError		= 1
 									, @success			= @ysnSuccess OUT
 
-		--IF @ysnSuccess = 1
-		--	BEGIN
-		--		DECLARE @tblPaymentDetail		PaymentDetailStaging
+		IF @ysnSuccess = 1
+			BEGIN
+				DECLARE @tblPaymentDetail		PaymentDetailStaging
 
-		--		INSERT INTO @tblPaymentDetail (
-		--			  intAccountId
-		--			, dblDiscount
-		--			, dblAmountDue
-		--			, dblPayment
-		--			, dblInterest
-		--			, dblTotal
-		--			, dblWithheld
-		--		)
-		--		SELECT intAccountId	= intAccountId
-		--			, dblDiscount	= 0.00000
-		--			, dblAmountDue	= 0.00000
-		--			, dblPayment	= dblInvoiceTotal
-		--			, dblInterest	= 0.00000
-		--			, dblTotal		= dblInvoiceTotal
-		--			, dblWithheld	= 0.00000
-		--		FROM tblARInvoice 
-		--		WHERE intInvoiceId = @intNewInvoiceId
+				INSERT INTO @tblPaymentDetail (
+					  intAccountId
+					, intInvoiceId
+					, dblDiscount
+					, dblAmountDue
+					, dblPayment
+					, dblInterest
+					, dblTotal
+					, dblWithheld
+				)
+				SELECT intAccountId	= intAccountId
+					, intInvoiceId	= intInvoiceId
+					, dblDiscount	= 0.00000
+					, dblAmountDue	= 0.00000
+					, dblPayment	= dblInvoiceTotal
+					, dblInterest	= 0.00000
+					, dblTotal		= dblInvoiceTotal
+					, dblWithheld	= 0.00000
+				FROM tblARInvoice 
+				WHERE intInvoiceId = @intNewInvoiceId
 
-		--		EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
-		--										  , @notes				= 'Cash Refund'
-		--										  , @payment			= 0.000000
-		--										  , @datePaid			= @dtmDateOnly
-		--										  , @paymentDetail		= @tblPaymentDetail
-		--										  , @createdPaymentId	= @intNewTransactionId OUT
-		--	END
+				EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
+												  , @notes				= 'Cash Refund'
+												  , @payment			= 0.000000
+												  , @datePaid			= @dtmDateOnly
+												  , @paymentDetail		= @tblPaymentDetail
+												  , @createdPaymentId	= @intNewTransactionId OUT
+				
+				IF ISNULL(@intNewTransactionId, 0) = 0
+					BEGIN
+						SET @strErrorMessage = 'Error in creating Pay Voucher Transaction.'
+						RAISERROR(@strErrorMessage, 16, 1) 
+						RETURN 0;
+					END
+			END
 		
 		--UPDATE YSNPROCESSED
 		UPDATE tblARInvoice
