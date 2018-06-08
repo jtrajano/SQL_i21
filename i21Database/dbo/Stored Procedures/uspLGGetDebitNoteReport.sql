@@ -102,6 +102,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,BA.strBankName
 	,B.strRemarks
 	,ROUND(SUM(WCD.dblClaimAmount),2) dblTotalClaimAmount
+	,ROUND((SELECT SUM(dblAmount) FROM tblLGWeightClaimOtherCharges OC WHERE OC.intWeightClaimId = WC.intWeightClaimId),2) dblTotalOtherChargeAmount
 	,INV.strInvoiceNumber
 	,INV.strComments AS strInvoiceComments
 	,CASE 

@@ -41,6 +41,7 @@ FROM (
 					END
 			END
 		,CH.strContractNumber
+		,CH.intContractTypeId
 		,CD.intContractSeq
 		,strEntityName = EM.strName
 		,intEntityId = EM.intEntityId

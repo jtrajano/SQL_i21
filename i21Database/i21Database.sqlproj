@@ -6741,6 +6741,7 @@
     <Build Include="dbo\Views\vyuSTGetHandheldScannerImportReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSTProcessHandheldScannerImportCount.sql" />
     <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDebitNoteOtherChargesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
