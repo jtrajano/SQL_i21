@@ -137,67 +137,34 @@ BEGIN
 			ELSE L.dblWeight
 			END AS dblWeight
 		,(
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN L.dblQty - T.dblQty
-						ELSE T.dblQty
-						END, 0))
+			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 			) AS dblReservedQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
 				THEN (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblQty - T.dblQty
-									ELSE T.dblQty
-									END, 0))
+						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 						)
 			ELSE (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
+					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
 					)
 			END AS dblReservedWeight
 		,L.dblQty - (
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN L.dblQty - T.dblQty
-						ELSE T.dblQty
-						END, 0))
+			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 			) AS dblAvailableQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
 				THEN L.dblQty - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblQty - T.dblQty
-									ELSE T.dblQty
-									END, 0))
+						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 						)
 			ELSE L.dblWeight - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
+					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
 					)
 			END AS dblAvailableWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 		AND UT.ysnAllowPick = 1
-	LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-		AND T.intTaskTypeId NOT IN (
-			5
-			,6
-			,8
-			,9
-			,10
-			,11
-			)
-		AND T.intTaskId <> @intTaskId
+	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0 and SR.intTransactionId<>@intOrderHeaderId
 	JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 		AND R.strInternalCode = 'STOCK'
 	LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -277,11 +244,7 @@ BEGIN
 											AND (
 												(
 													L.dblQty - (
-														SUM(ISNULL(CASE 
-																	WHEN T.intTaskTypeId = 13
-																		THEN L.dblQty - T.dblQty
-																	ELSE T.dblQty
-																	END, 0))
+														SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 														)
 													) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
 												)
@@ -335,17 +298,7 @@ BEGIN
 									ELSE L.dblWeight
 									END
 								) - (
-								SUM(ISNULL(CASE 
-											WHEN T.intTaskTypeId = 13
-												THEN (
-														CASE 
-															WHEN L.intWeightUOMId IS NULL
-																THEN L.dblQty
-															ELSE L.dblWeight
-															END
-														) - T.dblWeight
-											ELSE T.dblWeight
-											END, 0))
+								SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,IsNULL(L.intWeightUOMId,L.intItemUOMId), SR.dblQty), 0))
 								)
 							) - @dblRequiredWeight)
 			ELSE 0
@@ -372,67 +325,34 @@ BEGIN
 			ELSE L.dblWeight
 			END AS dblWeight
 		,(
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN L.dblQty - T.dblQty
-						ELSE T.dblQty
-						END, 0))
+			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 			) AS dblReservedQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
 				THEN (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblQty - T.dblQty
-									ELSE T.dblQty
-									END, 0))
+						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 						)
 			ELSE (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
+					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
 					)
 			END AS dblReservedWeight
 		,L.dblQty - (
-			SUM(ISNULL(CASE 
-						WHEN T.intTaskTypeId = 13
-							THEN L.dblQty - T.dblQty
-						ELSE T.dblQty
-						END, 0))
+			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 			) AS dblAvailableQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
 				THEN L.dblQty - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblQty - T.dblQty
-									ELSE T.dblQty
-									END, 0))
+						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 						)
 			ELSE L.dblWeight - (
-					SUM(ISNULL(CASE 
-								WHEN T.intTaskTypeId = 13
-									THEN L.dblWeight - T.dblWeight
-								ELSE T.dblWeight
-								END, 0))
+					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
 					)
 			END AS dblAvailableWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 		AND UT.ysnAllowPick = 1
-	LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-		AND T.intTaskTypeId NOT IN (
-			5
-			,6
-			,8
-			,9
-			,10
-			,11
-			)
-		AND T.intTaskId <> @intTaskId
+	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0 and SR.intTransactionId<>@intOrderHeaderId
 	JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
 		AND R.strInternalCode = 'STOCK'
 	LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -511,11 +431,7 @@ BEGIN
 											AND (
 												(
 													L.dblQty - (
-														SUM(ISNULL(CASE 
-																	WHEN T.intTaskTypeId = 13
-																		THEN L.dblQty - T.dblQty
-																	ELSE T.dblQty
-																	END, 0))
+														SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
 														)
 													) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
 												)
@@ -569,17 +485,7 @@ BEGIN
 									ELSE L.dblWeight
 									END
 								) - (
-								SUM(ISNULL(CASE 
-											WHEN T.intTaskTypeId = 13
-												THEN (
-														CASE 
-															WHEN L.intWeightUOMId IS NULL
-																THEN L.dblQty
-															ELSE L.dblWeight
-															END
-														) - T.dblWeight
-											ELSE T.dblWeight
-											END, 0))
+								SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,IsNULL(L.intWeightUOMId,L.intItemUOMId), SR.dblQty), 0))
 								)
 							) - @dblRequiredWeight)
 			ELSE 0

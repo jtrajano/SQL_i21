@@ -14,20 +14,8 @@ BEGIN
 		,T.dblPickQty AS dblTaskQty
 		,IUM.strUnitMeasure AS strQtyUOM
 		,T.intItemUOMId AS intQtyUOMId
-		,ISNULL((
-				SELECT SUM(ISNULL(T1.dblQty, 0))
-				FROM tblMFTask T1
-				WHERE T1.intLotId = T.intLotId
-					AND T1.intTaskId <> T.intTaskId
-				), 0) AS dblReservedQty
-		,(
-			(L.dblQty) - ISNULL((
-					SELECT SUM(ISNULL(T1.dblQty, 0))
-					FROM tblMFTask T1
-					WHERE T1.intLotId = T.intLotId
-						AND T1.intTaskId <> T.intTaskId
-					), 0)
-			) AS dblAvailableQty
+		,SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)) AS dblReservedQty
+		,(L.dblQty - SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblAvailableQty
 		,0.0 AS dblReservedWeight -- Not used in client
 		,0.0 AS dblAvailableWeight -- Not used in client
 		,T.intToStorageLocationId
@@ -40,5 +28,23 @@ BEGIN
 	JOIN tblICLot L ON L.intLotId = T.intLotId
 	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = T.intToStorageLocationId
+	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+		AND SR.ysnPosted = 0
+		AND SR.intTransactionId <> T.intOrderHeaderId
 	WHERE T.intTaskId = @intTaskId
+	GROUP BY T.intTaskId
+		,I.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,L.intLotId
+		,L.strLotNumber
+		,L.strLotAlias
+		,PL.strParentLotNumber
+		,SL.strName
+		,L.dblQty
+		,T.dblPickQty
+		,IUM.strUnitMeasure
+		,T.intItemUOMId
+		,T.intToStorageLocationId
+		,SL1.strName
 END
