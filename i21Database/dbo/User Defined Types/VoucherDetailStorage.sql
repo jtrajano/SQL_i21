@@ -2,6 +2,7 @@
 (
 	[intCustomerStorageId]		INT NULL,
 	[intScaleTicketId]			INT NULL,
+	[intInventoryReceiptItemId] INT NULL,
 	[intItemId]					INT	NOT NULL,
 	[intAccountId]				INT	NULL,
 	[dblQtyReceived]			DECIMAL(18, 6)	NOT NULL, 
