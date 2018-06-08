@@ -76,15 +76,25 @@ BEGIN TRY
 					BEGIN
 						SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 						IF @ysnPosted = 1
+						BEGIN
+							EXEC [dbo].[uspAPPostBill]
+							@post = 0
+							,@recap = 0
+							,@isBatch = 0
+							,@param = @intBillId
+							,@userId = @intUserId
+							,@success = @success OUTPUT
+							,@batchIdUsed = @success OUTPUT
+						END
+						IF ISNULL(@success, 0) = 0
+						BEGIN
+							SELECT @ErrorMessage = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+							IF ISNULL(@ErrorMessage, '') != ''
 							BEGIN
-								EXEC [dbo].[uspAPPostBill]
-								@post = 0
-								,@recap = 0
-								,@isBatch = 0
-								,@param = @intBillId
-								,@userId = @intUserId
-								,@success = @success OUTPUT
+								RAISERROR(@ErrorMessage, 11, 1);
+								RETURN;
 							END
+						END
 						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 					END

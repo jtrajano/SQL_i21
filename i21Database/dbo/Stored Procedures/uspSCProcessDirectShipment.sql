@@ -55,7 +55,7 @@ BEGIN TRY
 				, @dblMatchContractUnits = dblNetUnits
 			FROM vyuSCTicketScreenView where intTicketId = @intMatchTicketId 
 
-			IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination'
+			IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
 			BEGIN
 				UPDATE	MatchTicket SET
 					MatchTicket.dblGrossWeight = SC.dblGrossWeight
