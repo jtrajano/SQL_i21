@@ -36,7 +36,7 @@ RETURNS @returntable TABLE
     [dblCreditForeign]          NUMERIC (18, 6) NULL,
     [dblCreditReport]           NUMERIC (18, 6) NULL,
     [dblReportingRate]          NUMERIC (18, 6) NULL,
-    [dblForeignRate]            NUMERIC (18, 6) NULL,
+    [dblForeignRate]            NUMERIC (38, 20) NULL,
 	[strRateType]				NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
 )
 AS
@@ -107,7 +107,7 @@ BEGIN
 		,[strCode]						=	'AP'
 		,[strReference]					=	C.strVendorId
 		,[intCurrencyId]				=	P.intCurrencyId
-		,[dblExchangeRate]				=	1
+		,[dblExchangeRate]				=	P.dblExchangeRate
 		,[dtmDateEntered]				=	GETDATE()
 		,[dtmTransactionDate]			=	NULL
 		,[strJournalLineDescription]	=	'Posted Payment'
@@ -218,7 +218,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Posted Gain/Loss',
@@ -286,7 +286,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	1,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Withheld',

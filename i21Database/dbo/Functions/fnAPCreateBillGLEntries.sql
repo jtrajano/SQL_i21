@@ -109,7 +109,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
