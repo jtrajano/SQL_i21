@@ -6346,6 +6346,7 @@
     <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
