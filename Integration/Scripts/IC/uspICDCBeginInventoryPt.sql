@@ -164,7 +164,7 @@ BEGIN
 					--created duplicate storage location entries. converted into an inline sub query.	
 					--left join tblICStorageLocation sl 
 					--	on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
-			WHERE	(ptitm_on_hand > 0 OR (ptitm_on_hand < 0 AND il.intAllowNegativeInventory))
+			WHERE	(ptitm_on_hand > 0 OR (ptitm_on_hand < 0 AND il.intAllowNegativeInventory = 1))
 			AND ptitm_loc_no = @adjLoc
 			AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
 
