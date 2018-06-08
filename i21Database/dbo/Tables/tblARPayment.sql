@@ -131,8 +131,8 @@ BEGIN
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
 	SELECT @ysnPosted = ysnPosted FROM deleted
 	SELECT @ysnPostedNew = ysnPosted FROM inserted
-		
-	IF(@ysnPosted = 1 and @ysnPostedNew != 0)
+			
+	IF(@ysnPosted = 1 and @ysnPostedNew = 0)
 		RAISERROR('Cannot update posted payment',16,1)
 	ELSE
 		UPDATE p
