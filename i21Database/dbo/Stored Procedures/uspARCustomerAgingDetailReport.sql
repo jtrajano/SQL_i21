@@ -265,6 +265,32 @@ FROM tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
 
-SELECT AGING.* FROM tblARCustomerAgingStagingTable AGING
-INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
-WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
+IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
+	BEGIN
+		INSERT INTO tblARCustomerAgingStagingTable (
+			  strCompanyName
+			, strCompanyAddress
+			, dtmAsOfDate
+			, intEntityUserId
+			, strAgingType
+		)
+		SELECT strCompanyName		= COMPANY.strCompanyName
+			 , strCompanyAddress	= COMPANY.strCompanyAddress
+			 , dtmAsOfDate			= @dtmDateTo
+			 , intEntityUserId		= @intEntityUserId
+			 , strAgingType			= 'Detail'
+		FROM (
+			SELECT TOP 1 strCompanyName
+					   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+			FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+		) COMPANY
+
+		SELECT * FROM tblARCustomerAgingStagingTable AGING
+		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
+	END
+ELSE
+	BEGIN
+		SELECT AGING.* FROM tblARCustomerAgingStagingTable AGING
+		INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
+	END
