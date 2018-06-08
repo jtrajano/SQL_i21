@@ -38,7 +38,7 @@ AS
 				ARID.intItemUOMId,
 				ARI.intCompanyLocationId,
 				ARID.intTicketId,
-				ARI.dtmDate,
+				ST.dtmTicketDateTime,
 				GETDATE(),
 				ARID.intSubCurrencyId,
 				ITM.intCommodityId,
@@ -55,6 +55,8 @@ AS
 				on ITM.intItemId = ARID.intItemId
 			left join tblICInventoryTransaction ICT
 				on ARID.intInvoiceDetailId = ICT.intTransactionId
+			left join (select intTicketId, dtmTicketDateTime from tblSCTicket) ST
+				on ST.intTicketId = ARID.intTicketId
 
 		END
 		ELSE
@@ -87,7 +89,7 @@ AS
 				ATD.intItemUOMId,
 				ATD.intCompanyLocationId,
 				ATD.intTicketId,
-				NULL,
+				ST.dtmTicketDateTime,
 				GETDATE(),
 				ATD.intCurrencyId,
 				CASE WHEN ATD.intItemId IS NOT NULL THEN ITM.intCommodityId ELSE NULL END,
@@ -106,6 +108,8 @@ AS
 				on ITM.intItemId = ARID.intItemId
 			left join tblICInventoryTransaction ICT
 				on ARID.intInvoiceDetailId = ICT.intTransactionId
+			left join (select intTicketId, dtmTicketDateTime from tblSCTicket) ST
+				on ST.intTicketId = ARID.intTicketId
 			WHERE ATD.dblQtyShipped				<> ARID.dblQtyShipped OR
 				ATD.dblPrice					<> ARID.dblPrice OR
 				ATD.intItemId					<> ARID.intItemId OR
@@ -144,7 +148,7 @@ AS
 				ARID.intItemUOMId,
 				ARI.intCompanyLocationId,
 				ARID.intTicketId,
-				ARI.dtmDate,
+				ST.dtmTicketDateTime,
 				GETDATE(),
 				ARID.intSubCurrencyId,
 				ITM.intCommodityId,
@@ -162,6 +166,8 @@ AS
 				on ITM.intItemId = ARID.intItemId
 			left join tblICInventoryTransaction ICT
 				on ARID.intInvoiceDetailId = ICT.intTransactionId
+			left join (select intTicketId, dtmTicketDateTime from tblSCTicket) ST
+				on ST.intTicketId = ARID.intTicketId
 		/*INSERT INTO tblARInvoiceTransactionHistory
 		(
 			intInvoiceId

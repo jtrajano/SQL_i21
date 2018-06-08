@@ -15,7 +15,7 @@
 		,A.dtmTransactionDate
 		,A.intCurrencyId
 		,B.strInvoiceNumber
-
+		,strTicketNumber = ST.strTicketNumber
 		,strItemNo = C.strItemNo
 		,strUnitMeasure = C.strUnitMeasure
 		,strLocationName = D.strLocationName
@@ -37,3 +37,5 @@
 		ON A.intCurrencyId = E.intCurrencyID
 	LEFT JOIN (select intCommodityId, strCommodityCode from tblICCommodity with(nolock)) CM
 		on CM.intCommodityId = A.intCommodityId
+	left join (select intTicketId, dtmTicketDateTime, strTicketNumber from tblSCTicket) ST
+		on ST.intTicketId = A.intTicketId
