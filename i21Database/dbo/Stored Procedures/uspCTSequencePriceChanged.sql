@@ -45,17 +45,25 @@ BEGIN TRY
 			@prePayId						Id,
 			@intTicketId					INT,
 			@intInvoiceDetailId				INT,
-			@ysnInvoicePosted				BIT
+			@ysnInvoicePosted				BIT,
+			@intSeqPriceUOMId				INT,
+			@intCommodityId					INT,
+			@intStockUOMId					INT,
+			@intItemId						INT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
 			@intContractHeaderId	=	intContractHeaderId,
-			@intCompanyLocationId	=	intCompanyLocationId
+			@intCompanyLocationId	=	intCompanyLocationId,
+			@intItemId				=	intItemId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
 	
-	SELECT @dblCashPrice = dblSeqPrice FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
+	SELECT @dblCashPrice = dblSeqPrice,@intSeqPriceUOMId = intSeqPriceUOMId FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
+	SELECT @intCommodityId = intCommodityId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intStockUOMId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND ysnStockUOM = 1
+	SELECT @intStockUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intStockUOMId
 		
 	SELECT	@intEntityId		=	intEntityId,
 			@intContractTypeId	=	intContractTypeId
@@ -83,10 +91,16 @@ BEGIN TRY
 			EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
 		END
 	END
-	/*
+	
 	IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
+	IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
+	BEGIN
+		SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
+		EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
+	END
+	/*
 	IF @intContractTypeId = 1 
 	BEGIN
 		IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
