@@ -2858,12 +2858,6 @@ IF @recap = 0
 					intBillId IN (SELECT intBillId FROM @ARReceivablePostData)
 					)
 
-			-- Update the posted flag in the transaction table
-			UPDATE tblARPayment
-			SET		ysnPosted = 1
-					--,intConcurrencyId += 1 
-			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -3210,6 +3204,7 @@ IF @recap = 0
 			SET strBatchId		= CASE WHEN @post = 1 THEN @batchIdUsed ELSE NULL END
 			  , dtmBatchDate	= CASE WHEN @post = 1 THEN @PostDate ELSE NULL END
 			  , intPostedById	= CASE WHEN @post = 1 THEN @UserEntityID ELSE NULL END
+			  , ysnPosted       = @post
 			WHERE intPaymentId IN (SELECT DISTINCT intPaymentId FROM @ARReceivablePostData)
 			
 		END	
