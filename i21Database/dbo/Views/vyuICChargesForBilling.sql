@@ -153,6 +153,10 @@ WHERE	ReceiptCharge.ysnAccrue = 1
 				ISNULL(ReceiptCharge.dblAmountBilled, 0) = 0 
 				AND ROUND(ReceiptCharge.dblAmount, 6) = 0 
 			)
+			OR (
+				SIGN(ReceiptCharge.dblAmount) = -1
+				AND ABS(ISNULL(ReceiptCharge.dblAmountBilled, 0)) < ABS(ROUND(ReceiptCharge.dblAmount, 6))
+			)
 		)
 
 -- Query for 'Price' Other Charges. 
