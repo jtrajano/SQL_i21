@@ -12,6 +12,7 @@ SET XACT_ABORT ON;
 SET ANSI_WARNINGS OFF;
 
 	--delete from tblCRMSalesRepSummaryResult where intCreatedDate < convert(int, convert(nvarchar(8), DATEADD(day,-1,getdate()), 112)) or strFilterKey = @strIdentifier;
+	exec('uspCRMGetProcessedOpportunityQuote');
 
 	with sales as
 	(
