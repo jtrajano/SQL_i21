@@ -6743,6 +6743,7 @@
     <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCount.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDebitNoteOtherChargesReport.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
+    <Build Include="dbo\Functions\fnRKGetLatestBasisPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
