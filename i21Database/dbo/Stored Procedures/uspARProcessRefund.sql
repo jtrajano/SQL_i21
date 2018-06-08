@@ -1,1006 +1,245 @@
 CREATE PROCEDURE [dbo].[uspARProcessRefund]
-	@batchId			AS NVARCHAR(40)		= NULL
-	,@post				AS BIT				= 0
-	,@recap				AS BIT				= 0
-	,@param				AS NVARCHAR(MAX)	= NULL
-	,@userId			AS INT				= 1
-	,@beginDate			AS DATE				= NULL
-	,@endDate			AS DATE				= NULL
-	,@beginTransaction	AS NVARCHAR(50)		= NULL
-	,@endTransaction	AS NVARCHAR(50)		= NULL
-	,@exclude			AS NVARCHAR(MAX)	= NULL
-	,@successfulCount	AS INT				= 0 OUTPUT
-	,@invalidCount		AS INT				= 0 OUTPUT
-	,@success			AS BIT				= 0 OUTPUT
-	,@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
-	,@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
-	,@transType			AS NVARCHAR(25)		= 'all'
-	,@accrueLicense		AS BIT				= 0
-	,@raiseError		AS BIT				= 0
+	  @intInvoiceId			INT
+	, @intUserId			INT
+	, @intNewTransactionId	INT			  = NULL OUTPUT
+	, @strErrorMessage		NVARCHAR(MAX) = NULL OUTPUT
 AS
-  
-SET QUOTED_IDENTIFIER OFF  
-SET ANSI_NULLS ON  
-SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF  
 
-IF @raiseError = 1
-	SET XACT_ABORT ON
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
-DECLARE @totalRecords INT = 0
-        ,@totalInvalid INT = 0 
-        ,@PostInvoiceData AS [InvoicePostingTable]
-DECLARE @InvalidInvoiceData AS TABLE( -- Invalid Entries for CPP or CM header
-            [intInvoiceId]				INT				NOT NULL
-            ,[strInvoiceNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-            ,[strTransactionType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-            ,[intInvoiceDetailId]		INT				NULL
-            ,[intItemId]				INT				NULL
-            ,[strBatchId]				NVARCHAR(40)	COLLATE Latin1_General_CI_AS	NULL
-            ,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
-        )
-DECLARE @InvalidInvoiceDataHeaderCashRefund AS TABLE( -- Invalid Entries for Generated Cash refund
-            [intInvoiceId]				INT				NOT NULL
-            ,[strInvoiceNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-            ,[strTransactionType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
-            ,[intInvoiceDetailId]		INT				NULL
-            ,[intItemId]				INT				NULL
-            ,[strBatchId]				NVARCHAR(40)	COLLATE Latin1_General_CI_AS	NULL
-            ,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
-        )
-DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted'
-        ,@MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
-        ,@SCREEN_NAME NVARCHAR(25) = 'Invoice'
-        ,@CODE NVARCHAR(25) = 'AR'
-        ,@POSTDESC NVARCHAR(10) = 'Refund Processed '
-        ,@UserEntityID				INT
-        ,@DiscountAccountId			INT
-        ,@DeferredRevenueAccountId	INT
-        ,@AllowOtherUserToPost		BIT
-        ,@DefaultCurrencyId			INT
-        ,@HasImpactForProvisional   BIT
-        ,@InitTranCount				INT
-        ,@CurrentTranCount			INT
-        ,@Savepoint					NVARCHAR(32)
-        ,@CurrentSavepoint			NVARCHAR(32)
-        ,@DefaultCurrencyExchangeRateTypeId INT
-		
-        ,@ErrorMessage NVARCHAR(MAX)
-        ,@ZeroDecimal DECIMAL(18,6)
+DECLARE @tblInvoiceEntries		InvoiceIntegrationStagingTable
+DECLARE	@tblTaxEntries			LineItemTaxDetailStagingTable
+DECLARE @tblInvoicesCreated		Id
+DECLARE @dblZeroDecimal			NUMERIC(18,6)	= 0
+	  , @dblInvoiceTotal		NUMERIC(18,6)	= 0
+	  , @dblAmountDue			NUMERIC(18,6)	= 0
+	  , @dtmDateOnly			DATETIME		= CAST(GETDATE() AS DATE)
+	  , @strTransactionType		NVARCHAR(100)	= NULL
+	  , @strInvoiceNumber		NVARCHAR(100)	= NULL
+	  , @strCreatedInvoices		NVARCHAR(100)	= NULL
+	  , @ysnPosted				BIT				= 0
+	  , @ysnRefundProcessed		BIT				= 0
+	  , @ysnPaid				BIT				= 0
+	  , @ysnSuccess				BIT				= 0
+	  , @intAccountId			INT				= NULL
+	  , @intCompanyLocationId	INT				= NULL
+	  , @intInvoiceDetailId		INT				= NULL
+	  , @intEntityCustomerId	INT				= NULL
+	  , @intNewInvoiceId		INT				= NULL
 
-SET @ZeroDecimal = 0.000000	
-SET @InitTranCount = @@TRANCOUNT
-SET @Savepoint = SUBSTRING(('ARProcessRefund' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+SELECT @strTransactionType		= strTransactionType
+	 , @strInvoiceNumber		= strInvoiceNumber
+	 , @dblInvoiceTotal			= dblInvoiceTotal
+	 , @dblAmountDue			= dblAmountDue
+	 , @ysnPosted				= ysnPosted
+	 , @ysnRefundProcessed		= ysnRefundProcessed
+	 , @ysnPaid					= ysnPaid
+	 , @intCompanyLocationId	= intCompanyLocationId
+	 , @intInvoiceDetailId		= DETAIL.intInvoiceDetailId
+	 , @intEntityCustomerId		= intEntityCustomerId
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+OUTER APPLY (
+	SELECT TOP 1 intInvoiceDetailId
+	FROM tblARInvoiceDetail ID
+	WHERE ID.intInvoiceId = I.intInvoiceId
+) DETAIL
+WHERE I.intInvoiceId = @intInvoiceId
 
-IF ISNULL(@raiseError,0) = 0	
-BEGIN
-	IF @InitTranCount = 0
-		BEGIN TRANSACTION
-	ELSE
-		SAVE TRANSACTION @Savepoint
-END
-
-/* SET BATCH ID*/
-IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0)
-	EXEC dbo.uspSMGetStartingNumber 3, @batchId OUT
-
-SET @batchIdUsed = @batchId
-/* END SET BATCH ID*/
-
-
--- GET TRANSACTION TO POST
-
-IF (@transType IS NULL OR RTRIM(LTRIM(@transType)) = '')
-	SET @transType = 'all'
-
-IF (@param IS NOT NULL) 
+--VALIDATIONS
+IF ISNULL(@intUserId, 0) = 0
 	BEGIN
-		IF(@param = 'all')
-		BEGIN
-			INSERT INTO @PostInvoiceData(
-				 [intInvoiceId]
-				,[strInvoiceNumber]
-				,[strTransactionType]
-				,[strType]
-				,[dtmDate]
-				,[dtmPostDate]
-				,[dtmShipDate]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intAccountId]
-				,[intDeferredRevenueAccountId]
-				,[intCurrencyId]
-				,[intTermId]
-				,[dblInvoiceTotal]
-				,[dblShipping]
-				,[dblTax]
-				,[strImportFormat]
-				,[intOriginalInvoiceId]
-				,[strInvoiceOriginId]
-				,[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]
-				,[intLoadId]
-				,[intFreightTermId]
-				,[strActualCostId]
-				,[intPeriodsToAccrue]
-				,[ysnAccrueLicense]
-				,[intSplitId]
-				,[dblSplitPercent]				
-				,[ysnSplitted]
-				,[ysnImpactInventory]
-				,[intEntityId]
-				,[ysnPost]
-				,[intInvoiceDetailId]
-				,[intItemId]
-				,[intItemUOMId]
-				,[intDiscountAccountId]
-				,[intCustomerStorageId]
-				,[intStorageScheduleTypeId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQuantity]
-				,[dblMaxQuantity]
-				,[strOptionType]
-				,[strSourceType]
-				,[strBatchId]
-				,[strPostingMessage]
-				,[intUserId]
-				,[ysnAllowOtherUserToPost]
-				,[ysnImpactForProvisional]
-			)
-			 SELECT
-				 [intInvoiceId]					= ARI.[intInvoiceId]
-				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
-				,[strTransactionType]			= ARI.[strTransactionType]
-				,[strType]						= ARI.[strType]
-				,[dtmDate]						= ARI.[dtmDate]
-				,[dtmPostDate]					= ARI.[dtmPostDate]
-				,[dtmShipDate]					= ARI.[dtmShipDate]
-				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
-				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
-				,[intAccountId]					= ARI.[intAccountId]
-				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
-				,[intCurrencyId]				= ARI.[intCurrencyId]
-				,[intTermId]					= ARI.[intTermId]
-				,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
-				,[dblShipping]					= ARI.[dblShipping]
-				,[dblTax]						= ARI.[dblTax]
-				,[strImportFormat]				= ARI.[strImportFormat]
-				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
-				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
-				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
-				,[intLoadId]					= ARI.[intLoadId]
-				,[intFreightTermId]				= ARI.[intFreightTermId]
-				,[strActualCostId]				= ARI.[strActualCostId]
-				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
-				,[ysnAccrueLicense]				= @accrueLicense
-				,[intSplitId]					= ARI.[intSplitId]
-				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
-				,[ysnSplitted]					= ARI.[ysnSplitted]
-				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
-				,[intEntityId]					= ARI.[intEntityId]
-				,[ysnPost]						= @post
-				,[intInvoiceDetailId]			= NULL
-				,[intItemId]					= NULL
-				,[intItemUOMId]					= NULL
-				,[intDiscountAccountId]			= @DiscountAccountId
-				,[intCustomerStorageId]			= NULL
-				,[intStorageScheduleTypeId]		= NULL
-				,[intSubLocationId]				= NULL
-				,[intStorageLocationId]			= NULL
-				,[dblQuantity]					= @ZeroDecimal
-				,[dblMaxQuantity]				= @ZeroDecimal
-				,[strOptionType]				= NULL
-				,[strSourceType]				= NULL
-				,[strBatchId]					= @batchIdUsed
-				,[strPostingMessage]			= ''
-				,[intUserId]					= @UserEntityID
-				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
-				,[ysnImpactForProvisional]		= @HasImpactForProvisional
-			FROM
-				dbo.tblARInvoice ARI WITH (NOLOCK) 
-			WHERE
-				ARI.[ysnPosted] = 0 AND (ARI.[strTransactionType] = @transType OR @transType = 'all')
-				AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
-		END
-		ELSE
-		BEGIN
-			INSERT INTO @PostInvoiceData(
-				 [intInvoiceId]
-				,[strInvoiceNumber]
-				,[strTransactionType]
-				,[strType]
-				,[dtmDate]
-				,[dtmPostDate]
-				,[dtmShipDate]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intAccountId]
-				,[intDeferredRevenueAccountId]
-				,[intCurrencyId]
-				,[intTermId]
-				,[dblInvoiceTotal]
-				,[dblShipping]
-				,[dblTax]
-				,[strImportFormat]
-				,[intOriginalInvoiceId]
-				,[strInvoiceOriginId]
-				,[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]
-				,[intLoadId]
-				,[intFreightTermId]
-				,[strActualCostId]
-				,[intPeriodsToAccrue]
-				,[ysnAccrueLicense]
-				,[intSplitId]
-				,[dblSplitPercent]				
-				,[ysnSplitted]
-				,[ysnImpactInventory]
-				,[intEntityId]
-				,[ysnPost]
-				,[intInvoiceDetailId]
-				,[intItemId]
-				,[intItemUOMId]
-				,[intDiscountAccountId]
-				,[intCustomerStorageId]
-				,[intStorageScheduleTypeId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQuantity]
-				,[dblMaxQuantity]
-				,[strOptionType]
-				,[strSourceType]
-				,[strBatchId]
-				,[strPostingMessage]
-				,[intUserId]
-				,[ysnAllowOtherUserToPost]
-				,[ysnImpactForProvisional]
-			)
-			 SELECT
-				 [intInvoiceId]					= ARI.[intInvoiceId]
-				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
-				,[strTransactionType]			= ARI.[strTransactionType]
-				,[strType]						= ARI.[strType]
-				,[dtmDate]						= ARI.[dtmDate]
-				,[dtmPostDate]					= ARI.[dtmPostDate]
-				,[dtmShipDate]					= ARI.[dtmShipDate]
-				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
-				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
-				,[intAccountId]					= ARI.[intAccountId]
-				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
-				,[intCurrencyId]				= ARI.[intCurrencyId]
-				,[intTermId]					= ARI.[intTermId]
-				,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
-				,[dblShipping]					= ARI.[dblShipping]
-				,[dblTax]						= ARI.[dblTax]
-				,[strImportFormat]				= ARI.[strImportFormat]
-				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
-				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
-				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
-				,[intLoadId]					= ARI.[intLoadId]
-				,[intFreightTermId]				= ARI.[intFreightTermId]
-				,[strActualCostId]				= ARI.[strActualCostId]
-				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
-				,[ysnAccrueLicense]				= @accrueLicense
-				,[intSplitId]					= ARI.[intSplitId]
-				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
-				,[ysnSplitted]					= ARI.[ysnSplitted]
-				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
-				,[intEntityId]					= ARI.[intEntityId]
-				,[ysnPost]						= @post
-				,[intInvoiceDetailId]			= NULL
-				,[intItemId]					= NULL
-				,[intItemUOMId]					= NULL
-				,[intDiscountAccountId]			= @DiscountAccountId
-				,[intCustomerStorageId]			= NULL
-				,[intStorageScheduleTypeId]		= NULL
-				,[intSubLocationId]				= NULL
-				,[intStorageLocationId]			= NULL
-				,[dblQuantity]					= @ZeroDecimal
-				,[dblMaxQuantity]				= @ZeroDecimal
-				,[strOptionType]				= NULL
-				,[strSourceType]				= NULL
-				,[strBatchId]					= @batchIdUsed
-				,[strPostingMessage]			= ''
-				,[intUserId]					= @UserEntityID
-				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
-				,[ysnImpactForProvisional]		= @HasImpactForProvisional
-			FROM
-				dbo.tblARInvoice ARI WITH (NOLOCK) 
-			WHERE
-				EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@param) DV WHERE DV.[intID] = ARI.[intInvoiceId])
-				AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
-		END
+		SET @strErrorMessage = 'User Id is required when processing Refund.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
 	END
 
-IF(@beginDate IS NOT NULL)
+IF ISNULL(@strTransactionType, '') <> 'Credit Memo' AND ISNULL(@strTransactionType, '') <> 'Customer Prepayment'
 	BEGIN
-		INSERT INTO @PostInvoiceData(
-				 [intInvoiceId]
-				,[strInvoiceNumber]
-				,[strTransactionType]
-				,[strType]
-				,[dtmDate]
-				,[dtmPostDate]
-				,[dtmShipDate]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intAccountId]
-				,[intDeferredRevenueAccountId]
-				,[intCurrencyId]
-				,[intTermId]
-				,[dblInvoiceTotal]
-				,[dblShipping]
-				,[dblTax]
-				,[strImportFormat]
-				,[intOriginalInvoiceId]
-				,[strInvoiceOriginId]
-				,[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]
-				,[intLoadId]
-				,[intFreightTermId]
-				,[strActualCostId]
-				,[intPeriodsToAccrue]
-				,[ysnAccrueLicense]
-				,[intSplitId]
-				,[dblSplitPercent]				
-				,[ysnSplitted]
-				,[ysnImpactInventory]
-				,[intEntityId]
-				,[ysnPost]
-				,[intInvoiceDetailId]
-				,[intItemId]
-				,[intItemUOMId]
-				,[intDiscountAccountId]
-				,[intCustomerStorageId]
-				,[intStorageScheduleTypeId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQuantity]
-				,[dblMaxQuantity]
-				,[strOptionType]
-				,[strSourceType]
-				,[strBatchId]
-				,[strPostingMessage]
-				,[intUserId]
-				,[ysnAllowOtherUserToPost]
-				,[ysnImpactForProvisional]
-			)
-			 SELECT
-				 [intInvoiceId]					= ARI.[intInvoiceId]
-				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
-				,[strTransactionType]			= ARI.[strTransactionType]
-				,[strType]						= ARI.[strType]
-				,[dtmDate]						= ARI.[dtmDate]
-				,[dtmPostDate]					= ARI.[dtmPostDate]
-				,[dtmShipDate]					= ARI.[dtmShipDate]
-				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
-				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
-				,[intAccountId]					= ARI.[intAccountId]
-				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
-				,[intCurrencyId]				= ARI.[intCurrencyId]
-				,[intTermId]					= ARI.[intTermId]
-				,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
-				,[dblShipping]					= ARI.[dblShipping]
-				,[dblTax]						= ARI.[dblTax]
-				,[strImportFormat]				= ARI.[strImportFormat]
-				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
-				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
-				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
-				,[intLoadId]					= ARI.[intLoadId]
-				,[intFreightTermId]				= ARI.[intFreightTermId]
-				,[strActualCostId]				= ARI.[strActualCostId]
-				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
-				,[ysnAccrueLicense]				= @accrueLicense
-				,[intSplitId]					= ARI.[intSplitId]
-				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
-				,[ysnSplitted]					= ARI.[ysnSplitted]
-				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
-				,[intEntityId]					= ARI.[intEntityId]
-				,[ysnPost]						= @post
-				,[intInvoiceDetailId]			= NULL
-				,[intItemId]					= NULL
-				,[intItemUOMId]					= NULL
-				,[intDiscountAccountId]			= @DiscountAccountId
-				,[intCustomerStorageId]			= NULL
-				,[intStorageScheduleTypeId]		= NULL
-				,[intSubLocationId]				= NULL
-				,[intStorageLocationId]			= NULL
-				,[dblQuantity]					= @ZeroDecimal
-				,[dblMaxQuantity]				= @ZeroDecimal
-				,[strOptionType]				= NULL
-				,[strSourceType]				= NULL
-				,[strBatchId]					= @batchIdUsed
-				,[strPostingMessage]			= ''
-				,[intUserId]					= @UserEntityID
-				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
-				,[ysnImpactForProvisional]		= @HasImpactForProvisional
-			FROM
-				dbo.tblARInvoice ARI WITH (NOLOCK) 
-			WHERE
-				DATEADD(dd, DATEDIFF(dd, 0, ARI.[dtmDate]), 0) BETWEEN @beginDate AND @endDate
-				AND (ARI.[strTransactionType] = @transType OR @transType = 'all')
-				AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+		SET @strErrorMessage = ISNULL(@strTransactionType, '') + ' is not valid for processing Refund. Only Credit Memo or Customer Prepayment is allowed.'
+		RAISERROR(@strErrorMessage, 16, 1)  
+		RETURN 0;
 	END
 
-IF(@beginTransaction IS NOT NULL)
+IF ISNULL(@ysnPosted, 0) = 0
 	BEGIN
-		INSERT INTO @PostInvoiceData(
-				 [intInvoiceId]
-				,[strInvoiceNumber]
-				,[strTransactionType]
-				,[strType]
-				,[dtmDate]
-				,[dtmPostDate]
-				,[dtmShipDate]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intAccountId]
-				,[intDeferredRevenueAccountId]
-				,[intCurrencyId]
-				,[intTermId]
-				,[dblInvoiceTotal]
-				,[dblShipping]
-				,[dblTax]
-				,[strImportFormat]
-				,[intOriginalInvoiceId]
-				,[strInvoiceOriginId]
-				,[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]
-				,[intLoadId]
-				,[intFreightTermId]
-				,[strActualCostId]
-				,[intPeriodsToAccrue]
-				,[ysnAccrueLicense]
-				,[intSplitId]
-				,[dblSplitPercent]				
-				,[ysnSplitted]
-				,[ysnImpactInventory]
-				,[intEntityId]
-				,[ysnPost]
-				,[intInvoiceDetailId]
-				,[intItemId]
-				,[intItemUOMId]
-				,[intDiscountAccountId]
-				,[intCustomerStorageId]
-				,[intStorageScheduleTypeId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQuantity]
-				,[dblMaxQuantity]
-				,[strOptionType]
-				,[strSourceType]
-				,[strBatchId]
-				,[strPostingMessage]
-				,[intUserId]
-				,[ysnAllowOtherUserToPost]
-				,[ysnImpactForProvisional]
-			)
-			 SELECT
-				 [intInvoiceId]					= ARI.[intInvoiceId]
-				,[strInvoiceNumber]				= ARI.[strInvoiceNumber]
-				,[strTransactionType]			= ARI.[strTransactionType]
-				,[strType]						= ARI.[strType]
-				,[dtmDate]						= ARI.[dtmDate]
-				,[dtmPostDate]					= ARI.[dtmPostDate]
-				,[dtmShipDate]					= ARI.[dtmShipDate]
-				,[intEntityCustomerId]			= ARI.[intEntityCustomerId]
-				,[intCompanyLocationId]			= ARI.[intCompanyLocationId]
-				,[intAccountId]					= ARI.[intAccountId]
-				,[intDeferredRevenueAccountId]	= @DeferredRevenueAccountId
-				,[intCurrencyId]				= ARI.[intCurrencyId]
-				,[intTermId]					= ARI.[intTermId]
-				,[dblInvoiceTotal]				= ARI.[dblInvoiceTotal]
-				,[dblShipping]					= ARI.[dblShipping]
-				,[dblTax]						= ARI.[dblTax]
-				,[strImportFormat]				= ARI.[strImportFormat]
-				,[intOriginalInvoiceId]			= ARI.[intOriginalInvoiceId]
-				,[strInvoiceOriginId]			= ARI.[strInvoiceOriginId]
-				,[intDistributionHeaderId]		= ARI.[intDistributionHeaderId]
-				,[intLoadDistributionHeaderId]	= ARI.[intLoadDistributionHeaderId]
-				,[intLoadId]					= ARI.[intLoadId]
-				,[intFreightTermId]				= ARI.[intFreightTermId]
-				,[strActualCostId]				= ARI.[strActualCostId]
-				,[intPeriodsToAccrue]			= ARI.[intPeriodsToAccrue]
-				,[ysnAccrueLicense]				= @accrueLicense
-				,[intSplitId]					= ARI.[intSplitId]
-				,[dblSplitPercent]				= ARI.[dblSplitPercent]			
-				,[ysnSplitted]					= ARI.[ysnSplitted]
-				,[ysnImpactInventory]			= ARI.[ysnImpactInventory]
-				,[intEntityId]					= ARI.[intEntityId]
-				,[ysnPost]						= @post
-				,[intInvoiceDetailId]			= NULL
-				,[intItemId]					= NULL
-				,[intItemUOMId]					= NULL
-				,[intDiscountAccountId]			= @DiscountAccountId
-				,[intCustomerStorageId]			= NULL
-				,[intStorageScheduleTypeId]		= NULL
-				,[intSubLocationId]				= NULL
-				,[intStorageLocationId]			= NULL
-				,[dblQuantity]					= @ZeroDecimal
-				,[dblMaxQuantity]				= @ZeroDecimal
-				,[strOptionType]				= NULL
-				,[strSourceType]				= NULL
-				,[strBatchId]					= @batchIdUsed
-				,[strPostingMessage]			= ''
-				,[intUserId]					= @UserEntityID
-				,[ysnAllowOtherUserToPost]		= @AllowOtherUserToPost
-				,[ysnImpactForProvisional]		= @HasImpactForProvisional
-			FROM
-				dbo.tblARInvoice ARI WITH (NOLOCK) 
-			WHERE
-				ARI.[intInvoiceId] BETWEEN @beginTransaction AND @endTransaction
-				AND (ARI.[strTransactionType] = @transType OR @transType = 'all')
-				AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+		SET @strErrorMessage = ISNULL(@strInvoiceNumber, '') + ' is not yet Posted.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
 	END
 
--- VALIDATION
+IF ISNULL(@ysnRefundProcessed, 0) = 1
+	BEGIN
+		SET @strErrorMessage = 'This transaction was already Processed to Refund.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
+	END
 
-    INSERT INTO @InvalidInvoiceData([intInvoiceId],[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
-    SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-			,[intItemId]			= I.[intItemId] 
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= I.strTransactionType + ': ' + I.strInvoiceNumber + ' transaction is not yet posted.'
-    FROM @PostInvoiceData I
-    INNER JOIN 
-        (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice WITH (NOLOCK)) ARI
-            ON I.[intInvoiceId] = ARI.[intInvoiceId]
-    WHERE  
-        ARI.[ysnPosted] = 0
+IF ISNULL(@ysnPaid, 0) = 1
+	BEGIN
+		SET @strErrorMessage = 'This transaction was already Paid.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
+	END
 
-	INSERT INTO @InvalidInvoiceData([intInvoiceId],[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
+IF ISNULL(@intCompanyLocationId, 0) = 0
+	BEGIN
+		SET @strErrorMessage = 'Company Location is required when Processing Refund.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
+	END
+
+EXEC dbo.uspARGetDefaultAccount @strTransactionType		= 'Cash Refund'
+							  , @intCompanyLocationId	= @intCompanyLocationId
+							  , @intAccountId			= @intAccountId OUT
+
+IF ISNULL(@intAccountId, 0) = 0
+	BEGIN
+		SET @strErrorMessage = 'Default AP Account was not set in Company Location.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
+	END
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM vyuEMEntityType WHERE Customer = 1 AND Vendor = 1 AND intEntityId = @intEntityCustomerId)
+	BEGIN
+		SET @strErrorMessage = 'Customer should be a vendor too.'
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
+	END
+
+--CREATE CASH REFUND
+INSERT INTO @tblInvoiceEntries (
+	 [strSourceTransaction]
+	,[strTransactionType]
+	,[intSourceId]
+	,[strSourceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intAccountId]
+	,[dtmDate]
+	,[dtmPostDate]
+	,[intEntityId]
+	,[ysnPost]
+	,[intItemId]
+	,[ysnInventory]
+	,[strItemDescription]
+	,[intOrderUOMId]
+	,[dblQtyOrdered]
+	,[intItemUOMId]
+	,[dblQtyShipped]
+	,[dblPrice]
+	,[ysnRefreshPrice]
+	,[ysnRecomputeTax]
+)
 SELECT
-			[intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Refund for ' + I.strTransactionType + ': ' + I.strInvoiceNumber + ' already processed.'
-FROM @PostInvoiceData I
-INNER JOIN 
-    (SELECT [intInvoiceId], [ysnPosted], [ysnRefundProcessed] FROM tblARInvoice WITH (NOLOCK)) ARI
-        ON I.[intInvoiceId] = ARI.[intInvoiceId] 
-WHERE  
-    ARI.[ysnRefundProcessed] = 1
+	 [strSourceTransaction]				= 'Direct'
+	,[strTransactionType]				= 'Cash Refund'
+	,[intSourceId]						= I.intInvoiceId
+	,[strSourceId]						= I.strInvoiceNumber
+	,[intEntityCustomerId]				= I.intEntityCustomerId
+	,[intCompanyLocationId]				= I.intCompanyLocationId
+	,[intCurrencyId]					= I.intCurrencyId
+	,[intAccountId]						= @intAccountId	
+	,[dtmDate]							= @dtmDateOnly
+	,[dtmPostDate]						= @dtmDateOnly
+	,[intEntityId]						= @intUserId
+	,[ysnPost]							= 0
+	,[intItemId]						= NULL
+	,[ysnInventory]						= 0
+	,[strItemDescription]				= 'Cash Refund from: ' + I.strInvoiceNumber
+	,[intOrderUOMId]					= NULL
+	,[dblQtyOrdered]					= NULL
+	,[intItemUOMId]						= NULL
+	,[dblQtyShipped]					= 1
+	,[dblPrice]							= I.dblAmountDue
+	,[ysnRefreshPrice]					= 0
+	,[ysnRecomputeTax]					= 0
+FROM dbo.tblARInvoice I
+WHERE I.intInvoiceId = @intInvoiceId
 
-    INSERT INTO @InvalidInvoiceData([intInvoiceId],[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
-    SELECT   [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-			,[intItemId]			= I.[intItemId] 
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'Only Customer Prepayment and Credit Memo transactions are allowed.'
-    FROM @PostInvoiceData I
-    INNER JOIN 
-        (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice WITH (NOLOCK)) ARI
-            ON I.[intInvoiceId] = ARI.[intInvoiceId]
-    WHERE  
-        I.strTransactionType NOT IN('Customer Prepayment', 'Credit Memo')
+EXEC dbo.[uspARProcessInvoices] @InvoiceEntries		= @tblInvoiceEntries
+							  , @LineItemTaxEntries	= @tblTaxEntries
+							  , @UserId				= @intUserId
+							  , @GroupingOption		= 1	
+							  , @RaiseError			= 0
+							  , @ErrorMessage		= @strErrorMessage OUT
+							  , @CreatedIvoices		= @strCreatedInvoices OUT
 
-    INSERT INTO @InvalidInvoiceData([intInvoiceId],[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
-    SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-			,[intItemId]			= I.[intItemId] 
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= I.[strInvoiceNumber] + ' is not yet Paid.'
-    FROM @PostInvoiceData I
-    INNER JOIN 
-        (SELECT [intInvoiceId], intPaymentId, [ysnPosted] FROM tblARInvoice WITH (NOLOCK)) ARI
-            ON I.[intInvoiceId] = ARI.[intInvoiceId]
-    INNER JOIN tblARPayment P
-        ON P.intPaymentId   = ARI.intPaymentId
-    WHERE  
-        I.strTransactionType = 'Customer Prepayment' AND P.ysnPosted = 0
-
-    INSERT INTO @InvalidInvoiceData([intInvoiceId],[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
-    SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-			,[intItemId]			= I.[intItemId] 
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= I.[strInvoiceNumber] + ' is not yet Paid.'
-    FROM @PostInvoiceData I
-    INNER JOIN 
-        (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice WITH (NOLOCK)) ARI
-            ON I.[intInvoiceId] = ARI.[intInvoiceId]
-	INNER JOIN tblARPaymentDetail PD
-		ON PD.intInvoiceId = ARI.intInvoiceId
-	INNER JOIN tblARPayment P
-		ON P.intPaymentId = PD.intPaymentId
-	WHERE I.strTransactionType = 'Credit Memo' and P.ysnPosted = 0
-
-    /* Get Invalid Data */
-    SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
-
-    IF(@totalInvalid > 0)
+--INSERT CREDITMEMO/PREPAIDS TAB AND POST
+IF ISNULL(@strCreatedInvoices, '') <> ''
 	BEGIN
-		--Insert Invalid Post transaction result
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT 	
-			 [strPostingError]
-			,[strTransactionType]
-			,[strInvoiceNumber]
-			,[strBatchId]
-			,[intInvoiceId]
-		FROM
-			@InvalidInvoiceData 
-				ORDER BY strPostingError DESC
+		INSERT INTO @tblInvoicesCreated
+		SELECT intID FROM fnGetRowsFromDelimitedValues(@strCreatedInvoices)
 
-		SET @invalidCount = @totalInvalid
+		SELECT TOP 1 @intNewInvoiceId = intId FROM @tblInvoicesCreated
+		SET @intNewTransactionId = @intNewInvoiceId
 
-		--DELETE Invalid Transaction From temp table
-		DELETE @PostInvoiceData
-			FROM @PostInvoiceData A
-				INNER JOIN @InvalidInvoiceData B
-					ON A.intInvoiceId = B.intInvoiceId
-				
-		IF @raiseError = 1
-			BEGIN
-				SELECT TOP 1 @ErrorMessage = [strPostingError] FROM @InvalidInvoiceData
-				RAISERROR(@ErrorMessage, 11, 1)							
-				GOTO Post_Exit
-			END					
+		INSERT INTO tblARPrepaidAndCredit (
+			 intInvoiceId
+		   , intPrepaymentId
+		   , intPrepaymentDetailId
+		   , dblAppliedInvoiceDetailAmount
+		   , dblBaseAppliedInvoiceDetailAmount
+		   , ysnApplied
+		   , intRowNumber
+		)
+		SELECT intInvoiceId						= @intNewInvoiceId
+		   , intPrepaymentId					= @intInvoiceId
+		   , intPrepaymentDetailId				= @intInvoiceDetailId
+		   , dblAppliedInvoiceDetailAmount		= @dblAmountDue
+		   , dblBaseAppliedInvoiceDetailAmount	= @dblAmountDue
+		   , ysnApplied							= 1
+		   , intRowNumber						= 1
+	
+		EXEC [dbo].[uspARPostInvoice] @post				= 1
+									, @recap			= 0
+									, @param			= @strCreatedInvoices
+									, @userId			= @intUserId
+									, @raiseError		= 1
+									, @success			= @ysnSuccess OUT
+
+		--IF @ysnSuccess = 1
+		--	BEGIN
+		--		DECLARE @tblPaymentDetail		PaymentDetailStaging
+
+		--		INSERT INTO @tblPaymentDetail (
+		--			  intAccountId
+		--			, dblDiscount
+		--			, dblAmountDue
+		--			, dblPayment
+		--			, dblInterest
+		--			, dblTotal
+		--			, dblWithheld
+		--		)
+		--		SELECT intAccountId	= intAccountId
+		--			, dblDiscount	= 0.00000
+		--			, dblAmountDue	= 0.00000
+		--			, dblPayment	= dblInvoiceTotal
+		--			, dblInterest	= 0.00000
+		--			, dblTotal		= dblInvoiceTotal
+		--			, dblWithheld	= 0.00000
+		--		FROM tblARInvoice 
+		--		WHERE intInvoiceId = @intNewInvoiceId
+
+		--		EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
+		--										  , @notes				= 'Cash Refund'
+		--										  , @payment			= 0.000000
+		--										  , @datePaid			= @dtmDateOnly
+		--										  , @paymentDetail		= @tblPaymentDetail
+		--										  , @createdPaymentId	= @intNewTransactionId OUT
+		--	END
+		
+		--UPDATE YSNPROCESSED
+		UPDATE tblARInvoice
+		SET ysnRefundProcessed = 1
+		WHERE intInvoiceId = @intInvoiceId
 	END
-
-    SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
-			
-    IF(@totalInvalid >= 1 AND @totalRecords <= 0)
-        BEGIN
-            IF @raiseError = 0
-            BEGIN
-                IF @InitTranCount = 0
-                    BEGIN
-                        IF (XACT_STATE()) = -1
-                            ROLLBACK TRANSACTION
-                        IF (XACT_STATE()) = 1
-                            COMMIT TRANSACTION
-                    END		
-                ELSE
-                    BEGIN
-                        IF (XACT_STATE()) = -1
-                            ROLLBACK TRANSACTION  @Savepoint
-                        --IF (XACT_STATE()) = 1
-                        --	COMMIT TRANSACTION  @Savepoint
-                    END	
-            END
-
-            IF @raiseError = 1
-                BEGIN
-                    SELECT TOP 1 @ErrorMessage = [strPostingError] FROM @InvalidInvoiceData
-                    RAISERROR(@ErrorMessage, 11, 1)							
-                    GOTO Post_Exit
-                END				
-            GOTO Post_Exit	
-        END
-/* END Invoice Validation for Process Refund */
---BEGIN Refund Process
-			
-	DECLARE @EntityId						INT
-			,@InvoiceDate					DATETIME		
-			,@EntityCustomerId				INT
-			,@CompanyLocationId				INT,
-			@intNewInvoiceId					INT,
-			@_ERR							VARCHAR(MAX),
-			@raiseERR						INT,
-			@ItemDescription				NVARCHAR(MAX)
-	SELECT TOP 1 @EntityId = intEntityId,@EntityCustomerId = intEntityCustomerId, @CompanyLocationId = intCompanyLocationId,@InvoiceDate = dtmDate, @ItemDescription = 'Cash Refund for :' + strInvoiceNumber FROM @PostInvoiceData
-
-	EXEC [dbo].[uspARCreateCustomerInvoice]
-							@EntityCustomerId          = @EntityCustomerId
-						,@InvoiceDate              = @InvoiceDate
-						,@CompanyLocationId        = @CompanyLocationId
-						,@EntityId                 = @EntityId
-						,@NewInvoiceId             = @intNewInvoiceId OUTPUT
-						,@ErrorMessage             = @_ERR OUTPUT
-						,@ItemQtyShipped           = 1
-						,@TransactionType	       = 'Cash Refund'
-						,@Type					   = 'Standard'
-						,@RaiseError			   = 0
-						,@ItemCommentTypeId		   = 1
-						,@ItemDescription		   = @ItemDescription
-	IF LEN(ISNULL(@_ERR,'')) > 0
+ELSE IF ISNULL(@strErrorMessage, '') <> ''
 	BEGIN
-		GOTO InvalidDataPost
+		RAISERROR(@strErrorMessage, 16, 1) 
+		RETURN 0;
 	END
-
-	DECLARE @invoiceId AS INT, @intUserId as INT
-	SELECT @invoiceId = intInvoiceId, @intUserId = intUserId FROM @PostInvoiceData
-
-	EXEC dbo.uspARUpdatePrepaidForInvoice @InvoiceId = @intNewInvoiceId, @UserId = @intUserId
-
-	IF EXISTS(SELECT COUNT(1) FROM tblARPrepaidAndCredit WHERE intPrepaymentId = @invoiceId)
-	BEGIN		
-		UPDATE PPC
-		SET dblAppliedInvoiceDetailAmount = I2.dblInvoiceTotal,
-			dblBaseAppliedInvoiceDetailAmount = I2.dblBaseInvoiceTotal,
-			ysnApplied = 1
-		FROM tblARInvoice I
-		INNER JOIN tblARPrepaidAndCredit PPC
-			ON I.intInvoiceId = PPC.intInvoiceId
-		INNER JOIN tblARInvoice I2
-			ON PPC.intPrepaymentId = I2.intInvoiceId
-		INNER JOIN tblARInvoiceDetail ID
-			ON ID.intInvoiceId = I.intInvoiceId
-		WHERE I.intInvoiceId = @intNewInvoiceId and I2.intInvoiceId = @invoiceId
-
-		UPDATE ID
-		SET dblPrice = PPC.dblAppliedInvoiceDetailAmount,
-			dblTotal = PPC.dblAppliedInvoiceDetailAmount
-		FROM tblARInvoiceDetail ID
-		INNER JOIN tblARPrepaidAndCredit PPC
-			ON PPC.intInvoiceId = ID.intInvoiceId
-		INNER JOIN tblARInvoice I2
-			ON I2.intInvoiceId = PPC.intPrepaymentId
-		WHERE ID.intInvoiceId = @intNewInvoiceId and PPC.intPrepaymentId = @invoiceId
-
-
-		UPDATE I
-		SET dblAmountDue = I2.dblAmountDue,
-			dblBaseAmountDue = I2.dblBaseAmountDue,
-			dblInvoiceSubtotal = I2.dblInvoiceTotal,
-			dblBaseInvoiceSubtotal = I2.dblBaseInvoiceTotal,
-			dblBaseInvoiceTotal = I2.dblBaseInvoiceTotal,
-			dblInvoiceTotal = I2.dblInvoiceTotal,
-			intAccountId = I2.intAccountId
-		FROM tblARInvoice I
-		INNER JOIN tblARPrepaidAndCredit PPC
-			ON PPC.intInvoiceId = I.intInvoiceId
-		INNER JOIN tblARInvoice I2 
-			ON I2.intInvoiceId = PPC.intPrepaymentId
-		WHERE I.intInvoiceId = @intNewInvoiceId and intPrepaymentId = @invoiceId
-		
-		DECLARE @strNewInvoiceId AS NVARCHAR(MAX) = CAST(@intNewInvoiceId AS NVARCHAR(MAX))
-		EXEC uspARPostInvoice @post=1,@recap=0,@param=@strNewInvoiceId,@userId=@userId
-
-		/* CREATE VOUCHER */
-		BEGIN TRY
-		--DECLARE @APClearingAccountId AS INT
-		--SELECT TOP 1 @APClearingAccountId = ISNULL(intAPClearingAccountId,intARAccountId) FROM tblARCompanyPreference
-		--DECLARE @VoucherDetailNonInventory AS VoucherDetailNonInventory
-		DECLARE @PaymentDetailStaging AS PaymentDetailStaging
-        DELETE FROM @PaymentDetailStaging
-		DECLARE @intEntityVendorId as INT
-		DECLARE @intShiptoId AS INT
-		DECLARE @strInvoiceNumber as NVARCHAR(MAX)
-		SELECT @intEntityVendorId = intEntityCustomerId,@intShiptoId = intCompanyLocationId,@strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId
-		DECLARE @bankAccountId as INT
-
-		SELECT TOP 1 @bankAccountId = L.intCashAccount FROM tblARInvoice I
-		LEFT JOIN tblSMCompanyLocation L
-			ON I.intCompanyLocationId = L.intCompanyLocationId
-		WHERE intInvoiceId = @intNewInvoiceId
-
-        INSERT INTO @PaymentDetailStaging
-            (   [intBillId]     ,
-				[intInvoiceId]	,
-				[intAccountId]  ,
-				[dblDiscount]   ,
-				[dblAmountDue]  ,
-				[dblPayment]    ,
-				[dblInterest]   ,
-				[dblTotal]		,	
-				[dblWithheld])
-		SELECT
-             [intBillId]        = NULL
-            ,[intInvoiceId]     = intInvoiceId
-			,[intAccountId]     = @bankAccountId
-            ,[dblDiscount]      = 0
-            ,[dblAmountDue]     = dblAmountDue
-            ,[dblPayment]       = dblPayment
-			,[dblInterest]      = 0
-			,[dblTotal]         = dblInvoiceTotal
-			,[dblWithheld]		= 0
-		FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId
-		/*END CREATE VOUCHER */
-		/* POST VOUCHER */
-		-- DECLARE @BillId as INT
-		-- DECLARE @DateNow AS DATETIME = GETDATE()
-        -- EXEC [dbo].[uspAPCreateBillData]
-        --      @userId                = @userId
-        --     ,@vendorId              = @intEntityVendorId
-		-- 	,@voucherPODetails		= @voucherPODetails
-        --     ,@type                  = 1
-        --     ,@voucherNonInvDetails  = @VoucherDetailNonInventory
-        --     ,@voucherDate           = @DateNow
-		-- 	,@shipTo				= @intShiptoId
-		-- 	,@vendorOrderNumber		= @strInvoiceNumber
-		-- 	,@billId                = @BillId OUTPUT
-		
-		-- IF(ISNULL(@BillId,0) > 0)
-		-- BEGIN
-		-- 	DECLARE @strBillno as NVARCHAR(MAX)
-		-- 	SET @strBillno = CAST(@BillId as NVARCHAR(MAX))
-		-- 	EXEC [dbo].[uspAPPostBill]@post=1,@recap=0,@param=@strBillno,@userId=@userId
-
-		-- 	UPDATE tblARInvoice
-		-- 	SET ysnRefundProcessed = 1
-		-- 	WHERE intInvoiceId in(SELECT intInvoiceId FROM @PostInvoiceData)
-
-		-- 	SET @_ERR =  'Refund successfully processed!';
-		-- 	IF LEN(ISNULL(@_ERR,'')) > 0
-		-- 		BEGIN
-		-- 			SELECT @_ERR
-		-- 			GOTO InvalidDataPost
-		-- 		END
-
-		-- END
-
-		/*
-			INSERT create pay voucher here!*/
-
-		DECLARE @PayVoucherDetailId as INT
-
-			-- DECLARE @strBillno as NVARCHAR(MAX)
-			-- SET @strBillno = CAST(@BillId as NVARCHAR(MAX))
-			-- EXEC [dbo].[uspAPPostBill]@post=1,@recap=0,@param=@strBillno,@userId=@userId
-			EXEC [dbo].[uspAPCreatePaymentData] @userId = @userId,@paymentDetail = @PaymentDetailStaging,@createdPaymentId = @PayVoucherDetailId
-			UPDATE tblARInvoice
-			SET ysnRefundProcessed = 1
-			WHERE intInvoiceId in(SELECT intInvoiceId FROM @PostInvoiceData)
-
-			SET @_ERR =  'Refund successfully processed!';
-			IF LEN(ISNULL(@_ERR,'')) > 0
-				BEGIN
-					SELECT @_ERR
-					GOTO InvalidDataPost
-				END
-
-
-		/*END POST VOUCHER*/
-
-
-		END TRY
-		BEGIN CATCH
-			SELECT @_ERR = ERROR_MESSAGE()
-				IF LEN(ISNULL(@_ERR,'')) > 0
-				BEGIN
-					SELECT @_ERR
-					GOTO InvalidDataPost
-				END
-		END CATCH
-		
-	END
-
-
-/* END Refund Process */
-
-InvalidDataPost:
-INSERT INTO @InvalidInvoiceData([intInvoiceId],[strInvoiceNumber],[strTransactionType],[intInvoiceDetailId],[intItemId],[strBatchId],[strPostingError])
-			SELECT
-				 [intInvoiceId]			= I.[intInvoiceId]
-				,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-				,[strTransactionType]	= I.[strTransactionType]
-				,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-				,[intItemId]			= I.[intItemId] 
-				,[strBatchId]			= I.[strBatchId]
-				,[strPostingError]		= @_ERR
-			FROM @PostInvoiceData I
-
-			/* Get Invalid Data */
-		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
-
-		IF(@totalInvalid > 0)
-		BEGIN
-			--Insert Invalid Post transaction result
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 	
-					[strPostingError]
-				,[strTransactionType]
-				,[strInvoiceNumber]
-				,[strBatchId]
-				,[intInvoiceId]
-			FROM
-				@InvalidInvoiceData 
-					ORDER BY strPostingError DESC
-
-			SET @invalidCount = @totalInvalid
-
-			--DELETE Invalid Transaction From temp table
-			DELETE @PostInvoiceData
-				FROM @PostInvoiceData A
-					INNER JOIN @InvalidInvoiceData B
-						ON A.intInvoiceId = B.intInvoiceId
-				
-			IF @raiseError = 1
-				BEGIN
-					SELECT TOP 1 @ErrorMessage = [strPostingError] FROM @InvalidInvoiceData
-					RAISERROR(@ErrorMessage, 11, 1)							
-					GOTO Post_Exit
-				END					
-		END
-
-		SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
-			
-		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
-			BEGIN
-				IF @raiseError = 0
-				BEGIN
-					IF @InitTranCount = 0
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION
-							IF (XACT_STATE()) = 1
-								COMMIT TRANSACTION
-						END		
-					ELSE
-						BEGIN
-							IF (XACT_STATE()) = -1
-								ROLLBACK TRANSACTION  @Savepoint
-							--IF (XACT_STATE()) = 1
-							--	COMMIT TRANSACTION  @Savepoint
-						END	
-				END
-
-				IF @raiseError = 1
-					BEGIN
-						SELECT TOP 1 @ErrorMessage = [strPostingError] FROM @InvalidInvoiceData
-						RAISERROR(@ErrorMessage, 11, 1)							
-						GOTO Post_Exit
-					END				
-				GOTO Post_Exit	
-			END
-
-Do_Rollback:
-	IF @raiseError = 0
-		BEGIN
-			IF LEN(ISNULL(@_ERR,'')) > 0
-				BEGIN
-					SET @ErrorMessage = ERROR_MESSAGE()
-				END
-			IF @InitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @Savepoint
-												
-			SET @CurrentTranCount = @@TRANCOUNT
-			SET @CurrentSavepoint = SUBSTRING(('uspARProcessRefund' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
-			
-			IF @CurrentTranCount = 0
-				BEGIN TRANSACTION
-			ELSE
-				SAVE TRANSACTION @CurrentSavepoint
-			EXEC uspARInsertPostResult @batchIdUsed, 'Invoice',@ErrorMessage , @param								
-
-			IF @CurrentTranCount = 0
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION
-					IF (XACT_STATE()) = 1
-						COMMIT TRANSACTION
-				END		
-			ELSE
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION  @CurrentSavepoint
-					--IF (XACT_STATE()) = 1
-					--	COMMIT TRANSACTION  @Savepoint
-				END	
-		END
-	IF @raiseError = 1
-		RAISERROR(@ErrorMessage, 11, 1)	
-	    
--- This is our immediate exit in case of exceptions controlled by this stored procedure
-Post_Exit:
-	SET @successfulCount = 0	
-	SET @invalidCount = @totalInvalid + @totalRecords
-	SET @success = 0	
-	RETURN 0;
-
-
-	SELECT * FROM tblARPostResult Order BY intId DESC
