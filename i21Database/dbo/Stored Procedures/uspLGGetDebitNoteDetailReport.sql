@@ -50,9 +50,16 @@ FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-JOIN tblLGLoadDetail LD ON (CASE WHEN CH.intContractTypeId = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END) = CD.intContractDetailId
-JOIN tblLGLoad L ON LD.intLoadId= L.intLoadId
+JOIN tblLGLoad L ON WC.intLoadId = L.intLoadId
+JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	AND (
+		CASE 
+			WHEN CH.intContractTypeId = 1
+				THEN LD.intPContractDetailId
+			ELSE LD.intSContractDetailId
+			END
+		) = CD.intContractDetailId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) CDV
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
-WHERE L.intLoadId = @intLoadId
+WHERE WC.intWeightClaimId = @intWeightClaimId

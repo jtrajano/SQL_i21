@@ -183,9 +183,9 @@ BEGIN TRY
 		,WC.strReferenceNumber
 		,NULL
 		,WCOC.intVendorId
-		,WCOC.dblQuantity AS dblNetShippedWeight
-		,ABS(0) AS dblWeightLoss
-		,ABS(WCOC.dblWeight) AS dblNetWeight
+		,ROUND(WCOC.dblWeight,2) AS dblNetShippedWeight
+		,ROUND(ABS(WCOC.dblWeight),2) AS dblWeightLoss
+		,ROUND(ABS(WCOC.dblWeight),2) AS dblNetWeight
 		,0 AS dblFranchiseWeight
 		,WCOC.dblQuantity AS dblQtyReceived
 		,WCOC.dblRate
@@ -283,9 +283,9 @@ BEGIN TRY
 			,intContractDetailId
 			,dblFranchiseAmount)
 		SELECT dblNetShippedWeight
-			,dblWeightLoss
-			,dblFranchiseWeight
-			,(dblWeightLoss-ISNULL(dblFranchiseWeight,0))
+			,ROUND(dblWeightLoss,2)
+			,ROUND(dblFranchiseWeight,2)
+			,ROUND((dblWeightLoss-ISNULL(dblFranchiseWeight,0)),2)
 			,dblCost
 			,dblCostUnitQty
 			,dblWeightUnitQty
@@ -315,14 +315,16 @@ BEGIN TRY
 			SET intBillId = @intBillId
 			WHERE intWeightClaimId = @intWeightClaimId
 
-			UPDATE tblAPBillDetail
-			SET intLoadId = @intLoadId,
+			UPDATE BD
+				SET intLoadId = @intLoadId,
 				intCurrencyId = @intCurrencyId,
 				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = @dblClaimAmount,
-				dblTotal = @dblClaimAmount,
-				dbl1099 = @dblClaimAmount,
-				dblNetWeight = @dblNetWeight
+				dblClaimAmount = vdd.dblClaimAmount,
+				dblTotal = vdd.dblClaimAmount,
+				dbl1099 = vdd.dblClaimAmount,
+				dblNetWeight = vdd.dblNetWeight
+			FROM @voucherDetailData vdd
+			JOIN tblAPBillDetail BD ON BD.intItemId = vdd.intItemId
 			WHERE intBillId = @intBillId
 		END
 		ELSE 
@@ -339,7 +341,7 @@ BEGIN TRY
 				dblTotal = @dblClaimAmount,
 				dbl1099 = @dblClaimAmount,
 				dblNetWeight = @dblNetWeight
-			WHERE intBillId = @intBillId
+			WHERE intBillId = @intBillId AND intContractDetailId IS NOT NULL
 		END
 
 		DELETE

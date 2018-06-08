@@ -6737,6 +6737,7 @@
     <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Views\vyuHDProjectParentSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspCRMGetProcessedOpportunityQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetDebitNoteOtherChargesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

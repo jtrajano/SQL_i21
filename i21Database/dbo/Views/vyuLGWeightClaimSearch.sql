@@ -54,7 +54,8 @@ SELECT
 	WC.intBookId, 
 	BO.strBook,
 	WC.intSubBookId, 
-	SB.strSubBook
+	SB.strSubBook,
+	CH.intContractTypeId
 
 
 FROM tblLGWeightClaim WC
