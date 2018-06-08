@@ -137,7 +137,7 @@ BEGIN
 		,[intShipmentId]						= NULL
 		,[intTransactionId]						= NULL
 		,[intEntityId]							= @UserEntityId
-		,[ysnResetDetails]						= 0
+		,[ysnResetDetails]						= 1
 		,[ysnPost]								= @Post
 	
 		,[intInvoiceDetailId]					= NULL
