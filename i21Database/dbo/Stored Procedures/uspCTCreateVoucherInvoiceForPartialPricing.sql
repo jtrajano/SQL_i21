@@ -224,28 +224,27 @@ BEGIN TRY
 
 						UPDATE	tblCTPriceFixationDetail SET intBillId = @intNewBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
+						SELECT	@intTicketId = intTicketId FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+						DELETE FROM @prePayId
+
+						INSERT	INTO @prePayId([intId])
+						SELECT	DISTINCT BD.intBillId
+						FROM	tblAPBillDetail BD
+						JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+						JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
+						WHERE	BD.intContractDetailId = @intContractDetailId AND BD.intScaleTicketId = @intTicketId AND BL.intTransactionType IN (2, 13)
+
+						IF EXISTS(SELECT * FROM	@prePayId)
+						BEGIN
+							EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
+						END
+
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 				END		
-
-				/*
-				DELETE FROM @prePayId
-
-				INSERT	INTO @prePayId([intId])
-				SELECT	DISTINCT BD.intBillId
-				FROM	tblAPBillDetail BD
-				JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
-				JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
-				WHERE	BD.intContractDetailId = @intContractDetailId AND BD.intScaleTicketId = @intTicketId AND BL.intTransactionType IN (2, 13)
-
-				IF EXISTS(SELECT * FROM	@prePayId)
-				BEGIN
-				EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
-				END
-				*/	
-			 
 			END
 			ELSE
 			BEGIN
