@@ -55,7 +55,7 @@ BEGIN
 		INNER JOIN  @paymentDetail B
 			ON A.intInvoiceId = B.intInvoiceId
 		INNER JOIN tblAPVendor C
-			ON A.[intEntityId] = C.[intEntityId]
+			ON A.[intEntityCustomerId] = C.[intEntityId]
 
 	SELECT TOP 1 
 		@functionalCurrency = intDefaultCurrencyId 
