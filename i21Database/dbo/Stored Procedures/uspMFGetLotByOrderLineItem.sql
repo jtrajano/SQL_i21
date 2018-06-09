@@ -365,6 +365,15 @@ BEGIN
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 	JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = IU1.intUnitMeasureId
+	LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
+		AND T.intTaskTypeId NOT IN (
+			5
+			,6
+			,8
+			,9
+			,10
+			,11
+			)
 	WHERE L.intItemId = @intItemId
 		AND L.dblQty > 0
 		AND L.intLocationId = @intLocationId
