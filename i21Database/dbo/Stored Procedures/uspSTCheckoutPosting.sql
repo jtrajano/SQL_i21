@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
+﻿ALTER PROCEDURE [dbo].[uspSTCheckoutPosting]
 @intCurrentUserId INT,
 @intCheckoutId INT,
 @strDirection NVARCHAR(50),
@@ -23,6 +23,7 @@ BEGIN
 		SET @ysnCustomerChargesInvoiceStatus = 0
 		SET @strNewCheckoutStatus = ''
 
+		DECLARE @LineItems AS LineItemTaxDetailStagingTable -- Dummy Table
 
 		DECLARE @ysnUpdateCheckoutStatus BIT = 1
 
@@ -52,6 +53,7 @@ BEGIN
 		DECLARE @intCurrencyId INT = (SELECT intDefaultCurrencyId FROM tblSMCompanyPreference)
 		DECLARE @intShipViaId INT = (SELECT TOP 1 1 intShipViaId FROM tblEMEntityLocation WHERE intEntityId = @intEntityCustomerId AND intShipViaId IS NOT NULL)
 		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+		DECLARE @LineItemTaxEntries AS LineItemTaxDetailStagingTable
 		DECLARE @ysnPost BIT = NULL
 		-- DECLARE @CheckoutCurrentStatus NVARCHAR(50) = ''
 
@@ -159,7 +161,110 @@ BEGIN
 				---------------------------- PUMP TOTALS -----------------------------
 				----------------------------------------------------------------------
 				IF EXISTS(SELECT * FROM tblSTCheckoutPumpTotals WHERE intCheckoutId = @intCheckoutId AND dblAmount > 0)	
-					BEGIN																																																																																																																																																																																									BEGIN
+					BEGIN
+						
+						-- For own tax computation
+						INSERT INTO @LineItemTaxEntries(
+							 [intId]
+							,[intDetailId]
+							,[intDetailTaxId]
+							,[intTaxGroupId]
+							,[intTaxCodeId]
+							,[intTaxClassId]
+							,[strTaxableByOtherTaxes]
+							,[strCalculationMethod]
+							,[dblRate]
+							,[intTaxAccountId]
+							,[dblTax]
+							,[dblAdjustedTax]
+							,[ysnTaxAdjusted]
+							,[ysnSeparateOnInvoice]
+							,[ysnCheckoffTax]
+							,[ysnTaxExempt]
+							,[ysnTaxOnly]
+							,[strNotes]
+							,[intTempDetailIdForTaxes]
+							,[dblCurrencyExchangeRate]
+							,[ysnClearExisting]
+							,[strTransactionType]
+							,[strType]
+							,[strSourceTransaction]
+							,[intSourceId]
+							,[strSourceId]
+							,[intHeaderId]
+							,[dtmDate]
+						)
+					SELECT
+							 [intId] = CPT.intPumpTotalsId
+							,[intDetailId] = NULL
+							,[intDetailTaxId] = NULL
+							,[intTaxGroupId] = TAX.intTaxGroupId
+							,[intTaxCodeId] = TAX.intTaxCodeId
+							,[intTaxClassId] = TAX.intTaxClassId
+							,[strTaxableByOtherTaxes] = TAX.strTaxableByOtherTaxes
+							,[strCalculationMethod] = TAX.strCalculationMethod
+							,[dblRate] = TAX.dblRate
+							,[intTaxAccountId] = TAX.intTaxAccountId
+							,[dblTax] = TAX.dblTax
+							,[dblAdjustedTax] = TAX.dblAdjustedTax
+							,[ysnTaxAdjusted] = 1
+							,[ysnSeparateOnInvoice] = 0
+							,[ysnCheckoffTax] = TAX.ysnCheckoffTax
+							,[ysnTaxExempt] = TAX.ysnTaxExempt
+							,[ysnTaxOnly] = TAX.ysnTaxOnly
+							,[strNotes] = TAX.strNotes
+							,[intTempDetailIdForTaxes] = CPT.intPumpTotalsId
+							,[dblCurrencyExchangeRate] = 0
+							,[ysnClearExisting] = 0
+							,[strTransactionType] = ''
+							,[strType] = ''
+							,[strSourceTransaction] = ''
+							,[intSourceId] = @intCheckoutId
+							,[strSourceId] = @intCheckoutId
+							,[intHeaderId] = @intCheckoutId
+							,[dtmDate] = GETDATE()
+						FROM tblSTCheckoutPumpTotals CPT
+							JOIN tblICItemUOM UOM ON CPT.intPumpCardCouponId = UOM.intItemUOMId
+							JOIN tblSTCheckoutHeader CH ON CPT.intCheckoutId = CH.intCheckoutId
+							JOIN tblICItem I ON UOM.intItemId = I.intItemId
+							JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+							JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
+													AND IL.intItemLocationId = IP.intItemLocationId
+							JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
+												AND CH.intStoreId = ST.intStoreId	
+							JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
+							OUTER APPLY dbo.fnConstructLineItemTaxDetail (
+																			ISNULL(CPT.dblQuantity, 0)						-- Qty
+																			, ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+																			, @LineItems
+																			, 1										-- is Reversal
+																			, I.intItemId							-- Item Id
+																			, ST.intCheckoutCustomerId				-- Customer Id
+																			, ST.intCompanyLocationId				-- Company Location Id
+																			, ST.intTaxGroupId						-- Tax Group Id
+																			, 0										-- 0 Price if not reversal
+																			, GETDATE()
+																			, vC.intShipToId						-- Ship to Location
+																			, 1
+																			, NULL
+																			, vC.intFreightTermId					-- FreightTermId
+																			, NULL
+																			, NULL
+																			, 0
+																			, 0
+																			, UOM.intItemUOMId
+																			,NULL									--@CFSiteId
+																			,0										--@IsDeliver
+																		) TAX
+
+							WHERE CPT.intCheckoutId = @intCheckoutId
+							AND CPT.dblAmount > 0
+							AND UOM.ysnStockUnit = CAST(1 AS BIT)
+
+							
+							
+							
+																																																																																																																																																																																											BEGIN
 						INSERT INTO @EntriesForInvoice(
 										 [strSourceTransaction]
 										,[strTransactionType]
@@ -259,21 +364,21 @@ BEGIN
 										,[intEntityCustomerId]		= @intEntityCustomerId
 										,[intCompanyLocationId]		= @intCompanyLocationId
 										,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-										,[intTermId]				= NULL
+										,[intTermId]				= vC.intTermsId						--ADDED
 										,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 										,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 										,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 										,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 										,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-										,[intEntitySalespersonId]	= NULL
-										,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-										,[intShipViaId]				= NULL --@intShipViaId
-										,[intPaymentMethodId]		= NULL
+										,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+										,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+										,[intShipViaId]				= vC.intShipViaId					--ADDED
+										,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 										,[strInvoiceOriginId]		= NULL -- not sure
 										,[strPONumber]				= NULL -- not sure
 										,[strBOLNumber]				= NULL -- not sure
 										,[strComments]				= @strComments
-										,[intShipToLocationId]		= NULL
+										,[intShipToLocationId]		= vC.intShipToId					--ADDED
 										,[intBillToLocationId]		= NULL
 										,[ysnTemplate]				= 0
 										,[ysnForgiven]				= 0
@@ -299,36 +404,46 @@ BEGIN
 										,[dblDiscount]				= 0
 
 										-- Should remove tax to calculate Net Price --CPT.dblPrice
-										-- ,[dblPrice]				    = CPT.dblPrice --(Select dblPrice From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
-										,[dblPrice]					= ISNULL(CPT.dblPrice, 0) - ISNULL(CAST((SELECT SUM(dblAdjustedTax) 
-																						  FROM [dbo].[fnGetItemTaxComputationForCustomer]
-																						  (
-																								I.intItemId
-																								, ST.intCheckoutCustomerId
-																								, GETDATE()
-																								, CPT.dblPrice
-																								, 1
-																								, ST.intTaxGroupId
-																								, ST.intCompanyLocationId
-																								, NULL -- EL.intEntityLocationId
-																								, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-																						  )) AS DECIMAL(18,6)), 0)
-										--,[dblPrice]					= (CPT.dblAmount -
-										--							  (
-										--									CAST((SELECT SUM(dblAdjustedTax) 
+										--,[dblPrice]					= ISNULL(CPT.dblPrice, 0) - ISNULL(CAST((SELECT SUM(dblAdjustedTax) 
 										--												  FROM [dbo].[fnGetItemTaxComputationForCustomer]
 										--												  (
 										--														I.intItemId
 										--														, ST.intCheckoutCustomerId
 										--														, GETDATE()
 										--														, CPT.dblPrice
-										--														, CPT.dblQuantity
+										--														, 1
 										--														, ST.intTaxGroupId
 										--														, ST.intCompanyLocationId
-										--														, EL.intEntityLocationId
+										--														, NULL -- EL.intEntityLocationId
 										--														, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-										--												  )) AS DECIMAL(18,6))
-										--								)) / CPT.dblQuantity
+										--												  )) AS DECIMAL(18,6)), 0)
+
+										--, [dblPrice]				= ISNULL([dbo].fnRoundBanker(CPT.dblPrice, 2), 0) - ISNULL((SELECT  SUM([dblAdjustedTax])						
+										--								FROM dbo.fnConstructLineItemTaxDetail (
+										--									1										-- Qty
+										--									, ISNULL([dbo].fnRoundBanker(CPT.dblPrice, 2), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
+										--									, @LineItems
+										--									, 1										-- is Reversal
+										--									, I.intItemId							-- Item Id
+										--									, ST.intCheckoutCustomerId				-- Customer Id
+										--									, ST.intCompanyLocationId				-- Company Location Id
+										--									, ST.intTaxGroupId						-- Tax Group Id
+										--									, 0										-- 0 Price if not reversal
+										--									, GETDATE()
+										--									, vC.intShipToId						-- Ship to Location
+										--									, 1
+										--									, NULL
+										--									, vC.intFreightTermId					-- FreightTermId
+										--									, NULL
+										--									, NULL
+										--									, 0
+										--									, 0
+										--									, UOM.intItemUOMId
+										--									,NULL									--@CFSiteId
+										--									,0										--@IsDeliver
+										--								)), 0)
+										
+										, [dblPrice]				= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -337,7 +452,7 @@ BEGIN
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
 										,[intTaxGroupId]			= @intTaxGroupId
-										,[ysnRecomputeTax]			= 1 -- Should recompute tax only for Pump Total Items
+										,[ysnRecomputeTax]			= 0 -- Should recompute tax only for Pump Total Items
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
 										,[intInventoryShipmentItemId] = NULL
@@ -360,7 +475,7 @@ BEGIN
 										,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
 										,[strImportFormat]			= 'Not Familiar'
 										,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-										,[intTempDetailIdForTaxes]  = I.intItemId
+										,[intTempDetailIdForTaxes]  = CPT.intPumpTotalsId
 										,[intConversionAccountId]	= NULL -- not sure
 										,[intCurrencyExchangeRateTypeId]	= NULL
 										,[intCurrencyExchangeRateId]		= NULL
@@ -377,8 +492,19 @@ BEGIN
 							JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 													AND IL.intItemLocationId = IP.intItemLocationId
 							JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-												AND CH.intStoreId = ST.intStoreId
-							--JOIN dbo.tblEMEntityLocation EL ON ST.intCheckoutCustomerId = EL.intEntityId
+												AND CH.intStoreId = ST.intStoreId	
+							JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
+							LEFT OUTER JOIN
+							(
+							SELECT 
+							 [dblAdjustedTax] = SUM ([dblAdjustedTax])
+							 ,[intTempDetailIdForTaxes]
+							FROM
+								@LineItemTaxEntries
+							GROUP BY
+								[intTempDetailIdForTaxes]
+							) Tax
+								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
 							WHERE CPT.intCheckoutId = @intCheckoutId
 							AND CPT.dblAmount > 0
 							AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -499,21 +625,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -591,6 +717,7 @@ BEGIN
 														AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 													AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE IM.intCheckoutId = @intCheckoutId
 								AND IM.dblTotalSales > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -711,21 +838,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -838,6 +965,7 @@ BEGIN
 														AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 													AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
 								AND DT.dblTotalSalesAmount > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -958,21 +1086,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -1045,6 +1173,7 @@ BEGIN
 														AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 													AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE STT.intCheckoutId = @intCheckoutId
 								AND STT.dblTotalTax > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -1166,21 +1295,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -1253,6 +1382,7 @@ BEGIN
 														AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 													AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CPO.intCheckoutId = @intCheckoutId
 								AND CPO.dblAmount > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -1374,21 +1504,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -1461,6 +1591,7 @@ BEGIN
 														AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 													AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CC.intCheckoutId = @intCheckoutId
 								AND CC.dblAmount > 0
 								----AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -1582,21 +1713,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -1669,6 +1800,7 @@ BEGIN
 														AND IL.intItemLocationId = IP.intItemLocationId
 								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
 												AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CP.intCheckoutId = @intCheckoutId
 								AND CP.dblAmount > 0
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -1790,21 +1922,21 @@ BEGIN
 											,[intEntityCustomerId]		= @intEntityCustomerId
 											,[intCompanyLocationId]		= @intCompanyLocationId
 											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-											,[intTermId]				= NULL
+											,[intTermId]				= vC.intTermsId						--ADDED
 											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
 											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
 											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
 											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-											,[intEntitySalespersonId]	= NULL
-											,[intFreightTermId]			= @intCompanyLocationId --@intEntityLocationId
-											,[intShipViaId]				= NULL --@intShipViaId
-											,[intPaymentMethodId]		= NULL
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= vC.intPaymentMethodId				--ADDED
 											,[strInvoiceOriginId]		= NULL -- not sure
 											,[strPONumber]				= NULL -- not sure
 											,[strBOLNumber]				= NULL -- not sure
 											,[strComments]				= @strComments
-											,[intShipToLocationId]		= NULL
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
 											,[intBillToLocationId]		= NULL
 											,[ysnTemplate]				= 0
 											,[ysnForgiven]				= 0
@@ -1873,6 +2005,7 @@ BEGIN
 								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
 								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
 								--						AND IL.intItemLocationId = IP.intItemLocationId
+								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								JOIN tblSTCheckoutHeader CH ON ST.intStoreId = CH.intStoreId
 								WHERE CH.intCheckoutId = @intCheckoutId
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
@@ -2118,7 +2251,7 @@ BEGIN
 							-- POST Main Checkout Invoice
 							EXEC [dbo].[uspARProcessInvoices]
 										@InvoiceEntries	 = @EntriesForInvoice
-										--,@LineItemTaxEntries = NULL
+										,@LineItemTaxEntries = @LineItemTaxEntries
 										,@UserId			 = @intCurrentUserId
 		 								,@GroupingOption	 = 11
 										,@RaiseError		 = 1
