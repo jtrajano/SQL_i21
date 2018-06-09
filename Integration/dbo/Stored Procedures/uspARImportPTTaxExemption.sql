@@ -16,21 +16,21 @@ BEGIN
 			DROP TABLE tmpvndname
 
 		SELECT	ptcus_cus_no, ptcus_bill_to,
-				(CASE WHEN ptcus_co_per_ind_cp = 'C' THEN 
+				CAST(ISNULL((CASE WHEN ptcus_co_per_ind_cp = 'C' THEN 
 							ptcus_last_name + ptcus_first_name 
 					 WHEN ptcus_co_per_ind_cp = 'P' THEN 
 							RTRIM(LTRIM(ptcus_last_name)) + ', ' + RTRIM(LTRIM(ptcus_first_name))
-				 END) as ptcus_name, 
+				 END),'') AS NVARCHAR(MAX)) as ptcus_name, 
 				 ptcus_state,ptcus_sales_tax_yn, ptcus_sales_tax_id
 		INTO tmpptcusname
 		FROM ptcusmst WHERE ptcus_cus_no = ptcus_bill_to
 
 		INSERT INTO tmpptcusname (ptcus_cus_no, ptcus_bill_to, ptcus_name,ptcus_state,ptcus_sales_tax_yn, ptcus_sales_tax_id)
 		SELECT	ptcus_cus_no, ptcus_bill_to,
-				(RTRIM (CASE WHEN ptcus_co_per_ind_cp = 'C' THEN ptcus_last_name + ptcus_first_name 
+				CAST(ISNULL((RTRIM (CASE WHEN ptcus_co_per_ind_cp = 'C' THEN ptcus_last_name + ptcus_first_name 
 							 WHEN ptcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(ptcus_last_name)) 
 							 + ', ' + RTRIM(LTRIM(ptcus_first_name))
-						 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR),
+						 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR),'') AS NVARCHAR(MAX)),
 				ptcus_state,ptcus_sales_tax_yn, ptcus_sales_tax_id 
 		FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
 		
