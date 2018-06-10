@@ -3,6 +3,7 @@
 	@dtmToDate datetime=null
 
 AS
+
 set @dtmToDate=convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
 SELECT strShipmentNumber as strTicket,strContractNumber,
@@ -20,7 +21,7 @@ FROM(
 				SELECT b.strShipmentNumber,d1.strContractNumber +'-' +Convert(nvarchar,d.intContractSeq) strContractNumber,
 				(SELECT TOP 1 dblQty FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) dblShipmentQty,
 				il.intLocationId intCompanyLocationId,
-				cl.strLocationName strLocationName,
+				il.strDescription strLocationName,
 				d.intContractDetailId,
 				i.intCommodityId,
 				iuom.intItemUOMId,
@@ -28,8 +29,8 @@ FROM(
 				ium.intCommodityUnitMeasureId,
 				b.intEntityCustomerId as intEntityId,
 				(SELECT TOP 1 dblQty FROM tblARInvoice ia
-				JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  
-				WHERE ia.strInvoiceNumber=it.strTransactionId ) dblInvoiceQty,
+				JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId 
+				WHERE ad.strDocumentNumber=it.strTransactionId and ysnPosted=1 ) dblInvoiceQty,
 					e.strName
 		FROM tblICInventoryTransaction it
 		  join tblICInventoryShipment b on b.strShipmentNumber=it.strTransactionId  
@@ -37,10 +38,9 @@ FROM(
 		join tblICItem i on c.intItemId=i.intItemId
 		JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-		JOIN tblICItemLocation il ON il.intItemId = i.intItemId and b.intShipFromLocationId=il.intLocationId  
-		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=il.intLocationId 
+		JOIN tblICItemLocation il ON it.intItemId = i.intItemId and it.intItemLocationId=il.intItemLocationId and il.strDescription='In-Transit'		
 		JOIN tblEMEntity e on b.intEntityCustomerId=e.intEntityId
 		LEFT JOIN tblCTContractDetail d on d.intContractDetailId=c.intLineNo		
 		LEFT JOIN tblCTContractHeader d1 on d1.intContractHeaderId=d.intContractHeaderId
-		where    i.intCommodityId = @intCommodityId and convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+		WHERE i.intCommodityId = @intCommodityId and convert(DATETIME, CONVERT(VARCHAR(10), it.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
 	)t
