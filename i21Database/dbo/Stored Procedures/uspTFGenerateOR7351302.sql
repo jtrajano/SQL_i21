@@ -266,7 +266,7 @@ BEGIN TRY
 		SELECT @DisbursementGasoline_9 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '7' AND strType = 'Gasoline'
 		SELECT @DisbursementGasoline_10 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '8' AND strType = 'Gasoline'
 		SELECT @DisbursementGasoline_11 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '10D' AND strType = 'Gasoline'
-		SET @DisbursementAviation_12 = @DisbursementGasoline_7 + @DisbursementGasoline_8 + @DisbursementGasoline_9 + @DisbursementGasoline_10 + @DisbursementGasoline_11
+		SET @DisbursementGasoline_12 = @DisbursementGasoline_7 + @DisbursementGasoline_8 + @DisbursementGasoline_9 + @DisbursementGasoline_10 + @DisbursementGasoline_11
 
 		-- Disbursement Aviation
 		SELECT @DisbursementAviation_7 = ISNULL(SUM(dblReceived),0) FROM @transaction WHERE strScheduleCode = '5' AND strType = 'Aviation Gasoline'
