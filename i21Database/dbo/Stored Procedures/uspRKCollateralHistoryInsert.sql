@@ -86,7 +86,7 @@ BEGIN
 	tblRKCollateral C
 	INNER JOIN tblRKCollateralAdjustment CA ON C.intCollateralId = CA.intCollateralId
 	WHERE C.intCollateralId = @intCollateralId
-		AND intCollateralAdjustmentId NOT IN (SELECT intCollateralAdjustmentId FROM tblRKCollateralHistory)
+		AND intCollateralAdjustmentId NOT IN (SELECT intCollateralAdjustmentId FROM tblRKCollateralHistory WHERE intCollateralAdjustmentId IS NOT NULL)
 
 	IF @newDetailCount > 0 --Newly added detail record
 	BEGIN
@@ -144,7 +144,7 @@ BEGIN
 		tblRKCollateral C
 		INNER JOIN tblRKCollateralAdjustment CA ON C.intCollateralId = CA.intCollateralId
 		WHERE C.intCollateralId = @intCollateralId 
-			AND intCollateralAdjustmentId NOT IN (SELECT intCollateralAdjustmentId FROM tblRKCollateralHistory)
+			AND intCollateralAdjustmentId NOT IN (SELECT intCollateralAdjustmentId FROM tblRKCollateralHistory WHERE intCollateralAdjustmentId IS NOT NULL)
 	
 		IF @@ERROR <> 0	GOTO _Rollback
 		
