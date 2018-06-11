@@ -919,7 +919,7 @@ IF @recap = 1
 			,A.[strTransactionType]
 			,B.strAccountId
 			,C.strAccountGroup
-			,[strRateType]						= CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN NULL ELSE A.[strRateType]	 END 
+			,[strRateType]						= A.[strRateType] --CASE WHEN A.[intCurrencyId] = @DefaultCurrencyId THEN NULL ELSE A.[strRateType]	 END 
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId

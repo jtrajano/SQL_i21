@@ -252,9 +252,9 @@ SELECT
     ,[dblBaseTransactionInterest]       = @ZeroDecimal
     ,[dblTransactionAmountDue]          = @ZeroDecimal
     ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
-    ,[intCurrencyExchangeRateTypeId]    = NULL
+    ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
     ,[dblCurrencyExchangeRate]          = @ZeroDecimal
-    ,[strRateType]                      = ''
+    ,[strRateType]                      = case when rtype.intCurrencyExchangeRateTypeId is null then '' else rtype.strCurrencyExchangeRateType end
     
 FROM
     tblARPayment ARP
@@ -276,6 +276,8 @@ LEFT OUTER JOIN
     SELECT [intPaymentMethodID], [strPaymentMethod] FROM tblSMPaymentMethod WITH(NoLock)
     ) SMPM
         ON ARP.[intPaymentMethodId] = SMPM.[intPaymentMethodID]
+left join (select intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType from tblSMCurrencyExchangeRateType with (nolock) ) rtype
+	on rtype.intCurrencyExchangeRateTypeId = ARP.intCurrencyExchangeRateTypeId
 OPTION(recompile)
 
 DECLARE @Detail AS [dbo].[ReceivePaymentPostingTable]
