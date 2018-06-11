@@ -36,8 +36,8 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 		--========================--
 		DECLARE @intDiscountSchedDetailId		INT
 		DECLARE @intDetailDiscountScheduleId	INT
-		DECLARE @intFromQty						NUMERIC(18,6)
-		DECLARE @intThruQty						NUMERIC(18,6)
+		DECLARE @intFromQty						INT
+		DECLARE @intThruQty						INT
 		DECLARE @dblRate						NUMERIC(18,6)
 
 		--========================--
@@ -144,8 +144,8 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 			SELECT @originDiscountSchedule = cfdsc_schd FROM #tmpcfdscmst
 
 			DECLARE @DetailRecord TABLE (
-				intFrom			NUMERIC(18,6),
-				intTo			NUMERIC(18,6),
+				intFrom			INT,
+				intTo			INT,
 				dblPerUnit		NUMERIC(18,6)
 			)
 
