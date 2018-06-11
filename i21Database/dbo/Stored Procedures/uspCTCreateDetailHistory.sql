@@ -145,10 +145,22 @@ BEGIN TRY
 			,CD.intFutureMonthId,			intCurrencyId,					QU.intCommodityUnitMeasureId,		CD.intUnitMeasureId,	    CD.intCurrencyExchangeRateId
 			,dtmStartDate,					dtmEndDate,						CD.dblQuantity,						dblBalance,					CD.dblFutures
 			,dblBasis
-			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots ELSE PF.dblLotsFixed END
-			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 ELSE CD.dblNoOfLots - PF.dblLotsFixed END
-			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblQuantity ELSE FD.dblQuantity END
-			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 ELSE CD.dblQuantity - FD.dblQuantity END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots 
+					WHEN	CD.intPricingTypeId	=	2 THEN 0  
+					ELSE	PF.dblLotsFixed 
+			 END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
+					WHEN	CD.intPricingTypeId	=	2 THEN CD.dblNoOfLots  
+					ELSE	CD.dblNoOfLots - PF.dblLotsFixed 
+			 END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblQuantity 
+					WHEN	CD.intPricingTypeId	=	2 THEN 0 
+					ELSE	FD.dblQuantity 
+			 END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
+					WHEN	CD.intPricingTypeId	=	2 THEN CD.dblQuantity 
+					ELSE	CD.dblQuantity - FD.dblQuantity 
+			 END
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					CO.strCommodityCode
 			,strContractNumber,				intContractSeq,					CL.strLocationName,					strContractType,		    strPricingType
 			,CD.dblScheduleQty,				GETDATE(),						dblCashPrice
