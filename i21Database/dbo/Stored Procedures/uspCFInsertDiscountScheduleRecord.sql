@@ -9,8 +9,8 @@ CREATE PROCEDURE [dbo].[uspCFInsertDiscountScheduleRecord]
 	,@ysnDiscountOnRemotes			NVARCHAR(MAX)	 =	 ''
 	,@ysnDiscountOnExtRemotes		NVARCHAR(MAX)	 =	 ''
 	---------------------------------------------------------
-	,@intFromQty					INT				 =    0
-	,@intThruQty					INT				 =    0
+	,@intFromQty					NUMERIC(18,6)	 =    0
+	,@intThruQty					NUMERIC(18,6)	 =    0
 	,@dblRate						NUMERIC(18,6)	 =    0
 
 AS
@@ -98,7 +98,9 @@ BEGIN
 
 	IF(@intId IS NOT NULL AND @intId > 0)
 	BEGIN
-		IF (@intFromQty = 0 AND @intThruQty = 0 AND (@dblRate = 0 OR @dblRate = 0.0))
+		IF ((ISNULL(@intFromQty,0) = 0 OR ISNULL(@intFromQty,0.0) = 0.0) 
+		AND (ISNULL(@intThruQty,0) = 0 OR ISNULL(@intThruQty,0.0) = 0.0) 
+		AND (ISNULL(@dblRate,0) = 0 OR ISNULL(@dblRate,0.0) = 0.0))
 		BEGIN
 			RETURN 1
 		END

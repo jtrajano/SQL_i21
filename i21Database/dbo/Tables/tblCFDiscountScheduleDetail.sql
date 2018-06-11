@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblCFDiscountScheduleDetail] (
     [intDiscountSchedDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intDiscountScheduleId]    INT             NOT NULL,
-    [intFromQty]               INT             NULL,
-    [intThruQty]               INT             NULL,
+    [intFromQty]               NUMERIC (18, 6) NULL,
+    [intThruQty]               NUMERIC (18, 6) NULL,
     [dblRate]                  NUMERIC (18, 6) NULL,
     [intConcurrencyId]         INT             CONSTRAINT [DF_tblCFDiscountScheduleDetail_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFDiscountScheduleDetail] PRIMARY KEY CLUSTERED ([intDiscountSchedDetailId] ASC),
