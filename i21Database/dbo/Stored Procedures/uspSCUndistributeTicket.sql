@@ -60,13 +60,9 @@ BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
 		, @dblDeliveredQuantity = LGLD.dblDeliveredQuantity
 		, @dblLoadScheduledUnits = LGLD.dblQuantity
-		, @intLoadContractId = 
-				CASE WHEN @strInOutFlag = 'I' THEN LGLD.intPContractDetailId
-					WHEN @strInOutFlag = 'O' THEN LGLD.intSContractDetailId
-				END
+		, @intLoadContractId = CASE WHEN @strInOutFlag = 'I' THEN LGLD.intPContractDetailId WHEN @strInOutFlag = 'O' THEN LGLD.intSContractDetailId END
 		FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 		WHERE LGL.intTicketId = @intTicketId
-
 
 		SELECT @intId = MIN(intInventoryReceiptItemId) 
 		FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
@@ -74,7 +70,7 @@ BEGIN TRY
 		WHILE ISNULL(@intId,0) > 0
 		BEGIN
 			SELECT @intContractDetailId = intLineNo FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intId
-			IF ISNULL(@intContractDetailId,0) > 0
+			IF ISNULL(@intContractDetailId,0) > 0 
 			BEGIN
 				SELECT @intContractStatusId = intContractStatusId
 				, @strContractStatus = strContractStatus 
