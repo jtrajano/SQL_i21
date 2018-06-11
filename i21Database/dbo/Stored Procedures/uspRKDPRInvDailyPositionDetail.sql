@@ -313,7 +313,7 @@ SELECT * into #tempCollateral FROM (
 		FROM tblRKCollateralHistory c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
-		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
+		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId 
 		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId and ch.intContractStatusId <> 3
 		WHERE c.intCommodityId = @intCommodityId and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 		
@@ -324,7 +324,7 @@ SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@i
 	,null [Storage Due],s.intLocationId intLocationId into #invQty
 	FROM vyuICGetInventoryValuation s  		
 	JOIN tblICItem i on i.intItemId=s.intItemId
-	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1
+	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1 and  isnull(ysnInTransit,0)=0 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId   		  
 	WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1
 			AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
@@ -335,6 +335,8 @@ SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@i
 								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 								ELSE isnull(ysnLicensed, 0) END
 				)
+
+
 SELECT * into #tempOnHold  FROM (
 	SELECT  ROW_NUMBER() OVER (PARTITION BY t.intTicketId ORDER BY t.dtmTicketHistoryDate DESC) intSeqId,
 	dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(st.dblNetUnits, 0))  AS dblTotal,
@@ -626,7 +628,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			FROM vyuICGetInventoryValuation v
 			join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT') and  isnull(ysnInTransit,0)=0 
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2  and cd.intContractStatusId <> 3
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
@@ -646,7 +648,7 @@ SELECT 11 AS intSeqId,'Total Receipted',@strDescription
 			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,strShipmentNumber,cd.strContractNumber
 			FROM vyuICGetInventoryValuation v 
-			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
+			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId and  isnull(ysnInTransit,0)=0 
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
 			JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
@@ -669,7 +671,7 @@ SELECT 15 AS intSeqId,'Company Titled Stock',@strDescription
 		,ISNULL(invQty, 0) +
 		  (isnull(CollateralPurchases, 0) - isnull(CollateralSale, 0)) +
 		 CASE WHEN (SELECT TOP 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then isnull(OffSite,0) else 0 end +  
-		CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then 0 else -isnull(DP,0) end  
+		CASE WHEN (SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0 then 0 else isnull(DP,0) end  
 		 +isnull(SlsBasisDeliveries ,0)
 		 AS dblTotal,@intCommodityId,@intCommodityUnitMeasureId,strDPAReceiptNo
 	FROM (
@@ -980,7 +982,7 @@ IF (@ysnDisplayAllStorage=1)
 			@intCommodityId intCommodityId,cl.strLocationName,cd.strItemNo,strName,strTicketNumber strTicket,st.dtmTicketDateTime,strCustomerReference,
 					strDistributionOption,@intCommodityUnitMeasureId AS intCommodityUnitMeasureId,st.intProcessingLocationId intCompanyLocationId,cd.strContractNumber,intContractHeaderId
 			FROM vyuICGetInventoryValuation v
-			join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId
+			join tblICInventoryReceipt r on r.strReceiptNumber=v.strTransactionId and  isnull(ysnInTransit,0)=0 
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
 			JOIN tblEMEntity e on st.intEntityId=e.intEntityId
@@ -1006,7 +1008,7 @@ IF (@ysnDisplayAllStorage=1)
 			cd.dtmContractDate as dtmTicketDateTime ,
 			cd.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,cd.intUnitMeasureId,cl.intCompanyLocationId,cd.strContractNumber 
 			FROM  vyuICGetInventoryValuation v 
-			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
+			JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId and  isnull(ysnInTransit,0)=0 
 			INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3
 			join tblICInventoryTransaction it on it.intInventoryTransactionId=v.intInventoryTransactionId
