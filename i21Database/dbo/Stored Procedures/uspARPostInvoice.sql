@@ -4289,7 +4289,7 @@ IF @recap = 0
 			SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN INVOICE.dtmPostDate ELSE NULL END
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 			CROSS APPLY (
-				SELECT TOP 1 dtmPostDate
+				SELECT TOP 1 I.dtmPostDate
 				FROM dbo.tblARInvoice I
 				INNER JOIN @InvoiceToUpdate U ON I.intInvoiceId = U.intInvoiceId
 				WHERE I.intEntityCustomerId = CUSTOMER.intEntityId

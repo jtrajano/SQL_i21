@@ -1682,7 +1682,7 @@ IF @recap = 0
 			SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN PAYMENT.dtmDatePaid ELSE NULL END
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 			CROSS APPLY (
-				SELECT TOP 1 dtmDatePaid
+				SELECT TOP 1 P.dtmDatePaid
 				FROM dbo.tblARPayment P
 				INNER JOIN @tblPaymentsToUpdateBudget U ON P.intPaymentId = U.intPaymentId
 				WHERE P.intEntityCustomerId = CUSTOMER.intEntityId
