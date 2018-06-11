@@ -342,6 +342,7 @@ BEGIN
 			AND cfInv.intCardId = cfCardAccount.intCardId
 			--INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
 			WHERE ISNULL(intInvoiceId,0) != 0
+			AND cfInv.strUserId = @UserId
 
 
 			--SELECT * FROM @tblCFInvoiceFeesTemp
