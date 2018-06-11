@@ -57,8 +57,8 @@ DECLARE @intId AS INT
 		,@dblForexRate NUMERIC(38, 20)
 		,@dblUnitRetail AS NUMERIC(38, 20)
 		,@intCategoryId INT 
+		,@dblAdjustCostValue NUMERIC(38, 20)
 		,@dblAdjustRetailValue NUMERIC(38, 20)
-		,@intCategoryAdjustmentType AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -117,7 +117,6 @@ SELECT  intId
 		,dblUnitRetail
 		,intCategoryId
 		,dblAdjustRetailValue
-		,intCategoryAdjustmentType
 FROM	@ItemsToPost 
 
 OPEN loopItems;
@@ -146,8 +145,8 @@ FETCH NEXT FROM loopItems INTO
 	,@dblForexRate
 	,@dblUnitRetail
 	,@intCategoryId
+	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
-	,@intCategoryAdjustmentType
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -312,8 +311,8 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@dblAdjustCostValue 
 			,@dblAdjustRetailValue
-			,@intCategoryAdjustmentType
 	END
 
 	-- ACTUAL COST 
@@ -465,8 +464,8 @@ BEGIN
 					,@intEntityUserSecurityId
 					,@intForexRateTypeId
 					,@dblForexRate
+					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
-					,@intCategoryAdjustmentType
 			END
 		END 
 		ELSE 
@@ -627,8 +626,8 @@ BEGIN
 		,@dblForexRate
 		,@dblUnitRetail
 		,@intCategoryId
+		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
-		,@intCategoryAdjustmentType
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
