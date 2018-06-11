@@ -71,8 +71,32 @@ BEGIN TRY
 			,GETDATE()
 			,LD.dblQuantity
 			,IU.dblUnitQty
-			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END dblCost
-			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END * LD.dblQuantity dblValue
+			,CASE 
+				WHEN LD.strPriceStatus = 'Basis'
+					THEN CASE 
+							WHEN CUR.ysnSubCurrency = 1
+								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
+							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
+							END
+				ELSE CASE 
+						WHEN AD.ysnSeqSubCurrency = 1
+							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
+						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
+						END
+				END dblCost
+			,CASE 
+				WHEN LD.strPriceStatus = 'Basis'
+					THEN CASE 
+							WHEN CUR.ysnSubCurrency = 1
+								THEN dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice / 100
+							ELSE dbo.fnCTConvertQtyToTargetItemUOM(LD.intItemUOMId, LD.intPriceUOMId, 1) * LD.dblUnitPrice
+							END
+				ELSE CASE 
+						WHEN AD.ysnSeqSubCurrency = 1
+							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
+						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
+						END
+				END * LD.dblQuantity dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
@@ -98,6 +122,7 @@ BEGIN TRY
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CASE WHEN L.intPurchaseSale = 3 THEN 1 ELSE L.intFreightTermId END
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
 		WHERE L.intLoadId = @intLoadId
 		GROUP BY LD.intItemId
 			,IL.intItemLocationId
@@ -116,6 +141,11 @@ BEGIN TRY
 			,CD.intRateTypeId
 			,CD.dblRate
 			,CD.ysnUseFXPrice
+			,LD.strPriceStatus
+			,LD.intWeightItemUOMId
+			,LD.intPriceUOMId
+			,LD.dblUnitPrice
+			,CUR.ysnSubCurrency
 
 		BEGIN
 			INSERT INTO @GLEntries (
