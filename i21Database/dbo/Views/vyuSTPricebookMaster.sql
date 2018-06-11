@@ -12,7 +12,7 @@ SELECT
 	, UOM.strUpcCode
 	, UOM.strLongUPCCode
 	, IL.intItemLocationId
-	, IL.strDescription AS PosDescription
+	, IL.strDescription AS strPosDescription
 	, IL.intVendorId AS intEntityVendorId
 	, Entity.strName
 	, Vendor.strVendorId

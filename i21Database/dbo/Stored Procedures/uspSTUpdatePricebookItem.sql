@@ -5,7 +5,7 @@
 , @intItemVendorXrefId INT
 , @strVendorProduct NVARCHAR(250)
 , @strDescription nvarchar(250)
-, @PosDescription nvarchar(250)
+, @strPosDescription nvarchar(250)
 , @dblSalePrice decimal(18,6)
 , @dblLastCost decimal(18,6)
 , @intEntityVendorId int
@@ -18,6 +18,8 @@
 AS
 BEGIN
 	BEGIN TRY
+		
+		SET @strStatusMsg = ''
 
 		DECLARE @intItemUOMId int
 		DECLARE @intItemId int
@@ -44,9 +46,9 @@ BEGIN
 			BEGIN
 				SET @strDescription = ''
 			END
-		IF(@PosDescription = 'null' OR @PosDescription IS NULL)
+		IF(@strPosDescription = 'null' OR @strPosDescription IS NULL)
 			BEGIN
-				SET @PosDescription = ''
+				SET @strPosDescription = ''
 			END
 
 		-- Create Filters
@@ -365,7 +367,7 @@ BEGIN
 					,@strCountCode = NULL
 					,@strItemDescription = @strDescription 
 
-					,@intEntityUserSecurityId = 1
+					,@intEntityUserSecurityId = @intEntityId
 
 				-- ITEM PRICING
 				EXEC [uspICUpdateItemPricingForCStore]
@@ -375,7 +377,7 @@ BEGIN
 					,@dblStandardCost = null
 					,@dblRetailPrice = @dblSalePrice
 					,@dblLastCost = @dblLastCost
-					,@intEntityUserSecurityId = 1
+					,@intEntityUserSecurityId = @intEntityId
 
 				-- ITEM VendorXref
 				EXEC uspICUpdateItemVendorXrefForCStore
@@ -384,7 +386,7 @@ BEGIN
 					-- update params
 					,@strVendorProduct = @strVendorProduct
 					,@strVendorProductDescription = NULL
-					,@intEntityUserSecurityId = 1
+					,@intEntityUserSecurityId = @intEntityId
 
 				-- ITEM LOCATION
 				EXEC [dbo].[uspICUpdateItemLocationForCStore]
@@ -417,16 +419,16 @@ BEGIN
 					,@intFamilyId = @FamilyId
 					,@intClassId = @ClassId
 					,@intProductCodeId = NULL
-					,@intVendorId = 10
+					,@intVendorId = @intEntityVendorId
 					,@intMinimumAge = NULL
 					,@dblMinOrder = NULL
 					,@dblSuggestedQty = NULL
 					,@intCountGroupId = NULL
 					,@intStorageLocationId = NULL
 					,@dblReorderPoint = NULL 
-					,@strItemLocationDescription = @PosDescription 
+					,@strItemLocationDescription = @strPosDescription 
 
-					,@intEntityUserSecurityId = 1
+					,@intEntityUserSecurityId = @intEntityId
 			END
 
 
@@ -468,11 +470,7 @@ BEGIN
 					END
 					,I.strDescription
 					,CASE
-						WHEN [Changes].oldColumnName = 'strCategoryId_Original' THEN 'Category' /* + '	' + 'intLocationId: ' + CAST(@intCurrentLocationId AS NVARCHAR(10)) 
-																									  + '	intCurrentVendorId: ' + CAST(@intCurrentVendorId AS NVARCHAR(10))
-																									  + '	intCurrentCategoryId: ' + CAST(@intCurrentCategoryId AS NVARCHAR(10)) 
-																									  + '	intCurrentFamilyId: ' + CAST(@intCurrentFamilyId AS NVARCHAR(10))
-																									  + '	intCurrentClassId: ' + CAST(@intCurrentClassId AS NVARCHAR(10)) */
+						WHEN [Changes].oldColumnName = 'strCategoryId_Original' THEN 'Category'
 						WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Item Description'
 					END
 					,[Changes].strOldData
@@ -682,6 +680,7 @@ BEGIN
 						WHEN [Changes].oldColumnName = 'strFamilyId_Original' THEN 'Family'
 						WHEN [Changes].oldColumnName = 'strClassId_Original' THEN 'Class'
 						WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Description'
+						WHEN [Changes].oldColumnName = 'strVendor_Original' THEN 'Vendor'
 					END
 					,[Changes].strOldData
 					,[Changes].strNewData
@@ -697,11 +696,13 @@ BEGIN
 							-- Original Fields 
 							,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intFamilyId_Original) AS NVARCHAR(1000)) AS strFamilyId_Original
 							,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intClassId_Original) AS NVARCHAR(1000)) AS strClassId_Original
-							,CAST(ISNULL(REPLACE(strDescription_Original, NULL, ''), '') AS NVARCHAR(1000)) AS strDescription_Original
+							,CAST(ISNULL(strDescription_Original, '') AS NVARCHAR(1000)) AS strDescription_Original --CAST(ISNULL(REPLACE(strDescription_Original, NULL, ''), '') AS NVARCHAR(1000)) AS strDescription_Original
+							,CAST((SELECT strName FROM tblEMEntity WHERE intEntityId = intVendorId_Original) AS NVARCHAR(1000)) AS strVendor_Original
 							-- Modified Fields
 							,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intFamilyId_New) AS NVARCHAR(1000)) AS strFamilyId_New
 							,CAST((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = intClassId_New) AS NVARCHAR(1000)) AS strClassId_New
-							,CAST(ISNULL(REPLACE(strDescription_New, NULL, ''), '') AS NVARCHAR(1000)) AS strDescription_New
+							,CAST(ISNULL(strDescription_New, '') AS NVARCHAR(1000)) AS strDescription_New  --CAST(ISNULL(REPLACE(strDescription_New, NULL, ''), '') AS NVARCHAR(1000)) AS strDescription_New
+							,CAST((SELECT strName FROM tblEMEntity WHERE intEntityId = intVendorId_New) AS NVARCHAR(1000)) AS strVendor_New
 					FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog
 				) t
 				unpivot
