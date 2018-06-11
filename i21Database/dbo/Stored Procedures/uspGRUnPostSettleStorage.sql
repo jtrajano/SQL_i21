@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
+	DECLARE @strOwnedPhysicalStock NVARCHAR(20)
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -308,7 +309,7 @@ BEGIN TRY
 					,dtmDate					= GETDATE()
 					,dblQty						= CASE WHEN ST.strOwnedPhysicalStock ='Customer' THEN SH.dblUnits ELSE 0 END
 					,dblUOMQty					= @dblUOMQty
-					,dblCost					= SH.dblPaidAmount + ISNULL(OtherCharge.dblCashPrice,0) 
+					,dblCost					= SH.dblPaidAmount
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -322,19 +323,6 @@ BEGIN TRY
 				FROM tblGRStorageHistory SH
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
 				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				JOIN
-				(
-					SELECT 
-					CS.intCustomerStorageId
-					,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))) AS dblCashPrice
-					FROM tblGRCustomerStorage CS
-					JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId AND SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
-					JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
-					JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = CS.intCustomerStorageId AND QM.strSourceType = 'Storage'
-					WHERE ISNULL(CS.strStorageType, '') <> 'ITR' AND (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
-					GROUP BY CS.intCustomerStorageId
-				)OtherCharge ON OtherCharge.intCustomerStorageId = CS.intCustomerStorageId
-
 				WHERE SH.intSettleStorageId = @intSettleStorageId
 
 				BEGIN
@@ -348,12 +336,16 @@ BEGIN TRY
 				END
 
 				BEGIN
-					--EXEC uspICPostCosting 
-					--	 @ItemsToPost
-					--	,@strBatchId
-					--	,'Cost of Goods'
-					--	,@UserId
-
+				
+				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
+				FROM tblGRCustomerStorage CS 
+				JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId
+				WHERE SST.intSettleStorageId = @intSettleStorageId
+				
+				IF @strOwnedPhysicalStock ='Customer' 
+			    BEGIN
+					
 					INSERT INTO @GLEntries 
 					(
 							[dtmDate] 
@@ -402,9 +394,65 @@ BEGIN TRY
 					SET dblDebit = CASE WHEN dblCredit > 0 THEN dblCredit ELSE 0 END
 					,dblCredit   = CASE WHEN dblDebit > 0  THEN dblDebit ELSE 0 END
 
-					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
-					BEGIN 
-							EXEC dbo.uspGLBookEntries @GLEntries, 0 
+						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+						BEGIN 
+								EXEC dbo.uspGLBookEntries @GLEntries, 0 
+						END
+							
+							DELETE FROM @GLEntries
+							
+							INSERT INTO @GLEntries 
+							(
+							 [dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+						)
+						EXEC uspGRCreateGLEntries 
+							 'Storage Settlement'
+							,'OtherCharges'
+							,@intSettleStorageId
+							,@strBatchId
+							,@UserId
+							,0
+						
+						UPDATE @GLEntries 
+						SET dblDebit = dblCredit
+						,dblCredit   = dblDebit
+						
+						IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+						BEGIN 
+									EXEC dbo.uspGLBookEntries @GLEntries, 0 
+						END
+					
 					END
 
 					IF @@ERROR <> 0

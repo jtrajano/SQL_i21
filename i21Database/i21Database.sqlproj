@@ -6347,6 +6347,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
