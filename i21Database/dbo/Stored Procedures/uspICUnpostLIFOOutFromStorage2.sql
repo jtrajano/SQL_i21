@@ -62,6 +62,7 @@ FROM	(
 						OR (
 							inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId
+							AND ISNULL(inventory_transaction.dblQty, 0) <> 0
 						)
 					)
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
