@@ -104,7 +104,6 @@ FROM	(
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
 							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK)
-							AND ISNULL(inventory_transaction.dblQty, 0) <> 0
 						)
 					)
 					
