@@ -52,7 +52,6 @@
 :r .\4_SM\1740_FixMasterMenu.sql
 :r .\4_SM\1810_FixReportLabels_Language.sql
 :r .\4_SM\1810_Delete_Duplicate_Tax_Code_Rate.sql
-:r .\4_SM\1810_DeleteOldReportLabel.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
