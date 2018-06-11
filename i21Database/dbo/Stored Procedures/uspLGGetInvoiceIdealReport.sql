@@ -77,6 +77,13 @@ SELECT @strCompanyName AS strCompanyName
 	,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
 	,INV.intInvoiceId
 	,INV.strInvoiceNumber
+	,strCustomer = EN.strName
+	,INV.strBillToAddress
+	,INV.strBillToCity
+	,INV.strBillToState
+	,INV.strBillToZipCode
+	,INV.strBillToCity + ', ' + INV.strBillToState + ', ' + INV.strBillToZipCode AS strCityStateZip
+	,INV.strBillToCountry
 	,dblTotalAmount = 384.00
 	,strAmountCurrency = 'EURO'
 	,strAmountInfo = 'EURO' + ' ' + LTRIM(384.00)
@@ -88,4 +95,5 @@ SELECT @strCompanyName AS strCompanyName
 	,CUS.strVatNumber
 FROM tblARInvoice INV 
 LEFT JOIN tblARCustomer CUS ON CUS.intEntityId = INV.intEntityCustomerId
+LEFT JOIN tblEMEntity EN ON EN.intEntityId = INV.intEntityCustomerId
 WHERE INV.intInvoiceId = @intInvoiceId
