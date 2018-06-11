@@ -10,10 +10,10 @@
 , @dblLastCost decimal(18,6)
 , @intEntityVendorId int
 , @strVendorId nvarchar(100)
-, @Family nvarchar(100)
-, @FamilyId int
-, @Class nvarchar(100)
-, @ClassId int
+, @strFamily nvarchar(100)
+, @intFamilyId int
+, @strClass nvarchar(100)
+, @intClassId int
 , @strStatusMsg NVARCHAR(1000) OUTPUT
 AS
 BEGIN
@@ -271,48 +271,49 @@ BEGIN
 
 
 
-			-- Add the filter records (ITEM, ITEM LOCATION, VendorXref)
-			BEGIN
-				IF(@intCurrentLocationId IS NOT NULL AND @intCurrentLocationId != 0)
-					BEGIN
-						INSERT INTO #tmpUpdateItemForCStore_Location (
-							intLocationId
-						)
-						SELECT intLocationId = @intCurrentLocationId
-					END
+			---- Add the filter records (ITEM, ITEM LOCATION, VendorXref)
+			---- Remove filter for proper updating, 
+			--BEGIN
+			--	IF(@intCurrentLocationId IS NOT NULL AND @intCurrentLocationId != 0)
+			--		BEGIN
+			--			INSERT INTO #tmpUpdateItemForCStore_Location (
+			--				intLocationId
+			--			)
+			--			SELECT intLocationId = @intCurrentLocationId
+			--		END
 		
-				IF(@intCurrentVendorId IS NOT NULL AND @intCurrentVendorId != 0)
-					BEGIN
-						INSERT INTO #tmpUpdateItemForCStore_Vendor (
-							intVendorId
-						)
-						SELECT intVendorId = @intCurrentVendorId
-					END
+			--	IF(@intCurrentVendorId IS NOT NULL AND @intCurrentVendorId != 0)
+			--		BEGIN
+			--			INSERT INTO #tmpUpdateItemForCStore_Vendor (
+			--				intVendorId
+			--			)
+			--			SELECT intVendorId = @intCurrentVendorId
+			--		END
 
-				IF(@intCurrentCategoryId IS NOT NULL AND @intCurrentCategoryId != 0)
-					BEGIN
-						INSERT INTO #tmpUpdateItemForCStore_Category (
-							intCategoryId
-						)
-						SELECT intCategoryId = @intCurrentCategoryId
-					END
+			--	IF(@intCurrentCategoryId IS NOT NULL AND @intCurrentCategoryId != 0)
+			--		BEGIN
+			--			INSERT INTO #tmpUpdateItemForCStore_Category (
+			--				intCategoryId
+			--			)
+			--			SELECT intCategoryId = @intCurrentCategoryId
+			--		END
 
-				IF(@intCurrentFamilyId IS NOT NULL AND @intCurrentFamilyId != 0)
-					BEGIN
-						INSERT INTO #tmpUpdateItemForCStore_Family (
-							intFamilyId
-						)
-						SELECT intFamilyId = @intCurrentFamilyId
-					END
+			--	IF(@intCurrentFamilyId IS NOT NULL AND @intCurrentFamilyId != 0)
+			--		BEGIN
+			--			INSERT INTO #tmpUpdateItemForCStore_Family (
+			--				intFamilyId
+			--			)
+			--			SELECT intFamilyId = @intCurrentFamilyId
+			--		END
 
-				IF(@intCurrentClassId IS NOT NULL AND @intCurrentClassId != 0)
-					BEGIN
-						INSERT INTO #tmpUpdateItemForCStore_Class (
-							intClassId
-						)
-						SELECT intClassId = @intCurrentClassId
-					END
-			END
+			--	IF(@intCurrentClassId IS NOT NULL AND @intCurrentClassId != 0)
+			--		BEGIN
+			--			INSERT INTO #tmpUpdateItemForCStore_Class (
+			--				intClassId
+			--			)
+			--			SELECT intClassId = @intCurrentClassId
+			--		END
+			--END
 
 			-- Add the filter records (ITEM PRICING)
 			BEGIN
@@ -416,8 +417,8 @@ BEGIN
 					,@ysnCountedDaily = NULL
 					,@strCounted = NULL
 					,@ysnCountBySINo = NULL
-					,@intFamilyId = @FamilyId
-					,@intClassId = @ClassId
+					,@intFamilyId = @intFamilyId
+					,@intClassId = @intClassId
 					,@intProductCodeId = NULL
 					,@intVendorId = @intEntityVendorId
 					,@intMinimumAge = NULL

@@ -20,10 +20,10 @@ SELECT
 	, IC.strCategoryCode
 	, VX.intItemVendorXrefId
 	, VX.strVendorProduct
-	, Family.intSubcategoryId AS FamilyId
-	, Family.strSubcategoryId AS Family
-	, Class.intSubcategoryId AS ClassId
-	, Class.strSubcategoryId AS Class
+	, Family.intSubcategoryId AS intFamilyId
+	, Family.strSubcategoryId AS strFamily
+	, Class.intSubcategoryId AS intClassId
+	, Class.strSubcategoryId AS strClass
 FROM dbo.tblICItemPricing AS IP LEFT OUTER JOIN
 	dbo.tblICItem AS I ON I.intItemId = IP.intItemId LEFT OUTER JOIN
 	dbo.tblICItemUOM AS UOM ON IP.intItemId = UOM.intItemId LEFT OUTER JOIN
