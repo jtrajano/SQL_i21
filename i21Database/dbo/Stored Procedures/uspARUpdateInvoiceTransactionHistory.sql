@@ -31,7 +31,7 @@ AS
 			SELECT
 				ARID.intInvoiceId,
 				ARID.intInvoiceDetailId,
-				ARID.dblQtyOrdered,
+				ARID.dblQtyShipped,
 				ARID.dblPrice,
 				ARID.dblTotal,
 				ARID.intItemId,
@@ -82,7 +82,7 @@ AS
 			SELECT
 				ARID.intInvoiceId,
 				ARID.intInvoiceDetailId,
-				ATD.dblQtyOrdered,
+				ATD.dblQtyShipped,
 				ATD.dblPrice,
 				ATD.dblAmountDue,
 				ATD.intItemId,
@@ -141,7 +141,7 @@ AS
 			SELECT
 				ARID.intInvoiceId,
 				ARID.intInvoiceDetailId,
-				ARID.dblQtyOrdered,
+				ARID.dblQtyShipped,
 				ARID.dblPrice,
 				ARID.dblTotal,
 				ARID.intItemId,
