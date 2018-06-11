@@ -181,7 +181,7 @@ SELECT
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= NULL -- SC.intLotId
+		,intLotId					= SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
