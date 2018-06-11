@@ -31,7 +31,7 @@
 	CONSTRAINT [FK_tblPRPaycheckTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblPRPaycheckTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblPRPaycheckTax_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
-) ON [PRIMARY]
+)
 GO
 /****** Object:  Default [DF__tblPRPayc__dblAm__150B6AEE]    Script Date: 08/14/2014 10:50:11 ******/
 ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ((0)) FOR [dblAmount]

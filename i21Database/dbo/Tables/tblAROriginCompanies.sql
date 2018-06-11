@@ -27,4 +27,4 @@ CREATE TABLE [dbo].[tblAROriginCompanies](
 	[strCustomer_lic_co] ASC,
 	[strCompany_co] ASC
 )
-) ON [PRIMARY]
+)

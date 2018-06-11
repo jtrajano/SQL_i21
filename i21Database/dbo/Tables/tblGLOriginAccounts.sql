@@ -17,7 +17,7 @@
 	[glact_user_rev_dt] [int] NULL,
 	[A4GLIdentity] [numeric](9, 0) NOT NULL,
 	[glact_acct1_8_new] [int] NULL
-) ON [PRIMARY]
+)
 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'glact_acct1_8' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLOriginAccounts', @level2type=N'COLUMN',@level2name=N'glact_acct1_8' 

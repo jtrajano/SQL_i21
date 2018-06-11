@@ -51,7 +51,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[t
 	[intAccountId] ASC,
 	[dtmDatePaid] ASC
 )
-WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+WITH (  IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPPayment]
 (
@@ -61,7 +61,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPPayment]
 	[strPaymentRecordNum] ASC,
 	[intEntityVendorId] ASC,
 	[dtmDatePaid] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE STATISTICS [ST_rptAging_1] ON [dbo].[tblAPPayment]([strPaymentRecordNum], [intEntityVendorId], [intPaymentId], [ysnPosted])
 GO

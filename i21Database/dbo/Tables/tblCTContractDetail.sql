@@ -259,7 +259,7 @@ GO
 --	[strVessel],
 --	[intContainerTypeId],
 --	[intNumberOfContainers],
---	[strPackingDescription]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--	[strPackingDescription]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 --GO
 
 --[intStorageScheduleRuleId]
@@ -294,7 +294,7 @@ GO
 --	[strVessel],
 --	[intContainerTypeId],
 --	[intNumberOfContainers],
---	[strPackingDescription]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--	[strPackingDescription]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 --GO
 
 
@@ -377,7 +377,7 @@ INCLUDE (     [intContractSeq],
        [dblNoOfLots],
        [intMarketZoneId],
        [dtmPlannedAvailabilityDate],
-       [dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+       [dblRate]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 go
 
 CREATE STATISTICS [_dta_stat_1518224759_19_46] ON [dbo].[tblCTContractDetail]([intItemUOMId], [intPriceItemUOMId])
@@ -486,7 +486,7 @@ INCLUDE ( 	[intContractSeq],
 	[dtmStartDate],
 	[dblQuantity],
 	[dblBalance],
-	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblNoOfLots]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 go
 
 CREATE STATISTICS [_dta_stat_1518224759_19_15_35_1_34] ON [dbo].[tblCTContractDetail]([intItemUOMId], [intItemId], [intFutureMarketId], [intContractDetailId], [intPricingTypeId])
@@ -551,5 +551,5 @@ INCLUDE ( 	[intContractSeq],
 	[dblQuantity],
 	[dblBalance],
 	[intPricingTypeId],
-	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblNoOfLots]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 go

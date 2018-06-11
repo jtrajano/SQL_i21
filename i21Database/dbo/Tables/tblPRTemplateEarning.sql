@@ -19,7 +19,7 @@
     CONSTRAINT [FK_tblPRTemplateEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [tblPRTypeEarning]([intTypeEarningId]), 
 	CONSTRAINT [FK_tblPRTemplateEarning_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPRTemplateEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
-) ON [PRIMARY]
+)
 GO
 
 GO

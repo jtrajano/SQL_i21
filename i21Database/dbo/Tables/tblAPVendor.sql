@@ -79,20 +79,11 @@ ALTER TABLE [dbo].[tblAPVendor] CHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEnti
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPVendor]([intEntityId] ASC, [strVendorId] ASC)
-	WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	WITH (  IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)
 
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPVendor]
 (
 	[intEntityId] ASC
 )
-INCLUDE ( 	[strVendorId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-			@value = N'Information about the Vendor',
-			@level0type = N'SCHEMA',
-			@level0name = N'dbo',
-			@level1type = N'TABLE',
-			@level1name = N'tblAPVendor',
-			@level2type = NULL,
-			@level2name = NULL
+INCLUDE ( 	[strVendorId]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)

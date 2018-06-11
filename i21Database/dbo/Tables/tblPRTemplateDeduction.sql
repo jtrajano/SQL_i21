@@ -20,7 +20,7 @@
 	CONSTRAINT [FK_tblPRTemplateDeduction_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPRTemplateDeduction_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblPRTemplateDeduction_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
-) ON [PRIMARY]
+)
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',

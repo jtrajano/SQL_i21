@@ -20,8 +20,8 @@ CREATE TABLE [dbo].tblGLDeletedAccount(
  CONSTRAINT [PK_GLAccountDeleted_AccountId] PRIMARY KEY CLUSTERED 
 (
 	[intDeletedAccountId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80)
+) TEXTIMAGE_ON [PRIMARY]
 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDeletedAccount', @level2type=N'COLUMN',@level2name=N'intDeletedAccountId' 

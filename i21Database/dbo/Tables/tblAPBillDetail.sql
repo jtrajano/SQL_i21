@@ -75,7 +75,7 @@
 	[intContractSeq] INT NULL,
 	[intInvoiceId] INT NULL , 
     [intBuybackChargeId] INT NULL, 
-    CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
+    CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC),
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -99,7 +99,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES tblLGLoadDetail([intLoadDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
 	CONSTRAINT [FK_tblAPBillDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
-) ON [PRIMARY];
+);
 
 
 GO
@@ -125,7 +125,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
 	[intBillDetailId] ASC
 )
 INCLUDE ( 	[dblTotal],
-	[dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblRate]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblAPBillDetail]
 (
@@ -133,5 +133,5 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblAPBillDetail]
 	[intBillId] ASC
 )
 INCLUDE ( 	[dblTotal],
-	[dblRate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblRate]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO

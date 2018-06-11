@@ -18,8 +18,8 @@ CREATE TABLE [dbo].[tblGLRevalue](
  CONSTRAINT [PK_tblGLRevalue] PRIMARY KEY CLUSTERED
 (
 	[intConsolidationId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+)
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLRevalue', @level2type=N'COLUMN',@level2name=N'intConsolidationId' 
 GO

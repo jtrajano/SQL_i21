@@ -36,6 +36,6 @@
 		[intBillId] INT NULL,
 		[dtmDateImported] DATETIME NULL DEFAULT GETDATE(),
 		[intId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY
-	) ON [PRIMARY] ') 
+	) ') 
 	END    
 END

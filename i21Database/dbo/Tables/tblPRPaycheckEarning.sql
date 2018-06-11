@@ -24,7 +24,7 @@
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRDepartment] FOREIGN KEY ([intEmployeeDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]),
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [dbo].[tblPRWorkersCompensation] ([intWorkersCompensationId])
-) ON [PRIMARY]
+)
 GO
 /****** Object:  Default [DF__tblPRPayc__dblHo__244DAE7E]    Script Date: 08/14/2014 10:50:11 ******/
 ALTER TABLE [dbo].[tblPRPaycheckEarning] ADD  DEFAULT ((0)) FOR [dblHours]

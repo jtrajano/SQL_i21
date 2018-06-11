@@ -188,14 +188,14 @@ go
 --	[dtmETAPOL],
 --	[dtmETSPOL],
 --	[dtmETAPOD],
---	[dtmStuffingDate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--	[dtmStuffingDate]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 --go
 
 --CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_207_2053178660__K97_K1] ON [dbo].[tblLGLoad]
 --(
 --	[intShipmentType] ASC,
 --	[intLoadId] ASC
---)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 --go
 
 CREATE STATISTICS [_dta_stat_2053178660_3_44] ON [dbo].[tblLGLoad]([strLoadNumber], [strOriginPort])
@@ -257,13 +257,13 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K5_K1] ON [dbo].
 (
 	[intPurchaseSale] ASC,
 	[intLoadId] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K1_K5] ON [dbo].[tblLGLoad]
 (
 	[intLoadId] ASC,
 	[intPurchaseSale] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE STATISTICS [_dta_stat_1172915250_103_5_1] ON [dbo].[tblLGLoad]([ysnQuantityFinal], [intPurchaseSale], [intLoadId])

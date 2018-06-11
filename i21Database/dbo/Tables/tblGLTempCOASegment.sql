@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblGLTempCOASegment](
 	[Primary Account] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL,
 	[Location] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL,
 	[LOB] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL
-) ON [PRIMARY]
+)
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLTempCOASegment', @level2type=N'COLUMN',@level2name=N'intAccountId' 
 GO

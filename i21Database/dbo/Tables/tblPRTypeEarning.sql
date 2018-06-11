@@ -14,7 +14,7 @@
     CONSTRAINT [PK_tblPRTypeEarning] PRIMARY KEY ([intTypeEarningId]), 
     CONSTRAINT [AK_tblPRTypeEarning_strEarning] UNIQUE ([strEarning]), 
     CONSTRAINT [FK_tblPRTypeEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
-) ON [PRIMARY]
+)
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',

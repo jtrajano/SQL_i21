@@ -7,15 +7,3 @@
     CONSTRAINT [PK_tblGLAccountUnit] PRIMARY KEY CLUSTERED ([intAccountUnitId] ASC)
 );
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Unit Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountUnit', @level2type=N'COLUMN',@level2name=N'intAccountUnitId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit Of Measure Code' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountUnit', @level2type=N'COLUMN',@level2name=N'strUOMCode' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Unit Of Measure Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountUnit', @level2type=N'COLUMN',@level2name=N'strUOMDesc' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Lbs Per Unit' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountUnit', @level2type=N'COLUMN',@level2name=N'dblLbsPerUnit' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountUnit', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
-GO
-
-

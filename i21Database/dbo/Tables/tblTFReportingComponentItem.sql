@@ -4,6 +4,6 @@
 	[intItemId] [int] NOT NULL,
 	[intMasterId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT((0))
-) ON [PRIMARY]
+)
 
 GO

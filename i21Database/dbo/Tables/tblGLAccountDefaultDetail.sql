@@ -12,20 +12,3 @@
     CONSTRAINT [FK_tblGLAccountDefaultDetail_tblGLAccountDefault] FOREIGN KEY ([intAccountDefaultId]) REFERENCES [dbo].[tblGLAccountDefault] ([intAccountDefaultId])
 );
 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'intAccountDefaultDetailId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Foreign Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'intAccountDefaultId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Module Name' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'strModuleName' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Default Name' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'strDefaultName' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'strDescription' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Row Filter' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'strRowFilter' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountDefaultDetail', @level2type=N'COLUMN',@level2name=N'intAccountId' 
-GO

@@ -6,7 +6,7 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTaxLocal] PRIMARY KEY ([intTypeTaxLocalId]), 
 	CONSTRAINT [FK_tblPRTypeTaxLocal_tblPRTypeTaxState] FOREIGN KEY ([intTypeTaxStateId]) REFERENCES [tblPRTypeTaxState]([intTypeTaxStateId])
-) ON [PRIMARY]
+)
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',

@@ -5,7 +5,7 @@ intSecondary [int] NULL,
 decPercentage [decimal](9, 6) NULL,
 [intAccountId] [int] NULL,
 strAccountId [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
-) ON [PRIMARY]
+)
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLReallocationTemp', @level2type=N'COLUMN',@level2name=N'strAccountId' 
 GO

@@ -81,4 +81,4 @@ CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_strPurchaseOrderNumber]
 GO
 CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intVendorId]
     ON [dbo].[tblPOPurchase]([intEntityVendorId] ASC)
-	INCLUDE ([intPurchaseId],[strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	INCLUDE ([intPurchaseId],[strVendorOrderNumber]) WITH (  IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)

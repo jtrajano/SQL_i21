@@ -27,26 +27,26 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K4_1]
 (
 	[intPContractDetailId] ASC
 )
-INCLUDE ( 	[intAllocationDetailId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+INCLUDE ( 	[intAllocationDetailId]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K4_K1] ON [dbo].[tblLGAllocationDetail]
 (
 	[intPContractDetailId] ASC,
 	[intAllocationDetailId] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_197_692913540__K1_K4] ON [dbo].[tblLGAllocationDetail]
 (
        [intAllocationDetailId] ASC,
        [intPContractDetailId] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K5_1] ON [dbo].[tblLGLoad]
 (
 	[intPurchaseSale] ASC
 )
-INCLUDE ( 	[intLoadId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+INCLUDE ( 	[intLoadId]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO

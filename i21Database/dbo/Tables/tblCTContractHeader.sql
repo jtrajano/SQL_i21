@@ -167,7 +167,7 @@ INCLUDE (     [intCommodityUOMId],
        [dtmContractDate],
        [intContractBasisId],
        [ysnMultiplePriceFixation],
-       [dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+       [dblNoOfLots]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 go
 
 CREATE STATISTICS [_dta_stat_752721734_3_32_4] ON [dbo].[tblCTContractHeader]([intContractTypeId], [intPositionId], [intEntityId])
@@ -209,7 +209,7 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractHeader_197_752721734__K8_K3_K
 )
 INCLUDE ( 	[strContractNumber],
 	[ysnMultiplePriceFixation],
-	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblNoOfLots]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 go
 
 CREATE STATISTICS [_dta_stat_752721734_1_8_3] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intCommodityId], [intContractTypeId])

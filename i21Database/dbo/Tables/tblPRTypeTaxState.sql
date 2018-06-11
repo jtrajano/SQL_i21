@@ -5,7 +5,7 @@
 	[strFIPSCode] [nvarchar](2) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTaxState] PRIMARY KEY ([intTypeTaxStateId]),
-) ON [PRIMARY]
+)
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPRTypeTaxState] ON [dbo].[tblPRTypeTaxState] ([strState], [strCode]) WITH (IGNORE_DUP_KEY = OFF)

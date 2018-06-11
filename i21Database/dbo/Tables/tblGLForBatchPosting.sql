@@ -12,7 +12,7 @@
 	[ysnSelected] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblGLForBatchPosting] PRIMARY KEY ([intBatchPostingId])
-) ON [PRIMARY]
+)
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLForBatchPosting', @level2type=N'COLUMN',@level2name=N'intBatchPostingId' 
 GO

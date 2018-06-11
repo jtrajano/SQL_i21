@@ -14,7 +14,7 @@
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTaxAgency] PRIMARY KEY ([intTaxAgencyId]), 
     CONSTRAINT [AK_tblPRTaxAgency_strTaxAgencyName] UNIQUE ([strTaxAgency]) 
-) ON [PRIMARY]
+)
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',

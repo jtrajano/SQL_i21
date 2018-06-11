@@ -22,38 +22,3 @@
     CONSTRAINT [FK_tblGLBudget_tblGLFiscalYear] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId])
 );
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Budget Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intBudgetId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Budget Code' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intBudgetCode' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Period' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'strPeriod' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Date Start Date' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'dtmStartDate' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Fiscal Year Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intFiscalYearId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intAccountId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Group Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intAccountGroupId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Actual' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'curActual' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Sort' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intSort' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Date End Date' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'dtmEndDate' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'This Year' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'curThisYear' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Date Date' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'dtmDate' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Last Year' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'curLastYear' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Budget' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'curBudget' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Oper Plan' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'curOperPlan' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Select' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudget', @level2type=N'COLUMN',@level2name=N'ysnSelect' 
-GO
-

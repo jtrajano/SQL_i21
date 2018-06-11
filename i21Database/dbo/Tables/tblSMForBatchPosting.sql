@@ -15,4 +15,4 @@
 	[ysnSelected] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSMForBatchPosting] PRIMARY KEY ([intBatchPostingId])
-) ON [PRIMARY]
+)

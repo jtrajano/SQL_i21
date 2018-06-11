@@ -73,7 +73,7 @@ go
 --(
 --	[intLoadId] ASC
 --)
---INCLUDE ( 	[strContainerNumber]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+--INCLUDE ( 	[strContainerNumber]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 --go
 
 CREATE NONCLUSTERED INDEX [IX_tblLGLoadContainer_intLoadId] ON [dbo].[tblLGLoadContainer]

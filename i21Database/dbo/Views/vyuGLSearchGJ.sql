@@ -29,7 +29,7 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblEMEntity_9_2007079032__K1_2] ON [dbo].[
 (
 	[intEntityId] ASC
 )
-INCLUDE ( 	[strName]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+INCLUDE ( 	[strName]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE STATISTICS [_dta_stat_600545373_4_19_15] ON [dbo].[tblGLJournal]([strTransactionType], [strSourceType], [intEntityId])
 GO
@@ -53,7 +53,7 @@ INCLUDE ( 	[dtmReverseDate],
 	[strDescription],
 	[ysnPosted],
 	[dtmDateEntered],
-	[strJournalType]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[strJournalType]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE STATISTICS [_dta_stat_600545373_1_4_19_7_15] ON [dbo].[tblGLJournal]([intJournalId], [strTransactionType], [strSourceType], [intCurrencyId], [intEntityId])
 GO
@@ -64,5 +64,5 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblGLJournalDetail_9_691598348__K3_6_8] ON
 	[intJournalId] ASC
 )
 INCLUDE ( 	[dblDebit],
-	[dblCredit]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblCredit]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO

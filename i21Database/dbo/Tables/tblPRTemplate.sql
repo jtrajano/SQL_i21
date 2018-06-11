@@ -5,7 +5,7 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTemplate] PRIMARY KEY ([intTemplateId]), 
     CONSTRAINT [AK_tblPRTemplate_strTemplateName] UNIQUE ([strTemplateName]),
-) ON [PRIMARY]
+)
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',

@@ -25,10 +25,10 @@
 	[intLastModifiedUserId] INT NULL,
 	[dtmLastModified] [datetime] NULL,
 	[intConcurrencyId] [int] NULL,
- CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
+ CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH ( STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF),
  CONSTRAINT [FK_tblPRPaycheck_tblPREmployee] FOREIGN KEY ([intEntityEmployeeId]) REFERENCES [tblPREmployee]([intEntityId]),
  CONSTRAINT [FK_tblPRPaycheck_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
-) ON [PRIMARY]
+)
 GO
 /****** Object:  Default [DF__tblPRPayc__ysnGL__3D195C48]    Script Date: 08/14/2014 10:50:11 ******/
 

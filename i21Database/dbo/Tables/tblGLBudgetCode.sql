@@ -7,13 +7,3 @@
     CONSTRAINT [PK_tblGLBudgetCode] PRIMARY KEY CLUSTERED ([intBudgetCode] ASC)
 );
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudgetCode', @level2type=N'COLUMN',@level2name=N'intBudgetCode' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Is Default' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudgetCode', @level2type=N'COLUMN',@level2name=N'ysnDefault' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Budget Code (string)' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudgetCode', @level2type=N'COLUMN',@level2name=N'strBudgetCode' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Budget English Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudgetCode', @level2type=N'COLUMN',@level2name=N'strBudgetEnglishDescription' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLBudgetCode', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
-GO

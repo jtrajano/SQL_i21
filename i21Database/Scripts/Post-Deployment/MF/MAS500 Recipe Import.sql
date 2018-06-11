@@ -6,7 +6,7 @@
 	[LastTransferDateTime] [datetime] NULL,
 	[ViewName] [nvarchar](50) NULL,
 	[FilterColumn] [nvarchar](50) NULL
-) ON [PRIMARY]
+)
 
 GO
 

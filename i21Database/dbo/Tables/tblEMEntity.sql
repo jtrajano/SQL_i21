@@ -54,13 +54,13 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblEMEntity]
 	[intEntityId] ASC,
 	[intEntityClassId] ASC
 )
-INCLUDE ( 	[strName]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+INCLUDE ( 	[strName]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblEMEntity]
 (
 	[intEntityId] ASC
 )
-INCLUDE ( 	[strName], [intEntityClassId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+INCLUDE ( 	[strName], [intEntityClassId]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 
 
 

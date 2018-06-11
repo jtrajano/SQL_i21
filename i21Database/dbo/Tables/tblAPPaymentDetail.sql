@@ -29,7 +29,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intPaymentId_intBillId] ON [dbo
 	[intBillId] ASC,
 	[intPaymentId] ASC
 )
-WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+WITH (  IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 
@@ -37,7 +37,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPaymentDetail_intBillId] ON [dbo].[tblAPPayme
 (
 	[intBillId] ASC
 )
-WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+WITH (  IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPPaymentDetail]
@@ -49,7 +49,7 @@ INCLUDE ( 	[intPaymentId],
 	[dblDiscount],
 	[dblPayment],
 	[dblInterest],
-	[dblWithheld]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblWithheld]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 

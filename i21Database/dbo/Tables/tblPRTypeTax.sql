@@ -23,7 +23,7 @@
 	CONSTRAINT [FK_tblPRTypeTax_tblPRTypeTaxLocal] FOREIGN KEY ([intTypeTaxLocalId]) REFERENCES [tblPRTypeTaxLocal]([intTypeTaxLocalId]), 
     CONSTRAINT [FK_tblPRTypeTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblPRTypeTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId])
-) ON [PRIMARY]
+)
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',

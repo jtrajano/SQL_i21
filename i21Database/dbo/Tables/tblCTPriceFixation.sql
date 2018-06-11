@@ -46,5 +46,5 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblCTPriceFixation_197_13243102__K4_5_9_10
 )
 INCLUDE (     [intContractDetailId],
        [dblTotalLots],
-       [dblLotsFixed]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+       [dblLotsFixed]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 go

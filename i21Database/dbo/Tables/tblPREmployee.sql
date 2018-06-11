@@ -47,7 +47,7 @@
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),
 	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityId]),
 	CONSTRAINT [FK_tblPREmployee_tblPREmployeeRank] FOREIGN KEY ([intRank]) REFERENCES [tblPREmployeeRank]([intRank]),
-) ON [PRIMARY]
+)
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployee_intUserId] ON [dbo].[tblPREmployee] ([intUserSecurityId]) WHERE [intUserSecurityId] IS NOT NULL

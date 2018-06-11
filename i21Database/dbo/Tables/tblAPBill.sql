@@ -119,7 +119,7 @@ CREATE NONCLUSTERED INDEX [IX_intBillId]
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
     ON [dbo].[tblAPBill]([intEntityVendorId] ASC)
-	INCLUDE ([intBillId], dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	INCLUDE ([intBillId], dtmBillDate, ysnPosted, [strVendorOrderNumber], [intAccountId]) WITH (  IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBill]
 (
@@ -129,7 +129,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBill]
 	[ysnPaid] ASC,
 	[strBillId] ASC,
 	[dtmDueDate] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblAPBill]
 (
@@ -142,7 +142,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblAPBill]
 	[intEntityVendorId] ASC,
 	[dtmDate] ASC,
 	[intAccountId] ASC
-)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+)WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_3] ON [dbo].[tblAPBill]
 (
@@ -156,7 +156,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_3] ON [dbo].[tblAPBill]
 	[ysnPaid] ASC,
 	[intTransactionType] ASC
 )
-INCLUDE ( 	[dblTotal],[dblAmountDue]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+INCLUDE ( 	[dblTotal],[dblAmountDue]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_rptAging_4] ON [dbo].[tblAPBill]
@@ -174,7 +174,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_4] ON [dbo].[tblAPBill]
 )
 INCLUDE ( 	[dblTotal],
 	[dblAmountDue],
-	[dblTax]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblTax]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_rptAging_5] ON [dbo].[tblAPBill]
@@ -192,7 +192,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_5] ON [dbo].[tblAPBill]
 INCLUDE ( 	[dblTotal],
 	[dblAmountDue],
 	[intEntityVendorId],
-	[dblTax]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblTax]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_6] ON [dbo].[tblAPBill]
 (
@@ -209,7 +209,7 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_6] ON [dbo].[tblAPBill]
 )
 INCLUDE ( 	[dblTotal],
 	[dblAmountDue],
-	[dblTax]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+	[dblTax]) WITH (  DROP_EXISTING = OFF, ONLINE = OFF)
 GO
 CREATE STATISTICS [ST_rptAging_1] ON [dbo].[tblAPBill]([intEntityVendorId], [intTransactionType], [ysnPosted], [ysnPaid], [intBillId], [ysnOrigin], [dtmDate], [strBillId], [dtmDueDate], [intAccountId])
 GO

@@ -14,19 +14,3 @@
     CONSTRAINT [FK_tblGLAccountTemplateDetail_tblGLAccountTemplate] FOREIGN KEY ([intAccountTemplateId]) REFERENCES [dbo].[tblGLCOATemplate] ([intAccountTemplateId]) ON DELETE CASCADE
 );
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'intAccountTemplateDetailId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Foreign Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'intAccountTemplateId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Code' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'strCode' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'strDescription' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Group Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'intAccountGroupId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Structure Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'intAccountStructureId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLCOATemplateDetail', @level2type=N'COLUMN',@level2name=N'intAccountCategoryId' 
-GO

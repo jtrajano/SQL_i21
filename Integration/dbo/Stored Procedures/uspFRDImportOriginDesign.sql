@@ -32,7 +32,7 @@ BEGIN
 			[strAction] [nchar](10) NULL,
 			[intSort] [int] NULL,
 			[introwdetailiddet] [int] NULL
-		) ON [PRIMARY]
+		)
 		CREATE TABLE #irelyloadFRRowDesign(
 			[intRowDetailId] [int] IDENTITY(1,1) NOT NULL,
 			[intRowId] [int] NOT NULL,
@@ -75,8 +75,8 @@ BEGIN
 				[intRowDetailId] ASC,
 				[intRowId] ASC,
 				[intRefNo] ASC
-			)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-		) ON [PRIMARY]
+			)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+		)
 
 
 		--=====================================================================================================================================

@@ -16,7 +16,7 @@
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblTMGlobalJulianCalendar_intConcurrencyId]  DEFAULT ((1)),
 	[ysnDefault] [bit] NOT NULL CONSTRAINT [DF_tblTMGlobalJulianCalendar_ysnDefault]  DEFAULT ((0)), 
     CONSTRAINT [PK_tblTMGlobalJulianCalendar] PRIMARY KEY ([intGlobalJulianCalendarId])
-) ON [PRIMARY]
+)
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

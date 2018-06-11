@@ -9,13 +9,3 @@
 );
 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountReallocation', @level2type=N'COLUMN',@level2name=N'intAccountReallocationId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Name' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountReallocation', @level2type=N'COLUMN',@level2name=N'strName' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Description' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountReallocation', @level2type=N'COLUMN',@level2name=N'strDescription' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountReallocation', @level2type=N'COLUMN',@level2name=N'intCurrencyId' 
-GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Concurrency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountReallocation', @level2type=N'COLUMN',@level2name=N'intConcurrencyId' 
-GO
