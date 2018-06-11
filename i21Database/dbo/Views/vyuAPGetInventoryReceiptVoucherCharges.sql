@@ -173,6 +173,7 @@ FROM	tblICInventoryReceipt Receipt
 WHERE	Receipt.ysnPosted = 1
 		AND ReceiptCharge.ysnAccrue = 1
 		AND receiptAndVoucheredCharges.dblReceiptQty <> receiptAndVoucheredCharges.dblVoucherQty
+		AND ReceiptCharge.dblAmount <> 0
 GO
 
 
