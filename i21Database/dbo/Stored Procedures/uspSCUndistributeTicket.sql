@@ -40,18 +40,48 @@ DECLARE @InventoryReceiptId INT
 		,@strXml NVARCHAR(MAX)
 		,@intSettleStorageId INT
 		,@ItemsToIncreaseInTransitDirect AS InTransitTableType
-		,@ysnIRPosted BIT;
+		,@ysnIRPosted BIT
+        ,@intContractDetailId INT
+        ,@intContractStatusId INT
+        ,@strContractNumber NVARCHAR(40)
+        ,@strContractStatus NVARCHAR(40)
+        ,@intContractSeq INT
+        ,@intId INT;
 
 BEGIN TRY
 		SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
 		, @dblDeliveredQuantity = LGLD.dblDeliveredQuantity
 		, @dblLoadScheduledUnits = LGLD.dblQuantity
-		, @intLoadContractId = 
-				CASE WHEN @strInOutFlag = 'I' THEN LGLD.intPContractDetailId
-					WHEN @strInOutFlag = 'O' THEN LGLD.intSContractDetailId
-				END
+		, @intLoadContractId = CASE WHEN @strInOutFlag = 'I' THEN LGLD.intPContractDetailId WHEN @strInOutFlag = 'O' THEN LGLD.intSContractDetailId END
 		FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 		WHERE LGL.intTicketId = @intTicketId
+
+		IF ISNULL(@ysnDirectShip,0) = 0 AND ISNULL(@intEntityId,0) > 0
+		BEGIN
+			SELECT @intId = MIN(intInventoryReceiptItemId) 
+			FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
+
+			WHILE ISNULL(@intId,0) > 0
+			BEGIN
+				SELECT @intContractDetailId = intLineNo FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intId
+				IF ISNULL(@intContractDetailId,0) > 0
+				BEGIN
+					SELECT @intContractStatusId = intContractStatusId
+					, @strContractStatus = strContractStatus 
+					, @intContractSeq = intContractSeq
+					, @strContractNumber = strContractNumber 
+					from vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId
+					IF ISNULL(@intContractStatusId, 0) != 1 AND ISNULL(@intContractStatusId, 0) != 4
+					BEGIN
+						SET @ErrorMessage = 'Contract ' + @strContractNumber +'-Seq.' + CAST(@intContractSeq AS nvarchar) + ' is ' + @strContractStatus +'. Please Open before Undistributing.';
+						RAISERROR(@ErrorMessage, 11, 1);
+						RETURN;
+					END
+				END
+				SELECT @intId = MIN(intInventoryReceiptItemId) 
+				FROM tblICInventoryReceiptItemId where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+			END
+		END
 
 		IF @strInOutFlag = 'I'
 			BEGIN
