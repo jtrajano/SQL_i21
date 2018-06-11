@@ -110,12 +110,9 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	--EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
-	--	,@intTransactionTypeId = 34
-	--	,@ysnPosted = 1
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intOrderHeaderId
-			,34
+		,@intOrderHeaderId
+		,34
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -254,13 +251,6 @@ BEGIN TRY
 
 			SELECT @strTransactionId = @strReferenceNo
 
-			EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-				,@intTransactionId
-				,@intInventoryTransactionType
-
-			EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-				,@intOrderId
-				,34
 			SELECT @intInventoryTransactionType = 5
 		END
 		ELSE
@@ -643,10 +633,6 @@ BEGIN TRY
 		WHERE intTaskRecordId > @intMinTaskRecordId
 	END
 
-	--EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
-	--	,@intTransactionTypeId = 34
-	--	,@ysnPosted = 0
-
 	IF @ysnLoad = 0
 	BEGIN
 		SELECT @intRemainingTasks = COUNT(*)
@@ -706,9 +692,6 @@ BEGIN TRY
 			OR @strOrderType = 'WO PROD STAGING'
 			)
 	BEGIN
-		SELECT @intTransactionId = @intInventoryShipmentId
-
-		SELECT @strTransactionId = @strReferenceNo
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
@@ -741,7 +724,6 @@ BEGIN TRY
 			AND IL.intLocationId = SL.intLocationId
 		WHERE T.intOrderHeaderId = @intOrderHeaderId
 			AND T.intTaskStateId = 4
-			--AND @strOrderType = 'INVENTORY SHIPMENT STAGING'
 
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
@@ -749,10 +731,6 @@ BEGIN TRY
 
 		DELETE
 		FROM @ItemsToReserve
-
-		--EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-		--	,@intOrderId
-		--	,34
 
 		INSERT INTO @ItemsToReserve (
 			intItemId
