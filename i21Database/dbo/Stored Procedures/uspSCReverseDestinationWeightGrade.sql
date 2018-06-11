@@ -34,7 +34,8 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@ysnRecap BIT
 		,@intContractDetailId INT
 		,@dblContractQty INT
-		,@intTicketItemUOMId INT;
+		,@intTicketItemUOMId INT
+		,@dblContractAvailableQty NUMERIC(38,20);
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
@@ -64,8 +65,9 @@ BEGIN TRY
 
 		IF ISNULL(@intContractDetailId,0) != 0
 		BEGIN
-			SET @dblContractQty = (@dblContractQty * -1)
-			EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractQty, @intUserId, @intMatchTicketId, 'Scale', @intTicketItemUOMId
+			SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 		END
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId

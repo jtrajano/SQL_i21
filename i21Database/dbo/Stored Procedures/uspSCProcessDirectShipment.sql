@@ -33,7 +33,8 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intMatchContractDetailId INT
 		,@dblMatchContractUnits NUMERIC(38, 20)
 		,@intTicketItemUOMId INT
-		,@InventoryShipmentId INT;
+		,@InventoryShipmentId INT
+		,@dblContractAvailableQty NUMERIC(38, 20);
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
 	BEGIN
@@ -55,7 +56,7 @@ BEGIN TRY
 				, @dblMatchContractUnits = dblNetUnits
 			FROM vyuSCTicketScreenView where intTicketId = @intMatchTicketId 
 
-			IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
+			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
 				UPDATE	MatchTicket SET
 					MatchTicket.dblGrossWeight = SC.dblGrossWeight
@@ -83,7 +84,7 @@ BEGIN TRY
 				WHERE SC.intTicketId = @intTicketId
 			END
 
-			IF ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
+			IF ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
 				UPDATE	MatchDiscount SET
 					MatchDiscount.dblShrinkPercent = QM.dblShrinkPercent
@@ -144,7 +145,10 @@ BEGIN TRY
 				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
 
 				IF ISNULL(@intContractDetailId,0) != 0
-					EXEC uspCTUpdateScheduleQuantityUsingUOM @intMatchContractDetailId, @dblMatchContractUnits, @intUserId, @intMatchTicketId, 'Scale', @intTicketItemUOMId
+				BEGIN
+					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+					EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+				END
 
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 			END
@@ -174,7 +178,10 @@ BEGIN TRY
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
 			BEGIN
 				IF ISNULL(@intContractDetailId,0) != 0
-					EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				BEGIN
+					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+				END
 				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId
 			END
 			INSERT INTO @ItemsToIncreaseInTransitDirect(
@@ -212,7 +219,11 @@ BEGIN TRY
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
 			BEGIN
 				IF ISNULL(@intContractDetailId,0) != 0
-					EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+				BEGIN
+					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+				END
+					
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 			END
 		END
