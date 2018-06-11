@@ -197,6 +197,75 @@ BEGIN
 					FROM #tmpCustomerTable A
 					WHERE tblTMLease.intBillToCustomerId = A.intOriginId
 
+
+
+					---------------------------------------------------------------------------------
+					--- START Update/Check duplicate site numbers
+					-------------------------------------------------------------------------------------
+
+					SELECT 
+						intRowId = ROW_NUMBER() OVER(PARTITION BY intCustomerID,intSiteNumber ORDER BY dblTotalCapacity DESC,ysnActive DESC, intSiteID DESC)
+						,*
+					INTO #tmpSite
+					FROM tblTMSite
+
+
+					--SELECT * 
+					--FROM #tmpSite
+					--WHERE intRowId > 1
+
+					DECLARE @intSiteId INT
+					DECLARE @intCustomerId INT
+					DECLARE @intCurrentSiteNumber INT
+
+					WHILE EXISTS(SELECT TOP 1 1 FROM #tmpSite WHERE intRowId > 1)
+					BEGIN
+
+						--- get site id and customer id
+						SELECT TOP 1 
+							 @intSiteId = intSiteID
+							 ,@intCustomerId = intCustomerID
+						FROM #tmpSite 
+						WHERE intRowId > 1
+
+						--get current Site number
+						SELECT TOP 1
+							@intCurrentSiteNumber = intCurrentSiteNumber + 1 
+						FROM tblTMCustomer
+						WHERE intCustomerID = @intCustomerId
+
+						--Check current number
+						WHILE EXISTS(SELECT TOP 1 1 FROM tblTMSite WHERE intCustomerID = @intCustomerId AND intSiteNumber = @intCurrentSiteNumber)
+						BEGIN
+							SET @intCurrentSiteNumber = @intCurrentSiteNumber + 1
+						END
+
+						--- update duplicate site
+						UPDATE tblTMSite
+						SET intSiteNumber = @intCurrentSiteNumber
+						WHERE intSiteID = @intSiteId
+
+
+						-- update Customer for the currentSiteNumber
+						UPDATE tblTMCustomer
+						SET intCurrentSiteNumber = @intCurrentSiteNumber 
+						WHERE intCustomerID = @intCustomerId
+	
+	
+						--SELECT 
+						--	newSiteNumber = @intCurrentSiteNumber
+						--,oldSiteNumber = intSiteNumber
+						--,*
+						--FROM vyuTMConsumptionSiteSearch WHERE intSiteID = @intSiteId
+
+						DELETE FROM #tmpSite
+						WHERE intSiteID = @intSiteId
+
+					END
+
+					---------------------------------------------------------------------------------
+					--- END Update/Check duplicate site numbers
+					-------------------------------------------------------------------------------------
 				
 					PRINT ''END UPDATE CUSTOMER RELATED RECORDS''
 
@@ -823,54 +892,54 @@ BEGIN
 					FROM #tmpContractTable A
 					WHERE tblTMDispatch.intContractId = A.intOriginId
 
-					--------------------------------------------
-					---Check for site link contract vs i21 record
-					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the order contract.''
-						,strTable = ''tblTMSiteLink''
-						,intRecordId = A.intSiteLinkID
-					FROM tblTMSiteLink A
-					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpContractTable WHERE intOriginId = A.intContractID)
-						AND A.intContractID IS NOT NULL
+					----------------------------------------------
+					-----Check for site link contract vs i21 record
+					------------------------------------------------------------------------
+					--INSERT INTO @tmpMigrationResult(
+					--	strError
+					--	,strTable
+					--	,intRecordId
+					--)
+					--SELECT 
+					--	strError = ''No equivalent record in i21 for the order contract.''
+					--	,strTable = ''tblTMSiteLink''
+					--	,intRecordId = A.intSiteLinkID
+					--FROM tblTMSiteLink A
+					--WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpContractTable WHERE intOriginId = A.intContractID)
+					--	AND A.intContractID IS NOT NULL
 
-					----------------------------------------------------------------------
-					-- Update tblTMSiteLink
-					----------------------------------------------------------------------
-					UPDATE tblTMSiteLink
-					SET intContractID = A.intI21Id
-					FROM #tmpContractTable A
-					WHERE tblTMSiteLink.intContractID = A.intOriginId
+					------------------------------------------------------------------------
+					---- Update tblTMSiteLink
+					------------------------------------------------------------------------
+					--UPDATE tblTMSiteLink
+					--SET intContractID = A.intI21Id
+					--FROM #tmpContractTable A
+					--WHERE tblTMSiteLink.intContractID = A.intOriginId
 
 
-					--------------------------------------------
-					---Check for delivery contract vs i21 record
-					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the order contract.''
-						,strTable = ''tblTMDeliveryHistory''
-						,intRecordId = A.intDeliveryHistoryID
-					FROM tblTMDeliveryHistory A
-					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpContractTable WHERE intOriginId = A.intWillCallContractId)
-						AND A.intWillCallContractId IS NOT NULL
+					----------------------------------------------
+					-----Check for delivery contract vs i21 record
+					------------------------------------------------------------------------
+					--INSERT INTO @tmpMigrationResult(
+					--	strError
+					--	,strTable
+					--	,intRecordId
+					--)
+					--SELECT 
+					--	strError = ''No equivalent record in i21 for the order contract.''
+					--	,strTable = ''tblTMDeliveryHistory''
+					--	,intRecordId = A.intDeliveryHistoryID
+					--FROM tblTMDeliveryHistory A
+					--WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpContractTable WHERE intOriginId = A.intWillCallContractId)
+					--	AND A.intWillCallContractId IS NOT NULL
 				
-					----------------------------------------------------------------------
-					-- Update tblTMDeliveryHistory
-					----------------------------------------------------------------------
-					UPDATE tblTMDeliveryHistory
-					SET intWillCallContractId = A.intI21Id
-					FROM #tmpContractTable A
-					WHERE tblTMDeliveryHistory.intWillCallContractId = A.intOriginId
+					------------------------------------------------------------------------
+					---- Update tblTMDeliveryHistory
+					------------------------------------------------------------------------
+					--UPDATE tblTMDeliveryHistory
+					--SET intWillCallContractId = A.intI21Id
+					--FROM #tmpContractTable A
+					--WHERE tblTMDeliveryHistory.intWillCallContractId = A.intOriginId
 
 					PRINT ''END UPDATE CONTRACT RELATED RECORDS''
 				
@@ -904,112 +973,112 @@ BEGIN
 					--------------------------------------------
 					---Check for delivery history invoice vs i21 record
 					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the delivery history invoice.''
-						,strTable = ''tblTMDeliveryHistory''
-						,intRecordId = A.intDeliveryHistoryID
-					FROM (SELECT 
-						Z.strInvoiceNumber
-						,X.intCustomerNumber
-						,Y.intLocationId
-						,Z.intDeliveryHistoryID
-					FROM tblTMDeliveryHistory Z
-					INNER JOIN tblTMSite Y
-						ON Z.intSiteID = Y.intSiteID
-					INNER JOIN tblTMCustomer X
-						ON Y.intCustomerID = X.intCustomerID) A
-					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceTable V 
-										WHERE A.intCustomerNumber = V.intEntityId
-											AND A.intLocationId = V.intLocationId
-											AND RTRIM(A.strInvoiceNumber) = RTRIM(V.strOriginNumber)
-											AND ISNULL(A.strInvoiceNumber,'''') <> '''')
+					--INSERT INTO @tmpMigrationResult(
+					--	strError
+					--	,strTable
+					--	,intRecordId
+					--)
+					--SELECT 
+					--	strError = ''No equivalent record in i21 for the delivery history invoice.''
+					--	,strTable = ''tblTMDeliveryHistory''
+					--	,intRecordId = A.intDeliveryHistoryID
+					--FROM (SELECT 
+					--	Z.strInvoiceNumber
+					--	,X.intCustomerNumber
+					--	,Y.intLocationId
+					--	,Z.intDeliveryHistoryID
+					--FROM tblTMDeliveryHistory Z
+					--INNER JOIN tblTMSite Y
+					--	ON Z.intSiteID = Y.intSiteID
+					--INNER JOIN tblTMCustomer X
+					--	ON Y.intCustomerID = X.intCustomerID) A
+					--WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceTable V 
+					--					WHERE A.intCustomerNumber = V.intEntityId
+					--						AND A.intLocationId = V.intLocationId
+					--						AND RTRIM(A.strInvoiceNumber) = RTRIM(V.strOriginNumber)
+					--						AND ISNULL(A.strInvoiceNumber,'''') <> '''')
 
 
-					----------------------------------------------------------------------
-					-- Update tblTMDeliveryHistory
-					----------------------------------------------------------------------
-					UPDATE tblTMDeliveryHistory
-					SET intInvoiceId = A.intI21Id
-						,strInvoiceNumber = A.stri21Number
-					FROM (
-					SELECT 
-						V.stri21Number
-						,Z.intDeliveryHistoryID
-						,V.intI21Id
-					FROM tblTMDeliveryHistory Z
-					INNER JOIN tblTMSite Y
-						ON Z.intSiteID = Y.intSiteID
-					INNER JOIN tblTMCustomer X
-						ON Y.intCustomerID = X.intCustomerID
-					INNER JOIN #tmpInvoiceTable V
-						ON X.intCustomerNumber = V.intEntityId
-						AND Y.intLocationId = V.intLocationId
-						AND RTRIM(Z.strInvoiceNumber) = RTRIM(V.strOriginNumber)
-					) A
-					WHERE tblTMDeliveryHistory.intDeliveryHistoryID = A.intDeliveryHistoryID
+					------------------------------------------------------------------------
+					---- Update tblTMDeliveryHistory
+					------------------------------------------------------------------------
+					--UPDATE tblTMDeliveryHistory
+					--SET intInvoiceId = A.intI21Id
+					--	,strInvoiceNumber = A.stri21Number
+					--FROM (
+					--SELECT 
+					--	V.stri21Number
+					--	,Z.intDeliveryHistoryID
+					--	,V.intI21Id
+					--FROM tblTMDeliveryHistory Z
+					--INNER JOIN tblTMSite Y
+					--	ON Z.intSiteID = Y.intSiteID
+					--INNER JOIN tblTMCustomer X
+					--	ON Y.intCustomerID = X.intCustomerID
+					--INNER JOIN #tmpInvoiceTable V
+					--	ON X.intCustomerNumber = V.intEntityId
+					--	AND Y.intLocationId = V.intLocationId
+					--	AND RTRIM(Z.strInvoiceNumber) = RTRIM(V.strOriginNumber)
+					--) A
+					--WHERE tblTMDeliveryHistory.intDeliveryHistoryID = A.intDeliveryHistoryID
 				
 
 
-					--------------------------------------------
-					---Check for delivery history invoice vs i21 record
-					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the delivery history detail invoice.''
-						,strTable = ''tblTMDeliveryHistoryDetail''
-						,intRecordId = A.intDeliveryHistoryDetailID
-					FROM (SELECT 
-						AA.strInvoiceNumber
-						,X.intCustomerNumber
-						,Y.intLocationId
-						,AA.intDeliveryHistoryDetailID
-					FROM tblTMDeliveryHistory Z
-					INNER JOIN tblTMSite Y
-						ON Z.intSiteID = Y.intSiteID
-					INNER JOIN tblTMCustomer X
-						ON Y.intCustomerID = X.intCustomerID
-					INNER JOIN tblTMDeliveryHistoryDetail AA
-						ON Z.intDeliveryHistoryID = AA.intDeliveryHistoryID) A
-					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceTable V 
-										WHERE A.intCustomerNumber = V.intEntityId
-											AND A.intLocationId = V.intLocationId
-											AND RTRIM(A.strInvoiceNumber) = RTRIM(V.strOriginNumber)
-											AND ISNULL(A.strInvoiceNumber,'''') <> '''')
+					----------------------------------------------
+					-----Check for delivery history invoice vs i21 record
+					------------------------------------------------------------------------
+					--INSERT INTO @tmpMigrationResult(
+					--	strError
+					--	,strTable
+					--	,intRecordId
+					--)
+					--SELECT 
+					--	strError = ''No equivalent record in i21 for the delivery history detail invoice.''
+					--	,strTable = ''tblTMDeliveryHistoryDetail''
+					--	,intRecordId = A.intDeliveryHistoryDetailID
+					--FROM (SELECT 
+					--	AA.strInvoiceNumber
+					--	,X.intCustomerNumber
+					--	,Y.intLocationId
+					--	,AA.intDeliveryHistoryDetailID
+					--FROM tblTMDeliveryHistory Z
+					--INNER JOIN tblTMSite Y
+					--	ON Z.intSiteID = Y.intSiteID
+					--INNER JOIN tblTMCustomer X
+					--	ON Y.intCustomerID = X.intCustomerID
+					--INNER JOIN tblTMDeliveryHistoryDetail AA
+					--	ON Z.intDeliveryHistoryID = AA.intDeliveryHistoryID) A
+					--WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceTable V 
+					--					WHERE A.intCustomerNumber = V.intEntityId
+					--						AND A.intLocationId = V.intLocationId
+					--						AND RTRIM(A.strInvoiceNumber) = RTRIM(V.strOriginNumber)
+					--						AND ISNULL(A.strInvoiceNumber,'''') <> '''')
 
 
-					----------------------------------------------------------------------
-					-- Update tblTMDeliveryHistoryDetail
-					----------------------------------------------------------------------
-					UPDATE tblTMDeliveryHistoryDetail
-					SET strInvoiceNumber = A.stri21Number
-					FROM (
-						SELECT 
-							V.stri21Number
-							,W.intDeliveryHistoryDetailID
-							,V.intI21Id
-						FROM tblTMDeliveryHistory Z
-						INNER JOIN tblTMDeliveryHistoryDetail W
-							ON Z.intDeliveryHistoryID = W.intDeliveryHistoryID
-						INNER JOIN tblTMSite Y
-							ON Z.intSiteID = Y.intSiteID
-						INNER JOIN tblTMCustomer X
-							ON Y.intCustomerID = X.intCustomerID
-						INNER JOIN #tmpInvoiceTable V
-							ON X.intCustomerNumber = V.intEntityId
-							AND Y.intLocationId = V.intLocationId
-							AND RTRIM(W.strInvoiceNumber) = RTRIM(V.strOriginNumber)
+					------------------------------------------------------------------------
+					---- Update tblTMDeliveryHistoryDetail
+					------------------------------------------------------------------------
+					--UPDATE tblTMDeliveryHistoryDetail
+					--SET strInvoiceNumber = A.stri21Number
+					--FROM (
+					--	SELECT 
+					--		V.stri21Number
+					--		,W.intDeliveryHistoryDetailID
+					--		,V.intI21Id
+					--	FROM tblTMDeliveryHistory Z
+					--	INNER JOIN tblTMDeliveryHistoryDetail W
+					--		ON Z.intDeliveryHistoryID = W.intDeliveryHistoryID
+					--	INNER JOIN tblTMSite Y
+					--		ON Z.intSiteID = Y.intSiteID
+					--	INNER JOIN tblTMCustomer X
+					--		ON Y.intCustomerID = X.intCustomerID
+					--	INNER JOIN #tmpInvoiceTable V
+					--		ON X.intCustomerNumber = V.intEntityId
+					--		AND Y.intLocationId = V.intLocationId
+					--		AND RTRIM(W.strInvoiceNumber) = RTRIM(V.strOriginNumber)
 
-					) A
-					WHERE tblTMDeliveryHistoryDetail.intDeliveryHistoryDetailID = A.intDeliveryHistoryDetailID
+					--) A
+					--WHERE tblTMDeliveryHistoryDetail.intDeliveryHistoryDetailID = A.intDeliveryHistoryDetailID
 				
 
 				
@@ -1083,6 +1152,10 @@ BEGIN
 							EXEC uspTMRecreateLeaseSearchView
 					
 							EXEC uspTMRecreateDeviceSearchView
+
+							EXEC uspTMRecreateTMCustomerView
+
+							EXEC uspTMRecreateUpdateRouteSequenceSP
 					
 							EXEC uspTMRecreateGeneratedCallEntryView
 					
@@ -1109,6 +1182,34 @@ BEGIN
 							EXEC uspTMRecreateDYMOCustomerLabelReportView
 					
 							EXEC uspTMRecreateAssociateSiteSearchView
+
+							EXEC uspTMRecreateBudgetCalculationItemPricingView
+
+							EXEC uspTMRecreateBudgetCalculationSiteSP
+
+							EXEC uspTMRecreateBudgetCalculationSiteView
+
+							EXEC uspTMRecreateCustomerConsumptionSiteInfoView
+
+							EXEC uspTMRecreateDeliveryFillGroupSubReportView
+
+							EXEC uspTMRecreateDeliveryTicketView
+
+							EXEC uspTMRecreateForPrintDeliveryTicketView
+
+							EXEC uspTMRecreateETExportTankManagementSiteView
+
+							EXEC uspTMRecreateGeneratedCallEntryView
+
+							EXEC uspTMRecreateImportTankMonitorSP
+
+							EXEC uspTMRecreateLeaseCodeView
+
+							EXEC uspTMRecreateSiteCustomerView
+
+
+
+							
 					
 							
 
