@@ -552,11 +552,13 @@ BEGIN
 				,ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM #tmpdiscountschedule
-					 WHERE (@dblTotalQuantity >= intFromQty AND @dblTotalQuantity < intThruQty) AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId), 0)
+					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
+					 ORDER BY intFromQty DESC), 0)
 				,ROUND((ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM #tmpdiscountschedule
-					 WHERE (@dblTotalQuantity >= intFromQty AND @dblTotalQuantity < intThruQty) AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId), 0) * dblQuantity),2)
+					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
+					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
 				,dblDiscountEP		
 				,dblAPR			
@@ -667,11 +669,13 @@ BEGIN
 				,ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM #tmpdiscountschedule
-					 WHERE (@dblTotalQuantity >= intFromQty AND @dblTotalQuantity < intThruQty) AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId), 0)
+					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
+					 ORDER BY intFromQty DESC), 0)
 				,ROUND((ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM #tmpdiscountschedule
-					 WHERE (@dblTotalQuantity >= intFromQty AND @dblTotalQuantity < intThruQty) AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId), 0) * dblQuantity),2)	
+					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
+					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
 				,dblDiscountEP		
 				,dblAPR			
