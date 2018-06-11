@@ -35,7 +35,6 @@ RETURNS @returntable TABLE
     ,[dblUnitRetail]					NUMERIC(38, 20)								NULL
 	,[intCategoryId]					INT											NULL 
 	,[dblAdjustRetailValue]				NUMERIC(38, 20)								NULL
-	,[intCategoryAdjustmentType]		INT											NULL 
 )
 AS
 BEGIN
@@ -89,7 +88,7 @@ INSERT INTO @returntable
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[intCategoryAdjustmentType]) 
+) 
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= IST.[intItemLocationId]
@@ -144,7 +143,6 @@ SELECT
     ,[dblUnitRetail]			= NULL
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= NULL
-	,[intCategoryAdjustmentType]	= NULL
 FROM 
 	(SELECT [intInvoiceId], [intInvoiceDetailId], [intItemId], [dblPrice], [intCompanyLocationSubLocationId], [intStorageLocationId], [intItemUOMId], [intLoadDetailId], [dblTotal], [ysnBlended],
 			[dblQtyShipped], [intInventoryShipmentItemId], [intStorageScheduleTypeId], [intItemWeightUOMId], [intCurrencyExchangeRateTypeId], [dblCurrencyExchangeRate], [dblShipmentNetWt], [intLotId], [intTicketId]
@@ -228,7 +226,6 @@ SELECT
     ,[dblUnitRetail]			= NULL
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= NULL
-	,[intCategoryAdjustmentType]	= NULL
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN

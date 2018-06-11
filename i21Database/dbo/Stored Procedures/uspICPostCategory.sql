@@ -28,8 +28,8 @@ CREATE PROCEDURE [dbo].[uspICPostCategory]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20) 
-	,@dblAdjustRetailValue AS NUMERIC(38,20)
-	,@intCategoryAdjustmentType AS INT 
+	,@dblAdjustCostValue AS NUMERIC(38,20)
+	,@dblAdjustRetailValue AS NUMERIC(38,20)	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -152,13 +152,13 @@ END
 
 -- If Qty is unknown and it will only adjust the retail value, then do it here. 
 -- It will compute the cost using the Average Margin. 
-IF ISNULL(@dblAdjustRetailValue, 0) <> 0 
+IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) = 0 
 BEGIN 
 	-- Compute the Cost Value 
 	SELECT	@dblCostValue = 
 				CASE 
 					-- Do not compute the cost value if it a Mark Up or Mark Down. 
-					WHEN @intCategoryAdjustmentType IN (@AdjustTypeCategoryMarkupOrMarkDown) THEN 
+					WHEN @intTransactionTypeId IN (@AdjustTypeCategoryMarkupOrMarkDown) THEN 
 						0.00
 					ELSE 			
 					-- Formula: 
@@ -174,6 +174,16 @@ BEGIN
 
 	SET @dblValue = @dblCostValue
 	SET @dblRetailValue = @dblAdjustRetailValue
+END 
+
+-- Write-Off transaction. 
+-- It will adjust both the Cost Value and Retail Value
+IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) <> 0  AND @intTransactionTypeId = @AdjustTypeCategoryWriteOff
+BEGIN 
+	SET	@dblCostValue = @dblAdjustCostValue
+	SET @dblRetailValue = @dblAdjustRetailValue
+	SET @dblQty = 0
+	SET @dblValue = @dblAdjustCostValue
 END 
 
 -- Create the Inventory Transaction. 

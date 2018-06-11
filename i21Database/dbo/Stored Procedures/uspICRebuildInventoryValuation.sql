@@ -2588,8 +2588,8 @@ BEGIN
 						,dblForexRate
 						,intCategoryId
 						,dblUnitRetail
+						,dblAdjustCostValue
 						,dblAdjustRetailValue
-						,intCategoryAdjustmentType
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -2644,8 +2644,8 @@ BEGIN
 						,RebuildInvTrans.dblForexRate
 						,intCategoryId = RebuildInvTrans.intCategoryId 
 						,dblUnitRetail = RebuildInvTrans.dblUnitRetail
+						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
 						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
-						,intCategoryAdjustmentType = RebuildInvTrans.intTransactionTypeId
 
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 

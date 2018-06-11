@@ -1330,7 +1330,6 @@ IF @Post = 1
 				,[dblUnitRetail]
 				,[intCategoryId]
 				,[dblAdjustRetailValue]
-				,[intCategoryAdjustmentType]
 			) 
 			SELECT 
 				 [intItemId]
@@ -1362,7 +1361,6 @@ IF @Post = 1
 				,[dblUnitRetail]
 				,[intCategoryId]
 				,[dblAdjustRetailValue]
-				,[intCategoryAdjustmentType]
 			FROM 
 				[fnARGetItemsForCosting](@PostInvoiceData, @Post, 0)	
 				

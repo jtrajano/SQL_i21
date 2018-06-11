@@ -32,6 +32,6 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[intStorageScheduleTypeId] INT NULL					-- Storage schedule use for inventory shipment. 
     ,[dblUnitRetail] NUMERIC(38, 20) NULL
 	,[intCategoryId] INT NULL 
-	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
-	,[intCategoryAdjustmentType] INT NULL 
+	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
+	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL	
 )

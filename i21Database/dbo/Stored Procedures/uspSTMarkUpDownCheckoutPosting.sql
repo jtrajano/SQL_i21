@@ -57,7 +57,6 @@ BEGIN TRY
 								,dblForexRate
 								,intCategoryId
 								,dblAdjustRetailValue
-								,intCategoryAdjustmentType
 						) 
 						SELECT		
 								intItemId				= i.intItemId
@@ -86,7 +85,6 @@ BEGIN TRY
 								-- Department Manage
 								,dblAdjustRetailValue	= 0
 
-								,intCategoryAdjustmentType = NULL -- @intCategoryAdjustmentType -- Specify the adjustment type. 
 						FROM tblSTCheckoutMarkUpDowns MUD
 						INNER JOIN tblICItemUOM UOM ON MUD.intItemUOMId = UOM.intItemUOMId
 						INNER JOIN tblICItem i ON UOM.intItemId = i.intItemId

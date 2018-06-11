@@ -138,7 +138,6 @@ BEGIN TRY
 							,dblForexRate
 							,intCategoryId
 							,dblAdjustRetailValue
-							,intCategoryAdjustmentType
 					) 
 					SELECT		
 							intItemId				= i.intItemId
@@ -188,13 +187,7 @@ BEGIN TRY
 							,dblAdjustRetailValue	= CASE
 														WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblRetailPerUnit ELSE NULL
 													END -- -200 -- $$$ value to adjust the retail value.
-							,intCategoryAdjustmentType = CASE -- @intCategoryAdjustmentType -- Specify the adjustment type. 
-															WHEN MU.strType = @MarkUpType_DepartmentLevel AND MU.strAdjustmentType = @AdjustmentType_Regular 
-																THEN @AdjustTypeCategoryMarkupOrMarkDown
-															WHEN MU.strType = @MarkUpType_DepartmentLevel AND MU.strAdjustmentType = @AdjustmentType_WriteOff
-																THEN @AdjustTypeCategoryWriteOff
-															ELSE NULL
-														END
+
 					FROM tblSTMarkUpDownDetail MUD
 					INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId
 					INNER JOIN tblICItem i ON MUD.intItemId = i.intItemId
