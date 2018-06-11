@@ -68,7 +68,7 @@ FROM (
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
 	WHERE  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate 
-	AND h.intCommodityId = @intCommodityId 
+	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 	) a
 WHERE a.intRowNum = 1  AND strPricingStatus = 'Fully Priced' AND intContractStatusId NOT IN (2, 3, 6)
 
@@ -112,7 +112,9 @@ FROM (
 	FROM tblCTSequenceHistory h
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate AND h.intCommodityId = @intCommodityId 
+	WHERE  convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate 
+	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
+	
 	) a
 WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId=2 and strPricingStatus in( 'Parially Priced','Unpriced') 
 
@@ -154,7 +156,8 @@ FROM (
 	FROM tblCTSequenceHistory h
 	JOIN tblICItem i ON h.intItemId = i.intItemId
 	JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate AND h.intCommodityId = @intCommodityId 	
+	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate 
+	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 
 	) a
 WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and strPricingStatus = 'Parially Priced'  and intPricingTypeId=2
@@ -200,7 +203,8 @@ FROM (
 	WHERE intContractDetailId NOT IN (
 			SELECT intContractDetailId
 			FROM tblCTPriceFixation
-			) AND convert(DATETIME, CONVERT(VARCHAR(10), convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110), 110), 110) <= convert(DATETIME, @dtmToDate) AND h.intCommodityId = @intCommodityId
+			) AND convert(DATETIME, CONVERT(VARCHAR(10), convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110), 110), 110) <= convert(DATETIME, @dtmToDate) 
+			AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 				
 	) a
 WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId not in (1,2)

@@ -1,5 +1,6 @@
-﻿CREATE PROC [dbo].[uspRKGetOpenContractByDate]
-	@intCommodityId nvarchar(max)= null,
+﻿CREATE PROC [dbo].[uspRKGetOpenContractByDate] 
+ 
+	@intCommodityId int=null,
 	@dtmToDate datetime=null
 AS
 
@@ -14,9 +15,10 @@ SELECT ROW_NUMBER() OVER (PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtm
 		ot.intFutOptTransactionId,ot.intNewNoOfContract intNoOfContract	 
 FROM tblRKFutOptTransactionHistory ot 
  where ot.strNewBuySell='Buy' and isnull(ot.strInstrumentType,'') = 'Futures'
-and convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) and 
-ot.strCommodity=@strCommodityCode
-)t WHERE t.intRowNum =1 GROUP BY intFutOptTransactionId) t1
+and convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate)  
+and ot.strCommodity=case when isnull(@strCommodityCode,'')='' then ot.strCommodity else @strCommodityCode end 
+)t
+ WHERE t.intRowNum =1 GROUP BY intFutOptTransactionId) t1
 
 UNION 
 
@@ -28,7 +30,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtm
 FROM tblRKFutOptTransactionHistory ot 
 where ot.strNewBuySell='Sell' and isnull(ot.strInstrumentType,'') = 'Futures'
 and convert(DATETIME, CONVERT(VARCHAR(10), ot.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-and ot.strCommodity=@strCommodityCode
+and ot.strCommodity=case when isnull(@strCommodityCode,'')='' then ot.strCommodity else @strCommodityCode end 
 )t WHERE t.intRowNum =1 GROUP BY intFutOptTransactionId) t1
 
 UNION
