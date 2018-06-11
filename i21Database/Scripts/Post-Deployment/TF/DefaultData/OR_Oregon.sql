@@ -566,6 +566,23 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1334M', strScheduleCode = '6CRD', strType = 'Biodiesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37493
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1334M', strScheduleCode = '6FLT', strType = 'Biodiesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37494
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1334M', strScheduleCode = '6RTL', strType = 'Biodiesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37495
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1', strType = 'Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37498
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1', strType = 'Aviation Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37499
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1', strType = 'Jet Fuel', strState = 'OR', strStatus = 'Include', intMasterId = 37500
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1H', strType = 'Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37501
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1H', strType = 'Diesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37502
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1H', strType = 'Biodiesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37503
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1H', strType = 'CNG', strState = 'OR', strStatus = 'Include', intMasterId = 37504
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '1H', strType = 'Used Cooking Oil - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37505
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '2', strType = 'Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37506
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '2', strType = 'Aviation Gasoline', strState = 'OR', strStatus = 'Include', intMasterId = 37507
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '2', strType = 'Jet Fuel', strState = 'OR', strStatus = 'Include', intMasterId = 37508
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '2', strType = 'Ethanol', strState = 'OR', strStatus = 'Include', intMasterId = 37509
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1302', strScheduleCode = '2', strType = 'Diesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37510
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1334M', strScheduleCode = '2', strType = 'Biodiesel - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37511
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1334M', strScheduleCode = '2', strType = 'Biodiesel - Dyed', strState = 'OR', strStatus = 'Include', intMasterId = 37512
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '735-1334M', strScheduleCode = '2', strType = 'Used Cooking Oil - Undyed', strState = 'OR', strStatus = 'Include', intMasterId = 37513
+
 
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId
