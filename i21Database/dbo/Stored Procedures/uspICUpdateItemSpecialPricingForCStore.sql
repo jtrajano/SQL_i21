@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemSpecialPricingForCStore]
 	@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strDescription AS NVARCHAR(250) = NULL 
 	,@intItemId AS INT = NULL 
+	,@strPromotionType AS NVARCHAR(50) = NULL -- Added by Henry (ST-755)
 	-- update params
 	,@dtmBeginDate AS DATETIME = NULL
 	,@dtmEndDate AS DATETIME = NULL
@@ -158,6 +159,11 @@ BEGIN
 										WHERE	uom.intItemId = i.intItemId 
 												AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
 									)
+								)
+								-- Added by Henry (ST-755)
+								AND (
+									@strPromotionType IS NULL 
+									OR itemSpecialPricing.strPromotionType = @strPromotionType 
 								)
 					) AS Source_Query  
 						ON itemSpecialPricing.intItemSpecialPricingId = Source_Query.intItemSpecialPricingId
@@ -370,4 +376,4 @@ BEGIN
 		WHERE	ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0)
 	) auditLog
 	WHERE auditLog.strJsonData IS NOT NULL 
-END 
+END

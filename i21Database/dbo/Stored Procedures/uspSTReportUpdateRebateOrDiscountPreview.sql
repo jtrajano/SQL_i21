@@ -259,28 +259,52 @@ BEGIN TRY
 			IF(@strPromotionType = 'Vendor Rebate')
 				BEGIN
 					SET @dblDiscount = @dblRebateAmount
+					SET @strPromotionType = 'Rebate'
+
+					-- SP
+					EXEC [uspICUpdateItemSpecialPricingForCStore]
+						-- filter params
+						@strUpcCode = NULL 
+						,@strDescription = NULL 
+						,@intItemId = NULL 
+						,@strPromotionType = @strPromotionType
+						-- update params
+						,@dtmBeginDate = @dtmBeginDateConv
+						,@dtmEndDate = @dtmEndDateConv
+						,@dblDiscount = @dblDiscount
+
+						,@dblAccumulatedAmount = @dblAccumAmount
+						,@dblAccumulatedQty = @dblAccumlatedQty
+
+						,@dblDiscountThruAmount = NULL
+						,@dblDiscountThruQty = NULL
+
+						,@intEntityUserSecurityId = @intCurrentUserId
 				END
 			ELSE IF(@strPromotionType = 'Vendor Discount')
 				BEGIN
 					SET @dblDiscount = @dblDiscAmountUnit
-				END
-		
-			-- SP
-			EXEC [uspICUpdateItemSpecialPricingForCStore]
-			-- filter params
-			@strUpcCode = NULL 
-			,@strDescription = NULL 
-			,@intItemId = NULL 
-			-- update params
-			,@dtmBeginDate = @dtmBeginDateConv
-			,@dtmEndDate = @dtmEndDateConv
-			,@dblDiscount = @dblDiscount
-			,@dblAccumulatedAmount = @dblAccumAmount
-			,@dblAccumulatedQty = @dblAccumlatedQty
-			,@dblDiscountThruAmount = @dblDiscThroughAmount
-			,@dblDiscountThruQty = @dblDiscThroughQty
 
-			,@intEntityUserSecurityId = @intCurrentUserId
+					-- SP
+					EXEC [uspICUpdateItemSpecialPricingForCStore]
+						-- filter params
+						@strUpcCode = NULL 
+						,@strDescription = NULL 
+						,@intItemId = NULL 
+						,@strPromotionType = @strPromotionType
+						-- update params
+						,@dtmBeginDate = @dtmBeginDateConv
+						,@dtmEndDate = @dtmEndDateConv
+						,@dblDiscount = @dblDiscount
+
+						,@dblAccumulatedAmount = NULL
+						,@dblAccumulatedQty = NULL
+
+						,@dblDiscountThruAmount = @dblDiscThroughAmount
+						,@dblDiscountThruQty = @dblDiscThroughQty
+
+						,@intEntityUserSecurityId = @intCurrentUserId
+				END
 		END
 
 
