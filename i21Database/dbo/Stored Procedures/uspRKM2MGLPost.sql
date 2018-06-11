@@ -182,6 +182,13 @@ BEGIN
 	--If LOB is setup on GL Account Structure. intStructureType 5 is equal to Line of Bussiness on default data
 	IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType = 5)
 	BEGIN
+
+		--Check if there is LOB setup for commodity
+		IF NOT EXISTS (SELECT TOP 1 * FROM tblICCommodity com INNER JOIN tblSMLineOfBusiness lob ON com.intLineOfBusinessId = lob.intLineOfBusinessId WHERE intCommodityId = @intUsedCommoidtyId)
+		BEGIN
+			GOTO No_LOB_Setup
+		END
+
 		--Get the account code for LOB
 		SET @strLOBAccountCode = ''
 		SELECT 
@@ -193,7 +200,7 @@ BEGIN
 
 		IF ISNULL(@strLOBAccountCode,'') = ''
 		BEGIN
-			GOTO No_LOB_Setup
+			GOTO No_LOB_Segment
 		END
 
 		--Build the account number with LOB
@@ -330,6 +337,12 @@ No_GL_Setup_In_Comp_Pref:
 
 	INSERT INTO @tblResult(Result)
 	VALUES(@strErrorMessage)
+
+	GOTO Delete_Routine
+
+No_LOB_Segment:
+	INSERT INTO @tblResult(Result)
+	VALUES('Segment is missing on  Line of Business setup for commodity: ' + @strCommodityCode)
 
 	GOTO Delete_Routine
 
