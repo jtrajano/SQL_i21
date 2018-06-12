@@ -21,6 +21,10 @@ BEGIN
 			   , @ysnPT = CASE WHEN ISNULL(coctl_pt, '') = 'Y' THEN 1 ELSE 0 END 
 	FROM coctlmst	
 	
+	declare @maxId INT = 1
+
+	select @maxId = MAX(intMessageId) from tblEMEntityMessage
+
 	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agcmtmst')
 	AND (@Checking = 0) 
 	BEGIN
@@ -151,5 +155,11 @@ BEGIN
 	END
 
 
+	if @Checking = 0
+	begin
+		update tblEMEntityMessage 
+			set strMessage = dbo.fnEMBreakLine(strMessage, 80) 
+				where strMessageType = 'Energy Trac' and intMessageId > @maxId
+	end
 END
 

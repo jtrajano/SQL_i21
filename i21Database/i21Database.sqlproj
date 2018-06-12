@@ -6745,6 +6745,7 @@
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestBasisPrice.sql" />
     <Build Include="dbo\Views\vyuGRItemsSettlementReport.sql" />
+    <Build Include="dbo\Functions\fnEMBreakLine.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
