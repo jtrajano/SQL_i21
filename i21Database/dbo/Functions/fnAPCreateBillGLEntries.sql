@@ -518,7 +518,11 @@ BEGIN
 		[intAccountId]					=	CASE WHEN B.intInventoryReceiptChargeId > 0 THEN [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense')
 												ELSE [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 											END,
-		[dblDebit]						=	CAST((CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - usingOldCost.dblTotal) * ISNULL(NULLIF(B.dblRate,0),1) 
+		[dblDebit]						=	CAST((CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - 
+															usingOldCost.dblTotal * (CASE WHEN B.intInventoryReceiptChargeId > 0 
+																								AND A.intEntityVendorId = F.intEntityVendorId AND F.ysnPrice = 1
+																						THEN -1 ELSE 1 END)) 
+																				* ISNULL(NULLIF(B.dblRate,0),1) 
 											 ELSE 0 END) AS  DECIMAL(18, 2)), 
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
@@ -618,7 +622,11 @@ BEGIN
 		--[intAccountId]					=	dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing'), --AP-3227 always use the AP Clearing Account
 		[intAccountId]					=	B.intAccountId, --NO NEED TO GET THE ACCOUNT WHEN CREATING GL ENTRIES, ACCOUNT ON TRANSACTION DETAIL SHOULD BE THE ONE TO USE
 		[dblDebit]						=	CAST(CASE WHEN B.dblOldCost IS NULL THEN B.dblTotal 
-												 ELSE D.dblAmount--(CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
+												 ELSE (CASE WHEN A.intEntityVendorId = D.intEntityVendorId AND D.ysnPrice = 1 
+												 			THEN D.dblAmount * -1 
+															 ELSE D.dblAmount
+															END)
+												 		--D.dblAmount--(CASE WHEN D.ysnInventoryCost = 0 THEN D.dblAmount ELSE B.dblTotal END)
 													--commented on AP-3227, taxes for other charges should not be added here as it is already part of taxes entries
 											END 
 											* ISNULL(NULLIF(B.dblRate,0),1) 
