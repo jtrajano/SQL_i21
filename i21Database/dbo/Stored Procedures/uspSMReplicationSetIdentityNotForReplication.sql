@@ -21,7 +21,7 @@ BEGIN
 
 	   CREATE TABLE dbo.#ListOfArticles 
 	   (   
-		  strArticle NVARCHAR(100),
+		  strArticle NVARCHAR(MAX),
 		  intId INT
 	   ) 
 

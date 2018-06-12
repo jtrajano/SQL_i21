@@ -13,7 +13,7 @@ CREATE  PROCEDURE [dbo].[uspSMRepAddArticleSubToParent]
 
    CREATE TABLE dbo.#ListOfArticles 
    (   
-    strArticle NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    strArticle NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
    ) 
   
  
