@@ -155,9 +155,9 @@ select strQuery = 'UNION ALL SELECT intReportingComponentId = ' + CAST(intReport
  UNION ALL SELECT intReportingComponentId = 1710, strFormCode = '1096', strFormName = 'Motor Fuels Monthly Return', strScheduleCode = '9', strScheduleName = 'Gallons Delivered to PA and Political Subs, Tax Exempt', strType = 'Fuels', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '580', intComponentTypeId = '1', intMasterId = 381710
  UNION ALL SELECT intReportingComponentId = 1711, strFormCode = '1096', strFormName = 'Motor Fuels Monthly Return', strScheduleCode = '9', strScheduleName = 'Gallons Delivered to PA and Political Subs, Tax Exempt', strType = 'Jet Fuel', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '590', intComponentTypeId = '1', intMasterId = 381711
  UNION ALL SELECT intReportingComponentId = 1709, strFormCode = '1096', strFormName = 'Motor Fuels Monthly Return', strScheduleCode = '9', strScheduleName = 'Gallons Delivered to PA and Political Subs, Tax Exempt', strType = 'Liquid Fuels', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '570', intComponentTypeId = '1', intMasterId = 381709
- UNION ALL SELECT intReportingComponentId = 1717, strFormCode = 'DMF-26', strFormName = 'Carrier Monthly Return', strScheduleCode = '1A', strScheduleName = 'Deliveries Exported from PA', strType = '', strNote = '', strTransactionType = '', strStoredProcedure = '', intSort = '700', intComponentTypeId = '1', intMasterId = 381717
- UNION ALL SELECT intReportingComponentId = 1718, strFormCode = 'DMF-26', strFormName = 'Carrier Monthly Return', strScheduleCode = '2A', strScheduleName = 'Deliveries Imported into PA', strType = '', strNote = '', strTransactionType = '', strStoredProcedure = '', intSort = '710', intComponentTypeId = '1', intMasterId = 381718
- UNION ALL SELECT intReportingComponentId = 1719, strFormCode = 'DMF-26', strFormName = 'Carrier Monthly Return', strScheduleCode = '3A', strScheduleName = 'Intrastate Deliveries', strType = '', strNote = '', strTransactionType = '', strStoredProcedure = '', intSort = '720', intComponentTypeId = '1', intMasterId = 381719
+ UNION ALL SELECT intReportingComponentId = 1717, strFormCode = 'DMF-26', strFormName = 'Carrier Monthly Return', strScheduleCode = '1A', strScheduleName = 'Deliveries Exported from PA', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetTransporterInvoiceTax', intSort = '700', intComponentTypeId = '1', intMasterId = 381717
+ UNION ALL SELECT intReportingComponentId = 1718, strFormCode = 'DMF-26', strFormName = 'Carrier Monthly Return', strScheduleCode = '2A', strScheduleName = 'Deliveries Imported into PA', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetTransporterInvoiceTax', intSort = '710', intComponentTypeId = '1', intMasterId = 381718
+ UNION ALL SELECT intReportingComponentId = 1719, strFormCode = 'DMF-26', strFormName = 'Carrier Monthly Return', strScheduleCode = '3A', strScheduleName = 'Intrastate Deliveries', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetTransporterInvoiceTax	', intSort = '720', intComponentTypeId = '1', intMasterId = 381719
  UNION ALL SELECT intReportingComponentId = 1720, strFormCode = 'PA Efile', strFormName = 'PA Electronic File', strScheduleCode = 'PA E File', strScheduleName = 'PA E File', strType = '', strNote = 'PA CSV File', strTransactionType = '', strStoredProcedure = '', intSort = '1000', intComponentTypeId = '4', intMasterId = 381720
  
 
@@ -445,7 +445,9 @@ select strQuery = 'UNION ALL SELECT intValidOriginStateId = ' + CAST(intReportin
  UNION ALL SELECT intValidOriginStateId = 597, strFormCode = '1096', strScheduleCode = '4', strType = 'Fuels', strState = 'PA', strStatus = 'Exclude', intMasterId = 38597
  UNION ALL SELECT intValidOriginStateId = 598, strFormCode = '1096', strScheduleCode = '4', strType = 'Jet Fuel', strState = 'PA', strStatus = 'Exclude', intMasterId = 38598
  UNION ALL SELECT intValidOriginStateId = 596, strFormCode = '1096', strScheduleCode = '4', strType = 'Liquid Fuels', strState = 'PA', strStatus = 'Exclude', intMasterId = 38596
- 
+ UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 38600
+ UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', strState = 'PA', strStatus = 'Exclude', intMasterId = 38601
+ UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 38602
 
 EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
 
@@ -516,7 +518,10 @@ select strQuery = 'UNION ALL SELECT intValidDestinationStateId = ' + CAST(intRep
  UNION ALL SELECT intValidDestinationStateId = 631, strFormCode = '1096', strScheduleCode = '9', strType = 'Fuels', strState = 'PA', strStatus = 'Include', intMasterId = 38631
  UNION ALL SELECT intValidDestinationStateId = 632, strFormCode = '1096', strScheduleCode = '9', strType = 'Jet Fuel', strState = 'PA', strStatus = 'Include', intMasterId = 38632
  UNION ALL SELECT intValidDestinationStateId = 630, strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', strState = 'PA', strStatus = 'Include', intMasterId = 38630
- 
+ UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', strState = 'PA', strStatus = 'Exclude', intMasterId = 38638
+ UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 38639
+ UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 38640
+
 
 EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
 
