@@ -18,54 +18,62 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 BEGIN TRY
 
-SELECT	@intEntityId = intEntityId --this is a hiccup
-FROM	tblSMUserSecurity 
-WHERE	intEntityId = @intUserId --this also
+	SELECT	@intEntityId = intEntityId --this is a hiccup
+	FROM	tblSMUserSecurity 
+	WHERE	intEntityId = @intUserId --this also
 
-if @ysnPostOrUnPost = 0 and @ysnRecap = 0
-    BEGIN
-	    EXEC uspSMAuditLog 
-              @keyValue = @intLoadHeaderId,                         -- Primary Key Value
-              @screenName = 'Transports.view.TransportLoads',       -- Screen Namespace
-              @entityId = @intEntityId,                             -- Entity Id.
-              @actionType = 'Processed',                            -- Action Type
-              @changeDescription = 'UnPosted',                      -- Description
-              @fromValue = '',                                      -- Previous Value
-              @toValue = ''                                         -- New Value
-        EXEC uspTRLoadProcessToInvoice @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-	    EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-	    EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-    END
-ELSE
-    BEGIN
-	    if @ysnPostOrUnPost = 1
+	IF @ysnPostOrUnPost = 0 AND @ysnRecap = 0
+	BEGIN
+		EXEC uspSMAuditLog 
+				@keyValue = @intLoadHeaderId,                         -- Primary Key Value
+				@screenName = 'Transports.view.TransportLoads',       -- Screen Namespace
+				@entityId = @intEntityId,                             -- Entity Id.
+				@actionType = 'Processed',                            -- Action Type
+				@changeDescription = 'UnPosted',                      -- Description
+				@fromValue = '',                                      -- Previous Value
+				@toValue = ''                                         -- New Value
+		EXEC uspTRLoadProcessToInvoice @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+		EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+		EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+	END
+	ELSE
+	BEGIN
+		IF @ysnPostOrUnPost = 1
 		BEGIN
-	         EXEC uspSMAuditLog 
-                  @keyValue = @intLoadHeaderId,                          -- Primary Key Value
-                  @screenName = 'Transports.view.TransportLoads',        -- Screen Namespace
-                  @entityId = @intEntityId,                              -- Entity Id.
-                  @actionType = 'Processed',                             -- Action Type
-                  @changeDescription = 'Posted',                         -- Description
-                  @fromValue = '',                                       -- Previous Value
-                  @toValue = ''                                          -- New Value
-         END
-         EXEC uspTRLoadPostingValidation @intLoadHeaderId, @ysnPostOrUnPost, @intUserId
-         EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
-         EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
-         EXEC uspTRLoadProcessToInvoice @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
-    END
-if @ysnRecap = 0 
-BEGIN
-   EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost
-END
+			EXEC uspSMAuditLog 
+				@keyValue = @intLoadHeaderId,                          -- Primary Key Value
+				@screenName = 'Transports.view.TransportLoads',        -- Screen Namespace
+				@entityId = @intEntityId,                              -- Entity Id.
+				@actionType = 'Processed',                             -- Action Type
+				@changeDescription = 'Posted',                         -- Description
+				@fromValue = '',                                       -- Previous Value
+				@toValue = ''                                          -- New Value
+		END
+		EXEC uspTRLoadPostingValidation @intLoadHeaderId, @ysnPostOrUnPost, @intUserId
+		EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
+		EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
+		EXEC uspTRLoadProcessToInvoice @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
+		EXEC uspTRUpdateCostOnTransportLoad @intLoadHeaderId
+	END
+
+	IF @ysnRecap = 0 
+	BEGIN
+	   EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost
+	END
 
 END TRY
 BEGIN CATCH
-	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
+	SELECT 
+		@ErrorMessage = ERROR_MESSAGE(),
+		@ErrorSeverity = ERROR_SEVERITY(),
+		@ErrorState = ERROR_STATE();
 
-	SET @ErrorMessage = ERROR_MESSAGE()
-	RAISERROR (	@ErrorMessage,16,1,'WITH NOWAIT')
-
+	-- Use RAISERROR inside the CATCH block to return error
+	-- information about the original error that caused
+	-- execution to jump to the CATCH block.
+	RAISERROR (
+		@ErrorMessage, -- Message text.
+		@ErrorSeverity, -- Severity.
+		@ErrorState -- State.
+	);
 END CATCH

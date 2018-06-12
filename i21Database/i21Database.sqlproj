@@ -6213,8 +6213,6 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemSubtitutes.sql" />
     <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
     <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
-    <Build Include="dbo\Functions\fnTRGetLoadTransferWeightedAveCost.sql" />
-    <Build Include="dbo\Functions\fnTRGetLoadReceiptWeightedAveCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MInqTranExpMonthValidation.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceString.sql" />
@@ -6755,6 +6753,7 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspARPaymentIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
