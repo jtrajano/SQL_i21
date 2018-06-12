@@ -1120,7 +1120,6 @@ select strQuery = 'UNION ALL SELECT intValidDestinationStateId = ' + CAST(intRep
  UNION ALL SELECT intValidDestinationStateId = 774, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Dyed Kerosene', strState = 'NC', strStatus = 'Exclude', intMasterId = 33774
  UNION ALL SELECT intValidDestinationStateId = 775, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Jet Fuel', strState = 'NC', strStatus = 'Exclude', intMasterId = 33775
  UNION ALL SELECT intValidDestinationStateId = 776, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Aviation Gasoline', strState = 'NC', strStatus = 'Exclude', intMasterId = 33776
- 
  UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', strState = 'NC', strStatus = 'Exclude', intMasterId = 33777
  UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', strState = 'NC', strStatus = 'Include', intMasterId = 33778
  UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', strState = 'NC', strStatus = 'Include', intMasterId = 33779
