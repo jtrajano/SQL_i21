@@ -58,6 +58,7 @@ SELECT	DISTINCT
 						,dblVoucherTax
 						,dblOpenQty
 						,strContainerNumber
+						,dblUnitCost
 				FROM	vyuICGetInventoryReceiptVoucherItems items
 				WHERE	items.intEntityVendorId = vendor.intEntityId
 			) receiptItem
