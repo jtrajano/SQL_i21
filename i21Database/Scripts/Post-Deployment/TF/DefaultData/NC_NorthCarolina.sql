@@ -144,9 +144,9 @@ select strQuery = 'UNION ALL SELECT intReportingComponentId = ' + CAST(intReport
  UNION ALL SELECT intReportingComponentId = 1357, strFormCode = 'Gas-1219', strFormName = 'Importer Return', strScheduleCode = '9G', strScheduleName = 'Sold to NC Community College', strType = 'Jet Fuel', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '1490', intComponentTypeId = '1', intMasterId = 331357
  UNION ALL SELECT intReportingComponentId = 1358, strFormCode = 'Gas-1219', strFormName = 'Importer Return', strScheduleCode = '9G', strScheduleName = 'Sold to NC Community College', strType = 'Aviation Gasoline', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '1500', intComponentTypeId = '1', intMasterId = 331358
  UNION ALL SELECT intReportingComponentId = 1359, strFormCode = 'Gas-1219', strFormName = 'Importer Return', strScheduleCode = 'DC', strScheduleName = 'Diversion Corrections', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '1600', intComponentTypeId = '1', intMasterId = 331359
- UNION ALL SELECT intReportingComponentId = 599, strFormCode = 'Gas-1301', strFormName = 'Transporter Return', strScheduleCode = '14A', strScheduleName = 'Gallons Loaded in NC and Delivered to Another State', strType = '', strNote = '', strTransactionType = '', strStoredProcedure = NULL, intSort = '2000', intComponentTypeId = '1', intMasterId = 332690
- UNION ALL SELECT intReportingComponentId = 600, strFormCode = 'Gas-1301', strFormName = 'Transporter Return', strScheduleCode = '14B', strScheduleName = 'Gallons Loaded in Another State and Delivered to NC', strType = '', strNote = '', strTransactionType = '', strStoredProcedure = NULL, intSort = '2010', intComponentTypeId = '1', intMasterId = 332691
- UNION ALL SELECT intReportingComponentId = 601, strFormCode = 'Gas-1301', strFormName = 'Transporter Return', strScheduleCode = '14C', strScheduleName = 'Gallons Loaded in NC and Delivered to NC', strType = '', strNote = '', strTransactionType = '', strStoredProcedure = NULL, intSort = '2020', intComponentTypeId = '1', intMasterId = 332692
+ UNION ALL SELECT intReportingComponentId = 599, strFormCode = 'Gas-1301', strFormName = 'Transporter Return', strScheduleCode = '14A', strScheduleName = 'Gallons Loaded in NC and Delivered to Another State', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetTransporterInvoiceTax', intSort = '2000', intComponentTypeId = '1', intMasterId = 332690
+ UNION ALL SELECT intReportingComponentId = 600, strFormCode = 'Gas-1301', strFormName = 'Transporter Return', strScheduleCode = '14B', strScheduleName = 'Gallons Loaded in Another State and Delivered to NC', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetTransporterInvoiceTax', intSort = '2010', intComponentTypeId = '1', intMasterId = 332691
+ UNION ALL SELECT intReportingComponentId = 601, strFormCode = 'Gas-1301', strFormName = 'Transporter Return', strScheduleCode = '14C', strScheduleName = 'Gallons Loaded in NC and Delivered to NC', strType = '', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetTransporterInvoiceTax', intSort = '2020', intComponentTypeId = '1', intMasterId = 332692
  UNION ALL SELECT intReportingComponentId = 603, strFormCode = 'Gas-1239', strFormName = 'Bulk Plant Exporter Return', strScheduleCode = '7F', strScheduleName = 'Bulk Plant Exporter Schedule of Tax-Paid Exports', strType = 'Gasoline', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '2100', intComponentTypeId = '1', intMasterId = 332694
  UNION ALL SELECT intReportingComponentId = 604, strFormCode = 'Gas-1239', strFormName = 'Bulk Plant Exporter Return', strScheduleCode = '7F', strScheduleName = 'Bulk Plant Exporter Schedule of Tax-Paid Exports', strType = 'Undyed Diesel', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '2110', intComponentTypeId = '1', intMasterId = 332695
  UNION ALL SELECT intReportingComponentId = 605, strFormCode = 'Gas-1239', strFormName = 'Bulk Plant Exporter Return', strScheduleCode = '7F', strScheduleName = 'Bulk Plant Exporter Schedule of Tax-Paid Exports', strType = 'Dyed Diesel', strNote = '', strTransactionType = 'Invoice', strStoredProcedure = 'uspTFGetInvoiceTax', intSort = '2120', intComponentTypeId = '1', intMasterId = 332696
@@ -792,16 +792,16 @@ select strQuery = 'UNION ALL SELECT intValidOriginStateId = ' + CAST(intReportin
 
 	DECLARE @ValidOriginStates AS TFValidOriginStates
 
-	INSERT INTO @ValidOriginStates(
-		intValidOriginStateId
-		, strFormCode
-		, strScheduleCode
-		, strType
-		, strState
-		, strStatus
-		, intMasterId
-	)
-	-- Insert generated script here. Remove first instance of "UNION ALL "
+INSERT INTO @ValidOriginStates(
+	intValidOriginStateId
+	, strFormCode
+	, strScheduleCode
+	, strType
+	, strState
+	, strStatus
+	, intMasterId
+)
+-- Insert generated script here. Remove first instance of "UNION ALL "
  SELECT intValidOriginStateId = 600, strFormCode = 'Gas-1202', strScheduleCode = '5A', strType = 'Gasoline', strState = 'NC', strStatus = 'Include', intMasterId = 33600
  UNION ALL SELECT intValidOriginStateId = 601, strFormCode = 'Gas-1202', strScheduleCode = '5A', strType = 'Undyed Diesel', strState = 'NC', strStatus = 'Include', intMasterId = 33601
  UNION ALL SELECT intValidOriginStateId = 602, strFormCode = 'Gas-1202', strScheduleCode = '5A', strType = 'Undyed Kerosene', strState = 'NC', strStatus = 'Include', intMasterId = 33602
@@ -962,6 +962,9 @@ select strQuery = 'UNION ALL SELECT intValidOriginStateId = ' + CAST(intReportin
  UNION ALL SELECT intValidOriginStateId = 769, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Undyed Diesel', strState = 'NC', strStatus = 'Include', intMasterId = 33769
  UNION ALL SELECT intValidOriginStateId = 770, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Dyed Diesel', strState = 'NC', strStatus = 'Include', intMasterId = 33770
  UNION ALL SELECT intValidOriginStateId = 771, strFormCode = 'Gas-1259', strScheduleCode = '5V', strType = 'Undyed Kerosene', strState = 'NC', strStatus = 'Include', intMasterId = 33771
+ UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', strState = 'NC', strStatus = 'Include', intMasterId = 33772
+ UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', strState = 'NC', strStatus = 'Exclude', intMasterId = 33773
+ UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', strState = 'NC', strStatus = 'Include', intMasterId = 33774
  
 
 EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
@@ -1118,6 +1121,9 @@ select strQuery = 'UNION ALL SELECT intValidDestinationStateId = ' + CAST(intRep
  UNION ALL SELECT intValidDestinationStateId = 775, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Jet Fuel', strState = 'NC', strStatus = 'Exclude', intMasterId = 33775
  UNION ALL SELECT intValidDestinationStateId = 776, strFormCode = 'Gas-1239', strScheduleCode = '7F', strType = 'Aviation Gasoline', strState = 'NC', strStatus = 'Exclude', intMasterId = 33776
  
+ UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', strState = 'NC', strStatus = 'Exclude', intMasterId = 33777
+ UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', strState = 'NC', strStatus = 'Include', intMasterId = 33778
+ UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', strState = 'NC', strStatus = 'Include', intMasterId = 33779
 
 EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
 
