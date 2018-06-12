@@ -209,14 +209,6 @@ BEGIN TRY
 
 				IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
-				-- Update Mark Up/Down
-				--Update tblSTMarkUpDown
-				--SET ysnIsPosted = 1
-				--WHERE intMarkUpDownId = @intMarkUpDownId
-
-				--SET @ysnIsPosted = 1
-				--SET @strStatusMsg = 'Success'
-
 				-- NOTE: 
 				-- 1. To see in Retail valuation, item's category should have check retail valuation in Category screen
 				-- 2. After Unpost it will create GL Entries for audit
@@ -270,7 +262,15 @@ BEGIN TRY
 						IF @intReturnValue < 0 GOTO With_Rollback_Exit
 					END
 
-				END
+
+				--Update Mark Up/Down
+				Update tblSTMarkUpDown
+				SET ysnIsPosted = @ysnPost
+				WHERE intMarkUpDownId = @intMarkUpDownId
+
+				SET @ysnIsPosted = @ysnPost
+				SET @strStatusMsg = 'Success'
+		END
 
 
 
@@ -327,10 +327,10 @@ BEGIN TRY
 
 				-- Update Mark Up/Down
 				Update tblSTMarkUpDown
-				SET ysnIsPosted = 0
+				SET ysnIsPosted = @ysnPost
 				WHERE intMarkUpDownId = @intMarkUpDownId
 
-				SET @ysnIsPosted = 0
+				SET @ysnIsPosted = @ysnPost
 				SET @strStatusMsg = 'Success'
 
 			END
@@ -351,9 +351,7 @@ BEGIN TRY
 					@GLEntries
 					,@intCurrentUserId
 			END
-			
-			SET @ysnIsPosted = 1
-			SET @strStatusMsg = 'Success'
+		
 			
 			COMMIT TRAN @TransactionName
 			GOTO Post_Exit	
@@ -367,19 +365,9 @@ BEGIN TRY
 				BEGIN
 					EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 				END
-			END
-
-			-- Update Mark Up/Down
-			Update tblSTMarkUpDown
-			SET ysnIsPosted = @ysnPost
-			WHERE intMarkUpDownId = @intMarkUpDownId
-
-			SET @ysnIsPosted = 0
-			SET @strStatusMsg = 'Success'
-			
+			END		
 			
 			COMMIT TRAN @TransactionName
-		
 			GOTO Post_Exit;
 		END
 END TRY
