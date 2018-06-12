@@ -43,7 +43,7 @@ SELECT	DISTINCT
 				SELECT	intInventoryReceiptId
 						,intInventoryReceiptItemId
 						,dblReceiptQty
-						,dblVoucherQty
+						,ABS(dblVoucherQty) AS dblVoucherQty
 						,dtmReceiptDate
 						,strReceiptNumber
 						,strBillOfLading
@@ -77,6 +77,8 @@ SELECT	DISTINCT
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
 WHERE ((dblReceiptQty - dblVoucherQty)) != 0 --AND bill.ysnPosted = 0
+AND receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+
 UNION ALL 
 
 --QUERY FOR RECEIPT VENDOR ACCRUE CHARGES
@@ -154,6 +156,7 @@ WHERE Receipt.ysnPosted = 1
 	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 		--																  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
 	  AND (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) != 0
+	  AND ReceiptCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 UNION ALL																									
 --QUERY FOR RECEIPT VENDOR PRICE DOWN CHARGES
 SELECT DISTINCT
@@ -229,7 +232,7 @@ WHERE Receipt.ysnPosted = 1
 	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 	  --																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
 	  AND (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) != 0
-		
+	  AND ReceiptCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 UNION ALL  
 --QUERY FOR 3RD PARTY ACRUE VENDOR WITH CHARGES 
 SELECT DISTINCT
@@ -309,6 +312,7 @@ WHERE Receipt.ysnPosted = 1 AND ReceiptCharge.ysnAccrue = 1
 	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 	  --																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
       AND (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) != 0
+	  AND ReceiptCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 UNION ALL  
 --QUERY FOR 3RD PARTY ACRUE VENDOR WITH CHARGES INVENTORY SHIPMENT
 SELECT DISTINCT
@@ -383,7 +387,7 @@ WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1
 	  --AND ShipmentCharge.intInventoryShipmentChargeId NOT IN (SELECT DISTINCT intInventoryShipmentChargeId FROM tblAPBillDetail A
 	  -- 																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryShipmentChargeId IS NOT NULL AND B.ysnPosted = 1)
 	  AND (ShipmentCharge.dblQuantity - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) != 0
-
+	  AND ShipmentCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 GO
 
 
