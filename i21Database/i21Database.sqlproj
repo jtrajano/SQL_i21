@@ -6336,6 +6336,7 @@
     <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
+    <Build Include="dbo\Functions\fnEMBreakLine.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
