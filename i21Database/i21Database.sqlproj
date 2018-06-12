@@ -6328,6 +6328,7 @@
     <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
+    <Build Include="dbo\Functions\fnEMBreakLine.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
