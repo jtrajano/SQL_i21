@@ -9,6 +9,7 @@
     [intLinkFieldLength]        INT            NULL,
     [strSequenceId]             NVARCHAR (50)  NULL,
     [intImportMapping]          INT            NULL,
+	[strRuleId]					NVARCHAR (100) NULL,
     [intConcurrencyId]          INT            CONSTRAINT [DF_tblCFAdvanceMappingId_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFAdvanceMappingId] PRIMARY KEY CLUSTERED ([intAdvanceMappingDetailId] ASC),
     CONSTRAINT [FK_tblCFAdvanceMappingDetail_tblCFAdvanceMapping] FOREIGN KEY ([intAdvanceMappingId]) REFERENCES [dbo].[tblCFAdvanceMapping] ([intAdvanceMappingId]) ON DELETE CASCADE,
