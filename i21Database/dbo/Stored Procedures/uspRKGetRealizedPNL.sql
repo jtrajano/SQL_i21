@@ -105,9 +105,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 			,strContract					
 			,strAllocationRefNo				
 			,strEntityName					
+			,intQuantityUOMId				
 			,strInternalCompany				
 			,dblQuantity					
-			,intQuantityUOMId				
 			,intQuantityUnitMeasureId		
 			,strQuantityUOM					
 			,dblWeight						
@@ -186,9 +186,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strContract								= CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)
 		,strAllocationRefNo							= AllocationDetail.strAllocationDetailRefNo
 		,strEntityName								= Entity.strEntityName
-		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
-		,dblQuantity								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)
 		,intQuantityUOMId							= InvoiceDetail.intOrderUOMId
+		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
+		,dblQuantity								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
 		,intQuantityUnitMeasureId					= OrderUOM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
 		
@@ -333,7 +333,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 					WHERE Item.strType='Other Charge'
 					GROUP BY intContractDetailId
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
-		WHERE Book.intBookId = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  Book.intBookId END
+		WHERE ISNULL(Book.intBookId,0) = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  ISNULL(Book.intBookId,0) END
 	
 	UNION
 	
@@ -357,9 +357,9 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strContract								= CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)
 		,strAllocationRefNo							= AllocationDetail.strAllocationDetailRefNo
 		,strEntityName								= Entity.strEntityName
-		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
-		,dblQuantity								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)
 		,intQuantityUOMId							= InvoiceDetail.intOrderUOMId
+		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
+		,dblQuantity								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
 		,intQuantityUnitMeasureId					= OrderUOM.intUnitMeasureId
 		,strQuantityUOM								= IUM.strUnitMeasure
 		
@@ -497,7 +497,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 					GROUP BY intContractDetailId
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
 
-		WHERE Book.intBookId = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  Book.intBookId END
+		WHERE ISNULL(Book.intBookId,0) = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  ISNULL(Book.intBookId,0) END
 
 		-----------------------------------------------------dblCOGSOrNetSaleValue Updation--------------------------------------------
 		
@@ -564,7 +564,8 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 				FROM  @tblRealizedPNL
 				GROUP BY strAllocationRefNo
 			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo
-
+		
+		
 		UPDATE tblRealized 
 		SET  tblRealized.dblNetPNLValue = (t.dblRealizedPNLValue + t.dblRealizedFuturesPNLValue) * 
 													CASE 
@@ -579,10 +580,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 				,SUM(dblRealizedFuturesPNLValue) dblRealizedFuturesPNLValue 
 				FROM  @tblRealizedPNL
 				GROUP BY strAllocationRefNo
-			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo
-
-		--UPDATE @tblRealizedPNL 
-		--SET dblNetPNLValue = ISNULL(dblRealizedPNLValue,0)+ ISNULL(dblRealizedFuturesPNLValue,0)
+			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo	
 
 		SELECT * FROM @tblRealizedPNL ORDER BY strAllocationRefNo, intContractTypeId
 
