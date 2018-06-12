@@ -6348,6 +6348,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
+    <Build Include="dbo\Functions\fnEMBreakLine.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
