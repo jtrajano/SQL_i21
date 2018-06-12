@@ -90,12 +90,12 @@ BEGIN TRANSACTION
 		,[dtmTransactionDate]
 		,[strTransactionId]
 		,[intTransactionId]
-		,[strTransactionType]
+		,'Mark To Market' --[strTransactionType]
 		,[strTransactionForm]
 		,[strModuleName]
 		,[intConcurrencyId]
 		,[dblExchangeRate]
-		,[dtmDateEntered]
+		,GETDATE() --[dtmDateEntered]
 		,[ysnIsUnposted]
 		,'RK'
 		,[strReference]  
@@ -108,6 +108,11 @@ BEGIN TRANSACTION
 
 	EXEC dbo.uspGLBookEntries @GLEntries,0 --@ysnPost
 
+	DECLARE @strOldBatchId NVARCHAR(50)
+
+	SELECT @strOldBatchId = strBatchId FROM tblRKM2MPostRecap WHERE intM2MInquiryId = @intM2MInquiryId
+
+	UPDATE	tblGLDetail SET	ysnIsUnposted = 1WHERE	strBatchId = @strOldBatchId 
 	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=0,strBatchId=null WHERE intM2MInquiryId = @intM2MInquiryId
 	UPDATE tblRKM2MInquiry SET ysnPost=0,dtmPostedDateTime=null,strBatchId=null,dtmUnpostedDateTime=getdate() WHERE intM2MInquiryId = @intM2MInquiryId
 
