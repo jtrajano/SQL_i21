@@ -5,7 +5,7 @@
  As
  Begin
 		--DECLARE @result int;
-		DECLARE @ListOfArticles TABLE(strArticle VARCHAR(100));
+		DECLARE @ListOfArticles TABLE(strArticle NVARCHAR(MAX));
 		DECLARE @sql NVARCHAR(MAX) = N'';
 
 		INSERT INTO @ListOfArticles

@@ -30,7 +30,7 @@ CREATE PROCEDURE [dbo].[uspSMReplicationSetRangeStart]
 
 	   CREATE TABLE dbo.#ListOfArticles 
 	   (   
-		  strArticle NVARCHAR(100)
+		  strArticle NVARCHAR(MAX)
 	   ) 
 
 	   DECLARE @sql NVARCHAR(MAX) = N'';
