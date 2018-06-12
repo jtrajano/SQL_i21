@@ -116,6 +116,7 @@ SELECT  intId
 		,dblForexRate 
 		,dblUnitRetail
 		,intCategoryId
+		,dblAdjustCostValue
 		,dblAdjustRetailValue
 FROM	@ItemsToPost 
 
