@@ -123,6 +123,9 @@ IF OBJECT_ID('tempdb..#tempOnHold') IS NOT NULL
 IF OBJECT_ID('tempdb..#invPurBasisDelivary') IS NOT NULL
     DROP TABLE #invPurBasisDelivary
 
+IF OBJECT_ID('tempdb..#invQty1') IS NOT NULL
+    DROP TABLE #invQty1
+
 DECLARE @tblGetOpenFutureByDate TABLE (
 		intFutOptTransactionId int, 
 		intOpenContract  int)
