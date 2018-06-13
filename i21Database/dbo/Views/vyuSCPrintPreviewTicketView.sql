@@ -51,8 +51,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.dtmTareDateTime2,
 	SC.intTareUserId, 
 	SC.dblGrossUnits,
-	SC.dblNetUnits, 
-	SC.strItemNumber,
+	SC.dblNetUnits,
 	SC.strItemUOM, 
 	SC.intCustomerId,
 	SC.intSplitId, 
@@ -156,7 +155,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SMS.intEntityId AS intUserId,
 	SCMatch.strStationShortDescription AS strScaleMatchTicket,
 	SCMatch.strTicketNumber AS strMatchTicketNumber,
-	SCMatch.strLocationName AS strMatchLocation
+	SCMatch.strLocationName AS strMatchLocation,
+	IC.strItemNo AS strItemNumber
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -175,6 +175,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SC.intCommodityAttributeId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
+  LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
   OUTER APPLY(
 		SELECT EM.intEntityId,SM.blbDetail FROM tblEMEntitySignature EM
 		LEFT JOIN tblSMSignature SM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
