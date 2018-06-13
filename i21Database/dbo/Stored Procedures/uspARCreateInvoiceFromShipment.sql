@@ -280,7 +280,7 @@ SELECT
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 	,[dblPrice]								= ARSI.[dblShipmentUnitPrice]
-	,[dblUnitPrice]							= ARSI.[dblPrice]
+	,[dblUnitPrice]							= ARSI.[dblUnitPrice]
 	,[strPricing]							= ARSI.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
