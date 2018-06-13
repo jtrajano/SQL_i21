@@ -131,20 +131,21 @@ BEGIN TRY
 		-- BEGIN
 		-- 	RAISERROR('UOM does not exist.',16,1)
 		-- END
-		IF	@ReduceBalance	=	1
-		BEGIN
-			EXEC	uspCTUpdateSequenceBalance
-					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblConvertedQty,
-					@intUserId				=	@intUserId,
-					@intExternalId			=	@intInvoiceDetailId,
-					@strScreenName			=	'Invoice' 
-		END
-
+		
 		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 					
 		IF (ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O'))
 			BEGIN
+				IF	@ReduceBalance	=	1
+				BEGIN
+					EXEC	uspCTUpdateSequenceBalance
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblConvertedQty,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInvoiceDetailId,
+							@strScreenName			=	'Invoice' 
+				END
+				
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
