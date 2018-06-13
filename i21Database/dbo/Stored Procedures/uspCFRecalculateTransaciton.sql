@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -4335,7 +4334,7 @@ BEGIN
 			ELSE
 			BEGIN
 
-					SET @dblCalculatedGrossPrice	 =	   @dblPrice + Round((@totalCalculatedTaxZeroQuantity / @dblQuantity) ,6)
+										SET @dblCalculatedGrossPrice	 =	   @dblPrice + Round((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity) ,6)
 					SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
 					SET @dblCalculatedNetPrice		 =	   @dblPrice
 					SET @dblOriginalNetPrice		 =	   Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)
@@ -4393,13 +4392,10 @@ BEGIN
 		IF(ISNULL(@dblInventoryCost,0) = 0)
 		BEGIN
 			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
-
-			
 		END
 		ELSE
 		BEGIN
 			SET @dblMargin = ISNULL(@dblNetTransferCost,0) - ISNULL(@dblInventoryCost,0)
-			SET @dblTransferCost = ISNULL(@dblInventoryCost,0)
 		END
 	END
 	ELSE
@@ -4415,12 +4411,11 @@ BEGIN
 
 		IF(ISNULL(@dblInventoryCost,0) = 0)
 		BEGIN
-			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@TransferCost,0)
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 		END
 		ELSE
 		BEGIN
 			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
-			SET @dblTransferCost = ISNULL(@dblInventoryCost,0)
 		END
 
 	END
