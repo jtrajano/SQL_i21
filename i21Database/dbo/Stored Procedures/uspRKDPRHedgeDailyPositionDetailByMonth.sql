@@ -145,6 +145,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 		INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1		
 		WHERE ic.intCommodityId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 			AND f.intLocationId= case when isnull(@intLocationId,0)=0 then f.intLocationId else @intLocationId end			
+				 and  f.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then f.intEntityId else @intVendorId end 
 		) t
 
  --Option NetHEdge
@@ -190,7 +191,8 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-	WHERE ft.intCommodityId = @intCommodityId AND intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end 
+	WHERE ft.intCommodityId = @intCommodityId AND intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end
+		 and  ft.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then ft.intEntityId else @intVendorId end  
 	AND intFutOptTransactionId NOT IN (
 			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 		 --Net Hedge option end
