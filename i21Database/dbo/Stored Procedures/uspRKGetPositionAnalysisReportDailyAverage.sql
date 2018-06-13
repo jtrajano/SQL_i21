@@ -13,6 +13,7 @@ AS
 DECLARE @queryHeader nvarchar(max),
 		@query1 nvarchar(max),
 		@query2 nvarchar(max),
+		@query3 nvarchar(max),
 		@dateFilter nvarchar(max)
 
 --Compose the date filter
@@ -56,7 +57,7 @@ BEGIN
 	'
 	SET @query1 = N'
 	--=========================================
-	-- Outright Physicals AND Price Fixations
+	-- Outright Physicals
 	--=========================================
 	SELECT 
 		 CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
@@ -74,6 +75,34 @@ BEGIN
 		,0 AS dblFutureTradeDeltaQty
 		,0 AS dblFutureTradeQty
 		,0 as dblFutureTradePrice
+		,0 AS dblPriceFixationDeltaQty
+		,0 AS dblPriceFixationQty
+		,0 AS dblPriceFixationPrice
+	FROM tblCTContractHeader CH
+	INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
+	INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
+	LEFT JOIN tblICCommodityProductLine CPL ON ITM.intProductLineId = CPL.intCommodityProductLineId
+	WHERE 
+	CH.intPricingTypeId = 1 --Priced 
+	'
+
+	SET @query2 = N'
+	--=========================================
+	-- Price Fixations
+	--=========================================
+	UNION ALL 
+	SELECT 
+		 CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
+		,CONVERT(date,CH.dtmContractDate,101) AS dtmTransactionDate
+		,CD.intFutureMarketId
+		,CH.intCommodityId
+		,CD.intCurrencyId
+		,0 dblOutrightPhysicalDeltaQty
+		,0  AS dblOutrightPhysicalQty
+		,0 AS dblOutrightPhysicalPrice
+		,0 AS dblFutureTradeDeltaQty
+		,0 AS dblFutureTradeQty
+		,0 as dblFutureTradePrice
 		,CASE WHEN ITM.intProductLineId IS NOT NULL THEN 
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,(select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +'), ISNULL(PFD.dblQuantity,0))* (ISNULL(CPL.dblDeltaPercent,0) /100)
 		 ELSE
@@ -85,12 +114,13 @@ BEGIN
 	INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 	INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
 	LEFT JOIN tblICCommodityProductLine CPL ON ITM.intProductLineId = CPL.intCommodityProductLineId
-	LEFT JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId
-	LEFT JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
+	INNER JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId
+	INNER JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
 	WHERE 
-	CH.intPricingTypeId = 1 --Priced 
+	PF.intPriceFixationId IS NOT NULL 
 	'
-	SET @query2 = N'
+
+	SET @query3 = N'
 	--===================
 	-- Future Trades
 	--===================
@@ -125,7 +155,7 @@ BEGIN
 	,intCommodityId
 	,intCurrencyId '
 
-	EXEC(@queryHeader + @query1 + @query2)
+	EXEC(@queryHeader + @query1  + @query2 + @query3)
 	
 END
 ELSE
@@ -174,6 +204,33 @@ BEGIN
 		,0 AS dblFutureTradeDeltaQty
 		,0 AS dblFutureTradeQty
 		,0 as dblFutureTradePrice
+		,0 AS dblPriceFixationDeltaQty
+		,0 AS dblPriceFixationQty
+		,0 AS dblPriceFixationPrice
+	FROM tblCTContractHeader CH
+	INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
+	INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
+	LEFT JOIN tblICCommodityProductLine CPL ON ITM.intProductLineId = CPL.intCommodityProductLineId
+	WHERE 
+	CH.intPricingTypeId = 1 --Priced
+	'
+	SET @query2 = N'
+	--=========================================
+	-- Price Fixations
+	--=========================================
+	UNION ALL
+	SELECT 
+		 CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
+		,CONVERT(date,CH.dtmContractDate,101) AS dtmTransactionDate
+		,CD.intFutureMarketId
+		,CH.intCommodityId
+		,CD.intCurrencyId
+		,0 AS dblOutrightPhysicalDeltaQty
+		,0 AS dblOutrightPhysicalQty
+		,0 AS dblOutrightPhysicalPrice
+		,0 AS dblFutureTradeDeltaQty
+		,0 AS dblFutureTradeQty
+		,0 as dblFutureTradePrice
 		,CASE WHEN ITM.intProductLineId IS NOT NULL THEN 
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,(select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +'), ISNULL(PFD.dblQuantity,0))* (ISNULL(CPL.dblDeltaPercent,0) /100)
 		 ELSE
@@ -185,12 +242,12 @@ BEGIN
 	INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 	INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
 	LEFT JOIN tblICCommodityProductLine CPL ON ITM.intProductLineId = CPL.intCommodityProductLineId
-	LEFT JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId
-	LEFT JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
+	INNER JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId
+	INNER JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
 	WHERE 
-	CH.intPricingTypeId = 1 --Priced
+	PF.intPriceFixationId IS NOT NULL 
 	'
-	SET @query2 = N'
+	SET @query3 = N'
 	--===================
 	-- Future Trades
 	--===================
@@ -225,7 +282,7 @@ BEGIN
 	,intCommodityId
 	,intCurrencyId '
 
-	EXEC(@queryHeader + @query1 + @query2)
+	EXEC(@queryHeader + @query1 + @query2 + @query3)
 END
 
 
