@@ -1216,7 +1216,7 @@ BEGIN
 		[strReceiptType]		= RE.strReceiptType
 		,[intItemId]			= RE.intItemId
 		,[intLotId]				= RE.intLotId
-		,[strLotNumber]			= SC.strLotNumber
+		,[strLotNumber]			= CASE WHEN SC.strLotNumber != '' THEN SC.strLotNumber ELSE NULL END
 		,[intLocationId]		= RE.intLocationId
 		,[intShipFromId]		= RE.intShipFromId
 		,[intShipViaId]			= RE.intShipViaId
