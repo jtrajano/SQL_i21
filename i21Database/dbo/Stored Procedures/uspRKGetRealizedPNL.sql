@@ -166,6 +166,84 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 			,intCompanyId	
 			,strCompany				
 		)
+		  SELECT
+		  intContractTypeId					
+		 ,intContractDetailId				
+		 ,intBookId							
+		 ,strBook							
+		 ,strSubBook							
+		 ,intCommodityId						
+		 ,strCommodity						
+		 ,strProductType						
+		 ,strRealizedType					
+		 ,dtmContractDate					
+		 ,strTransactionType				
+		 ,dtmInvoicePostedDate				
+		 ,strContract						
+		 ,strAllocationRefNo					
+		 ,strEntityName						
+		 ,intQuantityUOMId					
+		 ,strInternalCompany					
+		 ,dblQuantity = SUM(dblQuantity)						
+		 ,intQuantityUnitMeasureId			
+		 ,strQuantityUOM
+		 ,dblWeight	  = SUM(dblQuantity)							
+		 ,intWeightUOMId
+		 ,strWeightUOM						
+		 ,intOriginId						
+		 ,strOrigin							
+		 ,strItemDescription					
+		 ,strGrade							
+		 ,strCropYear						
+		 ,strProductionLine					
+		 ,strCertification					
+		 ,strTerms							
+		 ,strPosition						
+		 ,dtmStartDate						
+		 ,dtmEndDate							
+		 ,strPriceTerms						
+		 ,strIncoTermLocation				
+		 ,dblContractDifferential			
+		 ,strContractDifferentialUOM			
+		 ,dblFuturesPrice					
+		 ,strFuturesPriceUOM					
+		 ,dblCashPrice						
+		 ,intPriceUOMId						
+		 ,intPriceUnitMeasureId				
+		 ,strContractPriceUOM				
+		 ,strFixationDetails					
+		 ,dblFixedLots						
+		 ,dblUnFixedLots						
+		 ,dblContractInvoiceValue = SUM(dblContractInvoiceValue)	
+		 ,dblSecondaryCosts			
+		 ,dblCOGSOrNetSaleValue				
+		 ,intFutureMarketId					
+		 ,strFutureMarket					
+		 ,intFutureMarketUOMId				
+		 ,intFutureMarketUnitMeasureId		
+		 ,strFutureMarketUOM					
+		 ,intMarketCurrencyId				
+		 ,intFutureMonthId					
+		 ,strFutureMonth						
+		 ,dtmRealizedDate					
+		 ,dblRealizedQty						
+		 ,dblRealizedPNLValue				
+		 ,dblPNLPreDayValue					
+		 ,dblProfitOrLossValue				
+		 ,dblPNLChange						
+		 ,strFixedBy							
+		 ,strPricingType						
+		 ,strInvoiceStatus					
+		 ,dblNetFuturesValue					
+		 ,dblRealizedFuturesPNLValue			
+		 ,dblNetPNLValue						
+		 ,dblFXValue							
+		 ,dblFXConvertedValue				
+		 ,strSalesReturnAdjustment			
+		 ,intCompanyId						
+		 ,strCompany							
+		  FROM
+	   (
 		 SELECT
 		 intContractTypeId							= CH.intContractTypeId 
 		,intContractDetailId						= CD.intContractDetailId
@@ -335,7 +413,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
 		WHERE ISNULL(Book.intBookId,0) = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  ISNULL(Book.intBookId,0) END
 	
-	UNION
+	UNION ALL
 	
 		 SELECT 
 		  intContractTypeId							= CH.intContractTypeId 
@@ -498,7 +576,80 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		          )BillCost ON BillCost.intContractDetailId = CD.intContractDetailId
 
 		WHERE ISNULL(Book.intBookId,0) = CASE WHEN @inBookId > 0 THEN @inBookId ELSE  ISNULL(Book.intBookId,0) END
-
+       )t
+	   GROUP BY
+	    intContractTypeId					
+	   ,intContractDetailId				
+	   ,intBookId							
+	   ,strBook							
+	   ,strSubBook						
+	   ,intCommodityId					
+	   ,strCommodity						
+	   ,strProductType					
+	   ,strRealizedType					
+	   ,dtmContractDate					
+	   ,strTransactionType				
+	   ,dtmInvoicePostedDate				
+	   ,strContract						
+	   ,strAllocationRefNo				
+	   ,strEntityName						
+	   ,intQuantityUOMId					
+	   ,strInternalCompany
+	   ,intQuantityUnitMeasureId			
+	   ,strQuantityUOM	   
+	   ,intWeightUOMId
+	   ,strWeightUOM						
+	   ,intOriginId						
+	   ,strOrigin							
+	   ,strItemDescription				
+	   ,strGrade							
+	   ,strCropYear						
+	   ,strProductionLine					
+	   ,strCertification					
+	   ,strTerms							
+	   ,strPosition						
+	   ,dtmStartDate						
+	   ,dtmEndDate						
+	   ,strPriceTerms						
+	   ,strIncoTermLocation				
+	   ,dblContractDifferential			
+	   ,strContractDifferentialUOM		
+	   ,dblFuturesPrice					
+	   ,strFuturesPriceUOM				
+	   ,dblCashPrice						
+	   ,intPriceUOMId						
+	   ,intPriceUnitMeasureId				
+	   ,strContractPriceUOM				
+	   ,strFixationDetails				
+	   ,dblFixedLots						
+	   ,dblUnFixedLots
+	   ,dblSecondaryCosts			
+	   ,dblCOGSOrNetSaleValue				
+	   ,intFutureMarketId					
+	   ,strFutureMarket					
+	   ,intFutureMarketUOMId				
+	   ,intFutureMarketUnitMeasureId		
+	   ,strFutureMarketUOM				
+	   ,intMarketCurrencyId				
+	   ,intFutureMonthId					
+	   ,strFutureMonth					
+	   ,dtmRealizedDate					
+	   ,dblRealizedQty					
+	   ,dblRealizedPNLValue				
+	   ,dblPNLPreDayValue					
+	   ,dblProfitOrLossValue				
+	   ,dblPNLChange						
+	   ,strFixedBy						
+	   ,strPricingType					
+	   ,strInvoiceStatus					
+	   ,dblNetFuturesValue				
+	   ,dblRealizedFuturesPNLValue		
+	   ,dblNetPNLValue					
+	   ,dblFXValue						
+	   ,dblFXConvertedValue				
+	   ,strSalesReturnAdjustment			
+	   ,intCompanyId						
+	   ,strCompany						
 		-----------------------------------------------------dblCOGSOrNetSaleValue Updation--------------------------------------------
 		
 		UPDATE @tblRealizedPNL SET dblCOGSOrNetSaleValue = (
