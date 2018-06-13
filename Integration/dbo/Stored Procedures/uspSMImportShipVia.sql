@@ -50,6 +50,7 @@ BEGIN
 		[strTransporterLicense]		nvarchar(100),
 		[strMotorCarrierIFTA]		nvarchar(100),
 		[strTransportationMode]		nvarchar(100),
+		[strFreightBilledBy]		nvarchar(15),
 		[ysnCompanyOwnedCarrier]	bit,
 		[ysnActive]					bit,
 		[intSort]					int,
@@ -74,6 +75,9 @@ BEGIN
 		,AG.[sscar_trans_lic_no]	AS [strTransporterLicense]
 		,AG.[sscar_ifta_no]		AS [strMotorCarrierIFTA]
 		,B.strDescription--AG.[sscar_trans_mode]		AS [strTransportationMode]
+		,(CASE WHEN EXISTS(SELECT TOP 1 1 FROM trhstmst WHERE trhst_pur_frt_billed_by_von = ''O'' AND RTRIM(LTRIM(trhst_pur_carrier)) = RTRIM(LTRIM(AG.[sscar_key])) ) THEN ''Other'' 
+		ELSE NULL 
+		END)  AS [strFreightBilledBy]
 		,(CASE WHEN AG.[sscar_co_owned_yn] = ''Y'' 
 			THEN 1
 			ELSE 0
