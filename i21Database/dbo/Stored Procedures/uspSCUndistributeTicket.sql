@@ -79,7 +79,7 @@ BEGIN TRY
 					END
 				END
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
-				FROM tblICInventoryReceiptItemId where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+				FROM tblICInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
 			END
 		END
 
