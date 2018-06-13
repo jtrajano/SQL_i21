@@ -36,6 +36,7 @@
 	[strBatchId]			NVARCHAR (20)	COLLATE Latin1_General_CI_AS NULL,	
 	[dtmBatchDate]			DATETIME		NULL,
 	[intPostedById]			INT				NULL,
+	[intCurrentStatus]		INT				NULL,
     [intConcurrencyId]		INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
     CONSTRAINT [PK_tblARPayment_intPaymentId] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
     CONSTRAINT [FK_tblARPayment_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -127,7 +128,7 @@ BEGIN
 	--SELECT ysnPosted FROM inserted WHERE ysnPosted = 1
 	DECLARE @ysnPosted AS VARCHAR(MAX) 
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
-	SELECT @ysnPosted = ysnPosted FROM deleted
+	SELECT @ysnPosted = ysnPosted FROM deleted WHERE intCurrentStatus <> 5
 	SELECT @ysnPostedNew = ysnPosted FROM inserted
 			
 	IF(@ysnPosted = 1 and @ysnPostedNew = 0)

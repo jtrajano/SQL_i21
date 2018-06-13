@@ -390,7 +390,7 @@ IF(@exclude IS NOT NULL)
 
 	END
 	
-	IF (SELECT COUNT(1) FROM @ARReceivablePostData) > 1
+	IF (SELECT COUNT(1) FROM @ARReceivablePostData) > 1 AND @post = 1
 	BEGIN
 		DECLARE @DiscouuntedInvoices TABLE (
 				intInvoiceId int PRIMARY KEY,
@@ -998,6 +998,13 @@ IF @recap = 0
 			SELECT * FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE [intTransactionId] = Z.[intTransactionId])
 
+			--update payment record
+            UPDATE A
+                SET A.intCurrentStatus = 5
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+
+
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -1221,6 +1228,12 @@ IF @recap = 0
 				intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)		
 
 			EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @arPaymentIds, @post = 0
+
+			--update payment record
+            UPDATE A
+                SET A.intCurrentStatus = NULL
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
 
 			END
 		ELSE
