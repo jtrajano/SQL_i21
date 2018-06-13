@@ -30,7 +30,7 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@REVALUE_SOLD AS INT = 3
 		,@AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK AS INT = 35
 
-		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 26;
+		,@COST_ADJUSTMENT AS INT = 26;
 
 ---- Validate the unpost of the stock in. Do not allow unpost if it has cost adjustments. 
 --IF @ysnRecap = 0
@@ -66,6 +66,7 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,dblQty
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
@@ -73,6 +74,7 @@ SELECT	Changes.intInventoryTransactionId
 		,Changes.intRelatedTransactionId
 		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
+		,Changes.dblQty 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -98,7 +100,6 @@ FROM	(
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
 							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK)
-							AND ISNULL(inventory_transaction.dblQty, 0) <> 0
 						)
 					)
 
@@ -193,5 +194,12 @@ FROM	dbo.tblICInventoryActualCost ActualCost INNER JOIN #tmpInventoryTransaction
 		INNER JOIN dbo.tblICInventoryTransaction InTransactions
 			ON InTransactions.intInventoryTransactionId = Reversal.intInventoryTransactionId
 			AND ISNULL(InTransactions.dblQty, 0) > 0 
-WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK) 
+WHERE	Reversal.intTransactionTypeId NOT IN (
+			@WRITE_OFF_SOLD
+			, @REVALUE_SOLD
+			, @AUTO_NEGATIVE
+			, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
+			, @COST_ADJUSTMENT 
+		) 
+		AND ISNULL(Reversal.dblQty, 0) <> 0
 ;

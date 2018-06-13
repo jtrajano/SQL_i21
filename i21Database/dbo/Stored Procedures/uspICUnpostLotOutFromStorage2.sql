@@ -19,6 +19,7 @@ BEGIN
 		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL 
+		,dblQty NUMERIC(38,20) 
 	)
 END 
 
@@ -44,6 +45,7 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,dblQty 
 )
 SELECT	Data_Changes.intInventoryTransactionStorageId
 		,Data_Changes.intTransactionId
@@ -51,6 +53,7 @@ SELECT	Data_Changes.intInventoryTransactionStorageId
 		,Data_Changes.intRelatedTransactionId
 		,Data_Changes.strRelatedTransactionId
 		,Data_Changes.intTransactionTypeId
+		,Data_Changes.dblQty 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -76,7 +79,6 @@ FROM	(
 						OR (
 							inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId
-							AND ISNULL(inventory_transaction.dblQty, 0) <> 0
 						)
 					)
 
@@ -85,8 +87,25 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionStorageId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Data_Changes (Action, intInventoryTransactionStorageId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT 
+					$action
+					, Inserted.intInventoryTransactionStorageId
+					, Inserted.intTransactionId
+					, Inserted.strTransactionId
+					, Inserted.intRelatedTransactionId
+					, Inserted.strRelatedTransactionId
+					, Inserted.intTransactionTypeId
+					, Inserted.dblQty 
+		) AS Data_Changes (
+			Action
+			, intInventoryTransactionStorageId
+			, intTransactionId
+			, strTransactionId
+			, intRelatedTransactionId
+			, strRelatedTransactionId
+			, intTransactionTypeId
+			, dblQty 
+		)
 WHERE	Data_Changes.Action = 'UPDATE'
 ;
 
@@ -98,6 +117,7 @@ FROM	dbo.tblICInventoryLotStorage LotBucket INNER JOIN #tmpInventoryTransactionS
 			ON LotBucket.intTransactionId = Reversal.intTransactionId
 			AND LotBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+		AND ISNULL(Reversal.dblQty, 0) <> 0 
 ;
 
 -- If LIFOBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
@@ -111,7 +131,8 @@ WHERE	EXISTS (
 			WHERE	Reversal.intTransactionId = LotBucket.intTransactionId
 					AND Reversal.strTransactionId = LotBucket.strTransactionId
 					AND Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
-		)
+					AND ISNULL(Reversal.dblQty, 0) <> 0 
+		)		
 ;
 
 -- If there are Lot out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
