@@ -645,7 +645,7 @@ BEGIN TRY
 		
 		SELECT RSI.intSubstituteItemId
 			,RSI.intItemId
-			,IU.intItemUOMId
+			,RSI.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
