@@ -77,33 +77,6 @@ BEGIN
 
 
 
-		----// START PM Morris File format validation
-		--IF(@intCsvFormat = 0) -- 0 = PM Morris
-		--BEGIN
-		--	SELECT @intCountAccountNumber = COUNT(DISTINCT intRetailAccountNumber) 
-		--	FROM tblSTRetailAccount
-		--	WHERE intEntityId = @intVendorId
-		--	AND intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-
-		--	IF(@intCountAccountNumber >= 2)
-		--	BEGIN
-		--		SET @strCSVHeader = ''
-		--		SET @intVendorAccountNumber = 0
-		--		SET @strStatusMsg = 'Selected Store does not have the same Chain Account Number'
-
-		--		RETURN
-		--	END
-		--	ELSE IF(@intCountAccountNumber = 1)
-		--	BEGIN
-		--		SELECT @intVendorAccountNumber = intRetailAccountNumber
-		--		FROM tblSTRetailAccount
-		--		WHERE intEntityId = @intVendorId
-		--		AND intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-		--	END
-		--END
-		----// END PM Morris File format validation
-
-
 
 		---- // Create temp table PMM
 		DECLARE @tblTempPMM TABLE (
@@ -199,6 +172,7 @@ BEGIN
 		END
 		--// END CHECK if stores has address
 
+
 		--// START CHECK if Stores has department
 		IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strDepartment = '' OR strDepartment IS NULL))
 		BEGIN
@@ -223,25 +197,6 @@ BEGIN
 			BEGIN
 
 				SET @Delimiter = '|'
-
-				---- START Validate if selected dates completes a aweek
-				--DECLARE @intCountDays AS INT = DATEDIFF(DAY, @dtmBeginningDate, @dtmEndingDate) + 1
-				
-				--IF(@intCountDays < 7)
-				--BEGIN
-				--	SET @strStatusMsg = 'The selected dates should complete 1 week of data transaction, you only selected ' + CAST(@intCountDays AS NVARCHAR(10)) + ' days of transaction data'
-				--	RETURN
-				--END
-				--ELSE IF(@intCountDays > 7)
-				--BEGIN
-				--	SET @strStatusMsg = 'The selected dates have more than a week of transaction data, you selected ' + CAST(@intCountDays AS NVARCHAR(10)) + ' days, It should only have 1 week'
-				--	RETURN
-				--END
-
-				-- END Validate if selected dates completes a aweek
-
-				-- GET week ending date (SATURDAY)
-				-- DECLARE @NextDayID INT = 5 -- 0=Mon, 1=Tue, 2=Wed, 3=Thur, 4=Fri, 5=Sat, 6=Sun
 
 				-- Check if has chain account number
 				IF EXISTS(SELECT intChainAccountNumber FROM tblAPVendor WHERE intEntityId = @intVendorId AND intChainAccountNumber IS NOT NULL)
@@ -379,7 +334,10 @@ BEGIN
 								, strTrlUPC as strUpcCode
 								, REPLACE(strTrlDesc, ',', ' ') as strUpcDescription
 								, 'PACK' as strUnitOfMeasure
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'Y' ELSE 'N' END as strPromotionFlag
+
+								, CASE 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' ELSE 'N' 	
+								  END as strPromotionFlag
 
 								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
 									THEN 'Y' ELSE 'N' END as strOutletMultipackFlag
@@ -390,27 +348,38 @@ BEGIN
 								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
 									THEN dblTrlMatchLineTrlPromoAmount ELSE 0 END as dblOutletMultipackDiscountAmount
 
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
+								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN 'COUPONS' ELSE '' END as strAccountPromotionName --21
+								, '' as strAccountPromotionName --21
 								--, CASE WHEN strTrlDesc like '% OFF%' THEN strTrlDesc ELSE '' END as strAccountPromotionName --21
 
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount --22
+								--, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblAccountDiscountAmount --22
+								, 0 as dblAccountDiscountAmount --22
 
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN dblTrpAmt ELSE 0 END as dblManufacturerDiscountAmount
+								, CASE 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50 ELSE 0 
+								  END as dblManufacturerDiscountAmount
 
+								-- COUPONS
 								, CASE WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
-									THEN strTrlUPC ELSE '' END as strCouponPid --24
+									THEN strTrlUPC ELSE '' END as strCouponPid --24 COUPON
 								, CASE WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
-									THEN dblTrpAmt ELSE 0 END as dblCouponAmount --25
+									THEN dblTrpAmt ELSE 0 END as dblCouponAmount --25 COUPON
 
 								, 'N' as strManufacturerMultipackFlag
 								, 0 as intManufacturerMultipackQuantity
 								, 0 as dblManufacturerMultipackDiscountAmount
-								, CASE WHEN strTrpPaycode IN ('COUPONS') THEN strTrpPaycode ELSE '' END as strManufacturerPromotionDescription
+
+								, CASE 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc ELSE '' 
+								  END as strManufacturerPromotionDescription
+
 								, REPLACE(CRP.strProgramName, ',','') as strManufacturerBuydownDescription
 								, CRP.dblManufacturerBuyDownAmount as dblManufacturerBuydownAmount
 								, '' as strManufacturerMultiPackDescription
 								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
-								, TR.strTrLoyaltyProgramProgramID as strCouponDescription
+								
+								--, TR.strTrLoyaltyProgramProgramID as strCouponDescription
+								, '' as strCouponDescription
 					FROM 
 					(   
 						SELECT * FROM
@@ -453,43 +422,43 @@ BEGIN
 		IF(@strStatusMsg = 'Success')
 		BEGIN
 			IF(@intCsvFormat = 0) -- 0 = PM Morris
-			BEGIN
-				IF EXISTS(SELECT COUNT(strTransactionIdCode) FROM @tblTempPMM)
 				BEGIN
-					--START mark ysnSubmitted = 1 (mark as submitted)
-					UPDATE tblSTTranslogRebates
-						SET ysnSubmitted = 1
-						WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-						AND CAST(dtmDate as DATE) >= @dtmBeginningDate
-						AND CAST(dtmDate as DATE) <= @dtmEndingDate
-						AND ysnSubmitted = 0
-					--END mark ysnSubmitted = 1 (mark as submitted)	
+					IF EXISTS(SELECT COUNT(strTransactionIdCode) FROM @tblTempPMM)
+						BEGIN
+							--START mark ysnSubmitted = 1 (mark as submitted)
+							UPDATE tblSTTranslogRebates
+								SET ysnSubmitted = 1
+								WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+								AND CAST(dtmDate as DATE) >= @dtmBeginningDate
+								AND CAST(dtmDate as DATE) <= @dtmEndingDate
+								AND ysnSubmitted = 0
+							--END mark ysnSubmitted = 1 (mark as submitted)	
+						END
 				END
-			END
 			ELSE IF(@intCsvFormat = 1) -- 1 = RJ REYNOLDS
-			BEGIN
-				IF EXISTS(SELECT COUNT(strMarketBasketTransactionId) FROM @tblTempRJR)
 				BEGIN
-					--START mark ysnSubmitted = 1 (mark as submitted)
-					UPDATE tblSTTranslogRebates
-						SET ysnSubmitted = 1
-						WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
-						AND CAST(dtmDate as DATE) >= @dtmBeginningDate
-						AND CAST(dtmDate as DATE) <= @dtmEndingDate
-						AND ysnSubmitted = 0
-					--END mark ysnSubmitted = 1 (mark as submitted)	
+					IF EXISTS(SELECT COUNT(strMarketBasketTransactionId) FROM @tblTempRJR)
+					BEGIN
+						--START mark ysnSubmitted = 1 (mark as submitted)
+						UPDATE tblSTTranslogRebates
+							SET ysnSubmitted = 1
+							WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+							AND CAST(dtmDate as DATE) >= @dtmBeginningDate
+							AND CAST(dtmDate as DATE) <= @dtmEndingDate
+							AND ysnSubmitted = 0
+						--END mark ysnSubmitted = 1 (mark as submitted)	
+					END
 				END
-			END
 		END
-		--ELSE IF NOT EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnSubmitted = 0)
+		
 		ELSE
-		BEGIN
-			SET @strStatusMsg = 'No transaction log found based on filter'
-			SET @strCSVHeader = ''
-			SET @intVendorAccountNumber = 0
+			BEGIN
+				SET @strStatusMsg = 'No transaction log found based on filter'
+				SET @strCSVHeader = ''
+				SET @intVendorAccountNumber = 0
 			
-			RETURN
-		END
+				RETURN
+			END
 
 
 
@@ -517,10 +486,6 @@ BEGIN
 			SELECT * FROM @tblTempRJR
 			ORDER BY intOutletNumber ASC
 		END
-
-		--DECLARE @SQL NVARCHAR(MAX)
-		--SET @SQL = 'DELETE FROM ' + @strTableName
-		--EXEC sp_executesql @SQL
 
 	END TRY
 
