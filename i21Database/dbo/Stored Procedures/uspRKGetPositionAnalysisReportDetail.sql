@@ -168,8 +168,8 @@ SET @outrightQuery = N'
 		INNER JOIN tblICItemUOM UOM ON CD.intItemUOMId = UOM.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		WHERE 
-		CH.intPricingTypeId = 1 --Priced
-		AND PF.intPriceFixationId IS NOT NULL
+		--CH.intPricingTypeId = 1 --Priced
+		PF.intPriceFixationId IS NOT NULL
 		AND CD.intFutureMarketId = '+ CASE WHEN @intFutureMarketId IS NULL THEN 'CD.intFutureMarketId' ELSE CAST(@intFutureMarketId AS NVARCHAR(10)) END +'
 		AND CH.intCommodityId = '+ CASE WHEN @intCommodityId IS NULL THEN 'CH.intCommodityId' ELSE CAST(@intCommodityId AS NVARCHAR(10)) END +'
 		AND CD.intCurrencyId = '+ CASE WHEN @intCurrencyId IS NULL THEN 'CD.intCurrencyId' ELSE CAST(@intCurrencyId AS NVARCHAR(10)) END+'
