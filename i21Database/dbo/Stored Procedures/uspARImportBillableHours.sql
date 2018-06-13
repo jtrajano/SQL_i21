@@ -125,7 +125,7 @@ INSERT INTO @tblInvoiceEntries (
 )
 SELECT 
 	 [strSourceTransaction]				= 'Direct'
-	,[intSourceId]						= BILLABLE.intTicketId
+	,[intSourceId]						= 0
 	,[strSourceId]						= BILLABLE.strTicketNumber
 	,[intEntityCustomerId]				= BILLABLE.intEntityCustomerId
 	,[intCompanyLocationId]				= BILLABLE.intCompanyLocationId
@@ -157,7 +157,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 			 @InvoiceEntries				= @tblInvoiceEntries
 			,@LineItemTaxEntries			= @tblTaxEntries
 			,@UserId						= @UserId
-			,@GroupingOption				= 3	
+			,@GroupingOption				= 5
 			,@RaiseError					= 0
 			,@ErrorMessage					= @strErrorMessage OUT
 			,@CreatedIvoices				= @strCreatedInvoices OUT
@@ -180,6 +180,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 				ON TICKETS.intTicketId = HW.intTicketId
 				AND TICKETS.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
 	
+				UPDATE ID
+                SET ID.strDocumentNumber = HW.strTicketNumber
+                FROM tblARInvoiceDetail ID
+                INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON ID.intInvoiceId = I.intID
+				INNER JOIN #BILLABLE HW ON ID.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
+
 				IF @Post = 1
 				BEGIN
 					DECLARE	@batchId		NVARCHAR(20),
