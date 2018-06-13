@@ -922,6 +922,19 @@ BEGIN
 		AND (intSiteId = 0 OR intSiteId IS NULL)
 	END
 
+	IF(@intProductId = 0)
+	BEGIN
+		SELECT TOP 1 
+			 @intProductId = intItemId
+			,@intARItemId = intARItemId
+		FROM tblCFItem 
+		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
+		AND intNetworkId = @intNetworkId
+		AND (intSiteId = 0 OR intSiteId IS NULL)
+	END
+
+
+
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
