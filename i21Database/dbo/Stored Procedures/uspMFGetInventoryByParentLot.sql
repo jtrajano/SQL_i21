@@ -113,13 +113,17 @@ BEGIN
 					THEN 'Bond Damaged'
 				WHEN LS1.strSecondaryStatus = 'Bond'
 					THEN LS1.strSecondaryStatus
-				WHEN LS.strSecondaryStatus = 'On Hold'
+				WHEN LS.strSecondaryStatus = 'PR HOLD'
 					THEN 'PR Hold'
 
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
 				WHEN LS.strSecondaryStatus = 'Active'
 					THEN 'Active'
+				WHEN LS.strSecondaryStatus = 'Quarantine'
+					THEN LS.strSecondaryStatus
+				WHEN LS.strSecondaryStatus = 'QA Hold'
+					THEN LS.strSecondaryStatus
 				ELSE 'Other Status'
 				END AS [Lot Status]
 			,(
@@ -200,12 +204,16 @@ BEGIN
 					THEN 'Bond Damaged'
 				WHEN LS1.strSecondaryStatus = 'Bond'
 					THEN LS1.strSecondaryStatus
-				WHEN LS.strSecondaryStatus = 'On Hold'
+				WHEN LS.strSecondaryStatus = 'PR HOLD'
 					THEN 'PR Hold'
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
 				WHEN LS.strSecondaryStatus = 'Active'
 					THEN 'Active'
+				WHEN LS.strSecondaryStatus = 'Quarantine'
+					THEN LS.strSecondaryStatus
+				WHEN LS.strSecondaryStatus = 'QA Hold'
+					THEN LS.strSecondaryStatus
 				ELSE 'Other Status'
 				END AS [Lot Status]
 			,(

@@ -775,7 +775,7 @@ BEGIN TRY
 					,intFreightTermId = IsNULL(FT.intFreightTermId, (
 							SELECT TOP 1 intFreightTermId
 							FROM tblSMFreightTerms
-							WHERE strFreightTerm = 'Deliver'
+							WHERE strFreightTerm = 'Collect'
 							))
 					,strSourceScreenName = 'EDI940'
 					,strBOLNumber = ''
@@ -859,7 +859,7 @@ BEGIN TRY
 					,intFreightTermId = IsNULL(FT.intFreightTermId, (
 							SELECT TOP 1 intFreightTermId
 							FROM tblSMFreightTerms
-							WHERE strFreightTerm = 'Deliver'
+							WHERE strFreightTerm = 'Collect'
 							))
 					,strSourceScreenName = 'EDI940'
 					,strBOLNumber = ''
@@ -933,7 +933,7 @@ BEGIN TRY
 					,intFreightTermId = IsNULL(FT.intFreightTermId, (
 							SELECT TOP 1 intFreightTermId
 							FROM tblSMFreightTerms
-							WHERE strFreightTerm = 'Deliver'
+							WHERE strFreightTerm = 'Collect'
 							))
 					,strSourceScreenName = 'EDI940'
 					,strBOLNumber = ''
@@ -1100,7 +1100,7 @@ BEGIN TRY
 					,intFreightTermId = (
 						SELECT TOP 1 intFreightTermId
 						FROM tblSMFreightTerms
-						WHERE strFreightTerm = 'Deliver'
+						WHERE strFreightTerm = 'Collect'
 						)
 					,strSourceScreenName = 'EDI940'
 					,strBOLNumber = ''
@@ -1183,7 +1183,7 @@ BEGIN TRY
 					,intFreightTermId = (
 						SELECT TOP 1 intFreightTermId
 						FROM tblSMFreightTerms
-						WHERE strFreightTerm = 'Deliver'
+						WHERE strFreightTerm = 'Collect'
 						)
 					,strSourceScreenName = 'EDI940'
 					,strBOLNumber = ''
@@ -1256,7 +1256,7 @@ BEGIN TRY
 					,intFreightTermId = (
 						SELECT TOP 1 intFreightTermId
 						FROM tblSMFreightTerms
-						WHERE strFreightTerm = 'Deliver'
+						WHERE strFreightTerm = 'Collect'
 						)
 					,strSourceScreenName = 'EDI940'
 					,strBOLNumber = ''
