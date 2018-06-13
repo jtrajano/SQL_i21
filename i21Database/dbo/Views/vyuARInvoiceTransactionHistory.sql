@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceTransactionHistory]
 	AS 
 	
-	SELECT 
+	SELECT DISTINCT
 		A.intInvoiceId
 		,A.intInvoiceDetailId
 		,A.dblQtyReceived
