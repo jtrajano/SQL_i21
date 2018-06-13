@@ -74,7 +74,7 @@ BEGIN
 			,intSort
 			,CAST(ysnPosted AS BIT) ysnPosted,
 			CASE	WHEN strType IN ('Invoice') THEN dblAccounting 
-					WHEN strType IN ('Amount')	THEN dblTranValue 
+					WHEN strType IN ('Amount', 'Per Unit')	THEN dblTranValue 
 					WHEN strType IN ('4 Supp. Invoice') AND strDescription <> 'Supp. Invoice' THEN dblPrice * -1 
 			ELSE ISNULL(dblAllocatedQtyPrice,dblBookedPrice) * dblPrice / CASE WHEN @ysnSubCurrency = 1 THEN 100 ELSE 1 END END AS	dblTransactionValue,
 			CASE	WHEN strType IN ('Amount')	THEN dblTranValue  / dblFX
@@ -311,7 +311,7 @@ BEGIN
 					BL.dblAccounting * -1 dblAccounting,
 					CH.dtmContractDate,
 					CC.strCostMethod strType,
-					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate ELSE dblTranValue END *-1 AS dblTranValue,
+					CASE WHEN CC.strCostMethod = 'Amount' THEN  CC.dblRate WHEN CC.strCostMethod = 'Per Unit' THEN CC.dblRate * CD.dblQuantity ELSE dblTranValue END *-1 AS dblTranValue,
 					99999999 + AD.intPContractDetailId AS intSort,
 					CAST(0 AS BIT) ysnPosted
 
