@@ -6746,6 +6746,7 @@
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationSetIdentityNotForReplication.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
