@@ -21,3 +21,4 @@ SELECT
 	,intEntityId
 FROM tblEMEntityCardInformation
 WHERE strToken is not null
+and  CAST(REPLACE(strCardExpDate,'/','/01/') as datetime) > DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0)
