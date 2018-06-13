@@ -30,6 +30,7 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,dblQty 
 )
 SELECT	Changes.intInventoryTransactionStorageId
 		,Changes.intTransactionId
@@ -37,6 +38,7 @@ SELECT	Changes.intInventoryTransactionStorageId
 		,Changes.intRelatedTransactionId
 		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
+		,Changes.dblQty 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -62,7 +64,6 @@ FROM	(
 						OR (
 							inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId
-							AND ISNULL(inventory_transaction.dblQty, 0) <> 0
 						)
 					)
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
@@ -70,8 +71,25 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionStorageId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionStorageId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT 
+					$action
+					, Inserted.intInventoryTransactionStorageId
+					, Inserted.intTransactionId
+					, Inserted.strTransactionId
+					, Inserted.intRelatedTransactionId
+					, Inserted.strRelatedTransactionId
+					, Inserted.intTransactionTypeId
+					, Inserted.dblQty 
+		) AS Changes (
+			Action
+			, intInventoryTransactionStorageId
+			, intTransactionId
+			, strTransactionId
+			, intRelatedTransactionId
+			, strRelatedTransactionId
+			, intTransactionTypeId
+			, dblQty 
+		)
 WHERE	Changes.Action = 'UPDATE'
 ;
 
@@ -85,7 +103,12 @@ WHERE	EXISTS (
 			FROM	#tmpInventoryTransactionStockToReverse InventoryToReverse
 			WHERE	InventoryToReverse.intTransactionId = fifoStorageBucket.intTransactionId
 					AND InventoryToReverse.strTransactionId = fifoStorageBucket.strTransactionId
-					AND InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+					AND InventoryToReverse.intTransactionTypeId NOT IN (
+						@WRITE_OFF_SOLD
+						, @REVALUE_SOLD
+						, @AUTO_NEGATIVE
+					) 
+					AND ISNULL(InventoryToReverse.dblQty, 0) <> 0
 		)
 ;
 
