@@ -6,7 +6,8 @@
 		,A.intInvoiceDetailId
 		,A.dblQtyReceived
 		,A.dblPrice
-		,A.dblAmountDue
+		,dblAmountDue = case  (isnull(A.ysnPost, 1)) when 1 then  A.dblAmountDue else (A.dblAmountDue *-1) end
+		,isnull(P.dblPayment, 0) as dblAmountPaid
 		,A.intItemId
 		,A.intItemUOMId
 		,A.intCompanyLocationId
@@ -24,10 +25,13 @@
 		,ysnPost = A.ysnPost
 		,A.intCommodityId
 		,CM.strCommodityCode
+		, strEvent = case  (A.ysnPost) when 1 then  'Post' when 0 then 'Unpost' else 'Add/Edit' end
 	FROM
 		tblARInvoiceTransactionHistory A
 	INNER JOIN tblARInvoice B
 		ON B.[intInvoiceId] = A.intInvoiceId
+	LEFT JOIN (select (isnull(dblBasePayment, 0) + isnull(dblBaseDiscount,0)) dblPayment, intInvoiceId, P.intPaymentId from tblARPaymentDetail PD INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId) P
+		ON P.intInvoiceId = A.intInvoiceId 
 	LEFT JOIN vyuICItemUOM C
 		ON C.intItemId = A.intItemId 
 			AND C.intItemUOMId = A.intItemUOMId
