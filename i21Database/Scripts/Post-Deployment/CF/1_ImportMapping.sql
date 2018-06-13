@@ -736,3 +736,140 @@ END
 -----------CFN-------------
 
 
+----- Network Cost Pac Pride
+DECLARE @headerId INT
+DECLARE @fileHeaderId INT
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Network Cost Pac Pride') =  0)
+BEGIN
+	--[tblSMImportFileHeader]
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Network Cost Pac Pride', N'Delimiter', 'Comma', NULL, NULL, 1, 1)
+
+	SET @headerId = SCOPE_IDENTITY()
+
+	--[tblSMImportFileRecordMarker]
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Site', 0, 2, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 1, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Product', 0, 7, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 2, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Transfer Cost', 0, 9, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 3, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Effective Date', 0, 6, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 4, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Fed Tax', 0, 11, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 5, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'State Tax', 0, 12, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 6, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'County Tax', 0, 13, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 7, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'City Tax', 0, 14, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 8, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Sales Tax', 0, 34, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 9, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'St Other Tax', 0, 17, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 10, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Sales Tax Type', 0, 16, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 11, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Fed Tax Type', 0, 21, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 12, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'State Tax Type', 0, 22, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 13, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'County Tax Type', 0, 23, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 14, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'City Tax Type', 0, 24, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 15, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'St Other Tax Type', 0, 25, NULL, NULL, 1, NULL, NULL)
+	SET @fileHeaderId = SCOPE_IDENTITY()
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @fileHeaderId, 16, 0, NULL, NULL, NULL, NULL, NULL, N'', 1, 1)
+
+END
+
+---- Network Cost Pac Pride
+
+---- Network Cost CFN
+DECLARE @siteFileHeaderId INT
+DECLARE @dateFileHeaderId INT
+DECLARE @productFileHeaderId INT
+DECLARE @costFileHeaderId INT
+DECLARE @taxFileHeaderId INT
+
+IF ((SELECT COUNT(*) FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Network Cost CFN') =  0)
+BEGIN
+	--[tblSMImportFileHeader]
+	INSERT [dbo].[tblSMImportFileHeader] ([strLayoutTitle], [strFileType], [strFieldDelimiter], [strXMLType], [strXMLInitiater], [ysnActive], [intConcurrencyId]) VALUES (N'Network Cost CFN', N'Fixed', NULL, NULL, NULL, 1, 1)
+
+	SET @headerId = SCOPE_IDENTITY()
+
+	--[tblSMImportFileRecordMarker]
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Site', 0, 0, NULL, 1, 1, NULL, NULL)
+	SET @siteFileHeaderId = SCOPE_IDENTITY()
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Date', 0, 6, NULL, 2, 1, N'YYMMDD', NULL)
+	SET @dateFileHeaderId = SCOPE_IDENTITY()
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Product', 0, 12, NULL, 3, 1, NULL, NULL)
+	SET @productFileHeaderId = SCOPE_IDENTITY()
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Network Cost', 0, 16, NULL, 4, 1, N'5 Implied Decimals', NULL)
+	SET @costFileHeaderId = SCOPE_IDENTITY()
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ( [intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@headerId, N'Taxes', 0, 22, NULL, 5, 1, N'5 Implied Decimals', NULL)
+	SET @taxFileHeaderId = SCOPE_IDENTITY()
+
+
+	--[tblSMImportFileColumnDetail]
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @siteFileHeaderId, 1, 0, NULL, N'tblCFSite', N'strSiteNumber', NULL, 6, N'', 1, 1)
+
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @dateFileHeaderId, 2, 6, NULL, N'tblCFNetworkCost', N'dtmDate', NULL, 6, N'', 1, 1)
+
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @productFileHeaderId, 3, 12, NULL, N'tblICItem', N'strItemNo', NULL, 4, N'', 1, 1)
+
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @costFileHeaderId, 4, 16, NULL, N'tblCFNetworkCost', N'dblTransferCost', NULL, 6, N'', 1, 1)
+
+	INSERT [dbo].[tblSMImportFileColumnDetail] ( [intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@headerId, @taxFileHeaderId, 5, 22, NULL, N'tblCFNetworkCost', N'dblTaxesPerUnit', NULL, 6, N'', 1, 1)
+END
+---- Network Cost CFN
