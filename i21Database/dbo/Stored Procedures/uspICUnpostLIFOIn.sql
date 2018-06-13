@@ -62,6 +62,7 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,dblQty 
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
@@ -69,6 +70,7 @@ SELECT	Changes.intInventoryTransactionId
 		,Changes.intRelatedTransactionId
 		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
+		,Changes.dblQty 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -95,7 +97,6 @@ FROM	(
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
 							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK)
-							AND ISNULL(inventory_transaction.dblQty, 0) <> 0
 						)
 					)
 
@@ -104,8 +105,25 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT 
+					$action
+					, Inserted.intInventoryTransactionId
+					, Inserted.intTransactionId
+					, Inserted.strTransactionId
+					, Inserted.intRelatedTransactionId
+					, Inserted.strRelatedTransactionId
+					, Inserted.intTransactionTypeId
+					, Inserted.dblQty 
+		) AS Changes (
+			Action
+			, intInventoryTransactionId
+			, intTransactionId
+			, strTransactionId
+			, intRelatedTransactionId
+			, strRelatedTransactionId
+			, intTransactionTypeId
+			, dblQty 
+		)
 WHERE	Changes.Action = 'UPDATE'
 ;
 
@@ -167,5 +185,11 @@ SET		dblStockOut = dblStockIn
 FROM	dbo.tblICInventoryLIFO LIFOBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 			ON LIFOBucket.intTransactionId = Reversal.intTransactionId
 			AND LIFOBucket.strTransactionId = Reversal.strTransactionId
-WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK) 
-;
+WHERE	Reversal.intTransactionTypeId NOT IN (
+			@WRITE_OFF_SOLD
+			, @REVALUE_SOLD
+			, @AUTO_NEGATIVE
+			, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK
+		) 
+		AND ISNULL(Reversal.dblQty, 0) <> 0 
+;	
