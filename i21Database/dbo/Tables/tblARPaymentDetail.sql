@@ -42,7 +42,7 @@ BEGIN
 	--SELECT ysnPosted FROM inserted WHERE ysnPosted = 1
 	DECLARE @ysnPosted AS VARCHAR(MAX) 
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
-	SELECT @ysnPosted = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId
+	SELECT @ysnPosted = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId AND P.intCurrentStatus <> 5
 	SELECT @ysnPostedNew = P.ysnPosted FROM tblARPayment P inner join deleted d on d.intPaymentId = P.intPaymentId
 		
 	IF(@ysnPosted = 1 and @ysnPostedNew != 0)
