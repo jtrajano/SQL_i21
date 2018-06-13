@@ -176,7 +176,6 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 		SELECT intID FROM fnGetRowsFromDelimitedValues(@strCreatedInvoices)
 
 		SELECT TOP 1 @intNewInvoiceId = intId FROM @tblInvoicesCreated
-		--SET @intNewTransactionId = @intNewInvoiceId
 
 		INSERT INTO tblARPrepaidAndCredit (
 			 intInvoiceId
@@ -229,7 +228,7 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 
 				EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
 												  , @notes				= 'Cash Refund'
-												  , @payment			= 0.000000
+												  , @payment			= @dblAmountDue
 												  , @datePaid			= @dtmDateOnly
 												  , @paymentDetail		= @tblPaymentDetail
 												  , @createdPaymentId	= @intNewTransactionId OUT
