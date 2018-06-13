@@ -348,9 +348,9 @@ select strQuery = 'UNION ALL SELECT intValidOriginStateId = ' + CAST(intReportin
 		, strStatus
 		, intMasterId
 	)
-	SELECT intValidOriginStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 401
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', strState = 'PA', strStatus = 'Exclude', intMasterId = 402
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 403
+	SELECT intValidOriginStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', strState = 'SC', strStatus = 'Include', intMasterId = 401
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', strState = 'SC', strStatus = 'Exclude', intMasterId = 402
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', strState = 'SC', strStatus = 'Include', intMasterId = 403
  
 
 EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
@@ -380,9 +380,9 @@ select strQuery = 'UNION ALL SELECT intValidDestinationStateId = ' + CAST(intRep
 		, strStatus
 		, intMasterId
 	)
-	 SELECT intValidDestinationStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', strState = 'PA', strStatus = 'Exclude', intMasterId = 401
-	 UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 402
-	 UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', strState = 'PA', strStatus = 'Include', intMasterId = 403
+	 SELECT intValidDestinationStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', strState = 'SC', strStatus = 'Exclude', intMasterId = 401
+	 UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', strState = 'SC', strStatus = 'Include', intMasterId = 402
+	 UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', strState = 'SC', strStatus = 'Include', intMasterId = 403
  
 
 EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
