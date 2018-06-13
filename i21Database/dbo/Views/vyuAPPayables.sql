@@ -250,7 +250,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
 			WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
 				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
-			ELSE B.dblPayment * A.dblExchangeRate END AS dblAmountPaid,     
+			ELSE ABS(B.dblPayment) * ISNULL(A.dblExchangeRate,1) END AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = 0
