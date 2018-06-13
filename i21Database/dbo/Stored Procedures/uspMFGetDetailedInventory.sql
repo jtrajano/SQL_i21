@@ -104,8 +104,6 @@ BEGIN
 				THEN LS1.strSecondaryStatus
 			WHEN LS.strSecondaryStatus LIKE '%Damaged'
 				THEN 'Damaged'
-			WHEN LS.strSecondaryStatus = 'On Hold'
-				THEN 'PR Hold'
 			ELSE LS.strSecondaryStatus
 			END AS [Lot Status]
 		,Convert(DECIMAL(24, 0), SD.dblWeight) AS Weight
@@ -162,8 +160,6 @@ BEGIN
 				THEN LS1.strSecondaryStatus
 			WHEN LS.strSecondaryStatus LIKE '%Damaged'
 				THEN 'Damaged'
-			WHEN LS.strSecondaryStatus = 'On Hold'
-				THEN 'PR Hold'
 			ELSE LS.strSecondaryStatus
 			END AS [Lot Status]
 		,Convert(DECIMAL(24, 0), SD.dblWeight) AS Weight
