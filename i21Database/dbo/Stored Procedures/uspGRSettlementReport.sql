@@ -128,6 +128,7 @@ DECLARE @temp_xml_table TABLE
 	  ,dblPartialPrepayment				DECIMAL(24,10)
 	  ,lblPartialPrepayment			    NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,blbHeaderLogo				    VARBINARY(max)
+	  ,strDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	)
 	
 	DECLARE @tblPayment AS TABLE 
@@ -272,7 +273,8 @@ BEGIN
 	  ,dblPartialPrepaymentSubTotal		
 	  ,dblPartialPrepayment				
 	  ,lblPartialPrepayment			    
-	  ,blbHeaderLogo				    
+	  ,blbHeaderLogo
+	  ,strDeliveryDate
 	)
 	SELECT DISTINCT
 		 intBankAccountId					= BNKTRN.intBankAccountId
@@ -375,7 +377,8 @@ BEGIN
 	   ,dblPartialPrepaymentSubTotal	   = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN PartialPayment.dblTotals						    ELSE NULL END
 	   ,dblPartialPrepayment			   = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
 	   ,lblPartialPrepayment			   = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN 'Partial Payment Adj'								ELSE NULL END						 
-	   ,blbHeaderLogo					   = @companyLogo						 	   						 
+	   ,blbHeaderLogo					   = @companyLogo
+	   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
 		AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -552,6 +555,7 @@ BEGIN
 	   ,dblPartialPrepayment				= CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			THEN  PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
 	   ,lblPartialPrepayment				= CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			THEN 'Partial Payment Adj'								 ELSE NULL END
 	   ,blbHeaderLogo						= @companyLogo
+	   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -733,6 +737,7 @@ BEGIN
 	   ,dblPartialPrepayment               = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
 	   ,lblPartialPrepayment               = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN 'Partial Payment Adj'							    ELSE NULL END
 	   ,blbHeaderLogo                      = @companyLogo
+	   ,strDeliveryDate					   = CONVERT(VARCHAR(10), GETDATE(), 110)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -914,7 +919,8 @@ BEGIN
 			  ,dblPartialPrepaymentSubTotal		
 			  ,dblPartialPrepayment				
 			  ,lblPartialPrepayment			    
-			  ,blbHeaderLogo				    
+			  ,blbHeaderLogo
+			  ,strDeliveryDate
 			)
 			--------------------------------------------------------
 			-- FROM INVENTORY RECEIPT
@@ -1021,6 +1027,7 @@ BEGIN
 			   ,dblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN  PartialPayment.dblPayment-PartialPayment.dblTotals	ELSE NULL END 
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'									ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
+			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1192,7 +1199,8 @@ BEGIN
 			   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			   THEN PartialPayment.dblTotals							ELSE NULL END
 			   ,dblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			   THEN PartialPayment.dblPayment-PartialPayment.dblTotals  ELSE NULL END 
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			   THEN 'Partial Payment Adj'								ELSE NULL END
-			   ,blbHeaderLogo				 = @companyLogo					    	   					    
+			   ,blbHeaderLogo				 = @companyLogo
+			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1370,7 +1378,8 @@ BEGIN
 			   ,dblPartialPrepaymentSubTotal = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN  PartialPayment.dblTotals							  ELSE NULL END
 			   ,dblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN  PartialPayment.dblPayment-PartialPayment.dblTotals ELSE NULL END 
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'								  ELSE NULL END
-			   ,blbHeaderLogo				 = @companyLogo					    	   					    
+			   ,blbHeaderLogo				 = @companyLogo
+			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), GETDATE(), 110)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
