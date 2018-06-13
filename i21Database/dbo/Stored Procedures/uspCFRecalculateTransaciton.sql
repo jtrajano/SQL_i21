@@ -4209,10 +4209,10 @@ BEGIN
 		BEGIN
 
 		DECLARE @dblLocalIndexRetailGrossPrice NUMERIC(18,6)
-		SET @dblLocalIndexRetailGrossPrice = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((@dblSpecialTax / @dblQuantity),6) ),6)
+		SET @dblLocalIndexRetailGrossPrice = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
 
 		DECLARE @dblLocalIndexRetailGrossPriceZeroQty NUMERIC(18,6)
-		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((@dblSpecialTaxZeroQty / @dblZeroQuantity),6) ),6)
+		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
@@ -4257,10 +4257,10 @@ BEGIN
 		BEGIN
 
 			DECLARE @dblPumpPriceAdjustmentGrossPrice NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPrice = Round(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((@dblSpecialTax / @dblQuantity),6) ),6)
+			SET @dblPumpPriceAdjustmentGrossPrice = Round(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
 
 			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((@dblSpecialTaxZeroQty / @dblZeroQuantity),6) ),6)
+			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
