@@ -1,6 +1,8 @@
 ﻿CREATE VIEW vyuLGAllocatedInventory
 AS
-SELECT SCH.strContractNumber AS strSContractNumber
+SELECT SCH.intContractHeaderId
+	   ,SCD.intContractDetailId
+	   ,SCH.strContractNumber AS strSContractNumber
        ,SCD.intContractSeq AS intSContractSeq
        ,SCD.dtmStartDate AS dtmSStartDate
        ,SCD.dtmEndDate AS dtmSEndDate
@@ -87,7 +89,9 @@ WHERE ISNULL(DO.intShipmentStatus,0) <> 6
 UNION ALL
 
 SELECT
-       SCH.strContractNumber AS strSContractNumber
+       SCH.intContractHeaderId
+	   ,SCD.intContractDetailId
+	   ,SCH.strContractNumber AS strSContractNumber
        ,SCD.intContractSeq AS intSContractSeq
        ,SCD.dtmStartDate AS dtmSStartDate
        ,SCD.dtmEndDate AS dtmSEndDate
@@ -160,7 +164,9 @@ WHERE L.intShipmentStatus = 3
 
 UNION ALL 
 
-SELECT SCH.strContractNumber AS strSContractNumber
+SELECT SCH.intContractHeaderId
+	   ,SCD.intContractDetailId
+	   ,SCH.strContractNumber AS strSContractNumber
        ,SCD.intContractSeq AS intSContractSeq
        ,SCD.dtmStartDate AS dtmSStartDate
        ,SCD.dtmEndDate AS dtmSEndDate
