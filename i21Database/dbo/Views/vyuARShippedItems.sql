@@ -313,13 +313,13 @@ FROM (
 												END)												
 		 , dblPriceUOMQuantity				= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblPriceUOMQuantity ELSE (CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) ELSE  ISNULL(ICISI.dblQuantity,0) END) END
 	     , dblDiscount						= 0.000000 
-	     , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
+	     , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ICISI.dblConvertedPrice END) AS DECIMAL(18,6))
 		 , dblUnitPrice						= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= ISNULL(ICISI.dblUnitPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice))
+	     , dblShipmentUnitPrice				= ISNULL(ICISI.dblConvertedPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice))
 	     , strPricing						= ''
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0.000000
-	     , dblTotal							= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) * ISNULL(ARCC.dblCashPrice, ICISI.dblUnitPrice) ELSE ISNULL(ICISI.dblQuantity,0) * ICISI.dblUnitPrice END
+	     , dblTotal							= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0)) * ISNULL(ARCC.dblCashPrice, ICISI.dblConvertedPrice) ELSE ISNULL(ICISI.dblQuantity,0) * ICISI.dblConvertedPrice END
 	     , intStorageLocationId				= ICISI.intStorageLocationId
 	     , intTermId						= NULL
 	     , intEntityShipViaId				= NULL
@@ -350,7 +350,31 @@ FROM (
 	     , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
-	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
+	FROM 
+		(
+			select 
+				dblForexRate,
+				intDestinationGradeId,
+				intDestinationWeightId,
+				intSubLocationId,
+				intSourceId,
+				intStorageLocationId,
+				intInventoryShipmentId,
+				intInventoryShipmentItemId,
+				intForexRateTypeId,
+				intLineNo,
+				intItemId,
+				intItemUOMId,
+				dblQuantity,
+				intWeightUOMId,
+				intPriceUOMId,
+				dblUnitPrice,
+				dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
+				dblDestinationQuantity
+			from
+				dbo.tblICInventoryShipmentItem WITH (NOLOCK)
+		)
+		ICISI 
 	INNER JOIN (
 		SELECT intInventoryShipmentId
 			 , intShipFromLocationId
