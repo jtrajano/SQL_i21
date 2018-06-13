@@ -17,16 +17,30 @@ DECLARE @intCommodityId int
 DECLARE @dtmCurrenctGLPostDate DATETIME
 DECLARE @dtmPreviousGLPostDate DATETIME
 DECLARE @dtmGLReverseDate DATETIME
-DECLARE @dtmPrviousGLReverseDate DATETIME
-SELECT @intCommodityId = intCommodityId,@dtmCurrenctGLPostDate=dtmGLPostDate,@dtmGLReverseDate=dtmGLReverseDate FROM tblRKM2MInquiry where intM2MInquiryId=@intM2MInquiryId
-SELECT TOP 1 @dtmPreviousGLPostDate=dtmGLPostDate,@dtmPrviousGLReverseDate=dtmGLReverseDate  FROM tblRKM2MInquiry where ysnPost=1 and intCommodityId=@intCommodityId order by dtmGLPostDate desc
+DECLARE @dtmPreviousGLReverseDate DATETIME
+DECLARE @strPreviousBatchId NVARCHAR(100)
+
+SELECT 
+	 @intCommodityId = intCommodityId
+	,@dtmCurrenctGLPostDate = dtmGLPostDate
+	,@dtmGLReverseDate=dtmGLReverseDate 
+FROM tblRKM2MInquiry 
+WHERE intM2MInquiryId=@intM2MInquiryId
+
+--Getting the data of the prevously posted transaction. We are going to use it as our reference for the reversal entry
+SELECT TOP 1 
+	 @dtmPreviousGLPostDate = dtmGLPostDate
+	,@dtmPreviousGLReverseDate = dtmGLReverseDate
+	,@strPreviousBatchId = strBatchId  
+FROM tblRKM2MInquiry 
+WHERE ysnPost=1 and intCommodityId=@intCommodityId ORDER BY dtmGLPostDate DESC
 
 IF (@dtmGLReverseDate IS NULL)
 BEGIN
 RAISERROR('Please save the record before posting.',16,1)
 END
 
-IF (convert(datetime,@dtmCurrenctGLPostDate) <= convert(datetime,@dtmPrviousGLReverseDate))
+IF (convert(datetime,@dtmCurrenctGLPostDate) <= convert(datetime,@dtmPreviousGLReverseDate))
 BEGIN
 RAISERROR('Current date cannot less than the previous post date',16,1)
 END
@@ -434,6 +448,72 @@ BEGIN TRANSACTION
 
 	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
 	UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId,dtmUnpostedDateTime=null WHERE intM2MInquiryId = @intM2MInquiryId
+
+
+	--Reversal of the previously posted transaction
+	IF ISNULL(@strPreviousBatchId,'') <> '' AND ISNULL(@dtmPreviousGLReverseDate,'') <> ''
+	BEGIN
+		DECLARE @ReverseGLEntries AS RecapTableType
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+		INSERT INTO @ReverseGLEntries (
+			 [dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[intCurrencyId]
+			,[dtmTransactionDate]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[ysnIsUnposted]
+			,[strCode]
+			,[strReference]  
+			,[intEntityId]
+			,[intUserId]      
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+			)
+		SELECT [dtmDate]
+			,@batchId
+			,[intAccountId]
+			,[dblCredit] --Reversal - credit value will become debit value
+			,[dblDebit]
+			,[dblCreditUnit]
+			,[dblDebitUnit]
+			,[strDescription]
+			,[intCurrencyId]
+			,[dtmTransactionDate]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblExchangeRate]
+			,@dtmPreviousGLReverseDate
+			,[ysnIsUnposted]
+			,[strCode]
+			,[strReference]  
+			,[intEntityId]
+			,[intUserId]  
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+		FROM tblGLDetail
+		WHERE strBatchId = @strPreviousBatchId
+
+		EXEC dbo.uspGLBookEntries @ReverseGLEntries,1 
+	END
+	
 
 	COMMIT TRAN	
 END TRY
