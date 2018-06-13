@@ -184,10 +184,10 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		 ,strEntityName						
 		 ,intQuantityUOMId					
 		 ,strInternalCompany					
-		 ,dblQuantity = SUM(dblQuantity)						
+		 ,dblQuantity				= SUM(dblQuantity)						
 		 ,intQuantityUnitMeasureId			
 		 ,strQuantityUOM
-		 ,dblWeight	  = SUM(dblQuantity)							
+		 ,dblWeight					= SUM(dblWeight)							
 		 ,intWeightUOMId
 		 ,strWeightUOM						
 		 ,intOriginId						
@@ -215,7 +215,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		 ,dblFixedLots						
 		 ,dblUnFixedLots						
 		 ,dblContractInvoiceValue = SUM(dblContractInvoiceValue)	
-		 ,dblSecondaryCosts			
+		 ,dblSecondaryCosts       = SUM(dblSecondaryCosts)			
 		 ,dblCOGSOrNetSaleValue				
 		 ,intFutureMarketId					
 		 ,strFutureMarket					
@@ -622,8 +622,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 	   ,strContractPriceUOM				
 	   ,strFixationDetails				
 	   ,dblFixedLots						
-	   ,dblUnFixedLots
-	   ,dblSecondaryCosts			
+	   ,dblUnFixedLots	  			
 	   ,dblCOGSOrNetSaleValue				
 	   ,intFutureMarketId					
 	   ,strFutureMarket					
