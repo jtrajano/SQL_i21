@@ -14,6 +14,7 @@ BEGIN
 	DECLARE @COST_METHOD_PER_UNIT AS NVARCHAR(50) = 'Per Unit'
 			,@COST_METHOD_PERCENTAGE AS NVARCHAR(50) = 'Percentage'
 			,@COST_METHOD_AMOUNT AS NVARCHAR(50) = 'Amount'
+			,@COST_METHOD_GROSS_UNIT AS NVARCHAR(50) = 'Gross Unit'
 
 			,@INVENTORY_SHIPMENT_TYPE AS INT = 4
 			,@STARTING_NUMBER_BATCH AS INT = 3  
@@ -104,6 +105,158 @@ BEGIN
 				ON Item.intItemId = ShipmentItem.intItemId
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
+			AND 
+			(
+				1 =
+				CASE	WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NULL 
+							AND ShipmentItem.intOrderId IS NULL 
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
+						THEN 
+							1
+
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NULL 
+							AND ShipmentItem.intOrderId IS NULL 
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
+						THEN 
+							1
+						
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NOT NULL 
+							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+						THEN 
+							1
+						
+						WHEN 
+							Shipment.intOrderType = 1 -- Sales Contract 
+							AND Charge.intContractId IS NOT NULL 
+							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Shipment.intOrderType, 1) <> 1 
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink IS NULL
+							AND ShipmentItem.strChargesLink IS NULL
+						THEN 
+							1
+
+						WHEN 
+							ISNULL(Shipment.intOrderType, 1) <> 1 
+							AND Charge.intContractId IS NULL 
+							AND Charge.strChargesLink = ShipmentItem.strChargesLink
+						THEN 
+							1
+						
+						ELSE 
+							0
+				END 				
+			)
+			AND ChargeItem.intOnCostTypeId IS NULL 
+			-- AND ISNULL(ShipmentItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			-- Do not include Kit Components when calculating the other charges. 
+			AND 1 = 
+				CASE	
+					WHEN ShipmentItem.strItemType = @SHIPMENT_ITEM_TYPE THEN 0
+					ELSE 1
+				END
+			
+
+	-- Check if the calculated values are valid. 
+	BEGIN 
+		SET @intItemId = NULL 
+
+		SELECT	TOP 1 
+				@strItemNo = Item.strItemNo
+				,@strUnitMeasure = UOM.strUnitMeasure
+				,@intItemId = Item.intItemId
+				,@strOtherCharge = ItemOtherCharge.strItemNo
+		FROM	dbo.tblICInventoryShipmentChargePerItem ChargePerItem INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
+					ON ChargePerItem.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId		
+				INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
+					ON Charge.intInventoryShipmentChargeId = ChargePerItem.intInventoryShipmentChargeId
+				LEFT JOIN tblICItem Item
+					ON Item.intItemId = ShipmentItem.intItemId					
+				LEFT JOIN tblICItemUOM ChargeUOM
+					ON ChargeUOM.intItemUOMId = Charge.intCostUOMId
+				LEFT JOIN tblICUnitMeasure UOM
+					ON UOM.intUnitMeasureId = ChargeUOM.intUnitMeasureId
+				--For Other Charge
+				LEFT JOIN tblICItem ItemOtherCharge
+					ON ItemOtherCharge.intItemId = ChargePerItem.intChargeId
+		WHERE	ChargePerItem.intInventoryShipmentId = @intInventoryShipmentId 
+				AND ChargePerItem.dblCalculatedAmount IS NULL
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			-- 'Unable to calculate {Other Charge Item} as {Unit of Measure} is not found in {Item} > UOM setup.'
+			EXEC uspICRaiseError 80050, @strOtherCharge, @strUnitMeasure, @strItemNo;
+			GOTO _Exit
+		END 
+	END 
+END 
+
+-- Calculate the cost method for "Gross Unit"
+BEGIN 
+	INSERT INTO dbo.tblICInventoryShipmentChargePerItem (
+			[intInventoryShipmentId]
+			,[intInventoryShipmentChargeId] 
+			,[intInventoryShipmentItemId] 
+			,[intChargeId] 
+			,[intEntityVendorId] 
+			,[dblCalculatedAmount]
+			,[dblCalculatedQty]
+			,[intContractId]
+			,[intContractDetailId]
+			,[strAllocatePriceBy]
+			,[ysnAccrue]
+			,[ysnPrice]
+			,[strChargesLink]
+	)
+	SELECT	[intInventoryShipmentId]		= ShipmentItem.intInventoryShipmentId
+			,[intInventoryShipmentChargeId]	= Charge.intInventoryShipmentChargeId
+			,[intInventoryShipmentItemId]	= ShipmentItem.intInventoryShipmentItemId
+			,[intChargeId]					= Charge.intChargeId
+			,[intEntityVendorId]			= Charge.intEntityVendorId
+			,[dblCalculatedAmount]			= ROUND (			
+												Charge.dblRate 
+												* dbo.fnCalculateQtyBetweenUOM(
+													ShipmentItem.intWeightUOMId
+													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
+													, ISNULL(ShipmentItem.dblGross, 0) 
+												)
+												, 2
+											 )
+			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
+													ShipmentItem.intWeightUOMId
+													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
+													, ISNULL(ShipmentItem.dblGross, 0) 
+											)
+			,[intContractId]				= Charge.intContractId
+			,[intContractDetailId]			= Charge.intContractDetailId
+			,[strAllocatePriceBy]			= Charge.strAllocatePriceBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
+			,[strChargesLink]				= Charge.strChargesLink
+	FROM	tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
+				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+			INNER JOIN dbo.tblICInventoryShipmentCharge Charge	
+				ON ShipmentItem.intInventoryShipmentId = Charge.intInventoryShipmentId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId	
+			INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = ShipmentItem.intItemId
+	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
+			AND ShipmentItem.intWeightUOMId IS NOT NULL 
+			AND Charge.strCostMethod = @COST_METHOD_GROSS_UNIT
 			AND 
 			(
 				1 =

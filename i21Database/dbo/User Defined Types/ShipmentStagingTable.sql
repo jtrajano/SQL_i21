@@ -43,6 +43,9 @@
 	intStorageScheduleTypeId INT NULL,
 	intForexRateTypeId INT NULL,
 	dblForexRate NUMERIC(38, 20) NULL, 
+	dblGross NUMERIC(38, 20) NULL, 
+	dblTare NUMERIC(38, 20) NULL, 
+	dblNet NUMERIC(38, 20) NULL, 
 
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,
