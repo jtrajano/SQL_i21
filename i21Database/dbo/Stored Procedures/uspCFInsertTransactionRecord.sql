@@ -363,6 +363,22 @@ BEGIN
 		BEGIN
 			SET @strTransactionType = @strSiteType
 		END
+
+			--===========ZERO QTY============---
+		IF(ISNULL(@dblQuantity,0) = 0 AND ISNULL(@dblOriginalTotalPrice,0) > 0)
+		BEGIN
+			SET @dblQuantity = 1
+			SET @dblOriginalGrossPrice = ISNULL(@dblOriginalTotalPrice,0)
+		END
+
+		IF(ISNULL(@dblQuantity,0) = 0 AND ISNULL(@dblOriginalTotalPrice,0) < 0)
+		BEGIN
+			SET @dblQuantity = -1
+			SET @dblOriginalGrossPrice = ISNULL(@dblOriginalTotalPrice,0) * 1
+		END
+
+		--===========ZERO QTY============---
+
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
