@@ -4284,7 +4284,7 @@ IF @recap = 0
 
 			--UPDATE tblARCustomer.dtmCreditLimitReached
 			UPDATE CUSTOMER
-			SET dtmCreditLimitReached = CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN INVOICE.dtmPostDate ELSE NULL END
+			SET dtmCreditLimitReached =  CASE WHEN dtmCreditLimitReached IS NULL THEN CASE WHEN CUSTOMER.dblARBalance >= CUSTOMER.dblCreditLimit THEN INVOICE.dtmPostDate ELSE NULL END ELSE dtmCreditLimitReached END
 			FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 			CROSS APPLY (
 				SELECT TOP 1 I.dtmPostDate
