@@ -689,14 +689,17 @@ BEGIN TRY
 		DECLARE @tblICItem TABLE (
 			intItemId INT
 			,intMainItemId INT
+			,intItemUOMId int
 			)
 
 		INSERT INTO @tblICItem (
 			intItemId
 			,intMainItemId
+			,intItemUOMId
 			)
 		SELECT ri.intItemId
 			,ri.intItemId
+			,ri.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -726,6 +729,7 @@ BEGIN TRY
 		
 		SELECT RSI.intSubstituteItemId
 			,RSI.intItemId
+			,RSI.intItemUOMId
 		FROM dbo.tblMFWorkOrderRecipeItem RI
 		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
 			AND RI.intWorkOrderId = RSI.intWorkOrderId
@@ -751,7 +755,7 @@ BEGIN TRY
 		INSERT INTO @tblMFWorkOrderInputItem
 		SELECT DISTINCT I.intItemId
 			,SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId)
-			,WI.intItemUOMId
+			,I.intItemUOMId
 			,(SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(WI.dblQuantity, 0)) OVER (PARTITION BY I.intMainItemId)) * 100
 			,I.intMainItemId
 		FROM @tblICItem I

@@ -88,8 +88,6 @@ BEGIN
 					THEN LS1.strSecondaryStatus
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
-				WHEN LS.strSecondaryStatus = 'On Hold'
-					THEN 'PR Hold'
 				ELSE LS.strSecondaryStatus
 				END AS [Lot Status]
 			,C.strCategoryCode
@@ -152,8 +150,6 @@ BEGIN
 					THEN LS1.strSecondaryStatus
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
-				WHEN LS.strSecondaryStatus = 'On Hold'
-					THEN 'PR Hold'
 				ELSE LS.strSecondaryStatus
 				END AS [Lot Status]
 			,C.strCategoryCode
