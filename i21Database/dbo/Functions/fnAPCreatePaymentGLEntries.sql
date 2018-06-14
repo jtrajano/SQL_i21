@@ -169,7 +169,7 @@ BEGIN
 			) withHoldData
 			-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			AND paymentDetail.dblPayment != 0
+			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
 			GROUP BY 
 			A.intPaymentId, 
 			A.dblAmountPaid,
@@ -184,6 +184,15 @@ BEGIN
 			A.dblExchangeRate
 			) AS tmpSummaryPayment
 			GROUP BY tmpSummaryPayment.intPaymentId
+			UNION ALL
+			SELECT		DISTINCT
+					[intPaymentId]					=	A.intPaymentId,
+					[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+					[dblCreditForeign]				=	paymentDetail.dblPayment
+			FROM	[dbo].tblAPPayment A 
+			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
 	)MainQuery	
 	INNER JOIN tblAPPayment P on P.intPaymentId = MainQuery.intPaymentId
 	INNER JOIN tblAPVendor C ON P.intEntityVendorId = C.[intEntityId]
@@ -443,7 +452,8 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=   CAST((B.dblPayment * -1) * A.dblExchangeRate AS DECIMAL(18,2)),
+		[dblDebit]						=   CAST(CASE WHEN E.strTransactionType = 'Cash Refund' THEN B.dblPayment
+											ELSE (B.dblPayment * -1) END * A.dblExchangeRate AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -465,7 +475,8 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[intConcurrencyId]				=	1,
-		[dblDebitForeign]				=	CAST((B.dblPayment * -1) AS DECIMAL(18,2)),      
+		[dblDebitForeign]				=	CAST(CASE WHEN E.strTransactionType = 'Cash Refund' THEN B.dblPayment
+											ELSE (B.dblPayment * -1) END AS DECIMAL(18,2)),    
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
@@ -475,6 +486,7 @@ BEGIN
 	FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
+			INNER JOIN tblARInvoice E ON B.intInvoiceId = E.intInvoiceId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
 	AND B.intInvoiceId IS NOT NULL
