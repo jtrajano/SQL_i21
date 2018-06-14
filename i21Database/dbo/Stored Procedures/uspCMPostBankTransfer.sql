@@ -273,6 +273,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]	
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -296,8 +298,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblAmount * ISNULL(A.dblRate,1) 
+			,[dblDebit]				= A.dblAmount * ISNULL(A.dblRate,1) 
+			,[dblCredit]			= 0
+			,[dblDebitForeign]		= A.dblAmount 
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
@@ -330,8 +334,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				=  A.dblAmount * ISNULL(A.dblHistoricRate, 1) -- 0.8 --ISNULL( A.dblHistoricRate,1) -- ISNULL(A.dblHistoricRate,1) * A.dblAmount 
-			,[dblCredit]			= 0
+			,[dblDebit]				= 0 -- 0.8 --ISNULL( A.dblHistoricRate,1) -- ISNULL(A.dblHistoricRate,1) * A.dblAmount 
+			,[dblCredit]			=  A.dblAmount * ISNULL(A.dblHistoricRate, 1)
+			,[dblDebitForeign]		= 0 
+			,[dblCreditForeign]		= A.dblAmount
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
