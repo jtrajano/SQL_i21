@@ -18,7 +18,7 @@ BEGIN
 										AND SC.strNamespace	    =   @strNamespace
 	JOIN	tblSMReportTranslation	RT	ON  RT.intLanguageId    =   @intLanguageId 
 										AND RT.intTransactionId =   TR.intTransactionId 
-										AND RT.strFieldName	    =   'Description'
+										AND RT.strFieldName	    =   @strFieldName
 
     RETURN ISNULL(@strTranslation,@strCurrentValue)
 END

@@ -423,8 +423,8 @@ BEGIN TRY
 													  	  ELSE NULL END
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
-		    ,strINCOTermWithWeight					=	CB.strContractBasis + ISNULL(', ' + isnull(rtrt4.strTranslation,W1.strWeightGradeDesc),'')
-			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
+		    ,strINCOTermWithWeight					=	dbo.fnCTGetTranslation('ContractManagement.view.INCOShipTerm',CB.intContractBasisId,@intLaguageId,'Contract Basis',CB.strContractBasis) + ISNULL(', ' + isnull(rtrt4.strTranslation,W1.strWeightGradeDesc),'')
+			,strQuantityWithUOM						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
 			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
 			,strStartAndEndDate						=	SQ.strStartAndEndDate
 			,strNoOfContainerAndType				=	SQ.strNoOfContainerAndType
@@ -480,7 +480,7 @@ BEGIN TRY
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
 							CD.strERPPONumber,
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
-							IM.strDescription + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
+							dbo.fnCTGetTranslation('Inventory.view.Item',CD.intItemId,@intLaguageId,'Description',IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
 							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
 							FORMAT(CD.dtmStartDate, 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(CD.dtmStartDate, 'MMM')), FORMAT(CD.dtmStartDate, 'MMM')) + ' ' + FORMAT(CD.dtmStartDate, 'yyyy') + ' - ' + FORMAT(CD.dtmEndDate, 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(CD.dtmEndDate, 'MMM')), FORMAT(CD.dtmEndDate, 'MMM')) + ' ' + FORMAT(CD.dtmEndDate, 'yyyy') AS strStartAndEndDate,
 							LTRIM(CD.intNumberOfContainers) + ' x ' + isnull(rtrt11.strTranslation,CT.strContainerType) AS strNoOfContainerAndType,
