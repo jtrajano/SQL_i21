@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -61,7 +58,22 @@ SELECT
 ,emEntity.strName
 ,emEntity.strCustomerNumber
 ----------------------------------------------
-,arInv.strBillTo
+,strBillTo =(CASE 
+				WHEN ISNULL(cfTrans.intInvoiceId,0) = 0
+				THEN dbo.fnARFormatCustomerAddress (
+				 NULL
+				,NULL
+				,emEntity.strBillToLocationName
+				,emEntity.strBillToAddress
+				,emEntity.strBillToCity
+				,emEntity.strBillToState
+				,emEntity.strBillToZipCode
+				,emEntity.strBillToCountry
+				,emEntity.strName
+				,NULL)
+				ELSE
+				arInv.strBillTo
+			END)
 ,arInv.strShipTo
 ,arInv.strType
 ,arInv.strLocationName
@@ -280,8 +292,6 @@ OUTER APPLY (
 -------------------------------------------------------------
 WHERE ISNULL(cfTrans.ysnPosted,0) = 1 
 AND ISNULL(cfTrans.ysnInvalid,0) = 0
-
-
 GO
 
 
