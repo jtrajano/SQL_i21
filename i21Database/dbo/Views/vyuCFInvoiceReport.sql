@@ -23,7 +23,10 @@ SELECT intCustomerId = ( CASE cfTrans.strTransactionType
                        WHEN 'Foreign Sale' THEN cfSiteItem.strBillTo 
                        ELSE 
 							CASE cfTrans.ysnPostedCSV 
-							WHEN 1 THEN cfSiteItem.strBillTo 
+								WHEN 1 
+								THEN 
+									dbo.fnARFormatCustomerAddress(NULL, NULL, BILLTO.strLocationName, BILLTO.strAddress, BILLTO.strCity, BILLTO.strState, BILLTO.strZipCode, BILLTO.strCountry, cfCardAccount.strName, NULL)
+									--dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, E.strName, 0)
 							ELSE 
 								arInv.strBillTo 
 							END
@@ -485,12 +488,8 @@ FROM   dbo.vyuCFInvoice AS arInv
                           iemEnt.strName, 
                           iemEnt.strEntityNo, 
                           icfNetwork.strNetwork, 
-                          [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, 
-                          arBillTo.strAddress, 
-                          arBillTo.strCity, arBillTo.strState, 
-                          arBillTo.strZipCode, 
-                          arBillTo.strCountry, 
-                          NULL, 0) AS strBillTo, 
+                          [dbo].fnARFormatCustomerAddress(NULL, NULL, arBillTo.strLocationName, arBillTo.strAddress, arBillTo.strCity, arBillTo.strState, arBillTo.strZipCode, arBillTo.strCountry, iemEnt.strName, 0) AS strBillTo, 
+						  --dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, E.strName, 0)
                           cfAcct.intInvoiceCycle, 
                           cfInvCycle.strInvoiceCycle, 
                           cfAcct.strPrimarySortOptions, 
@@ -585,9 +584,14 @@ FROM   dbo.vyuCFInvoice AS arInv
        LEFT OUTER JOIN dbo.tblCFDepartment AS cfAccntDep 
                     ON cfAccntDep.intDepartmentId = 
                        cfCardAccount.intDepartmentId
+
+		LEFT JOIN dbo.tblARCustomer AS arCust 
+                    ON arCust.intEntityId = 
+                       cfCardAccount.intCustomerId
+					LEFT JOIN dbo.tblEMEntityLocation BILLTO 
+					ON arCust.intBillToId = BILLTO.intEntityLocationId
+	   
 	WHERE ISNULL(cfTrans.ysnPosted,0) = 1 AND ISNULL(cfTrans.ysnInvalid,0) = 0
-
-
 GO
 
 
