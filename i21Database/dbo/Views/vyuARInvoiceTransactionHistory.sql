@@ -4,7 +4,7 @@
 	SELECT DISTINCT
 		A.intInvoiceId
 		,A.intInvoiceDetailId
-		,A.dblQtyReceived
+		,dblQtyReceived = case  (isnull(A.ysnPost, 1)) when 1 then  A.dblQtyReceived else (A.dblQtyReceived *-1) end
 		,A.dblPrice
 		,dblAmountDue = case  (isnull(A.ysnPost, 1)) when 1 then  A.dblAmountDue else (A.dblAmountDue *-1) end
 		,isnull(P.dblPayment, 0) as dblAmountPaid
