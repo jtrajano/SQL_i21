@@ -54,7 +54,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRStorageType ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRStorageType OFF
 
     -- tblGRStorageScheduleLocationUse
     SET @SQLString = N'MERGE tblGRStorageScheduleLocationUse AS Target
@@ -84,7 +86,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRStorageScheduleLocationUse ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRStorageScheduleLocationUse OFF
 
     -- tblGRStorageSchedulePeriod
     SET @SQLString = N'MERGE tblGRStorageSchedulePeriod AS Target
@@ -138,7 +142,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRStorageSchedulePeriod ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRStorageSchedulePeriod OFF
 
     -- tblGRStorageScheduleRule
     SET @SQLString = N'MERGE tblGRStorageScheduleRule AS Target
@@ -204,7 +210,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRStorageScheduleRule ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRStorageScheduleRule OFF
 
     -- tblGRDiscountSchedule
     SET @SQLString = N'MERGE tblGRDiscountSchedule AS Target
@@ -234,7 +242,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountSchedule ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountSchedule OFF
 
     -- tblGRDiscountScheduleCode
     SET @SQLString = N'MERGE tblGRDiscountScheduleCode AS Target
@@ -309,7 +319,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountScheduleCode ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountScheduleCode OFF
 
     -- tblGRDiscountScheduleLine
     SET @SQLString = N'MERGE tblGRDiscountScheduleLine AS Target
@@ -348,7 +360,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountScheduleLine ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountScheduleLine OFF
 
     -- tblGRDiscountCalculationOption
     SET @SQLString = N'MERGE tblGRDiscountCalculationOption AS Target
@@ -378,7 +392,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountCalculationOption ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountCalculationOption OFF
 
     -- tblGRDiscountCrossReference
     SET @SQLString = N'MERGE tblGRDiscountCrossReference AS Target
@@ -405,7 +421,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountCrossReference ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountCrossReference OFF
 
     -- tblGRDiscountId
     SET @SQLString = N'MERGE tblGRDiscountId AS Target
@@ -438,7 +456,9 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountId ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountId OFF
 
     -- tblGRDiscountLocationUse
     SET @SQLString = N'MERGE tblGRDiscountLocationUse AS Target
@@ -468,6 +488,8 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblGRDiscountLocationUse ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblGRDiscountLocationUse OFF
 
 END
