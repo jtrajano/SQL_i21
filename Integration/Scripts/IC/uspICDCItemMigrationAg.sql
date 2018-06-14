@@ -46,7 +46,14 @@ SET ANSI_WARNINGS OFF
 	,strKeywords
 	,ysnCommisionable
 	,intConcurrencyId
-	) (
+	) 
+SELECT ei.ItemNo, ei.ItemType, ei.ShortName, ei.ItemName, ei.ItemStatus, ei.InvValuation, ei.LotTracking,
+	ei.CategoryId, ei.CommodityId, ei.[LifeTime], ei.LandedCost, ei.DropDhip, ei.SpecialCommission
+	, ei.ysnStockedItem, ei.DyedFuel, ei.BarcodePrinted, ei.MSDSRequired, ei.AvailableTM
+	, ei.DefaultFull, ei.PickTicket, ei.ExportEDI, ei.HazardMaterial, ei.MaterialFee, ei.CountCode
+	, ei.Taxable, ei.KeyWords, ei.Commisionable, ei.ConcurrencyId
+FROM
+	 (
 	SELECT RTRIM(agitm_no) ItemNo
 --** inventory type should match with the inventory type of Category.
 --so read from the converted data of tblICCategory table
@@ -126,7 +133,7 @@ SET ANSI_WARNINGS OFF
 			ELSE 0
 			END
 		) AvailableTM
-	,MAX(agitm_deflt_percnt)	
+	,MAX(agitm_deflt_percnt) DefaultFull	
 	,0 PickTicket
 	,0 ExportEDI
 	,(
@@ -155,7 +162,8 @@ SET ANSI_WARNINGS OFF
 		) Commisionable
 	,1 ConcurrencyId
 		FROM agitmmst AS inv GROUP BY agitm_no
-)
+) ei
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = ei.ItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 
 --all items are imported with type 'Inventory'
 --update items Inventory type from Category table
@@ -181,6 +189,9 @@ where	C.intCategoryId = tblICItem.intCategoryId
 --items are repeated for location in origin. So pick only one item from the location to avoid duplicate entries 
 Insert into tblICItemUOM
 (intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+
+SELECT intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit,ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+FROM (
 select intItemId, U.intUnitMeasureId, 1 dblUnitQty, 1 ysnStockUnit,1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId 
 from tblICItem I 
 join 
@@ -190,11 +201,15 @@ on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE
 join tblICUnitMeasure U 
 on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
 where intItemId not in (select intItemId from tblICItemUOM)
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
 ---------------------------------------------------
 --add lb as additional uom for items which has agitm_lbs_per_un set
 Insert into tblICItemUOM
 (intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+SELECT intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit,ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+FROM (
 select intItemId, 
 (select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'LB') intUnitMeasureId, 
 Case oi.agitm_un_desc When 'BU' then 1/oi.agitm_lbs_per_un When 'TON' then 1/oi.agitm_lbs_per_un When 'CWT' then 1/oi.agitm_lbs_per_un else oi.agitm_lbs_per_un end dblUnitQty, 
@@ -206,12 +221,15 @@ where agitm_lbs_per_un not in (1,0) and agitm_un_desc <> 'LB'
 group by rtrim(agitm_no)) as oi 
 on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
-
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
 -----------------------------------------------------------
 --add packing units for uoms which has agitm_un_per_pak set
 Insert into tblICItemUOM
 (intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+SELECT intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit,ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+FROM (
 select intItemId, 
 (select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = 
 upper(rtrim(agitm_pak_desc))
@@ -224,7 +242,8 @@ where agitm_un_per_pak not in (1,0) and agitm_un_desc <> agitm_pak_desc
 group by rtrim(agitm_no)) as oi 
 on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_pak_desc COLLATE SQL_Latin1_General_CP1_CS_AS
-
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
 --set stock unit to No for Non Inventory Items
 update iu set ysnStockUnit = 0
@@ -247,7 +266,17 @@ INSERT INTO [dbo].[tblICItemLocation] (
 	,intAllowNegativeInventory
 	,intConcurrencyId
 	,dblReorderPoint
-	) (
+	) 
+SELECT intItemId
+	,intCompanyLocationId
+	,intEntityId
+	,intCostingMethod
+	,intIssueUOMId
+	,intReceiveUOMId
+	,intAllowNegativeInventory
+	,intConcurrencyId
+	, dblReorderPoint
+FROM (
 SELECT 
 	inv.intItemId
 	,loc.intCompanyLocationId
@@ -262,7 +291,8 @@ SELECT
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 LEFT JOIN vyuEMEntity AS vnd ON (itm.agitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
 	 LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) and uom.ysnStockUnit = 1
-)
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemId = a.intItemId AND intLocationId = a.intCompanyLocationId)
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemPricing data migration from agitmmst origin table to tblICItemPricing i21 table 
@@ -278,7 +308,10 @@ INSERT INTO [dbo].[tblICItemPricing] (
 	,dblAmountPercent
 	,dblSalePrice
 	,[intConcurrencyId]
-	) (
+	) 
+SELECT
+	intItemId, intItemLocationId, PricingMethod, LastCost, StandardCost, AverageCost, AmountPercent, SalePrice, ConcurrencyId
+FROM	(
 SELECT inv.intItemId
 	,iloc.intItemLocationId
 	,Case 
@@ -287,16 +320,18 @@ SELECT inv.intItemId
 	when agitm_prc_calc_ind = 'F' then 'Fixed Dollar Amount'
 	when agitm_prc_calc_ind = 'P' then 'Percent of Margin'
 	else 'None' End PricingMethod
-	,itm.agitm_last_un_cost
-	,itm.agitm_std_un_cost
-	,itm.agitm_avg_un_cost
-	,agitm_prc_calc1
-	,agitm_un_prc1
+	,itm.agitm_last_un_cost LastCost
+	,itm.agitm_std_un_cost StandardCost
+	,itm.agitm_avg_un_cost AverageCost
+	,agitm_prc_calc1 AmountPercent
+	,agitm_un_prc1 SalePrice
 	,1 ConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-)
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemId = a.intItemId AND intItemLocationId = a.intItemLocationId)
+
 ----------------------------------------------------------------------------------------------------------------
 --Import pricing level maintenance. There are 5 pricing levels in origin.
 -- Section 5
