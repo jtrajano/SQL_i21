@@ -136,9 +136,4 @@ BEGIN
 	WHERE intImportLogId = @LogId
 END
 
-IF(@TotalRows <= 0 AND @ErrorCount <= 0)
-BEGIN
-	UPDATE tblICImportLog SET strDescription = 'There''s no record to import.' WHERE intImportLogId = @LogId	
-END
-
 DELETE FROM tblICEdiPricebook
