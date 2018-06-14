@@ -6744,7 +6744,7 @@
     <Build Include="dbo\Functions\fnRKGetLatestBasisPrice.sql" />
     <Build Include="dbo\Views\vyuGRItemsSettlementReport.sql" />
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationSetIdentityNotForReplication.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationUpdateCompanyIdSubToParent.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
   </ItemGroup>
