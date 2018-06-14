@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPDeferredPayment]
 AS
 
-SELECT 
+SELECT DISTINCT
 	intBillId,
 	intEntityVendorId,
 	strCommodityCode,
