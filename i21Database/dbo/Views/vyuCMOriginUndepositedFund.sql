@@ -15,7 +15,9 @@ SELECT
 	dblAmount				= CMUF.dblAmount,
 	strName					= CMUF.strName, 
 	intEntityCustomerId		= CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intEntityCustomerId ELSE ARI.intEntityCustomerId END,
-	dtmDate					= CMUF.dtmDate
+	dtmDate					= CMUF.dtmDate,
+	intCurrencyId			= ARP.intCurrencyId,
+	dblWeigthRate			= F.dblWeigthRate
 FROM
 	tblCMUndepositedFund CMUF
 LEFT OUTER JOIN
@@ -26,4 +28,13 @@ LEFT OUTER JOIN
 	tblARInvoice ARI
 		ON CMUF.intSourceTransactionId = ARI.intInvoiceId
 		AND CMUF.strSourceTransactionId = ARI.strInvoiceNumber 
+OUTER APPLY(
+	SELECT dblWeigthRate = 
+		SUM(CASE WHEN ISNULL(dblCurrencyExchangeRate,1) = 1 OR ISNULL(dblCurrencyExchangeRate,0) = 0 
+			THEN dblPayment 
+			ELSE dblPayment * dblCurrencyExchangeRate END )/
+		SUM(dblPayment) 
+    FROM tblARPaymentDetail WHERE intPaymentId = ARP.intPaymentId
+)F
+
 
