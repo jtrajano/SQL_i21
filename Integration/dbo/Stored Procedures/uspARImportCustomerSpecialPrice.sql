@@ -46,38 +46,51 @@ BEGIN
 	IF  EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tmpvndname')
 		DROP TABLE tmpvndname
 
-	SELECT	ptcus_cus_no, ptcus_bill_to,
-			(CASE WHEN ptcus_co_per_ind_cp = 'C' THEN 
-						ptcus_last_name + ptcus_first_name 
-				 WHEN ptcus_co_per_ind_cp = 'P' THEN 
-						RTRIM(LTRIM(ptcus_last_name)) + ', ' + RTRIM(LTRIM(ptcus_first_name))
-			 END) as ptcus_name 
+	SELECT * 
 	INTO tmpptcusname
-	FROM ptcusmst WHERE ptcus_cus_no = ptcus_bill_to
+	FROM 
+	(
+		SELECT	ptcus_cus_no, ptcus_bill_to,
+				(CASE WHEN ptcus_co_per_ind_cp = 'C' THEN 
+							ptcus_last_name + ptcus_first_name 
+					 WHEN ptcus_co_per_ind_cp = 'P' THEN 
+							RTRIM(LTRIM(ptcus_last_name)) + ', ' + RTRIM(LTRIM(ptcus_first_name))
+				 END) as ptcus_name 
+		FROM ptcusmst WHERE ptcus_cus_no = ptcus_bill_to
 
-	INSERT INTO tmpptcusname (ptcus_cus_no, ptcus_bill_to, ptcus_name)
-	SELECT	ptcus_cus_no, ptcus_bill_to,
-			(RTRIM (CASE WHEN ptcus_co_per_ind_cp = 'C' THEN ptcus_last_name + ptcus_first_name 
-						 WHEN ptcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(ptcus_last_name)) 
-						 + ', ' + RTRIM(LTRIM(ptcus_first_name))
-					 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) 
-	FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
+		UNION ALL
 
-	SELECT	ssvnd_vnd_no, ssvnd_pay_to,
-			(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
-			ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-						+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-					END,''))) as ssvnd_name 
-	INTO tmpvndname
-	FROM ssvndmst  WHERE ssvnd_vnd_no = ssvnd_pay_to OR ssvnd_pay_to is null
+		SELECT	ptcus_cus_no, ptcus_bill_to,
+				(RTRIM (CASE WHEN ptcus_co_per_ind_cp = 'C' THEN ptcus_last_name + ptcus_first_name 
+							 WHEN ptcus_co_per_ind_cp = 'P' THEN RTRIM(LTRIM(ptcus_last_name)) 
+							 + ', ' + RTRIM(LTRIM(ptcus_first_name))
+						 END)) +'_' + CAST(A4GLIdentity AS NVARCHAR) 
+		FROM ptcusmst  WHERE ptcus_cus_no <> ptcus_bill_to
+	)tbl
 
-	INSERT INTO tmpvndname (ssvnd_vnd_no,ssvnd_pay_to,ssvnd_name)
-	SELECT	ssvnd_vnd_no, ssvnd_pay_to,
-			(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
-			ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-						+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-					END,'')) + '_' + CAST(A4GLIdentity AS NVARCHAR))  
-	FROM ssvndmst  WHERE ssvnd_vnd_no <> ssvnd_pay_to
+
+	SELECT * INTO tmpvndname
+	FROM
+	(
+		SELECT	ssvnd_vnd_no, ssvnd_pay_to,
+				(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
+				ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+							+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+						END,''))) as ssvnd_name 
+	
+		FROM ssvndmst  WHERE ssvnd_vnd_no = ssvnd_pay_to OR ssvnd_pay_to is null
+	
+		UNION ALL
+	
+		SELECT	ssvnd_vnd_no, ssvnd_pay_to,
+				(RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = 'C' THEN ssvnd_name
+				ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
+							+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+						END,'')) + '_' + CAST(A4GLIdentity AS NVARCHAR))  
+		FROM ssvndmst  WHERE ssvnd_vnd_no <> ssvnd_pay_to
+	)tbl
+
+
 
 	
 	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'spprcmst')
