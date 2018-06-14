@@ -95,8 +95,7 @@ BEGIN
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ISNULL(LD.intLoadDetailId,ReceiptItem.intSourceId) --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
-	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
+	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = ReceiptItem.intContainerId
 	WHERE Inv.intInvoiceId = @intInvoiceId
 		AND Item.strType <> CASE WHEN @ysnIncludeOtherChargeItems <> 1 THEN 'Other Charge' ELSE '' END
 END
