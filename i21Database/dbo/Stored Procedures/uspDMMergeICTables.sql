@@ -176,337 +176,341 @@ BEGIN
 				,Target.strOriginStatus = Source.strOriginStatus
 	    WHEN NOT MATCHED BY TARGET THEN
 			INSERT(
-				strItemNo
-				strShortName
-				strType
-				strBundleType
-				strDescription
-				intManufacturerId
-				intBrandId
-				intCategoryId
-				strStatus
-				strModelNo
-				strInventoryTracking
-				strLotTracking
-				ysnRequireCustomerApproval
-				intRecipeId
-				ysnSanitationRequired
-				intLifeTime
-				strLifeTimeType
-				intReceiveLife
-				strGTIN
-				strRotationType
-				intNMFCId
-				ysnStrictFIFO
-				intDimensionUOMId
-				dblHeight
-				dblWidth
-				dblDepth
-				intWeightUOMId
-				dblWeight
-				intMaterialPackTypeId
-				strMaterialSizeCode
-				intInnerUnits
-				intLayerPerPallet
-				intUnitPerLayer
-				dblStandardPalletRatio
-				strMask1
-				strMask2
-				strMask3
-				dblMaxWeightPerPack
-				intPatronageCategoryId
-				intPatronageCategoryDirectId
-				ysnStockedItem
-				ysnDyedFuel
-				strBarcodePrint
-				ysnMSDSRequired
-				strEPANumber
-				ysnInboundTax
-				ysnOutboundTax
-				ysnRestrictedChemical
-				ysnFuelItem
-				ysnTankRequired
-				ysnAvailableTM
-				dblDefaultFull
-				strFuelInspectFee
-				strRINRequired
-				intRINFuelTypeId
-				dblDenaturantPercent
-				ysnTonnageTax
-				ysnLoadTracking
-				dblMixOrder
-				ysnHandAddIngredient
-				intMedicationTag
-				intIngredientTag
-				intHazmatTag
-				strVolumeRebateGroup
-				intPhysicalItem
-				ysnExtendPickTicket
-				ysnExportEDI
-				ysnHazardMaterial
-				ysnMaterialFee
-				ysnAutoBlend
-				dblUserGroupFee
-				dblWeightTolerance
-				dblOverReceiveTolerance
-				strMaintenanceCalculationMethod
-				dblMaintenanceRate
-				ysnListBundleSeparately
-				intModuleId
-				strNACSCategory
-				strWICCode
-				intAGCategory
-				ysnReceiptCommentRequired
-				strCountCode
-				ysnLandedCost
-				strLeadTime
-				ysnTaxable
-				strKeywords
-				dblCaseQty
-				dtmDateShip
-				dblTaxExempt
-				ysnDropShip
-				ysnCommisionable
-				ysnSpecialCommission
-				intCommodityId
-				intCommodityHierarchyId
-				dblGAShrinkFactor
-				intOriginId
-				intProductTypeId
-				intRegionId
-				intSeasonId
-				intClassVarietyId
-				intProductLineId
-				intGradeId
-				strMarketValuation
-				ysnInventoryCost
-				ysnAccrue
-				ysnMTM
-				ysnPrice
-				strCostMethod
-				strCostType
-				intOnCostTypeId
-				dblAmount
-				intCostUOMId
-				intPackTypeId
-				strWeightControlCode
-				dblBlendWeight
-				dblNetWeight
-				dblUnitPerCase
-				dblQuarantineDuration
-				intOwnerId
-				intCustomerId
-				dblCaseWeight
-				strWarehouseStatus
-				ysnKosherCertified
-				ysnFairTradeCompliant
-				ysnOrganic
-				ysnRainForestCertified
-				dblRiskScore
-				dblDensity
-				dtmDateAvailable
-				ysnMinorIngredient
-				ysnExternalItem
-				strExternalGroup
-				ysnSellableItem
-				dblMinStockWeeks
-				dblFullContainerSize
-				ysnHasMFTImplication
-				intBuyingGroupId
-				intAccountManagerId
-				intConcurrencyId
-				ysnItemUsedInDiscountCode
-				ysnUsedForEnergyTracExport
-				strInvoiceComments
-				strPickListComments
-				intLotStatusId
-				strRequired
-				ysnBasisContract
-				intM2MComputationId
-				intTonnageTaxUOMId
-				ysn1099Box3
-				ysnUseWeighScales
-				ysnLotWeightsRequired
-				ysnBillable
-				ysnSupported
-				ysnDisplayInHelpdesk
-				intHazmatMessage
-				strOriginStatus
-				intCompanyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intItemId
+				,strItemNo
+				,strShortName
+				,strType
+				,strBundleType
+				,strDescription
+				,intManufacturerId
+				,intBrandId
+				,intCategoryId
+				,strStatus
+				,strModelNo
+				,strInventoryTracking
+				,strLotTracking
+				,ysnRequireCustomerApproval
+				,intRecipeId
+				,ysnSanitationRequired
+				,intLifeTime
+				,strLifeTimeType
+				,intReceiveLife
+				,strGTIN
+				,strRotationType
+				,intNMFCId
+				,ysnStrictFIFO
+				,intDimensionUOMId
+				,dblHeight
+				,dblWidth
+				,dblDepth
+				,intWeightUOMId
+				,dblWeight
+				,intMaterialPackTypeId
+				,strMaterialSizeCode
+				,intInnerUnits
+				,intLayerPerPallet
+				,intUnitPerLayer
+				,dblStandardPalletRatio
+				,strMask1
+				,strMask2
+				,strMask3
+				,dblMaxWeightPerPack
+				,intPatronageCategoryId
+				,intPatronageCategoryDirectId
+				,ysnStockedItem
+				,ysnDyedFuel
+				,strBarcodePrint
+				,ysnMSDSRequired
+				,strEPANumber
+				,ysnInboundTax
+				,ysnOutboundTax
+				,ysnRestrictedChemical
+				,ysnFuelItem
+				,ysnTankRequired
+				,ysnAvailableTM
+				,dblDefaultFull
+				,strFuelInspectFee
+				,strRINRequired
+				,intRINFuelTypeId
+				,dblDenaturantPercent
+				,ysnTonnageTax
+				,ysnLoadTracking
+				,dblMixOrder
+				,ysnHandAddIngredient
+				,intMedicationTag
+				,intIngredientTag
+				,intHazmatTag
+				,strVolumeRebateGroup
+				,intPhysicalItem
+				,ysnExtendPickTicket
+				,ysnExportEDI
+				,ysnHazardMaterial
+				,ysnMaterialFee
+				,ysnAutoBlend
+				,dblUserGroupFee
+				,dblWeightTolerance
+				,dblOverReceiveTolerance
+				,strMaintenanceCalculationMethod
+				,dblMaintenanceRate
+				,ysnListBundleSeparately
+				,intModuleId
+				,strNACSCategory
+				,strWICCode
+				,intAGCategory
+				,ysnReceiptCommentRequired
+				,strCountCode
+				,ysnLandedCost
+				,strLeadTime
+				,ysnTaxable
+				,strKeywords
+				,dblCaseQty
+				,dtmDateShip
+				,dblTaxExempt
+				,ysnDropShip
+				,ysnCommisionable
+				,ysnSpecialCommission
+				,intCommodityId
+				,intCommodityHierarchyId
+				,dblGAShrinkFactor
+				,intOriginId
+				,intProductTypeId
+				,intRegionId
+				,intSeasonId
+				,intClassVarietyId
+				,intProductLineId
+				,intGradeId
+				,strMarketValuation
+				,ysnInventoryCost
+				,ysnAccrue
+				,ysnMTM
+				,ysnPrice
+				,strCostMethod
+				,strCostType
+				,intOnCostTypeId
+				,dblAmount
+				,intCostUOMId
+				,intPackTypeId
+				,strWeightControlCode
+				,dblBlendWeight
+				,dblNetWeight
+				,dblUnitPerCase
+				,dblQuarantineDuration
+				,intOwnerId
+				,intCustomerId
+				,dblCaseWeight
+				,strWarehouseStatus
+				,ysnKosherCertified
+				,ysnFairTradeCompliant
+				,ysnOrganic
+				,ysnRainForestCertified
+				,dblRiskScore
+				,dblDensity
+				,dtmDateAvailable
+				,ysnMinorIngredient
+				,ysnExternalItem
+				,strExternalGroup
+				,ysnSellableItem
+				,dblMinStockWeeks
+				,dblFullContainerSize
+				,ysnHasMFTImplication
+				,intBuyingGroupId
+				,intAccountManagerId
+				,intConcurrencyId
+				,ysnItemUsedInDiscountCode
+				,ysnUsedForEnergyTracExport
+				,strInvoiceComments
+				,strPickListComments
+				,intLotStatusId
+				,strRequired
+				,ysnBasisContract
+				,intM2MComputationId
+				,intTonnageTaxUOMId
+				,ysn1099Box3
+				,ysnUseWeighScales
+				,ysnLotWeightsRequired
+				,ysnBillable
+				,ysnSupported
+				,ysnDisplayInHelpdesk
+				,intHazmatMessage
+				,strOriginStatus
+				,intCompanyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-			    Source.strItemNo
-                Source.strShortName
-                Source.strType
-                Source.strBundleType
-                Source.strDescription
-                Source.intManufacturerId
-                Source.intBrandId
-                Source.intCategoryId
-                Source.strStatus
-                Source.strModelNo
-                Source.strInventoryTracking
-                Source.strLotTracking
-                Source.ysnRequireCustomerApproval
-                Source.intRecipeId
-                Source.ysnSanitationRequired
-                Source.intLifeTime
-                Source.strLifeTimeType
-                Source.intReceiveLife
-                Source.strGTIN
-                Source.strRotationType
-                Source.intNMFCId
-                Source.ysnStrictFIFO
-                Source.intDimensionUOMId
-                Source.dblHeight
-                Source.dblWidth
-                Source.dblDepth
-                Source.intWeightUOMId
-                Source.dblWeight
-                Source.intMaterialPackTypeId
-                Source.strMaterialSizeCode
-                Source.intInnerUnits
-                Source.intLayerPerPallet
-                Source.intUnitPerLayer
-                Source.dblStandardPalletRatio
-                Source.strMask1
-                Source.strMask2
-                Source.strMask3
-                Source.dblMaxWeightPerPack
-                Source.intPatronageCategoryId
-                Source.intPatronageCategoryDirectId
-                Source.ysnStockedItem
-                Source.ysnDyedFuel
-                Source.strBarcodePrint
-                Source.ysnMSDSRequired
-                Source.strEPANumber
-                Source.ysnInboundTax
-                Source.ysnOutboundTax
-                Source.ysnRestrictedChemical
-                Source.ysnFuelItem
-                Source.ysnTankRequired
-                Source.ysnAvailableTM
-                Source.dblDefaultFull
-                Source.strFuelInspectFee
-                Source.strRINRequired
-                Source.intRINFuelTypeId
-                Source.dblDenaturantPercent
-                Source.ysnTonnageTax
-                Source.ysnLoadTracking
-                Source.dblMixOrder
-                Source.ysnHandAddIngredient
-                Source.intMedicationTag
-                Source.intIngredientTag
-                Source.intHazmatTag
-                Source.strVolumeRebateGroup
-                Source.intPhysicalItem
-                Source.ysnExtendPickTicket
-                Source.ysnExportEDI
-                Source.ysnHazardMaterial
-                Source.ysnMaterialFee
-                Source.ysnAutoBlend
-                Source.dblUserGroupFee
-                Source.dblWeightTolerance
-                Source.dblOverReceiveTolerance
-                Source.strMaintenanceCalculationMethod
-                Source.dblMaintenanceRate
-                Source.ysnListBundleSeparately
-                Source.intModuleId
-                Source.strNACSCategory
-                Source.strWICCode
-                Source.intAGCategory
-                Source.ysnReceiptCommentRequired
-                Source.strCountCode
-                Source.ysnLandedCost
-                Source.strLeadTime
-                Source.ysnTaxable
-                Source.strKeywords
-                Source.dblCaseQty
-                Source.dtmDateShip
-                Source.dblTaxExempt
-                Source.ysnDropShip
-                Source.ysnCommisionable
-                Source.ysnSpecialCommission
-                Source.intCommodityId
-                Source.intCommodityHierarchyId
-                Source.dblGAShrinkFactor
-                Source.intOriginId
-                Source.intProductTypeId
-                Source.intRegionId
-                Source.intSeasonId
-                Source.intClassVarietyId
-                Source.intProductLineId
-                Source.intGradeId
-                Source.strMarketValuation
-                Source.ysnInventoryCost
-                Source.ysnAccrue
-                Source.ysnMTM
-                Source.ysnPrice
-                Source.strCostMethod
-                Source.strCostType
-                Source.intOnCostTypeId
-                Source.dblAmount
-                Source.intCostUOMId
-                Source.intPackTypeId
-                Source.strWeightControlCode
-                Source.dblBlendWeight
-                Source.dblNetWeight
-                Source.dblUnitPerCase
-                Source.dblQuarantineDuration
-                Source.intOwnerId
-                Source.intCustomerId
-                Source.dblCaseWeight
-                Source.strWarehouseStatus
-                Source.ysnKosherCertified
-                Source.ysnFairTradeCompliant
-                Source.ysnOrganic
-                Source.ysnRainForestCertified
-                Source.dblRiskScore
-                Source.dblDensity
-                Source.dtmDateAvailable
-                Source.ysnMinorIngredient
-                Source.ysnExternalItem
-                Source.strExternalGroup
-                Source.ysnSellableItem
-                Source.dblMinStockWeeks
-                Source.dblFullContainerSize
-                Source.ysnHasMFTImplication
-                Source.intBuyingGroupId
-                Source.intAccountManagerId
-                Source.intConcurrencyId
-                Source.ysnItemUsedInDiscountCode
-                Source.ysnUsedForEnergyTracExport
-                Source.strInvoiceComments
-                Source.strPickListComments
-                Source.intLotStatusId
-                Source.strRequired
-                Source.ysnBasisContract
-                Source.intM2MComputationId
-                Source.intTonnageTaxUOMId
-                Source.ysn1099Box3
-                Source.ysnUseWeighScales
-                Source.ysnLotWeightsRequired
-                Source.ysnBillable
-                Source.ysnSupported
-                Source.ysnDisplayInHelpdesk
-                Source.intHazmatMessage
-                Source.strOriginStatus
-                Source.intCompanyId
-                Source.dtmDateCreated
-                Source.dtmDateModified
-                Source.intCreatedByUserId
-                Source.intModifiedByUserId
+				 Source.intItemId
+			    ,Source.strItemNo
+                ,Source.strShortName
+                ,Source.strType
+                ,Source.strBundleType
+                ,Source.strDescription
+                ,Source.intManufacturerId
+                ,Source.intBrandId
+                ,Source.intCategoryId
+                ,Source.strStatus
+                ,Source.strModelNo
+                ,Source.strInventoryTracking
+                ,Source.strLotTracking
+                ,Source.ysnRequireCustomerApproval
+                ,Source.intRecipeId
+                ,Source.ysnSanitationRequired
+                ,Source.intLifeTime
+                ,Source.strLifeTimeType
+                ,Source.intReceiveLife
+                ,Source.strGTIN
+                ,Source.strRotationType
+                ,Source.intNMFCId
+                ,Source.ysnStrictFIFO
+                ,Source.intDimensionUOMId
+                ,Source.dblHeight
+                ,Source.dblWidth
+                ,Source.dblDepth
+                ,Source.intWeightUOMId
+                ,Source.dblWeight
+                ,Source.intMaterialPackTypeId
+                ,Source.strMaterialSizeCode
+                ,Source.intInnerUnits
+                ,Source.intLayerPerPallet
+                ,Source.intUnitPerLayer
+                ,Source.dblStandardPalletRatio
+                ,Source.strMask1
+                ,Source.strMask2
+                ,Source.strMask3
+                ,Source.dblMaxWeightPerPack
+                ,Source.intPatronageCategoryId
+                ,Source.intPatronageCategoryDirectId
+                ,Source.ysnStockedItem
+                ,Source.ysnDyedFuel
+                ,Source.strBarcodePrint
+                ,Source.ysnMSDSRequired
+                ,Source.strEPANumber
+                ,Source.ysnInboundTax
+                ,Source.ysnOutboundTax
+                ,Source.ysnRestrictedChemical
+                ,Source.ysnFuelItem
+                ,Source.ysnTankRequired
+                ,Source.ysnAvailableTM
+                ,Source.dblDefaultFull
+                ,Source.strFuelInspectFee
+                ,Source.strRINRequired
+                ,Source.intRINFuelTypeId
+                ,Source.dblDenaturantPercent
+                ,Source.ysnTonnageTax
+                ,Source.ysnLoadTracking
+                ,Source.dblMixOrder
+                ,Source.ysnHandAddIngredient
+                ,Source.intMedicationTag
+                ,Source.intIngredientTag
+                ,Source.intHazmatTag
+                ,Source.strVolumeRebateGroup
+                ,Source.intPhysicalItem
+                ,Source.ysnExtendPickTicket
+                ,Source.ysnExportEDI
+                ,Source.ysnHazardMaterial
+                ,Source.ysnMaterialFee
+                ,Source.ysnAutoBlend
+                ,Source.dblUserGroupFee
+                ,Source.dblWeightTolerance
+                ,Source.dblOverReceiveTolerance
+                ,Source.strMaintenanceCalculationMethod
+                ,Source.dblMaintenanceRate
+                ,Source.ysnListBundleSeparately
+                ,Source.intModuleId
+                ,Source.strNACSCategory
+                ,Source.strWICCode
+                ,Source.intAGCategory
+                ,Source.ysnReceiptCommentRequired
+                ,Source.strCountCode
+                ,Source.ysnLandedCost
+                ,Source.strLeadTime
+                ,Source.ysnTaxable
+                ,Source.strKeywords
+                ,Source.dblCaseQty
+                ,Source.dtmDateShip
+                ,Source.dblTaxExempt
+                ,Source.ysnDropShip
+                ,Source.ysnCommisionable
+                ,Source.ysnSpecialCommission
+                ,Source.intCommodityId
+                ,Source.intCommodityHierarchyId
+                ,Source.dblGAShrinkFactor
+                ,Source.intOriginId
+                ,Source.intProductTypeId
+                ,Source.intRegionId
+                ,Source.intSeasonId
+                ,Source.intClassVarietyId
+                ,Source.intProductLineId
+                ,Source.intGradeId
+                ,Source.strMarketValuation
+                ,Source.ysnInventoryCost
+                ,Source.ysnAccrue
+                ,Source.ysnMTM
+                ,Source.ysnPrice
+                ,Source.strCostMethod
+                ,Source.strCostType
+                ,Source.intOnCostTypeId
+                ,Source.dblAmount
+                ,Source.intCostUOMId
+                ,Source.intPackTypeId
+                ,Source.strWeightControlCode
+                ,Source.dblBlendWeight
+                ,Source.dblNetWeight
+                ,Source.dblUnitPerCase
+                ,Source.dblQuarantineDuration
+                ,Source.intOwnerId
+                ,Source.intCustomerId
+                ,Source.dblCaseWeight
+                ,Source.strWarehouseStatus
+                ,Source.ysnKosherCertified
+                ,Source.ysnFairTradeCompliant
+                ,Source.ysnOrganic
+                ,Source.ysnRainForestCertified
+                ,Source.dblRiskScore
+                ,Source.dblDensity
+                ,Source.dtmDateAvailable
+                ,Source.ysnMinorIngredient
+                ,Source.ysnExternalItem
+                ,Source.strExternalGroup
+                ,Source.ysnSellableItem
+                ,Source.dblMinStockWeeks
+                ,Source.dblFullContainerSize
+                ,Source.ysnHasMFTImplication
+                ,Source.intBuyingGroupId
+                ,Source.intAccountManagerId
+                ,Source.intConcurrencyId
+                ,Source.ysnItemUsedInDiscountCode
+                ,Source.ysnUsedForEnergyTracExport
+                ,Source.strInvoiceComments
+                ,Source.strPickListComments
+                ,Source.intLotStatusId
+                ,Source.strRequired
+                ,Source.ysnBasisContract
+                ,Source.intM2MComputationId
+                ,Source.intTonnageTaxUOMId
+                ,Source.ysn1099Box3
+                ,Source.ysnUseWeighScales
+                ,Source.ysnLotWeightsRequired
+                ,Source.ysnBillable
+                ,Source.ysnSupported
+                ,Source.ysnDisplayInHelpdesk
+                ,Source.intHazmatMessage
+                ,Source.strOriginStatus
+                ,Source.intCompanyId
+                ,Source.dtmDateCreated
+                ,Source.dtmDateModified
+                ,Source.intCreatedByUserId
+                ,Source.intModifiedByUserId
 			)
 			
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICItem ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICItem OFF
 
     -- tblICCommodity
     SET @SQLString = N'
@@ -546,77 +550,81 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN
 				INSERT(
-					strCommodityCode
-					strDescription
-					ysnExchangeTraded
-					intFutureMarketId
-					intDecimalDPR
-					dblConsolidateFactor
-					ysnFXExposure
-					dblPriceCheckMin
-					dblPriceCheckMax
-					strCheckoffTaxDesc
-					strCheckoffAllState
-					strInsuranceTaxDesc
-					strInsuranceAllState
-					dtmCropEndDateCurrent
-					dtmCropEndDateNew
-					strEDICode
-					intScheduleStoreId
-					intScheduleDiscountId
-					intScaleAutoDistId
-					ysn1099Box3
-					ysnAllowLoadContracts
-					dblMaxUnder
-					dblMaxOver
-					intAdjustInventorySales
-					intAdjustInventoryTransfer
-					intCompanyId
-					intConcurrencyId
-					dtmDateCreated
-					dtmDateModified
-					intCreatedByUserId
-					intModifiedByUserId
+					intCommodityId
+					,strCommodityCode
+					,strDescription
+					,ysnExchangeTraded
+					,intFutureMarketId
+					,intDecimalDPR
+					,dblConsolidateFactor
+					,ysnFXExposure
+					,dblPriceCheckMin
+					,dblPriceCheckMax
+					,strCheckoffTaxDesc
+					,strCheckoffAllState
+					,strInsuranceTaxDesc
+					,strInsuranceAllState
+					,dtmCropEndDateCurrent
+					,dtmCropEndDateNew
+					,strEDICode
+					,intScheduleStoreId
+					,intScheduleDiscountId
+					,intScaleAutoDistId
+					,ysn1099Box3
+					,ysnAllowLoadContracts
+					,dblMaxUnder
+					,dblMaxOver
+					,intAdjustInventorySales
+					,intAdjustInventoryTransfer
+					,intCompanyId
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,intCreatedByUserId
+					,intModifiedByUserId
 
 				)
 			VALUES(
-				Source.strCommodityCode
-				Source.strDescription
-				Source.ysnExchangeTraded
-				Source.intFutureMarketId
-				Source.intDecimalDPR
-				Source.dblConsolidateFactor
-				Source.ysnFXExposure
-				Source.dblPriceCheckMin
-				Source.dblPriceCheckMax
-				Source.strCheckoffTaxDesc
-				Source.strCheckoffAllState
-				Source.strInsuranceTaxDesc
-				Source.strInsuranceAllState
-				Source.dtmCropEndDateCurrent
-				Source.dtmCropEndDateNew
-				Source.strEDICode
-				Source.intScheduleStoreId
-				Source.intScheduleDiscountId
-				Source.intScaleAutoDistId
-				Source.ysn1099Box3
-				Source.ysnAllowLoadContracts
-				Source.dblMaxUnder
-				Source.dblMaxOver
-				Source.intAdjustInventorySales
-				Source.intAdjustInventoryTransfer
-				Source.intCompanyId
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intCommodityId
+				,Source.strCommodityCode
+				,Source.strDescription
+				,Source.ysnExchangeTraded
+				,Source.intFutureMarketId
+				,Source.intDecimalDPR
+				,Source.dblConsolidateFactor
+				,Source.ysnFXExposure
+				,Source.dblPriceCheckMin
+				,Source.dblPriceCheckMax
+				,Source.strCheckoffTaxDesc
+				,Source.strCheckoffAllState
+				,Source.strInsuranceTaxDesc
+				,Source.strInsuranceAllState
+				,Source.dtmCropEndDateCurrent
+				,Source.dtmCropEndDateNew
+				,Source.strEDICode
+				,Source.intScheduleStoreId
+				,Source.intScheduleDiscountId
+				,Source.intScaleAutoDistId
+				,Source.ysn1099Box3
+				,Source.ysnAllowLoadContracts
+				,Source.dblMaxUnder
+				,Source.dblMaxOver
+				,Source.intAdjustInventorySales
+				,Source.intAdjustInventoryTransfer
+				,Source.intCompanyId
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICCommodity ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICCommodity OFF
 
     -- tblICCommodityAccount
     SET @SQLString = N'
@@ -636,32 +644,36 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN
 			INSERT(
-				intCommodityId
-				intAccountCategoryId
-				intAccountId
-				intSort
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intCommodityAccountId
+				,intCommodityId
+				,intAccountCategoryId
+				,intAccountId
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-				Source.intCommodityId
-				Source.intAccountCategoryId
-				Source.intAccountId
-				Source.intSort
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intCommodityAccountId
+				,Source.intCommodityId
+				,Source.intAccountCategoryId
+				,Source.intAccountId
+				,Source.intSort
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)					
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICCommodityAccount ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICCommodityAccount OFF
 
     -- tblICCommodityAttribute
     SET @SQLString = N'
@@ -684,38 +696,42 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN
 			INSERT(
-				intCommodityId
-				strType
-				strDescription
-				intDefaultPackingUOMId
-				intCountryID
-				intPurchasingGroupId
-				intSort
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intCommodityAttributeId
+				,intCommodityId
+				,strType
+				,strDescription
+				,intDefaultPackingUOMId
+				,intCountryID
+				,intPurchasingGroupId
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-				Source.intCommodityId
-				Source.strType
-				Source.strDescription
-				Source.intDefaultPackingUOMId
-				Source.intCountryID
-				Source.intPurchasingGroupId
-				Source.intSort
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intCommodityAttributeId
+				,Source.intCommodityId
+				,Source.strType
+				,Source.strDescription
+				,Source.intDefaultPackingUOMId
+				,Source.intCountryID
+				,Source.intPurchasingGroupId
+				,Source.intSort
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICCommodityAttribute ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICCommodityAttribute OFF
 
     -- tblICCommodityGroup
     SET @SQLString = N'
@@ -736,33 +752,37 @@ BEGIN
 
 		WHEN NOT MATCHED BY TARGET THEN
 		INSERT(
-			intCommodityId
-			intParentGroupId
-			strDescription
-			intSort
-			intConcurrencyId
-			dtmDateCreated
-			dtmDateModified
-			intCreatedByUserId
-			intModifiedByUserId
-		)
+		    intCommodityGroupId
+			,intCommodityId
+			,intParentGroupId
+			,strDescription
+			,intSort
+			,intConcurrencyId
+			,dtmDateCreated
+			,dtmDateModified
+			,intCreatedByUserId
+			,intModifiedByUserId
+		)	
 		VALUES (
-		    Source.intCommodityId
-			Source.intParentGroupId
-			Source.strDescription
-			Source.intSort
-			Source.intConcurrencyId
-			Source.dtmDateCreated
-			Source.dtmDateModified
-			Source.intCreatedByUserId
-			Source.intModifiedByUserId
-
+			Source.intCommodityGroupId
+		    ,Source.intCommodityId
+			,Source.intParentGroupId
+			,Source.strDescription
+			,Source.intSort
+			,Source.intConcurrencyId
+			,Source.dtmDateCreated
+			,Source.dtmDateModified
+			,Source.intCreatedByUserId
+			,Source.intModifiedByUserId
+			
 		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICCommodityGroup ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICCommodityGroup OFF
 
     -- tblICCommodityProductLine
     SET @SQLString = N'
@@ -783,36 +803,40 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN
 			INSERT(
-				intCommodityId
-				strDescription
-				ysnDeltaHedge
-				dblDeltaPercent
-				intSort
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intCommodityProductLineId
+				,intCommodityId
+				,strDescription
+				,ysnDeltaHedge
+				,dblDeltaPercent
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 
 			)
 			VALUES(
-			    Source.intCommodityId
-				Source.strDescription
-				Source.ysnDeltaHedge
-				Source.dblDeltaPercent
-				Source.intSort
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intCommodityProductLineId
+			    ,Source.intCommodityId
+				,Source.strDescription
+				,Source.ysnDeltaHedge
+				,Source.dblDeltaPercent
+				,Source.intSort
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICCommodityProductLine ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICCommodityProductLine OFF
 
     -- tblICCommodityUnitMeasure
     SET @SQLString = N'
@@ -835,39 +859,43 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN
 			INSERT(
-				intCommodityId
-				intUnitMeasureId
-				dblUnitQty
-				ysnStockUnit
-				ysnDefault
-				ysnStockUOM
-				intSort
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intCommodityUnitMeasureId
+				,intCommodityId
+				,intUnitMeasureId
+				,dblUnitQty
+				,ysnStockUnit
+				,ysnDefault
+				,ysnStockUOM
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 
 			)
 			VALUES(
-				Source.intCommodityId
-				Source.intUnitMeasureId
-				Source.dblUnitQty
-				Source.ysnStockUnit
-				Source.ysnDefault
-				Source.ysnStockUOM
-				Source.intSort
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intCommodityUnitMeasureId
+				,Source.intCommodityId
+				,Source.intUnitMeasureId
+				,Source.dblUnitQty
+				,Source.ysnStockUnit
+				,Source.ysnDefault
+				,Source.ysnStockUOM
+				,Source.intSort
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICCommodityUnitMeasure ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICCommodityUnitMeasure OFF
 
     -- tblICStorageLocation
     SET @SQLString = N'
@@ -911,83 +939,87 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 	    WHEN NOT MATCHED BY TARGET THEN
 			INSERT(
-				strName
-				strDescription
-				intStorageUnitTypeId
-				intLocationId
-				intSubLocationId
-				intParentStorageLocationId
-				ysnAllowConsume
-				ysnAllowMultipleItem
-				ysnAllowMultipleLot
-				ysnMergeOnMove
-				ysnCycleCounted
-				ysnDefaultWHStagingUnit
-				intRestrictionId
-				strUnitGroup
-				dblMinBatchSize
-				dblBatchSize
-				intBatchSizeUOMId
-				intSequence
-				ysnActive
-				intRelativeX
-				intRelativeY
-				intRelativeZ
-				intCommodityId
-				intItemId
-				dblPackFactor
-				dblEffectiveDepth
-				dblUnitPerFoot
-				dblResidualUnit
-				intCompanyId
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intStorageLocationId
+				,strName
+				,strDescription
+				,intStorageUnitTypeId
+				,intLocationId
+				,intSubLocationId
+				,intParentStorageLocationId
+				,ysnAllowConsume
+				,ysnAllowMultipleItem
+				,ysnAllowMultipleLot
+				,ysnMergeOnMove
+				,ysnCycleCounted
+				,ysnDefaultWHStagingUnit
+				,intRestrictionId
+				,strUnitGroup
+				,dblMinBatchSize
+				,dblBatchSize
+				,intBatchSizeUOMId
+				,intSequence
+				,ysnActive
+				,intRelativeX
+				,intRelativeY
+				,intRelativeZ
+				,intCommodityId
+				,intItemId
+				,dblPackFactor
+				,dblEffectiveDepth
+				,dblUnitPerFoot
+				,dblResidualUnit
+				,intCompanyId
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-			    Source.strName
-				Source.strDescription
-				Source.intStorageUnitTypeId
-				Source.intLocationId
-				Source.intSubLocationId
-				Source.intParentStorageLocationId
-				Source.ysnAllowConsume
-				Source.ysnAllowMultipleItem
-				Source.ysnAllowMultipleLot
-				Source.ysnMergeOnMove
-				Source.ysnCycleCounted
-				Source.ysnDefaultWHStagingUnit
-				Source.intRestrictionId
-				Source.strUnitGroup
-				Source.dblMinBatchSize
-				Source.dblBatchSize
-				Source.intBatchSizeUOMId
-				Source.intSequence
-				Source.ysnActive
-				Source.intRelativeX
-				Source.intRelativeY
-				Source.intRelativeZ
-				Source.intCommodityId
-				Source.intItemId
-				Source.dblPackFactor
-				Source.dblEffectiveDepth
-				Source.dblUnitPerFoot
-				Source.dblResidualUnit
-				Source.intCompanyId
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				 Source.intStorageLocationId
+			    ,Source.strName
+				,Source.strDescription
+				,Source.intStorageUnitTypeId
+				,Source.intLocationId
+				,Source.intSubLocationId
+				,Source.intParentStorageLocationId
+				,Source.ysnAllowConsume
+				,Source.ysnAllowMultipleItem
+				,Source.ysnAllowMultipleLot
+				,Source.ysnMergeOnMove
+				,Source.ysnCycleCounted
+				,Source.ysnDefaultWHStagingUnit
+				,Source.intRestrictionId
+				,Source.strUnitGroup
+				,Source.dblMinBatchSize
+				,Source.dblBatchSize
+				,Source.intBatchSizeUOMId
+				,Source.intSequence
+				,Source.ysnActive
+				,Source.intRelativeX
+				,Source.intRelativeY
+				,Source.intRelativeZ
+				,Source.intCommodityId
+				,Source.intItemId
+				,Source.dblPackFactor
+				,Source.dblEffectiveDepth
+				,Source.dblUnitPerFoot
+				,Source.dblResidualUnit
+				,Source.intCompanyId
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICStorageLocation ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICStorageLocation OFF
 
     -- tblICStorageLocationCategory
     SET @SQLString = N'
@@ -1006,32 +1038,36 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId	
 	    WHEN NOT MATCHED BY TARGET THEN	
 			INSERT(	
-				intStorageLocationId
-				intCategoryId
-				intSort
-				intCompanyId
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intStorageLocationCategoryId
+				,intStorageLocationId
+				,intCategoryId
+				,intSort
+				,intCompanyId
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-				Source.intStorageLocationId
-				Source.intCategoryId
-				Source.intSort
-				Source.intCompanyId
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intStorageLocationCategoryId
+				,Source.intStorageLocationId
+				,Source.intCategoryId
+				,Source.intSort
+				,Source.intCompanyId
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)	
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICStorageLocationCategory ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICStorageLocationCategory OFF
 
     -- tblICStorageLocationContainer
     SET @SQLString = N'
@@ -1054,40 +1090,44 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN	
 			INSERT (
-				intStorageLocationId
-				intContainerId
-				intExternalSystemId
-				intContainerTypeId
-				strLastUpdatedBy
-				dtmLastUpdatedOn
-				intSort
-				intCompanyId
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intStorageLocationContainerId
+				,intStorageLocationId
+				,intContainerId
+				,intExternalSystemId
+				,intContainerTypeId
+				,strLastUpdatedBy
+				,dtmLastUpdatedOn
+				,intSort
+				,intCompanyId
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES (
-				Source.intStorageLocationId
-				Source.intContainerId
-				Source.intExternalSystemId
-				Source.intContainerTypeId
-				Source.strLastUpdatedBy
-				Source.dtmLastUpdatedOn
-				Source.intSort
-				Source.intCompanyId
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+			     Source.intStorageLocationContainerId
+				,Source.intStorageLocationId
+				,Source.intContainerId
+				,Source.intExternalSystemId
+				,Source.intContainerTypeId
+				,Source.strLastUpdatedBy
+				,Source.dtmLastUpdatedOn
+				,Source.intSort
+				,Source.intCompanyId
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICStorageLocationContainer ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICStorageLocationContainer OFF
 
     -- tblICStorageLocationMeasurement
     SET @SQLString = N'
@@ -1108,36 +1148,40 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 		WHEN NOT MATCHED BY TARGET THEN	
 			INSERT (
-				intStorageLocationId
-				intMeasurementId
-				intReadingPointId
-				ysnActive
-				intSort
-				intCompanyId
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				 intStorageLocationMeasurementId
+				,intStorageLocationId
+				,intMeasurementId
+				,intReadingPointId
+				,ysnActive
+				,intSort
+				,intCompanyId
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-				Source.intStorageLocationId
-				Source.intMeasurementId
-				Source.intReadingPointId
-				Source.ysnActive
-				Source.intSort
-				Source.intCompanyId
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intStorageLocationMeasurementId
+				,Source.intStorageLocationId
+				,Source.intMeasurementId
+				,Source.intReadingPointId
+				,Source.ysnActive
+				,Source.intSort
+				,Source.intCompanyId
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 			)						
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	SET IDENTITY_INSERT tblICStorageLocationMeasurement ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICStorageLocationMeasurement OFF
 
     -- tblICStorageLocationSku
     SET @SQLString = N'
@@ -1162,44 +1206,49 @@ BEGIN
 				,Target.intConcurrencyId = Source.intConcurrencyId
 	    WHEN NOT MATCHED BY TARGET THEN	
 			INSERT(
-				intStorageLocationId
-				intItemId
-				intSkuId
-				dblQuantity
-				intContainerId
-				intLotCodeId
-				intLotStatusId
-				intOwnerId
-				intSort
-				intCompanyId
-				intConcurrencyId
-				dtmDateCreated
-				dtmDateModified
-				intCreatedByUserId
-				intModifiedByUserId
+				intStorageLocationSkuId
+				,intStorageLocationId
+				,intItemId
+				,intSkuId
+				,dblQuantity
+				,intContainerId
+				,intLotCodeId
+				,intLotStatusId
+				,intOwnerId
+				,intSort
+				,intCompanyId
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
 			)
 			VALUES(
-				Source.intStorageLocationId
-				Source.intItemId
-				Source.intSkuId
-				Source.dblQuantity
-				Source.intContainerId
-				Source.intLotCodeId
-				Source.intLotStatusId
-				Source.intOwnerId
-				Source.intSort
-				Source.intCompanyId
-				Source.intConcurrencyId
-				Source.dtmDateCreated
-				Source.dtmDateModified
-				Source.intCreatedByUserId
-				Source.intModifiedByUserId
+				Source.intStorageLocationSkuId
+				,Source.intStorageLocationId
+				,Source.intItemId
+				,Source.intSkuId
+				,Source.dblQuantity
+				,Source.intContainerId
+				,Source.intLotCodeId
+				,Source.intLotStatusId
+				,Source.intOwnerId
+				,Source.intSort
+				,Source.intCompanyId
+				,Source.intConcurrencyId
+				,Source.dtmDateCreated
+				,Source.dtmDateModified
+				,Source.intCreatedByUserId
+				,Source.intModifiedByUserId
 				
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+	
+    SET IDENTITY_INSERT tblICStorageLocationSku ON
     EXECUTE sp_executesql @SQLString;
+	SET IDENTITY_INSERT tblICStorageLocationSku OFF
 
 END
