@@ -52,15 +52,13 @@ DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;
 
-BEGIN 
-	SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-	, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
-	, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
-	, @intContractCostId = SC.intContractCostId
-	FROM dbo.tblICItemUOM UM	
-	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
-	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
-END
+SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
+, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
+, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
+, @intContractCostId = SC.intContractCostId
+FROM dbo.tblICItemUOM UM	
+JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
 
 DECLARE @ShipmentStagingTable AS ShipmentStagingTable,
 		@ShipmentItemLotStagingTable AS ShipmentItemLotStagingTable,
@@ -112,6 +110,8 @@ BEGIN
 		,intSourceType
 		,strSourceScreenName
 		,strChargesLink
+		,dblGross
+		,dblTare
 		)
 		SELECT
 		intOrderType				= @intOrderType
@@ -166,7 +166,10 @@ BEGIN
 												ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(LI.intItemUOMId,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
 											END
 										END
-		,intWeightUOMId				= SC.intItemUOMIdFrom
+		,intWeightUOMId				= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
+										ELSE LI.intItemUOMId
+									END
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,intStorageScheduleTypeId	= CASE
@@ -199,9 +202,15 @@ BEGIN
 		,intSourceType				= 1
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
+		,dblGross					=  CASE
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
+										ELSE (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
+									END
+		,dblTare					= CASE
+										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
+										ELSE SC.dblShrink 
+									END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
-		INNER JOIN dbo.tblICItemUOM ItemUOM	ON ItemUOM.intItemId = SC.intItemId AND ItemUOM.intItemUOMId = @intTicketItemUOMId
-		INNER JOIN dbo.tblICUnitMeasure UOM ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
 			,CTD.intContractDetailId
@@ -229,6 +238,7 @@ BEGIN
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
+		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
 
@@ -1181,7 +1191,6 @@ SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 IF (@total = 0)
 	RETURN;
 
-SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 IF @intLotType != 0
 BEGIN 
 	INSERT INTO @ShipmentItemLotStagingTable(
@@ -1211,14 +1220,8 @@ BEGIN
 		, intItemLotGroup			= SE.intItemLotGroup
 		, intLotId					= SC.intLotId
 		, dblQuantity				= SE.dblQuantity
-		, dblGrossWeight			= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN (SE.dblQuantity /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight)
-										ELSE (SE.dblQuantity / SC.dblNetUnits) * SC.dblGrossUnits
-									END
-		, dblTareWeight				= CASE
-										WHEN IC.ysnLotWeightsRequired = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SE.dblQuantity)
-										ELSE ((SE.dblQuantity / SC.dblNetUnits) * SC.dblGrossUnits) - SE.dblQuantity 
-									END
+		, dblGrossWeight			= SE.dblGross 
+		, dblTareWeight				= SE.dblTare
 		, dblWeightPerQty			= 0
 		, strWarehouseCargoNumber	= SC.strTicketNumber
 		FROM @ShipmentStagingTable SE 
