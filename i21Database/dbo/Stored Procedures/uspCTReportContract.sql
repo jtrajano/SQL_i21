@@ -423,8 +423,8 @@ BEGIN TRY
 													  	  ELSE NULL END
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
-		    ,strINCOTermWithWeight					=	CB.strContractBasis + ISNULL(', ' + isnull(rtrt4.strTranslation,W1.strWeightGradeDesc),'')
-			,strQuantityWithUOM						=	LTRIM(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
+		    ,strINCOTermWithWeight					=	dbo.fnCTGetTranslation('ContractManagement.view.INCOShipTerm',CB.intContractBasisId,@intLaguageId,'Contract Basis',CB.strContractBasis) + ISNULL(', ' + isnull(rtrt4.strTranslation,W1.strWeightGradeDesc),'')
+			,strQuantityWithUOM						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
 			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
 			,strStartAndEndDate						=	SQ.strStartAndEndDate
 			,strNoOfContainerAndType				=	SQ.strNoOfContainerAndType
@@ -480,7 +480,7 @@ BEGIN TRY
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
 							CD.strERPPONumber,
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
-							isnull(rtIMTranslation.strTranslation, IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
+							dbo.fnCTGetTranslation('Inventory.view.Item',CD.intItemId,@intLaguageId,'Description',IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
 							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
 							LEFT(DATENAME(DAY,CD.dtmStartDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)), LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmStartDate),4) + ' - ' + LEFT(DATENAME(DAy,CD.dtmEndDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)), LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmEndDate),4) AS strStartAndEndDate,
 							LTRIM(CD.intNumberOfContainers) + ' x ' + isnull(rtrt11.strTranslation,CT.strContainerType) AS strNoOfContainerAndType,
@@ -517,10 +517,6 @@ BEGIN TRY
 				left join tblSMScreen				rts11 on rts11.strNamespace = 'Logistics.view.ContainerType'
 				left join tblSMTransaction			rtt11 on rtt11.intScreenId = rts11.intScreenId and rtt11.intRecordId = CT.intContainerTypeId
 				left join tblSMReportTranslation	rtrt11 on rtrt11.intLanguageId = @intLaguageId and rtrt11.intTransactionId = rtt11.intTransactionId and rtrt11.strFieldName = 'Container Type'
-
-				left join tblSMScreen				rtIMScreen on rtIMScreen.strNamespace = 'Inventory.view.Item'
-				left join tblSMTransaction			rtIMTransaction on rtIMTransaction.intScreenId = rtIMScreen.intScreenId and rtIMTransaction.intRecordId = IM.intItemId
-				left join tblSMReportTranslation	rtIMTranslation on rtIMTranslation.intLanguageId = @intLaguageId and rtIMTranslation.intTransactionId = rtIMTransaction.intTransactionId and rtIMTranslation.strFieldName = 'Description'
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
