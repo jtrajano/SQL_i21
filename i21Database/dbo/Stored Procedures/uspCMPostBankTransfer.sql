@@ -7,6 +7,7 @@
 	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
+    ,@outBatchId 			NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -257,7 +258,12 @@ END
 -- Get the batch post id. 
 IF (@strBatchId IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	IF (@ysnRecap = 0)
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	ELSE
+		SELECT @strBatchId = NEWID()
+
+	SELECT @outBatchId = @strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
@@ -589,6 +595,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -615,6 +623,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -637,7 +647,7 @@ BEGIN
 			,[intConcurrencyId]
 	FROM	#tmpGLDetail
 	IF @@ERROR <> 0	GOTO Post_Rollback
-			
+		
 	GOTO Recap_Rollback
 END
 
@@ -659,8 +669,12 @@ Post_Rollback:
 	
 Recap_Rollback: 
 	SET @isSuccessful = 1
-	ROLLBACK TRANSACTION 
-	EXEC dbo.uspCMPostRecap @RecapTable
+	ROLLBACK TRANSACTION
+	
+	--EXEC dbo.uspCMPostRecap @RecapTable
+	EXEC dbo.uspGLPostRecap 
+			@RecapTable
+			,@intEntityId
 	GOTO Post_Exit
 
 Audit_Log:
