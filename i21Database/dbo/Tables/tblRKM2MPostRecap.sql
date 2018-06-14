@@ -2,6 +2,7 @@
 	[intM2MTransactionId]       INT              IDENTITY (1, 1) NOT NULL,
     [dtmDate]                   DATETIME         NOT NULL,
     [strBatchId]                NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
+	[strReversalBatchId]        NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NULL,
     [strAccountId]              NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [strAccountGroup]           NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
