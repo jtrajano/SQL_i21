@@ -142,11 +142,11 @@ SELECT
 														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
 												THEN B.dblOpenReceive - B.dblBillQty
 												ELSE A.dblQtyReceived END),
-	[dblCost]						=	CASE WHEN contractDetail.dblCashPrice > 0 
-														THEN contractDetail.dblCashPrice
+	[dblCost]						=	CASE WHEN contractDetail.dblSeqPrice > 0 
+														THEN contractDetail.dblSeqPrice
 														ELSE 
-															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblCashPrice > 0
-																THEN contractDetail.dblCashPrice
+															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblSeqPrice > 0
+																THEN contractDetail.dblSeqPrice
 																ELSE B.dblUnitCost
 																END)
 													END, --use cash price of contract if unit cost of receipt item is 0,
@@ -208,10 +208,13 @@ LEFT JOIN tblICItemBundle itemBundle ON itemBundle.intItemBundleId = A.intItemBu
 LEFT JOIN vyuSCGetScaleDistribution D ON D.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 LEFT JOIN vyuPATEntityPatron patron ON C.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
-LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
-				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
-				ON contractHeader.intContractHeaderId = B.intOrderId 
+LEFT JOIN vyuCTContractDetailView contractDetail 
+			ON 	contractDetail.intContractHeaderId = B.intOrderId 
 				AND contractDetail.intContractDetailId = B.intLineNo
+-- LEFT JOIN (tblCTContractHeader contractHeader INNER JOIN tblCTContractDetail contractDetail 
+-- 				ON contractHeader.intContractHeaderId = contractDetail.intContractHeaderId) 
+-- 				ON contractHeader.intContractHeaderId = B.intOrderId 
+-- 				AND contractDetail.intContractDetailId = B.intLineNo
 LEFT JOIN tblICItemUOM ContractItemCostUOM ON ContractItemCostUOM.intItemUOMId = contractDetail.intPriceItemUOMId
 LEFT JOIN tblAP1099Category F ON entity.str1099Type = F.strCategory
 WHERE C.intCurrencyId = @voucherCurrency --RETURN AND RECEIPT
