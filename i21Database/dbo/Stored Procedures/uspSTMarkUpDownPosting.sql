@@ -137,12 +137,13 @@ BEGIN TRY
 							,intForexRateTypeId
 							,dblForexRate
 							,intCategoryId
+							,dblAdjustCostValue
 							,dblAdjustRetailValue
 					) 
 					SELECT		
-							intItemId				= i.intItemId
-							,intItemLocationId		= il.intItemLocationId
-							,intItemUOMId			= iu.intItemUOMId
+							intItemId				= ISNULL(i.intItemId, CategoryItem.intItemId)
+							,intItemLocationId		= ISNULL(il.intItemLocationId, CategoryItem.intItemLocationId)
+							,intItemUOMId			= ISNULL(iu.intItemUOMId, CategoryItem.intItemUOMId)
 							,dtmDate				= MU.dtmMarkUpDownDate
 
 							-- Item Manage
@@ -184,16 +185,38 @@ BEGIN TRY
 							,intCategoryId			= CASE
 														WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.intCategoryId ELSE NULL
 													END
+							,dblAdjustCostValue		= CASE
+														WHEN MU.strType = @MarkUpType_DepartmentLevel THEN -MUD.dblTotalCostAmount ELSE NULL
+													END
 							,dblAdjustRetailValue	= CASE
-														WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblRetailPerUnit ELSE NULL
+														WHEN MU.strType = @MarkUpType_DepartmentLevel THEN -MUD.dblTotalRetailAmount ELSE NULL
 													END -- -200 -- $$$ value to adjust the retail value.
+
 
 					FROM tblSTMarkUpDownDetail MUD
 					INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId
-					INNER JOIN tblICItem i ON MUD.intItemId = i.intItemId
-					INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId AND il.intLocationId = @intLocationId
-					LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId 
-					INNER JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.intItemUOMId = il.intIssueUOMId -- Defaulted to issue uom id as per ST-313
+					--If Item Manage, query item fields that are needed
+					LEFT JOIN (
+						tblICItem i INNER JOIN tblICItemLocation il
+							ON i.intItemId = il.intItemId AND il.intLocationId = @intLocationId
+						INNER JOIN tblICItemUOM iu
+							ON iu.intItemId = i.intItemId AND iu.intItemUOMId = il.intIssueUOMId-- Defaulted to issue uom id as per ST-313
+					) ON i.intItemId = MUD.intItemId
+					
+					--Category Managed. Since item Ids are required, we'll fill those fields. This is just a temporary fix
+					OUTER APPLY ( 
+						SELECT TOP 1	Item.intItemId,
+										ItemLocation.intItemLocationId,
+										ItemUOM.intItemUOMId
+						FROM tblICCategoryPricing CategoryPricing
+						INNER JOIN tblICItem Item
+							ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
+						INNER JOIN tblICItemLocation ItemLocation
+							ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId
+						INNER JOIN tblICItemUOM ItemUOM
+							ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
+						WHERE Item.intCategoryId = MUD.intCategoryId
+					) CategoryItem
 					WHERE MU.intMarkUpDownId = @intMarkUpDownId
 
 				-- Generate New Batch Id
@@ -201,13 +224,16 @@ BEGIN TRY
 
 
 				-- Process Adjustments
-				EXEC @intReturnValue = dbo.uspICPostCosting  
-					 @ItemsForPost  
-					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-					,@intCurrentUserId
+				IF EXISTS(SELECT TOP 1 1 FROM @ItemsForPost)
+				BEGIN
+					EXEC @intReturnValue = dbo.uspICPostCosting  
+						 @ItemsForPost  
+						,@strBatchId  
+						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+						,@intCurrentUserId
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				END
 
 				-- NOTE: 
 				-- 1. To see in Retail valuation, item's category should have check retail valuation in Category screen
