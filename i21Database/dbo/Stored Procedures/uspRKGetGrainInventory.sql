@@ -106,7 +106,7 @@ WHERE i.intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
 and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%'
-AND it.intItemLocationId = @intLocationId)t
+AND il.intLocationId = @intLocationId)t
 union
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
 		'' as strAdjDistributionOption,
