@@ -71,7 +71,7 @@ BEGIN TRY
 			,GETDATE()
 			,LD.dblQuantity
 			,IU.dblUnitQty
-			,CASE 
+			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
 					THEN CASE 
 							WHEN CUR.ysnSubCurrency = 1
@@ -83,8 +83,8 @@ BEGIN TRY
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 						END
-				END dblCost
-			,CASE 
+				END,0) dblCost
+			,ISNULL(CASE 
 				WHEN LD.strPriceStatus = 'Basis'
 					THEN CASE 
 							WHEN CUR.ysnSubCurrency = 1
@@ -96,7 +96,7 @@ BEGIN TRY
 							THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
 						ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
 						END
-				END * LD.dblQuantity dblValue
+				END,0) * LD.dblQuantity dblValue
 			,0.0
 			,L.intCurrencyId
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)

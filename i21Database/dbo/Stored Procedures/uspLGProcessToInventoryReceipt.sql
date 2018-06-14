@@ -624,7 +624,7 @@ BEGIN TRY
 				,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
 				,dblGross = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross) --
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
-				,dblCost = ISNULL(AD.dblSeqPrice, LD.dblUnitPrice) --
+				,dblCost = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0)) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
 				,intCurrencyId = CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
@@ -735,7 +735,7 @@ BEGIN TRY
 				,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
 				,dblGross =  LD.dblGross - ISNULL(LD.dblDeliveredGross,0) --
 				,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
-				,dblCost = ISNULL(AD.dblSeqPrice, LD.dblUnitPrice) --
+				,dblCost = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0)) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
 				,intCurrencyId = CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
