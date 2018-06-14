@@ -12,7 +12,22 @@ BEGIN
 	begin
 		update [tblEMEntityToContact] set ysnPortalAccess = 0, intEntityRoleId = null where intEntityId = @intEntityId
 
-		delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId)
+		--delete from [tblEMEntityCredential] where intEntityId in (select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId)
+		delete from [tblEMEntityCredential] where intEntityId 
+		in 
+		(
+			select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId
+		) 
+		and intEntityId 
+		not in 
+		(
+			select intEntityContactId from [tblEMEntityToContact] where intEntityContactId 
+			in 
+			(
+				select intEntityContactId from [tblEMEntityToContact] where intEntityId = @intEntityId
+			) 
+			and ysnPortalAccess = 1 and intEntityId <> @intEntityId
+		)
 
 		if @ysnAdmin = 1
 		begin
@@ -24,10 +39,10 @@ BEGIN
 	else
 	begin
 
-		if not exists(select top 1 1 from tblEMEntityToRole where intEntityId = @intEntityId)
-		begin
-			INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId) VALUES(@intEntityId, @intUserRoleId) --exec [uspSMCreateContactAdmin] @entityId = @intEntityId
-		end 
+		--if not exists(select top 1 1 from tblEMEntityToRole where intEntityId = @intEntityId)
+		--begin
+		--	INSERT INTO tblEMEntityToRole(intEntityId, intEntityRoleId) VALUES(@intEntityId, @intUserRoleId) --exec [uspSMCreateContactAdmin] @entityId = @intEntityId
+		--end 
 
 		--declare @roleId int
 		--select @roleId = a.intEntityRoleId 
