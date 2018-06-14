@@ -94,11 +94,13 @@
 							('tblSMScreenStage'), --6
 			--('tblSMUserLogin'), --7
 			('tblSMUserPreference'), --8
+
 			('tblSMUserRole'), --9
 			('tblSMUserRoleCompanyLocationPermission'), -- 10
 			('tblSMUserRoleControlPermission'), --11
 			('tblSMUserRoleDashboardPermission'), --12
 			('tblSMUserRoleFRPermission'), --13
+			('tblSMMasterMenu'), --143
 			('tblSMUserRoleMenu'), --14
 			('tblSMUserRoleReportPermission'), --15
 			('tblSMUserRoleScreenPermission'), --16
