@@ -6337,6 +6337,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptTaxReport.sql" />
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
