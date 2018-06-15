@@ -15,11 +15,16 @@ DECLARE @voucherId INT = @billId;
 DECLARE @voucherIds AS Id;
 DECLARE @SaveTran NVARCHAR(32) = 'uspAPApplyPrepaid';
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @prepaidCount INT; 
+DECLARE @count INT = 0; 
 IF @transCount = 0 
 	BEGIN TRANSACTION
 ELSE 
 	SAVE TRANSACTION @SaveTran
 
+SELECT @prepaidCount = COUNT(@prepaidCount)
+WHILE @prepaidCount !=  @count
+BEGIN
 EXEC uspAPPrepaidAndDebit @billId = @voucherId;
 
 UPDATE A
@@ -34,7 +39,9 @@ INSERT INTO @voucherIds
 SELECT @voucherId
 
 EXEC uspAPUpdateVoucherTotal @voucherIds
+SET @count = @count + 1
 
+END
 IF @transCount = 0 
 	COMMIT TRANSACTION
 END TRY
