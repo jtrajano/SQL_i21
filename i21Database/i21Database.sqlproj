@@ -5271,7 +5271,6 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
     <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumberLocation.sql" />
-    <Build Include="dbo\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerLookup.sql" />
     <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
     <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
@@ -6349,6 +6348,7 @@
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
