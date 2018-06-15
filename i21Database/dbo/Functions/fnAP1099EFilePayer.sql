@@ -124,6 +124,7 @@ BEGIN
 			WHEN 2 THEN '6 ' --1099 INT
 			WHEN 3 THEN 'B ' --1099 B
 			WHEN 4 THEN '7 ' --1099 PATR
+			WHEN 5 THEN '1 ' --1099 DIV
 			ELSE SPACE(2) END --Type of return/1099 --Position 26-27
 		+ @amountCodes + SPACE(16 - LEN(@amountCodes))
 			--CASE @form1099 

@@ -76,19 +76,19 @@ BEGIN
 						REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dbl1099INT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))))),
 		@controlTotal2 = REPLICATE('0',18),
 		@controlTotal3 = REPLICATE('0',18),
-		@controlTotal4 = REPLICATE('0',18),
-		@controlTotal5 = REPLICATE('0',18),
-		@controlTotal6 = REPLICATE('0',18),
-		@controlTotal7 = REPLICATE('0',18),
-		@controlTotal8 = REPLICATE('0',18),
-		@controlTotal9 = REPLICATE('0',18),
+		@controlTotal4 = REPLICATE('0',12),
+		@controlTotal5 = REPLICATE('0',0),
+		@controlTotal6 = REPLICATE('0',0),
+		@controlTotal7 = REPLICATE('0',0),
+		@controlTotal8 = REPLICATE('0',0),
+		@controlTotal9 = REPLICATE('0',0),
 		@controlTotalA = REPLICATE('0',18),
 		@controlTotalB = REPLICATE('0',18),
 		@controlTotalC = REPLICATE('0',18),
 		@controlTotalD = REPLICATE('0',18),
 		@controlTotalE = REPLICATE('0',18),
 		@controlTotalF = REPLICATE('0',18),
-		@controlTotalG = REPLICATE('0',18)		
+		@controlTotalG = REPLICATE('0',18)			
 	FROM INT1099 A
 
 	--PAGE 110
