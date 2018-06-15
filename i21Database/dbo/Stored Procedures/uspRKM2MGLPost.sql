@@ -481,7 +481,7 @@ BEGIN TRANSACTION
 			,[intSourceLocationId]
 			,[intSourceUOMId]
 			)
-		SELECT [dtmDate]
+		SELECT @dtmGLReverseDate
 			,@strReversalBatchId
 			,[intAccountId]
 			,[dblCredit] --Reversal - credit value will become debit value
@@ -499,7 +499,7 @@ BEGIN TRANSACTION
 			,[intConcurrencyId]
 			,[dblExchangeRate]
 			,GETDATE() --[dtmDateEntered]
-			,[ysnIsUnposted]
+			,0
 			,'RK'--[strCode]
 			,[strReference]  
 			,[intEntityId]
