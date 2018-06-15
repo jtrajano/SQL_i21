@@ -935,7 +935,10 @@ GO
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName]) 
 		VALUES (N'Vendors', N'Vendors', N'AccountsPayable.view.EntityVendor', N'Accounts Payable', N'tblAPVendor', 1, N'Accounts Payable')
 	END
-
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET [strScreenId] = 'Vendors', [strScreenName] = 'Vendors', [strModule] = 'Accounts Payable' WHERE strNamespace = 'AccountsPayable.view.EntityVendor'
+	END
 
 	-- Subsidiary
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.OptionsLifecycle') 
