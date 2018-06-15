@@ -6747,6 +6747,7 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationSetIdentityNotForReplication.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMReplicationUpdateCompanyIdSubToParent.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
