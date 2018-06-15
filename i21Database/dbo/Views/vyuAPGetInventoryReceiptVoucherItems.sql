@@ -271,4 +271,4 @@ FROM	tblICInventoryReceipt Receipt
 
 WHERE	Receipt.ysnPosted = 1
 		AND receiptAndVoucheredItems.dblReceiptQty <> receiptAndVoucheredItems.dblVoucherQty
-		AND receiptAndVoucheredItems.dblUnitCost != 0
+		AND receiptAndVoucheredItems.dblUnitCost != 0 --WILL NOT SHOW RECEIPT FROM STORAGE
