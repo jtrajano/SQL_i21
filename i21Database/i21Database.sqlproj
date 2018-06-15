@@ -4313,7 +4313,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
     <Build Include="dbo\Views\vyuLGDeliveredNotInvoiced.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleSamples.sql" />
-    <Build Include="dbo\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
     <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
@@ -6350,6 +6349,7 @@
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
