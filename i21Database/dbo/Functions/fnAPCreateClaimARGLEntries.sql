@@ -81,7 +81,7 @@ BEGIN
 			,[strBatchId]					=	@batchId	
 			,[intAccountId]					=	voucher.intAccountId
 			,[dblDebit]						=	0
-			,[dblCredit]					=	arPayDetail.dblBasePayment
+			,[dblCredit]					=	arPayDetail.dblBasePayment + ISNULL(claimDetail.dblFranchiseAmount,0)
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
 			,[strDescription]				=	arPay.strNotes
@@ -123,12 +123,18 @@ BEGIN
 				tblSMCurrencyExchangeRateType
 		)	SMCERT
 			ON arPayDetail.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+		OUTER APPLY (
+			SELECT TOP 1
+				dblFranchiseAmount
+			FROM tblAPBillDetail voucherDetail
+			WHERE voucherDetail.intBillId = voucher.intBillId
+		) claimDetail
 		UNION ALL
 		SELECT
 			[dtmDate]						=	CAST(arPay.dtmDatePaid AS DATE)
 			,[strBatchId]					=	@batchId	
-			,[intAccountId]					=	weightGrade.intAccountId
-			,[dblDebit]						=	arPayDetail.dblBasePayment   --Please review -- voucherDetail.dblFranchiseAmount
+			,[intAccountId]					=	claimDetail.intAccountId
+			,[dblDebit]						=	ISNULL(claimDetail.dblFranchiseAmount,0)
 			,[dblCredit]					=	0
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
@@ -162,9 +168,8 @@ BEGIN
 		INNER JOIN tblARCustomer customer ON arPay.intEntityCustomerId = customer.intEntityId
 		INNER JOIN tblARPaymentDetail arPayDetail ON arPay.intPaymentId = arPayDetail.intPaymentId  AND arPayDetail.dblPayment <> 0
 		INNER JOIN tblAPBill voucher ON voucher.intBillId = arPayDetail.intBillId
-		INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
-		INNER JOIN tblCTContractHeader contractData ON voucherDetail.intContractHeaderId = contractData.intContractHeaderId
-		INNER JOIN tblCTWeightGrade weightGrade ON weightGrade.intWeightGradeId = contractData.intWeightId
+		-- INNER JOIN tblCTContractHeader contractData ON voucherDetail.intContractHeaderId = contractData.intContractHeaderId
+		-- INNER JOIN tblCTWeightGrade weightGrade ON weightGrade.intWeightGradeId = contractData.intWeightId
 		LEFT OUTER JOIN
 		(
 			SELECT
@@ -174,6 +179,15 @@ BEGIN
 				tblSMCurrencyExchangeRateType
 		)	SMCERT
 			ON arPayDetail.intCurrencyExchangeRateTypeId = SMCERT.intCurrencyExchangeRateTypeId
+		OUTER APPLY (
+			SELECT TOP 1
+				weightGrade.intAccountId
+				,dblFranchiseAmount
+			FROM tblAPBillDetail voucherDetail
+			INNER JOIN tblCTContractHeader ct ON voucherDetail.intContractHeaderId = ct.intContractHeaderId
+			INNER JOIN tblCTWeightGrade weightGrade ON weightGrade.intWeightGradeId = ct.intWeightId
+			WHERE voucherDetail.intBillId = voucher.intBillId
+		) claimDetail
 
 		RETURN;
 
