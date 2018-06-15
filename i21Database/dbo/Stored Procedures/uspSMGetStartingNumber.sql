@@ -34,8 +34,8 @@ BEGIN
 
 	SET @parameters += 
 	CASE @param
-		WHEN 'Company Location' THEN CASE WHEN @intCompanyLocationId IS NULL THEN '' ELSE (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) END
-		WHEN 'Company Location Number' THEN CASE WHEN @intCompanyLocationId IS NULL THEN '' ELSE (SELECT strLocationNumber FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) END
+		WHEN 'Company Location' THEN CASE WHEN @intCompanyLocationId IS NULL THEN '' ELSE (SELECT strLocationName FROM vyuSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) END
+		WHEN 'Company Location Number' THEN CASE WHEN @intCompanyLocationId IS NULL THEN '' ELSE (SELECT strProfitCenter FROM vyuSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId) END
 		WHEN 'MMYYYY' THEN RIGHT(REPLACE(CONVERT(VARCHAR(10), SYSDATETIME(), 103), '/', ''), 6)
 		WHEN 'YY' THEN LEFT(CONVERT(VARCHAR(5), SYSDATETIME(), 2), 2)
 		WHEN 'YYYY' THEN LEFT(CONVERT(VARCHAR(7), SYSDATETIME(), 102), 4)
@@ -73,10 +73,10 @@ BEGIN
 	IF @ysnUseLocation = 1
 	BEGIN
 
-		IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId)
+		IF EXISTS (SELECT TOP 1 1 FROM vyuSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId)
 		BEGIN
 
-			SELECT @locationNumber = strLocationNumber + '-' FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
+			SELECT @locationNumber = strProfitCenter + '-' FROM vyuSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumberLocation WHERE intStartingNumberId = @intStartingNumberId AND intCompanyLocationId = @intCompanyLocationId)
 			BEGIN
