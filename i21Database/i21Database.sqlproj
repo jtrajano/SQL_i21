@@ -6746,6 +6746,9 @@
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRItemsSettlementReport.sql" />
+    <Build Include="dbo\Views\vyuGRItemsSettlementOpenContractReport.sql" />
+    <Build Include="dbo\Views\vyuGRItemsSettlementStorageReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
