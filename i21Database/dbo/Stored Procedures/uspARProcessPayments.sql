@@ -704,8 +704,7 @@ BEGIN TRY
 			,@EndDate			= NULL
 			,@BeginTransaction	= NULL
 			,@EndTransaction	= NULL
-			,@Exclude			= NULL
-			,@TransType			= N'all'
+			,@Exclude			= NULL			
 			,@RaiseError		= @RaiseError
 END TRY
 BEGIN CATCH
@@ -1006,8 +1005,7 @@ BEGIN TRY
 			,@EndDate			= NULL
 			,@BeginTransaction	= NULL
 			,@EndTransaction	= NULL
-			,@Exclude			= NULL
-			,@TransType			= N'all'
+			,@Exclude			= NULL			
 			,@RaiseError		= @RaiseError
 
 	DECLARE @UpdatedIdsForUnPostingRecap PaymentId
@@ -1070,8 +1068,7 @@ BEGIN TRY
 			,@EndDate			= NULL
 			,@BeginTransaction	= NULL
 			,@EndTransaction	= NULL
-			,@Exclude			= NULL
-			,@TransType			= N'all'
+			,@Exclude			= NULL			
 			,@RaiseError		= @RaiseError
 END TRY
 BEGIN CATCH
