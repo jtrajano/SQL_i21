@@ -2,7 +2,6 @@
 	 @intDiscountScheduleCodeId INT
 	,@dblReading				DECIMAL(24, 10)
 	,@intItemUOMId				INT = 0
-	,@dblCost					DECIMAL(18,6) = 0
 AS
 BEGIN TRY
 	
@@ -263,18 +262,7 @@ BEGIN TRY
 				 intExtendedKey					 =  intExtendedKey
 				,dblFrom						 =  dblFrom
 				,dblTo							 =  dblTo
-				,dblDiscountAmount				 =  CASE WHEN @strDiscountChargeType = 'Percent' 
-															THEN 
-																CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)) * @dblCost
-																		ELSE dblDiscountAmount * @dblCost
-																END
-														ELSE --Discount
-															CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																	THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
-																	ELSE dblDiscountAmount
-															END
-													END
+				,dblDiscountAmount				 =  CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
 				,dblShrink						 =  CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)		    ELSE dblShrink		   END
 				,strMessage						 =  'Success'
 				,intDiscountCalculationOptionId  =  @intDiscountCalculationOptionId
@@ -310,18 +298,7 @@ BEGIN TRY
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
 				,dblTo							 = dblTo
-				,dblDiscountAmount				 = CASE WHEN @strDiscountChargeType = 'Percent' 
-															THEN 
-																CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)) * @dblCost
-																		ELSE dblDiscountAmount * @dblCost
-																END
-														ELSE --Discount
-															CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																	THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
-																	ELSE dblDiscountAmount
-															END
-													END
+				,dblDiscountAmount				 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
 				,dblShrink						 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)			ELSE dblShrink		   END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId
@@ -344,18 +321,7 @@ BEGIN TRY
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
 				,dblTo							 = dblTo
-				,dblDiscountAmount				 = CASE WHEN @strDiscountChargeType = 'Percent' 
-															THEN 
-																CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)) * @dblCost
-																		ELSE dblDiscountAmount * @dblCost
-																END
-														ELSE --Discount
-															CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																	THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
-																	ELSE dblDiscountAmount
-															END
-													END
+				,dblDiscountAmount				 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
 				,dblShrink						 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)			ELSE dblShrink		   END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
@@ -391,18 +357,7 @@ BEGIN TRY
 				 intExtendedKey					 = intExtendedKey
 				,dblFrom						 = dblFrom
 				,dblTo							 = dblTo
-				,dblDiscountAmount				 = CASE WHEN @strDiscountChargeType = 'Percent' 
-															THEN 
-																CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)) * @dblCost
-																		ELSE dblDiscountAmount * @dblCost
-																END
-														ELSE --Discount
-															CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0 
-																	THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount)
-																	ELSE dblDiscountAmount
-															END
-													END
+				,dblDiscountAmount				 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblDiscountAmount) ELSE dblDiscountAmount END
 				,dblShrink						 = CASE WHEN @intDiscountUOMId>0 AND @intItemStockUOMId > 0  THEN dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,@intItemStockUOMId,@intDiscountUOMId,dblShrink)			ELSE dblShrink		   END
 				,strMessage						 = 'Success'
 				,intDiscountCalculationOptionId  = @intDiscountCalculationOptionId 
