@@ -6329,6 +6329,13 @@
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\Views\vyuAPRptTaxReport.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherAmountMultiplier.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptTaxReport.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
