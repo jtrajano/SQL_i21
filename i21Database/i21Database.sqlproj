@@ -5268,7 +5268,6 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
     <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumberLocation.sql" />
-    <Build Include="dbo\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerLookup.sql" />
     <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
     <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
@@ -6747,6 +6746,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptTaxReport.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAmountMultiplier.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
