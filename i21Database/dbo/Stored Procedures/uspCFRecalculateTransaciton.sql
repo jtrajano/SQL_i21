@@ -4547,12 +4547,12 @@ BEGIN
 	IF (ISNULL(@ysnCaptiveSite,0) = 0)
 	BEGIN
 
-		DECLARE @dblCalculatedPricing NUMERIC(18,6)
-		--SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
-		SELECT TOP 1 @dblCalculatedPricing = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+		--DECLARE @dblCalculatedPricing NUMERIC(18,6)
+		----SELECT TOP 1 @dblCalculatedPricing = dblCalculatedAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		--SELECT TOP 1 @dblCalculatedPricing = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 
-		IF (@dblCalculatedPricing IS NULL OR @dblCalculatedPricing <= 0)
+		IF (ISNULL(@dblCalculatedNetPrice,0) = 0)
 		BEGIN		
 			SET @ysnInvalid = 1
 			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
@@ -4561,11 +4561,11 @@ BEGIN
 		END
 
 	
-		DECLARE @dblOriginalPricing NUMERIC(18,6)
-		--SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		--DECLARE @dblOriginalPricing NUMERIC(18,6)
+		----SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		--SELECT TOP 1 @dblOriginalPricing = dblOriginalNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
-		SELECT TOP 1 @dblOriginalPricing = dblOriginalNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
-		IF (@dblOriginalPricing IS NULL OR @dblOriginalPricing <= 0)
+		IF (ISNULL(@dblOriginalNetPrice,0) = 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
