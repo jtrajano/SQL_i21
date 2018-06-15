@@ -6747,6 +6747,7 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationUpdateCompanyIdSubToParent.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUnrestrictBasisAdvance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
