@@ -392,9 +392,7 @@ BEGIN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    SET IDENTITY_INSERT tblGRDiscountCalculationOption ON
     EXECUTE sp_executesql @SQLString;
-    SET IDENTITY_INSERT tblGRDiscountCalculationOption OFF
 
     -- tblGRDiscountCrossReference
     SET @SQLString = N'MERGE tblGRDiscountCrossReference AS Target
