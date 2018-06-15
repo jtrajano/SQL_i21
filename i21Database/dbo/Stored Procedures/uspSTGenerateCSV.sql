@@ -356,7 +356,9 @@ BEGIN
 								, 0 as dblAccountDiscountAmount --22
 
 								, CASE 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50 ELSE 0 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN CRP.dblManufacturerDiscountAmount 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN .50
+									ELSE 0 
 								  END as dblManufacturerDiscountAmount
 
 								-- COUPONS
@@ -370,7 +372,9 @@ BEGIN
 								, 0 as dblManufacturerMultipackDiscountAmount
 
 								, CASE 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc ELSE '' 
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN CRP.strManufacturerPromotionDescription 
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN strTrlDesc 
+									ELSE '' 
 								  END as strManufacturerPromotionDescription
 
 								, REPLACE(CRP.strProgramName, ',','') as strManufacturerBuydownDescription

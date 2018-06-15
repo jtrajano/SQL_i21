@@ -4,11 +4,14 @@ SELECT
 CRP.intCigaretteRebateProgramId
 , CRP.strStoreIdList
 , CRP.intEntityVendorId
-, CRP.strProgramName
 , CRP.dtmStartDate
 , CRP.dtmEndDate
+, CRP.strPromotionType
+, CRP.strProgramName
 , CRP.dblManufacturerBuyDownAmount
 , CRP.ysnMultipackFGI
+, CRP.strManufacturerPromotionDescription
+, CRP.dblManufacturerDiscountAmount
 , CRP.intConcurrencyId
 , UOM.intItemUOMId
 , UM.strUnitMeasure
