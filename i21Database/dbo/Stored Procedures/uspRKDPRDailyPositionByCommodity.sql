@@ -267,30 +267,24 @@ SELECT DISTINCT c.intCommodityId
 			) t where dblTotal >0 
 			)t1
 		) AS dblGrainBalance
-	,(
-		SELECT sum(dblTotal) dblTotal
-		FROM (
-			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull((PLDetail.dblLotPickedQty), 0)) AS dblTotal
-			FROM tblLGDeliveryPickDetail Del
-			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
-			INNER JOIN vyuLGPickOpenInventoryLots Lots ON Lots.intLotId = PLDetail.intLotId
-			INNER JOIN @tblGetOpenContractDetail CT ON CT.intContractDetailId = Lots.intContractDetailId AND CT.intContractStatusId <> 3
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CT.intCommodityId AND CT.intUnitMeasureId = ium.intUnitMeasureId
-			INNER JOIN tblSMCompanyLocation cl1 ON cl1.intCompanyLocationId = CT.intCompanyLocationId
-			WHERE CT.intPricingTypeId = 2 AND CT.intCommodityId = c.intCommodityId AND cl1.intCompanyLocationId = cl.intCompanyLocationId
-			
-			UNION
-			
-			SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, isnull(ri.dblReceived, 0)) AS dblTotal
+	
+	,(SELECT sum(ISNULL(dblTotal,0)) dblTotal FROM 
+			(			
+			SELECT distinct ri.intInventoryReceiptItemId,
+			dbo.fnCTConvertQuantityToTargetCommodityUOM(cd.intCommodityUnitMeasureId, um.intCommodityUnitMeasureId, 
+			isnull(ri.dblReceived, 0)) AS dblTotal
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
-			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
-			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
-			INNER JOIN tblSMCompanyLocation cl1 ON cl1.intCompanyLocationId = st.intProcessingLocationId
-			WHERE cd.intCommodityId = c.intCommodityId AND cl1.intCompanyLocationId = cl.intCompanyLocationId and strTicketStatus<> 'V'
-			) t
-		) AS PurBasisDelivary
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
+									AND  st.intProcessingLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+						ELSE isnull(ysnLicensed, 0) END
+						)
+			INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 			
+			WHERE cd.intCommodityId = c.intCommodityId  and st.strTicketStatus <> 'V'
+			AND st.intProcessingLocationId  =cl.intCompanyLocationId)t)
+			 as PurBasisDelivary
 	,(
 		SELECT sum(dblTotal)
 		FROM (
@@ -468,12 +462,21 @@ FROM (
 					) = 1 THEN isnull(OffSite, 0) ELSE 0 END + CASE WHEN (
 					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
 					FROM tblRKCompanyPreference
-					) = 1 THEN 0 ELSE - isnull(DP, 0) END + (isnull(dblCollatralPurchase, 0) - isnull(dblCollatralSales, 0)) + isnull(SlsBasisDeliveries, 0) + (isnull(OpenPurchasesQty, 0) - isnull(OpenSalesQty, 0)) AS CompanyTitled
+					) = 1 THEN 0 ELSE - isnull(DP, 0) END + (isnull(dblCollatralPurchase, 0) 
+					- isnull(dblCollatralSales, 0)) + isnull(SlsBasisDeliveries, 0) + (isnull(OpenPurchasesQty, 0)
+					 - isnull(OpenSalesQty, 0)) AS CompanyTitled
 		
-		,isnull(invQty, 0) - isnull(PurBasisDelivary, 0) + (isnull(OpenPurQty, 0) - isnull(OpenSalQty, 0)) + isnull(dblCollatralSales, 0) + isnull(SlsBasisDeliveries, 0) + CASE WHEN (
+		,
+		isnull(invQty, 0)
+		- isnull(PurBasisDelivary, 0)
+		  +(isnull(OpenPurQty, 0) - 
+		 isnull(OpenSalQty, 0)) 
+		 + isnull(dblCollatralSales, 0) + isnull(SlsBasisDeliveries, 0) 
+		 + CASE WHEN (
 					SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled
 					FROM tblRKCompanyPreference
-					) = 1 THEN 0 ELSE - isnull(DP, 0) END + isnull(dblOptionNetHedge, 0) + isnull(dblFutNetHedge, 0) 
+					) = 1 THEN 0 ELSE - isnull(DP, 0) END
+					  +isnull(dblOptionNetHedge, 0) + isnull(dblFutNetHedge, 0) 
 		 AS CashExposure
 
 
