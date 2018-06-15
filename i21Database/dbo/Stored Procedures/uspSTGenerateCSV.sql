@@ -336,7 +336,9 @@ BEGIN
 								, 'PACK' as strUnitOfMeasure
 
 								, CASE 
-									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' ELSE 'N' 	
+									WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
+									WHEN strTrpCardInfoTrpcHostID IN ('VAPS') THEN 'Y' 
+									ELSE 'N' 	
 								  END as strPromotionFlag
 
 								, CASE WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer')
