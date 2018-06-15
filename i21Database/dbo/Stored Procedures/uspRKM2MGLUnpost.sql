@@ -166,7 +166,7 @@ BEGIN TRANSACTION
 		,[intConcurrencyId]
 		,[dblExchangeRate]
 		,GETDATE() --[dtmDateEntered]
-		,[ysnIsUnposted]
+		,1
 		,[strCode]
 		,[strReference]  
 		,[intEntityId]
