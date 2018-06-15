@@ -1028,7 +1028,7 @@ BEGIN
 
 		--UPDATE CONTRACT COST
 		UPDATE  CC
-			SET     CC.dblActualAmount = ISNULL(CC.dblActualAmount,0) + tblBilled.dblTotal
+			SET     CC.dblActualAmount = ISNULL(CC.dblActualAmount,0) - tblBilled.dblTotal
 		FROM tblCTContractCost CC
 		JOIN ( 
 			SELECT Bill.intContractCostId, SUM(Bill.dblTotal) dblTotal 
@@ -1158,7 +1158,7 @@ BEGIN
 		WHERE	BillDetail.dblTotal > 0 				
 		
 		UPDATE  CC
-			SET     CC.dblActualAmount = ISNULL(CC.dblActualAmount,0) - tblBilled.dblTotal
+			SET     CC.dblActualAmount = ISNULL(CC.dblActualAmount,0) + tblBilled.dblTotal
 		FROM tblCTContractCost CC
 		JOIN ( 
 			SELECT Bill.intContractCostId, SUM(Bill.dblTotal) dblTotal 
