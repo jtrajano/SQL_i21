@@ -2,6 +2,8 @@
 	  @intTransactionId AS INT	 
 	 ,@intUserId AS INT	
 	 ,@intContractId AS INT = 0
+	 ,@ysnRaiseError AS BIT = 1
+	 ,@strErrorMessage AS NVARCHAR(MAX) = NULL OUTPUT  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -91,9 +93,15 @@ BEGIN CATCH
 	-- Use RAISERROR inside the CATCH block to return error
 	-- information about the original error that caused
 	-- execution to jump to the CATCH block.
-	RAISERROR (
+
+	SET @strErrorMessage = @ErrorMessage
+	IF(ISNULL(@ysnRaiseError,0) = 1)
+	BEGIN
+		RAISERROR (
 		@ErrorMessage, -- Message text.
 		@ErrorSeverity, -- Severity.
 		@ErrorState -- State.
 	);
+	END
+	
 END CATCH
