@@ -6338,6 +6338,7 @@
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Functions\fnAPCreateReceiptItemCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
