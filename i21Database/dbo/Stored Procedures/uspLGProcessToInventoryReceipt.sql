@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @dblVoucherQty NUMERIC(18,6)
 	DECLARE @dblBillQty NUMERIC(18, 6)
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
+	DECLARE @strLotCondition NVARCHAR(50)
 
 	DECLARE @tblLoadDetail TABLE (
 		intRecordId INT Identity(1, 1)
@@ -33,6 +34,9 @@ BEGIN TRY
 		,intContractDetailId INT
 		,dblLoadDetailQty NUMERIC(18, 6)
 		)
+
+	SELECT TOP 1 @strLotCondition = strLotCondition
+	FROM tblICCompanyPreference
 
 	INSERT INTO @tblLoadDetail
 	SELECT intLoadDetailId
@@ -508,6 +512,7 @@ BEGIN TRY
 				,[intSort]
 				,[intConcurrencyId]
 				,strMarkings
+				,strCondition
 				)
 			SELECT intInventoryReceiptItemId
 				,NULL
@@ -523,6 +528,7 @@ BEGIN TRY
 				,1
 				,1
 				,LC.strMarks
+				,@strLotCondition
 			FROM tblICInventoryReceiptItem RI
 			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
 			WHERE intInventoryReceiptItemId = @intMinInvRecItemId
@@ -993,6 +999,7 @@ BEGIN TRY
 				,[intSort]
 				,[intConcurrencyId]
 				,strMarkings
+				,strCondition
 				)
 			SELECT intInventoryReceiptItemId
 				,NULL
@@ -1008,6 +1015,7 @@ BEGIN TRY
 				,1
 				,1
 				,LC.strMarks
+				,@strLotCondition
 			FROM tblICInventoryReceiptItem RI
 			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
 			WHERE intInventoryReceiptItemId = @intMinInvRecItemId
