@@ -29,6 +29,7 @@ BEGIN TRY
 	DECLARE @strDeliveryNoticeNumber NVARCHAR(100)
 	DECLARE @intBookId INT
 	DECLARE @intSubBookId INT
+	DECLARE @intPickLotDetailId INT
 
 	SELECT @intTransportationMode = intDefaultTransportationMode
 		,@intTransUsedBy = intTransUsedBy
@@ -63,6 +64,7 @@ BEGIN TRY
 		,intAllocationHeaderId INT
 		,intAllocationDetailId INT
 		,strAllocationHeaderNo NVARCHAR(100)
+		,intPickLotDetailId INT
 		)
 
 	EXEC uspSMGetStartingNumber 39
@@ -70,13 +72,12 @@ BEGIN TRY
 
 	INSERT INTO @tblAllocationInfo
 	SELECT AD.intAllocationHeaderId
-		,PLD.intAllocationDetailId
+		,AD.intAllocationDetailId
 		,AH.strAllocationNumber
-	FROM tblLGPickLotHeader PLH
-	JOIN tblLGPickLotDetail PLD ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
-	JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PLD.intAllocationDetailId
+		,PLH.intPickLotDetailId
+	FROM vyuLGOpenPickLots PLH
+	JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId= PLH.intAllocationDetailId
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-	--WHERE PLH.strPickLotNumber = 'PL-28'
 	WHERE PLH.intPickLotHeaderId = @intPickLotHeaderId 
 
 	INSERT INTO tblLGLoad (
@@ -122,7 +123,8 @@ BEGIN TRY
 		SET @intSContractDetailId = NULL
 		SET @intAllocationDetailId = NULL
 
-		SELECT @intAllocationDetailId = intAllocationDetailId
+		SELECT @intAllocationDetailId = intAllocationDetailId,
+			   @intPickLotDetailId = intPickLotDetailId
 		FROM @tblAllocationInfo WHERE intAllocationRecordId = @intMinAllocationRecordId
 
 		SELECT @intSContractDetailId = intSContractDetailId
@@ -184,7 +186,7 @@ BEGIN TRY
 		JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) A
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
-			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
+			AND PLD.intPickLotDetailId = @intPickLotDetailId
 
 		SELECT @intLoadDetailId = SCOPE_IDENTITY()
 
@@ -227,7 +229,7 @@ BEGIN TRY
 		JOIN tblLGAllocationDetail AD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
-			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
+			AND PLD.intPickLotDetailId = @intPickLotDetailId
 
 		SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
 		FROM @tblAllocationInfo
