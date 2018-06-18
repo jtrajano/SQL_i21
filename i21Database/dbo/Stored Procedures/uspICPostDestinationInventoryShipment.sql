@@ -158,6 +158,8 @@ BEGIN
 	-- Update the destination qty. 
 	UPDATE	si
 	SET		si.dblDestinationQuantity = d.dblDestinationQty
+			,si.dblDestinationGross = d.dblDestinationGross
+			,si.dblDestinationNet = d.dblDestinationNet
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItemLocation l
