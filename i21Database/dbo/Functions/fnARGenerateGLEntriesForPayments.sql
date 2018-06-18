@@ -170,7 +170,10 @@ SELECT
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = P.[strNotes]
+    ,[strDescription]               = CASE WHEN ISNULL(P.[strNotes],'') = '' THEN (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ((CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+                                            WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
+                                            ELSE P.[intAccountId]
+                                      END))) ELSE P.[strNotes] END
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
