@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSLogEndOfDay]
-	@intPOSLogId AS INT
+	@intPOSLogId 			AS INT,
+	@dblNewEndingBalance	AS NUMERIC(18, 6) = 0
 AS
 	IF ISNULL(@intPOSLogId, NULL) > 0
 	BEGIN
@@ -14,7 +15,7 @@ AS
 
 		--UPDATE ENDING BALANCE AND LOG
 		UPDATE POSLOG
-		SET dblEndingBalance 	= ISNULL(POSLOG.dblOpeningBalance, 0) + ISNULL(POS.dblTotalAmount, 0)
+		SET dblEndingBalance 	= CASE WHEN ISNULL(POSLOG.dblOpeningBalance, 0) +  ISNULL(POS.dblTotalAmount, 0) <> ISNULL(@dblNewEndingBalance, 0) THEN ISNULL(@dblNewEndingBalance, 0) ELSE ISNULL(POSLOG.dblOpeningBalance, 0) + ISNULL(POS.dblTotalAmount, 0) END
 		  , dtmLogout 			= @dtmDateNow
 		  , ysnLoggedIn 		= 0
 		FROM tblARPOSLog POSLOG
@@ -104,7 +105,7 @@ AS
 				FROM #CASHPAYMENTS
 
 				SELECT TOP 1 @intCashOverAccountId = CL.intCashOverShort
-					  	   , @strCashOverAccountId = GL.strAccountId
+					  	   , @strCashOverAccountId = GL.strDescription
 				FROM tblSMCompanyLocation CL
 				INNER JOIN tblGLAccount GL ON CL.intCashOverShort = GL.intAccountId
 				WHERE intCompanyLocationId = @intCompanyLocationId
