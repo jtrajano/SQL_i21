@@ -29,7 +29,7 @@ BEGIN
 		,strSiteAddress		   NVARCHAR(max)
 		,strSiteCity		   NVARCHAR(max)
 		,strTaxState		   NVARCHAR(max)
-		,intItemId			   INT
+		--,intItemId			   INT
 		,intARItemId		   INT
 		,strProductNumber	   NVARCHAR(max)
 		,strItemNo			   NVARCHAR(max)
@@ -114,7 +114,6 @@ BEGIN
 	cfSite.strSiteAddress, 
 	cfSite.strSiteCity,
 	cfSite.strTaxState,
-	cfItem.intItemId,
 	cfItem.intARItemId,
 	ISNULL(icItem.strItemNo,'''') + '' - '' + ISNULL(icItem.strDescription,'''') as strProductNumber,
 	icItem.strItemNo, 
@@ -123,7 +122,21 @@ BEGIN
 	INNER JOIN tblCFSite as cfSite ON cfNetwork.intNetworkId = cfSite.intNetworkId
 	INNER JOIN tblCFItem as cfItem ON cfNetwork.intNetworkId = cfItem.intNetworkId
 	INNER JOIN tblICItem as icItem ON cfItem.intARItemId = icItem.intItemId
-	INNER JOIN tblCFItemCategory as cfItemCat ON icItem.intCategoryId = cfItemCat.intCategoryId' + ' ' + ISNULL(@where,'')
+	INNER JOIN tblCFItemCategory as cfItemCat ON icItem.intCategoryId = cfItemCat.intCategoryId' + ' ' 
+	+ ISNULL(@where,'')
+	+ ' GROUP BY
+	 cfNetwork	.intNetworkId	
+	,cfNetwork	.strNetwork		
+	,cfSite		.intSiteId		
+	,cfSite		.strSiteNumber	
+	,cfSite		.strSiteName	
+	,cfSite		.strSiteType	
+	,cfSite		.strSiteAddress	
+	,cfSite		.strSiteCity	
+	,cfSite		.strTaxState	
+	,cfItem		.intARItemId	
+	,icItem		.strItemNo
+	,icItem		.strDescription'
 
 	INSERT INTO @tblNetworkSiteItem
 	EXEC(@q)
@@ -143,7 +156,7 @@ BEGIN
 		SELECT 
 		 @loopNetworkId			= 	 intNetworkId	
 		,@loopSiteId			= 	 intSiteId	
-		,@loopItemId			= 	 intItemId	
+		--,@loopItemId			= 	 intItemId	
 		,@loopARItemId			= 	 intARItemId	
 		,@loopSiteType			=	 strSiteType
 		FROM @tblNetworkSiteItem
@@ -221,7 +234,7 @@ BEGIN
 			WHERE 
 			intNetworkId	 = @loopNetworkId	
 			AND intSiteId	 = @loopSiteId	
-			AND intItemId	 = @loopItemId	
+			--AND intItemId	 = @loopItemId	
 			AND intARItemId	 = @loopARItemId	
 			AND strSiteType	 = @loopSiteType	
 		
@@ -295,7 +308,7 @@ BEGIN
 						WHERE 
 						intNetworkId	 = @loopNetworkId	
 						AND intSiteId	 = @loopSiteId	
-						AND intItemId	 = @loopItemId	
+						--AND intItemId	 = @loopItemId	
 						AND intARItemId	 = @loopARItemId	
 						AND strSiteType	 = @loopSiteType	
 					END
@@ -311,7 +324,7 @@ BEGIN
 						WHERE 
 						intNetworkId	 = @loopNetworkId	
 						AND tblnsi.intSiteId	 = @loopSiteId	
-						AND tblnsi.intItemId	 = @loopItemId	
+						--AND tblnsi.intItemId	 = @loopItemId	
 						AND tblnsi.intARItemId	 = @loopARItemId	
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
@@ -333,7 +346,7 @@ BEGIN
 						WHERE 
 						intNetworkId	 = @loopNetworkId	
 						AND tblnsi.intSiteId	 = @loopSiteId	
-						AND tblnsi.intItemId	 = @loopItemId	
+						--AND tblnsi.intItemId	 = @loopItemId	
 						AND tblnsi.intARItemId	 = @loopARItemId	
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
@@ -355,7 +368,7 @@ BEGIN
 						WHERE 
 						intNetworkId	 = @loopNetworkId	
 						AND tblnsi.intSiteId	 = @loopSiteId	
-						AND tblnsi.intItemId	 = @loopItemId	
+						--AND tblnsi.intItemId	 = @loopItemId	
 						AND tblnsi.intARItemId	 = @loopARItemId	
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
@@ -377,7 +390,7 @@ BEGIN
 						WHERE 
 						intNetworkId	 = @loopNetworkId	
 						AND tblnsi.intSiteId	 = @loopSiteId	
-						AND tblnsi.intItemId	 = @loopItemId	
+						--AND tblnsi.intItemId	 = @loopItemId	
 						AND tblnsi.intARItemId	 = @loopARItemId	
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
@@ -399,7 +412,7 @@ BEGIN
 						WHERE 
 						intNetworkId	 = @loopNetworkId	
 						AND tblnsi.intSiteId	 = @loopSiteId	
-						AND tblnsi.intItemId	 = @loopItemId	
+						--AND tblnsi.intItemId	 = @loopItemId	
 						AND tblnsi.intARItemId	 = @loopARItemId	
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
@@ -439,7 +452,7 @@ BEGIN
 		WHERE 
 			intNetworkId		= @loopNetworkId		
 			AND intSiteId		= @loopSiteId			
-			AND intItemId		= @loopItemId			
+			--AND intItemId		= @loopItemId			
 			AND intARItemId		= @loopARItemId		
 			AND strSiteType		 = @loopSiteType		
 		
@@ -451,3 +464,5 @@ BEGIN
 
 	
 END
+
+
