@@ -676,7 +676,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -799,7 +799,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -923,7 +923,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
@@ -1047,7 +1047,7 @@ FROM
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
-		,[strTerm]									=	NULL
+		,[strTerm]									=	(SELECT TOP 1 strTerm FROM tblSMTerm WHERE intTermID =  CC.intTermId)
 		,[intTermId]								=	CC.intTermId	
 		,[strContractNumber]						=	CH.strContractNumber
 		,[strBillOfLading]							=	NULL
