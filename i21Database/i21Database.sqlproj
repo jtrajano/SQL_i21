@@ -6349,6 +6349,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherAmountMultiplier.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptTaxReport.sql" />
+    <Build Include="dbo\Functions\fnAPCreateReceiptItemCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
