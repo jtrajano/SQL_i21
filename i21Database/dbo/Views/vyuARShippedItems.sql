@@ -489,6 +489,7 @@ FROM (
 	) ID ON ICISI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId 
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
 	WHERE ISNULL(ARID.intInventoryShipmentItemId,0) = 0
+	  AND (ICISI.intDestinationGradeId IS NULL OR ICISI.intDestinationWeightId IS NULL)
 	  AND (
 			(dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))) - ISNULL(ID.dblQtyShipped, 0) > 0
 			OR
