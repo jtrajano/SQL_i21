@@ -3501,7 +3501,7 @@ WHERE SW.dblPlannedQty IS NULL
 Go
 UPDATE tblMFWorkOrderProducedLot
 SET intProducedLotId = (
-		SELECT L1.intLotId
+		SELECT Top 1 L1.intLotId
 		FROM tblICLot L1
 		WHERE L1.strLotNumber = L.strLotNumber
 			AND L1.intStorageLocationId = WP.intStorageLocationId
