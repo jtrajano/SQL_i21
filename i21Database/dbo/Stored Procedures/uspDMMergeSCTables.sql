@@ -275,11 +275,26 @@ BEGIN
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCLastScaleSetup]) AS Source
         ON (Target.intLastScaleSetupId = Source.intLastScaleSetupId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.dtmScaleDate = Source.dtmScaleDate
-			, Target.strScaleOperator = Source.strScaleOperator, Target.intConcurrencyId = Source.intConcurrencyId, Target.intEntityId = Source.intEntityId
+			 UPDATE SET Target.intScaleSetupId  = Source.intScaleSetupId
+			, Target.intEntityId  = Source.intEntityId
+			, Target.intEntityScaleOperatorId  = Source.intEntityScaleOperatorId
+			, Target.dtmScaleDate  = Source.dtmScaleDate
+			, Target.intConcurrencyId  = Source.intConcurrencyId
         WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intLastScaleSetupId, intScaleSetupId, dtmScaleDate, strScaleOperator, intConcurrencyId, intEntityId)
-            VALUES (Source.intLastScaleSetupId, Source.intScaleSetupId, Source.dtmScaleDate, Source.strScaleOperator, Source.intConcurrencyId, Source.intEntityId)
+            INSERT (intLastScaleSetupId
+				,intScaleSetupId
+				,intEntityId
+				,intEntityScaleOperatorId
+				,dtmScaleDate
+				,intConcurrencyId
+			)
+            VALUES (Source.intLastScaleSetupId
+				,Source.intScaleSetupId
+				,Source.intEntityId
+				,Source.intEntityScaleOperatorId
+				,Source.dtmScaleDate
+				,Source.intConcurrencyId
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
