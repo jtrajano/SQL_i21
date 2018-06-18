@@ -57,6 +57,10 @@ SELECT Lot.intLotId
 	, strGrade = Grade.strDescription
 	, Lot.dtmDateCreated
 	, Lot.intCreatedUserId
+	, Lot.intCreatedByUserId
+	, Lot.strWarehouseRefNo
+	, Lot.dtmDateModified
+	, Lot.intModifiedByUserId
 	, Lot.intConcurrencyId
 FROM tblICLot Lot
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
