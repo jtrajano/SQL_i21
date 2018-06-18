@@ -475,6 +475,7 @@ INSERT INTO @ShipmentEntries(
 		, dblGross
 		, dblTare
 		, dblNet
+		, ysnDestinationWeightsAndGrades
 )
 SELECT 
 		intOrderType
@@ -532,6 +533,7 @@ SELECT
 		, dblGross
 		, dblTare
 		, dblNet
+		, ysnDestinationWeightsAndGrades
 FROM @Items
 
 -- 2. Charges
@@ -885,6 +887,7 @@ INSERT INTO tblICInventoryShipmentItem(
 	, dblGross
 	, dblTare
 	, dblNet
+	, ysnDestinationWeightsAndGrades
 )
 SELECT 
 	se.intShipmentId
@@ -926,6 +929,7 @@ SELECT
 	, se.dblGross
 	, se.dblTare
 	, se.dblNet
+	, se.ysnDestinationWeightsAndGrades
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 
