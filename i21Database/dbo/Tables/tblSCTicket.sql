@@ -88,7 +88,6 @@
     [strFarmNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strFieldNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[strDiscountComment] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
-	[strCommodityCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[intCommodityId] INT NULL,
 	[intDiscountId] INT NULL,
 	[intContractId] INT NULL,
