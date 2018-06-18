@@ -350,31 +350,29 @@ FROM (
 	     , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
-	FROM 
-		(
-			select 
-				dblForexRate,
-				intDestinationGradeId,
-				intDestinationWeightId,
-				intSubLocationId,
-				intSourceId,
-				intStorageLocationId,
-				intInventoryShipmentId,
-				intInventoryShipmentItemId,
-				intForexRateTypeId,
-				intLineNo,
-				intItemId,
-				intItemUOMId,
-				dblQuantity,
-				intWeightUOMId,
-				intPriceUOMId,
-				dblUnitPrice,
-				dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
-				dblDestinationQuantity
-			from
-				dbo.tblICInventoryShipmentItem WITH (NOLOCK)
-		)
-		ICISI 
+	FROM (
+		SELECT 
+			dblForexRate,
+			intDestinationGradeId,
+			intDestinationWeightId,
+			intSubLocationId,
+			intSourceId,
+			intStorageLocationId,
+			intInventoryShipmentId,
+			intInventoryShipmentItemId,
+			intForexRateTypeId,
+			intLineNo,
+			intItemId,
+			intItemUOMId,
+			dblQuantity,
+			intWeightUOMId,
+			intPriceUOMId,
+			dblUnitPrice,
+			dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
+			dblDestinationQuantity
+		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
+		WHERE ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
+	) ICISI 
 	INNER JOIN (
 		SELECT intInventoryShipmentId
 			 , intShipFromLocationId
@@ -489,7 +487,6 @@ FROM (
 	) ID ON ICISI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId 
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
 	WHERE ISNULL(ARID.intInventoryShipmentItemId,0) = 0
-	  AND (ICISI.intDestinationGradeId IS NULL OR ICISI.intDestinationWeightId IS NULL)
 	  AND (
 			(dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))) - ISNULL(ID.dblQtyShipped, 0) > 0
 			OR
@@ -811,6 +808,7 @@ FROM (
 			 , intRecipeId
 		FROM tblMFRecipeItem WITH(NOLOCK)
 	) MFI ON MFG.intRecipeItemId = MFI.intRecipeItemId
+	WHERE ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 0
 
 	UNION ALL 
 
