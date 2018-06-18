@@ -35,7 +35,7 @@ WHERE
 
 IF (ISNULL(@InvoiceNumber,'') <> '')
 	BEGIN
-			RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
+		RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
 		RETURN 0;
 	END
 
@@ -606,6 +606,12 @@ WHERE
 	AND ICISI.intOrderId IS NULL
 	AND ICISI.intLineNo IS NULL
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
+
+IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
+	BEGIN
+		RAISERROR('There is no available item to Invoice.', 16, 1);
+		RETURN 0;
+	END
 
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice
