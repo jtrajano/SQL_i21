@@ -106,7 +106,7 @@ BEGIN TRY
 	SELECT	@blbFile    AS  blbFile,
 			@strAddress AS  strAddress,
 			--@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
-			@strCity + ', ' + FORMAT(GETDATE(), 'dd') + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,FORMAT(getdate(), 'MMM')),FORMAT(getdate(), 'MMM')) + ' ' + FORMAT(GETDATE(), 'yyyy') AS strCity,
+			@strCity + ', ' + LEFT(DATENAME(DAY,getdate()),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + LEFT(DATENAME(YEAR,getdate()),4) AS strCity,
 			ch.strContractNumber,
 			strSellerRef,
 			strSeller,

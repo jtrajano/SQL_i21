@@ -166,7 +166,7 @@ BEGIN
 		,@strZip AS strCompanyZip
 		,@strCountry AS strCompanyCountry
 		,@strPhone AS strCompanyPhone
-		,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,format(getdate(),'MMM')),format(getdate(),'MMM')) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+		,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
 		,'Gross ' + CHAR(9)+ LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentGrossWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Tare ' + CHAR(9) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentTareWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) + CHAR(13) + 'Net ' + CHAR(9) + CHAR(9) + LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) AS strWtInfo
 		,ROUND(InvDet.dblShipmentGrossWt, 2) dblGrossWt
 		,isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) strGrossUOM
