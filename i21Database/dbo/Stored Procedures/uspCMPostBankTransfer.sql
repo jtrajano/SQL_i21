@@ -314,7 +314,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= 1-- ISNULL(A.dblRate,1)
+			,[dblExchangeRate]		= ISNULL(A.dblRate,1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -350,7 +350,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= 1 --ISNULL(A.dblHistoricRate, 1)
+			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate, 1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
