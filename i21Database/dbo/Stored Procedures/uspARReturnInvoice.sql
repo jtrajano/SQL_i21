@@ -424,6 +424,9 @@ BEGIN
 		EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @UserId = @UserId
 	END
 
+	UPDATE tblARPOS
+	SET ysnReturn = 1
+	WHERE intInvoiceId = @InvoiceId
 
 END
 
