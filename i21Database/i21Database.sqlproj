@@ -6751,6 +6751,7 @@
     <Build Include="dbo\Views\vyuGRItemsSettlementStorageReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationUpdateCompanyIdSubToParent.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Functions\fnAPCreateReceiptItemCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
