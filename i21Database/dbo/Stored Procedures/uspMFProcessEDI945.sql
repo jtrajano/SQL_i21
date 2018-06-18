@@ -379,7 +379,7 @@ BEGIN
 				,EDI.dblTotalWeight
 				,EDI.strWeightUOM
 				,EDI.intLineNo
-				,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) AS strSSCCNo
+				,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 20) AS strSSCCNo
 				,EDI.strOrderStatus
 				,EDI.strUPCCaseCode
 				,EDI.strItemNo
@@ -389,7 +389,7 @@ BEGIN
 					PARTITION BY EDI.strShipmentId
 					,EDI.strParentLotNumber
 					,EDI.strItemNo
-					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
+					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 20)
 					) dblQtyShipped
 				,EDI.dblQtyOrdered - SUM(EDI.dblQtyShipped) OVER (
 					PARTITION BY EDI.strShipmentId
@@ -561,7 +561,7 @@ BEGIN
 					,EDI.dblTotalWeight
 					,EDI.strWeightUOM
 					,EDI.intLineNo
-					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) AS strSSCCNo
+					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 20) AS strSSCCNo
 					,EDI.strOrderStatus
 					,EDI.strUPCCaseCode
 					,EDI.strItemNo
@@ -571,7 +571,7 @@ BEGIN
 						PARTITION BY EDI.strShipmentId
 						,EDI.strParentLotNumber
 						,EDI.strItemNo
-						,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
+						,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 20)
 						) dblQtyShipped
 					,EDI.dblQtyOrdered - SUM(EDI.dblQtyShipped) OVER (
 						PARTITION BY EDI.strShipmentId
@@ -671,7 +671,7 @@ BEGIN
 				,EDI.dblTotalWeight
 				,EDI.strWeightUOM
 				,EDI.intLineNo
-				,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18) AS strSSCCNo
+				,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 20) AS strSSCCNo
 				,EDI.strOrderStatus
 				,EDI.strUPCCaseCode
 				,EDI.strItemNo
@@ -681,7 +681,7 @@ BEGIN
 					PARTITION BY EDI.strShipmentId
 					,EDI.strParentLotNumber
 					,EDI.strItemNo
-					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 18)
+					,Right(Ltrim(RTrim(REPLACE(REPLACE(REPLACE(SSCCNo.strSSCCNo, '(', ''), ')', ''), ' ', ''))), 20)
 					) dblQtyShipped
 				,EDI.dblQtyOrdered - SUM(EDI.dblQtyShipped) OVER (
 					PARTITION BY EDI.strShipmentId

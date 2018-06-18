@@ -1,6 +1,7 @@
-﻿CREATE VIEW vyuMFStockReservation
+﻿CREATE VIEW vyuMFStockReservationByWorkOrder
 AS
 SELECT S.intLotId
+	,S.intTransactionId As intWorkOrderId
 	,SUM(CASE 
 			WHEN S.intItemUOMId = L.intItemUOMId
 				THEN ISNULL(S.dblQty, 0)
@@ -14,4 +15,4 @@ SELECT S.intLotId
 FROM dbo.tblICStockReservation S
 JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
 	AND S.ysnPosted = 0 
-GROUP BY S.intLotId
+GROUP BY S.intLotId,S.intTransactionId 

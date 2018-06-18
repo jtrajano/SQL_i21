@@ -51,13 +51,15 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@intTransactionCount INT
 		,@intTaskId INT
-		,@intOrderDirectionId int
+		,@intOrderDirectionId INT
+		,@strWorkOrderNo NVARCHAR(MAX)
+		,@intWorkOrderId INT
 
-	If @strTaskId =''
-	Select @strTaskId=NULL
+	IF @strTaskId = ''
+		SELECT @strTaskId = NULL
 
-	If @strTaskId =''
-	Select @strTaskId=NULL
+	IF @strTaskId = ''
+		SELECT @strTaskId = NULL
 
 	SELECT @dtmDate = GETDATE()
 
@@ -77,18 +79,13 @@ BEGIN TRY
 		SELECT @ysnLoadProcessEnabled = 0
 	END
 
-	SELECT @intTransactionCount = @@TRANCOUNT
-
-	IF @intTransactionCount = 0
-		BEGIN TRANSACTION
-
 	SELECT @strOrderNo = OH.strOrderNo
 		,@strOrderType = OT.strOrderType
 		,@intStagingLocationId = OH.intStagingLocationId
 		,@strReferenceNo = strReferenceNo
 		,@intOrderId = intOrderHeaderId
 		,@intLocationId = intLocationId
-		,@intOrderDirectionId=intOrderDirectionId
+		,@intOrderDirectionId = intOrderDirectionId
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
@@ -107,6 +104,15 @@ BEGIN TRY
 	BEGIN
 		SELECT @intCustomerLabelTypeId = 0
 	END
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
+
+	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intOrderHeaderId
+			,34
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -240,6 +246,12 @@ BEGIN TRY
 				AND InvSI.intItemId = @intItemId
 
 			SELECT @strDescription = @strOrderNo + ' / ' + @strReferenceNo
+
+			SELECT @intTransactionId = @intInventoryShipmentId
+
+			SELECT @strTransactionId = @strReferenceNo
+
+			SELECT @intInventoryTransactionType = 5
 		END
 		ELSE
 		BEGIN
@@ -266,9 +278,17 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 
 			SELECT @strDescription = @strOrderNo + ' / ' + W.strWorkOrderNo
+				,@strWorkOrderNo = W.strWorkOrderNo
+				,@intWorkOrderId = W.intWorkOrderId
 			FROM tblMFStageWorkOrder SW
 			JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
 			WHERE SW.intOrderHeaderId = @intOrderHeaderId
+
+			SELECT @intTransactionId = @intWorkOrderId
+
+			SELECT @strTransactionId = @strWorkOrderNo
+
+			SELECT @intInventoryTransactionType = 9
 		END
 
 		SELECT @strInventoryTracking = strInventoryTracking
@@ -460,7 +480,8 @@ BEGIN TRY
 			)
 
 		IF @ysnLoad = 0
-			AND @intCustomerLabelTypeId <> 2 and @intOrderDirectionId=2
+			AND @intCustomerLabelTypeId <> 2
+			AND @intOrderDirectionId = 2
 		BEGIN
 			INSERT INTO tblMFOrderManifest (
 				intConcurrencyId
@@ -666,12 +687,11 @@ BEGIN TRY
 		WHERE intOrderHeaderId = @intOrderHeaderId
 	END
 
-	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
+	IF (
+			@strOrderType = 'INVENTORY SHIPMENT STAGING'
+			OR @strOrderType = 'WO PROD STAGING'
+			)
 	BEGIN
-		SELECT @intTransactionId = @intInventoryShipmentId
-
-		SELECT @strTransactionId = @strReferenceNo
-
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
@@ -712,10 +732,6 @@ BEGIN TRY
 		DELETE
 		FROM @ItemsToReserve
 
-		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-			,@intOrderId
-			,34
-
 		INSERT INTO @ItemsToReserve (
 			intItemId
 			,intItemLocationId
@@ -736,7 +752,7 @@ BEGIN TRY
 			,intStorageLocationId = T.intFromStorageLocationId
 			,dblQty = T.dblPickQty
 			,intTransactionId = @intOrderId
-			,strTransactionId = @strReferenceNo + ' / ' + @strOrderNo
+			,strTransactionId = @strTransactionId + ' / ' + @strOrderNo
 			,intTransactionTypeId = 34
 		FROM tblMFTask T
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId

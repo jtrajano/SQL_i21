@@ -223,11 +223,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
-:r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
+--:r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
-:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
+--:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
-:r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
+--:r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
 :r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
 :r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql

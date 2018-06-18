@@ -88,8 +88,6 @@ BEGIN
 					THEN LS1.strSecondaryStatus
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
-				WHEN LS.strSecondaryStatus = 'On Hold'
-					THEN 'PR Hold'
 				ELSE LS.strSecondaryStatus
 				END AS [Lot Status]
 			,C.strCategoryCode
@@ -109,7 +107,7 @@ BEGIN
 		WHERE L.intStorageLocationId NOT IN (
 				@intProdStageLocationId
 				,@intPMStageLocationId
-				) AND IO1.intOwnerId = @intOwnerId
+				) AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
 		) AS DT
 	GROUP BY [Item No]
 		,[Item Desc]
@@ -152,8 +150,6 @@ BEGIN
 					THEN LS1.strSecondaryStatus
 				WHEN LS.strSecondaryStatus LIKE '%Damaged'
 					THEN 'Damaged'
-				WHEN LS.strSecondaryStatus = 'On Hold'
-					THEN 'PR Hold'
 				ELSE LS.strSecondaryStatus
 				END AS [Lot Status]
 			,C.strCategoryCode
@@ -169,7 +165,7 @@ BEGIN
 		JOIN tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU2 ON IU2.intItemUOMId = SD.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM2 ON UM2.intUnitMeasureId = IU2.intUnitMeasureId
-		JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId AND IO1.intOwnerId = @intOwnerId
+		JOIN dbo.tblICItemOwner IO1 ON IO1.intItemOwnerId = L.intItemOwnerId AND IO1.intOwnerId = IsNULL(@intOwnerId,IO1.intOwnerId)
 		) AS DT
 	GROUP BY [Item No]
 		,[Item Desc]

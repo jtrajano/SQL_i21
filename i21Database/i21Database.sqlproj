@@ -4814,7 +4814,6 @@
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
     <None Include="Scripts\Post-Deployment\TM\5_ObsoletingSeasonReset.sql" />
     <Build Include="dbo\Stored Procedures\uspICDuplicateStorageLocation.sql" />
@@ -5112,7 +5111,6 @@
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
@@ -6102,17 +6100,12 @@
     <Build Include="dbo\Views\vyuRKGetGLAccountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityCredential.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeInvoiceParam.sql" />
-    <Build Include="dbo\fnAPGetVoucherAmountMultiplier.sql" />
-    <Build Include="dbo\uspAPRptTaxReport.sql" />
-    <Build Include="dbo\vyuAPRptTaxReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringBySymbol.sql" />
     <Build Include="dbo\Views\vyuCTGetINCOShipTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveINCOShipTerm.sql" />
     <Build Include="dbo\Views\vyuHDTimeHoursReport.sql" />
     <Build Include="dbo\Views\vyuARPaymentBankTransaction.sql" />
     <Build Include="dbo\Views\vyuICGetBundleItemStock.sql" />
-    <Build Include="dbo\vyuAPRptVoucherCheckOffDetail.sql" />
-    <Build Include="dbo\uspAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Functions\fnGetDebitUnit.sql" />
     <Build Include="dbo\Functions\fnGetCreditUnit.sql" />
     <None Include="Scripts\Post-Deployment\IC\27_RemoveAfter18.1_DataFix.sql" />
@@ -6350,6 +6343,12 @@
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\Views\vyuAPRptTaxReport.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherAmountMultiplier.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6484,7 +6483,6 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\26_ActivitySource.sql" />
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
     <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />

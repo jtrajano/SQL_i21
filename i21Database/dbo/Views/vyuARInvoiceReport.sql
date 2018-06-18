@@ -94,6 +94,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
+	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -148,6 +149,7 @@ LEFT JOIN (
 		 , SITE.intSiteID
 		 , SITE.strSiteNumber
 		 , SITE.dblEstimatedPercentLeft
+		 , ID.dblPercentFull
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId

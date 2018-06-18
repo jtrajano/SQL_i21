@@ -44,13 +44,13 @@ SELECT DISTINCT
 	, intItemId						= ABC.intItemId
 	, intTaxCodeId					= ABC.intTaxCodeId
 	, strProductNo					= CASE WHEN ABC.strTransactionType = 'Items' THEN ABC.strItemNo  
-										   WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 'RCV' 
+										--    WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 'RCV' 
 										   WHEN ABC.strTransactionType = 'TaxCodes' THEN ABC.strTaxCode
 										   WHEN ABC.strTransactionType = 'Service Charge' THEN 'Service Charges'
 										   WHEN ABC.strTransactionType = 'Debit Memo' THEN 'DEBIT MEMO'
 									  END
 	, intSortNo						= CASE WHEN ABC.strTransactionType = 'Items' THEN 4
-										   WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 1
+										--    WHEN ABC.strTransactionType IN ('Payments','Customer Prepayment','Overpayment') THEN 1
 										   WHEN ABC.strTransactionType = 'TaxCodes' THEN 5
 										   WHEN ABC.strTransactionType = 'Service Charge' THEN 2
 										   WHEN ABC.strTransactionType = 'Debit Memo' THEN 3
@@ -292,6 +292,6 @@ LEFT JOIN (
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) LOCATION ON ABC.intCompanyLocationId = LOCATION.intCompanyLocationId
-WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0
+WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0 AND ABC.strTransactionType NOT IN ('Payments','Customer Prepayment','Overpayment')
 ORDER BY ABC.intCompanyLocationId, intSortNo
 

@@ -61,7 +61,7 @@ BEGIN TRY
 		,@intWorkOrderId INT
 		,@intManufacturingProcessId INT
 		,@intOwnershipType INT
-		,@intDefaultConsumptionLocationId int
+		,@intDefaultConsumptionLocationId INT
 
 	SELECT @ysnPickByQty = 1
 
@@ -84,6 +84,7 @@ BEGIN TRY
 		,@intOrderId INT
 		,@intLocationId INT
 		,@strInventoryTracking NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50)
 
 	SELECT @strOrderType = OT.strOrderType
 		,@strOrderNo = OH.strOrderNo
@@ -101,6 +102,7 @@ BEGIN TRY
 	WHERE SW.intOrderHeaderId = @intOrderHeaderId
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -192,7 +194,7 @@ BEGIN TRY
 			,intUnitPerPallet INT
 			,strInventoryTracking NVARCHAR(50)
 			,intOwnershipType INT
-			,intStorageLocationId int
+			,intStorageLocationId INT
 			)
 		DECLARE @tblLot TABLE (
 			intLotRecordId INT Identity(1, 1)
@@ -321,7 +323,7 @@ BEGIN TRY
 
 			SELECT @intOwnershipType = NULL
 
-			Select @intDefaultConsumptionLocationId=NULL
+			SELECT @intDefaultConsumptionLocationId = NULL
 
 			DELETE
 			FROM @tblLot
@@ -340,7 +342,7 @@ BEGIN TRY
 				,@intUnitPerPallet2 = intUnitPerPallet
 				,@strInventoryTracking = strInventoryTracking
 				,@intOwnershipType = intOwnershipType
-				,@intDefaultConsumptionLocationId=intStorageLocationId
+				,@intDefaultConsumptionLocationId = intStorageLocationId
 			FROM @tblLineItem I
 			WHERE intItemRecordId = @intItemRecordId
 
@@ -398,6 +400,20 @@ BEGIN TRY
 				FROM tblICItemOwner
 				WHERE intOwnerId = @intEntityCustomerId
 					AND intItemId = @intItemId
+
+				SELECT @intTransactionId = @intInventoryShipmentId
+
+				SELECT @strTransactionId = @strReferenceNo
+
+				SELECT @intInventoryTransactionType = 5
+			END
+			ELSE
+			BEGIN
+				SELECT @intTransactionId = @intWorkOrderId
+
+				SELECT @strTransactionId = @strWorkOrderNo
+
+				SELECT @intInventoryTransactionType = 9
 			END
 
 			--- INSERT ALL THE LOTS WITHIN THE ALLOWABLE PICK DAY RANGE
@@ -444,20 +460,8 @@ BEGIN TRY
 					,S.intItemUOMId
 					,S.dblOnHand
 					,S.intItemUOMId
-					,S.dblOnHand - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN S.dblOnHand - T.dblQty
-									ELSE T.dblQty
-									END, 0))
-						) AS dblRemainingLotQty
-					,S.dblOnHand - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN S.dblOnHand - T.dblWeight
-									ELSE T.dblWeight
-									END, 0))
-						) AS dblRemainingLotWeight
+					,S.dblOnHand - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, S.intItemUOMId, SR.dblQty), 0))) AS dblRemainingLotQty
+					,S.dblOnHand - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, S.intItemUOMId, SR.dblQty), 0))) AS dblRemainingLotWeight
 					,NULL
 					,1
 					,S.intSubLocationId
@@ -468,19 +472,18 @@ BEGIN TRY
 				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
 					AND IL.intLocationId = IsNULL(@intLocationId, IL.intLocationId)
 					AND IL.intItemId = @intItemId
-				LEFT JOIN tblMFTask T ON T.intItemId = S.intItemId
-					AND T.intTaskTypeId NOT IN (
-						5
-						,6
-						,8
-						,9
-						,10
-						,11
-						)
+				LEFT JOIN tblICStockReservation SR ON SR.intItemId = S.intItemId
 				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 				WHERE S.intItemId = @intItemId
 					AND S.dblOnHand > 0
-					AND IsNULL(S.intStorageLocationId,0)= (Case When S.intStorageLocationId is not null and @intDefaultConsumptionLocationId is not null then @intDefaultConsumptionLocationId else IsNULL(S.intStorageLocationId,0) end)
+					AND IsNULL(S.intStorageLocationId, 0) = (
+						CASE 
+							WHEN S.intStorageLocationId IS NOT NULL
+								AND @intDefaultConsumptionLocationId IS NOT NULL
+								THEN @intDefaultConsumptionLocationId
+							ELSE IsNULL(S.intStorageLocationId, 0)
+							END
+						)
 				GROUP BY S.intItemId
 					,S.dblOnHand
 					,S.intItemUOMId
@@ -492,13 +495,7 @@ BEGIN TRY
 					,I.ysnStrictFIFO
 					,I.intUnitPerLayer
 					,I.intLayerPerPallet
-				HAVING S.dblOnHand - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN S.dblOnHand - T.dblWeight
-									ELSE T.dblWeight
-									END, 0))
-						) > 0
+				HAVING S.dblOnHand - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, S.intItemUOMId, SR.dblQty), 0))) > 0
 					AND (
 						CASE 
 							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
@@ -506,17 +503,7 @@ BEGIN TRY
 										CAST(CASE 
 												WHEN (
 														(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-														AND (
-															(
-																S.dblOnHand - (
-																	SUM(ISNULL(CASE 
-																				WHEN T.intTaskTypeId = 13
-																					THEN S.dblOnHand - T.dblQty
-																				ELSE T.dblQty
-																				END, 0))
-																	)
-																) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
-															)
+														AND ((S.dblOnHand - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, S.intItemUOMId, SR.dblQty), 0)))) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
 														)
 													THEN 1
 												ELSE 0
@@ -544,13 +531,7 @@ BEGIN TRY
 							THEN S.dblOnHand
 						WHEN I.ysnStrictFIFO = 0
 							AND @intPreferenceId = 3
-							THEN ABS(S.dblOnHand - (
-										SUM(ISNULL(CASE 
-													WHEN T.intTaskTypeId = 13
-														THEN S.dblOnHand - T.dblQty
-													ELSE T.dblQty
-													END, 0))
-										) - @intUnitPerPallet)
+							THEN ABS(S.dblOnHand - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, S.intItemUOMId, SR.dblQty), 0))) - @intUnitPerPallet)
 						ELSE 0
 						END ASC
 			END
@@ -576,20 +557,8 @@ BEGIN TRY
 					,L.intItemUOMId
 					,L.dblWeight
 					,L.intWeightUOMId
-					,L.dblQty - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblQty - T.dblQty
-									ELSE T.dblQty
-									END, 0))
-						) AS dblRemainingLotQty
-					,L.dblWeight - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblWeight - T.dblWeight
-									ELSE T.dblWeight
-									END, 0))
-						) AS dblRemainingLotWeight
+					,L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblRemainingLotQty
+					,L.dblWeight - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))) AS dblRemainingLotWeight
 					,L.dtmDateCreated
 					,1
 					,L.intSubLocationId
@@ -598,15 +567,7 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 					AND UT.ysnAllowPick = 1
-				LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-					AND T.intTaskTypeId NOT IN (
-						5
-						,6
-						,8
-						,9
-						,10
-						,11
-						)
+				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
 				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -614,7 +575,14 @@ BEGIN TRY
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
-					AND IsNULL(L.intStorageLocationId,0)= (Case When L.intStorageLocationId is not null and @intDefaultConsumptionLocationId is not null then @intDefaultConsumptionLocationId else IsNULL(L.intStorageLocationId,0) end)
+					AND IsNULL(L.intStorageLocationId, 0) = (
+						CASE 
+							WHEN L.intStorageLocationId IS NOT NULL
+								AND @intDefaultConsumptionLocationId IS NOT NULL
+								THEN @intDefaultConsumptionLocationId
+							ELSE IsNULL(L.intStorageLocationId, 0)
+							END
+						)
 					AND L.intItemId = @intItemId
 					AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
@@ -678,19 +646,7 @@ BEGIN TRY
 								THEN L.dblQty
 							ELSE L.dblWeight
 							END
-						) - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN (
-												CASE 
-													WHEN L.intWeightUOMId IS NULL
-														THEN L.dblQty
-													ELSE L.dblWeight
-													END
-												) - T.dblWeight
-									ELSE T.dblWeight
-									END, 0))
-						) > 0
+						) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0))) > 0
 					AND (
 						CASE 
 							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
@@ -698,17 +654,7 @@ BEGIN TRY
 										CAST(CASE 
 												WHEN (
 														(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-														AND (
-															(
-																L.dblQty - (
-																	SUM(ISNULL(CASE 
-																				WHEN T.intTaskTypeId = 13
-																					THEN L.dblQty - T.dblQty
-																				ELSE T.dblQty
-																				END, 0))
-																	)
-																) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
-															)
+														AND ((L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
 														)
 													THEN 1
 												ELSE 0
@@ -721,13 +667,7 @@ BEGIN TRY
 						CASE 
 							WHEN I.ysnStrictFIFO = 0
 								AND @intPreferenceId = 1
-								THEN L.dblQty - (
-										SUM(ISNULL(CASE 
-													WHEN T.intTaskTypeId = 13
-														THEN L.dblQty - T.dblQty
-													ELSE T.dblQty
-													END, 0))
-										)
+								THEN L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
 							ELSE 0
 							END
 						) = (
@@ -769,13 +709,7 @@ BEGIN TRY
 							THEN L.dblQty
 						WHEN I.ysnStrictFIFO = 0
 							AND @intPreferenceId = 3
-							THEN ABS(L.dblQty - (
-										SUM(ISNULL(CASE 
-													WHEN T.intTaskTypeId = 13
-														THEN L.dblQty - T.dblQty
-													ELSE T.dblQty
-													END, 0))
-										) - @intUnitPerPallet)
+							THEN ABS(L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) - @intUnitPerPallet)
 						ELSE 0
 						END ASC
 					,L.dtmDateCreated ASC
@@ -801,20 +735,8 @@ BEGIN TRY
 					,L.intItemUOMId
 					,L.dblWeight
 					,L.intWeightUOMId
-					,L.dblQty - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblQty - T.dblQty
-									ELSE T.dblQty
-									END, 0))
-						) AS dblRemainingLotQty
-					,L.dblWeight - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN L.dblWeight - T.dblWeight
-									ELSE T.dblWeight
-									END, 0))
-						) AS dblRemainingLotWeight
+					,L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblRemainingLotQty
+					,L.dblWeight - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))) AS dblRemainingLotWeight
 					,L.dtmDateCreated
 					,2
 					,L.intSubLocationId
@@ -823,15 +745,7 @@ BEGIN TRY
 				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 				JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 					AND UT.ysnAllowPick = 1
-				LEFT JOIN tblMFTask T ON T.intLotId = L.intLotId
-					AND T.intTaskTypeId NOT IN (
-						5
-						,6
-						,8
-						,9
-						,10
-						,11
-						)
+				LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0
 				LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 					AND BS.strPrimaryStatus = 'Active'
@@ -839,7 +753,14 @@ BEGIN TRY
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
-					AND IsNULL(L.intStorageLocationId,0)= (Case When L.intStorageLocationId is not null and @intDefaultConsumptionLocationId is not null then @intDefaultConsumptionLocationId else IsNULL(L.intStorageLocationId,0) end)
+					AND IsNULL(L.intStorageLocationId, 0) = (
+						CASE 
+							WHEN L.intStorageLocationId IS NOT NULL
+								AND @intDefaultConsumptionLocationId IS NOT NULL
+								THEN @intDefaultConsumptionLocationId
+							ELSE IsNULL(L.intStorageLocationId, 0)
+							END
+						)
 					AND L.intItemId = @intItemId
 					AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
@@ -896,19 +817,7 @@ BEGIN TRY
 								THEN L.dblQty
 							ELSE L.dblWeight
 							END
-						) - (
-						SUM(ISNULL(CASE 
-									WHEN T.intTaskTypeId = 13
-										THEN (
-												CASE 
-													WHEN L.intWeightUOMId IS NULL
-														THEN L.dblQty
-													ELSE L.dblWeight
-													END
-												) - L.dblWeight
-									ELSE T.dblWeight
-									END, 0))
-						) > 0
+						) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0))) > 0
 					AND (
 						CASE 
 							WHEN IsNULL(@ysnAllowPartialPallet, 1) = 0
@@ -916,17 +825,7 @@ BEGIN TRY
 										CAST(CASE 
 												WHEN (
 														(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-														AND (
-															(
-																L.dblQty - (
-																	SUM(ISNULL(CASE 
-																				WHEN T.intTaskTypeId = 13
-																					THEN L.dblQty - T.dblQty
-																				ELSE T.dblQty
-																				END, 0))
-																	)
-																) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
-															)
+														AND ((L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
 														)
 													THEN 1
 												ELSE 0
@@ -1462,13 +1361,14 @@ BEGIN TRY
 				)
 	END
 
-	IF @strOrderType = 'INVENTORY SHIPMENT STAGING'
-		AND @intInventoryShipmentId IS NOT NULL
+	IF (
+			(
+				@strOrderType = 'INVENTORY SHIPMENT STAGING'
+				AND @intInventoryShipmentId IS NOT NULL
+				)
+			OR @strOrderType = 'WO PROD STAGING'
+			)
 	BEGIN
-		SELECT @intTransactionId = @intInventoryShipmentId
-
-		SELECT @strTransactionId = @strReferenceNo
-
 		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intTransactionId
 			,@intInventoryTransactionType
@@ -1533,7 +1433,7 @@ BEGIN TRY
 			,intStorageLocationId = T.intFromStorageLocationId
 			,dblQty = T.dblPickQty
 			,intTransactionId = @intOrderId
-			,strTransactionId = @strReferenceNo + ' / ' + @strOrderNo
+			,strTransactionId = @strTransactionId + ' / ' + @strOrderNo
 			,intTransactionTypeId = 34
 		FROM tblMFTask T
 		JOIN tblICStorageLocation SL ON SL.intStorageLocationId = T.intFromStorageLocationId

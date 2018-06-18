@@ -31,7 +31,7 @@ BEGIN
 	DELETE FROM tblARInvoiceAccrual WHERE intInvoiceId = @intInvoiceId
 	
 	INSERT INTO tblARInvoiceAccrual(intInvoiceId,intInvoiceDetailId,dtmAccrualDate,dblAmount,intConcurrencyId)
-	SELECT I.intInvoiceId,intInvoiceDetailId, dtmAccrualMonth, ROUND(ID.dblTotal/@intPeriodsToAccrue,2,1) , 1 
+	SELECT I.intInvoiceId,intInvoiceDetailId, dtmAccrualMonth, ID.dblTotal/@intPeriodsToAccrue,1 
 	FROM tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
 			ON I.intInvoiceId = ID.intInvoiceId

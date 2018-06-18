@@ -337,5 +337,33 @@ SELECT inv.intItemId
 	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
 	 where PL.intSort = 3 and ptitm_prc3 > 0 and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
 
+	--===Convert Physical items to bundles in i21
+	UPDATE I 
+	SET strType = 'Bundle',
+		strBundleType = 'Kit',
+		ysnListBundleSeparately = 0
+	FROM tblICItem I WHERE strItemNo in	(SELECT ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS FROM ptitmmst WHERE ptitm_alt_itm <>'' and ptitm_alt_itm <> ptitm_itm_no) 
+
+	INSERT INTO tblICItemBundle (intItemId,
+								intBundleItemId,
+								strDescription,
+								dblQuantity,
+								intItemUnitMeasureId,
+								ysnAddOn,
+								dblMarkUpOrDown,
+								intConcurrencyId)
+	SELECT DISTINCT I.intItemId, 
+				IA.intItemId,
+				I.strDescription, 
+				1 Quantity, 
+				U.intItemUOMId,
+				0 addon, 
+				0 markup,
+				1 Concurrency 
+	FROM tblICItem I 
+		JOIN ptitmmst p ON I.strItemNo = p.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+		JOIN tblICItem IA ON IA.strItemNo = p.ptitm_alt_itm COLLATE SQL_Latin1_General_CP1_CS_AS
+		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUOM = 1
+	WHERE ptitm_alt_itm <>'' AND ptitm_alt_itm <> ptitm_itm_no
 
 GO

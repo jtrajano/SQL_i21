@@ -254,7 +254,8 @@ Begin Try
 									@intNewStorageLocationId=@intBlendStagingLocationId,
 									@dblMoveQty=@dblPickQuantity,
 									@intMoveItemUOMId=@intPickUOMId,
-									@intUserId=@intUserId
+									@intUserId=@intUserId,
+									@blnInventoryMove=1
 
 				Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
 				And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0
@@ -403,7 +404,8 @@ Begin
 										@intNewStorageLocationId=@intBlendStagingLocationId,
 										@dblMoveQty=@dblReqQty,
 										@intMoveItemUOMId=@intItemUOMId,
-										@intUserId=@intUserId
+										@intUserId=@intUserId,
+										@blnInventoryMove=1
 
 					Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
 					And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0
@@ -437,7 +439,8 @@ Begin
 										@intNewStorageLocationId=@intBlendStagingLocationId,
 										@dblMoveQty=@dblAvailableQty,
 										@intMoveItemUOMId=@intItemUOMId,
-										@intUserId=@intUserId
+										@intUserId=@intUserId,
+										@blnInventoryMove=1
 
 					Select TOP 1 @intNewLotId=intLotId From tblICLot where strLotNumber=@strLotNumber And intItemId=@intItemId And intLocationId=@intBlendLocationId 
 					And intSubLocationId=@intNewSubLocationId And intStorageLocationId=@intBlendStagingLocationId --And dblQty > 0

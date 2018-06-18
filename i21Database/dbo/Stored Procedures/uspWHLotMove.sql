@@ -48,6 +48,10 @@ BEGIN TRY
 		,@intBondStatusId INT
 		,@intStorageUnitTypeId INT
 		,@strInternalCode NVARCHAR(50)
+		,@intTransactionId INT
+		,@intInventoryTransactionType INT
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@ItemsToUnReserve AS dbo.ItemReservationTableType
 
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 		,@ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType = isNULL(ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType, 0)
@@ -251,20 +255,20 @@ BEGIN TRY
 
 	IF @dblWorkOrderReservedQty IS NULL
 	BEGIN
-		Select @dblWorkOrderReservedQty=0
+		SELECT @dblWorkOrderReservedQty = 0
 	END
 
 	IF (
 			@dblLotAvailableQty + (
-						(
-							CASE 
-								WHEN @intLotItemUOMId = @intItemUOMId
-									AND @intWeightUOMId IS NOT NULL
-									THEN - @dblMoveQty * @dblWeightPerQty
-								ELSE - @dblMoveQty
-								END
-							)
-						)
+				(
+					CASE 
+						WHEN @intLotItemUOMId = @intItemUOMId
+							AND @intWeightUOMId IS NOT NULL
+							THEN - @dblMoveQty * @dblWeightPerQty
+						ELSE - @dblMoveQty
+						END
+					)
+				)
 			) < @dblWorkOrderReservedQty
 	BEGIN
 		RAISERROR (
@@ -324,6 +328,53 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+	IF @blnInventoryMove = 1
+		AND EXISTS (
+			SELECT *
+			FROM tblICStockReservation
+			WHERE intLotId = @intLotId
+				AND ysnPosted = 0
+				AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intItemUOMId, dblQty) = @dblMoveQty
+			)
+	BEGIN
+		SELECT @intTransactionId = intTransactionId
+			,@intInventoryTransactionType = intInventoryTransactionType
+		FROM tblICStockReservation
+		WHERE intLotId = @intLotId
+			AND ysnPosted = 0
+			AND dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, @intItemUOMId, dblQty) = @dblMoveQty
+
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intInventoryTransactionType
+		FROM tblICStockReservation
+		WHERE intTransactionId = @intTransactionId
+			AND intInventoryTransactionType = @intInventoryTransactionType
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToUnReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+	END
+
 	EXEC uspICInventoryAdjustment_CreatePostLotMove @intItemId
 		,@dtmDate
 		,@intLocationId
@@ -345,6 +396,20 @@ BEGIN TRY
 	FROM dbo.tblICLot
 	WHERE strLotNumber = @strNewLotNumber
 		AND intStorageLocationId = @intNewStorageLocationId
+
+	IF @blnInventoryMove = 1
+		AND @intTransactionId IS NOT NULL
+	BEGIN
+		UPDATE @ItemsToReserve
+		SET intLotId = @intNewLotId
+			,intStorageLocationId = @intNewStorageLocationId
+			,intSubLocationId = @intSubLocationId
+		WHERE intLotId = @intLotId
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+	END
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 20
@@ -407,19 +472,6 @@ BEGIN TRY
 					12
 					,13
 					)
-			WHERE intLotId = @intLotId
-		END
-
-		IF EXISTS (
-				SELECT *
-				FROM dbo.tblICStockReservation
-				WHERE intLotId = @intLotId
-				)
-		BEGIN
-			UPDATE dbo.tblICStockReservation
-			SET intLotId = @intNewLotId
-				,intStorageLocationId = @intNewStorageLocationId
-				,intSubLocationId = @intNewSubLocationId
 			WHERE intLotId = @intLotId
 		END
 

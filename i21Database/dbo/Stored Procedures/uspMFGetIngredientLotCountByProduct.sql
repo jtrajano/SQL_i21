@@ -126,7 +126,7 @@ BEGIN
 				AND I.strInventoryTracking = 'Lot Level'
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 			JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-			LEFT JOIN vyuMFStockReservation SR ON SR.intLotId = L.intLotId
+			LEFT JOIN vyuMFStockReservationByWorkOrder SR ON SR.intLotId = L.intLotId and SR.intWorkOrderId =R.intWorkOrderId
 			WHERE L.intLotStatusId = 1
 				AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 				AND L.dblQty > 0
