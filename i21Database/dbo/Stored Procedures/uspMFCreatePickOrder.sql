@@ -226,6 +226,10 @@ BEGIN TRY
 	
 	SELECT @intPMStageLocationId
 
+	DELETE
+	FROM @tblMFStageLocation
+	WHERE intStageLocationId IS NULL
+
 	IF (
 			(
 				@strStageLocationType = 'Production Staging Location'
@@ -489,7 +493,10 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId in (1,2)
+			AND ri.intConsumptionMethodId IN (
+				1
+				,2
+				)
 		--,2
 		GROUP BY ri.intItemId
 			,ri.intItemUOMId
@@ -653,7 +660,7 @@ BEGIN TRY
 				,@intItemUOMId = NULL
 				,@intStagingLocationId = NULL
 				,@strInventoryTracking = NULL
-				,@intStorageLocationId =NULL
+				,@intStorageLocationId = NULL
 
 			SELECT @intItemId = intItemId
 				,@dblQty = dblQty
@@ -661,7 +668,7 @@ BEGIN TRY
 				,@intItemUOMId = intItemUOMId
 				,@intStagingLocationId = intStagingLocationId
 				,@strInventoryTracking = strInventoryTracking
-				,@intStorageLocationId=intStorageLocationId
+				,@intStorageLocationId = intStorageLocationId
 			FROM @OrderDetailInformation
 			WHERE intLineNo = @intLineNo
 
@@ -706,22 +713,11 @@ BEGIN TRY
 				OR @dblAvailableQty < 0
 			BEGIN
 				SELECT @dblAvailableQty = 0
-
-				DELETE
-				FROM @OrderDetailInformation
-				WHERE intLineNo = @intLineNo
-					AND dblQty = dblRequiredQty
 			END
 
 			IF @dblQty - @dblAvailableQty > 0
 			BEGIN
 				SELECT @dblQty = @dblQty - @dblAvailableQty
-
-				UPDATE @OrderDetailInformation
-				SET dblQty = @dblAvailableQty
-					,dblWeight = @dblAvailableQty
-					,dblRequiredQty = dblRequiredQty - dblQty + @dblAvailableQty
-				WHERE intLineNo = @intLineNo
 
 				DECLARE @tblSubstituteItem TABLE (
 					intItemRecordId INT Identity(1, 1)
@@ -749,6 +745,26 @@ BEGIN TRY
 					AND r.intLocationId = @intLocationId
 					AND r.ysnActive = 1
 					AND ri.intItemId = @intItemId
+
+				IF EXISTS (
+						SELECT *
+						FROM @tblSubstituteItem
+						)
+				BEGIN
+					IF @dblAvailableQty = 0
+					BEGIN
+						DELETE
+						FROM @OrderDetailInformation
+						WHERE intLineNo = @intLineNo
+							AND dblQty = dblRequiredQty
+					END
+
+					UPDATE @OrderDetailInformation
+					SET dblQty = @dblAvailableQty
+						,dblWeight = @dblAvailableQty
+						,dblRequiredQty = dblRequiredQty - dblQty + @dblAvailableQty
+					WHERE intLineNo = @intLineNo
+				END
 
 				SELECT @intItemRecordId = MIN(intItemRecordId)
 				FROM @tblSubstituteItem
