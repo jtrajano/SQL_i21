@@ -18,6 +18,7 @@
     [intEntityUserId]      INT             NOT NULL,
 	[intPOSLogId]		   INT             NOT NULL,
     [intConcurrencyId]     INT             NOT NULL,
+	[ysnReturn]			   INT             CONSTRAINT [DF_tblARPOS_ysnReturn] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARPOS] PRIMARY KEY CLUSTERED ([intPOSId] ASC),
 	CONSTRAINT [FK_tblARPOSLog] FOREIGN KEY ([intPOSLogId]) REFERENCES [dbo].[tblARPOSLog] ([intPOSLogId]) 
 );
