@@ -56,6 +56,7 @@
 	ysnLimitCTByLocation BIT,
 	ysnAllowLoadBasedContract BIT,
 	ysnRequireProducerQty BIT,
+	ysnDisableContractSearchScreenCancelButton	BIT NULL DEFAULT 0,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
