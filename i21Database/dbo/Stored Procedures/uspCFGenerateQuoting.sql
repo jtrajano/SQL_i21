@@ -8,14 +8,15 @@
 	,@isPortal					BIT			   = 0
 	,@ysnAccountQuote			BIT			   = 0
 	,@intItemSequence			INT			   = 0
+	,@intEntityUserId			INT			   = 0
 )
 AS
 BEGIN
 
 	IF(@ysnAccountQuote = 0)
 	BEGIN
-		DELETE FROM tblCFCSRSingleQuote
-		DELETE FROM tblCFCSRSingleQuoteDetailTax
+		DELETE FROM tblCFCSRSingleQuote	WHERE intEntityUserId = @intEntityUserId OR ISNULL(intEntityUserId,0) = 0
+		--DELETE FROM tblCFCSRSingleQuoteDetailTax
 	END
 	
 	
@@ -213,6 +214,7 @@ BEGIN
 				,strNetwork
 				,strSite
 				,strItem
+				,intEntityUserId
 			)
 			SELECT 
 			 intNetworkId
@@ -230,6 +232,7 @@ BEGIN
 			,strNetwork
 			,strSiteNumber + ' - ' + strSiteName
 			,strProductNumber
+			,@intEntityUserId
 			FROM @tblNetworkSiteItem
 			WHERE 
 			intNetworkId	 = @loopNetworkId	
@@ -286,7 +289,7 @@ BEGIN
 			ELSE
 			BEGIN	
 
-					IF NOT EXISTS(SELECT 1 FROM tblCFAccountQuote WHERE intSiteId = @loopSiteId AND intEntityCustomerId = @intCustomerId) 
+					IF NOT EXISTS(SELECT 1 FROM tblCFAccountQuote WHERE intSiteId = @loopSiteId AND intEntityCustomerId = @intCustomerId AND intEntityUserId = @intEntityUserId) 
 					BEGIN 
 						INSERT INTO tblCFAccountQuote
 						(
@@ -296,6 +299,7 @@ BEGIN
 							,strCity
 							,strState
 							,intEntityCustomerId
+							,intEntityUserId
 						)
 						SELECT
 							 intSiteId
@@ -304,6 +308,7 @@ BEGIN
 							,strSiteCity
 							,strTaxState
 							,@intCustomerId
+							,@intEntityUserId
 						FROM @tblNetworkSiteItem
 						WHERE 
 						intNetworkId	 = @loopNetworkId	

@@ -21,6 +21,7 @@
     [strItem5]            NVARCHAR (50)   NULL,
     [dblItem5Price]       NUMERIC (18, 6) NULL,
     [intEntityCustomerId] INT             NULL,
+	[intEntityUserId]	  INT			  NULL,
     [intConcurrencyId]    INT             CONSTRAINT [DF_tblCFAccountQuote_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFAccountQuote] PRIMARY KEY CLUSTERED ([intAccountQuoteId] ASC)
 );
