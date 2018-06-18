@@ -4312,7 +4312,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
     <Build Include="dbo\Views\vyuLGDeliveredNotInvoiced.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleSamples.sql" />
-    <Build Include="dbo\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
     <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
@@ -6747,11 +6746,11 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationSetIdentityNotForReplication.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateActualAmount.sql" />
     <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
-    <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRItemsSettlementReport.sql" />
     <Build Include="dbo\Views\vyuGRItemsSettlementOpenContractReport.sql" />
     <Build Include="dbo\Views\vyuGRItemsSettlementStorageReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationUpdateCompanyIdSubToParent.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspSMReplicationUpdateCompanyIdSubToParent.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
