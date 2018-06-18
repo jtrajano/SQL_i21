@@ -40,7 +40,7 @@ SELECT
 	, strFuelCategory 		= FuelCategory.strRinFuelCategoryCode
 	, strPhysicalItem 		= PhysicalItem.strItemNo
 	, strPatronageCategory 	= PatronageCategory.strCategoryCode
-	, strPatronageDirect 	= PatronageDirect.strCategoryCode
+	, strDirectSaleCategory	= PatronageDirect.strCategoryCode
 	, strGrade				= Grade.strDescription
 	, strOrigin 			= Origin.strDescription
 	, strProductType		= ProductType.strDescription
