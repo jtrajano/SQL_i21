@@ -45,7 +45,7 @@ BEGIN TRY
 			SELECT @intTicketItemUOMId = intItemUOMIdTo
 				, @intContractDetailId = intContractId
 				, @dblContractQty = dblNetUnits
-			FROM tblSCTicket WHERE intTicketId = @intTicketId
+			FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 		END
 
 		SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId
