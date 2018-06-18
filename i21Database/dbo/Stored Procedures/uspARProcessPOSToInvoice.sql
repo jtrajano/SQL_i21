@@ -355,22 +355,22 @@ BEGIN
 			) CREATEDPAYMENTS ON POSPAYMENT.strPaymentMethod = CREATEDPAYMENTS.strPaymentMethod
 			INNER JOIN #POSPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 
-			-- --UPDATE POS ENDING BALANCE
-			-- UPDATE POSLOG
-			-- SET dblEndingBalance = ISNULL(POSLOG.dblEndingBalance,0) + POSTPAYMENT.dblAmount
-			-- FROM tblARPOSLog POSLOG
-			-- INNER JOIN (
-			-- 	SELECT intPOSLogId
-			-- 		, intPOSId
-			-- 	FROM tblARPOS
-			-- ) POS ON POS.intPOSLogId = POSLOG.intPOSLogId
-			-- CROSS APPLY (
-			-- 	SELECT dblAmount = SUM(ISNULL(dblAmount, 0))
-			-- 	FROM tblARPOSPayment PAY
-			-- 	WHERE ISNULL(PAY.strPaymentMethod, '') <> 'On Account'
-			-- 	  AND PAY.intPOSId = POS.intPOSId 
-			-- 	GROUP BY intPOSId
-			-- ) POSTPAYMENT
-			-- WHERE POS.intPOSId = @intPOSId 
+			--UPDATE POS ENDING BALANCE
+			UPDATE POSLOG
+			SET dblEndingBalance = ISNULL(POSLOG.dblEndingBalance,0) + POSTPAYMENT.dblAmount
+			FROM tblARPOSLog POSLOG
+			INNER JOIN (
+				SELECT intPOSLogId
+					, intPOSId
+				FROM tblARPOS
+			) POS ON POS.intPOSLogId = POSLOG.intPOSLogId
+			CROSS APPLY (
+				SELECT dblAmount = SUM(ISNULL(dblAmount, 0))
+				FROM tblARPOSPayment PAY
+				WHERE ISNULL(PAY.strPaymentMethod, '') <> 'On Account'
+				  AND PAY.intPOSId = POS.intPOSId 
+				GROUP BY intPOSId
+			) POSTPAYMENT
+			WHERE POS.intPOSId = @intPOSId 
 		END
 END
