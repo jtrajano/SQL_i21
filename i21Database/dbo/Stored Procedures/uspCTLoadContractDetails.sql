@@ -24,6 +24,7 @@ BEGIN TRY
 				SV.strName AS strShipVia,
 				CU.strCurrency,
 				CY.strCurrency	strMainCurrency,
+				CU.intMainCurrencyId,
 				CU.ysnSubCurrency,
 				FR.strOrigin + FR.strDest strOriginDest,
 				RG.strRailGrade,
