@@ -1161,7 +1161,7 @@ BEGIN
 
 	WHILE @intBeginningIndex <> 0 AND @intEndingIndex <> 0
 	BEGIN
-		SET @strHtmlTableName = CONCAT('<tbl', RTRIM(LTRIM(STR(@intBeginningIndex))) + '/>');
+		SET @strHtmlTableName = '<tbl' + RTRIM(LTRIM(STR(@intBeginningIndex))) + '/>'
 		SET @strSelectedHTMLTable = SUBSTRING(@originalMsgInHTML, @intBeginningIndex, (@intEndingIndex + 8) - @intBeginningIndex);
 		
 		INSERT INTO @ExtractedHTMLTable(
