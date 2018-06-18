@@ -204,6 +204,10 @@ BEGIN TRY
 	
 	SELECT @intPMStageLocationId
 
+	DELETE
+	FROM @tblMFStageLocation
+	WHERE intStageLocationId IS NULL
+
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
 	SELECT @strReferernceNo = strWorkOrderNo
