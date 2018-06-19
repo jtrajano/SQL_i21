@@ -47,21 +47,21 @@ AS
 		UNION ALL
 
 		SELECT  'Purchase Order' strScreenName,PD.intContractDetailId, PO.strPurchaseOrderNumber AS strNumber,PO.intPurchaseId AS intExternalHeaderId,'intPurchaseId' AS strHeaderIdColumn
-		FROM	 tblPOPurchaseDetail	    PD
-		JOIN	 tblPOPurchase			    PO  ON  PO.intPurchaseId			=	PD.intPurchaseId
-   LEFT JOIN	 tblICInventoryReceiptItem  RI  ON  RI.intLineNo				=	PD.intPurchaseDetailId
-   LEFT JOIN	 tblICInventoryReceipt	    IR  ON  IR.intInventoryReceiptId	=	RI.intInventoryReceiptId
-		WHERE	 IR.strReceiptType = 'Purchase Order' 
-		AND	 PD.intContractDetailId IS NOT NULL
-		AND	 ISNULL(IR.ysnPosted,0) = 0
+		FROM	tblPOPurchaseDetail			PD
+		JOIN	tblPOPurchase			    PO  ON  PO.intPurchaseId			=	PD.intPurchaseId
+   LEFT JOIN	tblICInventoryReceiptItem	RI  ON  RI.intLineNo				=	PD.intPurchaseDetailId
+   LEFT JOIN	tblICInventoryReceipt	    IR  ON  IR.intInventoryReceiptId	=	RI.intInventoryReceiptId
+		WHERE	ISNULL(IR.strReceiptType,'Purchase Order') = 'Purchase Order' 
+		AND		PD.intContractDetailId IS NOT NULL
+		AND		ISNULL(IR.ysnPosted,0) = 0
 
 		UNION ALL
 
 		SELECT	'Transport'  strScreenName,LR.intContractDetailId, LH.strTransaction  AS strNumber,LH.intLoadHeaderId AS intExternalHeaderId,'intLoadHeaderId' AS strHeaderIdColumn
 		FROM	tblTRLoadReceipt	LR
-		JOIN	tblTRLoadHeader	LH  ON  LR.intLoadHeaderId  =	  LH.intLoadHeaderId
+		JOIN	tblTRLoadHeader		LH  ON  LR.intLoadHeaderId  =	  LH.intLoadHeaderId
 		WHERE	LR.intContractDetailId  IS NOT NULL
-		AND	ISNULL(LH.ysnPosted,0) = 0
+		AND		ISNULL(LH.ysnPosted,0) = 0
 
 		UNION ALL
 
@@ -70,7 +70,7 @@ AS
 		JOIN	tblTRLoadDistributionHeader DH  ON	 DH.intLoadDistributionHeaderId  =	  DD.intLoadDistributionHeaderId
 		JOIN	tblTRLoadHeader				LH  ON  LH.intLoadHeaderId  =	  DH.intLoadHeaderId
 		WHERE	DD.intContractDetailId  IS NOT NULL
-		AND	ISNULL(LH.ysnPosted,0) = 0
+		AND		ISNULL(LH.ysnPosted,0) = 0
 
 		UNION ALL
 
@@ -78,18 +78,18 @@ AS
 		FROM	tblARInvoiceDetail		DL
 		JOIN	tblARInvoice			HR	ON	HR.intInvoiceId	=	DL.intInvoiceId 
 		WHERE	DL.intContractDetailId IS NOT NULL
-		AND	DL.intInventoryShipmentChargeId IS NULL
-		AND	ISNULL(HR.ysnPosted,0) = 0
+		AND		DL.intInventoryShipmentChargeId IS NULL
+		AND		ISNULL(HR.ysnPosted,0) = 0
 
 		UNION ALL
 
 		SELECT  'Sales Order' strScreenName, PD.intContractDetailId, PO.strSalesOrderNumber AS strNumber,PO.intSalesOrderId AS intExternalHeaderId,'intSalesOrderId' AS strHeaderIdColumn 
-		FROM	tblSOSalesOrderDetail			PD
+		FROM	tblSOSalesOrderDetail		PD
 		JOIN	tblSOSalesOrder				PO ON PO.intSalesOrderId			=	PD.intSalesOrderId
    LEFT JOIN	tblICInventoryShipmentItem	RI ON RI.intLineNo				=	PD.intSalesOrderDetailId
    LEFT JOIN	tblICInventoryShipment		IR ON IR.intInventoryShipmentId	=	RI.intInventoryShipmentId
 		WHERE   PD.intContractDetailId IS NOT NULL
-		AND		IR.intOrderType = 2
+		AND		ISNULL(IR.intOrderType,2) = 2
 		AND		ISNULL(IR.ysnPosted,0) = 0
     )t
     JOIN	  tblCTContractDetail CD ON CD.intContractDetailId = t.intContractDetailId
