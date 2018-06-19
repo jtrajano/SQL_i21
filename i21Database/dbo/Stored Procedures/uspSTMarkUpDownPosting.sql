@@ -230,7 +230,7 @@ BEGIN TRY
 						INNER JOIN tblICItem Item
 							ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
 						INNER JOIN tblICItemLocation ItemLocation
-							ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId
+							ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
 						INNER JOIN tblICItemUOM ItemUOM
 							ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
 						WHERE Item.intCategoryId = MUD.intCategoryId
@@ -330,7 +330,7 @@ BEGIN TRY
 						INNER JOIN tblICItem Item
 							ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
 						INNER JOIN tblICItemLocation ItemLocation
-							ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId
+							ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
 						INNER JOIN tblICItemUOM ItemUOM
 							ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
 						WHERE Item.intCategoryId = MUD.intCategoryId
