@@ -237,6 +237,7 @@ IF(@exclude IS NOT NULL)
 				INSERT INTO
 					@AROverpayment
 				SELECT
+					DISTINCT
 					A.intPaymentId
 				FROM
 					tblARPayment A 
@@ -1702,6 +1703,14 @@ IF @recap = 0
 				ORDER BY P.dtmDatePaid DESC
 			) PAYMENT
 			WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
+
+			--Call integration 
+			declare @InvoiceIds InvoiceId
+			insert into @InvoiceIds(intHeaderId, intDetailId)					
+			select intInvoiceId, intPaymentId from tblARPaymentDetail where intPaymentId in (select intTransactionId from @ARReceivablePostData)
+			exec uspARPaymentIntegration @InvoiceIds,@post
+			--
+
 
 			--Update Customer's Budget 
 			WHILE EXISTS (SELECT NULL FROM @tblPaymentsToUpdateBudget)
