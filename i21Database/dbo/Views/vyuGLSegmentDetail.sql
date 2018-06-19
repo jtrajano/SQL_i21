@@ -12,6 +12,7 @@ SELECT
     G.intAccountGroupId,
     G.strAccountGroup,
 	U.intStructureType,
+	U.strType,
 	U.strStructureName,
 	ISNULL(Mapping.c,0)  ysnUsed,
 	S.intConcurrencyId
@@ -24,3 +25,5 @@ FROM
 		SELECT  TOP 1 CONVERT(BIT,1)    c FROM tblGLAccountSegmentMapping M WHERE M.intAccountSegmentId = S.intAccountSegmentId
 	)Mapping
 GO
+
+
