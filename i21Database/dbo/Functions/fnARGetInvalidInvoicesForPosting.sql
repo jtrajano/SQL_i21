@@ -1382,6 +1382,26 @@ ELSE
 			@Recap = 0
 
 		UNION
+		--Payments from Pay Voucher
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= APP.[strPaymentRecordNum] + ' payment was already made on this ' + I.strTransactionType + '.' + CASE WHEN I.strTransactionType = 'Credit Memo' THEN ' Please remove payment record and try again.' ELSE '' END
+		FROM 
+			(SELECT [intPaymentId], [strPaymentRecordNum] FROM tblAPPayment WITH (NOLOCK)) APP
+		INNER JOIN 
+			(SELECT [intPaymentId], [intInvoiceId] FROM tblAPPaymentDetail WITH (NOLOCK)) APPD 
+				ON APP.[intPaymentId] = APPD.[intPaymentId]						
+		INNER JOIN 
+			@Invoices I
+				ON APPD.[intInvoiceId] = I.[intInvoiceId]
+		WHERE @Recap = 0
+
+		UNION
 		--Invoice with created Bank Deposit
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
