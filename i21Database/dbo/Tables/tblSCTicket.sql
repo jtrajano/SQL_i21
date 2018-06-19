@@ -818,15 +818,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strDiscountComment'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Commodity Code',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicket',
-    @level2type = N'COLUMN',
-    @level2name = N'strCommodityCode'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Commodity Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',

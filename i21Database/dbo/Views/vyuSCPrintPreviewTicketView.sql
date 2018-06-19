@@ -93,7 +93,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strFarmNumber,
 	SC.strFieldNumber,
 	SC.strDiscountComment,
-	SC.strCommodityCode,
 	SC.intCommodityId,
 	SC.intDiscountId,
 	SC.intContractId,

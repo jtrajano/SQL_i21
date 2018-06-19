@@ -147,7 +147,6 @@ BEGIN
 	,strFarmNumber
 	,strFieldNumber
 	,strDiscountComment
-	,strCommodityCode
 	,intCommodityId
 	,intDiscountId
 	,intContractId
@@ -245,7 +244,6 @@ BEGIN
 	,strFarmNumber			   = NULL
 	,strFieldNumber			   = NULL
 	,strDiscountComment		   = LTRIM(RTRIM(gasct_tic_comment))
-	,strCommodityCode		   = LTRIM(RTRIM(gasct_com_cd))
 	,intCommodityId			   = CO.intCommodityId
 	,intDiscountId			   = 1
 	,intContractId			   = [Contract].intContractDetailId

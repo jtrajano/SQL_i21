@@ -99,7 +99,6 @@
        ,SCT.strFarmNumber
        ,SCT.strFieldNumber
        ,SCT.strDiscountComment
-       ,SCT.strCommodityCode
        ,SCT.intCommodityId
        ,SCT.intDiscountId
        ,SCT.intContractId
