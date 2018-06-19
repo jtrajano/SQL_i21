@@ -164,7 +164,7 @@ BEGIN
 		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC @intReturnValue = dbo.uspICReduceStockInFIFO
+			EXEC @intReturnValue = dbo.uspICReduceStockInAvg
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
@@ -243,7 +243,7 @@ BEGIN
 		-- Repeat call on uspICIncreaseStockInFIFO until @dblAddQty is completely distributed to the negative cost fifo buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC @intReturnValue = dbo.uspICIncreaseStockInFIFO
+			EXEC @intReturnValue = dbo.uspICIncreaseStockInAvg
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId 
