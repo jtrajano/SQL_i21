@@ -431,9 +431,9 @@ BEGIN TRY
 			,strFutureMonthYear						=	SQ.strFutureMonthYear
 			,strPricing								=	SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear +
 														CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +  
-														LTRIM(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
+														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
-														'''s '+@rtStrPricing2+':'+LTRIM(dblLotsToFix)+').'
+														'''s '+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
 			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CH.strContractNumber		
 			,strGABAssociation						=	@rtStrGABAssociation1 + ' ' + isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,getdate()),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)), LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + LEFT(DATENAME(YEAR,getdate()),4)
@@ -488,7 +488,7 @@ BEGIN TRY
 							isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,MO.dtmFutureMonthsDate)), DATENAME(mm,MO.dtmFutureMonthsDate)) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
 							CD.dblBasis,
 							CD.strBuyerSeller,
-							ISNULL(PF.dblTotalLots - ISNULL(PF.dblLotsFixed,0), 0) AS dblLotsToFix,
+							ISNULL(CD.dblNoOfLots - ISNULL(PF.dblLotsFixed,0), 0) AS dblLotsToFix,
 							CD.intPricingTypeId,
 							CY.strCurrency + '-' + isnull(rtrt5.strTranslation,UM.strUnitMeasure) AS	strPriceCurrencyAndUOM
 
