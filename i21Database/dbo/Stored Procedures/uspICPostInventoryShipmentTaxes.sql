@@ -116,11 +116,11 @@ BEGIN
 				,dblTax								= CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -ChargeTaxes.dblTax ELSE ChargeTaxes.dblTax END
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ShipmentCharge.intCurrencyId
-				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
@@ -152,11 +152,11 @@ BEGIN
 				,dblTax								= ChargeTaxes.dblTax 
 				,intTransactionTypeId				= TransType.intTransactionTypeId
 				,intCurrencyId						= ShipmentCharge.intCurrencyId
-				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
-				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 0)
+				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
