@@ -6339,6 +6339,8 @@
     <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Functions\fnAPCreateReceiptItemCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
