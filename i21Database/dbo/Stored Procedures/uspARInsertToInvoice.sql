@@ -602,7 +602,8 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 						DECLARE @softwareToPost NVARCHAR(MAX)
 						SET @softwareToPost = CONVERT(NVARCHAR(MAX), @intNewSoftwareInvoiceId)
 
-						EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @softwareToPost, @userId = @UserId, @transType = N'Invoice'							
+						EXEC dbo.uspARPostInvoice @post = 1, @recap = 0, @param = @softwareToPost, @userId = @UserId, @transType = N'Invoice'
+						EXEC dbo.uspSOUpdateOrderShipmentStatus @intTransactionId = @intNewSoftwareInvoiceId, @strTransactionType = 'Invoice'
 					END
 			END
 		ELSE
@@ -819,6 +820,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 			END
 
 		EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @SoftwareInvoiceId
+		EXEC dbo.uspSOUpdateOrderShipmentStatus @intTransactionId = @SoftwareInvoiceId, @strTransactionType = 'Invoice'
 	END
 
 --CHECK IF THERE IS NON STOCK ITEMS
