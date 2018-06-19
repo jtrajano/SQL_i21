@@ -143,6 +143,7 @@ BEGIN TRY
 	INNER JOIN tblSMMasterMenu mastermenu ON rolemenu.intMenuId = mastermenu.intMenuID
 	AND mastermenu.strMenuName = 'Dashboards'
 
+	-- Subject to be moved after 18.3
 	-- Assigned Default Control Permission
 	IF @isContact = 1
 	BEGIN
