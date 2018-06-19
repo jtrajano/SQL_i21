@@ -746,6 +746,7 @@ BEGIN TRY
 	FROM vyuCFDiscountSchedule as dis 
 	INNER JOIN tblCFInvoiceStagingTable as inv
 	ON dis.intDiscountScheduleId = inv.intDiscountScheduleId
+	AND dis.intAccountId = inv.intAccountId
 	WHERE strUserId = @username
 
 	INSERT INTO tblCFInvoiceFeeHistoryStagingTable
