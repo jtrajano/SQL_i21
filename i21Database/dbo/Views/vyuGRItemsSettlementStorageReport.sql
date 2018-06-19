@@ -2,8 +2,8 @@ CREATE VIEW [dbo].[vyuGRItemsSettlementStorageReport]
 AS
 SELECT --ITEMS.intItemId
 		ITEMS.strItemNo AS ItemName
-		, SUM(ITEMS.dblQtyReceived) AS Amount
-		, ITEMS.strDistributionType AS PivotColumn
+		, ISNULL(SUM(ITEMS.dblQtyReceived),0) AS Amount
+		, ISNULL(ITEMS.strDistributionType, 'Unknown') AS PivotColumn
 		, (
 			SELECT strUnitMeasure 
 			FROM tblICUnitMeasure UM
