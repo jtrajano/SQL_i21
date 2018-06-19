@@ -27,8 +27,6 @@ BEGIN TRY
 	--------------------------------------------------------------------------------------------  
 	BEGIN TRAN @TransactionName
 	SAVE TRAN @TransactionName -- Save point
-
-	
 	----------------------------------
 	-- DECLARE VARIABLES
 	----------------------------------
@@ -36,6 +34,7 @@ BEGIN TRY
 
 	SET @strStatusMsg = ''
 	SET @ysnIsPosted = 0
+	SET @strBatchId = ''
 
 	DECLARE @strMarkUpDownBatchId AS NVARCHAR(200)
 	DECLARE @intStoreId AS INT
@@ -87,6 +86,120 @@ BEGIN TRY
 	
 	DECLARE @intCategoryAdjustmentType AS INT
 
+
+	-- VALIDATE @isRequiredGLEntries = true
+	DECLARE @tblTempItemCheck TABLE 
+	(
+		[intCategoryId] int NULL,
+		[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
+		[ysnHasItem] BIT
+	)
+
+	DECLARE @tblTempItemValuationCheck TABLE 
+	(
+		[intCategoryId] int NULL,
+		[strCategoryCode] nvarchar(150) COLLATE Latin1_General_CI_AS NULL,
+		[ysnHasItemValuation] BIT,
+		[ysnHasItemCosting] BIT
+	)
+
+	IF(@isRequiredGLEntries = 1)
+		BEGIN
+			-- CHECK IF (DEPARTMENT LEVEL) HAS ITEM
+			INSERT INTO @tblTempItemCheck
+			(
+				intCategoryId,
+				strCategoryCode,
+				ysnHasItem
+			)
+			SELECT DISTINCT
+				MD.intCategoryId,
+				C.strCategoryCode,
+				CASE
+					WHEN I.intItemId IS NOT NULL THEN CAST(1 AS BIT) 
+					ELSE CAST(0 AS BIT) 
+				END as strResult
+			FROM tblSTMarkUpDownDetail MD
+			JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+			LEFT JOIN tblICItem I ON MD.intCategoryId = I.intCategoryId
+			WHERE intMarkUpDownId = @intMarkUpDownId
+
+			IF EXISTS(SELECT * FROM @tblTempItemCheck WHERE ysnHasItem = 0)
+				BEGIN
+					-- GET CATEGORIES WITHOUT ITEM
+					DECLARE @strCategoryCode AS NVARCHAR(1000) = ''
+
+					SELECT @strCategoryCode = @strCategoryCode + strCategoryCode + ', '
+					FROM @tblTempItemCheck
+
+					--PRINT @strCategoryCode
+					ROLLBACK TRAN @TransactionName
+					COMMIT TRAN @TransactionName
+					SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Items.'
+					RETURN
+				END
+			ELSE
+				BEGIN
+					-- CHECK ITEM VALUATION
+					INSERT INTO @tblTempItemValuationCheck
+					(
+						intCategoryId,
+						strCategoryCode,
+						ysnHasItemValuation,
+						ysnHasItemCosting
+					)
+					SELECT DISTINCT
+						MD.intCategoryId,
+						C.strCategoryCode,
+						CASE
+							WHEN IV.intCategoryId IS NOT NULL THEN CAST(1 AS BIT) 
+							ELSE CAST(0 AS BIT) 
+						END as ysnHasItemValuation,
+						CASE
+							WHEN IV.dblEndingCost > 0 THEN CAST(1 AS BIT) 
+							ELSE CAST(0 AS BIT) 
+						END as ysnHasItemCosting
+					FROM tblSTMarkUpDownDetail MD
+					JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+					LEFT JOIN tblICRetailValuation IV ON MD.intCategoryId = IV.intCategoryId
+					WHERE intMarkUpDownId = @intMarkUpDownId
+
+
+					IF EXISTS(SELECT * FROM @tblTempItemValuationCheck WHERE ysnHasItemValuation = 0)
+						BEGIN
+							-- GET CATEGORIES WITHOUT ITEM VALUATION
+
+							SELECT DISTINCT 
+								@strCategoryCode = @strCategoryCode + strCategoryCode + ', '
+							FROM @tblTempItemValuationCheck
+							WHERE ysnHasItemValuation = 0
+
+							--PRINT @strCategoryCode
+							ROLLBACK TRAN @TransactionName
+							COMMIT TRAN @TransactionName
+							SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation.'
+							RETURN
+						END
+					ELSE IF EXISTS(SELECT * FROM @tblTempItemValuationCheck WHERE ysnHasItemValuation = 1 AND ysnHasItemCosting = 0)
+						BEGIN
+							-- GET CATEGORIES WITHOUT ITEM VALUATION
+							DECLARE @strCategoryCodeItemValuation AS NVARCHAR(1000) = ''
+
+							SELECT DISTINCT 
+								@strCategoryCodeItemValuation = @strCategoryCodeItemValuation + strCategoryCode + ', '
+							FROM @tblTempItemValuationCheck
+							WHERE ysnHasItemValuation = 1 
+							AND ysnHasItemCosting = 0
+
+							--PRINT @strCategoryCode
+							ROLLBACK TRAN @TransactionName
+							COMMIT TRAN @TransactionName
+							SET @strStatusMsg = 'Category ' + @strCategoryCodeItemValuation + ' has no Item Costing.'
+							RETURN
+						END
+				END
+		END
+	-- END VALIDATE @isRequiredGLEntries = true
 
 
 	-- Check if Post or UnPost
@@ -520,7 +633,6 @@ END TRY
 BEGIN CATCH
 	SET @strStatusMsg = ERROR_MESSAGE()
 	GOTO With_Rollback_Exit;
-
 END CATCH
 
 With_Rollback_Exit:
