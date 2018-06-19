@@ -169,7 +169,7 @@ BEGIN TRY
 									,@param = @intBillId
 									,@userId = @intUserId
 									,@success = @success OUTPUT
-									,@batchIdUsed = @success OUTPUT
+									,@batchIdUsed = @batchIdUsed OUTPUT
 								END
 							IF ISNULL(@success, 0) = 0
 							BEGIN
