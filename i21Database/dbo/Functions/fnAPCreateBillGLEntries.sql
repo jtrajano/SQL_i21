@@ -300,9 +300,14 @@ BEGIN
 												
 												CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
-															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															CASE	WHEN B.intCustomerStorageId > 0 THEN 
+																		CASE WHEN B.dblOldCost IS NOT NULL
+																		THEN
+																			CASE WHEN B.dblOldCost = 0 THEN 0 ELSE storageOldCost.dblPaidAmount END
+																		ELSE B.dblTotal
+																		END
+																	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
-																		
 																		CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
 																					CASE	WHEN B.dblOldCost = 0 THEN 0 
 																							ELSE usingOldCost.dblTotal --COST ADJUSTMENT
@@ -347,7 +352,13 @@ BEGIN
 												
 												CASE	WHEN A.intTransactionType IN (2, 3, 11, 13) THEN -B.dblTotal /*- CAST(ISNULL(Taxes.dblTotalTax + ISNULL(@OtherChargeTaxes,0), 0) AS DECIMAL(18,2))*/ --IC Tax Commented AP-3485
 														ELSE
-															CASE	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+															CASE	WHEN B.intCustomerStorageId > 0 THEN 
+																		CASE WHEN B.dblOldCost IS NOT NULL
+																		THEN
+																			CASE WHEN B.dblOldCost = 0 THEN 0 ELSE storageOldCost.dblPaidAmount END
+																		ELSE B.dblTotal
+																		END
+																	WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 																	ELSE 
 																		
 																		CASE	WHEN B.dblOldCost IS NOT NULL THEN  																				
@@ -448,6 +459,17 @@ BEGIN
 						AS DECIMAL(18, 2)
 					)
 			) usingOldCost
+			OUTER APPLY (
+				SELECT TOP 1
+					storageHistory.dblPaidAmount
+				FROM tblGRSettleStorage storage 
+				INNER JOIN tblGRSettleStorageTicket storageTicket ON storage.intSettleStorageId = storageTicket.intSettleStorageId
+				INNER JOIN tblGRCustomerStorage customerStorage ON storageTicket.intCustomerStorageId = customerStorage.intCustomerStorageId 
+																	AND B.intCustomerStorageId = customerStorage.intCustomerStorageId
+				INNER JOIN tblGRStorageHistory storageHistory ON storageHistory.intCustomerStorageId = customerStorage.intCustomerStorageId 
+															AND storageHistory.intSettleStorageId = storageTicket.intSettleStorageId
+				WHERE B.intBillId = storage.intBillId
+			) storageOldCost
 
 
 
@@ -510,7 +532,7 @@ BEGIN
 	-- ) ForexRate
 	-- WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	-- AND B.dblDiscount <> 0
-	--COST ADJUSTMENT
+	--COST ADJUSTMENT RECEIPT ITEM
 	UNION ALL 
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -612,6 +634,80 @@ BEGIN
 	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost AND B.intInventoryReceiptItemId IS NOT NULL
 	AND 1 = (CASE WHEN B.intInventoryReceiptChargeId > 0 AND F.ysnInventoryCost = 0 THEN 1 
 			WHEN B.intInventoryReceiptItemId > 0 THEN 1 ELSE 0 END) --created adjustment for charges only if inventory cost yes
+	--COST ADJUSTMENT STORAGE ITEM
+	UNION ALL 
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	[dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'),
+											-- CASE WHEN B.intCustomerStorageId > 0 THEN [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense')
+											-- 	ELSE [dbo].[fnGetItemGLAccount](B.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+											-- END,
+		[dblDebit]						=	CAST((CASE	WHEN A.intTransactionType IN (1) THEN (B.dblTotal - 
+															storageOldCost.dblPaidAmount * ISNULL(NULLIF(B.dblRate,0),1)) 
+											 ELSE 0 END) AS  DECIMAL(18, 2)), 
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	A.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	B.strMiscDescription,
+		[intJournalLineNo]				=	B.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	CAST((CASE WHEN A.intTransactionType IN (1) THEN (B.dblTotal - storageOldCost.dblPaidAmount)
+											 ELSE 0 END) AS  DECIMAL(18, 2)),       
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
+		[strRateType]					=	G.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	D.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+			INNER JOIN tblICItemLocation ItemLoc
+				ON A.intShipToId = ItemLoc.intLocationId AND B.intItemId = ItemLoc.intItemId
+			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
+				ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId	
+			OUTER APPLY (
+				SELECT TOP 1
+					storageHistory.dblPaidAmount
+				FROM tblGRSettleStorage storage 
+				INNER JOIN tblGRSettleStorageTicket storageTicket ON storage.intSettleStorageId = storageTicket.intSettleStorageId
+				INNER JOIN tblGRCustomerStorage customerStorage ON storageTicket.intCustomerStorageId = customerStorage.intCustomerStorageId 
+																	AND B.intCustomerStorageId = customerStorage.intCustomerStorageId
+				INNER JOIN tblGRStorageHistory storageHistory ON storageHistory.intCustomerStorageId = customerStorage.intCustomerStorageId 
+															AND storageHistory.intSettleStorageId = storageTicket.intSettleStorageId
+				WHERE B.intBillId = storage.intBillId
+			) storageOldCost 
+	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND B.dblOldCost IS NOT NULL AND B.dblCost != B.dblOldCost
+	AND B.intCustomerStorageId IS NOT NULL
 	UNION ALL
 	--CHARGES
 	SELECT	
