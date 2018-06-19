@@ -448,8 +448,8 @@ BEGIN TRY
 		AND intContractStatusId NOT IN (2,3,6)
 		--AND dtmContractDate <= @dtmTransactionDateUpTo --@intCompanyId
 		AND (ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)) >0 --- Added Condition to  Check Balance minus Schedule Should be greater than Zero.
-		AND CH.intCompanyId = CASE 
-										WHEN ISNULL(@intCompanyId, 0) = 0 THEN CH.intCompanyId
+		AND ISNULL(CH.intCompanyId,0) = CASE 
+										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId,0)
 										ELSE @intCompanyId
 								  END	
 	
@@ -624,10 +624,10 @@ BEGIN TRY
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
 								  END
-		AND L.intCompanyId		= CASE 
-										WHEN ISNULL(@intCompanyId, 0) = 0 THEN L.intCompanyId
+		AND ISNULL(L.intCompanyId,0) = CASE 
+										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
 										ELSE @intCompanyId
-								  END								  		
+								       END								  		
 		----AND intContractStatusId NOT IN (2,3,6)
 		--AND dtmContractDate <= @dtmTransactionDateUpTo
 	 UNION
@@ -812,10 +812,10 @@ BEGIN TRY
 										ELSE @intLocationId
 								  END		
        
-	   AND CH.intCompanyId		= CASE 
-										WHEN ISNULL(@intCompanyId, 0) = 0 THEN CH.intCompanyId
-										ELSE @intCompanyId
-								  END
+	   AND ISNULL(CH.intCompanyId,0)		= CASE 
+													WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId,0)
+													ELSE @intCompanyId
+											  END
 	  -------------------Inventory (FG)---------------------
        UNION
 	   
@@ -950,10 +950,10 @@ BEGIN TRY
 																	AND	CA.strType					 = 'Origin'
         LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 =	CA.intCountryID	
 		LEFT JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = Lot.intCompanyId
-		WHERE Lot.intCompanyId = CASE 
-										WHEN ISNULL(@intCompanyId, 0) = 0 THEN Lot.intCompanyId
-										ELSE @intCompanyId
-								  END	
+		WHERE ISNULL(Lot.intCompanyId,0) = CASE 
+												WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(Lot.intCompanyId,0)
+												ELSE @intCompanyId
+										   END	
 
 
 	INSERT INTO @tblContractCost(intContractDetailId,dblTotalCost)
