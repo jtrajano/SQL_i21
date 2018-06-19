@@ -187,6 +187,9 @@ BEGIN
 	END 
 END
 
+DECLARE @DefaultLotCondition NVARCHAR(50)
+SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
+
 -- Get the list of item that needs lot numbers
 BEGIN 
 	INSERT INTO @ItemsThatNeedLotId (
@@ -276,7 +279,7 @@ BEGIN
 			,strSourceTransactionId		= Receipt.strReceiptNumber
 			,intSourceTransactionTypeId = @InventoryTransactionType_InventoryReceipt
 			,strContainerNo			= ItemLot.strContainerNo
-			,strCondition			= ItemLot.strCondition
+			,strCondition			= ISNULL(NULLIF(ItemLot.strCondition, ''), @DefaultLotCondition)
 			,intInventoryReceiptId			= Receipt.intInventoryReceiptId
 			,intInventoryReceiptItemId		= ReceiptItem.intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId	= ItemLot.intInventoryReceiptItemLotId

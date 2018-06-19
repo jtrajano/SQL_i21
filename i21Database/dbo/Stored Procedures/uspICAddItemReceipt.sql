@@ -1774,7 +1774,7 @@ BEGIN
 				,[strVendorLotId] = ItemLot.strVendorLotId
 				,[dtmManufacturedDate] = ItemLot.dtmManufacturedDate
 				,[strRemarks] = ItemLot.strRemarks
-				,[strCondition] = ISNULL(ItemLot.strCondition, @DefaultLotCondition)
+				,[strCondition] = ISNULL(NULLIF(ItemLot.strCondition, ''), @DefaultLotCondition)
 				,[dtmCertified] = ItemLot.dtmCertified
 				,[dtmExpiryDate] = 
 					ISNULL(
