@@ -78,7 +78,6 @@
     ,SCTicket.strFarmNumber
     ,SCTicket.strFieldNumber
     ,SCTicket.strDiscountComment
-    ,SCTicket.strCommodityCode
     ,SCTicket.intCommodityId
     ,SCTicket.intDiscountId
     ,SCTicket.intContractId

@@ -244,7 +244,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 				LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
-				LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  CONCAT((ICC.strDescription COLLATE Latin1_General_CI_AS), ('' Discount'' COLLATE Latin1_General_CI_AS))
+				LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 
 				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId)	
 				SELECT 
@@ -351,7 +351,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				)b 
 				INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
 				INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
-				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  CONCAT((ic.strDescription COLLATE Latin1_General_CI_AS), ('' Discount'' COLLATE Latin1_General_CI_AS))
+				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 				INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
 				INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
 				WHERE b.gasct_disc_cd is not null

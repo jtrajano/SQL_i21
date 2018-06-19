@@ -107,7 +107,6 @@ BEGIN
 	,strFarmNumber
 	,strFieldNumber
 	,strDiscountComment
-	,strCommodityCode
 	,intCommodityId
 	,intDiscountId
 	,intContractId
@@ -196,7 +195,6 @@ BEGIN
 	,strFarmNumber			   = NULL
 	,strFieldNumber			   = 'NonScale'
 	,strDiscountComment		   = LTRIM(RTRIM(gastl_tic_comment))
-	,strCommodityCode		   = LTRIM(RTRIM(gastl_com_cd))
 	,intCommodityId			   = CO.intCommodityId
 	,intDiscountId			   = 1
 	,intContractId			   = [Contract].intContractDetailId
