@@ -512,7 +512,7 @@ BEGIN
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
 		,CONVERT(NUMERIC(38, 20), ISNULL(iad.dblWeight, 0)) AS dblTransactionWeight
-		,um.strUnitMeasure AS strTransactionWeightUOM
+		,um1.strUnitMeasure AS strTransactionWeightUOM
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
 		,CONVERT(NUMERIC(38, 20), ISNULL(iad.dblWeight / (
 					CASE 
@@ -521,7 +521,7 @@ BEGIN
 						ELSE l.dblWeightPerQty
 						END
 					), 0)) AS dblTransactionQty
-		,um1.strUnitMeasure AS strTransactionQtyUOM
+		,um.strUnitMeasure AS strTransactionQtyUOM
 		,iad.strNewLotNumber AS strRelatedLotId
 		,i1.strItemNo AS strPreviousItem
 		,clsl1.strSubLocationName AS strSourceSubLocation
@@ -590,10 +590,10 @@ BEGIN
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
 		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) * L.dblWeightPerQty AS dblTransactionWeight
-		,UM.strUnitMeasure AS strTransactionWeightUOM
+		,UM1.strUnitMeasure AS strTransactionWeightUOM
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblQuantity
 		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) AS dblTransactionQty
-		,UM1.strUnitMeasure AS strTransactionQtyUOM
+		,UM.strUnitMeasure AS strTransactionQtyUOM
 		,NULL AS strRelatedLotId
 		,NULL AS strPreviousItem
 		,NULL AS strSourceSubLocation
