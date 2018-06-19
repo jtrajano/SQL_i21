@@ -8,6 +8,8 @@
     [dblPrice]										NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblPrice] DEFAULT ((0)) NULL,
     [dblCost]										NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblCost] DEFAULT ((0)) NULL,
     [dblAmountDue]									NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblAmountDue] DEFAULT ((0)) NULL,
+	[dblInvoiceAmountDue]							NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblInvoiceAmountDue] DEFAULT ((0)) NULL,
+    [dblInvoicePayment]								NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblInvoicePayment] DEFAULT ((0)) NULL,
 	[intItemId]										INT NULL,
 	[intItemUOMId]									INT NULL,
 	[intCompanyLocationId]							INT NULL,

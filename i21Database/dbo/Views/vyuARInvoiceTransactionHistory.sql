@@ -26,6 +26,7 @@
 		,A.intCommodityId
 		,CM.strCommodityCode
 		, strEvent = case  (A.ysnPost) when 1 then  'Post' when 0 then 'Unpost' else 'Add/Edit' end
+		, dblBalanceAmount = A.dblInvoiceAmountDue + A.dblInvoicePayment
 	FROM
 		tblARInvoiceTransactionHistory A
 	INNER JOIN tblARInvoice B
