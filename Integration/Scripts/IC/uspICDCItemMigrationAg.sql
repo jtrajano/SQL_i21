@@ -173,6 +173,9 @@ from	tblICCategory C
 where	C.intCategoryId = tblICItem.intCategoryId
 		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
+--====Delete obsolete items. It is not required in i21 as history is not imported===
+Delete from tblICItem where strStatus = 'Discontinued'
+
 --** Items allocated for some charges are considered as non item and we classify it as 'Other Charge' Type.
  --  We validate this thru strDescription. If it contains any charges in it then that item is marked as type 'Other Charge'. **  
 
