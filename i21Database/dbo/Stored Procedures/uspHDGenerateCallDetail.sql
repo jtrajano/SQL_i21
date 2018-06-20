@@ -24,6 +24,7 @@ with closedCalls as
 		,tblEMEntity b
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.intTicketStatusId = (select top 1 intTicketStatusId from tblHDTicketStatus where strStatus = 'Closed')
@@ -42,6 +43,7 @@ openCalls as
 		,tblEMEntity b
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		--and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.intTicketStatusId <> (select top 1 intTicketStatusId from tblHDTicketStatus where strStatus = 'Closed')
@@ -60,6 +62,7 @@ totalCalls as
 		,tblEMEntity b
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 	group by
@@ -79,6 +82,7 @@ reopenCalls as
 		,tblHDTicketStatus d
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and d.strStatus = 'Reopen'
@@ -98,6 +102,7 @@ billedhours as
 		,tblHDTicketHoursWorked b
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and b.intTicketId = a.intTicketId
 		and b.ysnBillable = convert(bit,1)
@@ -114,6 +119,7 @@ rating as
 		tblHDTicket a
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.intFeedbackWithRepresentativeId is not null
 	group by
@@ -128,6 +134,7 @@ daysoutstanding as
 		tblHDTicket a
 	where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 		and a.dtmCreated is not null
 		and a.dtmCompleted is not null
@@ -180,6 +187,7 @@ from
 		,tblEMEntity b
 where
 		a.intAssignedToEntity is not null
+		and a.strType = 'HD'
 		and b.intEntityId = a.intAssignedToEntity
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 order by
