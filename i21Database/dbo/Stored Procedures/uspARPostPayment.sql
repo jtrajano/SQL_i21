@@ -1671,7 +1671,6 @@ IF @recap = 0
 		END CATCH	
 					
 	END
-
 	IF @recap = 0
 		BEGIN			
 			DECLARE @tblPaymentsToUpdateBudget TABLE (intPaymentId INT)			
@@ -1708,10 +1707,18 @@ IF @recap = 0
 			WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 
 			--Call integration 
-			declare @InvoiceIds InvoiceId
-			insert into @InvoiceIds(intHeaderId, intDetailId)					
-			select intInvoiceId, intPaymentId from tblARPaymentDetail where intPaymentId in (select intTransactionId from @ARReceivablePostData)
-			exec uspARPaymentIntegration @InvoiceIds,@post
+			
+			declare @PaymentStaging PaymentIntegrationStagingTable
+			declare @InvoiceId InvoiceId
+
+			insert into @PaymentStaging(intId, intInvoiceId, dblBasePayment, strTransactionNumber, strSourceTransaction, strSourceId, intEntityCustomerId, intCompanyLocationId, intCurrencyId, dtmDatePaid, intPaymentMethodId, intEntityId)
+			--select intTransactionId, intInvoiceId,  dblBasePayment, strTransactionId, 'temp', '0', intEntityCustomerId, intCompanyLocationId, intCurrencyId, getdate(), 1, 1  from @ARReceivablePostData
+			select A.intPaymentId, A.intInvoiceId, B.dblBaseAmountPaid, B.strRecordNumber, '0', '0', 1, 1, 1, getdate(), 1, 1
+				from tblARPaymentDetail A join tblARPayment B 
+				on A.intPaymentId = B.intPaymentId where A.intPaymentId in (select intTransactionId from @ARReceivablePostData)
+			--			
+
+			exec uspARPaymentIntegration @InvoiceId, @post, @PaymentStaging
 			--
 
 

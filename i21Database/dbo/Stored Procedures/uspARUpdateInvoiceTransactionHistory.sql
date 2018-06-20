@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceTransactionHistory]
-	 @InvoiceIds	InvoiceId	READONLY,
-	 @Post		BIT = NULL,
-	 @Payment	BIT = 0
+	 @InvoiceIds			InvoiceId	READONLY,
+	 @Post					BIT = NULL,
+	 @Payment				BIT = 0,
+	 @PaymentStaging		PaymentIntegrationStagingTable READONLY
 
 AS
 
@@ -144,9 +145,9 @@ AS
 				SELECT
 					ARID.intInvoiceId,
 					ARID.intInvoiceDetailId,
-					ARID.dblQtyShipped,
+					case  (isnull(@Post, 1)) when 1 then  ARID.dblQtyShipped else (ARID.dblQtyShipped * -1) end,
 					ARID.dblPrice,
-					ARID.dblTotal,
+					case  (isnull(@Post, 1)) when 1 then  ARID.dblTotal else (ARID.dblTotal * -1) end,
 					ARID.intItemId,
 					ARID.intItemUOMId,
 					ARI.intCompanyLocationId,
@@ -209,14 +210,17 @@ AS
 					,dblCost
 					,ysnPost
 					,dblInvoicePayment
-					,dblInvoiceAmountDue
+					,dblInvoiceTotal
+					,dblInvoiceBalance
+					,intPaymentId
+					,strRecordNumber
 				)			
 		SELECT
 					ARID.intInvoiceId,
 					ARID.intInvoiceDetailId,
-					ARID.dblQtyShipped,
+					dblQtyShipped = (case when @Post = 1 then -1 else 1 end ) * case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARI.dblBaseInvoiceTotal) * (ARID.dblQtyShipped) else 0 end,
 					ARID.dblPrice,
-					ARID.dblTotal,
+					(case when @Post = 1 then -1 else 1 end ) * ARID.dblTotal,
 					ARID.intItemId,
 					ARID.intItemUOMId,
 					ARI.intCompanyLocationId,
@@ -227,18 +231,23 @@ AS
 					ITM.intCommodityId,
 					ICT.dblCost,
 					@Post,
-					(case when @Post = 1 then -1 else 0 end ) * isnull(PYM.dblBasePayment, 0),
-					(case when @Post = 0 then 1 else 1 end ) * isnull(ARI.dblBaseAmountDue, 0)
+					(case when @Post = 0 then -1 else 1 end ) * isnull(PS.dblBasePayment, 0),
+					(case when @Post = 0 then 1 else 1 end ) * isnull(ARI.dblBaseInvoiceTotal, 0),
+					dblInvoiceBalance = case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARI.dblBaseInvoiceTotal) * (ARID.dblBaseTotal) else 0 end,
+					PS.intId,
+					PS.strTransactionNumber
 				FROM
 					tblARInvoiceDetail ARID
 				INNER JOIN
-					(SELECT [intInvoiceId], [intCompanyLocationId], [intCurrencyId], dtmDate, dblBaseAmountDue FROM tblARInvoice WITH (NOLOCK)) ARI
+					(SELECT [intInvoiceId], [intCompanyLocationId], [intCurrencyId], dtmDate, dblBaseInvoiceTotal FROM tblARInvoice WITH (NOLOCK)) ARI
 						ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-				INNER JOIN
-					@InvoiceIds II
-						ON ARI.[intInvoiceId] = II.[intHeaderId]
-				left join tblARPaymentDetail PYM
-						on II.intDetailId = PYM.intPaymentId and PYM.intInvoiceId = II.[intHeaderId]
+				join @PaymentStaging PS
+					on PS.intInvoiceId = ARID.intInvoiceId
+				--INNER JOIN
+				--	@InvoiceIds II
+				--		ON ARI.[intInvoiceId] = II.[intHeaderId]
+				--left join tblARPaymentDetail PYM
+				--		on II.intDetailId = PYM.intPaymentId and PYM.intInvoiceId = II.[intHeaderId]
 				LEFT JOIN (select intItemId, intCommodityId from tblICItem with(nolock)) ITM
 					on ITM.intItemId = ARID.intItemId
 				left join tblICInventoryTransaction ICT
