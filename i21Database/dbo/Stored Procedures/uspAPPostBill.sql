@@ -453,6 +453,7 @@ BEGIN
 					@adjustedEntries
 					, @batchId
 					, @userId
+					, @ysnPost = @post
 		END TRY
 		BEGIN CATCH
 			SET @errorAdjustment = ERROR_MESSAGE()
@@ -657,6 +658,7 @@ BEGIN
 					@adjustedEntries
 					, @batchId
 					, @userId
+					, @ysnPost = @post
 		END TRY
 		BEGIN CATCH
 			SET @errorAdjustment = ERROR_MESSAGE()
@@ -866,15 +868,15 @@ BEGIN
 		--) AppliedPayments
 		--EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 0
 
-		IF EXISTS(SELECT 1 FROM @adjustedEntries)
-		BEGIN
-			--Unpost Cost Adjustment
-			DECLARE @billsToUnpost AS Id
-			INSERT INTO @billsToUnpost
-			SELECT DISTINCT intTransactionId FROM @adjustedEntries
+		-- IF EXISTS(SELECT 1 FROM @adjustedEntries)
+		-- BEGIN
+		-- 	--Unpost Cost Adjustment
+		-- 	DECLARE @billsToUnpost AS Id
+		-- 	INSERT INTO @billsToUnpost
+		-- 	SELECT DISTINCT intTransactionId FROM @adjustedEntries
 
-			EXEC uspAPUnpostCostAdjustmentGL  @billsToUnpost, @batchId, @userId
-		END
+		-- 	EXEC uspAPUnpostCostAdjustmentGL  @billsToUnpost, @batchId, @userId
+		-- END
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
