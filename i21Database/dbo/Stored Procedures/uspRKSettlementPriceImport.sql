@@ -62,13 +62,13 @@ WHILE @mRowNumber > 0
 	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarket
 
 
-	DECLARE @intCommodityId INT = NULL
-	SELECT @intCommodityId=intCommodityId FROM tblRKFutureMarket m
+		DECLARE @intCommodityMarketId INT = NULL
+	SELECT @intCommodityMarketId=intCommodityMarketId FROM tblRKFutureMarket m
 	JOIN tblRKCommodityMarketMapping mm on m.intFutureMarketId=mm.intFutureMarketId 
 	WHERE m.intFutureMarketId=@intFutureMarketId
 
   INSERT INTO tblRKFuturesSettlementPrice(intFutureMarketId,dtmPriceDate,intConcurrencyId,intCommodityMarketId,strPricingType)
-   VALUES(@intFutureMarketId,@strSettlementDate,1,@intCommodityId,'Mark To Market')
+   VALUES(@intFutureMarketId,@strSettlementDate,1,@intCommodityMarketId,'Mark To Market')
 
 	SELECT @intFutureSettlementPriceId = scope_Identity()
 
