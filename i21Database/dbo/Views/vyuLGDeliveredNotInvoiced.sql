@@ -2,6 +2,8 @@
 AS
 SELECT   Load.intLoadId
 		,Load.[strLoadNumber]
+		,ALH.strAllocationNumber
+		,ALD.strAllocationDetailRefNo
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
         ,strSContractNumber = SHeader.strContractNumber
@@ -42,6 +44,8 @@ LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = Lo
 LEFT JOIN tblICLot Lot ON Lot.intLotId = LoadDetailLot.intLotId
 LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId= LoadDetail.intPickLotDetailId
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
+LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId
+LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = Load.intLoadId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 LEFT JOIN tblCTBook BO ON BO.intBookId = Load.intBookId
