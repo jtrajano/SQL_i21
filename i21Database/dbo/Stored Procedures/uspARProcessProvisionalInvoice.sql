@@ -409,7 +409,107 @@ SELECT
 															ON IC.[intInventoryShipmentItemId] = AR.[intInventoryShipmentItemId]  
 													WHERE AR.[intInvoiceId] = @InvoiceId
 												)
+UNION ALL
 
+SELECT 
+		 [strTransactionType]				= 'Invoice'
+		,[strType]							= 'Standard'
+		,[strSourceTransaction]				= 'Provisional'
+		,[intSourceId]						= @InvoiceId   
+		,[strSourceId]						= @InvoiceNumber
+		,[intInvoiceId]						= NULL
+		,[intEntityCustomerId]				= @EntityCustomerId
+		,[intCompanyLocationId]				= @CompanyLocationId
+		,[intCurrencyId]					= @CurrencyId
+		,[intTermId]						= @TermId
+		,[dtmDate]							= @Date 
+		,[dtmDueDate]						= NULL
+		,[dtmShipDate]						= CAST(ISNULL(@ShipDate, GETDATE()) AS DATE)
+		,[intEntitySalespersonId]			= @EntitySalespersonId
+		,[intFreightTermId]					= @FreightTermId
+		,[intShipViaId]						= @ShipViaId
+		,[intPaymentMethodId]				= @PaymentMethodId
+		,[strInvoiceOriginId]				= @InvoiceNumber
+		,[strPONumber]						= @PONumber
+		,[strBOLNumber]						= @BOLNumber
+		,[strComments]						= @Comments
+		,[intShipToLocationId]				= @ShipToLocationId
+		,[intBillToLocationId]				= @BillToLocationId
+		,[ysnTemplate]						= 0
+		,[ysnForgiven]						= 0
+		,[ysnCalculated]					= 0
+		,[ysnSplitted]						= 0
+		,[intPaymentId]						= NULL
+		,[intSplitId]						= NULL
+		,[intDistributionHeaderId]			= NULL
+		,[strActualCostId]					= NULL
+		,[intShipmentId]					= NULL
+		,[intTransactionId]					= NULL
+		,[intOriginalInvoiceId]				= @OriginalInvoiceId
+		,[intEntityId]						= @UserEntityId
+		,[ysnResetDetails]					= 1
+		,[ysnPost]							= NULL	
+		,[intInvoiceDetailId]				= NULL 
+		,[intItemId]						= ARID.[intItemId] 
+		,[ysnInventory]						= 1
+		,[strDocumentNumber]				= @InvoiceNumber
+		,[strItemDescription]				= I.[strDescription] 
+		,[intOrderUOMId]					= ARID.[intItemUOMId]		
+		,[dblQtyOrdered]					= ARID.[dblQtyOrdered] 
+		,[intItemUOMId]						= ARID.[intItemUOMId] 
+		,[dblQtyShipped]					= ARID.[dblQtyShipped]  
+		,[dblDiscount]						= 0.00
+		,[dblPrice]							= ISNULL(ARID.[dblPrice], 0)
+		,[dblUnitPrice]						= ISNULL(ARID.[dblUnitPrice], 0)
+		,[ysnRefreshPrice]					= 0
+		,[strMaintenanceType]				= ARID.[strMaintenanceType]
+		,[strFrequency]						= ARID.[strFrequency]
+		,[dtmMaintenanceDate]				= ARID.[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]				= ARID.[dblMaintenanceAmount]
+		,[dblLicenseAmount]					= ARID.[dblLicenseAmount]
+		,[intTaxGroupId]					= ARID.[intTaxGroupId]
+		,[ysnRecomputeTax]					= 1
+		,[intSCInvoiceId]					= ARID.[intSCInvoiceId]
+		,[strSCInvoiceNumber]				= ARID.[strSCInvoiceNumber]
+		,[intInventoryShipmentItemId]		= NULL
+		,[strShipmentNumber]				= NULL
+		,[intSalesOrderDetailId]			= NULL
+		,[strSalesOrderNumber]				= NULL
+		,[intContractHeaderId]				= ARID.[intContractHeaderId] 
+		,[intContractDetailId]				= ARID.[intContractDetailId] 
+		,[intShipmentPurchaseSalesContractId]	= NULL
+		,[intItemWeightUOMId]				= NULL
+		,[dblItemWeight]					= 0.00
+		,[dblShipmentGrossWt]				= 0.00
+		,[dblShipmentTareWt]				= 0.00
+		,[dblShipmentNetWt]					= 0.00
+		,[intLoadDetailId]					= ARID.[intLoadDetailId]
+		,[intTicketId]						= ARID.[intTicketId]
+		,[intTicketHoursWorkedId]			= ARID.[intTicketHoursWorkedId]
+		,[intOriginalInvoiceDetailId]		= ARID.[intInvoiceDetailId] 
+		,[intSiteId]						= ARID.[intSiteId]
+		,[strBillingBy]						= ARID.[strBillingBy]
+		,[dblPercentFull]					= ARID.[dblPercentFull]
+		,[dblNewMeterReading]				= ARID.[dblNewMeterReading]
+		,[dblPreviousMeterReading]			= ARID.[dblPreviousMeterReading]
+		,[dblConversionFactor]				= ARID.[dblConversionFactor]
+		,[intPerformerId]					= ARID.[intPerformerId]
+		,[ysnLeaseBilling]					= ARID.[ysnLeaseBilling]
+		,[ysnVirtualMeterReading]			= ARID.[ysnVirtualMeterReading]
+		,[intDestinationGradeId]			= NULL
+		,[intDestinationWeightId]			= NULL
+		,[intCurrencyExchangeRateTypeId]	= ARID.intCurrencyExchangeRateId
+		,[intCurrencyExchangeRateId]		= NULL
+		,[dblCurrencyExchangeRate]			= ISNULL(ARID.dblCurrencyExchangeRate,1)
+		,[intSubCurrencyId]					= ARID.[intSubCurrencyId]
+		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
+		,[intStorageLocationId]				= ARID.[intStorageLocationId]
+		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
+	FROM 
+		tblARInvoiceDetail ARID
+	LEFT JOIN tblICItem I
+		ON ARID.intItemId = I.intItemId
+	WHERE intInvoiceId = @InvoiceId AND ISNULL(ARID.intInventoryShipmentItemId,0) = 0 AND ISNULL(ARID.intLoadDetailId,0) = 0
 
 END TRY
 BEGIN CATCH

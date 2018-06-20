@@ -1463,7 +1463,7 @@ SET @batchIdUsed = @batchId
 
 	END
 	
-	IF (SELECT COUNT(1) FROM @ARReceivablePostData) > 1
+	IF (SELECT COUNT(1) FROM @ARReceivablePostData) > 1 AND @post = 1
 	BEGIN
 		DECLARE @DiscouuntedInvoices TABLE (
 				intInvoiceId int PRIMARY KEY,
@@ -2610,6 +2610,13 @@ IF @recap = 0
 			SELECT Z.intPaymentId, Z.strTransactionId, intWriteOffAccountId, intEntityId, Z.intInterestAccountId, Z.intSalesDiscounts FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 
+			--update payment record
+            UPDATE A
+                SET A.intCurrentStatus = 5
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
+
+
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -2833,6 +2840,12 @@ IF @recap = 0
 				intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)		
 
 			EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @arPaymentIds, @post = 0
+
+			--update payment record
+            UPDATE A
+                SET A.intCurrentStatus = NULL
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 
 			END
 		ELSE

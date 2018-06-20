@@ -1,28 +1,26 @@
 ﻿CREATE VIEW [dbo].[vyuARBillableHoursForImport]
-	AS 
-SELECT
-	C.[intEntityId]
-	,C.[strCustomerNumber]
-	,E.[strName]
-	,T.[intTicketId]
-	,T.[strTicketNumber]
-	,HW.[intTicketHoursWorkedId]
-	,HW.[intAgentEntityId]
-	,U.[strName]					AS "strAgentName"
-	,GETDATE()						AS	"dtmBilled"
-	,HW.[dtmDate]
-	,HW.[intInvoiceId] 
-	,JC.[intJobCodeId]
-	,JC.[strJobCode]
-	,ISNULL(EML.[intWarehouseId], ISNULL(JC.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)))
-									AS "intCompanyLocationId"
-	,JC.[intItemId]
-	,JC.[intItemUOMId] 
-	,IC.[strItemNo]
-	,HW.[intHours]
-	,HW.[dblRate]					AS "dblPrice"
-	,HW.[intHours] * HW.[dblRate]	AS "dblTotal"
-	,EML.[intWarehouseId] 			AS "intEntityWarehouseId"
+AS
+SELECT intEntityId				= C.[intEntityId]
+	 , strCustomerNumber		= C.[strCustomerNumber]
+	 , strName					= E.[strName]
+	 , intTicketId				= T.[intTicketId]
+	 , strTicketNumber			= T.[strTicketNumber]
+	 , intTicketHoursWorkedId	= HW.[intTicketHoursWorkedId]
+	 , intAgentEntityId			= HW.[intAgentEntityId]
+	 , strAgentName				= U.[strName]
+	 , dtmBilled				= GETDATE()
+	 , dtmDate					= HW.[dtmDate]
+	 , intInvoiceId				= HW.[intInvoiceId] 
+	 , intJobCodeId				= JC.[intJobCodeId]
+	 , strJobCode				= JC.[strJobCode]
+	 , intCompanyLocationId		= ISNULL(EML.[intWarehouseId], CL.intCompanyLocationId)
+	 , intItemId				= JC.[intItemId]
+	 , intItemUOMId				= JC.[intItemUOMId] 
+	 , strItemNo				= IC.[strItemNo]
+	 , intHours					= HW.[intHours]
+	 , dblPrice					= HW.[dblRate]
+	 , dblTotal					= HW.[intHours] * HW.[dblRate]
+	 , intEntityWarehouseId		=  EML.[intWarehouseId]
 FROM
 	tblHDJobCode JC
 INNER JOIN 
@@ -50,3 +48,8 @@ LEFT JOIN
 INNER JOIN
 	tblEMEntity U
 		ON HW.[intAgentEntityId] = U.[intEntityId]
+OUTER APPLY (
+	SELECT TOP 1 intCompanyLocationId 
+	FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
+	WHERE ysnLocationActive = 1
+) CL

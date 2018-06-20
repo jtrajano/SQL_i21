@@ -1572,6 +1572,9 @@ BEGIN
 				GOTO _Exit_With_Rollback;
 			END
 			
+			DECLARE @DefaultLotCondition NVARCHAR(50)
+            SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
+
 			-- Insert Lot for Receipt Item
 			INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				[intInventoryReceiptItemId]		
@@ -1634,7 +1637,7 @@ BEGIN
 				,[strVendorLotId] = ItemLot.strVendorLotId
 				,[dtmManufacturedDate] = ItemLot.dtmManufacturedDate
 				,[strRemarks] = ItemLot.strRemarks
-				,[strCondition] = ItemLot.strCondition
+				,[strCondition] = ISNULL(NULLIF(ItemLot.strCondition, ''), @DefaultLotCondition)
 				,[dtmCertified] = ItemLot.dtmCertified
 				,[dtmExpiryDate] = 
 					ISNULL(
