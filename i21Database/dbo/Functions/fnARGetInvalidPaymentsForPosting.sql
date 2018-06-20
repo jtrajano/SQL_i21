@@ -315,28 +315,29 @@ BEGIN
 
     UNION
 
-    --NOT BALANCE
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = NULL
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The debit and credit amounts are not balanced.'
-	FROM
-		@Payments P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intTransactionDetailId] IS NOT NULL
-    GROUP BY
-         P.[intTransactionId]
-        ,P.[strTransactionId]
-        ,P.[strBatchId]
-    HAVING
-            AVG(P.[dblAmountPaid]) < SUM(P.[dblPayment])
-        --OR  AVG(P.[dblBaseAmountPaid]) < SUM(P.[dblBasePayment])
+-- let uspGLBookEntries do the checking
+ --   --NOT BALANCE
+	--SELECT
+ --        [intTransactionId]         = P.[intTransactionId]
+ --       ,[strTransactionId]         = P.[strTransactionId]
+ --       ,[strTransactionType]       = @TransType
+ --       ,[intTransactionDetailId]   = NULL
+ --       ,[strBatchId]               = P.[strBatchId]
+ --       ,[strError]                 = 'The debit and credit amounts are not balanced.'
+	--FROM
+	--	@Payments P
+ --   WHERE
+ --           P.[ysnPost] = 1
+ --       AND P.[intTransactionDetailId] IS NOT NULL
+ --   GROUP BY
+ --        P.[intTransactionId]
+ --       ,P.[strTransactionId]
+ --       ,P.[strBatchId]
+ --   HAVING
+ --           AVG(P.[dblAmountPaid]) < SUM(P.[dblPayment])
+ --       --OR  AVG(P.[dblBaseAmountPaid]) < SUM(P.[dblBasePayment])
 
-    UNION
+ --   UNION
 
     --Payment Date
 	SELECT

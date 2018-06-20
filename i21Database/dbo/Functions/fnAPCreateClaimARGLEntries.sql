@@ -81,7 +81,7 @@ BEGIN
 			,[strBatchId]					=	@batchId	
 			,[intAccountId]					=	voucher.intAccountId
 			,[dblDebit]						=	0
-			,[dblCredit]					=	arPayDetail.dblBasePayment + ISNULL(claimDetail.dblFranchiseAmount,0)
+			,[dblCredit]					=	arPayDetail.dblBasePayment + ISNULL(claimDetail.dblFranchiseAmount,0.000000)
 			,[dblDebitUnit]					=	0
 			,[dblCreditUnit]				=	0
 			,[strDescription]				=	arPay.strNotes
@@ -104,8 +104,8 @@ BEGIN
 			,[intConcurrencyId]				=	1
 			,[dblDebitForeign]				=	0
 			,[dblDebitReport]				=	0
-			,[dblCreditForeign]				=	arPayDetail.dblPayment
-			,[dblCreditReport]				=	arPayDetail.dblPayment
+			,[dblCreditForeign]				=	(arPayDetail.dblBasePayment + ISNULL(claimDetail.dblFranchiseAmount,0.000000))  * ISNULL(arPayDetail.dblCurrencyExchangeRate,1.000000)
+			,[dblCreditReport]				=	arPayDetail.dblBasePayment + ISNULL(claimDetail.dblFranchiseAmount,0.000000)
 			,[dblReportingRate]				=	arPayDetail.dblCurrencyExchangeRate
 			,[dblForeignRate]				=	arPayDetail.dblCurrencyExchangeRate
 			,[strRateType]					=	SMCERT.strCurrencyExchangeRateType	 	
@@ -156,8 +156,8 @@ BEGIN
 			,[strTransactionForm]			=	'Receive Payments'
 			,[strModuleName]				=	'Accounts Receivable'
 			,[intConcurrencyId]				=	1
-			,[dblDebitForeign]				=	arPayDetail.dblBasePayment * ISNULL(arPayDetail.dblCurrencyExchangeRate,1) --Please review -- voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
-			,[dblDebitReport]				=	arPayDetail.dblBasePayment * ISNULL(arPayDetail.dblCurrencyExchangeRate,1) --Please review -- voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitForeign]				=	ISNULL(claimDetail.dblFranchiseAmount,0.000000) * ISNULL(arPayDetail.dblCurrencyExchangeRate,1.000000) --Please review -- voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
+			,[dblDebitReport]				=	ISNULL(claimDetail.dblFranchiseAmount,0.000000) * ISNULL(arPayDetail.dblCurrencyExchangeRate,1.000000) --Please review -- voucherDetail.dblFranchiseAmount * ISNULL(arPayDetail.dblCurrencyExchangeRate,1)
 			,[dblCreditForeign]				=	0
 			,[dblCreditReport]				=	0
 			,[dblReportingRate]				=	arPayDetail.dblCurrencyExchangeRate
