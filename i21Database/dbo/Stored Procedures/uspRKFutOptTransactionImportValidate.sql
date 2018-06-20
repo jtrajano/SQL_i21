@@ -626,6 +626,8 @@ END
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
 		convert(datetime,dtmFilledDate,@ConvertYear) dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg, convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog
+		WHERE isnull(strName,'') <> '' and isnull(strFutMarketName,'') <> '' and isnull(strInstrumentType,'') <> ''
+AND isnull(strAccountNumber,'') <> '' and isnull(strCommodityCode,'') <> '' and isnull(strLocationName,'') <> '' and isnull(strSalespersonId,'') <> ''
 
 DELETE FROM tblRKFutOptTransactionImport_ErrLog
 END TRY
