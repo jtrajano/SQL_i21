@@ -397,6 +397,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblBaseItemTermDiscountExemption]
 				,[dblTermDiscountRate]
 				,[ysnTermDiscountExempt]
+				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[dblPrice]
 				,[dblUnitPrice]
@@ -475,6 +476,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 															,(CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1 ELSE ISNULL(@ItemCurrencyExchangeRate, 1) END))
 				,@TermDiscountRate
 				,@TermDiscountExempt
+				,@ItemMaintenanceAmount
 				,@ItemLicenseAmount
 				,@ItemPrice
 				,@ItemUnitPrice
