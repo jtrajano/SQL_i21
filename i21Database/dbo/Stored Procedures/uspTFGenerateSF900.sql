@@ -42,7 +42,7 @@ DECLARE @tblTempSummaryItem TABLE (
 
 IF @Refresh = 1
 		BEGIN
-			DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
+			DELETE FROM tblTFTransactionSummary  WHERE intTaxAuthorityId = 14 AND strFormCode = 'SF-900'
 		END
 	-- ======================== HEADER ==============================
 DECLARE @DatePeriod DATETIME

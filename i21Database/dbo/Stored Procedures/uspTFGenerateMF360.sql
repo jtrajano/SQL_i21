@@ -53,7 +53,7 @@ BEGIN TRY
 
 	IF @Refresh = 1
 	BEGIN
-		DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
+		DELETE FROM tblTFTransactionSummary WHERE intTaxAuthorityId = 14 AND strFormCode = 'MF-360'
 	END
 		-- ======================== HEADER ==============================
 	DECLARE @DatePeriod DATETIME
