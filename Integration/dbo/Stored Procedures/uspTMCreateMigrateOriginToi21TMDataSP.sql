@@ -42,6 +42,29 @@ BEGIN
 
 					BEGIN TRANSACTION
 
+					-----------------------------------------------------------------------------------
+					--------------------------------------Start Driver Checking
+					UPDATE tblTMDispatch
+					SET intDispatchDriverID = NULL
+					WHERE intDispatchDriverID = 0
+		
+					-----------------------------------End Driver Checking
+					-----------------------------------------------------------------------------------
+
+
+					-----------------------------------------------------------------------------------
+					--------------------------------------Start Term Checking
+					UPDATE tblTMSite
+					SET intDeliveryTermID = NULL
+					WHERE intDeliveryTermID = 0
+		
+					UPDATE tblTMDeliveryHistory
+					SET intWillCallDeliveryTermId = NULL
+					WHERE intWillCallDeliveryTermId = 0
+		
+					-----------------------------------End Term Checking
+					-----------------------------------------------------------------------------------
+
 
 					PRINT  ''START UPDATE CUSTOMER AND SHIPTO RELATED RECORDS''
 					----------------------------------------------------------------------------
