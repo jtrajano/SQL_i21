@@ -421,7 +421,7 @@ BEGIN
 	IF(@posStrPayment != 'On Account')
 	BEGIN
 		--create cash refund
-		EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @UserId = @UserId
+		EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @intUserId = @UserId
 	END
 
 	UPDATE tblARPOS
