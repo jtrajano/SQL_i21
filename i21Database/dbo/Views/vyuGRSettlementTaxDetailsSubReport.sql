@@ -7,7 +7,7 @@ SELECT
 					WHEN BillDtl.intInventoryReceiptChargeId IS NULL THEN Tax.dblTax
 					ELSE 
 							CASE 
-								WHEN Charge.ysnPrice = 1 THEN Tax.dblTax * - 1
+								WHEN Charge.ysnPrice = 1 AND Tax.dblTax > 0 THEN Tax.dblTax * - 1
 								ELSE Tax.dblTax
 							END
 			END
