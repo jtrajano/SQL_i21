@@ -6753,6 +6753,10 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspARPaymentIntegration.sql" />
+    <None Include="Scripts\Post-Deployment\ST\11_FileFieldMapping_Passport_ISM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportFGM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6799,7 +6803,7 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPaymentOverflow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorBasisAdvance.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
-    <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
+    <None Include="Scripts\Post-Deployment\ST\01_FileFieldMapping_PricebookSale.sql" />
     <None Include="i21Database_1.publish.xml" />
     <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
     <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />
@@ -6810,10 +6814,10 @@
     <None Include="Scripts\Post-Deployment\PR\DataFixes\ResetEaningHoursToProcess.sql" />
     <None Include="Scripts\Post-Deployment\EM\016_MoveCustomerAccountStatusToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherForApproval.sql" />
-    <None Include="Scripts\Post-Deployment\ST\2_FileFieldMapping_PromotionItemList.sql" />
-    <None Include="Scripts\Post-Deployment\ST\3_FileFieldMapping_PromotionCombo.sql" />
-    <None Include="Scripts\Post-Deployment\ST\4_FileFieldMapping_PricebookMixMatch.sql" />
-    <None Include="Scripts\Post-Deployment\ST\5_FileFieldMapping_PricebookSendSapphire.sql" />
+    <None Include="Scripts\Post-Deployment\ST\02_FileFieldMapping_PromotionItemList.sql" />
+    <None Include="Scripts\Post-Deployment\ST\03_FileFieldMapping_PromotionCombo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\04_FileFieldMapping_PricebookMixMatch.sql" />
+    <None Include="Scripts\Post-Deployment\ST\05_FileFieldMapping_PricebookSendSapphire.sql" />
     <None Include="Scripts\Post-Deployment\EM\017_MoveSplitCategoryToNewTable.sql" />
     <None Include="Scripts\Post-Deployment\EM\018_UpdateRoleId_ForEntityCredential.sql" />
     <None Include="Scripts\Utility\IC\Repost Costing\uspICRepostCosting.sql" />
@@ -6831,10 +6835,10 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\15_FixInvoiceDateForCredits.sql" />
     <Build Include="dbo\Views\vyuSMGlobalSearch.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillPayToAddress.sql" />
-    <None Include="Scripts\Post-Deployment\ST\6_Checkout_Radiant_ISM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\7_Checkout_Radiant_MCM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\8_Checkout_Radiant_FGM.sql" />
-    <None Include="Scripts\Post-Deployment\ST\9_Checkout_Radiant_MSM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\06_Checkout_Radiant_ISM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\07_Checkout_Radiant_MCM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\08_Checkout_Radiant_FGM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\09_Checkout_Radiant_MSM.sql" />
     <None Include="Scripts\Post-Deployment\EM\023_RenameEntityContactEmailDistribution.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\17_AddDefaultQuoteOrderTemplate.sql" />
     <None Include="Scripts\Post-Deployment\PR\Reports\SubReports\PaycheckTimeOffSubReport.sql" />
