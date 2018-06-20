@@ -71,12 +71,15 @@ SELECT DISTINCT PL.intPickLotDetailId,
 					ELSE
 						PL.dblNetWt * SCD.dblCashPrice * dbo.fnLGGetItemUnitConversion(SCD.intItemId, (SELECT Top(1) IU.intItemUOMId from tblICItemUOM IU WHERE IU.intItemId = SCD.intItemId AND IU.intUnitMeasureId=PL.intWeightUnitMeasureId), SUOM.intUnitMeasureId) / 100
 					END,
-  strSplitFrom = PPL.strPickLotNumber
+  strSplitFrom = PPL.strPickLotNumber,
+  strAllocationNumber = AH.strAllocationNumber,
+  strAllocationDetailRefNo = AD.strAllocationDetailRefNo
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
 JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
+JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = AD.intPContractDetailId
 JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = AD.intSContractDetailId
