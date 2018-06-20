@@ -91,7 +91,6 @@ FROM	tblICInventoryReceipt Receipt
 
 			WHERE	rc.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND rc.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-					AND ct.intPricingTypeId != 2
 		) receiptAndVoucheredCharges
 		OUTER APPLY (
 			SELECT	TOP 1 
