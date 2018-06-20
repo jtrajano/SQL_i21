@@ -42,6 +42,9 @@ BEGIN
 
 					BEGIN TRANSACTION
 
+					DELETE FROM tblTMBudgetCalculationItemPricing
+					WHERE intItemId = 0
+
 					-----------------------------------------------------------------------------------
 					--------------------------------------Start Driver Checking
 					UPDATE tblTMDispatch
