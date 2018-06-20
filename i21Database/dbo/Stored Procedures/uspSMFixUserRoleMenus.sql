@@ -49,10 +49,10 @@ BEGIN TRY
 				--							OR intParentMenuID IN (10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
 				--END
 
-				UPDATE rm SET ysnVisible = 1
-				FROM tblSMUserRoleMenu rm
-				INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID
-				WHERE mm.strMenuName IN ('My Account (Portal)', 'My Company (Portal)', 'Payment Methods (Portal)', 'Change Password (Portal)')
+				--UPDATE rm SET ysnVisible = 1
+				--FROM tblSMUserRoleMenu rm
+				--INNER JOIN tblSMMasterMenu mm ON rm.intMenuId = mm.intMenuID
+				--WHERE mm.strMenuName IN ('My Account (Portal)', 'My Company (Portal)', 'Payment Methods (Portal)', 'Change Password (Portal)')
 			END
 		ELSE -- U S E R 
 			BEGIN
