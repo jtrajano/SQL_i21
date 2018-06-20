@@ -27,22 +27,18 @@ select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId
 		, intMasterId
 	)
 	-- Insert generated script here. Remove first instance of "UNION ALL "
- SELECT intProductCodeId = 670, strProductCode = '054', strDescription = 'Propane', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332586
- UNION ALL SELECT intProductCodeId = 671, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332587
- UNION ALL SELECT intProductCodeId = 672, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332588
- UNION ALL SELECT intProductCodeId = 673, strProductCode = '123', strDescription = 'Fuel Alcohol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332589
- UNION ALL SELECT intProductCodeId = 674, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332590
- UNION ALL SELECT intProductCodeId = 675, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332591
- UNION ALL SELECT intProductCodeId = 676, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332592
- UNION ALL SELECT intProductCodeId = 677, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332593
- UNION ALL SELECT intProductCodeId = 678, strProductCode = '160', strDescription = 'Diesel - Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332594
- UNION ALL SELECT intProductCodeId = 679, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332595
- UNION ALL SELECT intProductCodeId = 680, strProductCode = '226', strDescription = 'Diesel ? High Sulfur Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332596
- UNION ALL SELECT intProductCodeId = 681, strProductCode = '227', strDescription = 'Diesel ? Low Sulfur Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332597
- UNION ALL SELECT intProductCodeId = 682, strProductCode = '241', strDescription = 'Ethanol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332598
- UNION ALL SELECT intProductCodeId = 683, strProductCode = '243', strDescription = 'Methanol', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332599
- UNION ALL SELECT intProductCodeId = 684, strProductCode = '284', strDescription = 'BioDiesel ? Undyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332600
- UNION ALL SELECT intProductCodeId = 685, strProductCode = '290', strDescription = 'Biodiesel ? Dyed', strProductCodeGroup = ' ', strNote = NULL, intMasterId = 332601
+ SELECT intProductCodeId = 670, strProductCode = '054', strDescription = 'Propane', strProductCodeGroup = '', strNote = NULL, intMasterId = 332586
+ UNION ALL SELECT intProductCodeId = 671, strProductCode = '065', strDescription = 'Gasoline', strProductCodeGroup = '', strNote = NULL, intMasterId = 332587
+ UNION ALL SELECT intProductCodeId = 672, strProductCode = '072', strDescription = 'Kerosene - Dyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 332588
+ UNION ALL SELECT intProductCodeId = 673, strProductCode = '123', strDescription = 'Fuel Alcohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 332589
+ UNION ALL SELECT intProductCodeId = 674, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 332590
+ UNION ALL SELECT intProductCodeId = 675, strProductCode = '125', strDescription = 'Aviation Gasoline', strProductCodeGroup = '', strNote = NULL, intMasterId = 332591
+ UNION ALL SELECT intProductCodeId = 676, strProductCode = '130', strDescription = 'Jet Fuel', strProductCodeGroup = '', strNote = NULL, intMasterId = 332592
+ UNION ALL SELECT intProductCodeId = 677, strProductCode = '142', strDescription = 'Kerosene - Undyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 332593
+ UNION ALL SELECT intProductCodeId = 678, strProductCode = '160', strDescription = 'Diesel - Undyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 332594
+ UNION ALL SELECT intProductCodeId = 679, strProductCode = '224', strDescription = 'Compressed Natural Gas (CNG)', strProductCodeGroup = '', strNote = NULL, intMasterId = 332595
+ UNION ALL SELECT intProductCodeId = 680, strProductCode = '226', strDescription = 'Diesel ? High Sulfur Dyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 332596
+ UNION ALL SELECT intProductCodeId = 681, strProductCode = '227', strDescription = 'Diesel ? Low Sulfur Dyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 332597
  UNION ALL SELECT intProductCodeId = 923, strProductCode = '122', strDescription = 'Blending Components', strProductCodeGroup = '', strNote = NULL, intMasterId = 33923
  UNION ALL SELECT intProductCodeId = 924, strProductCode = '170', strDescription = 'Biodiesel - Undyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 33924
  UNION ALL SELECT intProductCodeId = 925, strProductCode = '171', strDescription = 'Biodiesel - Dyed', strProductCodeGroup = '', strNote = NULL, intMasterId = 33925
@@ -772,7 +768,144 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 7473, strProductCode = '224', strFormCode = 'Gas-1252', strScheduleCode = '9E', strType = 'CNG', intMasterId = 337473
  UNION ALL SELECT intValidProductCodeId = 7474, strProductCode = '224', strFormCode = 'Gas-1252', strScheduleCode = '9F', strType = 'CNG', intMasterId = 337474
  UNION ALL SELECT intValidProductCodeId = 7475, strProductCode = '224', strFormCode = 'Gas-1252', strScheduleCode = '9G', strType = 'CNG', intMasterId = 337475
- 
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337476
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337477
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337478
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337479
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337480
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337481
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337482
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337483
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337484
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337485
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337486
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337487
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337488
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337489
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1206', strScheduleCode = 'USGov', strType = '', intMasterId = 337490
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337491
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337492
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337493
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337494
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337495
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337496
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337497
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337498
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337499
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337500
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337501
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337502
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337503
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337504
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1206', strScheduleCode = 'Muni', strType = '', intMasterId = 337505
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337506
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337507
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337508
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337509
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337510
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337511
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337512
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337513
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337514
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337515
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337516
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337517
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337518
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337519
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1206', strScheduleCode = 'Charter', strType = '', intMasterId = 337520
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337521
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337522
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337523
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337524
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337525
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337526
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337527
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337528
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337529
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337530
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337531
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337532
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337533
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337534
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1206', strScheduleCode = 'State', strType = '', intMasterId = 337535
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337536
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337537
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337538
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337539
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337540
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337541
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337542
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337543
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337544
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337545
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337546
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337547
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337548
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337549
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1206', strScheduleCode = 'Edu', strType = '', intMasterId = 337550
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337551
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337552
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337553
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337554
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337555
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337556
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337557
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337558
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337559
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337560
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337561
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337562
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337563
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337564
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1206', strScheduleCode = 'College', strType = '', intMasterId = 337565
+
+
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337566
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337567
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337568
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337569
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337570
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337571
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337572
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337573
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337574
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337575
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337576
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337577
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337578
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337579
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1301', strScheduleCode = '14A', strType = '', intMasterId = 337580
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337581
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337582
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337583
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337584
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337585
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337586
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337587
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337588
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337589
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337590
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337591
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337592
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337593
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337594
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1301', strScheduleCode = '14B', strType = '', intMasterId = 337595
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337596
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337597
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337598
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337599
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337600
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337601
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337602
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337603
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337604
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337605
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337606
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337607
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337608
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337609
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'Gas-1301', strScheduleCode = '14C', strType = '', intMasterId = 337610
+
 
 EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 
