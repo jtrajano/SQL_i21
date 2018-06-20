@@ -3,6 +3,7 @@ AS
 SELECT *
 FROM (
 	SELECT AH.[strAllocationNumber]
+		,AD.strAllocationDetailRefNo
 		,AH.intAllocationHeaderId
 		,AD.intAllocationDetailId
 		,AD.intPContractDetailId
