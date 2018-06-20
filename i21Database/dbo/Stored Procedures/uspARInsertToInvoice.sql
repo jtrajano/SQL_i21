@@ -590,7 +590,7 @@ IF EXISTS(SELECT NULL FROM @tblSODSoftware)
 							@ItemOrderUOMId			=	@intNewSoftwareUOMId,
 							@ItemQtyOrdered			=	@dblNewSoftwareOrderedQty,
 							@ItemQtyShipped			=	@dblNewSoftwareOrderedQty,							
-							@ItemMaintenanceType	=	@strNewSoftwareItemMaintType,
+							@ItemMaintenanceType	=	'Maintenance Only',
 							@ItemFrequency			=	@strNewSoftwareItemMainFreq,
 							@ItemMaintenanceDate	=	@dtmSOMaintenanceDate,
 							@ItemMaintenanceAmount	=	@dblNewSoftwareMaintAmt,
