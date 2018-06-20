@@ -42,7 +42,7 @@ DECLARE @tblSchedule TABLE (
 		)
 IF @Refresh = 1
 		BEGIN
-			DELETE FROM tblTFTransactionSummary --WHERE strSummaryGuid = @Guid
+			DELETE FROM tblTFTransactionSummary WHERE intTaxAuthorityId = 14 AND strFormCode = @FormCodeParam
 		END
 -- ======================== HEADER ==============================
 DECLARE @DatePeriod DATETIME
