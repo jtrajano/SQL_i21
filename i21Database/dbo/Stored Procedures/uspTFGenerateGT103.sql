@@ -35,7 +35,7 @@ BEGIN TRY
 
 	IF @Refresh = 1
 	BEGIN
-		DELETE FROM tblTFTransactionSummary
+		DELETE FROM tblTFTransactionSummary  WHERE intTaxAuthorityId = 14 AND strFormCode = 'GT-103'
 	END
 
 	-- ======================== HEADER ==============================
