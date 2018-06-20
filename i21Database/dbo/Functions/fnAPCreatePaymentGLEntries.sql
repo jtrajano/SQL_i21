@@ -107,7 +107,7 @@ BEGIN
 		,[strCode]						=	'AP'
 		,[strReference]					=	C.strVendorId
 		,[intCurrencyId]				=	P.intCurrencyId
-		,[dblExchangeRate]				=	1
+		,[dblExchangeRate]				=	P.dblExchangeRate
 		,[dtmDateEntered]				=	GETDATE()
 		,[dtmTransactionDate]			=	NULL
 		,[strJournalLineDescription]	=	'Posted Payment'
@@ -124,7 +124,7 @@ BEGIN
 		,[dblDebitForeign]				=	0      
 		,[dblDebitReport]				=	0
 		,[dblCreditForeign]				=	MainQuery.dblCreditForeign
-		,[dblCreditReport]				=	0
+		,[dblCreditReport]				=	MainQuery.dblCredit
 		,[dblReportingRate]				=	0
 		,[dblForeignRate]				=	P.dblExchangeRate
 		,[strRateType]					=	rateType.strCurrencyExchangeRateType
@@ -218,7 +218,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Posted Gain/Loss',
@@ -286,7 +286,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	1,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Withheld',
@@ -329,7 +329,7 @@ BEGIN
 			[strCode]						=	'AP',
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
-			[dblExchangeRate]				=	1,
+			[dblExchangeRate]				=	A.dblExchangeRate,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Discount',
@@ -385,7 +385,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	voucherRate.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	(SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId),
@@ -451,7 +451,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	(SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId),
@@ -502,7 +502,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
-		[dblExchangeRate]				=	1,
+		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Interest',
@@ -557,7 +557,7 @@ BEGIN
 			[strCode]						=	'AP',
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
-			[dblExchangeRate]				=	1,
+			[dblExchangeRate]				=	A.dblExchangeRate,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Overpayment',
