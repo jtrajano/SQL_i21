@@ -1002,7 +1002,7 @@ IF @recap = 0
             UPDATE A
                 SET A.intCurrentStatus = 5
             FROM tblARPayment A 
-            WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 
 
 			UPDATE 
@@ -1233,7 +1233,7 @@ IF @recap = 0
             UPDATE A
                 SET A.intCurrentStatus = NULL
             FROM tblARPayment A 
-            WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 
 			END
 		ELSE
