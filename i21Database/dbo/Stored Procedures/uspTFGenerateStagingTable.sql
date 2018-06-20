@@ -35,14 +35,13 @@ BEGIN TRY
 		, @ErrMsg NVARCHAR(MAX) = ''
 	
 	DELETE FROM tblTFTransaction
+	DELETE FROM tblTFTransactionSummary
 		
 	SELECT *
 	INTO #tmpRC
 	FROM vyuTFGetReportingComponent
 	WHERE intReportingComponentId IN (SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ','))
 		AND intComponentTypeId = 1
-		--AND strScheduleName != 'Main Form'
-		--AND strType != 'EDI'
 	ORDER BY strFormCode, strScheduleCode, strType, strTransactionType
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpRC)
