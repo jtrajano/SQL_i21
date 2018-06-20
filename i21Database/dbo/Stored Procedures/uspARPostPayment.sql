@@ -1069,7 +1069,10 @@ IF @recap = 0
 			WHERE
 				strTransactionId IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
 
-			EXEC dbo.uspGLBookEntries @GLEntries, @post
+			IF EXISTS(SELECT TOP 1 NULL FROM @GLEntries)
+				EXEC dbo.uspGLBookEntries @GLEntries, @post
+			ELSE
+				GOTO Do_Rollback
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()										
@@ -1220,7 +1223,7 @@ IF @recap = 0
 			FROM tblARPayment A 
 				INNER JOIN tblCMBankTransaction B
 					ON A.strRecordNumber = B.strTransactionId
-			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)	
+			WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)	
 			
 			--DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
 			DELETE FROM tblCMBankTransaction

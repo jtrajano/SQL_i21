@@ -212,6 +212,99 @@ IF @Post = 1
 			,[intSourceEntityId]
 			,[ysnRebuild]
 		FROM [dbo].[fnARGenerateGLEntriesForPayments] (@PaymentData, @Overpayment, @Prepayment)
+
+		DELETE FROM @PaymentIds
+        INSERT INTO @PaymentIds
+        SELECT DISTINCT [intTransactionId] FROM @PaymentData WHERE [intTransactionDetailId] IS NOT NULL AND [strTransactionType] = 'Claim'
+
+		INSERT INTO @GLEntries
+			([dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,[strDocument]
+			,[strComments]
+			,[strSourceDocumentId]
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+			,[dblSourceUnitDebit]
+			,[dblSourceUnitCredit]
+			,[intCommodityId]
+			,[intSourceEntityId]
+			,[ysnRebuild])
+		SELECT
+		     [dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[strRateType]
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
+		FROM [dbo].[fnAPCreateClaimARGLEntries] (@PaymentIds, @UserId, @BatchId)
+
 	END
 ELSE
 	BEGIN
