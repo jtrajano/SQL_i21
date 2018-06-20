@@ -194,8 +194,8 @@ AS
 							, [dtmDate]				= @dtmDateNow
 							, [intGLAccountId]		= @intCashOverAccountId
 							, [strDescription]		= @strCashOverAccountId
-							, [dblDebit]			= CASE WHEN ISNULL(@dblCashOverShort, 0) < 0 THEN @dblCashOverShort ELSE 0.00000 END
-							, [dblCredit]			= CASE WHEN ISNULL(@dblCashOverShort, 0) > 0 THEN @dblCashOverShort ELSE 0.00000 END
+							, [dblDebit]			= 0.00000
+							, [dblCredit]			= ISNULL(@dblCashOverShort, 0)
 							, [intEntityId]			= @intEntityCustomerId						
 					END
 
@@ -203,7 +203,7 @@ AS
 												 	 	 , @BankTransactionDetailEntries	= @BankTransactionDetail
 												 		 , @intTransactionId				= @intNewTransactionId OUT
 
-				IF ISNULL(@intNewTransactionId, 0) <> 0
+				IF ISNULL(@intNewTransactionId, 0) <> 0 AND ISNULL((SELECT dblAmount FROM dbo.tblCMBankTransaction WHERE intTransactionId = @intNewTransactionId), 0) <> 0
 					BEGIN
 						EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
 													, @ysnRecap			= 0
