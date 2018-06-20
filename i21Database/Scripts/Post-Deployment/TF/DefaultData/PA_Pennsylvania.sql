@@ -391,7 +391,36 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 7000, strProductCode = '065', strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', intMasterId = 387000
  UNION ALL SELECT intValidProductCodeId = 7001, strProductCode = '124', strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', intMasterId = 387001
  UNION ALL SELECT intValidProductCodeId = 7014, strProductCode = '123', strFormCode = '1096', strScheduleCode = '9', strType = 'Liquid Fuels', intMasterId = 387014
- 
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387106
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387107
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387108
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387109
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387110
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387111
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387112
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387113
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387114
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'DMF-26', strScheduleCode = '1A', strType = '', intMasterId = 387115
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387116
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387117
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387118
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387119
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387120
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387121
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387122
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387123
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387124
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'DMF-26', strScheduleCode = '2A', strType = '', intMasterId = 387125
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387126
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387127
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387128
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387129
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387130
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387131
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387132
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387133
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387134
+ UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'DMF-26', strScheduleCode = '3A', strType = '', intMasterId = 387135
 
 EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 
