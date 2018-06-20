@@ -22,26 +22,31 @@ IF @transCount = 0
 ELSE 
 	SAVE TRANSACTION @SaveTran
 
-SELECT @prepaidCount = COUNT(@prepaidCount)
+SELECT @prepaidCount = (SELECT COUNT(intId) FROM @prepaidIds)
 WHILE @prepaidCount !=  @count
+
 BEGIN
-EXEC uspAPPrepaidAndDebit @billId = @voucherId;
 
-UPDATE A
-	SET A.ysnApplied = 1
-	,A.dblAmountApplied = A.dblBalance
-    ,A.dblBalance = 0
-FROM tblAPAppliedPrepaidAndDebit A
-INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
-WHERE A.intTransactionId IN (SELECT intId FROM @prepaidIds) AND A.intBillId = @voucherId
+IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE dblAmountDue != 0 AND intBillId = @voucherId)
+	BEGIN
+	EXEC uspAPPrepaidAndDebit @billId = @voucherId;
 
-INSERT INTO @voucherIds
-SELECT @voucherId
+		UPDATE A
+			SET A.ysnApplied = 1
+			,A.dblAmountApplied = A.dblBalance
+			,A.dblBalance = 0
+		FROM tblAPAppliedPrepaidAndDebit A
+		INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
+		WHERE A.intTransactionId IN (SELECT intId FROM @prepaidIds) AND A.intBillId = @voucherId
 
-EXEC uspAPUpdateVoucherTotal @voucherIds
-SET @count = @count + 1
+		INSERT INTO @voucherIds
+		SELECT @voucherId
 
+		EXEC uspAPUpdateVoucherTotal @voucherIds
+		SET @count = @count + 1
+	END
 END
+
 IF @transCount = 0 
 	COMMIT TRANSACTION
 END TRY
