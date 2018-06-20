@@ -106,6 +106,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 									AND EL.intPayGroupId IS NOT NULL
 									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo))
+				 AND tblPRPayGroupDetail.intSource = 0
 
 		END
 	END
@@ -261,6 +262,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 									AND EL.intPayGroupId IS NOT NULL
 									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo)
+									AND ISNULL(PGD.intDepartmentId, 0) = ISNULL(TOR.intDepartmentId, 0)
 									AND intSource IN (0, 3)
 
 				IF (@intPayGroupDetail IS NULL)
@@ -270,6 +272,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,intEmployeeEarningId
 						,intTypeEarningId
 						,intDepartmentId
+						,intWorkersCompensationId
 						,strCalculationType
 						,dblDefaultHours
 						,dblHoursToProcess
@@ -286,6 +289,9 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,TOR.intEntityEmployeeId
 						,EL.intEmployeeEarningId
 						,EL.intTypeEarningId
+						,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) 
+											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
+											ELSE NULL END
 						,TOR.intDepartmentId
 						,EL.strCalculationType
 						,EL.dblDefaultHours
