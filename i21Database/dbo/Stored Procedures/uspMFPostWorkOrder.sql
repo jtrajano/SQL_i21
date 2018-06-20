@@ -718,7 +718,7 @@ BEGIN TRY
 			,[dblNewCost] = CASE 
 				WHEN IsNULL(RI.dblPercentage, 0) = 0
 					THEN @dblNewUnitCost * PL.dblQuantity
-				ELSE (@dblNewUnitCost * RI.dblPercentage / 100) * PL.dblQuantity
+				ELSE ((@dblNewUnitCost * RI.dblPercentage / 100) * PL.dblQuantity)
 				END
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
