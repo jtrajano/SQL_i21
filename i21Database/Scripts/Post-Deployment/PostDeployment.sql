@@ -281,6 +281,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\CleanBasisAdvance.sql
 :r .\AP\UpdateNewShipFromEntity.sql
 :r .\AP\UpdatePOPendingStatus.sql
+:r .\AP\UpdateVendorCreatePostVoucher.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
