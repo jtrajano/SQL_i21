@@ -307,7 +307,7 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblAmount * ISNULL(A.dblRate,1) 
+			,[dblCredit]			= A.dblAmount * ISNULL(A.dblHistoricRate,1) 
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= A.dblAmount 
 			,[dblDebitUnit]			= 0
@@ -316,7 +316,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= ISNULL(A.dblRate,1)
+			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate,1)
 			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -345,7 +345,7 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= A.dblAmount * ISNULL(A.dblHistoricRate, 1)
+			,[dblDebit]				= A.dblAmount * ISNULL(A.dblRate, 1)
 			,[dblCredit]			= 0 
 			,[dblDebitForeign]		= A.dblAmount 
 			,[dblCreditForeign]		= 0
@@ -355,7 +355,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
-			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate, 1)
+			,[dblExchangeRate]		= ISNULL(A.dblRate, 1)
 			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
