@@ -414,16 +414,18 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\QM\1_MasterTables.sql
 
 -- Store Module
-:r .\ST\1_FileFieldMapping_PricebookSale.sql
-:r .\ST\2_FileFieldMapping_PromotionItemList.sql
-:r .\ST\3_FileFieldMapping_PromotionCombo.sql
-:r .\ST\4_FileFieldMapping_PricebookMixMatch.sql
-:r .\ST\5_FileFieldMapping_PricebookSendSapphire.sql
-:r .\ST\6_Checkout_Radiant_ISM.sql
-:r .\ST\7_Checkout_Radiant_MCM.sql
-:r .\ST\8_Checkout_Radiant_FGM.sql
-:r .\ST\9_Checkout_Radiant_MSM.sql
+:r .\ST\01_FileFieldMapping_PricebookSale.sql
+:r .\ST\02_FileFieldMapping_PromotionItemList.sql
+:r .\ST\03_FileFieldMapping_PromotionCombo.sql
+:r .\ST\04_FileFieldMapping_PricebookMixMatch.sql
+:r .\ST\05_FileFieldMapping_PricebookSendSapphire.sql
+:r .\ST\06_Checkout_Radiant_ISM.sql
+:r .\ST\07_Checkout_Radiant_MCM.sql
+:r .\ST\08_Checkout_Radiant_FGM.sql
+:r .\ST\09_Checkout_Radiant_MSM.sql
 :r .\ST\10_Checkout_Commander_Translog.sql
+:r .\ST\11_FileFieldMapping_Passport_ISM.sql
+:r .\ST\12_FileFieldMapping_Passport_FGM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql
