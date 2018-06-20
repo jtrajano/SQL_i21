@@ -8,14 +8,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Sanitize the @xmlParam 
-IF LTRIM(RTRIM(@xmlParam)) = ''
-	BEGIN 
-		SET @xmlParam = NULL
-
-		SELECT * FROM tblARCustomerStatementStagingTable
-	END
-
 -- Declare the variables.
 DECLARE  @dtmDateTo					AS DATETIME
 		,@dtmDateFrom				AS DATETIME
@@ -69,6 +61,8 @@ DECLARE @temp_statement_table TABLE(
 	,[strItemNo]					NVARCHAR(100)
 	,[dblQtyOrdered]				NUMERIC(18,6)
 	,[dblQtyShipped]				NUMERIC(18,6)
+	,[dblDiscountAmount]			NUMERIC(18,6)
+	,[dblTax]						NUMERIC(18,6)
 	,[dblTotal]						NUMERIC(18,6)
 	,[dblPrice]						NUMERIC(18,6)
 	,[intInvoiceId]					INT
@@ -83,6 +77,14 @@ DECLARE @temp_statement_table TABLE(
 	,[strTicketNumbers]				NVARCHAR(MAX)
 	,[ysnStatementCreditLimit]		BIT
 )
+
+-- Sanitize the @xmlParam 
+IF LTRIM(RTRIM(@xmlParam)) = ''
+	BEGIN 
+		SET @xmlParam = NULL
+
+		SELECT * FROM @temp_statement_table
+	END
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
 BEGIN
@@ -250,49 +252,80 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName,
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 
 FROM (
-	SELECT strReferenceNumber = I.strInvoiceNumber
-		, strTransactionType = CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
-		, I.intEntityCustomerId
-		, dtmDueDate = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
-		, I.dtmPostDate
-		, intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], '+ @strDateTo +')
-		, dblTotalAmount = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
-		, dblAmountPaid = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-		, dblAmountDue = CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
-		, dblPastDue = CASE WHEN '+ @strDateTo +' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
-						THEN ISNULL(I.dblAmountDue, 0)
-						ELSE 0
-					END
-		, dblMonthlyBudget = ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
-		, strDescription = CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE IC.strDescription END
-		, IC.strItemNo
-		, ID.dblQtyOrdered
-		, ID.dblQtyShipped
-		, ID.dblTotal
-		, ID.dblPrice
-		, I.intInvoiceId
-		, C.strCustomerNumber
-		, C.strName
-		, I.strBOLNumber
-		, C.dblCreditLimit
-		, strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+	SELECT strReferenceNumber		= I.strInvoiceNumber
+		, strTransactionType		= CASE WHEN I.strType = ''Service Charge'' THEN ''Service Charge'' ELSE I.strTransactionType END
+		, intEntityCustomerId		= I.intEntityCustomerId
+		, dtmDueDate				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Credit Memo'', ''Debit Memo'') THEN NULL ELSE I.dtmDueDate END
+		, dtmPostDate				= I.dtmPostDate
+		, intDaysDue				= DATEDIFF(DAY, I.[dtmDueDate], ' + @strDateTo + ')
+		, dblTotalAmount			= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+		, dblAmountPaid				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
+		, dblAmountDue				= CASE WHEN I.strTransactionType NOT IN (''Invoice'', ''Debit Memo'') THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+		, dblPastDue				= CASE WHEN ' + @strDateTo + ' > I.[dtmDueDate] AND I.strTransactionType IN (''Invoice'', ''Debit Memo'')
+										THEN ISNULL(I.dblAmountDue, 0)
+										ELSE 0
+									END
+		, dblMonthlyBudget			= ISNULL([dbo].[fnARGetCustomerBudget](I.intEntityCustomerId, I.dtmDate), 0)
+		, strDescription			= CASE WHEN I.strType = ''Service Charge'' THEN ISNULL(ID.strSCInvoiceNumber, ID.strSCBudgetDescription) ELSE ITEM.strDescription END
+		, strItemNo					= ITEM.strItemNo
+		, dblQtyOrdered				= ID.dblQtyOrdered
+		, dblQtyShipped				= ID.dblQtyShipped
+		, dblDiscountAmount			= (ID.dblQtyShipped * ID.dblPrice) * (ID.dblDiscount/100)
+		, dblTax					= ID.dblTotalTax
+		, dblTotal					= ID.dblTotal + ID.dblTotalTax
+		, dblPrice					= ID.dblPrice
+		, intInvoiceId				= I.intInvoiceId
+		, strCustomerNumber			= CUSTOMER.strCustomerNumber
+		, strName					= CUSTOMER.strName
+		, strBOLNumber				= I.strBOLNumber
+		, dblCreditLimit			= CUSTOMER.dblCreditLimit
+		, strFullAddress			= CUSTOMER.strFullAddress
 		, strStatementFooterComment = dbo.fnARGetDefaultComment(I.intCompanyLocationId, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
-		, strCompanyName	= COMPANY.strCompanyName
-		, strCompanyAddress = COMPANY.strCompanyAddress
-		, strTicketNumbers	= SC.strTicketNumber
-		, C.ysnStatementCreditLimit
+		, strCompanyName			= COMPANY.strCompanyName
+		, strCompanyAddress			= COMPANY.strCompanyAddress
+		, strTicketNumbers			= SCALE.strTicketNumber
+		, ysnStatementCreditLimit	= CUSTOMER.ysnStatementCreditLimit
 FROM tblARInvoice I
-	INNER JOIN (tblARInvoiceDetail ID 
-		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId
-		LEFT JOIN tblSCTicket SC ON ID.intTicketId = SC.intTicketId
-	) ON I.intInvoiceId = ID.intInvoiceId	
-	INNER JOIN (vyuARCustomerSearch C INNER JOIN #CUSTOMERS CC ON C.intEntityCustomerId = CC.intEntityCustomerId) ON I.intEntityCustomerId = C.intEntityCustomerId
-	LEFT JOIN tblSMTerm T ON I.intTermId = T.intTermID
-	OUTER APPLY (
-		SELECT TOP 1 strCompanyName
-				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
-		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-	) COMPANY
+INNER JOIN (
+	SELECT intEntityCustomerId		= C.intEntityCustomerId
+		 , strCustomerNumber		= C.strCustomerNumber
+		 , strName					= C.strName
+		 , strFullAddress			= [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
+		 , dblCreditLimit			= C.dblCreditLimit
+		 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
+	FROM vyuARCustomerSearch C
+	INNER JOIN #CUSTOMERS CC ON C.intEntityCustomerId = CC.intEntityCustomerId
+) CUSTOMER ON I.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+INNER JOIN (
+	SELECT intInvoiceId
+		 , intTicketId
+		 , intItemId
+		 , dblQtyOrdered
+		 , dblQtyShipped
+		 , dblPrice
+		 , dblDiscount
+		 , dblTotalTax
+		 , dblTotal
+		 , strSCInvoiceNumber
+		 , strSCBudgetDescription
+	FROM dbo.tblARInvoiceDetail WITH (NOLOCK) 
+) ID ON I.intInvoiceId = ID.intInvoiceId
+LEFT JOIN (
+	SELECT intTicketId
+		 , strTicketNumber
+	FROM dbo.tblSCTicket WITH (NOLOCK)
+) SCALE ON ID.intTicketId = SCALE.intTicketId
+LEFT JOIN (
+	SELECT intItemId
+		 , strItemNo
+		 , strDescription
+	FROM dbo.tblICItem WITH (NOLOCK)
+) ITEM ON ID.intItemId = ITEM.intItemId
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))
@@ -326,6 +359,8 @@ SELECT strReferenceNumber			= STATEMENTREPORT.strReferenceNumber
 	 , strItemNo					= STATEMENTREPORT.strItemNo
 	 , dblQtyOrdered				= STATEMENTREPORT.dblQtyOrdered
 	 , dblQtyShipped				= STATEMENTREPORT.dblQtyShipped
+	 , dblDiscountAmount			= STATEMENTREPORT.dblDiscountAmount
+	 , dblTax						= STATEMENTREPORT.dblTax
 	 , dblTotal						= STATEMENTREPORT.dblTotal
 	 , dblPrice						= STATEMENTREPORT.dblPrice
 	 , intInvoiceId					= STATEMENTREPORT.intInvoiceId
