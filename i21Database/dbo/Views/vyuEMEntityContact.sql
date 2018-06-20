@@ -1,20 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuEMEntityContact]
 	AS 
 
-	SELECT 
- B.intEntityId,
+	SELECT       
+ B.intEntityId,     
  strEntityName = B.strName,
- D.intEntityId intEntityContactId,
- D.strName,
- D.strEmail,
- B.strWebsite,
- E.strLocationName,
- phone.strPhone,
- strMobile = mob.strPhone,
- E.strTimezone,
+ D.intEntityId intEntityContactId,   
+ D.strName,   
+ D.strEmail,   
+ E.strLocationName,   
+ phone.strPhone,   
+ strMobile = mob.strPhone,   
+ E.strTimezone,   
  D.strTitle,
  C.ysnPortalAccess,  
- D.ysnActive,
+ D.ysnActive,   
  C.ysnDefaultContact, 
  D.strContactType,
  D.strEmailDistributionOption,
@@ -50,23 +49,23 @@
  X.Lien,
  X.[Broker]
  
-FROM dbo.tblEMEntity AS B 
+FROM dbo.tblEMEntity AS B    
  INNER JOIN dbo.[tblEMEntityToContact] AS C 
-ON B.[intEntityId] = C.[intEntityId] 
+   ON B.[intEntityId] = C.[intEntityId] 
  INNER JOIN dbo.tblEMEntity AS D 
-ON C.[intEntityContactId] = D.[intEntityId] 
+   ON C.[intEntityContactId] = D.[intEntityId] 
  join vyuEMEntityType X
   on X.intEntityId = B.intEntityId
  LEFT JOIN tblEMEntityPhoneNumber phone
-ON phone.intEntityId = D.intEntityId
+   ON phone.intEntityId = D.intEntityId
  LEFT JOIN tblEMEntityMobileNumber mob
-ON mob.intEntityId = D.intEntityId
+   ON mob.intEntityId = D.intEntityId
  LEFT OUTER JOIN dbo.[tblEMEntityLocation] AS E 
-ON C.intEntityLocationId = E.intEntityLocationId
+   ON C.intEntityLocationId = E.intEntityLocationId
  JOIN vyuEMSearch F
   ON F.intEntityId = B.intEntityId
  LEFT JOIN [tblEMEntityCredential] g
-  on g.intEntityId = D.intEntityId
+  on g.intEntityId = D.intEntityId   
 
  LEFT JOIN tblSMCountry h
   on h.strCountry = E.strCountry
