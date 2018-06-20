@@ -1005,6 +1005,13 @@ IF @recap = 0
             WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
 
 
+			--update payment record
+            UPDATE A
+                SET A.intCurrentStatus = 5
+            FROM tblARPayment A 
+            WHERE intPaymentId IN (SELECT [intPaymentId] FROM @ARReceivablePostData)
+
+
 			UPDATE 
 				tblARInvoice
 			SET 

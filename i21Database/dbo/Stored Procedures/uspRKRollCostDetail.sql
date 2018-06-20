@@ -2,7 +2,8 @@
 	@dtmFromDate datetime = null,
 	@dtmToDate datetime = null,
 	@strFutureMonth nvarchar(50),
-	@strFutMarketName nvarchar(50)
+	@strFutMarketName nvarchar(50),
+	@strCommodityCode nvarchar(50)
 AS
 
 select intFutOptTransactionId ,strInternalTradeNo,intFutureMarketId  ,strFutMarketName ,intCommodityId ,strCommodityCode ,
@@ -119,5 +120,7 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 		LEFT JOIN tblRKFuturesMonth rfm on rfm.intFutureMonthId=ft.intRollingMonthId
 		
 		WHERE intSelectedInstrumentTypeId=1  AND intInstrumentTypeId=1 and fm.strFutureMonth=@strFutureMonth
+		and m.strFutMarketName = @strFutMarketName
+		and c.strCommodityCode = @strCommodityCode
 		and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate )t where intOpenContract >0
 		order by strFutureMonth
