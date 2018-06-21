@@ -44,6 +44,7 @@
 	[ysnValidatePassword] BIT NOT NULL DEFAULT 0, 
 	[ysnAutoRefreshOnOpen] BIT NOT NULL DEFAULT 0, 
 	[intDefaultTermId] INT NULL, 
+	[strReportDateFormat] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL,  
     [intCompanySetupId] INT NOT NULL,
 	[intMultiCurrencyId] INT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
