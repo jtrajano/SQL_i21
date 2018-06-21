@@ -125,6 +125,7 @@ INSERT INTO [tblARInvoiceDetailTax]
     ,[ysnTaxExempt]
 	,[ysnTaxOnly]
 	,[strNotes] 
+	,[intUnitMeasureId]
     ,[intConcurrencyId])		
 SELECT
 	 [intInvoiceDetailId]		= IDs.[intInvoiceDetailId] 
@@ -145,6 +146,7 @@ SELECT
 	,[ysnTaxExempt]				= TD.[ysnTaxExempt]
 	,[ysnTaxOnly]				= TD.[ysnTaxOnly]
 	,[strNotes]					= TD.[strNotes]
+	,[intUnitMeasureId]			= TD.[intUnitMeasureId]
 	,[intConcurrencyId]			= 1
 FROM
 	@InvoiceDetail IDs
