@@ -638,7 +638,7 @@ SELECT @strDescription,
 				WHERE 
 				c.intCommodityId = @intCommodityId  and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-				and convert(DATETIME, CONVERT(VARCHAR(10), dtmDateEntered, 110), 110) <= convert(datetime,@dtmToDate) 			
+				and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 			
 			)t 
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
@@ -652,7 +652,7 @@ SELECT @strDescription,
 			,dblQtyReceived,@intCommodityId,strCurrency	
 		FROM (
 		select * FROM (
-			SELECT DISTINCT ROW_NUMBER() OVER (PARTITION BY c.intCommodityId ORDER BY dtmTransactionDate DESC) intRowNum, 
+			SELECT DISTINCT ROW_NUMBER() OVER (PARTITION BY c.intTicketId ORDER BY dtmTransactionDate DESC) intRowNum, 
 				strLocationName
 				,strInvoiceNumber
 				,dtmTicketDate
@@ -667,8 +667,8 @@ SELECT @strDescription,
 			WHERE c.intCommodityId = @intCommodityId
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-			) a WHERE a.intRowNum = 1) b where isnull(ysnPost,0) =1
---			) t	
+				
+			) a WHERE a.intRowNum = 1) b  where isnull(ysnPost,0) =1
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType)
