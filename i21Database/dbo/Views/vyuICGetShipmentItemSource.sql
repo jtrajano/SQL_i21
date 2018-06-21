@@ -31,10 +31,10 @@ SELECT
 		(
 			CASE WHEN Shipment.intOrderType = 1
 				THEN (
-					CASE WHEN Shipment.intSourceType = 0 -- None
+					CASE WHEN Shipment.intSourceType = 0 OR Shipment.intSourceType = 1 -- None OR Scale
 						THEN CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END
-					WHEN Shipment.intSourceType = 1 -- Scale
-						THEN NULL
+					--WHEN Shipment.intSourceType = 1 -- Scale
+						--THEN NULL
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 						THEN NULL
 					WHEN Shipment.intSourceType = 3 -- Pick Lot
@@ -53,10 +53,10 @@ SELECT
 		(
 			CASE WHEN Shipment.intOrderType = 1
 				THEN (
-					CASE WHEN Shipment.intSourceType = 0 -- None
+					CASE WHEN Shipment.intSourceType = 0 OR Shipment.intSourceType = 1 -- None OR Scale
 						THEN ISNULL(ContractView.dblDetailQuantity, 0)
-					WHEN Shipment.intSourceType = 1 -- Scale
-						THEN 0
+					--WHEN Shipment.intSourceType = 1 -- Scale
+					--	THEN 0
 					WHEN Shipment.intSourceType = 2 -- Inbound Shipment
 						THEN 0
 					--WHEN Shipment.intSourceType = 3 -- Transport
