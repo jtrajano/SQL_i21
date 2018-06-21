@@ -6339,7 +6339,6 @@
     <Build Include="dbo\Functions\fnAPCreateReceiptItemCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPaymentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
   </ItemGroup>
   <ItemGroup>
