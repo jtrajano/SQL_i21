@@ -27,7 +27,6 @@ BEGIN TRY
 	DECLARE @dblBillQty NUMERIC(18, 6)
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 	DECLARE @strLotCondition NVARCHAR(50)
-
 	DECLARE @tblLoadDetail TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLoadDetailId INT
@@ -123,6 +122,7 @@ BEGIN TRY
 				,intFreightTermId
 				,intBookId
 				,intSubBookId
+				,intSort
 				)
 			SELECT strReceiptType = 'Direct'
 				,intEntityVendorId = LD.intVendorEntityId
@@ -140,8 +140,8 @@ BEGIN TRY
 				,intGrossNetUOMId = LD.intWeightItemUOMId
 				,dblGross = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross)
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
-				,dblCost = 0 
-				,intCostUOMId = NULL 
+				,dblCost = ISNULL(LD.dblUnitPrice,0)
+				,intCostUOMId = LD.intPriceUOMId
 				,intCurrencyId = ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
@@ -160,6 +160,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
+				,LC.intLoadContainerId
 			FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
@@ -226,6 +227,7 @@ BEGIN TRY
 				,intFreightTermId
 				,intBookId
 				,intSubBookId
+				,intSort
 				)
 			SELECT strReceiptType = 'Direct'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -243,8 +245,8 @@ BEGIN TRY
 				,intGrossNetUOMId = LD.intWeightItemUOMId
 				,dblGross =  LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
 				,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
-				,dblCost = 0
-				,intCostUOMId = NULL
+				,dblCost = ISNULL(LD.dblUnitPrice,0)
+				,intCostUOMId = LD.intPriceUOMId
 				,intCurrencyId = ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
@@ -263,6 +265,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
+				,0
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
@@ -339,7 +342,7 @@ BEGIN TRY
 			,CD.intContractHeaderId
 			,LD.intPContractDetailId
 			,1 ysnAccrue
-			,'Purchase Contract'
+			,'Direct'
 			,NULL
 			,L.intCurrencyId
 			,LD.intVendorEntityId
@@ -407,7 +410,7 @@ BEGIN TRY
 				WHERE intLoadId = @intLoadId
 				)
 			,1
-			,'Purchase Contract'
+			,'Direct'
 			,NULL
 			,L.intCurrencyId
 			,(
@@ -441,6 +444,69 @@ BEGIN TRY
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
 		WHERE L.intLoadId = @intLoadId
+	
+		INSERT INTO @LotEntries (
+			[intLotId]
+			,[strLotNumber]
+			,[strLotAlias]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[intContractHeaderId] 
+			,[intContractDetailId]
+			,[intItemUnitMeasureId]
+			,[intItemId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[strContainerNo]
+			,[intSort]
+			,[strMarkings]
+			,[strCondition]
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT NULL
+			,NULL
+			,NULL
+			,ISNULL(LW.intSubLocationId,LD.intPSubLocationId)
+			,LW.intStorageLocationId
+			,NULL
+			,NULL
+			,LD.intItemUOMId
+			,LD.intItemId
+			,ISNULL(LC.dblQuantity, LD.dblQuantity)
+			,ISNULL(LC.dblGrossWt, LD.dblGross)
+			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,LC.strContainerNumber
+			,ISNULL(LC.intLoadContainerId,0)
+			,LC.strMarks
+			,@strLotCondition
+			,LD.intVendorEntityId
+			,'Direct'
+			,LD.intPCompanyLocationId
+			,NULL
+			,EL.intEntityLocationId
+			,ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,0
+			,L.strBLNumber
+		FROM tblLGLoad L  
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
+			AND IL.intLocationId = LD.intPCompanyLocationId 
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId 
+			AND EL.ysnDefaultLocation = 1 
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId		
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		WHERE LD.intLoadId = @intLoadId
 
 		IF NOT EXISTS (
 				SELECT 1
@@ -452,7 +518,8 @@ BEGIN TRY
 
 		EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
 									,@OtherCharges = @OtherCharges
-									,@intUserId = @intEntityUserSecurityId;
+									,@intUserId = @intEntityUserSecurityId
+									,@LotEntries = @LotEntries
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
@@ -504,42 +571,6 @@ BEGIN TRY
 				SET dblBillQty = (@dblVoucherQty / @dblPContractDetailQty) * dblReceived
 				WHERE intInventoryReceiptItemId = @intMinInvRecItemId
 			END
-
-			INSERT INTO dbo.tblICInventoryReceiptItemLot (
-				[intInventoryReceiptItemId]
-				,[intLotId]
-				,[strLotNumber]
-				,[strLotAlias]
-				,intSubLocationId
-				,intStorageLocationId
-				,[intItemUnitMeasureId]
-				,dblQuantity
-				,dblGrossWeight
-				,dblTareWeight
-				,strContainerNo
-				,[intSort]
-				,[intConcurrencyId]
-				,strMarkings
-				,strCondition
-				)
-			SELECT intInventoryReceiptItemId
-				,NULL
-				,''
-				,''
-				,intSubLocationId
-				,intStorageLocationId
-				,RI.intUnitMeasureId
-				,RI.dblOpenReceive
-				,dblGross
-				,ISNULL(RI.dblGross,0) - ISNULL(RI.dblNet,0)
-				,LC.strContainerNumber
-				,1
-				,1
-				,LC.strMarks
-				,@strLotCondition
-			FROM tblICInventoryReceiptItem RI
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
-			WHERE intInventoryReceiptItemId = @intMinInvRecItemId
 
 			SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
 			FROM tblICInventoryReceiptItem
@@ -613,6 +644,7 @@ BEGIN TRY
 				,intFreightTermId
 				,intBookId
 				,intSubBookId
+				,intSort
 				)
 			SELECT strReceiptType = 'Purchase Contract'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -650,6 +682,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
+				,ISNULL(LC.intLoadContainerId,0)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -724,6 +757,7 @@ BEGIN TRY
 				,intFreightTermId
 				,intBookId
 				,intSubBookId
+				,intSort
 				)
 			SELECT strReceiptType = 'Purchase Contract'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -761,6 +795,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
+				,0
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -948,6 +983,69 @@ BEGIN TRY
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
 		WHERE L.intLoadId = @intLoadId
+		
+		INSERT INTO @LotEntries (
+			[intLotId]
+			,[strLotNumber]
+			,[strLotAlias]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[intContractHeaderId] 
+			,[intContractDetailId]
+			,[intItemUnitMeasureId]
+			,[intItemId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[strContainerNo]
+			,[intSort]
+			,[strMarkings]
+			,[strCondition]
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT NULL
+			,NULL
+			,NULL
+			,LW.intSubLocationId
+			,LW.intStorageLocationId
+			,CD.intContractHeaderId
+			,CD.intContractDetailId
+			,LD.intItemUOMId
+			,LD.intItemId
+			,ISNULL(LC.dblQuantity, LD.dblQuantity)
+			,ISNULL(LC.dblGrossWt, LD.dblGross)
+			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,LC.strContainerNumber
+			,ISNULL(LC.intLoadContainerId,0)
+			,LC.strMarks
+			,@strLotCondition
+			,LD.intVendorEntityId
+			,'Purchase Contract'
+			,CD.intCompanyLocationId
+			,NULL
+			,EL.intEntityLocationId
+			,ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,2
+			,L.strBLNumber
+		FROM tblLGLoad L  
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
+			AND IL.intLocationId = LD.intPCompanyLocationId 
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId 
+			AND EL.ysnDefaultLocation = 1 
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LD.intLoadId = LW.intLoadId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		WHERE LD.intLoadId = @intLoadId
 
 		IF NOT EXISTS (
 				SELECT 1
@@ -959,100 +1057,11 @@ BEGIN TRY
 
 		EXEC dbo.uspICAddItemReceipt @ReceiptEntries = @ReceiptStagingTable
 									,@OtherCharges = @OtherCharges
-									,@intUserId = @intEntityUserSecurityId;
+									,@intUserId = @intEntityUserSecurityId
+									,@LotEntries = @LotEntries
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
-
-		SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
-		FROM tblICInventoryReceiptItem
-		WHERE intInventoryReceiptId = @intInventoryReceiptId
-
-		WHILE @intMinInvRecItemId > 0
-		BEGIN
-			SET @intPContractDetailId = NULL
-			SET @dblVoucherQty = NULL
-			SET @dblBillQty = NULL
-
-			SELECT @intPContractDetailId = intLineNo
-				  ,@intPItemId = intItemId
-			FROM tblICInventoryReceiptItem
-			WHERE intInventoryReceiptItemId = @intMinInvRecItemId
-
-			SELECT @dblPContractDetailQty = dblQuantity
-			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intPContractDetailId
-
-			SELECT @intPEntityId = intEntityVendorId
-			FROM tblICInventoryReceipt
-			WHERE intInventoryReceiptId = @intInventoryReceiptId
-
-			IF EXISTS (
-					SELECT TOP 1 1
-					FROM tblAPBill BI
-					JOIN tblAPBillDetail BID ON BI.intBillId = BID.intBillId
-					WHERE BID.intLoadId = @intLoadId
-						AND BID.intContractDetailId = @intPContractDetailId
-						AND BI.intTransactionType IN (1,2)
-						AND BI.intEntityVendorId = @intPEntityId
-						AND BID.intItemId = @intPItemId
-					)
-			BEGIN
-				SELECT @dblVoucherQty = BID.dblQtyReceived
-				FROM tblAPBill BI
-				JOIN tblAPBillDetail BID ON BI.intBillId = BID.intBillId
-				WHERE BID.intLoadId = @intLoadId
-					AND BID.intContractDetailId = @intPContractDetailId
-					AND BI.intTransactionType IN (1,2)
-					AND BI.intEntityVendorId = @intPEntityId
-					AND BID.intItemId = @intPItemId
-
-				UPDATE tblICInventoryReceiptItem
-				SET dblBillQty = (@dblVoucherQty / @dblPContractDetailQty) * dblReceived
-				WHERE intInventoryReceiptItemId = @intMinInvRecItemId
-			END
-
-			INSERT INTO dbo.tblICInventoryReceiptItemLot (
-				[intInventoryReceiptItemId]
-				,[intLotId]
-				,[strLotNumber]
-				,[strLotAlias]
-				,intSubLocationId
-				,intStorageLocationId
-				,[intItemUnitMeasureId]
-				,dblQuantity
-				,dblGrossWeight
-				,dblTareWeight
-				,strContainerNo
-				,[intSort]
-				,[intConcurrencyId]
-				,strMarkings
-				,strCondition
-				)
-			SELECT intInventoryReceiptItemId
-				,NULL
-				,''
-				,''
-				,intSubLocationId
-				,intStorageLocationId
-				,RI.intUnitMeasureId
-				,RI.dblOpenReceive
-				,dblGross
-				,ISNULL(RI.dblGross,0) - ISNULL(RI.dblNet,0)
-				,LC.strContainerNumber
-				,1
-				,1
-				,LC.strMarks
-				,@strLotCondition
-			FROM tblICInventoryReceiptItem RI
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
-			WHERE intInventoryReceiptItemId = @intMinInvRecItemId
-
-			SELECT @intMinInvRecItemId = MIN(intInventoryReceiptItemId)
-			FROM tblICInventoryReceiptItem
-			WHERE intInventoryReceiptId = @intInventoryReceiptId
-			  AND intInventoryReceiptItemId > @intMinInvRecItemId
-		END
 	END
 
 
