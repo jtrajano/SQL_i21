@@ -6352,6 +6352,7 @@
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspARPaymentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
