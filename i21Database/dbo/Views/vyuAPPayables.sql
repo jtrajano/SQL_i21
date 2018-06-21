@@ -60,7 +60,7 @@ SELECT
 				ELSE ISNULL(B.dblTax, 0) * B.dblRate
 		END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
-		END AS dblAmountDue 
+		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
@@ -108,7 +108,7 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 13) AND A.ysnOrigin = 1
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
-	 B.intBillId,   
+	 C.intBillId,   
 	 C.strBillId ,
 	 CAST(
 		 	(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment > 0
