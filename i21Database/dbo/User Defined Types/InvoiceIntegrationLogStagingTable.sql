@@ -43,5 +43,5 @@
 	[ysnPosted]							BIT DEFAULT ((0)) NULL,
 	[ysnUnPosted]						BIT DEFAULT ((0)) NULL,
 	[ysnAccrueLicense]					BIT DEFAULT ((0)) NULL,
-	[strBatchId]						NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+	[strBatchId]						NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 )
