@@ -6356,6 +6356,7 @@
     <Build Include="dbo\Tables\tblIPFTPServer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

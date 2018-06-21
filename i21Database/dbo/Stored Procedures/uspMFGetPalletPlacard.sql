@@ -1,57 +1,66 @@
-﻿CREATE PROCEDURE uspMFGetPalletPlacard (@strLotNumber NVARCHAR(50))
+﻿CREATE PROCEDURE uspMFGetPalletPlacard (@strLotNumber NVARCHAR(MAX))
 AS
 BEGIN
-	IF EXISTS (
-			SELECT *
-			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber
-				AND ysnProduced = 0
+	DECLARE @tblMFLot TABLE (
+		strLotNumber NVARCHAR(50) collate Latin1_General_CI_AS
+		,intLocationId INT
+		)
+
+	INSERT INTO @tblMFLot
+	SELECT strLotNumber
+		,intLocationId
+	FROM tblICLot
+	WHERE intLotId IN (
+			SELECT x.Item COLLATE DATABASE_DEFAULT
+			FROM dbo.fnSplitString(@strLotNumber, '^') x
 			)
-	BEGIN
+
+	SELECT I.strItemNo
+		,I.strDescription
+		,UM.strUnitMeasure
+		,SUM(L.dblQty) AS dblTotalQty
+		,dbo.fnSMGetCompanyLogo('CompanyLogo') AS strLogo
+		,L.intLotId
+	FROM tblICLot L
+	JOIN tblICItem I ON I.intItemId = L.intItemId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	JOIN @tblMFLot L1 ON L1.strLotNumber = L.strLotNumber
+		AND L1.intLocationId = L.intLocationId
+	WHERE L.ysnProduced = 0
+	GROUP BY I.strItemNo
+		,I.strDescription
+		,UM.strUnitMeasure
+		,L.intLotId
+	
+	UNION
+	
+	SELECT DT.strItemNo
+		,DT.strDescription
+		,DT.strUnitMeasure
+		,SUM(DT.dblPhysicalCount) OVER (PARTITION BY DT.intLotId) dblTotalQty
+		,dbo.fnSMGetCompanyLogo('WholesomeSweeteners') AS strLogo
+		,DT.intLotId
+	FROM (
 		SELECT I.strItemNo
 			,I.strDescription
-			,PL.strParentLotNumber
-			,SUM(L.dblQty) AS dblPhysicalCount
+			,strParentLotNumber
+			,SUM(WP.dblPhysicalCount) AS dblPhysicalCount
 			,UM.strUnitMeasure
-			,SUM(L.dblQty) AS dblTotalQty
-			,dbo.fnSMGetCompanyLogo('CompanyLogo') AS strLogo
-		FROM tblICLot L
+			,L.intLotId
+		FROM tblMFWorkOrderProducedLot WP
+		JOIN tblICLot L ON L.intLotId = WP.intLotId
+			AND WP.ysnProductionReversed = 0
 		JOIN tblICItem I ON I.intItemId = L.intItemId
-		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intPhysicalItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-		WHERE L.strLotNumber = @strLotNumber
+		JOIN @tblMFLot L1 ON L1.strLotNumber = L.strLotNumber
+			AND L1.intLocationId = L.intLocationId
+		WHERE L.ysnProduced = 1
 		GROUP BY I.strItemNo
 			,I.strDescription
-			,PL.strParentLotNumber
+			,strParentLotNumber
 			,UM.strUnitMeasure
-	END
-	ELSE
-	BEGIN
-		SELECT DT.strItemNo
-			,DT.strDescription
-			,DT.strParentLotNumber
-			,DT.dblPhysicalCount
-			,DT.strUnitMeasure
-			,SUM(DT.dblPhysicalCount) OVER () dblTotalQty
-			,dbo.fnSMGetCompanyLogo('WholesomeSweeteners') AS strLogo
-		FROM (
-			SELECT I.strItemNo
-				,I.strDescription
-				,strParentLotNumber
-				,SUM(WP.dblPhysicalCount) AS dblPhysicalCount
-				,UM.strUnitMeasure
-			FROM tblMFWorkOrderProducedLot WP
-			JOIN tblICLot L ON L.intLotId = WP.intLotId
-				AND WP.ysnProductionReversed = 0
-			JOIN tblICItem I ON I.intItemId = L.intItemId
-			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intPhysicalItemUOMId
-			JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-			WHERE Left(L.strLotNumber, Len(@strLotNumber)) = Left(@strLotNumber, Len(@strLotNumber))
-			GROUP BY I.strItemNo
-				,I.strDescription
-				,strParentLotNumber
-				,UM.strUnitMeasure
-			) AS DT
-	END
+			,L.intLotId
+		) AS DT
 END
