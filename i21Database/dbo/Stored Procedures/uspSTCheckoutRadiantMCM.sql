@@ -68,7 +68,9 @@ BEGIN
 		JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
 		JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
-		WHERE intCheckoutId = @intCheckoutId AND tblSTCheckoutDepartmetTotals.intCategoryId = Cat.intCategoryId
+		WHERE intCheckoutId = @intCheckoutId 
+		AND tblSTCheckoutDepartmetTotals.intCategoryId = Cat.intCategoryId
+		AND S.intStoreId = @intStoreId
 	END
 
 	UPDATE dbo.tblSTCheckoutDepartmetTotals SET dblRegisterSalesAmount = dblTotalSalesAmount Where intCheckoutId = @intCheckoutId
