@@ -150,7 +150,7 @@ BEGIN
 								 ELSE
 									(dblHoursEarned + T.dblEarnedHours)
 								END
-				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
+				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
 				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
 									DATEADD(DD, -1, dtmPaycheckStartDate) 
 								ELSE T.dtmNextAward END
