@@ -23,7 +23,8 @@ FROM
 	INNER JOIN tblEMEntity EM
 		ON EM.intEntityId = CAST(AUD.strRecordNo AS INT)
 WHERE strActionType = 'Updated'
-	AND strTransactionType = 'Payroll.view.EntityEmployee'
+	AND strTransactionType IN ('EntityManagement.view.Entity', 'Payroll.view.EntityEmployee')
+	AND strRoute LIKE '%EntityEmployee%'
 	AND EM.intEntityId IN (SELECT intEntityId FROM tblPREmployee)
 	AND PATINDEX('%"changeDescription":%', strJsonData) > 0
 	AND (PATINDEX('%"hidden":true%', strJsonData) > 0 
