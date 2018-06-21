@@ -937,19 +937,34 @@ BEGIN
 	-- ,loc.intItemLocationId
 	-- ,B.intInventoryReceiptItemId
 	-- ,B.intInventoryReceiptChargeId
-	UNION ALL --Tax Adjustment
+	UNION ALL 
+	--Tax Adjustment
+	--When creating tax adjustment gl entry, we have to convert first the adjusted tax to foreign rate (same with original tax) 
+	--before subtracting with the original tax to accurately get the difference and avoid .01 discrepancy issue
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	CAST(CASE WHEN charges.intInventoryReceiptChargeId > 0 
+		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
-																	THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * -1
+																	THEN 
+																		(CAST(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) 
+																				* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) 
+																			- 
+																			CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))) 
+																		* -1
 														WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
-															THEN (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax))
-													END) * ISNULL(NULLIF(B.dblRate,0),1) 
-											ELSE (SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) END
-											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)),
+															THEN 
+																(CAST(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) 
+																		* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																	 - CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
+														END) 
+												ELSE 
+													(CAST(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) 
+																* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) 
+															- CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
+												END
+												* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		--[dblDebit]						=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -1042,6 +1057,7 @@ BEGIN
 	,A.intCommodityId
 	,A.intStoreLocationId
 	,E.strName
+
 	UPDATE A
 		SET A.strDescription = B.strDescription
 	FROM @returntable A
