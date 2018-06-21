@@ -306,7 +306,7 @@ BEGIN TRY
 	declare @rtStrGABAssociation1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'We confirm having bought today, at the conditions'), 'We confirm having bought today, at the conditions');
 	declare @rtStrGABAssociation3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'We confirm having sold to you today, at the conditions'), 'We confirm having sold to you today, at the conditions');
 	declare @rtStrGABAssociation2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'latest edition'), 'latest edition');
-	
+	declare @rtStriDealAssociation nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Re today phone conversation we confirm to you the following sale at the conditions'),'Re today phone conversation we confirm to you the following sale at the conditions');
 	
 	
 	SELECT @TotalAtlasLots= CASE 
@@ -438,14 +438,35 @@ BEGIN TRY
 			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CH.strContractNumber		
 			,strGABAssociation						=	CASE WHEN CH.intContractTypeId = 1 THEN @rtStrGABAssociation1 ELSE @rtStrGABAssociation3 END
 														+ ' ' + isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
+			,striDealAssociation					=	@rtStriDealAssociation
+														+ ' ' + isnull(rtrt.strTranslation,AN.strComment) + ' ('+isnull(rtrt1.strTranslation,AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,getdate()),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)), LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + LEFT(DATENAME(YEAR,getdate()),4)
 			,strCompanyName							=	@strCompanyName
+			,striDealShipment						=  ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH, SQ.dtmStartDate)), DATENAME(MONTH, SQ.dtmStartDate)) +'('+ RIGHT(YEAR(SQ.dtmStartDate), 2)+')'
+			,striDealSeller							=   LTRIM(RTRIM(EV.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EV.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EV.strEntityCity)),'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityState)) END,'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityZipCode)) END,'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt11.strTranslation,LTRIM(RTRIM(EV.strEntityCountry))) END,'')
+
+			,striDealBuyer							=   LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE isnull(rtrt12.strTranslation,LTRIM(RTRIM(EC.strEntityCountry))) END,'')
+			,striDealPrice								=	strFutMarketName + ' ' + strFutureMonth + ' ' + LTRIM(dblBasis)+' '+ strBasisCurrency + '/' + strBasisUnitMeasure
 
 	FROM	tblCTContractHeader			CH
 	JOIN	tblICCommodity				CM	ON	CM.intCommodityId				=	CH.intCommodityId
 	JOIN	tblCTContractType			TP	ON	TP.intContractTypeId			=	CH.intContractTypeId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
+	JOIN	vyuCTEntity					EV	ON	EV.intEntityId					=	CH.intEntityId        
+											AND EV.strEntityType				=	'Vendor'					LEFT
+	JOIN	vyuCTEntity					EC	ON	EC.intEntityId					=	CH.intCounterPartyId  
+											AND EC.strEntityType				=	'Customer'					LEFT
 	JOIN	tblCTCropYear				CY	ON	CY.intCropYearId				=	CH.intCropYearId			LEFT
 	JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId			=	CH.intContractBasisId		LEFT
 	JOIN	tblCTWeightGrade			W1	ON	W1.intWeightGradeId				=	CH.intWeightId				LEFT
@@ -482,7 +503,7 @@ BEGIN TRY
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
 							CD.strERPPONumber,
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
-							dbo.fnCTGetTranslation('Inventory.view.Item',CD.intItemId,@intLaguageId,'Description',IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
+							isnull(rtIMTranslation.strTranslation, IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
 							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
 							LEFT(DATENAME(DAY,CD.dtmStartDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)), LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmStartDate),4) + ' - ' + LEFT(DATENAME(DAy,CD.dtmEndDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)), LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmEndDate),4) AS strStartAndEndDate,
 							LTRIM(CD.intNumberOfContainers) + ' x ' + isnull(rtrt11.strTranslation,CT.strContainerType) AS strNoOfContainerAndType,
@@ -492,7 +513,11 @@ BEGIN TRY
 							CD.strBuyerSeller,
 							ISNULL(CD.dblNoOfLots - ISNULL(PF.dblLotsFixed,0), 0) AS dblLotsToFix,
 							CD.intPricingTypeId,
-							CY.strCurrency + '-' + isnull(rtrt5.strTranslation,UM.strUnitMeasure) AS	strPriceCurrencyAndUOM
+							CY.strCurrency + '-' + ISNULL(rtrt5.strTranslation,UM.strUnitMeasure) AS	strPriceCurrencyAndUOM,
+							CD.dtmStartDate,
+							ISNULL(rtrt8.strTranslation,MO.strFutureMonth) strFutureMonth,
+							BC.strCurrency AS strBasisCurrency,
+							ISNULL(rtrt7.strTranslation,BM.strUnitMeasure) strBasisUnitMeasure
 
 				FROM		tblCTContractDetail		CD
 				JOIN		tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
@@ -501,12 +526,16 @@ BEGIN TRY
 				JOIN		tblSMCity				DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
 				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
 				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
+				JOIN		tblSMCurrency			BC	ON	BC.intCurrencyID			=	CD.intBasisCurrencyId		LEFT
 				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		LEFT
 				JOIN		tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
 				JOIN		tblLGContainerType		CT	ON	CT.intContainerTypeId		=	CD.intContainerTypeId		LEFT
 				JOIN		tblCTPriceFixation		PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
 				JOIN		tblICItemUOM			IU	ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
 				JOIN		tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
+
+				LEFT JOIN   tblICItemUOM			BU	ON  BU.intItemUOMId				=	CD.intBasisUOMId
+				LEFT JOIN   tblICUnitMeasure		BM	ON  BM.intUnitMeasureId			=	BU.intUnitMeasureId
 	
 				left join tblSMScreen				rts5 on rts5.strNamespace = 'Inventory.view.ReportTranslation'
 				left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = UM.intUnitMeasureId
@@ -519,6 +548,18 @@ BEGIN TRY
 				left join tblSMScreen				rts11 on rts11.strNamespace = 'Logistics.view.ContainerType'
 				left join tblSMTransaction			rtt11 on rtt11.intScreenId = rts11.intScreenId and rtt11.intRecordId = CT.intContainerTypeId
 				left join tblSMReportTranslation	rtrt11 on rtrt11.intLanguageId = @intLaguageId and rtrt11.intTransactionId = rtt11.intTransactionId and rtrt11.strFieldName = 'Container Type'
+
+				left join tblSMScreen				rtIMScreen on rtIMScreen.strNamespace = 'Inventory.view.Item'
+				left join tblSMTransaction			rtIMTransaction on rtIMTransaction.intScreenId = rtIMScreen.intScreenId and rtIMTransaction.intRecordId = IM.intItemId
+				left join tblSMReportTranslation	rtIMTranslation on rtIMTranslation.intLanguageId = @intLaguageId and rtIMTranslation.intTransactionId = rtIMTransaction.intTransactionId and rtIMTranslation.strFieldName = 'Description'
+
+				left join tblSMScreen				rts8 on rts8.strNamespace = 'RiskManagement.view.FuturesTradingMonths'
+				left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = CD.intFutureMonthId
+				left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Future Trading Month'
+	
+				left join tblSMScreen				rts7 on rts7.strNamespace = 'Inventory.view.ReportTranslation'
+				left join tblSMTransaction			rtt7 on rtt7.intScreenId = rts7.intScreenId and rtt7.intRecordId = CD.intUnitMeasureId
+				left join tblSMReportTranslation	rtrt7 on rtrt7.intLanguageId = @intLaguageId and rtrt7.intTransactionId = rtt7.intTransactionId and rtrt7.strFieldName = 'Name'
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
@@ -555,6 +596,17 @@ BEGIN TRY
 	left join tblSMScreen				rts10 on rts10.strNamespace = 'i21.view.Country'
 	left join tblSMTransaction			rtt10 on rtt10.intScreenId = rts10.intScreenId and rtt10.intRecordId = rtc10.intCountryID
 	left join tblSMReportTranslation	rtrt10 on rtrt10.intLanguageId = @intLaguageId and rtrt10.intTransactionId = rtt10.intTransactionId and rtrt10.strFieldName = 'Country'
+
+	left join tblSMCountry				rtc11 on lower(rtrim(ltrim(rtc11.strCountry))) = lower(rtrim(ltrim(EV.strEntityCountry)))
+	left join tblSMScreen				rts11 on rts11.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt11 on rtt11.intScreenId = rts11.intScreenId and rtt11.intRecordId = rtc11.intCountryID
+	left join tblSMReportTranslation	rtrt11 on rtrt11.intLanguageId = @intLaguageId and rtrt11.intTransactionId = rtt11.intTransactionId and rtrt11.strFieldName = 'Country'
+
+	left join tblSMCountry				rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
+	left join tblSMScreen				rts12 on rts12.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtt12 on rtt12.intScreenId = rts12.intScreenId and rtt12.intRecordId = rtc12.intCountryID
+	left join tblSMReportTranslation	rtrt12 on rtrt12.intLanguageId = @intLaguageId and rtrt12.intTransactionId = rtt12.intTransactionId and rtrt12.strFieldName = 'Country'
+
 
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
