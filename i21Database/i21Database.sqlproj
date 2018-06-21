@@ -6761,6 +6761,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
     <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM.sql" />
     <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
