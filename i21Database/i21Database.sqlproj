@@ -6368,6 +6368,7 @@
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrderByLot.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
