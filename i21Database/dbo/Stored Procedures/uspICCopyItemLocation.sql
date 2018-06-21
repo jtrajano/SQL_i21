@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCopyItemLocation]
 	@intSourceItemId INT,
-	@intSourceLocationId INT = NULL,
 	@strDestinationItemIds VARCHAR(8000),
 	@intEntityUserSecurityId INT 
 AS
@@ -87,7 +86,7 @@ SELECT intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, 
 , ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
 , ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort
 FROM tblICItemLocation
-WHERE intItemId = @intSourceItemId AND (@intSourceLocationId IS NULL OR intLocationId = @intSourceLocationId)
+WHERE intItemId = @intSourceItemId
 
 UPDATE d
 SET 
