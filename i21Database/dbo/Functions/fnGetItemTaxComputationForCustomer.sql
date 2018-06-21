@@ -43,6 +43,7 @@ RETURNS @returntable TABLE
 	,[ysnInvalidSetup]				BIT
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
+	,[intUnitMeasureId]				INT
 )
 AS
 BEGIN
@@ -77,6 +78,7 @@ BEGIN
 			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT
 			,[ysnComputed]					BIT
+			,[intUnitMeasureId]				INT
 			)
 			
 			
@@ -108,7 +110,8 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
-		,[strNotes] 
+		,[strNotes]
+		,[intUnitMeasureId] 
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -131,6 +134,7 @@ BEGIN
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
+		,[intUnitMeasureId]
 	FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver)
 															
@@ -326,7 +330,8 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
-		,[strNotes] 
+		,[strNotes]
+		,[intUnitMeasureId] 
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -350,6 +355,7 @@ BEGIN
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
+		,[intUnitMeasureId] 
 	FROM
 		@ItemTaxes 	
 	RETURN				
