@@ -77,7 +77,7 @@ INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId]
 INNER JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 13)  AND A.ysnOrigin = 0
 --ORIGIN
 UNION ALL
 SELECT 
