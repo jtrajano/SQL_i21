@@ -231,6 +231,7 @@ BEGIN
 		WHEN @msgId = 80215 THEN 'Cannot change UOM to %s. %s is partially allocated.'
 		WHEN @msgId = 80216 THEN 'Category Code is invalid or missing.'
 		WHEN @msgId = 80217 THEN '%s is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency.'
+		WHEN @msgId = 80218 THEN 'Pricing type for %s is a Basis and its Futures needs a price. Please add it at Contract Management -> Price Contract.'
 	END 
 
 	RETURN @msg
