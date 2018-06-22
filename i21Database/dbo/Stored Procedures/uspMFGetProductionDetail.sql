@@ -48,11 +48,11 @@ BEGIN
 		,W.ysnFillPartialPallet
 		,I.intCategoryId
 		,LS.strSecondaryStatus AS strLotStatus
-		,PL.strParentLotNumber
+		,W.strParentLotNumber
 		,L1.strLotNumber AS strSpecialPalletId
 	FROM dbo.tblMFWorkOrderProducedLot W
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
-	LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+	--LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
