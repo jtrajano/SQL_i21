@@ -214,11 +214,15 @@ BEGIN
 											-- 	dbo.fnAPGetPaymentAmountFactor((voucherDetail.dblTotal + voucherDetail.dblTax), B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherDetail.dblRate
 											-- 	AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 											(CAST(
-												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
 												AS DECIMAL(18,2))
 											-
 											CAST(
-												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherRate.dblExchangeRate
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) * voucherRate.dblExchangeRate
 												AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -261,11 +265,15 @@ BEGIN
 	AND B.intInvoiceId IS NULL
 	AND A.intCurrencyId != @functionalCurrency
 	AND (CAST(
-												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+													- B.dblInterest, voucher.dblTotal) * A.dblExchangeRate
 												AS DECIMAL(18,2))
 											-
 											CAST(
-												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) * voucherRate.dblExchangeRate
+												dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+													- B.dblInterest, voucher.dblTotal) * voucherRate.dblExchangeRate
 												AS DECIMAL(18,2))) != 0
 	-- GROUP BY A.[strPaymentRecordNum],
 	-- A.dblExchangeRate,
@@ -385,7 +393,9 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
+													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
 											AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -410,7 +420,9 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment + B.dblDiscount - B.dblInterest, voucher.dblTotal))
+													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+													- B.dblInterest, voucher.dblTotal))
 											AS DECIMAL(18,2))
 											* (CASE WHEN voucher.intTransactionType != 1 AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),      
 		[dblDebitReport]				=	0,

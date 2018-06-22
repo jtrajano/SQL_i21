@@ -34,9 +34,16 @@ IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE dblAmountDue != 0 AND intBillId = 
 		UPDATE A
 			SET A.ysnApplied = 1
 			,A.dblAmountApplied = A.dblBalance
+			,A.intBillDetailApplied = voucherDetailBasis.intBillDetailId
 			,A.dblBalance = 0
 		FROM tblAPAppliedPrepaidAndDebit A
 		INNER JOIN tblAPBill B ON A.intTransactionId = B.intBillId
+		OUTER APPLY (
+			SELECT TOP 1
+				voucherDetail.intBillDetailId
+			FROM tblAPBillDetail voucherDetail
+			WHERE voucherDetail.intBillId = A.intBillId
+		) voucherDetailBasis
 		WHERE A.intTransactionId IN (SELECT intId FROM @prepaidIds) AND A.intBillId = @voucherId
 
 		INSERT INTO @voucherIds

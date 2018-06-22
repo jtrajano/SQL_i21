@@ -168,6 +168,12 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+OUTER APPLY (
+	SELECT TOP 1
+		voucherDetail.dblRate
+	FROM tblAPBillDetail voucherDetail
+	WHERE voucherDetail.intBillDetailId = B.intBillDetailApplied
+) voucherDetailApplied
 WHERE A.ysnPosted = 1
 UNION ALL
 --APPLIED DM, (DM HAVE BEEN USED AS OFFSET IN PREPAID AND DEBIT MEMO TABS)
