@@ -132,9 +132,9 @@ BEGIN
 			, intLoadContainerId = CAST(NULL AS INT)
 			, strContainerNumber = CAST(NULL AS NVARCHAR(100)) 
 			, intItemUOMId = CAST(NULL AS INT)
-			, strItemUOM = CAST(NULL AS NVARCHAR(50)) 
+			, strItemUOM = receiptPriceCharges.strItemUOM
 			, intCostUOMId = CAST(NULL AS INT)
-			, strCostUOM = CAST(NULL AS NVARCHAR(50)) 
+			, strCostUOM =  receiptPriceCharges.strCostUOM
 			, strFilterString
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityId
@@ -178,9 +178,9 @@ BEGIN
 			, intLoadContainerId = CAST(NULL AS INT)
 			, strContainerNumber = CAST(NULL AS NVARCHAR(100)) 
 			, intItemUOMId = CAST(NULL AS INT)
-			, strItemUOM = CAST(NULL AS NVARCHAR(50)) 
+			, strItemUOM = receiptCharges.strItemUOM
 			, intCostUOMId = CAST(NULL AS INT)
-			, strCostUOM = CAST(NULL AS NVARCHAR(50)) 
+			, strCostUOM =  receiptCharges.strCostUOM
 			, strFilterString
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityId
@@ -228,9 +228,9 @@ BEGIN
 			, intLoadContainerId = CAST(NULL AS INT)
 			, strContainerNumber = CAST(NULL AS NVARCHAR(100)) 
 			, intItemUOMId = CAST(NULL AS INT)
-			, strItemUOM = CAST(NULL AS NVARCHAR(50)) 
+			, strItemUOM = shipmentCharges.strItemUOM
 			, intCostUOMId = CAST(NULL AS INT)
-			, strCostUOM = CAST(NULL AS NVARCHAR(50)) 
+			, strCostUOM =  shipmentCharges.strCostUOM
 			, strFilterString
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityId
