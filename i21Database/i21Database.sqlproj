@@ -4313,7 +4313,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql" />
     <Build Include="dbo\Views\vyuLGDeliveredNotInvoiced.sql" />
     <Build Include="dbo\Views\vyuLGStockSaleSamples.sql" />
-    <Build Include="dbo\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentChargePerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
     <Build Include="dbo\Tables\tblARLetterPlaceHolder.sql" />
@@ -4815,7 +4814,6 @@
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
     <None Include="Scripts\Post-Deployment\TM\5_ObsoletingSeasonReset.sql" />
     <Build Include="dbo\Stored Procedures\uspICDuplicateStorageLocation.sql" />
@@ -5113,7 +5111,6 @@
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\28_UpdateBaseAmounts.sql" />
     <Build Include="dbo\Views\vyuCTItemCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
     <Build Include="dbo\Views\vyuLGNotificationCount.sql" />
@@ -5271,7 +5268,6 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateTaskStatus.sql" />
     <Build Include="dbo\Tables\tblETGPSCoordinates.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumberLocation.sql" />
-    <Build Include="dbo\tblDBPanelOwner.sql" />
     <Build Include="dbo\Views\vyuLGLoadContainerLookup.sql" />
     <Build Include="dbo\Views\vyuCTCompactContractDetailView.sql" />
     <Build Include="dbo\Views\vyuTRGetTransportLoadReceipt.sql" />
@@ -6104,17 +6100,12 @@
     <Build Include="dbo\Views\vyuRKGetGLAccountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityCredential.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeInvoiceParam.sql" />
-    <Build Include="dbo\fnAPGetVoucherAmountMultiplier.sql" />
-    <Build Include="dbo\uspAPRptTaxReport.sql" />
-    <Build Include="dbo\vyuAPRptTaxReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringBySymbol.sql" />
     <Build Include="dbo\Views\vyuCTGetINCOShipTerm.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveINCOShipTerm.sql" />
     <Build Include="dbo\Views\vyuHDTimeHoursReport.sql" />
     <Build Include="dbo\Views\vyuARPaymentBankTransaction.sql" />
     <Build Include="dbo\Views\vyuICGetBundleItemStock.sql" />
-    <Build Include="dbo\vyuAPRptVoucherCheckOffDetail.sql" />
-    <Build Include="dbo\uspAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Functions\fnGetDebitUnit.sql" />
     <Build Include="dbo\Functions\fnGetCreditUnit.sql" />
     <None Include="Scripts\Post-Deployment\IC\27_RemoveAfter18.1_DataFix.sql" />
@@ -6290,6 +6281,8 @@
     <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
     <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCommission.sql" />
+    <Build Include="dbo\Tables\tblPRElectronicFilingSUI.sql" />
+    <Build Include="dbo\Views\vyuPRElectronicFilingSUIDetail.sql" />
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
@@ -6318,15 +6311,37 @@
     <Build Include="dbo\Tables\tblMFEDI944Error.sql" />
     <Build Include="dbo\Views\vyuICItemStockDetailLookup.sql" />
     <Build Include="dbo\Tables\tblCFTransactionTaxType.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
-    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
+    <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
+    <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
-    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicMI.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixVoucherStatus.sql" />
+    <None Include="Scripts\Post-Deployment\IC\31_RemoveAfter18.3_DataFix.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidPaymentsForPosting.sql" />
+    <Build Include="dbo\Functions\fnARGetPaymentDetailsForPosting.sql" />
+    <Build Include="dbo\User Defined Types\ReceivePaymentPostingTable.sql" />
+    <Build Include="dbo\Functions\fnARGenerateGLEntriesForPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARValidatePaymentPosting.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
+    <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
+    <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Views\vyuAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Views\vyuAPRptTaxReport.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAmountMultiplier.sql" />
@@ -6336,8 +6351,7 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
-    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
-    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6472,7 +6486,6 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateAmountSign.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\26_ActivitySource.sql" />
     <None Include="Scripts\Post-Deployment\RM\01_MasterScript.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\30_UpdateBatchIdUsed.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePrepayVoucherStatus.sql" />
     <Build Include="dbo\Functions\fnHDTicketCommentSentMessage.sql" />
     <None Include="Scripts\Post-Deployment\CCR\SiteDataFix.sql" />
@@ -6505,6 +6518,8 @@
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
+    <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

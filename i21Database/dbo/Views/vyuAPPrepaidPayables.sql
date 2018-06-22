@@ -198,3 +198,36 @@ WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
+
+UNION ALL
+--PAYMENT MADE TO AR TO OFFSET THE PREPAYMENT
+SELECT A.dtmDatePaid AS dtmDate,   
+	 B.intBillId AS intTransactionId,   
+	 C.strBillId ,
+	 B.dblPayment * ISNULL(A.dblExchangeRate,1) * - 1 AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
+	 dblTotal = 0 
+	, dblAmountDue = 0 
+	, dblWithheld = 0
+	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
+	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblInterest) > 0 THEN B.dblInterest * -1 ELSE B.dblInterest END AS dblInterest 
+	, dblPrepaidAmount = 0 
+	, D.strVendorId 
+	, ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	, C.dtmDueDate 
+	, C.ysnPosted 
+	, C.ysnPaid
+	, B.intAccountId
+	, EC.strClass
+	,2
+FROM dbo.tblARPayment  A
+ LEFT JOIN dbo.tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
+ LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityCustomerId] = D.[intEntityId]
+LEFT JOIN dbo.tblCMBankTransaction E
+	ON A.strRecordNumber = E.strTransactionId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+ WHERE A.ysnPosted = 1  
+	AND C.ysnPosted = 1
+	AND C.intTransactionType IN (2)
+

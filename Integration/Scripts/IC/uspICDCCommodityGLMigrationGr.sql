@@ -23,8 +23,10 @@ SET ANSI_WARNINGS OFF
 ----***********************************************************************
 ----sales account
 INSERT INTO tblICCategoryAccount (	intCategoryId	,intAccountCategoryId	,intAccountId	,intConcurrencyId	) 
+SELECT q.intCategoryId, q.AccountCategoryId, q.intAccountId, 1
+FROM
 (
-select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId, 1 from tblICCategory c
+select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId from tblICCategory c
 cross apply
 (SELECT top 1
 cat.intCategoryId, cat.strCategoryCode ,
@@ -37,12 +39,15 @@ act.intAccountId, act.strDescription ACDescription
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_sls 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_sls 
-	and c.intCategoryId = cat.intCategoryId) as ac)
+	and c.intCategoryId = cat.intCategoryId) as ac) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = q.AccountCategoryId AND intCategoryId = q.intCategoryId)
 
 ----Inventory Account
 INSERT INTO tblICCategoryAccount (	intCategoryId	,intAccountCategoryId	,intAccountId	,intConcurrencyId	) 
+SELECT q.intCategoryId, q.AccountCategoryId, q.intAccountId, 1
+FROM
 (
-select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId, 1 from tblICCategory c
+select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId from tblICCategory c
 cross apply
 (SELECT top 1
 cat.intCategoryId, cat.strCategoryCode ,
@@ -55,12 +60,15 @@ act.intAccountId, act.strDescription ACDescription
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
-	and c.intCategoryId = cat.intCategoryId) as ac)
+	and c.intCategoryId = cat.intCategoryId) as ac) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = q.AccountCategoryId AND intCategoryId = q.intCategoryId)
 
 ----Inventory In-Transit Account
 INSERT INTO tblICCategoryAccount (	intCategoryId	,intAccountCategoryId	,intAccountId	,intConcurrencyId	) 
+SELECT q.intCategoryId, q.AccountCategoryId, q.intAccountId, 1
+FROM
 (
-select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId, 1 from tblICCategory c
+select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId from tblICCategory c
 cross apply
 (SELECT top 1
 cat.intCategoryId, cat.strCategoryCode ,
@@ -73,12 +81,14 @@ act.intAccountId, act.strDescription ACDescription
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_inv 
-	and c.intCategoryId = cat.intCategoryId) as ac)
-
+	and c.intCategoryId = cat.intCategoryId) as ac) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = q.AccountCategoryId AND intCategoryId = q.intCategoryId)
 ----COGS Account
 INSERT INTO tblICCategoryAccount (	intCategoryId	,intAccountCategoryId	,intAccountId	,intConcurrencyId	) 
+SELECT q.intCategoryId, q.AccountCategoryId, q.intAccountId, 1
+FROM
 (
-select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId, 1 from tblICCategory c
+select c.intCategoryId, ac.AccountCategoryId, ac.intAccountId from tblICCategory c
 cross apply
 (SELECT top 1
 cat.intCategoryId, cat.strCategoryCode ,
@@ -91,28 +101,25 @@ act.intAccountId, act.strDescription ACDescription
 	INNER JOIN tblGLCOACrossReference AS coa ON substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_pur 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 	WHERE substring(coa.strExternalId, 0, CHARINDEX('.', coa.strExternalId)) = cls.gacom_gl_pur 
-	and c.intCategoryId = cat.intCategoryId) as ac)
-
+	and c.intCategoryId = cat.intCategoryId) as ac) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = q.AccountCategoryId AND intCategoryId = q.intCategoryId)
 --===================================
 --insert AP clearing account required by i21. Origin does not have AP Clearing
 --All other LOBs have AP Clearing in origin
 --Other additional accounts will be imported in a separate sp
 
 
-insert into tblICCategoryAccount 
-(intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
-(Select intCategoryId, intAccountCategoryId, intAccountId, 1 from tblICCategory C 
-join tblICCommodity cm on C.strCategoryCode = cm.strCommodityCode
-cross join 
-(--select top 1 51 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%adjustment%'
---union
---select top 1 46 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%transit%'
---union
---select top 1 44 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%variance%'
---union
-select top 1 45 intAccountCategoryId, intAccountId from tblGLAccount where strDescription like '%Clearing%'
-) ac
-where C.strInventoryType = 'Inventory' )
+INSERT INTO tblICCategoryAccount(intCategoryId, intAccountCategoryId, intAccountId, intConcurrencyId)
+SELECT c.intCategoryId, ac.intAccountCategoryId, ac.intAccountId, 1
+FROM tblICCategory c
+	INNER JOIN tblICCommodity cm ON c.strCategoryCode = cm.strCommodityCode
+	CROSS JOIN (
+		SELECT TOP 1 45 intAccountCategoryId, intAccountId
+		FROM tblGLAccount
+		WHERE strDescription LIKE '%Clearing%'
+	) ac
+WHERE c.strInventoryType = 'Inventory'
+	AND NOT EXISTS(SELECT 1 FROM tblICCategoryAccount WHERE intAccountCategoryId = ac.intAccountCategoryId AND intCategoryId = c.intCategoryId)
 
 
 ---================================Grain Discounts=============================================
@@ -125,6 +132,8 @@ INSERT INTO tblICItemAccount (
 	,intAccountId
 	,intConcurrencyId
 	) 
+SELECT intItemId, intAccountCategoryId, intAccountId, intConcurrencyId
+FROM (
 select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
 Cross Apply
 	(SELECT top 1 inv.intItemId
@@ -138,6 +147,8 @@ Cross Apply
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
+) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICItemAccount WHERE intAccountCategoryId = q.intAccountCategoryId AND intItemId = q.intItemId)
 
 --Purchase account to Other Charge Expense account
 INSERT INTO tblICItemAccount (
@@ -146,6 +157,8 @@ INSERT INTO tblICItemAccount (
 	,intAccountId
 	,intConcurrencyId
 	) 
+SELECT intItemId, intAccountCategoryId, intAccountId, intConcurrencyId
+FROM (
 select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
 Cross Apply
 	(SELECT top 1 inv.intItemId
@@ -159,6 +172,8 @@ Cross Apply
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
+) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICItemAccount WHERE intAccountCategoryId = q.intAccountCategoryId AND intItemId = q.intItemId)
 
 ---================================Grain Freight=============================================
 --add gl accounts for freight items
@@ -170,6 +185,8 @@ INSERT INTO tblICItemAccount (
 	,intAccountId
 	,intConcurrencyId
 	) 
+SELECT intItemId, intAccountCategoryId, intAccountId, intConcurrencyId
+FROM (
 select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
 Cross Apply
 	(SELECT top 1 inv.intItemId
@@ -183,6 +200,8 @@ Cross Apply
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac
+) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICItemAccount WHERE intAccountCategoryId = q.intAccountCategoryId AND intItemId = q.intItemId)
 
 --Purchase account to Other Charge Expense account
 INSERT INTO tblICItemAccount (
@@ -191,6 +210,8 @@ INSERT INTO tblICItemAccount (
 	,intAccountId
 	,intConcurrencyId
 	) 
+SELECT intItemId, intAccountCategoryId, intAccountId, intConcurrencyId
+FROM (
 select I.intItemId,ac.intAccountCategoryId, ac.intAccountId, 1 intConcurrencyId from tblICItem I
 Cross Apply
 	(SELECT top 1 inv.intItemId
@@ -204,24 +225,9 @@ Cross Apply
 	--WHERE coa.strExternalId = itm.gacdc_sls_gl_acct_no
 	and inv.strType = 'Other Charge' 
 	and I.intItemId = inv.intItemId) as ac	
-
+) q
+WHERE NOT EXISTS(SELECT 1 FROM tblICItemAccount WHERE intAccountCategoryId = q.intAccountCategoryId AND intItemId = q.intItemId)
 --==================================================================
 --update the account table with correct account category required for inventory to function
-
-UPDATE tgs SET intAccountCategoryId = act.intAccountCategoryId
---select c.strDescription,ca.intCategoryId,ac.strAccountId,ac.strDescription, ca.intAccountCategoryId, tgs.intAccountCategoryId,act.intAccountCategoryId
-from tblICCategoryAccount ca 
-join tblGLAccount ac on ca.intAccountId = ac.intAccountId
-join tblICCategory c on ca.intCategoryId = c.intCategoryId
-join tblGLAccountCategory act on ca.intAccountCategoryId = act.intAccountCategoryId
-join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
-join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
-join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
-where act.strAccountCategory in ('Inventory', 'Sales Account')
-and c.strInventoryType in ('Inventory', 'Raw Material', 'Finished Goods')
-and ast.strType = 'Primary'
-
-
-
 
 GO

@@ -20,6 +20,7 @@
 																	-- 14 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]
 																	-- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
 	,@RaiseError					BIT								= 0
+	,@BatchId						NVARCHAR(40)					= NULL
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
 	,@LogId							INT								= NULL			OUTPUT
 	
@@ -58,8 +59,10 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
-DECLARE @NewBathId NVARCHAR(40)
-EXEC dbo.uspSMGetStartingNumber 3, @NewBathId OUT
+DECLARE @NewBatchId NVARCHAR(40)
+SET @NewBatchId = @BatchId
+IF ISNULL(@BatchId,'') = ''
+	EXEC dbo.uspSMGetStartingNumber 3, @NewBatchId OUT
 
 BEGIN TRY
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
@@ -489,7 +492,7 @@ BEGIN
 				,@GroupingOption	= @GroupingOption
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
-				,@BatchId			= @NewBathId
+				,@BatchId			= @NewBatchId
 				,@ErrorMessage		= @CurrentErrorMessage
 			
 	
@@ -1107,7 +1110,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @IdsForUnPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1442,7 +1445,7 @@ BEGIN
 				,@IntegrationLogId	= @IntegrationLogId
 				,@UserId			= @UserId
 				,@RaiseError		= @RaiseError
-				,@BatchId			= @NewBathId
+				,@BatchId			= @NewBatchId
 				,@ErrorMessage		= @CurrentErrorMessage
 			
 	
@@ -1668,7 +1671,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1712,7 +1715,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1776,7 +1779,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -1820,7 +1823,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 1
 			,@Recap				= 1
 			,@UserId			= @UserId
@@ -1962,7 +1965,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPosting)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 0
 			,@UserId			= @UserId
@@ -2006,7 +2009,7 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @UpdatedIdsForUnPostingRecap)
 		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBathId --NULL #mark 101
+			 @BatchId			= @NewBatchId --NULL #mark 101
 			,@Post				= 0
 			,@Recap				= 1
 			,@UserId			= @UserId

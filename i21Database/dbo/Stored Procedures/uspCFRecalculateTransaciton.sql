@@ -66,6 +66,7 @@
 ,@TaxValue8							NUMERIC(18,6)	= 0.000000
 ,@TaxValue9							NUMERIC(18,6)	= 0.000000
 ,@TaxValue10						NUMERIC(18,6)	= 0.000000
+,@DevMode							BIT				= 0
 
 AS
 
@@ -414,12 +415,12 @@ BEGIN
 
 
 	--DECLARE @ysnNetworkTaxOverride BIT	= 0
-	--DECLARE @strNetworkType NVARCHAR(MAX)
+	DECLARE @strNetworkType NVARCHAR(MAX)
 
 
-	--SELECT TOP 1 @strNetworkType = strNetworkType 
-	--FROM tblCFNetwork
-	--WHERE intNetworkId = @NetworkId
+	SELECT TOP 1 @strNetworkType = strNetworkType 
+	FROM tblCFNetwork
+	WHERE intNetworkId = @NetworkId
 
 	--IF(@strTransactionType != 'Local/Network')
 	--BEGIN
@@ -887,6 +888,54 @@ BEGIN
 				,@TaxValue9						=@TaxValue9	
 				,@TaxValue10					=@TaxValue10
 
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					SELECT '@tblCFRemoteTax1', * from @tblCFRemoteTax --HERE
+				END
+
+				--COMPUTE REMOTE TAX--
+				IF(@strNetworkType = 'CFN')
+				BEGIN
+					
+					--SELECT @strNetworkType
+
+					UPDATE @tblCFRemoteTax 
+					SET dblAdjustedTax = dblRate , dblTax = dblRate
+
+					--BACKOUT TAX--
+					IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+					OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
+					OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
+					OR @strPriceMethod = 'Import File Price' 
+					OR @strPriceMethod = 'Credit Card' 
+					OR @strPriceMethod = 'Posted Trans from CSV'
+					OR @strPriceMethod = 'Origin History'
+					OR @strPriceMethod = 'Network Cost')
+					BEGIN
+						UPDATE @tblCFRemoteTax 
+						SET dblRate = CASE 
+							WHEN LOWER(strCalculationMethod) = 'percentage' 
+							THEN ((ISNULL(dblRate,0) / @dblQuantity) / (ISNULL(@dblOriginalPrice,0) - (ISNULL(dblRate,0) / @dblQuantity))) * 100
+							--THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
+							ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+							END
+					END
+
+					ELSE
+					BEGIN
+						UPDATE @tblCFRemoteTax 
+						SET dblRate = CASE 
+							WHEN LOWER(strCalculationMethod) = 'percentage' 
+							THEN (ISNULL(dblRate,0) / @dblQuantity) / (ISNULL(@dblOriginalPrice,0)) * 100
+							--THEN ((ISNULL(@dblOriginalPrice,0) * ISNULL(@dblQuantity,0)) * (1 +(ISNULL(dblRate,0) / 100)) /@dblQuantity)
+							ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
+							END
+					END
+
+				END
+
+				
+			
 
 				IF(@IsImporting = 0)
 				BEGIN
@@ -907,7 +956,9 @@ BEGIN
 
 
 						UPDATE @tblCFRemoteTax 
-						SET dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+						SET 
+						 dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+						,dblTax = (SELECT TOP 1 dblTaxOriginalAmount FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
 						WHERE intTaxGroupId = @intLoopTaxGroupID
 						AND intTaxClassId = @intLoopTaxClassID
 						AND intTaxCodeId = @intLoopTaxCodeID
@@ -920,6 +971,11 @@ BEGIN
 					END
 
 					DROP TABLE #ItemTax
+				END
+
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					SELECT '@tblCFRemoteTax1', * from @tblCFRemoteTax --HERE
 				END
 
 				--LOG INVALID TAX SETUP--
@@ -960,7 +1016,7 @@ BEGIN
 					,[ysnCheckoffTax]				
 					,[ysnTaxExempt]			
 					,[ysnTaxOnly]			
-					,[strNotes]				
+					,[strNotes]			
 				)	
 				SELECT 
 					 [intTransactionDetailTaxId]
@@ -979,10 +1035,17 @@ BEGIN
 					,[ysnTaxExempt]		
 					,ISNULL([ysnTaxOnly],0)	
 					,[strNotes]  				
+					
 				FROM
 				@tblCFRemoteTax
 				WHERE ysnInvalidSetup = 0
 				--@LineItemTaxDetailStagingTable--
+
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					--DEBUGGER HERE--  
+					SELECT '@LineItemTaxDetailStagingTable',* FROM @LineItemTaxDetailStagingTable --HERE--
+				END
 
 				--Backout tax--
 				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
@@ -1250,9 +1313,47 @@ BEGIN
 
 				END
 
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					--DEBUGGER HERE-- 
+					SELECT '@tblCFOriginalTax1',* FROM @tblCFOriginalTax --HERE--
+					--DEBUGGER HERE-- 
+					SELECT '@tblCFCalculatedTax1',* FROM @tblCFCalculatedTax --HERE--
+				END
+				
+
+				IF(@strNetworkType = 'CFN')
+				BEGIN
+					UPDATE @tblCFOriginalTax 
+					SET dblTax = li.dblTax,
+						dblAdjustedTax = li.dblAdjustedTax
+					FROM @tblCFOriginalTax AS ot
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON  ot.intTaxCodeId = li.intTaxCodeId
+					WHERE ISNULL(ot.ysnTaxExempt,0) = 0
+					AND ISNULL(ot.ysnInvalidSetup,0) = 0
+
+					UPDATE @tblCFCalculatedTax 
+					SET dblTax = li.dblTax,
+						dblAdjustedTax = li.dblAdjustedTax
+					FROM @tblCFCalculatedTax AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON  ct.intTaxCodeId = li.intTaxCodeId
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+				END
+
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					--DEBUGGER HERE-- 
+					SELECT '@tblCFOriginalTax2',* FROM @tblCFOriginalTax --HERE--
+					--DEBUGGER HERE-- 
+					SELECT '@tblCFCalculatedTax2',* FROM @tblCFCalculatedTax --HERE--
+				END
+
 				
 				--Set tax to 0 for exemption--
-				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
+				UPDATE @tblCFOriginalTax SET ysnInvalidSetup = 1, dblTax = 0.0, dblAdjustedTax = 0.0 WHERE ysnTaxExempt = 1 AND strNotes LIKE '%has an exemption set for item category%'
 
 				INSERT INTO @tblCFTransactionTax
 				(
@@ -1307,6 +1408,14 @@ BEGIN
 				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
 				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
 				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+
+				IF(ISNULL(@DevMode,0) = 1)
+				BEGIN
+					--DEBUGGER HERE-- 
+					SELECT '@tblCFTransactionTax',* FROM @tblCFTransactionTax --HERE--
+				END
+
+
 			END
 			ELSE
 			BEGIN
@@ -3672,6 +3781,12 @@ BEGIN
 	---------------------------------------------------
 	--					TAXES OUT					 --
 	---------------------------------------------------
+	IF(ISNULL(@DevMode,0) = 1)
+	BEGIN
+		--DEBUGGER HERE-- 
+		SELECT * FROM @tblCFTransactionTax --HERE-- 
+	END
+
 	IF(@IsImporting = 1)
 		BEGIN
 			INSERT INTO tblCFTransactionTaxType
@@ -3706,6 +3821,8 @@ BEGIN
 	--					TAXES OUT					 --
 	---------------------------------------------------
 
+	--DEBUGGER HERE-- 
+	--SELECT * FROM tblCFTransactionTaxType
 	
 	---------------------------------------------------
 	--					INDEX PRICING				 --

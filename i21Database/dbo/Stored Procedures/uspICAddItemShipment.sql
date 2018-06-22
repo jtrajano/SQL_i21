@@ -471,6 +471,9 @@ INSERT INTO @ShipmentEntries(
 		, dblForexRate
 		, strChargesLink
 		, intPriceUOMId
+		, dblGross
+		, dblTare
+		, dblNet
 )
 SELECT 
 		intOrderType
@@ -524,6 +527,9 @@ SELECT
 		, dblForexRate
 		, strChargesLink
 		, intPriceUOMId
+		, dblGross
+		, dblTare
+		, dblNet
 FROM @Items
 
 -- 2. Charges
@@ -873,6 +879,9 @@ INSERT INTO tblICInventoryShipmentItem(
 	, intConcurrencyId
 	, intPriceUOMId
 	, dblLineTotal
+	, dblGross
+	, dblTare
+	, dblNet
 )
 SELECT 
 	se.intShipmentId
@@ -910,6 +919,9 @@ SELECT
 			) 
 			, 2
 		) 
+	, se.dblGross
+	, se.dblTare
+	, se.dblNet
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 

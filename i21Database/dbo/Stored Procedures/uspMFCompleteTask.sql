@@ -111,8 +111,8 @@ BEGIN TRY
 		BEGIN TRANSACTION
 
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
-		,@intOrderHeaderId
-		,34
+			,@intOrderHeaderId
+			,34
 
 	IF NOT EXISTS (
 			SELECT 1

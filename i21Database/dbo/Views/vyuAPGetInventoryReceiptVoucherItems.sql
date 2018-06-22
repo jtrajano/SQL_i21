@@ -213,6 +213,7 @@ FROM	tblICInventoryReceipt Receipt
 
 			WHERE	ri.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND ri.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+					AND ct.intPricingTypeId != 2
 		) receiptAndVoucheredItems
 		OUTER APPLY (
 			SELECT	TOP 1 
@@ -271,3 +272,4 @@ FROM	tblICInventoryReceipt Receipt
 
 WHERE	Receipt.ysnPosted = 1
 		AND receiptAndVoucheredItems.dblReceiptQty <> receiptAndVoucheredItems.dblVoucherQty
+		AND receiptAndVoucheredItems.dblUnitCost != 0 --WILL NOT SHOW RECEIPT FROM STORAGE

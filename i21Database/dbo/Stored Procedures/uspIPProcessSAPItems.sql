@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPItems]
 @strSessionId NVARCHAR(50)='',
 @strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT
+@strInfo2 NVARCHAR(MAX)='' OUT,
+@intNoOfRowsAffected INT=0 OUT
 AS
 BEGIN TRY
 
@@ -33,6 +34,8 @@ Declare @strFinalErrMsg NVARCHAR(MAX)=''
 
 If ISNULL(@strSessionId,'')=''
 	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
+Else If @strSessionId='ProcessOneByOne'
+	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage
 Else
 	Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where strSessionId=@strSessionId
 
@@ -40,6 +43,7 @@ While(@intMinItem is not null)
 Begin
 Begin Try
 
+Set @intNoOfRowsAffected=1
 Set @intItemId=NULL
 Set @intCategoryId=NULL
 Set @intCommodityId=NULL
@@ -262,6 +266,8 @@ END CATCH
 
 	If ISNULL(@strSessionId,'')=''
 		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem
+	Else If @strSessionId='ProcessOneByOne'
+		Select @intMinItem=NULL
 	Else
 		Select @intMinItem=MIN(intStageItemId) From tblIPItemStage Where intStageItemId>@intMinItem AND strSessionId=@strSessionId
 End

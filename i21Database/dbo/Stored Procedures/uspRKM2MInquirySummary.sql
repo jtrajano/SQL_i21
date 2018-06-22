@@ -59,6 +59,7 @@ DECLARE @tblFinalDetail TABLE (
 							strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 							intPricingTypeId INT,
 							strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+							dblContractRatio NUMERIC(24, 10),
 							dblContractBasis NUMERIC(24, 10),
 							dblFutures NUMERIC(24, 10),
 							dblCash NUMERIC(24, 10), 
@@ -69,9 +70,8 @@ DECLARE @tblFinalDetail TABLE (
 							dblAdjustedContractPrice NUMERIC(24, 10),
 							dblCashPrice NUMERIC(24, 10), 
 							dblMarketPrice NUMERIC(24, 10),
-							dblResult NUMERIC(24, 10),
 							dblResultBasis NUMERIC(24, 10),
-							dblMarketFuturesResult NUMERIC(24, 10),
+							dblMarketRatio NUMERIC(24, 10), 
 							dblResultCash NUMERIC(24, 10),
 							dblContractPrice NUMERIC(24, 10)
 							,intQuantityUOMId INT
@@ -83,6 +83,9 @@ DECLARE @tblFinalDetail TABLE (
 							intMarketZoneId int  ,intCompanyLocationId int
 							,strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
 							,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dblResult NUMERIC(24, 10)
+							,dblMarketFuturesResult NUMERIC(24, 10)
+							,dblResultRatio NUMERIC(24, 10)
 						)
 
 INSERT INTO @#tempSummary 

@@ -8,9 +8,9 @@
 		,'' AS fname
 		,'' AS mname
 		,EMPhone.strPhone as phone
-		,dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 1) as addr1
-		,dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 2) as addr2 
-		,dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 3) as addr3
+		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 1),1,50) as addr1
+		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 2),1,50) as addr2 
+		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 3),1,50) as addr3
 		,Loc.strZipCode zip
 		,Loc.strState [state]
 		,Loc.strCity [city]

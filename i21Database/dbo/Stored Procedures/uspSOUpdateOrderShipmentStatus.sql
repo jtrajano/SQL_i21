@@ -30,11 +30,12 @@ IF @strTransactionType = 'Invoice'
 		CROSS APPLY (
 			SELECT dblQtyShipped = CASE WHEN ID.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ID.intItemUOMId, UOM.intItemUOMId), SUM(ID.dblQtyShipped)), 0) ELSE SUM(ID.dblQtyShipped) END
 			FROM tblARInvoiceDetail ID
-			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnRecurring = 0
+			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 			LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
 			WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
 			  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
 			  AND ID.intInvoiceId = @intTransactionId
+			  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
 		) INVOICEITEMS
 		OUTER APPLY (
@@ -43,11 +44,12 @@ IF @strTransactionType = 'Invoice'
 
 				SELECT dblQtyShipped = CASE WHEN ID.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ID.intItemUOMId, UOM.intItemUOMId), SUM(ID.dblQtyShipped)), 0) ELSE SUM(ID.dblQtyShipped) END
 				FROM tblARInvoiceDetail ID
-				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnRecurring = 0
+				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 				LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
 				WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
 				  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
 				  AND ID.intInvoiceId <> @intTransactionId
+				  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 				GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
 
 				UNION ALL
@@ -96,11 +98,12 @@ ELSE IF @strTransactionType = 'Inventory'
 			
 				SELECT dblQuantity = CASE WHEN ID.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ID.intItemUOMId, UOM.intItemUOMId), SUM(ID.dblQtyShipped)), 0) ELSE SUM(ID.dblQtyShipped) END 
 				FROM tblARInvoiceDetail ID
-				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnRecurring = 0
+				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 				LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
 				WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
 				  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
 				  AND ID.intInvoiceId <> @intTransactionId
+				  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 				GROUP BY ID.intItemUOMId, UOM.intItemUOMId
 			) ITEMS
 		) OTHERITEMS
@@ -129,10 +132,11 @@ ELSE
 		OUTER APPLY (
 			SELECT dblQtyShipped = CASE WHEN ID.intItemUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, ISNULL(ID.intItemUOMId, UOM.intItemUOMId), SUM(ID.dblQtyShipped)), 0) ELSE SUM(ID.dblQtyShipped) END
 			FROM tblARInvoiceDetail ID
-			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId AND I.ysnRecurring = 0
+			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 			LEFT JOIN tblICItemUOM UOM ON ID.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
 			WHERE ISNULL(ID.intSalesOrderDetailId, 0) = SOD.intSalesOrderDetailId
 			  AND ISNULL(ID.intInventoryShipmentItemId, 0) = 0
+			  AND ((ISNULL(SOD.strMaintenanceType, '') = 'Maintenance Only' AND I.ysnRecurring = 1) OR (ISNULL(SOD.strMaintenanceType, '') <> 'Maintenance Only' AND I.ysnRecurring = 0))
 			GROUP BY ID.intItemUOMId, UOM.intItemUOMId 
 		) INVOICEITEMS
 		OUTER APPLY (
@@ -178,23 +182,27 @@ ELSE
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 	BEGIN
-		DECLARE @intSOToUpdate INT = NULL		
-		DECLARE @ysnShipmentPosted BIT = 0
+		DECLARE @intSOToUpdate		INT = NULL		
+		      , @ysnShipmentPosted	BIT = 0
+			  , @intUserId			INT = NULL
 
-		SELECT TOP 1 @intSOToUpdate = intId FROM @tblSOToUpdate
+		SELECT TOP 1 @intSOToUpdate = intId 
+		FROM @tblSOToUpdate
+
 		SET @dblTotalQtyOrdered = 0
 		SET @dblTotalQtyShipped = 0
 
-		SELECT @dblTotalQtyOrdered = SUM(dblQtyOrdered)
-			  ,@dblTotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END)
-			  ,@ysnShipmentPosted = [IS].ysnPosted
+		SELECT @dblTotalQtyOrdered	= SUM(dblQtyOrdered)
+			  ,@dblTotalQtyShipped	= SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END)
+			  ,@ysnShipmentPosted	= [IS].ysnPosted
+			  ,@intUserId			= [SO].intEntityId
 		FROM tblSOSalesOrderDetail [SOD]
 		INNER JOIN tblSOSalesOrder [SO]
 			ON [SO].intSalesOrderId = [SOD].intSalesOrderId
 		LEFT JOIN tblICInventoryShipment [IS]
 			ON [IS].strReferenceNumber = SO.strSalesOrderNumber
 		WHERE [SO].intSalesOrderId = @intSOToUpdate
-		GROUP BY [SO].intSalesOrderId, [IS].ysnPosted
+		GROUP BY [SO].intSalesOrderId, [IS].ysnPosted, [SO].intEntityId
 
 		IF (@dblTotalQtyShipped = 0)
 			SET @strOrderStatus = 'Open'
@@ -209,6 +217,9 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSOToUpdate)
 			, ysnProcessed   = CASE WHEN @strOrderStatus <> 'Open' THEN 1 ELSE 0 END
 			, ysnShipped     = CASE WHEN @strOrderStatus = 'Open' THEN 0 ELSE ysnShipped END
 		WHERE intSalesOrderId = @intSOToUpdate
+
+		IF @ysnForDelete = 1
+			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @intSOToUpdate, @intUserId = @intUserId, @ysnDelete = 1
 
 		DELETE FROM @tblSOToUpdate WHERE intId = @intSOToUpdate
 	END

@@ -33,6 +33,7 @@ BEGIN TRY
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
 		,dblCost NUMERIC(18, 6)
+		,intCostUOMId INT
 		,intLoadCostId INT
 		,ysnInventoryCost BIT
 		,intItemUOMId INT
@@ -113,6 +114,7 @@ BEGIN TRY
 		,intAccountId
 		,dblQtyReceived
 		,dblCost
+		,intCostUOMId
 		,intLoadCostId
 		,ysnInventoryCost
 		,intItemUOMId
@@ -134,6 +136,7 @@ BEGIN TRY
 						))
 				)
 			) * CONVERT(NUMERIC(18, 6), V.dblNet)
+		,V.intPriceItemUOMId
 		,V.intLoadCostId
 		,I.ysnInventoryCost
 		,LD.intItemUOMId
@@ -162,6 +165,7 @@ BEGIN TRY
 		,V.intLoadCostId
 		,I.ysnInventoryCost
 		,LD.intItemUOMId
+		,V.intPriceItemUOMId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -214,6 +218,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intCostUOMId
 				,intItemUOMId
 				)
 			SELECT intContractHeaderId
@@ -223,6 +228,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intCostUOMId
 				,intItemUOMId
 			FROM @voucherDetailData
 			WHERE intVendorEntityId = @intVendorEntityId
@@ -281,6 +287,7 @@ BEGIN TRY
 					,intLoadDetailId
 					,dblQtyReceived
 					,dblCost
+					,intCostUOMId
 					,intItemUOMId
 					)
 				SELECT intContractHeaderId
@@ -290,6 +297,7 @@ BEGIN TRY
 					,intLoadDetailId
 					,dblQtyReceived
 					,dblCost
+					,intCostUOMId
 					,intItemUOMId
 				FROM @voucherDetailData
 				WHERE intVendorEntityId = @intVendorEntityId

@@ -103,7 +103,7 @@ SELECT
 	,[intAccountId]						=	@bankGLAccount
 	,[intBankAccountId]					=	@bankAccountId
 	,[intWriteOffAccountId]				=	NULL
-	,[dblAmountPaid]					=	A.dblAmountDue
+	,[dblAmountPaid]					=	CAST(A.dblAmountDue - A.dblDiscount + A.dblInterest AS DECIMAL(18,2))
 	,[strPaymentOriginalId]				=	NULL
 	,[ysnUseOriginalIdAsPaymentNumber]	=	0
 	,[ysnApplytoBudget]					=	0
@@ -124,7 +124,7 @@ SELECT
 	,[dblDiscount]						=	0
 	,[dblDiscountAvailable]				=	0
 	,[dblInterest]						=	0
-	,[dblPayment]						=	A.dblAmountDue
+	,[dblPayment]						=	CAST(A.dblAmountDue - A.dblDiscount + A.dblInterest AS DECIMAL(18,2))
 	,[strInvoiceReportNumber]			=	NULL
 	,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
 	,[intCurrencyExchangeRateId]		=	NULL

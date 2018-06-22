@@ -25,6 +25,7 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,dblQty 
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
@@ -32,6 +33,7 @@ SELECT	Changes.intInventoryTransactionId
 		,Changes.intRelatedTransactionId
 		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
+		,Changes.dblQty 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -63,8 +65,25 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT 
+					$action
+					, Inserted.intInventoryTransactionId
+					, Inserted.intTransactionId
+					, Inserted.strTransactionId
+					, Inserted.intRelatedTransactionId
+					, Inserted.strRelatedTransactionId
+					, Inserted.intTransactionTypeId
+					, Inserted.dblQty 
+		) AS Changes (
+			Action
+			, intInventoryTransactionId
+			, intTransactionId
+			, strTransactionId
+			, intRelatedTransactionId
+			, strRelatedTransactionId
+			, intTransactionTypeId
+			, dblQty 
+		)
 WHERE	Changes.Action = 'UPDATE'
 ;
 
@@ -76,9 +95,10 @@ FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN #tmpInventoryTrans
 			ON Reversal.intTransactionId = ActualCostBucket.intTransactionId
 			AND Reversal.strTransactionId = ActualCostBucket.strTransactionId
 			AND Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
+			AND ISNULL(Reversal.dblQty, 0) <> 0 
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = Reversal.intInventoryTransactionId
-			AND ISNULL(OutTransactions.dblQty, 0) < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 		
 ;
 
 -- If there are ActualCost out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 

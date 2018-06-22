@@ -106,6 +106,7 @@ INSERT into @ReceiptStagingTable(
 		,strChargesLink
 		,dblGross
 		,dblNet
+		,intFreightTermId
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -180,7 +181,7 @@ SELECT
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= SC.intLotId
+		,intLotId					= NULL -- SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
@@ -197,6 +198,7 @@ SELECT
 										WHEN IC.ysnLotWeightsRequired = 1 AND dbo.fnGetItemLotType(SC.intItemId) > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty)
 										ELSE LI.dblQty 
 									END
+		,intFreightTermId			= CNT.intFreightTermId
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -217,6 +219,7 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			,CTD.intPricingTypeId
 			,CTD.intBasisUOMId
 			,CTD.dtmEndDate
+			,CTD.intFreightTermId
 			,AD.dblSeqPrice
 			,CU.intCent
 			,CU.ysnSubCurrency
@@ -1206,6 +1209,8 @@ BEGIN
 		,[dtmManufacturedDate]
 		,[strBillOfLadding]
 		,[intSourceType]
+		,[intContractHeaderId]
+		,[intContractDetailId]
 	)
 	SELECT 
 		[strReceiptType]		= RE.strReceiptType
@@ -1220,19 +1225,15 @@ BEGIN
 		,[intCurrencyId]		= RE.intCurrencyId
 		,[intItemUnitMeasureId] = RE.intItemUOMId
 		,[dblQuantity]			= RE.dblQty
-		,[dblGrossWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross
-									ELSE (RE.dblQty /  SC.dblNetUnits) * SC.dblGrossUnits
-								END
-		,[dblTareWeight]		= CASE
-									WHEN IC.ysnLotWeightsRequired = 1 THEN RE.dblGross - RE.dblNet
-									ELSE (RE.dblQty /  SC.dblNetUnits) * SC.dblShrink
-								END
+		,[dblGrossWeight]		= RE.dblGross 
+		,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
 		,[dblCost]				= RE.dblCost
 		,[intEntityVendorId]	= RE.intEntityVendorId
 		,[dtmManufacturedDate]	= RE.dtmDate
 		,[strBillOfLadding]		= ''
 		,[intSourceType]		= RE.intSourceType
+		,[intContractHeaderId]	= RE.intContractHeaderId
+		,[intContractDetailId]	= RE.intContractDetailId
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 		INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId

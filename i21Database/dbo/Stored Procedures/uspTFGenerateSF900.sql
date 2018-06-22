@@ -269,34 +269,34 @@ DECLARE @EIN NVARCHAR(50)
 								INSERT INTO @tblTempSummaryTotal
 								EXEC(@Query)
 							END
-						ELSE IF @TemplateItemId = 'SF-900-Summary-040'
-							BEGIN
-							--1. Total Billed Gallons (From Section 2 Line 5)
-								SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
-								INSERT INTO @tblTempSummaryTotal
-								EXEC(@Query)
-							END
-						ELSE IF @TemplateItemId = 'SF-900-Summary-041'
-							BEGIN
-							--2. Surcharge Tax Due (Multiply Line 1 by the applicable rate from the table)
-								SET @Query =  'SELECT TOP 1 ((a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue))) * (SELECT CASE WHEN strConfiguration = '''' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''SF-900-Summary-041'') FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
-								INSERT INTO @tblTempSummaryTotal
-								EXEC(@Query)
-							END
-						ELSE IF @TemplateItemId = 'SF-900-Summary-042'
-							BEGIN
-							--3. Adjustment (Schedule E-1 must be attached and is subject to department approval)
-								SET @Query = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''SF-900-Summary-042''' 
-								INSERT INTO @tblTempSummaryTotal
-								EXEC(@Query)
-							END
-						ELSE IF @TemplateItemId = 'SF-900-Summary-043'
-							BEGIN
-							--4. Total Surcharge Tax Due (Line 2 plus or minus Line 3)
-								SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
-								INSERT INTO @tblTempSummaryTotal
-								EXEC(@Query)
-							END
+						--ELSE IF @TemplateItemId = 'SF-900-Summary-040'
+						--	BEGIN
+						--	--1. Total Billed Gallons (From Section 2 Line 5)
+						--		SET @Query  = 'SELECT TOP 1 (a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue)) FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						--		INSERT INTO @tblTempSummaryTotal
+						--		EXEC(@Query)
+						--	END
+						--ELSE IF @TemplateItemId = 'SF-900-Summary-041'
+						--	BEGIN
+						--	--2. Surcharge Tax Due (Multiply Line 1 by the applicable rate from the table)
+						--		SET @Query =  'SELECT TOP 1 ((a.strColumnValue) - ((SELECT SUM(b.strColumnValue) FROM tblTFTransactionSummary b WHERE b.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''') - (a.strColumnValue))) * (SELECT CASE WHEN strConfiguration = '''' THEN 0 ELSE CONVERT(decimal(18,6), strConfiguration) END FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''SF-900-Summary-041'') FROM   tblTFTransactionSummary a WHERE a.intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						--		INSERT INTO @tblTempSummaryTotal
+						--		EXEC(@Query)
+						--	END
+						--ELSE IF @TemplateItemId = 'SF-900-Summary-042'
+						--	BEGIN
+						--	--3. Adjustment (Schedule E-1 must be attached and is subject to department approval)
+						--		SET @Query = 'SELECT strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = ''SF-900-Summary-042''' 
+						--		INSERT INTO @tblTempSummaryTotal
+						--		EXEC(@Query)
+						--	END
+						--ELSE IF @TemplateItemId = 'SF-900-Summary-043'
+						--	BEGIN
+						--	--4. Total Surcharge Tax Due (Line 2 plus or minus Line 3)
+						--		SET @Query = 'SELECT SUM(strColumnValue) FROM tblTFTransactionSummary WHERE intItemNumber IN (''' + @TemplateScheduleCode + ''') AND strSummaryGuid = ''' + @Guid + ''' AND strFormCode = ''' + @FormCodeParam + ''''
+						--		INSERT INTO @tblTempSummaryTotal
+						--		EXEC(@Query)
+						--	END
 						ELSE IF @TemplateItemId = 'SF-900-Summary-016'
 							BEGIN
 							--1. Total amount due (Section 2, Line 11 plus Section 3, Line 4)

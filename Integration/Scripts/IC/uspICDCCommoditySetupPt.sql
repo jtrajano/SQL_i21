@@ -17,7 +17,10 @@ SET ANSI_WARNINGS OFF
 --Origin Petro does not have commodity
 --Contracts need commodity. So create commodity for classes used in origin contract.
 INSERT INTO tblICCommodity(strCommodityCode,strDescription)
-select distinct cl.ptcls_class, cl.ptcls_desc from ptclsmst cl join ptcntmst ct on cl.ptcls_class = ct.ptcnt_itm_or_cls
+select distinct cl.ptcls_class, cl.ptcls_desc from ptitmmst it join ptclsmst cl on cl.ptcls_class = it.ptitm_class
+join ptcntmst ct on it.ptitm_itm_no = ct.ptcnt_itm_or_cls
+LEFT JOIN tblICCommodity ON  strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = cl.ptcls_class COLLATE SQL_Latin1_General_CP1_CS_AS
+WHERE intCommodityId IS NULL
 
 
 ----=====================================STEP 2=========================================
@@ -35,7 +38,8 @@ insert into tblICCommodityUnitMeasure
 select c.intCommodityId 'intCommodityId', iu.intUnitMeasureId, 1 'dblUnitQty', 1 'ysnStockUnit', 1 'ysnDefault', 1 'intConcurrencyId' 
 from tblICUnitMeasure iu
 cross join tblICCommodity c
-where strUnitMeasure = 'GALLON'
+where strUnitMeasure = 'GALLON' 
+AND NOT EXISTS (SELECT * FROM tblICCommodityUnitMeasure WHERE intCommodityId = c.intCommodityId AND intUnitMeasureId = iu.intUnitMeasureId)
 
 ----=====================================STEP 4=========================================
 --update all fuel items with commodity code

@@ -14,12 +14,15 @@ BEGIN
 	
 	IF (@dtmTradeDate = @ClosingDate)
 	BEGIN		
-		SELECT @result= CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
+		SELECT @result= case when isnull(dblPerFutureContract,0)>0 then dblPerFutureContract*intNoOfContract else 
+		
+					CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
 							 WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
-							 ELSE dblContractMargin END
+							 ELSE dblContractMargin END end
 		FROM(
 		SELECT dblMinAmount,dblMaxAmount,dblPercenatage,
-		((intNoOfContract*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin
+		((intNoOfContract*isnull(dblPrice,0)*dblContractSize)*dblPercenatage)/100 as dblContractMargin,
+		dblPerFutureContract,intNoOfContract
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKFutureMarket fm on ft.intFutureMarketId=fm.intFutureMarketId
 		JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=ft.intBrokerageAccountId

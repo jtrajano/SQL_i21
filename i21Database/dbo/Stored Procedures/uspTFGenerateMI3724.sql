@@ -119,7 +119,8 @@ BEGIN TRY
 
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
-		SELECT TOP 1 @strLicenseNo = strLicenseNumber, @steFEIN = strFEINSSN FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
+
+		SELECT @strLicenseNo =  ISNULL(strConfiguration, '')  FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '3724-TR-LicNum'
 
 		SELECT @dblLine8_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '14A' AND strType = 'Gasoline'
 		SELECT @dblLine8_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '14A' AND strType = 'Aviation Gasoline'

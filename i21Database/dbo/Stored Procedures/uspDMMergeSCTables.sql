@@ -294,41 +294,6 @@ BEGIN
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketPoolId = Source.intTicketPoolId, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.ysnTicketAllowed = Source.ysnTicketAllowed, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intDiscountSchedule = Source.intDiscountSchedule, Target.intDistributionMethod = Source.intDistributionMethod, Target.ysnSelectByPO = Source.ysnSelectByPO, Target.intSplitInvoiceOption = Source.intSplitInvoiceOption, Target.intContractRequired = Source.intContractRequired, Target.intOverrideTicketCopies = Source.intOverrideTicketCopies, Target.ysnPrintAtKiosk = Source.ysnPrintAtKiosk, Target.ynsVerifySplitMethods = Source.ynsVerifySplitMethods, Target.ysnOverrideSingleTicketSeries = Source.ysnOverrideSingleTicketSeries, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-            INSERT(
-				intTicketTypeId
-				,intTicketPoolId
-				,intListTicketTypeId
-				,ysnTicketAllowed
-				,intNextTicketNumber
-				,intDiscountSchedule
-				,intDistributionMethod
-				,ysnSelectByPO
-				,intSplitInvoiceOption
-				,intContractRequired
-				,intOverrideTicketCopies
-				,ysnPrintAtKiosk
-				,ynsVerifySplitMethods
-				,ysnOverrideSingleTicketSeries
-				,intConcurrencyId
-			)
-			VALUES(
-				Source.intTicketTypeId
-				,Source.intTicketPoolId
-				,Source.intListTicketTypeId
-				,Source.ysnTicketAllowed
-				,Source.intNextTicketNumber
-				,Source.intDiscountSchedule
-				,Source.intDistributionMethod
-				,Source.ysnSelectByPO
-				,Source.intSplitInvoiceOption
-				,Source.intContractRequired
-				,Source.intOverrideTicketCopies
-				,Source.ysnPrintAtKiosk
-				,Source.ynsVerifySplitMethods
-				,Source.ysnOverrideSingleTicketSeries
-				,Source.intConcurrencyId
-			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -343,31 +308,11 @@ BEGIN
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
             UPDATE SET Target.intTicketType = Source.intTicketType, Target.strTicketType = Source.strTicketType, Target.strInOutIndicator = Source.strInOutIndicator, Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-        INSERT(
-			intTicketTypeId
-			,intTicketType
-			,strTicketType
-			,strInOutIndicator
-			,ysnActive
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketTypeId
-			,Source.intTicketType
-			,Source.strTicketType
-			,Source.strInOutIndicator
-			,Source.ysnActive
-			,Source.intConcurrencyId
-		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    SET IDENTITY_INSERT tblSCListTicketTypes ON
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     EXECUTE sp_executesql @SQLString;
-    SET IDENTITY_INSERT tblSCListTicketTypes OFF
-
 
     -- tblSCUncompletedTicketAlert
     SET @SQLString = N'MERGE tblSCUncompletedTicketAlert AS Target
@@ -386,36 +331,10 @@ BEGIN
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDistributionOption]) AS Source
         ON (Target.intDistributionOptionId = Source.intDistributionOptionId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strDistributionOption = Source.strDistributionOption
-			, Target.intTicketPoolId = Source.intTicketPoolId
-			, Target.intTicketTypeId = Source.intTicketTypeId
-			, Target.ysnDistributionAllowed = Source.ysnDistributionAllowed
-			, Target.ysnDefaultDistribution = Source.ysnDefaultDistribution
-			, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-		INSERT(
-			intDistributionOptionId
-			,strDistributionOption
-			,intTicketPoolId
-			,intTicketTypeId
-			,ysnDistributionAllowed
-			,ysnDefaultDistribution
-			,intStorageScheduleTypeId
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intDistributionOptionId
-			,Source.strDistributionOption
-			,Source.intTicketPoolId
-			,Source.intTicketTypeId
-			,Source.ysnDistributionAllowed
-			,Source.ysnDefaultDistribution
-			,Source.intStorageScheduleTypeId
-			,Source.intConcurrencyId
-		)
+            UPDATE SET Target.strDistributionOption = Source.strDistributionOption, Target.intTicketPoolId = Source.intTicketPoolId, Target.intTicketTypeId = Source.intTicketTypeId, Target.ysnDistributionAllowed = Source.ysnDistributionAllowed, Target.ysnDefaultDistribution = Source.ysnDefaultDistribution, Target.intConcurrencyId = Source.intConcurrencyId
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
-			
+
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     SET IDENTITY_INSERT tblSCDistributionOption ON
     EXECUTE sp_executesql @SQLString;
@@ -426,86 +345,7 @@ BEGIN
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCScaleDevice]) AS Source
         ON (Target.intScaleDeviceId = Source.intScaleDeviceId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intPhysicalEquipmentId = Source.intPhysicalEquipmentId, Target.strDeviceDescription = Source.strDeviceDescription, Target.intDeviceTypeId = Source.intDeviceTypeId
-			, Target.intConnectionMethod = Source.intConnectionMethod, Target.strFilePath = Source.strFilePath, Target.strFileName = Source.strFileName
-			, Target.strIPAddress = Source.strIPAddress, Target.intIPPort = Source.intIPPort, Target.intComPort = Source.intComPort, Target.intBaudRate = Source.intBaudRate
-			, Target.intDataBits = Source.intDataBits, Target.intStopBits = Source.intStopBits, Target.intParityBits = Source.intParityBits
-			, Target.intFlowControl = Source.intFlowControl, Target.intGraderModel = Source.intGraderModel, Target.ysnVerifyCommodityCode = Source.ysnVerifyCommodityCode
-			, Target.ysnVerifyDateTime = Source.ysnVerifyDateTime, Target.ysnDateTimeCheck = Source.ysnDateTimeCheck, Target.ysnDateTimeFixedLocation = Source.ysnDateTimeFixedLocation, Target.intDateTimeStartingLocation = Source.intDateTimeStartingLocation, Target.intDateTimeLength = Source.intDateTimeLength, Target.strDateTimeValidationString = Source.strDateTimeValidationString, Target.ysnMotionDetection = Source.ysnMotionDetection, Target.ysnMotionFixedLocation = Source.ysnMotionFixedLocation, Target.intMotionStartingLocation = Source.intMotionStartingLocation
-			, Target.intMotionLength = Source.intMotionLength, Target.strMotionValidationString = Source.strMotionValidationString, Target.intWeightStabilityCheck = Source.intWeightStabilityCheck, Target.ysnWeightFixedLocation = Source.ysnWeightFixedLocation, Target.intWeightStartingLocation = Source.intWeightStartingLocation, Target.intWeightLength = Source.intWeightLength, Target.strNTEPCapacity = Source.strNTEPCapacity, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-		INSERT(
-			intScaleDeviceId
-			,intPhysicalEquipmentId
-			,strDeviceDescription
-			,intDeviceTypeId
-			,intConnectionMethod
-			,strFilePath
-			,strFileName
-			,strIPAddress
-			,intIPPort
-			,intComPort
-			,intBaudRate
-			,intDataBits
-			,intStopBits
-			,intParityBits
-			,intFlowControl
-			,intGraderModel
-			,ysnVerifyCommodityCode
-			,ysnVerifyDateTime
-			,ysnDateTimeCheck
-			,ysnDateTimeFixedLocation
-			,intDateTimeStartingLocation
-			,intDateTimeLength
-			,strDateTimeValidationString
-			,ysnMotionDetection
-			,ysnMotionFixedLocation
-			,intMotionStartingLocation
-			,intMotionLength
-			,strMotionValidationString
-			,intWeightStabilityCheck
-			,ysnWeightFixedLocation
-			,intWeightStartingLocation
-			,intWeightLength
-			,strNTEPCapacity
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intScaleDeviceId
-			, Source.intPhysicalEquipmentId
-			, Source.strDeviceDescription
-			, Source.intDeviceTypeId
-			, Source.intConnectionMethod
-			, Source.strFilePath
-			, Source.strFileName
-			, Source.strIPAddress
-			, Source.intIPPort
-			, Source.intComPort
-			, Source.intBaudRate
-			, Source.intDataBits
-			, Source.intStopBits
-			, Source.intParityBits
-			, Source.intFlowControl
-			, Source.intGraderModel
-			, Source.ysnVerifyCommodityCode
-			, Source.ysnVerifyDateTime
-			, Source.ysnDateTimeCheck
-			, Source.ysnDateTimeFixedLocation
-			, Source.intDateTimeStartingLocation
-			, Source.intDateTimeLength
-			, Source.strDateTimeValidationString
-			, Source.ysnMotionDetection
-			, Source.ysnMotionFixedLocation
-			, Source.intMotionStartingLocation
-			, Source.intMotionLength
-			, Source.strMotionValidationString
-			, Source.intWeightStabilityCheck
-			, Source.ysnWeightFixedLocation
-			, Source.intWeightStartingLocation
-			, Source.intWeightLength
-			, Source.strNTEPCapacity
-			, Source.intConcurrencyId
-		)
+            UPDATE SET Target.intPhysicalEquipmentId = Source.intPhysicalEquipmentId, Target.strDeviceDescription = Source.strDeviceDescription, Target.intDeviceTypeId = Source.intDeviceTypeId, Target.intConnectionMethod = Source.intConnectionMethod, Target.strFilePath = Source.strFilePath, Target.strFileName = Source.strFileName, Target.strIPAddress = Source.strIPAddress, Target.intIPPort = Source.intIPPort, Target.intComPort = Source.intComPort, Target.intBaudRate = Source.intBaudRate, Target.intDataBits = Source.intDataBits, Target.intStopBits = Source.intStopBits, Target.intParityBits = Source.intParityBits, Target.intFlowControl = Source.intFlowControl, Target.intGraderModel = Source.intGraderModel, Target.ysnVerifyCommodityCode = Source.ysnVerifyCommodityCode, Target.ysnVerifyDateTime = Source.ysnVerifyDateTime, Target.ysnDateTimeCheck = Source.ysnDateTimeCheck, Target.ysnDateTimeFixedLocation = Source.ysnDateTimeFixedLocation, Target.intDateTimeStartingLocation = Source.intDateTimeStartingLocation, Target.intDateTimeLength = Source.intDateTimeLength, Target.strDateTimeValidationString = Source.strDateTimeValidationString, Target.ysnMotionDetection = Source.ysnMotionDetection, Target.ysnMotionFixedLocation = Source.ysnMotionFixedLocation, Target.intMotionStartingLocation = Source.intMotionStartingLocation, Target.intMotionLength = Source.intMotionLength, Target.strMotionValidationString = Source.strMotionValidationString, Target.intWeightStabilityCheck = Source.intWeightStabilityCheck, Target.ysnWeightFixedLocation = Source.ysnWeightFixedLocation, Target.intWeightStartingLocation = Source.intWeightStartingLocation, Target.intWeightLength = Source.intWeightLength, Target.strNTEPCapacity = Source.strNTEPCapacity, Target.intConcurrencyId = Source.intConcurrencyId
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -616,36 +456,11 @@ BEGIN
         ON (Target.intTicketFormatId = Source.intTicketFormatId)
         WHEN MATCHED THEN
             UPDATE SET Target.strTicketFormat = Source.strTicketFormat, Target.intTicketFormatSelection = Source.intTicketFormatSelection, Target.ysnSuppressCompanyName = Source.ysnSuppressCompanyName, Target.ysnFormFeedEachCopy = Source.ysnFormFeedEachCopy, Target.strTicketHeader = Source.strTicketHeader, Target.strTicketFooter = Source.strTicketFooter, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intTicketFormatId
-			,strTicketFormat
-			,intTicketFormatSelection
-			,ysnSuppressCompanyName
-			,ysnFormFeedEachCopy
-			,intSuppressDiscountOptionId
-			,strTicketHeader
-			,strTicketFooter
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketFormatId
-			,Source.strTicketFormat
-			,Source.intTicketFormatSelection
-			,Source.ysnSuppressCompanyName
-			,Source.ysnFormFeedEachCopy
-			,Source.intSuppressDiscountOptionId
-			,Source.strTicketHeader
-			,Source.strTicketFooter
-			,Source.intConcurrencyId
-		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    SET IDENTITY_INSERT tblSCTicketFormat ON
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     EXECUTE sp_executesql @SQLString;
-    SET IDENTITY_INSERT tblSCTicketFormat OFF
 
     -- tblSCTicketPool
     SET @SQLString = N'MERGE tblSCTicketPool AS Target
@@ -653,28 +468,11 @@ BEGIN
         ON (Target.intTicketPoolId = Source.intTicketPoolId)
         WHEN MATCHED THEN
             UPDATE SET Target.strTicketPool = Source.strTicketPool, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-		INSERT(
-			intTicketPoolId
-			,strTicketPool
-			,intNextTicketNumber
-			,ysnActive
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketPoolId
-			,Source.strTicketPool
-			,Source.intNextTicketNumber
-			,Source.ysnActive
-			,Source.intConcurrencyId
-		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    SET IDENTITY_INSERT tblSCTicketPool ON
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     EXECUTE sp_executesql @SQLString;
-    SET IDENTITY_INSERT tblSCTicketPool OFF
 
     -- tblSCTicketPrintOption
     SET @SQLString = N'MERGE tblSCTicketPrintOption AS Target
@@ -682,47 +480,11 @@ BEGIN
         ON (Target.intTicketPrintOptionId = Source.intTicketPrintOptionId)
         WHEN MATCHED THEN
             UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.intTicketFormatId = Source.intTicketFormatId, Target.strTicketPrintDescription = Source.strTicketPrintDescription, Target.ysnPrintCustomerCopy = Source.ysnPrintCustomerCopy, Target.ysnPrintEachSplit = Source.ysnPrintEachSplit, Target.intTicketPrintCopies = Source.intTicketPrintCopies, Target.intIssueCutCode = Source.intIssueCutCode, Target.strTicketPrinter = Source.strTicketPrinter, Target.intTicketTypeOption = Source.intTicketTypeOption, Target.strInOutIndicator = Source.strInOutIndicator, Target.intPrintingOption = Source.intPrintingOption, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.intConcurrencyId = Source.intConcurrencyId
-		WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intTicketPrintOptionId
-			,intScaleSetupId
-			,intTicketFormatId
-			,strTicketPrintDescription
-			,ysnPrintCustomerCopy
-			,ysnPrintEachSplit
-			,intTicketPrintCopies
-			,intIssueCutCode
-			,strTicketPrinter
-			,intTicketTypeOption
-			,strInOutIndicator
-			,intPrintingOption
-			,intListTicketTypeId
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketPrintOptionId
-			,Source.intScaleSetupId
-			,Source.intTicketFormatId
-			,Source.strTicketPrintDescription
-			,Source.ysnPrintCustomerCopy
-			,Source.ysnPrintEachSplit
-			,Source.intTicketPrintCopies
-			,Source.intIssueCutCode
-			,Source.strTicketPrinter
-			,Source.intTicketTypeOption
-			,Source.strInOutIndicator
-			,Source.intPrintingOption
-			,Source.intListTicketTypeId
-			,Source.intConcurrencyId
-		)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
-   
-	SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    SET IDENTITY_INSERT tblSCTicketPrintOption ON
+    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
     EXECUTE sp_executesql @SQLString;
-    SET IDENTITY_INSERT tblSCTicketPrintOption OFF
 
     -- tblSCTicketSplit
     SET @SQLString = N'MERGE tblSCTicketSplit AS Target

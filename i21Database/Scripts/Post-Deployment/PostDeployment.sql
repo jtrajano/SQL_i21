@@ -223,11 +223,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\22_UpdateInvoiceSubCurrency.sql
 :r .\AR\DefaultData\23_AddDefaultCollectionLetters.sql
 :r .\AR\DefaultData\24_AddDefaultPlaceHolders.sql
-:r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
+--:r .\AR\DefaultData\26_UpdatePaymentdetailTransactionNumber.sql
 :r .\AR\DefaultData\27_RenamePricingForContracts.sql
-:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
+--:r .\AR\DefaultData\28_UpdateBaseAmounts.sql
 :r .\AR\DefaultData\29_UpdateInvoiceDetailLotId.sql
-:r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
+--:r .\AR\DefaultData\30_UpdateBatchIdUsed.sql
 :r .\AR\DefaultData\31_UpdateCustomerRackQuoteHeader.sql
 :r .\AR\DefaultData\32_UpdateCommissionScheduleEntity.sql
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql
@@ -293,6 +293,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\28_Company_Preferences.sql
 :r .\IC\29_Inventory_Constraints.sql
 :r .\IC\30_Populate_Shipment_LineTotal.sql
+:r .\IC\31_RemoveAfter18.3_DataFix.sql 
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

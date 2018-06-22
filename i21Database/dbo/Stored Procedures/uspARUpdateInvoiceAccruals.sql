@@ -26,33 +26,12 @@ INNER JOIN tblARInvoice I
 	ON I.intInvoiceId = A.intInvoiceId
 WHERE I.intInvoiceId = @intInvoiceId
 GROUP BY dblInvoiceSubtotal
-
-/* UPDATE Unequal Accrual Amount */
-IF(@ysnBalanceTotal = 0)
+IF (@ysnBalanceTotal != 1)
 BEGIN
-	UPDATE A
-	SET A.dblAmount = I.dblInvoiceSubtotal / @intAccrualEntriesCNT
-	FROM tblARInvoiceAccrual A
-	INNER JOIN tblARInvoice I
-		ON A.intInvoiceId = I.intInvoiceId
-	WHERE A.intInvoiceId = @intInvoiceId
-END
-
-/* UPDATE missing Accrual Item entries */
-IF((SELECT COUNT(DISTINCT IC.intItemId) FROM tblARInvoiceAccrual A
-	INNER JOIN tblARInvoiceDetail ID
-		ON A.intInvoiceDetailId = ID.intInvoiceDetailId
-	INNER JOIN tblICItem IC
-		ON ID.intItemId = IC.intItemId
-	WHERE A.intInvoiceId = @intInvoiceId) != (SELECT COUNT(DISTINCT IC.intItemId) FROM tblARInvoiceDetail AD
-	INNER JOIN tblICItem IC
-		ON AD.intItemId = IC.intItemId
-	WHERE intInvoiceId = @intInvoiceId))
-BEGIN	
 	DELETE FROM tblARInvoiceAccrual WHERE intInvoiceId = @intInvoiceId
 	
 	INSERT INTO tblARInvoiceAccrual(intInvoiceId,intInvoiceDetailId,dtmAccrualDate,dblAmount,intConcurrencyId)
-	SELECT I.intInvoiceId,intInvoiceDetailId, dtmAccrualMonth, (dblInvoiceSubtotal/@intAccrualEntriesCNT), 1 dblAmount
+	SELECT I.intInvoiceId,intInvoiceDetailId, dtmAccrualMonth, ID.dblTotal/@intPeriodsToAccrue,1 
 	FROM tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I
 			ON I.intInvoiceId = ID.intInvoiceId
@@ -61,4 +40,21 @@ BEGIN
 				WHERE intInvoiceId = @intInvoiceId) AccrualDate
 	WHERE I.intInvoiceId = @intInvoiceId
 	ORDER BY dtmAccrualMonth
+
+	IF (@ysnBalanceTotal != 1)
+	BEGIN
+		DECLARE @difference AS DECIMAL(16,1)
+		SELECT @difference = SUM(A.dblAmount) -  I.dblInvoiceSubtotal FROM tblARInvoiceAccrual A
+		INNER JOIN tblARInvoice I
+			ON I.intInvoiceId = A.intInvoiceId
+		WHERE I.intInvoiceId = @intInvoiceId
+		GROUP BY dblInvoiceSubtotal;
+
+		WITH Invoice_AccrualList AS (
+			SELECT TOP 1 * FROM tblARInvoiceAccrual WHERE intInvoiceId = @intInvoiceId ORDER BY dtmAccrualDate DESC
+		)
+		UPDATE Invoice_AccrualList
+			SET dblAmount  = dblAmount - (@difference) 
+	END
+
 END

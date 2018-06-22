@@ -48,6 +48,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[dblForexRate] NUMERIC(18, 6) NULL						-- Forex Rate (Exchange Rate)
 	,[intContainerId] INT NULL								-- Container id. Used by LG Inbound Shipment. 
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
+	,[intSort] INT NULL									
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	

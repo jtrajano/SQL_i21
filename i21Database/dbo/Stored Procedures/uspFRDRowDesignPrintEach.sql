@@ -96,7 +96,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 										'INNER JOIN tblFRBudget C on C.intAccountId = B.intAccountId ' +
 										'WHERE ' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ' ' +
 								') tblX ' +
-								'WHERE (' + REPLACE(REPLACE(REPLACE(REPLACE(@strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription') + ') AND intAccountId IS NOT NULL ORDER BY strAccountId'
+								'WHERE intAccountId IS NOT NULL ORDER BY strAccountId'
 		END
 		ELSE
 		BEGIN

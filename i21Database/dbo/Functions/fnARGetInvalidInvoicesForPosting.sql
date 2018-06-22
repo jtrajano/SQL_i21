@@ -1295,6 +1295,26 @@ ELSE
 		WHERE @Recap = 0
 
 		UNION
+		--Payments from Pay Voucher
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= APP.[strPaymentRecordNum] + ' payment was already made on this ' + I.strTransactionType + '.' + CASE WHEN I.strTransactionType = 'Credit Memo' THEN ' Please remove payment record and try again.' ELSE '' END
+		FROM 
+			(SELECT [intPaymentId], [strPaymentRecordNum] FROM tblAPPayment WITH (NOLOCK)) APP
+		INNER JOIN 
+			(SELECT [intPaymentId], [intInvoiceId] FROM tblAPPaymentDetail WITH (NOLOCK)) APPD 
+				ON APP.[intPaymentId] = APPD.[intPaymentId]						
+		INNER JOIN 
+			@Invoices I
+				ON APPD.[intInvoiceId] = I.[intInvoiceId]
+		WHERE @Recap = 0
+
+		UNION
 		--Invoice with created Bank Deposit
 		SELECT
 			 [intInvoiceId]			= I.[intInvoiceId]
@@ -1315,7 +1335,25 @@ ELSE
 				ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
 		WHERE 
 			CMUF.[strSourceSystem] = 'AR'
-				
+
+		UNION
+
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+			,[intItemId]			= I.[intItemId]
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'This Invoice was created from Patronage > Issue Stock - ' + ISNULL(PAT.strIssueNo, '') + '. Unpost it from there.'
+		FROM 
+			@Invoices I
+		CROSS APPLY (
+			SELECT TOP 1 P.strIssueNo
+			FROM dbo.tblPATIssueStock P WITH (NOLOCK)
+			WHERE P.intInvoiceId = I.intInvoiceId
+			  AND P.ysnPosted = 1
+		) PAT
 
 		--Don't allow Imported Invoice from Origin to be unposted
 		DECLARE @IsAG BIT = 0

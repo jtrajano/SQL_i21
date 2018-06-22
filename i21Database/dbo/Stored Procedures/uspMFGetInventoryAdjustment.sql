@@ -43,4 +43,4 @@ LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = IO1.intOwnerId
 WHERE IT.intTransactionTypeId = 10
 	AND IA.dtmBusinessDate BETWEEN @dtmFromDate
 		AND @dtmToDate
-			AND IO1.intOwnerId = @intOwnerId
+			AND IO1.intOwnerId =IsNULL(@intOwnerId,IO1.intOwnerId)

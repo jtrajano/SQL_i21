@@ -45,9 +45,14 @@ DECLARE @InventoryReceiptId INT
 		,@intMatchTicketId AS INT
 		,@strXml NVARCHAR(MAX)
 		,@intSettleStorageId INT
+		,@intContractDetailId INT
+		,@intContractStatusId INT
+		,@strContractNumber NVARCHAR(40)
+		,@strContractStatus NVARCHAR(40)
+		,@intContractSeq INT
+		,@intId INT
 		,@intTicketType INT
 		,@intStorageScheduleTypeId INT
-		,@intContractDetailId INT
 		,@dblScheduleQty NUMERIC(38,20)
 		,@intMatchTicketItemUOMId INT;
 
@@ -62,11 +67,36 @@ BEGIN TRY
 		FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 		WHERE LGL.intTicketId = @intTicketId
 
+
+		SELECT @intId = MIN(intInventoryReceiptItemId) 
+		FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
+
+		WHILE ISNULL(@intId,0) > 0
+		BEGIN
+			SELECT @intContractDetailId = intLineNo FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intId
+			IF ISNULL(@intContractDetailId,0) > 0
+			BEGIN
+				SELECT @intContractStatusId = intContractStatusId
+				, @strContractStatus = strContractStatus 
+				, @intContractSeq = intContractSeq
+				, @strContractNumber = strContractNumber 
+				from vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId
+				IF ISNULL(@intContractStatusId, 0) != 1 AND ISNULL(@intContractStatusId, 0) != 4
+				BEGIN
+					SET @ErrorMessage = 'Contract ' + @strContractNumber +'-Seq.' + CAST(@intContractSeq AS nvarchar) + ' is ' + @strContractStatus +'. Please Open before Undistributing.';
+					RAISERROR(@ErrorMessage, 11, 1);
+					RETURN;
+				END
+			END
+			SELECT @intId = MIN(intInventoryReceiptItemId) 
+			FROM vyuICGetInventoryReceiptItem where intSourceId = @intContractDetailId and strSourceType = 'Scale' AND intInventoryReceiptItemId > @intId
+		END
+
 		IF @strInOutFlag = 'I'
 			BEGIN
 				SELECT @intMatchTicketId = intMatchTicketId, @intTicketType = intTicketType
 				, @intStorageScheduleTypeId = intStorageScheduleTypeId, @intMatchTicketItemUOMId = intItemUOMIdTo
-				, @intContractDetailId = intContractId, @dblScheduleQty = dblScheduleQty
+				, @intContractDetailId = intContractId, @dblScheduleQty = (dblScheduleQty * -1)
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 				IF ISNULL(@intMatchTicketId, 0) > 0 AND @intTicketType = 6
 				BEGIN
@@ -93,16 +123,14 @@ BEGIN TRY
 					END
 					ELSE IF @intStorageScheduleTypeId = -2
 					BEGIN  
-						SET @dblScheduleQty = (@dblScheduleQty * -1)
-						SELECT @intMatchLoadContractId = intContractId FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intMatchLoadContractId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 					END
 					
 					UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
 					DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 					DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 				END
-
+				
 				IF OBJECT_ID (N'tempdb.dbo.#tmpSettleStorage') IS NOT NULL
                     DROP TABLE #tmpSettleStorage
 				CREATE TABLE #tmpSettleStorage (
@@ -205,125 +233,125 @@ BEGIN TRY
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 			END
 		ELSE
+		BEGIN
+		IF ISNULL(@ysnTransfer ,0) = 1
 			BEGIN
-				IF ISNULL(@ysnTransfer ,0) = 1
-					BEGIN
-						SELECT TOP 1 @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
-						INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SCT.intSalesOrderId 
-						INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderId = SO.intSalesOrderId 
-						INNER JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-						INNER JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
-						WHERE SCT.intTicketId = @intTicketId
+				SELECT TOP 1 @intInvoiceId = ARD.intInvoiceId, @ysnPosted = AR.ysnPosted FROM tblSCTicket SCT
+				INNER JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SCT.intSalesOrderId 
+				INNER JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderId = SO.intSalesOrderId 
+				INNER JOIN tblARInvoiceDetail ARD ON ARD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+				INNER JOIN tblARInvoice AR ON AR.intInvoiceId = ARD.intInvoiceId
+				WHERE SCT.intTicketId = @intTicketId
 
+				IF @ysnPosted = 1
+				BEGIN
+					EXEC [dbo].[uspARPostInvoice]
+							@batchId			= NULL,
+							@post				= 0,
+							@recap				= 0,
+							@param				= @intInvoiceId,
+							@userId				= @intUserId,
+							@beginDate			= NULL,
+							@endDate			= NULL,
+							@beginTransaction	= NULL,
+							@endTransaction		= NULL,
+							@exclude			= NULL,
+							@successfulCount	= @successfulCount OUTPUT,
+							@invalidCount		= @invalidCount OUTPUT,
+							@success			= @success OUTPUT,
+							@batchIdUsed		= @batchIdUsed OUTPUT,
+							@recapId			= @recapId OUTPUT,
+							@transType			= N'all',
+							@accrueLicense		= 0,
+							@raiseError			= 1
+				END
+				IF ISNULL(@intInvoiceId, 0) > 0
+					EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+			END
+		ELSE
+			BEGIN
+				IF @intEntityId = 0
+					BEGIN
+						SELECT @intInventoryTransferId = ICTD.intInventoryTransferId, @strTransactionId = ICTD.strTransferNo, @intMatchTicketId = SC.intMatchTicketId
+						FROM vyuICGetInventoryTransferDetail  ICTD
+						LEFT JOIN tblSCTicket SC ON SC.strTicketNumber = ICTD.strSourceNumber AND SC.intTicketId = ICTD.intSourceId
+						WHERE intSourceId = @intTicketId
+
+						IF @intMatchTicketId > 0
+						BEGIN
+							SET @ErrorMessage = 'Undistribute failed, this ticket is using in other ticket';
+							RAISERROR(@ErrorMessage, 11, 1);
+						END 
+
+						IF @intInventoryTransferId > 0
+							EXEC [dbo].[uspICPostInventoryTransfer] 0, 0, @strTransactionId, @intUserId;	
+							EXEC [dbo].[uspICDeleteInventoryTransfer] @intInventoryTransferId, @intUserId	
+
+						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+					END
+				
+				IF @intEntityId > 0
+				BEGIN
+					CREATE TABLE #tmpItemShipmentIds (
+						[intInventoryShipmentId] [INT] PRIMARY KEY,
+						[strShipmentNumber] [VARCHAR](100),
+						UNIQUE ([intInventoryShipmentId])
+					);
+					INSERT INTO #tmpItemShipmentIds(intInventoryShipmentId,strShipmentNumber) SELECT DISTINCT(intInventoryShipmentId),strShipmentNumber from vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
+				
+					DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+					FOR
+					SELECT intInventoryShipmentId, strShipmentNumber
+					FROM #tmpItemShipmentIds
+
+					OPEN intListCursor;
+
+					-- Initial fetch attempt
+					FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						SELECT @intInventoryShipmentItemId = intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
+						SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
+						SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 						IF @ysnPosted = 1
 						BEGIN
 							EXEC [dbo].[uspARPostInvoice]
-									@batchId			= NULL,
-									@post				= 0,
-									@recap				= 0,
-									@param				= @intInvoiceId,
-									@userId				= @intUserId,
-									@beginDate			= NULL,
-									@endDate			= NULL,
-									@beginTransaction	= NULL,
-									@endTransaction		= NULL,
-									@exclude			= NULL,
-									@successfulCount	= @successfulCount OUTPUT,
-									@invalidCount		= @invalidCount OUTPUT,
-									@success			= @success OUTPUT,
-									@batchIdUsed		= @batchIdUsed OUTPUT,
-									@recapId			= @recapId OUTPUT,
-									@transType			= N'all',
-									@accrueLicense		= 0,
-									@raiseError			= 1
+								@batchId			= NULL,
+								@post				= 0,
+								@recap				= 0,
+								@param				= @intInvoiceId,
+								@userId				= @intUserId,
+								@beginDate			= NULL,
+								@endDate			= NULL,
+								@beginTransaction	= NULL,
+								@endTransaction		= NULL,
+								@exclude			= NULL,
+								@successfulCount	= @successfulCount OUTPUT,
+								@invalidCount		= @invalidCount OUTPUT,
+								@success			= @success OUTPUT,
+								@batchIdUsed		= @batchIdUsed OUTPUT,
+								@recapId			= @recapId OUTPUT,
+								@transType			= N'all',
+								@accrueLicense		= 0,
+								@raiseError			= 1
 						END
 						IF ISNULL(@intInvoiceId, 0) > 0
 							EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
-					END
-				ELSE
-					BEGIN
-						IF @intEntityId = 0
-							BEGIN
-								SELECT @intInventoryTransferId = ICTD.intInventoryTransferId, @strTransactionId = ICTD.strTransferNo, @intMatchTicketId = SC.intMatchTicketId
-								FROM vyuICGetInventoryTransferDetail  ICTD
-								LEFT JOIN tblSCTicket SC ON SC.strTicketNumber = ICTD.strSourceNumber AND SC.intTicketId = ICTD.intSourceId
-								WHERE intSourceId = @intTicketId
-
-								IF @intMatchTicketId > 0
-								BEGIN
-									SET @ErrorMessage = 'Undistribute failed, this ticket is using in other ticket';
-									RAISERROR(@ErrorMessage, 11, 1);
-								END 
-
-								IF @intInventoryTransferId > 0
-									EXEC [dbo].[uspICPostInventoryTransfer] 0, 0, @strTransactionId, @intUserId;	
-									EXEC [dbo].[uspICDeleteInventoryTransfer] @intInventoryTransferId, @intUserId	
-
-								EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
-							END
-				
-						IF @intEntityId > 0
-					BEGIN
-						CREATE TABLE #tmpItemShipmentIds (
-							[intInventoryShipmentId] [INT] PRIMARY KEY,
-							[strShipmentNumber] [VARCHAR](100),
-							UNIQUE ([intInventoryShipmentId])
-						);
-						INSERT INTO #tmpItemShipmentIds(intInventoryShipmentId,strShipmentNumber) SELECT DISTINCT(intInventoryShipmentId),strShipmentNumber from vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
-				
-						DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-						FOR
-						SELECT intInventoryShipmentId, strShipmentNumber
-						FROM #tmpItemShipmentIds
-
-						OPEN intListCursor;
-
-						-- Initial fetch attempt
+						EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
+						EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
+						EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
+						EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
+						DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 						FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
-
-						WHILE @@FETCH_STATUS = 0
-						BEGIN
-							SELECT @intInventoryShipmentItemId = intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
-							SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
-							SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
-							IF @ysnPosted = 1
-							BEGIN
-								EXEC [dbo].[uspARPostInvoice]
-									@batchId			= NULL,
-									@post				= 0,
-									@recap				= 0,
-									@param				= @intInvoiceId,
-									@userId				= @intUserId,
-									@beginDate			= NULL,
-									@endDate			= NULL,
-									@beginTransaction	= NULL,
-									@endTransaction		= NULL,
-									@exclude			= NULL,
-									@successfulCount	= @successfulCount OUTPUT,
-									@invalidCount		= @invalidCount OUTPUT,
-									@success			= @success OUTPUT,
-									@batchIdUsed		= @batchIdUsed OUTPUT,
-									@recapId			= @recapId OUTPUT,
-									@transType			= N'all',
-									@accrueLicense		= 0,
-									@raiseError			= 1
-							END
-							IF ISNULL(@intInvoiceId, 0) > 0
-								EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
-							EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
-							EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
-							EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
-							EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
-							DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
-							FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
-						END
-						CLOSE intListCursor  
-						DEALLOCATE intListCursor 
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END
+				CLOSE intListCursor  
+				DEALLOCATE intListCursor 
+				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 				END
 			END
+		END
 		
 		--Audit Log
 		

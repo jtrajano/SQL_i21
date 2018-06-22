@@ -45,8 +45,8 @@ FROM	tblICInventoryReceipt Receipt
 		OUTER APPLY (
 			SELECT	strOrderNumber = ct.strContractNumber
 					,rc.intInventoryReceiptChargeId
-					,dblUnitCost = ROUND(rc.dblAmount, 2) 
-					,dblReceiptQty = 1
+					,dblUnitCost = (CASE WHEN rc.strCostMethod = 'Per Unit' THEN  ROUND(rc.dblRate, 2) ELSE ROUND(rc.dblAmount, 2) END )
+					,dblReceiptQty = (CASE WHEN rc.dblQuantityPriced <> 0 THEN ISNULL(rc.dblQuantityPriced,0) ELSE ISNULL(rc.dblAmountBilled,0) END)
 					,dblVoucherQty = ISNULL(voucher.QtyTotal, 0)
 					,dblReceiptLineTotal = ROUND(rc.dblAmount, 2)
 					,dblVoucherLineTotal = ISNULL(voucher.LineTotal, 0)
@@ -62,7 +62,7 @@ FROM	tblICInventoryReceipt Receipt
 						END 
 
 					,dblVoucherTax = ISNULL(voucher.TaxTotal, 0) 
-					,dblOpenQty = 1 - ISNULL(voucher.QtyTotal, 0)
+					,dblOpenQty =  ISNULL(rc.dblQuantity,1) - ISNULL(voucher.QtyTotal, 0)
 					,dblItemsPayable = 
 						ROUND(rc.dblAmount, 2)
 						- ISNULL(voucher.LineTotal, 0)
@@ -118,6 +118,7 @@ FROM	tblICInventoryReceipt Receipt
 
 			WHERE	rc.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					AND rc.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+					AND ct.intPricingTypeId != 2
 		) receiptAndVoucheredCharges
 		OUTER APPLY (					
 			SELECT	TOP 1 
@@ -181,6 +182,7 @@ FROM	tblICInventoryReceipt Receipt
 WHERE	Receipt.ysnPosted = 1
 		AND ReceiptCharge.ysnAccrue = 1
 		AND receiptAndVoucheredCharges.dblReceiptQty <> receiptAndVoucheredCharges.dblVoucherQty
+		AND ReceiptCharge.dblAmount <> 0 --WILL NOT SHOW RECEIPT FROM STORAGE
 GO
 
 

@@ -25,10 +25,10 @@ BEGIN TRY
 	DELETE FROM dbo.tblAPBillDetail 
 	WHERE intBillId = @intBillId
 
-	DELETE FROM dbo.tblAPBill 
+	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
 	WHERE intBillId = @intBillId
 
-	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
+	DELETE FROM dbo.tblAPBill 
 	WHERE intBillId = @intBillId
 
 	DELETE FROM dbo.tblSMTransaction

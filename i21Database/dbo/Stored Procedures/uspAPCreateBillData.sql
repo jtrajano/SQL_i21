@@ -29,7 +29,9 @@ CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@vendorOrderNumber NVARCHAR(50) = NULL,
 	@voucherDate DATETIME = NULL,
 	@currencyId INT = NULL,
-	@billId INT OUTPUT
+	@throwError BIT = 1,
+	@billId INT OUTPUT,
+	@error NVARCHAR(1000) = NULL OUTPUT 
 AS
 BEGIN
 
@@ -48,13 +50,30 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	IF NOT EXISTS(SELECT 1 FROM tblAPVendor WHERE [intEntityId] = @vendorId)
 	BEGIN
-		RAISERROR('Vendor does not exists.', 16, 1);
+		SET @error =  'Vendor does not exists.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
+	END
+
+	IF ISNULL(@userId, 0) > 0 AND @shipTo IS NULL
+	BEGIN
+		SELECT TOP 1 
+			@shipTo = intCompanyLocationId
+		FROM tblSMUserSecurity WHERE [intEntityId] = @userId
 	END
 
 	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
 	IF @APAccount IS NULL OR @APAccount <= 0
 	BEGIN
-		RAISERROR('Please setup default AP Account.', 16, 1);
+		SET @error =  'Please setup default AP Account.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
 	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
@@ -237,6 +256,10 @@ BEGIN CATCH
 	SET @ErrorState    = ERROR_STATE()
 	SET @ErrorLine     = ERROR_LINE()
 	IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	SET @error = @ErrorMessage;
+	IF @throwError = 1
+	BEGIN
+		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	END
 END CATCH
 END

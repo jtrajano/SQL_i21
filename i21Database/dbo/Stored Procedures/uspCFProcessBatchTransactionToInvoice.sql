@@ -417,6 +417,7 @@ SELECT * FROM #tmpForeignTransactionId
 		,@UserId			= @UserId
 		,@GroupingOption	= 11
 		,@RaiseError		= 0
+		,@BatchId			= @BatchId
 		,@ErrorMessage		= @ErrorMessage OUTPUT
 		,@LogId				= @LogId OUTPUT
 

@@ -34,6 +34,7 @@ BEGIN TRY
 		,intAccountId INT
 		,dblQtyReceived NUMERIC(18, 6)
 		,dblCost NUMERIC(18, 6)
+		,intCostUOMId INT
 		,intWarehouseServicesId INT
 		,ysnInventoryCost BIT
 		,intItemUOMId INT
@@ -113,6 +114,7 @@ BEGIN TRY
 		,intAccountId
 		,dblQtyReceived
 		,dblCost
+		,intCostUOMId
 		,intWarehouseServicesId
 		,ysnInventoryCost
 		,intItemUOMId
@@ -134,6 +136,7 @@ BEGIN TRY
 						))
 				) * CONVERT(NUMERIC(18, 6), SUM(LD.dblNet))
 			)
+		,LD.intItemUOMId
 		,LWS.intLoadWarehouseServicesId
 		,Item.ysnInventoryCost
 		,LD.intItemUOMId
@@ -240,6 +243,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intCostUOMId
 			,intItemUOMId
 			)
 		SELECT intContractHeaderId
@@ -249,6 +253,7 @@ BEGIN TRY
 			,intLoadDetailId
 			,dblQtyReceived
 			,dblCost
+			,intCostUOMId
 			,intItemUOMId
 		FROM @voucherDetailData
 
@@ -284,6 +289,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intCostUOMId
 				,intItemUOMId
 				)
 			SELECT intContractHeaderId
@@ -293,6 +299,7 @@ BEGIN TRY
 				,intLoadDetailId
 				,dblQtyReceived
 				,dblCost
+				,intCostUOMId
 				,intItemUOMId
 			FROM @voucherDetailData
 			WHERE ysnInventoryCost = 0

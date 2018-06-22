@@ -20,6 +20,7 @@ BEGIN
 		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intRelatedTransactionId INT NULL 
 		,intTransactionTypeId INT NOT NULL 
+		,dblQty NUMERIC(38,20) 
 	)
 END 
 
@@ -45,6 +46,7 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,intRelatedTransactionId
 	,strRelatedTransactionId
 	,intTransactionTypeId
+	,dblQty 
 )
 SELECT	Data_Changes.intInventoryTransactionId
 		,Data_Changes.intTransactionId
@@ -52,6 +54,7 @@ SELECT	Data_Changes.intInventoryTransactionId
 		,Data_Changes.intRelatedTransactionId
 		,Data_Changes.strRelatedTransactionId
 		,Data_Changes.intTransactionTypeId
+		,Data_Changes.dblQty 
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -85,8 +88,25 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Data_Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT 
+					$action
+					, Inserted.intInventoryTransactionId
+					, Inserted.intTransactionId
+					, Inserted.strTransactionId
+					, Inserted.intRelatedTransactionId
+					, Inserted.strRelatedTransactionId
+					, Inserted.intTransactionTypeId
+					, Inserted.dblQty 
+		) AS Data_Changes (
+			Action
+			, intInventoryTransactionId
+			, intTransactionId
+			, strTransactionId
+			, intRelatedTransactionId
+			, strRelatedTransactionId
+			, intTransactionTypeId
+			, dblQty 
+		)
 WHERE	Data_Changes.Action = 'UPDATE'
 ;
 
@@ -98,6 +118,7 @@ FROM	dbo.tblICInventoryLot LotBucket INNER JOIN #tmpInventoryTransactionStockToR
 			ON LotBucket.intTransactionId = Reversal.intTransactionId
 			AND LotBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+		AND ISNULL(Reversal.dblQty, 0) <> 0 
 ;
 
 -- If LIFOBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
@@ -111,6 +132,7 @@ WHERE	EXISTS (
 			WHERE	Reversal.intTransactionId = LotBucket.intTransactionId
 					AND Reversal.strTransactionId = LotBucket.strTransactionId
 					AND Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+					AND ISNULL(Reversal.dblQty, 0) <> 0 
 		)
 ;
 

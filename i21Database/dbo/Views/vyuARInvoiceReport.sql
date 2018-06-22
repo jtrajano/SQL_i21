@@ -22,7 +22,10 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strBillToLocationName	= INV.strBillToLocationName
 	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
-	 , strShipTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strShipTo				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
+	 									THEN CONSUMPTIONSITE.strSiteFullAddress
+										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+								  END
 	 , strSalespersonName		= SALESPERSON.strName
 	 , strPONumber				= INV.strPONumber
 	 , strBOLNumber				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
@@ -279,8 +282,16 @@ OUTER APPLY (
 	SELECT COUNT(*) AS intVFDDrugItemCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 	WHERE intInvoiceId = INVOICEDETAIL.intInvoiceId 
-	  AND ISNULL(strVFDDocumentNumber, '') != ''
+	  AND ISNULL(strVFDDocumentNumber, '') <> ''
 ) VFDDRUGITEM
+OUTER APPLY (
+	SELECT TOP 1 strSiteFullAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, S.strSiteAddress, S.strCity, S.strState, S.strZipCode, S.strCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+			   , intSiteId			= ID.intSiteId
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+	INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+	WHERE intInvoiceId = INVOICEDETAIL.intInvoiceId 
+	  AND ISNULL(ID.intSiteId, 0) <> 0
+) CONSUMPTIONSITE
 OUTER APPLY (
 	SELECT TOP 1 strProvisionalDescription = 'Less Payment Received: Provisional Invoice No. ' + ISNULL(strInvoiceNumber, '') + ' dated ' + CONVERT(VARCHAR(10), dtmDate, 110)
 			   , dblProvisionalTotal	   = dblPayment	    

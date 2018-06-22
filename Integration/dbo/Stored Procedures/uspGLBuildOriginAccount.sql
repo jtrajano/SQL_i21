@@ -43,6 +43,9 @@ BEGIN
 			,strAccountSegmentId		NVARCHAR(100)
 		)
 
+		--ensure strChartDesc is not null
+		UPDATE dbo.tblGLAccountSegment SET strChartDesc = ISNULL(strDescription,'''') WHERE ISNULL(strChartDesc,'''') = '''' OR LEN(REPLACE(strChartDesc,'' '','''')) = 0
+
 		INSERT INTO #PrimaryAccounts
 		SELECT a.strCode,'''', '''', a.strDescription, b.strAccountGroup, a.intAccountGroupId, x.intAccountSegmentId, a.intAccountStructureId, x.intAccountSegmentId AS strAccountSegmentId
 		FROM tblGLTempAccountToBuild x
