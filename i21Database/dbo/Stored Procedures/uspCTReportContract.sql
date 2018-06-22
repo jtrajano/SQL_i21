@@ -37,11 +37,12 @@ BEGIN TRY
 
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
-			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT,
-			@TotalAtlasLots		 INT,
+			@strAmendedColumns		NVARCHAR(MAX),
+			@intContractDetailId	INT,
+			@TotalAtlasLots			INT,
 			@strSequenceHistoryId	     NVARCHAR(MAX),
-			@strDetailAmendedColumns	 NVARCHAR(MAX)	
+			@strDetailAmendedColumns	 NVARCHAR(MAX),
+			@intApproverGroupId		INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -116,8 +117,8 @@ BEGIN TRY
 	IF @strCommodityCode = 'Tea'
 		SET @strApprovalText = NULL
 
-    SELECT TOP 1 @FirstApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
-	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId ORDER BY intApprovalId
+    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
+	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
 
 	SELECT @FirstApprovalSign =  Sig.blbDetail 
 								 FROM tblSMSignature Sig 
