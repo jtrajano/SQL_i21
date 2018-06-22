@@ -44,7 +44,8 @@ BEGIN TRY
 			@strDetailAmendedColumns	NVARCHAR(MAX),
 			@intLaguageId				INT,
 			@strExpressionLabelName		NVARCHAR(50) = 'Expression',
-			@strMonthLabelName			NVARCHAR(50) = 'Month'
+			@strMonthLabelName			NVARCHAR(50) = 'Month',
+			@intApproverGroupId			INT
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -137,8 +138,8 @@ BEGIN TRY
 	IF @strCommodityCode = 'Tea'
 		SET @strApprovalText = NULL
 
-    SELECT TOP 1 @FirstApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
-	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId ORDER BY intApprovalId
+    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
+	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
 
 	SELECT @FirstApprovalSign =  Sig.blbDetail 
 								 FROM tblSMSignature Sig 
