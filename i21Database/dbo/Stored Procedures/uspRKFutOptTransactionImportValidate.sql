@@ -586,7 +586,7 @@ IF NOT EXISTS(SELECT 1
 																	dblStrike,dblPrice,strReference,strStatus,dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime)
 					SELECT intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 																	strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,
-																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Currency is not configured for the market.',convert(datetime,dtmCreateDateTime,@ConvertYear)
+																	dblStrike,dblPrice,strReference,strStatus,convert(datetime,dtmFilledDate,@ConvertYear),strBook,strSubBook,intConcurrencyId,'Future Month is not configured for the market.',convert(datetime,dtmCreateDateTime,@ConvertYear)
 					FROM  tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 				END
 				ELSE
