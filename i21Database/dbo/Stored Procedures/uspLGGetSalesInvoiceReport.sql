@@ -182,7 +182,7 @@ BEGIN
 		,strPriceUOM = isnull(rtPriceUOMTranslation.strTranslation,PriceUOM.strUnitMeasure)
 		,strWeightUOM = isnull(rtWtUOMTranslation.strTranslation,WtUOM.strUnitMeasure)
 		,CH.strCustomerContract
-		,CH.strContractNumber
+		,LTRIM(CH.strContractNumber) +'/'+ LTRIM(CD.intContractSeq) AS strContractNumber
 		,CD.intContractSeq
 		,Cont.strContainerNumber
 		,Cont.strMarks
