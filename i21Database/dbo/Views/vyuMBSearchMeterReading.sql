@@ -38,22 +38,22 @@ SELECT MRDetail.intMeterReadingDetailId
 	, MRDetail.dblDollarsOwed
 	, MRDetail.dblDifference
 	, dblTotalTax = (CASE WHEN ISNULL(Invoice.intInvoiceId, '') = '' OR ISNULL(Invoice.dblQtyShipped, 0) = 0 THEN 0.00
-						ELSE (ISNULL(Invoice.dblTotalTax, 0) / ISNULL(Invoice.dblQtyShipped, 0)) * MRDetail.dblQuantitySold END)
+						ELSE (ISNULL(Invoice.dblTotalTax, 0) / NULLIF(Invoice.dblQtyShipped, 0)) * MRDetail.dblQuantitySold END)
 	, dblJobberMargin = (CASE WHEN ISNULL(Invoice.intInvoiceId, '') = '' OR ISNULL(Invoice.dblQtyShipped, 0) = 0 THEN (CASE WHEN ConRate.strRateType = 'Jobber' THEN ISNULL(ConRate.dblBaseRate, 0)
 																					ELSE MRDetail.dblGrossPrice - ISNULL(ConRate.dblBaseRate, 0) END)
 							ELSE (CASE WHEN ConRate.strRateType = 'Jobber' THEN ISNULL(ConRate.dblBaseRate, 0)
-									ELSE MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / ISNULL(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0)) END) END)	
+									ELSE MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / NULLIF(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0)) END) END)	
 	, dblJobberProfit = (CASE WHEN ISNULL(Invoice.intInvoiceId, '') = '' OR ISNULL(Invoice.dblQtyShipped, 0) = 0 THEN (CASE WHEN ConRate.strRateType = 'Jobber' THEN ISNULL(ConRate.dblBaseRate, 0) * MRDetail.dblQuantitySold
 																					ELSE (MRDetail.dblGrossPrice - ISNULL(ConRate.dblBaseRate, 0)) * MRDetail.dblQuantitySold END)
 							ELSE (CASE WHEN ConRate.strRateType = 'Jobber' THEN ISNULL(ConRate.dblBaseRate, 0) * MRDetail.dblQuantitySold
-									ELSE (MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / ISNULL(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0))) * MRDetail.dblQuantitySold END) END)
+									ELSE (MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / NULLIF(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0))) * MRDetail.dblQuantitySold END) END)
 	, dblDealerMargin = (CASE WHEN ISNULL(Invoice.intInvoiceId, '') = '' OR ISNULL(Invoice.dblQtyShipped, 0) = 0 THEN ((CASE WHEN ConRate.strRateType = 'Jobber' THEN MRDetail.dblGrossPrice - ISNULL(ConRate.dblBaseRate, 0)
 																					ELSE ISNULL(ConRate.dblBaseRate, 0) END))
-							ELSE ((CASE WHEN ConRate.strRateType = 'Jobber' THEN MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / ISNULL(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0))
+							ELSE ((CASE WHEN ConRate.strRateType = 'Jobber' THEN MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / NULLIF(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0))
 									ELSE ISNULL(ConRate.dblBaseRate, 0) END)) END)
 	, dblDealerProfit = (CASE WHEN ISNULL(Invoice.intInvoiceId, '') = '' OR ISNULL(Invoice.dblQtyShipped, 0) = 0 THEN ((CASE WHEN ConRate.strRateType = 'Jobber' THEN (MRDetail.dblGrossPrice - ISNULL(ConRate.dblBaseRate, 0)) * MRDetail.dblQuantitySold
 																					ELSE ISNULL(ConRate.dblBaseRate, 0) * MRDetail.dblQuantitySold END))
-							ELSE ((CASE WHEN ConRate.strRateType = 'Jobber' THEN (MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / ISNULL(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0))) * MRDetail.dblQuantitySold
+							ELSE ((CASE WHEN ConRate.strRateType = 'Jobber' THEN (MRDetail.dblGrossPrice - (ISNULL(Trans.dblCost, 0) + ((ISNULL(Invoice.dblTotalTax, 0) / NULLIF(Invoice.dblQtyShipped, 0))) + ISNULL(ConRate.dblBaseRate, 0))) * MRDetail.dblQuantitySold
 									ELSE ISNULL(ConRate.dblBaseRate, 0) * MRDetail.dblQuantitySold END)) END)
 	, MRDetail.ysnPosted
 	, MRDetail.dtmPostedDate

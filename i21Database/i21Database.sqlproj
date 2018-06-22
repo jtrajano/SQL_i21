@@ -6763,6 +6763,7 @@
     <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

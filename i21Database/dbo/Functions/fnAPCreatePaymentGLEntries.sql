@@ -338,7 +338,7 @@ BEGIN
 			[strCode]						=	'AP',
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
-			[dblExchangeRate]				=	1,
+			[dblExchangeRate]				=	A.dblExchangeRate,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Discount',
