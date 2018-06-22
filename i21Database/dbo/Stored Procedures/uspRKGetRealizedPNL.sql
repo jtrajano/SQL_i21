@@ -27,11 +27,11 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,strAllocationRefNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strEntityName							NVARCHAR(100)
 		,strInternalCompany						NVARCHAR(20)
-		,dblQuantity							NUMERIC(24, 10)
+		,dblQuantity							NUMERIC(38,20)
 		,intQuantityUOMId						INT							---ItemUOM
 		,intQuantityUnitMeasureId				INT							---UnitMeasure
 		,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblWeight								NUMERIC(24, 10)
+		,dblWeight								NUMERIC(38,20)
 		,intWeightUOMId							INT							---ItemUOM		
 		,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intOriginId							INT
@@ -47,20 +47,20 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,dtmEndDate								DATETIME
 		,strPriceTerms							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strIncoTermLocation					NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblContractDifferential				NUMERIC(24, 10)
+		,dblContractDifferential				NUMERIC(38,20)
 		,strContractDifferentialUOM				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFuturesPrice						NUMERIC(24, 10)
+		,dblFuturesPrice						NUMERIC(38,20)
 		,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblCashPrice							NUMERIC(24, 10)
+		,dblCashPrice							NUMERIC(38,20)
 		,intPriceUOMId							INT							---ItemUOM
 		,intPriceUnitMeasureId					INT							---UnitMeasure
 		,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFixedLots							NUMERIC(24, 10)
-		,dblUnFixedLots							NUMERIC(24, 10)
-		,dblContractInvoiceValue				NUMERIC(24, 10)
-		,dblSecondaryCosts						NUMERIC(24, 10)
-		,dblCOGSOrNetSaleValue					NUMERIC(24, 10)
+		,dblFixedLots							NUMERIC(38,20)
+		,dblUnFixedLots							NUMERIC(38,20)
+		,dblContractInvoiceValue				NUMERIC(38,20)
+		,dblSecondaryCosts						NUMERIC(38,20)
+		,dblCOGSOrNetSaleValue					NUMERIC(38,20)
 		,intFutureMarketId						INT
 		,strFutureMarket						NVARCHAR(100)
 		,intFutureMarketUOMId					INT
@@ -70,19 +70,19 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 		,intFutureMonthId						INT
 		,strFutureMonth							NVARCHAR(100)
 		,dtmRealizedDate						DATETIME
-		,dblRealizedQty							NUMERIC(24, 10)
-		,dblRealizedPNLValue					NUMERIC(24, 10)
-		,dblPNLPreDayValue						NUMERIC(24, 10)
-		,dblProfitOrLossValue					NUMERIC(24, 10)
-		,dblPNLChange							NUMERIC(24, 10)
+		,dblRealizedQty							NUMERIC(38,20)
+		,dblRealizedPNLValue					NUMERIC(38,20)
+		,dblPNLPreDayValue						NUMERIC(38,20)
+		,dblProfitOrLossValue					NUMERIC(38,20)
+		,dblPNLChange							NUMERIC(38,20)
 		,strFixedBy								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingType							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strInvoiceStatus						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblNetFuturesValue					    NUMERIC(24, 10)
-		,dblRealizedFuturesPNLValue			    NUMERIC(24, 10)
-		,dblNetPNLValue						    NUMERIC(24, 10)
-		,dblFXValue							    NUMERIC(24, 10)
-		,dblFXConvertedValue				    NUMERIC(24, 10)
+		,dblNetFuturesValue					    NUMERIC(38,20)
+		,dblRealizedFuturesPNLValue			    NUMERIC(38,20)
+		,dblNetPNLValue						    NUMERIC(38,20)
+		,dblFXValue							    NUMERIC(38,20)
+		,dblFXConvertedValue				    NUMERIC(38,20)
 		,strSalesReturnAdjustment				NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intCompanyId							INT
 		,strCompany								NVARCHAR(200) COLLATE Latin1_General_CI_AS
