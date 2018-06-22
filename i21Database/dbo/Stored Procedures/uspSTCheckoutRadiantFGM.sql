@@ -98,44 +98,9 @@ BEGIN
 		END
 	ELSE
 		BEGIN
-			-- SQL Param
-			SET @SQL = N'UPDATE dbo.tblSTCheckoutPumpTotals' + CHAR(13)
-					   + ' SET [dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))' + CHAR(13)
-					   + ', [dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))' + CHAR(13)
-					   + ', [dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))' + CHAR(13)
-					   + ' FROM #tempCheckoutInsert Chk' + CHAR(13)
-					   + ' JOIN dbo.tblICItemLocation IL ON RIGHT(Chk.FuelGradeID, 3) COLLATE Latin1_General_CI_AS = CASE WHEN ISNULL(IL.strPassportFuelId1, '''') <> '''' THEN IL.strPassportFuelId1' + CHAR(13)
-					   + '			WHEN ISNULL(IL.strPassportFuelId2, '''') <> '''' THEN IL.strPassportFuelId2' + CHAR(13)
-					   + '			WHEN ISNULL(IL.strPassportFuelId3, '''') <> '''' THEN IL.strPassportFuelId3' + CHAR(13)
-					   + '		END' + CHAR(13)
-					   + ' JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId' + CHAR(13)
-					   + ' JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId' + CHAR(13)
-					   + ' JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId' + CHAR(13)
-					   + ' JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId' + CHAR(13)
-					   + ' WHERE intCheckoutId = @CheckoutId' + CHAR(13)
-					   + ' AND intPumpCardCouponId = UOM.intItemUOMId' + CHAR(13)
-					   + ' AND S.intStoreId = @intStoreId' + CHAR(13)
-
-			EXEC sp_executesql @SQL
-							 , N'@CheckoutId INT'
-							 , @CheckoutId = @intCheckoutId
-							 , @intStoreId = @intStoreId
-
-			--UPDATE dbo.tblSTCheckoutPumpTotals
-			--SET [dblPrice] = (ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1))
-			--, [dblQuantity] = ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0)
-			--, [dblAmount] = ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0)
-			--from #tempCheckoutInsert Chk
-			--JOIN dbo.tblICItemLocation IL ON RIGHT(Chk.FuelGradeID, 3) COLLATE Latin1_General_CI_AS = CASE WHEN ISNULL(IL.strPassportFuelId1, '') <> '' THEN IL.strPassportFuelId1
-			--																					WHEN ISNULL(IL.strPassportFuelId2, '') <> '' THEN IL.strPassportFuelId2
-			--																					WHEN ISNULL(IL.strPassportFuelId3, '') <> '' THEN IL.strPassportFuelId3
-			--																				END
-			--JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId
-			--JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId
-			--JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId
-			--JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId
-			--WHERE intCheckoutId = @intCheckoutId AND intPumpCardCouponId = UOM.intItemUOMId
-
+			UPDATE dbo.tblSTCheckoutPumpTotals					 SET [dblPrice] = CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))						, [dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))						, [dblAmount] = (CAST(ISNULL(Chk.FuelGradeSalesAmount, 0) AS DECIMAL(18,6)) / CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))				 FROM #tempCheckoutInsert Chk				 JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = 						CASE WHEN ISNULL(IL.strPassportFuelId1, '') <> '' THEN IL.strPassportFuelId1							WHEN ISNULL(IL.strPassportFuelId2, '') <> '' THEN IL.strPassportFuelId2							WHEN ISNULL(IL.strPassportFuelId3, '') <> '' THEN IL.strPassportFuelId3						END				 JOIN dbo.tblICItem I ON I.intItemId = IL.intItemId				 JOIN dbo.tblICItemUOM UOM ON UOM.intItemId = I.intItemId				 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId				 JOIN dbo.tblSTStore S ON S.intCompanyLocationId = CL.intCompanyLocationId				 WHERE intCheckoutId = @intCheckoutId
+				 AND intPumpCardCouponId = UOM.intItemUOMId
+				 AND S.intStoreId = @intStoreId
 		END
 
 	SET @intCountRows = 1
