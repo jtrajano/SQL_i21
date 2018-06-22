@@ -27,6 +27,7 @@ DECLARE @intEntityVendorId AS INT
 
 		,@intShipFrom_DebitMemo AS INT
 
+
 DECLARE @Own AS INT = 1
 		,@Storage AS INT = 2
 		,@ConsignedPurchase AS INT = 3
@@ -213,6 +214,34 @@ BEGIN
 				AND ri.dblBillQty < ri.dblOpenReceive 
 				AND ri.intOwnershipType = @Own
 				AND Item.strType <> 'Bundle'
+	END 
+
+	-- Check if the item is "Basis" priced and futures price is not blank. 
+	BEGIN 
+		DECLARE	 @invalidItemNo AS NVARCHAR(50) 
+				,@invalidItemId AS INT 
+
+		SELECT	TOP 1
+				@invalidItemNo = i.strItemNo
+				,@invalidItemId = i.intItemId 
+		FROM	@voucherItems vi INNER JOIN tblICInventoryReceiptItem ri
+					ON vi.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+				INNER JOIN tblCTContractDetail cd
+					ON cd.intContractDetailId = ri.intLineNo
+					AND cd.intContractHeaderId = ri.intOrderId
+					AND cd.intItemId = ri.intItemId
+				INNER JOIN tblICItem i
+					ON i.intItemId = ri.intItemId
+		WHERE	vi.intInventoryReceiptType = 2 -- 2 is Purchase Contract. 
+				AND cd.intPricingTypeId = 2 -- 2 is Basis. 
+				AND ISNULL(cd.dblFutures, 0) = 0
+
+		IF @invalidItemId IS NOT NULL 
+		BEGIN 
+			-- 'Pricing type for {Item No} is a Basis and its Futures needs a price. Please add it at Contract Management -> Price Contract.'
+			EXEC uspICRaiseError 80218, @invalidItemNo; 		
+			RETURN -80218;
+		END 
 	END 
 
 	-- Assemble the Other Charges
