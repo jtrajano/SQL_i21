@@ -5,16 +5,14 @@
 			,b.intTicketId
 			,b.strTicketNumber
 			,b.strSubject
-			,strCustomerName = e.strName
+			,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = b.intCustomerId)
 			,b.intCustomerId
 			,b.dtmCreated
-			,strPriotity = f.strPriority
+			,strPriotity = (select top 1 strPriority from tblHDTicketPriority where intTicketPriorityId = b.intTicketPriorityId)
 			,b.intTicketPriorityId
-			,i.strStatus
-			,b.intTicketStatusId
-			,strModule = g.strModule
+			,strModule = (select top 1 strModule from tblHDModule where intModuleId = b.intModuleId)
 			,b.intModuleId
-			,strAssignedTo = h.strName
+			,strAssignedTo = (select top 1 strName from tblEMEntity where intEntityId = b.intAssignedToEntity)
 			,b.intAssignedToEntity
 			,d.strKey
 			,d.intJiraKeyId
@@ -36,11 +34,7 @@
 			,d.intOriginalEstimateSeconds
 		from
 			tblHDTicket b
-			inner join tblHDTicketJIRAIssue d on d.intTicketId = b.intTicketId
-			left join tblEMEntity e on e.intEntityId = b.intCustomerId
-			left join tblHDTicketPriority f on f.intTicketPriorityId = b.intTicketPriorityId
-			left join tblHDModule g on g.intModuleId = b.intModuleId
-			left join tblEMEntity h on h.intEntityId = b.intAssignedToEntity
-			left join tblHDTicketStatus i on i.intTicketStatusId = b.intTicketStatusId
+			,tblHDTicketJIRAIssue d
 		where
-			b.strType <> 'CRM'
+			b.intTicketId = d.intTicketId
+			and b.strType <> 'CRM'
