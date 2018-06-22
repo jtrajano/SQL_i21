@@ -37,6 +37,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , dblDiscount				= ISNULL(SOD.dblDiscount, 0)
 	 , dblTotal					= ISNULL(SOD.dblTotal, 0)
 	 , dtmDate					= SO.dtmDate
+	 , dblTotalQtyOrdered		= SOD.dblQtyOrdered
 FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT SO.intSalesOrderId
