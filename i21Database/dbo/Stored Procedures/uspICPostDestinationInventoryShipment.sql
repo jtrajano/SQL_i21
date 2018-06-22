@@ -187,6 +187,7 @@ BEGIN
 			, dblAmount
 			, dblRate
 			, intContractId
+			, intContractDetailId
 			, ysnPrice
 			, ysnAccrue
 			, intCostUOMId
@@ -194,6 +195,7 @@ BEGIN
 			, intForexRateTypeId 
 			, dblForexRate 
 			, strAllocatePriceBy
+			, strChargesLink
 			, intConcurrencyId
 	)
 	SELECT 
@@ -204,6 +206,7 @@ BEGIN
 			, sc.dblAmount
 			, sc.dblRate
 			, sc.intContractId
+			, sc.intContractDetailId
 			, sc.ysnPrice
 			, sc.ysnAccrue
 			, sc.intCostUOMId
@@ -211,6 +214,7 @@ BEGIN
 			, intForexRateTypeId = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
 			, dblForexRate = CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.dblForexRate, forexRate.dblRate) ELSE NULL END   
 			, ISNULL(sc.strAllocatePriceBy, 'Unit') 
+			, sc.strChargesLink 
 			, intConcurrencyId = 1
 	FROM	@ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 				ON sc.intInventoryShipmentId = s.intInventoryShipmentId 
