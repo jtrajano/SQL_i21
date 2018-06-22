@@ -204,7 +204,7 @@ SELECT
 	A.dtmDate
 	,B.intTransactionId
 	,C.strBillId
-	,CAST(B.dblAmountApplied * prepaidDetail.dblRate AS DECIMAL(18,2)) * -1
+	,B.dblAmountApplied
 	,0 AS dblTotal
 	,0 AS dblAmountDue
 	,0 AS dblWithheld
@@ -224,12 +224,6 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-OUTER APPLY (
-	SELECT TOP 1
-		bd.dblRate
-	FROM tblAPBillDetail bd
-	WHERE bd.intBillId = A.intBillId
-) prepaidDetail		
 WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
