@@ -13,7 +13,7 @@
 	[strFilterKey] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
 	[intRequestedByEntityId] [int] null,
 	[intCreatedDate] [int] not null,
-	[intTotalBilledHours] [int] null,
+	[intTotalBilledHours] [numeric](18,6) null,
 	[dblTotalBillableAmount] [numeric](18,6) null,
 	[intCallsRated] [int] null,
 	[dblAverageRating] [numeric](18,6) null,

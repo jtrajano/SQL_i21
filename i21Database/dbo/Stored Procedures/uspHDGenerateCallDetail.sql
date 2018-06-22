@@ -95,8 +95,8 @@ billedhours as
 (
 	select
 		intEntityId = a.intAssignedToEntity
-		,intTotalBilledHours = sum(isnull(b.intHours,0))
-		,dblTotalBillableAmount = sum(isnull(b.intHours,0)*isnull(b.dblRate,0))
+		,intTotalBilledHours = sum(isnull(b.intHours,0.00))
+		,dblTotalBillableAmount = sum(isnull(b.intHours,0.00)*isnull(b.dblRate,0.00))
 	from
 		tblHDTicket a
 		,tblHDTicketHoursWorked b
@@ -177,7 +177,7 @@ select distinct
 		,intRequestedByEntityId = 0
 		,intCreatedDate = convert(int, convert(nvarchar(8), getdate(), 112))
 		,intTotalBilledHours = isnull((select intTotalBilledHours from billedhours where intEntityId = b.intEntityId),0)
-		,dblTotalBillableAmount = isnull((select dblTotalBillableAmount from billedhours where intEntityId = b.intEntityId),0)
+		,dblTotalBillableAmount = isnull((select dblTotalBillableAmount from billedhours where intEntityId = b.intEntityId),0.00)
 		,intCallsRated = isnull((select intCallsRated from rating where intEntityId = b.intEntityId),0)
 		,dblAverageRating = isnull((select isnull(dblAverageRating,0.00) from rating where intEntityId = b.intEntityId),0.00)
 		,intDaysOutstanding = isnull((select intDaysOutstanding from daysoutstanding where intEntityId = b.intEntityId),0)
