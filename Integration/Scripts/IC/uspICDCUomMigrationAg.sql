@@ -41,7 +41,7 @@ FROM (
 select distinct upper(rtrim(agitm_pak_desc)) UnitMeasure
 from agitmmst
 left join tblICUnitMeasure I on I.strUnitMeasure = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-where agitm_un_per_pak not in (1,0) and I.strUnitMeasure is null
+where agitm_un_per_pak not in (1,0) and I.strUnitMeasure is null AND agitm_pak_desc IS NOT NULL
 ) u
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICUnitMeasure WHERE strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS <> u.UnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS)
 
@@ -69,7 +69,7 @@ select distinct intUnitMeasureId,
 (select top 1 intUnitMeasureId from tblICUnitMeasure U where U.strUnitMeasure = upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS) intToUnit,
 agitm_un_per_pak, 0,1
 from tblICUnitMeasure U join agitmmst I on U.strUnitMeasure = upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-where agitm_un_per_pak not in (1,0)
+where agitm_un_per_pak not in (1,0) AND agitm_pak_desc IS NOT NULL
 
 GO
 
