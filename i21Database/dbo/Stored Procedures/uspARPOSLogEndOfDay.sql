@@ -11,7 +11,29 @@ AS
 			  , @dblCashReceipts				NUMERIC(18, 6) = 0
 			  , @dblCashOverShort				NUMERIC(18, 6) = 0
 			  , @dtmDateNow						DATETIME = GETDATE()
+			  , @strCompanyLocatioName			NVARCHAR(100)	= NULL
 			  , @STARTING_NUMBER_BANK_DEPOSIT	NVARCHAR(100) = 'Bank Deposit'
+			  , @hintCashOverAccountId			INT = NULL
+
+
+		
+		select @hintCashOverAccountId = intCashOverShort, @strCompanyLocatioName = strLocationName
+			from tblSMCompanyLocation 
+				where intCompanyLocationId in (select intCompanyLocationId 
+													from tblARPOS  
+														where intPOSLogId = @intPOSLogId)
+
+
+		
+				
+		IF ISNULL(@hintCashOverAccountId, 0) = 0
+		BEGIN
+			DECLARE @strErrorMsg NVARCHAR(200) = '' + ISNULL(@strCompanyLocatioName, '') + ' does not have GL setup for Cash Over/Short. Please set it up in Company Location > GL Accounts.'
+			RAISERROR(@strErrorMsg, 16, 1)
+			RETURN;
+		END
+
+
 
 		--UPDATE ENDING BALANCE AND LOG
 		UPDATE POSLOG
@@ -110,6 +132,8 @@ AS
 				INNER JOIN tblGLAccount GL ON CL.intCashOverShort = GL.intAccountId
 				WHERE intCompanyLocationId = @intCompanyLocationId
 
+				
+
 				DELETE FROM @BankTransaction
 				DELETE FROM @BankTransactionDetail
 
@@ -179,6 +203,7 @@ AS
 
 				IF ISNULL(@dblCashOverShort, 0) <> 0 AND ISNULL(@intCashOverAccountId, 0) <> 0
 					BEGIN
+
 						INSERT INTO @BankTransactionDetail(
 							  [intTransactionId]
 							, [intUndepositedFundId]
