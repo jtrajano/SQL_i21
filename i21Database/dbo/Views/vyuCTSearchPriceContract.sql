@@ -55,7 +55,10 @@ AS
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName strItemShortName
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
@@ -120,7 +123,10 @@ AS
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName strItemShortName
 
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -153,7 +159,10 @@ AS
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName
 
 		UNION ALL
 
@@ -211,7 +220,10 @@ AS
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName strItemShortName
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
@@ -279,7 +291,10 @@ AS
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName strItemShortName
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
@@ -315,5 +330,8 @@ AS
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					CD.strItemNo,
+					CD.strItemDescription,
+					CD.strShortName
 	)t
