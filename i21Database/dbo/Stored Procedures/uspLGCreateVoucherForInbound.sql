@@ -28,7 +28,9 @@ BEGIN TRY
 		,dblQtyReceived NUMERIC(18, 6)
 		,dblCost NUMERIC(18, 6)
 		,intCostUOMId INT
-		,intItemUOMId INT)
+		,intItemUOMId INT
+		,dblUnitQty DECIMAL(38,20)
+		,dblCostUnitQty DECIMAL(38,20))
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -102,6 +104,8 @@ BEGIN TRY
 		,dblCost
 		,intCostUOMId
 		,intItemUOMId
+		,dblUnitQty
+		,dblCostUnitQty
 		)
 	SELECT LD.intVendorEntityId
 		,L.intLoadId
@@ -113,16 +117,13 @@ BEGIN TRY
 		,dblQtyReceived = LD.dblQuantity
 		,dblCost = CASE 
 			WHEN AD.ysnSeqSubCurrency = 1
-				THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
-			ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
+				THEN ISNULL(AD.dblSeqPrice, 0) / 100
+			ELSE ISNULL(AD.dblSeqPrice, 0)
 			END
 		,AD.intSeqPriceUOMId
 		,LD.intItemUOMId
-		--,dblCost = CASE 
-		--	WHEN AD.ysnSeqSubCurrency = 1
-		--		THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0) / 100
-		--	ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)
-		--	END
+		,ISNULL(ItemUOM.dblUnitQty,1)
+		,ISNULL(CostUOM.dblUnitQty,1)
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -132,6 +133,8 @@ BEGIN TRY
 		AND ItemLoc.intLocationId = CD.intCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 		AND ItemLoc.intLocationId = SLCL.intCompanyLocationId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = CD.intPriceItemUOMId
 	WHERE L.intLoadId = @intLoadId
 	GROUP BY LD.intVendorEntityId
 		,CH.intContractHeaderId
@@ -148,6 +151,8 @@ BEGIN TRY
 		,LD.dblQuantity
 		,LD.intItemUOMId
 		,AD.intSeqPriceUOMId
+		,ItemUOM.dblUnitQty
+		,CostUOM.dblUnitQty
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -207,6 +212,8 @@ BEGIN TRY
 			,dblCost
 			,intCostUOMId
 			,intItemUOMId
+			,dblUnitQty
+			,dblCostUnitQty
 			)
 		SELECT intContractHeaderId
 			,intContractDetailId
@@ -217,6 +224,8 @@ BEGIN TRY
 			,dblCost
 			,intCostUOMId
 			,intItemUOMId
+			,dblUnitQty
+			,dblCostUnitQty
 		FROM @voucherDetailData
 		WHERE intVendorEntityId = @intVendorEntityId
 
