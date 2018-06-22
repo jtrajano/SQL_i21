@@ -20,10 +20,11 @@ BEGIN
 		,UM.strUnitMeasure
 		,SUM(L.dblQty) AS dblTotalQty
 		,dbo.fnSMGetCompanyLogo('CompanyLogo') AS strLogo
-		,L.intLotId
+		,L.strLotNumber 
+		,L.intLocationId
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId 
 	JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN @tblMFLot L1 ON L1.strLotNumber = L.strLotNumber
 		AND L1.intLocationId = L.intLocationId
@@ -31,23 +32,26 @@ BEGIN
 	GROUP BY I.strItemNo
 		,I.strDescription
 		,UM.strUnitMeasure
-		,L.intLotId
+		,L.strLotNumber 
+		,L.intLocationId
 	
 	UNION
 	
 	SELECT DT.strItemNo
 		,DT.strDescription
 		,DT.strUnitMeasure
-		,SUM(DT.dblPhysicalCount) OVER (PARTITION BY DT.intLotId) dblTotalQty
+		,SUM(DT.dblPhysicalCount) OVER (PARTITION BY DT.strLotNumber) dblTotalQty
 		,dbo.fnSMGetCompanyLogo('WholesomeSweeteners') AS strLogo
-		,DT.intLotId
+		,DT.strLotNumber
+		,DT.intLocationId
 	FROM (
 		SELECT I.strItemNo
 			,I.strDescription
 			,strParentLotNumber
 			,SUM(WP.dblPhysicalCount) AS dblPhysicalCount
 			,UM.strUnitMeasure
-			,L.intLotId
+			,L.strLotNumber 
+			,L.intLocationId
 		FROM tblMFWorkOrderProducedLot WP
 		JOIN tblICLot L ON L.intLotId = WP.intLotId
 			AND WP.ysnProductionReversed = 0
@@ -61,6 +65,7 @@ BEGIN
 			,I.strDescription
 			,strParentLotNumber
 			,UM.strUnitMeasure
-			,L.intLotId
+			,L.strLotNumber
+			,L.intLocationId
 		) AS DT
 END
