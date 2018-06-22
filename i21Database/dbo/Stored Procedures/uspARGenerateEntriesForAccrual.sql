@@ -635,6 +635,7 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
+				AND B.intItemUOMId = ICIS.intStockUOMId
 				AND A.intCompanyLocationId = ICIS.intLocationId
 		LEFT OUTER JOIN
 			tblSMCurrencyExchangeRateType SMCERT
@@ -738,6 +739,7 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
+				AND B.intItemUOMId = ICIS.intStockUOMId
 				AND A.intCompanyLocationId = ICIS.intLocationId
 		LEFT OUTER JOIN
 			tblSMCompanyLocation SMCL
@@ -839,6 +841,7 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
+				AND B.intItemUOMId = ICIS.intStockUOMId
 				AND A.intCompanyLocationId = ICIS.intLocationId
 		LEFT OUTER JOIN
 			tblSMCurrencyExchangeRateType SMCERT
@@ -939,6 +942,7 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
+				AND B.intItemUOMId = ICIS.intStockUOMId
 				AND A.intCompanyLocationId = ICIS.intLocationId
 		LEFT OUTER JOIN
 			tblSMCurrencyExchangeRateType SMCERT
@@ -1039,6 +1043,7 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
+				AND B.intItemUOMId = ICIS.intStockUOMId
 				AND A.intCompanyLocationId = ICIS.intLocationId
 		LEFT OUTER JOIN
 			tblSMCurrencyExchangeRateType SMCERT
@@ -1136,6 +1141,7 @@ BEGIN
 		LEFT OUTER JOIN
 			vyuICGetItemStock ICIS
 				ON B.intItemId = ICIS.intItemId 
+				AND B.intItemUOMId = ICIS.intStockUOMId
 				AND A.intCompanyLocationId = ICIS.intLocationId
 		LEFT OUTER JOIN
 			tblSMCurrencyExchangeRateType SMCERT
