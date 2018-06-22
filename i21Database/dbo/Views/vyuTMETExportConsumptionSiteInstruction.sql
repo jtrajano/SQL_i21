@@ -5,7 +5,8 @@ SELECT
 	 dipat = C.strEntityNo
 	,diseq = REPLICATE('0',4 - LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR)
 	,ditype = 'S'
-	,diinfo = ISNULL(A.strCity,'')+',' + ISNULL(A.strState,'') + ' ' + ISNULL(A.strZipCode,'')
+	,diinfo = ISNULL(A.strSiteAddress,'') + ' ' + ISNULL(A.strCity,'')+',' + ISNULL(A.strState,'') + ' ' + ISNULL(A.strZipCode,'')
+	
 FROM tblTMSite A	
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID =B.intCustomerID
