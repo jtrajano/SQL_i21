@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKSavePnsOptionsMatched]    
-  @strXml nVarchar(Max)  
+  @strXml nVarchar(Max),
+  @strTranNoPNS nVarchar(50) OUT
 AS    
   
 BEGIN TRY    
@@ -131,6 +132,7 @@ SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 ---------------Matched Record Insert ----------------  
 
 SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPnS   
+
    
    INSERT INTO tblRKOptionsMatchPnS  
   (   
@@ -160,6 +162,12 @@ SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPn
  [intLFutOptTransactionId] INT,  
  [intSFutOptTransactionId] INT  
  )     
+ declare @intOptMPNSId INT
+ select @intOptMPNSId = scope_identity()
+ SELECT TOP 1 @strTranNoPNS =strTranNo FROM tblRKOptionsMatchPnS WHERE intMatchOptionsPnSId = @intOptMPNSId
+ 
+
+
    ---------------Expired Record Insert ----------------  
  SELECT @strExpiredTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsPnSExpired     
    
@@ -312,3 +320,5 @@ BEGIN CATCH
  END  
    
 END CATCH  
+GO
+
