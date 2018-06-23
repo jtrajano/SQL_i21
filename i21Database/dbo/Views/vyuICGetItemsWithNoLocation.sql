@@ -17,7 +17,7 @@ SELECT
 	,strVendorName = Vendor.strName 
 FROM	
 	tblICItem Item LEFT JOIN tblICItemLocation ItemLocation 
-		ON Item.intItemId = ItemLocation.intItemId
+		ON Item.intItemId = ItemLocation.intItemId AND ItemLocation.strDescription != N'In-Transit'
 	LEFT JOIN tblICCommodity ItemCommodity 
 		ON Item.intCommodityId = ItemCommodity.intCommodityId
 	LEFT JOIN tblICCategory ItemCategory 
@@ -29,4 +29,4 @@ FROM
 	LEFT JOIN vyuAPVendor Vendor 
 		ON Vendor.[intEntityId] = ItemLocation.intVendorId
 WHERE
-	ItemLocation.intItemLocationId IS NULL 
+	ItemLocation.intItemLocationId IS NULL
