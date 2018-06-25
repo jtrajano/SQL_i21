@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -1501,7 +1500,7 @@ BEGIN
 		,@dblGrossTransferCost			= dblGrossTransferCost
 		,@dblNetTransferCost			= dblNetTransferCost
 		,@dblAdjustmentRate				= dblAdjustmentRate
-		FROM ##tblCFTransactionPricingType
+		FROM tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
 		--BEGIN
@@ -1745,17 +1744,17 @@ BEGIN
 			,dblTaxCalculatedAmount		
 			,intTaxCodeId	
 			,dblTaxRate	
-		FROM ##tblCFTransactionTaxType
+		FROM tblCFTransactionTaxType
 
 
 		UPDATE tblCFTransaction
 		SET
 		dblCalculatedTotalTax		= (SELECT 
 		SUM(ISNULL(dblTaxCalculatedAmount,0))
-		FROM ##tblCFTransactionTaxType as tax)
+		FROM tblCFTransactionTaxType as tax)
 		,dblOriginalTotalTax		= (SELECT 
 		SUM(ISNULL(dblTaxOriginalAmount,0))
-		FROM ##tblCFTransactionTaxType as tax)
+		FROM tblCFTransactionTaxType as tax)
 	
 
 		------------------------------------------------------------
