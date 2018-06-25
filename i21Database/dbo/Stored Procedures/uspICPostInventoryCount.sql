@@ -260,26 +260,66 @@ BEGIN
 			,intLotId 
 			,intSubLocationId
 			,intStorageLocationId
+			,dblForexRate
 	)  	
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+			,intItemUOMId			= 
+					CASE 
+						-- If Physical count is a whole number, use it. 
+						WHEN Item.strLotTracking <> 'No' 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+						THEN 
+							Detail.intItemUOMId
+						ELSE 
+							ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+					END 
 			,dtmDate				= Header.dtmCountDate
 			,dblQty					= 
 					CASE 
+						-- If Physical count is a whole number, use it. 
+						WHEN Item.strLotTracking <> 'No' 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+						THEN 
+							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
+
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
 						ELSE 
 							ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0)
 					END
-			,dblUOMQty				= ItemUOM.dblUnitQty
+			,dblUOMQty				= 
+					CASE 
+						-- If Physical count is a whole number, use it. 
+						WHEN Item.strLotTracking <> 'No' 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+						THEN 
+							ItemUOM.dblUnitQty
+
+						WHEN Detail.intWeightUOMId IS NULL THEN 
+							ItemUOM.dblUnitQty
+						ELSE 
+							WeightUOM.dblUnitQty
+					END
 			,dblCost				= 
 					dbo.fnCalculateCostBetweenUOM(
 						StockUOM.intItemUOMId
-						, ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+						, CASE 
+							-- If Physical count is a whole number, use it. 
+							WHEN Item.strLotTracking <> 'No' 
+								 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+								 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+							THEN 
+								Detail.intItemUOMId
+							ELSE 
+								ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+						END
 						, COALESCE(Detail.dblLastCost, ItemLot.dblLastCost, ItemPricing.dblLastCost)
 					)
-			,0
+			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 
 			,dblExchangeRate		= 1
@@ -290,17 +330,30 @@ BEGIN
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
+			,dblForexRate			= 1
 	FROM 
 		dbo.tblICInventoryCount Header
-		INNER JOIN dbo.tblICInventoryCountDetail Detail ON Header.intInventoryCountId = Detail.intInventoryCountId
+		INNER JOIN dbo.tblICInventoryCountDetail Detail 
+			ON Header.intInventoryCountId = Detail.intInventoryCountId
 			AND Detail.ysnRecount = 0
-		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Header.intLocationId 
+		INNER JOIN dbo.tblICItemLocation ItemLocation 
+			ON ItemLocation.intLocationId = Header.intLocationId 
 			AND ItemLocation.intItemId = Detail.intItemId
-		LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-		LEFT JOIN dbo.tblICItemUOM ItemUOM ON Detail.intItemUOMId = ItemUOM.intItemUOMId
-		LEFT JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
-		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId AND Item.strLotTracking <> 'No'
-		LEFT JOIN dbo.tblICItemUOM StockUOM ON Detail.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
+		LEFT JOIN dbo.tblICItemPricing ItemPricing 
+			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM 
+			ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICItem Item 
+			ON Item.intItemId = Detail.intItemId
+		LEFT JOIN dbo.tblICLot ItemLot 
+			ON ItemLot.intLotId = Detail.intLotId 
+			AND Item.strLotTracking <> 'No'
+		LEFT JOIN dbo.tblICItemUOM StockUOM 
+			ON Detail.intItemId = StockUOM.intItemId 
+			AND StockUOM.ysnStockUnit = 1
+		LEFT JOIN dbo.tblICItemUOM WeightUOM
+			ON WeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
+
 	WHERE 
 		Header.intInventoryCountId = @intTransactionId
 		AND (
