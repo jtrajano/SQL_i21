@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspPOProcessItemReceipt]
+﻿CREATE PROCEDURE [dbo].[uspPOProcessItemReceipt]
 	@poId INT
 	,@userId INT
 	,@receiptNumber NVARCHAR(50) OUTPUT
