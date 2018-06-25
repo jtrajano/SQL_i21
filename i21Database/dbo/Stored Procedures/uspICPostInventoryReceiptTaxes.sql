@@ -10,6 +10,12 @@ BEGIN
 	DECLARE @AccountCategory_APClearing AS NVARCHAR(30) = 'AP Clearing';
 	DECLARE @GLAccounts AS dbo.ItemGLAccount;
 
+	DECLARE 
+		@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
+
 	INSERT INTO @GLAccounts (
 		intItemId 
 		,intItemLocationId 
@@ -195,7 +201,8 @@ BEGIN
 					ON TransType.intTransactionTypeId = @intTransactionTypeId
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
-		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId		
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+				AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		
 		-- Other Charge taxes for the Receipt Vendor. 
 		UNION ALL 
