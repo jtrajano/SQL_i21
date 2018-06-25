@@ -8,6 +8,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 
 DECLARE @SQLString NVARCHAR(MAX) = '';
+DECLARE @Columns NVARCHAR(MAX),
+		@InsertColumns NVARCHAR(MAX),
+		@ValueColumns NVARCHAR(MAX);
 
 BEGIN
     -- tblSCScaleSetup
