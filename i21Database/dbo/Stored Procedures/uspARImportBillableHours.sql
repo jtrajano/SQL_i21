@@ -95,6 +95,26 @@ ELSE
 		INNER JOIN fnGetRowsFromDelimitedValues(@HoursWorkedIDs) SELECTED
 		ON SELECTED.intID = BILLABLE.intTicketHoursWorkedId
 	END
+
+IF(OBJECT_ID('tempdb..#INACTIVECUSTOMERS') IS NOT NULL)
+BEGIN
+    DROP TABLE #INACTIVECUSTOMERS
+END
+
+SELECT C.strName
+INTO #INACTIVECUSTOMERS
+FROM #BILLABLE B
+INNER JOIN vyuARCustomerSearch C ON B.intEntityCustomerId = C.intEntityCustomerId
+WHERE C.ysnActive = 0
+
+IF EXISTS (SELECT TOP 1 NULL FROM #INACTIVECUSTOMERS)
+	BEGIN
+		DECLARE @strErrorMsg  NVARCHAR(500) = 'Customer: ' + ISNULL((SELECT TOP 1 strName FROM #INACTIVECUSTOMERS), '') + ' is Inactive.'
+		SET @IsSuccess = 0
+
+		RAISERROR(@strErrorMsg, 16, 1)
+		RETURN 0
+	END
 	
 INSERT INTO @tblInvoiceEntries (
 	 [strSourceTransaction]
