@@ -300,7 +300,7 @@ BEGIN
 		FROM @DataForReceiptHeader RawHeaderData
 		WHERE RawHeaderData.intId = @intId
 
-		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 5 OR @valueSourceTypeId < 0
+		IF @valueSourceTypeId IS NULL OR @valueSourceTypeId > 6 OR @valueSourceTypeId < 0
 			BEGIN
 				-- Source Type Id is invalid or missing.
 				EXEC uspICRaiseError 80115; 
@@ -827,7 +827,7 @@ BEGIN
 				,dblOrderQty			= --ISNULL(RawData.dblQty, 0)
 										(
 											CASE	WHEN RawData.strReceiptType = 'Purchase Contract' THEN 
-														CASE	WHEN RawData.intSourceType = 0 OR RawData.intSourceType = 1 THEN -- None
+														CASE	WHEN RawData.intSourceType = 0 OR RawData.intSourceType = 1 OR RawData.intSourceType = 6 THEN -- None
 																	CASE	WHEN (ContractView.ysnLoad = 1) THEN 
 																				ISNULL(ContractView.intNoOfLoad, 0)
 																			ELSE 

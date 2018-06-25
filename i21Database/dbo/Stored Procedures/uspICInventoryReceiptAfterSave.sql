@@ -158,7 +158,7 @@ BEGIN
 		--		 WHEN ISNULL(TransactionDetail.strItemType, '') <> '' THEN 0
 		--		 ELSE 1
 		--	END 
-
+		
 END 
 
 IF @ForDelete = 1
@@ -454,7 +454,242 @@ BEGIN
 	--EXEC dbo.uspICIncreaseOpenPurchaseContractQty @ItemsOpenPurchaseContract
 END
 
--- 
+IF (@ReceiptType = @ReceiptType_PurchaseContract AND @SourceType = 6)
+BEGIN
+	BEGIN
+		-- Create temporary table for processing records
+		DECLARE @tblPurchaseContractOrderToProcess TABLE
+		(
+			intKeyId					INT IDENTITY,
+			intInventoryReceiptItemId	INT,
+			intPurchaseDetailId			INT,
+			intItemUOMId				INT,
+			dblQty						NUMERIC(12,4)
+		)
+
+		INSERT INTO @tblPurchaseContractOrderToProcess (
+			intInventoryReceiptItemId,
+			intPurchaseDetailId,
+			intItemUOMId,
+			dblQty
+		)
+		-- Changed Quantity/UOM
+		SELECT 
+			currentSnapshot.intInventoryReceiptItemId,
+			PurchaseOrderDetail.intPurchaseDetailId,
+			currentSnapshot.intItemUOMId,
+			CASE 
+				WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN 
+					dbo.fnCalculateQtyBetweenUOM(
+						currentSnapshot.intItemUOMId
+						, PurchaseOrderDetail.intUnitOfMeasureId
+						, (
+							CASE 
+								WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive 
+								ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) 
+							END
+						)
+					)
+				ELSE currentSnapshot.intLoadReceive END 
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblPOPurchaseDetail PurchaseOrderDetail
+				ON PurchaseOrderDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = PurchaseOrderDetail.intItemId
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo = previousSnapshot.intLineNo
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
+			AND (currentSnapshot.intItemUOMId <> previousSnapshot.intItemUOMId OR currentSnapshot.dblOpenReceive <> previousSnapshot.dblOpenReceive)
+		
+		-- New PO Item Selected
+		UNION ALL 
+		SELECT 
+			currentSnapshot.intInventoryReceiptItemId
+			,PurchaseOrderDetail.intPurchaseDetailId
+			,currentSnapshot.intItemUOMId
+			,CASE 
+				WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN 
+					dbo.fnCalculateQtyBetweenUOM (
+						currentSnapshot.intItemUOMId
+						, previousSnapshot.intItemUOMId
+						, currentSnapshot.dblOpenReceive
+					)
+				ELSE 
+					currentSnapshot.intLoadReceive 
+			END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblPOPurchaseDetail PurchaseOrderDetail
+				ON PurchaseOrderDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = PurchaseOrderDetail.intItemId
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo		
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId		
+
+		-- Replaced PO Item 
+		UNION ALL
+		SELECT 
+			currentSnapshot.intInventoryReceiptItemId
+			,PurchaseOrderDetail.intPurchaseDetailId
+			,previousSnapshot.intItemUOMId
+			,CASE 
+				WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN 
+					dbo.fnCalculateQtyBetweenUOM (
+						previousSnapshot.intItemUOMId
+						, PurchaseOrderDetail.intUnitOfMeasureId
+						, -previousSnapshot.dblOpenReceive
+					)
+				ELSE 
+					previousSnapshot.intLoadReceive 
+			END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblPOPurchaseDetail PurchaseOrderDetail
+				ON PurchaseOrderDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = PurchaseOrderDetail.intItemId
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intLineNo <> previousSnapshot.intLineNo
+			AND currentSnapshot.intItemId = previousSnapshot.intItemId
+		
+		-- Removed the PO Item 
+		UNION ALL
+		SELECT 
+			currentSnapshot.intInventoryReceiptItemId
+			,PurchaseOrderDetail.intPurchaseDetailId
+			,previousSnapshot.intItemUOMId
+			,CASE 
+				WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN 
+					dbo.fnCalculateQtyBetweenUOM (
+						previousSnapshot.intItemUOMId
+						, PurchaseOrderDetail.intUnitOfMeasureId
+						, -previousSnapshot.dblOpenReceive
+					)
+				ELSE 
+					previousSnapshot.intLoadReceive 
+			END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN #tmpBeforeSaveReceiptItems previousSnapshot
+				ON previousSnapshot.intInventoryReceiptId = currentSnapshot.intInventoryReceiptId
+				AND previousSnapshot.intInventoryReceiptItemId = currentSnapshot.intInventoryReceiptItemId
+			INNER JOIN tblPOPurchaseDetail PurchaseOrderDetail
+				ON PurchaseOrderDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = PurchaseOrderDetail.intItemId
+		WHERE
+			currentSnapshot.intLineNo IS NULL
+			AND previousSnapshot.intLineNo IS NOT NULL
+		
+		-- Deleted the PO Item 
+		UNION ALL	
+		SELECT
+			previousSnapshot.intInventoryReceiptItemId
+			,PurchaseOrderDetail.intPurchaseDetailId
+			,previousSnapshot.intItemUOMId
+			,CASE 
+				WHEN (ISNULL(previousSnapshot.ysnLoad, 0) = 0) THEN 
+					dbo.fnCalculateQtyBetweenUOM (
+						previousSnapshot.intItemUOMId
+						, PurchaseOrderDetail.intUnitOfMeasureId
+						, -previousSnapshot.dblOpenReceive
+					)
+				ELSE 
+					previousSnapshot.intLoadReceive 
+			END
+		FROM 
+			#tmpBeforeSaveReceiptItems previousSnapshot
+			INNER JOIN tblPOPurchaseDetail PurchaseOrderDetail
+				ON PurchaseOrderDetail.intContractDetailId = previousSnapshot.intLineNo
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = PurchaseOrderDetail.intItemId
+		WHERE
+			previousSnapshot.intLineNo IS NOT NULL
+			AND previousSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpAfterSaveReceiptItems)
+
+		-- Added PO Item 
+		UNION ALL
+		SELECT 
+			currentSnapshot.intInventoryReceiptItemId
+			,PurchaseOrderDetail.intPurchaseDetailId
+			,currentSnapshot.intItemUOMId
+			,CASE 
+				WHEN (ISNULL(currentSnapshot.ysnLoad, 0) = 0) THEN 
+					dbo.fnCalculateQtyBetweenUOM (
+						currentSnapshot.intItemUOMId
+						, PurchaseOrderDetail.intUnitOfMeasureId
+						, currentSnapshot.dblOpenReceive
+					)
+				ELSE 
+					currentSnapshot.intLoadReceive 
+			END
+		FROM 
+			#tmpAfterSaveReceiptItems currentSnapshot
+			INNER JOIN tblPOPurchaseDetail PurchaseOrderDetail
+				ON PurchaseOrderDetail.intContractDetailId = currentSnapshot.intLineNo
+			LEFT JOIN tblICItem Item 
+				ON Item.intItemId = PurchaseOrderDetail.intItemId
+		WHERE
+			currentSnapshot.intLineNo IS NOT NULL
+			AND currentSnapshot.intInventoryReceiptItemId NOT IN (SELECT intInventoryReceiptItemId FROM #tmpBeforeSaveReceiptItems)
+			 
+		DECLARE loopItemsForPurchaseOrderReceivedQty CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT	intPurchaseDetailId
+				,dblQty
+				,intInventoryReceiptItemId
+		FROM	@tblPurchaseContractOrderToProcess
+
+		OPEN loopItemsForPurchaseOrderReceivedQty;
+	
+		-- Initial fetch attempt
+		FETCH NEXT FROM loopItemsForPurchaseOrderReceivedQty INTO 
+			@intPurchaseDetailId
+			,@dblQty
+			,@intInventoryReceiptItemId;
+
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- Start of the loop for the integration sp. 
+		-----------------------------------------------------------------------------------------------------------------------------
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 		
+			EXEC dbo.uspPOReceived 
+				@intPurchaseDetailId
+				,@intInventoryReceiptItemId
+				,@dblQty
+				,@UserId			
+			
+			IF @@ERROR <> 0 GOTO _Exit
+
+			-- Attempt to fetch the next row from cursor. 
+			FETCH NEXT FROM loopItemsForPurchaseOrderReceivedQty INTO 
+				@intPurchaseDetailId
+				,@dblQty
+				,@intInventoryReceiptItemId	
+		END;
+		-----------------------------------------------------------------------------------------------------------------------------
+		-- End of the loop
+		-----------------------------------------------------------------------------------------------------------------------------
+
+		CLOSE loopItemsForPurchaseOrderReceivedQty;
+		DEALLOCATE loopItemsForPurchaseOrderReceivedQty;
+	END
+END
+
 IF	@ReceiptType = @ReceiptType_PurchaseOrder
 BEGIN 
 	-- Get the deleted, new, or modified data. 

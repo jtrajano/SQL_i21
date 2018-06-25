@@ -13,6 +13,7 @@ SELECT
 			WHEN Receipt.intSourceType = 3 THEN 'Transport'
 			WHEN Receipt.intSourceType = 4 THEN 'Settle Storage'
 			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
+			WHEN Receipt.intSourceType = 6 THEN 'Purchase Order'
 			WHEN Receipt.intSourceType = 0 THEN 'None'
 		END),
 	strOrderNumber = 
@@ -53,6 +54,8 @@ SELECT
 				THEN ISNULL(vyuGRStorageSearchView.strStorageTicketNumber, '') 
 			WHEN Receipt.intSourceType = 5 -- Delivery Sheet
 				THEN (SELECT strDeliverySheetNumber FROM tblSCDeliverySheet WHERE intDeliverySheetId = ReceiptItem.intSourceId) COLLATE Latin1_General_CI_AS
+			WHEN Receipt.intSourceType = 6 -- Purchase Order
+				THEN (Select strPurchaseOrderNumber FROM vyuPODetails WHERE intPurchaseId = ReceiptItem.intSourceId)
 			ELSE NULL
 			END
 		),
@@ -68,6 +71,8 @@ SELECT
 						THEN LogisticsView.strUnitMeasure
 					WHEN Receipt.intSourceType = 3 -- Transport
 						THEN ItemUOM.strUnitMeasure
+					WHEN Receipt.intSourceType = 6 -- Purchase Order
+						THEN ContractView.strItemUOM
 					ELSE NULL
 					END
 				)
@@ -92,6 +97,8 @@ SELECT
 						THEN ISNULL(LogisticsView.dblItemUOMCF, 0)
 					WHEN Receipt.intSourceType = 3 -- Transport
 						THEN ItemUOM.dblUnitQty
+					WHEN Receipt.intSourceType = 6 -- Purchase Order
+						THEN POView.dblItemUOMCF
 					ELSE NULL
 					END
 				)
@@ -108,7 +115,7 @@ SELECT
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 				THEN (
-					CASE WHEN Receipt.intSourceType = 0 -- None
+					CASE WHEN Receipt.intSourceType = 0 OR Receipt.intSourceType = 6 -- None or Purchase Order
 						THEN (
 							CASE WHEN (ContractView.ysnLoad = 1) THEN ISNULL(ContractView.intNoOfLoad, 0)
 								ELSE ISNULL(ContractView.dblDetailQuantity, 0) END
@@ -138,7 +145,7 @@ SELECT
 				WHEN Receipt.strReceiptType = 'Purchase Contract'
 					THEN (
 						CASE 
-							WHEN Receipt.intSourceType = 0 THEN -- None
+							WHEN Receipt.intSourceType = 0 or Receipt.intSourceType = 6 THEN -- None or Purchase Order
 								CASE	
 									WHEN (ContractView.ysnLoad = 1) THEN 
 										ISNULL(ContractView.intLoadReceived, 0)
