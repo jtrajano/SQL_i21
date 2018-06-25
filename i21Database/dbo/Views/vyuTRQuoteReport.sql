@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuTRQuoteReport]
 	AS
 
-SELECT TOP 100 PERCENT QD.intQuoteDetailId
+SELECT TOP 100 PERCENT intQuoteDetailId = ISNULL(QD.intQuoteDetailId, 0)
 	, strCompanyName = CompanySetup.strCompanyName
 	, strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, CompanySetup.strAddress, CompanySetup.strCity, CompanySetup.strState, CompanySetup.strZip, CompanySetup.strCountry, NULL, 0)
 	, QH.strQuoteNumber
