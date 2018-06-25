@@ -436,95 +436,30 @@ BEGIN
     EXECUTE sp_executesql @SQLString;
     SET IDENTITY_INSERT tblSCDistributionOption OFF
 
-    -- tblSCScaleDevice
+	-- tblSCScaleDevice
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCScaleDevice' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCScaleDevice'
+
     SET @SQLString = N'MERGE tblSCScaleDevice AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCScaleDevice]) AS Source
         ON (Target.intScaleDeviceId = Source.intScaleDeviceId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intPhysicalEquipmentId = Source.intPhysicalEquipmentId, Target.strDeviceDescription = Source.strDeviceDescription, Target.intDeviceTypeId = Source.intDeviceTypeId
-			, Target.intConnectionMethod = Source.intConnectionMethod, Target.strFilePath = Source.strFilePath, Target.strFileName = Source.strFileName
-			, Target.strIPAddress = Source.strIPAddress, Target.intIPPort = Source.intIPPort, Target.intComPort = Source.intComPort, Target.intBaudRate = Source.intBaudRate
-			, Target.intDataBits = Source.intDataBits, Target.intStopBits = Source.intStopBits, Target.intParityBits = Source.intParityBits
-			, Target.intFlowControl = Source.intFlowControl, Target.intGraderModel = Source.intGraderModel, Target.ysnVerifyCommodityCode = Source.ysnVerifyCommodityCode
-			, Target.ysnVerifyDateTime = Source.ysnVerifyDateTime, Target.ysnDateTimeCheck = Source.ysnDateTimeCheck, Target.ysnDateTimeFixedLocation = Source.ysnDateTimeFixedLocation, Target.intDateTimeStartingLocation = Source.intDateTimeStartingLocation, Target.intDateTimeLength = Source.intDateTimeLength, Target.strDateTimeValidationString = Source.strDateTimeValidationString, Target.ysnMotionDetection = Source.ysnMotionDetection, Target.ysnMotionFixedLocation = Source.ysnMotionFixedLocation, Target.intMotionStartingLocation = Source.intMotionStartingLocation
-			, Target.intMotionLength = Source.intMotionLength, Target.strMotionValidationString = Source.strMotionValidationString, Target.intWeightStabilityCheck = Source.intWeightStabilityCheck, Target.ysnWeightFixedLocation = Source.ysnWeightFixedLocation, Target.intWeightStartingLocation = Source.intWeightStartingLocation, Target.intWeightLength = Source.intWeightLength, Target.strNTEPCapacity = Source.strNTEPCapacity, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-		INSERT(
-			intScaleDeviceId
-			,intPhysicalEquipmentId
-			,strDeviceDescription
-			,intDeviceTypeId
-			,intConnectionMethod
-			,strFilePath
-			,strFileName
-			,strIPAddress
-			,intIPPort
-			,intComPort
-			,intBaudRate
-			,intDataBits
-			,intStopBits
-			,intParityBits
-			,intFlowControl
-			,intGraderModel
-			,ysnVerifyCommodityCode
-			,ysnVerifyDateTime
-			,ysnDateTimeCheck
-			,ysnDateTimeFixedLocation
-			,intDateTimeStartingLocation
-			,intDateTimeLength
-			,strDateTimeValidationString
-			,ysnMotionDetection
-			,ysnMotionFixedLocation
-			,intMotionStartingLocation
-			,intMotionLength
-			,strMotionValidationString
-			,intWeightStabilityCheck
-			,ysnWeightFixedLocation
-			,intWeightStartingLocation
-			,intWeightLength
-			,strNTEPCapacity
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intScaleDeviceId
-			, Source.intPhysicalEquipmentId
-			, Source.strDeviceDescription
-			, Source.intDeviceTypeId
-			, Source.intConnectionMethod
-			, Source.strFilePath
-			, Source.strFileName
-			, Source.strIPAddress
-			, Source.intIPPort
-			, Source.intComPort
-			, Source.intBaudRate
-			, Source.intDataBits
-			, Source.intStopBits
-			, Source.intParityBits
-			, Source.intFlowControl
-			, Source.intGraderModel
-			, Source.ysnVerifyCommodityCode
-			, Source.ysnVerifyDateTime
-			, Source.ysnDateTimeCheck
-			, Source.ysnDateTimeFixedLocation
-			, Source.intDateTimeStartingLocation
-			, Source.intDateTimeLength
-			, Source.strDateTimeValidationString
-			, Source.ysnMotionDetection
-			, Source.ysnMotionFixedLocation
-			, Source.intMotionStartingLocation
-			, Source.intMotionLength
-			, Source.strMotionValidationString
-			, Source.intWeightStabilityCheck
-			, Source.ysnWeightFixedLocation
-			, Source.intWeightStartingLocation
-			, Source.intWeightLength
-			, Source.strNTEPCapacity
-			, Source.intConcurrencyId
-		)
+			INSERT (
+				'+@InsertColumns+'
+				
+			)
+			VALUES(
+				'+@ValueColumns+'
+				)
         WHEN NOT MATCHED BY SOURCE THEN
-            DELETE;';
+             DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET @SQLString = 'Exec('' '  + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+
     SET IDENTITY_INSERT tblSCScaleDevice ON
     EXECUTE sp_executesql @SQLString;
     SET IDENTITY_INSERT tblSCScaleDevice OFF
