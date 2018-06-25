@@ -220,17 +220,17 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[ysnLockedInventory] [bit] NULL DEFAULT ((0)),
 	[intSort] [int] NULL)
 
-DECLARE cur CURSOR
-FOR
-	SELECT DISTINCT Value
-	FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ',')
+--DECLARE cur CURSOR
+--FOR
+--	SELECT DISTINCT Value
+--	FROM dbo.fnICSplitStringToTable(@strDestinationItemIds, ',')
 
-OPEN cur
+--OPEN cur
 
-FETCH NEXT FROM cur INTO @intItemId
+--FETCH NEXT FROM cur INTO @intItemId
 
-WHILE @@FETCH_STATUS = 0
-BEGIN
+--WHILE @@FETCH_STATUS = 0
+--BEGIN
 	INSERT INTO @New(intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
 		, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
@@ -238,22 +238,23 @@ BEGIN
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
 		, ysnLockedInventory, intSort)
 	SELECT
-		  @intItemId, s.intLocationId, s.intVendorId, s.strDescription, s.intCostingMethod, s.intAllowNegativeInventory, s.intSubLocationId, s.intStorageLocationId, s.intIssueUOMId, s.intReceiveUOMId, s.intFamilyId
+		  NewItemLocation.Value, s.intLocationId, s.intVendorId, s.strDescription, s.intCostingMethod, s.intAllowNegativeInventory, s.intSubLocationId, s.intStorageLocationId, s.intIssueUOMId, s.intReceiveUOMId, s.intFamilyId
 		, s.intClassId, s.intProductCodeId, s.intFuelTankId, s.strPassportFuelId1, s.strPassportFuelId2, s.strPassportFuelId3, s.ysnTaxFlag1, s.ysnTaxFlag2, s.ysnTaxFlag3, s.ysnTaxFlag4, s.ysnPromotionalItem, s.intMixMatchId
 		, s.ysnDepositRequired, s.intDepositPLUId, s.intBottleDepositNo, s.ysnSaleable, s.ysnQuantityRequired, s.ysnScaleItem, s.ysnFoodStampable, s.ysnReturnable, s.ysnPrePriced, s.ysnOpenPricePLU, s.ysnLinkedItem, s.strVendorCategory
 		, s.ysnCountBySINo, s.strSerialNoBegin, s.strSerialNoEnd, s.ysnIdRequiredLiquor, s.ysnIdRequiredCigarette, s.intMinimumAge, s.ysnApplyBlueLaw1, s.ysnApplyBlueLaw2, s.ysnCarWash, s.intItemTypeCode, s.intItemTypeSubCode
 		, s.ysnAutoCalculateFreight, s.intFreightMethodId, s.dblFreightRate, s.intShipViaId, s.intNegativeInventory, s.dblReorderPoint, s.dblMinOrder, s.dblSuggestedQty, s.dblLeadTime, s.strCounted, s.intCountGroupId, s.ysnCountedDaily
 		, s.ysnLockedInventory, s.intSort
 	FROM @Source s
-		LEFT OUTER JOIN tblICItemLocation d ON d.intLocationId = s.intLocationId
-			AND d.intItemId = @intItemId
-	WHERE d.intItemId IS NULL
+		LEFT OUTER JOIN tblICItemLocation d 
+			ON d.intLocationId = s.intLocationId AND d.intItemId = s.intItemId
+		CROSS JOIN  [dbo].[fnICSplitStringToTable](@strDestinationItemIds, ',') NewItemLocation
+	WHERE NewItemLocation.Value != d.intItemId
 	
-	FETCH NEXT FROM cur INTO @intItemId
-END
+--	FETCH NEXT FROM cur INTO @intItemId
+--END
 
-CLOSE cur
-DEALLOCATE cur
+--CLOSE cur
+--DEALLOCATE cur
 
 INSERT INTO tblICItemLocation(intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
 	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
