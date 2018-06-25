@@ -210,7 +210,7 @@ BEGIN TRY
 		, TIN = @TIN
 		, OhioAccountNo = @OhioAccountNo
 		, dtmFrom = @dtmFrom
-		, dtmTo = @dtmFrom
+		, dtmTo = @dtmTo
 		, Gasoline_1B = @Gasoline_1B
 		, Gasoline_2E = @Gasoline_2E
 		, Gasoline_7A = @Gasoline_7A
