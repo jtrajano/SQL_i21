@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPPayablesAgingSummary]
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 AS
 SELECT
 A.dtmDate

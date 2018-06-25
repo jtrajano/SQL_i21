@@ -4,7 +4,7 @@
 	Note: Handle negative quantity received
 */
 CREATE VIEW vyuAPPayables
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 AS 
 SELECT 
 	A.dtmDate	
