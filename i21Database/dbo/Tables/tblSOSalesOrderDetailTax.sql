@@ -8,6 +8,7 @@
 	[strTaxableByOtherTaxes]    NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strCalculationMethod]      NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
     [dblRate]                   NUMERIC(18, 6) NULL, 
+	[dblBaseRate]               NUMERIC(18, 6) NULL, 
 	[dblExemptionPercent]       NUMERIC(18, 6) NULL, 
     [intSalesTaxAccountId]      INT NULL, 
     [dblTax]                    NUMERIC(18, 6) NULL, 

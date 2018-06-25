@@ -71,6 +71,9 @@ CROSS APPLY
 		,NULL
 		,NULL
 		,1
+		,NULL
+		,NULL
+		,NULL
 		) TC
 ) T
 GROUP BY 

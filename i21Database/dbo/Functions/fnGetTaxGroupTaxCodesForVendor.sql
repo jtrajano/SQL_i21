@@ -1,12 +1,15 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForVendor]
 (
-	 @TaxGroupId			INT
-	,@VendorId				INT
-	,@TransactionDate		DATETIME
-	,@ItemId				INT
-	,@ShipFromLocationId	INT
-	,@IncludeExemptedCodes	BIT
-	,@UOMId					INT = NULL
+	 @TaxGroupId					INT
+	,@VendorId						INT
+	,@TransactionDate				DATETIME
+	,@ItemId						INT
+	,@ShipFromLocationId			INT
+	,@IncludeExemptedCodes			BIT
+	,@UOMId							INT				= NULL
+	,@CurrencyId					INT				= NULL
+	,@CurrencyExchangeRateTypeId	INT				= NULL
+	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -18,6 +21,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblBaseRate]					NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
 	,[intTaxAccountId]				INT
@@ -52,6 +56,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]		= TC.[strTaxableByOtherTaxes]
 		,[strCalculationMethod]			= R.[strCalculationMethod]
 		,[dblRate]						= R.[dblRate]
+		,[dblBaseRate]					= R.[dblBaseRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
 		,[intTaxAccountId]				= TC.[intPurchaseTaxAccountId]
@@ -74,7 +79,7 @@ BEGIN
 	CROSS APPLY
 		[dbo].[fnGetVendorTaxCodeExemptionDetails](@VendorId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipFromLocationId) E
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId) R		
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)

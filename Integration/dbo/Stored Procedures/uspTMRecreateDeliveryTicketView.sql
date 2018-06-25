@@ -169,6 +169,9 @@ BEGIN
 																	,NULL
 																	,1
 																	,NULL --intItemUOMId
+																	,NULL
+																	,NULL
+																	,NULL
 																)
 				,intSiteId = A.intSiteID
 				,M.strDeliveryTicketFormat
