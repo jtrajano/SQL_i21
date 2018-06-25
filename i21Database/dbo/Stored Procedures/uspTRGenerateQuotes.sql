@@ -239,6 +239,7 @@ BEGIN TRY
 					, strTaxableByOtherTaxes
 					, strCalculationMethod
 					, dblRate
+					, dblBaseRate
 					, dblExemptionPercent
 					, dblTax = CASE WHEN (ISNULL(dblTax, 0) = 0) THEN 0 ELSE (dblTax / 100000) END
 					, dblAdjustedTax = CASE WHEN (ISNULL(dblAdjustedTax, 0) = 0) THEN 0 ELSE (dblAdjustedTax / 100000) END
@@ -271,6 +272,9 @@ BEGIN TRY
 					, NULL	--intItemUOMId
 					, NULL  --@CFSiteId
 					, 0		--@IsDeliver
+					,NULL --@CurrencyId
+					,NULL -- @CurrencyExchangeRateTypeId
+					,NULL -- @@CurrencyExchangeRate	
 				)
 
 				INSERT INTO tblTRQuoteDetailTax(

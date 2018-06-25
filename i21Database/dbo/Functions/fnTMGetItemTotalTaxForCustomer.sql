@@ -38,5 +38,8 @@ BEGIN
 											,NULL
 											,1
 											,NULL	-- intItemUOMId
+											,NULL
+											,NULL
+											,NULL
 											)
 END

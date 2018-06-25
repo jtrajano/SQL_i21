@@ -296,6 +296,7 @@ BEGIN TRY
 		,ARIDT.[strTaxableByOtherTaxes]	= EFP.[strTaxableByOtherTaxes]
 		,ARIDT.[strCalculationMethod]	= EFP.[strCalculationMethod]
 		,ARIDT.[dblRate]				= EFP.[dblRate]
+		,ARIDT.[dblBaseRate]			= EFP.[dblBaseRate]
 		,ARIDT.[intSalesTaxAccountId]	= EFP.[intTaxAccountId]
 		,ARIDT.[dblTax]					= EFP.[dblTax]
 		,ARIDT.[dblAdjustedTax]			= EFP.[dblAdjustedTax]
