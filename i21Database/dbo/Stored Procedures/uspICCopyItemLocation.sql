@@ -268,13 +268,16 @@ INSERT INTO tblICItemLocation(intItemId, intLocationId, intVendorId, strDescript
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
 	, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort)
-SELECT intItemId, intLocationId, intVendorId, strDescription, intCostingMethod, intAllowNegativeInventory, intSubLocationId, intStorageLocationId, intIssueUOMId, intReceiveUOMId, intFamilyId
-	, intClassId, intProductCodeId, intFuelTankId, strPassportFuelId1, strPassportFuelId2, strPassportFuelId3, ysnTaxFlag1, ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnPromotionalItem, intMixMatchId
-	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
-	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
-	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-	, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort
-FROM @New
+SELECT NewDetails.intItemId, NewDetails.intLocationId, NewDetails.intVendorId, NewDetails.strDescription, NewDetails.intCostingMethod, NewDetails.intAllowNegativeInventory, NewDetails.intSubLocationId, NewDetails.intStorageLocationId, NewDetails.intIssueUOMId, NewDetails.intReceiveUOMId, NewDetails.intFamilyId
+	, NewDetails.intClassId, NewDetails.intProductCodeId, NewDetails.intFuelTankId, NewDetails.strPassportFuelId1, NewDetails.strPassportFuelId2, NewDetails.strPassportFuelId3, NewDetails.ysnTaxFlag1, NewDetails.ysnTaxFlag2, NewDetails.ysnTaxFlag3, NewDetails.ysnTaxFlag4, NewDetails.ysnPromotionalItem, NewDetails.intMixMatchId
+	, NewDetails.ysnDepositRequired, NewDetails.intDepositPLUId, NewDetails.intBottleDepositNo, NewDetails.ysnSaleable, NewDetails.ysnQuantityRequired, NewDetails.ysnScaleItem, NewDetails.ysnFoodStampable, NewDetails.ysnReturnable, NewDetails.ysnPrePriced, NewDetails.ysnOpenPricePLU, NewDetails.ysnLinkedItem, NewDetails.strVendorCategory
+	, NewDetails.ysnCountBySINo, NewDetails.strSerialNoBegin, NewDetails.strSerialNoEnd, NewDetails.ysnIdRequiredLiquor, NewDetails.ysnIdRequiredCigarette, NewDetails.intMinimumAge, NewDetails.ysnApplyBlueLaw1, NewDetails.ysnApplyBlueLaw2, NewDetails.ysnCarWash, NewDetails.intItemTypeCode, NewDetails.intItemTypeSubCode
+	, NewDetails.ysnAutoCalculateFreight, NewDetails.intFreightMethodId, NewDetails.dblFreightRate, NewDetails.intShipViaId, NewDetails.intNegativeInventory, NewDetails.dblReorderPoint, NewDetails.dblMinOrder, NewDetails.dblSuggestedQty, NewDetails.dblLeadTime, NewDetails.strCounted, NewDetails.intCountGroupId, NewDetails.ysnCountedDaily
+	, NewDetails.ysnLockedInventory, NewDetails.strStorageUnitNo, NewDetails.ysnStorageUnitRequired, NewDetails.intSort
+FROM @New NewDetails
+LEFT JOIN tblICItemLocation ItemLocation
+	ON ItemLocation.intLocationId = NewDetails.intLocationId AND ItemLocation.intItemId = NewDetails.intItemId
+WHERE ItemLocation.intItemLocationId IS NULL
 
 -- Add the audit logs
 BEGIN 
