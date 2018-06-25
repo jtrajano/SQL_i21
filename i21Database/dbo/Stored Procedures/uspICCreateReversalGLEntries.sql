@@ -115,7 +115,7 @@ END
 
 BEGIN 
 	-------------------------------------------------------------------------------------------
-	-- Reverse the G/L entries for the main and related transactions
+	-- Reverse the G/L entries for the main transaction and related transaction 
 	-------------------------------------------------------------------------------------------
 	SELECT	
 			dtmDate						= GLEntries.dtmDate
@@ -150,23 +150,26 @@ BEGIN
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType
-	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
-				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
-				--AND GLEntries.strTransactionId = Reversal.strTransactionId
-				AND (
-						(
-							GLEntries.intTransactionId = Reversal.intTransactionId
-							AND GLEntries.strTransactionId = Reversal.strTransactionId
-						)
-						--OR (
-						--	GLEntries.intTransactionId = Reversal.intRelatedTransactionId
-						--	AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId					
-						--)					
-				)
+	FROM	dbo.tblICInventoryTransaction Reversal CROSS APPLY (
+				SELECT	*
+				FROM	tblGLDetail GLEntries 
+				WHERE	GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId -- (intRelatedInventoryTransactionId was from the original intInventoryTransactionId)
+						AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+						AND (
+								(
+									GLEntries.intTransactionId = Reversal.intTransactionId
+									AND GLEntries.strTransactionId = Reversal.strTransactionId
+								)
+								--OR (
+								--	GLEntries.intTransactionId = Reversal.intRelatedTransactionId
+								--	AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId
+								--)					
+						)			
+			) GLEntries
+				
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
-	WHERE	Reversal.strBatchId = @strBatchId
-			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+	WHERE	Reversal.strBatchId = @strBatchId			
 			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoVariance
 			
 	-----------------------------------------------------------------------------------

@@ -93,11 +93,14 @@ BEGIN
 			,t.intCostingMethod
 			,t.intFobPointId
 			,t.intInTransitSourceLocationId 
-	FROM	dbo.tblICInventoryTransaction t
+	FROM	dbo.tblICInventoryTransaction t 
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-			AND ISNULL(t.dblQty, 0) <> 0 
+			AND (
+				ISNULL(t.dblQty, 0) <> 0 
+				OR t.intCostingMethod = 6
+			)
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +125,7 @@ BEGIN
 			,intItemLocationId
 			,intItemUOMId
 			,intLotId
-			,SUM(ISNULL(dblQty, 0))				
+			,SUM(ISNULL(dblQty, 0))
 			,intSubLocationId
 			,intStorageLocationId
 	FROM	@ItemsToUnpost

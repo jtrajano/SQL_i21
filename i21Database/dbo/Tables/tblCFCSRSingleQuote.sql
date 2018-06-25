@@ -16,6 +16,7 @@
     [strSite]             NVARCHAR (50)   NULL,
     [strItem]             NVARCHAR (50)   NULL,
 	[intEntityUserId]	  INT			  NULL,
+	[dtmEffectiveDate]	  DATETIME		  NULL,
     [intConcurrencyId]    INT             CONSTRAINT [DF_tblCFCSRSingleQuote_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFCSRSingleQuote] PRIMARY KEY CLUSTERED ([intCSRSingleQuoteId] ASC)
 );

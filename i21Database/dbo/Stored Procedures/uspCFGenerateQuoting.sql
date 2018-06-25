@@ -148,6 +148,7 @@ BEGIN
 	DECLARE @loopARItemId	INT
 	DECLARE	@loopSiteType	NVARCHAR(MAX)		
 	DECLARE @networkCost	NUMERIC(18,6)
+	DECLARE @effectiveDate	DATETIME
 	DECLARE @pk				INT
 
 	
@@ -163,21 +164,31 @@ BEGIN
 		FROM @tblNetworkSiteItem
 
 
-		SET @networkCost = (SELECT TOP 1 ISNULL(dblTransferCost,0) FROM tblCFNetworkCost 
-		WHERE intNetworkId = @loopNetworkId 
-		AND intSiteId = @loopSiteId
-		AND intItemId = @loopARItemId
-		AND CONVERT( varchar, dtmDate, 101) >= CONVERT( varchar, @dtmDate, 101)
-		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, DATEADD(day, 7, @dtmDate), 101)
-		ORDER BY dtmDate ASC
-		)
+		--SET @networkCost = (SELECT TOP 1 ISNULL(dblTransferCost,0) FROM tblCFNetworkCost 
+		--WHERE intNetworkId = @loopNetworkId 
+		--AND intSiteId = @loopSiteId
+		--AND intItemId = @loopARItemId
+		--AND CONVERT( varchar, dtmDate, 101) >= CONVERT( varchar, @dtmDate, 101)
+		--AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, DATEADD(day, 7, @dtmDate), 101)
+		--ORDER BY dtmDate ASC
+		--)
 
-		IF(ISNULL(@networkCost,0) != 0)
-		BEGIN
+
+		SELECT TOP 1 
+		 @networkCost = ISNULL(dblTransferCost,0)
+		,@effectiveDate = dtmDate
+		FROM tblCFNetworkCost 
+		WHERE intNetworkId = 2 
+		AND intSiteId = 5955
+		AND intItemId = 11
+		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, @dtmDate, 101)
+		ORDER BY dtmDate ASC
+
+		
 
 			EXEC dbo.uspCFRecalculateTransaciton 
 			@CustomerId = @intCustomerId,
-			@ProductId=@loopItemId,
+			@ProductId=0,
 			@SiteId=@loopSiteId,
 			@NetworkId=@loopNetworkId,
 			@TransactionDate=@dtmDate,
@@ -191,12 +202,42 @@ BEGIN
 			@Quantity=1,
 			@OriginalPrice=@networkCost, -- NETWORK COST
 			@TransferCost=@networkCost,	-- NETWORK COST
-			@IsImporting = 1
+			@IsImporting = 1,
+			@ItemId = @loopARItemId
 
+
+		DECLARE @dblOutPriceProfileRate				NUMERIC(18,6)
+		DECLARE @dblOutAdjustmentRate				NUMERIC(18,6)
+		DECLARE @dblOutTaxCalculatedAmount			NUMERIC(18,6)
+		DECLARE @dblOutNetTaxCalculatedAmount	    NUMERIC(18,6)
+		DECLARE @dblOutGrossTaxCalculatedAmount	    NUMERIC(18,6)
+		DECLARE @strOutPriceBasis					NVARCHAR(MAX)
+		DECLARE @dtmOutPriceIndexDate				DATETIME
+
+
+		SELECT TOP 1 
+		 @dblOutPriceProfileRate = ISNULL(dblPriceProfileRate,0)	
+		,@dblOutAdjustmentRate 	 = ISNULL(dblAdjustmentRate,0)
+		,@dtmOutPriceIndexDate	 = dtmPriceIndexDate
+		,@strOutPriceBasis		 = strPriceBasis
+		FROM tblCFTransactionPricingType
+
+		SELECT TOP 1 @dblOutNetTaxCalculatedAmount = ISNULL(dblTaxCalculatedAmount,0)	
+		FROM tblCFTransactionPriceType 
+		WHERE strTransactionPriceId = 'Net Price'
+
+		SELECT TOP 1 @dblOutGrossTaxCalculatedAmount =ISNULL(dblTaxCalculatedAmount,0)	
+		FROM tblCFTransactionPriceType 
+		WHERE strTransactionPriceId = 'Gross Price'
+
+		SELECT	@dblOutTaxCalculatedAmount = ISNULL(SUM(dblTaxCalculatedAmount),0)	FROM tblCFTransactionTaxType
+
+
+		IF((ISNULL(@networkCost,0) != 0 OR LOWER(ISNULL(@strOutPriceBasis,'')) IN ('local index cost','local index retail','local index fixed')) AND @dblOutNetTaxCalculatedAmount > 0)
+		BEGIN
+		
 			IF(@ysnAccountQuote = 0)
 			BEGIN
-
-
 			
 			INSERT INTO tblCFCSRSingleQuote(
 				 intNetworkId
@@ -215,6 +256,7 @@ BEGIN
 				,strSite
 				,strItem
 				,intEntityUserId
+				,dtmEffectiveDate
 			)
 			SELECT 
 			 intNetworkId
@@ -233,6 +275,7 @@ BEGIN
 			,strSiteNumber + ' - ' + strSiteName
 			,strProductNumber
 			,@intEntityUserId
+			,@effectiveDate
 			FROM @tblNetworkSiteItem
 			WHERE 
 			intNetworkId	 = @loopNetworkId	
@@ -243,13 +286,27 @@ BEGIN
 		
 			SET @pk = SCOPE_IDENTITY()
 
+			
+
+			
+
+
+			IF(LOWER(@strOutPriceBasis) = 'local index fixed' OR LOWER(@strOutPriceBasis) = 'local index retail' OR LOWER(@strOutPriceBasis) = 'local index cost' )
+			BEGIN
+				IF(@dtmOutPriceIndexDate IS NOT NULL)
+				BEGIN
+					SET @effectiveDate = @dtmOutPriceIndexDate
+				END
+			END
+
 			UPDATE tblCFCSRSingleQuote
 			SET
-			 dblProfileRate = (SELECT TOP 1 ISNULL(dblPriceProfileRate,0)		FROM ##tblCFTransactionPricingType)
-			,dblAdjRate		= (SELECT TOP 1 ISNULL(dblAdjustmentRate,0)			FROM ##tblCFTransactionPricingType)
-			,dblNetPrice	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Net Price')
-			,dblGrossPrice	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
-			,dblTaxes		= (SELECT	ISNULL(SUM(dblTaxCalculatedAmount),0)	FROM ##tblCFTransactionTaxType)
+			 dblProfileRate = @dblOutPriceProfileRate
+			,dblAdjRate		= @dblOutAdjustmentRate
+			,dtmEffectiveDate = @effectiveDate
+			,dblNetPrice	= @dblOutNetTaxCalculatedAmount
+			,dblGrossPrice	= @dblOutGrossTaxCalculatedAmount
+			,dblTaxes		= @dblOutTaxCalculatedAmount
 			WHERE 
 			intCSRSingleQuoteId = @pk
 		
@@ -276,7 +333,7 @@ BEGIN
 			,strTaxCode
 			,strTaxGroup
 			,dblTaxCalculatedAmount
-			FROM ##tblCFTransactionTaxType
+			FROM tblCFTransactionTaxType
 
 			IF(ISNULL(@isPortal,0) = 1 )
 			BEGIN
@@ -299,6 +356,7 @@ BEGIN
 							,strCity
 							,strState
 							,intEntityCustomerId
+							,dtmEffectiveDate
 							,intEntityUserId
 						)
 						SELECT
@@ -308,6 +366,7 @@ BEGIN
 							,strSiteCity
 							,strTaxState
 							,@intCustomerId
+							,@effectiveDate
 							,@intEntityUserId
 						FROM @tblNetworkSiteItem
 						WHERE 
@@ -334,7 +393,7 @@ BEGIN
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
 						UPDATE tblCFAccountQuote
-						SET dblItem1Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
+						SET dblItem1Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
 						AND intEntityCustomerId = @intCustomerId
 
@@ -356,7 +415,7 @@ BEGIN
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
 						UPDATE tblCFAccountQuote
-						SET dblItem2Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
+						SET dblItem2Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
 						AND intEntityCustomerId = @intCustomerId
 
@@ -378,7 +437,7 @@ BEGIN
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
 						UPDATE tblCFAccountQuote
-						SET dblItem3Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
+						SET dblItem3Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
 						AND intEntityCustomerId = @intCustomerId
 
@@ -400,7 +459,7 @@ BEGIN
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
 						UPDATE tblCFAccountQuote
-						SET dblItem4Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
+						SET dblItem4Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
 						AND intEntityCustomerId = @intCustomerId
 
@@ -422,7 +481,7 @@ BEGIN
 						AND tblnsi.strSiteType	 = @loopSiteType	
 
 						UPDATE tblCFAccountQuote
-						SET dblItem5Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM ##tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
+						SET dblItem5Price	= (SELECT TOP 1 ISNULL(dblTaxCalculatedAmount,0)	FROM tblCFTransactionPriceType WHERE strTransactionPriceId = 'Gross Price')
 						WHERE intSiteId = @loopSiteId
 						AND intEntityCustomerId = @intCustomerId
 
@@ -431,20 +490,20 @@ BEGIN
 		END
 
 
-		IF OBJECT_ID('tempdb..##tblCFTransactionTaxType') IS NOT NULL
-		begin
-				drop table ##tblCFTransactionTaxType
-		end
+		--IF OBJECT_ID('tempdb..##tblCFTransactionTaxType') IS NOT NULL
+		--begin
+		--		drop table ##tblCFTransactionTaxType
+		--end
 
-		IF OBJECT_ID('tempdb..##tblCFTransactionPriceType') IS NOT NULL
-		begin
-				drop table ##tblCFTransactionPriceType
-		end
+		--IF OBJECT_ID('tempdb..##tblCFTransactionPriceType') IS NOT NULL
+		--begin
+		--		drop table ##tblCFTransactionPriceType
+		--end
 
-		IF OBJECT_ID('tempdb..##tblCFTransactionPricingType') IS NOT NULL
-		begin
-				drop table ##tblCFTransactionPricingType
-		end
+		--IF OBJECT_ID('tempdb..##tblCFTransactionPricingType') IS NOT NULL
+		--begin
+		--		drop table ##tblCFTransactionPricingType
+		--end
 
 		PRINT 'S------------------'
 		PRINT @loopNetworkId
@@ -469,5 +528,3 @@ BEGIN
 
 	
 END
-
-
