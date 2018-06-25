@@ -421,20 +421,22 @@ BEGIN
 	IF(@posStrPayment != 'On Account')
 	BEGIN
 		--create cash refund
-		EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @intUserId = @UserId
+			EXEC uspARProcessRefund @intInvoiceId = @creditMemoIntId, @intUserId = @UserId, @strErrorMessage = @ErrorMessage  OUTPUT
 	END
-
-	UPDATE tblARPOS
-	SET ysnReturn = 1
-	WHERE intInvoiceId = @InvoiceId
+	
+	IF(@ErrorMessage IS NULL)
+	BEGIN
+		UPDATE tblARPOS
+		SET ysnReturn = 1
+		WHERE intInvoiceId = @InvoiceId
+	END
 
 END
 
 --END OF POS RETURN
 
 IF ISNULL(@RaiseError,0) = 0
+BEGIN
 	COMMIT TRANSACTION 
-	
-RETURN 1;
-
-GO
+	RETURN 1;
+END
