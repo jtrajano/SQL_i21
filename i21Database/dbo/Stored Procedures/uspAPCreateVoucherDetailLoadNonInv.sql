@@ -31,7 +31,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						,
 		[dblQtyOrdered]					,
 		[dblQtyReceived]				,
+		[dblUnitQty]					,
 		[dblCost]						,
+		[dblCostUnitQty]				,
 		[intCostUOMId]					,
 		[int1099Form]					,
 		[int1099Category]				,
@@ -50,7 +52,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived  AS DECIMAL(18,2)),
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]				=	A.dblQtyReceived,
+		[dblUnitQty]					=	A.dblUnitQty,
 		[dblCost]						=	A.dblCost,
+		[dblCostUnitQty]				=	A.dblCostUnitQty,
 		[intCostUOMId]					=	A.intCostUOMId,
 		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND item.intItemId > 0

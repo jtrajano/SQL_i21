@@ -80,14 +80,25 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(
 													ShipmentItem.intItemUOMId
 													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
-													, ISNULL(ShipmentItem.dblQuantity, 0) 
+													, CASE 
+														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
+															ISNULL(ShipmentItem.dblDestinationQuantity, 0) 
+														ELSE 
+															ISNULL(ShipmentItem.dblQuantity, 0) 
+													  END  
 												)
 												, 2
 											 )
 			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
 													ShipmentItem.intItemUOMId
 													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
-													, ISNULL(ShipmentItem.dblQuantity, 0) 
+													, CASE 
+														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
+															ISNULL(ShipmentItem.dblDestinationQuantity, 0) 
+														ELSE 
+															ISNULL(ShipmentItem.dblQuantity, 0) 
+													  END  
+
 											)
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
@@ -231,14 +242,25 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(
 													ShipmentItem.intWeightUOMId
 													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
-													, ISNULL(ShipmentItem.dblGross, 0) 
+													, CASE 
+														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
+															ISNULL(ShipmentItem.dblDestinationGross, 0) 
+														ELSE 
+															ISNULL(ShipmentItem.dblGross, 0) 
+													  END  
+
 												)
 												, 2
 											 )
 			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
 													ShipmentItem.intWeightUOMId
 													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
-													, ISNULL(ShipmentItem.dblGross, 0) 
+													, CASE 
+														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
+															ISNULL(ShipmentItem.dblDestinationGross, 0) 
+														ELSE 
+															ISNULL(ShipmentItem.dblGross, 0) 
+													  END  
 											)
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId

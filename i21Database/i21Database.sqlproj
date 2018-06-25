@@ -6758,6 +6758,14 @@
     <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportFGM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM.sql" />
+    <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
+    <Build Include="dbo\Functions\fnGRConvertQuantityToTargetItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7044,5 +7052,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_CustomTab_ControlName.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AP\UpdateVendorCreatePostVoucher.sql" />
   </ItemGroup>
 </Project>

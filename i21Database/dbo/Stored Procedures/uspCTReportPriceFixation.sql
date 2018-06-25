@@ -207,7 +207,8 @@ BEGIN TRY
 			strCompanyName = @strCompanyName,
 			strCPContract  = CH.strCPContract,
 			intLanguageId = @intLaguageId,
-			xmlParam = @xmlParam
+			xmlParam = @xmlParam,
+			CASE WHEN CH.intContractTypeId = 1 THEN isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Reference'),'Seller Reference') ELSE isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Reference'),'Buyer Reference') END lblReference
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId

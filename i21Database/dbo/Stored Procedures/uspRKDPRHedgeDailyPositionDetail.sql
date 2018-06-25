@@ -638,7 +638,7 @@ SELECT @strDescription,
 				WHERE 
 				c.intCommodityId = @intCommodityId  and
 				cl.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-				and convert(DATETIME, CONVERT(VARCHAR(10), dtmDateEntered, 110), 110) <= convert(datetime,@dtmToDate) 			
+				and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 			
 			)t 
 						
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,
@@ -650,25 +650,25 @@ SELECT @strDescription,
 			,strCustomerReference
 			,strDistributionOption, dblUCost
 			,dblQtyReceived,@intCommodityId,strCurrency	
-		FROM (
-		select * FROM (
-			SELECT DISTINCT ROW_NUMBER() OVER (PARTITION BY c.intCommodityId ORDER BY dtmTransactionDate DESC) intRowNum, 
+		FROM (		
+			SELECT			
 				strLocationName
 				,strInvoiceNumber
 				,dtmTicketDate
 				,c.intTicketId intContractHeaderId
 				,s.strTicketNumber strTicketNumber	
 				,dblPrice dblUCost
-				,dblAmountDue AS dblUnitCost
-				,dblQtyReceived
+				,sum(dblAmountDue) over (partition by c.intTicketId) dblUnitCost				
+				,sum(dblQtyReceived) over (partition by c.intTicketId) dblQtyReceived
 				,c.intCommodityId,c.strCurrency,strCustomerReference,strDistributionOption,ysnPost
 			FROM vyuARInvoiceTransactionHistory c		
 			LEFT JOIN tblSCTicket s on s.intTicketId=c.intTicketId
 			WHERE c.intCommodityId = @intCommodityId
 				AND intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end	
 				 and convert(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-			) a WHERE a.intRowNum = 1) b where isnull(ysnPost,0) =1
---			) t	
+				 and ysnPost is not null
+				
+			) a 
 			
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intContractHeaderId,strContractNumber,strLocationName,strTicketNumber,dtmTicketDateTime,
 					strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType)
@@ -680,7 +680,7 @@ SELECT @strDescription,
 
 	INSERT INTO @tempFinal (strCommodityCode,strType,dblTotal,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
 	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType)
-	select @strDescription,'NR Un-Paid Quantity' strType,dblTotal/case when isnull(dblUnitCost,0)=0 then 1 else dblUnitCost end,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
+	select @strDescription,'NR Un-Paid Quantity' strType,dblQtyReceived,intInventoryReceiptItemId,strLocationName,intContractHeaderId,strContractNumber,strTicketNumber,dtmTicketDateTime,
 	strCustomerReference,strDistributionOption,dblUnitCost,dblQtyReceived,intCommodityId,strContractType from @tempFinal where strType= 'Net Receivable  ($)' and intCommodityId=@intCommodityId
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId)

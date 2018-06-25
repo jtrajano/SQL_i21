@@ -42,7 +42,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	CASE WHEN @QuantityToPost > Detail.dblQtyOrdered OR ItemUOM.ysnStockUnit = 1 THEN Detail.dblQtyOrdered ELSE @QuantityToPost END
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -90,7 +90,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(CASE WHEN @QuantityToPost > Detail.dblQtyOrdered  OR ItemUOM.ysnStockUnit = 1 THEN Detail.dblQtyOrdered ELSE @QuantityToPost END) * SOSODC.dblQuantity
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -141,7 +141,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	Detail.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyOrdered)
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -188,7 +188,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(Detail.dblQtyOrdered - dbo.fnCalculateQtyBetweenUOM(TD.intItemUOMId, Detail.intItemUOMId, TD.dblQtyOrdered)) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -235,7 +235,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) * -1
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -281,7 +281,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	((TD.dblQtyOrdered - TD.dblQtyShipped) * SOSODC.dblQuantity)  * -1 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -327,7 +327,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(Detail.dblQtyOrdered - Detail.dblQtyShipped)
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -373,7 +373,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	((Detail.dblQtyOrdered - Detail.dblQtyShipped)) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -420,7 +420,7 @@ BEGIN
 		--,[dblQty]					=	ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),(Detail.dblQtyOrdered - Detail.dblQtyShipped))
 		,[dblQty]					=	(CASE WHEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),0) > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),(CASE WHEN Detail.dblQtyShipped > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE Detail.dblQtyOrdered - Detail.dblQtyShipped END)) END)
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice 
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -464,7 +464,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(CASE WHEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),0) > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(ISHI.intItemUOMId, Detail.intItemUOMId, ISHI.dblQuantity),(CASE WHEN Detail.dblQtyShipped > Detail.dblQtyOrdered THEN Detail.dblQtyOrdered ELSE Detail.dblQtyOrdered - Detail.dblQtyShipped END)) END) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice 
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -506,7 +506,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) * -1
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -547,7 +547,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	((TD.dblQtyOrdered - TD.dblQtyShipped) * -1) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -590,7 +590,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) * -1
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -635,7 +635,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	((TD.dblQtyOrdered - TD.dblQtyShipped) * -1) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -680,7 +680,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped)
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
@@ -726,7 +726,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(TD.dblQtyOrdered - TD.dblQtyShipped) * SOSODC.dblQuantity 
 		,[dblUOMQty]				=	SOSODC.dblUnitQuantity 
-		,[dblCost]					=	IST.dblLastCost
+		,[dblCost]					=	ISNULL(IST.dblLastCost, 0)
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	TD.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId

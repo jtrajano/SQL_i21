@@ -206,7 +206,12 @@ ELSE
 --CREATE PAYMENTS
 IF ISNULL(@CreatedIvoices, '') <> '' AND ISNULL(@ErrorMessage, '') = ''
 BEGIN
+	DECLARE @dblInvoiceTotal	NUMERIC(18, 6) = 0
+		  , @dblTotalAmountPaid	NUMERIC(18, 6) = 0
+		  , @dblCounter			NUMERIC(18, 6) = 0
+
 	SELECT TOP 1 @intNewInvoiceId = intInvoiceId
+		       , @dblInvoiceTotal = dblInvoiceTotal
 	FROM tblARInvoice I 
 	INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) CI ON I.intInvoiceId = CI.intID
 
@@ -226,17 +231,53 @@ BEGIN
 		DROP TABLE #POSPAYMENTS
 	END
 
-	--REMOVE ON ACCOUNT PAYMENTS
-	SELECT intPOSId
-		 , intPOSPaymentId
-		 , strPaymentMethod
-		 , strReferenceNo
-		 , dblAmount
+	SELECT intPOSId			= intPOSId
+		 , intPOSPaymentId	= intPOSPaymentId
+		 , strPaymentMethod	= strPaymentMethod
+		 , strReferenceNo	= strReferenceNo
+		 , dblAmount		= dblAmount
+		 , ysnComputed		= CAST(0 AS BIT)
 	INTO #POSPAYMENTS
 	FROM dbo.tblARPOSPayment WITH (NOLOCK)
 	WHERE intPOSId = @intPOSId
 	  AND ISNULL(strPaymentMethod, '') <> 'On Account'
 
+	SELECT @dblTotalAmountPaid = SUM(dblAmount) FROM #POSPAYMENTS
+
+	--UPDATE OVERPAYMENTS
+	IF ISNULL(@dblTotalAmountPaid, 0) > ISNULL(@dblInvoiceTotal, 0)
+		BEGIN
+			SET @dblCounter = 0
+
+			WHILE EXISTS (SELECT TOP 1 NULL FROM #POSPAYMENTS WHERE ysnComputed = 0)
+				BEGIN
+					DECLARE @intPOSPaymentId	INT
+						  , @dblAmount			NUMERIC(18, 6)	= 0
+						  , @dblDiscrepancy		NUMERIC(18, 6)	= 0
+
+					SELECT TOP 1 @intPOSPaymentId = intPOSPaymentId
+							   , @dblAmount		  = dblAmount
+					FROM #POSPAYMENTS
+					WHERE ysnComputed = 0
+
+					IF @dblCounter + @dblAmount <= @dblInvoiceTotal
+						BEGIN
+							SET @dblCounter = @dblCounter + @dblAmount
+							UPDATE #POSPAYMENTS SET ysnComputed = 1 WHERE intPOSPaymentId = @intPOSPaymentId
+						END
+					ELSE 
+						BEGIN
+							SET @dblDiscrepancy = (@dblCounter + @dblAmount) - @dblInvoiceTotal
+
+							UPDATE #POSPAYMENTS SET ysnComputed = 1, dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
+							UPDATE tblARPOSPayment SET dblAmount = (@dblAmount - @dblDiscrepancy) WHERE intPOSPaymentId = @intPOSPaymentId
+
+							DELETE FROM tblARPOSPayment WHERE intPOSPaymentId IN (SELECT intPOSPaymentId FROM #POSPAYMENTS WHERE ysnComputed = 0)
+							DELETE FROM #POSPAYMENTS WHERE ysnComputed = 0
+						END
+				END 
+		END
+	
 	IF EXISTS (SELECT TOP 1 NULL FROM #POSPAYMENTS)
 		BEGIN
 			SELECT @dblOnAccountAmount = SUM(dblAmount)

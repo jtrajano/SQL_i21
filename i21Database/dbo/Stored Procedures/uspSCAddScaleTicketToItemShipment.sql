@@ -41,17 +41,6 @@ DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
 		,@TRANSFER_ORDER AS INT = 3
 
--- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT 
-
-IF @ShipmentNumber IS NULL 
-BEGIN 
-	-- Raise the error:
-	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR('Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.', 11, 1);
-	RETURN;
-END 
-
 DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;

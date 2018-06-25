@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspCMPostBankDeposit
+CREATE PROCEDURE [dbo].[uspCMPostBankDeposit]
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
@@ -8,7 +8,7 @@ CREATE PROCEDURE uspCMPostBankDeposit
 	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
-
+	,@outBatchId 			NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -60,6 +60,8 @@ DECLARE
 		,[intAccountId] [int] NULL
 		,[dblDebit] [numeric](18, 6) NULL
 		,[dblCredit] [numeric](18, 6) NULL
+		,[dblDebitForeign] [numeric](18, 6) NULL
+		,[dblCreditForeign] [numeric](18, 6) NULL
 		,[dblDebitUnit] [numeric](18, 6) NULL
 		,[dblCreditUnit] [numeric](18, 6) NULL
 		,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
@@ -69,6 +71,7 @@ DECLARE
 		,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 		,[intCurrencyId] [int] NULL
 		,[dblExchangeRate] [numeric](38, 20) NOT NULL
+		,[strRateType] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 		,[dtmDateEntered] [datetime] NOT NULL
 		,[dtmTransactionDate] [datetime] NULL
 		,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
@@ -260,7 +263,15 @@ END
 -- Get the batch post id. 
 IF (@strBatchId IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	--EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	--IF @@ERROR <> 0	GOTO Post_Rollback
+
+	IF (@ysnRecap = 0)
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	ELSE
+		SELECT @strBatchId = NEWID()
+
+	SELECT @outBatchId = @strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 End
 
@@ -275,6 +286,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -282,6 +295,7 @@ BEGIN
 			,[strReference]
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[strRateType]	
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -299,15 +313,18 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= A.dblAmount
+			,[dblDebit]				= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN A.dblAmount ELSE A.dblAmount * A.dblExchangeRate END 
 			,[dblCredit]			= 0
+			,[dblDebitForeign]		= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN 0 ELSE A.dblAmount END
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo 
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
+			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -324,6 +341,8 @@ BEGIN
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
+			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
+				ON RateType.intCurrencyExchangeRateTypeId= A.intCurrencyExchangeRateTypeId
 	WHERE	A.strTransactionId = @strTransactionId
 
 	--1.5 DEBIT SIDE SHORT
@@ -333,15 +352,18 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= A.intShortGLAccountId
-			,[dblDebit]				= A.dblShortAmount
+			,[dblDebit]				= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN A.dblShortAmount ELSE A.dblShortAmount * A.dblExchangeRate END --A.dblShortAmount * ISNULL(A.dblExchangeRate,1)
 			,[dblCredit]			= 0
+			,[dblDebitForeign]		= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN 0 ELSE A.dblShortAmount  END
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
+			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -358,6 +380,8 @@ BEGIN
 				ON A.intShortGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
+			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
+				ON RateType.intCurrencyExchangeRateTypeId= A.intCurrencyExchangeRateTypeId
 	WHERE	A.strTransactionId = @strTransactionId AND A.intShortGLAccountId IS NOT NULL AND A.intShortGLAccountId <> 0 AND A.dblShortAmount <> 0
 	
 	-- 2. CREDIT SIdE
@@ -367,15 +391,18 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= B.dblDebit
-			,[dblCredit]			= B.dblCredit
+			,[dblDebit]				= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN B.dblDebit ELSE B.dblDebit * B.dblExchangeRate END
+			,[dblCredit]			= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN B.dblCredit ELSE B.dblCredit * B.dblExchangeRate END
+			,[dblDebitForeign]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 0 ELSE B.dblDebit END
+			,[dblCreditForeign]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 0 ELSE B.dblCredit END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= Entity.strEntityNo
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 1 ELSE B.dblExchangeRate END
+			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -386,13 +413,23 @@ BEGIN
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
-	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
+	FROM	[dbo].tblCMBankTransaction A 
+	INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
 			INNER JOIN vyuGLAccountDetail GLAccnt
 				ON B.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON B.intEntityId = Entity.intEntityId
+			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
+				ON RateType.intCurrencyExchangeRateTypeId= B.intCurrencyExchangeRateTypeId
+
 	WHERE	A.strTransactionId = @strTransactionId
+
+	DECLARE @gainLoss DECIMAL (18,6)
+	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
+
+	if(@gainLoss <> 0)
+		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss on Multicurrency Bank Deposit'
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
@@ -426,6 +463,8 @@ BEGIN
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
@@ -433,6 +472,7 @@ BEGIN
 			,[intConcurrencyId]	
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[strRateType]	
 			,[intUserId]
 			,[intEntityId]			
 			,[dtmDateEntered]
@@ -453,6 +493,8 @@ SELECT
 			,[dtmTransactionDate]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
@@ -460,6 +502,7 @@ SELECT
 			,[intConcurrencyId]	
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[strRateType]	
 			,[intUserId]
 			,[intEntityId]			
 			,[dtmDateEntered]
@@ -498,6 +541,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -505,6 +550,7 @@ BEGIN
 			,[strReference]
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[strRateType]	
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -524,6 +570,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -531,6 +579,7 @@ BEGIN
 			,[strReference]
 			,[intCurrencyId]
 			,[dblExchangeRate]
+			,[strRateType]	
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -569,7 +618,10 @@ Post_Rollback:
 Recap_Rollback: 
 	SET @isSuccessful = 1
 	ROLLBACK TRANSACTION 		
-	EXEC dbo.uspCMPostRecap @RecapTable
+	--EXEC dbo.uspCMPostRecap @RecapTable
+		EXEC dbo.uspGLPostRecap 
+			@RecapTable
+			,@intEntityId
 	GOTO Post_Exit
 
 Audit_Log:

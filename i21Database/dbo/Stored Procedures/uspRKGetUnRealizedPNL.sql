@@ -23,7 +23,7 @@ BEGIN TRY
 	  (
 	  	  intFutureMarketId			  INT
 		 ,intFutureMonthId			  INT
-	  	 ,dblSettlementPrice		  NUMERIC(24, 10)
+	  	 ,dblSettlementPrice		  NUMERIC(38,20)
 	  )
 	  
 	  DECLARE @tblRKM2MBasisDetail AS TABLE
@@ -37,20 +37,20 @@ BEGIN TRY
 			,intCompanyLocationId   INT
 			,intPricingTypeId		INT
 			,intContractTypeId		INT
-			,dblBasisOrDiscount		NUMERIC(18,6)
+			,dblBasisOrDiscount		NUMERIC(38,20)
 	  )
 	  
 	  DECLARE @tblContractCost TABLE 
 	  (
 	  	 intContractDetailId	 INT
-	  	,dblTotalCost		     NUMERIC(24, 10)
+	  	,dblTotalCost		     NUMERIC(38,20)
 	  )
 	  
 	  DECLARE @tblFutureMonthByMarket TABLE 
 	  (
 	  	  Row_Num			  INT
 		 ,intFutureMarketId	  INT
-	  	 ,intFutureMonthId	  NUMERIC(24, 10)
+	  	 ,intFutureMonthId	  NUMERIC(38,20)
 	  )
 	  
 
@@ -88,20 +88,20 @@ BEGIN TRY
 		,intContractSeq							INT
 		,strEntityName							NVARCHAR(100)
 		,strInternalCompany						NVARCHAR(20)
-		,dblQuantity							NUMERIC(24, 10)
+		,dblQuantity							NUMERIC(38,20)
 		,intQuantityUOMId						INT							---ItemUOM
 		,intQuantityUnitMeasureId				INT							---UnitMeasure
 		,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblWeight								NUMERIC(24, 10)
+		,dblWeight								NUMERIC(38,20)
 		,intWeightUOMId							INT							---ItemUOM
 		,intWeightUnitMeasureId					INT							---UnitMeasure
 		,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblBasis								NUMERIC(24, 10)
+		,dblBasis								NUMERIC(38,20)
 		,intBasisUOMId							INT							---ItemUOM
 		,intBasisUnitMeasureId					INT							---UnitMeasure
 		,strBasisUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFutures								NUMERIC(24, 10)
-		,dblCashPrice							NUMERIC(24, 10)
+		,dblFutures								NUMERIC(38,20)
+		,dblCashPrice							NUMERIC(38,20)
 		,intPriceUOMId							INT							---ItemUOM
 		,intPriceUnitMeasureId					INT							---UnitMeasure
 		,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -120,27 +120,27 @@ BEGIN TRY
 		,strAllocationRefNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strAllocationStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPriceTerms							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblContractDifferential				NUMERIC(24, 10)
+		,dblContractDifferential				NUMERIC(38,20)
 		,strContractDifferentialUOM				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFuturesPrice						NUMERIC(24, 10)
+		,dblFuturesPrice						NUMERIC(38,20)
 		,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFixedLots							NUMERIC(24, 10)
-		,dblUnFixedLots							NUMERIC(24, 10)
-		,dblContractInvoiceValue				NUMERIC(24, 10)
-		,dblSecondaryCosts						NUMERIC(24, 10)
-		,dblCOGSOrNetSaleValue					NUMERIC(24, 10)
-		,dblInvoicePrice						NUMERIC(24, 10)
-		,dblInvoicePaymentPrice					NUMERIC(24, 10)
+		,dblFixedLots							NUMERIC(38,20)
+		,dblUnFixedLots							NUMERIC(38,20)
+		,dblContractInvoiceValue				NUMERIC(38,20)
+		,dblSecondaryCosts						NUMERIC(38,20)
+		,dblCOGSOrNetSaleValue					NUMERIC(38,20)
+		,dblInvoicePrice						NUMERIC(38,20)
+		,dblInvoicePaymentPrice					NUMERIC(38,20)
 		,strInvoicePriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblInvoiceValue						NUMERIC(24, 10)
+		,dblInvoiceValue						NUMERIC(38,20)
 		,strInvoiceCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblNetMarketValue						NUMERIC(24, 10)
+		,dblNetMarketValue						NUMERIC(38,20)
 		,dtmRealizedDate						DATETIME
-		,dblRealizedQty							NUMERIC(24, 10)
-		,dblProfitOrLossValue					NUMERIC(24, 10)
-		,dblPAndLinMarketUOM					NUMERIC(24, 10)
-		,dblPAndLChangeinMarketUOM				NUMERIC(24, 10)
+		,dblRealizedQty							NUMERIC(38,20)
+		,dblProfitOrLossValue					NUMERIC(38,20)
+		,dblPAndLinMarketUOM					NUMERIC(38,20)
+		,dblPAndLChangeinMarketUOM				NUMERIC(38,20)
 		,strMarketCurrencyUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strTrader								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strFixedBy								NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -153,9 +153,9 @@ BEGIN TRY
 		,intPricingTypeId						INT
 		,strPricingType							NVARCHAR(100)
 		,strPricingStatus						NVARCHAR(100)
-		,dblMarketDifferential					NUMERIC(24, 10)
-		,dblNetM2MPrice							NUMERIC(24, 10)
-		,dblSettlementPrice						NUMERIC(24, 10)
+		,dblMarketDifferential					NUMERIC(38,20)
+		,dblNetM2MPrice							NUMERIC(38,20)
+		,dblSettlementPrice						NUMERIC(38,20)
 		,intCompanyId							INT
 		,strCompanyName							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	) 
@@ -864,7 +864,7 @@ BEGIN TRY
 		,intBasisUnitMeasureId						= NULL
 		,strBasisUOM								= NULL
 		,dblFutures									= 0
-		,dblCashPrice								= dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,Market.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,(Lot.dblLastCost / Lot.dblQty)) * (CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END)
+		,dblCashPrice								= dbo.fnGRConvertQuantityToTargetItemUOM(Item.intItemId,Market.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,(Lot.dblLastCost / Lot.dblQty)) * (CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END)
 		,intPriceUOMId								= NULL
 		,intPriceUnitMeasureId						= Market.intUnitMeasureId
 		,strContractPriceUOM						= MarketUOM.strUnitMeasure
@@ -923,8 +923,8 @@ BEGIN TRY
 		FROM tblICItem							Item
 		JOIN (
 				SELECT L.intItemId,L.intCompanyId,L.intSubLocationId
-				,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId,LotUOM.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,L.dblQty)) dblQty 
-				,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId,LotUOM.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,L.dblQty) * ISNULL(L.dblLastCost,0)) dblLastCost 
+				,SUM(dbo.fnGRConvertQuantityToTargetItemUOM(L.intItemId,LotUOM.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,L.dblQty)) dblQty 
+				,SUM(dbo.fnGRConvertQuantityToTargetItemUOM(L.intItemId,LotUOM.intUnitMeasureId,ItemStockUOM.intUnitMeasureId,L.dblQty) * ISNULL(L.dblLastCost,0)) dblLastCost 
 				FROM tblICLot L
 				JOIN tblICItemUOM ItemStockUOM ON ItemStockUOM.intItemId =  L.intItemId AND ItemStockUOM.ysnStockUnit = 1  
 				JOIN tblICItemUOM LotUOM ON LotUOM.intItemUOMId =  L.intItemUOMId
@@ -1067,8 +1067,8 @@ BEGIN TRY
 	-----------------------------------------------------ContractInvoiceValue Updation--------------------------------------------
 	UPDATE CD
 	SET CD.dblContractInvoiceValue	
-	  =	  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
-		* dbo.fnCTConvertQuantityToTargetItemUOM(
+	  =	  dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+		* dbo.fnGRConvertQuantityToTargetItemUOM(
 												 CD.intItemId
 												,CD.intFutureMarketUnitMeasureId
 												,CD.intPriceUnitMeasureId
@@ -1085,12 +1085,12 @@ BEGIN TRY
 	SET 
 	 CD.dblContractInvoiceValue	= CASE 
 											  WHEN ISNULL(CD.dblCashPrice,0.0)<> 0.0 THEN
-													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
-													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intPriceUnitMeasureId, CD.dblCashPrice)
+													  dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+													* dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intPriceUnitMeasureId, CD.dblCashPrice)
 													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
 
 											  WHEN ISNULL(CD.dblCashPrice,0.0)= 0.0 THEN
-													  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intQuantityUnitMeasureId,CD.dblQuantity)
+													  dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intFutureMarketUnitMeasureId,CD.intQuantityUnitMeasureId,CD.dblQuantity)
 													 * ISNULL(SP.dblSettlementPrice,0)
 													/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
 								 END
@@ -1120,7 +1120,7 @@ BEGIN TRY
 		AND CD.intTransactionType = 4 -- Update dblMarketDifferential Other than Inventory (FG)
 
 		UPDATE CD
-		SET CD.dblNetMarketValue	=  dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
+		SET CD.dblNetMarketValue	=  dbo.fnGRConvertQuantityToTargetItemUOM(CD.intItemId,CD.intQuantityUnitMeasureId,CD.intFutureMarketUnitMeasureId,CD.dblQuantity)
 										* ( ISNULL(CD.dblSettlementPrice,0) +  ISNULL(CD.dblMarketDifferential,0))
 										/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END
 
@@ -1142,7 +1142,7 @@ BEGIN TRY
 								  END
 	
 	UPDATE 	UnRealizedPNL
-	SET UnRealizedPNL.dblPAndLinMarketUOM   = dbo.fnCTConvertQuantityToTargetItemUOM(intItemId,intQuantityUnitMeasureId,intFutureMarketUnitMeasureId,ISNULL(dblProfitOrLossValue,0)) 
+	SET UnRealizedPNL.dblPAndLinMarketUOM   = dbo.fnGRConvertQuantityToTargetItemUOM(intItemId,intQuantityUnitMeasureId,intFutureMarketUnitMeasureId,ISNULL(dblProfitOrLossValue,0)) 
 											/ CASE 
 													WHEN ISNULL(dblProfitOrLossValue,0) = 0 THEN 1 
 													ELSE ABS(dblProfitOrLossValue) /  

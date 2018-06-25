@@ -21,5 +21,8 @@ CREATE TYPE [dbo].[ScaleDestinationStagingTable] AS TABLE
 	,[intScaleSetupId] INT NULL								-- scale setup 
 	,[dblFreightRate] NUMERIC(38, 20) NOT NULL DEFAULT 0	-- Freight Rate
 	,[dblTicketFees] NUMERIC(38, 20) NOT NULL DEFAULT 0		-- Fees Rate
+	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL -- to group the charges per line item
+	,[dblGross] NUMERIC(38, 20) NULL						-- Gross Unit of Scale Ticket
+	,[dblTare] NUMERIC(38, 20) NULL							-- Shrink Unit of Scale Ticket
 	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 )

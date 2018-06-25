@@ -23,7 +23,8 @@ FROM
 	INNER JOIN tblEMEntity EM
 		ON EM.intEntityId = CAST(AUD.strRecordNo AS INT)
 WHERE strActionType = 'Updated'
-	AND strTransactionType = 'Payroll.view.EntityEmployee'
+	AND strTransactionType IN ('EntityManagement.view.Entity', 'Payroll.view.EntityEmployee')
+	AND strRoute LIKE '%EntityEmployee%'
 	AND EM.intEntityId IN (SELECT intEntityId FROM tblPREmployee)
 	AND PATINDEX('%"changeDescription":%', strJsonData) > 0
 	AND (PATINDEX('%"hidden":true%', strJsonData) > 0 
@@ -44,20 +45,21 @@ BEGIN
 
 	/* Loop each data to extract child field changes */
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
-					AND PATINDEX('%,"hidden":false%', strJsonData) > 0
-					AND (PATINDEX('%"change":"str%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"dbl%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"int%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"dtm%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"ysn%","from":%', strJsonData) > 0))
+					AND PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')) > 0
+					AND (PATINDEX('%"change":"str%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"dbl%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"int%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"dtm%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"ysn%","from":%', ISNULL(strJsonData, '')) > 0))
 			BEGIN
+
 				/* Remove hidden fields */
 				WHILE EXISTS(SELECT TOP 1 1 FROM #tmpAuditLog 
-							WHERE intAuditLogId = @intAuditLogId AND PATINDEX('%,"hidden":true%', strJsonData) > 0
-							AND PATINDEX('%,"hidden":false%', SUBSTRING(strJsonData, 0, PATINDEX('%,"hidden":true%', strJsonData))) = 0)
+							WHERE intAuditLogId = @intAuditLogId AND PATINDEX('%,"hidden":true%', ISNULL(strJsonData, '')) > 0
+							AND PATINDEX('%,"hidden":false%', SUBSTRING(ISNULL(strJsonData, ''), 0, PATINDEX('%,"hidden":true%', ISNULL(strJsonData, '')))) = 0)
 				BEGIN
 					UPDATE #tmpAuditLog
-						SET strJsonData = SUBSTRING(strJsonData, PATINDEX('%,"hidden":true%', strJsonData) + 14, LEN(strJsonData))
+						SET strJsonData = SUBSTRING(ISNULL(strJsonData, ''), PATINDEX('%,"hidden":true%', ISNULL(strJsonData, '')) + 14, LEN(ISNULL(strJsonData, '')))
 					WHERE intAuditLogId = @intAuditLogId
 				END
 
@@ -68,23 +70,30 @@ BEGIN
 				SELECT
 					intAuditLogId
 					,strJsonData = CASE 
-							WHEN (PATINDEX('%"change":"dbl%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"dbl%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"dbl%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"int%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"int%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"int%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"dtm%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"dtm%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"dtm%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"ysn%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"ysn%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"ysn%', strJsonData) + 15)
-							WHEN (PATINDEX('%"change":"str%","from":%', strJsonData) > 0) THEN
-								SUBSTRING(strJsonData, PATINDEX('%"change":"str%","from":%', strJsonData), PATINDEX('%,"hidden":false%', strJsonData) - PATINDEX('%"change":"str%', strJsonData) + 15)
+							WHEN (PATINDEX('%"change":"str%","from":%', SUBSTRING(ISNULL(strJsonData, ''), 0, PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')))) > 0) THEN
+								SUBSTRING(ISNULL(strJsonData, ''), PATINDEX('%"change":"str%","from":%', ISNULL(strJsonData, '')), 
+								PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')) - PATINDEX('%"change":"str%', ISNULL(strJsonData, '')) + 15)
+							WHEN (PATINDEX('%"change":"dbl%","from":%', SUBSTRING(ISNULL(strJsonData, ''), 0, PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')))) > 0) THEN
+								SUBSTRING(ISNULL(strJsonData, ''), PATINDEX('%"change":"dbl%","from":%', ISNULL(strJsonData, '')), 
+								PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')) - PATINDEX('%"change":"dbl%', ISNULL(strJsonData, '')) + 15)
+							WHEN (PATINDEX('%"change":"int%","from":%', SUBSTRING(ISNULL(strJsonData, ''), 0, PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')))) > 0) THEN
+								SUBSTRING(ISNULL(strJsonData, ''), PATINDEX('%"change":"int%","from":%', ISNULL(strJsonData, '')), 
+								PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')) - PATINDEX('%"change":"int%', ISNULL(strJsonData, '')) + 15)
+							WHEN (PATINDEX('%"change":"dtm%","from":%', SUBSTRING(ISNULL(strJsonData, ''), 0, PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')))) > 0) THEN
+								SUBSTRING(ISNULL(strJsonData, ''), PATINDEX('%"change":"dtm%","from":%', ISNULL(strJsonData, '')), 
+								PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')) - PATINDEX('%"change":"dtm%', ISNULL(strJsonData, '')) + 15)
+							WHEN (PATINDEX('%"change":"ysn%","from":%', SUBSTRING(ISNULL(strJsonData, ''), 0, PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')))) > 0) THEN
+								SUBSTRING(ISNULL(strJsonData, ''), PATINDEX('%"change":"ysn%","from":%', ISNULL(strJsonData, '')), 
+								PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')) - PATINDEX('%"change":"ysn%', ISNULL(strJsonData, '')) + 15)
 							ELSE '' END
 				FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
-					AND (PATINDEX('%"change":"str%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"dbl%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"int%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"dtm%","from":%', strJsonData) > 0
-						OR PATINDEX('%"change":"ysn%","from":%', strJsonData) > 0)
+					AND (PATINDEX('%"change":"str%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"dbl%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"int%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"dtm%","from":%', ISNULL(strJsonData, '')) > 0
+						OR PATINDEX('%"change":"ysn%","from":%', ISNULL(strJsonData, '')) > 0)
+				
+				IF (@@ROWCOUNT <= 0) BREAK
 
 				SET @intInsertedId = SCOPE_IDENTITY()
 
@@ -100,11 +109,14 @@ BEGIN
 
 				/* Delete entry if no more unhidden fields */
 				DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId 
-					AND PATINDEX('%,"hidden":false%', strJsonData) = 0
+					AND ISNULL(PATINDEX('%,"hidden":false%', ISNULL(strJsonData, '')), 0) = 0
+
+				IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId)
+				BREAK
 			END
 
 	/* Loop control */
-	--DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
+	DELETE FROM #tmpAuditLog WHERE intAuditLogId = @intAuditLogId
 END
 
 /*Clear and Update Employee Change Log data */

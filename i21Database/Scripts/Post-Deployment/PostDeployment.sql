@@ -281,6 +281,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\CleanBasisAdvance.sql
 :r .\AP\UpdateNewShipFromEntity.sql
 :r .\AP\UpdatePOPendingStatus.sql
+:r .\AP\UpdateVendorCreatePostVoucher.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -426,6 +427,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\10_Checkout_Commander_Translog.sql
 :r .\ST\11_FileFieldMapping_Passport_ISM.sql
 :r .\ST\12_FileFieldMapping_Passport_FGM.sql
+:r .\ST\13_FileFieldMapping_Passport_MCM.sql
+:r .\ST\14_FileFieldMapping_Passport_MSM.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql

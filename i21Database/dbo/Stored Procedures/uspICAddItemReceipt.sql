@@ -1708,6 +1708,9 @@ BEGIN
 			DECLARE @DefaultLotCondition NVARCHAR(50)
 			SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
 			
+			DECLARE @DefaultLotCondition NVARCHAR(50)
+            SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
+
 			-- Insert Lot for Receipt Item
 			INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				[intInventoryReceiptItemId]		

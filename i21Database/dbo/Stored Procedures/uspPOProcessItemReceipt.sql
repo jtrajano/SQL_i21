@@ -110,7 +110,7 @@ BEGIN
 			,dblForexRate
 	)
 	SELECT	
-			strReceiptType			= (CASE WHEN PODetail.intContractDetailId IS NOT NULL THEN @ReceiptType_PurchaseOrderContract ELSE @ReceiptType_PurchaseOrder END)
+			strReceiptType			= (CASE WHEN PODetail.intContractHeaderId IS NOT NULL THEN @ReceiptType_PurchaseOrderContract ELSE @ReceiptType_PurchaseOrder END)
 			,intEntityVendorId		= PO.intEntityVendorId
 			,intShipFromId			= PO.intShipFromId
 			,intLocationId			= PO.intShipToId

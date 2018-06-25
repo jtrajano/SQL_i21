@@ -1086,10 +1086,11 @@ BEGIN
 			LEFT JOIN tblICInventoryShipmentItemLot sil
 				ON sil.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 			LEFT JOIN tblICLot l
-				ON l.intLotId = sil.intLotId            
+				ON l.intLotId = sil.intLotId
 			LEFT JOIN tblICItemUOM lotPackUOM
-				ON lotPackUOM.intItemUOMId = l.intItemUOMId            			
+				ON lotPackUOM.intItemUOMId = l.intItemUOMId
 	WHERE   s.intInventoryShipmentId = @intTransactionId
+			AND ISNULL(si.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 
 	UPDATE @InTransit_Outbound
 	SET dblQty = CASE WHEN @ysnPost = 1 THEN -dblQty ELSE dblQty END

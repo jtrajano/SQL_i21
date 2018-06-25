@@ -124,6 +124,9 @@ SELECT l.intLotId
 	,l.strCertificate AS strCertification
 	,l.strCertificateId AS strCertificationId
 	,l.strTrackingNumber
+	,ISNULL(RC.strReportName, 'LotLabel') AS strReportName
+	,ISNULL(RC.intNoOfLabel, 1) AS intNoOfLabel
+	,ISNULL(RCC.strReportName, 'PalletTag') AS strPlacardReportName
 FROM tblICLot l
 JOIN tblICItem i ON i.intItemId = l.intItemId
 JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
@@ -148,3 +151,5 @@ LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
 LEFT JOIN tblMFWorkOrder w ON l.strTransactionId = w.strWorkOrderNo
 LEFT JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
 Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId
+LEFT JOIN tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
+LEFT JOIN tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId

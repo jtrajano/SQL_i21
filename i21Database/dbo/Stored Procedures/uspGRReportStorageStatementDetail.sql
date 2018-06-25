@@ -48,7 +48,7 @@ BEGIN TRY
 	JOIN tblICItem DItem ON DItem.intItemId = Dcode.intItemId
 	JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId
 	JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
-	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=IU.intUnitMeasureId AND UOM.strUnitMeasure='Ton'
+	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=IU.intUnitMeasureId AND UOM.strUnitMeasure='Tonne'
 	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
 	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId 
 	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)
@@ -96,7 +96,7 @@ BEGIN TRY
 	JOIN tblICItem DItem ON DItem.intItemId = Dcode.intItemId
 	JOIN tblSCTicket SC ON SC.intTicketId=CS.intTicketId
 	JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
-	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=IU.intUnitMeasureId AND UOM.strUnitMeasure='Ton'
+	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId=IU.intUnitMeasureId AND UOM.strUnitMeasure='Tonne'
 	WHERE CS.intEntityId=@intEntityId AND CS.intItemId=@intItemId 
 	AND   CS.intStorageTypeId=@intStorageTypeId AND CS.intStorageScheduleId=@intStorageScheduleId
 	AND   CS.ysnPrinted=0 AND CS.intCustomerStorageId NOT IN(SELECT intCustomerStorageId FROM tblGRStorageStatement)

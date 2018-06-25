@@ -38,7 +38,7 @@ BEGIN
 		WHEN @msgId = 80022 THEN 'The status of %s is Discontinued.'
 		WHEN @msgId = 80023 THEN 'Missing costing method setup for item %s.'
 		WHEN @msgId = 80024 THEN 'Lot status for %s for item %s is going to be updated more than once. Please remove the duplicate.'
-		WHEN @msgId = 80025 THEN 'Recap is not applicable for this type of transaction.'
+		WHEN @msgId = 80025 THEN 'Post Preview is not applicable for this type of transaction.'
 		WHEN @msgId = 80026 THEN 'Location %s is not setup for the item %s.'
 		WHEN @msgId = 80027 THEN 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
 		WHEN @msgId = 80028 THEN 'The lot expiry dates are outdated for %s. Please review your quantity adjustments after the system reloads the latest expiry dates.'
@@ -58,7 +58,7 @@ BEGIN
 		-- OBSOLETE: WHEN @msgId = 80042 THEN 'Cannot have the same item and weight UOM. Please remove the weight UOM for %s with lot number %s.'
 		WHEN @msgId = 80043 THEN 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.'
 		WHEN @msgId = 80044 THEN 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
-		WHEN @msgId = 80045 THEN 'Recap is not applicable when doing an inventory transfer for the same location.'
+		WHEN @msgId = 80045 THEN 'Post Preview is not applicable when doing an inventory transfer for the same location.'
 		WHEN @msgId = 80046 THEN 'Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.'
 		WHEN @msgId = 80047 THEN 'The Qty to Ship for %s is %f. Total Lot Quantity is %f. The difference is %f.'
 		WHEN @msgId = 80048 THEN 'Item UOM is invalid or missing.'
@@ -231,6 +231,7 @@ BEGIN
 		WHEN @msgId = 80215 THEN 'Cannot change UOM to %s. %s is partially allocated.'
 		WHEN @msgId = 80216 THEN 'Category Code is invalid or missing.'
 		WHEN @msgId = 80217 THEN '%s is on foreign currency. Default Rate Type is required for Inventory in Company Configuration -> System Manager -> Multi Currency.'
+		WHEN @msgId = 80218 THEN 'Pricing type for %s is a Basis and its Futures needs a price. Please add it at Contract Management -> Price Contract.'
 	END 
 
 	RETURN @msg

@@ -11,8 +11,8 @@ BEGIN TRY
 		  ,strCompany			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		  ,intBookId			INT
 		  ,strBook				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		  ,dblSaleAmount		NUMERIC(24,10)
-		  ,dblCogs				NUMERIC(24,10)  
+		  ,dblSaleAmount		NUMERIC(38,20)
+		  ,dblCogs				NUMERIC(38,20)  
 		)
 
 		 DECLARE @tblConsolidatedPNL AS TABLE 
@@ -25,9 +25,9 @@ BEGIN TRY
 			,intCompanyId		INT
 			,strCompany			NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strPurchaseSale	NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblBookValue		NUMERIC(24, 10)
-			,dblMarketValue		NUMERIC(24, 10)
-			,dblAmount			NUMERIC(24, 10)
+			,dblBookValue		NUMERIC(38,20)
+			,dblMarketValue		NUMERIC(38,20)
+			,dblAmount			NUMERIC(38,20)
 			,strBookValue		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strMarketValue		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strTotalAmount		NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -67,20 +67,20 @@ BEGIN TRY
 			,intContractSeq							INT
 			,strEntityName							NVARCHAR(100)
 			,strInternalCompany						NVARCHAR(20)
-			,dblQuantity							NUMERIC(24, 10)
+			,dblQuantity							NUMERIC(38,20)
 			,intQuantityUOMId						INT							
 			,intQuantityUnitMeasureId				INT							
 			,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblWeight								NUMERIC(24, 10)
+			,dblWeight								NUMERIC(38,20)
 			,intWeightUOMId							INT							
 			,intWeightUnitMeasureId					INT							
 			,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblBasis								NUMERIC(24, 10)
+			,dblBasis								NUMERIC(38,20)
 			,intBasisUOMId							INT							
 			,intBasisUnitMeasureId					INT							
 			,strBasisUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblFutures								NUMERIC(24, 10)
-			,dblCashPrice							NUMERIC(24, 10)
+			,dblFutures								NUMERIC(38,20)
+			,dblCashPrice							NUMERIC(38,20)
 			,intPriceUOMId							INT							
 			,intPriceUnitMeasureId					INT							
 			,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -99,27 +99,27 @@ BEGIN TRY
 			,strAllocationRefNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strAllocationStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strPriceTerms							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblContractDifferential				NUMERIC(24, 10)
+			,dblContractDifferential				NUMERIC(38,20)
 			,strContractDifferentialUOM				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblFuturesPrice						NUMERIC(24, 10)
+			,dblFuturesPrice						NUMERIC(38,20)
 			,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblFixedLots							NUMERIC(24, 10)
-			,dblUnFixedLots							NUMERIC(24, 10)
-			,dblContractInvoiceValue				NUMERIC(24, 10)
-			,dblSecondaryCosts						NUMERIC(24, 10)
-			,dblCOGSOrNetSaleValue					NUMERIC(24, 10)
-			,dblInvoicePrice						NUMERIC(24, 10)
-			,dblInvoicePaymentPrice					NUMERIC(24, 10)
+			,dblFixedLots							NUMERIC(38,20)
+			,dblUnFixedLots							NUMERIC(38,20)
+			,dblContractInvoiceValue				NUMERIC(38,20)
+			,dblSecondaryCosts						NUMERIC(38,20)
+			,dblCOGSOrNetSaleValue					NUMERIC(38,20)
+			,dblInvoicePrice						NUMERIC(38,20)
+			,dblInvoicePaymentPrice					NUMERIC(38,20)
 			,strInvoicePriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblInvoiceValue						NUMERIC(24, 10)
+			,dblInvoiceValue						NUMERIC(38,20)
 			,strInvoiceCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,dblNetMarketValue						NUMERIC(24, 10)
+			,dblNetMarketValue						NUMERIC(38,20)
 			,dtmRealizedDate						DATETIME
-			,dblRealizedQty							NUMERIC(24, 10)
-			,dblProfitOrLossValue					NUMERIC(24, 10)
-			,dblPAndLinMarketUOM					NUMERIC(24, 10)
-			,dblPAndLChangeinMarketUOM				NUMERIC(24, 10)
+			,dblRealizedQty							NUMERIC(38,20)
+			,dblProfitOrLossValue					NUMERIC(38,20)
+			,dblPAndLinMarketUOM					NUMERIC(38,20)
+			,dblPAndLChangeinMarketUOM				NUMERIC(38,20)
 			,strMarketCurrencyUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strTrader								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,strFixedBy								NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -132,9 +132,9 @@ BEGIN TRY
 			,intPricingTypeId						INT
 			,strPricingType							NVARCHAR(100)
 			,strPricingStatus						NVARCHAR(100)
-			,dblMarketDifferential					NUMERIC(24, 10)
-			,dblNetM2MPrice							NUMERIC(24, 10)
-			,dblSettlementPrice						NUMERIC(24, 10)
+			,dblMarketDifferential					NUMERIC(38,20)
+			,dblNetM2MPrice							NUMERIC(38,20)
+			,dblSettlementPrice						NUMERIC(38,20)
 			,intCompanyId							INT
 			,strCompanyName							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		)
@@ -158,11 +158,11 @@ BEGIN TRY
 		,strAllocationRefNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strEntityName							NVARCHAR(100)
 		,strInternalCompany						NVARCHAR(20)
-		,dblQuantity							NUMERIC(24, 10)
+		,dblQuantity							NUMERIC(38,20)
 		,intQuantityUOMId						INT							---ItemUOM
 		,intQuantityUnitMeasureId				INT							---UnitMeasure
 		,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblWeight								NUMERIC(24, 10)
+		,dblWeight								NUMERIC(38,20)
 		,intWeightUOMId							INT							---ItemUOM		
 		,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intOriginId							INT
@@ -178,20 +178,20 @@ BEGIN TRY
 		,dtmEndDate								DATETIME
 		,strPriceTerms							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strIncoTermLocation					NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblContractDifferential				NUMERIC(24, 10)
+		,dblContractDifferential				NUMERIC(38,20)
 		,strContractDifferentialUOM				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFuturesPrice						NUMERIC(24, 10)
+		,dblFuturesPrice						NUMERIC(38,20)
 		,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblCashPrice							NUMERIC(24, 10)
+		,dblCashPrice							NUMERIC(38,20)
 		,intPriceUOMId							INT							---ItemUOM
 		,intPriceUnitMeasureId					INT							---UnitMeasure
 		,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFixedLots							NUMERIC(24, 10)
-		,dblUnFixedLots							NUMERIC(24, 10)
-		,dblContractInvoiceValue				NUMERIC(24, 10)
-		,dblSecondaryCosts						NUMERIC(24, 10)
-		,dblCOGSOrNetSaleValue					NUMERIC(24, 10)
+		,dblFixedLots							NUMERIC(38,20)
+		,dblUnFixedLots							NUMERIC(38,20)
+		,dblContractInvoiceValue				NUMERIC(38,20)
+		,dblSecondaryCosts						NUMERIC(38,20)
+		,dblCOGSOrNetSaleValue					NUMERIC(38,20)
 		,intFutureMarketId						INT
 		,strFutureMarket						NVARCHAR(100)
 		,intFutureMarketUOMId					INT
@@ -201,19 +201,19 @@ BEGIN TRY
 		,intFutureMonthId						INT
 		,strFutureMonth							NVARCHAR(100)
 		,dtmRealizedDate						DATETIME
-		,dblRealizedQty							NUMERIC(24, 10)
-		,dblRealizedPNLValue					NUMERIC(24, 10)
-		,dblPNLPreDayValue						NUMERIC(24, 10)
-		,dblProfitOrLossValue					NUMERIC(24, 10)
-		,dblPNLChange							NUMERIC(24, 10)
+		,dblRealizedQty							NUMERIC(38,20)
+		,dblRealizedPNLValue					NUMERIC(38,20)
+		,dblPNLPreDayValue						NUMERIC(38,20)
+		,dblProfitOrLossValue					NUMERIC(38,20)
+		,dblPNLChange							NUMERIC(38,20)
 		,strFixedBy								NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingType							NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strInvoiceStatus						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblNetFuturesValue					    NUMERIC(24, 10)
-		,dblRealizedFuturesPNLValue			    NUMERIC(24, 10)
-		,dblNetPNLValue						    NUMERIC(24, 10)
-		,dblFXValue							    NUMERIC(24, 10)
-		,dblFXConvertedValue				    NUMERIC(24, 10)
+		,dblNetFuturesValue					    NUMERIC(38,20)
+		,dblRealizedFuturesPNLValue			    NUMERIC(38,20)
+		,dblNetPNLValue						    NUMERIC(38,20)
+		,dblFXValue							    NUMERIC(38,20)
+		,dblFXConvertedValue				    NUMERIC(38,20)
 		,strSalesReturnAdjustment				NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,intCompanyId							INT
 		,strCompany								NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -728,9 +728,43 @@ BEGIN TRY
 				,strCompany		
 	
 		IF @strType ='- All -'
-				SELECT * FROM @tblConsolidatedPNL
+				
+				SELECT 
+				 intConsolidatedPNL			= intConsolidatedPNL 
+				,strPNL						= strPNL				
+				,strType					= strType			
+				,intBookId					= intBookId			
+				,strBook					= strBook			
+				,intCompanyId				= intCompanyId		
+				,strCompany					= strCompany			
+				,strPurchaseSale			= strPurchaseSale	
+				,dblBookValue				= CAST(dblBookValue AS NUMERIC(38,10))	
+				,dblMarketValue				= CAST(dblMarketValue AS NUMERIC(38,10))		
+				,dblAmount					= CAST(dblAmount AS NUMERIC(38,10))			
+				,strBookValue				= strBookValue		
+				,strMarketValue				= strMarketValue		
+				,strTotalAmount		 		= strTotalAmount		
+				FROM @tblConsolidatedPNL
+					 
 		ELSE 
-				SELECT * FROM @tblConsolidatedPNL WHERE strType = @strType  
+				
+				SELECT 
+				 intConsolidatedPNL			= intConsolidatedPNL 
+				,strPNL						= strPNL				
+				,strType					= strType			
+				,intBookId					= intBookId			
+				,strBook					= strBook			
+				,intCompanyId				= intCompanyId		
+				,strCompany					= strCompany			
+				,strPurchaseSale			= strPurchaseSale	
+				,dblBookValue				= CAST(dblBookValue AS NUMERIC(38,10))	
+				,dblMarketValue				= CAST(dblMarketValue AS NUMERIC(38,10))		
+				,dblAmount					= CAST(dblAmount AS NUMERIC(38,10))			
+				,strBookValue				= strBookValue		
+				,strMarketValue				= strMarketValue		
+				,strTotalAmount		 		= strTotalAmount		
+				FROM @tblConsolidatedPNL 
+				WHERE strType = @strType  
 	
 
 END TRY  

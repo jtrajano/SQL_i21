@@ -377,7 +377,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
 	if(@dblRate <> @dblHistoricRate)
-		EXEC [uspCMInsertGainLossBankTransfer] 
+		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss from Bank Transfer'
 	
 END
 ELSE IF @ysnPost = 0
@@ -706,3 +706,5 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+GO
+

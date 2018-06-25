@@ -4,18 +4,18 @@
 	Note: Handle negative quantity received
 */
 CREATE VIEW vyuAPPayables
-WITH SCHEMABINDING
+--WITH SCHEMABINDING
 AS 
 SELECT 
 	A.dtmDate	
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CASE WHEN A.intTransactionType != 1 THEN (B.dblTotal) *  B.dblRate * -1 
+	, CAST(CASE WHEN A.intTransactionType != 1 THEN (B.dblTotal) *  B.dblRate * -1 
 				ELSE (B.dblTotal) * B.dblRate
-		END AS dblTotal
+		END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
-		END AS dblAmountDue 
+		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
@@ -55,11 +55,11 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, ROUND(CASE WHEN A.intTransactionType != 1 THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
+	, CAST(CASE WHEN A.intTransactionType != 1 THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
 				ELSE ISNULL(B.dblTax, 0) * B.dblRate
-		END,2) AS dblTotal
+		END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
-		END AS dblAmountDue 
+		END * B.dblRate AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
@@ -77,7 +77,7 @@ INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId]
 INNER JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
-WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2)  AND A.ysnOrigin = 0
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 13)  AND A.ysnOrigin = 0
 --ORIGIN
 UNION ALL
 SELECT 
@@ -85,7 +85,7 @@ SELECT
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
-	, CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN (A.dblTotal + A.dblTax) * -1 ELSE A.dblTotal + A.dblTax END AS dblTotal
+	, CAST(CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN (A.dblTotal + A.dblTax) * -1 ELSE A.dblTotal + A.dblTax END AS DECIMAL(18,2)) AS dblTotal
 	, CASE WHEN A.intTransactionType != 1 THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -105,19 +105,24 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 13) AND A.ysnOrigin = 1
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
-	 B.intBillId,   
+	 C.intBillId,   
 	 C.strBillId ,
-	 CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
-			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
+	 CAST(
+		 	(CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
+					THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-			WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
-				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
-			ELSE B.dblPayment * A.dblExchangeRate END AS dblAmountPaid,     
+				WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
+					THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+				ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
-	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
-	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblInterest) > 0 THEN B.dblInterest * -1 ELSE B.dblInterest END AS dblInterest 
+	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblDiscount) > 0 
+				THEN B.dblDiscount * -1 ELSE B.dblDiscount 
+			END AS dblDiscount
+	, CASE WHEN C.intTransactionType NOT IN (1,2) AND abs(B.dblInterest) > 0 
+				THEN B.dblInterest * -1 ELSE B.dblInterest 
+			END AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
@@ -163,6 +168,12 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+OUTER APPLY (
+	SELECT TOP 1
+		voucherDetail.dblRate
+	FROM tblAPBillDetail voucherDetail
+	WHERE voucherDetail.intBillDetailId = B.intBillDetailApplied
+) voucherDetailApplied
 WHERE A.ysnPosted = 1
 UNION ALL
 --APPLIED DM, (DM HAVE BEEN USED AS OFFSET IN PREPAID AND DEBIT MEMO TABS)
@@ -245,12 +256,12 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
-	 CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
+	 CAST(CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
 			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
 			WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)
 				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
-			ELSE ABS(B.dblPayment) * ISNULL(A.dblExchangeRate,1) END AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
+			ELSE ABS(B.dblPayment) * ISNULL(A.dblExchangeRate,1) END AS DECIMAL(18,2)) AS dblAmountPaid, --ALWAYS CONVERT TO POSSITIVE TO OFFSET THE PAYMENT
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = 0

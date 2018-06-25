@@ -94,15 +94,26 @@ BEGIN
 END
 
 --payment posting
+--calling this stored procedure assumes that the payment detail data has been updated ex. dblAmountDue
 IF EXISTS(SELECT 1 FROM @paymentDetailIds)
 BEGIN
 	SELECT 
 		[intBillId]				=	A.intBillId,
 		[strBillId]				=	A.strBillId,
-		[dblQtyReceived]		=	CASE WHEN @post = 0 THEN -voucherDetail.dblQtyReceived ELSE voucherDetail.dblQtyReceived END,
+		[dblQtyReceived]		=	(pd.dblPayment + (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END))
+		 							--get the percentage of payment made to total amount due
+									/ (CASE WHEN @post = 1 THEN (voucher.dblAmountDue + pd.dblPayment) 
+											ELSE (voucher.dblAmountDue) END) --get the percentage of payment
+									* voucherDetail.dblQtyReceived
+									* (CASE WHEN @post = 0 THEN -1 ELSE 1 END),
 		[dblCost]				=	voucherDetail.dblCost, 
-		[dblTotal]				=	CAST(CASE WHEN @post = 1 THEN -dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment + pd.dblDiscount, voucher.dblTotal) 
-									ELSE dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment + pd.dblDiscount, voucher.dblTotal) END AS DECIMAL(18,2)),
+		[dblTotal]				=	CAST(CASE WHEN @post = 1 
+											THEN -dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment 
+																		+ (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END)
+																		, voucher.dblTotal) 
+									ELSE dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment 
+																		+ (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END)
+																		, voucher.dblTotal) END AS DECIMAL(18,2)),
 		[dblAmountDue]			=	pd.dblAmountDue,
 		[strCommodity]			=	ISNULL(commodity.strCommodityCode, 'None'),
 		[strItemNo]				=	ISNULL(item.strItemNo, voucherDetail.strMiscDescription),
@@ -129,6 +140,7 @@ BEGIN
 			ON voucherDetail.intUnitOfMeasureId = uom.intItemUOMId
 	LEFT JOIN (tblICItemUOM costuom INNER JOIN tblICUnitMeasure costUnitMeasure ON costuom.intUnitMeasureId = costUnitMeasure.intUnitMeasureId)
 			ON voucherDetail.intCostUOMId = costuom.intItemUOMId
+
 
 	INSERT INTO tblAPVoucherHistory (
 		[intBillId]				

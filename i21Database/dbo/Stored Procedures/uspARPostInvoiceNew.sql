@@ -764,6 +764,22 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 				BEGIN
 					IF (XACT_STATE()) = -1 OR  @Recap = 1
 						ROLLBACK TRANSACTION  @Savepoint
+
+					UPDATE ILD
+					SET
+						 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
+						,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
+						,ILD.[strPostingMessage]		= PID.[strPostingError]
+						,ILD.[strBatchId]				= PID.[strBatchId]
+						,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
+					FROM
+						tblARInvoiceIntegrationLogDetail ILD
+					INNER JOIN
+						@InvalidInvoiceData PID
+							ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+					WHERE
+						ILD.[intIntegrationLogId] = @IntegrationLogId
+						AND ILD.[ysnPost] IS NOT NULL
 				END	
 		END
 			
