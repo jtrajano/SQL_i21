@@ -68,6 +68,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[intForexRateTypeId]
 		,[dblForexRate]
 		,[ysnIsUnposted]
+		,[dtmCreated]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
@@ -99,6 +100,7 @@ SELECT	[intItemId]								= @intItemId
 		,[intForexRateTypeId]					= @intForexRateTypeId
 		,[dblForexRate]							= @dblForexRate
 		,[ysnIsUnposted]						= 0
+		,[dtmCreated]							= GETDATE()
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
