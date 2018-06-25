@@ -16,22 +16,23 @@ AS
 			  , @hintCashOverAccountId			INT = NULL
 
 
-		
-		select @hintCashOverAccountId = intCashOverShort, @strCompanyLocatioName = strLocationName
-			from tblSMCompanyLocation 
-				where intCompanyLocationId in (select intCompanyLocationId 
-													from tblARPOS  
-														where intPOSLogId = @intPOSLogId)
 
-
+		if exists(select top 1 intPOSLogId from tblARPOS where intPOSLogId = @intPOSLogId)
+		begin
+			select @hintCashOverAccountId = intCashOverShort, @strCompanyLocatioName = strLocationName
+				from tblSMCompanyLocation 
+					where intCompanyLocationId in (select intCompanyLocationId 
+														from tblARPOS  
+															where intPOSLogId = @intPOSLogId)
+															
+			IF ISNULL(@hintCashOverAccountId, 0) = 0
+			BEGIN
+				DECLARE @strErrorMsg NVARCHAR(200) = '' + ISNULL(@strCompanyLocatioName, '') + ' does not have GL setup for Cash Over/Short. Please set it up in Company Location > GL Accounts.'
+				RAISERROR(@strErrorMsg, 16, 1)
+				RETURN;
+			END
+		end
 		
-				
-		IF ISNULL(@hintCashOverAccountId, 0) = 0
-		BEGIN
-			DECLARE @strErrorMsg NVARCHAR(200) = '' + ISNULL(@strCompanyLocatioName, '') + ' does not have GL setup for Cash Over/Short. Please set it up in Company Location > GL Accounts.'
-			RAISERROR(@strErrorMsg, 16, 1)
-			RETURN;
-		END
 
 
 
