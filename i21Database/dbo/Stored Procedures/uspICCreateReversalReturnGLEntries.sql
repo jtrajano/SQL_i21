@@ -143,7 +143,7 @@ BEGIN
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType			
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
-				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
+                ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
 				AND GLEntries.strTransactionId = Reversal.strTransactionId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
