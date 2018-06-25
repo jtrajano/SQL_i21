@@ -1,8 +1,13 @@
 ﻿-- Declare the Tax Authority Code that will be used all throughout Michigan Default Data
-	PRINT ('Deploying Michigan Tax Forms')
-	DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MI'
-		, @TaxAuthorityId INT
-	SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MI'
+	, @TaxAuthorityId INT
+	
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
+
+IF(@TaxAuthorityId IS NOT NULL)
+BEGIN
+
+PRINT ('Deploying Michigan Tax Forms')
 
 	-- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
@@ -10091,8 +10096,9 @@ select strQuery = 'UNION ALL SELECT intFilingPacketId = ' + CAST(intFilingPacket
  UNION ALL SELECT intFilingPacketId = 607, strFormCode = '5494', strScheduleCode = 'LNG', strType = 'Liquified Natural Gas', ysnStatus = 1, intFrequency = 1, intMasterId = 222799
  UNION ALL SELECT intFilingPacketId = 675, strFormCode = '5494', strScheduleCode = 'LPG', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 222797
  UNION ALL SELECT intFilingPacketId = 707, strFormCode = '680-3', strScheduleCode = 'Gasoline', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 222800
- 
 
 EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
+
+END
 
 GO
