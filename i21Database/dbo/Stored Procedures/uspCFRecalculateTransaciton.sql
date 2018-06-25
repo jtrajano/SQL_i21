@@ -549,6 +549,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -579,6 +580,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -613,6 +615,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -646,6 +649,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -676,6 +680,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -706,6 +711,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -736,6 +742,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -767,6 +774,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -799,6 +807,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -829,6 +838,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -859,6 +869,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -889,6 +900,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -920,6 +932,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
 		,[strCalculationMethod]				NVARCHAR(MAX)
 		,[dblRate]							NUMERIC(18,6)
+		,[dblBaseRate]						NUMERIC(18,6)
 		,[dblTax]							NUMERIC(18,6)
 		,[dblAdjustedTax]					NUMERIC(18,6)
 		,[dblExemptionPercent]				NUMERIC(18,6)
@@ -1011,6 +1024,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]		
 				,[strCalculationMethod]			
 				,[dblRate]						
+				--,[dblBaseRate]						
 				,[dblTax]						
 				,[dblAdjustedTax]				
 				,[intTaxAccountId]    			
@@ -1194,6 +1208,7 @@ BEGIN
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
 					,[dblRate]			
+					,[dblBaseRate]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
 					,[intTaxAccountId]    			
@@ -1211,7 +1226,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblTax]					
 					,[dblAdjustedTax]			
 					,[intSalesTaxAccountId]    	
@@ -1260,7 +1276,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1276,7 +1293,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1308,6 +1326,9 @@ BEGIN
 						,@intItemUOMId	--intItemUOMId
 						,@intSiteId
 						,0		--@IsDeliver
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate
 					)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 					(
@@ -1316,7 +1337,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1333,6 +1355,7 @@ BEGIN
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
 					,[dblRate]					
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1364,6 +1387,9 @@ BEGIN
 						,@intItemUOMId	--intItemUOMId
 						,@intSiteId
 						,0		--@IsDeliver
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate
 					)
 
 					update @LineItemTaxDetailStagingTable set ysnTaxExempt = 0
@@ -1375,7 +1401,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1391,7 +1418,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1422,7 +1450,10 @@ BEGIN
 						, 0	
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
-						,0		--@IsDeliver										 
+						,0		--@IsDeliver	
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate									 
 					)
 					INSERT INTO @tblCFOriginalTaxZeroQuantity
 					(
@@ -1431,7 +1462,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1447,7 +1479,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1478,7 +1511,10 @@ BEGIN
 						, 0	
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
-						,0		--@IsDeliver										 
+						,0		--@IsDeliver	
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate									 
 					)
 
 				END
@@ -1500,7 +1536,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1516,7 +1553,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1548,6 +1586,9 @@ BEGIN
 					, @intItemUOMId	--intItemUOMId			
 					,@intSiteId
 					,0		--@IsDeliver									 
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate	
 				)
 				INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 			(
@@ -1556,7 +1597,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1572,7 +1614,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1603,7 +1646,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId			
 					,@intSiteId
-					,0		--@IsDeliver									 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate								 
 				)
 
 				
@@ -1615,7 +1661,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1631,7 +1678,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1662,7 +1710,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 				INSERT INTO @tblCFOriginalTaxZeroQuantity
 				(
@@ -1671,7 +1722,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1687,7 +1739,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1718,7 +1771,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 
 				END
@@ -1775,7 +1831,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1800,6 +1857,7 @@ BEGIN
 					,originalTax.strTaxableByOtherTaxes
 					,originalTax.strCalculationMethod
 					,originalTax.dblRate
+					,originalTax.dblBaseRate
 					,originalTax.dblExemptionPercent
 					,originalTax.dblTax
 					,originalTax.dblAdjustedTax
@@ -1828,7 +1886,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1853,6 +1912,7 @@ BEGIN
 					,originalTax.strTaxableByOtherTaxes
 					,originalTax.strCalculationMethod
 					,originalTax.dblRate
+					,originalTax.dblBaseRate
 					,originalTax.dblExemptionPercent
 					,originalTax.dblTax
 					,originalTax.dblAdjustedTax
@@ -1904,7 +1964,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1920,7 +1981,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -1951,7 +2013,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 					INSERT INTO @tblCFOriginalTaxZeroQuantity
 					(
@@ -1960,7 +2025,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -1976,7 +2042,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2007,7 +2074,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -2017,7 +2087,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2033,7 +2104,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2064,7 +2136,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 				(
@@ -2073,7 +2148,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2089,7 +2165,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2120,7 +2197,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 
 					INSERT	INTO @tblCFCalculatedTaxExempt
@@ -2130,7 +2210,8 @@ BEGIN
 						,[intTaxClassId]				
 						,[strTaxableByOtherTaxes]		
 						,[strCalculationMethod]			
-						,[dblRate]			
+						,[dblRate]	
+						,[dblBaseRate]		
 						,[dblExemptionPercent]			
 						,[dblTax]						
 						,[dblAdjustedTax]				
@@ -2146,7 +2227,8 @@ BEGIN
 						,[intTaxClassId]			
 						,[strTaxableByOtherTaxes]	
 						,[strCalculationMethod]		
-						,[dblRate]					
+						,[dblRate]	
+						,[dblBaseRate]				
 						,[dblExemptionPercent]		
 						,[dblTax]					
 						,[dblAdjustedTax]			
@@ -2177,7 +2259,10 @@ BEGIN
 						,0
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
-						,0		--@IsDeliver										 
+						,0		--@IsDeliver		
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate									 
 					)
 					INSERT	INTO @tblCFCalculatedTaxExemptZeroQuantity
 					(
@@ -2186,7 +2271,8 @@ BEGIN
 						,[intTaxClassId]				
 						,[strTaxableByOtherTaxes]		
 						,[strCalculationMethod]			
-						,[dblRate]			
+						,[dblRate]	
+						,[dblBaseRate]		
 						,[dblExemptionPercent]			
 						,[dblTax]						
 						,[dblAdjustedTax]				
@@ -2202,7 +2288,8 @@ BEGIN
 						,[intTaxClassId]			
 						,[strTaxableByOtherTaxes]	
 						,[strCalculationMethod]		
-						,[dblRate]					
+						,[dblRate]	
+						,[dblBaseRate]				
 						,[dblExemptionPercent]		
 						,[dblTax]					
 						,[dblAdjustedTax]			
@@ -2233,7 +2320,10 @@ BEGIN
 						,0
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
-						,0		--@IsDeliver										 
+						,0		--@IsDeliver	
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate									 
 					)
 
 					--SELECT * FROM @tblCFCalculatedTax
@@ -2256,7 +2346,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2272,7 +2363,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2303,7 +2395,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 					INSERT INTO @tblCFOriginalTaxZeroQuantity
 					(
@@ -2312,7 +2407,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2328,7 +2424,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2359,7 +2456,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -2369,7 +2469,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2385,7 +2486,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2416,7 +2518,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId	
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 					(
@@ -2425,7 +2530,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2441,7 +2547,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2472,7 +2579,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId	
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver		
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 
 				END
@@ -2486,7 +2596,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2502,7 +2613,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2533,7 +2645,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 					INSERT INTO @tblCFOriginalTaxZeroQuantity 
 				(
@@ -2542,7 +2657,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2558,7 +2674,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2589,7 +2706,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -2599,7 +2719,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2615,7 +2736,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2646,7 +2768,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver									 
+					,0		--@IsDeliver		
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate							 
 				)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 				(
@@ -2655,7 +2780,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2671,7 +2797,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2702,7 +2829,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver									 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate								 
 				)
 
 				--	SELECT * FROM @tblCFOriginalTax
@@ -2721,7 +2851,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2746,6 +2877,7 @@ BEGIN
 					,originalTax.strTaxableByOtherTaxes
 					,originalTax.strCalculationMethod
 					,originalTax.dblRate
+					,originalTax.dblBaseRate
 					,originalTax.dblExemptionPercent
 					,originalTax.dblTax
 					,originalTax.dblAdjustedTax
@@ -2775,7 +2907,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2800,6 +2933,7 @@ BEGIN
 					,originalTax.strTaxableByOtherTaxes
 					,originalTax.strCalculationMethod
 					,originalTax.dblRate
+					,originalTax.dblBaseRate
 					,originalTax.dblExemptionPercent
 					,originalTax.dblTax
 					,originalTax.dblAdjustedTax
@@ -2845,7 +2979,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2861,7 +2996,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2892,7 +3028,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 					INSERT INTO @tblCFOriginalTaxZeroQuantity	
 				(
@@ -2901,7 +3040,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2917,7 +3057,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -2948,7 +3089,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 				
 
@@ -2959,7 +3103,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -2975,7 +3120,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3006,7 +3152,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 				(
@@ -3015,7 +3164,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3031,7 +3181,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3062,7 +3213,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 
 
@@ -3073,7 +3227,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3089,7 +3244,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]			
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3120,7 +3276,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 					INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity	
 				(
@@ -3129,7 +3288,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3145,7 +3305,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3176,7 +3337,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId		
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 
 					--SELECT * FROM @tblCFCalculatedTaxExempt
@@ -3200,7 +3364,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3216,7 +3381,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3247,7 +3413,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 					INSERT INTO  @tblCFOriginalTaxZeroQuantity 
 				(
@@ -3256,7 +3425,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3272,7 +3442,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3303,7 +3474,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -3313,7 +3487,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]	
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3329,7 +3504,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3360,7 +3536,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate										 
 				)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 					(
@@ -3369,7 +3548,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3385,7 +3565,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3416,7 +3597,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 
 				END
@@ -3430,7 +3614,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]		
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3446,7 +3631,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]		
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3477,7 +3663,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 					INSERT INTO  @tblCFOriginalTaxZeroQuantity 
 				(
@@ -3486,7 +3675,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3502,7 +3692,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3533,7 +3724,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver											 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate											 
 				)
 
 					INSERT INTO @tblCFCalculatedTax	
@@ -3543,7 +3737,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3559,7 +3754,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]					
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3590,7 +3786,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
 				(
@@ -3599,7 +3798,8 @@ BEGIN
 					,[intTaxClassId]				
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
-					,[dblRate]			
+					,[dblRate]	
+					,[dblBaseRate]		
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3615,7 +3815,8 @@ BEGIN
 					,[intTaxClassId]			
 					,[strTaxableByOtherTaxes]	
 					,[strCalculationMethod]		
-					,[dblRate]					
+					,[dblRate]	
+					,[dblBaseRate]				
 					,[dblExemptionPercent]		
 					,[dblTax]					
 					,[dblAdjustedTax]			
@@ -3646,7 +3847,10 @@ BEGIN
 					,0
 					, @intItemUOMId	--intItemUOMId
 					,@intSiteId
-					,0		--@IsDeliver										 
+					,0		--@IsDeliver	
+					,NULL	--@CurrencyId
+					,NULL	--@@CurrencyExchangeRateTypeId
+					,NULL	--@@CurrencyExchangeRate									 
 				)
 
 				
@@ -3668,6 +3872,7 @@ BEGIN
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
 					,[dblRate]			
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3692,6 +3897,7 @@ BEGIN
 					,originalTax.strTaxableByOtherTaxes
 					,originalTax.strCalculationMethod
 					,originalTax.dblRate
+					,originalTax.dblBaseRate
 					,originalTax.dblExemptionPercent
 					,originalTax.dblTax
 					,originalTax.dblAdjustedTax
@@ -3721,6 +3927,7 @@ BEGIN
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
 					,[dblRate]			
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3745,6 +3952,7 @@ BEGIN
 					,originalTax.strTaxableByOtherTaxes
 					,originalTax.strCalculationMethod
 					,originalTax.dblRate
+					,originalTax.dblBaseRate
 					,originalTax.dblExemptionPercent
 					,originalTax.dblTax
 					,originalTax.dblAdjustedTax
@@ -3853,6 +4061,7 @@ BEGIN
 				,[strTaxableByOtherTaxes]		
 				,[strCalculationMethod]			
 				,[dblRate]						
+				--,[dblBaseRate]						
 				,[dblTax]						
 				,[dblAdjustedTax]				
 				,[intTaxAccountId]    			
@@ -3928,6 +4137,7 @@ BEGIN
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
 					,[dblRate]			
+					,[dblBaseRate]			
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -3952,6 +4162,7 @@ BEGIN
 					,intTaxClassId
 					,strTaxableByOtherTaxes
 					,strCalculationMethod
+					,0
 					,0
 					,dblExemptionPercent
 					,dblTax
@@ -3981,6 +4192,7 @@ BEGIN
 					,[strTaxableByOtherTaxes]		
 					,[strCalculationMethod]			
 					,[dblRate]			
+					,[dblBaseRate]
 					,[dblExemptionPercent]			
 					,[dblTax]						
 					,[dblAdjustedTax]				
@@ -4005,6 +4217,7 @@ BEGIN
 					,intTaxClassId
 					,strTaxableByOtherTaxes
 					,strCalculationMethod
+					,0
 					,0
 					,dblExemptionPercent
 					,dblTax

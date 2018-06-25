@@ -1,21 +1,24 @@
 ﻿CREATE FUNCTION [dbo].[fnGetTaxGroupTaxCodesForCustomer]
 (
-	 @TaxGroupId				INT
-	,@CustomerId				INT
-	,@TransactionDate			DATETIME
-	,@ItemId					INT
-	,@ShipToLocationId			INT
-	,@IncludeExemptedCodes		BIT
-	,@IsCustomerSiteTaxable		BIT
-	,@CardId					INT
-	,@VehicleId					INT
+	 @TaxGroupId					INT
+	,@CustomerId					INT
+	,@TransactionDate				DATETIME
+	,@ItemId						INT
+	,@ShipToLocationId				INT
+	,@IncludeExemptedCodes			BIT
+	,@IsCustomerSiteTaxable			BIT
+	,@CardId						INT
+	,@VehicleId						INT
 	,@SiteId					INT
-	,@DisregardExemptionSetup	BIT
-	,@ItemUOMId					INT = NULL
-	,@CompanyLocationId			INT
-	,@FreightTermId				INT
-	,@CFSiteId					INT
-	,@IsDeliver					BIT
+	,@DisregardExemptionSetup		BIT
+	,@ItemUOMId						INT = NULL
+	,@CompanyLocationId				INT
+	,@FreightTermId					INT
+	,@CFSiteId						INT
+	,@IsDeliver						BIT
+	,@CurrencyId					INT				= NULL
+	,@CurrencyExchangeRateTypeId	INT				= NULL
+	,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
 )
 RETURNS @returntable TABLE
 (
@@ -27,6 +30,7 @@ RETURNS @returntable TABLE
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
 	,[strCalculationMethod]			NVARCHAR(30)
 	,[dblRate]						NUMERIC(18,6)
+	,[dblBaseRate]					NUMERIC(18,6)
 	,[dblExemptionPercent]			NUMERIC(18,6)
 	,[dblTax]						NUMERIC(18,6)
 	,[dblAdjustedTax]				NUMERIC(18,6)
@@ -63,6 +67,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[dblExemptionPercent]
 		,[dblTax]
 		,[dblAdjustedTax]
@@ -87,6 +92,7 @@ BEGIN
 		,[strTaxableByOtherTaxes]		= TC.[strTaxableByOtherTaxes]
 		,[strCalculationMethod]			= R.[strCalculationMethod]
 		,[dblRate]						= R.[dblRate]
+		,[dblBaseRate]					= R.[dblBaseRate]
 		,[dblExemptionPercent]			= E.[dblExemptionPercent]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
@@ -112,7 +118,7 @@ BEGIN
 	CROSS APPLY
 		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver) E
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @ItemUOMId) R			
+		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) R			
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
 		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)

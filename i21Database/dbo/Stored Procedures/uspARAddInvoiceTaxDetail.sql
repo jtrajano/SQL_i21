@@ -6,6 +6,7 @@
 	,@TaxableByOtherTaxes	NVARCHAR(MAX)	= NULL
     ,@CalculationMethod		NVARCHAR(15)	= NULL
     ,@Rate					NUMERIC(18, 6)	= 0.000000 
+    ,@BaseRate				NUMERIC(18, 6)	= 0.000000 
     ,@SalesTaxAccountId		INT				= NULL
     ,@Tax					NUMERIC(18, 6)	= 0.000000
     ,@AdjustedTax			NUMERIC(18, 6)	= 0.000000
@@ -30,11 +31,14 @@ SET ANSI_WARNINGS OFF
 IF @RaiseError = 1
 	SET XACT_ABORT ON
 	
-DECLARE  @ZeroDecimal	NUMERIC(18, 6)	
-		,@InvoiceDate	DATETIME
-		,@ItemUOMId		INT
-		,@InitTranCount	INT
-		,@Savepoint		NVARCHAR(32)
+DECLARE  @ZeroDecimal					NUMERIC(18, 6)	
+		,@InvoiceDate					DATETIME
+		,@ItemUOMId						INT
+		,@InitTranCount					INT
+		,@Savepoint						NVARCHAR(32)
+		,@CurrencyId					INT				= NULL
+		,@CurrencyExchangeRateTypeId	INT				= NULL
+		,@CurrencyExchangeRate			NUMERIC(18,6)   = NULL
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARAddInvoiceTaxDetail' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -42,8 +46,11 @@ SET @Savepoint = SUBSTRING(('ARAddInvoiceTaxDetail' + CONVERT(VARCHAR, @InitTran
 SET @ZeroDecimal = 0.000000
 
 SELECT 
-	@InvoiceDate = ARI.[dtmDate]
-	,@ItemUOMId	 = ARID.[intItemUOMId]
+	@InvoiceDate					= ARI.[dtmDate]
+	,@ItemUOMId						= ARID.[intItemUOMId]
+	,@CurrencyId					= ARI.[intCurrencyId]
+	,@CurrencyExchangeRateTypeId	= ARID.[intCurrencyExchangeRateTypeId]
+	,@CurrencyExchangeRate			= ISNULL(ARID.[dblCurrencyExchangeRate], 1.000000)
 FROM
 	tblARInvoice ARI
 INNER JOIN
@@ -89,7 +96,7 @@ SELECT TOP 1
 FROM
 	tblSMTaxCode
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId) TRD		
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) TRD		
 WHERE
 	[intTaxCodeId] = @TaxCodeId
 
@@ -111,15 +118,6 @@ END
 	
 BEGIN TRY
 
-	DECLARE	 @CurrencyExchangeRate	DECIMAL(18,6) 
-
-	SELECT
-		@CurrencyExchangeRate	= ISNULL([dblCurrencyExchangeRate], 1)
-	FROM
-		tblARInvoiceDetail WITH (NOLOCK)
-	WHERE
-		[intInvoiceDetailId] = @InvoiceDetailId
-
 	INSERT INTO [tblARInvoiceDetailTax]
 		([intInvoiceDetailId]
 		,[intTaxGroupId]
@@ -128,6 +126,7 @@ BEGIN TRY
 		,[strTaxableByOtherTaxes]
 		,[strCalculationMethod]
 		,[dblRate]
+		,[dblBaseRate]
 		,[intSalesTaxAccountId]
 		,[dblTax]
 		,[dblAdjustedTax]
@@ -146,6 +145,7 @@ BEGIN TRY
 		,strTaxableByOtherTaxes	= CASE WHEN ISNULL(@TaxableByOtherTaxes,'') <> '' THEN ISNULL(@TaxableByOtherTaxes,'') ELSE ISNULL([strTaxableByOtherTaxes],'') END
 		,strCalculationMethod	= CASE WHEN ISNULL(@CalculationMethod,'') <> '' THEN @CalculationMethod ELSE TRD.[strCalculationMethod] END
 		,dblRate				= CASE WHEN ISNULL(@Rate,0) <> 0 THEN @Rate ELSE TRD.dblRate END
+		,dblBaseRate			= CASE WHEN ISNULL(@BaseRate,0) <> 0 THEN @BaseRate ELSE (CASE WHEN @CurrencyExchangeRate = 1.000000 THEN TRD.dblRate ELSE TRD.dblBaseRate END) END
 		,intSalesTaxAccountId	= CASE WHEN ISNULL(@SalesTaxAccountId,0) <> 0 THEN @SalesTaxAccountId ELSE intSalesTaxAccountId END
 		,dblTax					= ISNULL(@Tax, @ZeroDecimal)
 		,dblAdjustedTax			= ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal))
@@ -159,7 +159,7 @@ BEGIN TRY
 	FROM
 		tblSMTaxCode
 	CROSS APPLY
-		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId) TRD		
+		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) TRD		
 	WHERE
 		[intTaxCodeId] = @TaxCodeId 
 			

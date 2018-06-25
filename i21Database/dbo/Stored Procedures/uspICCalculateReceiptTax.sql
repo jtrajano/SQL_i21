@@ -274,7 +274,7 @@ BEGIN
 			,[intUnitMeasureId]				= @TaxUOMId
 			,[intSort]						= 1
 			,[intConcurrencyId]				= 1
-	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@TaxUOMId) vendorTax
+	FROM	[dbo].[fnGetItemTaxComputationForVendor](@ItemId, @EntityId, @TransactionDate, @Amount, @Qty, @TaxGroupId, @LocationId, @ShipFromId, 0, @FreightTermId,0,@TaxUOMId, NULL, NULL, NULL) vendorTax
 			LEFT JOIN tblICInventoryReceiptItem ri 
 				ON ri.intInventoryReceiptItemId = @InventoryReceiptItemId
 								

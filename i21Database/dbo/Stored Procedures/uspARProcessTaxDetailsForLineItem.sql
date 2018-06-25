@@ -37,6 +37,7 @@ DECLARE @EntriesForProcessing AS TABLE(
 	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
 	,[strCalculationMethod]			NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL
 	,[dblRate]						NUMERIC(18, 6)									NULL
+	,[dblBaseRate]					NUMERIC(18, 6)									NULL
 	,[intTaxAccountId]				INT												NULL
 	,[dblTax]						NUMERIC(18, 6)									NULL
 	,[dblAdjustedTax]				NUMERIC(18, 6)									NULL
@@ -68,6 +69,7 @@ INSERT INTO @EntriesForProcessing
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
 	,[dblRate]
+	,[dblBaseRate]
 	,[intTaxAccountId]
 	,[dblTax]
 	,[dblAdjustedTax]
@@ -89,6 +91,7 @@ SELECT
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
 	,[dblRate]
+	,[dblBaseRate]
 	,[intTaxAccountId]
 	,[dblTax]
 	,[dblAdjustedTax]
@@ -138,6 +141,7 @@ DECLARE	@Id					INT
 	,@TaxableByOtherTaxes	NVARCHAR(MAX)
 	,@CalculationMethod		NVARCHAR(15)
 	,@Rate					NUMERIC(18, 6)
+	,@BaseRate					NUMERIC(18, 6)
 	,@TaxAccountId			INT
 	,@Tax					NUMERIC(18, 6)
 	,@AdjustedTax			NUMERIC(18, 6)
@@ -163,6 +167,7 @@ BEGIN TRY
 			,@TaxableByOtherTaxes	= [strTaxableByOtherTaxes]
 			,@CalculationMethod		= [strCalculationMethod]
 			,@Rate					= [dblRate]
+			,@BaseRate				= [dblBaseRate]
 			,@TaxAccountId			= [intTaxAccountId]
 			,@Tax					= [dblTax]
 			,@AdjustedTax			= [dblAdjustedTax]
@@ -238,6 +243,7 @@ BEGIN TRY
 		,ARIDT.[strTaxableByOtherTaxes]	= EFP.[strTaxableByOtherTaxes]
 		,ARIDT.[strCalculationMethod]	= EFP.[strCalculationMethod]
 		,ARIDT.[dblRate]				= EFP.[dblRate]
+		,ARIDT.[dblBaseRate]			= EFP.[dblBaseRate]
 		,ARIDT.[intSalesTaxAccountId]	= EFP.[intTaxAccountId]
 		,ARIDT.[dblTax]					= EFP.[dblTax]
 		,ARIDT.[dblAdjustedTax]			= EFP.[dblAdjustedTax]
