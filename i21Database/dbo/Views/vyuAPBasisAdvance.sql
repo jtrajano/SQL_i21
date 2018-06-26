@@ -39,7 +39,7 @@ SELECT TOP 100 PERCENT * FROM (
                         + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0)) 
                         * ISNULL(receiptItem.dblOpenReceive,0)) 
                     - ISNULL(discounts.dblAmount,0)
-                    + ISNULL(charges.dblAmount, 0)
+                    - ISNULL(charges.dblAmount, 0)
                     + ISNULL(taxes.dblTax,0.00)) 
                     * (ISNULL(basisCommodity.dblPercentage,0.00) / 100))
                     - ISNULL(priorAdvances.dblPriorAdvance,0.00) AS DECIMAL(18,2)) END AS dblAmountToAdvance
@@ -75,7 +75,8 @@ SELECT TOP 100 PERCENT * FROM (
         ON itemUOM.intItemId = ticket.intItemId AND itemUOM.ysnStockUnit = 1
     OUTER APPLY (
         SELECT
-            SUM(charge.dblAmount) AS dblAmount
+            SUM(CASE WHEN charge.ysnPrice > 0 THEN -charge.dblAmount ELSE charge.dblAmount END) AS dblAmount
+			
         FROM tblQMTicketDiscount tktDiscount
         INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
         INNER JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
@@ -89,7 +90,7 @@ SELECT TOP 100 PERCENT * FROM (
 		SELECT SUM(dblAmount) AS dblAmount
 		FROM (
 			SELECT
-				(ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 THEN -1 ELSE 1 END))
+				(ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 AND ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) = receipt.intEntityVendorId THEN -1 ELSE 1 END))
 					+ (
 						ISNULL((CASE WHEN ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) != receipt.intEntityVendorId
 									THEN (CASE WHEN chargeTax.ysnCheckoffTax = 0 THEN ABS(charge.dblTax) ELSE charge.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
