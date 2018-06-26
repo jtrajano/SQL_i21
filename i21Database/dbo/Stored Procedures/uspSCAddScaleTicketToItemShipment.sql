@@ -219,7 +219,7 @@ BEGIN
 										ELSE SC.dblShrink 
 									END
 		,ysnDestinationWeightsAndGrades = CASE
-											WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' THEN 1
+											WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strwestrWhereFinalizedGrade,'Origin') = 'Destination' THEN 1
 											ELSE 0 
 										END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
