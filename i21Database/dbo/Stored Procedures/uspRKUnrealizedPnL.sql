@@ -49,7 +49,7 @@ SELECT  intFutOptTransactionId,
 		--CASE WHEN bc.intFuturesRateType= 1 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission1,  
 		 --This filter is to get the correct commission based on date						
        dblFutCommission1 = ISNULL((select TOP 1
-		(case when bc.intFuturesRateType = 2 then 0  
+		(case when bc.intFuturesRateType = 1 then 0  
 			else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 'true' then cur.intCent else 1 end 
 		end) 
 		from tblRKBrokerageCommission bc
