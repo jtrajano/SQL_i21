@@ -30,6 +30,23 @@ IF @ForDelete = 1
 		IF @strTransactionType = 'Credit Note' AND @intOriginalInvoiceId IS NOT NULL
 			UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
 	END
+ELSE
+	BEGIN
+		UPDATE RT
+		SET RT.dtmLastProcess = I.dtmPostDate
+		  , RT.dtmNextProcess = DATEADD(MONTH, 1, I.dtmPostDate)
+		FROM tblSMRecurringTransaction RT
+		INNER JOIN (
+			SELECT intInvoiceId
+				 , strInvoiceNumber
+				 , dtmPostDate
+			FROM tblARInvoice
+			WHERE ysnRecurring = 1
+			  AND ysnPosted = 0
+			  AND intInvoiceId = @InvoiceId
+		) I ON RT.intTransactionId = I.intInvoiceId
+		   AND RT.strTransactionNumber = I.strInvoiceNumber
+	END
 
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
