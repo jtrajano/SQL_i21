@@ -20,7 +20,9 @@ BEGIN
 		SELECT SL.intStorageLocationId
 			,SL.strName
 			,SL.intSubLocationId
+			,CSL.strSubLocationName
 		FROM dbo.tblICStorageLocation SL
+		JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		WHERE intLocationId = @intLocationId
 			AND NOT EXISTS (
 				SELECT *
@@ -42,7 +44,9 @@ BEGIN
 		SELECT SL.intStorageLocationId
 			,SL.strName
 			,SL.intSubLocationId
+			,CSL.strSubLocationName
 		FROM dbo.tblICStorageLocation SL
+		JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		WHERE intLocationId = @intLocationId
 			AND NOT EXISTS (
 				SELECT *
