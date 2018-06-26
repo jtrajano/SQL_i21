@@ -14,6 +14,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @DefaultLotCondition NVARCHAR(50)
+SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
 
 DECLARE @strSubLocationDefault NVARCHAR(50);
 DECLARE @strStorageUnitDefault NVARCHAR(50);
@@ -157,6 +159,7 @@ DECLARE @tblInventoryTransaction TABLE(
 						ELSE MAX(t.dblCost) 
 					END
 			,Lot.strWarehouseRefNo
+			,COALESCE(Lot.strCondition, @DefaultLotCondition) strCondition
 		FROM @tblInventoryTransaction t 
 		LEFT JOIN tblICItem i 
 			ON i.intItemId = t.intItemId
@@ -232,6 +235,7 @@ DECLARE @tblInventoryTransaction TABLE(
 				,CostMethod.strCostingMethod
 				,FIFO.dblCost	
 				,Lot.strWarehouseRefNo
+				,Lot.strCondition
 	END
 	ELSE
 	BEGIN
@@ -275,6 +279,7 @@ DECLARE @tblInventoryTransaction TABLE(
 						ELSE MAX(t.dblCost) 
 					END
 			, Lot.strWarehouseRefNo
+			,COALESCE(Lot.strCondition, @DefaultLotCondition) strCondition
 		FROM @tblInventoryTransaction t 
 		LEFT JOIN tblICItem i 
 			ON i.intItemId = t.intItemId
@@ -350,5 +355,6 @@ DECLARE @tblInventoryTransaction TABLE(
 				,CostMethod.strCostingMethod
 				,FIFO.dblCost
 				,Lot.strWarehouseRefNo
+				,Lot.strCondition
 	END
 END
