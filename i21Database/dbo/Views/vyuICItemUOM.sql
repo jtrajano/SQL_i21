@@ -17,12 +17,12 @@ SELECT
 		, uom.ysnStockUnit
 		, uom.ysnAllowPurchase
 		, uom.ysnAllowSale
-		, uom.dblMaxQty
-		, uom.dblUnitQty
-		, uom.dblHeight
-		, uom.dblLength
-		, uom.dblWeight
-		, uom.dblVolume
+		, CAST(uom.dblMaxQty AS NUMERIC(37, 18)) dblMaxQty
+		, CAST(uom.dblUnitQty AS NUMERIC(37, 18)) dblUnitQty
+		, CAST(uom.dblHeight AS NUMERIC(37, 18)) dblHeight
+		, CAST(uom.dblLength AS NUMERIC(37, 18)) dblLength
+		, CAST(uom.dblWeight AS NUMERIC(37, 18)) dblWeight
+		, CAST(uom.dblVolume AS NUMERIC(37, 18)) dblVolume
 		, uom.strUpcCode
 		, uom.strLongUPCCode
 FROM	vyuICGetItemUOM uom
