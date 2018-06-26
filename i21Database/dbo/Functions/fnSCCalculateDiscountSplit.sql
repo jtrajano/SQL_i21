@@ -5,6 +5,7 @@
 	@intTicketDiscountId INT,
 	@dblUnitQty AS NUMERIC(38, 20),
 	@intUnitMeasureId INT = NULL,
+	@dblCost AS NUMERIC(38, 20),
 	@ysnDeliverySheet BIT = 0
 )
 RETURNS NUMERIC(18, 6) 
@@ -27,14 +28,16 @@ BEGIN
 	,@dblSplitPercent AS NUMERIC(38, 20)
 	,@dblUOMQty AS NUMERIC(38, 20)
 	,@intItemId AS NUMERIC(38, 20)
-	,@dblQtyToDistribute AS NUMERIC(38, 20);
+	,@dblQtyToDistribute AS NUMERIC(38, 20)
+	,@strDiscountChargeType NVARCHAR(10);
 
 	SELECT @dblTicketGrossUnit = dblGrossUnits, @dblTicketShrinkUnit = dblShrink, @dblTicketNetUnits = dblNetUnits 
 	, @dblTicketGrossWeight = (dblGrossWeight + ISNULL(dblGrossWeight1, 0) + ISNULL(dblGrossWeight2, 0))
 	, @dblTicketTareWeight = (dblTareWeight + ISNULL(dblTareWeight1, 0) + ISNULL(dblTareWeight2, 0))
 	, @intItemId = intItemId
 	FROM tblSCTicket WHERE intTicketId = @intTicketId
-	SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId;
+	SELECT @dblDiscountAmount = dblDiscountAmount, @strDiscountCalculationOptionId = strCalcMethod, @strDiscountChargeType = strDiscountChargeType 
+	FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId;
 
 	IF @ysnDeliverySheet = 0
 	BEGIN
@@ -69,5 +72,8 @@ BEGIN
 	ELSE 
 		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
 		SET @calculatedValue =  (@dblQtyToDistribute / @dblUOMQty) * @dblDiscountAmount
+	
+	IF @strDiscountChargeType = 'Percent'
+		RETURN (@calculatedValue * @dblCost)
 	RETURN @calculatedValue
 END
