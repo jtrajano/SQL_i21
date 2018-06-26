@@ -18,6 +18,7 @@ AS
 		,P.strProgramDescription
 		,P.strVendorProgramId
 		,E.strVendorCustomerLocation
+		,ysnPosted = CAST(ISNULL(D.ysnPosted,0) AS BIT)
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
