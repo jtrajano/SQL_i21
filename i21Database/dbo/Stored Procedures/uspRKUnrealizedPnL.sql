@@ -66,7 +66,7 @@ SELECT  intFutOptTransactionId,
 			  AND convert(datetime,CONVERT(VARCHAR(10),h.dtmMatchDate,110),110) <= @dtmToDate),0) as MatchShort,            
 		c.intCurrencyID as intCurrencyId,c.intCent,c.ysnSubCurrency,intFutOptTransactionHeaderId,ysnExpired,c.intCent ComCent,c.ysnSubCurrency ComSubCurrency            
 		,IsNull(dbo.fnRKGetVariationMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0)*fm.dblContractSize dblVariationMargin1
-		,IsNull(dbo.fnRKGetInitialMargin (ot.intFutOptTransactionId ,@dtmToDate,ot.dtmFilledDate), 0.0) as dblInitialMargin		
+		,IsNull(dbo.fnRKGetInitialMargin (ot.intFutOptTransactionId), 0.0) as dblInitialMargin		
  FROM tblRKFutOptTransaction ot   
  JOIN tblRKFuturesMonth om on om.intFutureMonthId=ot.intFutureMonthId   and ot.strStatus='Filled'
  JOIN tblRKBrokerageAccount acc on acc.intBrokerageAccountId=ot.intBrokerageAccountId  
@@ -84,7 +84,7 @@ SELECT  intFutOptTransactionId,
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
 	AND convert(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) BETWEEN @dtmFromDate AND @dtmToDate
-	AND ysnExpired = @ysnExpired
+	AND isnull(ysnExpired,0) = case when isnull(@ysnExpired,'false')= 'true' then isnull(ysnExpired,0) else @ysnExpired end
 	AND ot.intInstrumentTypeId =1
   )t1)t1 
 )t1 where (dblLong<>0 or dblShort <>0) 
