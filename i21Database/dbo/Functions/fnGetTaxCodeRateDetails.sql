@@ -22,6 +22,10 @@ BEGIN
 	DECLARE @DefaultCurrencyId INT
 	DECLARE @ToBse BIT = 1
 
+	SET @ExchangeRate = @CurrencyExchangeRate
+	IF ISNULL(@ExchangeRate, 0.000000) = 0.000000
+		SET @ExchangeRate = 1.000000
+
 	SELECT TOP 1 @DefaultCurrencyId = [intDefaultCurrencyId] FROM tblSMCompanyPreference
 	IF @CurrencyExchangeRateTypeId IS NOT NULL AND ISNULL(@CurrencyExchangeRate, 0.000000) = 0.000000
 		BEGIN
@@ -67,8 +71,6 @@ BEGIN
 				END
 		END		
 
-	IF ISNULL(@ExchangeRate, 0.000000) = 0.000000
-		SET @ExchangeRate = 1.000000
 
 	INSERT INTO @returntable
 	SELECT TOP 1 

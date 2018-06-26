@@ -262,6 +262,7 @@ BEGIN TRY
 					,[strTaxableByOtherTaxes]
 					,[strCalculationMethod]
 					,[dblRate]
+					,[dblBaseRate]
 					,[intSalesTaxAccountId]
 					,[dblTax]
 					,[dblAdjustedTax]
@@ -282,6 +283,7 @@ BEGIN TRY
 					,[strTaxableByOtherTaxes]
 					,[strCalculationMethod]
 					,[dblRate]
+					,ISNULL([dblBaseRate], [dblRate])
 					,[intSalesTaxAccountId]
 					,[dblTax]
 					,[dblAdjustedTax]

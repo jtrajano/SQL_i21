@@ -315,6 +315,7 @@ INSERT INTO @LineItemTaxes(
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
 	,[dblRate]
+	,[dblBaseRate]
 	,[intTaxAccountId]
 	,[dblTax]
 	,[dblAdjustedTax]
@@ -335,6 +336,7 @@ SELECT
 	,[strTaxableByOtherTaxes]	= ARIDT.[strTaxableByOtherTaxes] 
 	,[strCalculationMethod]		= ARIDT.[strCalculationMethod]
 	,[dblRate]					= ARIDT.[dblRate]
+	,[dblBaseRate]				= ISNULL(ARIDT.[dblBaseRate], ARIDT.[dblRate])
 	,[intTaxAccountId]			= ARIDT.[intSalesTaxAccountId]
 	,[dblTax]					= ARIDT.[dblTax]
 	,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]
