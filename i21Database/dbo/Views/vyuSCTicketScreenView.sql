@@ -15,7 +15,6 @@
 	,SCT.strScaleOperatorUser
 	,SCT.intEntityScaleOperatorId
 	,SCT.strTruckName
-	,SCT.strDriverName
 	,SCT.ysnDriverOff
 	,SCT.ysnSplitWeightTicket
 	,SCT.ysnGrossManual
@@ -132,6 +131,7 @@
 	,SCT.ysnDestinationWeightGradePost
 	,SCT.strPlateNumber
 	,SCT.blbPlateNumber
+	,SCT.intEntityContactId
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule
 	,SMCSubLocation.strSubLocationName
@@ -153,6 +153,7 @@
 	,EMEntityFarm.strLocationName AS strFarmField
 	,EMEntity.strName AS strCustomerNumber
 	,EMEntity.strName AS strCustomerName
+	,EMDriver.strName AS strDriverName
 
 	,ICItem.strItemNo
 	,ICCA.strDescription AS strGrade
@@ -283,3 +284,4 @@
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
+	LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
