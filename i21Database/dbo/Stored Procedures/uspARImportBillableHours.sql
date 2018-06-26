@@ -208,22 +208,17 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 
 				IF @Post = 1
 				BEGIN
-					DECLARE	@batchId		NVARCHAR(20),
-							@SuccessCount	INT,
-							@InvCount		INT
-				
 					EXEC [dbo].[uspARPostInvoice]
 							@post				= 1,
 							@recap				= 0,
 							@param				= @strCreatedInvoices,
 							@userId				= @UserId,
-							@successfulCount	= @SuccessCount OUT,
-							@invalidCount		= @InvCount OUT,
+							@successfulCount	= @SuccessfulCount OUT,
+							@invalidCount		= @InvalidCount OUT,
 							@success			= @IsSuccess OUT,
 							@batchIdUsed		= @BatchIdUsed OUT,
 							@recapId			= NULL,
-							@transType			= N'Invoice'
-				
+							@transType			= N'Invoice'				
 				END 
 			END
 	END
