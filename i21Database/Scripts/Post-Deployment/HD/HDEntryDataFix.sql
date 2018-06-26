@@ -580,4 +580,25 @@ GO
 
 GO
 	PRINT N'End Creating Help Desk Project Image Id';
+	PRINT N'Start updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';
+GO
+
+	update
+		a
+	set
+		a.intCurrencyId							= c.intCurrencyID
+		,a.intCurrencyExchangeRateTypeId		= (select top 1 d.intAccountsPayableRateTypeId from tblSMMultiCurrency d)
+		,a.dtmExchangeRateDate					= a.dtmCreated
+		,a.dblCurrencyRate						= (select e.dblRate from fnSMGetForexRate(c.intCurrencyID,(select top 1 d.intAccountsPayableRateTypeId from tblSMMultiCurrency d),a.dtmCreated) e)
+	from
+		tblHDTicket a
+		,tblARCustomer b
+		,tblSMCurrency c
+	where
+		a.intCurrencyId is null
+		and b.intEntityId = a.intCustomerId
+		and c.intCurrencyID = b.intCurrencyId
+
+GO
+	PRINT N'End updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';
 GO
