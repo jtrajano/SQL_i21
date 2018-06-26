@@ -60,6 +60,7 @@ AS
 		ON B.intInvoiceDetailId = Q.intTransactionDetailId
 		AND A.intInvoiceId = Q.intTransactionId
 		AND A.strInvoiceNumber = Q.strTransactionId
+		AND Q.ysnIsUnposted = 0
 	OUTER APPLY dbo.fnBBGetChargeRates(N.intProgramChargeId,D.intEntityLocationId,B.intItemId,J.intUnitMeasureId,A.dtmDate) P
 	WHERE B.dblPrice = 0
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
