@@ -11,6 +11,7 @@
     [dblDailyRate]        NUMERIC (18, 6) NULL,
     [dblMinRate]          NUMERIC (18, 6) NULL,
     [dblMaxRate]          NUMERIC (18, 6) NULL,
+	[ysnPegged]			  BIT			  NOT NULL DEFAULT 0, 
     [intSort]             INT             NULL,
     [intConcurrencyId]    INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_SMCurrency_CurrencyID] PRIMARY KEY CLUSTERED ([intCurrencyID] ASC),
