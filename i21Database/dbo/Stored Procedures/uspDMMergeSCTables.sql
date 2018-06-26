@@ -13,173 +13,24 @@ DECLARE @Columns NVARCHAR(MAX),
 		@ValueColumns NVARCHAR(MAX);
 
 BEGIN
-    -- tblSCScaleSetup
+	-- tblSCScaleSetup
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCScaleSetup' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCScaleSetup'
+    
     SET @SQLString = N'MERGE tblSCScaleSetup AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCScaleSetup]) AS Source
         ON (Target.intScaleSetupId = Source.intScaleSetupId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strStationShortDescription= Source.strStationShortDescription , Target.strStationDescription= Source.strStationDescription, Target.intStationType= Source.intStationType
-			, Target.intTicketPoolId= Source.intTicketPoolId, Target.strAddress= Source.strAddress, Target.strZipCode= Source.strZipCode
-			, Target.strCity= Source.strCity, Target.strState= Source.strState, Target.strCountry= Source.strCountry
-			, Target.strPhone= Source.strPhone, Target.intLocationId= Source.intLocationId, Target.ysnAllowManualTicketNumber= Source.ysnAllowManualTicketNumber, Target.strScaleOperator= Source.strScaleOperator
-			, Target.intScaleProcessing= Source.intScaleProcessing, Target.intTransferDelayMinutes= Source.intTransferDelayMinutes, Target.intBatchTransferInterval= Source.intBatchTransferInterval
-			, Target.strLocalFilePath= Source.strLocalFilePath, Target.strServerPath= Source.strServerPath, Target.strWebServicePath= Source.strServerPath
-			, Target.intMinimumPurgeDays= Source.intMinimumPurgeDays, Target.dtmLastPurgeDate= Source.dtmLastPurgeDate, Target.intLastPurgeUserId= Source.intLastPurgeUserId
-			, Target.intInScaleDeviceId= Source.intInScaleDeviceId, Target.ysnDisableInScale= Source.ysnDisableInScale, Target.intOutScaleDeviceId= Source.intOutScaleDeviceId
-			, Target.ysnDisableOutScale= Source.ysnDisableOutScale, Target.ysnShowOutScale= Source.ysnShowOutScale, Target.ysnAllowZeroWeights= Source.ysnAllowZeroWeights
-			, Target.strWeightDescription= Source.strWeightDescription, Target.intUnitMeasureId= Source.intUnitMeasureId, Target.intGraderDeviceId= Source.intGraderDeviceId
-			, Target.intAlternateGraderDeviceId= Source.intAlternateGraderDeviceId, Target.intLEDDeviceId= Source.intLEDDeviceId, Target.ysnCustomerFirst= Source.ysnCustomerFirst
-			, Target.intAllowOtherLocationContracts= Source.intAllowOtherLocationContracts, Target.intWeightDisplayDelay= Source.intWeightDisplayDelay, Target.intTicketSelectionDelay= Source.intTicketSelectionDelay
-			, Target.intFreightHaulerIDRequired= Source.intFreightHaulerIDRequired, Target.intBinNumberRequired= Source.intBinNumberRequired, Target.intDriverNameRequired= Source.intDriverNameRequired
-			, Target.intTruckIDRequired= Source.intTruckIDRequired, Target.intTrackAxleCount= Source.intTrackAxleCount, Target.intRequireSpotSalePrice= Source.intRequireSpotSalePrice
-			, Target.ysnTicketCommentRequired= Source.ysnTicketCommentRequired, Target.ysnAllowElectronicSpotPrice= Source.ysnAllowElectronicSpotPrice, Target.ysnRefreshContractsOnOpen= Source.ysnRefreshContractsOnOpen
-			, Target.ysnTrackVariety= Source.ysnTrackVariety, Target.ysnManualGrading= Source.ysnManualGrading, Target.ysnLockStoredGrade= Source.ysnLockStoredGrade
-			, Target.ysnAllowManualWeight= Source.ysnAllowManualWeight, Target.intStorePitInformation= Source.intStorePitInformation, Target.ysnReferenceNumberRequired= Source.ysnReferenceNumberRequired
-			, Target.ysnDefaultDriverOffTruck= Source.ysnDefaultDriverOffTruck, Target.ysnAutomateTakeOutTicket= Source.ysnAutomateTakeOutTicket, Target.ysnDefaultDeductFreightFromFarmer= Source.ysnDefaultDeductFreightFromFarmer
-			, Target.ysnDefaultDeductFeeFromCusVen= Source.ysnDefaultDeductFeeFromCusVen, Target.intStoreScaleOperator= Source.intStoreScaleOperator, Target.intDefaultStorageTypeId= Source.intDefaultStorageTypeId
-			, Target.intGrainBankStorageTypeId= Source.intGrainBankStorageTypeId, Target.ysnRefreshLoadsOnOpen= Source.ysnRefreshLoadsOnOpen, Target.ysnRequireContractForInTransitTicket= Source.ysnRequireContractForInTransitTicket
-			, Target.intDefaultFeeItemId= Source.intDefaultFeeItemId, Target.intFreightItemId= Source.intFreightItemId, Target.intEntityId= Source.intEntityId
-			, Target.ysnActive= Source.ysnActive, Target.ysnMultipleWeights= Source.ysnMultipleWeights, Target.intConcurrencyId= Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
 			INSERT (
-				intScaleSetupId
-				,strStationShortDescription
-				,strStationDescription
-				,intStationType
-				,intTicketPoolId
-				,strAddress
-				,strZipCode
-				,strCity
-				,strState
-				,strCountry
-				,strPhone
-				,intLocationId
-				,ysnAllowManualTicketNumber
-				,strScaleOperator
-				,intScaleProcessing
-				,intTransferDelayMinutes
-				,intBatchTransferInterval
-				,strLocalFilePath
-				,strServerPath
-				,strWebServicePath
-				,intMinimumPurgeDays
-				,dtmLastPurgeDate
-				,intLastPurgeUserId
-				,intInScaleDeviceId
-				,ysnDisableInScale
-				,intOutScaleDeviceId
-				,ysnDisableOutScale
-				,ysnShowOutScale
-				,ysnAllowZeroWeights
-				,strWeightDescription
-				,intUnitMeasureId
-				,intGraderDeviceId
-				,intAlternateGraderDeviceId
-				,intLEDDeviceId
-				,ysnCustomerFirst
-				,intAllowOtherLocationContracts
-				,intWeightDisplayDelay
-				,intTicketSelectionDelay
-				,intFreightHaulerIDRequired
-				,intBinNumberRequired
-				,intDriverNameRequired
-				,intTruckIDRequired
-				,intTrackAxleCount
-				,intRequireSpotSalePrice
-				,ysnTicketCommentRequired
-				,ysnAllowElectronicSpotPrice
-				,ysnRefreshContractsOnOpen
-				,ysnTrackVariety
-				,ysnManualGrading
-				,ysnLockStoredGrade
-				,ysnAllowManualWeight
-				,intStorePitInformation
-				,ysnReferenceNumberRequired
-				,ysnDefaultDriverOffTruck
-				,ysnAutomateTakeOutTicket
-				,ysnDefaultDeductFreightFromFarmer
-				,ysnDefaultDeductFeeFromCusVen
-				,intStoreScaleOperator
-				,intDefaultStorageTypeId
-				,intGrainBankStorageTypeId
-				,ysnRefreshLoadsOnOpen
-				,ysnRequireContractForInTransitTicket
-				,intDefaultFeeItemId
-				,intFreightItemId
-				,intEntityId
-				,ysnActive
-				,ysnMultipleWeights
-				,intConcurrencyId
+				' + @InsertColumns + '
 			)
 			VALUES(
-				Source.intScaleSetupId
-				,Source.strStationShortDescription
-				,Source.strStationDescription
-				,Source.intStationType
-				,Source.intTicketPoolId
-				,Source.strAddress
-				,Source.strZipCode
-				,Source.strCity
-				,Source.strState
-				,Source.strCountry
-				,Source.strPhone
-				,Source.intLocationId
-				,Source.ysnAllowManualTicketNumber
-				,Source.strScaleOperator
-				,Source.intScaleProcessing
-				,Source.intTransferDelayMinutes
-				,Source.intBatchTransferInterval
-				,Source.strLocalFilePath
-				,Source.strServerPath
-				,Source.strWebServicePath
-				,Source.intMinimumPurgeDays
-				,Source.dtmLastPurgeDate
-				,Source.intLastPurgeUserId
-				,Source.intInScaleDeviceId
-				,Source.ysnDisableInScale
-				,Source.intOutScaleDeviceId
-				,Source.ysnDisableOutScale
-				,Source.ysnShowOutScale
-				,Source.ysnAllowZeroWeights
-				,Source.strWeightDescription
-				,Source.intUnitMeasureId
-				,Source.intGraderDeviceId
-				,Source.intAlternateGraderDeviceId
-				,Source.intLEDDeviceId
-				,Source.ysnCustomerFirst
-				,Source.intAllowOtherLocationContracts
-				,Source.intWeightDisplayDelay
-				,Source.intTicketSelectionDelay
-				,Source.intFreightHaulerIDRequired
-				,Source.intBinNumberRequired
-				,Source.intDriverNameRequired
-				,Source.intTruckIDRequired
-				,Source.intTrackAxleCount
-				,Source.intRequireSpotSalePrice
-				,Source.ysnTicketCommentRequired
-				,Source.ysnAllowElectronicSpotPrice
-				,Source.ysnRefreshContractsOnOpen
-				,Source.ysnTrackVariety
-				,Source.ysnManualGrading
-				,Source.ysnLockStoredGrade
-				,Source.ysnAllowManualWeight
-				,Source.intStorePitInformation
-				,Source.ysnReferenceNumberRequired
-				,Source.ysnDefaultDriverOffTruck
-				,Source.ysnAutomateTakeOutTicket
-				,Source.ysnDefaultDeductFreightFromFarmer
-				,Source.ysnDefaultDeductFeeFromCusVen
-				,Source.intStoreScaleOperator
-				,Source.intDefaultStorageTypeId
-				,Source.intGrainBankStorageTypeId
-				,Source.ysnRefreshLoadsOnOpen
-				,Source.ysnRequireContractForInTransitTicket
-				,Source.intDefaultFeeItemId
-				,Source.intFreightItemId
-				,Source.intEntityId
-				,Source.ysnActive
-				,Source.ysnMultipleWeights
-				,Source.intConcurrencyId)
+				' + @ValueColumns + '
+				)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -189,47 +40,22 @@ BEGIN
     SET IDENTITY_INSERT tblSCScaleSetup OFF
 
 	-- tblSCTicketPrintOption
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketPrintOption' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketPrintOption'
+	
     SET @SQLString = N'MERGE tblSCTicketPrintOption AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketPrintOption]) AS Source
         ON (Target.intTicketPrintOptionId = Source.intTicketPrintOptionId)
         WHEN MATCHED THEN
-            UPDATE SET 	Target.intScaleSetupId = Source.intScaleSetupId, Target.intTicketFormatId = Source.intTicketFormatId, Target.strTicketPrintDescription = Source.strTicketPrintDescription
-			, Target.ysnPrintCustomerCopy = Source.ysnPrintCustomerCopy, Target.ysnPrintEachSplit = Source.ysnPrintEachSplit, Target.intTicketPrintCopies = Source.intTicketPrintCopies
-			, Target.intIssueCutCode = Source.intIssueCutCode, Target.strTicketPrinter = Source.strTicketPrinter, Target.intTicketTypeOption = Source.intTicketTypeOption
-			, Target.strInOutIndicator = Source.strInOutIndicator, Target.intPrintingOption = Source.intPrintingOption, Target.intListTicketTypeId = Source.intListTicketTypeId
-			, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (
-				intTicketPrintOptionId
-				,intScaleSetupId
-				,intTicketFormatId
-				,strTicketPrintDescription
-				,ysnPrintCustomerCopy
-				,ysnPrintEachSplit
-				,intTicketPrintCopies
-				,intIssueCutCode
-				,strTicketPrinter
-				,intTicketTypeOption
-				,strInOutIndicator
-				,intPrintingOption
-				,intListTicketTypeId
-				,intConcurrencyId
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
 			)
 			VALUES(
-				Source.intTicketPrintOptionId
-				,Source.intScaleSetupId
-				,Source.intTicketFormatId
-				,Source.strTicketPrintDescription
-				,Source.ysnPrintCustomerCopy
-				,Source.ysnPrintEachSplit
-				,Source.intTicketPrintCopies
-				,Source.intIssueCutCode
-				,Source.strTicketPrinter
-				,Source.intTicketTypeOption
-				,Source.strInOutIndicator
-				,Source.intPrintingOption
-				,Source.intListTicketTypeId
-				,Source.intConcurrencyId
+				' + @ValueColumns + '
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
@@ -240,30 +66,22 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketPrintOption OFF
 
 	-- tblSCTicketEmailOption
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketEmailOption' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketEmailOption'
+	
     SET @SQLString = N'MERGE tblSCTicketEmailOption AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketEmailOption]) AS Source
         ON (Target.intTicketEmailOptionId = Source.intTicketEmailOptionId)
-        WHEN MATCHED THEN
-            UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.strEmailSubject = Source.strEmailSubject, Target.strEmailBody = Source.strEmailBody
-			, Target.ysnEnabledEmailOption = Source.ysnEnabledEmailOption, Target.ysnEmailEachSplit = Source.ysnEmailEachSplit, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (
-				intTicketEmailOptionId
-				,intScaleSetupId
-				,strEmailSubject
-				,strEmailBody
-				,ysnEnabledEmailOption
-				,ysnEmailEachSplit
-				,intConcurrencyId
+       WHEN MATCHED THEN
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
 			)
 			VALUES(
-				Source.intTicketEmailOptionId
-				,Source.intScaleSetupId
-				,Source.strEmailSubject
-				,Source.strEmailBody
-				,Source.ysnEnabledEmailOption
-				,Source.ysnEmailEachSplit
-				,Source.intConcurrencyId
+				' + @ValueColumns + '
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
@@ -274,29 +92,22 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketEmailOption OFF
 
     -- tblSCLastScaleSetup
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCLastScaleSetup' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCLastScaleSetup'
+
     SET @SQLString = N'MERGE tblSCLastScaleSetup AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCLastScaleSetup]) AS Source
         ON (Target.intLastScaleSetupId = Source.intLastScaleSetupId)
         WHEN MATCHED THEN
-			 UPDATE SET Target.intScaleSetupId  = Source.intScaleSetupId
-			, Target.intEntityId  = Source.intEntityId
-			, Target.intEntityScaleOperatorId  = Source.intEntityScaleOperatorId
-			, Target.dtmScaleDate  = Source.dtmScaleDate
-			, Target.intConcurrencyId  = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intLastScaleSetupId
-				,intScaleSetupId
-				,intEntityId
-				,intEntityScaleOperatorId
-				,dtmScaleDate
-				,intConcurrencyId
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
 			)
-            VALUES (Source.intLastScaleSetupId
-				,Source.intScaleSetupId
-				,Source.intEntityId
-				,Source.intEntityScaleOperatorId
-				,Source.dtmScaleDate
-				,Source.intConcurrencyId
+			VALUES(
+				' + @ValueColumns + '
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
@@ -307,45 +118,22 @@ BEGIN
     SET IDENTITY_INSERT tblSCLastScaleSetup OFF
 
     -- tblSCTicketType
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketType' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketType'
+
     SET @SQLString = N'MERGE tblSCTicketType AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketType]) AS Source
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intTicketPoolId = Source.intTicketPoolId, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.ysnTicketAllowed = Source.ysnTicketAllowed, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intDiscountSchedule = Source.intDiscountSchedule, Target.intDistributionMethod = Source.intDistributionMethod, Target.ysnSelectByPO = Source.ysnSelectByPO, Target.intSplitInvoiceOption = Source.intSplitInvoiceOption, Target.intContractRequired = Source.intContractRequired, Target.intOverrideTicketCopies = Source.intOverrideTicketCopies, Target.ysnPrintAtKiosk = Source.ysnPrintAtKiosk, Target.ynsVerifySplitMethods = Source.ynsVerifySplitMethods, Target.ysnOverrideSingleTicketSeries = Source.ysnOverrideSingleTicketSeries, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-            INSERT(
-				intTicketTypeId
-				,intTicketPoolId
-				,intListTicketTypeId
-				,ysnTicketAllowed
-				,intNextTicketNumber
-				,intDiscountSchedule
-				,intDistributionMethod
-				,ysnSelectByPO
-				,intSplitInvoiceOption
-				,intContractRequired
-				,intOverrideTicketCopies
-				,ysnPrintAtKiosk
-				,ynsVerifySplitMethods
-				,ysnOverrideSingleTicketSeries
-				,intConcurrencyId
+			INSERT (
+				' + @InsertColumns + '
 			)
 			VALUES(
-				Source.intTicketTypeId
-				,Source.intTicketPoolId
-				,Source.intListTicketTypeId
-				,Source.ysnTicketAllowed
-				,Source.intNextTicketNumber
-				,Source.intDiscountSchedule
-				,Source.intDistributionMethod
-				,Source.ysnSelectByPO
-				,Source.intSplitInvoiceOption
-				,Source.intContractRequired
-				,Source.intOverrideTicketCopies
-				,Source.ysnPrintAtKiosk
-				,Source.ynsVerifySplitMethods
-				,Source.ysnOverrideSingleTicketSeries
-				,Source.intConcurrencyId
+				' + @ValueColumns + '
 			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
@@ -356,28 +144,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketType OFF
 
     -- tblSCListTicketTypes
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCListTicketTypes' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCListTicketTypes'
+
     SET @SQLString = N'MERGE tblSCListTicketTypes AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCListTicketTypes]) AS Source
         ON (Target.intTicketTypeId = Source.intTicketTypeId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intTicketType = Source.intTicketType, Target.strTicketType = Source.strTicketType, Target.strInOutIndicator = Source.strInOutIndicator, Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-        INSERT(
-			intTicketTypeId
-			,intTicketType
-			,strTicketType
-			,strInOutIndicator
-			,ysnActive
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketTypeId
-			,Source.intTicketType
-			,Source.strTicketType
-			,Source.strInOutIndicator
-			,Source.ysnActive
-			,Source.intConcurrencyId
-		)
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -386,51 +169,50 @@ BEGIN
     EXECUTE sp_executesql @SQLString;
     SET IDENTITY_INSERT tblSCListTicketTypes OFF
 
-
     -- tblSCUncompletedTicketAlert
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCUncompletedTicketAlert' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCUncompletedTicketAlert'
+
     SET @SQLString = N'MERGE tblSCUncompletedTicketAlert AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCUncompletedTicketAlert]) AS Source
         ON (Target.intUncompletedTicketAlertId = Source.intUncompletedTicketAlertId)
-        WHEN MATCHED THEN
-            UPDATE SET Target.intEntityId = Source.intEntityId, Target.intCompanyLocationId = Source.intCompanyLocationId, Target.intTicketUncompletedDaysAlert = Source.intTicketUncompletedDaysAlert, Target.intConcurrencyId = Source.intConcurrencyId
+       WHEN MATCHED THEN
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
     SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+    SET IDENTITY_INSERT tblSCUncompletedTicketAlert ON
     EXECUTE sp_executesql @SQLString;
+    SET IDENTITY_INSERT tblSCUncompletedTicketAlert OFF
 
     -- tblSCDistributionOption
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDistributionOption' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDistributionOption'
+
     SET @SQLString = N'MERGE tblSCDistributionOption AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDistributionOption]) AS Source
         ON (Target.intDistributionOptionId = Source.intDistributionOptionId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strDistributionOption = Source.strDistributionOption
-			, Target.intTicketPoolId = Source.intTicketPoolId
-			, Target.intTicketTypeId = Source.intTicketTypeId
-			, Target.ysnDistributionAllowed = Source.ysnDistributionAllowed
-			, Target.ysnDefaultDistribution = Source.ysnDefaultDistribution
-			, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-		INSERT(
-			intDistributionOptionId
-			,strDistributionOption
-			,intTicketPoolId
-			,intTicketTypeId
-			,ysnDistributionAllowed
-			,ysnDefaultDistribution
-			,intStorageScheduleTypeId
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intDistributionOptionId
-			,Source.strDistributionOption
-			,Source.intTicketPoolId
-			,Source.intTicketTypeId
-			,Source.ysnDistributionAllowed
-			,Source.ysnDefaultDistribution
-			,Source.intStorageScheduleTypeId
-			,Source.intConcurrencyId
-		)
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 			
@@ -467,20 +249,24 @@ BEGIN
     EXECUTE sp_executesql @SQLString;
     SET IDENTITY_INSERT tblSCScaleDevice OFF
 
-	--tblSCDeliverySheet
+	-- tblSCDeliverySheet
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheet' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheet'
+
 	SET @SQLString = N'MERGE tblSCDeliverySheet AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheet]) AS Source
         ON (Target.intDeliverySheetId = Source.intDeliverySheetId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intEntityId = Source.intEntityId, Target.intCompanyLocationId = Source.intCompanyLocationId, Target.intItemId = Source.intItemId, Target.intDiscountId = Source.intDiscountId
-			, Target.strDeliverySheetNumber = Source.strDeliverySheetNumber, Target.dtmDeliverySheetDate = Source.dtmDeliverySheetDate, Target.intCurrencyId = Source.intCurrencyId
-			, Target.intTicketTypeId = Source.intTicketTypeId, Target.intSplitId = Source.intSplitId, Target.intFarmFieldId = Source.intFarmFieldId, Target.ysnPost = Source.ysnPost
-			, Target.intConcurrencyId = Source.intConcurrencyId, Target.strOfflineGuid = Source.strOfflineGuid
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intDeliverySheetId, intEntityId, intCompanyLocationId, intItemId, intDiscountId, strDeliverySheetNumber, dtmDeliverySheetDate
-			, intCurrencyId, intTicketTypeId, intSplitId, intFarmFieldId, ysnPost, intConcurrencyId)
-            VALUES (Source.intDeliverySheetId, Source.intEntityId, Source.intCompanyLocationId, Source.intItemId, Source.intDiscountId, Source.strDeliverySheetNumber, Source.dtmDeliverySheetDate, Source.intCurrencyId
-			, Source.intTicketTypeId, Source.intSplitId, Source.intFarmFieldId, Source.ysnPost, Source.intConcurrencyId)
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -490,15 +276,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCDeliverySheet OFF
 
 	 -- tblSCDeliverySheetSplit
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheetSplit' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheetSplit'
+
     SET @SQLString = N'MERGE tblSCDeliverySheetSplit AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheetSplit]) AS Source
         ON (Target.intDeliverySheetSplitId = Source.intDeliverySheetSplitId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intDeliverySheetId = Source.intDeliverySheetId, Target.intEntityId = Source.intEntityId, Target.dblSplitPercent = Source.dblSplitPercent
-			, Target.strDistributionOption = Source.strDistributionOption, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intDeliverySheetSplitId, intDeliverySheetId, intEntityId, dblSplitPercent, strDistributionOption, intConcurrencyId)
-            VALUES (Source.intDeliverySheetSplitId, Source.intDeliverySheetId, Source.intEntityId, Source.dblSplitPercent, Source.strDistributionOption, Source.intConcurrencyId)
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -508,15 +302,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCDeliverySheetSplit OFF
 
 	-- tblSCDeliverySheetImportingTemplate
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheetImportingTemplate' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheetImportingTemplate'
+
     SET @SQLString = N'MERGE tblSCDeliverySheetImportingTemplate AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheetImportingTemplate]) AS Source
         ON (Target.intImportingTemplateId = Source.intImportingTemplateId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strTemplateCode = Source.strTemplateCode, Target.strTemplateDescription = Source.strTemplateDescription, Target.intDelimiterId = Source.intDelimiterId
-			, Target.strDelimiterType = Source.strDelimiterType, Target.ysnActive = Source.ysnActive, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intImportingTemplateId, strTemplateCode, strTemplateDescription, intDelimiterId, strDelimiterType, ysnActive, intConcurrencyId)
-            VALUES (Source.intImportingTemplateId, Source.strTemplateCode, Source.strTemplateDescription, Source.intDelimiterId, Source.strDelimiterType, Source.ysnActive, Source.intConcurrencyId)
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -526,15 +328,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCDeliverySheetImportingTemplate OFF
 
 	-- tblSCDeliverySheetImportingTemplateDetail
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheetImportingTemplateDetail' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCDeliverySheetImportingTemplateDetail'
+
     SET @SQLString = N'MERGE tblSCDeliverySheetImportingTemplateDetail AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCDeliverySheetImportingTemplateDetail]) AS Source
         ON (Target.intImportingTemplateDetailId = Source.intImportingTemplateDetailId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intImportingTemplateId = Source.intImportingTemplateId, Target.intFieldNameId = Source.intFieldNameId, Target.strFieldName = Source.strFieldName
-			, Target.intFieldColumnNumber = Source.intFieldColumnNumber, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intImportingTemplateDetailId, intImportingTemplateId, intFieldNameId, intFieldColumnNumber, intConcurrencyId)
-            VALUES (Source.intImportingTemplateDetailId, Source.intImportingTemplateId, Source.intFieldNameId, Source.intFieldColumnNumber, Source.intConcurrencyId)
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -564,34 +374,23 @@ BEGIN
    -- SET IDENTITY_INSERT tblSCTicket OFF
 
     -- tblSCTicketFormat
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketFormat' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketFormat'
+
     SET @SQLString = N'MERGE tblSCTicketFormat AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketFormat]) AS Source
         ON (Target.intTicketFormatId = Source.intTicketFormatId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strTicketFormat = Source.strTicketFormat, Target.intTicketFormatSelection = Source.intTicketFormatSelection, Target.ysnSuppressCompanyName = Source.ysnSuppressCompanyName, Target.ysnFormFeedEachCopy = Source.ysnFormFeedEachCopy, Target.strTicketHeader = Source.strTicketHeader, Target.strTicketFooter = Source.strTicketFooter, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intTicketFormatId
-			,strTicketFormat
-			,intTicketFormatSelection
-			,ysnSuppressCompanyName
-			,ysnFormFeedEachCopy
-			,intSuppressDiscountOptionId
-			,strTicketHeader
-			,strTicketFooter
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketFormatId
-			,Source.strTicketFormat
-			,Source.intTicketFormatSelection
-			,Source.ysnSuppressCompanyName
-			,Source.ysnFormFeedEachCopy
-			,Source.intSuppressDiscountOptionId
-			,Source.strTicketHeader
-			,Source.strTicketFooter
-			,Source.intConcurrencyId
-		)
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -601,26 +400,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketFormat OFF
 
     -- tblSCTicketPool
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketPool' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketPool'
+
     SET @SQLString = N'MERGE tblSCTicketPool AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketPool]) AS Source
         ON (Target.intTicketPoolId = Source.intTicketPoolId)
         WHEN MATCHED THEN
-            UPDATE SET Target.strTicketPool = Source.strTicketPool, Target.intNextTicketNumber = Source.intNextTicketNumber, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-		INSERT(
-			intTicketPoolId
-			,strTicketPool
-			,intNextTicketNumber
-			,ysnActive
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketPoolId
-			,Source.strTicketPool
-			,Source.intNextTicketNumber
-			,Source.ysnActive
-			,Source.intConcurrencyId
-		)
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -630,44 +426,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketPool OFF
 
     -- tblSCTicketPrintOption
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketPrintOption' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketPrintOption'
+
     SET @SQLString = N'MERGE tblSCTicketPrintOption AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketPrintOption]) AS Source
         ON (Target.intTicketPrintOptionId = Source.intTicketPrintOptionId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intScaleSetupId = Source.intScaleSetupId, Target.intTicketFormatId = Source.intTicketFormatId, Target.strTicketPrintDescription = Source.strTicketPrintDescription, Target.ysnPrintCustomerCopy = Source.ysnPrintCustomerCopy, Target.ysnPrintEachSplit = Source.ysnPrintEachSplit, Target.intTicketPrintCopies = Source.intTicketPrintCopies, Target.intIssueCutCode = Source.intIssueCutCode, Target.strTicketPrinter = Source.strTicketPrinter, Target.intTicketTypeOption = Source.intTicketTypeOption, Target.strInOutIndicator = Source.strInOutIndicator, Target.intPrintingOption = Source.intPrintingOption, Target.intListTicketTypeId = Source.intListTicketTypeId, Target.intConcurrencyId = Source.intConcurrencyId
+            UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
-		INSERT (
-			intTicketPrintOptionId
-			,intScaleSetupId
-			,intTicketFormatId
-			,strTicketPrintDescription
-			,ysnPrintCustomerCopy
-			,ysnPrintEachSplit
-			,intTicketPrintCopies
-			,intIssueCutCode
-			,strTicketPrinter
-			,intTicketTypeOption
-			,strInOutIndicator
-			,intPrintingOption
-			,intListTicketTypeId
-			,intConcurrencyId
-		)
-		VALUES(
-			Source.intTicketPrintOptionId
-			,Source.intScaleSetupId
-			,Source.intTicketFormatId
-			,Source.strTicketPrintDescription
-			,Source.ysnPrintCustomerCopy
-			,Source.ysnPrintEachSplit
-			,Source.intTicketPrintCopies
-			,Source.intIssueCutCode
-			,Source.strTicketPrinter
-			,Source.intTicketTypeOption
-			,Source.strInOutIndicator
-			,Source.intPrintingOption
-			,Source.intListTicketTypeId
-			,Source.intConcurrencyId
-		)
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -678,14 +453,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketPrintOption OFF
 
     -- tblSCTicketSplit
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketSplit' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketSplit'
+
     SET @SQLString = N'MERGE tblSCTicketSplit AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketSplit]) AS Source
         ON (Target.intTicketSplitId = Source.intTicketSplitId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intTicketId = Source.intTicketId, Target.intCustomerId = Source.intCustomerId, Target.dblSplitPercent = Source.dblSplitPercent, Target.strDistributionOption = Source.strDistributionOption, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intTicketSplitId, intTicketId, intCustomerId, dblSplitPercent, strDistributionOption, intConcurrencyId)
-            VALUES (Source.intTicketSplitId, Source.intTicketId, Source.intCustomerId, Source.dblSplitPercent, Source.strDistributionOption, Source.intConcurrencyId)
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -695,14 +479,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCTicketSplit OFF
 
     -- tblSCTruckDriverReference
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTruckDriverReference' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTruckDriverReference'
+
     SET @SQLString = N'MERGE tblSCTruckDriverReference AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTruckDriverReference]) AS Source
         ON (Target.intTruckDriverReferenceId = Source.intTruckDriverReferenceId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intEntityId = Source.intEntityId, Target.strRecordType = Source.strRecordType, Target.strData = Source.strData, Target.intConcurrencyId = Source.intConcurrencyId
-        WHEN NOT MATCHED BY TARGET THEN
-            INSERT (intTruckDriverReferenceId, intEntityId, strRecordType, strData, intConcurrencyId)
-            VALUES (Source.intTruckDriverReferenceId, Source.intEntityId, Source.strRecordType, Source.strData, Source.intConcurrencyId)
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
@@ -712,11 +505,23 @@ BEGIN
     SET IDENTITY_INSERT tblSCTruckDriverReference OFF
 
     -- tblSCTicketCost
+	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketCost' AND ORDINAL_POSITION > 1
+	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketCost'
+
     SET @SQLString = N'MERGE tblSCTicketCost AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketCost]) AS Source
         ON (Target.intTicketCostId = Source.intTicketCostId)
         WHEN MATCHED THEN
-            UPDATE SET Target.intTicketId = Source.intTicketId, Target.intConcurrencyId = Source.intConcurrencyId, Target.intItemId = Source.intItemId, Target.intEntityVendorId = Source.intEntityVendorId, Target.strCostMethod = Source.strCostMethod, Target.dblRate = Source.dblRate, Target.intItemUOMId = Source.intItemUOMId, Target.ysnAccrue = Source.ysnAccrue, Target.ysnMTM = Source.ysnMTM, Target.ysnPrice = Source.ysnPrice
+            UPDATE SET ' + @Columns + '
+		WHEN NOT MATCHED BY TARGET THEN
+			INSERT (
+				' + @InsertColumns + '
+			)
+			VALUES(
+				' + @ValueColumns + '
+			)
         WHEN NOT MATCHED BY SOURCE THEN
             DELETE;';
 
