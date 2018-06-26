@@ -686,6 +686,7 @@ BEGIN TRY
 			,[strTaxableByOtherTaxes]
 			,[strCalculationMethod]
 			,[dblRate]
+			,[dblBaseRate]
 			,[intSalesTaxAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
@@ -705,6 +706,7 @@ BEGIN TRY
 			,[strTaxableByOtherTaxes]	= ARIDT.[strTaxableByOtherTaxes]
 			,[strCalculationMethod]		= ARIDT.[strCalculationMethod]
 			,[dblRate]					= ARIDT.[dblRate]
+			,[dblBaseRate]				= ISNULL(ARIDT.[dblBaseRate], ARIDT.[dblRate])
 			,[intSalesTaxAccountId]		= ARIDT.[intSalesTaxAccountId]
 			,[dblTax]					= ARIDT.[dblTax]
 			,[dblAdjustedTax]			= ARIDT.[dblAdjustedTax]

@@ -295,8 +295,8 @@ BEGIN TRY
 		,ARIDT.[intTaxClassId]			= EFP.[intTaxClassId]
 		,ARIDT.[strTaxableByOtherTaxes]	= EFP.[strTaxableByOtherTaxes]
 		,ARIDT.[strCalculationMethod]	= EFP.[strCalculationMethod]
-		,ARIDT.[dblRate]				= EFP.[dblRate]
-		,ARIDT.[dblBaseRate]			= EFP.[dblBaseRate]
+		,ARIDT.[dblRate]				= ISNULL(EFP.[dblRate], @ZeroDecimal)
+		,ARIDT.[dblBaseRate]			= ISNULL(EFP.[dblBaseRate], ISNULL(EFP.[dblRate], @ZeroDecimal))
 		,ARIDT.[intSalesTaxAccountId]	= EFP.[intTaxAccountId]
 		,ARIDT.[dblTax]					= EFP.[dblTax]
 		,ARIDT.[dblAdjustedTax]			= EFP.[dblAdjustedTax]
