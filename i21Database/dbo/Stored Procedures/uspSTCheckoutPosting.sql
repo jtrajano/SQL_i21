@@ -255,6 +255,9 @@ BEGIN
 																			, UOM.intItemUOMId
 																			,NULL									--@CFSiteId
 																			,0										--@IsDeliver
+																			,NULL
+																			,NULL
+																			,NULL
 																		) TAX
 
 							WHERE CPT.intCheckoutId = @intCheckoutId
