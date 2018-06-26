@@ -151,7 +151,7 @@ SELECT
 FROM
 	@InvoiceDetail IDs
 CROSS APPLY
-	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, IDs.[intItemUOMId]) TD
+	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, IDs.[intItemUOMId], NULL, NULL, NULL) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 		
