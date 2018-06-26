@@ -105,7 +105,7 @@ BEGIN
 									/ (CASE WHEN @post = 1 THEN (voucher.dblAmountDue + pd.dblPayment) 
 											ELSE (voucher.dblAmountDue) END) --get the percentage of payment
 									* voucherDetail.dblQtyReceived
-									* (CASE WHEN @post = 0 THEN -1 ELSE 1 END),
+									* (CASE WHEN @post = 1 THEN -1 ELSE 1 END),
 		[dblCost]				=	voucherDetail.dblCost, 
 		[dblTotal]				=	CAST(CASE WHEN @post = 1 
 											THEN -dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal + voucherDetail.dblTax, pd.dblPayment 
