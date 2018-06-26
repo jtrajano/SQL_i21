@@ -337,7 +337,11 @@ Begin --Sales Order Pick List
 	if @intRecipeGuideId>0
 		Set @intPickListId=0
 
-	Select @dblTotalPickQty=SUM(dblQtyOrdered) From tblSOSalesOrderDetail Where intSalesOrderId=@intSalesOrderId
+	Select @dblTotalPickQty=SUM(SO.dblQtyOrdered)
+	From tblSOSalesOrderDetail SO
+	JOIN tblICItem I ON I.intItemId = SO.intItemId
+	Where SO.intSalesOrderId = @intSalesOrderId
+		AND I.strType <> 'Other Charge'
 	
 	If @dblBatchSize > 0
 		Begin
