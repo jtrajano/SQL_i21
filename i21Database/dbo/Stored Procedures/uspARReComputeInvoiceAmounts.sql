@@ -34,6 +34,7 @@ UPDATE
 	tblARInvoiceDetailTax
 SET
 	 [dblRate]				= ISNULL([dblRate], @ZeroDecimal)
+	,[dblBaseRate]			= ISNULL([dblBaseRate], ISNULL([dblRate], @ZeroDecimal))
 	,[dblTax]				= ISNULL([dblTax], @ZeroDecimal)
 	,[dblAdjustedTax]		= [dbo].fnRoundBanker(ISNULL([dblAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
 	,[dblBaseAdjustedTax]	= [dbo].fnRoundBanker(ISNULL([dblBaseAdjustedTax], @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
