@@ -301,6 +301,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 		IF ISNULL(@ItemUOMId, 0) = 0
 		BEGIN
 			SELECT TOP 1 @ItemUOMId = [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId] 
+
+			SET @ItemPriceUOMId = ISNULL(@ItemPriceUOMId, @ItemUOMId)
 		END
 
 
