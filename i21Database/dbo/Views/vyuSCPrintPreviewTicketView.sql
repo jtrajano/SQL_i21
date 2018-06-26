@@ -21,7 +21,6 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strScaleOperatorUser,
 	SC.intEntityScaleOperatorId,
 	SC.strTruckName,
-	SC.strDriverName, 
 	SC.ysnDriverOff,
 	SC.ysnSplitWeightTicket,
 	SC.ysnGrossManual,
@@ -116,6 +115,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.dblConvertedUOMQty,
 	SC.strCostMethod,
 	SC.strElevatorReceiptNumber,
+	SC.intEntityContactId,
 	(SC.dblUnitPrice + SC.dblUnitBasis) AS dblCashPrice,
 	ISNULL (tblGRStorageType.strStorageTypeDescription, CASE WHEN
 	SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
@@ -162,7 +162,8 @@ AS SELECT SC.intTicketId, (CASE WHEN
 		WHEN SC.intSalesOrderId > 0 THEN SOD.strItemNumber
 		ELSE IC.strItemNo
 	END) AS strItemNumber,
-	SO.strSalesOrderNumber
+	SO.strSalesOrderNumber,
+	EMDriver.strName AS strDriverName
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -182,6 +183,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+  LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SC.intEntityContactId
   OUTER APPLY(
 		SELECT EM.intEntityId,SM.blbDetail FROM tblEMEntitySignature EM
 		LEFT JOIN tblSMSignature SM ON EM.intEntityId = SM.intEntityId AND SM.intSignatureId = EM.intElectronicSignatureId
