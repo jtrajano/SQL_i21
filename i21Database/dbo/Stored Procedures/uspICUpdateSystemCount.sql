@@ -30,7 +30,7 @@ WHERE c.intImportFlagInternal = 1
 
 -- Update Last Cost
 UPDATE cd
-SET cd.dblLastCost = cd.dblLastCost --ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(cd.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))), 0)
+SET cd.dblLastCost = ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(cd.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))), 0)
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
 	INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = c.intLocationId 
@@ -143,6 +143,7 @@ SELECT
 	, intItemLocationId		= d.intItemLocationId
 	, intItemUOMId			= d.intItemUOMId
 	, strLotNumber			= d.strAutoCreatedLotNumber
+	, intLotId				= CASE NULLIF(d.strAutoCreatedLotNumber, '') WHEN NULL THEN d.intLotId ELSE NULL END
 	, intSubLocationId		= d.intSubLocationId
 	, intStorageLocationId	= d.intStorageLocationId
 	, dblQty				= d.dblSystemCount

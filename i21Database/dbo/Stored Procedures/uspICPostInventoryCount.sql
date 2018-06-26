@@ -268,7 +268,7 @@ BEGIN
 									--CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblPhysicalCount, 0) ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblPhysicalCount, 0)) END
 									--	- CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ItemLot.dblQty END
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty) --dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)))
+			,dblCost				= dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)))
 									--dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
