@@ -81,7 +81,7 @@ SELECT psh.intMatchFuturesPSHeaderId,
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
 	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),psh.dtmMatchDate,110),110) BETWEEN @dtmFromDate AND @dtmToDate
-	AND ysnExpired = @ysnExpired
+	AND isnull(ysnExpired,0) = case when isnull(@ysnExpired,'false')= 'true' then isnull(ysnExpired,0) else @ysnExpired end
 	AND ot.intInstrumentTypeId =1
   )t)t1
   )t  ORDER BY RowNum ASC
