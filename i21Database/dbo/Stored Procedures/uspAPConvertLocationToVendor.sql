@@ -84,7 +84,7 @@ AS
 		select @LocationCurrentyId = intDefaultCurrencyId From tblSMCompanyPreference
 	end
 
-	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId, intCurrencyId) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber, @LocationCurrentyId
+	INSERT INTO tblAPVendor(intEntityId, intVendorType, ysnWithholding, dblCreditLimit, intTermsId, strVendorId, intCurrencyId, ysnPostVoucher) SELECT @EntityNewId, 0, 0, 0, @DefaultTerms, @EntityNumber, @LocationCurrentyId, 1
 	INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId) SELECT @EntityNewId, @DefaultTerms
 
 	UPDATE tblEMEntityLocation 
