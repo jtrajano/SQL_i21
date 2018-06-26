@@ -159,7 +159,7 @@ DECLARE @tblInventoryTransaction TABLE(
 						ELSE MAX(t.dblCost) 
 					END
 			,Lot.strWarehouseRefNo
-			,COALESCE(Lot.strCondition, @DefaultLotCondition) strCondition
+			,COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition) strCondition
 		FROM @tblInventoryTransaction t 
 		LEFT JOIN tblICItem i 
 			ON i.intItemId = t.intItemId
@@ -279,7 +279,7 @@ DECLARE @tblInventoryTransaction TABLE(
 						ELSE MAX(t.dblCost) 
 					END
 			, Lot.strWarehouseRefNo
-			,COALESCE(Lot.strCondition, @DefaultLotCondition) strCondition
+			,COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition) strCondition
 		FROM @tblInventoryTransaction t 
 		LEFT JOIN tblICItem i 
 			ON i.intItemId = t.intItemId
