@@ -129,7 +129,7 @@ BEGIN TRY
 			WHERE intMarkUpDownId = @intMarkUpDownId
 			AND IL.intCostingMethod = 6
 			AND IL.intIssueUOMId IS NOT NULL
-			AND IL.intItemLocationId = @intLocationId
+			AND IL.intLocationId = @intLocationId
 
 			IF NOT EXISTS(SELECT * FROM @tblTempItemCheck)
 				BEGIN

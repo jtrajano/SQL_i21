@@ -102,7 +102,7 @@ BEGIN
 		ELSE
 		BEGIN
 			IF @dblSettlementPrice IS NULL
-				SELECT @dblSeqPrice = NULL
+				SELECT @dblSeqPrice = dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFutureMonthId,GETDATE()) + @dblBasis
 			ELSE 
 				SELECT @dblSeqPrice = @dblSettlementPrice +@dblBasis
 		END

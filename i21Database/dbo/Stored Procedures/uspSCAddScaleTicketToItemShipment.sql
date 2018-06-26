@@ -122,6 +122,7 @@ BEGIN
 		,strChargesLink
 		,dblGross
 		,dblTare
+		,ysnDestinationWeightsAndGrades
 		)
 		SELECT
 		intOrderType				= @intOrderType
@@ -217,6 +218,10 @@ BEGIN
 										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink)
 										ELSE SC.dblShrink 
 									END
+		,ysnDestinationWeightsAndGrades = CASE
+											WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strwestrWhereFinalizedGrade,'Origin') = 'Destination' THEN 1
+											ELSE 0 
+										END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId

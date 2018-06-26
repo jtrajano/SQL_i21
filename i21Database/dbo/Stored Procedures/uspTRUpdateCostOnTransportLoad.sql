@@ -117,11 +117,11 @@ BEGIN TRY
 
 			DROP TABLE #tmpBlends
 		END
+
+		DROP TABLE #BlendIngredients
 	END
-
-	DROP TABLE #BlendIngredients
+	
 	DROP TABLE #Receipts
-
 END TRY
 BEGIN CATCH
 	SELECT 

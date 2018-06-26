@@ -9,7 +9,9 @@
     [intStoreId]           INT             NULL,
     [ysnLoggedIn]          BIT             NULL,
 	[intPOSLogOriginId]    INT             NULL,
+    [intBankDepositId]     INT             NULL,
     [intConcurrencyId]     INT             NOT NULL,
-    CONSTRAINT [PK_tblARPOSLog] PRIMARY KEY CLUSTERED ([intPOSLogId] ASC)
+    CONSTRAINT [PK_tblARPOSLog] PRIMARY KEY CLUSTERED ([intPOSLogId] ASC),
+    CONSTRAINT [FK_tblARPOSLog_tblCMBankTransaction] FOREIGN KEY ([intBankDepositId]) REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId]) 
 );
 

@@ -229,17 +229,26 @@ AS
 												 	 	 , @BankTransactionDetailEntries	= @BankTransactionDetail
 												 		 , @intTransactionId				= @intNewTransactionId OUT
 
-				IF ISNULL(@intNewTransactionId, 0) <> 0 AND ISNULL((SELECT dblAmount FROM dbo.tblCMBankTransaction WHERE intTransactionId = @intNewTransactionId), 0) <> 0
+				IF ISNULL(@intNewTransactionId, 0) <> 0
 					BEGIN
-						EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
-													, @ysnRecap			= 0
-													, @strTransactionId = @strTransactionId
-													, @strBatchId		= NULL
-													, @intUserId		= @intUserId
-													, @intEntityId		= @intEntityCustomerId
-													, @isSuccessful		= @ysnSuccess OUT
-													, @message_id		= @intMessageId OUT
+						UPDATE tblARPOSLog
+						SET intBankDepositId = @intNewTransactionId
+						WHERE intPOSLogId = @intPOSLogId
+
+						IF ISNULL((SELECT dblAmount FROM dbo.tblCMBankTransaction WHERE intTransactionId = @intNewTransactionId), 0) <> 0
+							BEGIN
+								EXEC dbo.uspCMPostBankDeposit @ysnPost			= 1
+															, @ysnRecap			= 0
+															, @strTransactionId = @strTransactionId
+															, @strBatchId		= NULL
+															, @intUserId		= @intUserId
+															, @intEntityId		= @intEntityCustomerId
+															, @isSuccessful		= @ysnSuccess OUT
+															, @message_id		= @intMessageId OUT
+							END
 					END
+
+				
 
 				DELETE FROM #CASHPAYMENTS 
 				WHERE intBankAccountId 		= @intBankAccountId 

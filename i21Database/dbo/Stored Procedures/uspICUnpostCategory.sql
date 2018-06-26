@@ -80,7 +80,7 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
+					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
 					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY
 					AND 
 					(
@@ -88,7 +88,6 @@ FROM	(
 						(	
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-							AND ISNULL(inventory_transaction.dblQty, 0) > 0 -- Reverse Qty that is positive. 
 						)
 						-- Link to revalue, write-off sold, auto variance on sold or used stock. 
 						OR (

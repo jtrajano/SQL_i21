@@ -110,8 +110,8 @@ BEGIN TRY
 			,0
 			,FP.intFobPointId
 			,IL.intItemLocationId
-			,CASE WHEN CD.ysnUseFXPrice = 1 THEN CD.intRateTypeId ELSE NULL END
-			,CASE WHEN CD.ysnUseFXPrice = 1 THEN CD.dblRate ELSE 1 END
+			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId) ELSE LD.intForexRateTypeId END
+			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) ELSE ISNULL(LD.dblForexRate,1) END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
@@ -146,6 +146,8 @@ BEGIN TRY
 			,LD.intPriceUOMId
 			,LD.dblUnitPrice
 			,CUR.ysnSubCurrency
+			,LD.intForexRateTypeId
+			,LD.dblForexRate
 
 		BEGIN
 			INSERT INTO @GLEntries (
