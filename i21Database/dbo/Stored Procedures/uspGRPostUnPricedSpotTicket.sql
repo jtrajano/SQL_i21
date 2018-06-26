@@ -138,7 +138,7 @@ BEGIN TRY
 					,[intAccountId]        = NULL
 					,[dblQtyReceived]      = 1--SpotTicket.dblUnits
 					,[strMiscDescription]  = DItem.strItemNo
-					,[dblCost]             = ROUND(dbo.fnSCCalculateDiscount(SpotTicket.intTicketId, QM.intTicketDiscountId, SpotTicket.dblUnits, @intItemUOMId),2)--QM.dblDiscountDue
+					,[dblCost]             = ROUND(dbo.fnSCCalculateDiscount(SpotTicket.intTicketId, QM.intTicketDiscountId, SpotTicket.dblUnits, @intItemUOMId, @dblCashPrice),2)--QM.dblDiscountDue
 					,[intContractHeaderId] = NULL
 					,[intContractDetailId] = NULL
 					,[intUnitOfMeasureId]  = @intItemUOMId --SC.intItemUOMIdTo
@@ -519,7 +519,7 @@ BEGIN TRY
 					,[dblQtyOrdered]						= 0 --dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,@intItemUOMId,dblUnits) --dblUnits
 					,[dblQtyShipped]						= 1 --dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,@intItemUOMId,dblUnits) --dblUnits
 					,[dblDiscount]							= 0
-					,[dblPrice]							    = dbo.fnSCCalculateDiscount(SpotTicket.intTicketId, QM.intTicketDiscountId, SpotTicket.dblUnits, @intItemUOMId) --@dblCashPrice
+					,[dblPrice]							    = dbo.fnSCCalculateDiscount(SpotTicket.intTicketId, QM.intTicketDiscountId, SpotTicket.dblUnits, @intItemUOMId, @dblCashPrice) --@dblCashPrice
 					,[ysnRefreshPrice]						= 0
 					,[strMaintenanceType]					= ''
 					,[strFrequency]							= ''
