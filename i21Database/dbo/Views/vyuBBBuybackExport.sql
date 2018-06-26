@@ -18,7 +18,6 @@ AS
 		,P.strProgramDescription
 		,P.strVendorProgramId
 		,E.strVendorCustomerLocation
-		,ysnPosted = CAST(ISNULL(D.ysnPosted,0) AS BIT)
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -51,5 +50,6 @@ AS
 	LEFT JOIN tblVRUOMXref K
 		ON J.intUnitMeasureId = K.intUnitMeasureId
 			AND M.intVendorSetupId = K.intVendorSetupId
+	WHERE D.ysnPosted = 1
 GO
 
