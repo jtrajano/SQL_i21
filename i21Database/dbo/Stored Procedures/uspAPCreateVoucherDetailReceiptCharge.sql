@@ -117,7 +117,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[intContractDetailId]			=	A.intContractDetailId,
 		[intContractSeq]				=	A.intContractSeq,
 		[intContractHeaderId]			=	A.intContractHeaderId,
-		[intUnitOfMeasureId]			=	A.intCostUnitMeasureId,
+		[intUnitOfMeasureId]			=	(CASE WHEN A.intContractDetailId IS NOT NULL THEN cd.intItemUOMId ELSE A.intCostUnitMeasureId END),
 		[intCostUOMId]              	=   A.intCostUnitMeasureId,
 		[intWeightUOMId]				=	NULL,
 		[intLineNo]						=	1,
@@ -160,6 +160,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		ON F.intCurrencyExchangeRateId = G.intCurrencyExchangeRateId AND G.dtmValidFromDate = @currentDateFilter
 	LEFT JOIN vyuPATEntityPatron patron ON IR.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblAP1099Category H ON entity.str1099Type = H.strCategory
+	LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = A.intContractDetailId 
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT

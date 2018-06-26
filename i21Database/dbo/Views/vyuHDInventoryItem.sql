@@ -17,6 +17,6 @@
 	from
 		tblICItem a
 		inner join tblICItemUOM b on b.intItemId = a.intItemId
-		inner join tblICUnitMeasure c on c.intUnitMeasureId = b.intUnitMeasureId and c.intUnitMeasureId = 1
+		inner join tblICUnitMeasure c on c.intUnitMeasureId = b.intUnitMeasureId /* and c.intUnitMeasureId = 1*/
 		inner join tblICItemLocation d on d.intItemId = a.intItemId
 		inner join tblSMCompanyLocation e on e.intCompanyLocationId = d.intLocationId

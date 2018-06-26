@@ -488,7 +488,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intContractDetailId]		=	E1.intContractDetailId,
 			[intContractHeaderId]		=	E.intContractHeaderId,
 			[intContractSeq]			=	E1.intContractSeq,
-			[intUnitOfMeasureId]		=	B.intUnitMeasureId,
+			[intUnitOfMeasureId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract'  
+												THEN  (
+														CASE WHEN A.intSourceType = 1 --SCALE
+														THEN E1.intItemUOMId
+														ELSE NULL END)
+												ELSE B.intUnitMeasureId END,
 			[intCostUOMId]				=	voucherDetailReceipt.intCostUOMId,
 			[intWeightUOMId]			=	B.intWeightUOMId,
 			[intLineNo]					=	ISNULL(B.intSort,0),
