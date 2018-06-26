@@ -214,8 +214,8 @@ BEGIN TRY
 								WHEN SC.intStorageScheduleTypeId > 0 AND ISNULL(SC.intContractId,0) = 0 THEN 0
 								ELSE
 									CASE
-										WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId) * -1)
-										WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId)
+										WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, CNT.dblSeqPrice) * -1)
+										WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, CNT.dblSeqPrice)
 									END
 							END
 						END
@@ -228,10 +228,13 @@ BEGIN TRY
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 		LEFT JOIN (
-		SELECT intContractHeaderId
-			,intContractDetailId
-			,intPricingTypeId
-			FROM tblCTContractDetail 
+			SELECT 
+			CTD.intContractHeaderId
+			,CTD.intContractDetailId
+			,CTD.intPricingTypeId
+			,AD.dblSeqPrice
+			FROM tblCTContractDetail CTD
+			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = SC.intContractId
 		WHERE SC.intTicketId = @intTicketId AND QM.dblDiscountAmount != 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6)
 				
