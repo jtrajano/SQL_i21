@@ -308,12 +308,18 @@ FROM
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
 			GROUP BY G.intPurchaseDetailId
 		) Billed
+		OUTER APPLY
+		(
+			select strApprovalStatus from tblSMTransaction T
+			WHERE T.intRecordId = A.intPurchaseId and T.strTransactionNo = strPurchaseOrderNumber
+		) approval
 	WHERE 1 = CASE WHEN C.intItemId IS NOT NULL THEN 
 				(CASE WHEN C.strType IN ('Service','Software','Non-Inventory','Other Charge') THEN 1 ELSE 0 END )
 			ELSE 1
 			END
 	AND B.dblQtyOrdered != B.dblQtyReceived
 	AND ((Billed.dblQty < B.dblQtyReceived) OR Billed.dblQty IS NULL)
+	AND (approval.strApprovalStatus != 'Waiting for Approval' or approval.strApprovalStatus is null) --WILL NOT SHOW FOR APPROVAL TRANSACTION
 	UNION ALL
 	--DIRECT TYPE
 	SELECT DISTINCT
