@@ -42,8 +42,8 @@ CREATE TABLE #tmpGLDetail (
 	,[intTransactionId] [int] NULL
 	,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[intCurrencyId] [int] NULL
+	,[intCurrencyExchangeRateTypeId] [int] NULL
 	,[dblExchangeRate] [numeric](38, 20) NOT NULL
-	,[strRateType] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 	,[dtmDateEntered] [datetime] NOT NULL
 	,[dtmTransactionDate] [datetime] NULL
 	,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
@@ -288,8 +288,8 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -316,8 +316,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
 			,[intCurrencyId]		= NULL
+			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate,1)
-			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -332,8 +332,6 @@ BEGIN
 				ON A.intGLAccountIdFrom = GLAccnt.intAccountId
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
-			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
-				ON RateType.intCurrencyExchangeRateTypeId= A.intCurrencyExchangeRateTypeId
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	
@@ -355,8 +353,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(A.dblRate, 1)
-			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -371,8 +369,6 @@ BEGIN
 				ON A.intGLAccountIdTo = GLAccnt.intAccountId		
 			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
-			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
-				ON RateType.intCurrencyExchangeRateTypeId= A.intCurrencyExchangeRateTypeId
 	WHERE	A.strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
@@ -409,6 +405,7 @@ BEGIN
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -436,6 +433,7 @@ SELECT
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[intUserId]
 			,[intEntityId]			
@@ -467,6 +465,7 @@ FROM #tmpGLDetail
 			,intBankTransactionTypeId
 			,intBankAccountId
 			,intCurrencyId
+			,intCurrencyExchangeRateTypeId
 			,dblExchangeRate
 			,dtmDate
 			,strPayee
@@ -500,6 +499,7 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
 				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdFrom)
+				,intCurrencyExchangeRateTypeId =  A.intCurrencyExchangeRateTypeId
 				,dblExchangeRate			= ISNULL(A.dblRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
@@ -544,6 +544,7 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
 				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
+				,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
 				,dblExchangeRate			= ISNULL(A.dblHistoricRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
@@ -611,8 +612,8 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -640,8 +641,8 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]

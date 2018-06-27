@@ -70,6 +70,7 @@ DECLARE
 		,[intTransactionId] [int] NULL
 		,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 		,[intCurrencyId] [int] NULL
+		,[intCurrencyExchangeRateTypeId] [int] NULL
 		,[dblExchangeRate] [numeric](38, 20) NOT NULL
 		,[strRateType] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
 		,[dtmDateEntered] [datetime] NOT NULL
@@ -294,8 +295,8 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]	
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -323,8 +324,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
-			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -341,8 +342,6 @@ BEGIN
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
-			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
-				ON RateType.intCurrencyExchangeRateTypeId= A.intCurrencyExchangeRateTypeId
 	WHERE	A.strTransactionId = @strTransactionId
 
 	--1.5 DEBIT SIDE SHORT
@@ -362,8 +361,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(A.dblExchangeRate,1)
-			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -380,8 +379,6 @@ BEGIN
 				ON A.intShortGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
-			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
-				ON RateType.intCurrencyExchangeRateTypeId= A.intCurrencyExchangeRateTypeId
 	WHERE	A.strTransactionId = @strTransactionId AND A.intShortGLAccountId IS NOT NULL AND A.intShortGLAccountId <> 0 AND A.dblShortAmount <> 0
 	
 	-- 2. CREDIT SIdE
@@ -401,8 +398,8 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= Entity.strEntityNo
 			,[intCurrencyId]		= A.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] =  B.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 1 ELSE B.dblExchangeRate END
-			,[strRateType]			= RateType.strCurrencyExchangeRateType
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -420,9 +417,6 @@ BEGIN
 				ON B.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON B.intEntityId = Entity.intEntityId
-			LEFT  JOIN tblSMCurrencyExchangeRateType RateType 
-				ON RateType.intCurrencyExchangeRateTypeId= B.intCurrencyExchangeRateTypeId
-
 	WHERE	A.strTransactionId = @strTransactionId
 
 	DECLARE @gainLoss DECIMAL (18,6)
@@ -471,8 +465,8 @@ BEGIN
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]	
 			,[intUserId]
 			,[intEntityId]			
 			,[dtmDateEntered]
@@ -501,8 +495,8 @@ SELECT
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]	
 			,[intUserId]
 			,[intEntityId]			
 			,[dtmDateEntered]
@@ -549,8 +543,8 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]	
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]
@@ -578,8 +572,8 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,[strRateType]	
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
 			,[strJournalLineDescription]

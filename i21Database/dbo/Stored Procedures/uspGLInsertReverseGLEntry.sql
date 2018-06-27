@@ -26,6 +26,7 @@ BEGIN
 				,[strCode]
 				,[strReference]
 				,[intCurrencyId]
+				,[intCurrencyExchangeRateTypeId]
 				,[dblExchangeRate]
 				,[dtmDateEntered]
 				,[dtmTransactionDate]
@@ -56,6 +57,7 @@ BEGIN
 				,[strCode]
 				,[strReference]
 				,[intCurrencyId]
+				,[intCurrencyExchangeRateTypeId]
 				,[dblExchangeRate]
 				,dtmDateEntered		= GETDATE()
 				,[dtmTransactionDate]
