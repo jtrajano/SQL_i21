@@ -243,7 +243,7 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		LEFT
 	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
 	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	CD.intFutureMarketId	LEFT
-	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId		LEFT
+	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	CD.intFutureMonthId
 
 	JOIN	tblSMCurrency				IY	ON	IY.intCurrencyID				=	CD.intInvoiceCurrencyId	LEFT
 	JOIN	tblICItemUOM				FO	ON	FO.intItemUOMId					=	CD.intFXPriceUOMId		LEFT	
