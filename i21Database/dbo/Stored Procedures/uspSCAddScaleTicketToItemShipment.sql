@@ -1029,8 +1029,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	WHEN SC.strCostMethod = 'Amount' THEN ROUND((SE.dblQuantity / SC.dblNetUnits * ContractCost.dblRate),2)
 																	ELSE 0
 																END	
-							,[ysnAccrue]						= @ysnAccrue
-							,[ysnPrice]							= @ysnPrice
+							,[ysnAccrue]						= CASE WHEN  ContractCost.intVendorId = SE.intEntityCustomerId THEN 0 ELSE ContractCost.ysnAccrue END
+							,[ysnPrice]							= ContractCost.ysnPrice
 							,[strChargesLink]					= SE.strChargesLink
 							FROM tblCTContractCost ContractCost
 							LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
@@ -1095,7 +1095,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	WHEN SC.strCostMethod = 'Amount' THEN ROUND ((SE.dblQuantity / SC.dblNetUnits * SC.dblFreightRate), 2)
 																	ELSE 0
 																END 
-							,[ysnAccrue]						= @ysnAccrue
+							,[ysnAccrue]						= CASE WHEN @intHaulerId = SE.intEntityCustomerId THEN 0 ELSE @ysnAccrue END
 							,[ysnPrice]							= @ysnPrice
 							,[strChargesLink]					= SE.strChargesLink
 							FROM @ShipmentStagingTable SE 

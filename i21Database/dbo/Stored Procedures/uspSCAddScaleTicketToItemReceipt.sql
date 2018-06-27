@@ -1038,8 +1038,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 																END
 							,[intContractHeaderId]				= RE.intContractHeaderId
 							,[intContractDetailId]				= RE.intContractDetailId
-							,[ysnAccrue]						= @ysnAccrue
-							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
+							,[ysnAccrue]						= ContractCost.ysnAccrue
+							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
 							FROM tblCTContractCost ContractCost
 							LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
