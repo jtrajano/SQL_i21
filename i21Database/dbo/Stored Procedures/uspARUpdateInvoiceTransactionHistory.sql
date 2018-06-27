@@ -218,9 +218,10 @@ AS
 		SELECT
 					ARID.intInvoiceId,
 					ARID.intInvoiceDetailId,
-					dblQtyShipped = (case when @Post = 1 then -1 else 1 end ) * case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARI.dblBaseInvoiceTotal) * (ARID.dblQtyShipped) else 0 end,
+					dblQtyShipped = (case when @Post = 1 then -1 else 1 end ) * case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARID.dblBaseTotal) * (ARID.dblQtyShipped) else 0 end,
 					ARID.dblPrice,
-					(case when @Post = 1 then -1 else 1 end ) * ARID.dblTotal,
+					--(case when @Post = 1 then -1 else 1 end ) * ARID.dblTotal,
+					(case when @Post = 1 then -1 else 1 end ) * case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARID.dblBaseTotal) * (ARID.dblBaseTotal) else 0 end,
 					ARID.intItemId,
 					ARID.intItemUOMId,
 					ARI.intCompanyLocationId,
@@ -232,8 +233,8 @@ AS
 					ICT.dblCost,
 					@Post,
 					(case when @Post = 0 then -1 else 1 end ) * isnull(PS.dblBasePayment, 0),
-					(case when @Post = 0 then 1 else 1 end ) * isnull(ARI.dblBaseInvoiceTotal, 0),
-					dblInvoiceBalance = case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARI.dblBaseInvoiceTotal) * (ARID.dblBaseTotal) else 0 end,
+					(case when @Post = 0 then 1 else 1 end ) * isnull(ARID.dblBaseTotal, 0),
+					dblInvoiceBalance = case when PS.dblBasePayment  <> 0 then (PS.dblBasePayment / ARID.dblBaseTotal) * (ARID.dblBaseTotal) else 0 end,
 					PS.intId,
 					PS.strTransactionNumber
 				FROM
