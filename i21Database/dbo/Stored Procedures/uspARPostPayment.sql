@@ -1127,6 +1127,7 @@ IF @recap = 0
 						ON A.intInvoiceId = C.intInvoiceId
 					WHERE
 						A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+						AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 					GROUP BY
 						A.intInvoiceId
 				) P
@@ -1160,7 +1161,8 @@ IF @recap = 0
 			INNER JOIN tblARInvoice C
 				ON B.intInvoiceId = C.intInvoiceId
 			WHERE
-				A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+				A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)						
+				AND ISNULL(A.[ysnInvoicePrepayment],0) = 0
 			
 			UPDATE 
 				tblARInvoice
