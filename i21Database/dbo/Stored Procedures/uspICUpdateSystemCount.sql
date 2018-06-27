@@ -147,7 +147,7 @@ SELECT
 	, intLotId				= CASE NULLIF(d.strAutoCreatedLotNumber, '') WHEN NULL THEN d.intLotId ELSE NULL END
 	, intSubLocationId		= d.intSubLocationId
 	, intStorageLocationId	= d.intStorageLocationId
-	, dblQty				= d.dblSystemCount
+	, dblQty				= ISNULL(d.dblSystemCount, 0)
 	, intLotStatusId		= 1
 	, intDetailId			= d.intInventoryCountDetailId
 FROM tblICInventoryCountDetail d
@@ -156,18 +156,18 @@ FROM tblICInventoryCountDetail d
 			AND Item.strLotTracking <> 'No'
 WHERE c.intImportFlagInternal = 1
 
-IF EXISTS(SELECT * FROM @Lots)
-BEGIN
-	EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
+-- IF EXISTS(SELECT * FROM @Lots)
+-- BEGIN
+-- 	EXEC dbo.uspICCreateUpdateLotNumber @Lots, 1, 1, 0
 
-	UPDATE	countDetail
-	SET	intLotId = LotNumbers.intLotId
-	FROM tblICInventoryCountDetail countDetail
-		INNER JOIN #GeneratedLotItems LotNumbers ON countDetail.intInventoryCountDetailId = LotNumbers.intDetailId
-		INNER JOIN tblICItem Item ON Item.intItemId = countDetail.intItemId
-			AND Item.strLotTracking <> 'No'
+-- 	UPDATE	countDetail
+-- 	SET	intLotId = LotNumbers.intLotId
+-- 	FROM tblICInventoryCountDetail countDetail
+-- 		INNER JOIN #GeneratedLotItems LotNumbers ON countDetail.intInventoryCountDetailId = LotNumbers.intDetailId
+-- 		INNER JOIN tblICItem Item ON Item.intItemId = countDetail.intItemId
+-- 			AND Item.strLotTracking <> 'No'
 
-END
+-- END
 
 -- Reset Count Flag
 UPDATE ic
