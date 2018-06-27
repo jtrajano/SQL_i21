@@ -107,6 +107,7 @@ LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
+		AND ICISITEM.intOwnershipType = 1
 
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
@@ -603,6 +604,7 @@ INNER JOIN
 		ON ICISI.intItemId = ICI.intItemId
 WHERE 
 	ICIS.intInventoryShipmentId = @ShipmentId
+	AND ICISI.intOwnershipType = 1
 	AND ICISI.intOrderId IS NULL
 	AND ICISI.intLineNo IS NULL
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
