@@ -319,7 +319,7 @@ SELECT * into #tempCollateral FROM (
 		
 		) a where   a.intRowNum =1 
 
-SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblQuantity ,0)))  dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate
+SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblQuantity ,0)))  dblTotal,strEntity strCustomer,null Ticket,null dtmDeliveryDate
 	,s.strLocationName,s.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 	,null [Storage Due],s.intLocationId intLocationId into #invQty
 	FROM vyuICGetInventoryValuation s  		
@@ -368,7 +368,7 @@ BEGIN
 			,[Storage Due],intLocationId 
 	FROM(	
 	SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,'Receipt' AS [strType],
-					dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
+					dblTotal,strCustomer strCustomer,null Ticket,null dtmDeliveryDate,strLocationName,strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
 					,null [Storage Due],intLocationId intLocationId
 					FROM #invQty
 			UNION all
