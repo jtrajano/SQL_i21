@@ -64,7 +64,7 @@
 	[intCurrencyExchangeRateTypeId] INT		NULL,
 	[intCurrencyExchangeRateId] INT			NULL,
 	[dblCurrencyExchangeRate] NUMERIC(18, 6) CONSTRAINT [DF_tblSOSalesOrderDetail_dblCurrencyExchangeRate] DEFAULT ((1)) NULL,
-	[strAddonDetailKey]		 NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL
+	[strAddonDetailKey]		 NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnAddonParent]		 BIT			NULL
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,
