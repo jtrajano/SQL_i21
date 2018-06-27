@@ -60,6 +60,7 @@ ELSE
 			,[ysnIsUnposted]
 			,[intConcurrencyId]	
 			,[dblExchangeRate]
+			,[intCurrencyExchangeRateTypeId]
 			,[intUserId]
 			,[intEntityId]
 			,[dtmDateEntered]
@@ -86,7 +87,8 @@ ELSE
 			,A.[dtmDate]				
 			,[ysnIsUnposted]		
 			,A.[intConcurrencyId]		
-			,[dblExchangeRate]		
+			,[dblExchangeRate]
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId
 			,[dtmDateEntered]		= GETDATE()
