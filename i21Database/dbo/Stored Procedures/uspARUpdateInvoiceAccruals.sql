@@ -38,7 +38,7 @@ BEGIN
 	CROSS APPLY(SELECT TOP (@intPeriodsToAccrue) DATEADD(m, ROW_NUMBER() OVER(ORDER BY Id),DATEADD(MONTH, -1, dtmPostDate)) dtmAccrualMonth	FROM sysobjects
 				OUTER APPLY tblARInvoice
 				WHERE intInvoiceId = @intInvoiceId) AccrualDate
-	WHERE I.intInvoiceId = @intInvoiceId
+	WHERE I.intInvoiceId = @intInvoiceId AND ID.dblTotal <> 0
 	ORDER BY dtmAccrualMonth
 
 	IF (@ysnBalanceTotal != 1)
