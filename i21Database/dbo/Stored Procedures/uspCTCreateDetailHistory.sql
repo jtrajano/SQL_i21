@@ -146,20 +146,16 @@ BEGIN TRY
 			,dtmStartDate,					dtmEndDate,						CD.dblQuantity,						dblBalance,					CD.dblFutures
 			,dblBasis
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots 
-					WHEN	CD.intPricingTypeId	=	2 THEN 0  
-					ELSE	PF.dblLotsFixed 
+					ELSE	ISNULL(PF.dblLotsFixed,0)
 			 END
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
-					WHEN	CD.intPricingTypeId	=	2 THEN CD.dblNoOfLots  
-					ELSE	CD.dblNoOfLots - PF.dblLotsFixed 
+					ELSE	CD.dblNoOfLots - ISNULL(PF.dblLotsFixed,0) 
 			 END
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblQuantity 
-					WHEN	CD.intPricingTypeId	=	2 THEN 0 
-					ELSE	FD.dblQuantity 
+					ELSE	ISNULL(FD.dblQuantity,0) 
 			 END
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
-					WHEN	CD.intPricingTypeId	=	2 THEN CD.dblQuantity 
-					ELSE	CD.dblQuantity - FD.dblQuantity 
+					ELSE	CD.dblQuantity - ISNULL(FD.dblQuantity,0)
 			 END
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					CO.strCommodityCode
 			,strContractNumber,				intContractSeq,					CL.strLocationName,					strContractType,		    strPricingType
