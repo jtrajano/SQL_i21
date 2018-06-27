@@ -353,7 +353,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
-			,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(A.dblRate, 1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -373,7 +373,7 @@ BEGIN
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
 	if(@dblRate <> @dblHistoricRate)
-		EXEC [uspCMInsertGainLossBankTransfer] 
+		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss from Bank Transfer'
 	
 END
 ELSE IF @ysnPost = 0
@@ -544,7 +544,7 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
 				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
-				,intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
+				,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
 				,dblExchangeRate			= ISNULL(A.dblHistoricRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
@@ -707,3 +707,5 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+GO
+
