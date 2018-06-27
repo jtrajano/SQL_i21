@@ -137,7 +137,7 @@ UNION ALL
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
-	[intLineApplied]		=	CurrentBill.intLineNo,--B.intLineNo, 
+	[intLineApplied]		=	CurrentBill.intContractSeq,--B.intLineNo, 
 	[intTransactionId]		=	A.intBillId,
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
@@ -202,8 +202,9 @@ CROSS APPLY
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
 		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
+		,C.intContractSeq
 	FROM tblAPBillDetail C
-	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
+	INNER JOIN tblCTContractHeader D ON B.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
 		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal 
 			,SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived 
@@ -238,7 +239,7 @@ UNION ALL
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
-	[intLineApplied]		=	CurrentBill.intLineNo,--B.intLineNo, 
+	[intLineApplied]		=	CurrentBill.intContractSeq,--B.intLineNo, 
 	[intTransactionId]		=	A.intBillId,
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
@@ -303,6 +304,7 @@ CROSS APPLY
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
 		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
+		,C.intContractSeq
 	FROM tblAPBillDetail C
 	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
@@ -332,7 +334,7 @@ UNION ALL
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
-	[intLineApplied]		=	CurrentBill.intLineNo,--B.intLineNo, 
+	[intLineApplied]		=	CurrentBill.intContractSeq,--B.intLineNo, 
 	[intTransactionId]		=	A.intBillId,
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	B.intItemId,
@@ -397,8 +399,9 @@ CROSS APPLY
 		,Total.dblDetailTotal
 		,Total.dblTotalQtyReceived
 		,(C.dblTotal + C.dblTax) / Total.dblDetailTotal AS allocatedAmount
+		,C.intContractSeq
 	FROM tblAPBillDetail C
-	LEFT JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
+	LEFT JOIN tblCTContractHeader D ON B.intContractHeaderId = D.intContractHeaderId
 	CROSS APPLY (
 		SELECT SUM(dblTotal + dblTax) AS dblDetailTotal
 			,SUM(dbo.fnAPGetVoucherDetailQty(C2.intBillDetailId)) AS dblTotalQtyReceived 
