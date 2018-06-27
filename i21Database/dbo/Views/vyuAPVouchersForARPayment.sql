@@ -48,7 +48,7 @@ SELECT
 			,[strTicketNumbers]			= '' COLLATE Latin1_General_CI_AS
 			,[strCustomerReferences]	= '' COLLATE Latin1_General_CI_AS
 			,[intTermId]				= APB.[intTermsId]
-			,[ysnExcludeForPayment]		= CONVERT(BIT, 0)
+			,[ysnExcludeForPayment]		= APB.ysnPaid 
 			,intPaymentMethodId			= APV.intPaymentMethodId	
 			,strPaymentMethod			= SMP.strPaymentMethod
 			,ysnACHActive				= EFT.ysnActive
@@ -98,9 +98,7 @@ SELECT
 					LGWC.[ysnPosted] = 1
 			) LGWC
 				ON APB.[intBillId] = LGWC.[intBillId] 				
-		WHERE
-			APB.[ysnPaid] = 0
-			AND (
+		WHERE  (
 				(APB.[ysnPosted] = 1 AND APB.intTransactionType IN (1,3))
 				OR
 				(APB.[ysnPosted] = 0 AND APB.intTransactionType = 11 AND LGWC.[intBillId] IS NOT NULL)
