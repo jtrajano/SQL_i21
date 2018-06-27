@@ -128,24 +128,24 @@ BEGIN
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
         AND P.[strTransactionType] <> 'Claim'
 
-    UNION
+    --UNION
 
-    --Exclude Recieved Amount in Final Invoice enabled
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' was posted with ''Exclude Recieved Amount in Final Invoice'' option enabled! Payment not allowed!'  
-	FROM
-		@Payments P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intTransactionDetailId] IS NOT NULL
-        AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
-        AND P.[ysnExcludedFromPayment] = 1
+ --   --Exclude Recieved Amount in Final Invoice enabled
+	--SELECT
+ --        [intTransactionId]         = P.[intTransactionId]
+ --       ,[strTransactionId]         = P.[strTransactionId]
+ --       ,[strTransactionType]       = @TransType
+ --       ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+ --       ,[strBatchId]               = P.[strBatchId]
+ --       ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' was posted with ''Exclude Recieved Amount in Final Invoice'' option enabled! Payment not allowed!'  
+	--FROM
+	--	@Payments P
+ --   WHERE
+ --           P.[ysnPost] = 1
+ --       AND P.[intTransactionDetailId] IS NOT NULL
+ --       AND P.[intInvoiceId] IS NOT NULL
+ --       AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
+ --       AND P.[ysnExcludedFromPayment] = 1
 
     UNION
 
