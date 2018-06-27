@@ -18,7 +18,7 @@ IF OBJECT_ID (N'tempdb.dbo.#DeliverySheetGrade') IS NOT NULL
 
 DECLARE @strItemNo AS NVARCHAR(MAX)
 		,@counter AS INT;
-CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),Amount NUMERIC(38,6),intDeliverySheetId INT)
+CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),Amount NUMERIC(38,6),intDecimalPrecision INT,intDeliverySheetId INT)
 
 INSERT INTO #DeliverySheetGrade (Item)
 SELECT DISTINCT strItemNo FROM tblSCDeliverySheet SCD
@@ -55,6 +55,8 @@ BEGIN
 	LEFT JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 	WHERE SCT.intDeliverySheetId = @intDeliverySheetId AND IC.strItemNo = @strItemNo), 0) WHERE Item = @strItemNo;
 	
+	UPDATE #DeliverySheetGrade SET intDecimalPrecision = (SELECT TOP 1 intCurrencyDecimal FROM tblSMCompanyPreference)
+
 	FETCH NEXT FROM intListCursor INTO @strItemNo;
 END;
 
