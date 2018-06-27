@@ -6756,6 +6756,7 @@
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorCreatePostVoucher.sql" />
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateCallDetailNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
