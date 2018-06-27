@@ -220,6 +220,7 @@ FROM (
 			 WHERE ysnPosted = 1
 		) ISH ON ISI.intInventoryShipmentId = ISH.intInventoryShipmentId
 		WHERE ISI.intLineNo = SOD.intSalesOrderDetailId
+		  AND ISNULL(ISI.intOwnershipType, 0) <> 2
 		GROUP BY ISI.intInventoryShipmentItemId
 			   , ISH.strShipmentNumber
 			   , ISH.intInventoryShipmentId
@@ -372,6 +373,7 @@ FROM (
 			dblDestinationQuantity
 		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
 		WHERE ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
+		  AND ISNULL(intOwnershipType, 0) <> 2
 	) ICISI 
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -809,6 +811,7 @@ FROM (
 		FROM tblMFRecipeItem WITH(NOLOCK)
 	) MFI ON MFG.intRecipeItemId = MFI.intRecipeItemId
 	WHERE ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 0
+	  AND ISNULL(ICISI.intOwnershipType, 0) <> 2
 
 	UNION ALL 
 
