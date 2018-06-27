@@ -131,8 +131,8 @@ WHERE
 	UPDATE
 		tblARInvoice
 	SET
-		 [dblDiscountAvailable]					= ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal)
-		,[dblBaseDiscountAvailable]				= ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
+		 [dblDiscountAvailable]					= CASE WHEN strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END
+		,[dblBaseDiscountAvailable]				= CASE WHEN strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END
 		,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
 		,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
 		,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
