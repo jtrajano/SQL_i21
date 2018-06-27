@@ -3,8 +3,8 @@
 AS
 SELECT	DISTINCT	 
 			 APB.intBillId
-			,VendorId = V.strVendorId
-			,VendorName =  V.strVendorId + ' ' + E.strName
+			,VendorId = ISNULL(V.strVendorId, E.strEntityNo)
+			,VendorName =  ISNULL(V.strVendorId,'') + ' ' + E.strName
 			,strDescription = C.strCommodityCode 
 			,strItem = IE.strItemNo 
 			,intTicketId
