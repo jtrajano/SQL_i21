@@ -34,5 +34,7 @@ BEGIN
 		  ,@p10
 		) 	
 
+	SET @msgString = REPLACE(@msgString, '%', '%%')
+
 	RAISERROR(@msgString, 11, 1)
 END
