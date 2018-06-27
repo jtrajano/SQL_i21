@@ -19,7 +19,8 @@ AS
 			CA.intPurchasingGroupId,
 			IM.intProductTypeId,
 			PG.strName	AS	strPurchasingGroup,
-			IM.strCostType
+			IM.strCostType,
+			IM.ysnInventoryCost
 
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
