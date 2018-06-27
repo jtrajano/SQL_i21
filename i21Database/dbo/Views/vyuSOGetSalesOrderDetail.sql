@@ -106,7 +106,9 @@ SELECT
         strCurrencyExchangeRateType = CURTYPE.strCurrencyExchangeRateType,
 		--strVendorName = VPER.strName,
 		--strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
-		strPriceUOM = PITMUOM.strUnitMeasure
+		strPriceUOM = PITMUOM.strUnitMeasure,
+		strAddonDetailKey,
+        ysnAddonParent
 	from tblSOSalesOrderDetail SO
 		INNER JOIN ( SELECT intSalesOrderId, intCompanyLocationId 
 			FROM tblSOSalesOrder  WITH(NOLOCK) ) OSO
