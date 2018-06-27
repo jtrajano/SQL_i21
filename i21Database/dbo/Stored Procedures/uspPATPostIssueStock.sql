@@ -454,6 +454,11 @@ BEGIN
 		ELSE
 		BEGIN
 			BEGIN TRY
+				
+				UPDATE tblPATIssueStock
+				SET intInvoiceId = NULL
+				WHERE intIssueStockId IN (SELECT intIssueStockId FROM #tempCustomerStock)
+
 
 				SET ANSI_WARNINGS ON;
 				DECLARE @invoiceIds AS NVARCHAR(MAX);
