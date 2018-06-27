@@ -45,6 +45,7 @@ DECLARE @ItemTaxes AS TABLE(
 ,strTaxableByOtherTaxes	NVARCHAR(MAX)
 ,strCalculationMethod	NVARCHAR(30)
 ,dblRate				DECIMAL(18,6)
+,dblBaseRate			DECIMAL(18,6)
 ,intSalesTaxAccountId	INT
 ,dblTax					DECIMAL(18,6)
 ,dblAdjustedTax			DECIMAL(18,6)
@@ -71,6 +72,7 @@ INSERT INTO @ItemTaxes (
 	,[strTaxableByOtherTaxes]
 	,[strCalculationMethod]
 	,[dblRate]
+	,[dblBaseRate]
 	,[dblTax]
 	,[dblAdjustedTax]
 	,[intSalesTaxAccountId]
