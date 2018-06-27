@@ -118,7 +118,7 @@ BEGIN
 	BEGIN
 		IF @NetUnits = 0
 			SET @NetUnits = @ticketTotalUnitQty;
-		SET @tmpUnits = (@NetUnits * @SplitAverage) / 100;
+		SET @tmpUnits = ROUND((@NetUnits * @SplitAverage) / 100, @currencyDecimal);
 		IF @remainingUnits < @tmpUnits
 			SET @tmpUnits = @remainingUnits;
 
