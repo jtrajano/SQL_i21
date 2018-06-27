@@ -50,10 +50,7 @@ BEGIN
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
-	IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
-	BEGIN
-		SET @ysnIsStorage = 1
-	END	
+	SET @ysnIsStorage = 1	
 
 	SELECT @intTransactionTypeId = intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = @strTransactionType
 
@@ -124,6 +121,9 @@ BEGIN
 		,[intContractDetailId] 			   INT
 		,[ysnAccrue]					   BIT
 		,[ysnPrice]						   BIT
+		,[intTicketDiscountId]			   INT
+		,[intContractCostId]			   INT
+		,[dblUnits] 					   DECIMAL(24,10)
 	)
 
 	INSERT INTO @tblOtherCharges
@@ -144,6 +144,9 @@ BEGIN
 		,[intContractDetailId] 			
 		,[ysnAccrue]					
 		,[ysnPrice]
+		,[intTicketDiscountId]	
+		,[intContractCostId]
+		,[dblUnits] 	
 	)
 	SELECT
 	 intItemId							= IC.intItemId
@@ -178,12 +181,64 @@ BEGIN
 											WHEN QM.dblDiscountAmount < 0 THEN 0
 											WHEN QM.dblDiscountAmount > 0 THEN 1
 										END
+	,[intTicketDiscountId]				= QM.intTicketDiscountId
+	,[intContractCostId]				= NULL
+	,[dblUnits]							= @dblUnits
+
 	FROM tblGRSettleContract RE
 	JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageId = RE.intSettleStorageId
 	JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = SST.intCustomerStorageId AND QM.strSourceType = 'Storage'
 	JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 	JOIN tblICItem IC ON IC.intItemId = GR.intItemId
 	WHERE RE.intSettleStorageId = @intSettleStorageId AND ISNULL(QM.dblDiscountAmount,0) <> ISNULL(QM.dblDiscountPaid,0)
+	
+	UNION
+
+	SELECT
+	 intItemId							= IC.intItemId
+	,[strItemNo]						= IC.strItemNo	
+	,[intEntityVendorId]				= @intEntityVendorId	
+	,[intCurrencyId]  					= @intCurrencyId
+	,[intCostCurrencyId]  				= @intCurrencyId
+	,[intChargeId]						= IC.intItemId
+	,[intForexRateTypeId]				= NULL
+	,[dblForexRate]						= NULL
+	,[ysnInventoryCost]					= IC.ysnInventoryCost
+	,[strCostMethod]					= IC.strCostMethod
+	,[dblRate]							= CASE 
+												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)	
+												WHEN QM.dblDiscountAmount > 0 THEN  QM.dblDiscountAmount		
+										  END
+	,[intOtherChargeEntityVendorId]		= @intEntityVendorId
+	,[dblAmount]						= CASE
+											WHEN IC.strCostMethod = 'Per Unit' THEN 0
+											WHEN IC.strCostMethod = 'Amount' THEN 
+											CASE 
+												WHEN @ysnIsStorage = 1 THEN 0
+												WHEN @ysnIsStorage = 0 THEN 0												
+											END
+										END
+	,[intContractDetailId]				= NULL
+	,[ysnAccrue]						= CASE
+											WHEN QM.dblDiscountAmount < 0 THEN 1
+											WHEN QM.dblDiscountAmount > 0 THEN 0
+										END
+	,[ysnPrice]							= CASE
+											WHEN QM.dblDiscountAmount < 0 THEN 0
+											WHEN QM.dblDiscountAmount > 0 THEN 1
+										END
+	,[intTicketDiscountId]				= QM.intTicketDiscountId
+	,[intContractCostId]				= NULL
+	,[dblUnits]							= @dblUnits
+
+	FROM tblGRSettleStorageTicket SST
+	JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SST.intSettleStorageId
+	JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = SST.intCustomerStorageId AND QM.strSourceType = 'Storage'
+	JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+	JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+	WHERE SST.intSettleStorageId = @intSettleStorageId 
+	  AND ISNULL(QM.dblDiscountAmount,0) <> ISNULL(QM.dblDiscountPaid,0)
+	  AND SS.dblSpotUnits > 0
 
 	UNION
 
@@ -204,6 +259,10 @@ BEGIN
 	,[intContractDetailId]				= RE.intContractDetailId
 	,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 	,[ysnPrice]							= CASE WHEN @ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
+	,[intTicketDiscountId]				= NULL
+	,[intContractCostId]				= ContractCost.intContractCostId
+	,[dblUnits]							= RE.dblUnits
+
 	FROM tblCTContractCost ContractCost
 	JOIN tblGRSettleContract RE ON RE.intContractDetailId = ContractCost.intContractDetailId
 	JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageId = RE.intSettleStorageId
@@ -250,6 +309,7 @@ BEGIN
 		,strCharge							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		,strItem							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		,strBundleType						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		,dblUnits 						DECIMAL(24,10)
 	)
 
 		INSERT INTO @InventoryCostCharges
@@ -276,7 +336,8 @@ BEGIN
 			,strRateType					
 			,strCharge						
 			,strItem						
-			,strBundleType					
+			,strBundleType
+			,dblUnits					
 		)
 		SELECT 
 				 dtmDate						 = GETDATE()
@@ -302,9 +363,10 @@ BEGIN
 				,strCharge						 = Item.strItemNo
 				,strItem						 = Item.strItemNo
 				,strBundleType					 = ISNULL(Item.strBundleType, '')
+				,dblUnits						 = CS.dblUnits
 			FROM @tblOtherCharges CS
 			JOIN tblICItem Item ON Item.intItemId = CS.intChargeId
-			LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = CS.intChargeId
+			LEFT JOIN dbo.tblICItemLocation ChargeItemLocation ON ChargeItemLocation.intItemId = CS.intChargeId AND ChargeItemLocation.intLocationId = @LocationId
 
 
 	 INSERT INTO @tblItem(intItemId,intItemLocationId,dblCost,intItemType)
@@ -429,8 +491,8 @@ BEGIN
 	  [dtmDate]                
 	 ,[strBatchId]             
 	 ,[intAccountId]           
-	 ,[dblDebit] = CASE WHEN ABS(t.dblDebit)>0 THEN   ABS(Item.dblCost * @dblUnits) ELSE 0 END             
-	 ,[dblCredit] = CASE WHEN ABS(t.dblCredit)>0 THEN ABS(Item.dblCost * @dblUnits) ELSE 0 END             
+	 ,[dblDebit] = CASE WHEN ABS(t.dblDebit)>0 THEN   ABS(Item.dblCost * t.dblUnits) ELSE 0 END             
+	 ,[dblCredit] = CASE WHEN ABS(t.dblCredit)>0 THEN ABS(Item.dblCost * t.dblUnits) ELSE 0 END             
 	 ,[dblDebitUnit]           
 	 ,[dblCreditUnit]          
 	 ,[strDescription]         
@@ -495,6 +557,7 @@ BEGIN
 		,dblReportingRate			= NULL
 		,dblForeignRate				= InventoryCostCharges.dblForexRate
 		,strRateType				= InventoryCostCharges.strRateType
+		,dblUnits					= InventoryCostCharges.dblUnits
 	FROM @InventoryCostCharges InventoryCostCharges
 	INNER JOIN @ItemGLAccounts ItemGLAccounts ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 		AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -554,6 +617,7 @@ BEGIN
 		,dblReportingRate			= NULL
 		,dblForeignRate				= InventoryCostCharges.dblForexRate
 		,strRateType				= InventoryCostCharges.strRateType
+		,dblUnits					= InventoryCostCharges.dblUnits
 	FROM @InventoryCostCharges InventoryCostCharges
 	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 		AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -620,6 +684,7 @@ BEGIN
 		,dblReportingRate		   = NULL
 		,dblForeignRate			   = InventoryCostCharges.dblForexRate
 		,strRateType			   = InventoryCostCharges.strRateType
+		,dblUnits					= InventoryCostCharges.dblUnits
 	FROM @InventoryCostCharges InventoryCostCharges
 	INNER JOIN @ItemGLAccounts ItemGLAccounts ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 		AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -670,6 +735,7 @@ BEGIN
 		,dblReportingRate			= NULL
 		,dblForeignRate				= InventoryCostCharges.dblForexRate
 		,strRateType				= InventoryCostCharges.strRateType
+		,dblUnits					= InventoryCostCharges.dblUnits
 	FROM @InventoryCostCharges InventoryCostCharges
 	INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 		AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -726,6 +792,7 @@ BEGIN
 		,dblReportingRate			= NULL
 		,dblForeignRate				= InventoryCostCharges.dblForexRate
 		,strRateType				= InventoryCostCharges.strRateType
+		,dblUnits					= InventoryCostCharges.dblUnits
 	FROM @InventoryCostCharges InventoryCostCharges
 	INNER JOIN @ItemGLAccounts ItemGLAccounts ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 		AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -775,6 +842,7 @@ BEGIN
 		,dblReportingRate			= NULL
 		,dblForeignRate				= InventoryCostCharges.dblForexRate
 		,strRateType				= InventoryCostCharges.strRateType
+		,dblUnits					= InventoryCostCharges.dblUnits
 	FROM @InventoryCostCharges InventoryCostCharges
 	INNER JOIN @ItemGLAccounts ItemGLAccounts ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 		AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -832,6 +900,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,dblUnits					= NonInventoryCostCharges.dblUnits
 	FROM	@InventoryCostCharges NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -892,6 +961,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,dblUnits					= NonInventoryCostCharges.dblUnits
 	FROM	@InventoryCostCharges NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -959,6 +1029,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,dblUnits					= NonInventoryCostCharges.dblUnits
 	FROM	@InventoryCostCharges NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1017,6 +1088,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,dblUnits					= NonInventoryCostCharges.dblUnits
 	FROM	@InventoryCostCharges NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1083,6 +1155,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,dblUnits					= NonInventoryCostCharges.dblUnits
 	FROM	@InventoryCostCharges NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1140,6 +1213,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,dblUnits					= NonInventoryCostCharges.dblUnits
 	FROM	@InventoryCostCharges NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
