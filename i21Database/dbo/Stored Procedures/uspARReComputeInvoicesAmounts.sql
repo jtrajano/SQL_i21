@@ -100,8 +100,8 @@ WHERE
 
 UPDATE ARI
 SET
-	  [dblDiscountAvailable]		= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal)
-	 ,[dblBaseDiscountAvailable]	= ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountTotal], @ZeroDecimal)
+	  [dblDiscountAvailable]		= CASE WHEN ARI.strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountTotal], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal) END
+	 ,[dblBaseDiscountAvailable]	= CASE WHEN ARI.strType NOT IN ('CF Invoice','CF Tran') THEN ISNULL([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountTotal], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountTotal], @ZeroDecimal) END
 	 ,[dblTotalTermDiscount]		= ISNULL(T.[dblItemTermDiscountTotal], @ZeroDecimal)
 FROM
 	tblARInvoice ARI
