@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[tblGLPostRecap](
     [strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
     [strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [intCurrencyId]             INT              NULL,
+	[intCurrencyExchangeRateTypeId]             INT              NULL,
     [dblExchangeRate]           NUMERIC (38, 20) NOT NULL,
     [dtmDateEntered]            DATETIME         NOT NULL,
     [dtmTransactionDate]        DATETIME         NULL,
@@ -68,6 +69,8 @@ GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Reference' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'strReference' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'intCurrencyId' 
+GO
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Currency Exchange Rate Type Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'intCurrencyIdExchangeRateTypeId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Exchange Rate' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLPostRecap', @level2type=N'COLUMN',@level2name=N'dblExchangeRate' 
 GO
