@@ -768,6 +768,37 @@ BEGIN
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
 	END
+	ELSE IF (@strNetworkType = 'Non Network')
+	BEGIN 
+		IF(ISNULL(@intSiteId,0) != 0)
+		BEGIN
+			DECLARE @ysnPetrovendDualCard INT
+			SELECT TOP 1 @ysnPetrovendDualCard = ysnPetrovendDualCard
+			FROM tblCFSite where intSiteId = @intSiteId
+
+			IF(ISNULL(@ysnPetrovendDualCard,0) = 1)
+			BEGIN
+				--DECLARE @i NVARCHAR(MAX)
+				--SET @i = '0000000'
+				--SELECT CONVERT(BIGINT, @i)
+
+				IF(ISNULL(@strCardId,0) = 0)
+				BEGIN
+					SET @strCardId = @strVehicleId
+					SET @strVehicleId = null
+				END
+
+				IF (ISNUMERIC(@strCardId) = 1)
+				BEGIN
+					IF (CONVERT(BIGINT, @strCardId) = 0)
+					BEGIN
+						SET @strCardId = @strVehicleId
+						SET @strVehicleId = null
+					END
+				END
+			END
+		END
+	END
 	
 	--FIND CARD--
 	
