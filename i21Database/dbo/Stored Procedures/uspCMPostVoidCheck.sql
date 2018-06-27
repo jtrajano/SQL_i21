@@ -289,7 +289,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
-			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -326,7 +326,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= ISNULL(Entity.strName, A.strMemo)
 			,[intCurrencyId]		= A.intCurrencyId
-			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateTypeId] = B.intCurrencyExchangeRateTypeId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate

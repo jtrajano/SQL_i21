@@ -353,7 +353,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
 			,[intCurrencyId]		= NULL
-			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
 			,[dblExchangeRate]		= ISNULL(A.dblRate, 1)
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -544,7 +544,7 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
 				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
-				,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
+				,intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 				,dblExchangeRate			= ISNULL(A.dblHistoricRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''

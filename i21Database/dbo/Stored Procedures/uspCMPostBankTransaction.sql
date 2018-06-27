@@ -320,7 +320,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
-			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateTypeId] =  A.intCurrencyExchangeRateTypeId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -353,7 +353,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
-			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
