@@ -38,6 +38,7 @@ CREATE TABLE #tmpGLDetail (
 	,[intTransactionId] [int] NULL
 	,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[intCurrencyId] [int] NULL
+	,[intCurrencyExchangeRateTypeId] [int] NULL
 	,[dblExchangeRate] [numeric](38, 20) NOT NULL
 	,[dtmDateEntered] [datetime] NOT NULL
 	,[dtmTransactionDate] [datetime] NULL
@@ -293,6 +294,7 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -318,6 +320,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -350,6 +353,7 @@ BEGIN
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
@@ -409,6 +413,7 @@ BEGIN
 				,[ysnIsUnposted]
 				,[intConcurrencyId]	
 				,[intCurrencyId]
+				,[intCurrencyExchangeRateTypeId]
 				,[dblExchangeRate]
 				,[intUserId]
 				,[intEntityId]			
@@ -436,6 +441,7 @@ BEGIN
 				,[ysnIsUnposted]
 				,[intConcurrencyId]	
 				,[intCurrencyId]
+				,[intCurrencyExchangeRateTypeId]
 				,[dblExchangeRate]
 				,[intUserId]
 				,[intEntityId]			
@@ -481,6 +487,7 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -507,6 +514,7 @@ BEGIN
 			,[strCode]
 			,[strReference]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
