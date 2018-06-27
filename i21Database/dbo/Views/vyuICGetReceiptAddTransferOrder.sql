@@ -13,7 +13,7 @@ FROM (
 			, intLineNo					= d.intInventoryTransferDetailId
 			, intOrderId				= h.intInventoryTransferId
 			, strOrderNumber			= h.strTransferNo
-			, dblOrdered				= d.dblQuantity -- -t.dblQty 										
+			, dblOrdered				= d.dblQuantity 
 			, dblReceived				= CAST(NULL AS NUMERIC(38, 20))
 			, intSourceType				= CAST(0 AS INT)
 			, intSourceId				= d.intInventoryTransferDetailId
@@ -23,27 +23,64 @@ FROM (
 			, strItemDescription		= item.strDescription
 			, dblQtyToReceive			= d.dblQuantity - ISNULL(st.dblReceiptQty, 0)
 			, intLoadToReceive			= CAST(0 AS INT)
-			, dblUnitCost				= --t.dblCost 
+			, dblUnitCost				= 
 										CASE 
-											WHEN 
-												GrossNetUOM.intItemUOMId IS NOT NULL 
-												AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
-												AND ISNULL(d.dblNet, 0) <> 0 THEN 
-													dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblNet) 
-											WHEN 
-												t.intItemUOMId = ItemUOM.intItemUOMId 
-												AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
-													dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblQuantity) 
-											ELSE 
-												t.dblCost
-										END
+											WHEN t.intInventoryTransactionId IS NOT NULL THEN 
+												CASE 
+													WHEN 
+														GrossNetUOM.intItemUOMId IS NOT NULL 
+														AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+														AND ISNULL(d.dblNet, 0) <> 0 THEN 
+															dbo.fnDivide(
+																dbo.fnMultiply(
+																	-t.dblQty
+																	, t.dblCost
+																), d.dblNet
+															) 
+													WHEN 
+														t.intItemUOMId = ItemUOM.intItemUOMId 
+														AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
+															dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblQuantity) 
+													ELSE 
+														t.dblCost
+												END
+											ELSE
+												CASE 
+													WHEN 
+														GrossNetUOM.intItemUOMId IS NOT NULL 
+														AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+														AND ISNULL(d.dblNet, 0) <> 0 THEN 
+															dbo.fnDivide(
+																dbo.fnMultiply(
+																	-storage.dblQty
+																	, storage.dblCost
+																), d.dblNet
+															) 
+													WHEN 
+														storage.intItemUOMId = ItemUOM.intItemUOMId 
+														AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
+															dbo.fnDivide(dbo.fnMultiply(-storage.dblQty, storage.dblCost), d.dblQuantity) 
+													ELSE 
+														storage.dblCost
+												END
+										END 
+
 
 			, dblTax					= CAST(0 AS NUMERIC(18, 6))
-			, dblLineTotal				= --CAST(0 AS NUMERIC(38, 20))
-										ROUND(
-											-t.dblQty * t.dblCost
-											, 2
-										)
+			, dblLineTotal				= 
+										CASE 
+											WHEN t.intInventoryTransactionId IS NOT NULL THEN 
+												ROUND(
+													-t.dblQty * t.dblCost
+													, 2
+												)
+											ELSE
+												ROUND(
+													-storage.dblQty * storage.dblCost
+													, 2
+												)
+										END
+
 			, strLotTracking			= item.strLotTracking
 			, intCommodityId			= item.intCommodityId
 			, intContainerId			= CAST(NULL AS INT)
@@ -101,19 +138,30 @@ FROM (
 			, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
 			, ysnIsBasket = CAST(0 AS BIT)
 			, item.strBundleType
+			, d.intOwnershipType 
 	FROM	dbo.tblICInventoryTransfer h INNER JOIN tblICInventoryTransferDetail d 
 				ON h.intInventoryTransferId = d.intInventoryTransferId
 	
-			INNER JOIN tblICInventoryTransaction t
+			INNER JOIN dbo.tblICItem item
+				ON item.intItemId = d.intItemId
+
+			LEFT JOIN tblICInventoryTransaction t
 				ON t.intTransactionId = h.intInventoryTransferId
 				AND t.strTransactionId = h.strTransferNo
+				AND t.intTransactionDetailId = d.intInventoryTransferDetailId 
 				AND ISNULL(t.dblQty, 0) <> 0 
 				AND ISNULL(t.dblQty, 0) < 0 
 				AND t.ysnIsUnposted = 0 
 				AND t.intItemId = d.intItemId
 
-			INNER JOIN dbo.tblICItem item
-				ON item.intItemId = d.intItemId
+			LEFT JOIN tblICInventoryTransactionStorage storage
+				ON storage.intTransactionId = h.intInventoryTransferId
+				AND storage.strTransactionId = h.strTransferNo
+				AND storage.intTransactionDetailId = d.intInventoryTransferDetailId 
+				AND ISNULL(storage.dblQty, 0) <> 0 
+				AND ISNULL(storage.dblQty, 0) < 0 
+				AND storage.ysnIsUnposted = 0 
+				AND storage.intItemId = d.intItemId
 
 			LEFT JOIN tblICItemLocation fromLocation
 				ON fromLocation.intItemId = d.intItemId
@@ -140,7 +188,7 @@ FROM (
 				ON toStorageLocation.intStorageLocationId = d.intToStorageLocationId
 
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON ItemUOM.intItemUOMId = d.intItemUOMId -- t.intItemUOMId 
+				ON ItemUOM.intItemUOMId = d.intItemUOMId 
 				AND ItemUOM.intItemId = item.intItemId
 
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -154,21 +202,13 @@ FROM (
 				ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 
 			LEFT JOIN dbo.tblICItemUOM CostUOM
-				ON CostUOM.intItemUOMId = t.intItemUOMId 
+				ON CostUOM.intItemUOMId = ISNULL(t.intItemUOMId, storage.intItemUOMId)
 				AND CostUOM.intItemId = item.intItemId
 
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
 			LEFT JOIN vyuICGetItemStockTransferred st ON st.intInventoryTransferId = h.intInventoryTransferId
-			--LEFT JOIN dbo.tblICLot LotItem
-			--	ON item.intItemId = LotItem.intItemId
-			--	AND ItemUOM.intItemUOMId = LotItem.intItemUOMId
-			--	AND h.intToLocationId = LotItem.intLocationId
-			--	AND toSubLocation.intCompanyLocationSubLocationId = LotItem.intSubLocationId
-			--	AND toStorageLocation.intStorageLocationId= LotItem.intStorageLocationId
-			--	AND LotItem.intLotStatusId = 1
-			--	AND toLocation.intItemLocationId = LotItem.intItemLocationId
 
 			OUTER APPLY (
 				SELECT	LotItem.intLotId
@@ -185,29 +225,17 @@ FROM (
 						,LotItem.strCertificateId
 						,LotItem.strTrackingNumber
 				FROM	dbo.tblICLot LotItem 
-						--INNER JOIN tblICInventoryTransaction t_lot
-						--	ON LotItem.intLotId = t_lot.intLotId
-						--	AND t_lot.intTransactionId = h.intInventoryTransferId
-						--	AND t_lot.strTransactionId = h.strTransferNo
-						--	AND ISNULL(t_lot.dblQty, 0) <> 0 
-						--	AND ISNULL(t_lot.dblQty, 0) > 0 
-						--	AND t_lot.ysnIsUnposted = 0 
-						--	AND t_lot.intItemId = d.intItemId
 						LEFT JOIN tblICParentLot pl
 							ON pl.intParentLotId = LotItem.intParentLotId 
 						LEFT JOIN tblEMEntity producer
 							ON producer.intEntityId = LotItem.intProducerId
-				WHERE	LotItem.intLotId = t.intLotId
+				WHERE	LotItem.intLotId = ISNULL(t.intLotId, storage.intLotId) 
 			) LotItem
 
-			--LEFT JOIN dbo.vyuICItemUOM LotItemUOM
-			--	ON LotItemUOM.intItemUOMId = LotItem.intItemUOMId
-			--LEFT JOIN dbo.tblICParentLot ParentLot
-			--	ON ParentLot.intParentLotId = LotItem.intParentLotId
-			--	AND ParentLot.intItemId = item.intItemId
-
-	WHERE h.ysnPosted = 1
+	WHERE 
+		h.ysnPosted = 1
 		AND h.ysnShipmentRequired = 1
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)
+		AND ISNULL(t.intInventoryTransactionId, storage.intInventoryTransactionStorageId) IS NOT NULL 
 	
 ) tblAddOrders
