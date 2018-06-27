@@ -144,10 +144,10 @@ SELECT
 	, intItemLocationId		= d.intItemLocationId
 	, intItemUOMId			= d.intItemUOMId
 	, strLotNumber			= d.strAutoCreatedLotNumber
-	, intLotId				= CASE NULLIF(d.strAutoCreatedLotNumber, '') WHEN NULL THEN d.intLotId ELSE NULL END
 	, intSubLocationId		= d.intSubLocationId
 	, intStorageLocationId	= d.intStorageLocationId
 	, dblQty				= ISNULL(d.dblSystemCount, 0)
+	, intLotId				= CASE NULLIF(d.strAutoCreatedLotNumber, '') WHEN NULL THEN d.intLotId ELSE NULL END
 	, intLotStatusId		= 1
 	, intDetailId			= d.intInventoryCountDetailId
 FROM tblICInventoryCountDetail d
