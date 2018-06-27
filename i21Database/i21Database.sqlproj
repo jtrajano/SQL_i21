@@ -6766,6 +6766,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPalletPlacardDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspHDGenerateCallDetailNested.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
