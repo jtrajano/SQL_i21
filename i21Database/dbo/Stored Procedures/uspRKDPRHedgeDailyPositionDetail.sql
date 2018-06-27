@@ -385,47 +385,51 @@ BEGIN
                                 intOpenContract intNoOfContract
                 FROM (select sum(intOpenContract)intOpenContract
                                                 from(SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId,@intCommodityUnitMeasureId, intOpenContract*dblContractSize) as intOpenContract 
-                                from vyuRKGetOpenContract otr  
-                                JOIN tblRKFutOptTransaction t on otr.intFutOptTransactionId=t.intFutOptTransactionId
-                                                                                                                                                AND  intLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-                                                                                                                                                WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-                                                                                                                                                WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-                                                                                                                                                ELSE isnull(ysnLicensed, 0) END
-                                                                                                                                                )
-                                JOIN tblRKFutureMarket m on t.intFutureMarketId=m.intFutureMarketId
-                                JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
-                                WHERE t.intCommodityId=@intCommodityId
-                                AND t.intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end
-                                )t) intOpenContract   
-                                
-----         -- Option NetHedge
-                INSERT INTO @tempFinal (strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intNoOfContract,dblContractSize)                
-                                SELECT DISTINCT strCommodityCode,'Price Risk','Option',
-                
-                                                                CASE WHEN ft.strBuySell = 'Buy' THEN (
-                                                                                                ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
-                                                                                                WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId     ), 0)
-                                                                                                ) ELSE - (ft.intNoOfContract - isnull((        SELECT sum(intMatchQty)                FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId    ), 0)
-                                                                                                ) END * isnull((
-                                                                                                SELECT TOP 1 dblDelta
-                                                                                                FROM tblRKFuturesSettlementPrice sp
-                                                                                                INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-                                                                                                WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
-                                                                                                AND ft.dblStrike = mm.dblStrike
-                                                                                                ORDER BY dtmPriceDate DESC
-                                                                ),0)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,ft.intCommodityId,
-                                                                CASE WHEN ft.strBuySell = 'Buy' THEN (
-                                                                                                ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
-                                                                                                WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId     ), 0)
-                                                                                                ) ELSE - (ft.intNoOfContract - isnull((        SELECT sum(intMatchQty)                FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId    ), 0)
-                                                                                                ) END * isnull((
-                                                                                                SELECT TOP 1 dblDelta
-                                                                                                FROM tblRKFuturesSettlementPrice sp
-                                                                                                INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
-                                                                                                WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
-                                                                                                AND ft.dblStrike = mm.dblStrike
-                                                                                                ORDER BY dtmPriceDate DESC
-                                                                ),0) AS dblNoOfContract1, isnull(m.dblContractSize,0) dblContractSize
+	from vyuRKGetOpenContract oc  
+		JOIN tblRKFutOptTransaction f ON oc.intFutOptTransactionId = f.intFutOptTransactionId AND oc.intOpenContract <> 0
+			INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId AND f.intLocationId IN (
+					SELECT intCompanyLocationId
+					FROM tblSMCompanyLocation
+					WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+					)
+			INNER JOIN tblICCommodity ic ON f.intCommodityId = ic.intCommodityId
+			JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
+			INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
+			INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
+			INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
+			INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+		WHERE f.intCommodityId=@intCommodityId
+		AND f.intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end
+		 )t) intOpenContract   
+		
+----	-- Option NetHedge
+	INSERT INTO @tempFinal (strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intNoOfContract,dblContractSize)	
+		SELECT DISTINCT strCommodityCode,'Price Risk','Option',
+	
+				CASE WHEN ft.strBuySell = 'Buy' THEN (
+						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
+						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) END * isnull((
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0)*m.dblContractSize AS dblNoOfContract, m.intUnitMeasureId,ft.intCommodityId,
+				CASE WHEN ft.strBuySell = 'Buy' THEN (
+						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
+						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
+						) END * isnull((
+						SELECT TOP 1 dblDelta
+						FROM tblRKFuturesSettlementPrice sp
+						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+						WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END
+						AND ft.dblStrike = mm.dblStrike
+						ORDER BY dtmPriceDate DESC
+				),0) AS dblNoOfContract1, isnull(m.dblContractSize,0) dblContractSize
 
                 FROM tblRKFutOptTransaction ft
                 INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
