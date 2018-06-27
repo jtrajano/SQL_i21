@@ -117,6 +117,7 @@ AS SELECT SC.intTicketId, (CASE WHEN
 	SC.strElevatorReceiptNumber,
 	SC.intEntityContactId,
 	(SC.dblUnitPrice + SC.dblUnitBasis) AS dblCashPrice,
+	SC.intSalesOrderId,
 	ISNULL (tblGRStorageType.strStorageTypeDescription, CASE WHEN
 	SC.strDistributionOption = 'CNT' THEN 'Contract' WHEN
 	SC.strDistributionOption = 'LOD' THEN 'Load' WHEN
@@ -201,9 +202,12 @@ AS SELECT SC.intTicketId, (CASE WHEN
   OUTER APPLY(
 	SELECT 
 		strSalesOrderNumber,
-		strItemNumber = STUFF(( SELECT ', ' + strItemDescription FROM tblSOSalesOrderDetail WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
+		strItemNumber = STUFF(( SELECT ', ' + IC.strItemNo FROM tblSOSalesOrderDetail SOD
+			INNER JOIN tblICItem IC ON IC.intItemId = SOD.intItemId AND ysnUseWeighScales = 1
+			WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
 		strStorageLocation = STUFF(( SELECT ', ' + ICS.strDescription FROM tblSOSalesOrderDetail SOD
 			LEFT JOIN tblICStorageLocation ICS on ICS.intStorageLocationId = SOD.intStorageLocationId
+			INNER JOIN tblICItem IC ON IC.intItemId = SOD.intItemId AND ysnUseWeighScales = 1
 			WHERE SOD.intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, '')
 	FROM tblSOSalesOrderDetail AS x
 	INNER JOIN tblICItem IC ON IC.intItemId = x.intItemId
