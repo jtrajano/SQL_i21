@@ -505,27 +505,27 @@ BEGIN
     SET IDENTITY_INSERT tblSCTruckDriverReference OFF
 
     -- tblSCTicketCost
-	SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
-	SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketCost' AND ORDINAL_POSITION > 1
-	SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
-			@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketCost'
+	--SELECT	@Columns = NULL, @InsertColumns = NULL, @ValueColumns = NULL
+	--SELECT	@Columns = COALESCE(@Columns + ',', '') + 'Target.' + COLUMN_NAME + ' = Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketCost' AND ORDINAL_POSITION > 1
+	--SELECT	@InsertColumns	=	COALESCE(@InsertColumns + ',', '') + COLUMN_NAME ,
+	--		@ValueColumns	=	COALESCE(@ValueColumns + ',', '') + 'Source.' + COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSCTicketCost'
 
-    SET @SQLString = N'MERGE tblSCTicketCost AS Target
-        USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketCost]) AS Source
-        ON (Target.intTicketCostId = Source.intTicketCostId)
-        WHEN MATCHED THEN
-            UPDATE SET ' + @Columns + '
-		WHEN NOT MATCHED BY TARGET THEN
-			INSERT (
-				' + @InsertColumns + '
-			)
-			VALUES(
-				' + @ValueColumns + '
-			)
-        WHEN NOT MATCHED BY SOURCE THEN
-            DELETE;';
+ --   SET @SQLString = N'MERGE tblSCTicketCost AS Target
+ --       USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblSCTicketCost]) AS Source
+ --       ON (Target.intTicketCostId = Source.intTicketCostId)
+ --       WHEN MATCHED THEN
+ --           UPDATE SET ' + @Columns + '
+	--	WHEN NOT MATCHED BY TARGET THEN
+	--		INSERT (
+	--			' + @InsertColumns + '
+	--		)
+	--		VALUES(
+	--			' + @ValueColumns + '
+	--		)
+ --       WHEN NOT MATCHED BY SOURCE THEN
+ --           DELETE;';
 
-    SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
-    EXECUTE sp_executesql @SQLString;
+ --   SET @SQLString = 'Exec('' ' + Replace(@SQLString, 'repDB', @remoteDB) + ' '')'
+ --   EXECUTE sp_executesql @SQLString;
 
 END
