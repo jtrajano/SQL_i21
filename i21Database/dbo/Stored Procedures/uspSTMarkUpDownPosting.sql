@@ -106,78 +106,35 @@ BEGIN TRY
 		[intLocationId] INT
 	)
 
-	IF(@isRequiredGLEntries = 1)
+	IF(@isRequiredGLEntries = CAST(1 AS BIT))
 		BEGIN
-			-- CHECK IF (DEPARTMENT LEVEL) HAS ITEM
-			INSERT INTO @tblTempItemCheck
-			(
-				intCategoryId,
-				strCategoryCode,
-				ysnHasItem
-			)
-			SELECT DISTINCT
-				MD.intCategoryId,
-				C.strCategoryCode,
-				CASE
-					WHEN I.intItemId IS NOT NULL THEN CAST(1 AS BIT) 
-					ELSE CAST(0 AS BIT) 
-				END as strResult
-			FROM tblSTMarkUpDownDetail MD
-			JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-			JOIN tblICItem I ON MD.intCategoryId = I.intCategoryId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-			WHERE intMarkUpDownId = @intMarkUpDownId
-			AND IL.intCostingMethod = 6
-			AND IL.intIssueUOMId IS NOT NULL
-			AND IL.intLocationId = @intLocationId
-
-			IF NOT EXISTS(SELECT * FROM @tblTempItemCheck)
+			IF(@strType = 'Department Level')
 				BEGIN
-					PRINT 'NO Item with same Category or No Item that has Category Costing Method and has Sale UOM.'
-
-					SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
-					FROM tblSTMarkUpDownDetail MD
-					JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-					WHERE MD.intMarkUpDownId = @intMarkUpDownId
-
-					ROLLBACK TRAN @TransactionName
-					COMMIT TRAN @TransactionName
-					SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item or no Category Costing Method and Sale UOM.'
-					RETURN
-				END
-			ELSE IF EXISTS(SELECT * FROM @tblTempItemCheck)
-				BEGIN
-					PRINT 'Has Item with same Category and Has Item that has Category Costing Method and has Sale UOM.'
-
-					INSERT INTO @tblTempItemValuationCheck
+					INSERT INTO @tblTempItemCheck
 					(
 						intCategoryId,
 						strCategoryCode,
-						ysnHasItemValuation,
-						ysnHasItemCosting,
-						intLocationId
+						ysnHasItem
 					)
 					SELECT DISTINCT
 						MD.intCategoryId,
 						C.strCategoryCode,
 						CASE
-							WHEN IV.intCategoryId IS NOT NULL THEN CAST(1 AS BIT) 
+							WHEN I.intItemId IS NOT NULL THEN CAST(1 AS BIT) 
 							ELSE CAST(0 AS BIT) 
-						END as ysnHasItemValuation,
-						CASE
-							WHEN IV.dblEndingCost > 0 THEN CAST(1 AS BIT) 
-							ELSE CAST(0 AS BIT) 
-						END as ysnHasItemCosting,
-					IV.intLocationId
+						END as strResult
 					FROM tblSTMarkUpDownDetail MD
 					JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-					JOIN tblICRetailValuation IV ON MD.intCategoryId = IV.intCategoryId
+					JOIN tblICItem I ON MD.intCategoryId = I.intCategoryId
+					JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
 					WHERE intMarkUpDownId = @intMarkUpDownId
-					AND IV.intLocationId = @intLocationId
+					AND IL.intCostingMethod = 6
+					AND IL.intIssueUOMId IS NOT NULL
+					AND IL.intLocationId = @intLocationId
 
-					IF NOT EXISTS(SELECT * FROM @tblTempItemValuationCheck)
+					IF NOT EXISTS(SELECT * FROM @tblTempItemCheck)
 						BEGIN
-							PRINT 'NO Item Valuation or No Item Costing.'
+							PRINT 'NO Item with same Category or No Item that has Category Costing Method and has Sale UOM.'
 
 							SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
 							FROM tblSTMarkUpDownDetail MD
@@ -186,11 +143,56 @@ BEGIN TRY
 
 							ROLLBACK TRAN @TransactionName
 							COMMIT TRAN @TransactionName
-							SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation or No Item Costing.'
+							SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item or no Category Costing Method and Sale UOM.'
 							RETURN
 						END
-				END
-			END
+					ELSE IF EXISTS(SELECT * FROM @tblTempItemCheck)
+						BEGIN
+							PRINT 'Has Item with same Category and Has Item that has Category Costing Method and has Sale UOM.'
+
+							INSERT INTO @tblTempItemValuationCheck
+							(
+								intCategoryId,
+								strCategoryCode,
+								ysnHasItemValuation,
+								ysnHasItemCosting,
+								intLocationId
+							)
+							SELECT DISTINCT
+								MD.intCategoryId,
+								C.strCategoryCode,
+								CASE
+									WHEN IV.intCategoryId IS NOT NULL THEN CAST(1 AS BIT) 
+									ELSE CAST(0 AS BIT) 
+								END as ysnHasItemValuation,
+								CASE
+									WHEN IV.dblEndingCost > 0 THEN CAST(1 AS BIT) 
+									ELSE CAST(0 AS BIT) 
+								END as ysnHasItemCosting,
+							IV.intLocationId
+							FROM tblSTMarkUpDownDetail MD
+							JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+							JOIN tblICRetailValuation IV ON MD.intCategoryId = IV.intCategoryId
+							WHERE intMarkUpDownId = @intMarkUpDownId
+							AND IV.intLocationId = @intLocationId
+
+							IF NOT EXISTS(SELECT * FROM @tblTempItemValuationCheck)
+								BEGIN
+									PRINT 'NO Item Valuation or No Item Costing.'
+
+									SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
+									FROM tblSTMarkUpDownDetail MD
+									JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+									WHERE MD.intMarkUpDownId = @intMarkUpDownId
+
+									ROLLBACK TRAN @TransactionName
+									COMMIT TRAN @TransactionName
+									SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation or No Item Costing.'
+									RETURN
+								END
+						END
+					END
+				END		
 	-- END VALIDATE @isRequiredGLEntries = true
 
 
