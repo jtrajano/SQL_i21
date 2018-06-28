@@ -90,10 +90,11 @@ SELECT TOP 100 PERCENT * FROM (
 		SELECT SUM(dblAmount) AS dblAmount
 		FROM (
 			SELECT
-				(ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 AND ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) = receipt.intEntityVendorId THEN -1 ELSE 1 END))
+				 (ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 THEN -1 ELSE 1 END))
 					+ (
 						ISNULL((CASE WHEN ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) != receipt.intEntityVendorId
-									THEN (CASE WHEN chargeTax.ysnCheckoffTax = 0 THEN ABS(charge.dblTax) ELSE charge.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
+									THEN (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 0 THEN -charge.dblTax --negate, inventory receipt will bring postive tax
+											   WHEN chargeTax.ysnCheckoffTax = 0 THEN ABS(charge.dblTax) ELSE charge.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
 									ELSE (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 1 THEN charge.dblTax * -1 ELSE charge.dblTax END ) END),0)
 					)
 				AS dblAmount
