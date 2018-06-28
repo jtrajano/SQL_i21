@@ -778,28 +778,28 @@ BEGIN
         AND CMUF.[strSourceSystem] = 'AR'
 		AND @Recap = 0
 
-    UNION
+    -- UNION
 
     --Payment with applied Prepayment
-	SELECT
-        [intTransactionId]         = P.[intTransactionId]
-		,[strTransactionId]         = P.[strTransactionId]
-		,[strTransactionType]       = @TransType
-		,[intTransactionDetailId]   = P.[intTransactionDetailId]
-		,[strBatchId]               = P.[strBatchId]
-		,[strError]                 = 'You cannot unpost this transaction: ' + P.strTransactionNumber + ' was already applied in ' + PREPAIDS.strInvoiceNumber 
-	FROM
-		@Payments P
-	CROSS APPLY (
-		SELECT TOP 1 I.strInvoiceNumber
-		FROM tblARPrepaidAndCredit ARPC
-		INNER JOIN tblARInvoice I ON ARPC.intInvoiceId = I.intInvoiceId
-		WHERE P.[intInvoiceId] = ARPC.[intPrepaymentId]
-		AND ARPC.[ysnApplied] = 1
-		AND ARPC.[dblAppliedInvoiceDetailAmount] <> 0
-	) PREPAIDS    
-	WHERE @Post = 0
-	 AND P.[intTransactionDetailId] IS NOT NULL
+	-- SELECT
+    --     [intTransactionId]         = P.[intTransactionId]
+	-- 	,[strTransactionId]         = P.[strTransactionId]
+	-- 	,[strTransactionType]       = @TransType
+	-- 	,[intTransactionDetailId]   = P.[intTransactionDetailId]
+	-- 	,[strBatchId]               = P.[strBatchId]
+	-- 	,[strError]                 = 'You cannot unpost this transaction: ' + P.strTransactionNumber + ' was already applied in ' + PREPAIDS.strInvoiceNumber 
+	-- FROM
+	-- 	@Payments P
+	-- CROSS APPLY (
+	-- 	SELECT TOP 1 I.strInvoiceNumber
+	-- 	FROM tblARPrepaidAndCredit ARPC
+	-- 	INNER JOIN tblARInvoice I ON ARPC.intInvoiceId = I.intInvoiceId
+	-- 	WHERE P.[intInvoiceId] = ARPC.[intPrepaymentId]
+	-- 	AND ARPC.[ysnApplied] = 1
+	-- 	AND ARPC.[dblAppliedInvoiceDetailAmount] <> 0
+	-- ) PREPAIDS    
+	-- WHERE @Post = 0
+	--  AND P.[intTransactionDetailId] IS NOT NULL
 
     UNION
 
