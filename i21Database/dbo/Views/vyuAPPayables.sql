@@ -179,7 +179,7 @@ OUTER APPLY (
 	FROM tblAPBillDetail voucherDetail
 	WHERE voucherDetail.intBillDetailId = B.intBillDetailApplied
 ) voucherDetailApplied
-WHERE A.ysnPosted = 1
+WHERE A.ysnPosted = 1 AND B.ysnApplied = 1
 UNION ALL
 --APPLIED DM, (DM HAVE BEEN USED AS OFFSET IN PREPAID AND DEBIT MEMO TABS)
 SELECT
