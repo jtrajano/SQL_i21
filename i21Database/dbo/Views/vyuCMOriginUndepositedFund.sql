@@ -15,7 +15,9 @@ SELECT
 	dblAmount				= CMUF.dblAmount,
 	strName					= CMUF.strName, 
 	intEntityCustomerId		= CASE WHEN ARP.intPaymentId IS NOT NULL THEN ARP.intEntityCustomerId ELSE ARI.intEntityCustomerId END,
-	dtmDate					= CMUF.dtmDate
+	dtmDate					= CMUF.dtmDate,
+	intCurrencyId			= ARP.intCurrencyId,
+	dblWeightRate			= _Functional.Val/_Foreign.Val
 FROM
 	tblCMUndepositedFund CMUF
 LEFT OUTER JOIN
@@ -26,4 +28,14 @@ LEFT OUTER JOIN
 	tblARInvoice ARI
 		ON CMUF.intSourceTransactionId = ARI.intInvoiceId
 		AND CMUF.strSourceTransactionId = ARI.strInvoiceNumber 
+outer APPLY(
+	SELECT SUM(dblPayment *  CASE WHEN  dblCurrencyExchangeRate > 0 THEN dblCurrencyExchangeRate ELSE 1 END )Val
+	from tblARPaymentDetail A where intPaymentId = ARP.intPaymentId
+)_Functional
+
+outer APPLY(
+	SELECT SUM(dblPayment) Val
+	from tblARPaymentDetail where intPaymentId = ARP.intPaymentId
+) _Foreign
+
 
