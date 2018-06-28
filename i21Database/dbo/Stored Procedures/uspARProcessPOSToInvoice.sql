@@ -129,7 +129,7 @@ SELECT
 	,[strItemDescription]					= DETAILS.strItemDescription 
 	,[intItemUOMId]							= DETAILS.intItemUOMId
 	,[dblQtyShipped]						= DETAILS.dblQuantity 
-	,[dblDiscount]							= DETAILS.dblDiscount
+	,[dblDiscount]							= DETAILS.dblDiscountPercent
 	,[dblPrice]								= DETAILS.dblPrice
 	,[ysnRefreshPrice]						= 0
 	,[ysnRecomputeTax]						= 1
