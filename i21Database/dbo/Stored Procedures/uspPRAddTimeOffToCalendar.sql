@@ -289,10 +289,10 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,TOR.intEntityEmployeeId
 						,EL.intEmployeeEarningId
 						,EL.intTypeEarningId
+						,TOR.intDepartmentId
 						,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) 
 											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
 											ELSE NULL END
-						,TOR.intDepartmentId
 						,EL.strCalculationType
 						,EL.dblDefaultHours
 						,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
