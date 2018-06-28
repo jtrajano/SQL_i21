@@ -1461,6 +1461,7 @@ ELSE
 			WHERE P.intInvoiceId = I.intInvoiceId
 			  AND P.ysnPosted = 1
 		) PAT
+		WHERE @Recap = 0
 
 		UNION
 		--CASH REFUND ALREADY APPLIED IN PAY VOUCHER
