@@ -64,7 +64,9 @@ BEGIN TRY
 	DELETE tblTFFilingPacket
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpFP)
 	AND intTaxAuthorityId = @TaxAuthorityId
-	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpFP)
+	AND intReportingComponentId IN (SELECT intReportingComponentId FROM tblTFReportingComponent WHERE intTaxAuthorityId = @TaxAuthorityId)
+
+	DROP TABLE #tmpFP
 
 END TRY
 BEGIN CATCH

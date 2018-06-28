@@ -64,7 +64,7 @@ BEGIN TRY
 	-- Delete existing Valid Destination States that is not within Source
 	DELETE FROM tblTFReportingComponentDestinationState
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpVDS)
-	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpVDS)
+	AND intReportingComponentId IN (SELECT intReportingComponentId FROM tblTFReportingComponent WHERE intTaxAuthorityId = @TaxAuthorityId)
 
 	DROP TABLE #tmpVDS
 

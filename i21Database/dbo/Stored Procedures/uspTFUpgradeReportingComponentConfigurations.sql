@@ -95,7 +95,9 @@ BEGIN TRY
 	-- Set insMasterId to 0 for records that are not exist in default data
 	DELETE tblTFReportingComponentConfiguration
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpRCC)
-	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpRCC)
+	AND intReportingComponentId IN (SELECT intReportingComponentId FROM tblTFReportingComponent WHERE intTaxAuthorityId = @TaxAuthorityId)
+
+	DROP TABLE #tmpRCC
 
 END TRY
 BEGIN CATCH
