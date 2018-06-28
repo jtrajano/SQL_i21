@@ -125,15 +125,14 @@ ON dbo.tblARPayment
 INSTEAD OF UPDATE
 AS
 BEGIN
-	--SELECT ysnPosted FROM inserted WHERE ysnPosted = 1
 	DECLARE @ysnPosted AS VARCHAR(MAX) 
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
-	SELECT @ysnPosted = ysnPosted FROM deleted WHERE intCurrentStatus <> 5
+	SELECT @ysnPosted = ysnPosted FROM deleted
 	SELECT @ysnPostedNew = ysnPosted FROM inserted
-			
-	IF(@ysnPosted = 1 and @ysnPostedNew = 0)
-		RAISERROR('Cannot update posted payment',16,1)
-	ELSE
+	DECLARE @currentStatus AS VARCHAR(MAX)
+	SELECT @currentStatus = ISNULL(intCurrentStatus, 0) FROM inserted
+	IF((@ysnPosted = 1 and @ysnPostedNew = 0 and @currentStatus = 5) OR (@ysnPosted = 0 and @ysnPostedNew = 0) OR (@ysnPosted = 0 and @ysnPostedNew = 1) OR UPDATE(intCurrentStatus) OR @currentStatus = 5)
+	BEGIN
 		UPDATE p
 		SET  p.intEntityCustomerId            = i.intEntityCustomerId           
 			,p.intCurrencyId                  = i.intCurrencyId                 
@@ -171,8 +170,12 @@ BEGIN
 			,p.strBatchId                     = i.strBatchId                    
 			,p.dtmBatchDate                   = i.dtmBatchDate                  
 			,p.intPostedById                  = i.intPostedById                 
-			,p.intConcurrencyId               = i.intConcurrencyId   
+			,p.intConcurrencyId               = i.intConcurrencyId 
+			,p.intCurrentStatus				  = i.intCurrentStatus
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId
+	END
+	ELSE
+		RAISERROR('Cannot update posted payment',16,1)		
 END
