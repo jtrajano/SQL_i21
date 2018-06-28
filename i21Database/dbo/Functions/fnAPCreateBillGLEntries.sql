@@ -115,6 +115,8 @@ BEGIN
 		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
 												WHEN intTransactionType = 2 THEN 'Posted Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Posted Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Posted Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Posted Deferred Interest'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
@@ -125,6 +127,8 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -246,6 +250,7 @@ BEGIN
 		[strJournalLineDescription]		=	CASE WHEN C.intTransactionType = 2 THEN 'Applied Vendor Prepayment'
 												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
 												WHEN C.intTransactionType = 13 THEN 'Applied Basis Advance'
+												WHEN C.intTransactionType = 14 THEN 'Applied Deferred Interest'
 											ELSE 'NONE' END,
 		[intJournalLineNo]				=	B.intTransactionId,
 		[ysnIsUnposted]					=	0,
@@ -256,6 +261,7 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN C.intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN C.intTransactionType = 3 THEN 'Debit Memo'
 												WHEN C.intTransactionType = 13 THEN 'Basis Advance'
+												WHEN C.intTransactionType = 14 THEN 'Deferred Interest'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -345,6 +351,7 @@ BEGIN
 												WHEN intTransactionType = 8 THEN 'Overpayment'
 												WHEN intTransactionType = 9 THEN '1099 Adjustment'
 												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -566,6 +573,8 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -666,6 +675,8 @@ BEGIN
 		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
@@ -749,6 +760,7 @@ BEGIN
 												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
 												WHEN intTransactionType = 3 THEN 'Debit Memo'
 												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
 											ELSE 'NONE' END,
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,

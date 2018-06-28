@@ -57,6 +57,8 @@ BEGIN
 		[dblExchangeRate]           ,
 		[dtmTransactionDate]        ,
 		[intJournalLineNo]			,
+		[strJournalLineDescription]	,
+		[strTransactionType]		,
 		[intUserId]                 ,
 		[intEntityId]				,
 		[strTransactionId]          ,
@@ -83,6 +85,8 @@ BEGIN
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	1,
+		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 1 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
+		[strTransactionType]		=	CASE WHEN voucher.intTransactionType = 1 THEN 'Vendor Prepayment' ELSE 'Basis Advance' END,
 		[intUserId]                 =	@userId,
 		[intEntityId]				=	@userId,
 		[strTransactionId]          =	voucher.strBillId,
@@ -104,6 +108,7 @@ BEGIN
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
+	WHERE voucher.intTransactionType IN (2,12,13)
 	UNION ALL
 	SELECT
 		[dtmDate]                   =	DATEADD(dd, DATEDIFF(dd, 0, voucher.dtmDate), 0),
@@ -119,6 +124,8 @@ BEGIN
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	Details.intBillDetailId,
+		[strJournalLineDescription]	=	CASE WHEN voucher.intTransactionType = 1 THEN 'Posted Vendor Prepayment' ELSE 'Posted Basis Advance' END,
+		[strTransactionType]		=	CASE WHEN voucher.intTransactionType = 1 THEN 'Vendor Prepayment' ELSE 'Basis Advance' END,
 		[intUserId]                 =	@userId,
 		[intEntityId]				=	@userId,
 		[strTransactionId]          =	voucher.strBillId,
@@ -145,6 +152,7 @@ BEGIN
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
 	) Details
+	WHERE voucher.intTransactionType IN (2,12,13)
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
