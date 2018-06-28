@@ -280,7 +280,7 @@ WITH Pricing AS
 		CDT.intContractStatusId,
 		EY.intEntityId
 		,CDT.intCurrencyId
-		,CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+'HTA' END AS strType
+		,CASE WHEN CDT.intPricingTypeId = 3 THEN ct.strContractType+' HTA' END AS strType
 		,IM.intItemId
 		,IM.strItemNo,ch.dtmContractDate,strEntityName,ch.strCustomerContract
     FROM tblCTContractDetail CDT
