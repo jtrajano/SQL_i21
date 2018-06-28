@@ -1,16 +1,16 @@
 ﻿CREATE VIEW vyuSTPromotionItemLists
 AS
-SELECT        
+SELECT       
 intKey = CAST(ROW_NUMBER() OVER (ORDER BY UOM.intItemUOMId, IL.intLocationId) AS INT)
 , CL.strLocationName
 , UOM.strUpcCode
 , UOM.strLongUPCCode
 , UOM.intItemUOMId
-, I.strItemNo 
+, I.strItemNo
 , I.strDescription AS strPumpItemDescription
-, adj6.intCategoryId
-, adj6.strCategoryCode
-, adj6.strDescription AS categoryDesc
+, Cat.intCategoryId
+, Cat.strCategoryCode
+, Cat.strDescription AS categoryDesc
 , I.ysnFuelItem
 , IP.dblSalePrice AS dblPrice
 , IL.intFamilyId
@@ -18,7 +18,10 @@ intKey = CAST(ROW_NUMBER() OVER (ORDER BY UOM.intItemUOMId, IL.intLocationId) AS
 , Family.strSubcategoryId AS strFamily
 , Class.strSubcategoryId AS strClass
 , CL.intCompanyLocationId
-FROM            
+, I.strLotTracking
+, I.strType
+, I.strStatus
+FROM           
 tblICItemUOM UOM JOIN
 tblICItemLocation IL ON UOM.intItemId = IL.intItemId LEFT JOIN
 tblSTSubcategory AS Family ON Family.intSubcategoryId = IL.intFamilyId LEFT JOIN
@@ -26,6 +29,5 @@ tblSTSubcategory AS Class ON Class.intSubcategoryId = IL.intClassId JOIN
 tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId JOIN
 tblICItemPricing IP ON IP.intItemLocationId = IL.intItemLocationId JOIN
 tblICItem I ON I.intItemId = UOM.intItemId JOIN
-tblICCategory adj6 ON I.intCategoryId = adj6.intCategoryId
+tblICCategory Cat ON I.intCategoryId = Cat.intCategoryId
 WHERE I.strType = 'Inventory' AND I.strStatus = 'Active'
-
