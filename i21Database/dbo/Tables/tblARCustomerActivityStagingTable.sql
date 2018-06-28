@@ -50,5 +50,7 @@
 	[dblPrepayments]			NUMERIC(18, 6) NULL,
 	[dblPrepaids]				NUMERIC(18, 6) NULL,	
 	[ysnPrintDetail]			BIT NULL,
-	[ysnPrintRecap]				BIT NULL
+	[ysnPrintRecap]				BIT NULL,
+	[dtmFilterFrom]				DATETIME NULL,
+	[dtmFilterTo]				DATETIME NULL
 )
