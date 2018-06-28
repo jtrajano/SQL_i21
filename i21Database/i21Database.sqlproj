@@ -6768,6 +6768,7 @@
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateCallDetailNested.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetChargeAddOns.sql" />
+    <Build Include="dbo\Functions\fnGRConvertDateToReportDateFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
