@@ -2257,7 +2257,7 @@ BEGIN
 										,@LineItemTaxEntries = @LineItemTaxEntries
 										,@UserId			 = @intCurrentUserId
 		 								,@GroupingOption	 = 11
-										,@RaiseError		 = 1
+										,@RaiseError		 = 0
 										,@ErrorMessage		 = @ErrorMessage OUTPUT
 										,@CreatedIvoices	 = @CreatedIvoices OUTPUT
 						END TRY
