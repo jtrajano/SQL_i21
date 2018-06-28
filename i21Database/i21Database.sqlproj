@@ -6757,6 +6757,8 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVendorCreatePostVoucher.sql" />
     <Build Include="dbo\Functions\fnGRConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateCallDetailNested.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetChargeAddOns.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
