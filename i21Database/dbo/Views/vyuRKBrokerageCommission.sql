@@ -12,7 +12,7 @@ SELECT
 	,BC.intFutCurrencyId
 	,FutCur.strCurrency AS strFutCurrency
 	,BC.intOptionsRateType
-	,CASE WHEN BC.intOptionsRateType = 1 THEn 'Half-turn' ELSE '' END AS strOptionsRateType
+	,CASE WHEN BC.intOptionsRateType = 1 THEn 'Round-turn' ELSE '' END AS strOptionsRateType
 	,BC.dblOptCommission
 	,BC.intOptCurrencyId
 	,OptCur.strCurrency AS strOptCurrency
