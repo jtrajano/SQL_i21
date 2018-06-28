@@ -72,7 +72,7 @@ DECLARE @temp_xml_table TABLE
 	  ,strReferenceNo					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,strEntityName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,strVendorAddress					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	  ,dtmDeliveryDate					DATETIME NULL
+	  ,dtmDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,intTicketId						INT 
 	  ,strTicketNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	  ,strReceiptNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -289,13 +289,13 @@ BEGIN
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'				    ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity						= Commodity.strCommodityCode
-		,strDate							= CONVERT(VARCHAR(10), GETDATE(), 110)
+		,strDate							= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 		,strTime							= CONVERT(VARCHAR(8), GETDATE(), 108)
 		,strAccountNumber					= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo						= BNKTRN.strReferenceNo
 		,strEntityName						= ENTITY.strName
 		,strVendorAddress					= dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
-		,dtmDeliveryDate					= SC.dtmTicketDateTime 
+		,dtmDeliveryDate					= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 		,intTicketId						= SC.intTicketId		
 		,strTicketNumber					= SC.strTicketNumber 
 		,strReceiptNumber					= SC.strElevatorReceiptNumber
@@ -394,7 +394,7 @@ BEGIN
 	   ,lblPartialPrepayment			   = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN 'Partial Payment Adj'								ELSE NULL END						 
 	   ,blbHeaderLogo					   = @companyLogo
 	   ,VENDOR.[intEntityId]
-	   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+	   ,strDeliveryDate					   = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId
 		AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
@@ -492,13 +492,13 @@ BEGIN
 		,lblGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade'					ELSE NULL END
 		,strGrade							= CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 		,strCommodity						= Commodity.strCommodityCode
-		,strDate							= CONVERT(VARCHAR(10), GETDATE(), 110)
+		,strDate							= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 		,strTime							= CONVERT(VARCHAR(8), GETDATE(), 108)
 		,strAccountNumber				    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo					    = BNKTRN.strReferenceNo
 		,strEntityName					    = ENTITY.strName
 		,strVendorAddress				    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-		,dtmDeliveryDate					= SC.dtmTicketDateTime
+		,dtmDeliveryDate					= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 		,intTicketId						= SC.intTicketId
 		,strTicketNumber					= SC.strTicketNumber
 		,strReceiptNumber					= SC.strElevatorReceiptNumber 
@@ -585,7 +585,7 @@ BEGIN
 	   ,lblPartialPrepayment				= CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			THEN 'Partial Payment Adj'								 ELSE NULL END
 	   ,blbHeaderLogo						= @companyLogo
 	   ,VENDOR.[intEntityId]
-	   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+	   ,strDeliveryDate						= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -690,13 +690,13 @@ BEGIN
 		,lblGrade							= NULL
 		,strGrade							= NULL
 		,strCommodity						= Commodity.strCommodityCode
-		,strDate							= CONVERT(VARCHAR(10), GETDATE(), 110)
+		,strDate							= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 		,strTime							= CONVERT(VARCHAR(8), GETDATE(), 108)
 		,strAccountNumber					= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 		,strReferenceNo						= BNKTRN.strReferenceNo
 		,strEntityName						= ENTITY.strName
 		,strVendorAddress					= dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-		,dtmDeliveryDate					= CS.dtmDeliveryDate
+		,dtmDeliveryDate					= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 		,intTicketId						= DS.intDeliverySheetId
 		,strTicketNumber					= DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
 		,strReceiptNumber					= '' 
@@ -782,7 +782,7 @@ BEGIN
 	   ,lblPartialPrepayment               = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0				THEN 'Partial Payment Adj'							    ELSE NULL END
 	   ,blbHeaderLogo                      = @companyLogo
 	   ,VENDOR.[intEntityId]
-	   ,strDeliveryDate					   = CONVERT(VARCHAR(10), GETDATE(), 110)
+	   ,strDeliveryDate					   = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 	FROM tblCMBankTransaction BNKTRN
 	JOIN dbo.tblCMCheckPrintJobSpool PRINTSPOOL ON BNKTRN.strTransactionId = PRINTSPOOL.strTransactionId AND BNKTRN.intBankAccountId = PRINTSPOOL.intBankAccountId
 	JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -994,13 +994,13 @@ BEGIN
 				,lblGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade				    = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 				,strCommodity			    = Commodity.strCommodityCode
-				,strDate				    = CONVERT(VARCHAR(10), GETDATE(), 110)
+				,strDate				    = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 				,strTime				    = CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber		    = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    = BNKTRN.strReferenceNo
 				,strEntityName			    = ENTITY.strName
 				,strVendorAddress		    = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)		
-				,dtmDeliveryDate		    = SC.dtmTicketDateTime 
+				,dtmDeliveryDate		    = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime) 
 				,intTicketId			    = SC.intTicketId		
 				,strTicketNumber		    = SC.strTicketNumber 
 				,strReceiptNumber		    = SC.strElevatorReceiptNumber
@@ -1099,7 +1099,7 @@ BEGIN
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'									ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
 			   ,VENDOR.[intEntityId]
-			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+			   ,strDeliveryDate				 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1195,13 +1195,13 @@ BEGIN
 				,lblGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN 'Grade' ELSE NULL END
 				,strGrade					 = CASE WHEN SC.intCommodityAttributeId >0 THEN Attribute.strDescription ELSE NULL END
 				,strCommodity				 = Commodity.strCommodityCode
-				,strDate					 = CONVERT(VARCHAR(10), GETDATE(), 110)
+				,strDate					 = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 				,strTime					 = CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
 				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-				,dtmDeliveryDate			 = SC.dtmTicketDateTime		
+				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)		
 				,intTicketId				 = SC.intTicketId		
 				,strTicketNumber			 = SC.strTicketNumber
 				,strReceiptNumber			 = SC.strElevatorReceiptNumber
@@ -1287,7 +1287,7 @@ BEGIN
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			   THEN 'Partial Payment Adj'								ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
 			   ,VENDOR.[intEntityId]
-			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), SC.dtmTicketDateTime, 110)
+			   ,strDeliveryDate				 = dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -1398,13 +1398,13 @@ BEGIN
 				,lblGrade					 = NULL
 				,strGrade					 = NULL
 				,strCommodity				 = Commodity.strCommodityCode
-				,strDate					 = CONVERT(VARCHAR(10), GETDATE(), 110)
+				,strDate					 = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 				,strTime					 = CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 = dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 = BNKTRN.strReferenceNo
 				,strEntityName				 = ENTITY.strName
 				,strVendorAddress			 = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
-				,dtmDeliveryDate			 = CS.dtmDeliveryDate		
+				,dtmDeliveryDate			 = dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)		
 				,intTicketId				 = DS.intDeliverySheetId		
 				,strTicketNumber			 = DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS
 				,strReceiptNumber			 = ''
@@ -1490,7 +1490,7 @@ BEGIN
 			   ,lblPartialPrepayment		 = CASE WHEN ISNULL(PartialPayment.dblPayment,0) <> 0			 THEN 'Partial Payment Adj'								  ELSE NULL END
 			   ,blbHeaderLogo				 = @companyLogo
 			   ,VENDOR.[intEntityId]
-			   ,strDeliveryDate				 = CONVERT(VARCHAR(10), GETDATE(), 110)
+			   ,strDeliveryDate				 = dbo.fnGRConvertDateToReportDateFormat(GETDATE())
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
