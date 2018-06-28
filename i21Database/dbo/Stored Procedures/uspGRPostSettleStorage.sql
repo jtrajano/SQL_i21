@@ -950,7 +950,7 @@ BEGIN TRY
 												  END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
-														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice] + ISNULL(OtherCharge.dblCashPrice,0)
+														WHEN SV.intPricingTypeId=1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
@@ -967,13 +967,6 @@ BEGIN TRY
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
-				LEFT JOIN (
-							SELECT intCustomerStorageId
-							      ,SUM(dblCashPrice) dblCashPrice 
-						    FROM @SettleVoucherCreate 
-							WHERE intItemType = 3
-							GROUP BY intCustomerStorageId
-						  ) OtherCharge ON OtherCharge.intCustomerStorageId = SV.intCustomerStorageId
 				WHERE SV.intItemType = 1
 
 				--Reduce the On-Storage Quantity		
@@ -1258,8 +1251,8 @@ BEGIN TRY
 				 ,[strMiscDescription]	  = Item.[strItemNo]
 				 ,[dblCost]				  = (
 											  CASE 
-											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)*-1 
-											  		ELSE  CC.dblRate * -1  
+											  		WHEN CC.intCurrencyId IS NOT NULL AND ISNULL(CC.intCurrencyId,0)<> ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId) THEN [dbo].[fnCTCalculateAmountBetweenCurrency](CC.intCurrencyId, ISNULL(CD.intInvoiceCurrencyId, CD.intCurrencyId), CC.dblRate, 1)
+											  		ELSE  CC.dblRate
 											  END
 											 )
 											 /											
@@ -1286,7 +1279,6 @@ BEGIN TRY
 				 JOIN @SettleVoucherCreate SV ON SV.intContractDetailId = CD.intContractDetailId AND SV.intItemType = 1
 				 JOIN tblICItem Item ON Item.intItemId = CC.intItemId
 				 LEFT JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CC.intItemUOMId
-				 WHERE ISNULL(CC.ysnPrice,0) =1
 				
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
