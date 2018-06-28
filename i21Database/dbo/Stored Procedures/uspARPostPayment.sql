@@ -1131,7 +1131,8 @@ IF @recap = 0
 			
 			--update payment record based on record from tblCMBankTransaction
 			UPDATE tblARPayment
-				SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END
+				SET strPaymentInfo = CASE WHEN B.dtmCheckPrinted IS NOT NULL AND ISNULL(A.strPaymentInfo,'') <> '' THEN B.strReferenceNo ELSE A.strPaymentInfo END,
+					intCurrentStatus = ISNULL(intCurrentStatus, NULL)
 			FROM tblARPayment A 
 				INNER JOIN tblCMBankTransaction B
 					ON A.strRecordNumber = B.strTransactionId
