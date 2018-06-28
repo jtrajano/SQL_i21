@@ -64,7 +64,7 @@ BEGIN TRY
 	-- Delete existing Valid Origin States that is not within Source
 	DELETE tblTFReportingComponentOriginState
 	WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpVOS)
-	AND intReportingComponentId IN (SELECT DISTINCT intReportingComponentId FROM #tmpVOS)
+	AND intReportingComponentId IN (SELECT intReportingComponentId FROM tblTFReportingComponent WHERE intTaxAuthorityId = @TaxAuthorityId)
 
 	DROP TABLE #tmpVOS
 
