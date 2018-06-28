@@ -204,7 +204,7 @@ SELECT
 	A.dtmDate
 	,B.intTransactionId
 	,C.strBillId
-	,B.dblAmountApplied
+	,B.dblAmountApplied * -1
 	,0 AS dblTotal
 	,0 AS dblAmountDue
 	,0 AS dblWithheld
@@ -228,6 +228,7 @@ WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
+AND B.ysnApplied = 1
 
 UNION ALL
 --PAYMENT MADE TO AR TO OFFSET THE PREPAYMENT
