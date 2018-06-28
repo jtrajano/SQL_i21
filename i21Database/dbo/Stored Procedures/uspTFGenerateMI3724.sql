@@ -121,6 +121,7 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		SELECT @strLicenseNo =  ISNULL(strConfiguration, '')  FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = '3724-TR-LicNum'
+		SELECT @steFEIN = strFein FROM tblSMCompanySetup
 
 		SELECT @dblLine8_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '14A' AND strType = 'Gasoline'
 		SELECT @dblLine8_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '14A' AND strType = 'Aviation Gasoline'
