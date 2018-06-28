@@ -99,6 +99,7 @@ BEGIN
 		[strShipToZipCode]		=	A.[strShipToZipCode],
 		[strShipToCountry]		=	A.[strShipToCountry],
 		[strShipToPhone]		=	A.[strShipToPhone],
+		[intShipFromEntityId]	=	A.[intEntityVendorId],
 		[strShipFromAttention]	=	A.[strShipFromAttention],
 		[strShipFromAddress]	=	A.[strShipFromAddress],
 		[strShipFromCity]		=	A.[strShipFromCity],
@@ -133,7 +134,8 @@ BEGIN
 		,[strShipToState]		
 		,[strShipToZipCode]		
 		,[strShipToCountry]		
-		,[strShipToPhone]		
+		,[strShipToPhone]	
+		,[intShipFromEntityId]	
 		,[strShipFromAttention]	
 		,[strShipFromAddress]	
 		,[strShipFromCity]		
