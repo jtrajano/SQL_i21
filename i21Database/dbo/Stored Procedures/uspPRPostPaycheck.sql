@@ -147,6 +147,7 @@ BEGIN
 	--Create Earning Distribution Temporary Table
 	CREATE TABLE #tmpEarning (
 		intTmpEarningId			INT IDENTITY(1, 1)
+		,intPaycheckEarningId	INT
 		,intPaycheckId			INT
 		,intEmployeeEarningId	INT
 		,intTypeEarningId		INT
@@ -160,10 +161,10 @@ BEGIN
 	)
 
 	--Insert Earning Distribution to Temporary Table
-	INSERT INTO #tmpEarning (intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB, intWCCodeId)
-	SELECT A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, ISNULL(A.dblTotal, 0), ISNULL(B.dblPercentage, 0),
+	INSERT INTO #tmpEarning (intPaycheckEarningId, intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB, intWCCodeId)
+	SELECT A.intPaycheckEarningId, A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, ISNULL(A.dblTotal, 0), ISNULL(B.dblPercentage, 0),
 			C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB, intWCCodeId = A.intWorkersCompensationId
-	FROM (SELECT tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
+	FROM (SELECT intPaycheckEarningId, tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
 			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
 		  FROM tblPRPaycheckEarning INNER JOIN tblPRPaycheck ON tblPRPaycheckEarning.intPaycheckId = tblPRPaycheck.intPaycheckId) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
@@ -227,15 +228,15 @@ BEGIN
 
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Earning to Temporary Table to Distribute Amounts
-	SELECT intTmpEarningId, intTypeEarningId, intDepartmentId, intWCCodeId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
-	DECLARE @intAmountTempTypeEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT,
+	SELECT intTmpEarningId, intPaycheckEarningId, intDepartmentId, intWCCodeId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
+	DECLARE @intAmountTempPaycheckEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT,
 			@intAmountTempDepartmentId INT, @intAmountTempWCCodeId INT
 
 	--Distribute Amounts
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningAmount)
 	BEGIN
 		SELECT TOP 1 @dblAmountTempEarningFullAmount = dblAmount
-					,@intAmountTempTypeEarningId = intTypeEarningId
+					,@intAmountTempPaycheckEarningId = intPaycheckEarningId
 					,@intAmountTempDepartmentId = intDepartmentId
 					,@intAmountTempWCCodeId = intWCCodeId
 		FROM #tmpEarningAmount
@@ -243,11 +244,11 @@ BEGIN
 		WHILE (@dblAmountTempEarningFullAmount <> 0)
 		BEGIN
 			SELECT TOP 1 @intAmountTempTmpEarningId = intTmpEarningId FROM #tmpEarningAmount 
-			WHERE intTypeEarningId = @intAmountTempTypeEarningId
+			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
 				AND intDepartmentId = @intAmountTempDepartmentId
 				AND intWCCodeId = @intAmountTempWCCodeId
 
-			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intTypeEarningId = @intAmountTempTypeEarningId) = 1) 
+			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId) = 1) 
 				BEGIN
 					UPDATE #tmpEarning SET dblAmount = @dblAmountTempEarningFullAmount WHERE intTmpEarningId = @intAmountTempTmpEarningId
 					SELECT @dblAmountTempEarningFullAmount = 0.000000
@@ -262,7 +263,7 @@ BEGIN
 		END
 
 		DELETE FROM #tmpEarningAmount 
-			WHERE intTypeEarningId = @intAmountTempTypeEarningId
+			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
 				AND intDepartmentId = @intAmountTempDepartmentId
 				AND intWCCodeId = @intAmountTempWCCodeId
 	END
