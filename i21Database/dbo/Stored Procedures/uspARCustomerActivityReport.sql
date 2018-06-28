@@ -337,6 +337,8 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			, ysnPrintDetail
 			, ysnPrintRecap
 			, strFormattingOptions
+			, dtmFilterFrom
+			, dtmFilterTo
 		)
 		SELECT strReportDateRange	= 'From ' + CONVERT(NVARCHAR(50), @dtmDateFrom, 101) + ' To ' + CONVERT(NVARCHAR(50), @dtmDateTo, 101)
 			, dtmLastPaymentDate	= PAYMENT.dtmDatePaid
@@ -389,6 +391,8 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			, ysnPrintDetail		= @ysnPrintDetail
 			, ysnPrintRecap			= @ysnPrintRecap
 			, strFormattingOptions	= @strFormattingOptions
+			, dtmFilterFrom			= @dtmDateFrom
+			, dtmFilterTo			= @dtmDateTo
 		FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 		INNER JOIN (
 			SELECT C.intEntityId
