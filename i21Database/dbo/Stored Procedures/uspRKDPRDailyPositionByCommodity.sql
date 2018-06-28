@@ -788,41 +788,21 @@ END
 ELSE
 BEGIN
 
---SELECT 	dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(isnull(s.dblQuantity ,0)))  dblTotal,'' strCustomer,null Ticket,null dtmDeliveryDate
---	,s.strLocationName,s.strItemNo,@intCommodityId intCommodityId,@intCommodityUnitMeasureId intFromCommodityUnitMeasureId,'' strTruckName,'' strDriverName
---	,s.strEntity
---	,null [Storage Due],s.intLocationId intLocationId into #invQty1
---	FROM vyuICGetInventoryValuation s  		
---	JOIN tblICItem i on i.intItemId=s.intItemId
---	JOIN tblICItemUOM iuom on s.intItemId=iuom.intItemId and iuom.ysnStockUnit=1 and  isnull(ysnInTransit,0)=0 
---	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId and ltrim(rtrim(s.strEntity))=ltrim(rtrim(@strName))
---	WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit=1
---			AND s.intLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 then s.intLocationId else @intLocationId end
---			and convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
---			and s.intLocationId  IN (
---				SELECT intCompanyLocationId FROM tblSMCompanyLocation
---				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
---								WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
---								ELSE isnull(ysnLicensed, 0) END
---				)
-	
 INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId)
-	SELECT 1 intSeqId,strSeqHeader,strCommodityCode,sum(dblTotal),@intCommodityId,@intCommodityUnitMeasureId,intLocationId 
+	SELECT 1 intSeqId,strSeqHeader,strCommodityCode,dblTotal,@intCommodityId,@intCommodityUnitMeasureId,intLocationId 
 	FROM(	
-	--SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,	sum(dblTotal) dblTotal,intLocationId intLocationId	FROM #invQty1
-	--		where  intCommodityId=@intCommodityId	
-	--		group by intLocationId
-	SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,	Balance dblTotal,intCompanyLocationId intLocationId
+	SELECT  1 AS intSeqId,'In-House' strSeqHeader,@strDescription strCommodityCode,	sum(Balance) dblTotal,intCompanyLocationId intLocationId
                 FROM @tblGetStorageDetailByDate s
                 JOIN tblEMEntity e on s.intEntityId=e.intEntityId
                 WHERE intCommodityId = @intCommodityId AND 
                 intCompanyLocationId= case when isnull(@intLocationId,0)=0 then intCompanyLocationId else @intLocationId end
-                AND s.intEntityId= @intVendorId and strOwnedPhysicalStock='Customer'
+                AND s.intEntityId= @intVendorId and strOwnedPhysicalStock='Customer' and Balance<>0
+				group by intCommodityId,intCompanyLocationId
 
 			UNION all
 			SELECT  1intSeqId,'In-House' intInHouse,@strDescription strDescription, sum(dblTotal) dblTotal, intLocationId
-			FROM #tempOnHold  where intEntityId=@intVendorId and  intCommodityId=@intCommodityId	group by intLocationId
-		)t1 group by strSeqHeader,strCommodityCode,intLocationId 
+			FROM #tempOnHold  where intEntityId=@intVendorId and  intCommodityId=@intCommodityId 	group by intLocationId
+		)t1 
 			
 
 	INSERT INTO @Final (intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityId ,intFromCommodityUnitMeasureId,intCompanyLocationId)
@@ -841,8 +821,7 @@ INSERT INTO @FinalTable (intSeqId,strSeqHeader, strCommodityCode ,strType ,dblTo
 SELECT	intSeqId,strSeqHeader, strCommodityCode ,strType ,
 			Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,
 			case when isnull(@intUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal,
-			case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure,t.intCommodityId
-			
+			case when isnull(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure,t.intCommodityId			
 FROM @Final  t
 	LEFT JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 	LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
