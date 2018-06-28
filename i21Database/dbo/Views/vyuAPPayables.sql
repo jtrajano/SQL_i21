@@ -173,7 +173,7 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1
+WHERE A.ysnPosted = 1 AND B.ysnApplied = 1
 UNION ALL
 --APPLIED DM/VPRE
 SELECT
@@ -200,7 +200,7 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1
+WHERE A.ysnPosted = 1 AND B.ysnApplied = 1 AND A.intTransactionType = 3
 UNION ALL
 SELECT --OVERPAYMENT
 	A.dtmDate
@@ -226,32 +226,32 @@ LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] 
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId		
 WHERE intTransactionType IN (8) AND A.ysnPaid != 1
-UNION ALL
---APPLIED PREPAID TO VOUCHER
-SELECT 
-	A.dtmDate
-	,A.intBillId
-	,A.strBillId
-	,0 AS dblAmountPaid
-	,0 AS dblTotal
-	,0 AS dblAmountDue
-	,0 AS dblWithheld
-	,0 AS dblDiscount
-	,0 AS dblInterest
-	,B.dblAmountApplied AS dblPrepaidAmount --check if there still use for this
-	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
-	,D.strVendorId
-	,A.dtmDueDate
-	,A.ysnPosted
-	,A.ysnPaid
-	,A.intAccountId
-	,EC.strClass
-FROM dbo.tblAPBill A
-INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
-INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
-INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1 AND C.intTransactionType = 2
+-- UNION ALL
+-- --APPLIED PREPAID TO VOUCHER
+-- SELECT 
+-- 	A.dtmDate
+-- 	,A.intBillId
+-- 	,A.strBillId
+-- 	,0 AS dblAmountPaid
+-- 	,0 AS dblTotal
+-- 	,0 AS dblAmountDue
+-- 	,0 AS dblWithheld
+-- 	,0 AS dblDiscount
+-- 	,0 AS dblInterest
+-- 	,B.dblAmountApplied AS dblPrepaidAmount
+-- 	,ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+-- 	,D.strVendorId
+-- 	,A.dtmDueDate
+-- 	,A.ysnPosted
+-- 	,A.ysnPaid
+-- 	,A.intAccountId
+-- 	,EC.strClass
+-- FROM dbo.tblAPBill A
+-- INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+-- INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
+-- INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
+-- LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
+-- WHERE A.ysnPosted = 1
 UNION ALL
 --PAYMENT MADE TO AR
 SELECT A.dtmDatePaid AS dtmDate,   
