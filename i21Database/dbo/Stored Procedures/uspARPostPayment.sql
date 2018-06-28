@@ -1645,6 +1645,7 @@ IF @recap = 0
 			  , dtmBatchDate	= CASE WHEN @post = 1 THEN @PostDate ELSE NULL END
 			  , intPostedById	= CASE WHEN @post = 1 THEN @UserEntityID ELSE NULL END
 			  , ysnPosted       = @post
+			  , intCurrentStatus = CASE WHEN @post = 1 THEN 4 ELSE 5 END
 			WHERE intPaymentId IN (SELECT DISTINCT [intTransactionId] FROM @ARReceivablePostData)
 			
 		END	
