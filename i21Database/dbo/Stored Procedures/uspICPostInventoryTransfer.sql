@@ -917,7 +917,7 @@ BEGIN
 			FROM	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferDetail td
 						ON t.intInventoryTransferId = td.intInventoryTransferId
 			WHERE	t.intInventoryTransferId = @intTransactionId 
-					AND t.intFromLocationId <> t.intToLocationId
+					AND t.intFromLocationId = t.intToLocationId
 					AND td.intOwnershipType = @ownershipType_Own
 		)
 		BEGIN
