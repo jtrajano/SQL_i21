@@ -1415,7 +1415,12 @@ BEGIN TRY
 				END
 
 				UPDATE CS
-				SET CS.dblOpenBalance = CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit)
+				SET CS.dblOpenBalance 
+					 = CASE 
+							WHEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4,1) > 0.0009 
+									THEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4)
+							ELSE 0
+					   END				    
 				FROM tblGRCustomerStorage CS
 				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId=CS.intCommodityId AND CU.ysnStockUnit=1
 				JOIN (
