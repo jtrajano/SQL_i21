@@ -5,9 +5,12 @@
 	[intFieldNameId] INT NOT NULL, 
     [strFieldName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intFieldColumnNumber] INT NOT NULL, 
+    [strCellColumn] NVARCHAR(MAX) NOT NULL, 
+	[intItemId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCDeliverySheetImportingTemplateDetail_intImportingTemplateDetailId] PRIMARY KEY ([intImportingTemplateDetailId]),
-	CONSTRAINT [FK_tblSCDeliverySheetImportingTemplateDetail_tblSCDeliverySheetImportingTemplate_intImportingTemplateId] FOREIGN KEY ([intImportingTemplateId]) REFERENCES [tblSCDeliverySheetImportingTemplate]([intImportingTemplateId])
+	CONSTRAINT [FK_tblSCDeliverySheetImportingTemplateDetail_tblSCDeliverySheetImportingTemplate_intImportingTemplateId] FOREIGN KEY ([intImportingTemplateId]) REFERENCES [tblSCDeliverySheetImportingTemplate]([intImportingTemplateId]),
+	CONSTRAINT [FK_tblSCDeliverySheetImportingTemplateDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -54,6 +57,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCDeliverySheetImportingTemplateDetail',
     @level2type = N'COLUMN',
     @level2name = N'intFieldColumnNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount schedule Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCDeliverySheetImportingTemplateDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',
