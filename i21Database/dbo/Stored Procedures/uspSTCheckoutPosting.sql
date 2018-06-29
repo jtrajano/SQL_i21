@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
-@intCurrentUserId INT,
-@intCheckoutId INT,
-@strDirection NVARCHAR(50),
-@strStatusMsg NVARCHAR(1000) OUTPUT,
-@strNewCheckoutStatus NVARCHAR(100) OUTPUT,
-@ysnInvoiceStatus BIT OUTPUT,
-@ysnCustomerChargesInvoiceStatus BIT OUTPUT
+	@intCurrentUserId INT,
+	@intCheckoutId INT,
+	@strDirection NVARCHAR(50),
+	@strStatusMsg NVARCHAR(1000) OUTPUT,
+	@strNewCheckoutStatus NVARCHAR(100) OUTPUT,
+	@ysnInvoiceStatus BIT OUTPUT,
+	@ysnCustomerChargesInvoiceStatus BIT OUTPUT
 AS
 BEGIN
 
@@ -80,6 +80,12 @@ BEGIN
 		DECLARE @ysnSuccess BIT
 		DECLARE @strBatchIdUsed NVARCHAR(40)
 		DECLARE @ysnError BIT = 1
+
+		DECLARE @tblTempItems TABLE
+		(
+			intItemId INT
+			, strItemNo NVARCHAR(100)
+		)
 
 		-- Create the temp table for the intInvoiceId's.
 		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
@@ -2248,18 +2254,50 @@ BEGIN
 							-- Filter dblPrice should not be 0 and null
 							DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
 							
-							-- CLEAR
-							SET @CreatedIvoices = ''
+							-- Filter None Lotted Items Only
+							INSERT INTO @tblTempItems
+							(
+								intItemId
+								, strItemNo
+							)
+							SELECT DISTINCT
+								I.intItemId
+								, I.strItemNo
+							FROM @EntriesForInvoice E
+							JOIN tblICItem I 
+								ON E.intItemId = I.intItemId
+							WHERE I.strLotTracking != 'No'
 
-							-- POST Main Checkout Invoice
-							EXEC [dbo].[uspARProcessInvoices]
-										@InvoiceEntries	 = @EntriesForInvoice
-										,@LineItemTaxEntries = @LineItemTaxEntries
-										,@UserId			 = @intCurrentUserId
-		 								,@GroupingOption	 = 11
-										,@RaiseError		 = 0
-										,@ErrorMessage		 = @ErrorMessage OUTPUT
-										,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+							-- Validate Items if Lotted
+							IF EXISTS(SELECT * FROM @tblTempItems)
+								BEGIN
+									DECLARE @strLottedItem AS NVARCHAR(MAX) = ''
+
+									SELECT @strLottedItem = @strLottedItem + temp.strItemNo + ', '
+									FROM @tblTempItems temp
+									SELECT @strLottedItem = LEFT(@strLottedItem, LEN(@strLottedItem)-1)
+
+									SET @ysnUpdateCheckoutStatus = 0
+									SET @strStatusMsg = 'Lotted Items (' + @strLottedItem + ') Only None Lotted Items are allowed '
+									RETURN
+								END
+							ELSE
+								BEGIN
+									-- CLEAR
+									SET @CreatedIvoices = ''
+
+									-- POST Main Checkout Invoice
+									EXEC [dbo].[uspARProcessInvoices]
+												@InvoiceEntries	 = @EntriesForInvoice
+												,@LineItemTaxEntries = @LineItemTaxEntries
+												,@UserId			 = @intCurrentUserId
+		 										,@GroupingOption	 = 11
+												,@RaiseError		 = 0
+												,@ErrorMessage		 = @ErrorMessage OUTPUT
+												,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+								END
+
+							
 						END TRY
 
 						BEGIN CATCH
