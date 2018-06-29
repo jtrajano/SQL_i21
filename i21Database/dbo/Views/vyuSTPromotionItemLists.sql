@@ -21,13 +21,22 @@ intKey = CAST(ROW_NUMBER() OVER (ORDER BY UOM.intItemUOMId, IL.intLocationId) AS
 , I.strLotTracking
 , I.strType
 , I.strStatus
-FROM           
-tblICItemUOM UOM JOIN
-tblICItemLocation IL ON UOM.intItemId = IL.intItemId LEFT JOIN
-tblSTSubcategory AS Family ON Family.intSubcategoryId = IL.intFamilyId LEFT JOIN
-tblSTSubcategory AS Class ON Class.intSubcategoryId = IL.intClassId JOIN
-tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId JOIN
-tblICItemPricing IP ON IP.intItemLocationId = IL.intItemLocationId JOIN
-tblICItem I ON I.intItemId = UOM.intItemId JOIN
-tblICCategory Cat ON I.intCategoryId = Cat.intCategoryId
-WHERE I.strType = 'Inventory' AND I.strStatus = 'Active'
+, ST.intStoreId
+FROM tblICItemUOM UOM
+JOIN tblICItemLocation IL 
+	ON UOM.intItemId = IL.intItemId 
+JOIN tblSTStore ST 
+	ON IL.intLocationId = ST.intCompanyLocationId
+LEFT JOIN tblSTSubcategory AS Family 
+	ON Family.intSubcategoryId = IL.intFamilyId 
+LEFT JOIN tblSTSubcategory AS Class 
+	ON Class.intSubcategoryId = IL.intClassId 
+JOIN tblSMCompanyLocation CL 
+	ON CL.intCompanyLocationId = IL.intLocationId 
+JOIN tblICItemPricing IP 
+	ON IP.intItemLocationId = IL.intItemLocationId 
+JOIN tblICItem I 
+	ON I.intItemId = UOM.intItemId 
+JOIN tblICCategory Cat 
+	ON I.intCategoryId = Cat.intCategoryId
+WHERE UOM.ysnStockUnit = CAST(1 AS BIT)
