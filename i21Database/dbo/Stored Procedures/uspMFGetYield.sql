@@ -71,7 +71,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -88,7 +88,12 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE PS.intWorkOrderId = @intWorkOrderId and PS.intItemTypeId in (2,4,5)
+		WHERE PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemTypeId IN (
+				2
+				,4
+				,5
+				)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -115,8 +120,8 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
-					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) > 0
+					THEN Round(SUM(dblConsumedQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -133,7 +138,11 @@ BEGIN
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE PS.intWorkOrderId = @intWorkOrderId and PS.intItemTypeId in (1,3)
+		WHERE PS.intWorkOrderId = @intWorkOrderId
+			AND PS.intItemTypeId IN (
+				1
+				,3
+				)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
@@ -161,7 +170,7 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
 					THEN Round(SUM(dblOutputQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
@@ -171,12 +180,17 @@ BEGIN
 			,UM.strUnitMeasure
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			--AND I.intCategoryId <> @intCategoryId
-		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId 
+		--AND I.intCategoryId <> @intCategoryId
+		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE intWorkOrderId = @intWorkOrderId and intItemTypeId IN (2,4,5)
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
+				2
+				,4
+				,5
+				)
 		GROUP BY C.intCategoryId
 			,C.strCategoryCode
 			,C.strDescription
@@ -199,8 +213,8 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity+ dblInputQuantity) > 0
-					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) > 0
+					THEN Round(SUM(dblConsumedQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -209,13 +223,17 @@ BEGIN
 			,UM.strUnitMeasure
 		FROM tblMFProductionSummary PS
 		JOIN dbo.tblICItem I ON I.intItemId = PS.intItemId
-			--AND I.intCategoryId <> @intCategoryId
-			--AND I.intItemId <> @intItemId
+		--AND I.intCategoryId <> @intCategoryId
+		--AND I.intItemId <> @intItemId
 		JOIN dbo.tblICCategory C ON C.intCategoryId = I.intCategoryId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 			AND IU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE intWorkOrderId = @intWorkOrderId and intItemTypeId IN (1,3)
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
+				1
+				,3
+				)
 		GROUP BY I.intItemId
 			,I.strItemNo
 			,I.strDescription
