@@ -102,6 +102,8 @@ ON dbo.tblARPayment
 INSTEAD OF DELETE 
 AS
 BEGIN
+	--Apply changes to i21Database\Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql
+
 	DECLARE @strRecordNumber NVARCHAR(50);
 	DECLARE @intPaymentId INT;
 	DECLARE @error NVARCHAR(500);
@@ -127,6 +129,8 @@ ON dbo.tblARPayment
 INSTEAD OF UPDATE
 AS
 BEGIN
+	--Apply changes to i21Database\Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql
+
 	DECLARE @ysnPosted AS VARCHAR(MAX) 
 	DECLARE @ysnPostedNew as VARCHAR(MAX)
 	SELECT @ysnPosted = ysnPosted FROM deleted
