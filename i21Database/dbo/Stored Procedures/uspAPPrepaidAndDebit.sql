@@ -735,35 +735,35 @@ AND EXISTS
 	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
 	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
 )
-UNION ALL
+-- UNION ALL
 --=========================================================
 --BASIS ADVANCE
 --=========================================================
-SELECT
-	[intBillId]				=	@billId, 
-	[intBillDetailApplied]	=	NULL, 
-	[intLineApplied]		=	NULL, 
-	[intTransactionId]		=	A.intBillId,
-	[strTransactionNumber]	=	A.strBillId,
-	[intItemId]				=	NULL,
-	[strItemDescription]	=	NULL,
-	[strItemNo]				=	NULL,
-	[intContractHeaderId]	=	NULL,	
-	[strContractNumber]		=	NULL,
-	[intPrepayType]			=	NULL,
-	[dblTotal]				=	A.dblTotal,
-	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
-	[dblBalance]			=	A.dblAmountDue,
-	[dblAmountApplied]		=	0,
-	[ysnApplied]			=	0,
-	[intConcurrencyId]		=	0
-FROM tblAPBill A
---LEFT JOIN tblAPAppliedPrepaidAndDebit B ON B.intTransactionId = A.intBillId
-WHERE A.intTransactionType IN (13)
-AND A.intEntityVendorId = @vendorId
-AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
-AND 1 = CASE WHEN A.intTransactionType = 13 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED 
-		ELSE 1 END
+-- SELECT
+-- 	[intBillId]				=	@billId, 
+-- 	[intBillDetailApplied]	=	NULL, 
+-- 	[intLineApplied]		=	NULL, 
+-- 	[intTransactionId]		=	A.intBillId,
+-- 	[strTransactionNumber]	=	A.strBillId,
+-- 	[intItemId]				=	NULL,
+-- 	[strItemDescription]	=	NULL,
+-- 	[strItemNo]				=	NULL,
+-- 	[intContractHeaderId]	=	NULL,	
+-- 	[strContractNumber]		=	NULL,
+-- 	[intPrepayType]			=	NULL,
+-- 	[dblTotal]				=	A.dblTotal,
+-- 	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
+-- 	[dblBalance]			=	A.dblAmountDue,
+-- 	[dblAmountApplied]		=	0,
+-- 	[ysnApplied]			=	0,
+-- 	[intConcurrencyId]		=	0
+-- FROM tblAPBill A
+-- --LEFT JOIN tblAPAppliedPrepaidAndDebit B ON B.intTransactionId = A.intBillId
+-- WHERE A.intTransactionType IN (13)
+-- AND A.intEntityVendorId = @vendorId
+-- AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
+-- AND 1 = CASE WHEN A.intTransactionType = 13 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED 
+-- 		ELSE 1 END
 
 SELECT * FROM tblAPAppliedPrepaidAndDebit WHERE intBillId = @billId
 
