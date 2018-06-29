@@ -216,16 +216,19 @@ SET
 	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
 	,ARI.[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,ARI.[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
+	,ARI.[dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
 FROM
 	tblARInvoice ARI
 LEFT OUTER JOIN
 	(
 		SELECT 
-			 SUM([dblTotalTax])		AS [dblTotalTax]
-			,SUM([dblBaseTotalTax])	AS [dblBaseTotalTax]
-			,SUM([dblTotal])		AS [dblTotal]
-			,SUM([dblBaseTotal])	AS [dblBaseTotal]
-			,[intInvoiceId]
+			 [dblTotalTax]				= SUM([dblTotalTax])
+			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
+			,[dblTotal]					= SUM([dblTotal])
+			,[dblBaseTotal]				= SUM([dblBaseTotal])
+			,[dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
+			,[intCount]					= COUNT([intInvoiceId])
+			,[intInvoiceId]				= [intInvoiceId]
 		FROM
 			tblARInvoiceDetail
 		GROUP BY

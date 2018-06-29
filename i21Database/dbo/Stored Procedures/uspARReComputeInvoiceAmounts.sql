@@ -231,14 +231,17 @@ SET
 	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
 	,[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
+	,[dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
 FROM
 	(
 		SELECT 
-			 SUM([dblTotalTax])		AS [dblTotalTax]
-			,SUM([dblBaseTotalTax])	AS [dblBaseTotalTax]
-			,SUM([dblTotal])		AS [dblTotal]
-			,SUM([dblBaseTotal])	AS [dblBaseTotal]
-			,[intInvoiceId]
+			 [dblTotalTax]				= SUM([dblTotalTax])
+			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
+			,[dblTotal]					= SUM([dblTotal])
+			,[dblBaseTotal]				= SUM([dblBaseTotal])
+			,[dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
+			,[intCount]					= COUNT([intInvoiceId])
+			,[intInvoiceId]				= [intInvoiceId]
 		FROM
 			tblARInvoiceDetail
 		WHERE
