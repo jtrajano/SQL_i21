@@ -133,8 +133,8 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
-					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) > 0
+					THEN Round(SUM(dblConsumedQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
@@ -245,8 +245,8 @@ BEGIN
 			,SUM(dblCountOutputQuantity) AS dblCountOutputQuantity
 			,SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) - Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) AS dblYieldQuantity
 			,CASE 
-				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) > 0
-					THEN Round(SUM(dblConsumedQuantity + dblCountQuantity + dblCountOutputQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity) * 100, 2)
+				WHEN Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) > 0
+					THEN Round(SUM(dblConsumedQuantity) / Sum(dblOpeningQuantity + dblOpeningOutputQuantity + dblInputQuantity - dblCountQuantity - dblCountOutputQuantity) * 100, 2)
 				ELSE 100
 				END AS dblYieldPercentage
 			,C.intCategoryId
