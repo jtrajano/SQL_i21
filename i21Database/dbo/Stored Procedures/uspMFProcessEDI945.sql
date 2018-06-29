@@ -188,7 +188,8 @@ BEGIN
 		,IsNULL(IsNULL(EDI.strShipToCode, @strShipToCode), '') AS strShipToCode
 		,dtmShipDate dtmShippedDate
 		,IsNULL(IsNULL(CASE 
-					WHEN CF.ysnCustomerPickUp = 1
+					WHEN CF.ysnCustomerPickUp = '1'
+						OR CF.ysnCustomerPickUp = 'True'
 						THEN 'H'
 					ELSE 'M'
 					END, IsNULL(EDI.strTransportationMethod, @strTransportationMethod)), '') AS strTransportationMethod
