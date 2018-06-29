@@ -147,5 +147,5 @@ BEGIN
 		AND ItemAddOnUOM.intItemUOMId = @intItemUOMId
 		AND l.intCompanyLocationId = @intLocationId
 		AND Component.strType IN ('Inventory', 'Finished Good', 'Raw Material')
-
+		AND ItemAddOn.ysnAutoAdd = 1
 END
