@@ -6762,7 +6762,6 @@
     <Build Include="dbo\Functions\fnGRConvertDateToReportDateFormat.sql" />
     <Build Include="dbo\Views\vyuSMAuditLogPanel.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
-    <Build Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6947,6 +6946,7 @@
     <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
     <Build Include="dbo\User Defined Types\UdtCompanyLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUnrestrictBasisAdvance.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
