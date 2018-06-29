@@ -687,7 +687,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId1
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,1
@@ -739,7 +739,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId2
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,2
@@ -792,7 +792,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId3
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,3
@@ -844,7 +844,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId4
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,4
@@ -896,7 +896,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId5
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,5
@@ -948,7 +948,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId6
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,6
@@ -1000,7 +1000,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId7
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,7
@@ -1052,7 +1052,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId8
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,8
@@ -1104,7 +1104,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId9
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,9
@@ -1156,7 +1156,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId10
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,10
@@ -1208,7 +1208,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId11
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,11
@@ -1260,7 +1260,7 @@ BEGIN
 			,@ysnGraderAutoEntry
 			,@intDiscountScheduleCodeId12
 			,@dtmDiscountPaidDate
-			,@intCustomerStorageId
+			,NULL
 			,@intCustomerStorageId
 			,@strSourceType
 			,12
