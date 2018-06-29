@@ -1,0 +1,1 @@
+﻿:r .\PreDeployment\01_Drop_Column.sql

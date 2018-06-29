@@ -1,0 +1,1057 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Circular.Objects</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{d4803773-920e-43f7-a062-57c1270fdfcb}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Circular.Objects</RootNamespace>
+    <AssemblyName>iRely.Circular.Objects</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <QueryStoreCaptureMode>None</QueryStoreCaptureMode>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Functions" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="User Defined Types" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsPayable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsPayable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.BuyBack.Table.dacpac">
+      <HintPath>..\packages\iRely.BuyBack.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CardFueling.Table.dacpac">
+      <HintPath>..\packages\iRely.CardFueling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.ContractManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.ContractManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CreditCardCon.Table.dacpac">
+      <HintPath>..\packages\iRely.CreditCardCon.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CRM.Table.dacpac">
+      <HintPath>..\packages\iRely.CRM.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EnergyTrac.Table.dacpac">
+      <HintPath>..\packages\iRely.EnergyTrac.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EntityManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.EntityManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FinancialReportDesigner.Table.dacpac">
+      <HintPath>..\packages\iRely.FinancialReportDesigner.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FixedAsset.Table.dacpac">
+      <HintPath>..\packages\iRely.FixedAsset.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.GeneralLedger.Table.dacpac">
+      <HintPath>..\packages\iRely.GeneralLedger.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Grain.Table.dacpac">
+      <HintPath>..\packages\iRely.Grain.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.HelpDesk.Table.dacpac">
+      <HintPath>..\packages\iRely.HelpDesk.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Integration.Table.dacpac">
+      <HintPath>..\packages\iRely.Integration.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Inventory.Table.dacpac">
+      <HintPath>..\packages\iRely.Inventory.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Logistics.Table.dacpac">
+      <HintPath>..\packages\iRely.Logistics.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Manufacturing.Table.dacpac">
+      <HintPath>..\packages\iRely.Manufacturing.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.MeterBilling.Table.dacpac">
+      <HintPath>..\packages\iRely.MeterBilling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.NotesReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.NotesReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Patronage.Table.dacpac">
+      <HintPath>..\packages\iRely.Patronage.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Payroll.Table.dacpac">
+      <HintPath>..\packages\iRely.Payroll.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Quality.Table.dacpac">
+      <HintPath>..\packages\iRely.Quality.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.RiskManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.RiskManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Scale.Table.dacpac">
+      <HintPath>..\packages\iRely.Scale.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Store.Table.dacpac">
+      <HintPath>..\packages\iRely.Store.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.SystemManager.Table.dacpac">
+      <HintPath>..\packages\iRely.SystemManager.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TankManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.TankManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TaxForm.Table.dacpac">
+      <HintPath>..\packages\iRely.TaxForm.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Transports.Table.dacpac">
+      <HintPath>..\packages\iRely.Transports.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.VendorRebates.Table.dacpac">
+      <HintPath>..\packages\iRely.VendorRebates.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Warehouse.Table.dacpac">
+      <HintPath>..\packages\iRely.Warehouse.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Dashboard.Table.dacpac">
+      <HintPath>..\packages\iRely.Dashboard.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CashManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.CashManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Functions\fnAddZeroPrefixes.sql" />
+    <Build Include="Functions\fnAESDecryptASym.sql" />
+    <Build Include="Functions\fnCommaSeparatedValueToTable.sql" />
+    <Build Include="Functions\fnConstructLineItemTaxDetail.sql" />
+    <Build Include="Functions\fnConvertFilterTableToWhereExpression.sql" />
+    <Build Include="Functions\fnConvertNumberToWord.sql" />
+    <Build Include="Functions\fnConvertOriginDateToSQLDateTime.sql" />
+    <Build Include="Functions\fnConvertToFullAddress.sql" />
+    <Build Include="Functions\fnCreateCostAdjGLDescription.sql" />
+    <Build Include="Functions\fnCreateTableFromDelimitedValues.sql" />
+    <Build Include="Functions\fnCRMCoalesceEntityType.sql" />
+    <Build Include="Functions\fnCRMCoalesceLinesOfBusiness.sql" />
+    <Build Include="Functions\fnCRMCoalesceLinesOfBusinessId.sql" />
+    <Build Include="Functions\fnDateEquals.sql" />
+    <Build Include="Functions\fnDateLessThan.sql" />
+    <Build Include="Functions\fnDateLessThanEquals.sql" />
+    <Build Include="Functions\fnDateNotEquals.sql" />
+    <Build Include="Functions\fnDivide.sql" />
+    <Build Include="Functions\fnEliminateHTMLTags.sql" />
+    <Build Include="Functions\fnEMEntityMessage.sql" />
+    <Build Include="Functions\fnEMGetEntityLineOfBusiness.sql" />
+    <Build Include="Functions\fnEMSplitWithGetByIdx.sql" />
+    <Build Include="Functions\fnEscapeXML.sql" />
+    <Build Include="Functions\fnFormatMessage.sql" />
+    <Build Include="Functions\fnFormatMsg80003.sql" />
+    <Build Include="Functions\fnFormatNumber.sql" />
+    <Build Include="Functions\fnGetBankBalance.sql" />
+    <Build Include="Functions\fnGetBankBeginningBalance.sql" />
+    <Build Include="Functions\fnGetBankCurrentEndingBalance.sql" />
+    <Build Include="Functions\fnGetBankGLBalance.sql" />
+    <Build Include="Functions\fnGetBusinessDate.sql" />
+    <Build Include="Functions\fnGetClearedDeposits.sql" />
+    <Build Include="Functions\fnGetCostingMethod.sql" />
+    <Build Include="Functions\fnGetCostingMethodAsTable.sql" />
+    <Build Include="Functions\fnGetCredit.sql" />
+    <Build Include="Functions\fnGetCreditForeign.sql" />
+    <Build Include="Functions\fnGetCreditFunctional.sql" />
+    <Build Include="Functions\fnGetCreditUnit.sql" />
+    <Build Include="Functions\fnGetCustomerTaxCodeExemption.sql" />
+    <Build Include="Functions\fnGetCustomerTaxCodeExemptionDetails.sql" />
+    <Build Include="Functions\fnGetDaysInMonth.sql" />
+    <Build Include="Functions\fnGetDebit.sql" />
+    <Build Include="Functions\fnGetDebitForeign.sql" />
+    <Build Include="Functions\fnGetDebitFunctional.sql" />
+    <Build Include="Functions\fnGetDebitUnit.sql" />
+    <Build Include="Functions\fnGetDefaultGrossNetUOMForLotItem.sql" />
+    <Build Include="Functions\fnGetDepositEntry.sql" />
+    <Build Include="Functions\fnGetDiscountBasedonTerm.sql" />
+    <Build Include="Functions\fnGetDiscountDateBasedOnTerm.sql" />
+    <Build Include="Functions\fnGetDueDateBasedonTerm.sql" />
+    <Build Include="Functions\fnGetFirstDateOfWeek.sql" />
+    <Build Include="Functions\fnGetGLAccountFromCompanyLocation.sql" />
+    <Build Include="Functions\fnGetGLAccountIdFromProfitCenter.sql" />
+    <Build Include="Functions\fnGetGLEntriesErrors.sql" />
+    <Build Include="Functions\fnGetInterestBasedOnTerm.sql" />
+    <Build Include="Functions\fnGetItemAverageCost.sql" />
+    <Build Include="Functions\fnGetItemBaseGLAccount.sql" />
+    <Build Include="Functions\fnGetItemCostingOnPostErrors.sql" />
+    <Build Include="Functions\fnGetItemCostingOnPostInTransitErrors.sql" />
+    <Build Include="Functions\fnGetItemCostingOnPostStorageErrors.sql" />
+    <Build Include="Functions\fnGetItemCostingOnUnpostErrors.sql" />
+    <Build Include="Functions\fnGetItemCostingOnUnpostStorageErrors.sql" />
+    <Build Include="Functions\fnGetItemGLAccount.sql" />
+    <Build Include="Functions\fnGetItemInTransitCostingOnUnpostErrors.sql" />
+    <Build Include="Functions\fnGetItemLotType.sql" />
+    <Build Include="Functions\fnGetItemProfitCenter.sql" />
+    <Build Include="Functions\fnGetItemTaxComputationForCustomer.sql" />
+    <Build Include="Functions\fnGetItemTaxComputationForVendor.sql" />
+    <Build Include="Functions\fnGetItemTotalTaxForCustomer.sql" />
+    <Build Include="Functions\fnGetItemTotalValueFromTransactions.sql" />
+    <Build Include="Functions\fnGetLotUnitCost.sql" />
+    <Build Include="Functions\fnGetMatchingItemUOMId.sql" />
+    <Build Include="Functions\fnGetNumericValueFromString.sql" />
+    <Build Include="Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
+    <Build Include="Functions\fnGetProcessToInventoryReceiptErrors.sql" />
+    <Build Include="Functions\fnGetRowsFromDelimitedValues.sql" />
+    <Build Include="Functions\fnGetTaxCodeRateDetails.sql" />
+    <Build Include="Functions\fnGetTaxGroupIdForCustomer.sql" />
+    <Build Include="Functions\fnGetTaxGroupIdForVendor.sql" />
+    <Build Include="Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
+    <Build Include="Functions\fnGetTaxGroupTaxCodesForVendor.sql" />
+    <Build Include="Functions\fnGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="Functions\fnGetTrucksRemaining.sql" />
+    <Build Include="Functions\fnGetUnclearedDeposits.sql" />
+    <Build Include="Functions\fnGetUnclearedPayments.sql" />
+    <Build Include="Functions\fnGetUserDefaultLocation.sql" />
+    <Build Include="Functions\fnGetVendorTaxCodeExemption.sql" />
+    <Build Include="Functions\fnGetVendorTaxCodeExemptionDetails.sql" />
+    <Build Include="Functions\fnGLGetCMGLDetailBalance.sql" />
+    <Build Include="Functions\fnGLGetExchangeRate.sql" />
+    <Build Include="Functions\fnGLGetGLEntriesErrorMessage.sql" />
+    <Build Include="Functions\fnGLGetPostErrors.sql" />
+    <Build Include="Functions\fnHundredsPlaceToWord.sql" />
+    <Build Include="Functions\fnICCalculateExpiryDate.sql" />
+    <Build Include="Functions\fnICCheckItemUOMIdIsNotUsed.sql" />
+    <Build Include="Functions\fnICConvertUOMtoStockUnit.sql" />
+    <Build Include="Functions\fnICDescribeSoldStock.sql" />
+    <Build Include="Functions\fnICFormatErrorMessage.sql" />
+    <Build Include="Functions\fnICFormatNumber.sql" />
+    <Build Include="Functions\fnICGetCreateGLEntriesErrors.sql" />
+    <Build Include="Functions\fnICGetErrorMessage.sql" />
+    <Build Include="Functions\fnICGetInvalidInvoicesForCosting.sql" />
+    <Build Include="Functions\fnICGetInvalidInvoicesForInTransitCosting.sql" />
+    <Build Include="Functions\fnICGetInvalidInvoicesForItemStoragePosting.sql" />
+    <Build Include="Functions\fnICGetItemLocation.sql" />
+    <Build Include="Functions\fnICGetOwnershipType.sql" />
+    <Build Include="Functions\fnICGetReceiptTotals.sql" />
+    <Build Include="Functions\fnICGetScaleTicketIdForReceiptCharge.sql" />
+    <Build Include="Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
+    <Build Include="Functions\fnICGetTransWeightedAveCost.sql" />
+    <Build Include="Functions\fnICIsShrinkableUOM.sql" />
+    <Build Include="Functions\fnICSplitStringToTable.sql" />
+    <Build Include="Functions\fnIsAllowUserSelfPost.sql" />
+    <Build Include="Functions\fnIsDepositEntry.sql" />
+    <Build Include="Functions\fnIsDue.sql" />
+    <Build Include="Functions\fnIsStockTrackingItem.sql" />
+    <Build Include="Functions\fnLastIndex.sql" />
+    <Build Include="Functions\fnLGGetItemUnitConversion.sql" />
+    <Build Include="Functions\fnLTrimX.sql" />
+    <Build Include="Functions\fnMaxNumeric.sql" />
+    <Build Include="Functions\fnMFConvertCostToTargetItemUOM.sql" />
+    <Build Include="Functions\fnMFConvertQuantityToTargetItemUOM.sql" />
+    <Build Include="Functions\fnMFGetInvalidInvoicesForPosting.sql" />
+    <Build Include="Functions\fnMFGetInvoiceChargesByShipment.sql" />
+    <Build Include="Functions\fnMultiply.sql" />
+    <Build Include="Functions\fnOnesPlaceToWord.sql" />
+    <Build Include="Functions\fnPATValidateAssociatedTransaction.sql" />
+    <Build Include="Functions\fnPOPurchaseDetailGetReceiptId.sql" />
+    <Build Include="Functions\fnPOPurchaseDetailGetReceiptNumber.sql" />
+    <Build Include="Functions\fnQMGetPropertyTestResult.sql" />
+    <Build Include="Functions\fnRecalculateAverageCost.sql" />
+    <Build Include="Functions\fnRemoveSpecialChars.sql" />
+    <Build Include="Functions\fnRemoveTimeOnDate.sql" />
+    <Build Include="Functions\fnRemoveTrailingZeroes.sql" />
+    <Build Include="Functions\fnRKGetFutureAndBasisPrice.sql" />
+    <Build Include="Functions\fnRKGetLatestBasisPrice.sql" />
+    <Build Include="Functions\fnRKGetLatestClosingPrice.sql" />
+    <Build Include="Functions\fnRoundBanker.sql" />
+    <Build Include="Functions\fnRTrim.sql" />
+    <Build Include="Functions\fnRTrimX.sql" />
+    <Build Include="Functions\fnSCCalculateDiscount.sql" />
+    <Build Include="Functions\fnSMGetCompanyLogo.sql" />
+    <Build Include="Functions\fnSMGetDefaultCurrency.sql" />
+    <Build Include="Functions\fnSMGetForexRate.sql" />
+    <Build Include="Functions\fnSMHideOriginMenus.sql" />
+    <Build Include="Functions\fnSMUniqueEffectiveMethodUOM.sql" />
+    <Build Include="Functions\fnSplitString.sql" />
+    <Build Include="Functions\fnSplitStringWithTrim.sql" />
+    <Build Include="Functions\fnStripHtml.sql" />
+    <Build Include="Functions\fnTensPlaceToWord.sql" />
+    <Build Include="Functions\fnTMComputeNewBurnRate.sql" />
+    <Build Include="Functions\fnTMComputeNewBurnRateTable.sql" />
+    <Build Include="Functions\fnTMGetCalculatedBurnRate.sql" />
+    <Build Include="Functions\fnTMGetElapseDegreeDayForCalculation.sql" />
+    <Build Include="Functions\fnTMGetInvalidInvoicesForSync.sql" />
+    <Build Include="Functions\fnTMGetNextJulianDeliveryDate.sql" />
+    <Build Include="Functions\fnTrim.sql" />
+    <Build Include="Functions\fnTrimX.sql" />
+    <Build Include="Functions\isOpenAccountingDate.sql" />
+    <Build Include="Functions\isOpenAccountingDateByModule.sql" />
+    <Build Include="User Defined Types\ApprovalConfigurationType.sql" />
+    <Build Include="User Defined Types\AuditLogStagingTable.sql" />
+    <Build Include="User Defined Types\BankTransactionBatchDetailTable.sql" />
+    <Build Include="User Defined Types\BankTransactionDetailTable.sql" />
+    <Build Include="User Defined Types\BankTransactionTable.sql" />
+    <Build Include="User Defined Types\CommissionPostingTable.sql" />
+    <Build Include="User Defined Types\DestinationShipmentCharge.sql" />
+    <Build Include="User Defined Types\DestinationShipmentItem.sql" />
+    <Build Include="User Defined Types\Entity.sql" />
+    <Build Include="User Defined Types\EntityContact.sql" />
+    <Build Include="User Defined Types\ETTranslateRPToReceivePaymentTable.sql" />
+    <Build Include="User Defined Types\ETTranslateSDToInvoiceTable.sql" />
+    <Build Include="User Defined Types\FilterTableType.sql" />
+    <Build Include="User Defined Types\Id.sql" />
+    <Build Include="User Defined Types\InTransitTableType.sql" />
+    <Build Include="User Defined Types\InventoryCountStagingTable.sql" />
+    <Build Include="User Defined Types\InventoryTranactionStockToReverse.sql" />
+    <Build Include="User Defined Types\InventoryTransferStagingTable.sql" />
+    <Build Include="User Defined Types\InvoiceId.sql" />
+    <Build Include="User Defined Types\InvoiceIntegrationLogStagingTable.sql" />
+    <Build Include="User Defined Types\InvoiceIntegrationStagingTable.sql" />
+    <Build Include="User Defined Types\InvoiceItemTableType.sql" />
+    <Build Include="User Defined Types\InvoicePostingTable.sql" />
+    <Build Include="User Defined Types\InvoiceStagingTable.sql" />
+    <Build Include="User Defined Types\ItemCostAdjustmentTableType.sql" />
+    <Build Include="User Defined Types\ItemCostingTableType.sql" />
+    <Build Include="User Defined Types\ItemCostingZeroStockTableType.sql" />
+    <Build Include="User Defined Types\ItemGLAccount.sql" />
+    <Build Include="User Defined Types\ItemInTransitCostingTableType.sql" />
+    <Build Include="User Defined Types\ItemLotTableType.sql" />
+    <Build Include="User Defined Types\ItemOtherChargesGLAccount.sql" />
+    <Build Include="User Defined Types\ItemReservationTableType.sql" />
+    <Build Include="User Defined Types\ItemsOpenPurchaseContractTableType.sql" />
+    <Build Include="User Defined Types\JournalIDTableType.sql" />
+    <Build Include="User Defined Types\LineItemTaxDetailStagingTable.sql" />
+    <Build Include="User Defined Types\OrderDetailInformation.sql" />
+    <Build Include="User Defined Types\OrderHeaderInformation.sql" />
+    <Build Include="User Defined Types\OriginImportOptions.sql" />
+    <Build Include="User Defined Types\OtherChargeCostAdjustmentTableType.sql" />
+    <Build Include="User Defined Types\PaymentDetailStaging.sql" />
+    <Build Include="User Defined Types\PaymentId.sql" />
+    <Build Include="User Defined Types\PaymentIntegrationLogStagingTable.sql" />
+    <Build Include="User Defined Types\PaymentIntegrationStagingTable.sql" />
+    <Build Include="User Defined Types\PlaceHolderTable.sql" />
+    <Build Include="User Defined Types\QualityInspectionTable.sql" />
+    <Build Include="User Defined Types\QualityPropertyValueTable.sql" />
+    <Build Include="User Defined Types\RecapTableType.sql" />
+    <Build Include="User Defined Types\ReceiptItemLotStagingTable.sql" />
+    <Build Include="User Defined Types\ReceiptItemTableType.sql" />
+    <Build Include="User Defined Types\ReceiptOtherChargesTableType.sql" />
+    <Build Include="User Defined Types\ReceiptStagingTable.sql" />
+    <Build Include="User Defined Types\ReceivePaymentPostingTable.sql" />
+    <Build Include="User Defined Types\RouteOrdersTableType.sql" />
+    <Build Include="User Defined Types\SalesOrderItemTableType.sql" />
+    <Build Include="User Defined Types\ScaleDestinationStagingTable.sql" />
+    <Build Include="User Defined Types\ScaleManualCostingTableType.sql" />
+    <Build Include="User Defined Types\ScaleTransactionTableType.sql" />
+    <Build Include="User Defined Types\ScheduleConstraintTable.sql" />
+    <Build Include="User Defined Types\ScheduleTable.sql" />
+    <Build Include="User Defined Types\ServiceChargeInvoiceParam.sql" />
+    <Build Include="User Defined Types\ServiceChargeTableType.sql" />
+    <Build Include="User Defined Types\ShipmentChargeStagingTable.sql" />
+    <Build Include="User Defined Types\ShipmentItemLotStagingTable.sql" />
+    <Build Include="User Defined Types\ShipmentItemTableType.sql" />
+    <Build Include="User Defined Types\ShipmentStagingTable.sql" />
+    <Build Include="User Defined Types\TFFilingPackets.sql" />
+    <Build Include="User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
+    <Build Include="User Defined Types\TFInvoiceDetail.sql" />
+    <Build Include="User Defined Types\TFInvoiceDetailTransaction.sql" />
+    <Build Include="User Defined Types\TFInvoiceTransaction.sql" />
+    <Build Include="User Defined Types\TFOriginDestinationStates.sql" />
+    <Build Include="User Defined Types\TFProductCodes.sql" />
+    <Build Include="User Defined Types\TFReceiptItem.sql" />
+    <Build Include="User Defined Types\TFReceiptTransaction.sql" />
+    <Build Include="User Defined Types\TFReportingComponent.sql" />
+    <Build Include="User Defined Types\TFReportingComponentConfigurations.sql" />
+    <Build Include="User Defined Types\TFReportingComponentOutputDesigners.sql" />
+    <Build Include="User Defined Types\TFReportOR7351334MSub.sql" />
+    <Build Include="User Defined Types\TFReportOR7351334MSubSummary.sql" />
+    <Build Include="User Defined Types\TFReportTransaction.sql" />
+    <Build Include="User Defined Types\TFScheduleCodeParam.sql" />
+    <Build Include="User Defined Types\TFTaxCategory.sql" />
+    <Build Include="User Defined Types\TFTaxCriteria.sql" />
+    <Build Include="User Defined Types\TFTerminalControlNumbers.sql" />
+    <Build Include="User Defined Types\TFTransaction.sql" />
+    <Build Include="User Defined Types\TFTransactionSummaryItem.sql" />
+    <Build Include="User Defined Types\TFTransactionSummaryTotal.sql" />
+    <Build Include="User Defined Types\TFValidDestinationStates.sql" />
+    <Build Include="User Defined Types\TFValidOriginStates.sql" />
+    <Build Include="User Defined Types\TFValidProductCodes.sql" />
+    <Build Include="User Defined Types\TMGPSUpdateByIdTable.sql" />
+    <Build Include="User Defined Types\TMGPSUpdateTable.sql" />
+    <Build Include="User Defined Types\UdtCompanyLocations.sql" />
+    <Build Include="User Defined Types\UnpostItemsTableType.sql" />
+    <Build Include="User Defined Types\VoucherDetailCC.sql" />
+    <Build Include="User Defined Types\VoucherDetailClaim.sql" />
+    <Build Include="User Defined Types\VoucherDetailData.sql" />
+    <Build Include="User Defined Types\VoucherDetailDirectInventory.sql" />
+    <Build Include="User Defined Types\VoucherDetailLoadNonInv.sql" />
+    <Build Include="User Defined Types\VoucherDetailNonInvContract.sql" />
+    <Build Include="User Defined Types\VoucherDetailNonInventory.sql" />
+    <Build Include="User Defined Types\VoucherDetailReceipt.sql" />
+    <Build Include="User Defined Types\VoucherDetailReceiptCharge.sql" />
+    <Build Include="User Defined Types\VoucherDetailStorage.sql" />
+    <Build Include="User Defined Types\VoucherDetailTax.sql" />
+    <Build Include="User Defined Types\VoucherPayable.sql" />
+    <Build Include="User Defined Types\VoucherPayableItem.sql" />
+    <Build Include="User Defined Types\VoucherPODetail.sql" />
+    <Build Include="Views\vyuAP1099.sql" />
+    <Build Include="Views\vyuAP1099B.sql" />
+    <Build Include="Views\vyuAP1099DIV.sql" />
+    <Build Include="Views\vyuAP1099INT.sql" />
+    <Build Include="Views\vyuAP1099MISC.sql" />
+    <Build Include="Views\vyuAP1099PATR.sql" />
+    <Build Include="Views\vyuAPBatchPostTransaction.sql" />
+    <Build Include="Views\vyuAPBillDetailTax.sql" />
+    <Build Include="Views\vyuAPForApprovalTransaction.sql" />
+    <Build Include="Views\vyuAPMultiCurrencyRevalue.sql" />
+    <Build Include="Views\vyuAPPaidOriginPrepaid.sql" />
+    <Build Include="Views\vyuAPPayables.sql" />
+    <Build Include="Views\vyuAPPrepaidPayables.sql" />
+    <Build Include="Views\vyuAPUnpostedTransaction.sql" />
+    <Build Include="Views\vyuAPVendor.sql" />
+    <Build Include="Views\vyuAPVendorHistory.sql" />
+    <Build Include="Views\vyuAPVoucherCommodity.sql" />
+    <Build Include="Views\vyuAPVouchersForARPayment.sql" />
+    <Build Include="Views\vyuARBatchPosting.sql" />
+    <Build Include="Views\vyuARCustomer.sql" />
+    <Build Include="Views\vyuARCustomerAgingReport.sql" />
+    <Build Include="Views\vyuARCustomerAgingSubview.sql" />
+    <Build Include="Views\vyuARCustomerContacts.sql" />
+    <Build Include="Views\vyuARCustomerHistory.sql" />
+    <Build Include="Views\vyuARCustomerInquiry.sql" />
+    <Build Include="Views\vyuARCustomerInquiryReport.sql" />
+    <Build Include="Views\vyuARCustomerSearch.sql" />
+    <Build Include="Views\vyuARForApprovalTransction.sql" />
+    <Build Include="Views\vyuARGetItemAccount.sql" />
+    <Build Include="Views\vyuARGetItemComponents.sql" />
+    <Build Include="Views\vyuARGetSalesOrderItems.sql" />
+    <Build Include="Views\vyuARInvoicesForPayment.sql" />
+    <Build Include="Views\vyuARInvoiceTransactionHistory.sql" />
+    <Build Include="Views\vyuARItemUOM.sql" />
+    <Build Include="Views\vyuARItemWUOM.sql" />
+    <Build Include="Views\vyuARMultiCurrencyRevalue.sql" />
+    <Build Include="Views\vyuARProcessedQuotes.sql" />
+    <Build Include="Views\vyuARSalesAnalysisReport.sql" />
+    <Build Include="Views\vyuARShippedItems.sql" />
+    <Build Include="Views\vyuARUndepositedPayment.sql" />
+    <Build Include="Views\vyuARUnpostedTransactions.sql" />
+    <Build Include="Views\vyuCFBatchPostTransactions.sql" />
+    <Build Include="Views\vyuCFCustomerEntity.sql" />
+    <Build Include="Views\vyuCFInvoice.sql" />
+    <Build Include="Views\vyuCFInvoiceReport.sql" />
+    <Build Include="Views\vyuCMBankAccount.sql" />
+    <Build Include="Views\vyuCMMultiCurrencyRevalue.sql" />
+    <Build Include="Views\vyuCMOriginDepositEntry.sql" />
+    <Build Include="Views\vyuCMUnpostedTransaction.sql" />
+    <Build Include="Views\vyuCTCompactContractDetailView.sql" />
+    <Build Include="Views\vyuCTContractAddOrdersLookup.sql" />
+    <Build Include="Views\vyuCTContractCostEnquiryCost.sql" />
+    <Build Include="Views\vyuCTContractCostView.sql" />
+    <Build Include="Views\vyuCTContractDetailView.sql" />
+    <Build Include="Views\vyuCTContractHeaderNotMapped.sql" />
+    <Build Include="Views\vyuCTContractHeaderView.sql" />
+    <Build Include="Views\vyuCTContractSequence.sql" />
+    <Build Include="Views\vyuCTCostType.sql" />
+    <Build Include="Views\vyuCTCustomerContract.sql" />
+    <Build Include="Views\vyuCTDashboardJDE.sql" />
+    <Build Include="Views\vyuCTEntity.sql" />
+    <Build Include="Views\vyuCTEntityToContact.sql" />
+    <Build Include="Views\vyuCTEventRecipientFilter.sql" />
+    <Build Include="Views\vyuCTLoadView.sql" />
+    <Build Include="Views\vyuCTMultiCurrencyRevalue.sql" />
+    <Build Include="Views\vyuCTQualityApprovedRejected.sql" />
+    <Build Include="Views\vyuCTSearchPriceContract.sql" />
+    <Build Include="Views\vyuCTSearchPriceContractDetail.sql" />
+    <Build Include="Views\vyuEMCustomerApplicator.sql" />
+    <Build Include="Views\vyuEMEntity.sql" />
+    <Build Include="Views\vyuEMEntityContact.sql" />
+    <Build Include="Views\vyuEMEntityContact2.sql" />
+    <Build Include="Views\vyuEMEntityCustomerSearch.sql" />
+    <Build Include="Views\vyuEMEntityType.sql" />
+    <Build Include="Views\vyuEMSalesperson.sql" />
+    <Build Include="Views\vyuEMSearch.sql" />
+    <Build Include="Views\vyuEMSearchEntityCompetitor.sql" />
+    <Build Include="Views\vyuEMSearchEntityUserSecurity.sql" />
+    <Build Include="Views\vyuEMSearchShipVia.sql" />
+    <Build Include="Views\vyuGLAccountDetail.sql" />
+    <Build Include="Views\vyuGLDetail.sql" />
+    <Build Include="Views\vyuGLExchangeRate.sql" />
+    <Build Include="Views\vyuGRGetDiscountCode.sql" />
+    <Build Include="Views\vyuGRGetStorageDetail.sql" />
+    <Build Include="Views\vyuGRGetStorageOffSiteDetail.sql" />
+    <Build Include="Views\vyuGRGetStorageTransferTicket.sql" />
+    <Build Include="Views\vyuHDItem.sql" />
+    <Build Include="Views\vyuHDSalesPerson.sql" />
+    <Build Include="Views\vyuICCategoryLocation.sql" />
+    <Build Include="Views\vyuICChargesForBilling.sql" />
+    <Build Include="Views\vyuICGetCompactItem.sql" />
+    <Build Include="Views\vyuICGetInventoryCount.sql" />
+    <Build Include="Views\vyuICGetInventoryCountDetail.sql" />
+    <Build Include="Views\vyuICGetInventoryReceipt.sql" />
+    <Build Include="Views\vyuICGetInventoryReceiptCharge.sql" />
+    <Build Include="Views\vyuICGetInventoryReceiptItem.sql" />
+    <Build Include="Views\vyuICGetInventoryReceiptVoucherItems.sql" />
+    <Build Include="Views\vyuICGetInventoryShipment.sql" />
+    <Build Include="Views\vyuICGetInventoryShipmentCharge.sql" />
+    <Build Include="Views\vyuICGetInventoryShipmentItem.sql" />
+    <Build Include="Views\vyuICGetInventoryShipmentLookup.sql" />
+    <Build Include="Views\vyuICGetInventoryTransferDetail.sql" />
+    <Build Include="Views\vyuICGetInventoryValuation.sql" />
+    <Build Include="Views\vyuICGetItemLocation.sql" />
+    <Build Include="Views\vyuICGetItemPricing.sql" />
+    <Build Include="Views\vyuICGetItemStock.sql" />
+    <Build Include="Views\vyuICGetItemStockSummary.sql" />
+    <Build Include="Views\vyuICGetItemStockSummaryByLot.sql" />
+    <Build Include="Views\vyuICGetItemStockUOM.sql" />
+    <Build Include="Views\vyuICGetItemUOM.sql" />
+    <Build Include="Views\vyuICGetLot.sql" />
+    <Build Include="Views\vyuICGetOtherCharges.sql" />
+    <Build Include="Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="Views\vyuICGetShipmentItemSource.sql" />
+    <Build Include="Views\vyuICGetStorageLocation.sql" />
+    <Build Include="Views\vyuICGetUnpostedTransactions.sql" />
+    <Build Include="Views\vyuICInventoryReceiptItemLookUp.sql" />
+    <Build Include="Views\vyuICInventoryReceiptLookUp.sql" />
+    <Build Include="Views\vyuICItemUOM.sql" />
+    <Build Include="Views\vyuICMultiCurrencyRevalueReceipt.sql" />
+    <Build Include="Views\vyuICMultiCurrencyRevalueReceiptOtherCharges.sql" />
+    <Build Include="Views\vyuICMultiCurrencyRevalueShipment.sql" />
+    <Build Include="Views\vyuICMultiCurrencyRevalueShipmentOtherCharges.sql" />
+    <Build Include="Views\vyuICShipmentChargesForBilling.sql" />
+    <Build Include="Views\vyuICTMProductPricing.sql" />
+    <Build Include="Views\vyuLGDeliveryOpenPickLotDetails.sql" />
+    <Build Include="Views\vyuLGDeliveryOpenPickLotHeader.sql" />
+    <Build Include="Views\vyuLGDeliveryOpenPickLots.sql" />
+    <Build Include="Views\vyuLGInventoryView.sql" />
+    <Build Include="Views\vyuLGLoadContainerLookup.sql" />
+    <Build Include="Views\vyuLGLoadContainerPurchaseContracts.sql" />
+    <Build Include="Views\vyuLGLoadContainerPurchaseContractsLookup.sql" />
+    <Build Include="Views\vyuLGLoadContainerReceiptContracts.sql" />
+    <Build Include="Views\vyuLGLoadCostForCustomer.sql" />
+    <Build Include="Views\vyuLGLoadDetailLotsView.sql" />
+    <Build Include="Views\vyuLGLoadDetailView.sql" />
+    <Build Include="Views\vyuLGLoadDetailViewLookup.sql" />
+    <Build Include="Views\vyuLGLoadOpenContracts.sql" />
+    <Build Include="Views\vyuLGLoadPurchaseContracts.sql" />
+    <Build Include="Views\vyuLGLoadScheduleForInvoice.sql" />
+    <Build Include="Views\vyuLGLoadStorageCostForInvoice.sql" />
+    <Build Include="Views\vyuLGLoadView.sql" />
+    <Build Include="Views\vyuLGLoadViewSearch.sql" />
+    <Build Include="Views\vyuLGLoadWarehouseServicesForInvoice.sql" />
+    <Build Include="Views\vyuLGNotifyParties.sql" />
+    <Build Include="Views\vyuLGPickOpenInventoryLots.sql" />
+    <Build Include="Views\vyuLGShipmentContainerPurchaseContracts.sql" />
+    <Build Include="Views\vyuLGShipmentContainerReceiptContracts.sql" />
+    <Build Include="Views\vyuLGShipmentPurchaseContracts.sql" />
+    <Build Include="Views\vyuMBGetMeterAccount.sql" />
+    <Build Include="Views\vyuMBGetMeterAccountDetail.sql" />
+    <Build Include="Views\vyuMBGetMeterReading.sql" />
+    <Build Include="Views\vyuMBGetMeterReadingDetail.sql" />
+    <Build Include="Views\vyuMFGetBlendTransactions.sql" />
+    <Build Include="Views\vyuMFGetItemByLocation.sql" />
+    <Build Include="Views\vyuMFGetItemStockDetail.sql" />
+    <Build Include="Views\vyuMFGetRecipeItem.sql" />
+    <Build Include="Views\vyuPATEntityPatron.sql" />
+    <Build Include="Views\vyuPODetails.sql" />
+    <Build Include="Views\vyuPOPurchaseDetailReceiptNumber.sql" />
+    <Build Include="Views\vyuPRUnpostedTransactions.sql" />
+    <Build Include="Views\vyuQMGetLotQuality.sql" />
+    <Build Include="Views\vyuRKFutOptTransaction.sql" />
+    <Build Include="Views\vyuRKGetOpenContract.sql" />
+    <Build Include="Views\vyuRKPositionByPeriodContDetView.sql" />
+    <Build Include="Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="Views\vyuSCTicketInventoryShipmentView.sql" />
+    <Build Include="Views\vyuSMBEExportTax.sql" />
+    <Build Include="Views\vyuSMCompanyLogo.sql" />
+    <Build Include="Views\vyuSMForex.sql" />
+    <Build Include="Views\vyuSMUserLocationSubRolePermission.sql" />
+    <Build Include="Views\vyuSMUserRoleMenuLocationMVC.sql" />
+    <Build Include="Views\vyuSMUserRoleMenuSubRoleMVC.sql" />
+    <Build Include="Views\vyuSMUserRoleSubRole.sql" />
+    <Build Include="Views\vyuSOSalesOrderDetail.sql" />
+    <Build Include="Views\vyuSOSalesOrderSearch.sql" />
+    <Build Include="Views\vyuTFGetReportingComponentAccountStatusCode.sql" />
+    <Build Include="Views\vyuTFGetReportingComponentCustomer.sql" />
+    <Build Include="Views\vyuTFGetReportingComponentDestinationState.sql" />
+    <Build Include="Views\vyuTFGetReportingComponentOriginState.sql" />
+    <Build Include="Views\vyuTFGetReportingComponentProductCode.sql" />
+    <Build Include="Views\vyuTFGetReportingComponentVendor.sql" />
+    <Build Include="Views\vyuTMCustomerConsumptionSiteInfo.sql" />
+    <Build Include="Views\vyuTMGeneratedCallEntry.sql" />
+    <Build Include="Views\vyuTMOrderApprovalTransaction.sql" />
+    <Build Include="Views\vyuTRGetLoadBlendIngredient.sql" />
+    <Build Include="Views\vyuTRGetLoadReceipt.sql" />
+    <Build Include="Views\vyuTRGetQuoteHeader.sql" />
+    <Build Include="Views\vyuTRGetRackPriceDetail.sql" />
+    <Build Include="Views\vyuTRGetSupplyPointSearchValue.sql" />
+    <Build Include="Views\vyuTRGetTransportLoadReceipt.sql" />
+    <Build Include="Views\vyuTRRackPriceEquation.sql" />
+    <Build Include="Views\vyuTRSupplyPointView.sql" />
+    <Build Include="Views\vyuTRTerminal.sql" />
+    <Build Include="Functions\fnAPCalculateVoucherDetailUnits.sql" />
+    <Build Include="Functions\fnAPCalculateVoucherUnits.sql" />
+    <Build Include="Functions\fnAPContractHasUnappliedPrepaid.sql" />
+    <Build Include="Functions\fnAPCreateBillData.sql" />
+    <Build Include="Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="Functions\fnAPCreateClaimARGLEntries.sql" />
+    <Build Include="Functions\fnAPFormatAddress.sql" />
+    <Build Include="Functions\fnAPRemoveSpecialChars.sql" />
+    <Build Include="Functions\fnAPReverseGLEntries.sql" />
+    <Build Include="Functions\fnAPValidatePostBill.sql" />
+    <Build Include="Functions\fnAPValidateRecapBill.sql" />
+    <Build Include="Functions\fnARCalculateQtyBetweenUOM.sql" />
+    <Build Include="Functions\fnARFormatCustomerAddress.sql" />
+    <Build Include="Functions\fnARFormatMessage.sql" />
+    <Build Include="Functions\fnARGenerateGLEntriesForPayments.sql" />
+    <Build Include="Functions\fnARGetContractPricingDetails.sql" />
+    <Build Include="Functions\fnARGetCustomerAccountStatusCodes.sql" />
+    <Build Include="Functions\fnARGetCustomerBudget.sql" />
+    <Build Include="Functions\fnARGetCustomerDefaultContact.sql" />
+    <Build Include="Functions\fnARGetCustomerDefaultCurrency.sql" />
+    <Build Include="Functions\fnARGetCustomerPricingDetails.sql" />
+    <Build Include="Functions\fnARGetDefaultComment.sql" />
+    <Build Include="Functions\fnARGetDefaultCommentTable.sql" />
+    <Build Include="Functions\fnARGetDefaultDecimal.sql" />
+    <Build Include="Functions\fnARGetDefaultForexRate.sql" />
+    <Build Include="Functions\fnARGetInvalidInvoicesForInvoiceSplits.sql" />
+    <Build Include="Functions\fnARGetInvalidInvoicesForPosting.sql" />
+    <Build Include="Functions\fnARGetInvalidPaymentsForPosting.sql" />
+    <Build Include="Functions\fnARGetInventoryItemPricingDetails.sql" />
+    <Build Include="Functions\fnARGetInvoiceAmountMultiplier.sql" />
+    <Build Include="Functions\fnARGetInvoiceTypeAccount.sql" />
+    <Build Include="Functions\fnARGetItemPricingDetails.sql" />
+    <Build Include="Functions\fnARGetItemsForCosting.sql" />
+    <Build Include="Functions\fnARGetItemsForInTransitCosting.sql" />
+    <Build Include="Functions\fnARGetItemsForInTransitCostingForFinalInvoice.sql" />
+    <Build Include="Functions\fnARGetItemsForInTransitCostingForProvisionalReversal.sql" />
+    <Build Include="Functions\fnARGetItemsForStoragePosting.sql" />
+    <Build Include="Functions\fnARGetItemTermDiscount.sql" />
+    <Build Include="Functions\fnARGetItemTermDiscountExemption.sql" />
+    <Build Include="Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
+    <Build Include="Functions\fnARGetPaymentDetailsForPosting.sql" />
+    <Build Include="Functions\fnARGetRowsFromDelimitedValues.sql" />
+    <Build Include="Functions\fnARValidateInvoiceSourceId.sql" />
+    <Build Include="Functions\fnCalculateAverageCost.sql" />
+    <Build Include="Functions\fnCalculateCostBetweenUOM.sql" />
+    <Build Include="Functions\fnCalculateInterestToDate.sql" />
+    <Build Include="Functions\fnCalculateLotQty.sql" />
+    <Build Include="Functions\fnCalculateLotWeight.sql" />
+    <Build Include="Functions\fnCalculateQtyBetweenUOM.sql" />
+    <Build Include="Functions\fnCalculateReceiptUnitCost.sql" />
+    <Build Include="Functions\fnCalculateStockUnitQty.sql" />
+    <Build Include="Functions\fnCalculateUnitCost.sql" />
+    <Build Include="Functions\fnCalculateWeightUnitQty.sql" />
+    <Build Include="Functions\fnCFSplitString.sql" />
+    <Build Include="Functions\fnCMGetBankAccountMICR.sql" />
+    <Build Include="Functions\fnCTCalculateAmountBetweenCurrency.sql" />
+    <Build Include="Functions\fnCTConvertQtyToTargetItemUOM.sql" />
+    <Build Include="Functions\fnCTConvertQuantityToTargetCommodityUOM.sql" />
+    <Build Include="Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
+    <Build Include="Functions\fnCTGetAdditionalColumnForDetailView.sql" />
+    <Build Include="Functions\fnCTGetContractPrice.sql" />
+    <Build Include="Functions\fnCTGetContractStatuses.sql" />
+    <Build Include="Functions\fnCTGetCurrencyExchangeRate.sql" />
+    <Build Include="Functions\fnCTGetLastSettlementPrice.sql" />
+    <Build Include="Functions\fnCTGetPrepaidIds.sql" />
+    <Build Include="Functions\fnCTGetSequencePrice.sql" />
+    <Build Include="Functions\fnCTGetTranslatedExpression.sql" />
+    <Build Include="Functions\fnGetItemStockUOM.sql" />
+    <Build Include="Views\vyuLGInboundShipmentView.sql" />
+    <Build Include="Stored Procedures\uspAPCreateBillData.sql" />
+    <Build Include="Stored Procedures\uspAPCreatePaymentData.sql" />
+    <Build Include="Stored Procedures\uspAPDeletePatronageTaxes.sql" />
+    <Build Include="Stored Procedures\uspAPDeleteVoucher.sql" />
+    <Build Include="Stored Procedures\uspAPPostBill.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateVoucherTotal.sql" />
+    <Build Include="Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
+    <Build Include="Stored Procedures\uspARAddInventoryItemToInvoices.sql" />
+    <Build Include="Stored Procedures\uspARAddInvoicesTaxDetail.sql" />
+    <Build Include="Stored Procedures\uspARAddInvoiceTaxDetail.sql" />
+    <Build Include="Stored Procedures\uspARAddInvoiceToPayment.sql" />
+    <Build Include="Stored Procedures\uspARAddItemToInvoice.sql" />
+    <Build Include="Stored Procedures\uspARAddItemToInvoices.sql" />
+    <Build Include="Stored Procedures\uspARAddMiscItemToInvoice.sql" />
+    <Build Include="Stored Procedures\uspARAddMiscItemToInvoices.sql" />
+    <Build Include="Stored Procedures\uspARAddNonInventoryItemToInvoices.sql" />
+    <Build Include="Stored Procedures\uspARAddToInvoicesToPayments.sql" />
+    <Build Include="Stored Procedures\uspARAutoApplyPrepaids.sql" />
+    <Build Include="Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
+    <Build Include="Stored Procedures\uspARBatchPostCosting.sql" />
+    <Build Include="Stored Procedures\uspARCreateCustomerInvoice.sql" />
+    <Build Include="Stored Procedures\uspARCreateCustomerInvoices.sql" />
+    <Build Include="Stored Procedures\uspARCreateCustomerPayment.sql" />
+    <Build Include="Stored Procedures\uspARCreateCustomerPayments.sql" />
+    <Build Include="Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
+    <Build Include="Stored Procedures\uspARCreateOverPayment.sql" />
+    <Build Include="Stored Procedures\uspARCreatePrePayment.sql" />
+    <Build Include="Stored Procedures\uspARCreateRCVForCreditMemo.sql" />
+    <Build Include="Stored Procedures\uspARDeleteInvoice.sql" />
+    <Build Include="Stored Procedures\uspARDeleteOverPayment.sql" />
+    <Build Include="Stored Procedures\uspARDeletePrePayment.sql" />
+    <Build Include="Stored Procedures\uspARGenerateEntriesForAccrual.sql" />
+    <Build Include="Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
+    <Build Include="Stored Procedures\uspARGetDefaultComment.sql" />
+    <Build Include="Stored Procedures\uspARGetItemPrice.sql" />
+    <Build Include="Stored Procedures\uspARGetItemsFromInvoice.sql" />
+    <Build Include="Stored Procedures\uspARGetItemTaxes.sql" />
+    <Build Include="Stored Procedures\uspARInsertDefaultAccrual.sql" />
+    <Build Include="Stored Procedures\uspARInsertInvoiceIntegrationLog.sql" />
+    <Build Include="Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
+    <Build Include="Stored Procedures\uspARInsertPostResult.sql" />
+    <Build Include="Stored Procedures\uspARInsertRecurringInvoice.sql" />
+    <Build Include="Stored Procedures\uspARInsertRecurringSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspARInsertToInvoice.sql" />
+    <Build Include="Stored Procedures\uspARInsertTransactionDetail.sql" />
+    <Build Include="Stored Procedures\uspARInsertTransactionDetails.sql" />
+    <Build Include="Stored Procedures\uspARPostInvoice.sql" />
+    <Build Include="Stored Procedures\uspARPostInvoiceIntegrations.sql" />
+    <Build Include="Stored Procedures\uspARPostInvoiceNew.sql" />
+    <Build Include="Stored Procedures\uspARPostPayment.sql" />
+    <Build Include="Stored Procedures\uspARPostPaymentNew.sql" />
+    <Build Include="Stored Procedures\uspARProcessACHPayments.sql" />
+    <Build Include="Stored Procedures\uspARProcessInvoices.sql" />
+    <Build Include="Stored Procedures\uspARProcessInvoicesByBatch.sql" />
+    <Build Include="Stored Procedures\uspARProcessPaymentFromInvoice.sql" />
+    <Build Include="Stored Procedures\uspARProcessPayments.sql" />
+    <Build Include="Stored Procedures\uspARProcessSplitInvoice.sql" />
+    <Build Include="Stored Procedures\uspARProcessTaxDetailsForLineItem.sql" />
+    <Build Include="Stored Procedures\uspARProcessTaxDetailsForLineItems.sql" />
+    <Build Include="Stored Procedures\uspARReComputeInvoiceAmounts.sql" />
+    <Build Include="Stored Procedures\uspARReComputeInvoicesAmounts.sql" />
+    <Build Include="Stored Procedures\uspARReComputeInvoicesTaxes.sql" />
+    <Build Include="Stored Procedures\uspARReComputeInvoiceTaxes.sql" />
+    <Build Include="Stored Procedures\uspARReComputePaymentAmounts.sql" />
+    <Build Include="Stored Procedures\uspARSplitInvoice.sql" />
+    <Build Include="Stored Procedures\uspARUpdateCommitted.sql" />
+    <Build Include="Stored Procedures\uspARUpdateContractOnInvoice.sql" />
+    <Build Include="Stored Procedures\uspARUpdateCustomerBudget.sql" />
+    <Build Include="Stored Procedures\uspARUpdateCustomerInvoices.sql" />
+    <Build Include="Stored Procedures\uspARUpdateGrainOpenBalance.sql" />
+    <Build Include="Stored Procedures\uspARUpdateInboundShipmentOnInvoice.sql" />
+    <Build Include="Stored Procedures\uspARUpdateInboundShipmentOnInvoices.sql" />
+    <Build Include="Stored Procedures\uspARUpdateInvoiceAccruals.sql" />
+    <Build Include="Stored Procedures\uspARUpdateInvoiceIntegrations.sql" />
+    <Build Include="Stored Procedures\uspARUpdateInvoicesIntegrations.sql" />
+    <Build Include="Stored Procedures\uspARUpdateInvoiceTransactionHistory.sql" />
+    <Build Include="Stored Procedures\uspARUpdateItemComponent.sql" />
+    <Build Include="Stored Procedures\uspARUpdateLineItemsCommitted.sql" />
+    <Build Include="Stored Procedures\uspARUpdateLineItemsComponent.sql" />
+    <Build Include="Stored Procedures\uspARUpdateLineItemsReservedStock.sql" />
+    <Build Include="Stored Procedures\uspARUpdatePricingHistory.sql" />
+    <Build Include="Stored Procedures\uspARUpdateProvisionalOnStandardInvoice.sql" />
+    <Build Include="Stored Procedures\uspARUpdateProvisionalOnStandardInvoices.sql" />
+    <Build Include="Stored Procedures\uspARUpdateReservedStock.sql" />
+    <Build Include="Stored Procedures\uspARUpdateReturnedInvoice.sql" />
+    <Build Include="Stored Procedures\uspARUpdateSOStatusFromInvoices.sql" />
+    <Build Include="Stored Procedures\uspARUpdateTransactionAccounts.sql" />
+    <Build Include="Stored Procedures\uspARUpdateTransactionsPricingHistory.sql" />
+    <Build Include="Stored Procedures\uspCMBankTransactionReversal.sql" />
+    <Build Include="Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
+    <Build Include="Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
+    <Build Include="Stored Procedures\uspCMPostBankDeposit.sql" />
+    <Build Include="Stored Procedures\uspCMPostBankTransaction.sql" />
+    <Build Include="Stored Procedures\uspCMPostRecap.sql" />
+    <Build Include="Stored Procedures\uspCMRefreshUndepositedFundsFromOrigin.sql" />
+    <Build Include="Stored Procedures\uspCMReverseGLEntries.sql" />
+    <Build Include="Stored Procedures\uspCTGetTableDataInXML.sql" />
+    <Build Include="Stored Procedures\uspCTInvoicePosted.sql" />
+    <Build Include="Stored Procedures\uspCTReceived.sql" />
+    <Build Include="Stored Procedures\uspCTShipped.sql" />
+    <Build Include="Stored Procedures\uspCTUpdationFromTicketDistribution.sql" />
+    <Build Include="Stored Procedures\uspEMConvertCustomerToVendor.sql" />
+    <Build Include="Stored Procedures\uspGLBookEntries.sql" />
+    <Build Include="Stored Procedures\uspGLGetNewID.sql" />
+    <Build Include="Stored Procedures\uspGLInsertReverseGLEntry.sql" />
+    <Build Include="Stored Procedures\uspGLPostJournal.sql" />
+    <Build Include="Stored Procedures\uspGLPostRecap.sql" />
+    <Build Include="Stored Procedures\uspGLReverseGLEntries.sql" />
+    <Build Include="Stored Procedures\uspGLValidateGLEntries.sql" />
+    <Build Include="Stored Procedures\uspGRDeleteStorageHistory.sql" />
+    <Build Include="Stored Procedures\uspGRReverseOnReceiptDelete.sql" />
+    <Build Include="Stored Procedures\uspGRReverseTicketOpenBalance.sql" />
+    <Build Include="Stored Procedures\uspGRShipped.sql" />
+    <Build Include="Stored Procedures\uspGRUnPostSettleStorage.sql" />
+    <Build Include="Stored Procedures\uspICAddInventoryTransfer.sql" />
+    <Build Include="Stored Procedures\uspICAddItemReceipt.sql" />
+    <Build Include="Stored Procedures\uspICAddItemShipment.sql" />
+    <Build Include="Stored Procedures\uspICAfterPostInventoryShipmentIntegration.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndCost.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndUnits.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByCost.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByStockUnit.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByUnits.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndPrice.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndStockUnit.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByContractAndUnits.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByPrice.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByStockUnit.sql" />
+    <Build Include="Stored Procedures\uspICAllocateInventoryShipmentOtherChargesByUnits.sql" />
+    <Build Include="Stored Procedures\uspICBeforePostInventoryShipmentIntegration.sql" />
+    <Build Include="Stored Procedures\uspICCalculateInventoryReceiptOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICCalculateInventoryReceiptOtherChargesTaxes.sql" />
+    <Build Include="Stored Procedures\uspICCalculateInventoryReceiptSurchargeOnOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICCalculateInventoryShipmentOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICCalculateInventoryShipmentSurchargeOnOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICCalculateOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICCalculateShipmentOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICCreateGLEntries.sql" />
+    <Build Include="Stored Procedures\uspICCreateGLEntriesForInTransitCosting.sql" />
+    <Build Include="Stored Procedures\uspICCreateGLEntriesOnCostAdjustment.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentChangeLotWeight.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentItemChange.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentOpeningInventory.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentQtyChange.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentUOMChange.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspICCreateLotNumberOnInventoryTransfer.sql" />
+    <Build Include="Stored Procedures\uspICCreateStockReservation.sql" />
+    <Build Include="Stored Procedures\uspICCreateUpdateLotNumber.sql" />
+    <Build Include="Stored Procedures\uspICDeleteInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspICDeleteInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspICDeleteInventoryTransfer.sql" />
+    <Build Include="Stored Procedures\uspICGetItemsForItemReceipt.sql" />
+    <Build Include="Stored Procedures\uspICGetItemsFromItemShipment.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseInTransitDirectQty.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseInTransitInboundQty.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseInTransitOutBoundQty.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseOnOrderQty.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseReservedQty.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInActualCost.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInFIFO.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInFIFOStorage.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInLIFO.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInLIFOStorage.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInLot.sql" />
+    <Build Include="Stored Procedures\uspICIncreaseStockInLotStorage.sql" />
+    <Build Include="Stored Procedures\uspICInventoryAdjustment_CreatePostItemChange.sql" />
+    <Build Include="Stored Procedures\uspICInventoryAdjustment_CreatePostOwnerChange.sql" />
+    <Build Include="Stored Procedures\uspICPostActualCost.sql" />
+    <Build Include="Stored Procedures\uspICPostActualCostInTransit.sql" />
+    <Build Include="Stored Procedures\uspICPostAverageCosting.sql" />
+    <Build Include="Stored Procedures\uspICPostCategory.sql" />
+    <Build Include="Stored Procedures\uspICPostCosting.sql" />
+    <Build Include="Stored Procedures\uspICPostFIFO.sql" />
+    <Build Include="Stored Procedures\uspICPostFIFOStorage.sql" />
+    <Build Include="Stored Procedures\uspICPostInTransitCosting.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustment.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentChangeLotWeight.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentLotMerge.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentLotMove.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentLotOwnerChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentLotStatusChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentOpeningInventory.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentQtyChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentSplitLotChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryAdjustmentUOMChange.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryLotTransaction.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryLotTransactionStorage.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryReceiptIntegrations.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryReceiptTaxes.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryShipmentOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryShipmentTaxes.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryTransaction.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryTransactionStorage.sql" />
+    <Build Include="Stored Procedures\uspICPostInventoryTransfer.sql" />
+    <Build Include="Stored Procedures\uspICPostLIFO.sql" />
+    <Build Include="Stored Procedures\uspICPostLIFOStorage.sql" />
+    <Build Include="Stored Procedures\uspICPostLot.sql" />
+    <Build Include="Stored Procedures\uspICPostLotInTransit.sql" />
+    <Build Include="Stored Procedures\uspICPostLotStorage.sql" />
+    <Build Include="Stored Procedures\uspICPostStockQuantity.sql" />
+    <Build Include="Stored Procedures\uspICPostStockReservation.sql" />
+    <Build Include="Stored Procedures\uspICPostStorageQuantity.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInActualCost.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInFIFO.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInFIFOStorage.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInLIFO.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInLIFOStorage.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInLot.sql" />
+    <Build Include="Stored Procedures\uspICReduceStockInLotStorage.sql" />
+    <Build Include="Stored Procedures\uspICUnpostActualCostIn.sql" />
+    <Build Include="Stored Procedures\uspICUnpostActualCostOut.sql" />
+    <Build Include="Stored Procedures\uspICUnpostAutoNegative.sql" />
+    <Build Include="Stored Procedures\uspICUnpostCategory.sql" />
+    <Build Include="Stored Procedures\uspICUnpostCosting.sql" />
+    <Build Include="Stored Procedures\uspICUnpostFIFOIn.sql" />
+    <Build Include="Stored Procedures\uspICUnpostFIFOInFromStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnpostFIFOOut.sql" />
+    <Build Include="Stored Procedures\uspICUnpostFIFOOutFromStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnpostInventoryReceiptTaxes.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLIFOIn.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLIFOInFromStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLIFOOut.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLIFOOutFromStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLotIn.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLotInFromStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLotOut.sql" />
+    <Build Include="Stored Procedures\uspICUnpostLotOutFromStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnpostStorage2.sql" />
+    <Build Include="Stored Procedures\uspICUnshipInventoryItem.sql" />
+    <Build Include="Stored Procedures\uspICUpdateItemAccountForCStore.sql" />
+    <Build Include="Stored Procedures\uspICUpdateItemForCStore.sql" />
+    <Build Include="Stored Procedures\uspICUpdateItemLocationForCStore.sql" />
+    <Build Include="Stored Procedures\uspICUpdateItemPromotionalPricingForCStore.sql" />
+    <Build Include="Stored Procedures\uspICValidateCostingOnPost.sql" />
+    <Build Include="Stored Procedures\uspICValidateCostingOnPostInTransit.sql" />
+    <Build Include="Stored Procedures\uspICValidateCostingOnPostStorage.sql" />
+    <Build Include="Stored Procedures\uspICValidateCostingOnUnpost.sql" />
+    <Build Include="Stored Procedures\uspICValidateCostingOnUnpostStorage.sql" />
+    <Build Include="Stored Procedures\uspICValidateCreateGLEntries.sql" />
+    <Build Include="Stored Procedures\uspICValidateInTransitCostingOnUnpost.sql" />
+    <Build Include="Stored Procedures\uspICValidateProcessToInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
+    <Build Include="Stored Procedures\uspICPostStorage2.sql" />
+    <Build Include="Stored Procedures\uspICValidateReceiptItemLocations.sql" />
+    <Build Include="Stored Procedures\uspICValidateStockReserves.sql" />
+    <Build Include="Stored Procedures\uspLGAddInboundShipmentToInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspLGReceived.sql" />
+    <Build Include="Stored Procedures\uspLGShipped.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateLoadDetails.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateLoadShipmentOnInvoicePost.sql" />
+    <Build Include="Stored Procedures\uspMFAdjustInventory.sql" />
+    <Build Include="Stored Procedures\uspMFAutoBlend.sql" />
+    <Build Include="Stored Procedures\uspMFCreateUpdateParentLotNumber.sql" />
+    <Build Include="Stored Procedures\uspMFGeneratePatternId.sql" />
+    <Build Include="Stored Procedures\uspMFLotAdjustQty.sql" />
+    <Build Include="Stored Procedures\uspMFReverseAutoBlend.sql" />
+    <Build Include="Stored Procedures\uspMFUnReservePickListBySalesOrder.sql" />
+    <Build Include="Stored Procedures\uspPOReceived.sql" />
+    <Build Include="Stored Procedures\uspPRProcessCommissionsToPayGroup.sql" />
+    <Build Include="Stored Procedures\uspQMInspectionGetResult.sql" />
+    <Build Include="Stored Procedures\uspQMSampleCreateForScaleTicket.sql" />
+    <Build Include="Stored Procedures\uspSCDeliverySheetReceived.sql" />
+    <Build Include="Stored Procedures\uspSCReceived.sql" />
+    <Build Include="Stored Procedures\uspSCShipped.sql" />
+    <Build Include="Stored Procedures\uspSMAuditLog.sql" />
+    <Build Include="Stored Procedures\uspSMComputeItemTaxes.sql" />
+    <Build Include="Stored Procedures\uspSMGenerateDynamicXML.sql" />
+    <Build Include="Stored Procedures\uspSMGetItemTaxes.sql" />
+    <Build Include="Stored Procedures\uspSMGetStartingNumber.sql" />
+    <Build Include="Stored Procedures\uspSMInserAuditLogs.sql" />
+    <Build Include="Stored Procedures\uspSMTransactionCheckIfRequiredApproval.sql" />
+    <Build Include="Stored Procedures\uspSOGetItemsFromSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspSOInsertTransactionDetail.sql" />
+    <Build Include="Stored Procedures\uspSOProcessToInvoice.sql" />
+    <Build Include="Stored Procedures\uspSOShipped.sql" />
+    <Build Include="Stored Procedures\uspSOUpdateCommitted.sql" />
+    <Build Include="Stored Procedures\uspSOUpdateContractOnSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspSOUpdateItemComponent.sql" />
+    <Build Include="Stored Procedures\uspSOUpdateOrderIntegrations.sql" />
+    <Build Include="Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
+    <Build Include="Stored Procedures\uspTMSyncInvoiceToDeliveryHistory.sql" />
+    <Build Include="Stored Procedures\uspTMUnSyncInvoiceFromDeliveryHistory.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateRouteSequence.sql" />
+    <Build Include="Stored Procedures\uspTRReceived.sql" />
+    <Build Include="Stored Procedures\uspTRShipped.sql" />
+    <Build Include="Stored Procedures\uspWHCreateOutboundOrder.sql" />
+    <Build Include="Stored Procedures\uspWHCreateSKUByLot.sql" />
+    <Build Include="Stored Procedures\uspWHDeleteSKUForWarehouse.sql" />
+    <Build Include="Stored Procedures\uspWHSplitSKUForOrder.sql" />
+    <Build Include="Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspICCreateReversalGLEntries.sql" />
+    <Build Include="Functions\fnCTConvertQtyToTargetCommodityUOM.sql" />
+    <Build Include="Stored Procedures\uspICRaiseError.sql" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+﻿:r .\PreDeployment\Remove_Accounts_With_Deleted_Category.sql
+:r .\PreDeployment\Update_Item_Commodity_Origin_Keys.sql
+:r .\PreDeployment\CleanInvalidWeightVolumeGrossUOM.sql
+:r .\PreDeployment\CleanUPCCodes.sql
+:r .\PreDeployment\DeleteObsoleteSP.sql
+:r .\PreDeployment\DeleteObsoleteColumns.sql
+:r .\PreDeployment\RenameColumns.sql
+:r .\PreDeployment\Remove_Duplicate_Item_Owners.sql 
+:r .\PreDeployment\CreateTempBasketColumn.sql 

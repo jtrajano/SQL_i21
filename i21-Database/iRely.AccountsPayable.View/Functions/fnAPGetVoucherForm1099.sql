@@ -1,0 +1,13 @@
+﻿CREATE FUNCTION [dbo].[fnAPGetVoucherForm1099]()
+RETURNS @tblResult TABLE (intId INT , strText NVARCHAR(50) )
+AS
+BEGIN
+	INSERT INTO @tblResult
+			 SELECT 0 ,  'None' UNION
+			 SELECT 1 ,  '1099 MISC' UNION
+			 SELECT 2 ,  '1099 INT' UNION
+			 SELECT 3 ,  '1099 B' UNION
+			 SELECT 4 ,  '1099 PATR' UNION
+			 SELECT 5 ,  '1099 DIV'
+	RETURN;
+END

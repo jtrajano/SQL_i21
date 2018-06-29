@@ -1,0 +1,403 @@
+CREATE VIEW vyuLGLoadOpenContracts
+AS
+SELECT CD.intContractDetailId
+	,CD.intContractHeaderId
+	,CD.intContractSeq
+	,CD.intItemId
+	,Item.strDescription strItemDescription
+	,Item.strItemNo
+	,CD.dblQuantity AS dblDetailQuantity
+	,CD.intUnitMeasureId
+	,CD.intItemUOMId
+	,U1.strUnitMeasure AS strUnitMeasure
+	,CD.intCompanyLocationId
+	,CL.strLocationName AS strLocationName
+	,ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) AS dblUnLoadedQuantity
+	,CH.intContractTypeId intPurchaseSale
+	,CH.intEntityId
+	,CH.strContractNumber
+	,CH.dtmContractDate
+	,E.strName strEntityName
+	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) AS strStartDate
+	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
+	,CD.dtmStartDate
+	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
+	,E.intDefaultLocationId
+	,ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
+	,CH.strCustomerContract
+	,ISNULL(CD.dblBalance, 0) AS dblBalance
+	,CASE WHEN CP.ysnValidateExternalPONo = 1 AND ISNULL(CD.strERPPONumber,'')= ''
+		THEN CAST(0 AS BIT)
+	ELSE
+		CASE 
+			WHEN (
+					(
+						CAST(CASE 
+								WHEN CD.intContractStatusId IN (1,4)
+									THEN 1
+								ELSE 0
+								END AS BIT) = 1
+						)
+					AND (
+						(ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) > 0)
+						OR (CH.ysnUnlimitedQuantity = 1)
+						)
+					)
+				THEN CAST(1 AS BIT)
+			ELSE CAST(0 AS BIT)
+			END 
+		END AS ysnAllowedToShow
+	,CH.ysnUnlimitedQuantity
+	,CH.ysnLoad
+	,CD.dblQuantityPerLoad
+	,CD.intNoOfLoad
+	,Item.strType AS strItemType
+	,CH.intPositionId
+	,CD.intLoadingPortId
+	,CD.intDestinationPortId
+	,CD.intDestinationCityId
+	,LoadingPort.strCity AS strOriginPort
+	,DestPort.strCity AS strDestinationPort
+	,DestCity.strCity AS strDestinationCity
+	,CD.strPackingDescription
+	,CD.intShippingLineId AS intShippingLineEntityId
+	,CD.intNumberOfContainers
+	,CD.intContainerTypeId
+	,CD.strVessel
+	,CH.intContractTypeId
+	,S.strSampleStatus
+	,S.strSampleNumber
+	,S.strContainerNumber
+	,S.strSampleTypeName
+	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
+	,CASE 
+		WHEN S.intCompanyLocationSubLocationId IS NULL
+			THEN CD.intSubLocationId
+		ELSE S.intCompanyLocationSubLocationId
+		END AS intCompanyLocationSubLocationId
+	,CASE 
+		WHEN ISNULL(S.strSubLocationName, '') = ''
+			THEN CLSL.strSubLocationName
+		ELSE S.strSubLocationName
+		END AS strSubLocationName
+	,S.dblRepresentingQty AS dblContainerQty
+	,SL.strName AS strStorageLocationName
+	,CD.intStorageLocationId
+	,intShipmentType = 1
+	,CD.strERPPONumber
+	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
+	,CO.strCountry AS strOrigin
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
+	,AD.dblSeqPrice
+	,PT.strPricingType
+	,AD.intSeqCurrencyId 
+	,AD.strSeqCurrency
+	,AD.intSeqPriceUOMId
+	,AD.strSeqPriceUOM
+	,PCU.ysnSubCurrency
+	,CD.intRateTypeId
+	,CD.dblRate
+	,CD.intInvoiceCurrencyId
+	,FXC.strCurrency AS strInvoiceCurrency
+	,CET.strCurrencyExchangeRateType
+FROM tblCTContractHeader CH
+JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
+LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = CD.intInvoiceCurrencyId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
+LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
+LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CD.intRateTypeId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
+LEFT JOIN (
+	SELECT *
+	FROM (
+		SELECT ROW_NUMBER() OVER (
+				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
+				) intRowNum
+			,S.intContractDetailId
+			,S.strSampleNumber
+			,S.strContainerNumber
+			,ST.strSampleTypeName
+			,SS.strStatus AS strSampleStatus
+			,S.dtmTestingStartDate
+			,S.dtmTestingEndDate
+			,S.intCompanyLocationSubLocationId
+			,CLSL.strSubLocationName
+			,S.dblRepresentingQty
+		FROM tblQMSample S
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+		WHERE S.intContractDetailId IS NOT NULL
+		) t
+	WHERE intRowNum = 1
+	) S ON S.intContractDetailId = CD.intContractDetailId
+CROSS APPLY tblLGCompanyPreference CP
+
+UNION
+
+SELECT CD.intContractDetailId
+	,CD.intContractHeaderId
+	,CD.intContractSeq
+	,CD.intItemId
+	,Item.strDescription strItemDescription
+	,Item.strItemNo
+	,CD.dblQuantity AS dblDetailQuantity
+	,CD.intUnitMeasureId
+	,CD.intItemUOMId
+	,U1.strUnitMeasure AS strUnitMeasure
+	,CD.intCompanyLocationId
+	,CL.strLocationName AS strLocationName
+	,ISNULL(CD.dblQuantity, 0) - (CASE WHEN ISNULL(CD.dblShippingInstructionQty,0)<=0 THEN 0 ELSE ISNULL(CD.dblShippingInstructionQty,0) END) AS dblUnLoadedQuantity
+	,CH.intContractTypeId intPurchaseSale
+	,CH.intEntityId
+	,CH.strContractNumber
+	,CH.dtmContractDate
+	,E.strName strEntityName
+	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) AS strStartDate
+	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) AS strEndDate
+	,CD.dtmStartDate
+	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
+	,E.intDefaultLocationId
+	,ISNULL(CD.dblShippingInstructionQty, 0) AS dblScheduleQty
+	,CH.strCustomerContract
+	,ISNULL(CD.dblBalance, 0) AS dblBalance
+	,CASE WHEN CP.ysnValidateExternalPONo = 1 AND ISNULL(CD.strERPPONumber,'')= ''
+		THEN CAST(0 AS BIT)
+		ELSE
+			CASE 
+				WHEN (
+						(
+							CAST(CASE 
+									WHEN CD.intContractStatusId IN (1,4)
+										THEN 1
+									ELSE 0
+									END AS BIT) = 1
+							)
+						AND (
+							(
+								ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblShippingInstructionQty, 0) > 0
+								)
+							OR (CH.ysnUnlimitedQuantity = 1)
+							)
+						)
+					THEN CAST(1 AS BIT)
+				ELSE CAST(0 AS BIT)
+				END 
+			END AS ysnAllowedToShow
+	,CH.ysnUnlimitedQuantity
+	,CH.ysnLoad
+	,CD.dblQuantityPerLoad
+	,CD.intNoOfLoad
+	,Item.strType AS strItemType
+	,CH.intPositionId
+	,CD.intLoadingPortId
+	,CD.intDestinationPortId
+	,CD.intDestinationCityId
+	,LoadingPort.strCity AS strOriginPort
+	,DestPort.strCity AS strDestinationPort
+	,DestCity.strCity AS strDestinationCity
+	,CD.strPackingDescription
+	,CD.intShippingLineId AS intShippingLineEntityId
+	,CD.intNumberOfContainers
+	,CD.intContainerTypeId
+	,CD.strVessel
+	,CH.intContractTypeId
+	,S.strSampleStatus
+	,S.strSampleNumber
+	,S.strContainerNumber
+	,S.strSampleTypeName
+	,CONVERT(NVARCHAR(100), S.dtmTestingStartDate, 101) AS strTestingStartDate
+	,CONVERT(NVARCHAR(100), S.dtmTestingEndDate, 101) AS strTestingEndDate
+	,CASE 
+		WHEN S.intCompanyLocationSubLocationId IS NULL
+			THEN CD.intSubLocationId
+		ELSE S.intCompanyLocationSubLocationId
+		END AS intCompanyLocationSubLocationId
+	,CASE 
+		WHEN ISNULL(S.strSubLocationName, '') = ''
+			THEN CLSL.strSubLocationName
+		ELSE S.strSubLocationName
+		END AS strSubLocationName
+	,S.dblRepresentingQty AS dblContainerQty
+	,SL.strName AS strStorageLocationName
+	,CD.intStorageLocationId
+	,intShipmentType = 2
+	,CD.strERPPONumber
+	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
+	,CO.strCountry AS strOrigin
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
+	,AD.dblSeqPrice
+	,PT.strPricingType
+	,AD.intSeqCurrencyId 
+	,AD.strSeqCurrency
+	,AD.intSeqPriceUOMId
+	,AD.strSeqPriceUOM
+	,PCU.ysnSubCurrency
+	,CD.intRateTypeId
+	,CD.dblRate
+	,CD.intInvoiceCurrencyId
+	,FXC.strCurrency AS strInvoiceCurrency
+	,CET.strCurrencyExchangeRateType
+FROM tblCTContractHeader CH
+JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN tblICItem Item ON Item.intItemId = CD.intItemId
+JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
+LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = CD.intInvoiceCurrencyId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
+LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
+LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
+	AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CD.intRateTypeId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
+		CASE 
+			WHEN ISNULL(ICI.intCountryId, 0) = 0
+				THEN ISNULL(CA.intCountryID, 0)
+			ELSE ICI.intCountryId
+			END
+		)
+LEFT JOIN (
+	SELECT *
+	FROM (
+		SELECT ROW_NUMBER() OVER (
+				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
+				) intRowNum
+			,S.intContractDetailId
+			,S.strSampleNumber
+			,S.strContainerNumber
+			,ST.strSampleTypeName
+			,SS.strStatus AS strSampleStatus
+			,S.dtmTestingStartDate
+			,S.dtmTestingEndDate
+			,S.intCompanyLocationSubLocationId
+			,CLSL.strSubLocationName
+			,S.dblRepresentingQty
+		FROM tblQMSample S
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+		WHERE S.intContractDetailId IS NOT NULL
+		) t
+	WHERE intRowNum = 1
+	) S ON S.intContractDetailId = CD.intContractDetailId
+CROSS APPLY tblLGCompanyPreference CP
+GROUP BY CD.intContractDetailId
+	,CD.intContractHeaderId
+	,CD.intContractSeq
+	,CD.intItemId
+	,Item.strDescription
+	,Item.strItemNo
+	,CD.dblQuantity
+	,CD.intUnitMeasureId
+	,CD.intItemUOMId
+	,U1.strUnitMeasure
+	,CD.intCompanyLocationId
+	,CL.strLocationName
+	,CD.dblBalance
+	,CD.dblScheduleQty
+	,CH.intContractTypeId
+	,CH.intEntityId
+	,CH.strContractNumber
+	,CH.dtmContractDate
+	,E.strName
+	,CD.dtmStartDate
+	,CD.dtmEndDate
+	,CD.dtmPlannedAvailabilityDate
+	,E.intDefaultLocationId
+	,CH.strCustomerContract
+	,CD.intContractStatusId
+	,CH.ysnUnlimitedQuantity
+	,CH.ysnLoad
+	,CD.dblQuantityPerLoad
+	,CD.intNoOfLoad
+	,Item.strType
+	,CH.intPositionId
+	,CD.intLoadingPortId
+	,CD.intDestinationPortId
+	,CD.intDestinationCityId
+	,LoadingPort.strCity
+	,DestCity.strCity
+	,DestPort.strCity
+	,CD.strPackingDescription
+	,CD.intShippingLineId
+	,CD.intNumberOfContainers
+	,CD.intContainerTypeId
+	,CD.strVessel
+	,S.strSampleStatus
+	,S.strSampleNumber
+	,S.strContainerNumber
+	,S.strSampleTypeName
+	,S.dtmTestingStartDate
+	,S.dtmTestingEndDate
+	,S.intCompanyLocationSubLocationId
+	,S.strSubLocationName
+	,S.dblRepresentingQty
+	,CD.strERPPONumber
+	,ysnValidateExternalPONo
+	,CD.intSubLocationId
+	,CLSL.strSubLocationName
+	,SL.strName
+	,CD.intStorageLocationId
+	,WG.ysnSample
+	,CD.dblShippingInstructionQty
+	,CO.strCountry
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
+	,AD.dblSeqPrice
+	,PT.strPricingType
+	,AD.intSeqCurrencyId 
+	,AD.strSeqCurrency
+	,AD.intSeqPriceUOMId
+	,AD.strSeqPriceUOM
+	,PCU.ysnSubCurrency
+	,CD.intRateTypeId
+	,CD.dblRate
+	,CET.strCurrencyExchangeRateType
+	,CD.intInvoiceCurrencyId
+	,FXC.strCurrency

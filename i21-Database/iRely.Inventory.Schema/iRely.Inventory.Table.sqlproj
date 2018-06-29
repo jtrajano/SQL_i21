@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Inventory.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{674ec5ea-c7dd-4bf4-a2a5-8728d342f876}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Inventory.Schema</RootNamespace>
+    <AssemblyName>iRely.Inventory.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblICBackup.sql" />
+    <Build Include="tblICBackupDetailInventoryTransaction.sql" />
+    <Build Include="tblICBackupDetailInventoryTransactionStorage.sql" />
+    <Build Include="tblICBackupDetailLot.sql" />
+    <Build Include="tblICBackupDetailTransactionDetailLog.sql" />
+    <Build Include="tblICBatchInventoryTransaction.sql" />
+    <Build Include="tblICBuildAssembly.sql" />
+    <Build Include="tblICBuildAssemblyDetail.sql" />
+    <Build Include="tblICCatalog.sql" />
+    <Build Include="tblICCategoryAccount.sql" />
+    <Build Include="tblICCategoryLocation.sql" />
+    <Build Include="tblICCategoryPricing.sql" />
+    <Build Include="tblICCategoryTax.sql" />
+    <Build Include="tblICCategoryVendor.sql" />
+    <Build Include="tblICCertificationCommodity.sql" />
+    <Build Include="tblICCommodityAccount.sql" />
+    <Build Include="tblICCommodityGroup.sql" />
+    <Build Include="tblICCommodityProductLine.sql" />
+    <Build Include="tblICCompanyPreference.sql" />
+    <Build Include="tblICCostingMethod.sql" />
+    <Build Include="tblICEdiMap.sql" />
+    <Build Include="tblICEdiMapObject.sql" />
+    <Build Include="tblICEdiMapTemplate.sql" />
+    <Build Include="tblICEdiMapTemplateSegment.sql" />
+    <Build Include="tblICEdiMapTemplateSegmentDetail.sql" />
+    <Build Include="tblICEdiPricebook.sql" />
+    <Build Include="tblICEquipmentLength.sql" />
+    <Build Include="tblICFixLog.sql" />
+    <Build Include="tblICFOBPoint.sql" />
+    <Build Include="tblICFuelTaxClass.sql" />
+    <Build Include="tblICFuelTaxClassProductCode.sql" />
+    <Build Include="tblICFuelType.sql" />
+    <Build Include="tblICImportLog.sql" />
+    <Build Include="tblICImportLogDetail.sql" />
+    <Build Include="tblICInventoryActualCost.sql" />
+    <Build Include="tblICInventoryActualCostAdjustmentLog.sql" />
+    <Build Include="tblICInventoryActualCostOut.sql" />
+    <Build Include="tblICInventoryAdjustment.sql" />
+    <Build Include="tblICInventoryAdjustmentDetail.sql" />
+    <Build Include="tblICInventoryCostAdjustmentType.sql" />
+    <Build Include="tblICInventoryCount.sql" />
+    <Build Include="tblICInventoryCountDetail.sql" />
+    <Build Include="tblICInventoryFIFO.sql" />
+    <Build Include="tblICInventoryFIFOCostAdjustmentLog.sql" />
+    <Build Include="tblICInventoryFIFOOut.sql" />
+    <Build Include="tblICInventoryFIFORevalueOutStock.sql" />
+    <Build Include="tblICInventoryFIFOStorage.sql" />
+    <Build Include="tblICInventoryFIFOStorageOut.sql" />
+    <Build Include="tblICInventoryGLAccountUsedOnPostLog.sql" />
+    <Build Include="tblICInventoryLIFO.sql" />
+    <Build Include="tblICInventoryLIFOCostAdjustmentLog.sql" />
+    <Build Include="tblICInventoryLIFOOut.sql" />
+    <Build Include="tblICInventoryLIFOStorage.sql" />
+    <Build Include="tblICInventoryLIFOStorageOut.sql" />
+    <Build Include="tblICInventoryLot.sql" />
+    <Build Include="tblICInventoryLotCostAdjustmentLog.sql" />
+    <Build Include="tblICInventoryLotOut.sql" />
+    <Build Include="tblICInventoryLotStorage.sql" />
+    <Build Include="tblICInventoryLotStorageOut.sql" />
+    <Build Include="tblICInventoryLotTransaction.sql" />
+    <Build Include="tblICInventoryLotTransactionStorage.sql" />
+    <Build Include="tblICInventoryReceiptChargePerItem.sql" />
+    <Build Include="tblICInventoryReceiptChargeTax.sql" />
+    <Build Include="tblICInventoryReceiptInspection.sql" />
+    <Build Include="tblICInventoryReceiptItemAllocatedCharge.sql" />
+    <Build Include="tblICInventoryReceiptItemLot.sql" />
+    <Build Include="tblICInventoryReceiptItemTax.sql" />
+    <Build Include="tblICInventoryReturned.sql" />
+    <Build Include="tblICInventoryShipmentChargePerItem.sql" />
+    <Build Include="tblICInventoryShipmentChargeTax.sql" />
+    <Build Include="tblICInventoryShipmentInspection.sql" />
+    <Build Include="tblICInventoryShipmentItemAllocatedCharge.sql" />
+    <Build Include="tblICInventoryShipmentItemLot.sql" />
+    <Build Include="tblICInventoryTransaction.sql" />
+    <Build Include="tblICInventoryTransactionPostingIntegration.sql" />
+    <Build Include="tblICInventoryTransactionStorage.sql" />
+    <Build Include="tblICInventoryTransactionWithNoCounterAccountCategory.sql" />
+    <Build Include="tblICInventoryTransferDetail.sql" />
+    <Build Include="tblICItemAccount.sql" />
+    <Build Include="tblICItemAddOn.sql" />
+    <Build Include="tblICItemAssembly.sql" />
+    <Build Include="tblICItemBundle.sql" />
+    <Build Include="tblICItemCertification.sql" />
+    <Build Include="tblICItemCommodityCost.sql" />
+    <Build Include="tblICItemContractDocument.sql" />
+    <Build Include="tblICItemCustomerXref.sql" />
+    <Build Include="tblICItemFactory.sql" />
+    <Build Include="tblICItemFactoryManufacturingCell.sql" />
+    <Build Include="tblICItemKit.sql" />
+    <Build Include="tblICItemKitDetail.sql" />
+    <Build Include="tblICItemLicense.sql" />
+    <Build Include="tblICItemManufacturingUOM.sql" />
+    <Build Include="tblICItemMotorFuelTax.sql" />
+    <Build Include="tblICItemNote.sql" />
+    <Build Include="tblICItemPOSCategory.sql" />
+    <Build Include="tblICItemPOSSLA.sql" />
+    <Build Include="tblICItemPricing.sql" />
+    <Build Include="tblICItemPricingLevel.sql" />
+    <Build Include="tblICItemSpecialPricing.sql" />
+    <Build Include="tblICItemStock.sql" />
+    <Build Include="tblICItemStockDetail.sql" />
+    <Build Include="tblICItemStockPath.sql" />
+    <Build Include="tblICItemStockType.sql" />
+    <Build Include="tblICItemStockUOM.sql" />
+    <Build Include="tblICItemSubLocation.sql" />
+    <Build Include="tblICItemSubstitute.sql" />
+    <Build Include="tblICItemSubstitution.sql" />
+    <Build Include="tblICItemSubstitutionDetail.sql" />
+    <Build Include="tblICItemUPC.sql" />
+    <Build Include="tblICItemVendorXref.sql" />
+    <Build Include="tblICLineOfBusiness.sql" />
+    <Build Include="tblICLockedSubLocation.sql" />
+    <Build Include="tblICMaterialNMFC.sql" />
+    <Build Include="tblICMeasurement.sql" />
+    <Build Include="tblICPostResult.sql" />
+    <Build Include="tblICReadingPoint.sql" />
+    <Build Include="tblICReasonCode.sql" />
+    <Build Include="tblICReasonCodeWorkCenter.sql" />
+    <Build Include="tblICRebuildValuationGLSnapshot.sql" />
+    <Build Include="tblICRetailValuation.sql" />
+    <Build Include="tblICRinFeedStock.sql" />
+    <Build Include="tblICRinFeedStockUOM.sql" />
+    <Build Include="tblICRinFuel.sql" />
+    <Build Include="tblICRinProcess.sql" />
+    <Build Include="tblICSearchReceiptVoucher.sql" />
+    <Build Include="tblICSearchShipmentInvoice.sql" />
+    <Build Include="tblICSku.sql" />
+    <Build Include="tblICStockReservation.sql" />
+    <Build Include="tblICStorageLocationCategory.sql" />
+    <Build Include="tblICStorageLocationContainer.sql" />
+    <Build Include="tblICStorageLocationMeasurement.sql" />
+    <Build Include="tblICStorageLocationSku.sql" />
+    <Build Include="tblICStorageMeasurementReading.sql" />
+    <Build Include="tblICStorageMeasurementReadingConversion.sql" />
+    <Build Include="tblICTransactionDetailLog.sql" />
+    <Build Include="tblICUnitMeasureConversion.sql" />
+    <Build Include="tblLockedStorageLocation.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="iRely.Inventory.Table.refactorlog" />
+  </ItemGroup>
+</Project>

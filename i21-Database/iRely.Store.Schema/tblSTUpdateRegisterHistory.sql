@@ -1,0 +1,22 @@
+﻿CREATE TABLE [dbo].[tblSTUpdateRegisterHistory]
+(
+	[intUpdateRegisterHistoryId] [int] IDENTITY(1,1) NOT NULL,
+	[intStoreId] [int] NOT NULL,
+	[intRegisterId] [int] NULL,
+	[ysnPricebookFile] [bit] NULL,
+	[ysnPromotionItemList] [bit] NULL,
+	[ysnPromotionSalesList] [bit] NULL,
+	[dtmBeginningChangeDate] [datetime] NULL,
+	[dtmEndingChangeDate] [datetime] NULL,
+	[strCategoryCode] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
+	[ysnExportEntirePricebookFile] [bit] NULL,
+	[intBeginningPromoItemListId] [int] NULL,
+	[intEndingPromoItemListId] [int] NULL,
+	[strPromoCode] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[intBeginningPromoSalesId] [int] NULL,
+	[intEndingPromoSalesId] [int] NULL,
+	[dtmBuildFileThruEndingDate] [datetime] NULL, 
+	[intUpdatedByUserId] [int] NULL,
+	CONSTRAINT [PK_tblSTUpdateRegisterHistory] PRIMARY KEY CLUSTERED ([intUpdateRegisterHistoryId] ASC),
+    CONSTRAINT [FK_tblSTUpdateRegisterHistory_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]) ON DELETE CASCADE,
+)

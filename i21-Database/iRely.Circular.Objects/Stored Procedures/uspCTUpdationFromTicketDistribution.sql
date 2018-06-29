@@ -1,0 +1,313 @@
+CREATE PROCEDURE uspCTUpdationFromTicketDistribution
+
+	@intTicketId			INT,
+	@intEntityId			INT,
+	@dblNetUnits			NUMERIC(18,6),
+	@intContractDetailId	INT,
+	@intUserId				INT,
+	@ysnDP					BIT,
+	@ysnDeliverySheet		BIT = 0
+	
+AS
+
+BEGIN TRY
+	
+	DECLARE @ErrMsg					NVARCHAR(MAX),
+			@dblBalance				NUMERIC(18,6),			
+			@dblAvailable			NUMERIC(18,6),	
+			@intItemId				INT,
+			@dblNewBalance			NUMERIC(18,6),
+			@strInOutFlag			NVARCHAR(4),
+			@dblQuantity			NUMERIC(18,6),
+			@strAdjustmentNo		NVARCHAR(50),
+			@dblCost				NUMERIC(18,6),
+			@ApplyScaleToBasis		BIT,
+			@intContractHeaderId	INT,
+			@ysnAllowedToShow		BIT,
+			@ysnUnlimitedQuantity	BIT,
+			@strContractStatus		NVARCHAR(MAX),
+			@intScaleUOMId			INT,
+			@intScaleUnitMeasureId	INT,
+			@intItemUOMId			INT,
+			@intNewContractHeaderId	INT,
+			@ysnAutoCreateDP		BIT,
+			@strScreenName			NVARCHAR(20),
+			@XML					NVARCHAR(MAX),
+			@dtmEndDate				DATETIME,
+			@intContractTypeId		INT,
+			@intCommodityId			INT,
+			@strSeqMonth			NVARCHAR(50)
+
+	DECLARE @Processed TABLE
+	(
+			intContractDetailId INT,
+			dblUnitsDistributed NUMERIC(18,6),
+			dblUnitsRemaining	NUMERIC(18,6),
+			dblCost				NUMERIC(18,6),
+			ysnIgnore			BIT
+	)			
+	
+	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
+
+	IF @ysnDeliverySheet = 0
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)
+			BEGIN
+				RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
+			END
+			
+			SELECT	@intItemId		=	intItemId,
+					@strInOutFlag	=	strInOutFlag 
+			FROM	tblSCTicket
+			WHERE	intTicketId		=	@intTicketId
+
+			SELECT  @intScaleUOMId			=	IU.intItemUOMId,
+					@intScaleUnitMeasureId  =   IU.intUnitMeasureId
+			FROM    tblICItemUOM	IU    
+			JOIN	tblSCTicket		SC	ON	SC.intItemId = IU.intItemId  
+			WHERE   SC.intTicketId = @intTicketId AND IU.ysnStockUnit = 1
+		END
+	ELSE
+		BEGIN
+			IF NOT EXISTS(SELECT * FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intTicketId)
+			BEGIN
+				RAISERROR ('Delivery Sheet is deleted by other user.',16,1,'WITH NOWAIT')  
+			END
+
+			SELECT	@intItemId				=	SCD.intItemId,
+					@strInOutFlag			= CASE WHEN SCD.intTicketTypeId = 1 THEN 'I' ELSE 'O' END,
+					@intScaleUOMId			=	IUOM.intItemUOMId,
+					@intScaleUnitMeasureId  =   IUOM.intUnitMeasureId
+			FROM	tblSCDeliverySheet SCD
+			INNER JOIN tblICItemUOM IUOM ON IUOM.intItemId = SCD.intItemId
+			WHERE	SCD.intDeliverySheetId = @intTicketId AND IUOM.ysnStockUnit = 1
+		END
+
+	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
+	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
+
+	IF	ISNULL(@intContractDetailId,0) > 0
+	BEGIN
+		SELECT	@ysnAllowedToShow	=	ysnAllowedToShow,
+				@strContractStatus	=	strContractStatus 
+		FROM	vyuCTContractDetailView
+		WHERE	intContractDetailId =	@intContractDetailId
+
+		IF	ISNULL(@ysnAllowedToShow,0) = 0
+		BEGIN
+			SET @ErrMsg = 'Using of contract having status '''+@strContractStatus+''' is not allowed.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+	END
+
+	IF	@ysnDP = 1 AND ISNULL(@intContractDetailId,0) = 0
+	BEGIN
+		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
+		FROM	vyuCTContractDetailView CD
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND		CD.intPricingTypeId		=	5
+		AND		CD.ysnAllowedToShow		=	1
+		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+
+		IF	ISNULL(@intContractDetailId,0) = 0
+		BEGIN
+			IF ISNULL(@ysnAutoCreateDP ,0) = 1
+			BEGIN
+				SET @strScreenName = CASE WHEN ISNULL(@ysnDeliverySheet,0) = 0 THEN 'Scale' ELSE 'Delivery Sheet' END
+				SET @XML = '<overrides><intEntityId>' + LTRIM(@intEntityId) + '</intEntityId></overrides>'
+				
+				EXEC uspCTCreateContract @intTicketId,@strScreenName,@intUserId,@XML,@intNewContractHeaderId OUTPUT
+				
+				SELECT	@intContractDetailId	=	intContractDetailId, 
+						@intContractTypeId		=	intContractTypeId,
+						@intCommodityId			=	intCommodityId,
+						@strSeqMonth			=	RIGHT(CONVERT(varchar, dtmEndDate, 106),8),
+						@intItemId				=	intItemId
+				FROM	vyuCTContractSequence 
+				WHERE	intContractHeaderId = @intNewContractHeaderId
+
+				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
+					DROP TABLE #FutureAndBasisPrice						
+
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,null,0,@intItemId,null)
+
+				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
+				BEGIN
+					RAISERROR ('Settlement price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(dblSettlementPrice,0) = 0)
+				BEGIN
+					RAISERROR ('Settlement price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+				
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(dblBasis,0) = 0)
+				BEGIN
+					RAISERROR ('Basis price in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(intSettlementUOMId,0) = 0)
+				BEGIN
+					RAISERROR ('Settlement UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+
+				IF EXISTS(SELECT * FROM #FutureAndBasisPrice WHERE ISNULL(intBasisUOMId,0) = 0)
+				BEGIN
+					RAISERROR ('Basis UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
+				END
+			END
+			IF	ISNULL(@intContractDetailId,0) = 0
+			BEGIN
+				RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT') 
+			END 
+		END
+	END
+
+	IF	ISNULL(@intContractDetailId,0) = 0
+	BEGIN
+		SELECT	TOP	1	
+				@intContractDetailId	=	CD.intContractDetailId,
+				@intContractHeaderId	=	CD.intContractHeaderId
+		FROM	vyuCTContractDetailView CD
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND		CD.intPricingTypeId		=	1
+		AND		CD.ysnAllowedToShow		=	1
+		AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
+		AND		CD.ysnEarlyDayPassed	=	1
+		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+	END
+	
+	IF	ISNULL(@intContractDetailId,0) = 0
+	BEGIN
+		SELECT	TOP	1	
+				@intContractDetailId	=	intContractDetailId
+		FROM	vyuCTContractDetailView CD
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND	    (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+		AND		CD.ysnAllowedToShow		=	1
+		AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
+		AND		CD.ysnEarlyDayPassed	=	1
+		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+	END
+		
+	WHILE	@dblNetUnits > 0 AND ISNULL(@intContractDetailId,0) > 0
+	BEGIN
+		SELECT	@dblBalance		=	NULL,
+				@dblQuantity	=	NULL,
+				@dblCost		=	NULL,
+				@dblAvailable	=	NULL,
+				@ysnUnlimitedQuantity = NULL
+
+		SELECT	@intContractHeaderId = CD.intContractHeaderId,
+				@dblBalance		=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
+				@dblQuantity	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
+				@dblCost		=	ISNULL(CD.dblCashPrice, ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0)),
+				@dblAvailable	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)),
+				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
+				@intItemUOMId	=	CD.intItemUOMId
+		FROM	tblCTContractDetail CD
+		JOIN	tblCTContractHeader CH	ON CH.intContractHeaderId = CD.intContractHeaderId 
+		WHERE	CD.intContractDetailId = @intContractDetailId
+
+		IF @ysnDP = 1
+		BEGIN
+
+			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
+			
+			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0
+
+			--EXEC	uspCTUpdateSequenceQuantity 
+			--		@intContractDetailId	=	@intContractDetailId,
+			--		@dblQuantityToUpdate	=	@dblNetUnits,
+			--		@intUserId				=	@intUserId,
+			--		@intExternalId			=	@intTicketId,
+			--		@strScreenName			=	'Scale'
+
+			SELECT	@dblNetUnits = 0
+
+			BREAK
+		END
+
+		IF NOT @dblAvailable > 0
+		BEGIN
+			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
+			GOTO CONTINUEISH
+		END
+
+		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
+		BEGIN
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
+
+			SELECT	@dblNetUnits = 0
+
+			BREAK
+		END
+		ELSE
+		BEGIN
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
+
+			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
+		END
+		
+		CONTINUEISH:
+
+		SELECT	@intContractDetailId = NULL
+		
+		SELECT	TOP	1	
+				@intContractDetailId	=	intContractDetailId
+		FROM	vyuCTContractDetailView CD
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND		CD.intPricingTypeId		=	1
+		AND		CD.ysnAllowedToShow		=	1
+		AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
+		AND		CD.ysnEarlyDayPassed	=	1
+		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
+		ORDER 
+		BY		CD.dtmStartDate, CD.intContractDetailId ASC
+
+		IF	ISNULL(@intContractDetailId,0) = 0
+		BEGIN
+			SELECT	TOP	1	
+					@intContractDetailId	=	intContractDetailId
+			FROM	vyuCTContractDetailView CD
+			WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+			AND		CD.intEntityId			=	@intEntityId
+			AND		CD.intItemId			=	@intItemId
+			AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+			AND		CD.ysnAllowedToShow		=	1
+			AND		(CD.dblAvailableQty		>	0 OR CD.ysnUnlimitedQuantity = 1)
+			AND		CD.ysnEarlyDayPassed	=	1
+			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
+			ORDER 
+			BY		CD.dtmStartDate, CD.intContractDetailId ASC
+		END
+	END	
+	
+	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
+	
+	SELECT	PR.intContractDetailId,
+			PR.dblUnitsDistributed,
+			PR.dblUnitsRemaining,
+			PR.dblCost,
+			CD.intInvoiceCurrencyId
+	FROM	@Processed	PR
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+	WHERE	ISNULL(ysnIgnore,0) <> 1
+	
+END TRY
+
+BEGIN CATCH
+
+	SET @ErrMsg = ERROR_MESSAGE()  
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
+	
+END CATCH
+GO

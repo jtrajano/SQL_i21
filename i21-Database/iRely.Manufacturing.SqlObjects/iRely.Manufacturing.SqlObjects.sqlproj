@@ -1,0 +1,703 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Manufacturing.SqlObjects</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{fa0d8bce-3e1a-4e2c-9ec5-d4e6abe4ce33}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Manufacturing.SqlObjects</RootNamespace>
+    <AssemblyName>iRely.Manufacturing.SqlObjects</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Functions" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="Triggers" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\PostDeployment" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Functions\fnMFCalculateRecipeItemLowerTolerance.sql" />
+    <Build Include="Functions\fnMFCalculateRecipeItemQuantity.sql" />
+    <Build Include="Functions\fnMFCalculateRecipeItemUpperTolerance.sql" />
+    <Build Include="Functions\fnMFCalculateRecipeSubItemLowerTolerance.sql" />
+    <Build Include="Functions\fnMFCalculateRecipeSubItemQuantity.sql" />
+    <Build Include="Functions\fnMFCalculateRecipeSubItemUpperTolerance.sql" />
+    <Build Include="Functions\fnMFConvertNumberToString.sql" />
+    <Build Include="Functions\fnMFGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="Stored Procedures\uspMFAddDefaultValuesToManufacturingProcess.sql" />
+    <Build Include="Stored Procedures\uspMFAddLotsToPickList.sql" />
+    <Build Include="Stored Procedures\uspMFAddOrderNewLot.sql" />
+    <Build Include="Stored Procedures\uspMFApplyItemSubstitution.sql" />
+    <Build Include="Stored Procedures\uspMFApproveBlendSheets.sql" />
+    <Build Include="Stored Procedures\uspMFAutoBlendBatchEntry.sql" />
+    <Build Include="Stored Procedures\uspMFAutoBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFAutoBlendSheetFIFO.sql" />
+    <Build Include="Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
+    <Build Include="Stored Procedures\uspMFAutoBlendSheetQuality.sql" />
+    <Build Include="Stored Procedures\uspMFBillOfLadingReport.sql" />
+    <Build Include="Stored Procedures\uspMFBlendBinTicketReport.sql" />
+    <Build Include="Stored Procedures\uspMFBlendSheetReport.sql" />
+    <Build Include="Stored Procedures\uspMFCalculateDemandRatio.sql" />
+    <Build Include="Stored Procedures\uspMFCalculateYield.sql" />
+    <Build Include="Stored Procedures\uspMFCancelItemSubstitution.sql" />
+    <Build Include="Stored Procedures\uspMFCheckContamination.sql" />
+    <Build Include="Stored Procedures\uspMFCloseSanitizationWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCloseWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCompleteBlendsheet.sql" />
+    <Build Include="Stored Procedures\uspMFCompleteTask.sql" />
+    <Build Include="Stored Procedures\uspMFCompleteWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFConsumeSKU.sql" />
+    <Build Include="Stored Procedures\uspMFConsumeWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCopyHandheldUserMenu.sql" />
+    <Build Include="Stored Procedures\uspMFCopyRecipe.sql" />
+    <Build Include="Stored Procedures\uspMFCopyRecipeByWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCreateBlendRecipeComputation.sql" />
+    <Build Include="Stored Procedures\uspMFCreateHandheldUserMenuMap.sql" />
+    <Build Include="Stored Procedures\uspMFCreateInventoryCountDetail.sql" />
+    <Build Include="Stored Procedures\uspMFCreateLotReservation.sql" />
+    <Build Include="Stored Procedures\uspMFCreateLotReservationByPickList.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickList.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickListForProduction.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickListForSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickOrderForInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickOrderValidation.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePickTask.sql" />
+    <Build Include="Stored Procedures\uspMFCreatePutAwayOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCreateRequirement.sql" />
+    <Build Include="Stored Procedures\uspMFCreateShift.sql" />
+    <Build Include="Stored Procedures\uspMFCreateShipmentFromSalesOrderPickList.sql" />
+    <Build Include="Stored Procedures\uspMFCreateSplitAndPickTask.sql" />
+    <Build Include="Stored Procedures\uspMFCreateSplitAndPickTaskO1.sql" />
+    <Build Include="Stored Procedures\uspMFCreateStagingOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCreateStagingOrderDetail.sql" />
+    <Build Include="Stored Procedures\uspMFCreateWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFCreateWorkOrderFromSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspMFDeleteBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFDeleteLotReservation.sql" />
+    <Build Include="Stored Procedures\uspMFDeleteLotReservationByPickList.sql" />
+    <Build Include="Stored Procedures\uspMFDeleteOrderLabels.sql" />
+    <Build Include="Stored Procedures\uspMFDeletePickList.sql" />
+    <Build Include="Stored Procedures\uspMFDeletePickListForSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspMFDeleteWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFDragAndDropWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFEndBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFEndShiftActivity.sql" />
+    <Build Include="Stored Procedures\uspMFErrorNotificationEDI940.sql" />
+    <Build Include="Stored Procedures\uspMFErrorNotificationEDI943.sql" />
+    <Build Include="Stored Procedures\uspMFGeneratePutAwayTask.sql" />
+    <Build Include="Stored Procedures\uspMFGenerateSSCCNo.sql" />
+    <Build Include="Stored Procedures\uspMFGenerateTask.sql" />
+    <Build Include="Stored Procedures\uspMFGErrorMessages.sql" />
+    <Build Include="Stored Procedures\uspMFGetActualItemByLot.sql" />
+    <Build Include="Stored Procedures\uspMFGetActualItemByProduct.sql" />
+    <Build Include="Stored Procedures\uspMFGetActualItemCountByProduct.sql" />
+    <Build Include="Stored Procedures\uspMFGetAttributeByAttributeName.sql" />
+    <Build Include="Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
+    <Build Include="Stored Procedures\uspMFGetAttributesByType.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendDemandDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendDemandSummary.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendProduction.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendProductionAvailableLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendProductionChildLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendProductionParentLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendProductions.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendRecipeComputation.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendRequests.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheetAvailableLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheetInputLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheetItems.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheetItemUOMs.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheetLotUOMs.sql" />
+    <Build Include="Stored Procedures\uspMFGetBlendSheetRecipeComputations.sql" />
+    <Build Include="Stored Procedures\uspMFGetBudgets.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendar.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendarDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendarDetailException.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendarMachineByManufacturingCell.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendarMachineCountByManufacturingCell.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendarShift.sql" />
+    <Build Include="Stored Procedures\uspMFGetCalendarShiftCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetCaseLabelCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetConsumptionDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetContainer.sql" />
+    <Build Include="Stored Procedures\uspMFGetContainerByContainerType.sql" />
+    <Build Include="Stored Procedures\uspMFGetContainerCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetContainerCountByContainerType.sql" />
+    <Build Include="Stored Procedures\uspMFGetContainerType.sql" />
+    <Build Include="Stored Procedures\uspMFGetContainerTypeCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetCostSources.sql" />
+    <Build Include="Stored Procedures\uspMFGetCustomTabFieldNames.sql" />
+    <Build Include="Stored Procedures\uspMFGetCycleCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetDestinationStorageLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetDestinationStorageLocationCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetDetailedInventory.sql" />
+    <Build Include="Stored Procedures\uspMFGetEntitySplitDetailForReport.sql" />
+    <Build Include="Stored Procedures\uspMFGetForecastDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetGRNIntakeComparison.sql" />
+    <Build Include="Stored Procedures\uspMFGetHandheldUserMenu.sql" />
+    <Build Include="Stored Procedures\uspMFGetIngredientLotByProduct.sql" />
+    <Build Include="Stored Procedures\uspMFGetIngredientLotCountByProduct.sql" />
+    <Build Include="Stored Procedures\uspMFGetInventory.sql" />
+    <Build Include="Stored Procedures\uspMFGetInventoryAdjustment.sql" />
+    <Build Include="Stored Procedures\uspMFGetInventoryByItem.sql" />
+    <Build Include="Stored Procedures\uspMFGetInventoryByParentLot.sql" />
+    <Build Include="Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
+    <Build Include="Stored Procedures\uspMFGetItemByRecipe.sql" />
+    <Build Include="Stored Procedures\uspMFGetItemCostInTargetUOM.sql" />
+    <Build Include="Stored Procedures\uspMFGetItemNutrients.sql" />
+    <Build Include="Stored Procedures\uspMFGetItemRequirement.sql" />
+    <Build Include="Stored Procedures\uspMFGetItemsRequiredByDemand.sql" />
+    <Build Include="Stored Procedures\uspMFGetKits.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotByItem.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotByOrderLineItem.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotByStorageLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotByStorageUnit.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotCodeByProduction.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotHistory.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotInputOutputDetails.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotLocationDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotQualityDetailsByWOAndPropertyId.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotQualityOutturn.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotQualityOutturnColumns.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotQualityOutturnDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetLotTextInReport.sql" />
+    <Build Include="Stored Procedures\uspMFGetManufacturingCell.sql" />
+    <Build Include="Stored Procedures\uspMFGetManufacturingCellByPackType.sql" />
+    <Build Include="Stored Procedures\uspMFGetManufacturingCellCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetManufacturingCellCountByPackType.sql" />
+    <Build Include="Stored Procedures\uspMFGetManufacturingProcessDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
+    <Build Include="Stored Procedures\uspMFGetOrderDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetOrderLineItem.sql" />
+    <Build Include="Stored Procedures\uspMFGetOrderNewLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetPalletPlacard.sql" />
+    <Build Include="Stored Procedures\uspMFGetPickList.sql" />
+    <Build Include="Stored Procedures\uspMFGetPickListAvailableLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetPickListDetails.sql" />
+    <Build Include="Stored Procedures\uspMFGetPreSanitizeLot.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductByProcess.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductBySubLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductCountByProcess.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductCountBySubLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductionDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductionLine.sql" />
+    <Build Include="Stored Procedures\uspMFGetProductionReport.sql" />
+    <Build Include="Stored Procedures\uspMFGetQualityPropertiesByWO.sql" />
+    <Build Include="Stored Procedures\uspMFGetReceiving.sql" />
+    <Build Include="Stored Procedures\uspMFGetReceivingSummary.sql" />
+    <Build Include="Stored Procedures\uspMFGetRecipeGuideItems.sql" />
+    <Build Include="Stored Procedures\uspMFGetRecipeGuideSOItems.sql" />
+    <Build Include="Stored Procedures\uspMFGetRecipeItemByProduct.sql" />
+    <Build Include="Stored Procedures\uspMFGetRecipeItems.sql" />
+    <Build Include="Stored Procedures\uspMFGetRecipeItemsCost.sql" />
+    <Build Include="Stored Procedures\uspMFGetRecipesByInputItem.sql" />
+    <Build Include="Stored Procedures\uspMFGetSalesOrderPickListAvailableLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetSalesOrderRecipe.sql" />
+    <Build Include="Stored Procedures\uspMFGetSchedule.sql" />
+    <Build Include="Stored Procedures\uspMFGetScheduleByLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetScheduleDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetScheduleGroupDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetScheduleGroupDetailDesc.sql" />
+    <Build Include="Stored Procedures\uspMFGetShift.sql" />
+    <Build Include="Stored Procedures\uspMFGetShiftActivity.sql" />
+    <Build Include="Stored Procedures\uspMFGetShiftActivityDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetShiftActivityLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetShiftActivityMachines.sql" />
+    <Build Include="Stored Procedures\uspMFGetShiftCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetShipped.sql" />
+    <Build Include="Stored Procedures\uspMFGetShippedSummary.sql" />
+    <Build Include="Stored Procedures\uspMFGetSourceStorageLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetSourceStorageLocationCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetSpaceUtilization.sql" />
+    <Build Include="Stored Procedures\uspMFGetStagedContainer.sql" />
+    <Build Include="Stored Procedures\uspMFGetStageDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetStagedLot.sql" />
+    <Build Include="Stored Procedures\uspMFGetStockHistory.sql" />
+    <Build Include="Stored Procedures\uspMFGetStorageLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetStorageLocationDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTaskDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityContainerDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityContainerFromInboundShipment.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityContractDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityDiagram.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityInboundShipmentDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityInboundShipmentFromContract.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityInvoiceFromShipment.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityLotDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityLotReceiptDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityLotsFromReceipt.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityLotShipDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityLotSplitDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityReceiptDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityReceiptFromContainer.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityReceiptFromContract.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilitySalesOrderFromShipment.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityShipmentDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityShipmentLots.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityWorkOrderDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityWorkOrderInputDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetTraceabilityWorkOrderOutputDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetUnscheduledLine.sql" />
+    <Build Include="Stored Procedures\uspMFGetUnscheduledShiftActivityLine.sql" />
+    <Build Include="Stored Procedures\uspMFGetUOMByLot.sql" />
+    <Build Include="Stored Procedures\uspMFGetWIPSubLocation.sql" />
+    <Build Include="Stored Procedures\uspMFGetWIPSubLocationCount.sql" />
+    <Build Include="Stored Procedures\uspMFGetWOPickListDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetWorkOrderByLot.sql" />
+    <Build Include="Stored Procedures\uspMFGetWorkOrderByPlannedDate.sql" />
+    <Build Include="Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspMFGetWOSampleDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetYield.sql" />
+    <Build Include="Stored Procedures\uspMFGetYieldConfigDetail.sql" />
+    <Build Include="Stored Procedures\uspMFGetYieldView.sql" />
+    <Build Include="Stored Procedures\uspMFGetYieldViewTransaction.sql" />
+    <Build Include="Stored Procedures\uspMFImportRecipes.sql" />
+    <Build Include="Stored Procedures\uspMFInventoryReceiptReport.sql" />
+    <Build Include="Stored Procedures\uspMFKitItemMove.sql" />
+    <Build Include="Stored Procedures\uspMFKitTicketReport.sql" />
+    <Build Include="Stored Procedures\uspMFLotCreate.sql" />
+    <Build Include="Stored Procedures\uspMFLotItemChange.sql" />
+    <Build Include="Stored Procedures\uspMFLotMerge.sql" />
+    <Build Include="Stored Procedures\uspMFLotMove.sql" />
+    <Build Include="Stored Procedures\uspMFLotOwnerUpdate.sql" />
+    <Build Include="Stored Procedures\uspMFLotReceiptPutaway.sql" />
+    <Build Include="Stored Procedures\uspMFLotSnapshot.sql" />
+    <Build Include="Stored Procedures\uspMFLotSplit.sql" />
+    <Build Include="Stored Procedures\uspMFLotSplitOnHandHeld.sql" />
+    <Build Include="Stored Procedures\uspMFMBSReport.sql" />
+    <Build Include="Stored Procedures\uspMFMBSSubReport.sql" />
+    <Build Include="Stored Procedures\uspMFPickAlternateLotForKitting.sql" />
+    <Build Include="Stored Procedures\uspMFPickAlternateLotForShipment.sql" />
+    <Build Include="Stored Procedures\uspMFPickAlternateLotForWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFPickListReport.sql" />
+    <Build Include="Stored Procedures\uspMFPickWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFPostConsumption.sql" />
+    <Build Include="Stored Procedures\uspMFPostConsumptionProduction.sql" />
+    <Build Include="Stored Procedures\uspMFPostProduction.sql" />
+    <Build Include="Stored Procedures\uspMFPostRecap.sql" />
+    <Build Include="Stored Procedures\uspMFPostWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFPrintReceiptLabel.sql" />
+    <Build Include="Stored Procedures\uspMFProcessEDI940.sql" />
+    <Build Include="Stored Procedures\uspMFProcessEDI943.sql" />
+    <Build Include="Stored Procedures\uspMFProcessEDI944.sql" />
+    <Build Include="Stored Procedures\uspMFProcessEDI945.sql" />
+    <Build Include="Stored Procedures\uspMFProduceSanitizedOrder.sql" />
+    <Build Include="Stored Procedures\uspMFProduceWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFReassignCustomerLabel.sql" />
+    <Build Include="Stored Procedures\uspMFRecallReport.sql" />
+    <Build Include="Stored Procedures\uspMFRegenerateTask.sql" />
+    <Build Include="Stored Procedures\uspMFReleaseBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFReleaseReservation.sql" />
+    <Build Include="Stored Procedures\uspMFReopenWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFReportActualOutTurn.sql" />
+    <Build Include="Stored Procedures\uspMFReportBagOffLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportBondedPalletTag.sql" />
+    <Build Include="Stored Procedures\uspMFReportDailyProduction.sql" />
+    <Build Include="Stored Procedures\uspMFReportEfficiencySummaryByDay.sql" />
+    <Build Include="Stored Procedures\uspMFReportEfficiencySummaryByWeek.sql" />
+    <Build Include="Stored Procedures\uspMFReportFGLotLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportGTINCaseBarcode.sql" />
+    <Build Include="Stored Procedures\uspMFReportItemLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportItemPlan.sql" />
+    <Build Include="Stored Procedures\uspMFReportItemPlanSummary.sql" />
+    <Build Include="Stored Procedures\uspMFReportLidlUCCPalletLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportLidlUCCPalletLabelWithoutWeight.sql" />
+    <Build Include="Stored Procedures\uspMFReportLotLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportProcessProductionDetail.sql" />
+    <Build Include="Stored Procedures\uspMFReportProcessProductionSummary.sql" />
+    <Build Include="Stored Procedures\uspMFReportProductSpecification.sql" />
+    <Build Include="Stored Procedures\uspMFReportStorageLocationLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportSubLocationLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportToteLabel.sql" />
+    <Build Include="Stored Procedures\uspMFReportUCCPalletLabel.sql" />
+    <Build Include="Stored Procedures\uspMFRepostCostAdjustment.sql" />
+    <Build Include="Stored Procedures\uspMFReprocessEDI940.sql" />
+    <Build Include="Stored Procedures\uspMFReprocessEDI943.sql" />
+    <Build Include="Stored Procedures\uspMFRescheduleAndSaveWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFRescheduleAndSaveWorkOrderByForward.sql" />
+    <Build Include="Stored Procedures\uspMFRescheduleWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFRescheduleWorkOrderByLocation.sql" />
+    <Build Include="Stored Procedures\uspMFResetDefaultReasonCode.sql" />
+    <Build Include="Stored Procedures\uspMFSaveBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFSaveBudget.sql" />
+    <Build Include="Stored Procedures\uspMFSaveCalendar.sql" />
+    <Build Include="Stored Procedures\uspMFSaveConsumeCustomFields.sql" />
+    <Build Include="Stored Procedures\uspMFSaveForecast.sql" />
+    <Build Include="Stored Procedures\uspMFSaveHandheldUserMenu.sql" />
+    <Build Include="Stored Procedures\uspMFSavePickList.sql" />
+    <Build Include="Stored Procedures\uspMFSavePickListForSalesOrder.sql" />
+    <Build Include="Stored Procedures\uspMFSaveRecipeGuide.sql" />
+    <Build Include="Stored Procedures\uspMFSaveSchedule.sql" />
+    <Build Include="Stored Procedures\uspMFSaveShiftActivityLots.sql" />
+    <Build Include="Stored Procedures\uspMFSaveShiftActivityMachines.sql" />
+    <Build Include="Stored Procedures\uspMFSaveYieldConfig.sql" />
+    <Build Include="Stored Procedures\uspMFSendNotificationEDI940.sql" />
+    <Build Include="Stored Procedures\uspMFSendNotificationEDI944.sql" />
+    <Build Include="Stored Procedures\uspMFSendNotificationEDI945.sql" />
+    <Build Include="Stored Procedures\uspMFSetLotAlias.sql" />
+    <Build Include="Stored Procedures\uspMFSetLotDetail.sql" />
+    <Build Include="Stored Procedures\uspMFSetLotDueDate.sql" />
+    <Build Include="Stored Procedures\uspMFSetLotExpiryDate.sql" />
+    <Build Include="Stored Procedures\uspMFSetLotInformation.sql" />
+    <Build Include="Stored Procedures\uspMFSetLotStatus.sql" />
+    <Build Include="Stored Procedures\uspMFSetVendorLotNumber.sql" />
+    <Build Include="Stored Procedures\uspMFShiftActivity_Create.sql" />
+    <Build Include="Stored Procedures\uspMFStageKit.sql" />
+    <Build Include="Stored Procedures\uspMFStageWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFStartBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFStartCycleCount.sql" />
+    <Build Include="Stored Procedures\uspMFStartWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFStockControlReport.sql" />
+    <Build Include="Stored Procedures\uspMFTransferBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFTransferKit.sql" />
+    <Build Include="Stored Procedures\uspMFTransferPickListForProduction.sql" />
+    <Build Include="Stored Procedures\uspMFTransferProcessMovement.sql" />
+    <Build Include="Stored Procedures\uspMFUndoPallet.sql" />
+    <Build Include="Stored Procedures\uspMFUndoStageWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFUndoStartBlendSheet.sql" />
+    <Build Include="Stored Procedures\uspMFUndoStartCycleCount.sql" />
+    <Build Include="Stored Procedures\uspMFUnpostCycleCount.sql" />
+    <Build Include="Stored Procedures\uspMFUnpostProducedLot.sql" />
+    <Build Include="Stored Procedures\uspMFUnReservePickListByShipment.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateBatchWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateBlendProduction.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateBlendProductionDetail.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateBondStatus.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateCycleCount.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateLotTareWeight.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateProductSpecification.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateSalesOrderItemsPrice.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateShiftActivityDowntime.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateTask.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateTaskStatus.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFUpdateWorkOrderPriority.sql" />
+    <Build Include="Stored Procedures\uspMFValidateBlendProduction.sql" />
+    <Build Include="Stored Procedures\uspMFValidateBlendRelease.sql" />
+    <Build Include="Stored Procedures\uspMFValidateConsumeLot.sql" />
+    <Build Include="Stored Procedures\uspMFValidateCreateLot.sql" />
+    <Build Include="Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFValidateDockdoorLocation.sql" />
+    <Build Include="Stored Procedures\uspMFValidateInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspMFValidateLotByOrder.sql" />
+    <Build Include="Stored Procedures\uspMFValidatePickOrder.sql" />
+    <Build Include="Stored Procedures\uspMFValidatePostWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFValidateTransferKit.sql" />
+    <Build Include="Stored Procedures\uspMFValidateWarehouseReleaseByParentLot.sql" />
+    <Build Include="Stored Procedures\uspMFValidateWarehouseReleaseLot.sql" />
+    <Build Include="Stored Procedures\uspMFValidateWorkOrder.sql" />
+    <Build Include="Stored Procedures\uspMFValidateWorkOrderMsgAndMail.sql" />
+    <Build Include="Stored Procedures\uspMFWarehouseReleaseByParentLot.sql" />
+    <Build Include="Stored Procedures\uspMFWarehouseReleaseLot.sql" />
+    <Build Include="Stored Procedures\uspMFWastage_LotCreate.sql" />
+    <Build Include="Stored Procedures\uspMFWastage_LotDelete.sql" />
+    <Build Include="Stored Procedures\uspMFWastage_LotUpdate.sql" />
+    <Build Include="Stored Procedures\uspMFWOStagingPickListReport.sql" />
+    <Build Include="Views\vyuMFCompanyPreference.sql" />
+    <Build Include="Views\vyuMFDowntimeMachines.sql" />
+    <Build Include="Views\vyuMFGetAvailableStorageLocation.sql" />
+    <Build Include="Views\vyuMFGetBlendConsolidationView.sql" />
+    <Build Include="Views\vyuMFGetBlendItem.sql" />
+    <Build Include="Views\vyuMFGetBlendItemByLocation.sql" />
+    <Build Include="Views\vyuMFGetBlendSheet.sql" />
+    <Build Include="Views\vyuMFGetCalendar.sql" />
+    <Build Include="Views\vyuMFGetChangeOverGroup.sql" />
+    <Build Include="Views\vyuMFGetHolidayCalendar.sql" />
+    <Build Include="Views\vyuMFGetInventoryByItemAndStatus.sql" />
+    <Build Include="Views\vyuMFGetInventoryByParentLot.sql" />
+    <Build Include="Views\vyuMFGetInventoryCountDetail.sql" />
+    <Build Include="Views\vyuMFGetInventoryReceiptCustomField.sql" />
+    <Build Include="Views\vyuMFGetInventoryShipmentCustomField.sql" />
+    <Build Include="Views\vyuMFGetItem.sql" />
+    <Build Include="Views\vyuMFGetItemConsumptionView.sql" />
+    <Build Include="Views\vyuMFGetItemSubstitution.sql" />
+    <Build Include="Views\vyuMFGetItemSubstitutionView.sql" />
+    <Build Include="Views\vyuMFGetKitDemand.sql" />
+    <Build Include="Views\vyuMFGetMachinesByCell.sql" />
+    <Build Include="Views\vyuMFGetMultipleChangeOverFactor.sql" />
+    <Build Include="Views\vyuMFGetOrderLabels.sql" />
+    <Build Include="Views\vyuMFGetOverAndUnderWeight.sql" />
+    <Build Include="Views\vyuMFGetOwnerDetail.sql" />
+    <Build Include="Views\vyuMFGetPackType.sql" />
+    <Build Include="Views\vyuMFGetPalletSSCCNo.sql" />
+    <Build Include="Views\vyuMFGetParentLot.sql" />
+    <Build Include="Views\vyuMFGetPMUsage.sql" />
+    <Build Include="Views\vyuMFGetPostedDate.sql" />
+    <Build Include="Views\vyuMFGetProduction.sql" />
+    <Build Include="Views\vyuMFGetProductionOrder.sql" />
+    <Build Include="Views\vyuMFGetProductionSummary.sql" />
+    <Build Include="Views\vyuMFGetPutawayDate.sql" />
+    <Build Include="Views\vyuMFGetQualityComparison.sql" />
+    <Build Include="Views\vyuMFGetReasonCode.sql" />
+    <Build Include="Views\vyuMFGetReasonDowntime.sql" />
+    <Build Include="Views\vyuMFGetReceiving.sql" />
+    <Build Include="Views\vyuMFGetRecipe.sql" />
+    <Build Include="Views\vyuMFGetRecipeGuide.sql" />
+    <Build Include="Views\vyuMFGetRMUsage.sql" />
+    <Build Include="Views\vyuMFGetRMUsageByLot.sql" />
+    <Build Include="Views\vyuMFGetSalesOrder.sql" />
+    <Build Include="Views\vyuMFGetSanitizationWorkOrder.sql" />
+    <Build Include="Views\vyuMFGetSchedule.sql" />
+    <Build Include="Views\vyuMFGetShipped.sql" />
+    <Build Include="Views\vyuMFGetSSCCDetail.sql" />
+    <Build Include="Views\vyuMFGetTaskQty.sql" />
+    <Build Include="Views\vyuMFGetThirdPartyPallet.sql" />
+    <Build Include="Views\vyuMFGetTraceabilityObject.sql" />
+    <Build Include="Views\vyuMFGetWorkOrder.sql" />
+    <Build Include="Views\vyuMFGetWorkOrderItem.sql" />
+    <Build Include="Views\vyuMFGetWorkOrderSummaryView.sql" />
+    <Build Include="Views\vyuMFGetWorkOrderTransactionView.sql" />
+    <Build Include="Views\vyuMFInventoryReservationByLot.sql" />
+    <Build Include="Views\vyuMFInventoryShipmentView.sql" />
+    <Build Include="Views\vyuMFInventoryView.sql" />
+    <Build Include="Views\vyuMFInventoryViewAsonDate.sql" />
+    <Build Include="Views\vyuMFInventoryViewAsonDateByItem.sql" />
+    <Build Include="Views\vyuMFItemDetails.sql" />
+    <Build Include="Views\vyuMFItemOwner.sql" />
+    <Build Include="Views\vyuMFLabelValues.sql" />
+    <Build Include="Views\vyuMFLotList.sql" />
+    <Build Include="Views\vyuMFLotSnapshot.sql" />
+    <Build Include="Views\vyuMFLotStatus.sql" />
+    <Build Include="Views\vyuMFOrderDetail.sql" />
+    <Build Include="Views\vyuMFOrderHeaderNotMapped.sql" />
+    <Build Include="Views\vyuMFOrderManifest.sql" />
+    <Build Include="Views\vyuMFParentLot.sql" />
+    <Build Include="Views\vyuMFShiftActivityDowntime.sql" />
+    <Build Include="Views\vyuMFShiftActivityProductionSummary.sql" />
+    <Build Include="Views\vyuMFShiftActivityProductionSummaryByDate.sql" />
+    <Build Include="Views\vyuMFShiftActivityProductionSummaryByLine.sql" />
+    <Build Include="Views\vyuMFShiftActivityProductionSummaryWithWastage.sql" />
+    <Build Include="Views\vyuMFShiftActivityUnallocatedLot.sql" />
+    <Build Include="Views\vyuMFShiftActivityWastage.sql" />
+    <Build Include="Views\vyuMFShiftActivityWastageTotal.sql" />
+    <Build Include="Views\vyuMFStockReservation.sql" />
+    <Build Include="Views\vyuMFStockReservationByWorkOrder.sql" />
+    <Build Include="Views\vyuMFStorageLocation.sql" />
+    <Build Include="Views\vyuMFStorageUnit.sql" />
+    <Build Include="Views\vyuMFTask.sql" />
+    <Build Include="Views\vyuMFTaskDetails.sql" />
+    <Build Include="Views\vyuMFWastageItem.sql" />
+    <Build Include="Views\vyuMFWastageLotStorageLocation.sql" />
+    <Build Include="Views\vyuMFWastageNotMapped.sql" />
+    <Build Include="Views\vyuMFWastageWorkOrder.sql" />
+    <Build Include="Triggers\trgMFAfterUpdateLogBudget.sql" />
+    <Build Include="Triggers\trgMFAfterInsertScheduledMaintenance.sql" />
+    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
+    <None Include="Scripts\PostDeployment\2_ProcessAttribute.sql" />
+    <None Include="Scripts\PostDeployment\7_ProcessAttributeDefaultValue.sql" />
+    <PostDeploy Include="Scripts\PostDeploy.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsPayable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsPayable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.BuyBack.Table.dacpac">
+      <HintPath>..\packages\iRely.BuyBack.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CardFueling.Table.dacpac">
+      <HintPath>..\packages\iRely.CardFueling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.ContractManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.ContractManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CreditCardCon.Table.dacpac">
+      <HintPath>..\packages\iRely.CreditCardCon.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CRM.Table.dacpac">
+      <HintPath>..\packages\iRely.CRM.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EnergyTrac.Table.dacpac">
+      <HintPath>..\packages\iRely.EnergyTrac.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EntityManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.EntityManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FinancialReportDesigner.Table.dacpac">
+      <HintPath>..\packages\iRely.FinancialReportDesigner.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FixedAsset.Table.dacpac">
+      <HintPath>..\packages\iRely.FixedAsset.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.GeneralLedger.Table.dacpac">
+      <HintPath>..\packages\iRely.GeneralLedger.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Grain.Table.dacpac">
+      <HintPath>..\packages\iRely.Grain.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.HelpDesk.Table.dacpac">
+      <HintPath>..\packages\iRely.HelpDesk.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Integration.Table.dacpac">
+      <HintPath>..\packages\iRely.Integration.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Inventory.Table.dacpac">
+      <HintPath>..\packages\iRely.Inventory.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Logistics.Table.dacpac">
+      <HintPath>..\packages\iRely.Logistics.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Manufacturing.Table.dacpac">
+      <HintPath>..\packages\iRely.Manufacturing.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.MeterBilling.Table.dacpac">
+      <HintPath>..\packages\iRely.MeterBilling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.NotesReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.NotesReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Patronage.Table.dacpac">
+      <HintPath>..\packages\iRely.Patronage.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Payroll.Table.dacpac">
+      <HintPath>..\packages\iRely.Payroll.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Quality.Table.dacpac">
+      <HintPath>..\packages\iRely.Quality.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.RiskManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.RiskManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Scale.Table.dacpac">
+      <HintPath>..\packages\iRely.Scale.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Store.Table.dacpac">
+      <HintPath>..\packages\iRely.Store.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.SystemManager.Table.dacpac">
+      <HintPath>..\packages\iRely.SystemManager.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TankManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.TankManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TaxForm.Table.dacpac">
+      <HintPath>..\packages\iRely.TaxForm.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Transports.Table.dacpac">
+      <HintPath>..\packages\iRely.Transports.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.VendorRebates.Table.dacpac">
+      <HintPath>..\packages\iRely.VendorRebates.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Warehouse.Table.dacpac">
+      <HintPath>..\packages\iRely.Warehouse.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Dashboard.Table.dacpac">
+      <HintPath>..\packages\iRely.Dashboard.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CashManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.CashManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Objects.dacpac">
+      <HintPath>..\packages\iRely.Circular.Objects.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

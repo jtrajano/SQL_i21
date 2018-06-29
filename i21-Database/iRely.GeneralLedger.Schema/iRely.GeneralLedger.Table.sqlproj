@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.GeneralLedger.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{a2872527-7d9c-45ae-841a-64078a6d66a3}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.GeneralLedger.Schema</RootNamespace>
+    <AssemblyName>iRely.GeneralLedger.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblGLAccountAdjustmentLog.sql" />
+    <Build Include="tblGLAccountAllocationDetail.sql" />
+    <Build Include="tblGLAccountCategoryGroup.sql" />
+    <Build Include="tblGLAccountDefault.sql" />
+    <Build Include="tblGLAccountDefaultDetail.sql" />
+    <Build Include="tblGLAccountReallocation.sql" />
+    <Build Include="tblGLAccountReallocationDetail.sql" />
+    <Build Include="tblGLAccountSegmentMapping.sql" />
+    <Build Include="tblGLAccountSystem.sql" />
+    <Build Include="tblGLAccountTemplate.sql" />
+    <Build Include="tblGLAccountTemplateDetail.sql" />
+    <Build Include="tblGLBudget.sql" />
+    <Build Include="tblGLBudgetCode.sql" />
+    <Build Include="tblGLBudgetDetail.sql" />
+    <Build Include="tblGLCOAAdjustment.sql" />
+    <Build Include="tblGLCOAAdjustmentDetail.sql" />
+    <Build Include="tblGLCOACrossReference.sql" />
+    <Build Include="tblGLCOAImportCSV.sql" />
+    <Build Include="tblGLCOAImportLog.sql" />
+    <Build Include="tblGLCOAImportLogDetail.sql" />
+    <Build Include="tblGLCOATemplate.sql" />
+    <Build Include="tblGLCOATemplateDetail.sql" />
+    <Build Include="tblGLCompanyPreferenceOption.sql" />
+    <Build Include="tblGLConsolidateResult.sql" />
+    <Build Include="tblGLCrossReferenceMapping.sql" />
+    <Build Include="tblGLCurrentFiscalYear.sql" />
+    <Build Include="tblGLDeletedAccount.sql" />
+    <Build Include="tblGLDetail.sql" />
+    <Build Include="tblGLDetailRecap.sql" />
+    <Build Include="tblGLDetailSync.sql" />
+    <Build Include="tblGLFiscalYearPeriod.sql" />
+    <Build Include="tblGLForBatchPosting.sql" />
+    <Build Include="tblGLIjemst.sql" />
+    <Build Include="tblGLImportError.sql" />
+    <Build Include="tblGLImportFile.sql" />
+    <Build Include="tblGLJournal.sql" />
+    <Build Include="tblGLJournalDetail.sql" />
+    <Build Include="tblGLJournalRecurring.sql" />
+    <Build Include="tblGLJournalRecurringDetail.sql" />
+    <Build Include="tblGLModuleList.sql" />
+    <Build Include="tblGLMulticurrencyAccount.sql" />
+    <Build Include="tblGLOriginAccounts.sql" />
+    <Build Include="tblGLPostHistory.sql" />
+    <Build Include="tblGLPostRecap.sql" />
+    <Build Include="tblGLPostResult.sql" />
+    <Build Include="tblGLReallocationTemp.sql" />
+    <Build Include="tblGLReconciledAccount.sql" />
+    <Build Include="tblGLRecurringHistory.sql" />
+    <Build Include="tblGLRequiredPrimaryCategory.sql" />
+    <Build Include="tblGLRevalue.sql" />
+    <Build Include="tblGLRevalueDetails.sql" />
+    <Build Include="tblGLSegmentType.sql" />
+    <Build Include="tblGLSummary.sql" />
+    <Build Include="tblGLTempAccount.sql" />
+    <Build Include="tblGLTempAccountToBuild.sql" />
+    <Build Include="tblGLTempCOASegment.sql" />
+    <Build Include="tblGLVendorMapping.sql" />
+    <Build Include="tblGLVendorMappingDetail.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,367 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Circular.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{723362f1-b26d-4ee0-9500-7c6d79736286}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Circular.Schema</RootNamespace>
+    <AssemblyName>iRely.Circular.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblAPBill.sql" />
+    <Build Include="tblAPBillDetail.sql" />
+    <Build Include="tblAPPayment.sql" />
+    <Build Include="tblAPVendor.sql" />
+    <Build Include="tblARAccountStatus.sql" />
+    <Build Include="tblARCustomer.sql" />
+    <Build Include="tblARCustomerGroup.sql" />
+    <Build Include="tblARCustomerSpecialPrice.sql" />
+    <Build Include="tblARICT.sql" />
+    <Build Include="tblARInvoice.sql" />
+    <Build Include="tblARInvoiceDetail.sql" />
+    <Build Include="tblARMarketZone.sql" />
+    <Build Include="tblARPayment.sql" />
+    <Build Include="tblARQuoteTemplate.sql" />
+    <Build Include="tblARSalesperson.sql" />
+    <Build Include="tblARServiceCharge.sql" />
+    <Build Include="tblARTerritory.sql" />
+    <Build Include="tblCCSite.sql" />
+    <Build Include="tblCCSiteDetail.sql" />
+    <Build Include="tblCCSiteHeader.sql" />
+    <Build Include="tblCCVendorDefault.sql" />
+    <Build Include="tblCFAccount.sql" />
+    <Build Include="tblCFAdvanceMapping.sql" />
+    <Build Include="tblCFCard.sql" />
+    <Build Include="tblCFCardType.sql" />
+    <Build Include="tblCFDepartment.sql" />
+    <Build Include="tblCFDiscountSchedule.sql" />
+    <Build Include="tblCFFeeProfile.sql" />
+    <Build Include="tblCFInvoiceCycle.sql" />
+    <Build Include="tblCFNetwork.sql" />
+    <Build Include="tblCFPriceProfileHeader.sql" />
+    <Build Include="tblCFPriceRuleGroup.sql" />
+    <Build Include="tblCFProductAuth.sql" />
+    <Build Include="tblCFSite.sql" />
+    <Build Include="tblCFSiteGroup.sql" />
+    <Build Include="tblCFTransaction.sql" />
+    <Build Include="tblCFVehicle.sql" />
+    <Build Include="tblCMBank.sql" />
+    <Build Include="tblCMBankAccount.sql" />
+    <Build Include="tblCMBankFileFormat.sql" />
+    <Build Include="tblCRMCampaign.sql" />
+    <Build Include="tblCRMMilestone.sql" />
+    <Build Include="tblCRMOpportunity.sql" />
+    <Build Include="tblCRMSalesPipeStatus.sql" />
+    <Build Include="tblCRMSource.sql" />
+    <Build Include="tblCRMStatus.sql" />
+    <Build Include="tblCRMType.sql" />
+    <Build Include="tblCTApprovalBasis.sql" />
+    <Build Include="tblCTAssociation.sql" />
+    <Build Include="tblCTBook.sql" />
+    <Build Include="tblCTCondition.sql" />
+    <Build Include="tblCTContractBasis.sql" />
+    <Build Include="tblCTContractCost.sql" />
+    <Build Include="tblCTContractDetail.sql" />
+    <Build Include="tblCTContractHeader.sql" />
+    <Build Include="tblCTContractOptHeader.sql" />
+    <Build Include="tblCTContractPlan.sql" />
+    <Build Include="tblCTContractStatus.sql" />
+    <Build Include="tblCTContractText.sql" />
+    <Build Include="tblCTContractType.sql" />
+    <Build Include="tblCTCropYear.sql" />
+    <Build Include="tblCTDiscountType.sql" />
+    <Build Include="tblCTFreightRate.sql" />
+    <Build Include="tblCTIndex.sql" />
+    <Build Include="tblCTInsuranceBy.sql" />
+    <Build Include="tblCTInvoiceType.sql" />
+    <Build Include="tblCTPosition.sql" />
+    <Build Include="tblCTPricingType.sql" />
+    <Build Include="tblCTRailGrade.sql" />
+    <Build Include="tblCTSubBook.sql" />
+    <Build Include="tblCTWeightGrade.sql" />
+    <Build Include="tblEMEntity.sql" />
+    <Build Include="tblEMEntityCardInformation.sql" />
+    <Build Include="tblEMEntityClass.sql" />
+    <Build Include="tblEMEntityFarm.sql" />
+    <Build Include="tblEMEntityLocation.sql" />
+    <Build Include="tblEMEntitySplit.sql" />
+    <Build Include="tblEMEntityTariffType.sql" />
+    <Build Include="tblGLAccount.sql" />
+    <Build Include="tblGLAccountCategory.sql" />
+    <Build Include="tblGLAccountGroup.sql" />
+    <Build Include="tblGLAccountRange.sql" />
+    <Build Include="tblGLAccountSegment.sql" />
+    <Build Include="tblGLAccountStructure.sql" />
+    <Build Include="tblGLAccountUnit.sql" />
+    <Build Include="tblGLFiscalYear.sql" />
+    <Build Include="tblGRCustomerStorage.sql" />
+    <Build Include="tblGRDiscountCalculationOption.sql" />
+    <Build Include="tblGRDiscountId.sql" />
+    <Build Include="tblGRDiscountSchedule.sql" />
+    <Build Include="tblGRDiscountScheduleCode.sql" />
+    <Build Include="tblGRShrinkCalculationOption.sql" />
+    <Build Include="tblGRStorageScheduleRule.sql" />
+    <Build Include="tblGRStorageType.sql" />
+    <Build Include="tblHDMilestone.sql" />
+    <Build Include="tblHDModule.sql" />
+    <Build Include="tblHDTicket.sql" />
+    <Build Include="tblHDTicketGroup.sql" />
+    <Build Include="tblHDTicketHoursWorked.sql" />
+    <Build Include="tblHDTicketPriority.sql" />
+    <Build Include="tblHDTicketProduct.sql" />
+    <Build Include="tblHDTicketStatus.sql" />
+    <Build Include="tblHDTicketType.sql" />
+    <Build Include="tblHDVersion.sql" />
+    <Build Include="tblICAdjustInventoryTerms.sql" />
+    <Build Include="tblICBrand.sql" />
+    <Build Include="tblICCategory.sql" />
+    <Build Include="tblICCategoryUOM.sql" />
+    <Build Include="tblICCertification.sql" />
+    <Build Include="tblICCommodity.sql" />
+    <Build Include="tblICCommodityAttribute.sql" />
+    <Build Include="tblICCommodityUnitMeasure.sql" />
+    <Build Include="tblICContainer.sql" />
+    <Build Include="tblICContainerType.sql" />
+    <Build Include="tblICCountGroup.sql" />
+    <Build Include="tblICDocument.sql" />
+    <Build Include="tblICInventoryReceipt.sql" />
+    <Build Include="tblICInventoryReceiptCharge.sql" />
+    <Build Include="tblICInventoryReceiptItem.sql" />
+    <Build Include="tblICInventoryShipment.sql" />
+    <Build Include="tblICInventoryShipmentCharge.sql" />
+    <Build Include="tblICInventoryShipmentItem.sql" />
+    <Build Include="tblICInventoryTransactionType.sql" />
+    <Build Include="tblICInventoryTransfer.sql" />
+    <Build Include="tblICItem.sql" />
+    <Build Include="tblICItemContract.sql" />
+    <Build Include="tblICItemLocation.sql" />
+    <Build Include="tblICItemOwner.sql" />
+    <Build Include="tblICItemUOM.sql" />
+    <Build Include="tblICLot.sql" />
+    <Build Include="tblICLotStatus.sql" />
+    <Build Include="tblICM2MComputation.sql" />
+    <Build Include="tblICManufacturer.sql" />
+    <Build Include="tblICParentLot.sql" />
+    <Build Include="tblICRestriction.sql" />
+    <Build Include="tblICRinFuelCategory.sql" />
+    <Build Include="tblICStatus.sql" />
+    <Build Include="tblICStorageLocation.sql" />
+    <Build Include="tblICStorageUnitType.sql" />
+    <Build Include="tblICTag.sql" />
+    <Build Include="tblICUnitMeasure.sql" />
+    <Build Include="tblLGAllocationDetail.sql" />
+    <Build Include="tblLGAllocationHeader.sql" />
+    <Build Include="tblLGContainerType.sql" />
+    <Build Include="tblLGEquipmentType.sql" />
+    <Build Include="tblLGGenerateLoad.sql" />
+    <Build Include="tblLGLoad.sql" />
+    <Build Include="tblLGLoadContainer.sql" />
+    <Build Include="tblLGLoadDetail.sql" />
+    <Build Include="tblLGLoadDetailContainerLink.sql" />
+    <Build Include="tblLGPickLotDetail.sql" />
+    <Build Include="tblLGPickLotHeader.sql" />
+    <Build Include="tblLGReasonCode.sql" />
+    <Build Include="tblLGRoute.sql" />
+    <Build Include="tblLGShipment.sql" />
+    <Build Include="tblLGShipmentBL.sql" />
+    <Build Include="tblLGShipmentBLContainer.sql" />
+    <Build Include="tblLGShipmentBLContainerContract.sql" />
+    <Build Include="tblLGShipmentContractQty.sql" />
+    <Build Include="tblLGShipmentPurchaseSalesContract.sql" />
+    <Build Include="tblLGShippingInstruction.sql" />
+    <Build Include="tblLGShippingMode.sql" />
+    <Build Include="tblMBConsignmentGroup.sql" />
+    <Build Include="tblMBILPayment.sql" />
+    <Build Include="tblMBMeterAccount.sql" />
+    <Build Include="tblMBMeterReading.sql" />
+    <Build Include="tblMFAttributeType.sql" />
+    <Build Include="tblMFBlendRequirement.sql" />
+    <Build Include="tblMFBlendRequirementStatus.sql" />
+    <Build Include="tblMFBuyingGroup.sql" />
+    <Build Include="tblMFCommentType.sql" />
+    <Build Include="tblMFConsumptionMethod.sql" />
+    <Build Include="tblMFCostDriver.sql" />
+    <Build Include="tblMFCostType.sql" />
+    <Build Include="tblMFDepartment.sql" />
+    <Build Include="tblMFMachine.sql" />
+    <Build Include="tblMFMachineIssuedUOMType.sql" />
+    <Build Include="tblMFManufacturingCell.sql" />
+    <Build Include="tblMFManufacturingProcess.sql" />
+    <Build Include="tblMFMarginBy.sql" />
+    <Build Include="tblMFOneLinePrint.sql" />
+    <Build Include="tblMFRecipe.sql" />
+    <Build Include="tblMFRecipeItem.sql" />
+    <Build Include="tblMFRecipeItemType.sql" />
+    <Build Include="tblMFRecipeType.sql" />
+    <Build Include="tblMFShift.sql" />
+    <Build Include="tblMFWorkOrder.sql" />
+    <Build Include="tblMFWorkOrderInputLot.sql" />
+    <Build Include="tblMFWorkOrderProductionType.sql" />
+    <Build Include="tblMFWorkOrderStatus.sql" />
+    <Build Include="tblPATPatronageCategory.sql" />
+    <Build Include="tblPOOrderStatus.sql" />
+    <Build Include="tblPOPurchase.sql" />
+    <Build Include="tblPOPurchaseDetail.sql" />
+    <Build Include="tblPREmployee.sql" />
+    <Build Include="tblPREmployeeRank.sql" />
+    <Build Include="tblPRPaycheck.sql" />
+    <Build Include="tblPRPayGroup.sql" />
+    <Build Include="tblPRWorkersCompensation.sql" />
+    <Build Include="tblQMAnalysisType.sql" />
+    <Build Include="tblQMDataType.sql" />
+    <Build Include="tblQMList.sql" />
+    <Build Include="tblQMProperty.sql" />
+    <Build Include="tblQMTest.sql" />
+    <Build Include="tblRKBrokerageAccount.sql" />
+    <Build Include="tblRKFutOptTransaction.sql" />
+    <Build Include="tblRKFutOptTransactionHeader.sql" />
+    <Build Include="tblRKFutureMarket.sql" />
+    <Build Include="tblRKFuturesMonth.sql" />
+    <Build Include="tblRKVendorPriceFixationLimit.sql" />
+    <Build Include="tblSCDeliverySheet.sql" />
+    <Build Include="tblSCListTicketTypes.sql" />
+    <Build Include="tblSCScaleDevice.sql" />
+    <Build Include="tblSCScaleSetup.sql" />
+    <Build Include="tblSCTicket.sql" />
+    <Build Include="tblSCTicketPool.sql" />
+    <Build Include="tblSCTruckDriverReference.sql" />
+    <Build Include="tblSMApprovalList.sql" />
+    <Build Include="tblSMAttachment.sql" />
+    <Build Include="tblSMBuildNumber.sql" />
+    <Build Include="tblSMCity.sql" />
+    <Build Include="tblSMCompanyLocation.sql" />
+    <Build Include="tblSMCompanyLocationPricingLevel.sql" />
+    <Build Include="tblSMCompanyLocationSubLocation.sql" />
+    <Build Include="tblSMCompanySetup.sql" />
+    <Build Include="tblSMCountry.sql" />
+    <Build Include="tblSMCurrency.sql" />
+    <Build Include="tblSMCurrencyExchangeRate.sql" />
+    <Build Include="tblSMCurrencyExchangeRateType.sql" />
+    <Build Include="tblSMDocumentMaintenance.sql" />
+    <Build Include="tblSMEvents.sql" />
+    <Build Include="tblSMFreightTerm.sql" />
+    <Build Include="tblSMImportFileHeader.sql" />
+    <Build Include="tblSMLanguage.sql" />
+    <Build Include="tblSMLetter.sql" />
+    <Build Include="tblSMLicenseType.sql" />
+    <Build Include="tblSMLineOfBusiness.sql" />
+    <Build Include="tblSMModule.sql" />
+    <Build Include="tblSMMultiCompany.sql" />
+    <Build Include="tblSMPaymentMethod.sql" />
+    <Build Include="tblSMPurchasingGroup.sql" />
+    <Build Include="tblSMScreen.sql" />
+    <Build Include="tblSMSecurityPolicy.sql" />
+    <Build Include="tblSMShipVia.sql" />
+    <Build Include="tblSMShipViaTruck.sql" />
+    <Build Include="tblSMSignature.sql" />
+    <Build Include="tblSMTaxClass.sql" />
+    <Build Include="tblSMTaxCode.sql" />
+    <Build Include="tblSMTaxGroup.sql" />
+    <Build Include="tblSMTerm.sql" />
+    <Build Include="tblSMTransaction.sql" />
+    <Build Include="tblSMUserRole.sql" />
+    <Build Include="tblSMUserSecurity.sql" />
+    <Build Include="tblSOSalesOrder.sql" />
+    <Build Include="tblSOSalesOrderDetail.sql" />
+    <Build Include="tblSTPaymentOption.sql" />
+    <Build Include="tblSTRegister.sql" />
+    <Build Include="tblSTStore.sql" />
+    <Build Include="tblTFProductCode.sql" />
+    <Build Include="tblTFTaxAuthority.sql" />
+    <Build Include="tblTFTaxCategory.sql" />
+    <Build Include="tblTFTerminalControlNumber.sql" />
+    <Build Include="tblTMClock.sql" />
+    <Build Include="tblTMCustomer.sql" />
+    <Build Include="tblTMFillGroup.sql" />
+    <Build Include="tblTMFillMethod.sql" />
+    <Build Include="tblTMGlobalJulianCalendar.sql" />
+    <Build Include="tblTMHoldReason.sql" />
+    <Build Include="tblTMLostCustomerReason.sql" />
+    <Build Include="tblTMRoute.sql" />
+    <Build Include="tblTMSite.sql" />
+    <Build Include="tblTMTankTownship.sql" />
+    <Build Include="tblTRLoadDistributionHeader.sql" />
+    <Build Include="tblTRLoadHeader.sql" />
+    <Build Include="tblTRState.sql" />
+    <Build Include="tblTRSupplyPoint.sql" />
+    <Build Include="tblVRVendorSetup.sql" />
+    <Build Include="tblRKOptionsMonth.sql" />
+    <Build Include="tblDBPanel.sql" />
+    <Build Include="tblDBPanelFilter.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblFRReport.sql" />
+    <Build Include="tblFRSegmentFilterGroup.sql" />
+    <Build Include="tblRMConnection.sql" />
+    <Build Include="tblRMReport.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="iRely.Circular.Table.refactorlog" />
+  </ItemGroup>
+</Project>

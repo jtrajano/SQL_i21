@@ -1,0 +1,554 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.AccountsPayable.SqlObjects</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{407456df-3a61-4fd6-beae-9fd75135f615}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.AccountsPayable.SqlObjects</RootNamespace>
+    <AssemblyName>iRely.AccountsPayable.SqlObjects</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Functions" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="Triggers" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\PostDeployment" />
+    <Folder Include="Scripts\PostDeployment\DefaultData" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Functions\fnAP1099EFileBPayee.sql" />
+    <Build Include="Functions\fnAP1099EFileDIVPayee.sql" />
+    <Build Include="Functions\fnAP1099EfileEndOfB.sql" />
+    <Build Include="Functions\fnAP1099EFileEndOfDIV.sql" />
+    <Build Include="Functions\fnAP1099EFileEndOfINT.sql" />
+    <Build Include="Functions\fnAP1099EFileEndOfMISC.sql" />
+    <Build Include="Functions\fnAP1099EFileEndOfPATR.sql" />
+    <Build Include="Functions\fnAP1099EFileEndOfTransmitter.sql" />
+    <Build Include="Functions\fnAP1099EFileINTPayee.sql" />
+    <Build Include="Functions\fnAP1099EFileMISCPayee.sql" />
+    <Build Include="Functions\fnAP1099EFilePATRPayee.sql" />
+    <Build Include="Functions\fnAP1099EFilePayer.sql" />
+    <Build Include="Functions\fnAP1099EFileTransmitter.sql" />
+    <Build Include="Functions\fnAPBankRounding.sql" />
+    <Build Include="Functions\fnAPCheckPOOrderStatus.sql" />
+    <Build Include="Functions\fnAPCreateARInvoiceGLEntries.sql" />
+    <Build Include="Functions\fnAPCreateFilter.sql" />
+    <Build Include="Functions\fnAPCreatePaymentBankTransaction.sql" />
+    <Build Include="Functions\fnAPCreatePaymentDetail.sql" />
+    <Build Include="Functions\fnAPCreatePaymentGLEntries.sql" />
+    <Build Include="Functions\fnAPCreatePrepaymentGLEntries.sql" />
+    <Build Include="Functions\fnAPCreateTaxes.sql" />
+    <Build Include="Functions\fnAPCreateVoucherDetailData.sql" />
+    <Build Include="Functions\fnAPCreateVoucherPrepayGLEntries.sql" />
+    <Build Include="Functions\fnAPCreateWriteOffGLEntries.sql" />
+    <Build Include="Functions\fnAPGet1099PrintStatus.sql" />
+    <Build Include="Functions\fnAPGetBillDetailReceiptTotal.sql" />
+    <Build Include="Functions\fnAPGetImportedBillsNotEqualToDetailTotal.sql" />
+    <Build Include="Functions\fnAPGetNextVoucherApprover.sql" />
+    <Build Include="Functions\fnAPGetPaymentAmountFactor.sql" />
+    <Build Include="Functions\fnAPGetPaymentByUOM.sql" />
+    <Build Include="Functions\fnAPGetPaymentDetailPayment.sql" />
+    <Build Include="Functions\fnAPGetPaymentForexRate.sql" />
+    <Build Include="Functions\fnAPGetPaymentUOM.sql" />
+    <Build Include="Functions\fnAPGetReceiptTotal.sql" />
+    <Build Include="Functions\fnAPGetSettlementStatus.sql" />
+    <Build Include="Functions\fnAPGetTaxesFromIRItem.sql" />
+    <Build Include="Functions\fnAPGetVendorBalances.sql" />
+    <Build Include="Functions\fnAPGetVoucherApprovalStatus.sql" />
+    <Build Include="Functions\fnAPGetVoucherAverageRate.sql" />
+    <Build Include="Functions\fnAPGetVoucherBalance.sql" />
+    <Build Include="Functions\fnAPGetVoucherCategories1099.sql" />
+    <Build Include="Functions\fnAPGetVoucherCommodity.sql" />
+    <Build Include="Functions\fnAPGetVoucherDetailCost.sql" />
+    <Build Include="Functions\fnAPGetVoucherDetailQty.sql" />
+    <Build Include="Functions\fnAPGetVoucherForm1099.sql" />
+    <Build Include="Functions\fnAPGetVoucherLatestPayment.sql" />
+    <Build Include="Functions\fnAPGetVoucherPrepayType.sql" />
+    <Build Include="Functions\fnAPGetVoucherTransactionType.sql" />
+    <Build Include="Functions\fnAPIsBalanced.sql" />
+    <Build Include="Functions\fnAPIsBillApprover.sql" />
+    <Build Include="Functions\fnAPMaskBankAccountNos.sql" />
+    <Build Include="Functions\fnAPValidatePO.sql" />
+    <Build Include="Functions\fnAPValidatePODetailQtyToReceive.sql" />
+    <Build Include="Functions\fnAPValidatePostInvoice.sql" />
+    <Build Include="Functions\fnAPValidatePostPayment.sql" />
+    <Build Include="Functions\fnAPValidatePrepay.sql" />
+    <Build Include="Functions\fnAPValidateVoucherPrepay.sql" />
+    <Build Include="Functions\fnAPVendorInquiryFinancialInfo.sql" />
+    <Build Include="Stored Procedures\uspAPAddVoucherPayable.sql" />
+    <Build Include="Stored Procedures\uspAPApplyPrepaid.sql" />
+    <Build Include="Stored Procedures\uspAPBalance.sql" />
+    <Build Include="Stored Procedures\uspAPBalanceCheck.sql" />
+    <Build Include="Stored Procedures\uspAPBillRecurring.sql" />
+    <Build Include="Stored Procedures\uspAPBillUpdateAddressInfo.sql" />
+    <Build Include="Stored Procedures\uspAPConvertLocationToVendor.sql" />
+    <Build Include="Stored Procedures\uspAPCreate1099BFile.sql" />
+    <Build Include="Stored Procedures\uspAPCreate1099DIVFile.sql" />
+    <Build Include="Stored Procedures\uspAPCreate1099History.sql" />
+    <Build Include="Stored Procedures\uspAPCreate1099INTFile.sql" />
+    <Build Include="Stored Procedures\uspAPCreate1099MISCFile.sql" />
+    <Build Include="Stored Procedures\uspAPCreate1099PATRFile.sql" />
+    <Build Include="Stored Procedures\uspAPCreateBasisAdvance.sql" />
+    <Build Include="Stored Procedures\uspAPCreateBillFromIR.sql" />
+    <Build Include="Stored Procedures\uspAPCreateBillFromShipmentCharge.sql" />
+    <Build Include="Stored Procedures\uspAPCreateBillReversal.sql" />
+    <Build Include="Stored Procedures\uspAPCreateBillTaxes.sql" />
+    <Build Include="Stored Procedures\uspAPCreateClaim.sql" />
+    <Build Include="Stored Procedures\uspAPCreateDeferredPayment.sql" />
+    <Build Include="Stored Procedures\uspAPCreateOverpayment.sql" />
+    <Build Include="Stored Procedures\uspAPCreatePayment.sql" />
+    <Build Include="Stored Procedures\uspAPCreatePaymentFromOriginBill.sql" />
+    <Build Include="Stored Procedures\uspAPCreatePaymentFromVoucherBatch.sql" />
+    <Build Include="Stored Procedures\uspAPCreatePrepayment.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVendor1099Adjustment.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVendorRefund.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherApprover.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetail.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailCC.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailClaim.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailDirectInventory.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailLoadNonInv.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailNonInvContract.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailReceipt.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailReceiptCharge.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailReceiptPO.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherDetailStorage.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherNonInvDetail.sql" />
+    <Build Include="Stored Procedures\uspAPCreateVoucherPODetail.sql" />
+    <Build Include="Stored Procedures\uspAPCreateWriteOff.sql" />
+    <Build Include="Stored Procedures\uspAPDuplicateBill.sql" />
+    <Build Include="Stored Procedures\uspAPDuplicateBillBatch.sql" />
+    <Build Include="Stored Procedures\uspAPDuplicateRecord.sql" />
+    <Build Include="Stored Procedures\uspAPFixAmount.sql" />
+    <Build Include="Stored Procedures\uspAPFixStartingNumbers.sql" />
+    <Build Include="Stored Procedures\uspAPFixVoucher.sql" />
+    <Build Include="Stored Procedures\uspAPFixVoucherStatus.sql" />
+    <Build Include="Stored Procedures\uspAPGetBalance.sql" />
+    <Build Include="Stored Procedures\uspAPGetStartingNumber.sql" />
+    <Build Include="Stored Procedures\uspAPGetStatusUnitCost.sql" />
+    <Build Include="Stored Procedures\uspAPGetVendorApprover.sql" />
+    <Build Include="Stored Procedures\uspAPGetVendorContact.sql" />
+    <Build Include="Stored Procedures\uspAPGetVoucherNextApproverEmail.sql" />
+    <Build Include="Stored Procedures\uspAPGLBalance.sql" />
+    <Build Include="Stored Procedures\uspAPImportVendorPricingFromCSV.sql" />
+    <Build Include="Stored Procedures\uspAPPopulateRecordVoucher.sql" />
+    <Build Include="Stored Procedures\uspAPPostBillBatch.sql" />
+    <Build Include="Stored Procedures\uspAPPostPayment.sql" />
+    <Build Include="Stored Procedures\uspAPPostPrepayment.sql" />
+    <Build Include="Stored Procedures\uspAPPostVoucherPrepay.sql" />
+    <Build Include="Stored Procedures\uspAPPostWriteOff.sql" />
+    <Build Include="Stored Procedures\uspAPPrepaidAndDebit.sql" />
+    <Build Include="Stored Procedures\uspAPProcessRecurring.sql" />
+    <Build Include="Stored Procedures\uspAPProcessShipmentChargeToBill.sql" />
+    <Build Include="Stored Procedures\uspAPProcessToBill.sql" />
+    <Build Include="Stored Procedures\uspAPRecurBill.sql" />
+    <Build Include="Stored Procedures\uspAPRemovePaymentAndCreatePrepay.sql" />
+    <Build Include="Stored Procedures\uspAPReverseGLEntries.sql" />
+    <Build Include="Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
+    <Build Include="Stored Procedures\uspAPReverseVoucherPrepay.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1096.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099B.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099BTwoPart.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099DIVTwoPart.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099INT.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099INTTwoPart.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099MISC.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099MISCTwoPart.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099PATR.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099PATRTwoPart.sql" />
+    <Build Include="Stored Procedures\uspAPRpt1099Summary.sql" />
+    <Build Include="Stored Procedures\uspAPRptAPTransactionByGLAccount.sql" />
+    <Build Include="Stored Procedures\uspAPRptCashRequirements.sql" />
+    <Build Include="Stored Procedures\uspAPRptCheckRegister.sql" />
+    <Build Include="Stored Procedures\uspAPRptDebitMemo.sql" />
+    <Build Include="Stored Procedures\uspAPRptOpenClearing.sql" />
+    <Build Include="Stored Procedures\uspAPRptOpenClearingSummary.sql" />
+    <Build Include="Stored Procedures\uspAPRptPayablesAging.sql" />
+    <Build Include="Stored Procedures\uspAPRptPayablesAgingSummary.sql" />
+    <Build Include="Stored Procedures\uspAPRptPurchaseOrder.sql" />
+    <Build Include="Stored Procedures\uspAPRptPurchaseSettlement.sql" />
+    <Build Include="Stored Procedures\uspAPRptVendorHistory.sql" />
+    <Build Include="Stored Procedures\uspAPRptVoucherCheckOff.sql" />
+    <Build Include="Stored Procedures\uspAPRptVoucherCheckOffCommodity.sql" />
+    <Build Include="Stored Procedures\uspAPRptWeightClaimDM.sql" />
+    <Build Include="Stored Procedures\uspAPRptWeightClaims.sql" />
+    <Build Include="Stored Procedures\uspAPShowBalanceDifference.sql" />
+    <Build Include="Stored Procedures\uspAPUnpostCostAdjustmentGL.sql" />
+    <Build Include="Stored Procedures\uspAPUnrestrictContractPrepay.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBalance.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBalancePerTransaction.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBill1099.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBill1099Status.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBillAmounts.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBillContractPrice.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBillPayment.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateBillPaymentFromAR.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateCost.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateInvoiceNumInGLDetail.sql" />
+    <Build Include="Stored Procedures\uspAPUpdatePaymentAmountDue.sql" />
+    <Build Include="Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
+    <Build Include="Stored Procedures\uspAPUpdatePaymentInfo.sql" />
+    <Build Include="Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
+    <Build Include="Stored Procedures\uspAPUpdatePrepayStatus.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateTransactionsFromAR.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateVoucherContract.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateVoucherDetailTax.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateVoucherHistory.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateVoucherPayable.sql" />
+    <Build Include="Stored Procedures\uspAPUpdateVoucherTax.sql" />
+    <Build Include="Stored Procedures\uspAPValidate1099Config.sql" />
+    <Build Include="Stored Procedures\uspAPValidatePODetailData.sql" />
+    <Build Include="Stored Procedures\uspAPValidateVoucherDetailReceiptPO.sql" />
+    <Build Include="Stored Procedures\uspAPVoidPayment.sql" />
+    <Build Include="Stored Procedures\uspAPVoucherPayablePO.sql" />
+    <Build Include="Views\vyuAP1099Detail.sql" />
+    <Build Include="Views\vyuAP1099Summary.sql" />
+    <Build Include="Views\vyuAPBasisAdvance.sql" />
+    <Build Include="Views\vyuAPBill.sql" />
+    <Build Include="Views\vyuAPBillBatch.sql" />
+    <Build Include="Views\vyuAPBillDeferredInterest.sql" />
+    <Build Include="Views\vyuAPBillDetail.sql" />
+    <Build Include="Views\vyuAPBillDetailGL.sql" />
+    <Build Include="Views\vyuAPBillDetailImport.sql" />
+    <Build Include="Views\vyuAPBillDetailSource.sql" />
+    <Build Include="Views\vyuAPBillForApproval.sql" />
+    <Build Include="Views\vyuAPBillHeaderGL.sql" />
+    <Build Include="Views\vyuAPBillImport.sql" />
+    <Build Include="Views\vyuAPBillItemReceiptTaxes.sql" />
+    <Build Include="Views\vyuAPBillPayment.sql" />
+    <Build Include="Views\vyuAPBillPaymentActual.sql" />
+    <Build Include="Views\vyuAPBillStatus.sql" />
+    <Build Include="Views\vyuAPBillTotals.sql" />
+    <Build Include="Views\vyuAPClaims.sql" />
+    <Build Include="Views\vyuAPClaimsDetails.sql" />
+    <Build Include="Views\vyuAPClaimsRptDetails.sql" />
+    <Build Include="Views\vyuAPClearables.sql" />
+    <Build Include="Views\vyuAPContractDistinct.sql" />
+    <Build Include="Views\vyuAPContractItemDistinct.sql" />
+    <Build Include="Views\vyuAPContractPayables.sql" />
+    <Build Include="Views\vyuAPDeferredPayment.sql" />
+    <Build Include="Views\vyuAPGetInventoryReceiptVoucher.sql" />
+    <Build Include="Views\vyuAPGetInventoryReceiptVoucher2.sql" />
+    <Build Include="Views\vyuAPGetInventoryReceiptVoucherCharges.sql" />
+    <Build Include="Views\vyuAPGetInventoryReceiptVoucherItems.sql" />
+    <Build Include="Views\vyuAPGetInventoryReceiptVoucherPriceCharges.sql" />
+    <Build Include="Views\vyuAPGetShipmentChargesForBilling.sql" />
+    <Build Include="Views\vyuAPGLByAccount.sql" />
+    <Build Include="Views\vyuAPItemUOM.sql" />
+    <Build Include="Views\vyuAPLogisticsPayables.sql" />
+    <Build Include="Views\vyuAPOpenPayableDetailsFields.sql" />
+    <Build Include="Views\vyuAPOriginCCDTransaction.sql" />
+    <Build Include="Views\vyuAPOriginPayables.sql" />
+    <Build Include="Views\vyuAPPaidBillsHistory.sql" />
+    <Build Include="Views\vyuAPPayablesAgingSummary.sql" />
+    <Build Include="Views\vyuAPPayablesSummary.sql" />
+    <Build Include="Views\vyuAPPaymentDetail.sql" />
+    <Build Include="Views\vyuAPPaymentHeaderGL.sql" />
+    <Build Include="Views\vyuAPPayments.sql" />
+    <Build Include="Views\vyuAPPurchase.sql" />
+    <Build Include="Views\vyuAPPurchaseOrderPayables.sql" />
+    <Build Include="Views\vyuAPQuickVoucherSearch.sql" />
+    <Build Include="Views\vyuAPRecapTransaction.sql" />
+    <Build Include="Views\vyuAPReceiptPayables.sql" />
+    <Build Include="Views\vyuAPReceivedItems.sql" />
+    <Build Include="Views\vyuAPRptAPTransactionByGLAccount.sql" />
+    <Build Include="Views\vyuAPRptCashRequirements.sql" />
+    <Build Include="Views\vyuAPRptCheckBasisInfo.sql" />
+    <Build Include="Views\vyuAPRptCheckRegister.sql" />
+    <Build Include="Views\vyuAPRptDebitMemo.sql" />
+    <Build Include="Views\vyuAPRptPurchase.sql" />
+    <Build Include="Views\vyuAPRptPurchaseCustomerSettlement.sql" />
+    <Build Include="Views\vyuAPRptReconcileAPGL.sql" />
+    <Build Include="Views\vyuAPRptTaxRemittance.sql" />
+    <Build Include="Views\vyuAPRptVendorHistory.sql" />
+    <Build Include="Views\vyuAPRptVoucherCheckOff.sql" />
+    <Build Include="Views\vyuAPRptVoucherCheckOffCommodity.sql" />
+    <Build Include="Views\vyuAPRptWeightClaimDM.sql" />
+    <Build Include="Views\vyuAPRptWeightClaims.sql" />
+    <Build Include="Views\vyuAPSearchVendorInquiry.sql" />
+    <Build Include="Views\vyuAPShipmentChargesForBilling.sql" />
+    <Build Include="Views\vyuAPStatus.sql" />
+    <Build Include="Views\vyuAPVendorDefault.sql" />
+    <Build Include="Views\vyuAPVendorInquiry.sql" />
+    <Build Include="Views\vyuAPVendorSearch.sql" />
+    <Build Include="Views\vyuAPVoucherCheckOffDetail.sql" />
+    <Build Include="Views\vyuAPVoucherCheckOffDetailPerPayment.sql" />
+    <Build Include="Views\vyuAPYear1099B.sql" />
+    <Build Include="Views\vyuAPYearDIV.sql" />
+    <Build Include="Views\vyuAPYearINT.sql" />
+    <Build Include="Views\vyuAPYearPATR.sql" />
+    <Build Include="Views\vyuAPRptTaxReport.sql" />
+    <Build Include="Views\vyuAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="Stored Procedures\uspAPRptTaxReport.sql" />
+    <Build Include="Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
+    <Build Include="Functions\fnAPGetVoucherAmountMultiplier.sql" />
+    <Build Include="Stored Procedures\uspPOCreateApprover.sql" />
+    <Build Include="Stored Procedures\uspPODuplicate.sql" />
+    <Build Include="Stored Procedures\uspPOGetCreatorEmail.sql" />
+    <Build Include="Stored Procedures\uspPOGetNextApproverEmail.sql" />
+    <Build Include="Stored Procedures\uspPOProcessItemReceipt.sql" />
+    <Build Include="Stored Procedures\uspPOReceivedMiscItem.sql" />
+    <Build Include="Stored Procedures\uspPORecur.sql" />
+    <Build Include="Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateAddressInfo.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateContract.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateOnOrder.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateReceivedMiscItem.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateReceivedQty.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateStatus.sql" />
+    <Build Include="Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspPOValidateStatus.sql" />
+    <Build Include="Functions\fnPOGetNextApprover.sql" />
+    <Build Include="Functions\fnPOHasBill.sql" />
+    <Build Include="Functions\fnPOHasItemReceipt.sql" />
+    <Build Include="Functions\fnPOIsProcessed.sql" />
+    <Build Include="Views\vyuPOForApproval.sql" />
+    <Build Include="Views\vyuPOSGetLoggedIn.sql" />
+    <Build Include="Views\vyuPOStatus.sql" />
+    <Build Include="Triggers\trgAPBill.sql" />
+    <Build Include="Triggers\trgPOVoucherPayablePurchaseDetail.sql" />
+    <Build Include="Triggers\trgAPPaymentDetail.sql" />
+    <Build Include="Views\vyuAPYearMISC.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\Categories1099.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\Categories1099DIV.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\Categories1099PATR.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\DeferredPaymentInterest.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\InsertWriteOffPaymentMethod.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\POOrderStatus.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\Threshold1099.sql" />
+    <None Include="Scripts\PostDeployment\CleanBasisAdvance.sql" />
+    <None Include="Scripts\PostDeployment\ClearPostResult.sql" />
+    <None Include="Scripts\PostDeployment\DateCreatedValueDefault.sql" />
+    <None Include="Scripts\PostDeployment\DefaultDataBalance.sql" />
+    <None Include="Scripts\PostDeployment\DeleteInvalidBasisAdvanceStaging.sql" />
+    <None Include="Scripts\PostDeployment\FixPaymentRecordStatus.sql" />
+    <None Include="Scripts\PostDeployment\FixVendorGLAccountExpense.sql" />
+    <None Include="Scripts\PostDeployment\MigratePOForApprovals.sql" />
+    <None Include="Scripts\PostDeployment\MigrateVouchersForApproval.sql" />
+    <None Include="Scripts\PostDeployment\RemoveBillTemplate.sql" />
+    <None Include="Scripts\PostDeployment\UpdateAmountSign.sql" />
+    <None Include="Scripts\PostDeployment\UpdateApprovalRecords.sql" />
+    <None Include="Scripts\PostDeployment\UpdateBillBatch.sql" />
+    <None Include="Scripts\PostDeployment\UpdateBillDetailCurrencies.sql" />
+    <None Include="Scripts\PostDeployment\UpdateBillDetailRate.sql" />
+    <None Include="Scripts\PostDeployment\UpdateBillGLEntriesRecords.sql" />
+    <None Include="Scripts\PostDeployment\UpdateBillPayToAddress.sql" />
+    <None Include="Scripts\PostDeployment\UpdateNewShipFromEntity.sql" />
+    <None Include="Scripts\PostDeployment\UpdateOldCost.sql" />
+    <None Include="Scripts\PostDeployment\UpdatePOPendingStatus.sql" />
+    <None Include="Scripts\PostDeployment\UpdatePrepayVoucherStatus.sql" />
+    <None Include="Scripts\PostDeployment\UpdateTaxGroupId.sql" />
+    <None Include="Scripts\PostDeployment\UpdateVoucherDetail1099.sql" />
+    <None Include="Scripts\PostDeployment\UpdateVoucherForApproval.sql" />
+    <PostDeploy Include="Scripts\PostDeploy.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsPayable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsPayable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.BuyBack.Table.dacpac">
+      <HintPath>..\packages\iRely.BuyBack.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CardFueling.Table.dacpac">
+      <HintPath>..\packages\iRely.CardFueling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.ContractManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.ContractManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CreditCardCon.Table.dacpac">
+      <HintPath>..\packages\iRely.CreditCardCon.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CRM.Table.dacpac">
+      <HintPath>..\packages\iRely.CRM.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EnergyTrac.Table.dacpac">
+      <HintPath>..\packages\iRely.EnergyTrac.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EntityManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.EntityManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FinancialReportDesigner.Table.dacpac">
+      <HintPath>..\packages\iRely.FinancialReportDesigner.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FixedAsset.Table.dacpac">
+      <HintPath>..\packages\iRely.FixedAsset.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.GeneralLedger.Table.dacpac">
+      <HintPath>..\packages\iRely.GeneralLedger.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Grain.Table.dacpac">
+      <HintPath>..\packages\iRely.Grain.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.HelpDesk.Table.dacpac">
+      <HintPath>..\packages\iRely.HelpDesk.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Integration.Table.dacpac">
+      <HintPath>..\packages\iRely.Integration.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Inventory.Table.dacpac">
+      <HintPath>..\packages\iRely.Inventory.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Logistics.Table.dacpac">
+      <HintPath>..\packages\iRely.Logistics.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Manufacturing.Table.dacpac">
+      <HintPath>..\packages\iRely.Manufacturing.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.MeterBilling.Table.dacpac">
+      <HintPath>..\packages\iRely.MeterBilling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.NotesReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.NotesReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Patronage.Table.dacpac">
+      <HintPath>..\packages\iRely.Patronage.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Payroll.Table.dacpac">
+      <HintPath>..\packages\iRely.Payroll.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Quality.Table.dacpac">
+      <HintPath>..\packages\iRely.Quality.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.RiskManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.RiskManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Scale.Table.dacpac">
+      <HintPath>..\packages\iRely.Scale.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Store.Table.dacpac">
+      <HintPath>..\packages\iRely.Store.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.SystemManager.Table.dacpac">
+      <HintPath>..\packages\iRely.SystemManager.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TankManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.TankManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TaxForm.Table.dacpac">
+      <HintPath>..\packages\iRely.TaxForm.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Transports.Table.dacpac">
+      <HintPath>..\packages\iRely.Transports.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.VendorRebates.Table.dacpac">
+      <HintPath>..\packages\iRely.VendorRebates.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Warehouse.Table.dacpac">
+      <HintPath>..\packages\iRely.Warehouse.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Dashboard.Table.dacpac">
+      <HintPath>..\packages\iRely.Dashboard.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CashManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.CashManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Objects.dacpac">
+      <HintPath>..\packages\iRely.Circular.Objects.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

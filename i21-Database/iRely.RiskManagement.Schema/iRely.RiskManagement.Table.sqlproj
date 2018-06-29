@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.RiskManagement.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{26fc3703-e16e-481a-8244-40559584f35a}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.RiskManagement.Schema</RootNamespace>
+    <AssemblyName>iRely.RiskManagement.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblRKArchBlendDemand.sql" />
+    <Build Include="tblRKAssignFuturesToContractSummary.sql" />
+    <Build Include="tblRKAssignFuturesToContractSummaryHeader.sql" />
+    <Build Include="tblRKBroker.sql" />
+    <Build Include="tblRKBrokerageCommission.sql" />
+    <Build Include="tblRKBrokersAccountMarketMapping.sql" />
+    <Build Include="tblRKCollateral.sql" />
+    <Build Include="tblRKCollateralAdjustment.sql" />
+    <Build Include="tblRKCollateralHistory.sql" />
+    <Build Include="tblRKCommodityMarketMapping.sql" />
+    <Build Include="tblRKCommodityMarketMappingAttribute.sql" />
+    <Build Include="tblRKCompanyPreference.sql" />
+    <Build Include="tblRKCurExpBankBalance.sql" />
+    <Build Include="tblRKCurExpCurrencyContract.sql" />
+    <Build Include="tblRKCurExpMoneyMarket.sql" />
+    <Build Include="tblRKCurExpNonOpenSales.sql" />
+    <Build Include="tblRKCurExpStock.sql" />
+    <Build Include="tblRKCurExpSummary.sql" />
+    <Build Include="tblRKCurrencyContract.sql" />
+    <Build Include="tblRKCurrencyContractSwapped.sql" />
+    <Build Include="tblRKCurrencyExposure.sql" />
+    <Build Include="tblRKDailyPositionForCustomer.sql" />
+    <Build Include="tblRKDateFilterFor360.sql" />
+    <Build Include="tblRKElectronicPricing.sql" />
+    <Build Include="tblRKElectronicPricingHistory.sql" />
+    <Build Include="tblRKElectronicPricingPreferences.sql" />
+    <Build Include="tblRKElectronicPricingValue.sql" />
+    <Build Include="tblRKElectronicUserInformation.sql" />
+    <Build Include="tblRKFutOptTransactionHistory.sql" />
+    <Build Include="tblRKFutOptTransactionImport.sql" />
+    <Build Include="tblRKFutOptTransactionImport_ErrLog.sql" />
+    <Build Include="tblRKFutSettlementPriceMarketMap.sql" />
+    <Build Include="tblRKFuturesBroker.sql" />
+    <Build Include="tblRKFuturesSettlementPrice.sql" />
+    <Build Include="tblRKInterCompanyDerivativeEntryAcknowledgementStage.sql" />
+    <Build Include="tblRKInterCompanyDerivativeEntryStage.sql" />
+    <Build Include="tblRKInterfaceSystem.sql" />
+    <Build Include="tblRKM2MBasis.sql" />
+    <Build Include="tblRKM2MBasisDetail.sql" />
+    <Build Include="tblRKM2MBasisTransaction.sql" />
+    <Build Include="tblRKM2MConfiguration.sql" />
+    <Build Include="tblRKM2MGrainBasis.sql" />
+    <Build Include="tblRKM2MInquiry.sql" />
+    <Build Include="tblRKM2MInquiryBasisDetail.sql" />
+    <Build Include="tblRKM2MInquiryLatestMarketPrice.sql" />
+    <Build Include="tblRKM2MInquirySummary.sql" />
+    <Build Include="tblRKM2MInquiryTransaction.sql" />
+    <Build Include="tblRKM2MPostRecap.sql" />
+    <Build Include="tblRKM2MTransaction_ErrLog.sql" />
+    <Build Include="tblRKM2MTransactionImport.sql" />
+    <Build Include="tblRKM2MVendorExposure.sql" />
+    <Build Include="tblRKMarketExchange.sql" />
+    <Build Include="tblRKMatchDerivativesHistory.sql" />
+    <Build Include="tblRKMatchFuturesPSDetail.sql" />
+    <Build Include="tblRKMatchFuturesPSHeader.sql" />
+    <Build Include="tblRKOptionsMatchPnS.sql" />
+    <Build Include="tblRKOptionsMatchPnSHeader.sql" />
+    <Build Include="tblRKOptionsPnSExercisedAssigned.sql" />
+    <Build Include="tblRKOptionsPnSExpired.sql" />
+    <Build Include="tblRKOptSettlementPriceMarketMap.sql" />
+    <Build Include="tblRKReconciliationBrokerStatement.sql" />
+    <Build Include="tblRKReconciliationBrokerStatementHeader.sql" />
+    <Build Include="tblRKReconciliationBrokerStatementImport.sql" />
+    <Build Include="tblRKSettlementPriceImport.sql" />
+    <Build Include="tblRKSettlementPriceImport_ErrLog.sql" />
+    <Build Include="tblRKStgBlendDemand.sql" />
+    <Build Include="tblRKStgMatchPnS.sql" />
+    <Build Include="tblRKTradersbyBrokersAccountMapping.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

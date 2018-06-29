@@ -1,0 +1,414 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Logistics.SqlObjects</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{f9778e6f-9eb6-48e6-b8a4-f512e1a92520}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Logistics.SqlObjects</RootNamespace>
+    <AssemblyName>iRely.Logistics.SqlObjects</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Functions" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\PostDeployment" />
+    <Folder Include="Scripts\PreDeployment" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsPayable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsPayable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.BuyBack.Table.dacpac">
+      <HintPath>..\packages\iRely.BuyBack.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CardFueling.Table.dacpac">
+      <HintPath>..\packages\iRely.CardFueling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.ContractManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.ContractManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CreditCardCon.Table.dacpac">
+      <HintPath>..\packages\iRely.CreditCardCon.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CRM.Table.dacpac">
+      <HintPath>..\packages\iRely.CRM.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EnergyTrac.Table.dacpac">
+      <HintPath>..\packages\iRely.EnergyTrac.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EntityManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.EntityManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FinancialReportDesigner.Table.dacpac">
+      <HintPath>..\packages\iRely.FinancialReportDesigner.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FixedAsset.Table.dacpac">
+      <HintPath>..\packages\iRely.FixedAsset.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.GeneralLedger.Table.dacpac">
+      <HintPath>..\packages\iRely.GeneralLedger.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Grain.Table.dacpac">
+      <HintPath>..\packages\iRely.Grain.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.HelpDesk.Table.dacpac">
+      <HintPath>..\packages\iRely.HelpDesk.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Integration.Table.dacpac">
+      <HintPath>..\packages\iRely.Integration.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Inventory.Table.dacpac">
+      <HintPath>..\packages\iRely.Inventory.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Logistics.Table.dacpac">
+      <HintPath>..\packages\iRely.Logistics.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Manufacturing.Table.dacpac">
+      <HintPath>..\packages\iRely.Manufacturing.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.MeterBilling.Table.dacpac">
+      <HintPath>..\packages\iRely.MeterBilling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.NotesReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.NotesReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Patronage.Table.dacpac">
+      <HintPath>..\packages\iRely.Patronage.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Payroll.Table.dacpac">
+      <HintPath>..\packages\iRely.Payroll.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Quality.Table.dacpac">
+      <HintPath>..\packages\iRely.Quality.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.RiskManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.RiskManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Scale.Table.dacpac">
+      <HintPath>..\packages\iRely.Scale.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Store.Table.dacpac">
+      <HintPath>..\packages\iRely.Store.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.SystemManager.Table.dacpac">
+      <HintPath>..\packages\iRely.SystemManager.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TankManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.TankManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TaxForm.Table.dacpac">
+      <HintPath>..\packages\iRely.TaxForm.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Transports.Table.dacpac">
+      <HintPath>..\packages\iRely.Transports.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.VendorRebates.Table.dacpac">
+      <HintPath>..\packages\iRely.VendorRebates.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Warehouse.Table.dacpac">
+      <HintPath>..\packages\iRely.Warehouse.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Dashboard.Table.dacpac">
+      <HintPath>..\packages\iRely.Dashboard.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CashManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.CashManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Objects.dacpac">
+      <HintPath>..\packages\iRely.Circular.Objects.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Functions\fnLGGetDefaultWeightItemUOM.sql" />
+    <Build Include="Functions\fnLGGetShipmentStatus.sql" />
+    <Build Include="Functions\fnLGGetTotalAmountPerLoad.sql" />
+    <Build Include="Stored Procedures\uspLGAlertNotificationCount.sql" />
+    <Build Include="Stored Procedures\uspLGCancelLoadSchedule.sql" />
+    <Build Include="Stored Procedures\uspLGCreateDebitCreditMemo.sql" />
+    <Build Include="Stored Procedures\uspLGCreateInvoiceForDropShip.sql" />
+    <Build Include="Stored Procedures\uspLGCreateInvoiceForShipment.sql" />
+    <Build Include="Stored Procedures\uspLGCreateInvoiceForWeightClaims.sql" />
+    <Build Include="Stored Procedures\uspLGCreateLoadForPickLot.sql" />
+    <Build Include="Stored Procedures\uspLGCreateLoadIntegrationLog.sql" />
+    <Build Include="Stored Procedures\uspLGCreateLoadIntegrationLSPLog.sql" />
+    <Build Include="Stored Procedures\uspLGCreateVoucher.sql" />
+    <Build Include="Stored Procedures\uspLGCreateVoucherForInbound.sql" />
+    <Build Include="Stored Procedures\uspLGCreateVoucherForOtherCharges.sql" />
+    <Build Include="Stored Procedures\uspLGCreateVoucherForOutbound.sql" />
+    <Build Include="Stored Procedures\uspLGCreateVoucherForWarehouseServices.sql" />
+    <Build Include="Stored Procedures\uspLGCreateVoucherForWeightClaims.sql" />
+    <Build Include="Stored Procedures\uspLGCreateWeightClaims.sql" />
+    <Build Include="Stored Procedures\uspLGDeleteBill.sql" />
+    <Build Include="Stored Procedures\uspLGGetAcknowledgementXML.sql" />
+    <Build Include="Stored Procedures\uspLGGetCarrierShipmentReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetContainerTypes.sql" />
+    <Build Include="Stored Procedures\uspLGGetDebitNoteDetailReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetDebitNoteOtherChargesReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetDebitNoteReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
+    <Build Include="Stored Procedures\uspLGGetDeliveryOrderDetailReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetDeliveryOrderInstructionReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetDeliveryOrderReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetEmailInfo.sql" />
+    <Build Include="Stored Procedures\uspLGGetInboundShipmentContainerReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetInboundShipmentReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetInboundShipmentSalesReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetInvoiceIdealReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadContainerData.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadCostData.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadData.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadDetailContainerLinkData.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadDetailData.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadDetailLotData.sql" />
+    <Build Include="Stored Procedures\uspLGGetLoadMailMessage.sql" />
+    <Build Include="Stored Procedures\uspLGGetOrganicDeclarationReportDetail.sql" />
+    <Build Include="Stored Procedures\uspLGGetOrganicDeclarationReportHeader.sql" />
+    <Build Include="Stored Procedures\uspLGGetQuantitiesForAllocatedDetail.sql" />
+    <Build Include="Stored Procedures\uspLGGetSalesInvoiceAdditionalCostReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetSalesInvoiceDetailReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetSalesInvoiceHeaderReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetSalesInvoiceReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetSalesInvoiceStorageCostReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetShippingAdviceReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetShippingInstructionCertificateReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetShippingInstructionPurchaseInfoReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetShippingInstructionReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetShippingInstructionSalesInfoReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetWarehouseInstructionReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetWeightClaimsCreditNoteReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
+    <Build Include="Stored Procedures\uspLGGetWeightLoss.sql" />
+    <Build Include="Stored Procedures\uspLGInterCompanyTransaction.sql" />
+    <Build Include="Stored Procedures\uspLGInterCompanyWeightClaims.sql" />
+    <Build Include="Stored Procedures\uspLGLoadContractCopy.sql" />
+    <Build Include="Stored Procedures\uspLGLoadContractSlice.sql" />
+    <Build Include="Stored Procedures\uspLGLoadContractUnSlice.sql" />
+    <Build Include="Stored Procedures\uspLGPopulateLoadUpdateXML.sql" />
+    <Build Include="Stored Procedures\uspLGPopulateLoadXML.sql" />
+    <Build Include="Stored Procedures\uspLGPopulateWeightClaimXML.sql" />
+    <Build Include="Stored Procedures\uspLGPostInTransitCosting.sql" />
+    <Build Include="Stored Procedures\uspLGPostInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspLGPostLoadSchedule.sql" />
+    <Build Include="Stored Procedures\uspLGPostWeightClaims.sql" />
+    <Build Include="Stored Procedures\uspLGProcessAfloatInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspLGProcessIntegrationLogData.sql" />
+    <Build Include="Stored Procedures\uspLGProcessInterCompanyLogisticsXML.sql" />
+    <Build Include="Stored Procedures\uspLGProcessInterCompanyWeightClaimsXML.sql" />
+    <Build Include="Stored Procedures\uspLGProcessInvoice.sql" />
+    <Build Include="Stored Procedures\uspLGProcessLoadToIntegration.sql" />
+    <Build Include="Stored Procedures\uspLGProcessLogisticsAckXML.sql" />
+    <Build Include="Stored Procedures\uspLGProcessLogisticsXML.sql" />
+    <Build Include="Stored Procedures\uspLGProcessShipmentToInvoice.sql" />
+    <Build Include="Stored Procedures\uspLGProcessToBill.sql" />
+    <Build Include="Stored Procedures\uspLGProcessToInventoryReceipt.sql" />
+    <Build Include="Stored Procedures\uspLGProcessWeightClaimAckXML.sql" />
+    <Build Include="Stored Procedures\uspLGRecalculatedWarehouseServiceCharges.sql" />
+    <Build Include="Stored Procedures\uspLGRejectContainer.sql" />
+    <Build Include="Stored Procedures\uspLGRejectContainerFromQuality.sql" />
+    <Build Include="Stored Procedures\uspLGReprocessToLoadStg.sql" />
+    <Build Include="Stored Procedures\uspLGReserveStockForInventoryShipment.sql" />
+    <Build Include="Stored Procedures\uspLGReserveStockForPickLots.sql" />
+    <Build Include="Stored Procedures\uspLGRouteRemoveIncompleteOrders.sql" />
+    <Build Include="Stored Procedures\uspLGRouteUpdateOrders.sql" />
+    <Build Include="Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
+    <Build Include="Stored Procedures\uspLGShipmentUpdatePurchaseContractReceivedQty.sql" />
+    <Build Include="Stored Procedures\uspLGSplitPickedLotBatch.sql" />
+    <Build Include="Stored Procedures\uspLGTransferContractLoads.sql" />
+    <Build Include="Stored Procedures\uspLGTransferWeightClaimAckXML.sql" />
+    <Build Include="Stored Procedures\uspLGTransferWeightClaimXML.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateCompanyLocation.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateContainerLinkInSample.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateContractQty.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateContractShippingInstructionQty.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateEntityTables.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateInboundIntransitQty.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateLoadItem.sql" />
+    <Build Include="Stored Procedures\uspLGUpdateTMSiteGeocodes.sql" />
+    <Build Include="Stored Procedures\uspLGValidateUpdatePickedLot.sql" />
+    <Build Include="Views\vyuLGAllocatedContracts.sql" />
+    <Build Include="Views\vyuLGAllocatedInventory.sql" />
+    <Build Include="Views\vyuLGAllocationDetailOpenGenerateLoads.sql" />
+    <Build Include="Views\vyuLGAllocationDetails.sql" />
+    <Build Include="Views\vyuLGAllocationOpenContracts.sql" />
+    <Build Include="Views\vyuLGAllocationReservation.sql" />
+    <Build Include="Views\vyuLGArrivalForecast.sql" />
+    <Build Include="Views\vyuLGBrokerCommissionInvoice.sql" />
+    <Build Include="Views\vyuLGCompanyPreference.sql" />
+    <Build Include="Views\vyuLGContainerPositionView.sql" />
+    <Build Include="Views\vyuLGContainerReceiptView.sql" />
+    <Build Include="Views\vyuLGContainerType.sql" />
+    <Build Include="Views\vyuLGContainerTypeNotMapped.sql" />
+    <Build Include="Views\vyuLGContarctWithoutShippingAdvice.sql" />
+    <Build Include="Views\vyuLGContractsWithoutDocuments.sql" />
+    <Build Include="Views\vyuLGContractWithoutShippingInstruction.sql" />
+    <Build Include="Views\vyuLGDeliveredNotInvoiced.sql" />
+    <Build Include="Views\vyuLGDropShipmentDetails.sql" />
+    <Build Include="Views\vyuLGDropShipmentDetailsView.sql" />
+    <Build Include="Views\vyuLGETAPODTracking.sql" />
+    <Build Include="Views\vyuLGETSPOLTracking.sql" />
+    <Build Include="Views\vyuLGGenerateLoad.sql" />
+    <Build Include="Views\vyuLGGetContractSubLocation.sql" />
+    <Build Include="Views\vyuLGGetInventoryDocumentList.sql" />
+    <Build Include="Views\vyuLGGetOpenWeightClaim.sql" />
+    <Build Include="Views\vyuLGGetSaleContractForStockSale.sql" />
+    <Build Include="Views\vyuLGGetShipmentContainerContract.sql" />
+    <Build Include="Views\vyuLGInsuranceCalculatorNotMapped.sql" />
+    <Build Include="Views\vyuLGInsurancePremiumFactor.sql" />
+    <Build Include="Views\vyuLGInsurancePremiumOnPhysicalStock.sql" />
+    <Build Include="Views\vyuLGLateShipmentView.sql" />
+    <Build Include="Views\vyuLGLoadContainerView.sql" />
+    <Build Include="Views\vyuLGLoadCostForVendor.sql" />
+    <Build Include="Views\vyuLGLoadCostView.sql" />
+    <Build Include="Views\vyuLGLoadDetailForVoucher.sql" />
+    <Build Include="Views\vyuLGLoadDetailViewSearch.sql" />
+    <Build Include="Views\vyuLGLoadDocumentTracking.sql" />
+    <Build Include="Views\vyuLGLoadDocumentTrackingSummary.sql" />
+    <Build Include="Views\vyuLGLoadNotifyPartiesNotMapped.sql" />
+    <Build Include="Views\vyuLGLoadPickLotDetails.sql" />
+    <Build Include="Views\vyuLGLoadStorageCostLots.sql" />
+    <Build Include="Views\vyuLGLoadStorageCostView.sql" />
+    <Build Include="Views\vyuLGLoadVesselViewSearch.sql" />
+    <Build Include="Views\vyuLGLoadWarehouseContainerView.sql" />
+    <Build Include="Views\vyuLGLoadWarehouseServices.sql" />
+    <Build Include="Views\vyuLGLoadWarehouseView.sql" />
+    <Build Include="Views\vyuLGLotConditionSummaryView.sql" />
+    <Build Include="Views\vyuLGNoOfContainerPerShippingLine.sql" />
+    <Build Include="Views\vyuLGNotificationCount.sql" />
+    <Build Include="Views\vyuLGNotifications.sql" />
+    <Build Include="Views\vyuLGNotifyPartiesAddresses.sql" />
+    <Build Include="Views\vyuLGOpenLogisticsContract.sql" />
+    <Build Include="Views\vyuLGOpenPickLots.sql" />
+    <Build Include="Views\vyuLGOverallPosition.sql" />
+    <Build Include="Views\vyuLGRoute.sql" />
+    <Build Include="Views\vyuLGRouteOpenOrders.sql" />
+    <Build Include="Views\vyuLGRouteOrders.sql" />
+    <Build Include="Views\vyuLGShipmentHeader.sql" />
+    <Build Include="Views\vyuLGShipmentOpenAllocationDetails.sql" />
+    <Build Include="Views\vyuLGShipmentOpenContracts.sql" />
+    <Build Include="Views\vyuLGShippingInstructionOpenContracts.sql" />
+    <Build Include="Views\vyuLGShippingInstructions.sql" />
+    <Build Include="Views\vyuLGShippingLineServiceContract.sql" />
+    <Build Include="Views\vyuLGStockSales.sql" />
+    <Build Include="Views\vyuLGStockSalesAllocation.sql" />
+    <Build Include="Views\vyuLGStockSaleSamples.sql" />
+    <Build Include="Views\vyuLGStockSaleSearch.sql" />
+    <Build Include="Views\vyuLGStockSalesNotMapped.sql" />
+    <Build Include="Views\vyuLGStockValuationForBank.sql" />
+    <Build Include="Views\vyuLGUnAllocatedContracts.sql" />
+    <Build Include="Views\vyuLGUnAllocatedInventory.sql" />
+    <Build Include="Views\vyuLGWarehouseRateMatrix.sql" />
+    <Build Include="Views\vyuLGWarehouseRateMatrixSearch.sql" />
+    <Build Include="Views\vyuLGWeightClaimHeader.sql" />
+    <Build Include="Views\vyuLGWeightClaimOtherCharges.sql" />
+    <Build Include="Views\vyuLGWeightClaimSearch.sql" />
+    <Build Include="Stored Procedures\uspValidateShippingAdvice.sql" />
+    <None Include="Scripts\PostDeployment\1_MasterTables.sql" />
+    <PostDeploy Include="Scripts\PostDeploy.sql" />
+  </ItemGroup>
+</Project>

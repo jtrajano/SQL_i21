@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblNRCompanyPreference]
+(
+	[intCompanyPreferenceId]				INT					IDENTITY (1, 1)	NOT NULL,
+    [dblFee]								DECIMAL(18, 6)		NULL, 
+    [intNotesReceivableAccountId]			INT					NULL, 
+    [intClearingAccountId]					INT					NULL, 
+    [intNotesWriteOffAccountId]				INT					NULL, 
+    [intInterestIncomeAccountId]			INT					NULL, 
+    [intScheduledInvoiceAccountId]			INT					NULL, 
+    [intScheduledInvoiceLateFeeAccountId]	INT					NULL, 
+    [intCashAccountId]						INT					NULL, 
+    [intBankAccountId]						INT					NULL, 
+    [intNumberofDaysPriorNoteBeGenerated]	INT					NULL, 
+    [ysnOriginCompatible]					BIT					NOT NULL CONSTRAINT [DF_tblNRCompanyPreference_ysnOriginCompatible] DEFAULT ((0)), 
+	[ysnContinueInterestCalculationAfterNoteMaturityDate] BIT	NOT NULL CONSTRAINT [DF_tblNRCompanyPreference_ysnContinueInterestCalculation] DEFAULT ((0)), 
+    [strOriginSystem]						NVARCHAR(50)		COLLATE Latin1_General_CI_AS NULL, 
+    [strVersionNumber]						NVARCHAR(50)		COLLATE Latin1_General_CI_AS NULL, 
+    [intConcurrencyId]						INT					NOT NULL DEFAULT ((0)),
+	CONSTRAINT [PK_tblNRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intNotesReceivableAccountId] FOREIGN KEY ([intNotesReceivableAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intClearingAccountId] FOREIGN KEY ([intClearingAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intNotesWriteOffAccountId] FOREIGN KEY ([intNotesWriteOffAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intInterestIncomeAccountId] FOREIGN KEY ([intInterestIncomeAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intScheduledInvoiceAccountId] FOREIGN KEY ([intScheduledInvoiceAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intScheduledInvoiceLateFeeAccountId] FOREIGN KEY ([intScheduledInvoiceLateFeeAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intCashAccountId] FOREIGN KEY ([intCashAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblNRCompanyPreference_tblGLAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+)

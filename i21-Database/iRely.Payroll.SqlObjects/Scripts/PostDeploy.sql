@@ -1,0 +1,17 @@
+﻿:r .\PostDeployment\DefaultData\1_TaxStatesAndLocalities.sql
+:r .\PostDeployment\DefaultData\2_ElectronicFileFormats.sql
+:r .\PostDeployment\DataFixes\AddDefaultEmployeeEarningDistribution.sql
+:r .\PostDeployment\DataFixes\AddPaycheckDirectDepositEntries.sql
+:r .\PostDeployment\DataFixes\ResetEaningHoursToProcess.sql
+:r .\PostDeployment\DataFixes\SynchronizePaycheckCheckNumber.sql
+:r .\PostDeployment\DataFixes\UpdateEarningDeductionTaxId.sql
+:r .\PostDeployment\DataFixes\UpdatePaycheckTotalHours.sql
+:r .\PostDeployment\DataFixes\UpdateOldData.sql
+:r .\PostDeployment\Reports\DashboardPanelViews.sql
+:r .\PostDeployment\Reports\SubReports\PaycheckEarningSubReport.sql
+:r .\PostDeployment\Reports\SubReports\PaycheckTaxSubReport.sql
+:r .\PostDeployment\Reports\SubReports\PaycheckDeductionSubReport.sql
+:r .\PostDeployment\Reports\SubReports\PaycheckTimeOffSubReport.sql
+:r .\PostDeployment\Reports\PaycheckTop.sql
+:r .\PostDeployment\Reports\PaycheckMiddle.sql
+:r .\PostDeployment\Reports\PaycheckBottom.sql

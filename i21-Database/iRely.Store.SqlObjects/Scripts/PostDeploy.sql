@@ -1,0 +1,10 @@
+﻿:r .\PostDeployment\1_FileFieldMapping_PricebookSale.sql
+:r .\PostDeployment\2_FileFieldMapping_PromotionItemList.sql
+:r .\PostDeployment\3_FileFieldMapping_PromotionCombo.sql
+:r .\PostDeployment\4_FileFieldMapping_PricebookMixMatch.sql
+:r .\PostDeployment\5_FileFieldMapping_PricebookSendSapphire.sql
+:r .\PostDeployment\6_Checkout_Radiant_ISM.sql
+:r .\PostDeployment\7_Checkout_Radiant_MCM.sql
+:r .\PostDeployment\8_Checkout_Radiant_FGM.sql
+:r .\PostDeployment\9_Checkout_Radiant_MSM.sql
+:r .\PostDeployment\10_Checkout_Commander_Translog.sql

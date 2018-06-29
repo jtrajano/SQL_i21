@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.SystemManager.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{93236cb4-de36-4bb4-a710-1aaa6d1e325d}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.SystemManager.Schema</RootNamespace>
+    <AssemblyName>iRely.SystemManager.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblSMActiveScreen.sql" />
+    <Build Include="tblSMActivity.sql" />
+    <Build Include="tblSMActivityAttendee.sql" />
+    <Build Include="tblSMActivityFollowUp.sql" />
+    <Build Include="tblSMActivityFollowUpTemplate.sql" />
+    <Build Include="tblSMActivitySource.sql" />
+    <Build Include="tblSMAnnouncement.sql" />
+    <Build Include="tblSMAnnouncementDisplay.sql" />
+    <Build Include="tblSMAnnouncementType.sql" />
+    <Build Include="tblSMAnnouncementUpload.sql" />
+    <Build Include="tblSMApproval.sql" />
+    <Build Include="tblSMApprovalAmendmentLog.sql" />
+    <Build Include="tblSMApprovalHistory.sql" />
+    <Build Include="tblSMApprovalListUserSecurity.sql" />
+    <Build Include="tblSMApproverConfiguration.sql" />
+    <Build Include="tblSMApproverConfigurationApprovalFor.sql" />
+    <Build Include="tblSMApproverConfigurationDetail.sql" />
+    <Build Include="tblSMApproverConfigurationForApprovalGroup.sql" />
+    <Build Include="tblSMApproverGroup.sql" />
+    <Build Include="tblSMApproverGroupUserSecurity.sql" />
+    <Build Include="tblSMAttachmentDetailLink.sql" />
+    <Build Include="tblSMAuditLog.sql" />
+    <Build Include="tblSMBatchPostingLog.sql" />
+    <Build Include="tblSMCacheVersion.sql" />
+    <Build Include="tblSMCalendarEntity.sql" />
+    <Build Include="tblSMCalendars.sql" />
+    <Build Include="tblSMCleanupLog.sql" />
+    <Build Include="tblSMColumnDictionary.sql" />
+    <Build Include="tblSMComboBoxValue.sql" />
+    <Build Include="tblSMComment.sql" />
+    <Build Include="tblSMCommentWatcher.sql" />
+    <Build Include="tblSMCompanyGridLayout.sql" />
+    <Build Include="tblSMCompanyLocationAccount.sql" />
+    <Build Include="tblSMCompanyLocationRequireApprovalFor.sql" />
+    <Build Include="tblSMCompanyLocationSubLocationCategory.sql" />
+    <Build Include="tblSMCompanyPreference.sql" />
+    <Build Include="tblSMConnectedUser.sql" />
+    <Build Include="tblSMContactMenu.sql" />
+    <Build Include="tblSMControl.sql" />
+    <Build Include="tblSMControlStage.sql" />
+    <Build Include="tblSMCSVDynamicImport.sql" />
+    <Build Include="tblSMCSVDynamicImportLog.sql" />
+    <Build Include="tblSMCSVDynamicImportLogDetail.sql" />
+    <Build Include="tblSMCSVDynamicImportParameter.sql" />
+    <Build Include="tblSMCurrencyExchangeRateDetail.sql" />
+    <Build Include="tblSMCustomField.sql" />
+    <Build Include="tblSMCustomFieldDetail.sql" />
+    <Build Include="tblSMCustomFieldValue.sql" />
+    <Build Include="tblSMCustomGrid.sql" />
+    <Build Include="tblSMCustomGridCell.sql" />
+    <Build Include="tblSMCustomGridField.sql" />
+    <Build Include="tblSMCustomGridRow.sql" />
+    <Build Include="tblSMCustomGridTab.sql" />
+    <Build Include="tblSMCustomLabel.sql" />
+    <Build Include="tblSMCustomTab.sql" />
+    <Build Include="tblSMCustomTabDetail.sql" />
+    <Build Include="tblSMDefaultMenu.sql" />
+    <Build Include="tblSMDocument.sql" />
+    <Build Include="tblSMDocumentConfiguration.sql" />
+    <Build Include="tblSMDocumentMaintenanceMessage.sql" />
+    <Build Include="tblSMDocumentSourceFolder.sql" />
+    <Build Include="tblSMDocumentType.sql" />
+    <Build Include="tblSMDocumentTypeField.sql" />
+    <Build Include="tblSMDocumentTypeFieldValue.sql" />
+    <Build Include="tblSMEmail.sql" />
+    <Build Include="tblSMEmailRecipient.sql" />
+    <Build Include="tblSMEmailUpload.sql" />
+    <Build Include="tblSMEntityMenuFavorite.sql" />
+    <Build Include="tblSMEULA.sql" />
+    <Build Include="tblSMEventInvitees.sql" />
+    <Build Include="tblSMFieldValue.sql" />
+    <Build Include="tblSMFileDownload.sql" />
+    <Build Include="tblSMFileDownloadDetail.sql" />
+    <Build Include="tblSMForBatchPosting.sql" />
+    <Build Include="tblSMGlobalSearch.sql" />
+    <Build Include="tblSMGlobalSearchConfig.sql" />
+    <Build Include="tblSMGlobalSearchFavorite.sql" />
+    <Build Include="tblSMGlobalSearchTag.sql" />
+    <Build Include="tblSMGridCellValue.sql" />
+    <Build Include="tblSMGridColumn.sql" />
+    <Build Include="tblSMGridLayout.sql" />
+    <Build Include="tblSMGridRow.sql" />
+    <Build Include="tblSMHomePanelDashboard.sql" />
+    <Build Include="tblSMIdentityRoles.sql" />
+    <Build Include="tblSMIdentityUserClaims.sql" />
+    <Build Include="tblSMIdentityUserLogins.sql" />
+    <Build Include="tblSMIdentityUserRoles.sql" />
+    <Build Include="tblSMImportFileColumnDetail.sql" />
+    <Build Include="tblSMImportFileRecordMarker.sql" />
+    <Build Include="tblSMImportFileTable.sql" />
+    <Build Include="tblSMInterCompanyTransactionConfiguration.sql" />
+    <Build Include="tblSMInterCompanyTransactionType.sql" />
+    <Build Include="tblSMLetterUpload.sql" />
+    <Build Include="tblSMLicenseAcceptance.sql" />
+    <Build Include="tblSMLoginDeviceToken.sql" />
+    <Build Include="tblSMLogoPreference.sql" />
+    <Build Include="tblSMMappingDictionary.sql" />
+    <Build Include="tblSMMasterMenu.sql" />
+    <Build Include="tblSMMenu.sql" />
+    <Build Include="tblSMMessage.sql" />
+    <Build Include="tblSMMigrationLog.sql" />
+    <Build Include="tblSMMultiCurrency.sql" />
+    <Build Include="tblSMNewDocument.sql" />
+    <Build Include="tblSMNotification.sql" />
+    <Build Include="tblSMOfflineConfiguration.sql" />
+    <Build Include="tblSMOfflineLog.sql" />
+    <Build Include="tblSMOfflineMenu.sql" />
+    <Build Include="tblSMPayment.sql" />
+    <Build Include="tblSMPreferences.sql" />
+    <Build Include="tblSMPricingLevel.sql" />
+    <Build Include="tblSMRecentlyViewed.sql" />
+    <Build Include="tblSMRecurringHistory.sql" />
+    <Build Include="tblSMRecurringTransaction.sql" />
+    <Build Include="tblSMReminderList.sql" />
+    <Build Include="tblSMRemoteServer.sql" />
+    <Build Include="tblSMReplicationAgentSetup.sql" />
+    <Build Include="tblSMReplicationConfiguration.sql" />
+    <Build Include="tblSMReplicationConfigurationTable.sql" />
+    <Build Include="tblSMReplicationTable.sql" />
+    <Build Include="tblSMReportLabelDetail.sql" />
+    <Build Include="tblSMReportLabels.sql" />
+    <Build Include="tblSMReportTranslation.sql" />
+    <Build Include="tblSMScreenLabel.sql" />
+    <Build Include="tblSMScreenLabelStage.sql" />
+    <Build Include="tblSMScreenReport.sql" />
+    <Build Include="tblSMScreenStage.sql" />
+    <Build Include="tblSMSearch.sql" />
+    <Build Include="tblSMSearchField.sql" />
+    <Build Include="tblSMSearchFilter.sql" />
+    <Build Include="tblSMShortcutKeys.sql" />
+    <Build Include="tblSMStartingNumber.sql" />
+    <Build Include="tblSMStartingNumberLocation.sql" />
+    <Build Include="tblSMStartingNumberParameter.sql" />
+    <Build Include="tblSMTableDictionary.sql" />
+    <Build Include="tblSMTabRow.sql" />
+    <Build Include="tblSMTaxCodeRate.sql" />
+    <Build Include="tblSMTaxGroupCode.sql" />
+    <Build Include="tblSMTaxGroupCodeCategoryExemption.sql" />
+    <Build Include="tblSMTaxGroupMasterGroup.sql" />
+    <Build Include="tblSMTaxType.sql" />
+    <Build Include="tblSMTransactionLockHistory.sql" />
+    <Build Include="tblSMTransportationMode.sql" />
+    <Build Include="tblSMTrustedComputer.sql" />
+    <Build Include="tblSMTypeValue.sql" />
+    <Build Include="tblSMUpload.sql" />
+    <Build Include="tblSMUserLogin.sql" />
+    <Build Include="tblSMUserPreference.sql" />
+    <Build Include="tblSMUserRoleCompanyLocationPermission.sql" />
+    <Build Include="tblSMUserRoleControlPermission.sql" />
+    <Build Include="tblSMUserRoleDashboardPermission.sql" />
+    <Build Include="tblSMUserRoleFRPermission.sql" />
+    <Build Include="tblSMUserRoleMenu.sql" />
+    <Build Include="tblSMUserRoleReportPermission.sql" />
+    <Build Include="tblSMUserRoleScreenPermission.sql" />
+    <Build Include="tblSMUserRoleSubRole.sql" />
+    <Build Include="tblSMUserSecurityCompanyLocationRolePermission.sql" />
+    <Build Include="tblSMUserSecurityControlPermission.sql" />
+    <Build Include="tblSMUserSecurityDashboardPermission.sql" />
+    <Build Include="tblSMUserSecurityFilterType.sql" />
+    <Build Include="tblSMUserSecurityFRPermission.sql" />
+    <Build Include="tblSMUserSecurityMenu.sql" />
+    <Build Include="tblSMUserSecurityMenuFavorite.sql" />
+    <Build Include="tblSMUserSecurityPasswordHistory.sql" />
+    <Build Include="tblSMUserSecurityReportPermission.sql" />
+    <Build Include="tblSMUserSecurityRequireApprovalFor.sql" />
+    <Build Include="tblSMUserSecurityScreenPermission.sql" />
+    <Build Include="tblSMXMLTagAttribute.sql" />
+    <Build Include="tblSMZipCode.sql" />
+    <Build Include="tblRMArchive.sql" />
+    <Build Include="tblRMConfiguration.sql" />
+    <Build Include="tblRMCriteriaField.sql" />
+    <Build Include="tblRMCriteriaFieldSelection.sql" />
+    <Build Include="tblRMDatasource.sql" />
+    <Build Include="tblRMDefaultFilter.sql" />
+    <Build Include="tblRMDefaultOption.sql" />
+    <Build Include="tblRMDefaultSort.sql" />
+    <Build Include="tblRMFieldSelectionFilter.sql" />
+    <Build Include="tblRMFilter.sql" />
+    <Build Include="tblRMOption.sql" />
+    <Build Include="tblRMPrintingFilter.sql" />
+    <Build Include="tblRMPrintingOption.sql" />
+    <Build Include="tblRMSort.sql" />
+    <Build Include="tblRMSubreportCondition.sql" />
+    <Build Include="tblRMSubreportFilter.sql" />
+    <Build Include="tblRMSubreportSetting.sql" />
+    <Build Include="tblSMTaxGroupMaster.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,288 @@
+﻿CREATE TABLE [dbo].[tblPRPaycheckTax](
+	[intPaycheckTaxId] [int] IdENTITY(1,1) NOT NULL,
+	[intPaycheckId] INT NOT NULL,
+	[intTypeTaxId] INT NOT NULL,
+	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[strFilingStatus] [nvarchar](25) COLLATE Latin1_General_CI_AS NULL,
+	[intTypeTaxStateId] INT NULL,
+	[intTypeTaxLocalId] INT NULL,
+	[intSupplementalCalc] INT NULL DEFAULT ((1)),
+	[dblAmount] [numeric](18, 6) NULL,
+	[dblExtraWithholding] [numeric](18, 6) NULL,
+	[dblLimit] [numeric](18, 6) NULL,
+	[dblTotal] [numeric](18, 6) NULL DEFAULT ((0)),
+	[intAccountId] [int] NULL,
+	[intExpenseAccountId] [int] NULL,
+	[intAllowance] [int] NULL DEFAULT ((0)),
+	[strPaidBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
+	[strVal1] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+	[strVal2] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+	[strVal3] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+	[strVal4] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+	[strVal5] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+	[strVal6] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+	[ysnSet] [bit] NULL,
+	[intBillId] INT NULL,
+	[intSort] [int] NULL,
+	[intConcurrencyId] [int] NULL, 
+    CONSTRAINT [PK_tblPRPaycheckTax] PRIMARY KEY ([intPaycheckTaxId]), 
+	CONSTRAINT [FK_tblPRPaycheckTax_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPRPaycheckTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId]),
+	CONSTRAINT [FK_tblPRPaycheckTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPRPaycheckTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblPRPaycheckTax_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]) ON DELETE SET NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Default [DF__tblPRPayc__dblAm__150B6AEE]    Script Date: 08/14/2014 10:50:11 ******/
+ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ((0)) FOR [dblAmount]
+GO
+/****** Object:  Default [DF__tblPRPayc__dblLi__16F3B360]    Script Date: 08/14/2014 10:50:11 ******/
+ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ((0)) FOR [dblLimit]
+GO
+/****** Object:  Default [DF__tblPRPayc__dblEx__17E7D799]    Script Date: 08/14/2014 10:50:11 ******/
+ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ((0)) FOR [dblExtraWithholding]
+GO
+/****** Object:  Default [DF__tblPRPayc__ysnSe__1AC44444]    Script Date: 08/14/2014 10:50:11 ******/
+ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ((0)) FOR [ysnSet]
+GO
+/****** Object:  Default [DF__tblPRPayc__strPa__1BB8687D]    Script Date: 08/14/2014 10:50:11 ******/
+ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ('Employee') FOR [strPaidBy]
+GO
+/****** Object:  Default [DF__tblPRPayc__intCo__1CAC8CB6]    Script Date: 08/14/2014 10:50:11 ******/
+ALTER TABLE [dbo].[tblPRPaycheckTax] ADD  DEFAULT ((1)) FOR [intConcurrencyId]
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intPaycheckTaxId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Paycheck Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intPaycheckId'
+GO
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intTypeTaxId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strCalculationType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Filing Status',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strFilingStatus'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Type State Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intTypeTaxStateId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Type Locality Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intTypeTaxLocalId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Amount/Percent',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAmount'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Extra Withholding',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'dblExtraWithholding'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Limit',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'dblLimit'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Total',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'dblTotal'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Liability Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Expense Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intExpenseAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Federal Allowances',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intAllowance'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Paid By',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strPaidBy'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 1',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal1'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 2',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal2'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 3',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal3'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 3',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal4'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 5',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal5'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Holder for extra value 6',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'strVal6'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sort Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intSort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'is Manually Set',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSet'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Voucher Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intBillId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Supplemental Tax Calculation Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intSupplementalCalc'

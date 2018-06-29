@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Logistics.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{6c09ba5b-667d-4a46-9896-2a9a732ade97}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Logistics.Schema</RootNamespace>
+    <AssemblyName>iRely.Logistics.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblLGAllocationHeaderOrigin.sql" />
+    <Build Include="tblLGCompanyPreference.sql" />
+    <Build Include="tblLGContainerTypeCommodityQty.sql" />
+    <Build Include="tblLGDeliveryDetail.sql" />
+    <Build Include="tblLGDeliveryHeader.sql" />
+    <Build Include="tblLGDeliveryPickDetail.sql" />
+    <Build Include="tblLGEntityInsurer.sql" />
+    <Build Include="tblLGEntityShippingLine.sql" />
+    <Build Include="tblLGETATracking.sql" />
+    <Build Include="tblLGForwardingAgent.sql" />
+    <Build Include="tblLGFreightRateMatrix.sql" />
+    <Build Include="tblLGInsuranceCalculator.sql" />
+    <Build Include="tblLGInsurancePremiumFactor.sql" />
+    <Build Include="tblLGInsurancePremiumFactorDetail.sql" />
+    <Build Include="tblLGIntrCompLogisticsAck.sql" />
+    <Build Include="tblLGIntrCompLogisticsStg.sql" />
+    <Build Include="tblLGIntrCompWeightClaimsAck.sql" />
+    <Build Include="tblLGIntrCompWeightClaimsStg.sql" />
+    <Build Include="tblLGLoadContainerCost.sql" />
+    <Build Include="tblLGLoadContainerLog.sql" />
+    <Build Include="tblLGLoadContainerLSPStg.sql" />
+    <Build Include="tblLGLoadContainerStg.sql" />
+    <Build Include="tblLGLoadCost.sql" />
+    <Build Include="tblLGLoadDetailContainerCost.sql" />
+    <Build Include="tblLGLoadDetailLog.sql" />
+    <Build Include="tblLGLoadDetailLot.sql" />
+    <Build Include="tblLGLoadDetailLSPStg.sql" />
+    <Build Include="tblLGLoadDetailStg.sql" />
+    <Build Include="tblLGLoadDocuments.sql" />
+    <Build Include="tblLGLoadLog.sql" />
+    <Build Include="tblLGLoadLSPStg.sql" />
+    <Build Include="tblLGLoadNotifyParties.sql" />
+    <Build Include="tblLGLoadStg.sql" />
+    <Build Include="tblLGLoadStorageCost.sql" />
+    <Build Include="tblLGLoadWarehouse.sql" />
+    <Build Include="tblLGLoadWarehouseContainer.sql" />
+    <Build Include="tblLGLoadWarehouseServices.sql" />
+    <Build Include="tblLGReservation.sql" />
+    <Build Include="tblLGRouteDirection.sql" />
+    <Build Include="tblLGRouteLeastCost.sql" />
+    <Build Include="tblLGRouteMileage.sql" />
+    <Build Include="tblLGRouteOrder.sql" />
+    <Build Include="tblLGShipmentBLContainerContractCost.sql" />
+    <Build Include="tblLGShipmentBLContainerCost.sql" />
+    <Build Include="tblLGShipmentCertificates.sql" />
+    <Build Include="tblLGShippingInstructionCertificates.sql" />
+    <Build Include="tblLGShippingInstructionContractQty.sql" />
+    <Build Include="tblLGShippingLine.sql" />
+    <Build Include="tblLGShippingLineServiceContract.sql" />
+    <Build Include="tblLGShippingLineServiceContractDetail.sql" />
+    <Build Include="tblLGStockSalesHeader.sql" />
+    <Build Include="tblLGStockSalesLotDetail.sql" />
+    <Build Include="tblLGTerminal.sql" />
+    <Build Include="tblLGTrucker.sql" />
+    <Build Include="tblLGWarehouseInstructionCost.sql" />
+    <Build Include="tblLGWarehouseInstructionDetail.sql" />
+    <Build Include="tblLGWarehouseInstructionHeader.sql" />
+    <Build Include="tblLGWarehouseRateMatrixDetail.sql" />
+    <Build Include="tblLGWarehouseRateMatrixHeader.sql" />
+    <Build Include="tblLGWeightClaim.sql" />
+    <Build Include="tblLGWeightClaimDetail.sql" />
+    <Build Include="tblLGWeightClaimOtherCharges.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

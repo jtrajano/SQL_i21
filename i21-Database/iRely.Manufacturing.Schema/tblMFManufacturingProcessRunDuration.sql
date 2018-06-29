@@ -1,0 +1,4 @@
+﻿CREATE TABLE dbo.tblMFManufacturingProcessRunDuration (
+intManufacturingProcessRunDurationId INT, 
+strManufacturingProcessRunDurationName NVARCHAR(50)COLLATE Latin1_General_CI_AS,
+CONSTRAINT PK_tblMFManufacturingProcessRunDuration_intManufacturingProcessRunDurationId PRIMARY KEY (intManufacturingProcessRunDurationId))

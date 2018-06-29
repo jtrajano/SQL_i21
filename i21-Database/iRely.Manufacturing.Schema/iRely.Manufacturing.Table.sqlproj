@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Manufacturing.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{6a8f1171-7ed3-4a6f-b967-e96d042b0bfb}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Manufacturing.Schema</RootNamespace>
+    <AssemblyName>iRely.Manufacturing.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblMFAttribute.sql" />
+    <Build Include="tblMFAttributeDataType.sql" />
+    <Build Include="tblMFAttributeDefaultValue.sql" />
+    <Build Include="tblMFBinType.sql" />
+    <Build Include="tblMFBlendDemand.sql" />
+    <Build Include="tblMFBlendDemandStatus.sql" />
+    <Build Include="tblMFBlendProductionOutputDetail.sql" />
+    <Build Include="tblMFBlendRequirementRule.sql" />
+    <Build Include="tblMFBlendSheetRule.sql" />
+    <Build Include="tblMFBlendSheetRuleValue.sql" />
+    <Build Include="tblMFBlendValidation.sql" />
+    <Build Include="tblMFBlendValidationDefault.sql" />
+    <Build Include="tblMFBlendValidationMessageType.sql" />
+    <Build Include="tblMFBudget.sql" />
+    <Build Include="tblMFBudgetLog.sql" />
+    <Build Include="tblMFBudgetType.sql" />
+    <Build Include="tblMFCompanyPreference.sql" />
+    <Build Include="tblMFCostDistributionMethod.sql" />
+    <Build Include="tblMFCostSource.sql" />
+    <Build Include="tblMFCustomerLabelType.sql" />
+    <Build Include="tblMFCustomFieldValue.sql" />
+    <Build Include="tblMFDowntime.sql" />
+    <Build Include="tblMFDowntimeMachines.sql" />
+    <Build Include="tblMFEDI940.sql" />
+    <Build Include="tblMFEDI940Archive.sql" />
+    <Build Include="tblMFEDI940Error.sql" />
+    <Build Include="tblMFEDI943.sql" />
+    <Build Include="tblMFEDI943Archive.sql" />
+    <Build Include="tblMFEDI943Error.sql" />
+    <Build Include="tblMFEDI944.sql" />
+    <Build Include="tblMFEDI944Error.sql" />
+    <Build Include="tblMFEDI945.sql" />
+    <Build Include="tblMFEDI945Error.sql" />
+    <Build Include="tblMFEDIPreference.sql" />
+    <Build Include="tblMFFloorMovement.sql" />
+    <Build Include="tblMFFloorMovementType.sql" />
+    <Build Include="tblMFForecastItemType.sql" />
+    <Build Include="tblMFForecastItemValue.sql" />
+    <Build Include="tblMFHaldheldUserMenuItemMap.sql" />
+    <Build Include="tblMFHandheldMenuItem.sql" />
+    <Build Include="tblMFHolidayCalendar.sql" />
+    <Build Include="tblMFHolidayType.sql" />
+    <Build Include="tblMFInventoryAdjustment.sql" />
+    <Build Include="tblMFInventoryShipmentRestrictionType.sql" />
+    <Build Include="tblMFItemChangeMap.sql" />
+    <Build Include="tblMFItemContamination.sql" />
+    <Build Include="tblMFItemContaminationDetail.sql" />
+    <Build Include="tblMFItemDemand.sql" />
+    <Build Include="tblMFItemDemandStage.sql" />
+    <Build Include="tblMFItemGradeDiff.sql" />
+    <Build Include="tblMFItemGroup.sql" />
+    <Build Include="tblMFItemMachine.sql" />
+    <Build Include="tblMFItemOwner.sql" />
+    <Build Include="tblMFItemOwnerDetail.sql" />
+    <Build Include="tblMFItemSubstitution.sql" />
+    <Build Include="tblMFItemSubstitutionDetail.sql" />
+    <Build Include="tblMFItemSubstitutionRecipe.sql" />
+    <Build Include="tblMFItemSubstitutionRecipeDetail.sql" />
+    <Build Include="tblMFItemSubstitutionType.sql" />
+    <Build Include="tblMFLotInventory.sql" />
+    <Build Include="tblMFLotSnapshot.sql" />
+    <Build Include="tblMFLotSnapshotDetail.sql" />
+    <Build Include="tblMFLotStatusException.sql" />
+    <Build Include="tblMFLotTareWeight.sql" />
+    <Build Include="tblMFLotTransactionType.sql" />
+    <Build Include="tblMFMachineMeasurement.sql" />
+    <Build Include="tblMFMachinePackType.sql" />
+    <Build Include="tblMFManufacturingCellPackType.sql" />
+    <Build Include="tblMFManufacturingProcessAttribute.sql" />
+    <Build Include="tblMFManufacturingProcessMachine.sql" />
+    <Build Include="tblMFManufacturingProcessRunDuration.sql" />
+    <Build Include="tblMFMeasurement.sql" />
+    <Build Include="tblMFMethodOfApp.sql" />
+    <Build Include="tblMFNutrient.sql" />
+    <Build Include="tblMFOrderDetail.sql" />
+    <Build Include="tblMFOrderDirection.sql" />
+    <Build Include="tblMFOrderHeader.sql" />
+    <Build Include="tblMFOrderManifest.sql" />
+    <Build Include="tblMFOrderManifestLabel.sql" />
+    <Build Include="tblMFOrderStatus.sql" />
+    <Build Include="tblMFOrderType.sql" />
+    <Build Include="tblMFPackingItemCategory.sql" />
+    <Build Include="tblMFPackType.sql" />
+    <Build Include="tblMFPackTypeDetail.sql" />
+    <Build Include="tblMFParentLotNumberPattern.sql" />
+    <Build Include="tblMFPattern.sql" />
+    <Build Include="tblMFPatternByCategory.sql" />
+    <Build Include="tblMFPatternCode.sql" />
+    <Build Include="tblMFPatternDetail.sql" />
+    <Build Include="tblMFPatternSequence.sql" />
+    <Build Include="tblMFPickForWOStaging.sql" />
+    <Build Include="tblMFPickList.sql" />
+    <Build Include="tblMFPickListDetail.sql" />
+    <Build Include="tblMFPickListPreference.sql" />
+    <Build Include="tblMFPickPreference.sql" />
+    <Build Include="tblMFProcessCycleCount.sql" />
+    <Build Include="tblMFProcessCycleCountMachine.sql" />
+    <Build Include="tblMFProcessCycleCountSession.sql" />
+    <Build Include="tblMFProductionSummary.sql" />
+    <Build Include="tblMFQAProperty.sql" />
+    <Build Include="tblMFReadingPoint.sql" />
+    <Build Include="tblMFReasonCode.sql" />
+    <Build Include="tblMFReasonCodeDetail.sql" />
+    <Build Include="tblMFReasonType.sql" />
+    <Build Include="tblMFRecipeAlertLog.sql" />
+    <Build Include="tblMFRecipeCategory.sql" />
+    <Build Include="tblMFRecipeGuide.sql" />
+    <Build Include="tblMFRecipeGuideNutrient.sql" />
+    <Build Include="tblMFRecipeItemStage.sql" />
+    <Build Include="tblMFRecipeStage.sql" />
+    <Build Include="tblMFRecipeSubstituteItem.sql" />
+    <Build Include="tblMFRecipeSubstituteItemStage.sql" />
+    <Build Include="tblMFReleaseStatus.sql" />
+    <Build Include="tblMFReportCategory.sql" />
+    <Build Include="tblMFReportCategoryByCustomer.sql" />
+    <Build Include="tblMFReportLabel.sql" />
+    <Build Include="tblMFReportLidlUCCPalletLabel.sql" />
+    <Build Include="tblMFSchedule.sql" />
+    <Build Include="tblMFScheduleAttribute.sql" />
+    <Build Include="tblMFScheduleCalendar.sql" />
+    <Build Include="tblMFScheduleCalendarDetail.sql" />
+    <Build Include="tblMFScheduleCalendarMachineDetail.sql" />
+    <Build Include="tblMFScheduleChangeoverFactor.sql" />
+    <Build Include="tblMFScheduleChangeoverFactorDetail.sql" />
+    <Build Include="tblMFScheduleConstraint.sql" />
+    <Build Include="tblMFScheduleConstraintDetail.sql" />
+    <Build Include="tblMFScheduledMaintenance.sql" />
+    <Build Include="tblMFScheduledMaintenanceDetail.sql" />
+    <Build Include="tblMFScheduleGroup.sql" />
+    <Build Include="tblMFScheduleGroupDetail.sql" />
+    <Build Include="tblMFScheduleMachineDetail.sql" />
+    <Build Include="tblMFScheduleRule.sql" />
+    <Build Include="tblMFScheduleRuleType.sql" />
+    <Build Include="tblMFScheduleWorkOrder.sql" />
+    <Build Include="tblMFScheduleWorkOrderDetail.sql" />
+    <Build Include="tblMFShiftActivity.sql" />
+    <Build Include="tblMFShiftActivityMachines.sql" />
+    <Build Include="tblMFShiftActivityStatus.sql" />
+    <Build Include="tblMFShiftBreakType.sql" />
+    <Build Include="tblMFShiftDetail.sql" />
+    <Build Include="tblMFStageWorkOrder.sql" />
+    <Build Include="tblMFStationType.sql" />
+    <Build Include="tblMFStorageLocationRestrictionTypeLotStatus.sql" />
+    <Build Include="tblMFSubPatternType.sql" />
+    <Build Include="tblMFTask.sql" />
+    <Build Include="tblMFTaskPriority.sql" />
+    <Build Include="tblMFTaskState.sql" />
+    <Build Include="tblMFTaskType.sql" />
+    <Build Include="tblMFUserPrinterMap.sql" />
+    <Build Include="tblMFUserRoleEventMap.sql" />
+    <Build Include="tblMFWastage.sql" />
+    <Build Include="tblMFWastageType.sql" />
+    <Build Include="tblMFWorkOrderConsumedLot.sql" />
+    <Build Include="tblMFWorkOrderConsumedSKU.sql" />
+    <Build Include="tblMFWorkOrderInputParentLot.sql" />
+    <Build Include="tblMFWorkOrderItem.sql" />
+    <Build Include="tblMFWorkOrderProducedLot.sql" />
+    <Build Include="tblMFWorkOrderProducedLotTransaction.sql" />
+    <Build Include="tblMFWorkOrderProducedSKU.sql" />
+    <Build Include="tblMFWorkOrderProductSpecification.sql" />
+    <Build Include="tblMFWorkOrderRecipe.sql" />
+    <Build Include="tblMFWorkOrderRecipeCategory.sql" />
+    <Build Include="tblMFWorkOrderRecipeComputation.sql" />
+    <Build Include="tblMFWorkOrderRecipeComputationMethod.sql" />
+    <Build Include="tblMFWorkOrderRecipeComputationType.sql" />
+    <Build Include="tblMFWorkOrderRecipeItem.sql" />
+    <Build Include="tblMFWorkOrderRecipeSubstituteItem.sql" />
+    <Build Include="tblMFYield.sql" />
+    <Build Include="tblMFYieldDetail.sql" />
+    <Build Include="tblMFYieldTransaction.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

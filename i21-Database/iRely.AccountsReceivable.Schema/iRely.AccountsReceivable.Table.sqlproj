@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.AccountsReceivable.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{2fc3c5b2-8159-4ee1-b7e4-6aada9fd31a6}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.AccountsReceivable.Schema</RootNamespace>
+    <AssemblyName>iRely.AccountsReceivable.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblARCollectionOverdue.sql" />
+    <Build Include="tblARCollectionOverdueDetail.sql" />
+    <Build Include="tblARCommission.sql" />
+    <Build Include="tblARCommissionDetail.sql" />
+    <Build Include="tblARCommissionPlan.sql" />
+    <Build Include="tblARCommissionPlanAccount.sql" />
+    <Build Include="tblARCommissionPlanAgent.sql" />
+    <Build Include="tblARCommissionPlanItem.sql" />
+    <Build Include="tblARCommissionPlanItemCategory.sql" />
+    <Build Include="tblARCommissionPlanSalesperson.sql" />
+    <Build Include="tblARCommissionRecap.sql" />
+    <Build Include="tblARCommissionRecapDetail.sql" />
+    <Build Include="tblARCommissionSchedule.sql" />
+    <Build Include="tblARCommissionScheduleDetail.sql" />
+    <Build Include="tblARCompanyPreference.sql" />
+    <Build Include="tblARCreditBalancePayOut.sql" />
+    <Build Include="tblARCreditBalancePayOutDetail.sql" />
+    <Build Include="tblARCustomerAccountStatus.sql" />
+    <Build Include="tblARCustomerActivityStagingTable.sql" />
+    <Build Include="tblARCustomerAgingStagingTable.sql" />
+    <Build Include="tblARCustomerApplicatorLicense.sql" />
+    <Build Include="tblARCustomerBudget.sql" />
+    <Build Include="tblARCustomerBuyback.sql" />
+    <Build Include="tblARCustomerCardFueling.sql" />
+    <Build Include="tblARCustomerCategoryPrice.sql" />
+    <Build Include="tblARCustomerCommission.sql" />
+    <Build Include="tblARCustomerCompetitor.sql" />
+    <Build Include="tblARCustomerContract.sql" />
+    <Build Include="tblARCustomerContractDetail.sql" />
+    <Build Include="tblARCustomerFailedImport.sql" />
+    <Build Include="tblARCustomerFarm.sql" />
+    <Build Include="tblARCustomerFieldXRef.sql" />
+    <Build Include="tblARCustomerFreightXRef.sql" />
+    <Build Include="tblARCustomerGroupDetail.sql" />
+    <Build Include="tblARCustomerLicenseInformation.sql" />
+    <Build Include="tblARCustomerLicenseModule.sql" />
+    <Build Include="tblARCustomerLineOfBusiness.sql" />
+    <Build Include="tblARCustomerMasterLicense.sql" />
+    <Build Include="tblARCustomerMessage.sql" />
+    <Build Include="tblARCustomerPortalMenu.sql" />
+    <Build Include="tblARCustomerProductVersion.sql" />
+    <Build Include="tblARCustomerQuote.sql" />
+    <Build Include="tblARCustomerRackQuoteCategory.sql" />
+    <Build Include="tblARCustomerRackQuoteHeader.sql" />
+    <Build Include="tblARCustomerRackQuoteItem.sql" />
+    <Build Include="tblARCustomerRackQuoteVendor.sql" />
+    <Build Include="tblARCustomerSplit.sql" />
+    <Build Include="tblARCustomerSplitDetail.sql" />
+    <Build Include="tblARCustomerStatementStagingTable.sql" />
+    <Build Include="tblARCustomerTaxingTaxException.sql" />
+    <Build Include="tblAREmailTemplate.sql" />
+    <Build Include="tblARGLSummaryStagingTable.sql" />
+    <Build Include="tblARImportFile.sql" />
+    <Build Include="tblARImportInvoiceLog.sql" />
+    <Build Include="tblARImportLog.sql" />
+    <Build Include="tblARImportLogDetail.sql" />
+    <Build Include="tblARIntrCompanyInvoiceStg.sql" />
+    <Build Include="tblARInvoiceAccrual.sql" />
+    <Build Include="tblARInvoiceDetailComponent.sql" />
+    <Build Include="tblARInvoiceDetailCondition.sql" />
+    <Build Include="tblARInvoiceDetailLot.sql" />
+    <Build Include="tblARInvoiceDetailTax.sql" />
+    <Build Include="tblARInvoiceIntegrationLog.sql" />
+    <Build Include="tblARInvoiceIntegrationLogDetail.sql" />
+    <Build Include="tblARInvoiceTransactionHistory.sql" />
+    <Build Include="tblARLead.sql" />
+    <Build Include="tblARLeadSourceList.sql" />
+    <Build Include="tblARLetterPlaceHolder.sql" />
+    <Build Include="tblARNSFStagingTable.sql" />
+    <Build Include="tblARNSFStagingTableDetail.sql" />
+    <Build Include="tblAROriginCompanies.sql" />
+    <Build Include="tblARPaymentDetail.sql" />
+    <Build Include="tblARPaymentIntegrationLog.sql" />
+    <Build Include="tblARPaymentIntegrationLogDetail.sql" />
+    <Build Include="tblARPOS.sql" />
+    <Build Include="tblARPOSDetail.sql" />
+    <Build Include="tblARPOSLog.sql" />
+    <Build Include="tblARPOSPayment.sql" />
+    <Build Include="tblARPostResult.sql" />
+    <Build Include="tblARPrepaidAndCredit.sql" />
+    <Build Include="tblARPricingHistory.sql" />
+    <Build Include="tblARProductRecapStagingTable.sql" />
+    <Build Include="tblARProductType.sql" />
+    <Build Include="tblARProductTypeDetail.sql" />
+    <Build Include="tblARQuoteTemplateDetail.sql" />
+    <Build Include="tblARSalespersonNote.sql" />
+    <Build Include="tblARSearchStatementCustomer.sql" />
+    <Build Include="tblARServiceChargeRecap.sql" />
+    <Build Include="tblARServiceChargeRecapDetail.sql" />
+    <Build Include="tblARSpecialTax.sql" />
+    <Build Include="tblARStatementOfAccount.sql" />
+    <Build Include="tblARTaxAuthority.sql" />
+    <Build Include="tblARTaxStagingTable.sql" />
+    <Build Include="tblARTerritoryDetail.sql" />
+    <Build Include="tblARTransactionDetail.sql" />
+    <Build Include="tblSOSalesOrderDetailComponent.sql" />
+    <Build Include="tblSOSalesOrderDetailTax.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,22 @@
+CREATE TABLE [dbo].[tblMBILInvoiceItem](
+	[intMBILInvoiceItemId]	INT				IDENTITY(1,1) NOT NULL,	
+	[intMBILInvoiceSiteId]	INT				NOT NULL,
+	[intOrderId]			INT				NOT NULL,
+	[strOrderNumber]		NVARCHAR (30) COLLATE Latin1_General_CI_AS NULL,	
+	[strCustomerNumber]		NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
+	[intEntityId]			INT				NULL,
+	[intUserId]				INT				NULL,
+	[strUser]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[intSiteId]				INT				NULL,
+	[intSiteNumber]			INT				NULL,
+	[strSiteName]			NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,
+	[intItemId]				INT				NULL,
+	[strItemNo]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strItemDescription]	NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+	[intItemUOMId]			INT				NULL,
+	[dblQuantity]			NUMERIC (18, 6) NULL,
+	[dblPrice]				NUMERIC (18, 6) NULL,	
+	[intConcurrencyId]		INT				DEFAULT 1 NOT NULL,
+	CONSTRAINT [PK_tblMBILInvoiceItem] PRIMARY KEY CLUSTERED ([intMBILInvoiceItemId] ASC),
+	CONSTRAINT [FK_tblMBILInvoiceItem_tblMBILInvoiceSite] FOREIGN KEY([intMBILInvoiceSiteId]) REFERENCES [dbo].[tblMBILInvoiceSite] ([intMBILInvoiceSiteId]) ON DELETE CASCADE
+)

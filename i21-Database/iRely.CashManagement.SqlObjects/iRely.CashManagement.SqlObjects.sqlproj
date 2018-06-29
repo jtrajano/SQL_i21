@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.CashManagement.SqlObjects</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{9a6d026d-bf91-47d7-a5a5-791b7a73ba4a}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.CashManagement.SqlObjects</RootNamespace>
+    <AssemblyName>iRely.CashManagement.SqlObjects</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Functions" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="Triggers" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\PostDeployment" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsPayable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsPayable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.BuyBack.Table.dacpac">
+      <HintPath>..\packages\iRely.BuyBack.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CardFueling.Table.dacpac">
+      <HintPath>..\packages\iRely.CardFueling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.ContractManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.ContractManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CreditCardCon.Table.dacpac">
+      <HintPath>..\packages\iRely.CreditCardCon.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CRM.Table.dacpac">
+      <HintPath>..\packages\iRely.CRM.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EnergyTrac.Table.dacpac">
+      <HintPath>..\packages\iRely.EnergyTrac.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EntityManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.EntityManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FinancialReportDesigner.Table.dacpac">
+      <HintPath>..\packages\iRely.FinancialReportDesigner.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FixedAsset.Table.dacpac">
+      <HintPath>..\packages\iRely.FixedAsset.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.GeneralLedger.Table.dacpac">
+      <HintPath>..\packages\iRely.GeneralLedger.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Grain.Table.dacpac">
+      <HintPath>..\packages\iRely.Grain.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.HelpDesk.Table.dacpac">
+      <HintPath>..\packages\iRely.HelpDesk.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Integration.Table.dacpac">
+      <HintPath>..\packages\iRely.Integration.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Inventory.Table.dacpac">
+      <HintPath>..\packages\iRely.Inventory.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Logistics.Table.dacpac">
+      <HintPath>..\packages\iRely.Logistics.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Manufacturing.Table.dacpac">
+      <HintPath>..\packages\iRely.Manufacturing.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.MeterBilling.Table.dacpac">
+      <HintPath>..\packages\iRely.MeterBilling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.NotesReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.NotesReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Patronage.Table.dacpac">
+      <HintPath>..\packages\iRely.Patronage.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Payroll.Table.dacpac">
+      <HintPath>..\packages\iRely.Payroll.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Quality.Table.dacpac">
+      <HintPath>..\packages\iRely.Quality.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.RiskManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.RiskManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Scale.Table.dacpac">
+      <HintPath>..\packages\iRely.Scale.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Store.Table.dacpac">
+      <HintPath>..\packages\iRely.Store.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.SystemManager.Table.dacpac">
+      <HintPath>..\packages\iRely.SystemManager.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TankManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.TankManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TaxForm.Table.dacpac">
+      <HintPath>..\packages\iRely.TaxForm.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Transports.Table.dacpac">
+      <HintPath>..\packages\iRely.Transports.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.VendorRebates.Table.dacpac">
+      <HintPath>..\packages\iRely.VendorRebates.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Warehouse.Table.dacpac">
+      <HintPath>..\packages\iRely.Warehouse.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Dashboard.Table.dacpac">
+      <HintPath>..\packages\iRely.Dashboard.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CashManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.CashManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Objects.dacpac">
+      <HintPath>..\packages\iRely.Circular.Objects.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Functions\fnCMGetACHTransactionCode.sql" />
+    <Build Include="Functions\fnCMGetBankAccountHistoricRate.sql" />
+    <Build Include="Stored Procedures\uspCMAddDeposit.sql" />
+    <Build Include="Stored Procedures\uspCMAddPayment.sql" />
+    <Build Include="Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
+    <Build Include="Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
+    <Build Include="Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
+    <Build Include="Stored Procedures\uspCMBankDepositReport.sql" />
+    <Build Include="Stored Procedures\uspCMBankFileGenerationLog.sql" />
+    <Build Include="Stored Procedures\uspCMBankReconClearedDepositsSubReport.sql" />
+    <Build Include="Stored Procedures\uspCMBankReconClearedPaymentsSubReport.sql" />
+    <Build Include="Stored Procedures\uspCMBankReconReport.sql" />
+    <Build Include="Stored Procedures\uspCMBankReconUnclearedDepositsSubReport.sql" />
+    <Build Include="Stored Procedures\uspCMBankReconUnclearedPaymentsSubReport.sql" />
+    <Build Include="Stored Procedures\uspCMBatchPosting.sql" />
+    <Build Include="Stored Procedures\uspCMBookGLEntries.sql" />
+    <Build Include="Stored Procedures\uspCMCheckNumberAuditReport.sql" />
+    <Build Include="Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
+    <Build Include="Stored Procedures\uspCMCheckPrint_GetCheckSettlement.sql" />
+    <Build Include="Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql" />
+    <Build Include="Stored Procedures\uspCMCheckPrint_ValidatePrintJobs.sql" />
+    <Build Include="Stored Procedures\uspCMClearRangeByCheckNo.sql" />
+    <Build Include="Stored Procedures\uspCMClearRangeByDate.sql" />
+    <Build Include="Stored Procedures\uspCMCommitPrintCheckVerification.sql" />
+    <Build Include="Stored Procedures\uspCMErrorMessages.sql" />
+    <Build Include="Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
+    <Build Include="Stored Procedures\uspCMFixStartingNumbers.sql" />
+    <Build Include="Stored Procedures\uspCMGenerateCheckNumbers.sql" />
+    <Build Include="Stored Procedures\uspCMGetBankAccountRegister.sql" />
+    <Build Include="Stored Procedures\uspCMGetBankBalance.sql" />
+    <Build Include="Stored Procedures\uspCMGetBankBeginningBalance.sql" />
+    <Build Include="Stored Procedures\uspCMGetBankCurrentEndingBalance.sql" />
+    <Build Include="Stored Procedures\uspCMGetBankGLBalance.sql" />
+    <Build Include="Stored Procedures\uspCMGetClearedDeposits.sql" />
+    <Build Include="Stored Procedures\uspCMGetClearedPayments.sql" />
+    <Build Include="Stored Procedures\uspCMGetDuplicateCheckNumber.sql" />
+    <Build Include="Stored Procedures\uspCMGetUnclearedDeposits.sql" />
+    <Build Include="Stored Procedures\uspCMGetUnclearedPayments.sql" />
+    <Build Include="Stored Procedures\uspCMImportBankAccountsFromOrigin.sql" />
+    <Build Include="Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
+    <Build Include="Stored Procedures\uspCMImportBanksFromOrigin.sql" />
+    <Build Include="Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
+    <Build Include="Stored Procedures\uspCMImportValidations.sql" />
+    <Build Include="Stored Procedures\uspCMInsertGainLossBankTransfer.sql" />
+    <Build Include="Stored Procedures\uspCMMiscCheckReversal.sql" />
+    <Build Include="Stored Procedures\uspCMPostBankTransfer.sql" />
+    <Build Include="Stored Procedures\uspCMPostMiscChecks.sql" />
+    <Build Include="Stored Procedures\uspCMPostVoidCheck.sql" />
+    <Build Include="Stored Procedures\uspCMProcessUndepositedFunds.sql" />
+    <Build Include="Stored Procedures\uspCMReconcileBankRecords.sql" />
+    <Build Include="Stored Procedures\uspCMRecurTransaction.sql" />
+    <Build Include="Stored Procedures\uspCMSettlementReport.sql" />
+    <Build Include="Stored Procedures\uspCMTransactionBatchEntry.sql" />
+    <Build Include="Stored Procedures\uspCMTransactionBatchEntryBatchPosting.sql" />
+    <Build Include="Stored Procedures\uspCMUnreconcileBankRecords.sql" />
+    <Build Include="Stored Procedures\uspCMUpdateEFTNextNo.sql" />
+    <Build Include="Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleOverflowReport.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleReport.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPayment.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPaymentOverflow.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorBasisAdvance.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleSubReportAPVendorPrepayment.sql" />
+    <Build Include="Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
+    <Build Include="Views\vyuCMACHFromCustomer.sql" />
+    <Build Include="Views\vyuCMBank.sql" />
+    <Build Include="Views\vyuCMBankTransaction.sql" />
+    <Build Include="Views\vyuCMBankTransactionBatchDetail.sql" />
+    <Build Include="Views\vyuCMCashGLAccountSetup.sql" />
+    <Build Include="Views\vyuCMExchangeRateTypeCombo.sql" />
+    <Build Include="Views\vyuCMOriginUndepositedFund.sql" />
+    <Build Include="Views\vyuCMUndepositedFund.sql" />
+    <Build Include="Views\vyuCMUndepositedPayment.sql" />
+    <Build Include="Stored Procedures\PagedBankReconDepositAndCredit.sql" />
+    <Build Include="Stored Procedures\PagedBankReconPaymentAndDebit.sql" />
+    <Build Include="Triggers\trgCMInsertBankAccount.sql" />
+    <Build Include="Triggers\trgCMUpdateBankAccount.sql" />
+    <Build Include="Triggers\trgCMDeleteUndepositedFunds.sql" />
+    <Build Include="Triggers\trgCMInsteadOfInserBank.sql" />
+    <Build Include="Triggers\trgCMInsteadOfUpdateBank.sql" />
+    <None Include="Scripts\PostDeployment\1_BankTransactionTypes.sql" />
+    <None Include="Scripts\PostDeployment\2_DataImportStatus.sql" />
+    <None Include="Scripts\PostDeployment\3_PopulateSourceSystemData.sql" />
+    <None Include="Scripts\PostDeployment\4_DataFix.sql" />
+    <PostDeploy Include="Scripts\PostDeploy.sql" />
+  </ItemGroup>
+</Project>

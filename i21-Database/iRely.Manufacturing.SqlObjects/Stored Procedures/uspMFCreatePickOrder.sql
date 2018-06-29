@@ -1,0 +1,1067 @@
+﻿CREATE PROCEDURE [dbo].uspMFCreatePickOrder (
+	@strXML NVARCHAR(MAX)
+	,@intOrderHeaderId INT OUTPUT
+	)
+AS
+BEGIN TRY
+	DECLARE @idoc INT
+		,@ErrMsg NVARCHAR(MAX)
+		,@intUserId INT
+		,@intLocationId INT
+		,@dtmCurrentDate DATETIME
+		,@intOwnerId INT
+		,@strBlendProductionStagingLocation NVARCHAR(50)
+		,@intOrderTermsId INT
+		,@strUserName NVARCHAR(50)
+		,@strBOLNo NVARCHAR(50)
+		,@intEntityId INT
+		,@strItemNo NVARCHAR(50)
+		,@intBlendProductionStagingUnitId INT
+		,@intPackagingCategoryId INT
+		,@strPackagingCategory NVARCHAR(50)
+		,@intManufacturingProcessId INT
+		,@intDayOfYear INT
+		,@intStageLocationTypeId INT
+		,@strStageLocationType NVARCHAR(50)
+		,@intProductionStagingId INT
+		,@intProductionStageLocationId INT
+		,@intStagingId INT
+		,@intStageLocationId INT
+		,@intItemId INT
+		,@dblQty NUMERIC(18, 6)
+		,@intItemUOMId INT
+		,@intLineNo INT
+		,@dblAvailableQty NUMERIC(18, 6)
+		,@dblRequiredQty NUMERIC(18, 6)
+		,@dblSubstituteRatio NUMERIC(18, 6)
+		,@dblMaxSubstituteRatio NUMERIC(18, 6)
+		,@dblPlannedQty NUMERIC(18, 6)
+		,@intWorkOrderId INT
+		,@intItemRecordId INT
+		,@dblQtyCanBeProduced NUMERIC(18, 6)
+		,@dblMinQtyCanBeProduced NUMERIC(18, 6)
+		,@strRequiredQty NVARCHAR(50)
+		,@strAvailableQty NVARCHAR(50)
+		,@intUnitMeasureId INT
+		,@strUnitMeasure NVARCHAR(50)
+		,@strMinQtyCanBeProduced NVARCHAR(50)
+		,@intProductId INT
+		,@intSubstituteItemId INT
+		,@intSubstituteItemUOMId INT
+		,@intPMCategoryId INT
+		,@intPMStageLocationId INT
+		,@intStagingLocationId INT
+		,@strPickByUpperToleranceQty NVARCHAR(50)
+		,@ysnPickRemainingQty BIT
+		,@strReferernceNo NVARCHAR(50)
+		,@ysnGenerateTaskOnCreatePickOrder BIT
+		,@strInventoryTracking NVARCHAR(50)
+		,@intStorageLocationId int
+		,@intRecipeTypeId int
+
+	SELECT @dtmCurrentDate = GetDate()
+
+	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDate)
+
+	EXEC sp_xml_preparedocument @idoc OUTPUT
+		,@strXML
+
+	SELECT @intManufacturingProcessId = intManufacturingProcessId
+		,@intLocationId = x.intLocationId
+		,@intUserId = intUserId
+		,@ysnPickRemainingQty = IsNULL(ysnPickRemainingQty, 1)
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intManufacturingProcessId INT
+			,intLocationId INT
+			,intUserId INT
+			,ysnPickRemainingQty BIT
+			) x
+
+	--Select @ysnPickRemainingQty=0
+	DECLARE @tblMFWorkOrder TABLE (
+		intWorkOrderId INT
+		,intItemId INT
+		,dblPlannedQty NUMERIC(18, 6)
+		,dtmPlannedDate DATETIME
+		,intPlannedShift INT
+		,intItemUOMId INT
+		)
+
+	INSERT INTO @tblMFWorkOrder (
+		intWorkOrderId
+		,intItemId
+		,dblPlannedQty
+		,dtmPlannedDate
+		,intPlannedShift
+		,intItemUOMId
+		)
+	SELECT x.intWorkOrderId
+		,x.intItemId
+		,x.dblPlannedQty
+		,x.dtmPlannedDate
+		,x.intPlannedShift
+		,W.intItemUOMId
+	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+			intWorkOrderId INT
+			,intItemId INT
+			,dblPlannedQty NUMERIC(18, 6)
+			,dtmPlannedDate DATETIME
+			,intPlannedShift INT
+			) x
+	JOIN tblMFWorkOrder W ON W.intWorkOrderId = x.intWorkOrderId
+
+	DECLARE @tblMFWorkOrderFinal TABLE (
+		intItemId INT
+		,dblPlannedQty NUMERIC(18, 6)
+		,intItemUOMId INT
+		)
+
+	INSERT INTO @tblMFWorkOrderFinal (
+		intItemId
+		,dblPlannedQty
+		,intItemUOMId
+		)
+	SELECT intItemId
+		,SUM(dblPlannedQty)
+		,intItemUOMId
+	FROM @tblMFWorkOrder
+	GROUP BY intItemId
+		,intItemUOMId
+
+	SELECT @intPackagingCategoryId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Packaging Category'
+
+	SELECT @intPMCategoryId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intPackagingCategoryId
+
+	SELECT @intBlendProductionStagingUnitId = intBlendProductionStagingUnitId
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @intLocationId
+
+	SELECT @strPickByUpperToleranceQty = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 95 -- 'Pick By Upper Tolerance Qty'
+
+	IF @strPickByUpperToleranceQty IS NULL
+	BEGIN
+		SELECT @strPickByUpperToleranceQty = 'False'
+	END
+
+	SELECT @strUserName = strUserName
+	FROM tblSMUserSecurity
+	WHERE [intEntityId] = @intUserId
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+		,@intItemId = NULL
+		,@intManufacturingId = NULL
+		,@intSubLocationId = NULL
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = 6
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 75
+		,@ysnProposed = 0
+		,@strPatternString = @strBOLNo OUTPUT
+
+	DECLARE @tblMFOrderHeader TABLE (intOrderHeaderId INT)
+
+	SELECT @intStageLocationTypeId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Staging Location Type'
+
+	SELECT @strStageLocationType = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intStageLocationTypeId
+
+	SELECT @intProductionStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Production Staging Location'
+
+	SELECT @intProductionStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intProductionStagingId
+
+	SELECT @intStagingId = intAttributeId
+	FROM tblMFAttribute
+	WHERE strAttributeName = 'Staging Location'
+
+	SELECT @intStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = @intStagingId
+
+	SELECT @intPMStageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 90 --PM Staging Location
+
+	DECLARE @tblMFStageLocation TABLE (intStageLocationId INT)
+
+	INSERT INTO @tblMFStageLocation
+	SELECT intStagingLocationId
+	FROM tblMFManufacturingProcessMachine
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intProductionStagingLocationId IS NOT NULL
+	
+	UNION
+	
+	SELECT strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 76
+	
+	UNION
+	
+	SELECT @intPMStageLocationId
+
+	IF (
+			(
+				@strStageLocationType = 'Production Staging Location'
+				AND @intProductionStageLocationId IS NULL
+				)
+			OR (
+				@strStageLocationType = 'Staging Location'
+				AND @intStageLocationId IS NULL
+				)
+			)
+	BEGIN
+		RAISERROR (
+				'Staging/Production Staging Location is not configured in the manufacturing process attribute.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
+	BEGIN TRANSACTION
+
+	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
+
+	SELECT @strReferernceNo = strWorkOrderNo,@intRecipeTypeId=intRecipeTypeId 
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId IN (
+			SELECT intWorkOrderId
+			FROM @tblMFWorkOrder
+			)
+
+	INSERT INTO @OrderHeaderInformation (
+		intOrderStatusId
+		,intOrderTypeId
+		,intOrderDirectionId
+		,strOrderNo
+		,strReferenceNo
+		,intStagingLocationId
+		,strComment
+		,dtmOrderDate
+		,strLastUpdateBy
+		,intLocationId
+		)
+	SELECT 1
+		,1
+		,2
+		,@strBOLNo
+		,@strReferernceNo
+		,CASE 
+			WHEN @strStageLocationType = 'Alternate Staging Location'
+				THEN NULL
+			WHEN @strStageLocationType = 'Production Staging Location'
+				THEN @intProductionStageLocationId
+			ELSE @intStageLocationId
+			END
+		,''
+		,@dtmCurrentDate
+		,@strUserName
+		,@intLocationId
+
+	INSERT INTO @tblMFOrderHeader
+	EXEC dbo.uspMFCreateStagingOrder @OrderHeaderInformation = @OrderHeaderInformation
+
+	SELECT @intOrderHeaderId = intOrderHeaderId
+	FROM @tblMFOrderHeader
+
+	DECLARE @OrderDetail AS OrderDetailInformation
+	DECLARE @OrderDetailInformation AS OrderDetailInformation
+
+	IF EXISTS (
+			SELECT *
+			FROM tblMFWorkOrder W
+			JOIN @tblMFWorkOrder W1 ON W.intWorkOrderId = W1.intWorkOrderId
+			WHERE intTransactionFrom = 1
+			)
+	BEGIN
+		INSERT INTO @OrderDetailInformation (
+			intOrderHeaderId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dblWeightPerUnit
+			,intLotId
+			,strLotAlias
+			,intUnitsPerLayer
+			,intLayersPerPallet
+			,intPreferenceId
+			,dtmProductionDate
+			,intLineNo
+			,intSanitizationOrderDetailsId
+			,strLineItemNote
+			)
+		SELECT @intOrderHeaderId
+			,CL.intItemId
+			,SUm(L.dblQty)
+			,L.intItemUOMId
+			,SUm(L.dblWeight)
+			,L.intWeightUOMId
+			,L.dblWeightPerQty
+			,L.intLotId
+			,L.strLotAlias
+			,I.intUnitPerLayer
+			,intLayerPerPallet
+			,(
+				SELECT TOP 1 intPickListPreferenceId
+				FROM tblMFPickListPreference
+				)
+			,L.dtmDateCreated
+			,Row_Number() OVER (
+				ORDER BY CL.intItemId
+				)
+			,NULL
+			,''
+		FROM dbo.tblMFWorkOrderConsumedLot CL
+		JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
+		JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
+		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
+		WHERE CL.intWorkOrderId IN (
+				SELECT x.intWorkOrderId
+				FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (intWorkOrderId INT) x
+				)
+		GROUP BY CL.intItemId
+			,L.intItemUOMId
+			,L.intWeightUOMId
+			,L.dblWeightPerQty
+			,L.intLotId
+			,L.strLotAlias
+			,I.intUnitPerLayer
+			,intLayerPerPallet
+			,L.dtmDateCreated
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @OrderDetail (
+			intOrderHeaderId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dblWeightPerUnit
+			,dblRequiredQty
+			,intUnitsPerLayer
+			,intLayersPerPallet
+			,intPreferenceId
+			,intLineNo
+			,intSanitizationOrderDetailsId
+			,strLineItemNote
+			,intStagingLocationId
+			,strInventoryTracking
+			,intStorageLocationId
+			)
+		SELECT @intOrderHeaderId
+			,ri.intItemId
+			,SUM(CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING((
+										(
+											CASE 
+												WHEN @strPickByUpperToleranceQty = 'True'
+													THEN ri.dblCalculatedUpperTolerance
+												ELSE ri.dblCalculatedQuantity
+												END
+											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+										)) AS NUMERIC(38, 2))
+					ELSE (
+							(
+								CASE 
+									WHEN @strPickByUpperToleranceQty = 'True'
+										THEN ri.dblCalculatedUpperTolerance
+									ELSE ri.dblCalculatedQuantity
+									END
+								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+							)
+					END)
+			,ri.intItemUOMId
+			,SUM(CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING((
+										(
+											CASE 
+												WHEN @strPickByUpperToleranceQty = 'True'
+													THEN ri.dblCalculatedUpperTolerance
+												ELSE ri.dblCalculatedQuantity
+												END
+											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+										)) AS NUMERIC(38, 2))
+					ELSE (
+							(
+								CASE 
+									WHEN @strPickByUpperToleranceQty = 'True'
+										THEN ri.dblCalculatedUpperTolerance
+									ELSE ri.dblCalculatedQuantity
+									END
+								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+							)
+					END)
+			,ri.intItemUOMId
+			,MAX(IU.dblUnitQty)
+			,SUM(CASE 
+					WHEN C.strCategoryCode = @strPackagingCategory
+						THEN CAST(CEILING((
+										(
+											CASE 
+												WHEN @strPickByUpperToleranceQty = 'True'
+													THEN ri.dblCalculatedUpperTolerance
+												ELSE ri.dblCalculatedQuantity
+												END
+											) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+										)) AS NUMERIC(38, 2))
+					ELSE (
+							(
+								CASE 
+									WHEN @strPickByUpperToleranceQty = 'True'
+										THEN ri.dblCalculatedUpperTolerance
+									ELSE ri.dblCalculatedQuantity
+									END
+								) * (dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, r.intItemUOMId, W.dblPlannedQty) / r.dblQuantity)
+							)
+					END)
+			,ISNULL(NULL, I.intUnitPerLayer)
+			,ISNULL(NULL, I.intLayerPerPallet)
+			,(
+				SELECT TOP 1 intPickListPreferenceId
+				FROM tblMFPickListPreference
+				)
+			,Row_Number() OVER (
+				ORDER BY MAX(ri.intRecipeItemId)
+				)
+			,NULL
+			,''
+			,CASE 
+				WHEN C.intCategoryId = @intPMCategoryId
+					THEN (CASE WHEN @intPMStageLocationId = 0 THEN NULL ELSE @intPMStageLocationId END)
+				ELSE NULL
+				END
+			,I.strInventoryTracking
+			,ri.intStorageLocationId
+		FROM dbo.tblMFRecipeItem ri
+		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			AND r.ysnActive = 1
+			AND r.intLocationId = @intLocationId
+		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
+		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId
+		JOIN dbo.tblICItem P ON r.intItemId = P.intItemId
+		JOIN @tblMFWorkOrderFinal W ON W.intItemId = r.intItemId
+		WHERE ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId in (1,2)
+		--,2
+		GROUP BY ri.intItemId
+			,ri.intItemUOMId
+			,I.intUnitPerLayer
+			,I.intLayerPerPallet
+			,C.intCategoryId
+			,I.strInventoryTracking
+			,ri.intStorageLocationId
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM @OrderDetail
+				) and @intRecipeTypeId<>3
+		BEGIN
+			RAISERROR (
+					'There is no input item to create a pick list. Please check the recipe input item set up.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
+
+		DECLARE @tblMFRequiredQty TABLE (
+			intItemId INT
+			,dblRequiredQty DECIMAL(38, 20)
+			)
+
+		INSERT INTO @tblMFRequiredQty (
+			intItemId
+			,dblRequiredQty
+			)
+		SELECT OD1.intItemId
+			,IsNULL(sum(OD.dblRequiredQty), 0)
+		FROM @OrderDetail OD1
+		LEFT JOIN tblMFOrderDetail OD ON OD1.intItemId = OD.intItemId
+			AND OD.intOrderHeaderId IN (
+				SELECT OH.intOrderHeaderId
+				FROM tblMFOrderHeader OH
+				WHERE OH.intOrderTypeId = 1
+					AND OH.intOrderStatusId <> 10
+				)
+		GROUP BY OD1.intItemId
+
+		IF @ysnPickRemainingQty = 1
+		BEGIN
+			DECLARE @tblMFStagedQty TABLE (
+				intItemId INT
+				,dblStagedQty DECIMAL(38, 20)
+				)
+
+			INSERT INTO @tblMFStagedQty (
+				intItemId
+				,dblStagedQty
+				)
+			SELECT OD1.intItemId
+				,IsNULL(sum(CASE 
+							WHEN L.intWeightUOMId IS NULL
+								THEN L.dblQty
+							ELSE L.dblWeight
+							END), 0)
+			FROM @OrderDetail OD1
+			LEFT JOIN dbo.tblICLot L ON L.intItemId = OD1.intItemId
+			WHERE L.intStorageLocationId IN (
+					SELECT intStageLocationId
+					FROM @tblMFStageLocation
+					)
+			GROUP BY OD1.intItemId
+
+			DECLARE @tblMFRemainingQty TABLE (
+				intItemId INT
+				,dblRemainingQty DECIMAL(38, 20)
+				)
+
+			INSERT INTO @tblMFRemainingQty (
+				intItemId
+				,dblRemainingQty
+				)
+			SELECT R.intItemId
+				,(
+					CASE 
+						WHEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0) > 0
+							THEN IsNULL(dblStagedQty, 0) - IsNULL(dblRequiredQty, 0)
+						ELSE 0
+						END
+					)
+			FROM @tblMFRequiredQty R
+			LEFT JOIN @tblMFStagedQty S ON S.intItemId = R.intItemId
+
+			UPDATE OD
+			SET dblQty = CASE 
+					WHEN dblQty - R.dblRemainingQty < 0
+						THEN 0
+					ELSE dblQty - R.dblRemainingQty
+					END
+				,dblWeight = CASE 
+					WHEN dblWeight - R.dblRemainingQty < 0
+						THEN 0
+					ELSE dblWeight - R.dblRemainingQty
+					END
+				,dblSurplusQtyInStageLocation = R.dblRemainingQty
+			FROM @OrderDetail OD
+			LEFT JOIN @tblMFRemainingQty R ON R.intItemId = OD.intItemId
+		END
+
+		SELECT @intWorkOrderId = intWorkOrderId
+			,@intProductId = intItemId
+			,@dblPlannedQty = dblPlannedQty
+		FROM @tblMFWorkOrder
+
+		INSERT INTO @OrderDetailInformation (
+			intOrderHeaderId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dblWeightPerUnit
+			,dblRequiredQty
+			,intUnitsPerLayer
+			,intLayersPerPallet
+			,intPreferenceId
+			,intLineNo
+			,intSanitizationOrderDetailsId
+			,strLineItemNote
+			,intStagingLocationId
+			,dblSurplusQtyInStageLocation
+			,strInventoryTracking
+			,intStorageLocationId
+			)
+		SELECT intOrderHeaderId
+			,intItemId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dblWeightPerUnit
+			,dblRequiredQty
+			,intUnitsPerLayer
+			,intLayersPerPallet
+			,intPreferenceId
+			,intLineNo
+			,intSanitizationOrderDetailsId
+			,strLineItemNote
+			,intStagingLocationId
+			,dblSurplusQtyInStageLocation
+			,strInventoryTracking
+			,intStorageLocationId
+		FROM @OrderDetail
+
+		SELECT @dblMinQtyCanBeProduced = - 1
+
+		SELECT @intLineNo = MIn(intLineNo)
+		FROM @OrderDetail
+
+		WHILE @intLineNo IS NOT NULL
+		BEGIN
+			SELECT @intItemId = NULL
+				,@dblQty = NULL
+				,@dblRequiredQty = NULL
+				,@intItemUOMId = NULL
+				,@intStagingLocationId = NULL
+				,@strInventoryTracking = NULL
+				,@intStorageLocationId =NULL
+
+			SELECT @intItemId = intItemId
+				,@dblQty = dblQty
+				,@dblRequiredQty = dblRequiredQty
+				,@intItemUOMId = intItemUOMId
+				,@intStagingLocationId = intStagingLocationId
+				,@strInventoryTracking = strInventoryTracking
+				,@intStorageLocationId=intStorageLocationId
+			FROM @OrderDetailInformation
+			WHERE intLineNo = @intLineNo
+
+			IF @strInventoryTracking = 'Item Level'
+			BEGIN
+				SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, @intItemUOMId, S.dblOnHand - S.dblUnitReserved))
+				FROM dbo.tblICItemStockUOM S
+				JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+					AND S.intItemId = @intItemId
+					AND S.dblOnHand - S.dblUnitReserved > 0
+				JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+					AND IU.ysnStockUnit = 1
+				JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+				WHERE S.intItemId = @intItemId
+					AND IL.intLocationId = @intLocationId
+					AND S.intStorageLocationId NOT IN (
+						SELECT intStageLocationId
+						FROM @tblMFStageLocation
+						)
+			END
+			ELSE
+			BEGIN
+				SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+				JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
+					AND R.strInternalCode = 'STOCK'
+				JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+				JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+					AND BS.strPrimaryStatus = 'Active'
+				WHERE L.intItemId = @intItemId
+					AND L.intLocationId = @intLocationId
+					AND L.intLotStatusId = 1
+					AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+					AND L.intStorageLocationId NOT IN (
+						SELECT intStageLocationId
+						FROM @tblMFStageLocation
+						)
+			END
+
+			IF @dblAvailableQty IS NULL
+				OR @dblAvailableQty < 0
+			BEGIN
+				SELECT @dblAvailableQty = 0
+
+				DELETE
+				FROM @OrderDetailInformation
+				WHERE intLineNo = @intLineNo
+					AND dblQty = dblRequiredQty
+			END
+
+			IF @dblQty - @dblAvailableQty > 0
+			BEGIN
+				SELECT @dblQty = @dblQty - @dblAvailableQty
+
+				UPDATE @OrderDetailInformation
+				SET dblQty = @dblAvailableQty
+					,dblWeight = @dblAvailableQty
+					,dblRequiredQty = dblRequiredQty - dblQty + @dblAvailableQty
+				WHERE intLineNo = @intLineNo
+
+				DECLARE @tblSubstituteItem TABLE (
+					intItemRecordId INT Identity(1, 1)
+					,intSubstituteItemId INT
+					,dblSubstituteRatio NUMERIC(18, 6)
+					,dblMaxSubstituteRatio NUMERIC(18, 6)
+					,strInventoryTracking NVARCHAR(50)
+					)
+
+				INSERT INTO @tblSubstituteItem (
+					intSubstituteItemId
+					,dblSubstituteRatio
+					,dblMaxSubstituteRatio
+					,strInventoryTracking
+					)
+				SELECT rs.intSubstituteItemId
+					,dblSubstituteRatio
+					,dblMaxSubstituteRatio
+					,I.strInventoryTracking
+				FROM dbo.tblMFRecipe r
+				JOIN dbo.tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
+				JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+				JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
+				WHERE r.intItemId = @intProductId
+					AND r.intLocationId = @intLocationId
+					AND r.ysnActive = 1
+					AND ri.intItemId = @intItemId
+
+				SELECT @intItemRecordId = MIN(intItemRecordId)
+				FROM @tblSubstituteItem
+
+				WHILE @intItemRecordId IS NOT NULL
+				BEGIN
+					SELECT @dblSubstituteRatio = NULL
+						,@dblMaxSubstituteRatio = NULL
+						,@intSubstituteItemId = NULL
+						,@strInventoryTracking = NULL
+
+					SELECT @dblSubstituteRatio = dblSubstituteRatio
+						,@dblMaxSubstituteRatio = dblMaxSubstituteRatio
+						,@intSubstituteItemId = intSubstituteItemId
+						,@strInventoryTracking = strInventoryTracking
+					FROM @tblSubstituteItem
+					WHERE intItemRecordId = @intItemRecordId
+
+					SELECT @intUnitMeasureId = intUnitMeasureId
+					FROM dbo.tblICItemUOM
+					WHERE intItemUOMId = @intItemUOMId
+
+					SELECT @intSubstituteItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intSubstituteItemId
+						AND intUnitMeasureId = @intUnitMeasureId
+
+					SELECT @dblAvailableQty = 0
+
+					IF @strInventoryTracking = 'Item Level'
+					BEGIN
+						SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(S.intItemUOMId, @intItemUOMId, S.dblOnHand - S.dblUnitReserved))
+						FROM dbo.tblICItemStockUOM S
+						JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+							AND S.intItemId = @intItemId
+							AND S.dblOnHand - S.dblUnitReserved > 0
+						JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+							AND IU.ysnStockUnit = 1
+						JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
+						WHERE S.intItemId = @intItemId
+							AND IL.intLocationId = @intLocationId
+							AND S.intStorageLocationId NOT IN (
+								SELECT intStageLocationId
+								FROM @tblMFStageLocation
+								)
+					END
+					ELSE
+					BEGIN
+						SELECT @dblAvailableQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intItemUOMId, L.dblQty))
+						FROM dbo.tblICLot L
+						JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+						JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
+							AND R.strInternalCode = 'STOCK'
+						JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+						JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+							AND BS.strPrimaryStatus = 'Active'
+						JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+						WHERE L.intItemId = @intSubstituteItemId
+							AND L.intLocationId = @intLocationId
+							AND LS.strPrimaryStatus = 'Active'
+							AND ISNULL(dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
+							AND L.intStorageLocationId NOT IN (
+								SELECT intStageLocationId
+								FROM @tblMFStageLocation
+								)
+					END
+
+					IF @dblAvailableQty IS NULL
+					BEGIN
+						SELECT @dblAvailableQty = 0
+
+						GOTO x
+					END
+
+					SELECT @dblQty = @dblQty * (@dblMaxSubstituteRatio / 100) * @dblSubstituteRatio
+
+					IF @dblAvailableQty - @dblQty >= 0
+					BEGIN
+						INSERT INTO @OrderDetailInformation (
+							intOrderHeaderId
+							,intItemId
+							,dblQty
+							,intItemUOMId
+							,dblWeight
+							,intWeightUOMId
+							,dblWeightPerUnit
+							,dblRequiredQty
+							,intUnitsPerLayer
+							,intLayersPerPallet
+							,intPreferenceId
+							,intLineNo
+							,intSanitizationOrderDetailsId
+							,strLineItemNote
+							,intStagingLocationId
+							,intStorageLocationId
+							)
+						SELECT @intOrderHeaderId
+							,intItemId
+							,@dblQty
+							,@intSubstituteItemUOMId
+							,@dblQty
+							,@intSubstituteItemUOMId
+							,1
+							,@dblQty
+							,ISNULL(NULL, intUnitPerLayer)
+							,ISNULL(NULL, intLayerPerPallet)
+							,(
+								SELECT TOP 1 intPickListPreferenceId
+								FROM tblMFPickListPreference
+								)
+							,(
+								SELECT MAX(intLineNo) + 1
+								FROM @OrderDetailInformation
+								)
+							,NULL
+							,''
+							,@intStagingLocationId
+							,@intStorageLocationId
+						FROM tblICItem
+						WHERE intItemId = @intSubstituteItemId
+
+						SELECT @dblQty = 0
+
+						BREAK
+					END
+					ELSE
+					BEGIN
+						INSERT INTO @OrderDetailInformation (
+							intOrderHeaderId
+							,intItemId
+							,dblQty
+							,intItemUOMId
+							,dblWeight
+							,intWeightUOMId
+							,dblWeightPerUnit
+							,dblRequiredQty
+							,intUnitsPerLayer
+							,intLayersPerPallet
+							,intPreferenceId
+							,intLineNo
+							,intSanitizationOrderDetailsId
+							,strLineItemNote
+							,intStagingLocationId
+							,intStorageLocationId
+							)
+						SELECT @intOrderHeaderId
+							,intItemId
+							,@dblAvailableQty
+							,@intSubstituteItemUOMId
+							,@dblAvailableQty
+							,@intSubstituteItemUOMId
+							,1
+							,@dblAvailableQty
+							,ISNULL(NULL, intUnitPerLayer)
+							,ISNULL(NULL, intLayerPerPallet)
+							,(
+								SELECT TOP 1 intPickListPreferenceId
+								FROM tblMFPickListPreference
+								)
+							,(
+								SELECT MAX(intLineNo) + 1
+								FROM @OrderDetailInformation
+								)
+							,NULL
+							,''
+							,@intStagingLocationId
+							,@intStorageLocationId
+						FROM tblICItem
+						WHERE intItemId = @intSubstituteItemId
+
+						SELECT @dblQty = @dblQty - @dblAvailableQty
+					END
+
+					x:
+
+					SELECT @intItemRecordId = MIN(intItemRecordId)
+					FROM @tblSubstituteItem
+					WHERE intItemRecordId > @intItemRecordId
+				END
+
+				IF @dblQty > 0
+				BEGIN
+					SELECT @dblQtyCanBeProduced = (@dblRequiredQty - @dblQty) * @dblPlannedQty / @dblRequiredQty
+
+					IF @dblQtyCanBeProduced < @dblMinQtyCanBeProduced
+						OR @dblQtyCanBeProduced = 0
+						OR @dblMinQtyCanBeProduced = - 1
+					BEGIN
+						SELECT @dblMinQtyCanBeProduced = @dblQtyCanBeProduced
+
+						SELECT @strItemNo = strItemNo
+						FROM tblICItem
+						WHERE intItemId = @intItemId
+
+						SELECT @intUnitMeasureId = intUnitMeasureId
+						FROM tblICItemUOM
+						WHERE intItemUOMId = @intItemUOMId
+
+						SELECT @strUnitMeasure = strUnitMeasure
+						FROM tblICUnitMeasure
+						WHERE intUnitMeasureId = @intUnitMeasureId
+
+						SELECT @strRequiredQty = Ltrim(@dblRequiredQty) + ' ' + @strUnitMeasure
+
+						SELECT @strAvailableQty = Ltrim(@dblRequiredQty - @dblQty) + ' ' + @strUnitMeasure
+
+						SELECT @strMinQtyCanBeProduced = Ltrim(Floor(@dblMinQtyCanBeProduced))
+					END
+				END
+
+				SELECT @intLineNo = MIn(intLineNo)
+				FROM @OrderDetailInformation
+				WHERE @intLineNo > intLineNo
+			END
+
+			SELECT @intLineNo = MIn(intLineNo)
+			FROM @OrderDetail
+			WHERE intLineNo > @intLineNo
+		END
+	END
+
+	EXEC dbo.uspMFCreateStagingOrderDetail @OrderDetailInformation = @OrderDetailInformation
+
+	INSERT INTO tblMFStageWorkOrder (
+		intWorkOrderId
+		,intItemId
+		,dblPlannedQty
+		,dtmPlannedDate
+		,intPlannnedShiftId
+		,intOrderHeaderId
+		,intConcurrencyId
+		,dtmCreated
+		,intCreatedUserId
+		,dtmLastModified
+		,intLastModifiedUserId
+		)
+	SELECT intWorkOrderId
+		,intItemId
+		,dblPlannedQty
+		,dtmPlannedDate
+		,intPlannedShift
+		,@intOrderHeaderId
+		,0
+		,@dtmCurrentDate
+		,@intUserId
+		,@dtmCurrentDate
+		,@intUserId
+	FROM @tblMFWorkOrder
+
+	DELETE
+	FROM tblMFOrderHeader
+	WHERE intOrderTypeId = 5
+		AND strReferenceNo NOT IN (
+			SELECT S.strShipmentNumber
+			FROM tblICInventoryShipment S
+			)
+
+	DELETE T
+	FROM tblMFTask T
+	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+		AND OH.intOrderTypeId = 5
+		AND T.intTaskStateId <> 4
+	JOIN tblICInventoryShipment S ON S.strShipmentNumber = OH.strReferenceNo
+		AND S.ysnPosted = 1
+
+	DELETE T
+	FROM tblMFTask T
+	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = T.intOrderHeaderId
+		AND OH.intOrderTypeId = 1
+		AND T.intTaskStateId <> 4
+	JOIN tblMFStageWorkOrder SW ON SW.intOrderHeaderId = T.intOrderHeaderId
+	JOIN tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+		AND W.intStatusId = 13
+
+	DELETE
+	FROM tblICStockReservation
+	WHERE intInventoryTransactionType = 34
+		AND ysnPosted = 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblMFTask
+			WHERE intLotId = tblICStockReservation.intLotId
+				AND intOrderHeaderId = tblICStockReservation.intTransactionId
+			)
+
+	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
+	FROM tblMFCompanyPreference
+
+	IF IsNULL(@ysnGenerateTaskOnCreatePickOrder, 0) = 1
+	BEGIN
+		EXEC uspMFGenerateTask @intOrderHeaderId = @intOrderHeaderId
+			,@intEntityUserSecurityId = @intUserId
+			,@ysnAllTasksNotGenerated = 0
+	END
+
+	COMMIT TRANSACTION
+
+	EXEC sp_xml_removedocument @idoc
+END TRY
+
+BEGIN CATCH
+	SET @ErrMsg = ERROR_MESSAGE()
+
+	IF XACT_STATE() != 0
+		ROLLBACK TRANSACTION
+
+	IF @idoc <> 0
+		EXEC sp_xml_removedocument @idoc
+
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
+END CATCH

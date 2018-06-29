@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.CardFueling.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{b4402f12-f14f-4f89-bd1c-bb37f825b02b}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.CardFueling.Schema</RootNamespace>
+    <AssemblyName>iRely.CardFueling.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblCFAccountQuote.sql" />
+    <Build Include="tblCFAccountQuoteSite.sql" />
+    <Build Include="tblCFAdvanceMappingDetail.sql" />
+    <Build Include="tblCFBatchRecalculateStagingTable.sql" />
+    <Build Include="tblCFCityCountyCode.sql" />
+    <Build Include="tblCFCompanyPreference.sql" />
+    <Build Include="tblCFCreditCard.sql" />
+    <Build Include="tblCFCSRSingleQuote.sql" />
+    <Build Include="tblCFCSRSingleQuoteDetailTax.sql" />
+    <Build Include="tblCFCSUAuditLog.sql" />
+    <Build Include="tblCFCSULog.sql" />
+    <Build Include="tblCFCustomerStatementHistoryStagingTable.sql" />
+    <Build Include="tblCFDiscountScheduleDetail.sql" />
+    <Build Include="tblCFDiscountScheduleHistory.sql" />
+    <Build Include="tblCFExportTaxMapping.sql" />
+    <Build Include="tblCFExportTaxMappingDetail.sql" />
+    <Build Include="tblCFExportValidURL.sql" />
+    <Build Include="tblCFFailedImportedTransaction.sql" />
+    <Build Include="tblCFFee.sql" />
+    <Build Include="tblCFFeeProfileDetail.sql" />
+    <Build Include="tblCFHost.sql" />
+    <Build Include="tblCFImportFromCSVLog.sql" />
+    <Build Include="tblCFImportLog.sql" />
+    <Build Include="tblCFImportNetworkCostResult.sql" />
+    <Build Include="tblCFImportResult.sql" />
+    <Build Include="tblCFImportTransactionLagging.sql" />
+    <Build Include="tblCFindexPricingBySiteGroup.sql" />
+    <Build Include="tblCFIndexPricingBySiteGroupHeader.sql" />
+    <Build Include="tblCFInvoiceDiscountTempTable.sql" />
+    <Build Include="tblCFInvoiceFeeHistoryStagingTable.sql" />
+    <Build Include="tblCFInvoiceFeeStagingTable.sql" />
+    <Build Include="tblCFInvoiceGroupByCardOdometerHistory.sql" />
+    <Build Include="tblCFInvoiceGroupByDeptOdometerHistory.sql" />
+    <Build Include="tblCFInvoiceGroupByMiscOdometerHistory.sql" />
+    <Build Include="tblCFInvoiceGroupByVehicleOdometerHistory.sql" />
+    <Build Include="tblCFInvoiceHistoryStagingTable.sql" />
+    <Build Include="tblCFInvoiceProcessHistory.sql" />
+    <Build Include="tblCFInvoiceProcessResult.sql" />
+    <Build Include="tblCFInvoiceReportTempTable.sql" />
+    <Build Include="tblCFInvoiceStagingTable.sql" />
+    <Build Include="tblCFInvoiceSummaryTempTable.sql" />
+    <Build Include="tblCFItem.sql" />
+    <Build Include="tblCFItemCategory.sql" />
+    <Build Include="tblCFLog.sql" />
+    <Build Include="tblCFMiscellaneous.sql" />
+    <Build Include="tblCFNetworkAccount.sql" />
+    <Build Include="tblCFNetworkCost.sql" />
+    <Build Include="tblCFNetworkCostStaging.sql" />
+    <Build Include="tblCFNetworkFailedImport.sql" />
+    <Build Include="tblCFNetworkSiteTaxGroup.sql" />
+    <Build Include="tblCFNetworkSuccessImport.sql" />
+    <Build Include="tblCFNetworkTaxCode.sql" />
+    <Build Include="tblCFPostForeignTransResult.sql" />
+    <Build Include="tblCFPPTaxCode.sql" />
+    <Build Include="tblCFPriceIndex.sql" />
+    <Build Include="tblCFPriceProfileDetail.sql" />
+    <Build Include="tblCFProductAuthDetail.sql" />
+    <Build Include="tblCFPurchaseOrder.sql" />
+    <Build Include="tblCFSiteGroupPriceAdjustment.sql" />
+    <Build Include="tblCFSiteGroupPriceAdjustmentHeader.sql" />
+    <Build Include="tblCFSiteMapping.sql" />
+    <Build Include="tblCFSiteTaxCode.sql" />
+    <Build Include="tblCFSpecialTaxingRuleHeader.sql" />
+    <Build Include="tblCFSpecialTaxingRuleSite.sql" />
+    <Build Include="tblCFSpecialTaxingRuleTax.sql" />
+    <Build Include="tblCFStateCode.sql" />
+    <Build Include="tblCFTaxException.sql" />
+    <Build Include="tblCFTempAuditLog.sql" />
+    <Build Include="tblCFTempCSUAuditLog.sql" />
+    <Build Include="tblCFTempCSUCard.sql" />
+    <Build Include="tblCFTempCSUVehicle.sql" />
+    <Build Include="tblCFTransactionNote.sql" />
+    <Build Include="tblCFTransactionPrice.sql" />
+    <Build Include="tblCFTransactionPriceType.sql" />
+    <Build Include="tblCFTransactionPricingType.sql" />
+    <Build Include="tblCFTransactionTax.sql" />
+    <Build Include="tblCFTransactionTaxType.sql" />
+    <Build Include="tblCFUsageExceptionAlertStaging.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

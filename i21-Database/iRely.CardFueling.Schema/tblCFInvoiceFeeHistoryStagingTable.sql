@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblCFInvoiceFeeHistoryStagingTable] (
+    [intFeeLoopId]            INT             NULL,
+    [intAccountId]            INT             NULL,
+    [intTransactionId]        INT             NULL,
+    [intCardId]               INT             NULL,
+    [intCustomerId]           INT             NULL,
+    [intTermID]               INT             NULL,
+    [intSalesPersonId]        INT             NULL,
+    [intItemId]               INT             NULL,
+    [intARLocationId]         INT             NULL,
+    [dblFeeRate]              NUMERIC (18, 6) NULL,
+    [dblQuantity]             NUMERIC (18, 6) NULL,
+    [dblFeeAmount]            NUMERIC (18, 6) NULL,
+    [dblFeeTotalAmount]       NUMERIC (18, 6) NULL,
+    [strFeeDescription]       NVARCHAR (MAX)  NULL,
+    [strFee]                  NVARCHAR (MAX)  NULL,
+    [strInvoiceFormat]        NVARCHAR (MAX)  NULL,
+    [strInvoiceReportNumber]  NVARCHAR (MAX)  NULL,
+    [strCalculationType]      NVARCHAR (MAX)  NULL,
+    [strGuid]                 NVARCHAR (MAX)  NULL,
+    [strUserId]               NVARCHAR (MAX)  NULL,
+    [dtmTransactionDate]      DATETIME        NULL,
+    [dtmInvoiceDate]          DATETIME        NULL,
+    [dtmStartDate]            DATETIME        NULL,
+    [dtmEndDate]              DATETIME        NULL,
+    [strInvoiceNumberHistory] NVARCHAR (MAX)  NULL
+);
+

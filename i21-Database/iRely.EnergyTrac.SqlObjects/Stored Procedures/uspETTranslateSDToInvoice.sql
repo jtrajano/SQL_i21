@@ -1,0 +1,402 @@
+﻿CREATE PROCEDURE [uspETTranslateSDToInvoice]
+	@StagingTable ETTranslateSDToInvoiceTable READONLY
+	,@EntityUserId			INT
+	,@strAllErrorMessage	NVARCHAR(MAX) = '' OUTPUT	
+	
+AS
+BEGIN
+
+	DECLARE @strCustomerNumber						NVARCHAR(100)
+	DECLARE @strInvoiceNumber						NVARCHAR(25)
+	DECLARE @dtmInvoiceDate							DATETIME
+	DECLARE	@strSiteNumber							NVARCHAR(5)
+	DECLARE	@strUOM									NVARCHAR(50)
+	DECLARE	@dblUnitPrice							NUMERIC(18,6)
+	DECLARE	@strItemDescription						NVARCHAR(250)
+	DECLARE	@dblPercentFullAfterDelivery			NUMERIC(18,6)
+	DECLARE	@strLocation							NVARCHAR(50)
+	DECLARE	@strTermCode							NVARCHAR(100)
+	DECLARE	@strSalesAccount						NVARCHAR(40)
+	DECLARE	@strItemNumber							NVARCHAR(50)
+	DECLARE	@strSalesTaxId							NVARCHAR(50)
+	DECLARE	@strDriverNumber						NVARCHAR(100)
+	DECLARE	@strType								NVARCHAR(10)
+	DECLARE	@dblQuantity							NUMERIC(18, 6)
+	DECLARE	@dblTotal								NUMERIC(18, 6)
+	DECLARE	@intLineItem							INT
+	DECLARE	@dblPrice								NUMERIC(18, 6)
+	DECLARE	@strComment								NVARCHAR(MAX)
+	DECLARE @strDetailType							NVARCHAR(2)
+	DECLARE @strContractNumber						NVARCHAR(50)
+	DECLARE @intImportSDToInvoiceId					INT
+	DECLARE @intContractSequence						INT
+
+	DECLARE @strCustomerNumberTax						NVARCHAR(100)
+	DECLARE @strInvoiceNumberTax						NVARCHAR(25)
+	DECLARE @dtmInvoiceDateTax							DATETIME
+	DECLARE	@strSiteNumberTax							NVARCHAR(5)
+	DECLARE	@strUOMTax									NVARCHAR(50)
+	DECLARE	@dblUnitPriceTax							NUMERIC(18,6)
+	DECLARE	@strItemDescriptionTax						NVARCHAR(250)
+	DECLARE	@dblPercentFullAfterDeliveryTax			NUMERIC(18,6)
+	DECLARE	@strLocationTax							NVARCHAR(50)
+	DECLARE	@strTermCodeTax							NVARCHAR(100)
+	DECLARE	@strSalesAccountTax						NVARCHAR(40)
+	DECLARE	@strItemNumberTax							NVARCHAR(50)
+	DECLARE	@strSalesTaxIdTax							NVARCHAR(50)
+	DECLARE	@strDriverNumberTax						NVARCHAR(100)
+	DECLARE	@strTypeTax								NVARCHAR(10)
+	DECLARE	@dblQuantityTax							NUMERIC(18, 6)
+	DECLARE	@dblTotalTax								NUMERIC(18, 6)
+	DECLARE	@intLineItemTax							INT
+	DECLARE	@dblPriceTax								NUMERIC(18, 6)
+	DECLARE	@strCommentTax								NVARCHAR(MAX)
+	DECLARE @strDetailTypeTax							NVARCHAR(2)
+	DECLARE @strContractNumberTax						NVARCHAR(50)
+	DECLARE @intImportSDToInvoiceIdTax					INT
+	DECLARE @intCustomerEntityId					INT
+	DECLARE @intLocationId							INT
+	DECLARE @intCntIdUniqueInvoiceCustomerDate		INT
+	DECLARE @intNewInvoiceId						INT
+	DECLARE @intItemId								INT
+	DECLARE @intSiteId								INT
+	DECLARE @strErrorMessage						NVARCHAR(MAX) 
+	DECLARE @strTransactionType						NVARCHAR(25)
+	DECLARE @intTermCode							INT
+	DECLARE @intDriverEntityId						INT					
+	DECLARE @intTaxGroupId							INT		
+	DECLARE @strSiteBillingBy						NVARCHAR(10)
+	DECLARE @intItemUOMId							INT		
+	DECLARE @intUnitMeasureId						INT	
+	DECLARE @ysnHeader								BIT
+	DECLARE @intNewInvoiceDetailId					INT
+	DECLARE @strNewInvoiceNumber					NVARCHAR(25)
+	--DECLARE @ysnProcessNextAsHeader					BIT
+	DECLARE @intContractDetailId					INT
+	DECLARE @intTaxCodeId							INT
+	DECLARE @intTaxClassId							INT
+	DECLARE	@strPONumber						    NVARCHAR(50)
+	
+	
+	DECLARE @ResultTableLog TABLE(
+		strCustomerNumber			NVARCHAR(100)
+		,strInvoiceNumber			NVARCHAR(25)
+		,strSiteNumber				NVARCHAR(5)
+		,dtmDate					DATETIME
+		,intLineItem				INT
+		,strFileName				NVARCHAR(300)
+		,strStatus					NVARCHAR(MAX)
+		,ysnSuccessful				BIT
+		,intInvoiceId				INT
+		,strTransactionType 		NVARCHAR(25)
+	)
+
+	SET @strAllErrorMessage = ''
+
+	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpSDToInvoice')) 
+	BEGIN
+		DROP TABLE #tmpSDToInvoice
+	END
+	SELECT intImportSDToInvoiceId = IDENTITY(INT, 1, 1), * INTO #tmpSDToInvoice 
+	FROM @StagingTable
+
+	IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpUniqueInvoiceList')) 
+	BEGIN
+		DROP TABLE #tmpUniqueInvoiceList
+	END
+	--Get the unique list of Customer, Invoice Number and date
+	SELECT DISTINCT 
+		strCustomerNumber
+		,strInvoiceNumber
+		,dtmDate
+		,intCntId = ROW_NUMBER() OVER (ORDER BY strCustomerNumber)
+	INTO #tmpUniqueInvoiceList
+	FROM #tmpSDToInvoice
+	
+
+	
+	---Loop through the unique customer invoice date
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUniqueInvoiceList) 
+	BEGIN
+		--BEGIN TRANSACTION
+		
+		
+		SELECT TOP 1
+			@strCustomerNumber = strCustomerNumber
+			,@strInvoiceNumber = strInvoiceNumber
+			,@dtmInvoiceDate = dtmDate
+			,@intCntIdUniqueInvoiceCustomerDate = intCntId
+		FROM #tmpUniqueInvoiceList		
+				
+		IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceDetail')) 
+		BEGIN
+			DROP TABLE #tmpCustomerInvoiceDetail
+		END
+
+		--Get the Details 
+		SELECT *
+		INTO #tmpCustomerInvoiceDetail
+		FROM  #tmpSDToInvoice
+		WHERE strCustomerNumber = @strCustomerNumber
+			AND strInvoiceNumber = @strInvoiceNumber
+			AND dtmDate = @dtmInvoiceDate
+			AND strDetailType = 'D'
+		
+
+		--IF EXISTS (SELECT TOP 1 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCustomerInvoiceTaxDetail')) 
+		--BEGIN
+		--	DROP TABLE #tmpCustomerInvoiceTaxDetail
+		--END
+
+		--SELECT *
+		--INTO #tmpCustomerInvoiceTaxDetail
+		--FROM  #tmpSDToInvoice
+		--WHERE strCustomerNumber = @strCustomerNumber
+		--	AND strInvoiceNumber = @strInvoiceNumber
+		--	AND dtmDate = @dtmInvoiceDate
+		--	AND strDetailType <> 'D'
+
+		--BEGIN TRANSACTION
+		SET @ysnHeader = 1
+		--Loop through the details 
+		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceDetail)
+		BEGIN
+			SET @strErrorMessage = ''
+			--SET @ysnProcessNextAsHeader = 0
+			--Get the first Record and create Invoice
+			SELECT TOP 1 
+				@strCustomerNumber			  = strCustomerNumber
+				,@strInvoiceNumber			  = strInvoiceNumber
+				,@dtmInvoiceDate			  = dtmDate
+				,@intLineItem				  = intLineItem
+				,@strSiteNumber				  = strSiteNumber	
+				,@strUOM					  =	strUOM
+				,@dblUnitPrice				  = dblUnitPrice
+				,@strItemDescription		  = strItemDescription
+				,@dblPercentFullAfterDelivery = dblPercentFullAfterDelivery
+				,@strLocation				  =	strLocation
+				,@strTermCode				  =	strTermCode
+				,@strSalesAccount			  =	strSalesAccount
+				,@strItemNumber				  =	strItemNumber
+				,@strSalesTaxId				  =	strSalesTaxId
+				,@strDriverNumber			  =	strDriverNumber
+				,@strType					  =	strType
+				,@dblQuantity				  =	dblQuantity
+				,@dblTotal					  =	dblTotal
+				,@intLineItem				  =	intLineItem
+				,@dblPrice					  =	dblPrice
+				,@strComment				  =	strComment
+				,@intImportSDToInvoiceId	  = intImportSDToInvoiceId
+				,@strDetailType				  = strDetailType
+				,@strContractNumber			  = strContractNumber
+				,@intContractSequence		  = intContractSequence
+				,@strPONumber				  = strPONumber
+			FROM #tmpCustomerInvoiceDetail
+			ORDER BY intLineItem ASC
+
+			--Get Customer Entity Id
+			SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)
+			--Get Location Id
+			SET @intLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber = @strLocation)
+			--Get Item id
+			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+			---Set TransactionType
+			SET @strTransactionType = (SELECT (CASE	WHEN @strType = 'B' THEN 'Invoice'
+													WHEN @strType = 'A' THEN 'Cash'
+													ELSE
+														'Invoice'
+												END))
+			--Get Term Code
+			SET @intTermCode = (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTermCode = @strTermCode)
+			--Get Entity ID of the Driver
+			SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strDriverNumber)
+			
+			---GEt Tax Group Id
+					--SET @intTaxGroupId = (SELECT TOP 1 B.intTaxGroupId 
+					--						FROM tblSMTaxCode A
+					--						INNER JOIN  tblSMTaxGroupCode B
+					--							ON A.intTaxCodeId = B.intTaxCodeId
+					--						WHERE A.strTaxCode = @strSalesTaxId)
+			IF(LEN(@strSalesTaxId) > 2) 
+			SET @intTaxGroupId = (SELECT SUBSTRING(@strSalesTaxId,3,LEN(@strSalesTaxId)-2))
+			
+			--get Item Unit Measure Id = ()
+			SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)
+			---Get Uom ID
+			SET	@intItemUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intUnitMeasureId = @intUnitMeasureId AND intItemId = @intItemId)
+			--Get contract ID
+			SET @intContractDetailId = (SELECT TOP 1 B.intContractDetailId 
+											FROM tblCTContractHeader A
+											INNER JOIN tblCTContractDetail B
+												ON A.intContractHeaderId = B.intContractHeaderId
+											WHERE A.strContractNumber = @strContractNumber
+											AND A.intEntityId = @intCustomerEntityId
+											AND B.intContractSeq = @intContractSequence)
+				--TM----------------------------------------------------------------------------------------------------------------------------
+				--Get Site Id 
+				SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+															WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
+				----------------------------------------------------------------------------------------------------------------------------
+
+			---Insert/Create Invoice 
+			IF(@ysnHeader = 1)
+				BEGIN
+				
+				BEGIN TRANSACTION
+
+					EXEC [dbo].[uspARCreateCustomerInvoice]
+						@EntityCustomerId          = @intCustomerEntityId
+						,@InvoiceDate              = @dtmInvoiceDate
+						,@CompanyLocationId        = @intLocationId
+						,@EntityId                 = @EntityUserId
+						,@NewInvoiceId             = @intNewInvoiceId OUTPUT
+						,@ErrorMessage             = @strErrorMessage OUTPUT
+						,@ItemId                   = @intItemId
+						,@ItemQtyShipped           = @dblQuantity
+						,@ItemPrice                = @dblPrice
+						,@ItemSiteId               = @intSiteId
+						,@TransactionType	       = @strTransactionType
+						,@Type					   = 'Tank Delivery'
+						,@TermId				   = @intTermCode
+						,@ShipDate				   = @dtmInvoiceDate
+						,@EntitySalespersonId	   = @intDriverEntityId		
+						,@Comment				   = @strComment	
+						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+						,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@ItemDescription		   = @strItemDescription
+						,@ItemUOMId				   = @intItemUOMId
+						,@BOLNumber				   = @strInvoiceNumber
+						,@ItemContractDetailId     = @intContractDetailId
+						,@RaiseError			   = 0
+						,@UseOriginIdAsInvoiceNumber = 1
+						,@InvoiceOriginId         = @strInvoiceNumber
+						,@PONumber				   =@strPONumber
+
+					--GEt the created invoice number
+					SET @strNewInvoiceNumber = (SELECT TOP 1 strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intNewInvoiceId) 
+					SET @intNewInvoiceDetailId = (SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId)
+
+					--Check if any error in creating invoice 
+					--Log Entry
+					LOGHEADERENTRY:
+					IF 	LTRIM(@strErrorMessage) != ''
+						BEGIN		
+							ROLLBACK TRANSACTION
+					
+							-- Insert the header to log table 	
+							INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )
+							SELECT strCustomerNumber = @strCustomerNumber ,strInvoiceNumber = @strInvoiceNumber ,strSiteNumber = @strSiteNumber, dtmDate = @dtmInvoiceDate ,intLineItem = @intLineItem ,strFileName = '' ,strStatus = @strErrorMessage ,ysnSuccessful = 0 ,intInvoiceId = @intNewInvoiceId							,strTransactionType = 'Invoice'										
+							GOTO CONTINUELOOP
+						END
+				END
+			ELSE
+			BEGIN
+				---- Add as line Item to Existing Invoice
+				EXEC [dbo].[uspARAddInventoryItemToInvoice]
+						@InvoiceId = @intNewInvoiceId
+						,@NewInvoiceDetailId = @intNewInvoiceDetailId OUTPUT
+						,@ErrorMessage = @strErrorMessage OUTPUT
+						,@ItemId                   = @intItemId
+						,@ItemQtyShipped           = @dblQuantity
+						,@ItemPrice                = @dblPrice
+						,@ItemSiteId               = @intSiteId
+						,@ItemPercentFull		   = @dblPercentFullAfterDelivery
+						,@ItemTaxGroupId		   = @intTaxGroupId	
+						,@ItemDescription		   = @strItemDescription
+						,@ItemUOMId				   = @intItemUOMId
+						,@ItemContractDetailId     = @intContractDetailId
+						,@ItemCurrencyExchangeRateTypeId = NULL            
+                        ,@ItemCurrencyExchangeRateId = NULL            
+						,@RecomputeTax			   = 1
+
+				LOGDETAILENTRY:
+				IF 	LTRIM(@strErrorMessage) != ''
+					BEGIN		
+						ROLLBACK TRANSACTION
+
+						---insert log table
+						INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )
+						SELECT strCustomerNumber = @strCustomerNumber ,strInvoiceNumber = @strInvoiceNumber ,strSiteNumber = @strSiteNumber ,dtmDate = @dtmInvoiceDate ,intLineItem = @intLineItem ,strFileName = '' ,strStatus = @strErrorMessage ,ysnSuccessful = 0 ,intInvoiceId = @intNewInvoiceId ,strTransactionType = 'Invoice'
+						GOTO CONTINUELOOP
+					END
+			END
+			
+						
+			BEGIN TRY
+				EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intNewInvoiceId, @ForDelete = 0, @UserId = @EntityUserId	
+				EXEC uspARReComputeInvoiceAmounts @intNewInvoiceId
+
+				IF((SELECT COUNT(1) FROM #tmpCustomerInvoiceDetail) = 1)
+				BEGIN
+					-- Insert the succes log to table 	
+					INSERT INTO @ResultTableLog (
+						strCustomerNumber			
+						,strInvoiceNumber			
+						,strSiteNumber				
+						,dtmDate	
+						,intLineItem				
+						,strFileName				
+						,strStatus
+						,ysnSuccessful
+						,intInvoiceId 
+						,strTransactionType 
+				)
+				SELECT
+						strCustomerNumber = @strCustomerNumber		
+						,strInvoiceNumber =	@strNewInvoiceNumber		
+						,strSiteNumber = @strSiteNumber				
+						,dtmDate = @dtmInvoiceDate
+						,intLineItem = 0						
+						,strFileName = ''				
+						,strStatus = 'Successfully created ' + @strNewInvoiceNumber  +
+						-- Tank consumption site
+						ISNULL((SELECT  TOP 1 '<br>' + 'Unable to find a tank consumption site for item no. ' + ICI.strItemNo
+						FROM
+							tblARInvoice ARI
+						INNER JOIN tblARInvoiceDetail ARID
+							ON ARI.intInvoiceId = ARID.intInvoiceId
+						INNER JOIN tblICItem ICI
+							ON ARID.intItemId = ICI.intItemId
+						WHERE
+							ARI.strType = 'Tank Delivery'
+							AND ARID.intSiteId IS NULL
+							AND ICI.ysnTankRequired = 1
+							AND ICI.strType <> 'Comment'
+							AND ARI.intInvoiceId =  @intNewInvoiceId),'')
+
+						,ysnSuccessful = 1
+						,intInvoiceId = @intNewInvoiceId
+							,strTransactionType = 'Invoice'
+				END
+			END TRY
+			BEGIN CATCH
+				ROLLBACK TRANSACTION 
+
+				--DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
+				INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )
+						SELECT strCustomerNumber = @strCustomerNumber ,strInvoiceNumber = @strInvoiceNumber ,strSiteNumber = @strSiteNumber ,dtmDate = @dtmInvoiceDate ,intLineItem = @intLineItem ,strFileName = '' ,strStatus = ERROR_MESSAGE() ,ysnSuccessful = 0 ,intInvoiceId = @intNewInvoiceId ,strTransactionType = 'Invoice'
+						GOTO CONTINUELOOP
+			END CATCH
+
+			--Delete the processed detail list
+			DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
+			
+			SET @ysnHeader = 0
+		END
+
+		COMMIT TRANSACTION
+	
+		CONTINUELOOP:
+
+		--Delete processed record
+		DELETE FROM #tmpUniqueInvoiceList 
+		WHERE strCustomerNumber = @strCustomerNumber 
+			AND strInvoiceNumber = @strInvoiceNumber
+			AND dtmDate = @dtmInvoiceDate 
+
+	END
+			
+	SELECT * FROM @ResultTableLog
+
+END
+GO

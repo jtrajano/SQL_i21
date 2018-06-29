@@ -1,0 +1,406 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.TankManagement.SqlObjects</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{232d2a45-06b6-4912-913f-07c87d3028b9}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.TankManagement.SqlObjects</RootNamespace>
+    <AssemblyName>iRely.TankManagement.SqlObjects</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Functions" />
+    <Folder Include="Stored Procedures" />
+    <Folder Include="Views" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\PostDeployment" />
+    <Folder Include="Scripts\PostDeployment\DefaultData" />
+    <Folder Include="Scripts\PostDeployment\Integration" />
+    <Folder Include="Scripts\PostDeployment\Integration\dbo" />
+    <Folder Include="Scripts\PostDeployment\Integration\dbo\Functions" />
+    <Folder Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures" />
+    <Folder Include="Scripts\PostDeployment\Integration\dbo\Views" />
+    <Folder Include="Scripts\PostDeployment\Reports" />
+    <Folder Include="Scripts\PostDeployment\Reports\DataSource" />
+    <Folder Include="Scripts\PostDeployment\Reports\DefaultCriteria" />
+    <Folder Include="Scripts\PostDeployment\Reports\FieldSelection" />
+    <Folder Include="Scripts\PostDeployment\Reports\Layout" />
+    <Folder Include="Scripts\PostDeployment\Reports\SubReportSettings" />
+    <Folder Include="Scripts\PostDeployment\Tables" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsPayable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsPayable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.AccountsReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.AccountsReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.BuyBack.Table.dacpac">
+      <HintPath>..\packages\iRely.BuyBack.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CardFueling.Table.dacpac">
+      <HintPath>..\packages\iRely.CardFueling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.ContractManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.ContractManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CreditCardCon.Table.dacpac">
+      <HintPath>..\packages\iRely.CreditCardCon.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CRM.Table.dacpac">
+      <HintPath>..\packages\iRely.CRM.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EnergyTrac.Table.dacpac">
+      <HintPath>..\packages\iRely.EnergyTrac.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.EntityManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.EntityManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FinancialReportDesigner.Table.dacpac">
+      <HintPath>..\packages\iRely.FinancialReportDesigner.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.FixedAsset.Table.dacpac">
+      <HintPath>..\packages\iRely.FixedAsset.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.GeneralLedger.Table.dacpac">
+      <HintPath>..\packages\iRely.GeneralLedger.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Grain.Table.dacpac">
+      <HintPath>..\packages\iRely.Grain.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.HelpDesk.Table.dacpac">
+      <HintPath>..\packages\iRely.HelpDesk.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Integration.Table.dacpac">
+      <HintPath>..\packages\iRely.Integration.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Inventory.Table.dacpac">
+      <HintPath>..\packages\iRely.Inventory.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Logistics.Table.dacpac">
+      <HintPath>..\packages\iRely.Logistics.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Manufacturing.Table.dacpac">
+      <HintPath>..\packages\iRely.Manufacturing.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.MeterBilling.Table.dacpac">
+      <HintPath>..\packages\iRely.MeterBilling.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.NotesReceivable.Table.dacpac">
+      <HintPath>..\packages\iRely.NotesReceivable.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Patronage.Table.dacpac">
+      <HintPath>..\packages\iRely.Patronage.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Payroll.Table.dacpac">
+      <HintPath>..\packages\iRely.Payroll.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Quality.Table.dacpac">
+      <HintPath>..\packages\iRely.Quality.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.RiskManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.RiskManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Scale.Table.dacpac">
+      <HintPath>..\packages\iRely.Scale.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Store.Table.dacpac">
+      <HintPath>..\packages\iRely.Store.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.SystemManager.Table.dacpac">
+      <HintPath>..\packages\iRely.SystemManager.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TankManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.TankManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.TaxForm.Table.dacpac">
+      <HintPath>..\packages\iRely.TaxForm.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Transports.Table.dacpac">
+      <HintPath>..\packages\iRely.Transports.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.VendorRebates.Table.dacpac">
+      <HintPath>..\packages\iRely.VendorRebates.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Warehouse.Table.dacpac">
+      <HintPath>..\packages\iRely.Warehouse.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Dashboard.Table.dacpac">
+      <HintPath>..\packages\iRely.Dashboard.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.CashManagement.Table.dacpac">
+      <HintPath>..\packages\iRely.CashManagement.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Objects.dacpac">
+      <HintPath>..\packages\iRely.Circular.Objects.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Functions\fnTMComputeNewBurnRateZeroDeliveryTable.sql" />
+    <Build Include="Functions\fnTMGetItemPricingDetails.sql" />
+    <Build Include="Functions\fnTMGetItemTotalTaxForCustomer.sql" />
+    <Build Include="Functions\fnTMGetSeasonYear.sql" />
+    <Build Include="Functions\fnTMGetSiteEfficiencyTable.sql" />
+    <Build Include="Functions\fnTMGetSpecialPricingPriceTable.sql" />
+    <Build Include="Functions\fnTMLastLeakGasCheckTable.sql" />
+    <Build Include="Stored Procedures\uspTMBatchSyncInvoiceToDeliveryHistory.sql" />
+    <Build Include="Stored Procedures\uspTMBEExportPrice.sql" />
+    <Build Include="Stored Procedures\uspTMCheckPendingTransaction.sql" />
+    <Build Include="Stored Procedures\uspTMCreateDeliveryHistoryAdjustment.sql" />
+    <Build Include="Stored Procedures\uspTMDeliveryFillReport.sql" />
+    <Build Include="Stored Procedures\uspTMDuplicateDevice.sql" />
+    <Build Include="Stored Procedures\uspTMGenerateEquipmentUsageAnalysis.sql" />
+    <Build Include="Stored Procedures\uspTMGetBudgetCalculationSite.sql" />
+    <Build Include="Stored Procedures\uspTMGetBudgetLetter.sql" />
+    <Build Include="Stored Procedures\uspTMGetItemTaxTotal.sql" />
+    <Build Include="Stored Procedures\uspTMGetNextWillCallStartingNumber.sql" />
+    <Build Include="Stored Procedures\uspTMImportTankMonitorReading.sql" />
+    <Build Include="Stored Procedures\uspTMInsertToCobolWrite.sql" />
+    <Build Include="Stored Procedures\uspTMRecalculateCallEntryPrices.sql" />
+    <Build Include="Stored Procedures\uspTMRenewJulianCalendar.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateCustomerBudget.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateEstimatedValuesBySite.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateForecastedValuesBySite.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateNextJulianDelivery.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateNextJulianDeliveryBySite.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateSiteGPS.sql" />
+    <Build Include="Stored Procedures\uspTMUpdateSiteGPSById.sql" />
+    <Build Include="Stored Procedures\uspTMValidateInvoiceForSync.sql" />
+    <Build Include="Views\vyuTMAssociateSiteSearch.sql" />
+    <Build Include="Views\vyuTMBEExportAssetAct.sql" />
+    <Build Include="Views\vyuTMBEExportConsumptionSite.sql" />
+    <Build Include="Views\vyuTMBEExportDispatch.sql" />
+    <Build Include="Views\vyuTMBEExportPrice.sql" />
+    <Build Include="Views\vyuTMBudgetCalculationItemPricing.sql" />
+    <Build Include="Views\vyuTMBudgetCalculationProjection.sql" />
+    <Build Include="Views\vyuTMBudgetCalculationSite.sql" />
+    <Build Include="Views\vyuTMCallEntryPrintOutReport.sql" />
+    <Build Include="Views\vyuTMClockUsedBySite.sql" />
+    <Build Include="Views\vyuTMCobolPrice.sql" />
+    <Build Include="Views\vyuTMConsumptionSite.sql" />
+    <Build Include="Views\vyuTMConsumptionSiteSearch.sql" />
+    <Build Include="Views\vyuTMCustomer.sql" />
+    <Build Include="Views\vyuTMCustomerContractSubReport.sql" />
+    <Build Include="Views\vyuTMCustomerEntityView.sql" />
+    <Build Include="Views\vyuTMDegreeDayReadingSearch.sql" />
+    <Build Include="Views\vyuTMDegreeReadingSeasonYear.sql" />
+    <Build Include="Views\vyuTMDeliveriesSearch.sql" />
+    <Build Include="Views\vyuTMDeliveryFillGroupSubReport.sql" />
+    <Build Include="Views\vyuTMDeliveryFillReport.sql" />
+    <Build Include="Views\vyuTMDeliveryFillWithItemPriceReport.sql" />
+    <Build Include="Views\vyuTMDeliveryHistoryCallEntry.sql" />
+    <Build Include="Views\vyuTMDeliveryTicket.sql" />
+    <Build Include="Views\vyuTMDeviceSearch.sql" />
+    <Build Include="Views\vyuTMDriverUsedBySite.sql" />
+    <Build Include="Views\vyuTMDYMOCustomerLabelReport.sql" />
+    <Build Include="Views\vyuTMEfficiencySearch.sql" />
+    <Build Include="Views\vyuTMEquipmentUsageAnalysisWithoutTotal.sql" />
+    <Build Include="Views\vyuTMETExportConsumptionSite.sql" />
+    <Build Include="Views\vyuTMETExportConsumptionSiteInstruction.sql" />
+    <Build Include="Views\vyuTMETExportTankManagementAppliance.sql" />
+    <Build Include="Views\vyuTMETExportTankManagementDeliveryHistory.sql" />
+    <Build Include="Views\vyuTMETExportTankManagementDevice.sql" />
+    <Build Include="Views\vyuTMETExportTankManagementEventHistory.sql" />
+    <Build Include="Views\vyuTMETExportTankManagementSite.sql" />
+    <Build Include="Views\vyuTMFailedLeaseBilling.sql" />
+    <Build Include="Views\vyuTMFillMethodUsedBySite.sql" />
+    <Build Include="Views\vyuTMForPrintDeliveryTicket.sql" />
+    <Build Include="Views\vyuTMItemUsedBySite.sql" />
+    <Build Include="Views\vyuTMLastLeakGasCheckTable.sql" />
+    <Build Include="Views\vyuTMLeakGasCheckSearch.sql" />
+    <Build Include="Views\vyuTMLeaseBilling.sql" />
+    <Build Include="Views\vyuTMLeaseCode.sql" />
+    <Build Include="Views\vyuTMLeaseSearch.sql" />
+    <Build Include="Views\vyuTMLocationUsedBySite.sql" />
+    <Build Include="Views\vyuTMMobileBillingOrder.sql" />
+    <Build Include="Views\vyuTMOpenCallEntry.sql" />
+    <Build Include="Views\vyuTMOpenWorkOrder.sql" />
+    <Build Include="Views\vyuTMOutOfRangeBurnRateSearch.sql" />
+    <Build Include="Views\vyuTMRegulatorInformationSubReport.sql" />
+    <Build Include="Views\vyuTMRouteUsedBySite.sql" />
+    <Build Include="Views\vyuTMSalesAnalysisReport.sql" />
+    <Build Include="Views\vyuTMSiteCustomer.sql" />
+    <Build Include="Views\vyuTMSiteDeliveryHistory.sql" />
+    <Build Include="Views\vyuTMSiteDeliveryHistoryTotal.sql" />
+    <Build Include="Views\vyuTMSiteDevices.sql" />
+    <Build Include="Views\vyuTMSiteEventHistory.sql" />
+    <Build Include="Views\vyuTMSiteOrder.sql" />
+    <Build Include="Views\vyuTMTankInformationSubReport.sql" />
+    <Build Include="Views\vyuTMUniqueItemList.sql" />
+    <Build Include="Views\vyuTMVirtualMeterBilling.sql" />
+    <Build Include="Views\vyuTMWorkOrderReport.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\1_PreferenceCompany.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\10_RegulatorType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\11_ApplianceType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\12_BudgetCalculation.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\13_GlobalJulianCalendar.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\2_EventType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\3_DeviceType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\4_MeterType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\5_FillMethodType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\6_InventoryStatusType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\7_WorkStatusType.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\8_WorkToDoItem.sql" />
+    <None Include="Scripts\PostDeployment\DefaultData\9_WorkCloseReason.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Functions\fnTMGetContractForCustomer.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Functions\fnTMGetSpecialPricing.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateCommentsView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateContractView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateCTLMSTView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateCustomerView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateInvoiceView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateItemView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateLeaseSearchView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateLocationView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateSalesPersonView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Stored Procedures\uspTMRecreateTermsView.sql" />
+    <None Include="Scripts\PostDeployment\Integration\dbo\Views\vyuTMOriginDegreeOption.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\CallEntryPrintOut.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\CustomerListByRoute.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\DeliveryFill.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\DeliveryFillGroup.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\DeviceActions.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\EfficiencyReport.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\GasCheckLeakcheck.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\OpenCallEntries.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\ProductTotals.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\RegulatorInformation.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DataSource\TankInformation.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DefaultCriteria\CustomerListByRoute.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DefaultCriteria\DeliveryFill.sql" />
+    <None Include="Scripts\PostDeployment\Reports\DefaultCriteria\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\PostDeployment\Reports\FieldSelection\DeliveryFill.sql" />
+    <None Include="Scripts\PostDeployment\Reports\FieldSelection\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\CallEntryPrintOut.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\CustomerListByRoute.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\DeliveryFill.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\DeviceActions.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\EfficiencyReport.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\ProductTotals.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\WithGasCheckSubReport.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\WithLeakCheckSubReport.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\WithoutGasCheckSubReport.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\WithoutLeakCheckSubReport.sql" />
+    <None Include="Scripts\PostDeployment\Reports\Layout\WorkOrder.sql" />
+    <None Include="Scripts\PostDeployment\Reports\SubReportSettings\DeliveryFill.sql" />
+    <None Include="Scripts\PostDeployment\Tables\tblTMCOBOLWRITE.sql" />
+    <None Include="Scripts\PostDeployment\2_DataTransferAndCorrection.sql" />
+    <None Include="Scripts\PostDeployment\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql" />
+    <None Include="Scripts\PostDeployment\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql" />
+    <None Include="Scripts\PostDeployment\5_ObsoletingSeasonReset.sql" />
+    <PostDeploy Include="Scripts\PostDeploy.sql" />
+  </ItemGroup>
+</Project>

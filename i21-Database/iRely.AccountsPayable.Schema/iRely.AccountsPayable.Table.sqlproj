@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.AccountsPayable.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{f6f72460-f38f-42ba-ad78-b3b39d6265cb}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.AccountsPayable.Schema</RootNamespace>
+    <AssemblyName>iRely.AccountsPayable.Schema</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblAP1099Category.sql" />
+    <Build Include="tblAP1099DIVCategory.sql" />
+    <Build Include="tblAP1099History.sql" />
+    <Build Include="tblAP1099PATRCategory.sql" />
+    <Build Include="tblAP1099Threshold.sql" />
+    <Build Include="tblAPAppliedPrepaidAndDebit.sql" />
+    <Build Include="tblAPBalance.sql" />
+    <Build Include="tblAPBalanceLog.sql" />
+    <Build Include="tblAPBasisAdvanceCommodity.sql" />
+    <Build Include="tblAPBasisAdvanceCommodityPercentage.sql" />
+    <Build Include="tblAPBasisAdvanceContractFuturesPrice.sql" />
+    <Build Include="tblAPBasisAdvanceDummyHeader.sql" />
+    <Build Include="tblAPBasisAdvanceFuture.sql" />
+    <Build Include="tblAPBasisAdvanceStaging.sql" />
+    <Build Include="tblAPBillBatch.sql" />
+    <Build Include="tblAPBillDeferredInterest.sql" />
+    <Build Include="tblAPBillDetailTax.sql" />
+    <Build Include="tblAPCompanyPreference.sql" />
+    <Build Include="tblAPDeferredPaymentInterest.sql" />
+    <Build Include="tblAPDeferredPaymentStaging.sql" />
+    <Build Include="tblAPImportVoucherLog.sql" />
+    <Build Include="tblAPPaymentDetail.sql" />
+    <Build Include="tblAPPaymentDetailDeleted.sql" />
+    <Build Include="tblAPPostResult.sql" />
+    <Build Include="tblAPRecurringHistory.sql" />
+    <Build Include="tblAPRecurringTransaction.sql" />
+    <Build Include="tblAPRecurrinHistory.sql" />
+    <Build Include="tblAPSearchRecordVoucher.sql" />
+    <Build Include="tblAPVendorLien.sql" />
+    <Build Include="tblAPVendorPortalMenu.sql" />
+    <Build Include="tblAPVendorPricing.sql" />
+    <Build Include="tblAPVendorSpecialTax.sql" />
+    <Build Include="tblAPVendorTaxException.sql" />
+    <Build Include="tblAPVendorTerm.sql" />
+    <Build Include="tblAPVoucherApprover.sql" />
+    <Build Include="tblAPVoucherHistory.sql" />
+    <Build Include="tblAPVoucherPayable.sql" />
+    <Build Include="tblPOApprover.sql" />
+    <Build Include="tblPOPurchaseDetailTax.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

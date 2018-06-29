@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>iRely.Payroll.Table</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{6185580e-7e85-420d-af6c-608199826439}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>iRely.Payroll.Schema</RootNamespace>
+    <AssemblyName>iRely.Payroll.Schema</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tblPRCompanyPreference.sql" />
+    <Build Include="tblPRDepartment.sql" />
+    <Build Include="tblPRDepartmentShift.sql" />
+    <Build Include="tblPREFileFormat.sql" />
+    <Build Include="tblPREFileFormatField.sql" />
+    <Build Include="tblPREFileFormatRecord.sql" />
+    <Build Include="tblPRElectronicFilingSUI.sql" />
+    <Build Include="tblPRElectronicFilingW2.sql" />
+    <Build Include="tblPREmployeeChangeLog.sql" />
+    <Build Include="tblPREmployeeDeduction.sql" />
+    <Build Include="tblPREmployeeDeductionTax.sql" />
+    <Build Include="tblPREmployeeDepartment.sql" />
+    <Build Include="tblPREmployeeEarning.sql" />
+    <Build Include="tblPREmployeeEarningDistribution.sql" />
+    <Build Include="tblPREmployeeEarningTax.sql" />
+    <Build Include="tblPREmployeeLocationDistribution.sql" />
+    <Build Include="tblPREmployeeSupervisor.sql" />
+    <Build Include="tblPREmployeeTax.sql" />
+    <Build Include="tblPREmployeeTimeOff.sql" />
+    <Build Include="tblPREmployeeW2.sql" />
+    <Build Include="tblPRForm941.sql" />
+    <Build Include="tblPRIRSCountryCode.sql" />
+    <Build Include="tblPRPaycheckDeduction.sql" />
+    <Build Include="tblPRPaycheckDeductionTax.sql" />
+    <Build Include="tblPRPaycheckDirectDeposit.sql" />
+    <Build Include="tblPRPaycheckEarning.sql" />
+    <Build Include="tblPRPaycheckEarningTax.sql" />
+    <Build Include="tblPRPaycheckTax.sql" />
+    <Build Include="tblPRPaycheckTimeOff.sql" />
+    <Build Include="tblPRPayGroupDetail.sql" />
+    <Build Include="tblPRTaxAgency.sql" />
+    <Build Include="tblPRTemplate.sql" />
+    <Build Include="tblPRTemplateDeduction.sql" />
+    <Build Include="tblPRTemplateDeductionTax.sql" />
+    <Build Include="tblPRTemplateEarning.sql" />
+    <Build Include="tblPRTemplateEarningDistribution.sql" />
+    <Build Include="tblPRTemplateEarningTax.sql" />
+    <Build Include="tblPRTemplateTax.sql" />
+    <Build Include="tblPRTemplateTimeOff.sql" />
+    <Build Include="tblPRTimecard.sql" />
+    <Build Include="tblPRTimeEntry.sql" />
+    <Build Include="tblPRTimeOffRequest.sql" />
+    <Build Include="tblPRTypeDeduction.sql" />
+    <Build Include="tblPRTypeDeductionTax.sql" />
+    <Build Include="tblPRTypeEarning.sql" />
+    <Build Include="tblPRTypeEarningTax.sql" />
+    <Build Include="tblPRTypeTax.sql" />
+    <Build Include="tblPRTypeTaxLocal.sql" />
+    <Build Include="tblPRTypeTaxState.sql" />
+    <Build Include="tblPRTypeTaxStatePSDCode.sql" />
+    <Build Include="tblPRTypeTimeOff.sql" />
+    <Build Include="tblPRTypeTimeOffDetail.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="..\packages\iRely.Circular.Table.dacpac">
+      <HintPath>..\packages\iRely.Circular.Table.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+﻿:r .\PostDeployment\01_TaxAuthority.sql
+:r .\PostDeployment\02_TerminalControl.sql
+:r .\PostDeployment\IN_Indiana.sql
+:r .\PostDeployment\IL_Illinois.sql
+:r .\PostDeployment\NE_Nebraska.sql
+:r .\PostDeployment\MS_Mississippi.sql
+:r .\PostDeployment\LA_Louisiana.sql
+:r .\PostDeployment\MI_Michigan.sql
+:r .\PostDeployment\NC_NorthCarolina.sql
+:r .\PostDeployment\OR_Oregon.sql
+:r .\PostDeployment\WA_Washington.sql
+:r .\PostDeployment\OH_Ohio.sql
+:r .\PostDeployment\NM_NewMexico.sql
+:r .\PostDeployment\SC_SouthCarolina.sql
+:r .\PostDeployment\PA_Pennsylvania.sql
+:r .\PostDeployment\AfterUpgradeCleanup.sql
