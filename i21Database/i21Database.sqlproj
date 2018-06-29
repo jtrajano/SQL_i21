@@ -6775,6 +6775,7 @@
     <Build Include="dbo\Views\vyuGRGetDiscountScheduleCode.sql" />
     <Build Include="dbo\Views\vyuGRGetDiscountScheduleWithCrossReference.sql" />
     <Build Include="dbo\Tables\tblSCImportLogFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
