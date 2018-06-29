@@ -26,7 +26,7 @@ AS
 		,M.strProgramId
 		,dblReimbursementAmount = CAST((P.dblRate * B.dblQtyShipped) AS NUMERIC(18,6))
 		,intProgramRateId = P.intProgramRateId
-		,dblItemCost = Q.dblCost
+		,dblItemCost = ISNULL(Q.dblCost,0.0)
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -56,7 +56,7 @@ AS
 		ON C.intVendorSetupId = M.intVendorSetupId
 	INNER JOIN tblBBProgramCharge N
 		ON M.intProgramId = N.intProgramId
-	INNER JOIN tblICInventoryTransaction Q
+	LEFT JOIN tblICInventoryTransaction Q
 		ON B.intInvoiceDetailId = Q.intTransactionDetailId
 		AND A.intInvoiceId = Q.intTransactionId
 		AND A.strInvoiceNumber = Q.strTransactionId
