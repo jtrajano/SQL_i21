@@ -61,6 +61,7 @@
 :r .\6_GL\5_1710.sql
 
 -- AR
+:r .\7_AR\00_DropTriggers.sql
 :r .\7_AR\1_FixInvoiceAndSalesOrderNumberUniqueConstraint.sql
 :r .\7_AR\3_fnARGetCustomerDefaultContact.sql
 :r .\7_AR\4_UpdateInvoicePaymentMethod.sql

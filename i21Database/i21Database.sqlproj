@@ -6520,6 +6520,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
     <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
