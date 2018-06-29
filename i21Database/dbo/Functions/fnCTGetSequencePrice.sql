@@ -23,6 +23,7 @@ BEGIN
 		,@ysnSubCurrency BIT
 		,@intMainCurrencyId INT
 		,@intPriceItemUOMId INT
+		,@ysnValidFX BIT = 0
 
 	SELECT @intPricingTypeId = intPricingTypeId
 		,@dbldblNoOfLots = dblNoOfLots
@@ -47,6 +48,14 @@ BEGIN
 	FROM tblCTContractDetail CD
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
 	WHERE intContractDetailId = @intContractDetailId
+
+	IF ISNULL(@ysnUseFXPrice, 0) = 1
+				AND @intExchangeRateId IS NOT NULL
+				AND @dblRate IS NOT NULL
+				AND @intFXPriceUOMId IS NOT NULL
+	BEGIN
+		SET @ysnValidFX = 1
+	END
 
 	IF @intPricingTypeId IN (
 			1
@@ -75,10 +84,7 @@ BEGIN
 
 			SELECT @dblSeqPrice = @dblSeqPrice + @dblBasis
 
-			IF ISNULL(@ysnUseFXPrice, 0) = 1
-				AND @intExchangeRateId IS NOT NULL
-				AND @dblRate IS NOT NULL
-				AND @intFXPriceUOMId IS NOT NULL
+			IF @ysnValidFX = 1
 			BEGIN
 				IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrencyExchangeRate
 							WHERE intCurrencyExchangeRateId = @intExchangeRateId
@@ -105,6 +111,12 @@ BEGIN
 				SELECT @dblSeqPrice = dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFutureMonthId,GETDATE()) + @dblBasis
 			ELSE 
 				SELECT @dblSeqPrice = @dblSettlementPrice +@dblBasis
+
+			SELECT @dblSeqPrice = CASE 
+								  WHEN @ysnSubCurrency = 1 AND @ysnValidFX = 1
+									 THEN @dblSeqPrice / 100
+								  ELSE @dblSeqPrice
+								  END
 		END
 	END
 
