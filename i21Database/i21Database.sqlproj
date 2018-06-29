@@ -6770,6 +6770,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetChargeAddOns.sql" />
     <Build Include="dbo\Functions\fnGRConvertDateToReportDateFormat.sql" />
     <Build Include="dbo\Views\vyuSMAuditLogPanel.sql" />
+    <Build Include="dbo\Views\vyuSTStoreItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
