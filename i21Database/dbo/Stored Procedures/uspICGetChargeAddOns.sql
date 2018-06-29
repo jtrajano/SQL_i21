@@ -32,4 +32,5 @@ BEGIN
 				AND ItemLocation.intLocationId IS NOT NULL
 	WHERE	ItemWithAddOn.intItemId = @intItemId
 			AND l.intCompanyLocationId = @intLocationId
+			AND ItemWithAddOn.ysnAutoAdd = 1
 END
