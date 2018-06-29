@@ -151,7 +151,7 @@ BEGIN TRY
 	[intInventoryShipmentId]			= SC.intTransactionHeaderId
 	,[intContractId]					= SC.intContractHeaderId
 	,[intContractDetailId]				= SC.intContractDetailId
-	,[intChargeId]						= SC.intItemId
+	,[intChargeId]						= GR.intItemId
 	,[strCostMethod]					= IC.strCostMethod
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
