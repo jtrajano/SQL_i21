@@ -69,6 +69,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Purchase Order Number
 	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number	
 	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Comments		
+	,[intDocumentMaintenanceId]				INT												NULL		-- Combobox Comment in Invoice Header
 	,[intShipToLocationId]					INT												NULL		-- Customer Ship To Location Id(If NULL, customer's default location will be used)
 	,[intBillToLocationId]					INT												NULL		-- Customer Bill To Location Id(If NULL, customer's default location will be used)
 	,[ysnTemplate]							BIT												NULL		
