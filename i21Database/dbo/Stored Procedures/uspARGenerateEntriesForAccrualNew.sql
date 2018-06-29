@@ -79,8 +79,8 @@ BEGIN
 		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= A.intAccountId
-		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblBaseInvoiceTotal ELSE 0 END
-		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblBaseInvoiceTotal END
+		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblBaseInvoiceTotal ELSE @ZeroDecimal END
+		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblBaseInvoiceTotal END
 		,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash')	THEN  
 																						(
 																						SELECT
@@ -106,10 +106,10 @@ BEGIN
 																							AND ARID.dblTotal <> @ZeroDecimal  
 																						)
 																					ELSE 
-																						0
+																						@ZeroDecimal
 																					END
 		,dblCreditUnit				=  CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash')	THEN  
-																						0
+																						@ZeroDecimal
 																					ELSE 
 																						(
 																						SELECT
@@ -139,7 +139,7 @@ BEGIN
 		,strCode					= @Code
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
-		,dblExchangeRate			= 1
+		,dblExchangeRate			= A.dblCurrencyExchangeRate
 		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -153,12 +153,12 @@ BEGIN
 		,strTransactionForm			= @ScreenName 
 		,strModuleName				= @ModuleName 
 		,intConcurrencyId			= 1
-		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END
-		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE 0 END	
-		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
-		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblInvoiceTotal END
-		,[dblReportingRate]			= 0
-		,[dblForeignRate]			= 0
+		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE @ZeroDecimal END
+		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal ELSE @ZeroDecimal END	
+		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal END
+		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal END
+		,[dblReportingRate]			= A.dblCurrencyExchangeRate
+		,[dblForeignRate]			= A.dblCurrencyExchangeRate
 		,[strRateType]				= ''			 
 	FROM
 		tblARInvoice A
@@ -174,9 +174,9 @@ BEGIN
 		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= @DeferredRevenueAccountId
-		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblBaseInvoiceTotal + BASEDT.dblDiscountTotal END
-		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblBaseInvoiceTotal + BASEDT.dblDiscountTotal ELSE 0 END
-		,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0
+		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblBaseInvoiceTotal + BASEDT.dblDiscountTotal END
+		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblBaseInvoiceTotal + BASEDT.dblDiscountTotal ELSE @ZeroDecimal END
+		,dblDebitUnit				= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal
 																					ELSE
 																						(
 																						SELECT
@@ -226,13 +226,13 @@ BEGIN
 																							AND ARID.dblTotal <> @ZeroDecimal
 																						)																						
 																					ELSE
-																						0
+																						@ZeroDecimal
 																					END				
 		,strDescription				= A.strComments
 		,strCode					= @Code
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
-		,dblExchangeRate			= 1
+		,dblExchangeRate			= A.dblCurrencyExchangeRate
 		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -246,12 +246,12 @@ BEGIN
 		,strTransactionForm			= @ScreenName 
 		,strModuleName				= @ModuleName 
 		,intConcurrencyId			= 1
-		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END
-		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  0 ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END	
-		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE 0 END
-		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE 0 END
-		,[dblReportingRate]			= 0
-		,[dblForeignRate]			= 0
+		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END
+		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  @ZeroDecimal ELSE A.dblInvoiceTotal + DT.dblDiscountTotal END	
+		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE @ZeroDecimal END
+		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN  A.dblInvoiceTotal + DT.dblDiscountTotal ELSE @ZeroDecimal END
+		,[dblReportingRate]			= A.dblCurrencyExchangeRate
+		,[dblForeignRate]			= A.dblCurrencyExchangeRate
 		,[strRateType]				= ''				 
 	FROM
 		tblARInvoice A
@@ -577,12 +577,12 @@ BEGIN
 			 dtmDate					= DATEADD(mm, @LoopCounter, CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE))
 			,strBatchID					= @BatchId
 			,intAccountId				= @DeferredRevenueAccountId
-			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END)
+			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) ELSE @ZeroDecimal END)
 											* B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END)
+			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END)
 											* B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= @ZeroDecimal
+			,dblCreditUnit				= @ZeroDecimal
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -601,10 +601,10 @@ BEGIN
 			,strTransactionForm			= @ScreenName 
 			,strModuleName				= @ModuleName 
 			,intConcurrencyId			= 1
-			,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END
-			,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) ELSE 0 END
-			,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
-			,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+			,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) ELSE @ZeroDecimal END
+			,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) ELSE @ZeroDecimal END
+			,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END
+			,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
 			,[strRateType]				= SMCERT.strCurrencyExchangeRateType 
@@ -651,18 +651,18 @@ BEGIN
 											END)
 			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE @ZeroDecimal END) END 
 										  END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
 			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE @ZeroDecimal END)  END 
 										  END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= @ZeroDecimal
+			,dblCreditUnit				= @ZeroDecimal
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -683,27 +683,27 @@ BEGIN
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE @ZeroDecimal END) END 
 										  END
 			,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE @ZeroDecimal END) END 
 										  END
 			,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE @ZeroDecimal END)  END 
 										  END
 			,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @TotalPerPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @RemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @TotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @Remainder ELSE @ZeroDecimal END)  END 
 										  END
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
@@ -746,18 +746,18 @@ BEGIN
 			,intAccountId				= @DeferredRevenueAccountId
 			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END)  END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
 			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END) END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= @ZeroDecimal
+			,dblCreditUnit				= @ZeroDecimal
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -778,27 +778,27 @@ BEGIN
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
@@ -843,18 +843,18 @@ BEGIN
 			,intAccountId				= IST.intGeneralAccountId
 			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END) END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
 			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END)  END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= @ZeroDecimal
+			,dblCreditUnit				= @ZeroDecimal
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -875,27 +875,27 @@ BEGIN
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @LicenseTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @LicenseTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @LicenseRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
@@ -940,18 +940,18 @@ BEGIN
 			,intAccountId				= @DeferredRevenueAccountId
 			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END)  END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
 			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END) END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= @ZeroDecimal
+			,dblCreditUnit				= @ZeroDecimal
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -972,27 +972,27 @@ BEGIN
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
@@ -1034,18 +1034,18 @@ BEGIN
 			,intAccountId				= IST.intMaintenanceSalesAccountId
 			,dblDebit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END) END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
 			,dblCredit					= [dbo].fnRoundBanker(((CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END)  END 
 											END) * B.dblCurrencyExchangeRate), [dbo].[fnARGetDefaultDecimal]())
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblDebitUnit				= @ZeroDecimal
+			,dblCreditUnit				= @ZeroDecimal
 			,strDescription				= A.strComments
 			,strCode					= @Code
 			,strReference				= C.strCustomerNumber
@@ -1066,27 +1066,27 @@ BEGIN
 			,intConcurrencyId			= 1
 			,[dblDebitForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblDebitReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END 
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END) END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END) END 
 											END
 			,[dblCreditForeign]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblCreditReport]			= CASE WHEN @AccrualPeriod > 1 
 											THEN 
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE 0 END) END
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @MaintenanceTotalPeriodWODiscount + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainderWODiscount ELSE @ZeroDecimal END) END
 											ELSE
-												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE 0 END)  END 
+												CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE @MaintenanceTotalPerPeriod + (CASE WHEN @LoopCounter + 1 = @AccrualPeriod THEN @MaintenanceRemainder ELSE @ZeroDecimal END)  END 
 											END
 			,[dblReportingRate]			= B.dblCurrencyExchangeRate
 			,[dblForeignRate]			= B.dblCurrencyExchangeRate
@@ -1337,15 +1337,15 @@ END
 		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= @DeferredRevenueAccountId
-		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblBaseAdjustedTax ELSE 0 END
-		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblBaseAdjustedTax END
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0				
+		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblBaseAdjustedTax ELSE @ZeroDecimal END
+		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblBaseAdjustedTax END
+		,dblDebitUnit				= @ZeroDecimal
+		,dblCreditUnit				= @ZeroDecimal				
 		,strDescription				= A.strComments
 		,strCode					= @Code
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
-		,dblExchangeRate			= D.dblCurrencyExchangeRate
+		,dblExchangeRate			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
 		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -1359,12 +1359,12 @@ END
 		,strTransactionForm			= @ScreenName 
 		,strModuleName				= @ModuleName 
 		,intConcurrencyId			= 1
-		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
-		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
-		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-		,[dblReportingRate]			= D.dblCurrencyExchangeRate
-		,[dblForeignRate]			= D.dblCurrencyExchangeRate
+		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE @ZeroDecimal END
+		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE @ZeroDecimal END
+		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblAdjustedTax END
+		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblAdjustedTax END
+		,[dblReportingRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
+		,[dblForeignRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
 		,[strRateType]				= SMCERT.strCurrencyExchangeRateType			 
 	FROM
 		tblARInvoiceDetailTax DT
@@ -1394,15 +1394,15 @@ END
 		 dtmDate					= CAST(ISNULL(A.dtmPostDate, A.dtmDate) AS DATE)
 		,strBatchID					= @BatchId
 		,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblBaseAdjustedTax END
-		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblBaseAdjustedTax ELSE 0 END
+		,dblDebit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblBaseAdjustedTax END
+		,dblCredit					= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblBaseAdjustedTax ELSE @ZeroDecimal END
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0				
 		,strDescription				= A.strComments
 		,strCode					= @Code
 		,strReference				= C.strCustomerNumber
 		,intCurrencyId				= A.intCurrencyId 
-		,dblExchangeRate			= D.dblCurrencyExchangeRate
+		,dblExchangeRate			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
 		,dtmDateEntered				= @PostDate 
 		,dtmTransactionDate			= A.dtmDate
 		,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
@@ -1416,12 +1416,12 @@ END
 		,strTransactionForm			= @ScreenName 
 		,strModuleName				= @ModuleName 
 		,intConcurrencyId			= 1
-		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN 0 ELSE DT.dblAdjustedTax END
-		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
-		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE 0 END
-		,[dblReportingRate]			= D.dblCurrencyExchangeRate
-		,[dblForeignRate]			= D.dblCurrencyExchangeRate
+		,[dblDebitForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblAdjustedTax END
+		,[dblDebitReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE DT.dblAdjustedTax END
+		,[dblCreditForeign]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE @ZeroDecimal END
+		,[dblCreditReport]			= CASE WHEN A.strTransactionType  IN ('Invoice', 'Cash') THEN DT.dblAdjustedTax ELSE @ZeroDecimal END
+		,[dblReportingRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
+		,[dblForeignRate]			= ISNULL(D.dblCurrencyExchangeRate, 1.000000)
 		,[strRateType]				= SMCERT.strCurrencyExchangeRateType			 
 	FROM
 		tblARInvoiceDetailTax DT
