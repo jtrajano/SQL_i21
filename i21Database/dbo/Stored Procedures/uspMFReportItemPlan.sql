@@ -302,7 +302,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT I.intItemId
+		SELECT DISTINCT I.intItemId
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
@@ -326,7 +326,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT I.intItemId
+		SELECT DISTINCT I.intItemId
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
@@ -349,7 +349,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT I.intItemId
+		SELECT DISTINCT I.intItemId
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
@@ -371,7 +371,7 @@ BEGIN
 			,strItemNo
 			,strDescription
 			)
-		SELECT I.intItemId
+		SELECT DISTINCT I.intItemId
 			,I.strItemNo
 			,I.strDescription
 		FROM tblICItem I
@@ -767,7 +767,7 @@ BEGIN
 		,strComments
 		,dtmPlannedDate
 		,CL.intCompanyLocationId
-		,RI.strCompanyLocationName
+		,CL.strLocationName
 		,CAST(NULL AS NUMERIC(38, 20)) dblQOH
 		,CAST(NULL AS NUMERIC(38, 20)) dblQtyInProduction
 		,CAST(NULL AS NUMERIC(38, 20)) dblDemandQty
@@ -775,8 +775,7 @@ BEGIN
 	FROM @tblMFRequiredItem RI
 		,@tblMFWIPRequiredDate RD
 		,tblSMCompanyLocation CL
-	WHERE RI.strCompanyLocationName = CL.strLocationName
-		AND CL.strLocationName = CASE 
+	WHERE CL.strLocationName = CASE 
 			WHEN LTRIM(RTRIM(@strCompanyLocationName)) = ''
 				THEN strLocationName
 			ELSE @strCompanyLocationName
