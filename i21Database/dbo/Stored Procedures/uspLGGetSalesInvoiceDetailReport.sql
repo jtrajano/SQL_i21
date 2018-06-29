@@ -5,7 +5,24 @@ AS
 BEGIN
 	DECLARE @intInvoiceId INT
 	DECLARE @intLineCount INT
+	DECLARE @strDocumentNumber NVARCHAR(100)
+	DECLARE @ysnDisplayPIInfo BIT = 0
 	SET @intInvoiceId = @xmlParam
+
+	SELECT @strDocumentNumber = strDocumentNumber
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = @intInvoiceId
+
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblARInvoice Inv
+			JOIN tblARInvoiceDetail InvDet ON Inv.intInvoiceId = InvDet.intInvoiceId
+			WHERE Inv.strType = 'Provisional'
+				AND Inv.strInvoiceNumber = @strDocumentNumber
+			)
+	BEGIN
+		SET @ysnDisplayPIInfo = 1
+	END
 
 	SELECT @intLineCount = COUNT(*)
 	FROM tblARInvoice Inv
@@ -22,9 +39,9 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = PriceItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM WtItemUOM ON WtItemUOM.intItemUOMId = InvDet.intItemWeightUOMId
 	LEFT JOIN tblICUnitMeasure WtUOM ON WtUOM.intUnitMeasureId = WtItemUOM.intUnitMeasureId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
-	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
+	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
@@ -62,6 +79,7 @@ BEGIN
 		InvDet.dblShipmentTareWt,
 		InvDet.dblShipmentNetWt,
 		InvDet.dblTotal,
+		ISNULL(Inv.dblProvisionalAmount,0) AS dblProvisionalAmount,
 		strInvoiceCurrency = InvCur.strCurrency,
 		strPriceCurrency = PriceCur.strCurrency,
 		strPriceUOM = PriceUOM.strUnitMeasure,
@@ -75,7 +93,8 @@ BEGIN
 		Inv.dblTax,
 		Inv.dblInvoiceTotal,
 		strTaxDescription = TaxG.strDescription,
-		intLineCount = @intLineCount 
+		intLineCount = @intLineCount,
+		ysnDisplayPIInfo = @ysnDisplayPIInfo   
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId AND strEntityType = 'Customer'
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
@@ -89,8 +108,9 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = PriceItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM WtItemUOM ON WtItemUOM.intItemUOMId = InvDet.intItemWeightUOMId
 	LEFT JOIN tblICUnitMeasure WtUOM ON WtUOM.intUnitMeasureId = WtItemUOM.intUnitMeasureId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
-	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId AND LD.intLoadDetailId = InvDet.intLoadDetailId
+	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
+		AND LD.intLoadDetailId = InvDet.intLoadDetailId
+	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId	
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
