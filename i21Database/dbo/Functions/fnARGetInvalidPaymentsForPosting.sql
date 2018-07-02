@@ -796,7 +796,7 @@ BEGIN
     --         P.[ysnPost] = 0
     --     AND P.[intTransactionDetailId] IS NULL
 
-    UNION
+    -- UNION
 
     --Payment with associated Overpayment
 	SELECT
