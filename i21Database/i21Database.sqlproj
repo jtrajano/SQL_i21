@@ -6779,6 +6779,8 @@
     <Build Include="dbo\Views\vyuCTUsedPriceUOM.sql" />
     <Build Include="dbo\Views\vyuARSearchPOS.sql" />
     <Build Include="dbo\Views\vyuARSearchPOSEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
