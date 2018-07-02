@@ -6762,6 +6762,7 @@
     <Build Include="dbo\Functions\fnGRConvertDateToReportDateFormat.sql" />
     <Build Include="dbo\Views\vyuSMAuditLogPanel.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
+    <Build Include="dbo\Views\vyuSTStoreItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
