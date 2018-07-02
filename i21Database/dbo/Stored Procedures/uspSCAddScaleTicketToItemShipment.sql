@@ -52,13 +52,25 @@ DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;
 
-SELECT	@intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-, @intContractDetailId = SC.intContractId ,@intItemId = SC.intItemId
-, @splitDistribution = SC.strDistributionOption, @ticketStatus = SC.strTicketStatus
+SELECT	@intTicketItemUOMId = UM.intItemUOMId
+, @intLoadId = SC.intLoadId
+, @intContractDetailId = SC.intContractId
+, @intItemId = SC.intItemId
+, @splitDistribution = SC.strDistributionOption
+, @ticketStatus = SC.strTicketStatus
 , @intContractCostId = SC.intContractCostId
 FROM dbo.tblICItemUOM UM	
 JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+
+IF @ticketStatus = 'C'
+BEGIN
+	 --Raise the error:
+	RAISERROR('Ticket already completed', 16, 1);
+	RETURN;
+END
+
+SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 
 DECLARE @ShipmentStagingTable AS ShipmentStagingTable,
 		@ShipmentItemLotStagingTable AS ShipmentItemLotStagingTable,

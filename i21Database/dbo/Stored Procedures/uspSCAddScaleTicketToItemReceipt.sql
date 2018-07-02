@@ -40,12 +40,21 @@ DECLARE @intScaleStationId AS INT
 		,@intContractCostId AS INT
 		,@currencyDecimal AS INT;
 		
-BEGIN 
-	SELECT @intTicketItemUOMId = UM.intItemUOMId, @intLoadId = SC.intLoadId
-	, @intContractDetailId = SC.intContractId, @splitDistribution = SC.strDistributionOption
-	, @intItemId = SC.intItemId , @ticketStatus = SC.strTicketStatus, @intContractCostId = SC.intContractCostId
+	SELECT @intTicketItemUOMId = UM.intItemUOMId
+	, @intLoadId = SC.intLoadId
+	, @intContractDetailId = SC.intContractId
+	, @splitDistribution = SC.strDistributionOption
+	, @intItemId = SC.intItemId 
+	, @ticketStatus = SC.strTicketStatus
+	, @intContractCostId = SC.intContractCostId
 	FROM	dbo.tblICItemUOM UM	JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.ysnStockUnit = 1 AND SC.intTicketId = @intTicketId
+
+IF @ticketStatus = 'C'
+BEGIN
+	 --Raise the error:
+	RAISERROR('Ticket already completed', 16, 1);
+	RETURN;
 END
 
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
@@ -181,7 +190,7 @@ SELECT
 											END 
 									END
 		,dblExchangeRate			= 1 -- Need to check this
-		,intLotId					= NULL -- SC.intLotId
+		,intLotId					= SC.intLotId
 		,intSubLocationId			= SC.intSubLocationId
 		,intStorageLocationId		= SC.intStorageLocationId
 		,ysnIsStorage				= LI.ysnIsStorage
