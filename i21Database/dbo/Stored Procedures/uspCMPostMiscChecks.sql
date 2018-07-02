@@ -25,32 +25,35 @@ BEGIN TRANSACTION
 
 -- CREATE THE TEMPORARY TABLE 
 CREATE TABLE #tmpGLDetail (
-	[dtmDate] [datetime] NOT NULL
-	,[strBatchId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intAccountId] [int] NULL
-	,[dblDebit] [numeric](18, 6) NULL
-	,[dblCredit] [numeric](18, 6) NULL
-	,[dblDebitUnit] [numeric](18, 6) NULL
-	,[dblCreditUnit] [numeric](18, 6) NULL
-	,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strCode] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[strTransactionId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
-	,[intTransactionId] [int] NULL
-	,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[intCurrencyId] [int] NULL
-	,[dblExchangeRate] [numeric](38, 20) NOT NULL
-	,[dtmDateEntered] [datetime] NOT NULL
-	,[dtmTransactionDate] [datetime] NULL
-	,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
-	,[intJournalLineNo] [int]
-	,[ysnIsUnposted] [bit] NOT NULL
-	,[intUserId] [int] NULL
-	,[intEntityId] [int] NULL
-	,[strTransactionType] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strTransactionForm] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
-	,[strModuleName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL		
-	,[intConcurrencyId] [int] NULL
-)
+		[dtmDate] [datetime] NOT NULL
+		,[strBatchId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+		,[intAccountId] [int] NULL
+		,[dblDebit] [numeric](18, 6) NULL
+		,[dblCredit] [numeric](18, 6) NULL
+		,[dblDebitForeign] [numeric](18, 6) NULL
+		,[dblCreditForeign] [numeric](18, 6) NULL
+		,[dblDebitUnit] [numeric](18, 6) NULL
+		,[dblCreditUnit] [numeric](18, 6) NULL
+		,[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strCode] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+		,[strTransactionId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL
+		,[intTransactionId] [int] NULL
+		,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[intCurrencyId] [int] NULL
+		,[intCurrencyExchangeRateTypeId] [int] NULL
+		,[dblExchangeRate] [numeric](38, 20) NOT NULL
+		,[dtmDateEntered] [datetime] NOT NULL
+		,[dtmTransactionDate] [datetime] NULL
+		,[strJournalLineDescription] [nvarchar](250)  COLLATE Latin1_General_CI_AS NULL
+		,[intJournalLineNo] [int]
+		,[ysnIsUnposted] [bit] NOT NULL
+		,[intUserId] [int] NULL
+		,[intEntityId] [int] NULL
+		,[strTransactionType] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strTransactionForm] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
+		,[strModuleName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL		
+		,[intConcurrencyId] [int] NULL
+	)
 
 -- Declare the variables 
 DECLARE 
