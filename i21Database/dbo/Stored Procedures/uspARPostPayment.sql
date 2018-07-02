@@ -1176,6 +1176,7 @@ IF @recap = 0
 				ON B.intInvoiceId = C.intInvoiceId				
 			WHERE
 				A.intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+				
 								
 			UPDATE 
 				tblARPaymentDetail
@@ -1192,8 +1193,24 @@ IF @recap = 0
 				tblARInvoice C
 					ON A.intInvoiceId = C.intInvoiceId
 			WHERE
-				ISNULL(B.[ysnInvoicePrepayment],0) = 0							
-					
+				ISNULL(B.[ysnInvoicePrepayment],0) = 0	
+				
+			UPDATE tblARPaymentDetail
+			SET dblPayment = 0,
+				dblBasePayment = 0,
+				dblBaseAmountDue = 	dblBaseInvoiceTotal + ((ISNULL(dblBaseAmountDue, 0.00) + ISNULL(dblBaseInterest,0.00)) - ISNULL(dblBaseDiscount,0.00)),
+				dblAmountDue = 	dblInvoiceTotal + ((ISNULL(dblAmountDue, 0.00) + ISNULL(dblInterest,0.00)) - ISNULL(dblDiscount,0.00))
+			WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+			
+			UPDATE ARP
+			SET ARP.dblAmountPaid = 0,
+				ARP.dblUnappliedAmount = APD.dblPayment
+			FROM tblARPayment ARP
+			INNER JOIN (SELECT APD.intPaymentId, SUM(APD.dblPayment) dblPayment FROM tblARPaymentDetail APD WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData) GROUP BY APD.intPaymentId ) APD
+				ON ARP.intPaymentId = APD.intPaymentId
+			WHERE APD.intPaymentId IN(SELECT [intTransactionId] FROM @ARReceivablePostData)
+
+
 			UPDATE tblGLDetail
 				SET tblGLDetail.ysnIsUnposted = 1
 			FROM tblARPayment A
@@ -1817,4 +1834,3 @@ Post_Exit:
 	SET @invalidCount = @totalInvalid + @totalRecords
 	SET @success = 0	
 	RETURN 0;
-	
