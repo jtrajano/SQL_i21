@@ -53,11 +53,6 @@ CREATE TABLE #tmpInvalidBillData (
 	[intErrorKey]	INT
 );
 
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-
-SET @batchIdUsed = @batchId
-
 --DECLARRE VARIABLES
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
@@ -214,6 +209,15 @@ FROM #tmpPostBillData
 ORDER BY intBillId
 
 BEGIN TRANSACTION
+
+IF(@batchId IS NULL)
+BEGIN
+	--DO NOT GENERATE IF UNPOST
+	IF NOT (@post = 0 AND @recap = 0)
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+END
+
+SET @batchIdUsed = @batchId
 
 --CREATE DATA FOR COST ADJUSTMENT
 DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
