@@ -4,7 +4,6 @@
 	,@intCommodityId INT = NULL
 	,@ysnExpired BIT
 	,@intFutureMarketId INT = NULL
-	,@intEntityId int = null
 AS  
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
@@ -81,7 +80,6 @@ SELECT psh.intMatchFuturesPSHeaderId,
  --JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ot.intInstrumentTypeId =1
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
-	AND ot.intEntityId= CASE WHEN ISNULL(@intEntityId,0)=0 then ot.intEntityId else @intEntityId end
 	AND CONVERT(DATETIME,CONVERT(VARCHAR(10),psh.dtmMatchDate,110),110) BETWEEN @dtmFromDate AND @dtmToDate
 	AND isnull(ysnExpired,0) = case when isnull(@ysnExpired,'false')= 'true' then isnull(ysnExpired,0) else @ysnExpired end
 	AND ot.intInstrumentTypeId =1
