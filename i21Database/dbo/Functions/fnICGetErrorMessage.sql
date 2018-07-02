@@ -69,7 +69,7 @@ BEGIN
 		-- OBSOLETE: WHEN @msgId = 80053 THEN 'Unable to continue. Cost allocation is by Weight but stock unit for %s is not a weight type.'
 		WHEN @msgId = 80054 THEN 'Unable to unpost the %s. The %s was %s.'
 		WHEN @msgId = 80055 THEN 'Data not found. Unable to create the Inventory Receipt.'
-		WHEN @msgId = 80056 THEN 'Unable to Unreceive. The inventory receipt has a voucher in %s.'
+		WHEN @msgId = 80056 THEN 'Unable to unpost. The inventory receipt has a voucher in %s.'
 		WHEN @msgId = 80057 THEN 'Split Lot requires a negative Adjust Qty on %s to split stocks from it.'
 		WHEN @msgId = 80058 THEN 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
 		WHEN @msgId = 80059 THEN 'Lot Move requires a negative Adjust Qty on %s as stock for the move.'
