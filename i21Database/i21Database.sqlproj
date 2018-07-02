@@ -6781,6 +6781,7 @@
     <Build Include="dbo\Views\vyuARSearchPOSEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
+    <Build Include="dbo\Tables\tblRKMatchDerivativesHistoryForOption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
