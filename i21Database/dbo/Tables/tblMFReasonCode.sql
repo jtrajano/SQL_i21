@@ -6,7 +6,7 @@
 	strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	ysnReduceavailabletime BIT NOT NULL CONSTRAINT DF_tblMFReasonCode_ysnReduceavailabletime DEFAULT 0,
 	ysnExplanationrequired BIT NOT NULL CONSTRAINT DF_tblMFReasonCode_ysnExplanationrequired DEFAULT 0,
-	
+	ysnActive BIT CONSTRAINT DF_tblMFReasonCode_ysnActive DEFAULT 1,
 	ysnDefault BIT NOT NULL CONSTRAINT DF_tblMFReasonCode_ysnDefault DEFAULT 0,
 	intReasonTypeId INT NOT NULL,
 	intTransactionTypeId INT,

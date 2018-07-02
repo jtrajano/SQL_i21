@@ -3383,3 +3383,11 @@ FROM tblMFWorkOrderProducedLot WP
 JOIN tblICLot L ON L.intLotId = WP.intLotId
 Where WP.intProducedLotId is null
 Go
+UPDATE tblMFReasonCode
+SET ysnActive = 0
+WHERE ysnActive IS NULL
+GO
+UPDATE tblMFReasonCode
+SET intConcurrencyId = 1
+WHERE intConcurrencyId = 0
+GO
