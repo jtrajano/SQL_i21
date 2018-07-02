@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICGetItemRunningStock]
+﻿CREATE PROCEDURE [dbo].[uspICGetItemUOMFromRunningStock]
 	@intItemId AS INT,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
@@ -12,6 +12,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @DefaultLotCondition NVARCHAR(50)
+SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
 
 DECLARE @strSubLocationDefault NVARCHAR(50);
 DECLARE @strStorageUnitDefault NVARCHAR(50);
@@ -23,6 +25,7 @@ DECLARE @tblInventoryTransaction TABLE(
 	intSubLocationId		INT,
 	intStorageLocationId	INT,
 	intLotId				INT,
+	intCostingMethod		INT,
 	dtmDate					DATETIME,
 	dblQty					NUMERIC(38, 20),
 	dblUnitStorage			NUMERIC(38, 20),
@@ -36,7 +39,6 @@ DECLARE @tblInventoryTransactionGrouped TABLE(
 	intItemLocationId		INT,
 	intSubLocationId		INT,
 	intStorageLocationId	INT,
-	intCostingMethodId		INT, 
 	dblQty					NUMERIC(38, 20),
 	dblUnitStorage			NUMERIC(38, 20),
 	dblCost					NUMERIC(38, 20)
@@ -173,20 +175,18 @@ INSERT INTO @tblInventoryTransactionGrouped (
 	,intItemLocationId
 	,intSubLocationId
 	,intStorageLocationId
-	,intCostingMethodId
 	,dblQty
 	,dblUnitStorage
 	,dblCost
 )
-SELECT TOP 1 
+SELECT 
 	i.intItemId
 	,intItemUOMId
 	,intItemLocationId
 	,intSubLocationId = intSubLocationId
 	,intStorageLocationId = intStorageLocationId
-	,intCostingMethod
-	,dblQty = SUM(t.dblQty) 
- 	,dblUnitStorage = SUM(t.dblUnitStorage)
+	,dblQty = SUM(ISNULL(t.dblQty, 0)) 
+ 	,dblUnitStorage = SUM(ISNULL(t.dblUnitStorage, 0))
 	,dblCost = MAX(t.dblCost)
 FROM	
 	@tblInventoryTransaction t INNER JOIN tblICItem i 
@@ -197,10 +197,9 @@ GROUP BY
 	,intItemLocationId
 	,intSubLocationId
 	,intStorageLocationId
-	,intCostingMethod
-ORDER BY 
-	SUM(t.dblQty) DESC 
-	,SUM(t.dblUnitStorage) DESC 
+HAVING 
+	SUM(ISNULL(t.dblQty, 0)) <> 0 
+	OR SUM(ISNULL(t.dblUnitStorage, 0)) <> 0 
 
 -- Return the result back to the caller. 
 SELECT 
@@ -252,7 +251,7 @@ LEFT JOIN tblICItemUOM StockUOM
 LEFT JOIN tblICItemLocation ItemLocation 
 	ON ItemLocation.intItemLocationId = t.intItemLocationId
 LEFT JOIN tblICCostingMethod CostMethod
-	ON CostMethod.intCostingMethodId = t.intCostingMethodId
+	ON CostMethod.intCostingMethodId = ItemLocation.intCostingMethod
 LEFT JOIN tblSMCompanyLocation CompanyLocation 
 	ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
