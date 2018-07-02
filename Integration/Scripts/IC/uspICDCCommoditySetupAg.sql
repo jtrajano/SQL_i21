@@ -14,13 +14,11 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 --==============================Step 1 =============================================
---Origin AG Items does not have commodity
---Contracts need commodity. So create commodity for classes used in origin contract.
+--Origin Ag does not have commodity
+--Contracts need commodity. So create commodity .
 INSERT INTO tblICCommodity(strCommodityCode,strDescription)
-SELECT DISTINCT ITM.agitm_no, ITM.agitm_desc FROM agitmmst ITM
-		JOIN agcntmst CT ON ITM.agitm_no = CT.agcnt_itm_or_cls
-		LEFT JOIN tblICCommodity ON  strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = ITM.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS
-	WHERE intCommodityId IS NULL
+values
+('Ag', 'Ag Contract')
 
 ----=====================================STEP 2=========================================
 --find Gallons uoms from i21 
@@ -30,17 +28,26 @@ SELECT DISTINCT ITM.agitm_no, ITM.agitm_desc FROM agitmmst ITM
 --select * from tblICUnitMeasure
 
 ----=====================================STEP 3=========================================
---insert uoms into Commodity UOM 
+--update all items in origin contract with commodity code
+
+update I set intCommodityId = (select intCommodityId from tblICCommodity where strCommodityCode = 'Ag')
+from tblICItem I 
+join agcntmst cnt on I.strItemNo collate Latin1_General_CI_AS = rtrim(cnt.agcnt_itm_or_cls) 
+
+----=====================================STEP 4=========================================
+--insert uoms into Commodity UOM for all items in the contract.
 
 insert into tblICCommodityUnitMeasure 
 (intCommodityId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnDefault, intConcurrencyId)
-select c.intCommodityId 'intCommodityId', iu.intUnitMeasureId, 1 'dblUnitQty', 1 'ysnStockUnit', 1 'ysnDefault', 1 'intConcurrencyId' 
-from tblICCommodity c 
-join agitmmst I on agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
-join tblICUnitMeasure iu on strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = upper(rtrim(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS
-WHERE NOT EXISTS (SELECT * FROM tblICCommodityUnitMeasure WHERE intCommodityId = c.intCommodityId AND intUnitMeasureId = iu.intUnitMeasureId)
+select distinct c.intCommodityId 'intCommodityId', u.intUnitMeasureId, 1 'dblUnitQty', 1 'ysnStockUnit', 1 'ysnDefault', 1 'intConcurrencyId' 
+from tblICItem i
+join tblICItemUOM iu on i.intItemId = iu.intItemId
+join tblICUnitMeasure u on iu.intUnitMeasureId = u.intUnitMeasureId
+join agcntmst cnt on i.strItemNo collate Latin1_General_CI_AS = rtrim(cnt.agcnt_itm_or_cls) 
+join tblICCommodity c on i.intCommodityId = c.intCommodityId
+where iu.ysnStockUnit = 1
 
-----=====================================STEP 4=========================================
---update all AG items with commodity code
-update I set intCommodityId = CM.intCommodityId
-from tblICItem I join tblICCommodity CM on I.strItemNo = CM.strCommodityCode
+
+
+
+GO
