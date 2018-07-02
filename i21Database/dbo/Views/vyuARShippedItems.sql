@@ -57,6 +57,7 @@ SELECT id							= NEWID()
 	 , dblTotal						= SHIPPEDITEMS.dblTotal
 	 , intStorageLocationId			= SHIPPEDITEMS.intStorageLocationId
 	 , strStorageLocationName		= STORAGELOCATION.strName
+	 , strSubLocationName			= SUBLOCATION.strSubLocationName
 	 , intTermID					= SHIPPEDITEMS.intTermId
 	 , strTerm						= TERM.strTerm
 	 , intEntityShipViaId			= SHIPPEDITEMS.intEntityShipViaId
@@ -1398,6 +1399,11 @@ LEFT OUTER JOIN (
 		 , strName = CAST(ISNULL(strName, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblICStorageLocation WITH (NOLOCK)
 ) STORAGELOCATION ON SHIPPEDITEMS.intStorageLocationId = STORAGELOCATION.intStorageLocationId
+LEFT OUTER JOIN (
+	SELECT intCompanyLocationSubLocationId
+		 , strSubLocationName = CAST(ISNULL(strSubLocationName, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	FROM dbo.tblSMCompanyLocationSubLocation WITH (NOLOCK)
+) SUBLOCATION ON SHIPPEDITEMS.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
 LEFT OUTER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName
