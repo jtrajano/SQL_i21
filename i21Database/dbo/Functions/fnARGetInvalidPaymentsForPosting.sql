@@ -775,26 +775,26 @@ BEGIN
 
     UNION
 
-    --Payment with applied Prepayment
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'You cannot unpost payment with applied prepaids.'
-	FROM
-		@Payments P
-    INNER JOIN (SELECT [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [intInvoiceId] FROM tblARPrepaidAndCredit) ARPC
-        ON  P.[intInvoiceId] = ARPC.[intPrepaymentId]
-        AND ARPC.[ysnApplied] = 1
-        AND ARPC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
-    INNER JOIN (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
-        ON  ARPC.[intInvoiceId] = ARI.[intInvoiceId]
-        AND ARI.[ysnPosted] = 1
-    WHERE
-            P.[ysnPost] = 0
-        AND P.[intTransactionDetailId] IS NULL
+    -- --Payment with applied Prepayment
+	-- SELECT
+    --      [intTransactionId]         = P.[intTransactionId]
+    --     ,[strTransactionId]         = P.[strTransactionId]
+    --     ,[strTransactionType]       = @TransType
+    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+    --     ,[strBatchId]               = P.[strBatchId]
+    --     ,[strError]                 = 'You cannot unpost payment with applied prepaids.'
+	-- FROM
+	-- 	@Payments P
+    -- INNER JOIN (SELECT [intPrepaymentId], [ysnApplied], [dblAppliedInvoiceDetailAmount], [intInvoiceId] FROM tblARPrepaidAndCredit) ARPC
+    --     ON  P.[intInvoiceId] = ARPC.[intPrepaymentId]
+    --     AND ARPC.[ysnApplied] = 1
+    --     AND ARPC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+    -- INNER JOIN (SELECT [intInvoiceId], [ysnPosted] FROM tblARInvoice) ARI
+    --     ON  ARPC.[intInvoiceId] = ARI.[intInvoiceId]
+    --     AND ARI.[ysnPosted] = 1
+    -- WHERE
+    --         P.[ysnPost] = 0
+    --     AND P.[intTransactionDetailId] IS NULL
 
     UNION
 
