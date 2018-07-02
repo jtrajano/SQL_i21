@@ -200,11 +200,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 		SELECT DISTINCT strCommodityCode,ft.intCommodityId,ft.strInternalTradeNo,intFutOptTransactionHeaderId,'Net Hedge' ,strLocationName,
 				 left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) strFutureMonth, 	
 				 left(strFutureMonth,4) +  '20'+convert(nvarchar(2),intYear) dtmFutureMonthsDate,			
-				CASE WHEN ft.strBuySell = 'Buy' THEN (
-						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
-						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) END * isnull((
+				intOpenContract * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
@@ -214,10 +210,7 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 				),0)*m.dblContractSize AS dblTotal, m.intUnitMeasureId,				
 		e.strName + '-' + strAccountNumber AS strAccountNumber, 		
 		strBuySell AS TranType, 
-		CASE WHEN ft.strBuySell = 'Buy' THEN (
-					ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-					ELSE - (ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS s WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)
-				) END AS dblNoOfLot, 
+		intOpenContract AS dblNoOfLot, 
 		ISNULL((SELECT TOP 1 dblDelta
 		FROM tblRKFuturesSettlementPrice sp
 		INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
@@ -225,7 +218,8 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 		AND ft.dblStrike = mm.dblStrike
 		ORDER BY dtmPriceDate DESC
 		),0) AS dblDelta,ft.intBrokerageAccountId,case when ft.intInstrumentTypeId  = 1 then 'Futures' else 'Options ' end as strInstrumentType
-	FROM tblRKFutOptTransaction ft
+	FROM @tblGetOpenFutureByDate oc
+	JOIN tblRKFutOptTransaction ft on oc.intFutOptTransactionId=ft.intFutOptTransactionId 
 	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
 						AND ft.intLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -238,8 +232,8 @@ INSERT INTO @List (strCommodityCode,intCommodityId,strInternalTradeNo,intFutOptT
 	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
 	WHERE ft.intCommodityId = @intCommodityId AND intLocationId = case when isnull(@intLocationId,0)=0 then intLocationId else @intLocationId end 
-	AND intFutOptTransactionId NOT IN (
-			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+	AND ft.intFutOptTransactionId NOT IN (
+			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND ft.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 				 and  ft.intEntityId= CASE WHEN ISNULL(@intVendorId,0)=0 then ft.intEntityId else @intVendorId end 
 
 --Net Hedge option end

@@ -623,11 +623,7 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityI
 	INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName)
 	select intSeqId,strSeqHeader,strCommodityCode,sum(dblTotal) dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName from(
 		SELECT 40 intSeqId,'Price Risk' strSeqHeader,@strDescription strCommodityCode,	
-				CASE WHEN ft.strBuySell = 'Buy' THEN (
-						ft.intNoOfContract - isnull((SELECT sum(intMatchQty) FROM tblRKOptionsMatchPnS l
-						WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) ELSE - (ft.intNoOfContract - isnull((	SELECT sum(intMatchQty)	FROM tblRKOptionsMatchPnS s	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId	), 0)
-						) END * isnull((
+				intOpenContract * isnull((
 						SELECT TOP 1 dblDelta
 						FROM tblRKFuturesSettlementPrice sp
 						INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
@@ -635,7 +631,8 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityI
 						AND ft.dblStrike = mm.dblStrike
 						ORDER BY dtmPriceDate DESC
 				),0)*m.dblContractSize AS dblTotal,ft.intCommodityId, m.intUnitMeasureId intFromCommodityUnitMeasureId,intLocationId intCompanyLocationId,l.strLocationName
-	FROM tblRKFutOptTransaction ft
+	FROM @tblGetOpenFutureByDate oc
+	JOIN tblRKFutOptTransaction ft on oc.intFutOptTransactionId=ft.intFutOptTransactionId
 	INNER JOIN tblRKFutureMarket m ON ft.intFutureMarketId = m.intFutureMarketId
 					  		  			AND  intLocationId   IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
@@ -647,9 +644,9 @@ INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityI
 	INNER JOIN tblRKBrokerageAccount ba ON ft.intBrokerageAccountId = ba.intBrokerageAccountId
 	INNER JOIN tblEMEntity e ON e.intEntityId = ft.intEntityId AND ft.intInstrumentTypeId = 2
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = ft.intFutureMonthId AND fm.intFutureMarketId = ft.intFutureMarketId AND fm.ysnExpired = 0
-	WHERE ft.intCommodityId = @intCommodityId AND intFutOptTransactionId NOT IN (
-			SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)	
-			)t group by intSeqId,strSeqHeader,strCommodityCode,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName
+	WHERE ft.intCommodityId = @intCommodityId AND ft.intFutOptTransactionId NOT IN (
+	SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned	) AND ft.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)	
+	)t group by intSeqId,strSeqHeader,strCommodityCode,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId, strLocationName
 ----		-- Net Hedge option end
 	
 INSERT INTO @Final(intSeqId,strSeqHeader,strCommodityCode,dblTotal,intCommodityId,intFromCommodityUnitMeasureId,intCompanyLocationId,strLocationName)	
