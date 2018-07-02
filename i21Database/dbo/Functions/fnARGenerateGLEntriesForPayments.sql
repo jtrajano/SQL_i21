@@ -178,7 +178,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
+    ,[dblExchangeRate]              = ISNULL(NULLIF(P.dblBaseAmountPaid, 0), 1)/ISNULL(NULLIF(P.dblAmountPaid, 0), 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -272,7 +272,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount])
+    ,[dblExchangeRate]              = ISNULL(NULLIF(P.dblBaseUnappliedAmount, 0), 1)/ISNULL(NULLIF(P.dblUnappliedAmount, 0), 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -371,7 +371,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
+    ,[dblExchangeRate]              = ISNULL(NULLIF(P.dblBaseAmountPaid, 0), 1)/ISNULL(NULLIF(P.dblBaseAmountPaid, 0), 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -483,7 +483,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
+    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -603,7 +603,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
+    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -730,7 +730,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
+    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -854,7 +854,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
+    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -971,7 +971,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
+    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -1092,7 +1092,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
+    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
