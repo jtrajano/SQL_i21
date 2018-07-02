@@ -23,6 +23,7 @@ DECLARE @tblInventoryTransaction TABLE(
 	intSubLocationId		INT,
 	intStorageLocationId	INT,
 	intLotId				INT,
+	intCostingMethod		INT,
 	dtmDate					DATETIME,
 	dblQty					NUMERIC(38, 20),
 	dblUnitStorage			NUMERIC(38, 20),
