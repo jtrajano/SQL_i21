@@ -1,12 +1,12 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGenerateCSV]
-@intVendorId int,
-@strStoreIdList NVARCHAR(MAX),
-@dtmBeginningDate datetime,
-@dtmEndingDate datetime,
-@intCsvFormat INT,
-@strStatusMsg NVARCHAR(1000) OUTPUT,
-@strCSVHeader NVARCHAR(MAX) OUTPUT,
-@intVendorAccountNumber INT OUTPUT
+﻿ALTER PROCEDURE [dbo].[uspSTGenerateCSV]
+	@intVendorId int,
+	@strStoreIdList NVARCHAR(MAX),
+	@dtmBeginningDate datetime,
+	@dtmEndingDate datetime,
+	@intCsvFormat INT,
+	@strStatusMsg NVARCHAR(1000) OUTPUT,
+	@strCSVHeader NVARCHAR(MAX) OUTPUT,
+	@intVendorAccountNumber INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -244,9 +244,32 @@ BEGIN
 
 								, 1 as intConsumerUnits
 
-								, 'N' as strMultiPackIndicator
-								, 0 as intMultiPackRequiredQuantity
-								, 0 as dblMultiPackDiscountAmount
+								, CASE
+									-- 2 Can Deal
+									WHEN strTrlDept = 'OTP' AND	strTrlMatchLineTrlMatchName IS NOT NULL AND strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+										THEN 'Y'
+									ELSE 'N'
+								  END AS strMultiPackIndicator	
+								, CASE
+									-- 2 Can Deal
+									WHEN strTrlDept = 'OTP' AND	strTrlMatchLineTrlMatchName IS NOT NULL AND strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+										THEN 2
+									ELSE NULL
+								  END as intMultiPackRequiredQuantity
+								, CASE
+									-- 2 Can Deal
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+										THEN (
+												SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
+												FROM tblSTTranslogRebates tbl
+												WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+												AND tbl.intCheckoutId = TR.intCheckoutId
+												AND tbl.strTrlDept = 'OTP' 
+												AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+												AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+											 )
+									ELSE NULL
+								  END as dblMultiPackDiscountAmount
 
 								, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
 								, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
