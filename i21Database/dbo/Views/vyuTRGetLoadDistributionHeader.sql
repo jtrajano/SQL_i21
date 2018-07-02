@@ -24,6 +24,7 @@ SELECT DistHeader.intLoadDistributionHeaderId
 	, DistHeader.dtmInvoiceDateTime
 	, DistHeader.intInvoiceId
 	, Invoice.strInvoiceNumber
+	, Invoice.dblAmountDue
 FROM tblTRLoadDistributionHeader DistHeader
 LEFT JOIN tblTRLoadHeader Header ON Header.intLoadHeaderId = DistHeader.intLoadHeaderId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = DistHeader.intEntityCustomerId
