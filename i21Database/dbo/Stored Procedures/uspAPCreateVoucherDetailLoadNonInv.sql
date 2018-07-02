@@ -31,7 +31,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						,
 		[dblQtyOrdered]					,
 		[dblQtyReceived]				,
+		[dblUnitQty]					,		
 		[dblCost]						,
+		[dblCostUnitQty]				,
 		[intCostUOMId]					,
 		[int1099Form]					,
 		[int1099Category]				,
@@ -50,7 +52,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblTotal]						=	CAST(A.dblCost * A.dblQtyReceived  AS DECIMAL(18,2)),
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]				=	A.dblQtyReceived,
+		[dblUnitQty]					=	A.dblUnitQty,
 		[dblCost]						=	A.dblCost,
+		[dblCostUnitQty]				=	A.dblCostUnitQty,
 		[intCostUOMId]					=	A.intCostUOMId,
 		[int1099Form]					=	(CASE WHEN E.str1099Form = '1099-MISC' THEN 1
 													WHEN E.str1099Form = '1099-INT' THEN 2
@@ -63,6 +67,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	INNER JOIN tblCTContractDetail G ON A.intContractDetailId = G.intContractDetailId
+	INNER JOIN tblICItem item ON A.intItemId = item.intItemId
+	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 	WHERE B.intBillId = @voucherId
 
