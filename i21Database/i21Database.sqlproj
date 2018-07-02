@@ -6254,6 +6254,8 @@
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
