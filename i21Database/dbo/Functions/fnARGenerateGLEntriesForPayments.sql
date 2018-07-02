@@ -165,20 +165,19 @@ SELECT
                                             WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
                                             ELSE P.[intAccountId]
                                       END)
-    --,[dblDebit]                     = (CASE WHEN (P.[dblBaseAmountDue] = (P.[dblBasePayment] - P.[dblBaseInterest]) + P.[dblBaseDiscount])
-    --                                        THEN (P.[dblBasePayment] - P.[dblBaseInterest])  + P.[dblBaseDiscount]
-    --                                        ELSE P.[dblBasePayment]
-    --                                   END)
-    --                                        * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblDebit]                     = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    --,[dblDebit]                     = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+	,[dblDebit]                     = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCredit]                    = @ZeroDecimal
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
-    ,[strDescription]               = P.[strNotes]
+    ,[strDescription]               = CASE WHEN ISNULL(P.[strNotes],'') = '' THEN (SELECT strDescription FROM tblGLAccount WHERE intAccountId = ((CASE WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('Write Off') THEN P.[intWriteOffAccountId]
+                                            WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
+                                            ELSE P.[intAccountId]
+                                      END))) ELSE P.[strNotes] END
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(NULLIF(P.dblBaseAmountPaid, 0), 1)/ISNULL(NULLIF(P.dblAmountPaid, 0), 1)
+    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblAmountPaid], 0) = 0 THEN 1 ELSE (P.[dblBaseAmountPaid] / P.[dblAmountPaid]) END
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -190,9 +189,11 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = P.[dblAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    --,[dblDebitForeign]              = (P.[dblAmountPaid] - ISNULL(P1.[dblClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    --,[dblDebitReport]               = (P.[dblBaseAmountPaid] - ISNULL(P1.[dblBaseClaim], 0)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+	,[dblDebitForeign]              = P.[dblAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblDebitReport]               = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCreditForeign]             = @ZeroDecimal
     ,[dblCreditReport]              = @ZeroDecimal
@@ -211,6 +212,22 @@ SELECT
     ,[ysnRebuild]                   = NULL
 FROM
     @Payments P
+--LEFT OUTER JOIN
+--    (
+--    SELECT
+--         [dblClaim]         = SUM(P1.[dblPayment])
+--        ,[dblBaseClaim]     = SUM(P1.[dblBasePayment])
+--        ,[intTransactionId] = P1.[intTransactionId]
+--    FROM
+--        @Payments P1
+--    WHERE
+--            P1.[intTransactionDetailId] IS NOT NULL
+--        AND P1.[strTransactionType] = 'Claim'
+--        AND P1.[dblPayment] <> @ZeroDecimal
+--    GROUP BY
+--        P1.[intTransactionId]
+--    ) P1
+--        ON P.[intTransactionId] = P1.[intTransactionId]
 WHERE
     P.[intTransactionDetailId] IS NULL
 
@@ -272,7 +289,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(NULLIF(P.dblBaseUnappliedAmount, 0), 1)/ISNULL(NULLIF(P.dblUnappliedAmount, 0), 1)
+    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblUnappliedAmount], 0) = 0 THEN 1 ELSE (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount]) END
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -284,7 +301,7 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = @ZeroDecimal
     ,[dblDebitReport]               = @ZeroDecimal
@@ -371,7 +388,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(NULLIF(P.dblBaseAmountPaid, 0), 1)/ISNULL(NULLIF(P.dblBaseAmountPaid, 0), 1)
+    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblAmountPaid], 0) = 0 THEN 1 ELSE (P.[dblBaseAmountPaid] / P.[dblAmountPaid]) END
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -383,7 +400,7 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = @ZeroDecimal
     ,[dblDebitReport]               = @ZeroDecimal
@@ -483,7 +500,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -495,7 +512,7 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = P.[dblDiscount]
     ,[dblDebitReport]               = P.[dblBaseDiscount]
@@ -518,6 +535,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblDiscount] <> @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseDiscount] <> @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
@@ -603,7 +621,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -615,7 +633,7 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = P.[dblInterest]
     ,[dblDebitReport]               = P.[dblBaseInterest]
@@ -638,6 +656,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
@@ -719,18 +738,14 @@ SELECT
     ,[strBatchId]                   = P.[strBatchId]
     ,[intAccountId]                 = P.[intTransactionAccountId]
     ,[dblDebit]                     = @ZeroDecimal
-    --,[dblCredit]                    = (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END) * (P.[dblBaseAmountPaid] + ISNULL((SELECT SUM(ISNULL(((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00) * (CASE WHEN C.strTransactionType IN ('Invoice', 'Debit Memo') THEN 1 ELSE -1 END))) - ARPD.dblBasePayment),0)) FROM tblARPaymentDetail ARPD INNER JOIN tblARInvoice C ON ARPD.intInvoiceId = C.intInvoiceId  WHERE ARPD.intPaymentId = A.intPaymentId AND ((C.dblAmountDue + C.dblInterest) - C.dblDiscount) = ((ARPD.dblPayment - ARPD.dblInterest) + ARPD.dblDiscount)),0))
-    ,[dblCredit]                    = (CASE WHEN (P.[dblBaseAmountDue] = (P.[dblBasePayment] - P.[dblBaseInterest]) + P.[dblBaseDiscount])
-												THEN (P.[dblBasePayment] - P.[dblBaseInterest])  + P.[dblBaseDiscount]
-												ELSE P.[dblBasePayment] END)
-										  * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblCredit]                    = (P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = P.[intTransactionAccountId]) 
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -742,18 +757,12 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = @ZeroDecimal
     ,[dblDebitReport]               = @ZeroDecimal
-    ,[dblCreditForeign]             = (CASE WHEN (P.[dblAmountDue] = (P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
-												THEN (P.[dblPayment] - P.[dblInterest])  + P.[dblDiscount]
-												ELSE P.[dblPayment] END)
-										  * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-    ,[dblCreditReport]              = (CASE WHEN (P.[dblBaseAmountDue] = (P.[dblBasePayment] - P.[dblBaseInterest]) + P.[dblBaseDiscount])
-												THEN (P.[dblBasePayment] - P.[dblBaseInterest])  + P.[dblBaseDiscount]
-												ELSE P.[dblBasePayment] END)
-										  * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblCreditForeign]             = P.[dblPayment] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+    ,[dblCreditReport]              = (P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
     ,[strRateType]                  = P.[strRateType]
@@ -769,9 +778,26 @@ SELECT
     ,[ysnRebuild]                   = NULL
 FROM
     @Payments P
+LEFT OUTER JOIN
+    (
+        SELECT
+             [dblGainLossAmount]        = SUM((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal)))
+            ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        FROM
+            @Payments P
+        WHERE
+                P.[intTransactionDetailId] IS NOT NULL
+            AND P.[strTransactionType] <> 'Claim'
+            AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
+        			AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
+        GROUP BY
+            P.[intTransactionDetailId]
+    ) GL
+        ON P.[intTransactionDetailId] = GL.[intTransactionDetailId]
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
-     AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
+    AND P.[strTransactionType] <> 'Claim'
+    AND (P.[dblPayment] <> @ZeroDecimal OR P.[dblBasePayment] <> @ZeroDecimal)
 
 UNION ALL
 --GAIN LOSS
@@ -854,7 +880,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -866,11 +892,11 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN (ISNULL((( P.[dblPayment] - ((ISNULL(P.[dblTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblInterest], @ZeroDecimal)) - ISNULL(P.[dblDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN @ZeroDecimal ELSE ABS((ISNULL((P.[dblPayment] - (((ISNULL(P.[dblTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblInterest], @ZeroDecimal)) - ISNULL(P.[dblDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal))) END
+    ,[dblDebitForeign]              = @ZeroDecimal
     ,[dblDebitReport]               = CASE WHEN (ISNULL((( P.[dblBasePayment] - ((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN @ZeroDecimal ELSE ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal))) END
-    ,[dblCreditForeign]             = CASE WHEN (ISNULL((( P.[dblPayment] - ((ISNULL(P.[dblTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblInterest], @ZeroDecimal)) - ISNULL(P.[dblDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN @ZeroDecimal ELSE ABS((ISNULL((P.[dblPayment] - (((ISNULL(P.[dblTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblInterest], @ZeroDecimal)) - ISNULL(P.[dblDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))), @ZeroDecimal))) END
+    ,[dblCreditForeign]             = @ZeroDecimal
     ,[dblCreditReport]              = CASE WHEN (ISNULL(( P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal)) > @ZeroDecimal THEN ABS((ISNULL((P.[dblBasePayment] - (((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType])))),@ZeroDecimal))) ELSE @ZeroDecimal END
     ,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
@@ -889,8 +915,9 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
-			AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])  
+			AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
 
 UNION ALL
 --DEBIT Discount
@@ -971,7 +998,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -983,7 +1010,7 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = @ZeroDecimal
     ,[dblDebitReport]               = @ZeroDecimal
@@ -1006,6 +1033,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblDiscount] <> @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseDiscount] <> @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
@@ -1092,7 +1120,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = ISNULL(P.[dblCurrencyExchangeRate], 1)
+    ,[dblExchangeRate]              = P.[dblCurrencyExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -1104,7 +1132,7 @@ SELECT
     ,[intTransactionId]             = P.[intTransactionId]
     ,[strTransactionType]           = @SCREEN_NAME
     ,[strTransactionForm]           = @SCREEN_NAME
-    ,[strModuleName]                = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = @ZeroDecimal
     ,[dblDebitReport]               = @ZeroDecimal
@@ -1127,6 +1155,7 @@ FROM
     @Payments P
 WHERE
         P.[intTransactionDetailId] IS NOT NULL
+    AND P.[strTransactionType] <> 'Claim'
     AND ((P.[dblInterest] <> @ZeroDecimal AND P.[dblPayment] = @ZeroDecimal AND P.[dblAmountDue] = @ZeroDecimal)
 		OR
         (P.[dblBaseInterest] <> @ZeroDecimal AND P.[dblBasePayment] = @ZeroDecimal AND P.[dblBaseAmountDue] = @ZeroDecimal))
