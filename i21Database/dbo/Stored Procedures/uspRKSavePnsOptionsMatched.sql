@@ -29,29 +29,38 @@ EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
  ------------------------- Delete Matched ---------------------  
 DECLARE @tblMatchedDelete table          
   (     
-  strTranNo nvarchar(max),  
+  strTranNo nvarchar(max)  COLLATE Latin1_General_CI_AS NOT NULL,  
+  userName nvarchar(50),
   ysnDeleted Bit   
   )    
   
 INSERT INTO @tblMatchedDelete  
 SELECT    
- strTranNo,  
+ strTranNo,
+ userName,  
  ysnDeleted  
-  FROM OPENXML(@idoc,'root/DeleteMatched', 2)        
+ FROM OPENXML(@idoc,'root/DeleteMatched', 2)        
  WITH      
  (    
  [strTranNo] INT,  
- [ysnDeleted] Bit  
+ [userName] nvarchar(100),
+ [ysnDeleted] BIT  
  )  
   
-IF EXISTS(select * from @tblMatchedDelete)  
+IF EXISTS(SELECT * FROM @tblMatchedDelete)  
 BEGIN  
-DELETE FROM tblRKOptionsMatchPnS  
-  WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblMatchedDelete)  
+
+INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
+
+SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,-(intMatchQty),dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),userName
+FROM tblRKOptionsMatchPnS  p
+JOIN @tblMatchedDelete m on p.strTranNo=m.strTranNo
+
+DELETE FROM tblRKOptionsMatchPnS  WHERE CONVERT(INT,strTranNo) in( SELECT CONVERT(INT,strTranNo) FROM @tblMatchedDelete)  
 END  
-  ------------------------- END Delete Matched ---------------------  
+------------------------- END Delete Matched ---------------------  
    
- ------------------------- Delete Expired ---------------------  
+------------------------- Delete Expired ---------------------  
 DECLARE @tblExpiredDelete table          
   (     
      strTranNo nvarchar(max),  
@@ -69,18 +78,18 @@ SELECT
  [ysnDeleted] Bit  
  )  
   
-IF EXISTS(select * from @tblExpiredDelete)  
+IF EXISTS(SELECT * FROM @tblExpiredDelete)  
 BEGIN  
 DELETE FROM tblRKOptionsPnSExpired  
-  WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExpiredDelete)  
+  WHERE CONVERT(INT,strTranNo) in( SELECT CONVERT(INT,strTranNo) FROM @tblExpiredDelete)  
 END  
  ------------------------- END Delete Expired ---------------------------  
    
  ------------------------- Delete ExercisedAssigned ---------------------  
 DECLARE @tblExercisedAssignedDelete table          
   (     
-     strTranNo nvarchar(max),  
-  ysnDeleted Bit   
+     strTranNo NVARCHAR(MAX),  
+	 ysnDeleted BIT   
   )    
   
 INSERT INTO @tblExercisedAssignedDelete  
@@ -95,7 +104,7 @@ SELECT
  )  
  
   
-IF EXISTS(select * from @tblExercisedAssignedDelete)  
+IF EXISTS(SELECT * FROM @tblExercisedAssignedDelete)  
 BEGIN  
 
 SELECT intFutOptTransactionHeaderId into #temp FROM tblRKFutOptTransaction   
@@ -108,10 +117,6 @@ DELETE FROM tblRKFutOptTransaction
 WHERE intFutOptTransactionId in(SELECT intFutTransactionId   
         FROM tblRKOptionsPnSExercisedAssigned  
         WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete))  
-
---delete from tblRKFutOptTransactionHeader where intFutOptTransactionHeaderId in(SELECT f.intFutOptTransactionHeaderId FROM tblRKFutOptTransaction f
---																				JOIN #temp t on f.intFutOptTransactionHeaderId=t.intFutOptTransactionHeaderId 
---																				group by f.intFutOptTransactionHeaderId having count(f.intFutOptTransactionHeaderId)<= 0)
 
 DELETE FROM tblRKOptionsPnSExercisedAssigned  
   WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete)  
@@ -132,7 +137,6 @@ SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 ---------------Matched Record Insert ----------------  
 
 SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPnS   
-
    
    INSERT INTO tblRKOptionsMatchPnS  
   (   
@@ -142,7 +146,7 @@ SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPn
   intMatchQty,  
   intLFutOptTransactionId,  
   intSFutOptTransactionId,  
-  intConcurrencyId    
+  intConcurrencyId      
   )    
   
  SELECT    
@@ -151,22 +155,35 @@ SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPn
  dtmMatchDate,  
  intMatchQty,  
  intLFutOptTransactionId,  
- intSFutOptTransactionId,  
- 1 as intConcurrencyId    
+ intSFutOptTransactionId,   
+ 1 as intConcurrencyId 
+   
   FROM OPENXML(@idoc,'root/Transaction', 2)        
  WITH      
  (   
  [intOptionsMatchPnSHeaderId] int ,  
  [dtmMatchDate]  DATETIME  ,   
-    [intMatchQty] int ,   
+ [intMatchQty] int ,   
  [intLFutOptTransactionId] INT,  
- [intSFutOptTransactionId] INT  
+ [intSFutOptTransactionId] INT 
  )     
+
+declare @strName nvarchar(100) =''
+  SELECT    
+	@strName=[userName]
+  FROM OPENXML(@idoc,'root/Transaction', 2)        
+ WITH      
+ (   
+ [userName] nvarchar(max)  
+ ) 
+
  declare @intOptMPNSId INT
  select @intOptMPNSId = scope_identity()
  SELECT TOP 1 @strTranNoPNS =strTranNo FROM tblRKOptionsMatchPnS WHERE intMatchOptionsPnSId = @intOptMPNSId
  
-
+ INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
+ SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),@strName
+FROM tblRKOptionsMatchPnS where strTranNo=@strTranNoPNS
 
    ---------------Expired Record Insert ----------------  
  SELECT @strExpiredTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsPnSExpired     
@@ -321,4 +338,3 @@ BEGIN CATCH
    
 END CATCH  
 GO
-
