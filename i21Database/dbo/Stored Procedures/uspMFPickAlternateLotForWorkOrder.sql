@@ -32,12 +32,14 @@ BEGIN TRY
 		,@dblAlternateTaskQty NUMERIC(18, 6)
 		,@intAlternateOrderHeaderId INT
 		,@intAlternateTaskId INT
-		,@intLocationId int
+		,@intLocationId INT
 		,@ysnPickAllowed BIT
+		,@intSubLocationId INT
 
-		SELECT @intItemId = intItemId
+	SELECT @intItemId = intItemId
 		,@intParentLotId = intParentLotId
-		,@intLocationId=intLocationId
+		,@intLocationId = intLocationId
+		,@intSubLocationId = intSubLocationId
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
@@ -53,7 +55,8 @@ BEGIN TRY
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
 	WHERE strName = @strLotSourceLocation
-	and intLocationId=@intLocationId
+		AND intSubLocationId = @intSubLocationId
+		AND intLocationId = @intLocationId
 
 	SELECT @intAlternateLotId = intLotId
 		,@dblAlternateLotQty = dblQty
@@ -94,8 +97,6 @@ BEGIN TRY
 				,1
 				)
 	END
-
-
 
 	SELECT @strPrimaryStatus = strPrimaryStatus
 	FROM tblICLotStatus
@@ -139,7 +140,8 @@ BEGIN TRY
 		END
 	END
 
-	SELECT @intBondStatusId = intBondStatusId,@ysnPickAllowed=ysnPickAllowed
+	SELECT @intBondStatusId = intBondStatusId
+		,@ysnPickAllowed = ysnPickAllowed
 	FROM tblMFLotInventory
 	WHERE intLotId = @intAlternateLotId
 
@@ -152,7 +154,7 @@ BEGIN TRY
 				)
 	END
 
-	IF @ysnPickAllowed =0
+	IF @ysnPickAllowed = 0
 	BEGIN
 		RAISERROR (
 				'SCANNED LOT IS NOT ALLOWED.'
