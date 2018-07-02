@@ -111,7 +111,8 @@ SELECT
 	[dblTax]				=	CASE WHEN @differentCost = 1 AND @costAdjustment = 1 THEN C.dblTax 
 									ELSE CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)) 
 								END,
-	[dblAdjustedTax]		=	CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)), 
+	[dblAdjustedTax]		=	CAST(CASE WHEN @costAdjustment = 1 AND C.strCalculationMethod = 'UNIT' THEN ((C.dblTax * D.dblLineTotal) / (D.dblLineTotal))
+										ELSE ((C.dblTax * B.dblTotal) / (D.dblLineTotal)) END AS DECIMAL(18,2)), 
 	[ysnTaxAdjusted]		=	CASE WHEN @differentCost = 1 AND @costAdjustment = 1 THEN 1 ELSE 0 END, 
 	[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
 	[ysnCheckOffTax]		=	C.ysnCheckoffTax
