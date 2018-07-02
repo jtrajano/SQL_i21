@@ -57,6 +57,13 @@ SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 FROM vyuSCTicketScreenView SC
 WHERE SC.intTicketId = @intTicketId
 
+IF @ticketStatus = 'C'
+BEGIN
+     --Raise the error:
+    RAISERROR('Ticket already completed', 16, 1);
+    RETURN;
+END
+
 SELECT @intFreightTermId = intFreightTermId, @intShipToId = intShipToId 
 FROM tblARCustomer AR
 LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
