@@ -385,7 +385,11 @@ BEGIN TRY
 					,intContractHeaderId   = NULL
 					,intContractDetailId   = NULL
 					,dblUnits			   = SST.dblUnits
-					,dblCashPrice		   = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)) 
+					,dblCashPrice		   = CASE WHEN QM.strDiscountChargeType = 'Percent'
+														THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))) * (SELECT dblFuturesPrice + dblFuturesBasis FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
+											ELSE --Dollar
+												dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
+											END
 					,intItemId             = DItem.intItemId 
 					,intItemType           = 3 
 					,IsProcessed           = 0
