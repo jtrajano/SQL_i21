@@ -2712,604 +2712,604 @@ BEGIN
 END
 GO
 
-DELETE
-FROM tblMFReasonCode
-WHERE strReasonCode IN (
-		'Damaged'
-		,'Samples'
-		,'QA'
-		,'Miscount'
-		,'Bad pallet/lot number'
-		,'Rework'
-		,'Cycle count'
-		,'Yield adjustment'
-		,'Mis-scan'
-		,'Disposed / destroyed'
-		,'Production reversal adjustment'
-		,'Incorrect receiving'
-		,'Rounding'
-		,'Others'
-		,'Expired'
-		,'Mistake'
-		,'Unknown'
-		,'Inventory adjustment'
-		,'Lost in transit'
-		,'Unknown'
-		,'Damage transit'
-		,'Inventory was found'
-		)
-	AND intTransactionTypeId IS NOT NULL
-	AND intReasonTypeId = 1
-	AND ysnAutoCreated IS NULL
-	and intConcurrencyId =0
-	and intCreatedUserId is null
-GO
+--DELETE
+--FROM tblMFReasonCode
+--WHERE strReasonCode IN (
+--		'Damaged'
+--		,'Samples'
+--		,'QA'
+--		,'Miscount'
+--		,'Bad pallet/lot number'
+--		,'Rework'
+--		,'Cycle count'
+--		,'Yield adjustment'
+--		,'Mis-scan'
+--		,'Disposed / destroyed'
+--		,'Production reversal adjustment'
+--		,'Incorrect receiving'
+--		,'Rounding'
+--		,'Others'
+--		,'Expired'
+--		,'Mistake'
+--		,'Unknown'
+--		,'Inventory adjustment'
+--		,'Lost in transit'
+--		,'Unknown'
+--		,'Damage transit'
+--		,'Inventory was found'
+--		)
+--	AND intTransactionTypeId IS NOT NULL
+--	AND intReasonTypeId = 1
+--	AND ysnAutoCreated IS NULL
+--	and intConcurrencyId =0
+--	and intCreatedUserId is null
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Damaged'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Damaged'
-		,'Damaged'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Damaged'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Damaged'
+--		,'Damaged'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Samples'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Samples'
-		,'Samples'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Samples'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Samples'
+--		,'Samples'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'QA'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'QA'
-		,'QA'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'QA'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'QA'
+--		,'QA'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Miscount'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Miscount'
-		,'Miscount'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Miscount'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Miscount'
+--		,'Miscount'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Bad pallet/lot number'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Bad pallet/lot number'
-		,'Bad pallet/lot number'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Bad pallet/lot number'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Bad pallet/lot number'
+--		,'Bad pallet/lot number'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Rework'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Rework'
-		,'Rework'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Rework'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Rework'
+--		,'Rework'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Cycle count'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Cycle count'
-		,'Cycle count'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Cycle count'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Cycle count'
+--		,'Cycle count'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Yield adjustment'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Yield adjustment'
-		,'Yield adjustment'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Yield adjustment'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Yield adjustment'
+--		,'Yield adjustment'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Mis-scan'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Mis-scan'
-		,'Mis-scan'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Mis-scan'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Mis-scan'
+--		,'Mis-scan'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Disposed / destroyed'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Disposed / destroyed'
-		,'Disposed / destroyed'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Disposed / destroyed'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Disposed / destroyed'
+--		,'Disposed / destroyed'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Production reversal adjustment'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Production reversal adjustment'
-		,'Production reversal adjustment'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Production reversal adjustment'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Production reversal adjustment'
+--		,'Production reversal adjustment'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Incorrect receiving'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Incorrect receiving'
-		,'Incorrect receiving'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Incorrect receiving'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Incorrect receiving'
+--		,'Incorrect receiving'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Rounding'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Rounding'
-		,'Rounding'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Rounding'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Rounding'
+--		,'Rounding'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Others'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Others'
-		,'Others'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Others'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Others'
+--		,'Others'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Expired'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Expired'
-		,'Expired'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Expired'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Expired'
+--		,'Expired'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Mistake'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Mistake'
-		,'Mistake'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Mistake'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Mistake'
+--		,'Mistake'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Unknown'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Unknown'
-		,'Unknown'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Unknown'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Unknown'
+--		,'Unknown'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Inventory adjustment'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Inventory adjustment'
-		,'Inventory adjustment'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Inventory adjustment'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Inventory adjustment'
+--		,'Inventory adjustment'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Lost in transit'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Lost in transit'
-		,'Lost in transit'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Lost in transit'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Lost in transit'
+--		,'Lost in transit'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Damage transit'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Damage transit'
-		,'Damage transit'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
-GO
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Damage transit'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Damage transit'
+--		,'Damage transit'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
+--GO
 
-IF NOT EXISTS (
-		SELECT *
-		FROM tblMFReasonCode
-		WHERE strReasonCode = 'Inventory was found'
-		)
-BEGIN
-	INSERT INTO tblMFReasonCode (
-		strReasonCode
-		,strDescription
-		,ysnReduceavailabletime
-		,ysnExplanationrequired
-		,ysnDefault
-		,intReasonTypeId
-		,intTransactionTypeId
-		,ysnAutoCreated
-		)
-	SELECT 'Inventory was found'
-		,'Inventory was found'
-		,0
-		,0
-		,0
-		,1
-		,NULL
-		,1
-END
+--IF NOT EXISTS (
+--		SELECT *
+--		FROM tblMFReasonCode
+--		WHERE strReasonCode = 'Inventory was found'
+--		)
+--BEGIN
+--	INSERT INTO tblMFReasonCode (
+--		strReasonCode
+--		,strDescription
+--		,ysnReduceavailabletime
+--		,ysnExplanationrequired
+--		,ysnDefault
+--		,intReasonTypeId
+--		,intTransactionTypeId
+--		,ysnAutoCreated
+--		)
+--	SELECT 'Inventory was found'
+--		,'Inventory was found'
+--		,0
+--		,0
+--		,0
+--		,1
+--		,NULL
+--		,1
+--END
 GO
 
 
