@@ -48,7 +48,8 @@ DECLARE
 	,@ysnBankAccountIdInactive AS BIT
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
-	
+	,@intCurrencyId INT
+	,@intDefaultCurrencyId INT
 	-- Table Variables
 	,@RecapTable AS RecapTableType
 	,@GLEntries AS  RecapTableType
@@ -107,9 +108,12 @@ SELECT	TOP 1
 		,@ysnTransactionClearedFlag = ysnClr
 		,@intBankAccountId = intBankAccountId
 		,@intCreatedEntityId = intEntityId
+		,@intCurrencyId = intCurrencyId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
+
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 IF @@ERROR <> 0	GOTO Post_Rollback				
 
 -- Read the user preference
@@ -337,7 +341,7 @@ BEGIN
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
-			INNER JOIN vyuGLAccountDetail GLAccnt
+			INNER JOIN tblGLAccount GLAccnt
 				ON BankAccnt.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
@@ -374,7 +378,7 @@ BEGIN
 			,[intEntityId]			= A.intEntityId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
-			INNER JOIN vyuGLAccountDetail GLAccnt
+			INNER JOIN tblGLAccount GLAccnt
 				ON A.intShortGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
@@ -412,7 +416,7 @@ BEGIN
 	FROM	[dbo].tblCMBankTransaction A 
 	INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
-			INNER JOIN vyuGLAccountDetail GLAccnt
+			INNER JOIN tblGLAccount GLAccnt
 				ON B.intGLAccountId = GLAccnt.intAccountId
 			LEFT JOIN [dbo].tblEMEntity Entity
 				ON B.intEntityId = Entity.intEntityId
@@ -421,7 +425,7 @@ BEGIN
 	DECLARE @gainLoss DECIMAL (18,6)
 	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
 
-	if(@gainLoss <> 0)
+	if(@gainLoss <> 0  AND @intDefaultCurrencyId <> @intCurrencyId)
 		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss on Multicurrency Bank Deposit'
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
