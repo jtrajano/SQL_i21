@@ -354,28 +354,22 @@ IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 ELSE
  	SET @intOrderId = 4
 
-BEGIN 
 	EXEC dbo.uspSCAddScaleTicketToItemShipment @intTicketId ,@intUserId ,@ItemsForItemShipment ,@intEntityId ,@intOrderId ,@InventoryShipmentId OUTPUT;
-END
 
 	SELECT	@strTransactionId = ship.strShipmentNumber
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking = 'No' -- temporary fixes for 16.2
+	--INVOICE intergration
+	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
+	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
+	WHERE intInventoryShipmentId = @InventoryShipmentId
+
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 	BEGIN
-
-		--INVOICE intergration
-		SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-		LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-		WHERE intInventoryShipmentId = @InventoryShipmentId
-
-		IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
-		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
-		END
+		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 	END
 _Exit:
 	
