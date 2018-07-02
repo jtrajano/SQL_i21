@@ -242,76 +242,86 @@ BEGIN TRY
 
 	-- Insert the Customer Storage Record 
 	INSERT INTO [dbo].[tblGRCustomerStorage]
-	           ([intConcurrencyId]
-	           ,[intEntityId]
-	           ,[intCommodityId]
-	           ,[intStorageScheduleId]
-	           ,[intStorageTypeId]
-	           ,[intCompanyLocationId]
-	           ,[intDeliverySheetId]
-	           ,[intDiscountScheduleId]
-	           ,[dblTotalPriceShrink]
-	           ,[dblTotalWeightShrink]
-	           ,[dblOriginalBalance]
-	           ,[dblOpenBalance]
-	           ,[dtmDeliveryDate]
-	           ,[dtmZeroBalanceDate]
-	           ,[strDPARecieptNumber]
-	           ,[dtmLastStorageAccrueDate]
-	           ,[dblStorageDue]
-	           ,[dblStoragePaid]
-	           ,[dblInsuranceRate]
-	           ,[strOriginState]
-	           ,[strInsuranceState]
-	           ,[dblFeesDue]
-	           ,[dblFeesPaid]
-	           ,[dblFreightDueRate]
-	           ,[ysnPrinted]
-	           ,[dblCurrencyRate]
-			   ,[intCurrencyId]
-			   ,[strStorageTicketNumber]
-			   ,[intItemId]
-			   ,[intCompanyLocationSubLocationId]
-			   ,[intStorageLocationId]
-			   ,[intUnitMeasureId])
+	(	
+		[intConcurrencyId]
+		,[intEntityId]
+		,[intCommodityId]
+		,[intStorageScheduleId]
+		,[intStorageTypeId]
+		,[intCompanyLocationId]
+		,[intDeliverySheetId]
+		,[intDiscountScheduleId]
+		,[dblTotalPriceShrink]
+		,[dblTotalWeightShrink]
+		,[dblOriginalBalance]
+		,[dblOpenBalance]
+		,[dtmDeliveryDate]
+		,[dtmZeroBalanceDate]
+		,[strDPARecieptNumber]
+		,[dtmLastStorageAccrueDate]
+		,[dblStorageDue]
+		,[dblStoragePaid]
+		,[dblInsuranceRate]
+		,[strOriginState]
+		,[strInsuranceState]
+		,[dblFeesDue]
+		,[dblFeesPaid]
+		,[dblFreightDueRate]
+		,[ysnPrinted]
+		,[dblCurrencyRate]
+		,[intCurrencyId]
+		,[strStorageTicketNumber]
+		,[intItemId]
+		,[intCompanyLocationSubLocationId]
+		,[intStorageLocationId]
+		,[intUnitMeasureId]
+	)
 	SELECT DISTINCT 
-			[intConcurrencyId]		= 1
-			,[intEntityId]			= @intEntityId
-			,[intCommodityId]		= IC.intCommodityId
-			,[intStorageScheduleId]	= @intDefaultStorageSchedule -- TODO Storage Schedule
-			,[intStorageTypeId]		= @intGRStorageId
-			,[intCompanyLocationId]= SCD.intCompanyLocationId
-			,[intDeliverySheetId]= SCD.intDeliverySheetId
-			,[intDiscountScheduleId]= GRDS.intDiscountScheduleId
-			,[dblTotalPriceShrink]= 0
-			,[dblTotalWeightShrink]= 0 
-			,[dblOriginalBalance]= @dblNetUnits
-			,[dblOpenBalance]= @dblNetUnits
-			,[dtmDeliveryDate]= GETDATE()
-			,[dtmZeroBalanceDate]= NULL
-			,[strDPARecieptNumber]= NULL
-			,[dtmLastStorageAccrueDate]= NULL 
-			,[dblStorageDue]= 0 
-			,[dblStoragePaid]= 0
-			,[dblInsuranceRate]= 0 
-			,[strOriginState]= NULL 
-			,[strInsuranceState]= NULL
-			,[dblFeesDue]= 0 
-			,[dblFeesPaid]= 0 
-			,[dblFreightDueRate]= 0 
-			,[ysnPrinted]= 0 
-			,[dblCurrencyRate]= 1
-			,[intCurrencyId] = SCD.intCurrencyId
-			,[intStorageTicketNumber] = SCD.strDeliverySheetNumber
-			,SCD.[intItemId]
-			,NULL -- SET to null delivery sheet has no requirements yet for sub location
-			,NULL -- SET to null delivery sheet has no requirements yet for storage location
-			,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
-	FROM	dbo.tblSCDeliverySheet SCD 
-	INNER JOIN dbo.tblICItem IC ON IC.intItemId = SCD.intItemId
+		[intConcurrencyId]		= 1
+		,[intEntityId]			= @intEntityId
+		,[intCommodityId]		= IC.intCommodityId
+		,[intStorageScheduleId]	= @intDefaultStorageSchedule -- TODO Storage Schedule
+		,[intStorageTypeId]		= @intGRStorageId
+		,[intCompanyLocationId]= SCD.intCompanyLocationId
+		,[intDeliverySheetId]= SCD.intDeliverySheetId
+		,[intDiscountScheduleId]= GRDS.intDiscountScheduleId
+		,[dblTotalPriceShrink]= 0
+		,[dblTotalWeightShrink]= 0 
+		,[dblOriginalBalance]= @dblNetUnits
+		,[dblOpenBalance]= @dblNetUnits
+		,[dtmDeliveryDate]= GETDATE()
+		,[dtmZeroBalanceDate]= NULL
+		,[strDPARecieptNumber]= NULL
+		,[dtmLastStorageAccrueDate]= NULL 
+		,[dblStorageDue]= 0 
+		,[dblStoragePaid]= 0
+		,[dblInsuranceRate]= 0 
+		,[strOriginState]= NULL 
+		,[strInsuranceState]= NULL
+		,[dblFeesDue]= CASE
+							WHEN ICFee.strCostMethod = 'Amount' THEN ROUND((@dblNetUnits / SCD.dblNet * SC.dblTicketFees),6)
+							ELSE ROUND(SC.dblTicketFees,6)
+						END 
+		,[dblFeesPaid]= 0
+		,[dblFreightDueRate]= 0 
+		,[ysnPrinted]= 0 
+		,[dblCurrencyRate]= 1
+		,[intCurrencyId] = SCD.intCurrencyId
+		,[intStorageTicketNumber] = SCD.strDeliverySheetNumber
+		,SCD.[intItemId]
+		,NULL -- SET to null delivery sheet has no requirements yet for sub location
+		,NULL -- SET to null delivery sheet has no requirements yet for storage location
+		,(SELECT intUnitMeasureId FROM tblICItemUOM WHERE intItemUOMId = @intTicketItemUOMId)
+	FROM tblSCDeliverySheet SCD 
+	INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
 	INNER JOIN tblGRDiscountId GRD ON GRD.intDiscountId = SCD.intDiscountId
 	INNER JOIN tblGRDiscountCrossReference GRDCR ON GRDCR.intDiscountId = GRD.intDiscountId
 	INNER JOIN tblGRDiscountSchedule GRDS ON GRDS.intDiscountScheduleId = GRDCR.intDiscountScheduleId AND GRDS.intCommodityId = IC.intCommodityId
+	OUTER APPLY(
+		SELECT SUM(dblTicketFees) AS dblTicketFees,intScaleSetupId FROM tblSCTicket WHERE intDeliverySheetId = SCD.intDeliverySheetId GROUP BY intScaleSetupId
+	) SC
+	LEFT JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+	LEFT JOIN tblICItem ICFee ON ICFee.intItemId = SCS.intDefaultFeeItemId
 	WHERE	SCD.intDeliverySheetId = @intDeliverySheetId
 
 	SELECT @intCustomerStorageId = SCOPE_IDENTITY()
