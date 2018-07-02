@@ -6777,6 +6777,8 @@
     <Build Include="dbo\Tables\tblSCImportLogFile.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
     <Build Include="dbo\Views\vyuCTUsedPriceUOM.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOS.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOSEndOfDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
