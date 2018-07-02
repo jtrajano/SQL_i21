@@ -80,6 +80,7 @@ UPDATE ARP
 SET
 	 ARP.[dblAmountPaid]		= PD.[dblPaymentTotal]
 	,ARP.[dblBaseAmountPaid]	= PD.[dblBasePaymentTotal]
+	,ARP.[intCurrentStatus] =  2
 FROM tblARPayment ARP
 INNER JOIN 
 	(SELECT
@@ -99,6 +100,7 @@ SET
 	,ARP.[dblBaseUnappliedAmount]	= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
 	,ARP.[dblOverpayment]			= ARP.[dblAmountPaid] - PD.[dblPaymentTotal]
 	,ARP.[dblBaseOverpayment]		= ARP.[dblBaseAmountPaid] - PD.[dblBasePaymentTotal]
+	,ARP.[intCurrentStatus] =  2
 FROM tblARPayment ARP
 INNER JOIN 
 	(SELECT
