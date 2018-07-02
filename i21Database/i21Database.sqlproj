@@ -6763,6 +6763,8 @@
     <Build Include="dbo\Views\vyuSMAuditLogPanel.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
     <Build Include="dbo\Views\vyuSTStoreItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
