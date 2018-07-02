@@ -56,8 +56,8 @@ BEGIN TRY
 		,@strReferernceNo NVARCHAR(50)
 		,@ysnGenerateTaskOnCreatePickOrder BIT
 		,@strInventoryTracking NVARCHAR(50)
-		,@intStorageLocationId int
-		,@intRecipeTypeId int
+		,@intStorageLocationId INT
+		,@intRecipeTypeId INT
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -254,7 +254,8 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	SELECT @strReferernceNo = strWorkOrderNo,@intRecipeTypeId=intRecipeTypeId 
+	SELECT @strReferernceNo = strWorkOrderNo
+		,@intRecipeTypeId = intRecipeTypeId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
 			SELECT intWorkOrderId
@@ -466,7 +467,13 @@ BEGIN TRY
 			,''
 			,CASE 
 				WHEN C.intCategoryId = @intPMCategoryId
-					THEN (CASE WHEN @intPMStageLocationId = 0 THEN NULL ELSE @intPMStageLocationId END)
+					THEN (
+							CASE 
+								WHEN @intPMStageLocationId = 0
+									THEN NULL
+								ELSE @intPMStageLocationId
+								END
+							)
 				ELSE NULL
 				END
 			,I.strInventoryTracking
@@ -509,7 +516,8 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM @OrderDetail
-				) and @intRecipeTypeId<>3
+				)
+			AND @intRecipeTypeId <> 3
 		BEGIN
 			RAISERROR (
 					'There is no input item to create a pick list. Please check the recipe input item set up.'
@@ -876,7 +884,7 @@ BEGIN TRY
 								FROM tblMFPickListPreference
 								)
 							,(
-								SELECT MAX(intLineNo) + 1
+								SELECT IsNULL(MAX(intLineNo), 0) + 1
 								FROM @OrderDetailInformation
 								)
 							,NULL
@@ -925,7 +933,7 @@ BEGIN TRY
 								FROM tblMFPickListPreference
 								)
 							,(
-								SELECT MAX(intLineNo) + 1
+								SELECT IsNULL(MAX(intLineNo), 0) + 1
 								FROM @OrderDetailInformation
 								)
 							,NULL
