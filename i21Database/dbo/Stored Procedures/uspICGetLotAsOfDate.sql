@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICGetLotAsOfDate]
+﻿ALTER PROCEDURE [dbo].[uspICGetLotAsOfDate]
 	@intItemId AS INT,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
@@ -143,7 +143,7 @@ SELECT
 	,dblRunningAvailableQty			= SUM(t.dblQty) 
 	,dblStorageAvailableQty			= SUM(t.dblUnitStorage) 
 	,dblCost						= MAX(t.dblCost)
-	,Lot.strWarehouseRefNo
+	--,Lot.strWarehouseRefNo
 	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition) 
 FROM 
 	@tblInventoryTransaction t 
@@ -207,5 +207,5 @@ GROUP BY i.intItemId
 		,ItemLocation.intItemLocationId
 		,t.intCostingMethod	
 		,CostMethod.strCostingMethod
-		,Lot.strWarehouseRefNo
+		--,Lot.strWarehouseRefNo
 		,Lot.strCondition
