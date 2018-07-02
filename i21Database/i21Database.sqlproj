@@ -6763,6 +6763,8 @@
     <Build Include="dbo\Views\vyuSMAuditLogPanel.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportData.sql" />
     <Build Include="dbo\Views\vyuSTStoreItems.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOS.sql" />
+    <Build Include="dbo\Views\vyuARSearchPOSEndOfDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
