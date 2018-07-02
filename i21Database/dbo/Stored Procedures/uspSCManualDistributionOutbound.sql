@@ -361,31 +361,24 @@ IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 ELSE
  	SET @intOrderId = 4
 
-BEGIN 
 	EXEC dbo.uspSCAddScaleTicketToItemShipment @intTicketId ,@intUserId ,@ItemsForItemShipment ,@intEntityId ,@intOrderId ,@InventoryShipmentId OUTPUT;
-END
 
-BEGIN 
 	SELECT	@strTransactionId = ship.strShipmentNumber
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+
+	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+
+	--INVOICE intergration
+	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
+	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
+	WHERE intInventoryShipmentId = @InventoryShipmentId
+
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
+	BEGIN
+		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
 	END
-	SELECT @strLotTracking = strLotTracking FROM tblICItem WHERE intItemId = @intItemId
-	IF @strLotTracking = 'No' -- temporary fixes for 16.2
-	--IF @strLotTracking != 'Yes - Manual'
-		BEGIN
-			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-			--INVOICE intergration
-			SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-			WHERE intInventoryShipmentId = @InventoryShipmentId
-
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin'
-			BEGIN
-				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL;
-			END
-		END
 _Exit:
 	
 END TRY
