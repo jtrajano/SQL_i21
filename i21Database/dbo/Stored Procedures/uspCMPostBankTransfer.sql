@@ -83,6 +83,10 @@ DECLARE
 	,@ysnAllowUserSelfPost AS BIT = 0
 	,@dblRate DECIMAL (18,6)
 	,@dblHistoricRate DECIMAL (18,6)
+	,@intCurrencyIdFrom INT
+	,@intCurrencyIdTo INT
+	,@intDefaultCurrencyId INT
+	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
 	,@GLEntries AS RecapTableType
@@ -105,8 +109,19 @@ SELECT	TOP 1
 		,@intCreatedEntityId = intEntityId
 		,@dblRate = dblRate
 		,@dblHistoricRate = dblHistoricRate
-FROM	[dbo].tblCMBankTransfer 
+		,@intCurrencyIdFrom = B.intCurrencyId
+		,@intCurrencyIdTo = C.intCurrencyId
+FROM	[dbo].tblCMBankTransfer A JOIN
+[dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN
+[dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo
 WHERE	strTransactionId = @strTransactionId 
+
+
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+IF @intCurrencyIdTo <> @intDefaultCurrencyId AND @intCurrencyIdFrom = @intDefaultCurrencyId
+	SET @dblHistoricRate = @dblRate
+		
+
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
 -- Read the user preference
@@ -307,17 +322,17 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblAmount * ISNULL(A.dblHistoricRate,1) 
+			,[dblCredit]			= A.dblAmount * ISNULL(@dblHistoricRate,1)
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= A.dblAmount 
+			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN A.dblAmount  ELSE 0 END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceFrom
-			,[intCurrencyId]		= NULL
+			,[intCurrencyId]		= @intCurrencyIdFrom
 			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= ISNULL(A.dblHistoricRate,1)
+			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -343,18 +358,18 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= A.dblAmount * ISNULL(A.dblRate, 1)
+			,[dblDebit]				= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount * ISNULL(@dblRate, 1) ELSE  A.dblAmount END
 			,[dblCredit]			= 0 
-			,[dblDebitForeign]		= A.dblAmount 
+			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE 0 END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
 			,[strCode]				= @GL_DETAIL_CODE
 			,[strReference]			= A.strReferenceTo
-			,[intCurrencyId]		= NULL
+			,[intCurrencyId]		= @intCurrencyIdTo
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= ISNULL(A.dblRate, 1)
+			,[dblExchangeRate]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  ISNULL(@dblRate, 1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -372,7 +387,7 @@ BEGIN
 	WHERE	A.strTransactionId = @strTransactionId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 
-	if(@dblRate <> @dblHistoricRate)
+	if(@dblRate <> @dblHistoricRate AND @intDefaultCurrencyId = @intCurrencyIdTo AND @intDefaultCurrencyId <> @intCurrencyIdFrom )
 		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss from Bank Transfer'
 	
 END
@@ -498,9 +513,9 @@ FROM #tmpGLDetail
 		SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_WD_PREFIX
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
-				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdFrom)
+				,intCurrencyId				= @intCurrencyIdFrom
 				,intCurrencyExchangeRateTypeId =  A.intCurrencyExchangeRateTypeId
-				,dblExchangeRate			= ISNULL(A.dblRate,1)
+				,dblExchangeRate			= ISNULL(@dblHistoricRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -509,9 +524,9 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount * ISNULL(A.dblRate,1)
-				,dblAmountForeign			= CASE WHEN ISNULL(A.dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(A.dblRate,1))
+				,dblAmount					= A.dblAmount * ISNULL(@dblHistoricRate,1)
+				,dblAmountForeign			= CASE WHEN ISNULL(@dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblHistoricRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -543,9 +558,9 @@ FROM #tmpGLDetail
 		SELECT	strTransactionId			= A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
-				,intCurrencyId				= (SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountIdTo)
+				,intCurrencyId				= @intCurrencyIdTo
 				,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
-				,dblExchangeRate			= ISNULL(A.dblHistoricRate,1)
+				,dblExchangeRate			= ISNULL(@dblRate,1)
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -554,9 +569,9 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= A.dblAmount * ISNULL(A.dblHistoricRate,1)
-				,dblAmountForeign			= CASE WHEN ISNULL(A.dblHistoricRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(A.dblHistoricRate,1))
+				,dblAmount					= A.dblAmount * ISNULL(@dblRate,1)
+				,dblAmountForeign			= CASE WHEN ISNULL(@dblRate,1) <> 1 THEN  A.dblAmount ELSE 0 END 
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount * ISNULL(@dblRate,1))
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
