@@ -241,4 +241,12 @@ BEGIN
 	BEGIN
 		SELECT intEntityId,strEntityName from vyuCTEntity WHERE strEntityType = 'SalesPerson' AND intEntityId = @intLoggedInUserId
 	END
+
+	IF @strType = 'MarketZone'
+	BEGIN
+		SELECT	C.intMarketZoneId,M.strMarketZoneCode 
+		FROM	tblARCustomer C 
+		JOIN	tblARMarketZone M ON M.intMarketZoneId = C.intMarketZoneId
+		WHERE	intEntityId = @intEntityId
+	END
 END
