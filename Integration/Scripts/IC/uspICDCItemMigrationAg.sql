@@ -231,20 +231,24 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId 
 --add packing units for uoms which has agitm_un_per_pak set
 Insert into tblICItemUOM
 (intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+SELECT intItemId, intUnitMeasureId, dblUnitQty, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId
+FROM (
 select I.intItemId, 
-(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = 
-upper(rtrim(agitm_pak_desc))
-COLLATE SQL_Latin1_General_CP1_CS_AS) intUnitMeasureId, 
-oi.agitm_un_per_pak dblUnitQty, 0 ysnStockUnit,1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId 
-from tblICItem I 
-join 
-(select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_pak_desc))) agitm_pak_desc, min(agitm_un_per_pak) agitm_un_per_pak from agitmmst 
-where agitm_un_per_pak not in (1,0) and agitm_un_desc <> agitm_pak_desc
-group by rtrim(agitm_no)) as oi 
-on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
-join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_pak_desc COLLATE SQL_Latin1_General_CP1_CS_AS
-left join tblICItemUOM iu on iu.intItemId = I.intItemId and iu.intUnitMeasureId = U.intUnitMeasureId
-where iu.intItemId is null and iu.intUnitMeasureId is null
+	(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = 
+	upper(rtrim(agitm_pak_desc))
+	COLLATE SQL_Latin1_General_CP1_CS_AS) intUnitMeasureId, 
+	oi.agitm_un_per_pak dblUnitQty, 0 ysnStockUnit,1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId 
+	from tblICItem I 
+	join 
+	(select rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_pak_desc))) agitm_pak_desc, min(agitm_un_per_pak) agitm_un_per_pak from agitmmst 
+	where agitm_un_per_pak not in (1,0) and agitm_un_desc <> agitm_pak_desc
+	group by rtrim(agitm_no)) as oi 
+	on I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
+	join tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_pak_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+	left join tblICItemUOM iu on iu.intItemId = I.intItemId and iu.intUnitMeasureId = U.intUnitMeasureId
+	where iu.intItemId is null and iu.intUnitMeasureId is null
+) a
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
 --set stock unit to No for Non Inventory Items
 update iu set ysnStockUnit = 0
