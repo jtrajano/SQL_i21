@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspICGetLotAsOfDate]
+﻿CREATE PROCEDURE [dbo].[uspICGetLotAsOfDate]
 	@intItemId AS INT,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
