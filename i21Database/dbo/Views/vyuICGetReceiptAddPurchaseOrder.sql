@@ -73,6 +73,7 @@ FROM (
 		, POView.intFreightTermId
 		, POView.strFreightTerm
 		, POView.strBundleType
+		, strLotCondition = ICPreference.strLotCondition
 	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
@@ -88,6 +89,10 @@ FROM (
                 ON GrossNetName.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = POView.intForexRateTypeId
+		OUTER APPLY (
+			SELECT	TOP 1 *
+			FROM	 tblICCompanyPreference			
+		) ICPreference
 	WHERE ysnCompleted = 0
 		
 ) tblAddOrders
