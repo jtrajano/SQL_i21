@@ -65,7 +65,7 @@ BEGIN
 											WHEN ISNULL(ADDON.intParentItemId, 0) <> 0 AND ITEM.ysnUseWeighScales = 0 THEN dbo.fnRoundBanker(ID.dblQtyOrdered * (ADDON.dblParentQtyOrdered / @dblTotalOrderedQty), 2) --FOR ADD ON ITEMS
 											ELSE ID.dblQtyShipped --REGULAR ITEMS
 										END
-				, ID.intItemUOMId		= @intScaleUOMId
+				, ID.intItemUOMId		= CASE WHEN ITEM.ysnUseWeighScales = 1 THEN @intScaleUOMId ELSE ID.intItemUOMId END
 				, ID.intTicketId		= @intTicketId
 			FROM tblARInvoiceDetail ID
 			INNER JOIN (
