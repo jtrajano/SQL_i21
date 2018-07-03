@@ -246,28 +246,59 @@ BEGIN
 
 								, CASE
 									-- 2 Can Deal
-									WHEN strTrlDept = 'OTP' AND	strTrlMatchLineTrlMatchName IS NOT NULL AND strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
-										THEN 'Y'
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+										--AND (
+										--		SELECT COUNT(tbl.intTranslogId) 
+										--		FROM tblSTTranslogRebates tbl
+										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+										--		AND tbl.intCheckoutId = TR.intCheckoutId
+										--		AND tbl.strTrlDept = 'OTP' 
+										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+										--		AND tbl.strTrpPaycode != 'Change'
+										--	) > 1
+											THEN 'Y'
 									ELSE 'N'
 								  END AS strMultiPackIndicator	
 								, CASE
 									-- 2 Can Deal
-									WHEN strTrlDept = 'OTP' AND	strTrlMatchLineTrlMatchName IS NOT NULL AND strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
-										THEN 2
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+										--AND (
+										--		SELECT COUNT(tbl.intTranslogId) 
+										--		FROM tblSTTranslogRebates tbl
+										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+										--		AND tbl.intCheckoutId = TR.intCheckoutId
+										--		AND tbl.strTrlDept = 'OTP' 
+										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+										--		AND tbl.strTrpPaycode != 'Change'
+										--	) > 1
+											THEN 2
 									ELSE NULL
 								  END as intMultiPackRequiredQuantity
 								, CASE
 									-- 2 Can Deal
-									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
-										THEN (
-												SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
-												FROM tblSTTranslogRebates tbl
-												WHERE tbl.intTermMsgSN = TR.intTermMsgSN
-												AND tbl.intCheckoutId = TR.intCheckoutId
-												AND tbl.strTrlDept = 'OTP' 
-												AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
-												AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-											 )
+									WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+										--AND (
+										--		SELECT COUNT(tbl.intTranslogId) 
+										--		FROM tblSTTranslogRebates tbl
+										--		WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+										--		AND tbl.intCheckoutId = TR.intCheckoutId
+										--		AND tbl.strTrlDept = 'OTP' 
+										--		AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+										--		AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+										--		AND tbl.strTrpPaycode != 'Change'
+										--	) > 1
+											THEN (
+													SELECT SUM(dblTrlMatchLineTrlPromoAmount) 
+													FROM tblSTTranslogRebates tbl
+													WHERE tbl.intTermMsgSN = TR.intTermMsgSN
+													AND tbl.intCheckoutId = TR.intCheckoutId
+													AND tbl.strTrlDept = 'OTP' 
+													AND	tbl.strTrlMatchLineTrlMatchName = TR.strTrlMatchLineTrlMatchName 
+													AND tbl.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+													AND tbl.strTrpPaycode != 'Change'
+												 )
 									ELSE NULL
 								  END as dblMultiPackDiscountAmount
 
