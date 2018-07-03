@@ -106,6 +106,7 @@ BEGIN
 							apcbk_desc = i.apcbk_desc COLLATE Latin1_General_CI_AS
 					FROM	apcbkmst i
 					WHERE apcbk_bnk_no IS NULL 
+					AND NOT EXISTS (SELECT TOP 1 1 FROM ssbnkmst where ssbnk_name = apcbk_desc) 
 				) QUERY
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBank WHERE strBankName = LTRIM(RTRIM(ISNULL(QUERY.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)
 

@@ -742,7 +742,13 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 								FROM tblRKOptionsMatchPnS s
 								WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId
 								), 0)
-						) END AS dblNoOfLot
+						) END * isnull((
+					SELECT TOP 1 dblDelta
+					FROM tblRKFuturesSettlementPrice sp
+					INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+					WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END AND ft.dblStrike = mm.dblStrike
+					ORDER BY dtmPriceDate DESC
+					), 0) AS dblNoOfLot
 			,isnull((
 					SELECT TOP 1 dblDelta
 					FROM tblRKFuturesSettlementPrice sp
@@ -863,7 +869,13 @@ AND isnull(intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(intS
 								FROM tblRKOptionsMatchPnS s
 								WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId
 								), 0)
-						) END AS dblNoOfLot
+						) END * isnull((
+					SELECT TOP 1 dblDelta
+					FROM tblRKFuturesSettlementPrice sp
+					INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
+					WHERE intFutureMarketId = ft.intFutureMarketId AND mm.intOptionMonthId = ft.intOptionMonthId AND mm.intTypeId = CASE WHEN ft.strOptionType = 'Put' THEN 1 ELSE 2 END AND ft.dblStrike = mm.dblStrike
+					ORDER BY dtmPriceDate DESC
+					), 0) AS dblNoOfLot
 			,isnull((
 					SELECT TOP 1 dblDelta
 					FROM tblRKFuturesSettlementPrice sp

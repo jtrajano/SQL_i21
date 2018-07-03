@@ -183,6 +183,7 @@ BEGIN
 			ON transType.strName = 'Bill' -- 'Cost Adjustment'
 
 		WHERE	 B.intInventoryReceiptChargeId IS NULL 
+		AND B.intInventoryReceiptItemId > 0
 		AND E2.intOwnershipType != 2
 		-- Compare the cost used in Voucher against the IR cost. 
 		-- Compare the ForexRate use in Voucher against IR Rate

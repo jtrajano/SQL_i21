@@ -34,6 +34,7 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intCustomTabId INT
 		,@intCustomTabDetailId INT
+		,@intCustomTabDetailId0 INT
 		,@strReceiptNumber NVARCHAR(50)
 		,@strLocationCount NVARCHAR(50)
 		,@ysnDefaultLocation BIT
@@ -1208,6 +1209,26 @@ BEGIN TRY
 				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
 					AND strFieldName = 'CreatedByEDI'
 
+				SELECT @intCustomTabDetailId0 = [Extent1].[intCustomTabDetailId]
+				FROM [dbo].[tblSMCustomTabDetail] AS [Extent1]
+				WHERE [Extent1].[intCustomTabId] = @intCustomTabId
+					AND strFieldName = 'Id'
+
+				DECLARE @tblCustomTabColumn TABLE (
+					intCustomTabDetailId INT
+					,strValue NVARCHAR(50)
+					)
+
+				INSERT INTO @tblCustomTabColumn
+				SELECT Extent1.intCustomTabDetailId
+					,NULL
+				FROM dbo.tblSMCustomTabDetail AS Extent1
+				WHERE Extent1.intCustomTabId = @intCustomTabId
+					AND strFieldName NOT IN (
+						'CreatedByEDI'
+						,'Id'
+						)
+
 				IF NOT EXISTS (
 						SELECT *
 						FROM [tblSMTransaction]
@@ -1270,6 +1291,25 @@ BEGIN TRY
 
 				IF NOT EXISTS (
 						SELECT *
+						FROM tblSMFieldValue
+						WHERE intTabRowId = @intTabRowId
+							AND intCustomTabDetailId = @intCustomTabDetailId0
+						)
+				BEGIN
+					INSERT dbo.tblSMFieldValue (
+						intTabRowId
+						,intCustomTabDetailId
+						,strValue
+						,intConcurrencyId
+						)
+					SELECT @intTabRowId
+						,@intCustomTabDetailId0
+						,1
+						,1
+				END
+
+				IF NOT EXISTS (
+						SELECT *
 						FROM [tblSMFieldValue]
 						WHERE [intTabRowId] = @intTabRowId
 							AND [intCustomTabDetailId] = @intCustomTabDetailId
@@ -1294,6 +1334,24 @@ BEGIN TRY
 					WHERE [intTabRowId] = @intTabRowId
 						AND [intCustomTabDetailId] = @intCustomTabDetailId
 				END
+
+				INSERT dbo.tblSMFieldValue (
+					intTabRowId
+					,intCustomTabDetailId
+					,strValue
+					,intConcurrencyId
+					)
+				SELECT @intTabRowId
+					,C.intCustomTabDetailId
+					,C.strValue
+					,1
+				FROM @tblCustomTabColumn C
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblSMFieldValue FV
+						WHERE FV.intTabRowId = @intTabRowId
+							AND FV.intCustomTabDetailId = C.intCustomTabDetailId
+						)
 			END
 
 			INSERT INTO tblMFEDI943Archive (

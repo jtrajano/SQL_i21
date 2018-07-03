@@ -99,7 +99,7 @@ BEGIN
 		FROM	@GLEntriesToValidate A JOIN
 		dbo.tblGLAccount B ON A.intAccountId = B.intAccountId
 		WHERE	B.ysnActive = 0 AND ISNULL( A.ysnRebuild,0) = 0
-		)
+		AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal'))
 		INSERT INTO @tbl 
 		SELECT TOP 1 strTransactionId
 		,CASE 

@@ -43,6 +43,7 @@ BEGIN
 			,[strDocument]
 			,[strComments]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
 			,[dtmTransactionDate]
@@ -86,6 +87,7 @@ BEGIN
 			,[strDocument]
 			,[strComments]
 			,[intCurrencyId]
+			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
 			,dtmDateEntered
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
