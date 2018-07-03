@@ -677,8 +677,8 @@ BEGIN TRY
 							(
 								CASE 
 									WHEN L.intWeightUOMId IS NULL
-										THEN L.dblQty
-									ELSE L.dblWeight
+										THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+									ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 									END
 								) - ISNULL((
 									SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -703,8 +703,8 @@ BEGIN TRY
 							(
 								CASE 
 									WHEN L.intWeightUOMId IS NULL
-										THEN L.dblQty
-									ELSE L.dblWeight
+										THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+									ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 									END
 								) - ISNULL((
 									SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -746,8 +746,8 @@ BEGIN TRY
 								(
 									CASE 
 										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
+											THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+										ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 										END
 									) - ISNULL((
 										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -772,8 +772,8 @@ BEGIN TRY
 								(
 									CASE 
 										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
+											THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+										ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 										END
 									) - ISNULL((
 										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -807,6 +807,9 @@ BEGIN TRY
 									END
 
 							SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
+
+							IF @dblYieldQuantity < 0.0001
+								SELECT @dblYieldQuantity = 0
 						END
 					END
 
@@ -820,8 +823,8 @@ BEGIN TRY
 								(
 									CASE 
 										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
+											THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+										ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 										END
 									) - ISNULL((
 										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -846,8 +849,8 @@ BEGIN TRY
 								(
 									CASE 
 										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
+											THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+										ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 										END
 									) - ISNULL((
 										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -885,8 +888,8 @@ BEGIN TRY
 								(
 									CASE 
 										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
+											THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+										ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 										END
 									) - ISNULL((
 										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -911,8 +914,8 @@ BEGIN TRY
 								(
 									CASE 
 										WHEN L.intWeightUOMId IS NULL
-											THEN L.dblQty
-										ELSE L.dblWeight
+											THEN dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, @intYieldItemUOMId, L.dblQty)
+										ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intWeightUOMId, @intYieldItemUOMId, L.dblWeight)
 										END
 									) - ISNULL((
 										SELECT SUM(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNUll(L1.intWeightUOMId, L1.intItemUOMId), ISNULL(SR.dblQty, 0)))
@@ -941,6 +944,9 @@ BEGIN TRY
 									END
 
 							SELECT @dblYieldQuantity = @dblYieldQuantity - @dblNewQty
+
+							IF @dblYieldQuantity < 0.0001
+								SELECT @dblYieldQuantity = 0
 						END
 					END
 
