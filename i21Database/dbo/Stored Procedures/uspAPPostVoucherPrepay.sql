@@ -83,6 +83,7 @@ BEGIN
 	    strCode ,
 	    strReference ,
 	    intCurrencyId ,
+		intCurrencyExchangeRateTypeId,
 	    dblExchangeRate ,
 	    dtmDateEntered ,
 	    dtmTransactionDate ,
@@ -116,6 +117,7 @@ BEGIN
 	    strCode ,
 	    strReference ,
 	    intCurrencyId ,
+		intCurrencyExchangeRateTypeId,
 	    dblExchangeRate ,
 	    dtmDateEntered ,
 	    dtmTransactionDate ,
@@ -152,6 +154,7 @@ BEGIN
 	    strCode ,
 	    strReference ,
 	    intCurrencyId ,
+		intCurrencyExchangeRateTypeId,
 	    dblExchangeRate ,
 	    dtmDateEntered ,
 	    dtmTransactionDate ,
@@ -181,10 +184,11 @@ BEGIN
 	    dblDebit ,
 	    dblCreditUnit ,
 	    dblDebitUnit ,
-	    strDescription ,
+	    A.strDescription ,
 	    strCode ,
 	    strReference ,
 	    intCurrencyId ,
+		A.intCurrencyExchangeRateTypeId,
 	    dblExchangeRate ,
 	    dtmDateEntered ,
 	    dtmTransactionDate ,
@@ -204,8 +208,9 @@ BEGIN
 	    dblDebitReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
-	    ''
+	    B.strCurrencyExchangeRateType
 	FROM tblGLDetail A
+	LEFT JOIN tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 	WHERE A.intTransactionId IN (SELECT intId FROM @validVoucherPrepay)
 	AND EXISTS (
 		SELECT 1 FROM tblAPBill B
@@ -329,7 +334,7 @@ BEGIN
 		,C.strAccountGroup
 		,DebitForeign.Value
 		,CreditForeign.Value
-		,A.[strRateType]           
+		,rateType.[strCurrencyExchangeRateType]           
 	FROM @GLEntries A
 	INNER JOIN dbo.tblGLAccount B 
 		ON A.intAccountId = B.intAccountId
@@ -338,7 +343,8 @@ BEGIN
 	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
 	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
-	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign;
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign
+	LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 END
 
 SET @invalidCount = @totalInvalid;

@@ -17,6 +17,7 @@ RETURNS @returntable TABLE
 	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
 	[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]             INT              NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
 	[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
 	[dtmDateEntered]            DATETIME         NOT NULL,
 	[dtmTransactionDate]        DATETIME         NULL,
@@ -107,6 +108,7 @@ BEGIN
 		,[strCode]						=	'AP'
 		,[strReference]					=	C.strVendorId
 		,[intCurrencyId]				=	P.intCurrencyId
+		,[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId
 		,[dblExchangeRate]				=	P.dblExchangeRate
 		,[dtmDateEntered]				=	GETDATE()
 		,[dtmTransactionDate]			=	NULL
@@ -180,6 +182,7 @@ BEGIN
 			A.dblWithheld,
 			paymentDetail.dblPayment, 
 			paymentDetail.dblWithheld,
+			paymentDetail.dblDiscount,
 			intTransactionType , 
 			A.dblExchangeRate
 			) AS tmpSummaryPayment
@@ -231,6 +234,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
@@ -303,6 +307,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	1,
+		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
@@ -346,6 +351,7 @@ BEGIN
 			[strCode]						=	'AP',
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
+			[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 			[dblExchangeRate]				=	A.dblExchangeRate,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
@@ -404,6 +410,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	voucherRate.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
@@ -445,6 +452,7 @@ BEGIN
 	A.dblExchangeRate,
 	A.intPaymentId,
 	rateType.strCurrencyExchangeRateType,
+	rateType.intCurrencyExchangeRateTypeId,
 	voucher.intTransactionType,
 	--voucherDetail.dblRate,
 	voucherRate.dblExchangeRate,
@@ -473,6 +481,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
@@ -499,6 +508,7 @@ BEGIN
 			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.[intEntityId] 
 			INNER JOIN tblARInvoice E ON B.intInvoiceId = E.intInvoiceId
+			LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND B.dblPayment <> 0
 	AND B.intInvoiceId IS NOT NULL
@@ -526,6 +536,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	A.strNotes,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	A.dblExchangeRate,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
@@ -581,6 +592,7 @@ BEGIN
 			[strCode]						=	'AP',
 			[strReference]					=	A.strNotes,
 			[intCurrencyId]					=	A.intCurrencyId,
+			[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 			[dblExchangeRate]				=	A.dblExchangeRate,
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,

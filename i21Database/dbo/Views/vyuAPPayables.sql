@@ -120,12 +120,12 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
-	, CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND abs(B.dblDiscount) > 0 
+	, CAST(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND abs(B.dblDiscount) > 0 
 				THEN B.dblDiscount * -1 ELSE B.dblDiscount 
-			END AS dblDiscount
-	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND abs(B.dblInterest) > 0 
+			END * A.dblExchangeRate AS DECIMAL(18,2)) AS dblDiscount
+	, CAST(CASE WHEN C.intTransactionType NOT IN (1,2,14) AND abs(B.dblInterest) > 0 
 				THEN B.dblInterest * -1 ELSE B.dblInterest 
-			END AS dblInterest 
+			END * A.dblExchangeRate AS DECIMAL(18,2)) AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
