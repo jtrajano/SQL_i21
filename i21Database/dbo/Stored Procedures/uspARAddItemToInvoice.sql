@@ -84,8 +84,9 @@
 	,@ItemStorageScheduleTypeId		INT				= NULL
 	,@ItemDestinationGradeId		INT				= NULL
 	,@ItemDestinationWeightId		INT				= NULL
+	,@ItemstrAddonDetailKey			VARCHAR(MAX)    = NULL
+	,@ItemysnAddonParent			BIT				= NULL
 AS
-
 BEGIN
 
 
@@ -225,6 +226,8 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemDestinationGradeId		= @ItemDestinationGradeId
 			,@ItemDestinationWeightId		= @ItemDestinationWeightId
 			,@ItemSalesAccountId			= @ItemSalesAccountId
+			,@ItemstrAddonDetailKey			= @ItemstrAddonDetailKey
+			,@ItemysnAddonParent			= @ItemysnAddonParent
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
@@ -437,7 +440,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intDestinationWeightId]
 				,[intSalesAccountId]
 				,[intTicketId]
-				,[intTicketHoursWorkedId])
+				,[intTicketHoursWorkedId]
+				,[strAddonDetailKey]
+				,[ysnAddonParent])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -517,6 +522,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemSalesAccountId
 				,@ItemTicketId
 				,@ItemTicketHoursWorkedId
+				,@ItemstrAddonDetailKey	
+				,@ItemysnAddonParent	
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
@@ -604,7 +611,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
 			,@ItemSalesAccountId			= @ItemSalesAccountId
 			,@ItemStorageScheduleTypeId		= @ItemStorageScheduleTypeId
 			,@ItemTicketId					= @ItemTicketId
-
+			,@ItemstrAddonDetailKey			= @ItemstrAddonDetailKey
+			,@ItemysnAddonParent			= @ItemysnAddonParent
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0
