@@ -17,6 +17,7 @@ RETURNS @returntable TABLE
 	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
 	[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]             INT              NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
 	[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
 	[dtmDateEntered]            DATETIME         NOT NULL,
 	[dtmTransactionDate]        DATETIME         NULL,
@@ -109,6 +110,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	Details.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(Details.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -158,13 +160,13 @@ BEGIN
 			CROSS APPLY dbo.fnAPCalculateVoucherUnits(A.intBillId) units	
 			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
 				ON A.intEntityVendorId = C.[intEntityId]
-			CROSS APPLY
-			(
-				SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
-				FROM dbo.tblAPBillDetail A 
-				LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
-				WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-			) ForexRate
+			-- CROSS APPLY
+			-- (
+			-- 	SELECT TOP 1 A.intCurrencyExchangeRateTypeId,B.strCurrencyExchangeRateType,A.dblRate,A.ysnSubCurrency
+			-- 	FROM dbo.tblAPBillDetail A 
+			-- 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType B ON A.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
+			-- 	WHERE A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+			-- ) ForexRate
 			-- CROSS APPLY
 			-- (
 			-- 	SELECT CASE COUNT(DISTINCT A.dblRate) WHEN 1 THEN 0 ELSE 1 END AS ysnUniqueForex
@@ -244,6 +246,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	D.strVendorId,
 		[intCurrencyId]					=	C.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	ForexRate.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -334,6 +337,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -560,6 +564,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -662,6 +667,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -746,6 +752,7 @@ BEGIN
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -844,6 +851,7 @@ BEGIN
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -985,6 +993,7 @@ BEGIN
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	G.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
@@ -1061,6 +1070,7 @@ BEGIN
 	,A.intEntityVendorId
 	,B.dblRate
 	,G.strCurrencyExchangeRateType
+	,G.intCurrencyExchangeRateTypeId
 	,B.dblOldCost
 	,F.intItemId
 	,loc.intItemLocationId
