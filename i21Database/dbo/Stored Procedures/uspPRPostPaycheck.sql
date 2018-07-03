@@ -228,25 +228,20 @@ BEGIN
 
 	--PERFORM AMOUNT DISTRIBUTION
 	--Place Earning to Temporary Table to Distribute Amounts
-	SELECT intTmpEarningId, intPaycheckEarningId, intDepartmentId, intWCCodeId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
-	DECLARE @intAmountTempPaycheckEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT,
-			@intAmountTempDepartmentId INT, @intAmountTempWCCodeId INT
+	SELECT intTmpEarningId, intPaycheckEarningId, dblAmount INTO #tmpEarningAmount FROM #tmpEarning
+	DECLARE @intAmountTempPaycheckEarningId INT, @dblAmountTempEarningFullAmount NUMERIC(18, 6), @intAmountTempTmpEarningId INT
 
 	--Distribute Amounts
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpEarningAmount)
 	BEGIN
 		SELECT TOP 1 @dblAmountTempEarningFullAmount = dblAmount
 					,@intAmountTempPaycheckEarningId = intPaycheckEarningId
-					,@intAmountTempDepartmentId = intDepartmentId
-					,@intAmountTempWCCodeId = intWCCodeId
 		FROM #tmpEarningAmount
 
 		WHILE (@dblAmountTempEarningFullAmount <> 0)
 		BEGIN
 			SELECT TOP 1 @intAmountTempTmpEarningId = intTmpEarningId FROM #tmpEarningAmount 
 			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
-				AND intDepartmentId = @intAmountTempDepartmentId
-				AND intWCCodeId = @intAmountTempWCCodeId
 
 			IF ((SELECT COUNT(1) FROM #tmpEarningAmount WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId) = 1) 
 				BEGIN
@@ -264,8 +259,6 @@ BEGIN
 
 		DELETE FROM #tmpEarningAmount 
 			WHERE intPaycheckEarningId = @intAmountTempPaycheckEarningId
-				AND intDepartmentId = @intAmountTempDepartmentId
-				AND intWCCodeId = @intAmountTempWCCodeId
 	END
 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
