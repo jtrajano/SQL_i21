@@ -445,6 +445,8 @@ BEGIN TRY
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
 				END
 
+			
+			COMMIT TRAN @TransactionName;
 			-- Generate New Batch Id
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 
@@ -619,7 +621,7 @@ BEGIN TRY
 				END
 			END		
 			
-			COMMIT TRAN @TransactionName
+			--COMMIT TRAN @TransactionName
 			GOTO Post_Exit;
 		END
 END TRY
@@ -633,7 +635,6 @@ With_Rollback_Exit:
 IF @@TRANCOUNT > 1 
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	COMMIT TRAN @TransactionName
+	--COMMIT TRAN @TransactionName
 END
-
 Post_Exit:
