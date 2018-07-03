@@ -115,12 +115,9 @@ SELECT TOP 1 @isCAD = 1 FROM  tblCMBankAccount BA JOIN tblSMCurrency SMC ON SMC.
 WHERE intBankAccountId = @intBankAccountId AND SMC.strCurrency = 'CAD'
 
 -- Report Query:  
-SELECT	CASE WHEN @isCAD = 1 THEN
-			REPLACE(CONVERT(NVARCHAR(10), CHK.dtmDate, 111), '/', '-')   
-		ELSE
-			CHK.dtmDate
-		END
-		dtmDate
+SELECT	
+		strCADDate =	REPLACE(CONVERT(NVARCHAR(10), CHK.dtmDate, 111), '/', '-')
+		,CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
 		,strPayee = CASE
