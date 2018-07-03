@@ -6768,6 +6768,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Tables\tblRKMatchDerivativesHistoryForOption.sql" />
+    <Build Include="dbo\Views\vyuSTStorePumpItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
