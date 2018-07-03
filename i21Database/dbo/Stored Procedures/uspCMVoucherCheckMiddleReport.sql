@@ -110,17 +110,10 @@ WHERE [fieldname] = 'strBatchId'
 SET @strTransactionId = CASE WHEN LTRIM(RTRIM(ISNULL(@strTransactionId, ''))) = '' THEN NULL ELSE @strTransactionId END  
 SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL ELSE @strBatchId END  
 
-DECLARE @isCAD BIT = 0
-SELECT TOP 1 @isCAD = 1 FROM  tblCMBankAccount BA JOIN tblSMCurrency SMC ON SMC.intCurrencyID = BA.intCurrencyId 
-WHERE intBankAccountId = @intBankAccountId AND SMC.strCurrency = 'CAD'
-
 -- Report Query:  
-SELECT	CASE WHEN @isCAD = 1 THEN
-			REPLACE(CONVERT(NVARCHAR(10), CHK.dtmDate, 111), '/', '-')   
-		ELSE
-			CHK.dtmDate
-		END
-		dtmDate
+SELECT	
+		strCADDate = REPLACE(CONVERT(NVARCHAR(10), CHK.dtmDate, 111), '/', '-')  
+		,CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
 		,strPayee = CASE
