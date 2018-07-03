@@ -5,7 +5,6 @@
 		@intItemId int= null,
 		@strPositionIncludes nvarchar(100) = NULL,
 		@intLocationId int = null
-
 AS
 
 DECLARE @tblResult TABLE
@@ -106,7 +105,7 @@ WHERE i.intCommodityId=@intCommodityId
 AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end 
 AND convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) 
 and convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110) and strTransactionId not like'%IS%'
-AND il.intLocationId = @intLocationId)t
+AND il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end)t
 union
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
 		'' as strAdjDistributionOption,
@@ -152,7 +151,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		AND st.intProcessingLocationId = @intLocationId)a
+		AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end)a
 
 UNION ALL--IR came from Delivery Sheet
 SELECT dtmDate,strDistributionOption strDistributionOption,'' strShipDistributionOption,
@@ -201,7 +200,7 @@ convert(datetime,CONVERT(VARCHAR(10),r.dtmReceiptDate,110),110) BETWEEN
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		AND DS.intCompanyLocationId = @intLocationId
+		AND DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then DS.intCompanyLocationId  else @intLocationId end
 		AND DS.ysnPost = 1)a
 
 
@@ -250,7 +249,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEE
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.strOwnedPhysicalStock='Customer'
-		AND st.intProcessingLocationId = @intLocationId )a
+		AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end )a
 
 UNION ALL --IS came from Delivery Sheet
 SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributionOption,
@@ -298,7 +297,7 @@ WHERE convert(datetime,CONVERT(VARCHAR(10),r.dtmShipDate,110),110) BETWEEN
 		AND i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and  gs.strOwnedPhysicalStock='Customer'
-		AND DS.intCompanyLocationId = @intLocationId
+		AND DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then DS.intCompanyLocationId  else @intLocationId end 
 		AND DS.ysnPost = 1)a
 
 UNION ALL --Delivery Sheet
@@ -334,7 +333,7 @@ FROM tblSCTicket st
 WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-	AND st.intProcessingLocationId = @intLocationId
+	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end 
 	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H'
 	
 
@@ -369,7 +368,7 @@ FROM tblSCTicket st
 WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-	AND st.intProcessingLocationId = @intLocationId
+	AND st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end 
 	AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H'
 
  )t

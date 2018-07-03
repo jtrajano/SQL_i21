@@ -41,7 +41,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 													ELSE isnull(ysnLicensed, 0) END
 											)
-		AND st.intProcessingLocationId = @intLocationId
+		AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 
 		UNION ALL --Delivery Sheet
 			SELECT 
@@ -72,7 +72,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 															ELSE isnull(ysnLicensed, 0) END
 													)
-				AND st.intProcessingLocationId = @intLocationId
+				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 				AND DS.ysnPost = 0 AND st.strTicketStatus = 'H'
 
 			UNION ALL --On Hold without Delivery Sheet
@@ -94,7 +94,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
 															ELSE isnull(ysnLicensed, 0) END
 													)
-				AND st.intProcessingLocationId = @intLocationId
+				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
 				AND st.strTicketStatus = 'H' AND st.intDeliverySheetId IS NULL
 
 		  )t     GROUP BY  dtmDate,strStorageTypeDescription

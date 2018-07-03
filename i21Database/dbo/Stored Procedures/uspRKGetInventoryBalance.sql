@@ -60,7 +60,7 @@ JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId
  and isnull(il.strDescription,'') <> 'In-Transit'
 WHERE i.intCommodityId=@intCommodityId  
 and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and strTransactionId not like'%IS%'
-and il.intLocationId = @intLocationId
+and il.intLocationId =  case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end
 
 UNION 
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
@@ -81,7 +81,7 @@ FROM tblSCTicket st
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		 and st.intProcessingLocationId = @intLocationId)a
+		 and st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end)a
 
 UNION all --IR came from Delivery Sheet
 SELECT dtmDate,'' tranShipmentNumber,0.0 tranShipQty,strReceiptNumber tranReceiptNumber,dblInQty tranRecQty,''  tranAdjNumber,
@@ -103,7 +103,7 @@ FROM tblSCDeliverySheet DS
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		 and gs.strOwnedPhysicalStock='Customer' and  gs.intStorageScheduleTypeId > 0 
-		 and DS.intCompanyLocationId = @intLocationId
+		 and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then DS.intCompanyLocationId else @intLocationId end
 		 AND DS.ysnPost = 1)a
 		 
 
@@ -129,7 +129,7 @@ FROM tblSCTicket st
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and gs.strOwnedPhysicalStock='Customer'
-		and st.intProcessingLocationId = @intLocationId)a
+		and st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId  else @intLocationId end)a
 
 union all--IS came from Delivery Sheet
 SELECT dtmDate,strShipmentNumber tranShipmentNumber,-dblOutQty tranShipQty,'' tranReceiptNumber,0.0 tranRecQty,''  tranAdjNumber,
@@ -154,7 +154,7 @@ FROM tblSCDeliverySheet DS
 WHERE  i.intCommodityId= @intCommodityId
 		and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 		and gs.strOwnedPhysicalStock='Customer'
-		and DS.intCompanyLocationId = @intLocationId)a
+		and DS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then  DS.intCompanyLocationId  else @intLocationId end)a
 
 UNION ALL --Delivery Sheet
 select dtmDate,'' tranShipmentNumber,0.0 tranShipQty,'' tranReceiptNumber,tranRecQty tranRecQty,''  tranAdjNumber,
@@ -192,7 +192,7 @@ FROM tblSCTicket st
 WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-	AND st.intProcessingLocationId = @intLocationId
+	AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
 	AND DS.ysnPost = 0 AND st.strTicketStatus = 'H')t
 	
 
@@ -230,7 +230,7 @@ FROM tblSCTicket st
 WHERE   convert(datetime,CONVERT(VARCHAR(10),st.dtmTicketDateTime,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 	AND i.intCommodityId= @intCommodityId
 	AND i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
-	AND st.intProcessingLocationId = @intLocationId
+	AND st.intProcessingLocationId =  case when isnull(@intLocationId,0)=0 then  st.intProcessingLocationId  else @intLocationId end
 	AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H')t1
 
  )t
