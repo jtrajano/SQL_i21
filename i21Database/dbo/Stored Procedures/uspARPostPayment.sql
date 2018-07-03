@@ -1203,13 +1203,14 @@ IF @recap = 0
 			WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
 			
 			UPDATE ARP
-			SET ARP.dblAmountPaid = 0,
-				ARP.dblUnappliedAmount = APD.dblPayment
+			SET ARP.dblAmountPaid = @ZeroDecimal
+			  , ARP.dblBaseAmountPaid = @ZeroDecimal
+			  , ARP.dblUnappliedAmount = APD.dblPayment
+			  , ARP.dblBaseUnappliedAmount = APD.dblBasePayment
 			FROM tblARPayment ARP
-			INNER JOIN (SELECT APD.intPaymentId, SUM(APD.dblPayment) dblPayment FROM tblARPaymentDetail APD WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData) GROUP BY APD.intPaymentId ) APD
+			INNER JOIN (SELECT APD.intPaymentId, SUM(APD.dblPayment) dblPayment, SUM(APD.dblBasePayment) dblBasePayment FROM tblARPaymentDetail APD WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData) GROUP BY APD.intPaymentId ) APD
 				ON ARP.intPaymentId = APD.intPaymentId
 			WHERE APD.intPaymentId IN(SELECT [intTransactionId] FROM @ARReceivablePostData)
-
 
 			UPDATE tblGLDetail
 				SET tblGLDetail.ysnIsUnposted = 1
