@@ -380,6 +380,7 @@ BEGIN
 	    strCode ,
 	    strReference ,
 	    intCurrencyId ,
+		intCurrencyExchangeRateTypeId,
 	    dblExchangeRate ,
 	    dtmDateEntered ,
 	    dtmTransactionDate ,
@@ -419,6 +420,7 @@ BEGIN
 	    strCode ,
 	    strReference ,
 	    intCurrencyId ,
+		intCurrencyExchangeRateTypeId,
 	    dblExchangeRate ,
 	    dtmDateEntered ,
 	    dtmTransactionDate ,
@@ -500,7 +502,8 @@ BEGIN
 			,strDescription				
 			,strCode					
 			,strReference				
-			,intCurrencyId				
+			,intCurrencyId			
+			,intCurrencyExchangeRateTypeId	
 			,dblExchangeRate			
 			,dtmDateEntered				
 			,dtmTransactionDate			
@@ -585,7 +588,8 @@ BEGIN
 		,strDescription				
 		,strCode					
 		,strReference				
-		,intCurrencyId				
+		,intCurrencyId		
+		,intCurrencyExchangeRateTypeId		
 		,dblExchangeRate			
 		,dtmDateEntered				
 		,dtmTransactionDate			
@@ -622,7 +626,8 @@ BEGIN
 		,strDescription				
 		,strCode					
 		,strReference				
-		,intCurrencyId				
+		,intCurrencyId	
+		,intCurrencyExchangeRateTypeId			
 		,dblExchangeRate			
 		,dtmDateEntered				
 		,dtmTransactionDate			
@@ -1209,7 +1214,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,A.[strRateType]           
+			,forex.[strCurrencyExchangeRateType]           
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
@@ -1218,7 +1223,8 @@ ELSE
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign;
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign
+		LEFT JOIN tblSMCurrencyExchangeRateType forex ON forex.intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId
 		
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 

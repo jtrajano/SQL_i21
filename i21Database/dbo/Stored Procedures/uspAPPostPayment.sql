@@ -71,14 +71,6 @@ DECLARE @totalInvalid INT = 0;
 
 SET @recapId = '1'
 
---SET BatchId
-IF(@batchId IS NULL)
-BEGIN
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-END
-
-SET @batchIdUsed = @batchId
-
 --=====================================================================================================================================
 -- 	POPULATE TRANSACTIONS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -222,6 +214,17 @@ END
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
+
+--SET BatchId
+IF(@batchId IS NULL)
+BEGIN
+	--DO NOT GENERATE IF UNPOST
+	IF NOT (@post = 0 AND @recap = 0)
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+END
+
+SET @batchIdUsed = @batchId
+
 IF ISNULL(@post,0) = 1
 BEGIN
 	INSERT INTO @GLEntries(
@@ -236,6 +239,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -269,6 +273,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -304,6 +309,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -341,6 +347,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -374,6 +381,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -409,6 +417,7 @@ BEGIN
 	[strCode],    
 	[strReference],
 	[intCurrencyId],
+	[intCurrencyExchangeRateTypeId],
 	[dblExchangeRate],
 	[dtmDateEntered] ,
 	[dtmTransactionDate],
@@ -674,7 +683,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,A.strRateType
+			,rateType.strCurrencyExchangeRateType
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
@@ -683,7 +692,8 @@ ELSE
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
-		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) CreditForeign;
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) CreditForeign
+		LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	END
 
 IF(ISNULL(@recap,0) = 0)

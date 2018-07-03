@@ -4,7 +4,7 @@
 AS
 
 SELECT * FROM (
-SELECT ROW_NUMBER() OVER (PARTITION BY sh.intCustomerStorageId ORDER BY dtmHistoryDate DESC) intRowNum,
+SELECT ROW_NUMBER() OVER (PARTITION BY sh.intCustomerStorageId ORDER BY dtmDistributionDate DESC) intRowNum,
  a.intCustomerStorageId
 	 ,a.intCompanyLocationId	
 	,sl.strSubLocationName [Loc]
@@ -31,7 +31,7 @@ SELECT ROW_NUMBER() OVER (PARTITION BY sh.intCustomerStorageId ORDER BY dtmHisto
  	,c1.strScheduleId,
  	isnull(ysnExternal,0) as ysnExternal,
 	i.intItemId,  	 
-	sh.dtmHistoryDate 
+	sh.dtmDistributionDate 
 FROM tblICInventoryReceipt r
 JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 JOIN tblSCTicket sc on sc.intTicketId = ri.intSourceId
@@ -43,5 +43,5 @@ JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
 JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
 LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId
-and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)  <= convert(datetime,@dtmToDate) and a.intCommodityId=case when isnull(@intCommodityId,0)=0 then a.intCommodityId else @intCommodityId end
+and convert(DATETIME, CONVERT(VARCHAR(10), dtmDistributionDate, 110), 110)  <= convert(datetime,@dtmToDate) and a.intCommodityId=case when isnull(@intCommodityId,0)=0 then a.intCommodityId else @intCommodityId end
 	) a WHERE a.intRowNum =1 

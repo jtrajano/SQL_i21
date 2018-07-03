@@ -17,6 +17,7 @@ RETURNS @returntable TABLE
 	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL DEFAULT 'AP',    
 	[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyId]             INT              NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
 	[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
 	[dtmDateEntered]            DATETIME         NOT NULL DEFAULT GETDATE(),
 	[dtmTransactionDate]        DATETIME         NULL,
@@ -54,6 +55,7 @@ BEGIN
 		[strDescription]            ,
 		[strReference]              ,
 		[intCurrencyId]             ,
+		[intCurrencyExchangeRateTypeId],
 		[dblExchangeRate]           ,
 		[dtmTransactionDate]        ,
 		[intJournalLineNo]			,
@@ -82,6 +84,7 @@ BEGIN
 		[strDescription]            =	voucher.strReference,
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	1,
@@ -103,7 +106,10 @@ BEGIN
 	INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
 	OUTER APPLY
 	(
-		SELECT (voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal , voucherDetail.dblRate AS dblRate, currencyExchange.strCurrencyExchangeRateType
+		SELECT (voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal 
+				, voucherDetail.dblRate AS dblRate
+				, currencyExchange.strCurrencyExchangeRateType
+				, currencyExchange.intCurrencyExchangeRateTypeId
 		FROM dbo.tblAPBillDetail voucherDetail
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
 		WHERE voucherDetail.intBillId = voucher.intBillId
@@ -121,6 +127,7 @@ BEGIN
 		[strDescription]            =	voucher.strReference,
 		[strReference]              =	vendor.strVendorId,
 		[intCurrencyId]             =	voucher.intCurrencyId,
+		[intCurrencyExchangeRateTypeId]= Details.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]           =	1,
 		[dtmTransactionDate]        =	voucher.dtmDate,
 		[intJournalLineNo]			=	Details.intBillDetailId,
@@ -147,6 +154,7 @@ BEGIN
 			(voucherDetail.dblTotal + voucherDetail.dblTax) AS dblTotal,
 			voucherDetail.dblRate AS dblRate, 
 			currencyExchange.strCurrencyExchangeRateType, 
+			currencyExchange.intCurrencyExchangeRateTypeId, 
 			voucherDetail.intAccountId
 		FROM dbo.tblAPBillDetail voucherDetail
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyExchange ON voucherDetail.intCurrencyExchangeRateTypeId = currencyExchange.intCurrencyExchangeRateTypeId
