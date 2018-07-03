@@ -1,7 +1,8 @@
 CREATE VIEW [dbo].[vyuPRReportQuarterlySUI]
 AS
 SELECT 
-	tblPREmployee.strEmployeeId
+	intEntityId = tblPRPaycheck.intEntityEmployeeId
+	,tblPREmployee.strEmployeeId
 	,tblPREmployee.strSocialSecurity
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
@@ -27,7 +28,6 @@ SELECT
 	,dblLimit = vyuPRPaycheckTax.dblLimit
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal)
 	,vyuPRPaycheckTax.strTaxId
-	,vyuPRPaycheckTax.intTypeTaxStateId
 	,dblTotalHours = MAX(tblPRPaycheck.dblTotalHoursYTD)
 	,intPaychecks = COUNT(tblPRPaycheck.intPaycheckId)
 FROM
@@ -63,17 +63,16 @@ FROM
 WHERE (vyuPRPaycheckTax.strCalculationType = 'USA SUTA' AND vyuPRPaycheckTax.ysnVoid = 0)
 GROUP BY 
 	tblPREmployee.strEmployeeId
-	, tblPREmployee.strSocialSecurity
-	, tblPREmployee.strFirstName
-	, tblPREmployee.strMiddleName
-	, tblPREmployee.strLastName
-	, tblPRPaycheck.intYear
-	, tblPRPaycheck.intQuarter
-	, vyuPRPaycheckTax.dblAmount
-	, vyuPRPaycheckTax.dblLimit
-	, vyuPRPaycheckTax.strTaxId
-	, vyuPRPaycheckTax.intTypeTaxStateId
-	, tblPRPaycheck.intEntityEmployeeId
+	,tblPREmployee.strSocialSecurity
+	,tblPREmployee.strFirstName
+	,tblPREmployee.strMiddleName
+	,tblPREmployee.strLastName
+	,tblPRPaycheck.intYear
+	,tblPRPaycheck.intQuarter
+	,vyuPRPaycheckTax.dblAmount
+	,vyuPRPaycheckTax.dblLimit
+	,vyuPRPaycheckTax.strTaxId
+	,tblPRPaycheck.intEntityEmployeeId
 HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0
 
 GO

@@ -23,6 +23,10 @@ DECLARE @intUnrealizedGainOnBasisId INT
 	,@intUnrealizedLossOnInventoryCashIOSId INT
 	,@intUnrealizedGainOnInventoryIntransitIOSId INT
 	,@intUnrealizedLossOnInventoryIntransitIOSId INT
+	,@intUnrealizedGainOnRatioId INT
+	,@intUnrealizedLossOnRatioId INT
+	,@intUnrealizedGainOnInventoryRatioIOSId INT
+	,@intUnrealizedLossOnInventoryRatioIOSId INT
 SELECT @intUnrealizedGainOnBasisId = intUnrealizedGainOnBasisId
 	,@intUnrealizedGainOnFuturesId = intUnrealizedGainOnFuturesId
 	,@intUnrealizedGainOnCashId = intUnrealizedGainOnCashId
@@ -37,6 +41,10 @@ SELECT @intUnrealizedGainOnBasisId = intUnrealizedGainOnBasisId
  	,@intUnrealizedLossOnInventoryCashIOSId = intUnrealizedLossOnInventoryCashIOSId
 	,@intUnrealizedGainOnInventoryIntransitIOSId= intUnrealizedGainOnInventoryIntransitIOSId
  	,@intUnrealizedLossOnInventoryIntransitIOSId = intUnrealizedLossOnInventoryIntransitIOSId
+	,@intUnrealizedGainOnRatioId = intUnrealizedGainOnRatioId
+	,@intUnrealizedLossOnRatioId = intUnrealizedLossOnRatioId
+	,@intUnrealizedGainOnInventoryRatioIOSId = intUnrealizedGainOnInventoryRatioIOSId
+	,@intUnrealizedLossOnInventoryRatioIOSId = intUnrealizedLossOnInventoryRatioIOSId 
 FROM tblRKCompanyPreference
 declare @strUnrealizedGainOnBasisId NVARCHAR(MAX)
 	,@strUnrealizedGainOnFuturesId NVARCHAR(MAX)
@@ -52,6 +60,10 @@ declare @strUnrealizedGainOnBasisId NVARCHAR(MAX)
 	,@strUnrealizedLossOnInventoryCashIOSId NVARCHAR(MAX)
 	,@strUnrealizedGainOnInventoryIntransitIOSId NVARCHAR(MAX)
 	,@strUnrealizedLossOnInventoryIntransitIOSId NVARCHAR(MAX)
+	,@strUnrealizedGainOnRatioId NVARCHAR(MAX)
+	,@strUnrealizedLossOnRatioId NVARCHAR(MAX)
+	,@strUnrealizedGainOnInventoryRatioIOSId NVARCHAR(MAX)
+	,@strUnrealizedLossOnInventoryRatioIOSId NVARCHAR(MAX)
 SELECT @strUnrealizedGainOnBasisId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedGainOnBasisId
 SELECT @strUnrealizedGainOnFuturesId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedGainOnCashId
 select @strUnrealizedGainOnCashId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedGainOnCashId
@@ -66,6 +78,10 @@ select @strUnrealizedLossOnInventoryFuturesIOSId=strAccountId from tblGLAccount 
 select @strUnrealizedLossOnInventoryCashIOSId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedLossOnInventoryCashIOSId
 select @strUnrealizedGainOnInventoryIntransitIOSId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedGainOnInventoryIntransitIOSId
 select @strUnrealizedLossOnInventoryIntransitIOSId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedLossOnInventoryIntransitIOSId
+select @strUnrealizedGainOnRatioId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedGainOnRatioId
+select @strUnrealizedLossOnRatioId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedLossOnRatioId
+select @strUnrealizedGainOnInventoryRatioIOSId=strAccountId from tblGLAccount where intAccountId=@intUnrealizedGainOnInventoryRatioIOSId
+select @strUnrealizedLossOnInventoryRatioIOSId=strAccountId from tblGLAccount where intAccountId=@strUnrealizedLossOnInventoryRatioIOSId
 
 DECLARE @dtmGLPostDate DATETIME
 DECLARE @intCommodityId int
@@ -187,6 +203,26 @@ SELECT @intM2MInquiryId intM2MInquiryId,@dtmGLPostDate AS dtmPostDate,
 'Mark To Market-Cash Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
 FROM tblRKM2MInquiryTransaction where intM2MInquiryId=@intM2MInquiryId and strContractOrInventoryType in('Contract(P)','Contract(S)')
 	and strPricingType = 'Cash' and isnull(dblResultCash,0)<>0
+
+--Ratio
+UNION ALL
+SELECT @intM2MInquiryId intM2MInquiryId, @dtmGLPostDate AS dtmPostDate,
+CASE WHEN isnull(dblResultRatio,0) >= 0 then @intUnrealizedGainOnRatioId else @intUnrealizedLossOnRatioId end intAccountId,
+CASE WHEN isnull(dblResultRatio,0) >= 0 then @strUnrealizedGainOnRatioId else @strUnrealizedLossOnRatioId end strAccountId
+,dblResultRatio,0.0,dblOpenQty,0.0,'Mark To Market-Ratio',@intCurrencyId,@dtmGLPostDate, strContractSeq,intContractDetailId,
+'Mark To Market-Ratio','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
+FROM tblRKM2MInquiryTransaction 
+where intM2MInquiryId=@intM2MInquiryId and strContractOrInventoryType in('Contract(P)','Contract(S)') and isnull(dblResultRatio,0)<>0
+
+--Ratio Offset
+UNION ALL
+SELECT @intM2MInquiryId intM2MInquiryId, @dtmGLPostDate AS dtmPostDate,
+CASE WHEN isnull(dblResultRatio,0) >= 0 then @intUnrealizedGainOnInventoryRatioIOSId else @intUnrealizedLossOnInventoryRatioIOSId end intAccountId,
+CASE WHEN isnull(dblResultRatio,0) >= 0 then @strUnrealizedGainOnInventoryRatioIOSId else @strUnrealizedLossOnInventoryRatioIOSId end strAccountId
+,0.0,dblResultRatio,dblOpenQty,0.0,'Mark To Market-Ratio Offset',@intCurrencyId,@dtmGLPostDate, strContractSeq,intContractDetailId,
+'Mark To Market-Ratio Offset','Mark To Market','Risk Management',1,1,getdate(),0,intEntityId,@strRecordName strRecordName,@intUserId intUserId,@intLocationId intLocationId,@intUnitMeasureId intUnitMeasureId
+FROM tblRKM2MInquiryTransaction 
+where intM2MInquiryId=@intM2MInquiryId and strContractOrInventoryType in('Contract(P)','Contract(S)') and isnull(dblResultRatio,0)<>0
 
 
 -------- intransit Offset

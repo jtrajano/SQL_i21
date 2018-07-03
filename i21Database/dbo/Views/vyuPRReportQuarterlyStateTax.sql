@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPRReportQuarterlyStateTax]
 AS
 SELECT 
-	tblPREmployee.strEmployeeId
+	intEntityId = tblPRPaycheck.intEntityEmployeeId
+	,tblPREmployee.strEmployeeId
 	,tblPREmployee.strSocialSecurity
 	,tblPREmployee.strFirstName
 	,tblPREmployee.strMiddleName
@@ -12,8 +13,9 @@ SELECT
 	,SUM(tblPRPaycheck.dblAdjustedGross) AS dblAdjustedGross
 	,SUM(vyuPRPaycheckTax.dblStateTotal) AS dblStateTotal
 	,SUM(vyuPRPaycheckTax.dblLocalTotal) AS dblLocalTotal
-	,(SELECT TOP 1 strState FROM tblPRTypeTaxState WHERE intTypeTaxStateId = vyuPRPaycheckTax.intTypeTaxStateId) strState
-	,(SELECT TOP 1 strLocalName FROM tblPRTypeTaxLocal WHERE intTypeTaxLocalId = vyuPRPaycheckTax.intTypeTaxLocalId) strCounty
+	,strCode = tblPRTypeTaxState.strCode
+	,strState = tblPRTypeTaxState.strState
+	,strCounty = tblPRTypeTaxLocal.strLocalName
 FROM
 	(tblPREmployee 
 		INNER JOIN (SELECT PC.*
@@ -40,15 +42,22 @@ FROM
 	ON tblPRPaycheck.intPaycheckId = vyuPRPaycheckTax.intPaycheckId
 								AND tblPRPaycheck.intYear = YEAR(vyuPRPaycheckTax.dtmPayDate)
 								AND tblPRPaycheck.intQuarter = DATEPART(QQ, vyuPRPaycheckTax.dtmPayDate)
+	LEFT JOIN tblPRTypeTaxState
+		ON vyuPRPaycheckTax.intTypeTaxStateId = tblPRTypeTaxState.intTypeTaxStateId
+	LEFT JOIN tblPRTypeTaxLocal
+		on vyuPRPaycheckTax.intTypeTaxLocalId = tblPRTypeTaxLocal.intTypeTaxLocalId
 GROUP BY 
 	tblPREmployee.strEmployeeId
-	, tblPREmployee.strSocialSecurity
-	, tblPREmployee.strFirstName
-	, tblPREmployee.strMiddleName
-	, tblPREmployee.strLastName
-	, tblPRPaycheck.intYear
-	, tblPRPaycheck.intQuarter
-	, vyuPRPaycheckTax.intTypeTaxStateId
-	, vyuPRPaycheckTax.intTypeTaxLocalId
-	, tblPRPaycheck.intEntityEmployeeId
+	,tblPREmployee.strSocialSecurity
+	,tblPREmployee.strFirstName
+	,tblPREmployee.strMiddleName
+	,tblPREmployee.strLastName
+	,tblPRPaycheck.intYear
+	,tblPRPaycheck.intQuarter
+	,tblPRTypeTaxState.strCode
+	,tblPRTypeTaxState.strState
+	,tblPRTypeTaxLocal.strLocalName
+	,tblPRPaycheck.intEntityEmployeeId
 HAVING SUM(vyuPRPaycheckTax.dblAdjustedGross) > 0
+
+GO

@@ -75,12 +75,6 @@ IF @transCount = 0 BEGIN TRANSACTION
 		END
 		RETURN;
 	END
-
-	SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @shipTo)  
-	IF @APAccount IS NULL OR @APAccount <= 0
-	BEGIN
-		RAISERROR('Please setup default AP Account.', 16, 1);
-	END
 	
 	DECLARE @billRecordNumber NVARCHAR(50);
 	IF @type = 1

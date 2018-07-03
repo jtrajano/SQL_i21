@@ -39,6 +39,8 @@ ON dbo.tblARPaymentDetail
 INSTEAD OF UPDATE
 AS
 BEGIN
+	--Apply changes to i21Database\Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql
+
 	--SELECT ysnPosted FROM inserted WHERE ysnPosted = 1
 	DECLARE @ysnPosted AS VARCHAR(MAX) 
 	DECLARE @ysnPostedNew as VARCHAR(MAX)

@@ -6281,6 +6281,8 @@
     <Build Include="dbo\Stored Procedures\uspPOReverseReceivedMiscItem.sql" />
     <Build Include="dbo\Functions\fnICGetOwnershipType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCommission.sql" />
+    <Build Include="dbo\Tables\tblPRElectronicFilingSUI.sql" />
+    <Build Include="dbo\Views\vyuPRElectronicFilingSUIDetail.sql" />
     <Build Include="dbo\Tables\tblSRDirectFilter.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAverageRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
@@ -6312,36 +6314,46 @@
     <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPricingType.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPriceType.sql" />
-    <Build Include="dbo\Functions\fnAPGetPaymentForexRate.sql" />
     <Build Include="dbo\Functions\fnARCalculateQtyBetweenUOM.sql" />
     <Build Include="dbo\Functions\fnARIsStockTrackingItem.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_TaxCodeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGetDiversionTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertM2MBasisDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARAutoBlendSalesOrderItems.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicMI.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixVoucherStatus.sql" />
     <None Include="Scripts\Post-Deployment\IC\31_RemoveAfter18.3_DataFix.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidPaymentsForPosting.sql" />
+    <Build Include="dbo\Functions\fnARGetPaymentDetailsForPosting.sql" />
+    <Build Include="dbo\User Defined Types\ReceivePaymentPostingTable.sql" />
+    <Build Include="dbo\Functions\fnARGenerateGLEntriesForPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspARValidatePaymentPosting.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeLocationDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
     <Build Include="dbo\Functions\fnAPGetSettlementStatus.sql" />
     <Build Include="dbo\Tables\tblRKCommodityMarketMappingAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSyncCommodityMarketAttribute.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportSubLocationLabel.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTCreateBillForBasisContract.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRepostCostAdjustment.sql" />
-    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleScreenPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnEMBreakLine.sql" />
+    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
+    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
+    <Build Include="dbo\Views\vyuMFStockReservationByWorkOrder.sql" />
     <Build Include="dbo\Views\vyuAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Views\vyuAPRptTaxReport.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherAmountMultiplier.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptVoucherCheckOffDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptTaxReport.sql" />
-    <Build Include="dbo\Tables\tblDBPanelOwner.sql" />
-    <Build Include="dbo\Views\vyuSCGetScaleDistribution.sql" />
-    <Build Include="dbo\Views\vyuARTaxDetailReport.sql" />
     <Build Include="dbo\Functions\fnAPCreateReceiptItemCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInAvg.sql" />
     <Build Include="dbo\Stored Procedures\uspTRUpdateCostOnTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6508,6 +6520,9 @@
     <None Include="Scripts\Post-Deployment\AP\CleanBasisAdvance.sql" />
     <None Include="Scripts\Post-Deployment\IC\28_Company_Preferences.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\34_UpdateUnitPriceUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRInsertElectronicFilingSUI.sql" />
+    <Build Include="dbo\Functions\fnPRGetAccountIdWithThisLocationLOB.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\99_ReCreateTriggers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
