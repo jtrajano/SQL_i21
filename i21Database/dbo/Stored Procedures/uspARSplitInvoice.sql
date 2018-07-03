@@ -364,8 +364,7 @@ BEGIN
 								,[strItemDescription]
 								,[intItemUOMId]
 								,(CASE WHEN  @TransactionType='Invoice' 
-										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null) 
-										OR (intInventoryShipmentItemId is null OR intSalesOrderDetailId is null))
+										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null))
 			                            THEN dblQtyShipped * @dblSplitPercent  ELSE 0 END)
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  
