@@ -53,6 +53,9 @@ SELECT
 			,strPaymentMethod			= SMP.strPaymentMethod
 			,ysnACHActive				= EFT.ysnActive
 			,dblInvoiceDiscountAvailable= CAST(0 AS DECIMAL(18,6))
+			,intCurrencyExchangeRateTypeId	= NULL
+			,strCurrencyExchangeRateType	= ''
+			,[dblCurrencyExchangeRate]		= 1.000000
 		FROM
 			tblAPBill APB
 		INNER JOIN
