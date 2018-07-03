@@ -141,6 +141,7 @@ SELECT TOP 100 PERCENT * FROM (
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
     LEFT JOIN tblAPBasisAdvanceStaging staging ON staging.intContractDetailId = ctd.intContractDetailId
+        AND staging.intTicketId = ticket.intTicketId
     WHERE ctd.intPricingTypeId = 2
 ) basisAdvance
 ORDER BY intTicketId DESC
