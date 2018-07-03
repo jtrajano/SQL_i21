@@ -987,7 +987,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemCurrencyExchangeRate			= dblCurrencyExchangeRate,
 						@ItemStorageLocationId				= intStorageLocationId,
 						@ItemCompanyLocationSubLocationId	= intCompanyLocationSubLocationId,
-						@ItemstrAddonDetailKey				= strADdonDetailKey,
+						@ItemstrAddonDetailKey				= strAddonDetailKey,
 						@ItemysnAddonParent					= ysnAddonParent
 				FROM @tblItemsToInvoice ORDER BY intItemToInvoiceId ASC
 				
