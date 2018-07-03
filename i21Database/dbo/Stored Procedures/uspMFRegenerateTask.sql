@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFRegenerateTask @intLotId INT
 	,@strAlternateLotNo NVARCHAR(50)
 	,@strLotSourceLocation NVARCHAR(50)
+	,@strLotSourceSubLocation NVARCHAR(50)
 	,@intOrderHeaderId INT
 	,@intTaskId INT
 	,@dblQty NUMERIC(18, 6)
@@ -54,6 +55,7 @@ BEGIN TRY
 		,@intInventoryShipmentId INT
 		,@strOrderNo NVARCHAR(50)
 		,@ysnReservationRequired BIT
+		,@intSubLocationId INT
 
 	SELECT @ysnReservationRequired = 1
 
@@ -78,9 +80,14 @@ BEGIN TRY
 		,intOrderHeaderId INT
 		)
 
+	SELECT @intSubLocationId = intCompanyLocationSubLocationId
+	FROM tblSMCompanyLocationSubLocation
+	WHERE strSubLocationName = @strLotSourceSubLocation
+
 	SELECT @intStorageLocationId = intStorageLocationId
 	FROM tblICStorageLocation
 	WHERE strName = @strLotSourceLocation
+		AND intSubLocationId = @intSubLocationId
 		AND intLocationId = @intLocationId
 
 	SELECT @intAlternateLotId = intLotId
