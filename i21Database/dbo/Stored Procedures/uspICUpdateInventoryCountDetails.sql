@@ -60,7 +60,7 @@ BEGIN
 			, intLotId
 			, strLotNumber
 			, strLotAlias
-			, dblSystemCount = dblQty
+			, dblSystemCount = ISNULL(dblQty, 0)
 			, dblWeightQty = Lot.dblWeight
 			, dblLastCost = dblLastCost
 			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
@@ -160,7 +160,7 @@ BEGIN
 		, intSubLocationId = COALESCE(stock.intSubLocationId, il.intSubLocationId)
 		, intStorageLocationId = COALESCE(stock.intStorageLocationId, il.intStorageLocationId)
 		, intLotId = NULL
-		, dblSystemCount = dblOnHand-- SUM(COALESCE(stock.dblOnHand, 0.00))
+		, dblSystemCount = ISNULL(dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost = COALESCE(stock.dblLastCost, p.dblLastCost)
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, uom.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, uom.intItemUOMId)
