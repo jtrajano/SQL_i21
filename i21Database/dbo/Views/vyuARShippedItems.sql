@@ -373,8 +373,18 @@ FROM (
 			dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
 			dblDestinationQuantity
 		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
-		WHERE ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
-		  AND ISNULL(intOwnershipType, 0) <> 2
+		WHERE 
+			(	ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
+				AND
+				ISNULL(intOwnershipType, 0) <> 2
+			)
+			OR
+			(	ISNULL(ysnDestinationWeightsAndGrades, 0) = 1 
+				AND 
+				dblDestinationQuantity IS NOT NULL
+				AND
+				ISNULL(intOwnershipType, 0) <> 2
+			)
 	) ICISI 
 	INNER JOIN (
 		SELECT intInventoryShipmentId
