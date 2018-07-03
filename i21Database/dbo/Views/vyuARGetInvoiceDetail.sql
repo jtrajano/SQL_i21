@@ -160,9 +160,9 @@ SELECT
     strDestinationGrade = isnull(GRADE.strWeightGradeDesc, ''),
     strDestinationWeight = isnull(DWEIGHT.strWeightGradeDesc, ''),
     strCurrencyExchangeRateType = isnull(RTYPE.strCurrencyExchangeRateType, ''),
-    intOriginDestWeight = DWEIGHT.intOriginDest
-
-
+    intOriginDestWeight = DWEIGHT.intOriginDest,
+	strAddonDetailKey,
+    ysnAddonParent
 FROM  ( SELECT intInvoiceId, intCompanyLocationId 
 			FROM tblARInvoice WITH(NOLOCK) ) PINV		
 	JOIN tblARInvoiceDetail INV
