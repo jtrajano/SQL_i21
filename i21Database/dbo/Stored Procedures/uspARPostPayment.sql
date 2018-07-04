@@ -1195,22 +1195,22 @@ IF @recap = 0
 			WHERE
 				ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 				
-			UPDATE tblARPaymentDetail
-			SET dblPayment = 0,
-				dblBasePayment = 0,
-				dblBaseAmountDue = 	dblBaseInvoiceTotal + ((ISNULL(dblBaseAmountDue, 0.00) + ISNULL(dblBaseInterest,0.00)) - ISNULL(dblBaseDiscount,0.00)),
-				dblAmountDue = 	dblInvoiceTotal + ((ISNULL(dblAmountDue, 0.00) + ISNULL(dblInterest,0.00)) - ISNULL(dblDiscount,0.00))
-			WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
+			-- UPDATE tblARPaymentDetail
+			-- SET dblPayment = 0,
+			-- 	dblBasePayment = 0,
+			-- 	dblBaseAmountDue = 	dblBaseInvoiceTotal + ((ISNULL(dblBaseAmountDue, 0.00) + ISNULL(dblBaseInterest,0.00)) - ISNULL(dblBaseDiscount,0.00)),
+			-- 	dblAmountDue = 	dblInvoiceTotal + ((ISNULL(dblAmountDue, 0.00) + ISNULL(dblInterest,0.00)) - ISNULL(dblDiscount,0.00))
+			-- WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData)
 			
-			UPDATE ARP
-			SET ARP.dblAmountPaid = @ZeroDecimal
-			  , ARP.dblBaseAmountPaid = @ZeroDecimal
-			  , ARP.dblUnappliedAmount = APD.dblPayment
-			  , ARP.dblBaseUnappliedAmount = APD.dblBasePayment
-			FROM tblARPayment ARP
-			INNER JOIN (SELECT APD.intPaymentId, SUM(APD.dblPayment) dblPayment, SUM(APD.dblBasePayment) dblBasePayment FROM tblARPaymentDetail APD WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData) GROUP BY APD.intPaymentId ) APD
-				ON ARP.intPaymentId = APD.intPaymentId
-			WHERE APD.intPaymentId IN(SELECT [intTransactionId] FROM @ARReceivablePostData)
+			-- UPDATE ARP
+			-- SET ARP.dblAmountPaid = @ZeroDecimal
+			--   , ARP.dblBaseAmountPaid = @ZeroDecimal
+			--   , ARP.dblUnappliedAmount = APD.dblPayment
+			--   , ARP.dblBaseUnappliedAmount = APD.dblBasePayment
+			-- FROM tblARPayment ARP
+			-- INNER JOIN (SELECT APD.intPaymentId, SUM(APD.dblPayment) dblPayment, SUM(APD.dblBasePayment) dblBasePayment FROM tblARPaymentDetail APD WHERE intPaymentId IN (SELECT [intTransactionId] FROM @ARReceivablePostData) GROUP BY APD.intPaymentId ) APD
+			-- 	ON ARP.intPaymentId = APD.intPaymentId
+			-- WHERE APD.intPaymentId IN(SELECT [intTransactionId] FROM @ARReceivablePostData)
 
 			UPDATE tblGLDetail
 				SET tblGLDetail.ysnIsUnposted = 1
