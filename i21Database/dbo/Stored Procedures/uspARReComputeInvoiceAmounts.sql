@@ -16,14 +16,45 @@ DECLARE  @ZeroDecimal			DECIMAL(18,6)
 		,@CurrencyId			INT
 		,@strTransType			NVARCHAR(50)
 		,@OriginalInvoiceId		INT
+		,@CurrencyExchangeRate	DECIMAL(18,6)
 
 SET @ZeroDecimal = 0.000000	
 SET @InvoiceIdLocal = @InvoiceId
+
+UPDATE
+	tblARInvoiceDetail
+SET
+	 [dblCurrencyExchangeRate]	= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END
+WHERE
+	[intInvoiceId] = @InvoiceIdLocal
+
+UPDATE
+	tblARInvoice
+SET
+	 [dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
+FROM
+	(
+		SELECT 
+			 [dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
+			,[intCount]					= COUNT([intInvoiceId])
+			,[intInvoiceId]				= [intInvoiceId]
+		FROM
+			tblARInvoiceDetail
+		WHERE
+			[intInvoiceId] = @InvoiceIdLocal
+		GROUP BY
+			[intInvoiceId]
+	)
+	 T
+WHERE
+	tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
+	AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
 						
 SELECT
-	@CurrencyId			= [intCurrencyId],
-	@OriginalInvoiceId	= [intOriginalInvoiceId],
-	@strTransType		= [strTransactionType]
+	 @CurrencyId			= [intCurrencyId]
+	,@OriginalInvoiceId		= [intOriginalInvoiceId]
+	,@strTransType			= [strTransactionType]
+	,@CurrencyExchangeRate	= (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END)
 FROM
 	tblARInvoice
 WHERE
@@ -54,9 +85,9 @@ SET
 	,[dblShipmentTareWt]				= ISNULL([dblShipmentTareWt], @ZeroDecimal)
 	,[dblShipmentNetWt]					= ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal)		
 	,[dblPrice]							= ISNULL([dblPrice], @ZeroDecimal)
-	,[dblBasePrice]						= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,[dblBasePrice]						= ISNULL(ISNULL([dblPrice], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
 	,[dblUnitPrice] 					= ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal)
-	,[dblBaseUnitPrice]					= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,[dblBaseUnitPrice]					= ISNULL(ISNULL(ISNULL([dblUnitPrice], [dblPrice]), @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
 	,[intPriceUOMId]					= CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([intPriceUOMId], [intItemWeightUOMId]) ELSE ISNULL([intPriceUOMId], [intItemUOMId]) END
 	,[dblUnitQuantity]					= CASE WHEN (ISNULL([dblUnitQuantity],@ZeroDecimal) <> @ZeroDecimal) THEN [dblUnitQuantity] ELSE (CASE WHEN (ISNULL([intLoadDetailId],0) <> 0) THEN ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL([dblQtyShipped], @ZeroDecimal) END) END
 	,[dblTotalTax]						= ISNULL([dblTotalTax], @ZeroDecimal)
@@ -74,7 +105,7 @@ SET
 																				,[dblItemTermDiscount]
 																				,[dblQtyShipped]
 																				,[dblPrice]
-																				,(CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END))
+																				,@CurrencyExchangeRate)
 	,[dblItemTermDiscountExemption]		= [dbo].[fnARGetItemTermDiscountExemption](	[ysnTermDiscountExempt]
 																					,[dblTermDiscountRate]
 																					,[dblQtyShipped]
@@ -84,12 +115,11 @@ SET
 																					,[dblTermDiscountRate]
 																					,[dblQtyShipped]
 																					,[dblPrice]
-																					,(CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END))
+																					,@CurrencyExchangeRate)
 	,[dblTermDiscountRate]				= ISNULL([dblTermDiscountRate], @ZeroDecimal)
 	,[ysnTermDiscountExempt]			= ISNULL([ysnTermDiscountExempt], 0)
 	,[intSubCurrencyId]					= ISNULL([intSubCurrencyId], @CurrencyId)
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL([dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblSubCurrencyRate] END
-	,[dblCurrencyExchangeRate] 			= CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblCurrencyExchangeRate] END
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	
@@ -213,7 +243,7 @@ WHERE
 UPDATE
 	ARID
 SET
-	ARID.[dblBaseTotal]		= [dbo].fnRoundBanker(ARID.[dblTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	ARID.[dblBaseTotal]		= [dbo].fnRoundBanker(ARID.[dblTotal] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 	
 FROM
 	tblARInvoiceDetail ARID
@@ -231,7 +261,6 @@ SET
 	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
 	,[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
-	,[dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
 FROM
 	(
 		SELECT 
@@ -239,8 +268,6 @@ FROM
 			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
 			,[dblTotal]					= SUM([dblTotal])
 			,[dblBaseTotal]				= SUM([dblBaseTotal])
-			,[dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
-			,[intCount]					= COUNT([intInvoiceId])
 			,[intInvoiceId]				= [intInvoiceId]
 		FROM
 			tblARInvoiceDetail

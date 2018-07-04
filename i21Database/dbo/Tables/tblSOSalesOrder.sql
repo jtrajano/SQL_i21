@@ -31,6 +31,7 @@
 	[dblBaseAmountDue]			NUMERIC (18, 6) NULL,
     [dblPayment]				NUMERIC (18, 6) NULL,
 	[dblBasePayment]			NUMERIC (18, 6) NULL,
+	[dblCurrencyExchangeRate]	NUMERIC(18, 6)	CONSTRAINT [DF_tblSOSalesOrder_dblCurrencyExchangeRate] DEFAULT ((1)) NULL,
     [strTransactionType]		NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType]					NVARCHAR (25)   COLLATE Latin1_General_CI_AS DEFAULT 'Standard' NULL,
     [strOrderStatus]			NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,

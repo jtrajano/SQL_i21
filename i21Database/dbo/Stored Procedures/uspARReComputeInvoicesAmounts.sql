@@ -12,7 +12,41 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE  @ZeroDecimal	DECIMAL(18,6)
-SET @ZeroDecimal = 0.000000	
+SET @ZeroDecimal = 0.000000
+
+UPDATE ARID
+SET
+	 ARID.[dblCurrencyExchangeRate]	= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END
+FROM
+	tblARInvoiceDetail ARID
+INNER JOIN
+	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice) ARI
+		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN
+	@InvoiceIds IID
+		ON ARID.[intInvoiceId] = IID.[intHeaderId]
+
+UPDATE ARI	
+SET
+	 ARI.[dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
+FROM
+	tblARInvoice ARI
+LEFT OUTER JOIN
+	(
+		SELECT 
+			 [dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
+			,[intCount]					= COUNT([intInvoiceId])
+			,[intInvoiceId]				= [intInvoiceId]
+		FROM
+			tblARInvoiceDetail
+		GROUP BY
+			[intInvoiceId]
+	)
+	 T
+	 ON ARI.[intInvoiceId] = T.[intInvoiceId] 
+INNER JOIN
+	@InvoiceIds IID
+		ON ARI.[intInvoiceId] = IID.[intHeaderId]
 						
 UPDATE ARIDT
 SET
@@ -42,9 +76,9 @@ SET
 	,ARID.[dblShipmentTareWt]				= ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
 	,ARID.[dblShipmentNetWt]				= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
 	,ARID.[dblPrice]						= ISNULL(ARID.[dblPrice], @ZeroDecimal)
-	,ARID.[dblBasePrice]					= ISNULL(ISNULL(ARID.[dblPrice], @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,ARID.[dblBasePrice]					= ISNULL(ISNULL(ARID.[dblPrice], @ZeroDecimal) * ARID.[dblCurrencyExchangeRate], @ZeroDecimal)
 	,ARID.[dblUnitPrice] 					= ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal)
-	,ARID.[dblBaseUnitPrice]				= ISNULL(ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * (CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.00000 ELSE ARID.[dblCurrencyExchangeRate] END), @ZeroDecimal)
+	,ARID.[dblBaseUnitPrice]				= ISNULL(ISNULL(ISNULL(ARID.[dblUnitPrice], ARID.[dblPrice]), @ZeroDecimal) * ARID.[dblCurrencyExchangeRate], @ZeroDecimal)
 	,ARID.[intPriceUOMId]					= CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) THEN ISNULL(ARID.[intPriceUOMId], ARID.[intItemWeightUOMId]) ELSE ISNULL(ARID.[intPriceUOMId], ARID.[intItemUOMId]) END
 	,ARID.[dblUnitQuantity]					= CASE WHEN (ISNULL(ARID.[dblUnitQuantity],@ZeroDecimal) <> @ZeroDecimal) THEN ARID.[dblUnitQuantity] ELSE (CASE WHEN (ISNULL(ARID.[intLoadDetailId],0) <> 0) THEN ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal) ELSE ISNULL(ARID.[dblQtyShipped], @ZeroDecimal) END) END
 	,ARID.[dblTotalTax]						= ISNULL(ARID.[dblTotalTax], @ZeroDecimal)
@@ -62,7 +96,7 @@ SET
 																				,ARID.[dblItemTermDiscount]
 																				,ARID.[dblQtyShipped]
 																				,ARID.[dblPrice]
-																				,(CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END))
+																				,ARI.[dblCurrencyExchangeRate])
 	,ARID.[dblItemTermDiscountExemption]	= [dbo].[fnARGetItemTermDiscountExemption](	ARID.[ysnTermDiscountExempt]
 																						,ARID.[dblTermDiscountRate]
 																						,ARID.[dblQtyShipped]
@@ -72,16 +106,15 @@ SET
 																						,ARID.[dblTermDiscountRate]
 																						,ARID.[dblQtyShipped]
 																						,ARID.[dblPrice]
-																						,(CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END))
+																						,ARI.[dblCurrencyExchangeRate])
 	,ARID.[dblTermDiscountRate]				= ISNULL(ARID.[dblTermDiscountRate], @ZeroDecimal)
 	,ARID.[ysnTermDiscountExempt]			= ISNULL(ARID.[ysnTermDiscountExempt], 0)
 	,ARID.[intSubCurrencyId]				= ISNULL(ARID.[intSubCurrencyId], ARI.[intCurrencyId])
 	,ARID.[dblSubCurrencyRate]				= CASE WHEN ISNULL(ARID.[dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblSubCurrencyRate] END
-	,ARID.[dblCurrencyExchangeRate]			= CASE WHEN ISNULL(ARID.[dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblCurrencyExchangeRate] END
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
-	(SELECT [intInvoiceId], [intCurrencyId] FROM tblARInvoice) ARI
+	(SELECT [intInvoiceId], [intCurrencyId], [dblCurrencyExchangeRate] FROM tblARInvoice) ARI
 		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
 	@InvoiceIds IID
@@ -203,9 +236,12 @@ INNER JOIN
 UPDATE
 	ARID
 SET
-	ARID.[dblBaseTotal]	= [dbo].fnRoundBanker(ARID.[dblTotal] * ARID.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())	
+	ARID.[dblBaseTotal]	= [dbo].fnRoundBanker(ARID.[dblTotal] * ARI.[dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())	
 FROM
 	tblARInvoiceDetail ARID
+INNER JOIN
+	(SELECT [intInvoiceId], [dblCurrencyExchangeRate] FROM tblARInvoice) ARI
+		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 WHERE
 	EXISTS(SELECT NULL FROM @InvoiceIds WHERE [intHeaderId] = ARID.[intInvoiceId] AND ISNULL([ysnUpdateAvailableDiscountOnly],0) = 0)
 		
@@ -216,7 +252,6 @@ SET
 	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
 	,ARI.[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,ARI.[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
-	,ARI.[dblCurrencyExchangeRate]	= [dbo].fnRoundBanker(ISNULL(T.[dblCurrencyExchangeRate], 1.000000) / ISNULL(T.[intCount], 1.000000), 6)
 FROM
 	tblARInvoice ARI
 LEFT OUTER JOIN
@@ -226,8 +261,6 @@ LEFT OUTER JOIN
 			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
 			,[dblTotal]					= SUM([dblTotal])
 			,[dblBaseTotal]				= SUM([dblBaseTotal])
-			,[dblCurrencyExchangeRate]	= SUM([dblCurrencyExchangeRate])
-			,[intCount]					= COUNT([intInvoiceId])
 			,[intInvoiceId]				= [intInvoiceId]
 		FROM
 			tblARInvoiceDetail
