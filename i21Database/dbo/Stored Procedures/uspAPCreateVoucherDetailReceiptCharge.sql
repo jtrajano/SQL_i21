@@ -216,11 +216,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	--recalculate tax if partial
 	UPDATE voucherDetails
-		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
+		SET voucherDetails.dblTax =( CASE WHEN D.ysnPrice = 1 AND taxes.ysnCheckOffTax = 1 THEN  ISNULL(taxes.dblTax,0) * -1 ELSE  ISNULL(taxes.dblTax,0) END)
 		-- ,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
-		SELECT SUM(ISNULL(dblTax,0)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+		SELECT SUM(ISNULL(dblTax,0)) dblTax, ysnCheckOffTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+		GROUP BY ysnCheckOffTax , dblTax
 	) taxes
 	INNER JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = voucherDetails.intInventoryReceiptChargeId
 	WHERE voucherDetails.intBillDetailId IN (SELECT intBillDetailId FROM @detailCreated)
