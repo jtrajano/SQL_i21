@@ -1790,7 +1790,11 @@ BEGIN
 						dblAdjustedTax = li.dblAdjustedTax
 					FROM @tblCFOriginalTax AS ot
 					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON  ot.intTaxCodeId = li.intTaxCodeId
+					ON ot.intTaxGroupId			= li.intTaxGroupId
+					AND ot.intTaxCodeId		= li.intTaxCodeId
+					AND ot.intTaxClassId	= li.intTaxClassId
+					AND ot.dblRate			= li.dblRate
+					
 					WHERE ISNULL(ot.ysnTaxExempt,0) = 0
 					AND ISNULL(ot.ysnInvalidSetup,0) = 0
 
@@ -1799,7 +1803,10 @@ BEGIN
 						dblAdjustedTax = li.dblAdjustedTax
 					FROM @tblCFCalculatedTax AS ct
 					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON  ct.intTaxCodeId = li.intTaxCodeId
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
 					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
 					AND ISNULL(ct.ysnInvalidSetup,0) = 0
 				END
@@ -1810,6 +1817,9 @@ BEGIN
 					SELECT '@tblCFOriginalTax2',* FROM @tblCFOriginalTax --HERE--
 					--DEBUGGER HERE-- 
 					SELECT '@tblCFCalculatedTax2',* FROM @tblCFCalculatedTax --HERE--
+
+					
+
 				END
 
 				
@@ -1867,10 +1877,21 @@ BEGIN
 					,calculatedTax.dblTax
 					,originalTax.dblTax
 				FROM @tblCFOriginalTax as originalTax
-				INNER JOIN @tblCFCalculatedTax as calculatedTax
-				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
-				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
-				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+				CROSS APPLY (
+						SELECT TOP 1 
+							ysnTaxExempt
+							,dblTax
+						FROM @tblCFCalculatedTax
+						WHERE originalTax.intTaxGroupId = intTaxGroupId
+						AND originalTax.intTaxCodeId = intTaxCodeId
+						AND originalTax.intTaxClassId = intTaxClassId
+						AND originalTax.dblRate = dblRate
+					) AS calculatedTax
+				--INNER JOIN @tblCFCalculatedTax as calculatedTax
+				--ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				--AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				--AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+
 				INSERT INTO @tblCFTransactionTaxZeroQuantity
 				(
 					 [intTransactionDetailTaxId]	
@@ -1922,10 +1943,20 @@ BEGIN
 					,calculatedTax.dblTax
 					,originalTax.dblTax
 				FROM @tblCFOriginalTaxZeroQuantity as originalTax
-				INNER JOIN @tblCFCalculatedTaxZeroQuantity as calculatedTax
-				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
-				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
-				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+				CROSS APPLY (
+						SELECT TOP 1 
+							ysnTaxExempt
+							,dblTax
+						FROM @tblCFCalculatedTax
+						WHERE originalTax.intTaxGroupId = intTaxGroupId
+						AND originalTax.intTaxCodeId = intTaxCodeId
+						AND originalTax.intTaxClassId = intTaxClassId
+						AND originalTax.dblRate = dblRate
+					) AS calculatedTax
+				--INNER JOIN @tblCFCalculatedTax as calculatedTax
+				--ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				--AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				--AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
 
 				IF(ISNULL(@DevMode,0) = 1)
 				BEGIN
@@ -2887,10 +2918,20 @@ BEGIN
 					,calculatedTax.dblTax
 					,originalTax.dblTax
 				FROM @tblCFOriginalTax as originalTax
-				INNER JOIN @tblCFCalculatedTax as calculatedTax
-				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
-				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
-				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+				CROSS APPLY (
+						SELECT TOP 1 
+							ysnTaxExempt
+							,dblTax
+						FROM @tblCFCalculatedTax
+						WHERE originalTax.intTaxGroupId = intTaxGroupId
+						AND originalTax.intTaxCodeId = intTaxCodeId
+						AND originalTax.intTaxClassId = intTaxClassId
+						AND originalTax.dblRate = dblRate
+					) AS calculatedTax
+				--INNER JOIN @tblCFCalculatedTax as calculatedTax
+				--ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				--AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				--AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
 
 				INSERT INTO @tblCFTransactionTaxZeroQuantity
 				(
@@ -2943,10 +2984,20 @@ BEGIN
 					,calculatedTax.dblTax
 					,originalTax.dblTax
 				FROM @tblCFOriginalTaxZeroQuantity as originalTax
-				INNER JOIN @tblCFCalculatedTaxZeroQuantity as calculatedTax
-				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
-				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
-				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+				CROSS APPLY (
+						SELECT TOP 1 
+							ysnTaxExempt
+							,dblTax
+						FROM @tblCFCalculatedTax
+						WHERE originalTax.intTaxGroupId = intTaxGroupId
+						AND originalTax.intTaxCodeId = intTaxCodeId
+						AND originalTax.intTaxClassId = intTaxClassId
+						AND originalTax.dblRate = dblRate
+					) AS calculatedTax
+				--INNER JOIN @tblCFCalculatedTax as calculatedTax
+				--ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				--AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				--AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
 			END
 		END
 		ELSE
@@ -3907,10 +3958,22 @@ BEGIN
 					,calculatedTax.dblTax
 					,originalTax.dblTax
 				FROM @tblCFOriginalTax as originalTax
-				INNER JOIN @tblCFCalculatedTax as calculatedTax
-				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
-				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
-				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+				CROSS APPLY (
+						SELECT TOP 1 
+							ysnTaxExempt
+							,dblTax
+						FROM @tblCFCalculatedTax
+						WHERE originalTax.intTaxGroupId = intTaxGroupId
+						AND originalTax.intTaxCodeId = intTaxCodeId
+						AND originalTax.intTaxClassId = intTaxClassId
+						AND originalTax.dblRate = dblRate
+					) AS calculatedTax
+				--INNER JOIN @tblCFCalculatedTax as calculatedTax
+				--ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				--AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				--AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+
+
 				INSERT INTO @tblCFTransactionTaxZeroQuantity
 				(
 					 [intTransactionDetailTaxId]	
@@ -3962,10 +4025,20 @@ BEGIN
 					,calculatedTax.dblTax
 					,originalTax.dblTax
 				FROM @tblCFOriginalTaxZeroQuantity as originalTax
-				INNER JOIN @tblCFCalculatedTaxZeroQuantity as calculatedTax
-				ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
-				AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
-				AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
+				CROSS APPLY (
+						SELECT TOP 1 
+							ysnTaxExempt
+							,dblTax
+						FROM @tblCFCalculatedTax
+						WHERE originalTax.intTaxGroupId = intTaxGroupId
+						AND originalTax.intTaxCodeId = intTaxCodeId
+						AND originalTax.intTaxClassId = intTaxClassId
+						AND originalTax.dblRate = dblRate
+					) AS calculatedTax
+				--INNER JOIN @tblCFCalculatedTax as calculatedTax
+				--ON originalTax.intTaxGroupId = calculatedTax.intTaxGroupId
+				--AND originalTax.intTaxCodeId = calculatedTax.intTaxCodeId
+				--AND originalTax.intTaxClassId = calculatedTax.intTaxClassId
 			END
 
 		
@@ -4176,6 +4249,7 @@ BEGIN
 				FROM @tblCFRemoteTax
 				WHERE (intTaxClassId IS NOT NULL AND intTaxClassId > 0)
 				AND (intTaxCodeId IS NOT NULL AND intTaxCodeId > 0)
+
 				INSERT INTO @tblCFTransactionTaxZeroQuantity
 				(
 					 [intTransactionDetailTaxId]	
