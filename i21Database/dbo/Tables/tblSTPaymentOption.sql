@@ -6,7 +6,7 @@
     [strDescription] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
 	[intItemId] INT NULL, 
     [intAccountId] INT NULL, 
-    [intRegisterMop] INT NULL, 
+    [strRegisterMop] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
 	[ysnDepositable] BIT NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPaymentOption] PRIMARY KEY CLUSTERED ([intPaymentOptionId]), 
