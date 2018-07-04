@@ -8,6 +8,7 @@ AS
 -- Get the A/P Clearing account 
 BEGIN 
 	DECLARE @AccountCategory_APClearing AS NVARCHAR(30) = 'AP Clearing';
+	DECLARE @AccountCategory_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense';
 	DECLARE @GLAccounts AS dbo.ItemGLAccount;
 
 	DECLARE 
@@ -82,7 +83,7 @@ BEGIN
 			ReceiptItem.intItemId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,TaxCode.intPurchaseTaxAccountId
+			,TaxCode.intPurchaseTaxAccountId 
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -93,6 +94,30 @@ BEGIN
 				ON ReceiptItem.intInventoryReceiptItemId = ReceiptTaxes.intInventoryReceiptItemId
 			INNER JOIN dbo.tblSMTaxCode TaxCode
 				ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+			LEFT JOIN dbo.tblICInventoryTransactionType TransType
+				ON TransType.intTransactionTypeId = @intTransactionTypeId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+	UNION ALL 
+	SELECT	DISTINCT 
+			ChargeItem.intChargeId
+			,ItemLocation.intItemLocationId
+			,NULL
+			,CASE 
+				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+					dbo.fnGetItemGLAccount(ChargeItem.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+				ELSE 
+					TaxCode.intPurchaseTaxAccountId 
+			END
+			,@strBatchId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ChargeItem
+				ON Receipt.intInventoryReceiptId = ChargeItem.intInventoryReceiptId
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = ChargeItem.intChargeId
+				AND ItemLocation.intLocationId = Receipt.intLocationId							
+			INNER JOIN dbo.tblICInventoryReceiptChargeTax ChargeTaxes
+				ON ChargeItem.intInventoryReceiptChargeId = ChargeTaxes.intInventoryReceiptChargeId
+			INNER JOIN dbo.tblSMTaxCode TaxCode
+				ON TaxCode.intTaxCodeId = ChargeTaxes.intTaxCodeId
 			LEFT JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = @intTransactionTypeId
 	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -208,7 +233,17 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 0)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
+				,intPurchaseTaxAccountId			= 
+													CASE 
+														WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+															dbo.fnGetItemGLAccount(
+																ReceiptCharge.intChargeId
+																, ItemLocation.intItemLocationId
+																, @AccountCategory_OtherChargeExpense
+															) 
+														ELSE 
+															TaxCode.intPurchaseTaxAccountId 
+													END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
@@ -250,7 +285,17 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 0)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
+				,intPurchaseTaxAccountId			= 
+													CASE 
+														WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+															dbo.fnGetItemGLAccount(
+																ReceiptCharge.intChargeId
+																, ItemLocation.intItemLocationId
+																, @AccountCategory_OtherChargeExpense
+															) 
+														ELSE 
+															TaxCode.intPurchaseTaxAccountId 
+													END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
