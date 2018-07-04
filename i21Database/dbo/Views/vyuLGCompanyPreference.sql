@@ -98,6 +98,8 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipping Instruction Report Format - 1'
 		WHEN 2
 			THEN 'Shipping Instruction Report Format - 2'
+		WHEN 3
+			THEN 'Shipping Instruction Report Format - 3'
 		END AS strShippingInstructionReportFormat
 	,CP.intDeliveryOrderReportFormat
 	,CASE CP.intDeliveryOrderReportFormat

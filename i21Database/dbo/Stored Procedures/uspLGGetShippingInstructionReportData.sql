@@ -26,6 +26,10 @@ BEGIN
 		,@strUserEmailId NVARCHAR(100)
 		,@strContainerQtyUOM NVARCHAR(100)
 		,@strPackingUOM NVARCHAR(100)
+		,@intLaguageId INT
+		,@strExpressionLabelName NVARCHAR(50) = 'Expression'
+		,@strMonthLabelName NVARCHAR(50) = 'Month'
+		,@strDocuments NVARCHAR(MAX)
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -69,16 +73,21 @@ BEGIN
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'intCompanyLocationId'
 
-	SELECT TOP 1 @strCompanyName = strCompanyName
-		,@strCompanyAddress = strAddress
-		,@strContactName = strContactName
-		,@strCounty = strCounty
-		,@strCity = strCity
-		,@strState = strState
-		,@strZip = strZip
-		,@strCountry = strCountry
-		,@strPhone = strPhone
+	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
+		,@strCompanyAddress = tblSMCompanySetup.strAddress
+		,@strContactName = tblSMCompanySetup.strContactName
+		,@strCounty = tblSMCompanySetup.strCounty
+		,@strCity = tblSMCompanySetup.strCity
+		,@strState = tblSMCompanySetup.strState
+		,@strZip = tblSMCompanySetup.strZip
+		,@strCountry = isnull(rtCompanyTranslation.strTranslation, tblSMCompanySetup.strCountry)
+		,@strPhone = tblSMCompanySetup.strPhone
 	FROM tblSMCompanySetup
+	left join tblSMCountry				rtCompanyCountry on lower(rtrim(ltrim(rtCompanyCountry.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
+	left join tblSMScreen				rtCompanyScreen on rtCompanyScreen.strNamespace = 'i21.view.Country'
+	left join tblSMTransaction			rtCompanyTransaction on rtCompanyTransaction.intScreenId = rtCompanyScreen.intScreenId and rtCompanyTransaction.intRecordId = rtCompanyCountry.intCountryID
+	left join tblSMReportTranslation	rtCompanyTranslation on rtCompanyTranslation.intLanguageId = @intLaguageId and rtCompanyTranslation.intTransactionId = rtCompanyTransaction.intTransactionId and rtCompanyTranslation.strFieldName = 'Country'
+
 
 	SELECT @strFullName = E.strName
 		,@strUserEmailId = ETC.strEmail
@@ -115,7 +124,23 @@ BEGIN
 	WHERE intLoadId = @intLoadId
 	GROUP BY strItemUOM
 
-	SELECT *
+	SELECT @strDocuments = STUFF((
+				SELECT DISTINCT CHAR(13) + CHAR(10) + LTRIM(BD.strDocumentName)
+				FROM (
+					SELECT DOC.strDocumentName
+					FROM tblLGLoadDocuments D
+					JOIN tblICDocument DOC ON DOC.intDocumentId = D.intDocumentId
+					WHERE intLoadId = (
+							SELECT intLoadId
+							FROM tblLGLoad
+							WHERE strLoadNumber = 'LS-44'
+							)
+					) BD
+				FOR XML PATH('')
+					,TYPE
+				).value('.', 'nvarchar(max)'), 1, 2, '')
+
+	SELECT DISTINCT *
 		,LTRIM(RTRIM(CASE 
 					WHEN ISNULL(strConsigneeText, '') = ''
 						THEN ''
@@ -246,6 +271,18 @@ BEGIN
 						ELSE Vendor.strName
 						END
 				END AS strVendor
+			,Vendor.strEmail as strVendorEmail
+			,Vendor.strFax as strVendorFax
+			,Vendor.strPhone as strVendorPhone
+			,Vendor.strMobile as strVendorMobile
+			,Vendor.strWebsite as strVendorWebsite
+			,VLocation.strAddress as strVendorAddress
+			,VLocation.strCity as strVendorCity
+			,isnull(rtrt5.strTranslation,VLocation.strCountry) as strVendorCountry
+			,VLocation.strState as strVendorState
+			,VLocation.strZipCode as strVendorZipCode
+			,VLocation.strCity  + ' ' + VLocation.strState + ' ' + VLocation.strZipCode AS strVendorCityStateZip
+			,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
 			,CASE 
 				WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
 					THEN DPETC.strName
@@ -827,6 +864,7 @@ BEGIN
 				END strConsigneeZipCode
 			,LC.strMarks
 			,L.strMarkingInstructions
+			,L.strMarks AS strSIMarks
 			,L.strComments
 			,L.dblDemurrage
 			,DemCurrency.strCurrency AS strDemurrageCurrency
@@ -859,6 +897,7 @@ BEGIN
 					THEN 'true'
 				ELSE 'false'
 				END ysnFullHeaderLogo
+			,@strDocuments strDocuments
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -877,6 +916,8 @@ BEGIN
 		LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId
 		LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
+		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId 
+			AND VLocation.intEntityLocationId = Vendor.intDefaultLocationId
 		LEFT JOIN tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
 		LEFT JOIN tblEMEntity VETC ON VETC.intEntityId = VEC.intEntityContactId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
@@ -932,6 +973,17 @@ BEGIN
 		LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		CROSS APPLY tblLGCompanyPreference CP
+		
+		left join tblSMCountry				rtc4 on lower(rtrim(ltrim(rtc4.strCountry))) = lower(rtrim(ltrim(VLocation.strCountry)))
+		left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = rtc4.intCountryID
+		left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
+						
+		left join tblSMCountry				rtc5 on lower(rtrim(ltrim(rtc5.strCountry))) = lower(rtrim(ltrim(VLocation.strCountry)))
+		left join tblSMScreen				rts5 on rts5.strNamespace = 'i21.view.Country'
+		left join tblSMTransaction			rtt5 on rtt5.intScreenId = rts5.intScreenId and rtt5.intRecordId = rtc5.intCountryID
+		left join tblSMReportTranslation	rtrt5 on rtrt5.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
+
 		WHERE L.intLoadId = @intLoadId
 		) tbl
 END
