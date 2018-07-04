@@ -11,6 +11,7 @@ SELECT	ItemAddOn.intItemAddOnId
 		,ItemAddOn.intItemUOMId
 		,UOM.strUnitMeasure
 		,ItemAddOn.ysnAutoAdd
+		,AddOnComponent.strType 
 FROM	tblICItemAddOn ItemAddOn
 		LEFT JOIN tblICItem Item ON Item.intItemId = ItemAddOn.intItemId
 		LEFT JOIN tblICItem AddOnComponent ON AddOnComponent.intItemId = ItemAddOn.intAddOnItemId
