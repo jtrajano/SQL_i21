@@ -6354,6 +6354,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddAllUserLocationRolePermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
