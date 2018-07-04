@@ -423,6 +423,7 @@ BEGIN
 			WHERE B.strTransactionId = A.strBillId AND A.intBillId = B.intTransactionId AND B.strModuleName = 'Accounts Payable'
 		) GLEntries
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND A.ysnPosted = 1
 		AND GLEntries.intGLDetailId IS NULL
 
 		--ALREADY HAVE PAYMENTS
