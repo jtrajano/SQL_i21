@@ -109,8 +109,6 @@ INSERT INTO @EntriesForInvoice(
 	,[dblCurrencyExchangeRate]
 	,[dblSubCurrencyRate]
 	,[intSalesAccountId]
-	,[strPONumber]
-	,[intDocumentMaintenanceId]
 )
 SELECT
 	 [strTransactionType]					= @strTransactionType
@@ -140,8 +138,6 @@ SELECT
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= NULL
-	,[strPONumber]							= POS.strPONumber
-	,[intDocumentMaintenanceId]				= POS.intDocumentMaintenanceId
 FROM tblARPOS POS 
 INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
 WHERE POS.intPOSId = @intPOSId
@@ -176,8 +172,6 @@ SELECT TOP 1
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
 	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
-	,[strPONumber]							= POS.strPONumber
-	,[intDocumentMaintenanceId]				= POS.intDocumentMaintenanceId
 FROM tblARPOS POS
 OUTER APPLY (
 	SELECT TOP 1 intDiscountAccountId 
