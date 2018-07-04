@@ -1566,6 +1566,7 @@ BEGIN
 						ON ItemLot.strLotNumber = l.strLotNumber
 						AND ItemLot.intLotId = l.intLotId
 			WHERE	ItemLot.strLotNumber IS NOT NULL 
+					AND ItemLot.intLotId IS NOT NULL 
 					AND l.strLotNumber IS NULL 
 
 			IF @valueLotRecordItemId > 0
