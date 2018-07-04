@@ -101,7 +101,7 @@ BEGIN
 		WHERE	B.ysnActive = 0 AND ISNULL( A.ysnRebuild,0) = 0
 		AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal'))
 		INSERT INTO @tbl 
-		SELECT TOP 1 strTransactionId
+		SELECT strTransactionId
 		,CASE 
 				WHEN a.strText  = '' 
 					THEN  PostError.strMessage 
