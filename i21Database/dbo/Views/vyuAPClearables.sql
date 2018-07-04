@@ -113,9 +113,10 @@ SELECT DISTINCT
 	,dblQtyToReceive = ISNULL(ReceiptCharge.dblQuantity,1)
 	,dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblQtyReceived,1) ELSE 0 END 
 	,dblQtyToVoucher = (ISNULL(ReceiptCharge.dblQuantity,0) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-	,dblAmountToVoucher = CASE  WHEN Bill.dblQtyReceived <> 0 THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  ISNULL(Bill.dblDetailTotal,0) AS DECIMAL (18,2)) 
+	,dblAmountToVoucher = CASE  WHEN ReceiptCharge.dblQuantityBilled = 0  THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
+								WHEN Bill.dblQtyReceived <> 0 THEN CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) -  ISNULL(Bill.dblDetailTotal,0) AS DECIMAL (18,2)) 
 								ELSE CAST(((ISNULL(dblAmount,0)) + (ISNULL(dblTax,0))) AS DECIMAL (18,2)) 
-								END 
+								END  
 	, 0 AS dblChargeAmount	
 	, ''AS strContainer
 FROM tblICInventoryReceiptCharge ReceiptCharge
