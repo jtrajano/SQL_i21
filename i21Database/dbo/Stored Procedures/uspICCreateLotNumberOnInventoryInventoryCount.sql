@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateLotNumberOnInventoryInventoryCount]
 	@intTransactionId INT 
 	,@intEntityUserSecurityId INT = NULL 
+	,@ysnPost BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -42,7 +43,6 @@ BEGIN
 			,[intWeightUOMId]
 			,[dblWeight]
 			,[dblGrossWeight]
-			,[dblWeightPerQty]
 			,[dtmExpiryDate]
 			,[strParentLotNumber]
 			,[strParentLotAlias]
@@ -54,16 +54,17 @@ BEGIN
 			,[strLotNumber]				= Detail.strLotNo
 			,[intSubLocationId]			= Detail.intSubLocationId
 			,[intStorageLocationId]		= Detail.intStorageLocationId
-			,[dblQty]					= Detail.dblPhysicalCount
+			,[dblQty]					= CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END * (Detail.dblPhysicalCount - Detail.dblSystemCount)
 			,[strLotAlias]				= Detail.strLotAlias
 			,[intLotStatusId]			= 1
 			,[intOwnershipType]			= 1
 			,[intDetailId]				= Detail.intInventoryCountDetailId
 			,[strTransactionId]			= Header.strCountNo
-			,[intWeightUOMId]           = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.intWeightUOMId ELSE NULL END
-			,[dblWeightQty]             = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty ELSE NULL END
-			,[dblGrossWeight]           = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty ELSE NULL END
-			,[dblWeightPerQty]          = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblPhysicalCount <> 0 THEN Detail.dblWeightQty / Detail.dblPhysicalCount ELSE 0 END
+			,[intWeightUOMId]           = CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblNetQty <> 0 THEN Detail.intWeightUOMId ELSE NULL END
+			,[dblWeightQty]             = CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END *
+											(CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblNetQty <> 0 THEN Detail.dblNetQty - Detail.dblWeightQty ELSE NULL END)
+			,[dblGrossWeight]           = CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END *
+											(CASE WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblNetQty <> 0 THEN Detail.dblNetQty - Detail.dblWeightQty ELSE NULL END)
 			,[dtmExpiryDate]			= dbo.fnICCalculateExpiryDate(Detail.intItemId, Header.dtmCountDate, Header.dtmCountDate)
 			,[strParentLotNumber]		= Detail.strParentLotNo
 			,[strParentLotAlias]		= Detail.strParentLotAlias
@@ -73,7 +74,7 @@ BEGIN
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId
 			AND ItemLocation.intLocationId = Header.intLocationId
 	WHERE Header.intInventoryCountId = @intTransactionId
-		AND Detail.intLotId IS NULL
+		AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblNetQty - Detail.dblWeightQty END <> 0)
 		AND Item.strLotTracking <> 'No'
 END 
 
