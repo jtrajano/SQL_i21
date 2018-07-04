@@ -7,6 +7,7 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	Item.strItemNo,
 	strItemDescription = Item.strDescription,
 	Item.strLotTracking,
+	ysnLotWeightsRequired = CAST((CASE WHEN [dbo].[fnGetItemLotType](Item.intItemId) != 0 THEN ISNULL(Item.ysnLotWeightsRequired, CAST(0 AS BIT)) ELSE 0 END) AS BIT),
 	Item.intCategoryId,
 	strCategory = Category.strCategoryCode,
 	InvCountDetail.intItemLocationId,
@@ -31,12 +32,13 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	strStockUOM = StockUOM.strUnitMeasure,
 	InvCountDetail.intItemUOMId,
 	InvCountDetail.intWeightUOMId,
-	InvCountDetail.dblWeightQty,
+	dblWeightQty = Lot.dblWeight,--InvCountDetail.dblWeightQty,
 	InvCountDetail.dblNetQty,
 	UOM.strUnitMeasure,
 	strWeightUOM = WeightUOM.strUnitMeasure,
 	dblItemUOMConversionFactor = ISNULL(ItemUOM.dblUnitQty, 0.00),
 	dblWeightUOMConversionFactor = ISNULL(ItemWeightUOM.dblUnitQty, 0.00),
+	dblWeightPerQty = ISNULL(Lot.dblWeightPerQty, 0.00),
 	dblConversionFactor = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, 1),
 	dblPhysicalCountStockUnit = dbo.fnICConvertUOMtoStockUnit(InvCountDetail.intItemId, InvCountDetail.intItemUOMId, InvCountDetail.dblPhysicalCount),
 	dblVariance = (CASE WHEN InvCount.ysnCountByLots = 1 THEN ISNULL(InvCountDetail.dblSystemCount, 0) - ISNULL(InvCountDetail.dblPhysicalCount, 0)
@@ -49,7 +51,8 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	CountGroup.strCountGroup,
 	InvCountDetail.dblQtyReceived,
 	InvCountDetail.dblQtySold,
-	InvCountDetail.intSort, InvCountDetail.intConcurrencyId
+	InvCountDetail.intSort, InvCountDetail.intConcurrencyId,
+	ItemLocation.strStorageUnitNo
 FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId

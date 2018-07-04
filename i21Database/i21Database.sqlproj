@@ -6357,6 +6357,8 @@
     <Build Include="dbo\Stored Procedures\uspICGetLotAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddInventoryCount.sql" />
+    <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

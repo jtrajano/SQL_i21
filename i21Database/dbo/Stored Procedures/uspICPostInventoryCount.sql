@@ -206,6 +206,7 @@ BEGIN
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryInventoryCount 
 			@intTransactionId
 			,@intEntityUserSecurityId
+			,@ysnPost
 
 	IF @intCreateUpdateLotError <> 0 GOTO With_Rollback_Exit;
 END
@@ -264,11 +265,17 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId) --CASE Item.strLotTracking WHEN 'No' THEN Detail.intItemUOMId ELSE ItemLot.intItemUOMId END
 			,dtmDate				= Header.dtmCountDate
-			,dblQty					= CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END
+			,dblQty					= CASE 
+										WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) 
+										ELSE Detail.dblNetQty - Detail.dblWeightQty 
+									END
 									--CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblPhysicalCount, 0) ELSE dbo.fnCalculateQtyBetweenUOM(ItemLot.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblPhysicalCount, 0)) END
 									--	- CASE Item.strLotTracking WHEN 'No' THEN ISNULL(Detail.dblSystemCount, 0) ELSE ItemLot.dblQty END
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)))
+			,dblCost				= CASE 
+										WHEN Detail.intWeightUOMId IS NULL THEN dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ISNULL(Detail.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)))
+										ELSE dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblLastCost, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)))
+									END
 									--dbo.fnMultiply(ISNULL(Detail.dblLastCost, ItemPricing.dblLastCost), ItemUOM.dblUnitQty)
 			,0
 			,dblSalesPrice			= 0
@@ -292,8 +299,9 @@ BEGIN
 		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = Detail.intLotId AND Item.strLotTracking <> 'No'
 		LEFT JOIN dbo.tblICItemUOM StockUOM ON Detail.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
 	WHERE Header.intInventoryCountId = @intTransactionId
-				--AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
-			AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END <> 0)
+			--AND Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) <> 0
+			--AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblWeightQty - dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intWeightUOMId, ISNULL(Detail.dblSystemCount, 0)) END <> 0)
+			AND (CASE WHEN Detail.intWeightUOMId IS NULL THEN Detail.dblPhysicalCount - ISNULL(Detail.dblSystemCount, 0) ELSE Detail.dblNetQty - Detail.dblWeightQty END <> 0)
 			AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
 	-----------------------------------
 	--  Call the costing routine 

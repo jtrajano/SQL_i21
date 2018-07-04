@@ -23,6 +23,10 @@ Type the overview for the table here.
 		[ysnExternal] BIT NOT NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[dtmDateCreated] DATETIME NULL,
+		[dtmDateModified] DATETIME NULL,
+		[intCreatedByUserId] INT NULL,
+		[intModifiedByUserId] INT NULL,
 		CONSTRAINT [PK_tblICCountGroup] PRIMARY KEY ([intCountGroupId]), 
 		CONSTRAINT [AK_tblICCountGroup_strCountGroup] UNIQUE ([strCountGroup])
 	)
