@@ -3229,6 +3229,19 @@ BEGIN
 	---------------------------------------------------
 	--				LOG DUPLICATE TRANS				 --
 	---------------------------------------------------
+
+	DECLARE @intItemLocation INT
+
+	SELECT TOP 1 @intItemLocation = intItemLocationId
+	FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @intLocationId
+
+	IF(ISNULL(@intItemLocation,0) = 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Item does not have setup for specified site location.')
+		SET @ysnInvalid = 1
+	END
+
 	DECLARE @ysnVehicleRequire BIT = 0
 
 	IF (@intCardId = 0)
