@@ -29,6 +29,7 @@ SELECT
     SO.dblAmountDue,
     SO.dblBaseAmountDue,
     SO.dblPayment,
+	SO.dblCurrencyExchangeRate,
 
     SO.strTransactionType,
     SO.strType,
