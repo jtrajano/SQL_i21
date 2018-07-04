@@ -65,7 +65,8 @@ BEGIN TRY
 				FO.dblPrice,
 				MM.strUnitMeasure strHedgeUOM,
 				PF.intPriceContractId,
-				PC.strPriceContractNo
+				PC.strPriceContractNo,
+				PD.dblFutures
 
 		FROM	tblCTPriceFixationDetail			PD
 		JOIN	tblCTPriceFixation					PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId	
