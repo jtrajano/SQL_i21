@@ -17,7 +17,8 @@ BEGIN
 		  , @TransactionType		NVARCHAR(50)
 		  , @DistributionHeaderId	INT
 		  , @errorMsg				NVARCHAR(500)
-
+		  , @ysnTaxExempt			BIT
+	SELECT @ysnTaxExempt = ysnTaxExempt FROM vyuARCustomerSearch WHERE intEntityCustomerId = @intSplitEntityId
 	SET @ZeroDecimal	= 0.000000
 	SET @EntityId		= ISNULL((SELECT TOP 1 [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), 0)
 	SET @InvoiceDate	= ISNULL(@InvoiceDate, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GETDATE()))))
@@ -442,7 +443,7 @@ BEGIN
 								,[ysnTaxAdjusted]
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
-								,[ysnTaxExempt]
+								,@ysnTaxExempt
 								,[strNotes] 
 								,1
 							FROM tblARInvoiceDetailTax 
