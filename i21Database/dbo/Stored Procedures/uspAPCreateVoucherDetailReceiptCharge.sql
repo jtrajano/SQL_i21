@@ -216,6 +216,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	--recalculate tax if partial
 	UPDATE voucherDetails
+		--BILL DETAIL TAX SHOULD BE POSSITIVE IF PRICE DOWN AND CHECKOFF 
 		SET voucherDetails.dblTax =( CASE WHEN D.ysnPrice = 1 AND taxes.ysnCheckOffTax = 1 THEN  ISNULL(taxes.dblTax,0) * -1 ELSE  ISNULL(taxes.dblTax,0) END)
 		-- ,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
