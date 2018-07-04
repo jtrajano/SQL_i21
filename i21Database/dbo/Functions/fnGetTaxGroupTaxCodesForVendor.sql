@@ -39,9 +39,13 @@ BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 			,@ItemCategoryId INT
+			,@ItemLocationId INT
+			,@ExpenseAccountId INT
 
 	SET @ZeroDecimal = 0.000000
-	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId 
+	SELECT @ItemCategoryId = [intCategoryId] FROM tblICItem WHERE [intItemId] = @ItemId 
+	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @ShipFromLocationId
+	SELECT @ExpenseAccountId = dbo.fnGetItemGLAccount(@ItemId, @ItemLocationId, 'Other Charge Expense')
 
 	-- IF (ISNULL(@UOMId,0) = 0)
 	-- 	SET @UOMId = [dbo].[fnGetItemStockUOM](@ItemId) 
@@ -59,7 +63,7 @@ BEGIN
 		,[dblBaseRate]					= R.[dblBaseRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
-		,[intTaxAccountId]				= TC.[intPurchaseTaxAccountId]
+		,[intTaxAccountId]				= CASE WHEN TC.[ysnExpenseAccountOverride] = 1 THEN ISNULL(@ExpenseAccountId,TC.[intPurchaseTaxAccountId]) ELSE TC.[intPurchaseTaxAccountId] END
 		,[ysnSeparateOnInvoice]			= 0
 		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
 		,[strTaxCode]					= TC.[strTaxCode]
