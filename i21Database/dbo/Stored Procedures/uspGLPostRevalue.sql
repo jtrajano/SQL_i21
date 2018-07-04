@@ -8,6 +8,7 @@ DECLARE @PostGLEntries RecapTableType
 DECLARE @ReversePostGLEntries RecapTableType
 DECLARE @strPostBatchId NVARCHAR(100) = ''
 DECLARE @strReversePostBatchId NVARCHAR(100) = ''
+DECLARE @strMessage NVARCHAR(100)
 
 
 		DECLARE @errorNum INT
@@ -17,8 +18,9 @@ DECLARE @strReversePostBatchId NVARCHAR(100) = ''
 		IF EXISTS (SELECT TOP 1 1  FROM dbo.fnGLValidateRevaluePeriod(@intConsolidationId))
 		BEGIN
 			DECLARE @errorCode INT , @strModule  NVARCHAR(50), @strStatus NVARCHAR(10)
-			SELECT TOP 1 @errorCode = errorCode, @strModule = strModule, @strStatus = strStatus FROM dbo.fnGLValidateRevaluePeriod(@intConsolidationId)
-			RAISERROR (@errorCode,11,1,@strModule, @strStatus)
+			SELECT TOP 1 @strMessage = REPLACE(REPLACE(strMessage,'{0}',strModule), '{1}',strStatus) FROM dbo.fnGLValidateRevaluePeriod(@intConsolidationId) A
+			JOIN  dbo.[fnGLGetGLEntriesErrorMessage]() B ON A.errorCode = B.intErrorCode
+			RAISERROR (@strMessage,11,1)
 			RETURN
 		END
 
