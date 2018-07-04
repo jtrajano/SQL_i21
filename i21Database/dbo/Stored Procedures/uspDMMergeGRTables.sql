@@ -252,7 +252,7 @@ BEGIN
 
     SET @SQLString = N'MERGE tblGRDiscountId AS Target
         USING (SELECT * FROM REMOTEDBSERVER.[repDB].[dbo].[tblGRDiscountId]) AS Source
-        ON (Target.intDiscountCrossReferenceId = Source.intDiscountCrossReferenceId)
+        ON (Target.intDiscountId = Source.intDiscountId)
         WHEN MATCHED THEN
             UPDATE SET ' + @Columns + '
 		WHEN NOT MATCHED BY TARGET THEN
