@@ -621,11 +621,13 @@ END
 ELSE
 	BEGIN
 
+		ROLLBACK TRANSACTION;
 		--RECAP
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLPostRecap
-			WHERE intTransactionId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds);
+		WHERE strBatchId = @batchIdUsed
+		--WHERE intTransactionId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds);
 
 		INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
@@ -694,6 +696,8 @@ ELSE
 		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) CreditForeign
 		LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
+
+		GOTO DONE;
 	END
 
 IF(ISNULL(@recap,0) = 0)
@@ -722,8 +726,9 @@ END
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpPayableInvalidData')) DROP TABLE #tmpPayableInvalidData
 
-DONE:
 IF @transCount = 0 COMMIT TRANSACTION
+
+DONE:
 SET @success = 1
 SET @successfulCount = @totalRecords
 
