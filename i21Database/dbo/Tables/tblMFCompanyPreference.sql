@@ -63,6 +63,7 @@
 	ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnChangeLotStatusOnLotMoveByStorageLocationRestrictionType] DEFAULT 0,
 	ysnSendEDIOnRepost Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnSendEDIOnRepost] DEFAULT 1,
 	ysnGenerateTaskOnCreatePickOrder Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnGenerateTaskOnCreatePickOrder] DEFAULT 0,
-	ysnLotSnapshotByFiscalMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLotSnapshotByFiscalMonth] DEFAULT 1
+	ysnLotSnapshotByFiscalMonth BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnLotSnapshotByFiscalMonth] DEFAULT 1,
+	ysnIncludeConsumptionByLocationInPickOrder BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnIncludeConsumptionByLocationInPickOrder] DEFAULT 1,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
