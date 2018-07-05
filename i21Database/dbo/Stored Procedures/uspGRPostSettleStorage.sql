@@ -429,12 +429,21 @@ BEGIN TRY
 					,intContractHeaderId  = NULL
 					,intContractDetailId  = NULL
 					,dblUnits             = SST.dblUnits
-					,dblCashPrice         = (ISNULL(dblFeesPaid, 0) - ISNULL(dblFeesDue, 0))
+					,dblCashPrice         = CS.dblFeesDue
 					,intItemId            = @FeeItemId
 					,intItemType          = 4
 					,IsProcessed          = 0
 				FROM tblGRCustomerStorage CS
-				JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId AND SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
+				INNER JOIN tblGRSettleStorageTicket SST 
+					ON 	SST.intCustomerStorageId = CS.intCustomerStorageId 
+						AND SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
+				INNER JOIN tblSCTicket SC 
+					ON 	SC.intTicketId = CS.intTicketId 
+						OR SC.intDeliverySheetId = CS.intDeliverySheetId
+				INNER JOIN tblSCScaleSetup SCSetup 
+					ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+				INNER JOIN tblICItem IC 
+					ON IC.intItemId = SCSetup.intDefaultFeeItemId
 			END
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
