@@ -1048,7 +1048,7 @@ BEGIN TRY
 						FROM @FinalShipmentStagingTable
 						)
 				BEGIN
-					EXEC dbo.uspICAddItemShipment @Entries = @FinalShipmentStagingTable
+					EXEC dbo.uspICAddItemShipment @Items = @FinalShipmentStagingTable
 						,@Charges = @OtherCharges
 						,@intUserId = @intUserId;
 
