@@ -4,15 +4,27 @@
 @intCountRows INT OUTPUT
 AS
 BEGIN
+	
+	--SET NOCOUNT ON
+    SET XACT_ABORT ON
+
 	BEGIN TRY
 		
 		--------------------------------------------------------------------------------------------  
 		-- Create Save Point.  
 		--------------------------------------------------------------------------------------------    
 		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutRadiantMSM' + CAST(NEWID() AS NVARCHAR(100)); 
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName --> Save point
+		DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutRadiantMSM' + CAST(NEWID() AS NVARCHAR(100)); 
+		DECLARE @intTransactionCount INT = @@TRANCOUNT;
+
+		IF(@intTransactionCount = 0)
+			BEGIN
+				BEGIN TRAN @SavedPointTransaction
+			END
+		ELSE
+			BEGIN
+				SAVE TRAN @SavedPointTransaction --> Save point
+			END
 		--------------------------------------------------------------------------------------------  
 		-- END Create Save Point.  
 		-------------------------------------------------------------------------------------------- 
@@ -26,7 +38,7 @@ BEGIN
 	 --   , intRegisterCount = ISNULL(CAST(chk.MiscellaneousSummaryCount as int) ,0)
 		--, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
 	 --   FROM #tempCheckoutInsert chk
-	 --   JOIN tblSTPaymentOption PO ON PO.intRegisterMop = chk.TenderSubCode
+	 --   JOIN tblSTPaymentOption PO ON PO.strRegisterMop = chk.TenderSubCode
 	 --   JOIN tblSTStore S ON S.intStoreId = PO.intStoreId
 	 --   WHERE S.intStoreId = @intStoreId AND intCheckoutId = @intCheckoutId AND tblSTCheckoutPaymentOptions.intPaymentOptionId = PO.intPaymentOptionId
        
@@ -43,7 +55,7 @@ BEGIN
 				FROM #tempCheckoutInsert
 				GROUP BY TenderSubCode
 			 ) s ON ST.TenderSubCode = s.TenderSubCode
-		JOIN tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+		JOIN tblSTPaymentOption PO ON PO.strRegisterMop = ST.TenderSubCode
 		JOIN tblSTStore Store ON Store.intStoreId = PO.intStoreId
 		JOIN tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
 		WHERE Store.intStoreId = @intStoreId AND ST.TenderSubCode <> ''
@@ -63,7 +75,7 @@ BEGIN
 		, dblAmount = ISNULL(CAST(chk.MiscellaneousSummaryAmount as decimal(18,6)) ,0)
 		FROM #tempCheckoutInsert chk
 		WHERE intCheckoutId = @intCheckoutId AND chk.MiscellaneousSummaryCode = 19 AND chk.MiscellaneousSummarySubCodeModifier = 1550
-		AND intPaymentOptionId IN (SELECT intPaymentOptionId FROM dbo.tblSTPaymentOption Where intRegisterMop = MiscellaneousSummarySubCodeModifier )
+		AND intPaymentOptionId IN (SELECT intPaymentOptionId FROM dbo.tblSTPaymentOption Where strRegisterMop = MiscellaneousSummarySubCodeModifier )
 
        
 		IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
@@ -142,7 +154,7 @@ BEGIN
 		(SELECT 
 			SUM(CAST(TenderTransactionsCount as int)) as TenderTransactionsCount
 		FROM #tempCheckoutInsert ST
-		JOIN dbo.tblSTPaymentOption PO ON PO.intRegisterMop = ST.TenderSubCode
+		JOIN dbo.tblSTPaymentOption PO ON PO.strRegisterMop = ST.TenderSubCode
 		JOIN dbo.tblSTStore Store ON Store.intStoreId = PO.intStoreId
 		JOIN dbo.tblSTCheckoutPaymentOptions CPO ON CPO.intPaymentOptionId = PO.intPaymentOptionId
 		WHERE ST.TenderSubCode <> ''
@@ -220,18 +232,27 @@ BEGIN
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'
 
+		PRINT 'SUCCESS'
+
 		-- IF SUCCESS Commit Transaction
-		COMMIT TRAN @TransactionName
+		IF(@intTransactionCount = 0)
+			BEGIN
+				COMMIT TRANSACTION @SavedPointTransaction
+			END
 
 	END TRY
 
 	BEGIN CATCH
+        SET @intCountRows = 0
+        SET @strStatusMsg = ERROR_MESSAGE()
+
+		PRINT ERROR_MESSAGE()
+
 		-- IF HAS Error Rollback Transaction
-		ROLLBACK TRAN @TransactionName	
-
-		SET @intCountRows = 0
-		SET @strStatusMsg = ERROR_MESSAGE()
-
-		COMMIT TRAN @TransactionName
-	END CATCH
+		IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0)) 
+			BEGIN
+				ROLLBACK TRANSACTION @SavedPointTransaction;
+				--THROW;
+			END
+    END CATCH
 END
