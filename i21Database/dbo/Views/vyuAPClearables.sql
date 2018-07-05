@@ -15,7 +15,7 @@ SELECT	DISTINCT
 			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
 			,dblAmountDue = ISNULL(dblItemsPayable + dblTaxesPayable,0)
 			,dblVoucherAmount = CASE 
-								WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
+								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN
 								ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE dblVoucherLineTotal + dblVoucherTax END),0)
 								ELSE 0 END    
 			,dblWithheld = 0
@@ -29,7 +29,7 @@ SELECT	DISTINCT
 			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
 			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 			,dblQtyToReceive = dblReceiptQty
-			,dblQtyVouchered = CASE WHEN bill.ysnPosted = 1 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
+			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
 			,dblQtyToVoucher = dblOpenQty
 			,dblAmountToVoucher = CASE 
 									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax) - ISNULL((totalVouchered.dblTotal),0),0)
@@ -177,7 +177,7 @@ SELECT DISTINCT
 		THEN Bill.dblDetailTotal 
 		ELSE Bill.dblDetailTotal 
 	  END,0) AS dblAmountDue 
-	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+	, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) ELSE 0 END  
 	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
