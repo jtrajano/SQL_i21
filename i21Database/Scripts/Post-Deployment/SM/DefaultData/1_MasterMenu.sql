@@ -1,4 +1,13 @@
 ﻿GO
+    /* UPDATE ENTITY CREDENTIAL CONCURRENCY */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo LIKE '18.3%')
+	BEGIN
+		EXEC uspSMIncreaseECConcurrency 0
+		
+		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
+		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
+	END
+GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = 'Reporting.view.ReportManager?group=Sales&report=SalesTrendComparativeReport&direct=true')
 	BEGIN
