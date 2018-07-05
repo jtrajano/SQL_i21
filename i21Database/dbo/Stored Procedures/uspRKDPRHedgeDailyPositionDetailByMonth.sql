@@ -20,7 +20,7 @@ BEGIN
 		SELECT @strPurchaseSales='Purchase'
 	END
 END
-
+SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @strCommodityCode NVARCHAR(50)
 
 	 DECLARE @Commodity AS TABLE 
