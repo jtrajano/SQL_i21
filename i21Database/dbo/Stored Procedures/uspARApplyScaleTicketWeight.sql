@@ -62,7 +62,7 @@ BEGIN
 			UPDATE ID 
 			SET ID.dblQtyShipped		= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
 											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
-											WHEN ISNULL(ADDON.intParentItemId, 0) <> 0 AND ITEM.ysnUseWeighScales = 0 THEN dbo.fnRoundBanker(ID.dblQtyOrdered * (ADDON.dblParentQtyOrdered / @dblTotalOrderedQty), 2) --FOR ADD ON ITEMS
+											--WHEN ID.ysnAddonParent <> 0 AND ITEM.ysnUseWeighScales = 0 THEN dbo.fnRoundBanker(ID.dblQtyOrdered * (ADDON.dblParentQtyOrdered / @dblTotalOrderedQty), 2) --FOR ADD ON ITEMS
 											ELSE ID.dblQtyShipped --REGULAR ITEMS
 										END
 				, ID.intItemUOMId		= CASE WHEN ITEM.ysnUseWeighScales = 1 THEN @intScaleUOMId ELSE ID.intItemUOMId END
@@ -87,7 +87,7 @@ BEGIN
 				CROSS APPLY (
 					SELECT TOP 1 dblQtyOrdered
 					FROM tblARInvoiceDetail
-					WHERE intInvoiceDetailId = @intNewInvoiceId
+					WHERE intInvoiceId = @intNewInvoiceId
 						AND intItemId = AO.intItemId
 				) ADDONPARENT
 			) ADDON ON ADDON.intCompanyLocationId = INVOICE.intCompanyLocationId
