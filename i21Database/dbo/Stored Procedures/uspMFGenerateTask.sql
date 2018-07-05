@@ -580,18 +580,8 @@ BEGIN TRY
 					AND L.dblQty > 0
 					AND LS.strPrimaryStatus = 'Active'
 					AND ISNULL(L.dtmExpiryDate - @intReceivedLife, @dtmCurrentDateTime) >= @dtmCurrentDateTime
-					AND (
-						(
-							@ysnPickByLotCode = 0
-							AND L.dtmDateCreated BETWEEN @dtmDateCreated1
-								AND @dtmDateCreated2
-							)
-						OR (
-							@ysnPickByLotCode = 1
-							AND Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits) BETWEEN @intLotCode1
-								AND @intLotCode2
-							)
-						)
+					AND L.dtmDateCreated BETWEEN @dtmDateCreated1
+						AND @dtmDateCreated2
 					AND ISNULL(L.intLotId, 0) = ISNULL((
 							CASE 
 								WHEN @intLineItemLotId IS NULL
