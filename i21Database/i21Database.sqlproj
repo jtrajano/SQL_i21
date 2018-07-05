@@ -6783,7 +6783,8 @@
     <Build Include="dbo\Stored Procedures\uspICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Tables\tblRKMatchDerivativesHistoryForOption.sql" />
     <Build Include="dbo\Views\vyuSTStorePumpItem.sql" />
-	<Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
+    <Build Include="dbo\Views\vyuSTItemCategoryLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

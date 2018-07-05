@@ -15,21 +15,26 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF 
 
 BEGIN TRY
-	
 	--------------------------------------------------------------------------------------------  
-	-- Initialize   
+	-- Create Save Point.  
 	--------------------------------------------------------------------------------------------    
 	-- Create a unique transaction name. 
-	DECLARE @TransactionName AS VARCHAR(500) = 'InventoryCostPosting' + CAST(NEWID() AS NVARCHAR(100));
+	DECLARE @SavedPointTransaction AS VARCHAR(500) = 'MarkUpMarkDownPosting' + CAST(NEWID() AS NVARCHAR(100)); 
+	DECLARE @intTransactionCount INT = @@TRANCOUNT;
 
+	IF(@intTransactionCount = 0)
+		BEGIN
+			BEGIN TRAN @SavedPointTransaction
+		END
+	ELSE
+		BEGIN
+			SAVE TRAN @SavedPointTransaction --> Save point
+		END
 	--------------------------------------------------------------------------------------------  
-	-- Begin a transaction and immediately create a save point 
-	--------------------------------------------------------------------------------------------  
-	BEGIN TRAN @TransactionName
-	SAVE TRAN @TransactionName -- Save point
-	----------------------------------
-	-- DECLARE VARIABLES
-	----------------------------------
+	-- END Create Save Point.  
+	-------------------------------------------------------------------------------------------- 
+
+
 	DECLARE @GLEntries AS RecapTableType 
 
 	SET @strStatusMsg = ''
@@ -106,97 +111,99 @@ BEGIN TRY
 		[intLocationId] INT
 	)
 
-	IF(@isRequiredGLEntries = CAST(1 AS BIT))
-		BEGIN
-			IF(@strType = 'Department Level')
-				BEGIN
-					INSERT INTO @tblTempItemCheck
-					(
-						intCategoryId,
-						strCategoryCode,
-						ysnHasItem
-					)
-					SELECT DISTINCT
-						MD.intCategoryId,
-						C.strCategoryCode,
-						CASE
-							WHEN I.intItemId IS NOT NULL THEN CAST(1 AS BIT) 
-							ELSE CAST(0 AS BIT) 
-						END as strResult
-					FROM tblSTMarkUpDownDetail MD
-					JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-					JOIN tblICItem I ON MD.intCategoryId = I.intCategoryId
-					JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-					WHERE intMarkUpDownId = @intMarkUpDownId
-					AND IL.intCostingMethod = 6
-					AND IL.intIssueUOMId IS NOT NULL
-					AND IL.intLocationId = @intLocationId
+	--IF(@isRequiredGLEntries = CAST(1 AS BIT))
+	--	BEGIN
+	--		IF(@strType = 'Department Level')
+	--			BEGIN
+	--				INSERT INTO @tblTempItemCheck
+	--				(
+	--					intCategoryId,
+	--					strCategoryCode,
+	--					ysnHasItem
+	--				)
+	--				SELECT DISTINCT
+	--					MD.intCategoryId,
+	--					C.strCategoryCode,
+	--					CASE
+	--						WHEN I.intItemId IS NOT NULL THEN CAST(1 AS BIT) 
+	--						ELSE CAST(0 AS BIT) 
+	--					END as strResult
+	--				FROM tblSTMarkUpDownDetail MD
+	--				JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+	--				JOIN tblICItem I ON MD.intCategoryId = I.intCategoryId
+	--				JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+	--				WHERE intMarkUpDownId = @intMarkUpDownId
+	--				AND IL.intCostingMethod = 6
+	--				AND IL.intIssueUOMId IS NOT NULL
+	--				AND IL.intLocationId = @intLocationId
 
-					IF NOT EXISTS(SELECT * FROM @tblTempItemCheck)
-						BEGIN
-							PRINT 'NO Item with same Category or No Item that has Category Costing Method and has Sale UOM.'
+	--				IF NOT EXISTS(SELECT * FROM @tblTempItemCheck)
+	--					BEGIN
+	--						PRINT 'NO Item with same Category or No Item that has Category Costing Method and has Sale UOM.'
 
-							SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
-							FROM tblSTMarkUpDownDetail MD
-							JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-							WHERE MD.intMarkUpDownId = @intMarkUpDownId
+	--						SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
+	--						FROM tblSTMarkUpDownDetail MD
+	--						JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+	--						WHERE MD.intMarkUpDownId = @intMarkUpDownId
 
-							ROLLBACK TRAN @TransactionName
-							COMMIT TRAN @TransactionName
-							SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item or no Category Costing Method and Sale UOM.'
-							RETURN
-						END
-					ELSE IF EXISTS(SELECT * FROM @tblTempItemCheck)
-						BEGIN
-							PRINT 'Has Item with same Category and Has Item that has Category Costing Method and has Sale UOM.'
+	--						ROLLBACK TRAN @TransactionName
+	--						COMMIT TRAN @TransactionName
+	--						SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item or no Category Costing Method and Sale UOM.'
+	--						RETURN
+	--					END
+	--				ELSE IF EXISTS(SELECT * FROM @tblTempItemCheck)
+	--					BEGIN
+	--						PRINT 'Has Item with same Category and Has Item that has Category Costing Method and has Sale UOM.'
 
-							INSERT INTO @tblTempItemValuationCheck
-							(
-								intCategoryId,
-								strCategoryCode,
-								ysnHasItemValuation,
-								ysnHasItemCosting,
-								intLocationId
-							)
-							SELECT DISTINCT
-								MD.intCategoryId,
-								C.strCategoryCode,
-								CASE
-									WHEN IV.intCategoryId IS NOT NULL THEN CAST(1 AS BIT) 
-									ELSE CAST(0 AS BIT) 
-								END as ysnHasItemValuation,
-								CASE
-									WHEN IV.dblEndingCost > 0 THEN CAST(1 AS BIT) 
-									ELSE CAST(0 AS BIT) 
-								END as ysnHasItemCosting,
-							IV.intLocationId
-							FROM tblSTMarkUpDownDetail MD
-							JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-							JOIN tblICRetailValuation IV ON MD.intCategoryId = IV.intCategoryId
-							WHERE intMarkUpDownId = @intMarkUpDownId
-							AND IV.intLocationId = @intLocationId
+	--						INSERT INTO @tblTempItemValuationCheck
+	--						(
+	--							intCategoryId,
+	--							strCategoryCode,
+	--							ysnHasItemValuation,
+	--							ysnHasItemCosting,
+	--							intLocationId
+	--						)
+	--						SELECT DISTINCT
+	--							MD.intCategoryId,
+	--							C.strCategoryCode,
+	--							CASE
+	--								WHEN IV.intCategoryId IS NOT NULL THEN CAST(1 AS BIT) 
+	--								ELSE CAST(0 AS BIT) 
+	--							END as ysnHasItemValuation,
+	--							CASE
+	--								WHEN IV.dblEndingCost > 0 THEN CAST(1 AS BIT) 
+	--								ELSE CAST(0 AS BIT) 
+	--							END as ysnHasItemCosting,
+	--						IV.intLocationId
+	--						FROM tblSTMarkUpDownDetail MD
+	--						JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+	--						JOIN tblICRetailValuation IV ON MD.intCategoryId = IV.intCategoryId
+	--						WHERE intMarkUpDownId = @intMarkUpDownId
+	--						AND IV.intLocationId = @intLocationId
 
-							IF NOT EXISTS(SELECT * FROM @tblTempItemValuationCheck)
-								BEGIN
-									PRINT 'NO Item Valuation or No Item Costing.'
+	--						IF NOT EXISTS(SELECT * FROM @tblTempItemValuationCheck)
+	--							BEGIN
+	--								PRINT 'NO Item Valuation or No Item Costing.'
 
-									SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
-									FROM tblSTMarkUpDownDetail MD
-									JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
-									WHERE MD.intMarkUpDownId = @intMarkUpDownId
+	--								SELECT @strCategoryCode = @strCategoryCode + C.strCategoryCode + ', '
+	--								FROM tblSTMarkUpDownDetail MD
+	--								JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
+	--								WHERE MD.intMarkUpDownId = @intMarkUpDownId
 
-									ROLLBACK TRAN @TransactionName
-									COMMIT TRAN @TransactionName
-									SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation or No Item Costing.'
-									RETURN
-								END
-						END
-					END
-				END		
-	-- END VALIDATE @isRequiredGLEntries = true
+	--								ROLLBACK TRAN @TransactionName
+	--								COMMIT TRAN @TransactionName
+	--								SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation or No Item Costing.'
+	--								RETURN
+	--							END
+	--					END
+	--				END
+	--			END		
+	---- END VALIDATE @isRequiredGLEntries = true
 
 
 	-- Check if Post or UnPost
+
+
 	IF(@ysnPost = CAST(1 AS BIT))
 		BEGIN
 			IF(@strAdjustmentType = @AdjustmentType_Regular)
@@ -248,12 +255,14 @@ BEGIN TRY
 								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
 								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
 								,dblUnitRetail			= NULL
+
 								-- Department Manage
 								,intCategoryId			= NULL
 								,dblAdjustCostValue		= NULL
 								,dblAdjustRetailValue	= NULL -- -200 -- $$$ value to adjust the retail value.
 						FROM tblSTMarkUpDownDetail MUD
-						INNER JOIN tblSTMarkUpDown MU ON MU.intMarkUpDownId = MUD.intMarkUpDownId
+						INNER JOIN tblSTMarkUpDown MU 
+							ON MU.intMarkUpDownId = MUD.intMarkUpDownId
 						--If Item Manage, query item fields that are needed
 						INNER JOIN (
 							tblICItem i INNER JOIN tblICItemLocation il
@@ -263,8 +272,10 @@ BEGIN TRY
 							INNER JOIN tblICItemPricing ItemPricing
 								ON ItemPricing.intItemId = i.intItemId AND ItemPricing.intItemLocationId = il.intItemLocationId
 						) ON i.intItemId = MUD.intItemId
-						WHERE MU.intMarkUpDownId = @intMarkUpDownId AND MU.strType = @MarkUpType_ItemLevel
+						WHERE MU.intMarkUpDownId = @intMarkUpDownId 
+						AND MU.strType = @MarkUpType_ItemLevel
 						UNION ALL
+
 						-- Query all the MarkUp/Down for Item & Category managed
 						SELECT		
 								intItemId				= ISNULL(i.intItemId, CategoryItem.intItemId)
@@ -445,8 +456,12 @@ BEGIN TRY
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
 				END
 
-			
-			COMMIT TRAN @TransactionName;
+			---- COMMIT HERE Note sure
+			--IF(@intTransactionCount = 0)
+			--	BEGIN
+			--		COMMIT TRANSACTION @SavedPointTransaction
+			--	END
+
 			-- Generate New Batch Id
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 
@@ -460,7 +475,14 @@ BEGIN TRY
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@intCurrentUserId
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				--IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				IF (@intReturnValue < 0)
+					BEGIN
+						IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+							BEGIN 
+								ROLLBACK TRANSACTION @SavedPointTransaction;
+							END
+					END
 			END
 
 			-- NOTE: 
@@ -513,7 +535,14 @@ BEGIN TRY
 						,@intCurrentUserId
 						,@strAdjustmentType
 
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					--IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					IF (@intReturnValue < 0)
+						BEGIN
+							IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+								BEGIN 
+									ROLLBACK TRANSACTION @SavedPointTransaction;
+								END
+						END
 				END
 
 
@@ -577,7 +606,14 @@ BEGIN TRY
 						,@intCurrentUserId
 						,0
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				--IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				IF (@intReturnValue < 0) 
+					BEGIN
+						IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+						BEGIN 
+							ROLLBACK TRANSACTION @SavedPointTransaction;
+						END
+					END
 
 				-- Update Mark Up/Down
 				Update tblSTMarkUpDown
@@ -594,8 +630,22 @@ BEGIN TRY
 	---- Check if recap
 	IF(@ysnRecap = CAST(1 AS BIT) AND @isRequiredGLEntries = 1)
 		BEGIN
-			--IF @@TRANCOUNT > 0 
-			ROLLBACK TRAN @TransactionName
+
+			---------------------------------------------------------------------------------------
+			----------- MANIPULATE TRANSACTION ----------------------------------------------------
+			---------------------------------------------------------------------------------------
+			-- ROLLBACK TRANSACTION
+			IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+				BEGIN 
+					ROLLBACK TRANSACTION @SavedPointTransaction;
+				END
+
+			-- BEGIN TRANSACTION to COMMIT
+			BEGIN TRAN @SavedPointTransaction
+			---------------------------------------------------------------------------------------
+			--------- END MANIPULATE TRANSACTION --------------------------------------------------
+			---------------------------------------------------------------------------------------
+
 
 			--SET @strBatchId = NEWID();
 			IF EXISTS(SELECT * FROM @GLEntries)
@@ -605,14 +655,16 @@ BEGIN TRY
 					@GLEntries
 					,@intCurrentUserId
 			END
-		
 			
-			COMMIT TRAN @TransactionName
-			GOTO Post_Exit	
+			-- Commit Transaction
+			IF(@intTransactionCount = 0)
+				BEGIN
+					COMMIT TRANSACTION @SavedPointTransaction
+					GOTO Post_Exit;
+				END	
 		END
 	ELSE
-		BEGIN--IF @@TRANCOUNT > 0 
-			
+		BEGIN
 			IF @isRequiredGLEntries = 1
 			BEGIN 
 				IF(EXISTS(SELECT * FROM @GLEntries))
@@ -620,9 +672,13 @@ BEGIN TRY
 					EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 				END
 			END		
-			
-			--COMMIT TRAN @TransactionName
-			GOTO Post_Exit;
+
+			-- IF SUCCESS Commit Transaction
+			IF(@intTransactionCount = 0)
+				BEGIN
+					COMMIT TRANSACTION @SavedPointTransaction
+					GOTO Post_Exit;
+				END
 		END
 END TRY
 
@@ -631,10 +687,12 @@ BEGIN CATCH
 	GOTO With_Rollback_Exit;
 END CATCH
 
+
 With_Rollback_Exit:
-IF @@TRANCOUNT > 1 
-BEGIN 
-	ROLLBACK TRAN @TransactionName
-	--COMMIT TRAN @TransactionName
-END
+IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+	BEGIN 
+		ROLLBACK TRANSACTION @SavedPointTransaction;
+	END
+
+--EXIT here
 Post_Exit:
