@@ -107,8 +107,6 @@ LEFT OUTER JOIN
 	tblSOSalesOrder SO
 		ON SO.strSalesOrderNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
-		AND ICISITEM.intOwnershipType = 1
-
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
