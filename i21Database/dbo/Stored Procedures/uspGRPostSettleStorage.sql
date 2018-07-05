@@ -50,7 +50,7 @@ BEGIN TRY
 	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
 	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
 	DECLARE @dblTicketStorageDue DECIMAL(24, 10)
-	DECLARE @FeeItemId INT
+	--DECLARE @FeeItemId INT
 	DECLARE @strFeeItem NVARCHAR(40)
 	DECLARE @intCurrencyId INT
 	DECLARE @intDefaultCurrencyId INT
@@ -254,12 +254,12 @@ BEGIN TRY
 		FROM tblSMUserSecurity
 		WHERE [intEntityId] = @intCreatedUserId
 
-		SELECT @FeeItemId = intItemId
-		FROM tblGRCompanyPreference
+		-- SELECT @FeeItemId = intItemId
+		-- FROM tblGRCompanyPreference
 
-		SELECT @strFeeItem = strItemNo
-		FROM tblICItem
-		WHERE intItemId = @FeeItemId
+		-- SELECT @strFeeItem = strItemNo
+		-- FROM tblICItem
+		-- WHERE intItemId = @FeeItemId
 
 		SELECT @dblUOMQty = dblUnitQty
 			,@intUnitMeasureId = intUnitMeasureId
@@ -430,7 +430,7 @@ BEGIN TRY
 					,intContractDetailId  = NULL
 					,dblUnits             = SST.dblUnits
 					,dblCashPrice         = CS.dblFeesDue
-					,intItemId            = @FeeItemId
+					,intItemId            = IC.intItemId
 					,intItemType          = 4
 					,IsProcessed          = 0
 				FROM tblGRCustomerStorage CS
