@@ -8,7 +8,8 @@ SELECT	DISTINCT
 			,strDescription = C.strCommodityCode 
 			,strItem = IE.strItemNo 
 			,intTicketId = ISNULL(SC.intTicketId, Scale.intTicketId)
-			,strTicketNumber = ISNULL(SC.strTicketNumber, Scale.strTicketNumber)
+			,strTicketNumber = 	CASE WHEN (IR.intSourceType = 5) --Delivery Sheet
+								THEN DS.strDeliverySheetNumber ELSE  ISNULL(SC.strTicketNumber, Scale.strTicketNumber) END
 			,APB.strVendorOrderNumber
 			--,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL)),'N/A')
 			,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, EL.strCity, EL.strState, NULL, NULL, NULL)),'N/A')
@@ -17,7 +18,7 @@ SELECT	DISTINCT
 			,PostDate = APB.dtmBillDate
 			,PaymentDate = Payment.dtmDatePaid
 			,ExemptUnits = APBD.dblQtyReceived 
-			,APBD.dblTotal --AP-4155
+			,dblTotal = APBD.dblTotal + APBD.dblTax
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
@@ -47,6 +48,8 @@ SELECT	DISTINCT
 				ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN dbo.tblEMEntityLocation EL 
 				ON  EL.intEntityLocationId = APB.intShipFromId --AND EL.ysnDefaultLocation = 1
+			LEFT JOIN tblSCDeliverySheet DS
+				ON DS.intDeliverySheetId = IRE.intSourceId
 			OUTER APPLY (
 			SELECT TOP 1 
 				SC.intTicketId
