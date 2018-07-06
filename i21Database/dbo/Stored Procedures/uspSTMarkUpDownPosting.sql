@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspSTMarkUpDownPosting]
+﻿CREATE PROCEDURE [dbo].[uspSTMarkUpDownPosting]
 	@intMarkUpDownId INT
 	,@intCurrentUserId INT
 	,@ysnRecap BIT
