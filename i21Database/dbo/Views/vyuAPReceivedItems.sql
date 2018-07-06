@@ -637,7 +637,7 @@ FROM
 			
 	--) Qty
 	WHERE  
-		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty <> 0)) AND A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)
+		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty != 0)) AND A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)
 	UNION ALL
 	SELECT
 	DISTINCT  
