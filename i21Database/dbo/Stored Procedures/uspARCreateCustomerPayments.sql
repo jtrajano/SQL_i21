@@ -50,6 +50,8 @@ INSERT INTO @PaymentsToGenerate (
 	,[intBankAccountId]
 	,[intWriteOffAccountId]
 	,[dblAmountPaid]
+	,[intExchangeRateTypeId]
+	,[dblExchangeRate]
 	,[strPaymentOriginalId]
 	,[ysnUseOriginalIdAsPaymentNumber]
 	,[ysnApplytoBudget]
@@ -95,6 +97,8 @@ SELECT
 	,[intBankAccountId]						= [intBankAccountId]
 	,[intWriteOffAccountId]					= [intWriteOffAccountId]
 	,[dblAmountPaid]						= [dblAmountPaid]
+	,[intExchangeRateTypeId]				= [intExchangeRateTypeId]
+	,[dblExchangeRate]						= [dblExchangeRate]
 	,[strPaymentOriginalId]					= [strPaymentOriginalId]
 	,[ysnUseOriginalIdAsPaymentNumber]		= [ysnUseOriginalIdAsPaymentNumber]
 	,[ysnApplytoBudget]						= [ysnApplytoBudget]
@@ -389,54 +393,79 @@ SELECT
 FROM
 	@InvalidRecords
 
+UPDATE PTG
+SET
+	 PTG.[intEntityCustomerId]		= ARC.[intEntityId]
+	,PTG.[intCurrencyId]			= ISNULL(PTG.[intCurrencyId], ISNULL(ARC.[intCurrencyId], @DefaultCurrency))	
+	,PTG.[dtmDatePaid]				= ISNULL(PTG.[dtmDatePaid], @DateNow)
+	,PTG.[dblAmountPaid]			= ISNULL(PTG.[dblAmountPaid], @ZeroDecimal)
+	,PTG.[dblBaseAmountPaid]		= [dbo].fnRoundBanker((ISNULL(PTG.[dblAmountPaid], @ZeroDecimal) * (CASE WHEN ISNULL(PTG.[dblExchangeRate],@ZeroDecimal) = @ZeroDecimal THEN CER.[dblCurrencyExchangeRate] ELSE PTG.[dblExchangeRate] END)), [dbo].[fnARGetDefaultDecimal]())	
+	,PTG.[dblBalance]				= ARC.[dblARBalance]
+	,PTG.[intExchangeRateTypeId]	= ISNULL(PTG.[intExchangeRateTypeId], CER.[intCurrencyExchangeRateTypeId])
+	,PTG.[dblExchangeRate]			= (CASE WHEN ISNULL(PTG.[dblExchangeRate],@ZeroDecimal) = @ZeroDecimal THEN CER.[dblCurrencyExchangeRate] ELSE PTG.[dblExchangeRate] END)
+	,PTG.[ysnApplytoBudget]			= ISNULL(PTG.[ysnApplytoBudget], 0)
+	,PTG.[ysnApplyOnAccount]		= ISNULL(PTG.[ysnApplyOnAccount], 0)
+	,PTG.[ysnInvoicePrepayment]		= ISNULL(PTG.[ysnInvoicePrepayment], 0)
+	,PTG.[ysnImportedFromOrigin]	= ISNULL(PTG.[ysnImportedFromOrigin], 0)
+	,PTG.[ysnImportedAsPosted]		= ISNULL(PTG.[ysnImportedAsPosted], 0)    
+FROM
+	@PaymentsToGenerate PTG
+INNER JOIN
+	(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
+		ON PTG.[intEntityCustomerId] = ARC.[intEntityId]
+CROSS APPLY
+	dbo.[fnARGetDefaultForexRate](ISNULL(PTG.[dtmDatePaid], @DateNow), ISNULL(PTG.[intCurrencyId], ISNULL(ARC.[intCurrencyId], @DefaultCurrency)), PTG.[intExchangeRateTypeId])	CER
+
 BEGIN TRY
 MERGE INTO tblARPayment AS Target
 USING 
 	(
 	SELECT
-		 [intEntityCustomerId]		= ARC.[intEntityId]
-		,[intCurrencyId]			= ISNULL(ITG.[intCurrencyId], ISNULL(ARC.[intCurrencyId], @DefaultCurrency))	
-		,[dtmDatePaid]				= ISNULL(ITG.[dtmDatePaid], @DateNow)
-		,[intAccountId]				= ITG.[intAccountId]
-		,[intBankAccountId]			= ITG.[intBankAccountId]
-		,[intPaymentMethodId]		= ITG.[intPaymentMethodId]
-		,[intLocationId]			= ITG.[intCompanyLocationId]
-		,[dblAmountPaid]			= ITG.[dblAmountPaid]
-		,[dblBaseAmountPaid]		= ITG.[dblAmountPaid]
-		,[dblUnappliedAmount]		= @ZeroDecimal
-		,[dblBaseUnappliedAmount]	= @ZeroDecimal
-		,[dblOverpayment]			= @ZeroDecimal
-		,[dblBaseOverpayment]		= @ZeroDecimal
-		,[dblBalance]				= ARC.[dblARBalance]
-		,[strRecordNumber]			= CASE WHEN ISNULL(ITG.ysnUseOriginalIdAsPaymentNumber, 0) = 1 THEN ITG.strPaymentOriginalId ELSE NULL END
-		,[strPaymentInfo]			= ITG.[strPaymentInfo]
-		,[strNotes]					= ITG.[strNotes]
-		,[ysnApplytoBudget]			= ISNULL(ITG.[ysnApplytoBudget], 0)
-		,[ysnApplyOnAccount]		= ISNULL(ITG.[ysnApplyOnAccount], 0)
-		,[ysnInvoicePrepayment]		= ISNULL(ITG.[ysnInvoicePrepayment], 0)
-		,[ysnImportedFromOrigin]	= ISNULL(ITG.[ysnImportedFromOrigin], 0)
-		,[ysnImportedAsPosted]		= ISNULL(ITG.[ysnImportedAsPosted], 0)
-		,[intEntityId]				= ITG.[intEntityId]
-		,[intWriteOffAccountId]		= ITG.[intWriteOffAccountId]
-		,[strPaymentMethod]			= ITG.[strPaymentMethod]
-		,[dblTotalAR]				= @ZeroDecimal
-		,[intConcurrencyId]			= 1
-		,[intId]					= ITG.[intId]
-		,[strSourceTransaction]		= ITG.[strSourceTransaction]
-		,[intSourceId]				= ITG.[intSourceId]
-		,[strSourceId]				= ITG.[strSourceId]
-		,[ysnPost]					= ITG.[ysnPost]
-		,[ysnRecap]					= ITG.[ysnRecap]
-		,[intPaymentId]				= ITG.[intPaymentId]
-		,[ysnPosted]				= ISNULL(ITG.[ysnImportedAsPosted], 0)
+		 [intEntityCustomerId]				= ITG.[intEntityCustomerId]
+		,[intCurrencyId]					= ITG.[intCurrencyId]    
+		,[dtmDatePaid]						= ITG.[dtmDatePaid]
+		,[intAccountId]						= ITG.[intAccountId]
+		,[intBankAccountId]					= ITG.[intBankAccountId]
+		,[intPaymentMethodId]				= ITG.[intPaymentMethodId]
+		,[intLocationId]					= ITG.[intCompanyLocationId]
+		,[dblAmountPaid]					= ITG.[dblAmountPaid]
+		,[dblBaseAmountPaid]				= ITG.[dblBaseAmountPaid]	
+		,[dblUnappliedAmount]				= @ZeroDecimal
+		,[dblBaseUnappliedAmount]			= @ZeroDecimal
+		,[dblOverpayment]					= @ZeroDecimal
+		,[dblBaseOverpayment]				= @ZeroDecimal
+		,[dblBalance]						= ITG.[dblBalance]
+		,[intCurrencyExchangeRateTypeId]	= ITG.[intExchangeRateTypeId]
+		,[dblExchangeRate]					= ITG.[dblExchangeRate]
+		,[strRecordNumber]					= CASE WHEN ISNULL(ITG.ysnUseOriginalIdAsPaymentNumber, 0) = 1 THEN ITG.strPaymentOriginalId ELSE NULL END
+		,[strPaymentInfo]					= ITG.[strPaymentInfo]
+		,[strNotes]							= ITG.[strNotes]
+		,[ysnApplytoBudget]					= ITG.[ysnApplytoBudget]
+		,[ysnApplyOnAccount]				= ITG.[ysnApplyOnAccount]
+		,[ysnInvoicePrepayment]				= ITG.[ysnInvoicePrepayment]
+		,[ysnImportedFromOrigin]			= ITG.[ysnImportedFromOrigin]
+		,[ysnImportedAsPosted]				= ITG.[ysnImportedAsPosted]
+		,[intEntityId]						= ITG.[intEntityId]
+		,[intWriteOffAccountId]				= ITG.[intWriteOffAccountId]
+		,[strPaymentMethod]					= ITG.[strPaymentMethod]
+		,[dblTotalAR]						= @ZeroDecimal
+		,[intConcurrencyId]					= 1
+		,[intId]							= ITG.[intId]
+		,[strSourceTransaction]				= ITG.[strSourceTransaction]
+		,[intSourceId]						= ITG.[intSourceId]
+		,[strSourceId]						= ITG.[strSourceId]
+		,[ysnPost]							= ITG.[ysnPost]
+		,[ysnRecap]							= ITG.[ysnRecap]
+		,[intPaymentId]						= ITG.[intPaymentId]
+		,[ysnPosted]						= ITG.[ysnImportedAsPosted]	
 	FROM	
 		@PaymentsToGenerate ITG --WITH (NOLOCK)
 	-- INNER JOIN
 	-- 	(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
 	-- 		ON ITG.[intId] = ITG2.[intId]
-	INNER JOIN
-		(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
-			ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 	
+	--INNER JOIN
+	--	(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
+	--		ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 	
 	)
 AS Source
 ON Target.[intPaymentId] = Source.[intPaymentId]
@@ -456,6 +485,8 @@ INSERT(
 	,[dblOverpayment]
 	,[dblBaseOverpayment]
 	,[dblBalance]
+	,[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]
 	,[strRecordNumber]
 	,[strPaymentInfo]
 	,[strNotes]
@@ -486,6 +517,8 @@ VALUES(
 	,[dblOverpayment]
 	,[dblBaseOverpayment]
 	,[dblBalance]
+	,[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]
 	,[strRecordNumber]
 	,[strPaymentInfo]
 	,[strNotes]
@@ -613,6 +646,8 @@ BEGIN TRY
 		,[intBankAccountId]
 		,[intWriteOffAccountId]		
 		,[dblAmountPaid]
+		,[intExchangeRateTypeId]
+		,[dblExchangeRate]
 		,[strPaymentOriginalId]
 		,[ysnUseOriginalIdAsPaymentNumber]
 		,[ysnApplytoBudget]
@@ -659,6 +694,8 @@ BEGIN TRY
 		,[intBankAccountId]					= ITG.[intBankAccountId]
 		,[intWriteOffAccountId]				= ITG.[intWriteOffAccountId]
 		,[dblAmountPaid]					= ITG.[dblAmountPaid]
+		,[intExchangeRateTypeId]			= ITG.[intExchangeRateTypeId]
+		,[dblExchangeRate]					= ITG.[dblExchangeRate]
 		,[strPaymentOriginalId]				= ITG.[strPaymentOriginalId]
 		,[ysnUseOriginalIdAsPaymentNumber]	= ITG.[ysnUseOriginalIdAsPaymentNumber]
 		,[ysnApplytoBudget]					= ITG.[ysnApplytoBudget]

@@ -14,6 +14,8 @@
     ,[intPaymentMethodId]               INT             NOT NULL
     ,[strPaymentMethod]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[strNotes]                         NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[intExchangeRateTypeId]			INT												NULL
+	,[dblExchangeRate]					NUMERIC(18, 6)									NULL
     ,[dtmDatePaid]                      DATETIME        NOT NULL
     ,[dtmPostDate]                      DATETIME        NOT NULL
     ,[intWriteOffAccountId]             INT             NULL

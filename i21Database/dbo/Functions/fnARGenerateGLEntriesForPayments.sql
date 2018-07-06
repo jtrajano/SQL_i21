@@ -177,7 +177,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblAmountPaid], 0) = 0 THEN 1 ELSE (P.[dblBaseAmountPaid] / P.[dblAmountPaid]) END
+    ,[dblExchangeRate]              = P.[dblExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -197,8 +197,8 @@ SELECT
     ,[dblDebitReport]               = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
     ,[dblCreditForeign]             = @ZeroDecimal
     ,[dblCreditReport]              = @ZeroDecimal
-    ,[dblReportingRate]             = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
-    ,[dblForeignRate]               = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
+    ,[dblReportingRate]             = P.[dblExchangeRate]
+    ,[dblForeignRate]               = P.[dblExchangeRate]
     ,[strRateType]                  = P.[strRateType]
     ,[strDocument]                  = NULL
     ,[strComments]                  = NULL
@@ -289,7 +289,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblUnappliedAmount], 0) = 0 THEN 1 ELSE (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount]) END
+    ,[dblExchangeRate]              = P.[dblExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -307,8 +307,8 @@ SELECT
     ,[dblDebitReport]               = @ZeroDecimal
     ,[dblCreditForeign]             = P.[dblUnappliedAmount]
     ,[dblCreditReport]              = P.[dblBaseUnappliedAmount]
-    ,[dblReportingRate]             = (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount])
-    ,[dblForeignRate]               = (P.[dblBaseUnappliedAmount] / P.[dblUnappliedAmount])
+    ,[dblReportingRate]             = P.[dblExchangeRate]
+    ,[dblForeignRate]               = P.[dblExchangeRate]
     ,[strRateType]                  = P.[strRateType]
     ,[strDocument]                  = NULL
     ,[strComments]                  = NULL
@@ -388,7 +388,7 @@ SELECT
     ,[strCode]                      = @CODE
     ,[strReference]                 = P.[strCustomerNumber]
     ,[intCurrencyId]                = P.[intCurrencyId]
-    ,[dblExchangeRate]              = CASE WHEN ISNULL(P.[dblAmountPaid], 0) = 0 THEN 1 ELSE (P.[dblBaseAmountPaid] / P.[dblAmountPaid]) END
+    ,[dblExchangeRate]              = P.[dblExchangeRate]
     ,[dtmDateEntered]               = P.[dtmPostDate]
     ,[dtmTransactionDate]           = P.[dtmDatePaid]
     ,[strJournalLineDescription]    = @POSTDESC + @SCREEN_NAME 
@@ -406,8 +406,8 @@ SELECT
     ,[dblDebitReport]               = @ZeroDecimal
     ,[dblCreditForeign]             = P.[dblAmountPaid]
     ,[dblCreditReport]              = P.[dblBaseAmountPaid]
-    ,[dblReportingRate]             = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
-    ,[dblForeignRate]               = (P.[dblBaseAmountPaid] / P.[dblAmountPaid])
+    ,[dblReportingRate]             = P.[dblExchangeRate]
+    ,[dblForeignRate]               = P.[dblExchangeRate]
     ,[strRateType]                  = P.[strRateType]
     ,[strDocument]                  = NULL
     ,[strComments]                  = NULL

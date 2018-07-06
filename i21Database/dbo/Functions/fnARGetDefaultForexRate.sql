@@ -2,7 +2,7 @@
 (
 	 @TransactionDate	DATETIME 
 	,@CurrencyId		INT
-	,@ForexRateTypeId	INT
+	,@ForexRateTypeId	INT			= NULL
 )
 RETURNS @returntable TABLE
 (
@@ -16,6 +16,9 @@ BEGIN
 
 	IF ISNULL(@ForexRateTypeId, 0) = 0
 		SET @ForexRateTypeId = (SELECT TOP 1 [intAccountsReceivableRateTypeId] FROM tblSMMultiCurrency ORDER BY [intMultiCurrencyId])
+
+	DECLARE @FunctionalCurrencyId INT
+	SELECT TOP 1 @FunctionalCurrencyId = [intDefaultCurrencyId] FROM tblSMCompanyPreference
 	
 	INSERT @returntable(
 		 [intCurrencyExchangeRateTypeId]
@@ -33,7 +36,7 @@ BEGIN
 	WHERE 
 		[intFromCurrencyId] = @CurrencyId 
 		AND [intCurrencyExchangeRateTypeId] = @ForexRateTypeId 
-		AND [intFunctionalCurrencyId] = [intToCurrencyId] 
+		AND [intToCurrencyId] = @FunctionalCurrencyId
 		AND CAST(@TransactionDate AS DATE) >= CAST([dtmValidFromDate] AS DATE) 
 	ORDER BY
 		[dtmValidFromDate] DESC
