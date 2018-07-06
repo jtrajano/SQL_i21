@@ -322,9 +322,9 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.dblAmount * ISNULL(@dblHistoricRate,1)
+			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount * ISNULL(@dblHistoricRate,1) ELSE A.dblAmount END
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN A.dblAmount  ELSE 0 END
+			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE A.dblAmount / ISNULL(@dblHistoricRate,1)  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
@@ -358,9 +358,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= GLAccnt.intAccountId
-			,[dblDebit]				= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount * ISNULL(@dblRate, 1) ELSE  A.dblAmount END
+			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  A.dblAmount * ISNULL(@dblRate, 1) ELSE  A.dblAmount END
 			,[dblCredit]			= 0 
-			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE 0 END
+			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN A.dblAmount/ ISNULL(@dblRate, 1)  ELSE A.dblAmount END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
