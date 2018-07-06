@@ -160,11 +160,13 @@ IF @dtmDate IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' 
+		ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' END 
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + '''' END
 	END  
 	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
 	SET @dateTo = @dtmDateTo;
