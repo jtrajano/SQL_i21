@@ -28,9 +28,16 @@ FROM tblICInventoryCountDetail cd
 		AND s.intLocationId = c.intLocationId
 WHERE c.intImportFlagInternal = 1
 
--- Update Last Cost
+-- Update Last Cost, Calculate Physical Count, Physical Weight, & Qty Per Pallet
 UPDATE cd
-SET cd.dblLastCost = ISNULL(cd.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)), 0))
+SET cd.dblLastCost = ISNULL(cd.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)), 0)),
+	cd.dblNetQty = CAST(CASE WHEN cd.intWeightUOMId IS NOT NULL THEN CASE WHEN NULLIF(cd.dblPhysicalCount, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(cd.intItemUOMId, cd.intWeightUOMId, cd.dblPhysicalCount) ELSE cd.dblNetQty END ELSE NULL END AS NUMERIC(38, 20)),
+	cd.dblPhysicalCount = CAST(
+		CASE 
+			WHEN ISNULL(cd.dblPallets, 0) <> 0 AND ISNULL(cd.dblQtyPerPallet, 0) <> 0 THEN cd.dblPallets * cd.dblQtyPerPallet
+			WHEN NULLIF(cd.dblPhysicalCount, 0) IS NULL AND cd.intWeightUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(cd.intWeightUOMId, cd.intItemUOMId, cd.dblNetQty)
+			ELSE cd.dblPhysicalCount
+		END AS NUMERIC(38, 20))
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
 	INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = c.intLocationId 
@@ -114,47 +121,47 @@ DEALLOCATE cur
 
 -- Auto-create Lot
 -- Create the temp table 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
-BEGIN 
-	CREATE TABLE #GeneratedLotItems (
-		intLotId INT
-		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,intDetailId INT 
-		,intParentLotId INT
-		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	)
-END
+--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
+--BEGIN 
+--	CREATE TABLE #GeneratedLotItems (
+--		intLotId INT
+--		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+--		,intDetailId INT 
+--		,intParentLotId INT
+--		,strParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+--	)
+--END
 
-DECLARE @Lots ItemLotTableType
+--DECLARE @Lots ItemLotTableType
 
-INSERT INTO @Lots(
-	  intItemId
-	, intItemLocationId
-	, intItemUOMId
-	, strLotNumber
-	, intSubLocationId
-	, intStorageLocationId
-	, dblQty
-	, intLotId
-	, intLotStatusId
-	, intDetailId
-)
-SELECT 
-	  intItemId				= d.intItemId
-	, intItemLocationId		= d.intItemLocationId
-	, intItemUOMId			= d.intItemUOMId
-	, strLotNumber			= d.strAutoCreatedLotNumber
-	, intSubLocationId		= d.intSubLocationId
-	, intStorageLocationId	= d.intStorageLocationId
-	, dblQty				= ISNULL(d.dblSystemCount, 0)
-	, intLotId				= CASE NULLIF(d.strAutoCreatedLotNumber, '') WHEN NULL THEN d.intLotId ELSE NULL END
-	, intLotStatusId		= 1
-	, intDetailId			= d.intInventoryCountDetailId
-FROM tblICInventoryCountDetail d
-	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
-	INNER JOIN tblICItem Item ON Item.intItemId = d.intItemId
-			AND Item.strLotTracking <> 'No'
-WHERE c.intImportFlagInternal = 1
+--INSERT INTO @Lots(
+--	  intItemId
+--	, intItemLocationId
+--	, intItemUOMId
+--	, strLotNumber
+--	, intSubLocationId
+--	, intStorageLocationId
+--	, dblQty
+--	, intLotId
+--	, intLotStatusId
+--	, intDetailId
+--)
+--SELECT 
+--	  intItemId				= d.intItemId
+--	, intItemLocationId		= d.intItemLocationId
+--	, intItemUOMId			= d.intItemUOMId
+--	, strLotNumber			= d.strAutoCreatedLotNumber
+--	, intSubLocationId		= d.intSubLocationId
+--	, intStorageLocationId	= d.intStorageLocationId
+--	, dblQty				= ISNULL(d.dblSystemCount, 0)
+--	, intLotId				= CASE NULLIF(d.strAutoCreatedLotNumber, '') WHEN NULL THEN d.intLotId ELSE NULL END
+--	, intLotStatusId		= 1
+--	, intDetailId			= d.intInventoryCountDetailId
+--FROM tblICInventoryCountDetail d
+--	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = d.intInventoryCountId
+--	INNER JOIN tblICItem Item ON Item.intItemId = d.intItemId
+--			AND Item.strLotTracking <> 'No'
+--WHERE c.intImportFlagInternal = 1
 
 -- IF EXISTS(SELECT * FROM @Lots)
 -- BEGIN
