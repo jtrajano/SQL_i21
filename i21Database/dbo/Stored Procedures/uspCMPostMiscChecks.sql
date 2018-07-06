@@ -38,6 +38,7 @@ CREATE TABLE #tmpGLDetail (
 	,[intTransactionId] [int] NULL
 	,[strReference] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL
 	,[intCurrencyId] [int] NULL
+	,[intCurrencyExchangeRateTypeId] [int] NULL
 	,[dblExchangeRate] [numeric](38, 20) NOT NULL
 	,[dtmDateEntered] [datetime] NOT NULL
 	,[dtmTransactionDate] [datetime] NULL
