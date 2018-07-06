@@ -138,7 +138,7 @@ FROM
 			   ,InboundGrossDollars          = SUM(BillDtl.dblTotal) 
 			   ,InboundTax					 = SUM(BillDtl.dblTax) 
 			   ,InboundDiscount				 = ISNULL(tblOtherCharge.dblTotal, 0)
-			   ,InboundNetDue		         = SUM(BillDtl.dblTotal + ISNULL(tblTax.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0))
+			   ,InboundNetDue		         = SUM(BillDtl.dblTotal + ISNULL(BillDtl.dblTax, 0) + ISNULL(tblOtherCharge.dblTotal, 0))
 			   ,OutboundNetWeight	         = 0 
 			   ,OutboundGrossDollars         = 0 
 			   ,OutboundTax		             = 0
