@@ -370,8 +370,10 @@ BEGIN
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblTransactionInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseTransactionDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]), @ZeroDecimal) <> @ZeroDecimal
         AND ISNULL(P.[intGainLossAccount],0) = 0
+		AND P.[strTransactionType] <> 'Claim'
+		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
+        AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
 
     UNION
 
