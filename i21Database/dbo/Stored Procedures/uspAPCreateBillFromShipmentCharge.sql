@@ -40,6 +40,7 @@ INSERT INTO #tmpShipmentId(intInventoryShipmentId) SELECT [intID] FROM [dbo].fnG
 IF OBJECT_ID('tempdb..#tmpShipmentData') IS NOT NULL DROP TABLE #tmpShipmentData
 
 SELECT SCB.* INTO #tmpShipmentData 
+-- FROM vyuAPShipmentChargesForBilling SCB
 FROM vyuAPShipmentChargesForBilling SCB
 INNER JOIN #tmpShipmentId SI ON SCB.intInventoryShipmentId = SI.intInventoryShipmentId
 
@@ -70,6 +71,7 @@ BEGIN
 		[intTermsId], 
 		--[intShipViaId],
 		[intShipFromId],
+		[intShipFromEntityId],
 		[intShipToId],
 		[dtmDate], 
 		[dtmDateCreated], 
@@ -112,6 +114,7 @@ BEGIN
 		[intTermsId] 				=	(SELECT intTermsId FROM vyuAPVendorDefault WHERE intEntityId = @vendorId),
 		--[intShipViaId]				=	NULL,
 		[intShipFromId]				=	NULLIF(Terms.intEntityLocationId,0),
+		[intShipFromEntityId]		=	NULLIF(Terms.intEntityLocationId,0),
 		[intShipToId]				=	A.intLocationId,
 		[dtmDate] 					=	GETDATE(),
 		[dtmDateCreated] 			=	GETDATE(),
@@ -242,7 +245,7 @@ BEGIN
 		[dblQtyContract]				=	0,
 		[dblContractCost]				=	0,
 		[dblRate]						=	ISNULL(A.dblForexRate,1)
-	FROM #tmpShipmentData
+	FROM #tmpShipmentData A
 	WHERE A.intInventoryShipmentChargeId = @shipmentChargeId
 
 END
