@@ -59,7 +59,7 @@ SELECT
 	--CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	Approvals.strName as strApprover,
 	Approvals.dtmApprovalDate,
-	GL.strBatchId,
+	'' AS strBatchId,--GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
 	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId),
 	A.strComment,
@@ -125,7 +125,7 @@ FROM
 	-- 	WHERE H.strScreenName = 'Voucher' AND H.strModule = 'Accounts Payable' AND J.ysnCurrent = 1
 	-- 	AND A.intBillId = I.intRecordId
 	OUTER APPLY [dbo].[fnAPGetVoucherApprovalStatus](A.intBillId) Approvals
-	OUTER APPLY 
-	(
-		SELECT TOP 1 strBatchId FROM dbo.tblGLDetail H WHERE A.intBillId = H.intTransactionId AND A.strBillId = H.strTransactionId AND H.ysnIsUnposted = 0
-	) GL
+	-- OUTER APPLY 
+	-- (
+	-- 	SELECT TOP 1 strBatchId FROM dbo.tblGLDetail H WHERE A.intBillId = H.intTransactionId AND A.strBillId = H.strTransactionId AND H.ysnIsUnposted = 0
+	-- ) GL
