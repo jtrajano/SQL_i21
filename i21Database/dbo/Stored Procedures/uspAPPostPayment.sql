@@ -154,6 +154,7 @@ SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
 --OVERIDE THE INVALID TRANSACTION COUNT TO HANDLE VOIDED RECAP VIEWING
 DECLARE @totalVoided INT
+DECLARE @postResult TABLE(id INT)
 SELECT @totalVoided = COUNT(*) FROM tblAPPayment B 
 INNER JOIN tblCMBankTransaction C ON B.strPaymentRecordNum = C.strTransactionId
 WHERE intPaymentId IN (SELECT intId FROM @payments) AND C.ysnCheckVoid = 1
@@ -166,6 +167,7 @@ IF(@totalInvalid > 0)
 BEGIN
 
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	OUTPUT inserted.intId INTO @postResult
 	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpPayableInvalidData
 
 	SET @invalidCount = @totalInvalid
@@ -198,6 +200,15 @@ FROM
 ) PaymentRecords
 IF(@totalRecords = 0)  
 BEGIN
+
+	SET @batchId = NEWID();
+	SET @batchIdUsed = @batchId;
+	
+	UPDATE A
+		SET A.strBatchNumber = @batchId
+	FROM tblAPPostResult A
+	INNER JOIN @postResult B ON A.intId = B.id
+
 	SET @success = 1
 	RETURN;
 END
@@ -221,9 +232,16 @@ BEGIN
 	--DO NOT GENERATE IF UNPOST
 	IF NOT (@post = 0 AND @recap = 0)
 		EXEC uspSMGetStartingNumber 3, @batchId OUT
+	ELSE
+		SET @batchId = NEWID()
 END
 
 SET @batchIdUsed = @batchId
+
+UPDATE A
+	SET A.strBatchNumber = @batchId
+FROM tblAPPostResult A
+INNER JOIN @postResult B ON A.intId = B.id
 
 IF ISNULL(@post,0) = 1
 BEGIN

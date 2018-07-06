@@ -173,6 +173,7 @@ BEGIN
 END
 
 DECLARE @totalInvalid INT = 0
+DECLARE @postResult TABLE(id INT)
 SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidBillData
 
 IF(@totalInvalid > 0)
@@ -180,6 +181,7 @@ BEGIN
 
 	--Insert Invalid Post transaction result
 	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	OUTPUT inserted.intId INTO @postResult
 	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpInvalidBillData
 
 	SET @invalidCount = @totalInvalid
@@ -198,6 +200,14 @@ COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
 IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
 BEGIN
+	SET @batchId = NEWID();
+	SET @batchIdUsed = @batchId;
+	
+	UPDATE A
+		SET A.strBatchNumber = @batchId
+	FROM tblAPPostResult A
+	INNER JOIN @postResult B ON A.intId = B.id
+
 	SET @successfulCount = 0;
 	SET @success = 0
 	GOTO Post_Exit
@@ -215,9 +225,16 @@ BEGIN
 	--DO NOT GENERATE IF UNPOST
 	IF NOT (@post = 0 AND @recap = 0)
 		EXEC uspSMGetStartingNumber 3, @batchId OUT
+	ELSE
+		SET @batchId = NEWID()
 END
 
 SET @batchIdUsed = @batchId
+
+UPDATE A
+	SET A.strBatchNumber = @batchId
+FROM tblAPPostResult A
+INNER JOIN @postResult B ON A.intId = B.id
 
 --CREATE DATA FOR COST ADJUSTMENT
 DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
