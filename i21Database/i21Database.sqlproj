@@ -6771,6 +6771,7 @@
     <Build Include="dbo\Views\vyuSTStorePumpItem.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
     <Build Include="dbo\Views\vyuSTItemCategoryLocation.sql" />
+    <Build Include="dbo\Views\vyuARInvoicesForPaymentIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

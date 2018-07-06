@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARAddInvoiceToPayment]
+﻿CREATE PROCEDURE [dbo].[uspARAddInvoiceToPayment] 
 	 @PaymentId						INT
 	,@InvoiceId						INT
 	,@Payment						NUMERIC(18,6)	= 0.000000
@@ -32,6 +32,7 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@DateOnly DATETIME
 		,@InitTranCount INT
 		,@Savepoint NVARCHAR(32)
+		,@ExchangeRate NUMERIC(18,6)
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARAddInvoiceToPayment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -40,15 +41,19 @@ SET @Savepoint = SUBSTRING(('ARAddInvoiceToPayment' + CONVERT(VARCHAR, @InitTran
 SET @ZeroDecimal = 0.000000	
 SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
+SELECT @ExchangeRate = [dblExchangeRate] FROM tblARPayment WHERE [intPaymentId] = @PaymentId
+IF ISNULL(@ExchangeRate,0) = 0
+	SET @ExchangeRate = 1.000000 
+
 IF ISNULL(@CurrencyExchangeRate,0) = 0
 	SET @CurrencyExchangeRate = 1.000000 
 
 SET @Payment		= [dbo].fnRoundBanker(@Payment, [dbo].[fnARGetDefaultDecimal]())
-SET @BasePayment	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Payment, [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+SET @BasePayment	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Payment, [dbo].[fnARGetDefaultDecimal]()) * @ExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 SET @Discount		= [dbo].fnRoundBanker(@Discount, [dbo].[fnARGetDefaultDecimal]())
-SET @BaseDiscount	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Discount, [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+SET @BaseDiscount	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Discount, [dbo].[fnARGetDefaultDecimal]()) * @ExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 SET @Interest		= [dbo].fnRoundBanker(@Interest, [dbo].[fnARGetDefaultDecimal]())
-SET @BaseInterest	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Interest, [dbo].[fnARGetDefaultDecimal]()) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+SET @BaseInterest	= [dbo].fnRoundBanker([dbo].fnRoundBanker(@Interest, [dbo].[fnARGetDefaultDecimal]()) * @ExchangeRate, [dbo].[fnARGetDefaultDecimal]())
 
 IF NOT EXISTS(SELECT NULL FROM tblARPayment WHERE [intPaymentId] = @PaymentId)
 	BEGIN		
@@ -121,15 +126,8 @@ SELECT
 	,@BaseAvailableDiscount	= [dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
 	,@InvoiceNumber			= [strInvoiceNumber]
 	,@TransactionType		= [strTransactionType]
-	,@dtmDiscountDate		= CASE WHEN ISNULL(dblDiscountAvailable, 0) = 0
-									THEN NULL
-									ELSE CASE WHEN ISNULL(intDiscountDay, 0) = 0 OR ISNULL(intDiscountDay, 0) > DATEDIFF(DAY, DATEADD(DAY, 1-DAY(dtmDate), dtmDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(dtmDate), dtmDate)))
-											THEN DATEADD(DAY, 1, dtmDate)
-										ELSE DATEADD(DAY, intDiscountDay, dtmDate)
-									END
-							  END
-FROM tblARInvoice I
-LEFT OUTER JOIN tblSMTerm T ON I.[intTermId] = T.[intTermID]
+	,@dtmDiscountDate		= [dtmDiscountDate]
+FROM [vyuARInvoicesForPaymentIntegration] I
 WHERE
 	[intInvoiceId] = @InvoiceId
 
@@ -234,7 +232,7 @@ BEGIN TRY
 		,[dblInterest]				= @Interest
 		,[dblBaseInterest]			= @BaseInterest
 		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - @Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)
-		,[dblBaseAmountDue]			= (@BaseInvoiceAmountDue + @BaseInterest) - @BasePayment + (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END)
+		,[dblBaseAmountDue]			= [dbo].fnRoundBanker([dbo].fnRoundBanker((@InvoiceAmountDue + @Interest) - @Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END), [dbo].[fnARGetDefaultDecimal]()) * @ExchangeRate, [dbo].[fnARGetDefaultDecimal]())		
 		,[dblPayment]				= @Payment		
 		,[dblBasePayment]			= @BasePayment		
 		,[strInvoiceReportNumber]	= @InvoiceReportNumber

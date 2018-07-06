@@ -45,6 +45,8 @@ INSERT INTO @ItemEntries
 	,[intBankAccountId]
 	,[intWriteOffAccountId]		
 	,[dblAmountPaid]
+	,[intExchangeRateTypeId]
+	,[dblExchangeRate]
 	,[strPaymentOriginalId]
 	,[ysnUseOriginalIdAsPaymentNumber]
 	,[ysnApplytoBudget]
@@ -69,15 +71,15 @@ INSERT INTO @ItemEntries
 	,[dblBaseInvoiceTotal]
 	,[ysnApplyTermDiscount]
 	,[dblDiscount]
-	,[dblBaseDiscount]
+	--,[dblBaseDiscount]
 	,[dblDiscountAvailable]
-	,[dblBaseDiscountAvailable]
+	--,[dblBaseDiscountAvailable]
 	,[dblInterest]
-	,[dblBaseInterest]
+	--,[dblBaseInterest]
 	,[dblPayment]
-	,[dblBasePayment]
+	--,[dblBasePayment]
 	,[dblAmountDue]
-	,[dblBaseAmountDue]
+	--,[dblBaseAmountDue]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]
@@ -102,6 +104,8 @@ SELECT
 	,[intBankAccountId]					= PE.[intBankAccountId]
 	,[intWriteOffAccountId]				= PE.[intWriteOffAccountId]
 	,[dblAmountPaid]					= PE.[dblAmountPaid]
+	,[intExchangeRateTypeId]			= PE.[intExchangeRateTypeId]
+	,[dblExchangeRate]					= PE.[dblExchangeRate]
 	,[strPaymentOriginalId]				= PE.[strPaymentOriginalId]
 	,[ysnUseOriginalIdAsPaymentNumber]	= PE.[ysnUseOriginalIdAsPaymentNumber]
 	,[ysnApplytoBudget]					= PE.[ysnApplytoBudget]
@@ -116,79 +120,89 @@ SELECT
 	,[intEntityId]						= PE.[intEntityId]
 	--Detail																																															
 	,[intPaymentDetailId]				= PE.[intPaymentDetailId]
-	,[intInvoiceId]						= PE.[intInvoiceId]
-	,[strTransactionType]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[strTransactionType] ELSE APB.[strTransactionType] END
-	,[intBillId]						= PE.[intBillId]
-	,[strTransactionNumber]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[strTransactionNumber] ELSE APB.[strTransactionNumber] END
-	,[intTermId]						= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[intTermId] ELSE APB.[intTermId] END
-	,[intInvoiceAccountId]				= CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ARI.[intAccountId] ELSE APB.[intAccountId] END
-	,[dblInvoiceTotal]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblInvoiceTotal], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblInvoiceTotal], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBaseInvoiceTotal]				= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 THEN ISNULL(ARI.[dblBaseInvoiceTotal], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) ELSE ISNULL(APB.[dblBaseInvoiceTotal], @ZeroDecimal) END), [dbo].[fnARGetDefaultDecimal]())
+	,[intInvoiceId]						= RFP.[intInvoiceId]
+	,[strTransactionType]				= RFP.[strTransactionType]
+	,[intBillId]						= RFP.[intBillId]
+	,[strTransactionNumber]				= RFP.[strTransactionNumber]
+	,[intTermId]						= RFP.[intTermId]
+	,[intInvoiceAccountId]				= RFP.[intAccountId]
+	,[dblInvoiceTotal]					= [dbo].fnRoundBanker(ISNULL(RFP.[dblInvoiceTotal], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL 
+												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) 
+												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
+										   END)
+	,[dblBaseInvoiceTotal]				= [dbo].fnRoundBanker(ISNULL(RFP.[dblBaseInvoiceTotal], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL 
+												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) 
+												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
+										   END)
 	,[ysnApplyTermDiscount]				= ISNULL(PE.[ysnApplyTermDiscount],0)
-	,[dblDiscount]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
+	,[dblDiscount]						= (CASE WHEN RFP.[intInvoiceId] IS NOT NULL 
+												THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) = -1.000000
 																			   THEN @ZeroDecimal 
 																			   ELSE (CASE WHEN ISNULL(PE.[ysnApplyTermDiscount],0) = 1 
-																			         THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], ARI.[dtmDate], ARI.[intTermId], ARI.[dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) 
-																					 ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
+																			         THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], RFP.[dtmDate], RFP.[intTermId], RFP.[dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) 
+																					 ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
 																					 END) 
 																		  END)
-																	ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBaseDiscount]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-	                                                                THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
-																	           THEN @ZeroDecimal 
-																			   ELSE (CASE WHEN ISNULL(PE.[ysnApplyTermDiscount],0) = 1 
-																			              THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], ARI.[dtmDate], ARI.[intTermId], ARI.[dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) 
-																						  ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
-																					 END) 
-																		 END)
-																	ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
-																END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblDiscountAvailable]				= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN ARI.[dblDiscountAvailable] 
-																	ELSE @ZeroDecimal 
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBaseDiscountAvailable]			= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN ARI.[dblBaseDiscountAvailable] 
-																	ELSE @ZeroDecimal 
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblInterest]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
-																	THEN @ZeroDecimal 
-																	ELSE ISNULL(PE.[dblInterest], @ZeroDecimal) 
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBaseInterest]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
-																	THEN @ZeroDecimal 
-																	ELSE ISNULL(PE.[dblInterest], @ZeroDecimal) 
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblPayment]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN ISNULL(PE.[dblPayment], @ZeroDecimal)
-																	ELSE ISNULL(PE.[dblPayment], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBasePayment]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN ISNULL(PE.[dblBasePayment], @ZeroDecimal)
-																	ELSE ISNULL(PE.[dblPayment], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblAmountDue]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
-																	ELSE ISNULL(APB.[dblAmountDue], @ZeroDecimal)
-															   END), [dbo].[fnARGetDefaultDecimal]())
-	,[dblBaseAmountDue]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
-																	THEN ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
-																	ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) 
-															   END), [dbo].[fnARGetDefaultDecimal]())
+												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+										   END)
+		
+	----,[dblBaseDiscount]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
+	--                                                                THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
+	--																           THEN @ZeroDecimal 
+	--																		   ELSE (CASE WHEN ISNULL(PE.[ysnApplyTermDiscount],0) = 1 
+	--																		              THEN [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](PE.[dtmDatePaid], ARI.[dtmDate], ARI.[intTermId], ARI.[dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) 
+	--																					  ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
+	--																				 END) 
+	--																	 END)
+	--																ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
+	--															END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblDiscountAvailable]				= [dbo].fnRoundBanker(ISNULL(RFP.[dblDiscountAvailable],@ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	--,[dblBaseDiscountAvailable]			= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
+	--																THEN ARI.[dblBaseDiscountAvailable] 
+	--																ELSE @ZeroDecimal 
+	--														   END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblInterest]						= [dbo].fnRoundBanker(ISNULL(PE.[dblInterest], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL AND dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) = -1.000000
+												THEN @ZeroDecimal
+												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
+										   END)
+	--,[dblBaseInterest]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 AND dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
+	--																THEN @ZeroDecimal 
+	--																ELSE ISNULL(PE.[dblInterest], @ZeroDecimal) 
+	--														   END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblPayment]						= [dbo].fnRoundBanker(ISNULL(PE.[dblPayment], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
+												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
+												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
+										   END)
+	--,[dblBasePayment]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
+	--																THEN ISNULL(PE.[dblBasePayment], @ZeroDecimal)
+	--																ELSE ISNULL(PE.[dblPayment], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
+	--														   END), [dbo].[fnARGetDefaultDecimal]())
+	,[dblAmountDue]						= [dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
+												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
+												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
+										   END)	
+	--,[dblBaseAmountDue]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
+	--																THEN ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
+	--																ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) 
+	--														   END), [dbo].[fnARGetDefaultDecimal]())
 	,[strInvoiceReportNumber]			= PE.[strInvoiceReportNumber]
-	,[intCurrencyExchangeRateTypeId]	= PE.[intCurrencyExchangeRateTypeId]
-	,[intCurrencyExchangeRateId]		= PE.[intCurrencyExchangeRateId]
-	,[dblCurrencyExchangeRate]			= ISNULL(PE.[dblCurrencyExchangeRate], 1.000000)
+	,[intCurrencyExchangeRateTypeId]	= RFP.[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]		= RFP.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]			= ISNULL(RFP.[dblCurrencyExchangeRate], 1.000000)
 	,[ysnAllowOverpayment]				= ISNULL(PE.[ysnAllowOverpayment], 0)
 	,[ysnFromAP]						= ISNULL(PE.[ysnFromAP], 0)
 FROM @PaymentEntries PE
-LEFT OUTER JOIN
+INNER JOIN
 	(
 		SELECT
 			 [intInvoiceId]
-			,[strInvoiceNumber] AS [strTransactionNumber]
+			,[intBillId]
+			,[strTransactionNumber]
 			,[strTransactionType]
 			,[intTermId]
 			,[intAccountId]
@@ -199,37 +213,61 @@ LEFT OUTER JOIN
 			,[dblDiscountAvailable]
 			,[dblBaseDiscountAvailable]
 			,[dtmDate]
+			,[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateId]
+			,[dblCurrencyExchangeRate]
 		FROM
-			tblARInvoice			
-	)ARI
-		ON ISNULL(PE.[ysnFromAP], 0) = 0
-		AND PE.[intInvoiceId] = ARI.[intInvoiceId]
-LEFT OUTER JOIN
-	(
-		SELECT
-			 [intBillId]
-			,[strBillId] AS [strTransactionNumber]
-			,CASE	WHEN [intTransactionType] = 1 THEN 'Voucher'
-					WHEN [intTransactionType] = 2 THEN 'Vendor Prepayment'
-					WHEN [intTransactionType] = 3 THEN 'Debit Memo'
-					WHEN [intTransactionType] = 7 THEN 'Invalid Type'
-					WHEN [intTransactionType] = 9 THEN '1099 Adjustment'
-					WHEN [intTransactionType] = 11 THEN 'Claim'
-					WHEN [intTransactionType] = 13 THEN 'Basis Advance'
-					WHEN [intTransactionType] = 14 THEN 'Deferred Interest'
-					ELSE 'Invalid Type' 
-			 END AS [strTransactionType]
-			,[intTermsId] AS [intTermId]
-			,[intAccountId]
-			,[dblTotal] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblInvoiceTotal]
-			,[dblTotal] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblBaseInvoiceTotal]
-			,[dblAmountDue] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) as [dblAmountDue]
-			,[dblAmountDue]  * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblBaseAmountDue]
-		FROM
-			tblAPBill			
-	)APB
-		ON ISNULL(PE.[ysnFromAP], 0) = 1
-		AND PE.[intBillId] = APB.[intBillId]
+			[vyuARInvoicesForPaymentIntegration]
+	) RFP
+		ON	(RFP.[intInvoiceId] IS NOT NULL AND PE.[intInvoiceId] = RFP.[intInvoiceId])
+			OR
+			(RFP.[intBillId] IS NOT NULL AND PE.[intBillId] = RFP.[intBillId])
+--LEFT OUTER JOIN
+--	(
+--		SELECT
+--			 [intInvoiceId]
+--			,[strInvoiceNumber] AS [strTransactionNumber]
+--			,[strTransactionType]
+--			,[intTermId]
+--			,[intAccountId]
+--			,[dblInvoiceTotal]
+--			,[dblBaseInvoiceTotal]
+--			,[dblAmountDue]
+--			,[dblBaseAmountDue]
+--			,[dblDiscountAvailable]
+--			,[dblBaseDiscountAvailable]
+--			,[dtmDate]
+--		FROM
+--			tblARInvoice			
+--	)ARI
+--		ON ISNULL(PE.[ysnFromAP], 0) = 0
+--		AND PE.[intInvoiceId] = ARI.[intInvoiceId]
+--LEFT OUTER JOIN
+--	(
+--		SELECT
+--			 [intBillId]
+--			,[strBillId] AS [strTransactionNumber]
+--			,CASE	WHEN [intTransactionType] = 1 THEN 'Voucher'
+--					WHEN [intTransactionType] = 2 THEN 'Vendor Prepayment'
+--					WHEN [intTransactionType] = 3 THEN 'Debit Memo'
+--					WHEN [intTransactionType] = 7 THEN 'Invalid Type'
+--					WHEN [intTransactionType] = 9 THEN '1099 Adjustment'
+--					WHEN [intTransactionType] = 11 THEN 'Claim'
+--					WHEN [intTransactionType] = 13 THEN 'Basis Advance'
+--					WHEN [intTransactionType] = 14 THEN 'Deferred Interest'
+--					ELSE 'Invalid Type' 
+--			 END AS [strTransactionType]
+--			,[intTermsId] AS [intTermId]
+--			,[intAccountId]
+--			,[dblTotal] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblInvoiceTotal]
+--			,[dblTotal] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblBaseInvoiceTotal]
+--			,[dblAmountDue] * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) as [dblAmountDue]
+--			,[dblAmountDue]  * (CASE WHEN [intTransactionType] IN (1, 14) THEN -1 ELSE 1 END) AS [dblBaseAmountDue]
+--		FROM
+--			tblAPBill			
+--	)APB
+--		ON ISNULL(PE.[ysnFromAP], 0) = 1
+--		AND PE.[intBillId] = APB.[intBillId]
 
 --Clear Discounts for Partial Payment AR-5721
 UPDATE @ItemEntries
@@ -581,15 +619,15 @@ USING
 		,[dblInvoiceTotal]					= [dblInvoiceTotal]
 		,[dblBaseInvoiceTotal]				= [dblBaseInvoiceTotal]
 		,[dblDiscount]						= [dblDiscount]
-		,[dblBaseDiscount]					= [dblBaseDiscount]
+		,[dblBaseDiscount]					= [dbo].fnRoundBanker([dblBaseDiscount] * [dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 		,[dblDiscountAvailable]				= [dblDiscountAvailable]
 		,[dblBaseDiscountAvailable]			= [dblBaseDiscountAvailable]
 		,[dblInterest]						= [dblInterest]
-		,[dblBaseInterest]					= [dbo].fnRoundBanker([dblInterest] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+		,[dblBaseInterest]					= [dbo].fnRoundBanker([dblInterest] * [dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 		,[dblAmountDue]						= [dblAmountDue]
-		,[dblBaseAmountDue]					= [dbo].fnRoundBanker([dblAmountDue] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+		,[dblBaseAmountDue]					= [dbo].fnRoundBanker([dblAmountDue] * [dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 		,[dblPayment]						= [dblPayment]
-		,[dblBasePayment]					= [dbo].fnRoundBanker([dblPayment] * [dblCurrencyExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+		,[dblBasePayment]					= [dbo].fnRoundBanker([dblPayment] * [dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 		,[strInvoiceReportNumber]			= [strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]	= [intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]		= [intCurrencyExchangeRateId]

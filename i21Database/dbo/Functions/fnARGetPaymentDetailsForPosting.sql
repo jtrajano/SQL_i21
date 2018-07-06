@@ -24,6 +24,8 @@ RETURNS @returntable TABLE
     ,[intPaymentMethodId]               INT             NOT NULL
     ,[strPaymentMethod]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[strNotes]                         NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
+	,[intExchangeRateTypeId]			INT												NULL
+	,[dblExchangeRate]					NUMERIC(18,6)	NULL
     ,[dtmDatePaid]                      DATETIME        NOT NULL
     ,[dtmPostDate]                      DATETIME        NOT NULL
     ,[intWriteOffAccountId]             INT             NULL
@@ -121,6 +123,8 @@ INSERT @Header
     ,[intPaymentMethodId]
     ,[strPaymentMethod]
     ,[strNotes]
+	,[intExchangeRateTypeId]
+	,[dblExchangeRate]
     ,[dtmDatePaid]
     ,[dtmPostDate]
     ,[intWriteOffAccountId]
@@ -200,6 +204,8 @@ SELECT
     ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
     ,[strPaymentMethod]                 = CASE WHEN LEN(RTRIM(LTRIM(ISNULL(ARP.[strPaymentMethod],'')))) > 0 THEN RTRIM(LTRIM(ARP.[strPaymentMethod])) ELSE RTRIM(LTRIM(ISNULL(SMPM.[strPaymentMethod],''))) END
     ,[strNotes]                         = ARP.[strNotes]
+	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = @PostDate
     ,[intWriteOffAccountId]             = ISNULL(ARP.[intWriteOffAccountId], @WriteOffAccount)
@@ -254,7 +260,7 @@ SELECT
     ,[dblBaseTransactionAmountDue]      = @ZeroDecimal
     ,[intCurrencyExchangeRateTypeId]    = ARP.intCurrencyExchangeRateTypeId
     ,[dblCurrencyExchangeRate]          = @ZeroDecimal
-    ,[strRateType]                      = case when rtype.intCurrencyExchangeRateTypeId is null then '' else rtype.strCurrencyExchangeRateType end
+    ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
     
 FROM
     tblARPayment ARP
@@ -276,8 +282,9 @@ LEFT OUTER JOIN
     SELECT [intPaymentMethodID], [strPaymentMethod] FROM tblSMPaymentMethod WITH(NoLock)
     ) SMPM
         ON ARP.[intPaymentMethodId] = SMPM.[intPaymentMethodID]
-left join (select intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType from tblSMCurrencyExchangeRateType with (nolock) ) rtype
-	on rtype.intCurrencyExchangeRateTypeId = ARP.intCurrencyExchangeRateTypeId
+LEFT OUTER JOIN
+    (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
+        ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OPTION(recompile)
 
 DECLARE @Detail AS [dbo].[ReceivePaymentPostingTable]
@@ -296,6 +303,8 @@ INSERT @Detail
     ,[intPaymentMethodId]
     ,[strPaymentMethod]
     ,[strNotes]
+	,[intExchangeRateTypeId]
+	,[dblExchangeRate]
     ,[dtmDatePaid]
     ,[dtmPostDate]
     ,[intWriteOffAccountId]
@@ -366,6 +375,8 @@ SELECT
     ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
     ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
     ,[strNotes]                         = ARP.[strNotes]
+	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = CAST(ARP.[dtmDatePaid] AS DATE)
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
@@ -420,7 +431,7 @@ SELECT
     ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
-    ,[strRateType]                      = SMCER.[strCurrencyExchangeRateType]
+    ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
 FROM
     tblARPaymentDetail ARPD
 INNER JOIN
@@ -434,7 +445,7 @@ INNER JOIN
         ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
-        ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+        ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 
 UNION
 
@@ -453,6 +464,8 @@ SELECT
     ,[intPaymentMethodId]               = ARP.[intPaymentMethodId]
     ,[strPaymentMethod]                 = ARP.[strPaymentMethod]
     ,[strNotes]                         = ARP.[strNotes]
+	,[intExchangeRateTypeId]			= ARP.[intCurrencyExchangeRateTypeId]
+	,[dblExchangeRate]					= ARP.[dblExchangeRate]
     ,[dtmDatePaid]                      = ARP.[dtmDatePaid]
     ,[dtmPostDate]                      = ARP.[dtmPostDate]
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
@@ -516,7 +529,7 @@ SELECT
     ,[dblBaseTransactionAmountDue]      = APB.[dblAmountDue]
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
-    ,[strRateType]                      = SMCER.[strCurrencyExchangeRateType]    
+    ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
 FROM
     tblARPaymentDetail ARPD
 INNER JOIN
@@ -530,7 +543,7 @@ INNER JOIN
         ON ARPD.[intBillId] = APB.[intBillId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
-        ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+        ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OPTION(recompile)
 
 

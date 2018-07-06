@@ -23,6 +23,10 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[intBankAccountId]						INT												NULL		-- Bank Account Id ([tblCMBankAccount].[intBankAccountId])	
 	,[intWriteOffAccountId]					INT												NULL		-- Account Id ([tblGLAccount].[intAccountId])		
 	,[dblAmountPaid]						NUMERIC(18, 6)									NULL		-- Amount Paid
+	,[dblBaseAmountPaid]					NUMERIC(18, 6)									NULL		-- Amount Paid
+	,[dblBalance]							NUMERIC(18, 6)									NULL		-- Amount Paid
+	,[intExchangeRateTypeId]				INT												NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
+	,[dblExchangeRate]						NUMERIC(18, 6)									NULL
 	,[strPaymentOriginalId]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Reference to the original/parent record
 	,[ysnUseOriginalIdAsPaymentNumber]		BIT												NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 	,[ysnApplytoBudget]						BIT												NULL		-- 	
@@ -30,7 +34,7 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[ysnInvoicePrepayment]					BIT												NULL		-- 		
 	,[ysnImportedFromOrigin]				BIT												NULL		-- 	
 	,[ysnImportedAsPosted]					BIT												NULL		-- 	
-	,[ysnAllowPrepayment]					BIT												NULL		-- 	
+	,[ysnAllowPrepayment]					BIT												NULL		-- 		
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Payments will be posted
 																										-- If [ysnPost] = 0 > Existing posted Invoices will be unposted
 																										-- If [ysnPost] IS NULL > No action will be made
@@ -62,9 +66,9 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[dblAmountDue]							NUMERIC(18, 6)									NULL		-- Invoice Total
 	,[dblBaseAmountDue]						NUMERIC(18, 6)									NULL		-- Base Invoice Total
 	,[strInvoiceReportNumber]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL		-- Transaction Number	
-	,[intCurrencyExchangeRateTypeId]		INT												NULL		-- Forex Rate Type Key Value from tblSMCurrencyExchangeRateType
-	,[intCurrencyExchangeRateId]			INT												NULL
-	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL		-- Forex Rate
+	,[intCurrencyExchangeRateTypeId]		INT												NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
+	,[intCurrencyExchangeRateId]			INT												NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
+	,[dblCurrencyExchangeRate]				NUMERIC(18, 6)									NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate
 	,[ysnAllowOverpayment]					BIT												NULL		-- 	
 	,[ysnFromAP]							BIT												NULL		-- 	
 

@@ -2843,7 +2843,7 @@ IF @Recap = 0
 			-- Update the posted flag in the transaction table
 			UPDATE tblARPayment
 			SET		ysnPosted = 1
-					--,intConcurrencyId += 1 
+					,intCurrentStatus = 4 
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)			
 
 			UPDATE 
@@ -3070,8 +3070,29 @@ IF @Recap = 0
 			WHERE
 				ILD.[intIntegrationLogId] = @IntegrationLogId
 				AND ILD.[ysnPost] IS NOT NULL
+
+			UPDATE tblARPayment
+			SET		intCurrentStatus = NULL 
+			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARPaymentPostData)	
 							
 			END						
+
+		UPDATE 
+			B
+		SET 
+			B.intCurrentStatus = 4
+		FROM
+			tblARPaymentDetail A
+		INNER JOIN
+			tblARPayment B
+				ON A.[intPaymentId] = B.[intPaymentId]
+				AND A.[intPaymentId] NOT IN (SELECT intPaymentId FROM @ARPaymentPostData)
+		INNER JOIN 
+			tblARInvoice C
+				ON A.[intInvoiceId] = C.[intInvoiceId]
+		WHERE
+			B.[ysnPosted] = 1
+			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
 
 		UPDATE 
 			tblARPaymentDetail
@@ -3090,6 +3111,23 @@ IF @Recap = 0
 		WHERE
 			B.[ysnPosted] = 1
 			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0		
+
+		UPDATE 
+			B
+		SET 
+			B.intCurrentStatus = NULL
+		FROM
+			tblARPaymentDetail A
+		INNER JOIN
+			tblARPayment B
+				ON A.[intPaymentId] = B.[intPaymentId]
+				AND A.[intPaymentId] NOT IN (SELECT intPaymentId FROM @ARPaymentPostData)
+		INNER JOIN 
+			tblARInvoice C
+				ON A.[intInvoiceId] = C.[intInvoiceId]
+		WHERE
+			B.[ysnPosted] = 1
+			AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
 						
 		UPDATE 
 			tblARPaymentDetail
