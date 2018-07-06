@@ -61,8 +61,8 @@ BEGIN
 		BEGIN			
 			UPDATE ID 
 			SET ID.dblQtyShipped		= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
-											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
-											--WHEN ID.ysnAddonParent <> 0 AND ITEM.ysnUseWeighScales = 0 THEN dbo.fnRoundBanker(ID.dblQtyOrdered * (ADDON.dblParentQtyOrdered / @dblTotalOrderedQty), 2) --FOR ADD ON ITEMS
+											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ID.ysnAddonParent <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
+											WHEN ID.ysnAddonParent = 0 THEN dblParentQtyOrdered * dblQuantity
 											ELSE ID.dblQtyShipped --REGULAR ITEMS
 										END
 				, ID.intItemUOMId		= CASE WHEN ITEM.ysnUseWeighScales = 1 THEN @intScaleUOMId ELSE ID.intItemUOMId END
@@ -82,13 +82,14 @@ BEGIN
 				SELECT intParentItemId		= AO.intItemId
 						, intComponentItemId	= AO.intComponentItemId
 						, intCompanyLocationId	= AO.intCompanyLocationId
-						, dblParentQtyOrdered  = ISNULL(ADDONPARENT.dblQtyOrdered, 0)
+						, dblParentQtyOrdered  = ISNULL(dblQtyShipped, 0)
+						,AO.dblQuantity
 				FROM vyuARGetAddOnItems AO
 				CROSS APPLY (
-					SELECT TOP 1 dblQtyOrdered
+					SELECT dblQtyOrdered,dblQtyShipped
 					FROM tblARInvoiceDetail
 					WHERE intInvoiceId = @intNewInvoiceId
-						AND intItemId = AO.intItemId
+						AND ysnAddonParent = 1
 				) ADDONPARENT
 			) ADDON ON ADDON.intCompanyLocationId = INVOICE.intCompanyLocationId
 					AND ADDON.intComponentItemId = ID.intItemId
