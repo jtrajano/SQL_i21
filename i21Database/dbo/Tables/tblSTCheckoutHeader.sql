@@ -29,10 +29,10 @@
     [dblCustomerCount] DECIMAL(18, 6) NULL,
     [dblCashOverShort] DECIMAL(18, 6) NULL,
     [strCheckoutStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    [intTotalNoSalesCount] INT,
-    [intFuelAdjustmentCount] INT,
+    [dblTotalNoSalesCount] DECIMAL(18, 6) NULL,
+    [dblFuelAdjustmentCount] DECIMAL(18, 6) NULL,
     [dblFuelAdjustmentAmount] DECIMAL(18, 6) NULL,
-    [intTotalRefundCount] INT,
+    [dblTotalRefundCount] DECIMAL(18, 6) NULL,
     [dblTotalRefundAmount] DECIMAL(18, 6) NULL,
 
     [intCategoryId] INT NULL,
