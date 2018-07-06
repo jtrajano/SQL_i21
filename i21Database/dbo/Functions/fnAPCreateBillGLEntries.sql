@@ -186,7 +186,7 @@ BEGIN
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
 					exRates.strCurrencyExchangeRateType,
-					dblUnits = CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 THEN 0
+					dblUnits = CASE WHEN item.intItemId IS NULL OR R.intInventoryReceiptChargeId > 0 OR item.strType != 'Inventory' THEN 0
 									ELSE
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId 
