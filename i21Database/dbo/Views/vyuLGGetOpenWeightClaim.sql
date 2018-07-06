@@ -363,7 +363,7 @@ FROM (
 		AND LOAD.intPurchaseSale = 1
 	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblLGWeightClaim WC ON WCD.intWeightClaimId = WC.intWeightClaimId
-	WHERE LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
+	WHERE (LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
 			WHEN 1
 				THEN 4
 			WHEN 2
@@ -376,7 +376,7 @@ FROM (
 		 LOAD.intShipmentStatus = CASE LOAD.intPurchaseSale
 			WHEN 3
 				THEN 11
-			END
+			END)
 		AND ISNULL(WC.intWeightClaimId, 0) = 0
 		AND ISNULL(LD.ysnNoClaim, 0) = 0
 	) t1
