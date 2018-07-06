@@ -16,6 +16,25 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
+		
+		-------------------------------------------------------------------------------------------- 
+		-- Create Save Point. 
+		--------------------------------------------------------------------------------------------   
+		-- Create a unique transaction name.
+		DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutPosting' + CAST(NEWID() AS NVARCHAR(100));
+		DECLARE @intTransactionCount INT = @@TRANCOUNT;
+		
+		IF(@intTransactionCount = 0)
+			BEGIN
+				BEGIN TRANSACTION @SavedPointTransaction
+			END
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @SavedPointTransaction --> Save point
+			END
+		-------------------------------------------------------------------------------------------- 
+		-- END Create Save Point. 
+		--------------------------------------------------------------------------------------------
 
 		-- OUT Params
 		SET @strStatusMsg = 'Success'
@@ -520,11 +539,11 @@ BEGIN
 
 					END
 				END
-				ELSE
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Pump Totals'
-					END
+				--ELSE
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Pump Totals'
+				--	END
 				----------------------------------------------------------------------
 				------------------------- END PUMP TOTALS ----------------------------
 				----------------------------------------------------------------------
@@ -732,11 +751,11 @@ BEGIN
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Item Movements'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Item Movements'
+				--	END
 				----------------------------------------------------------------------
 				---------------------------- ITEM MOVEMENTS --------------------------
 				----------------------------------------------------------------------
@@ -980,11 +999,11 @@ BEGIN
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Department Totals'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Department Totals'
+				--	END
 				----------------------------------------------------------------------
 				--------------------- END DEPARTMENT TOTALS --------------------------
 				----------------------------------------------------------------------
@@ -1188,11 +1207,11 @@ BEGIN
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Sales Tax Totals'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Sales Tax Totals'
+				--	END
 				----------------------------------------------------------------------
 				---------------------- END SALES TAX TOTALS --------------------------
 				----------------------------------------------------------------------
@@ -1397,11 +1416,11 @@ BEGIN
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Payment Options'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Payment Options'
+				--	END
 				----------------------------------------------------------------------
 				----------------------- END PAYMENT OPTIONS --------------------------
 				----------------------------------------------------------------------
@@ -1606,11 +1625,11 @@ BEGIN
 								----AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Customer Charges'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Customer Charges'
+				--	END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
 				----------------------------------------------------------------------
@@ -1815,11 +1834,11 @@ BEGIN
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Customer Payments'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Customer Payments'
+				--	END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER PAYMENTS ------------------------
 				----------------------------------------------------------------------
@@ -2020,11 +2039,11 @@ BEGIN
 								AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				END
-				ELSE 
-					BEGIN
-						SET @ysnUpdateCheckoutStatus = 0
-						SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Over short'
-					END
+				--ELSE 
+				--	BEGIN
+				--		SET @ysnUpdateCheckoutStatus = 0
+				--		SET @strStatusMsg = @strStatusMsg + '<BR>' + 'No records found to Post Over short'
+				--	END
 				----------------------------------------------------------------------
 				------------------------- END CASH OVER SHORT ------------------------
 				----------------------------------------------------------------------
@@ -2245,16 +2264,14 @@ BEGIN
 				DECLARE @ErrorMessage AS NVARCHAR(MAX) = ''
 				DECLARE @CreatedIvoices AS NVARCHAR(MAX) = ''
 
-				-- SELECT * FROM @EntriesForInvoice
+				-- Filter dblPrice should not be 0 and null
+				DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
 
 				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
 						BEGIN TRY
-							
-							-- Filter dblPrice should not be 0 and null
-							DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
-							
 							-- Filter None Lotted Items Only
+
 							INSERT INTO @tblTempItems
 							(
 								intItemId
@@ -2279,12 +2296,16 @@ BEGIN
 
 									SET @ysnUpdateCheckoutStatus = 0
 									SET @strStatusMsg = 'Lotted Items (' + @strLottedItem + ') Only None Lotted Items are allowed '
-									RETURN
+									GOTO With_Rollback_Exit;
 								END
 							ELSE
 								BEGIN
 									-- CLEAR
 									SET @CreatedIvoices = ''
+
+									--TEST
+									SELECT * FROM @EntriesForInvoice
+									SELECT * FROM @LineItemTaxEntries
 
 									-- POST Main Checkout Invoice
 									EXEC [dbo].[uspARProcessInvoices]
@@ -2295,21 +2316,20 @@ BEGIN
 												,@RaiseError		 = 0
 												,@ErrorMessage		 = @ErrorMessage OUTPUT
 												,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-								END
 
-							
+
+								END
 						END TRY
 
 						BEGIN CATCH
 							SET @ErrorMessage = ERROR_MESSAGE()
+							SET @strStatusMsg = 'Checkout Invoice: ' + @ErrorMessage
 						END CATCH
-
+						
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
-								--SET @intCreatedInvoiceId = CAST(@CreatedIvoices AS INT)
-
-								-- Insert to temp table
+							    -- Insert to temp table
 								INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
 								SELECT [intID] AS intInvoiceId 
 								FROM [dbo].[fnGetRowsFromDelimitedValues](@CreatedIvoices) ORDER BY [intID] ASC
@@ -2327,11 +2347,6 @@ BEGIN
 								-----------------------------------------------------------------------
 								------------- START POST MArk Up / Down -------------------------------
 								-----------------------------------------------------------------------
-								--DECLARE @intMarkUpDownId AS INT = (SELECT intMarkUpDownId FROM tblSTMarkUpDown WHERE intCheckoutId = @intCheckoutId)
-								--IF(@intMarkUpDownId IS NOT NULL AND @intMarkUpDownId <> 0)
-								--	BEGIN
-										
-								--	END
 
 								-- POST
 										EXEC uspSTMarkUpDownCheckoutPosting
@@ -2342,19 +2357,6 @@ BEGIN
 											,@strBatchId		= @strBatchId OUTPUT
 											,@ysnIsPosted		= @ysnIsPosted OUTPUT
 
-										--EXEC uspSTMarkUpDownPosting 
-										--	@intMarkUpDownId	= @intMarkUpDownId
-										--	,@intCurrentUserId	= @intCurrentUserId 
-										--	,@ysnRecap			= 0
-										--	,@ysnPost			= 1 -- POST
-										--	,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUT
-										--	,@strBatchId		= @strBatchId OUT
-										--	,@ysnIsPosted		= @ysnIsPosted OUT
-										
-										--IF(@strMarkUpDownPostingStatusMsg = 'Success')
-										--	BEGIN
-												
-										--	END
 								-----------------------------------------------------------------------
 								------------- END POST MArk Up / Down ---------------------------------
 								-----------------------------------------------------------------------
@@ -2369,8 +2371,15 @@ BEGIN
 							BEGIN
 								SET @ysnUpdateCheckoutStatus = 0
 								SET @strStatusMsg = 'Checkout Invoice: ' + @ErrorMessage
+
+								-- ROLLBACK TRANSACTION
+								GOTO With_Rollback_Exit;
 							END
 							END
+				ELSE 
+					BEGIN
+						SET @strStatusMsg = 'No records found to Post'
+					END
 				----------------------------------------------------------------------
 				---------------------------- END POST --------------------------------
 				----------------------------------------------------------------------
@@ -2413,6 +2422,9 @@ BEGIN
 							SET @ysnUpdateCheckoutStatus = 0
 							SET @ysnSuccess = 0
 							SET @strStatusMsg = ERROR_MESSAGE()
+
+							-- ROLLBACK TRANSACTION
+							GOTO With_Rollback_Exit;
 						END CATCH
 
 						-- Example OutPut params
@@ -2424,15 +2436,9 @@ BEGIN
 						IF(@ysnSuccess = CAST(1 AS BIT))
 							BEGIN
 								SET @ysnInvoiceStatus = 0
-
 								-----------------------------------------------------------------------
 								------------- START UNPOST MArk Up / Down -------------------------------
 								-----------------------------------------------------------------------
-								--IF(@intMarkUpDownId IS NOT NULL AND @intMarkUpDownId <> 0)
-								--	BEGIN
-										
-								--	END
-
 								-- UNPOST	
 										EXEC uspSTMarkUpDownCheckoutPosting
 											@intCheckoutId		= @intCheckoutId
@@ -2441,11 +2447,6 @@ BEGIN
 											,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUTPUT
 											,@strBatchId		= @strBatchId OUTPUT
 											,@ysnIsPosted		= @ysnIsPosted OUTPUT
-										
-										--IF(@strMarkUpDownPostingStatusMsg = 'Success')
-										--	BEGIN
-												
-										--	END
 								-----------------------------------------------------------------------
 								------------- END UNPOST MArk Up / Down ---------------------------------
 								-----------------------------------------------------------------------
@@ -2453,6 +2454,9 @@ BEGIN
 						ELSE IF(@ysnSuccess = CAST(0 AS BIT))
 							BEGIN
 								SET @strStatusMsg = ERROR_MESSAGE()
+
+								-- ROLLBACK TRANSACTION
+								GOTO With_Rollback_Exit;
 							END
 					END
 				ELSE 
@@ -2563,15 +2567,46 @@ BEGIN
 				BEGIN
 					DROP TABLE #tmpCustomerInvoiceIdList
 				END
+
+			-- IF SUCCESS Commit Transaction
+			IF(@intTransactionCount = 0)
+				BEGIN
+					COMMIT TRANSACTION @SavedPointTransaction
+					SET @strStatusMsg = 'Success'
+					GOTO Post_Exit
+				END
+			
+
 	END TRY
 
 	BEGIN CATCH
 		--DROP
 		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
 			BEGIN
-					DROP TABLE #tmpCustomerInvoiceIdList
+				DROP TABLE #tmpCustomerInvoiceIdList
 			END
 
 		SET @strStatusMsg = 'Script Error: ' + ERROR_MESSAGE()
+
+		declare @error int, @message varchar(4000), @xstate int;
+        select @error = ERROR_NUMBER(), @message = ERROR_MESSAGE(), @xstate = XACT_STATE();
+        if @xstate = -1
+            rollback;
+        if @xstate = 1 and @intTransactionCount = 0
+            rollback
+        if @xstate = 1 and @intTransactionCount > 0
+            rollback transaction @SavedPointTransaction;
+
+        raiserror ('uspSTCheckoutPosting: %d: %s', 16, 1, @error, @message) ;
 	END CATCH
 END
+
+
+With_Rollback_Exit:
+IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
+	BEGIN 
+		ROLLBACK TRANSACTION @SavedPointTransaction;
+	END
+
+--EXIT here
+Post_Exit:
