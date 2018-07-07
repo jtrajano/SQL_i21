@@ -6776,6 +6776,9 @@
     <None Include="Scripts\Post-Deployment\ST\12_FileFieldMapping_Passport_FGM.sql" />
     <None Include="Scripts\Post-Deployment\ST\13_FileFieldMapping_Passport_MCM.sql" />
     <None Include="Scripts\Post-Deployment\ST\14_FileFieldMapping_Passport_MSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportFGM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
