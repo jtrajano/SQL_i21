@@ -52,7 +52,6 @@ BEGIN TRY
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-
 	DECLARE @tblMFTask TABLE (
 		intAlternateTaskId INT
 		,dblAlternateTaskQty NUMERIC(18, 6)
@@ -105,32 +104,37 @@ BEGIN TRY
 			ELSE dblWeightPerQty
 			END
 		,@dblQty = dblQty
-		,@dblLotAvailableQty=Case When @intWeightUOMId is null then dblQty else dblWeight End
+		,@dblLotAvailableQty = CASE 
+			WHEN @intWeightUOMId IS NULL
+				THEN dblQty
+			ELSE dblWeight
+			END
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
 	WHERE intLotId = @intLotId
+		AND intInventoryTransactionType <> 34
 		AND ISNULL(ysnPosted, 0) = 0
 
 	IF (
-					@dblLotAvailableQty + (
-						CASE 
-							WHEN @intItemUOMId = @intTaskItemUOMId
-								AND @intWeightUOMId IS NOT NULL
-								THEN - @dblTaskQty * @dblWeightPerQty
-							ELSE - @dblTaskQty
-							END
-						)
-					) < @dblLotReservedQty
-			BEGIN
-				RAISERROR (
-						'There is reservation against this lot. Cannot proceed.'
-						,16
-						,1
-						)
-			END
+			@dblLotAvailableQty + (
+				CASE 
+					WHEN @intItemUOMId = @intTaskItemUOMId
+						AND @intWeightUOMId IS NOT NULL
+						THEN - @dblTaskQty * @dblWeightPerQty
+					ELSE - @dblTaskQty
+					END
+				)
+			) < @dblLotReservedQty
+	BEGIN
+		RAISERROR (
+				'There is reservation against this lot. Cannot proceed.'
+				,16
+				,1
+				)
+	END
 
 	IF @intTaskItemUOMId = @intItemUOMId
 	BEGIN

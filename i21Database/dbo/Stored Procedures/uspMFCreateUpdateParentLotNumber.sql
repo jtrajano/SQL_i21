@@ -48,6 +48,9 @@ BEGIN
 		,@dblTareWeight NUMERIC(38, 20)
 		,@ysnPickAllowed BIT
 		,@ysnSendEDIOnRepost BIT
+		,@intWorkOrderId int
+		,@intManufacturingProcessId int
+		,@ysnLotNumberUniqueByItem BIT
 
 		SELECT @strLifeTimeType = strLifeTimeType
 			,@intLifeTime = intLifeTime
@@ -65,6 +68,7 @@ BEGIN
 		,@intLotDueDays = IsNULL(@intLotDueDays,intLotDueDays)
 		,@ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 		,@ysnSendEDIOnRepost=ysnSendEDIOnRepost
+		,@ysnLotNumberUniqueByItem=ysnLotNumberUniqueByItem
 	FROM tblMFCompanyPreference
 
 	SELECT @strLotNumber = strLotNumber
@@ -136,7 +140,7 @@ BEGIN
 			WHERE strLotNumber=@strLotNumber and intItemId<>@intItemId
 			and dblQty>0
 			and intLocationId=@intLocationId
-			)
+			) and @ysnLotNumberUniqueByItem=1
 	BEGIN
 		RAISERROR (
 				'Lot number already exists. Note: Same lot number cannot be used by more than one item.'
@@ -297,6 +301,8 @@ BEGIN
 			,@dblTareWeight = dblTareWeight
 			,@dtmDueDate = dtmDueDate
 			,@ysnPickAllowed=ysnPickAllowed
+			,@intWorkOrderId=intWorkOrderId
+			,@intManufacturingProcessId=intManufacturingProcessId
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -373,6 +379,8 @@ BEGIN
 			,dblTareWeight
 			,dtmDueDate
 			,ysnPickAllowed
+			,intWorkOrderId
+			,intManufacturingProcessId
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -384,6 +392,8 @@ BEGIN
 			,@dblTareWeight
 			,@dtmDueDate
 			,IsNULL(@ysnPickAllowed,1)
+			,@intWorkOrderId
+			,@intManufacturingProcessId
 	END
 	ELSE
 	BEGIN

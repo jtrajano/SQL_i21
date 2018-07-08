@@ -72,5 +72,7 @@
 	ysnConsiderCurrentWeekForDemandPlanning BIT Default 1,
 	dblAverageWeekTransitPeriodForDemandPlanning NUMERIC(18,6),
 	ysnIncludeConsumptionByLocationInPickOrder BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnIncludeConsumptionByLocationInPickOrder] DEFAULT 1,
+	ysnCostEnabled BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnCostEnabled] DEFAULT 1,
+	ysnLotNumberUniqueByItem Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnLotNumberUniqueByItem] DEFAULT 1,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

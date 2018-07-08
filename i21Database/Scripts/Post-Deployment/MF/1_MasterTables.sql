@@ -3518,3 +3518,11 @@ UPDATE tblMFReasonCode
 SET intConcurrencyId = 1
 WHERE intConcurrencyId = 0
 GO
+UPDATE dbo.tblMFCompanyPreference
+SET ysnCostEnabled  =1
+WHERE ysnCostEnabled is NULL
+Go
+UPDATE dbo.tblMFCompanyPreference
+SET ysnLotNumberUniqueByItem =1
+WHERE ysnLotNumberUniqueByItem is NULL
+Go
