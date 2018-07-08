@@ -31,7 +31,7 @@
 	,@ysnFillPartialPallet BIT = 0
 	,@intSpecialPalletLotId INT = NULL
 	,@ysnRecap BIT = 0
-	,@intLotStatusId int=NULL
+	,@intLotStatusId INT = NULL
 	)
 AS
 BEGIN
@@ -50,7 +50,7 @@ BEGIN
 		,@intSpecialPalletItemId INT
 		,@intSpecialPalletCategoryId INT
 		,@ysnProducedQtyByUnitCount BIT
-		,@strPickLot nvarchar(50)
+		,@strPickLot NVARCHAR(50)
 
 	SELECT @dtmCreated = Getdate()
 
@@ -425,7 +425,7 @@ BEGIN
 			,@intStorageLocationId = @intStorageLocationId
 			,@dtmProductionDate = @dtmProductionDate
 			,@intTransactionDetailId = @intWorkOrderProducedLotId
-			,@intLotStatusId=@intLotStatusId
+			,@intLotStatusId = @intLotStatusId
 	END
 
 	IF @strParentLotNumber IS NULL
@@ -479,7 +479,7 @@ BEGIN
 	UPDATE tblMFWorkOrderProducedLot
 	SET intLotId = @intLotId
 		,strParentLotNumber = IsNULL(@strParentLotNumber2, @strParentLotNumber)
-		,intProducedLotId=@intLotId
+		,intProducedLotId = @intLotId
 	WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
 	IF @intSpecialPalletLotId IS NOT NULL
@@ -604,16 +604,21 @@ BEGIN
 	FROM tblMFManufacturingProcessAttribute
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND intAttributeId = 108--Pick Lot/Pallet after closing work order
+		AND intAttributeId = 108 --Pick Lot/Pallet after closing work order
 
-	If @strPickLot is null or @strPickLot=''
-	Begin
-		Select @strPickLot='False'
-	End
+	IF @strPickLot IS NULL
+		OR @strPickLot = ''
+	BEGIN
+		SELECT @strPickLot = 'False'
+	END
 
-	IF @strPickLot='True'
-	Begin
-		Update tblMFLotInventory Set ysnPickAllowed=0 Where intLotId=@intLotId
-	End
-
+	UPDATE tblMFLotInventory
+	SET ysnPickAllowed = CASE 
+			WHEN @strPickLot = 'True'
+				THEN 0
+			ELSE 1
+			END
+		,intWorkOrderId = @intWorkOrderId
+		,intManufacturingProcessId=@intManufacturingProcessId
+	WHERE intLotId = @intLotId
 END
