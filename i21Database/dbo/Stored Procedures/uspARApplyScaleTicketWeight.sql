@@ -62,7 +62,7 @@ BEGIN
 			UPDATE ID 
 			SET ID.dblQtyShipped		= CASE WHEN ISNULL(ID.intContractDetailId, 0) <> 0 AND dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) > ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, @intScaleUOMId, ID.dblQtyShipped), 0) --FOR CONTRACT ITEMS
 											WHEN ISNULL(ITEM.ysnUseWeighScales, 0) = 1  and ID.ysnAddonParent <> 0 THEN dbo.fnRoundBanker(@dblNetWeight * (ID.dblQtyOrdered / @dblTotalOrderedQty), 2) --FOR SCALE ITEMS
-											WHEN ID.ysnAddonParent = 0 THEN dblParentQtyOrdered * dblQuantity
+											WHEN ID.ysnAddonParent = 0 THEN (CASE WHEN ISNULL(ParentAddon.intInvoiceDetailId,0) = 0 THEN ID.dblQtyShipped  ELSE dbo.fnRoundBanker((@dblNetWeight * (ParentAddon.dblQtyOrdered / @dblTotalOrderedQty)) * ISNULL(AddOnQty.dblQuantity,0), 2)  END) --FOR SCALE ITEMS ELSE ID.dblQtyShipped END)
 											ELSE ID.dblQtyShipped --REGULAR ITEMS
 										END
 				, ID.intItemUOMId		= CASE WHEN ITEM.ysnUseWeighScales = 1 THEN @intScaleUOMId ELSE ID.intItemUOMId END
@@ -78,22 +78,14 @@ BEGIN
 						, ysnUseWeighScales	= ISNULL(ysnUseWeighScales, 0)
 				FROM dbo.tblICItem
 			) ITEM ON ID.intItemId = ITEM.intItemId
-			LEFT JOIN (
-				SELECT intParentItemId		= AO.intItemId
-						, intComponentItemId	= AO.intComponentItemId
-						, intCompanyLocationId	= AO.intCompanyLocationId
-						, dblParentQtyOrdered  = ISNULL(dblQtyShipped, 0)
-						,AO.dblQuantity
-				FROM vyuARGetAddOnItems AO
-				CROSS APPLY (
-					SELECT dblQtyOrdered,dblQtyShipped
-					FROM tblARInvoiceDetail
-					WHERE intInvoiceId = @intNewInvoiceId
-						AND ysnAddonParent = 1
-				) ADDONPARENT
-			) ADDON ON ADDON.intCompanyLocationId = INVOICE.intCompanyLocationId
-					AND ADDON.intComponentItemId = ID.intItemId
+			LEFT JOIN tblARInvoiceDetail ParentAddon
+				ON ParentAddon.intInvoiceId =  @intNewInvoiceId and ParentAddon.strAddonDetailKey = ID.strAddonDetailKey AND ParentAddon.ysnAddonParent = 1
+			LEFT JOIN tblICItem AddonItemParent
+				ON AddonItemParent.intItemId = ParentAddon.intItemId
+			LEFT JOIN vyuARGetAddOnItems AddOnQty
+				ON (AddOnQty.intItemId = ParentAddon.intItemId AND AddOnQty.intComponentItemId = ID.intItemId) and AddOnQty.intCompanyLocationId = INVOICE.intCompanyLocationId
 			WHERE ID.intInvoiceId = @intNewInvoiceId
+	
 
 			IF(OBJECT_ID('tempdb..#CONTRACTLINEITEMS') IS NOT NULL)
 			BEGIN
