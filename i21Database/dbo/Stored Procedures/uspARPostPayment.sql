@@ -241,9 +241,10 @@ IF(@exclude IS NOT NULL)
 					A.intPaymentId
 				FROM
 					tblARPayment A 
-				INNER JOIN
-					@ARReceivablePostData P
-						ON A.intPaymentId = P.[intTransactionId]				
+				INNER JOIN (
+					SELECT DISTINCT intTransactionId
+					FROM @ARReceivablePostData
+				) P ON A.intPaymentId = P.[intTransactionId]				
 				WHERE
 					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
 					AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)	
@@ -255,9 +256,10 @@ IF(@exclude IS NOT NULL)
 					A.intPaymentId
 				FROM
 					tblARPayment A 
-				INNER JOIN
-					@ARReceivablePostData P
-						ON A.intPaymentId = P.[intTransactionId]				
+				INNER JOIN (
+					SELECT DISTINCT intTransactionId
+					FROM @ARReceivablePostData
+				) P ON A.intPaymentId = P.[intTransactionId]				
 				WHERE
 					(A.dblAmountPaid) <> 0
 					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0	
@@ -276,9 +278,10 @@ IF(@exclude IS NOT NULL)
 					A.intPaymentId
 				FROM
 					tblARPayment A 
-				INNER JOIN
-					@ARReceivablePostData P
-						ON A.intPaymentId = P.[intTransactionId]
+				INNER JOIN (
+					SELECT DISTINCT intTransactionId
+					FROM @ARReceivablePostData
+				) P ON A.intPaymentId = P.[intTransactionId]
 				INNER JOIN
 					tblARInvoice I
 						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
@@ -292,9 +295,10 @@ IF(@exclude IS NOT NULL)
 					A.intPaymentId
 				FROM
 					tblARPayment A 
-				INNER JOIN
-					@ARReceivablePostData P
-						ON A.intPaymentId = P.[intTransactionId]
+				INNER JOIN (
+					SELECT DISTINCT intTransactionId
+					FROM @ARReceivablePostData
+				) P ON A.intPaymentId = P.[intTransactionId]
 				INNER JOIN
 					tblARInvoice I
 						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
