@@ -16,25 +16,6 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
-		
-		-------------------------------------------------------------------------------------------- 
-		-- Create Save Point. 
-		--------------------------------------------------------------------------------------------   
-		-- Create a unique transaction name.
-		DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutPosting' + CAST(NEWID() AS NVARCHAR(100));
-		DECLARE @intTransactionCount INT = @@TRANCOUNT;
-		
-		IF(@intTransactionCount = 0)
-			BEGIN
-				BEGIN TRANSACTION @SavedPointTransaction
-			END
-		ELSE
-			BEGIN
-				SAVE TRANSACTION @SavedPointTransaction --> Save point
-			END
-		-------------------------------------------------------------------------------------------- 
-		-- END Create Save Point. 
-		--------------------------------------------------------------------------------------------
 
 		-- OUT Params
 		SET @strStatusMsg = 'Success'
@@ -419,7 +400,11 @@ BEGIN
 										,[intShipmentId]			= NULL
 										,[intTransactionId]			= NULL
 										,[intEntityId]				= @intCurrentUserId
-										,[ysnResetDetails]			= 1
+										,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	  END
 										,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 										,[intInvoiceDetailId]		= NULL
 										,[intItemId]				= I.intItemId
@@ -430,46 +415,6 @@ BEGIN
 										,[intItemUOMId]				= UOM.intItemUOMId
 										,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0) --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[dblDiscount]				= 0
-
-										-- Should remove tax to calculate Net Price --CPT.dblPrice
-										--,[dblPrice]					= ISNULL(CPT.dblPrice, 0) - ISNULL(CAST((SELECT SUM(dblAdjustedTax) 
-										--												  FROM [dbo].[fnGetItemTaxComputationForCustomer]
-										--												  (
-										--														I.intItemId
-										--														, ST.intCheckoutCustomerId
-										--														, GETDATE()
-										--														, CPT.dblPrice
-										--														, 1
-										--														, ST.intTaxGroupId
-										--														, ST.intCompanyLocationId
-										--														, NULL -- EL.intEntityLocationId
-										--														, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-										--												  )) AS DECIMAL(18,6)), 0)
-
-										--, [dblPrice]				= ISNULL([dbo].fnRoundBanker(CPT.dblPrice, 2), 0) - ISNULL((SELECT  SUM([dblAdjustedTax])						
-										--								FROM dbo.fnConstructLineItemTaxDetail (
-										--									1										-- Qty
-										--									, ISNULL([dbo].fnRoundBanker(CPT.dblPrice, 2), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
-										--									, @LineItems
-										--									, 1										-- is Reversal
-										--									, I.intItemId							-- Item Id
-										--									, ST.intCheckoutCustomerId				-- Customer Id
-										--									, ST.intCompanyLocationId				-- Company Location Id
-										--									, ST.intTaxGroupId						-- Tax Group Id
-										--									, 0										-- 0 Price if not reversal
-										--									, GETDATE()
-										--									, vC.intShipToId						-- Ship to Location
-										--									, 1
-										--									, NULL
-										--									, vC.intFreightTermId					-- FreightTermId
-										--									, NULL
-										--									, NULL
-										--									, 0
-										--									, 0
-										--									, UOM.intItemUOMId
-										--									,NULL									--@CFSiteId
-										--									,0										--@IsDeliver
-										--								)), 0)
 										
 										, [dblPrice]				= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
@@ -680,7 +625,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -893,7 +842,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1141,7 +1094,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1350,7 +1307,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1559,7 +1520,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1768,7 +1733,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -1977,7 +1946,11 @@ BEGIN
 											,[intShipmentId]			= NULL
 											,[intTransactionId]			= NULL
 											,[intEntityId]				= @intCurrentUserId
-											,[ysnResetDetails]			= 1
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
 											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 											,[intInvoiceDetailId]		= NULL
 											,[intItemId]				= I.intItemId
@@ -2185,7 +2158,11 @@ BEGIN
 															,[intShipmentId]			= NULL
 															,[intTransactionId]			= NULL
 															,[intEntityId]				= @intCurrentUserId
-															,[ysnResetDetails]			= 1
+															,[ysnResetDetails]			= CASE
+																							WHEN @intCurrentInvoiceId IS NOT NULL
+																								THEN CAST(0 AS BIT)
+																							ELSE CAST(1 AS BIT)
+																						  END
 															,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
 															,[intInvoiceDetailId]		= NULL
 															,[intItemId]				= I.intItemId
@@ -2269,9 +2246,8 @@ BEGIN
 
 				IF EXISTS(SELECT * FROM @EntriesForInvoice)
 					BEGIN
-						BEGIN TRY
-							-- Filter None Lotted Items Only
-
+						
+						-- Filter None Lotted Items Only
 							INSERT INTO @tblTempItems
 							(
 								intItemId
@@ -2296,36 +2272,31 @@ BEGIN
 
 									SET @ysnUpdateCheckoutStatus = 0
 									SET @strStatusMsg = 'Lotted Items (' + @strLottedItem + ') Only None Lotted Items are allowed '
-									GOTO With_Rollback_Exit;
+									
+									--GOTO With_Rollback_Exit;
 								END
 							ELSE
 								BEGIN
 									-- CLEAR
 									SET @CreatedIvoices = ''
 
-									--TEST
-									SELECT * FROM @EntriesForInvoice
-									SELECT * FROM @LineItemTaxEntries
+									BEGIN TRY
+										-- POST Main Checkout Invoice
+										EXEC [dbo].[uspARProcessInvoices]
+													@InvoiceEntries	 = @EntriesForInvoice
+													,@LineItemTaxEntries = @LineItemTaxEntries
+													,@UserId			 = @intCurrentUserId
+		 											,@GroupingOption	 = 11
+													,@RaiseError		 = 1
+													,@ErrorMessage		 = @ErrorMessage OUTPUT
+													,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+									END TRY
 
-									-- POST Main Checkout Invoice
-									EXEC [dbo].[uspARProcessInvoices]
-												@InvoiceEntries	 = @EntriesForInvoice
-												,@LineItemTaxEntries = @LineItemTaxEntries
-												,@UserId			 = @intCurrentUserId
-		 										,@GroupingOption	 = 11
-												,@RaiseError		 = 0
-												,@ErrorMessage		 = @ErrorMessage OUTPUT
-												,@CreatedIvoices	 = @CreatedIvoices OUTPUT
-
-
+									BEGIN CATCH
+										SET @ErrorMessage = ERROR_MESSAGE()
+										SET @strStatusMsg = 'Post Invoice error: ' + @ErrorMessage
+									END CATCH
 								END
-						END TRY
-
-						BEGIN CATCH
-							SET @ErrorMessage = ERROR_MESSAGE()
-							SET @strStatusMsg = 'Checkout Invoice: ' + @ErrorMessage
-						END CATCH
-						
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
@@ -2349,7 +2320,7 @@ BEGIN
 								-----------------------------------------------------------------------
 
 								-- POST
-										EXEC uspSTMarkUpDownCheckoutPosting
+								EXEC uspSTMarkUpDownCheckoutPosting
 											@intCheckoutId		= @intCheckoutId
 											,@intCurrentUserId	= @intCurrentUserId
 											,@ysnPost			= 1 -- POST
@@ -2370,10 +2341,10 @@ BEGIN
 						ELSE
 							BEGIN
 								SET @ysnUpdateCheckoutStatus = 0
-								SET @strStatusMsg = 'Checkout Invoice: ' + @ErrorMessage
+								SET @strStatusMsg = 'Post Invoice error: ' + @ErrorMessage
 
-								-- ROLLBACK TRANSACTION
-								GOTO With_Rollback_Exit;
+								---- ROLLBACK TRANSACTION
+								--GOTO With_Rollback_Exit;
 							END
 							END
 				ELSE 
@@ -2394,9 +2365,11 @@ BEGIN
 				-- Main Invoice: Main CHeckout
 				IF(@strCurrentAllInvoiceIdList IS NOT NULL AND @strCurrentAllInvoiceIdList != '')
 					BEGIN
-						BEGIN TRY
 
-								EXEC [dbo].[uspARPostInvoice]
+						SET @ysnSuccess = 1
+
+						BEGIN TRY
+							EXEC [dbo].[uspARPostInvoice]
 											@batchId			= NULL,
 											@post				= 0, -- 0 = UnPost
 											@recap				= 0,
@@ -2413,18 +2386,12 @@ BEGIN
 											@batchIdUsed		= @strBatchIdUsed OUTPUT,
 											@transType			= N'all',
 											@raiseError			= 1
-
-								SET @ysnSuccess = 1
-
 						END TRY
 
 						BEGIN CATCH
-							SET @ysnUpdateCheckoutStatus = 0
-							SET @ysnSuccess = 0
-							SET @strStatusMsg = ERROR_MESSAGE()
-
-							-- ROLLBACK TRANSACTION
-							GOTO With_Rollback_Exit;
+							SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+							SET @ysnSuccess = CAST(0 AS BIT)
+							SET @strStatusMsg = 'Unpost Invoice error: ' + ERROR_MESSAGE()
 						END CATCH
 
 						-- Example OutPut params
@@ -2440,23 +2407,18 @@ BEGIN
 								------------- START UNPOST MArk Up / Down -------------------------------
 								-----------------------------------------------------------------------
 								-- UNPOST	
-										EXEC uspSTMarkUpDownCheckoutPosting
-											@intCheckoutId		= @intCheckoutId
-											,@intCurrentUserId	= @intCurrentUserId
-											,@ysnPost			= 0 -- UNPOST
-											,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUTPUT
-											,@strBatchId		= @strBatchId OUTPUT
-											,@ysnIsPosted		= @ysnIsPosted OUTPUT
+								EXEC uspSTMarkUpDownCheckoutPosting
+											@intCheckoutId
+											,@intCurrentUserId
+											,0 -- UNPOST
+											,@strMarkUpDownPostingStatusMsg OUTPUT
+											,@strBatchId OUTPUT
+											,@ysnIsPosted OUTPUT
 								-----------------------------------------------------------------------
 								------------- END UNPOST MArk Up / Down ---------------------------------
 								-----------------------------------------------------------------------
-							END
-						ELSE IF(@ysnSuccess = CAST(0 AS BIT))
-							BEGIN
-								SET @strStatusMsg = ERROR_MESSAGE()
 
-								-- ROLLBACK TRANSACTION
-								GOTO With_Rollback_Exit;
+								SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
 							END
 					END
 				ELSE 
@@ -2469,7 +2431,6 @@ BEGIN
 		----------------------- END POST / UNPOST ----------------------------
 		----------------------------------------------------------------------
 		
-	
 
 		IF(@ysnUpdateCheckoutStatus = 1)
 			BEGIN
@@ -2567,16 +2528,6 @@ BEGIN
 				BEGIN
 					DROP TABLE #tmpCustomerInvoiceIdList
 				END
-
-			-- IF SUCCESS Commit Transaction
-			IF(@intTransactionCount = 0)
-				BEGIN
-					COMMIT TRANSACTION @SavedPointTransaction
-					SET @strStatusMsg = 'Success'
-					GOTO Post_Exit
-				END
-			
-
 	END TRY
 
 	BEGIN CATCH
@@ -2587,26 +2538,5 @@ BEGIN
 			END
 
 		SET @strStatusMsg = 'Script Error: ' + ERROR_MESSAGE()
-
-		declare @error int, @message varchar(4000), @xstate int;
-        select @error = ERROR_NUMBER(), @message = ERROR_MESSAGE(), @xstate = XACT_STATE();
-        if @xstate = -1
-            rollback;
-        if @xstate = 1 and @intTransactionCount = 0
-            rollback
-        if @xstate = 1 and @intTransactionCount > 0
-            rollback transaction @SavedPointTransaction;
-
-        raiserror ('uspSTCheckoutPosting: %d: %s', 16, 1, @error, @message) ;
 	END CATCH
 END
-
-
-With_Rollback_Exit:
-IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
-	BEGIN 
-		ROLLBACK TRANSACTION @SavedPointTransaction;
-	END
-
---EXIT here
-Post_Exit:
