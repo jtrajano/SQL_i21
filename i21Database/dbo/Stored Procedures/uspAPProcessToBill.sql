@@ -31,7 +31,8 @@ EXEC [dbo].[uspICProcessToBill]
 	@intBillId = @billId OUTPUT,
 	@strBillIds = @voucherCreated OUTPUT
 
-SET @strBillIds = @voucherCreated
+SET @intBillId = @billId;
+SET @strBillIds = @voucherCreated;
 
 -- SELECT TOP 1 @intBillId = intBillId FROM #tmpBillIds
 
