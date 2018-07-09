@@ -112,7 +112,11 @@ BEGIN
 		ShippingLine.strName AS strShippingLineName,
 		ysnDisplayPIInfo = @ysnDisplayPIInfo,
 		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType,
-		strReportName = @strReportName
+		strReportName = @strReportName,
+		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
+		dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
+		ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
+		ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
@@ -126,5 +130,6 @@ BEGIN
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+	CROSS APPLY tblLGCompanyPreference CP
 	WHERE Inv.intInvoiceId = @intInvoiceId
 END

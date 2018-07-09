@@ -93,7 +93,10 @@ SELECT @strCompanyName AS strCompanyName
 	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 	,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
 	,CUS.strVatNumber
+	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth	
 FROM tblARInvoice INV 
 LEFT JOIN tblARCustomer CUS ON CUS.intEntityId = INV.intEntityCustomerId
 LEFT JOIN tblEMEntity EN ON EN.intEntityId = INV.intEntityCustomerId
+CROSS APPLY tblLGCompanyPreference CP
 WHERE INV.intInvoiceId = @intInvoiceId

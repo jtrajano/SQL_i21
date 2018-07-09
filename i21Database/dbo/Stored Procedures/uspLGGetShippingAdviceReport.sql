@@ -262,6 +262,8 @@ BEGIN
 				Via.strName strShipVia,
 				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 				dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
+				ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
+				ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth,
 				@strCompanyName AS strCompanyName,
 				@strCompanyAddress AS strCompanyAddress,
 				@strContactName AS strCompanyContactName ,
