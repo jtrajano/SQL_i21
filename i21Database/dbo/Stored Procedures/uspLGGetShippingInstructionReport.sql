@@ -926,7 +926,9 @@ FROM (
 		,Basis.strDescription AS strContractBasisDescription
 		,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 		,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
-		,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	
+		,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo
+		,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+		,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth			
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
