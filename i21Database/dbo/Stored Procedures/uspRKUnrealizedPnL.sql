@@ -4,7 +4,10 @@
 	,@intCommodityId INT = NULL
 	,@ysnExpired BIT
 	,@intFutureMarketId INT = NULL
-	,@intEntityId int = null
+	,@intEntityId int = null		
+	,@intBrokerageAccountId INT = NULL
+	,@intFutureMonthId INT = NULL
+	,@strBuySell nvarchar(10)=NULL
 AS  
 
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
@@ -82,6 +85,9 @@ SELECT  intFutOptTransactionId,
  WHERE ot.intCommodityId= CASE WHEN ISNULL(@intCommodityId,0)=0 then ot.intCommodityId else @intCommodityId end
 	AND ot.intFutureMarketId= CASE WHEN ISNULL(@intFutureMarketId,0)=0 then ot.intFutureMarketId else @intFutureMarketId end
 	AND ot.intEntityId= CASE WHEN ISNULL(@intEntityId,0)=0 then ot.intEntityId else @intEntityId end
+	AND ot.intBrokerageAccountId= CASE WHEN ISNULL(@intBrokerageAccountId,0)=0 then ot.intBrokerageAccountId else @intBrokerageAccountId end
+	AND ot.intFutureMonthId= CASE WHEN ISNULL(@intFutureMonthId,0)=0 then ot.intFutureMonthId else @intFutureMonthId end
+	AND ot.strBuySell= CASE WHEN ISNULL(@strBuySell,'0')= '0'  then ot.strBuySell else @strBuySell end
 	AND convert(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) BETWEEN @dtmFromDate AND @dtmToDate
 	AND isnull(ysnExpired,0) = case when isnull(@ysnExpired,'false')= 'true' then isnull(ysnExpired,0) else @ysnExpired end
 	AND ot.intInstrumentTypeId =1
