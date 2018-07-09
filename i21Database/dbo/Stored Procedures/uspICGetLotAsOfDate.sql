@@ -159,7 +159,7 @@ FROM
 	LEFT JOIN (
 			tblICItemUOM LotWeightUOM INNER JOIN tblICUnitMeasure wUOM
 				ON LotWeightUOM.intUnitMeasureId = wUOM.intUnitMeasureId
-		) ON LotWeightUOM.intItemUOMId = Lot.intItemUOMId
+		) ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId 
 	LEFT JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemLocationId = t.intItemLocationId
 	LEFT JOIN tblICCostingMethod CostMethod
