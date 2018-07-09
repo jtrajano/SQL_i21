@@ -203,7 +203,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 
 									EXEC dbo.uspARCalculateCommission @intSchedCommPlanId, NULL, @intNewCommissionRecapId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
-									UPDATE tblARCommissionRecap SET dblTotalAmount = (SELECT SUM(ISNULL(dblAmount, 0)) FROM tblARCommissionRecapDetail WHERE intCommissionRecapId = @intNewCommissionRecapId) WHERE intCommissionRecapId = @intNewCommissionRecapId
+									UPDATE tblARCommissionRecap SET dblTotalAmount = ISNULL( (SELECT SUM(ISNULL(dblAmount, 0)) FROM tblARCommissionRecapDetail WHERE intCommissionRecapId = @intNewCommissionRecapId), 0) WHERE intCommissionRecapId = @intNewCommissionRecapId
 
 									IF @ysnRecap = 0
 										BEGIN
@@ -319,7 +319,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																, 0
 																, CS.ysnPayroll
 																, CS.ysnPayables
-																, @dblLineTotal
+																, isnull(@dblLineTotal,0)
 																, NULL
 																, @batchId
 																, 1
@@ -331,7 +331,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 
 															EXEC dbo.uspARCalculateCommission @intCommissionPlanId, @intEntityId, @intNewCommissionRecapId, @dtmStartDate, @dtmEndDate, @dblLineTotal OUT
 
-															UPDATE tblARCommissionRecap SET dblTotalAmount = (SELECT SUM(ISNULL(dblAmount, 0)) FROM tblARCommissionRecapDetail WHERE intCommissionRecapId = @intNewCommissionRecapId) WHERE intCommissionRecapId = @intNewCommissionRecapId
+															UPDATE tblARCommissionRecap SET dblTotalAmount = ISNULL((SELECT SUM(ISNULL(dblAmount, 0)) FROM tblARCommissionRecapDetail WHERE intCommissionRecapId = @intNewCommissionRecapId), 0) WHERE intCommissionRecapId = @intNewCommissionRecapId
 
 															IF @ysnRecap = 0
 																BEGIN
@@ -362,7 +362,7 @@ DECLARE  @strCommissionSchedule	NVARCHAR(500)
 																		, ysnRejected
 																		, ysnPayroll
 																		, ysnPayables
-																		, dblTotalAmount
+																		, ISNULL(dblTotalAmount, 0)
 																		, strReason
 																		, 1
 																	FROM tblARCommissionRecap
