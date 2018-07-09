@@ -143,7 +143,7 @@ BEGIN
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)--fully paid
+		AND B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2))--fully paid
 		AND B.dblDiscount <> 0
 		AND B.dblPayment <> 0
 		AND @DiscountAccount IS NULL
@@ -165,7 +165,7 @@ BEGIN
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) --fully paid
+		AND B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) --fully paid
 		AND B.dblInterest <> 0
 		AND B.dblPayment <> 0
 		AND @InterestAccount IS NULL
