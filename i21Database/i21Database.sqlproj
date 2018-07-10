@@ -6780,7 +6780,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportISM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMCM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportMSM.sql" />
-    <Build Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
+    <None Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
