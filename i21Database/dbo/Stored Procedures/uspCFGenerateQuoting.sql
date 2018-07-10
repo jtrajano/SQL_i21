@@ -178,9 +178,9 @@ BEGIN
 		 @networkCost = ISNULL(dblTransferCost,0)
 		,@effectiveDate = dtmDate
 		FROM tblCFNetworkCost 
-		WHERE intNetworkId = 2 
-		AND intSiteId = 5955
-		AND intItemId = 11
+		WHERE intNetworkId = @loopNetworkId
+		AND intSiteId = @loopSiteId
+		AND intItemId = @loopARItemId
 		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, @dtmDate, 101)
 		ORDER BY dtmDate ASC
 
@@ -235,6 +235,14 @@ BEGIN
 
 		IF((ISNULL(@networkCost,0) != 0 OR LOWER(ISNULL(@strOutPriceBasis,'')) IN ('local index cost','local index retail','local index fixed')) AND @dblOutNetTaxCalculatedAmount > 0)
 		BEGIN
+
+			IF(LOWER(@strOutPriceBasis) = 'local index fixed' OR LOWER(@strOutPriceBasis) = 'local index retail' OR LOWER(@strOutPriceBasis) = 'local index cost' )
+			BEGIN
+				IF(@dtmOutPriceIndexDate IS NOT NULL)
+				BEGIN
+					SET @effectiveDate = @dtmOutPriceIndexDate
+				END
+			END
 		
 			IF(@ysnAccountQuote = 0)
 			BEGIN
@@ -285,19 +293,6 @@ BEGIN
 			AND strSiteType	 = @loopSiteType	
 		
 			SET @pk = SCOPE_IDENTITY()
-
-			
-
-			
-
-
-			IF(LOWER(@strOutPriceBasis) = 'local index fixed' OR LOWER(@strOutPriceBasis) = 'local index retail' OR LOWER(@strOutPriceBasis) = 'local index cost' )
-			BEGIN
-				IF(@dtmOutPriceIndexDate IS NOT NULL)
-				BEGIN
-					SET @effectiveDate = @dtmOutPriceIndexDate
-				END
-			END
 
 			UPDATE tblCFCSRSingleQuote
 			SET

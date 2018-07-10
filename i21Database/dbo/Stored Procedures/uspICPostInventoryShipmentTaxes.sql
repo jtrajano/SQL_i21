@@ -9,6 +9,7 @@ AS
 -- Get the A/P Clearing account 
 BEGIN 
 	DECLARE @AccountCategory_APClearing AS NVARCHAR(30) = 'AP Clearing';
+	DECLARE @AccountCategory_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense';
 	DECLARE @GLAccounts AS dbo.ItemGLAccount;
 	
 	INSERT INTO @GLAccounts (
@@ -55,7 +56,13 @@ BEGIN
 			ShipmentCharge.intChargeId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,TaxCode.intPurchaseTaxAccountId
+		   ,intPurchaseTaxCodeId = 
+			CASE 
+				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+				 dbo.fnGetItemGLAccount(ShipmentCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+				ELSE 
+				 TaxCode.intPurchaseTaxAccountId 
+		   END
 			,@strBatchId
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 				ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
@@ -119,7 +126,17 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
+				,intPurchaseTaxAccountId			= 
+													 CASE 
+														  WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+															dbo.fnGetItemGLAccount(
+																ShipmentCharge.intChargeId
+																, ItemLocation.intItemLocationId
+																, @AccountCategory_OtherChargeExpense
+															) 
+														  ELSE 
+															TaxCode.intPurchaseTaxAccountId 
+													 END
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
@@ -155,7 +172,17 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
+				,intPurchaseTaxAccountId			= 
+													 CASE 
+														  WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+															dbo.fnGetItemGLAccount(
+																ShipmentCharge.intChargeId
+																, ItemLocation.intItemLocationId
+																, @AccountCategory_OtherChargeExpense
+															) 
+														  ELSE 
+															TaxCode.intPurchaseTaxAccountId 
+													 END
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo

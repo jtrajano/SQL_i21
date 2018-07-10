@@ -29,7 +29,7 @@ DECLARE @datatype NVARCHAR(50)
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM [vyuAPRptTaxReport] WHERE intBillId = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT null as dtmCurrentDate, * FROM [vyuAPRptTaxReport] WHERE intBillId = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -167,7 +167,8 @@ SET @query = 'SELECT  transactions.* FROM
 					dblNonTaxable ,
 					dblTaxable ,
 					dblTotalVoucher ,
-					dblTaxCollected 
+					dblTaxCollected ,
+					GETDATE() as dtmCurrentDate
 				FROM [vyuAPRptTaxReport]
 			 WHERE strBillId IS NOT NULL)
 			 transactions'

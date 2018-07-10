@@ -6786,6 +6786,7 @@
     <Build Include="dbo\Stored Procedures\uspPATImportEquityDetails.sql" />
     <Build Include="dbo\Views\vyuSTItemCategoryLocation.sql" />
     <Build Include="dbo\Views\vyuARInvoicesForPaymentIntegration.sql" />
+    <None Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

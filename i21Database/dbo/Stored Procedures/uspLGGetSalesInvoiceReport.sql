@@ -157,6 +157,8 @@ BEGIN
 		,InvDet.dblShipmentNetWt
 		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 		,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
+		,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
+		,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strContactName AS strCompanyContactName
@@ -228,7 +230,7 @@ BEGIN
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ISNULL(LD.intLoadDetailId, ReceiptItem.intSourceId) --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
-		
+	CROSS APPLY tblLGCompanyPreference CP
 	left join tblSMScreen				rtWUOMScreen on rtWUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtWUOMTransaction on rtWUOMTransaction.intScreenId = rtWUOMScreen.intScreenId and rtWUOMTransaction.intRecordId = WUOM.intUnitMeasureId
 	left join tblSMReportTranslation	rtWUOMTranslation on rtWUOMTranslation.intLanguageId = @intLaguageId and rtWUOMTranslation.intTransactionId = rtWUOMTransaction.intTransactionId and rtWUOMTranslation.strFieldName = 'Name'

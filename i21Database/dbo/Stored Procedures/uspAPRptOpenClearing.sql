@@ -76,7 +76,9 @@ BEGIN
 		0 AS dblQtyVouchered,
 		0 AS dblQtyToVoucher,
 		0 AS dblAmountToVoucher,
-		0 AS dblChargeAmount
+		0 AS dblChargeAmount, 
+		NULL as dtmCurrentDate
+
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -195,6 +197,7 @@ BEGIN
 	
 	IF EXISTS(SELECT 1 FROM @temp_xml_table)
 	BEGIN
+		
 		SET @filter = @filter + ' AND '
 	END
 END
@@ -292,6 +295,7 @@ SELECT * FROM (
 	 ,tmpAgingSummaryTotal.dblAmountToVoucher
 	 ,tmpAgingSummaryTotal.dblChargeAmount
 	 ,tmpAgingSummaryTotal.strContainer
+	 ,GETDATE() as dtmCurrentDate
 	FROM  
 	(
 		SELECT DISTINCT
