@@ -15,6 +15,7 @@ SELECT fm.intFutureMarketId
 	,fm.dblContractSize
 	,fm.strOptMarketName
 	,fm.ysnOptions
+	,fm.ysnActive
 	,intCommodityId = (SELECT TOP 1  intCommodityId FROM tblRKCommodityMarketMapping WHERE intFutureMarketId = fm.intFutureMarketId ORDER BY intCommodityMarketId ASC)
 FROM tblRKFutureMarket fm
 --INNER JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId
