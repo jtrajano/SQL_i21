@@ -7,6 +7,17 @@ BEGIN TRY
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 
+DECLARE @DefaultCompanyId	 INT
+DECLARE @DefaultCompanyName	 NVARCHAR(200)
+  
+  IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
+  BEGIN
+		 SELECT 
+		 @DefaultCompanyId = intMultiCompanyId
+		,@DefaultCompanyName = strCompanyName 
+		 FROM tblSMMultiCompany
+
+  END
 
 	 DECLARE @tblRealizedPNL AS TABLE 
 	 (
@@ -761,7 +772,85 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 				GROUP BY strAllocationRefNo
 			 )t ON t.strAllocationRefNo = tblRealized.strAllocationRefNo	
 
-		SELECT * FROM @tblRealizedPNL ORDER BY strAllocationRefNo, intContractTypeId
+		SELECT
+		 intRealizedPNL                     
+		,intContractTypeId					
+		,intContractDetailId				
+		,intBookId							
+		,strBook							
+		,strSubBook							
+		,intCommodityId						
+		,strCommodity						
+		,strProductType						
+		,strRealizedType					
+		,dtmContractDate					
+		,strTransactionType					
+		,dtmInvoicePostedDate				
+		,strContract						
+		,strAllocationRefNo					
+		,strEntityName						
+		,strInternalCompany					
+		,dblQuantity						
+		,intQuantityUOMId					
+		,intQuantityUnitMeasureId			
+		,strQuantityUOM						
+		,dblWeight							
+		,intWeightUOMId						
+		,strWeightUOM						
+		,intOriginId						
+		,strOrigin							
+		,strItemDescription					
+		,strGrade							
+		,strCropYear						
+		,strProductionLine					
+		,strCertification					
+		,strTerms							
+		,strPosition						
+		,dtmStartDate						
+		,dtmEndDate							
+		,strPriceTerms						
+		,strIncoTermLocation				
+		,dblContractDifferential			
+		,strContractDifferentialUOM			
+		,dblFuturesPrice					
+		,strFuturesPriceUOM					
+		,dblCashPrice						
+		,intPriceUOMId						
+		,intPriceUnitMeasureId				
+		,strContractPriceUOM				
+		,strFixationDetails					
+		,dblFixedLots						
+		,dblUnFixedLots						
+		,dblContractInvoiceValue			
+		,dblSecondaryCosts					
+		,dblCOGSOrNetSaleValue				
+		,intFutureMarketId					
+		,strFutureMarket					
+		,intFutureMarketUOMId				
+		,intFutureMarketUnitMeasureId		
+		,strFutureMarketUOM					
+		,intMarketCurrencyId				
+		,intFutureMonthId					
+		,strFutureMonth						
+		,dtmRealizedDate					
+		,dblRealizedQty						
+		,dblRealizedPNLValue				
+		,dblPNLPreDayValue					
+		,dblProfitOrLossValue				
+		,dblPNLChange						
+		,strFixedBy							
+		,strPricingType						
+		,strInvoiceStatus					
+		,dblNetFuturesValue					
+		,dblRealizedFuturesPNLValue			
+		,dblNetPNLValue						
+		,dblFXValue							
+		,dblFXConvertedValue				
+		,strSalesReturnAdjustment			
+		,ISNULL(intCompanyId,@DefaultCompanyId) intCompanyId						
+		,ISNULL(strCompany,@DefaultCompanyName)	strCompany						 
+		FROM @tblRealizedPNL 
+		ORDER BY strAllocationRefNo, intContractTypeId
 
 					  
 END TRY  
