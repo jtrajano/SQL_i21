@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspAPRptPurchaseSettlement
+﻿CREATE PROCEDURE [dbo].[uspAPRptPurchaseSettlement]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -30,7 +30,7 @@ DECLARE @datatype NVARCHAR(50)
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM vyuAPRptPurchaseCustomerSettlement WHERE intTransactionId = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT null as dtmCurrentDate,* FROM vyuAPRptPurchaseCustomerSettlement WHERE intTransactionId = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -144,7 +144,8 @@ SET @query = 'SELECT  transactions.* FROM
 					strId ,
 					intPaymentId ,
 					CheckAmount ,
-					IsAdjustment
+					IsAdjustment,
+					GETDATE() as dtmCurrentDate
 					FROM 
 				 [vyuAPRptPurchaseCustomerSettlement]
 			 WHERE strTicketNumber IS NOT NULL)
