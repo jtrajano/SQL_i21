@@ -6788,6 +6788,7 @@
     <Build Include="dbo\Views\vyuARInvoicesForPaymentIntegration.sql" />
     <None Include="Scripts\Post-Deployment\EM\040_UpdatePasswordHistoryEncryption.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostPaymentIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportGABMulti.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

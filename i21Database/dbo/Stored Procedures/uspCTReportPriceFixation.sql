@@ -22,7 +22,9 @@ BEGIN TRY
 			@LastModifiedUserSign      VARBINARY(MAX),
 			@intLaguageId			INT,
 			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
-			@strMonthLabelName		NVARCHAR(50) = 'Month'
+			@strMonthLabelName		NVARCHAR(50) = 'Month',
+			@intReportLogoHeight		INT,
+			@intReportLogoWidth			INT
 			
 			DECLARE @TotalQuantity DECIMAL(24,10)
 			DECLARE @TotalNetQuantity DECIMAL(24,10)			
@@ -96,6 +98,8 @@ BEGIN TRY
 	JOIN tblCTPriceFixation PF ON PF.intPriceContractId=PC.intPriceContractId 
 	WHERE PF.intPriceFixationId=@intPriceFixationId
 	
+	SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference
+
 	SELECT @LastModifiedUserSign = Sig.blbDetail 
 								   FROM tblSMSignature Sig 
 								   JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
@@ -208,7 +212,9 @@ BEGIN TRY
 			strCPContract  = CH.strCPContract,
 			intLanguageId = @intLaguageId,
 			xmlParam = @xmlParam,
-			CASE WHEN CH.intContractTypeId = 1 THEN isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Reference'),'Seller Reference') ELSE isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Reference'),'Buyer Reference') END lblReference
+			CASE WHEN CH.intContractTypeId = 1 THEN isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Seller Reference'),'Seller Reference') ELSE isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Buyer Reference'),'Buyer Reference') END lblReference,
+			ISNULL(@intReportLogoHeight,0) intReportLogoHeight,
+			ISNULL(@intReportLogoWidth,0) intReportLogoWidth
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
