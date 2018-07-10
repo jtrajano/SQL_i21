@@ -642,30 +642,6 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() 
 if @recap = 1 AND @raiseError = 0
 	SAVE TRAN @TransactionName
 
-DECLARE @InvoiceIds TABLE(
-	id  	INT
-)
-INSERT INTO @InvoiceIds(id)
-SELECT distinct intInvoiceId FROM @PostInvoiceData
-
-WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds ORDER BY id)
-BEGIN				
-	DECLARE @InvoiceId1 INT
-				
-	SELECT TOP 1 @InvoiceId1 = id FROM @InvoiceIds ORDER BY id
-	
-	EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @userId, 1, @post
-
-	-- EXEC [dbo].[uspICPostStockReservation]
-	-- 	@intTransactionId		= @InvoiceId1
-	-- 	,@intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
-	-- 	,@ysnPosted				= @post
-		
-	DELETE FROM @InvoiceIds WHERE id = @InvoiceId1
-END		 
-
-
-	
 --------------------------------------------------------------------------------------------  
 -- Validations  
 ----------------------------------------------------------------------------------------------
@@ -765,6 +741,26 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 --Process Split Invoice
 BEGIN TRY
+	IF @recap = 0
+	BEGIN
+		DECLARE @InvoiceIds TABLE(
+			id  	INT
+		)
+		INSERT INTO @InvoiceIds(id)
+		SELECT distinct intInvoiceId FROM @PostInvoiceData
+
+		WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds ORDER BY id)
+		BEGIN				
+			DECLARE @InvoiceId1 INT
+						
+			SELECT TOP 1 @InvoiceId1 = id FROM @InvoiceIds ORDER BY id
+			
+			EXEC dbo.[uspARUpdateReservedStock] @InvoiceId1, 0, @userId, 1, @post
+
+			DELETE FROM @InvoiceIds WHERE id = @InvoiceId1
+		END
+	END		 
+
 	IF @post = 1 AND @recap = 0
 	BEGIN
 		DECLARE @SplitInvoiceData TABLE([intInvoiceId] INT)
